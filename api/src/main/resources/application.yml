@@ -1,0 +1,24 @@
+server:
+  port: 8081
+  servlet:
+    encoding:
+      force: true
+spring:
+  config:
+    activate:
+      on-profile: @profile.active@
+  flyway:
+    enabled: true
+    clean-disabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 1
+    out-of-order: true
+    validate-on-migrate: true
+    encoding: UTF-8
+
+pagehelper:
+  support-methods-arguments: true
+logging:
+  charset:
+    console: UTF-8

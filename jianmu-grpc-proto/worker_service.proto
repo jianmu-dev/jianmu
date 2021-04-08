@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "dev.jianmu.api.grpc";
+option go_package = "client/grpc";
+
+package grpc;
+
+import "google/protobuf/timestamp.proto";
+
+message OnlineReq {
+    string worker_id = 1;
+}
+
+message OffLineReq {
+    string worker_id = 1;
+}
+
+message SubReq {
+    string worker_id = 1;
+}
+
+message VolumeMount {
+    string name = 1;
+    string path = 2;
+}
+
+message Task {
+    string id = 1;
+    string name = 2;
+    string dto = 3;
+}
+
+message TaskResult {
+    enum Status {
+        RUNNING = 0;
+        SUCCEEDED = 1;
+        FAILED = 2;
+    }
+    string task_id = 1;
+    Status task_status = 2;
+    string message = 3;
+    map<string, string> params = 4;
+    google.protobuf.Timestamp worker_timestamp = 5;
+}
+
+message TaskOutput {
+    string task_id = 1;
+    string line = 2;
+}
+
+message ServerResp {
+    bool result = 1;
+    string error_msg = 2;
+}
+
+service WorkerStreamService {
+    rpc Registry (OnlineReq) returns (ServerResp);
+    rpc Leave (OffLineReq) returns (ServerResp);
+    rpc SubscribeTask(SubReq) returns (stream Task);
+    rpc UpdateTask (TaskResult) returns (ServerResp);
+    rpc UploadTaskLog (stream TaskOutput) returns (ServerResp);
+}
