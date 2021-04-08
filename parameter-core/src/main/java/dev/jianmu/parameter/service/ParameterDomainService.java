@@ -5,7 +5,10 @@ import dev.jianmu.parameter.aggregate.ParameterInstance;
 import dev.jianmu.parameter.aggregate.StringParameterDefinition;
 import dev.jianmu.parameter.aggregate.StringParameterInstance;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -15,6 +18,8 @@ import java.util.stream.Collectors;
  * @create: 2021-04-08 10:00
  **/
 public class ParameterDomainService {
+
+    private static final String ParameterPrefix = "JIANMU_";
 
     public List<ParameterInstance<?>> createTaskInputParameterInstance(
             String businessId,
@@ -80,7 +85,7 @@ public class ParameterDomainService {
                 var v = systemParameterMap.get(parameterInstance.getRef());
                 if (v == null) {
                     businessParameterMap.put(
-                            "JIANMU_" + parameterInstance.getRef().toUpperCase(),
+                            ParameterPrefix + parameterInstance.getRef().toUpperCase(),
                             ((StringParameterInstance) parameterInstance).getValue()
                     );
                 }

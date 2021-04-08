@@ -4,7 +4,6 @@ import dev.jianmu.parameter.repository.ParameterDefinitionRepository;
 import dev.jianmu.parameter.repository.ParameterInstanceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.repository.TaskDefinitionRepository;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +18,16 @@ import java.util.Map;
  **/
 @Service
 public class ParameterApplication {
-    private final TaskDefinitionRepository taskDefinitionRepository;
     private final ParameterDefinitionRepository parameterDefinitionRepository;
     private final ParameterInstanceRepository parameterInstanceRepository;
     private final ParameterDomainService parameterDomainService;
 
+    // Scope常量
+    private static final String TaskInputParameterScope = "TaskInput";
+    private static final String WorkerParameterScope = "Worker";
+
     @Inject
-    public ParameterApplication(TaskDefinitionRepository taskDefinitionRepository, ParameterDefinitionRepository parameterDefinitionRepository, ParameterInstanceRepository parameterInstanceRepository, ParameterDomainService parameterDomainService) {
-        this.taskDefinitionRepository = taskDefinitionRepository;
+    public ParameterApplication(ParameterDefinitionRepository parameterDefinitionRepository, ParameterInstanceRepository parameterInstanceRepository, ParameterDomainService parameterDomainService) {
         this.parameterDefinitionRepository = parameterDefinitionRepository;
         this.parameterInstanceRepository = parameterInstanceRepository;
         this.parameterDomainService = parameterDomainService;
@@ -35,9 +36,9 @@ public class ParameterApplication {
     public Pair<Map<String, String>, Map<String, String>> findTaskParameters(TaskInstance instance) {
         // TODO 目前这里写死了worker,需要改成动态
         var workerDefinitions = this.parameterDefinitionRepository
-                .findByBusinessIdAndScope("worker9527", "Worker");
+                .findByBusinessIdAndScope("worker9527", WorkerParameterScope);
         var taskInstance = this.parameterInstanceRepository
-                .findByBusinessIdAndScope(instance.getId(), "TaskInput");
+                .findByBusinessIdAndScope(instance.getId(), TaskInputParameterScope);
         var systemParameterMap = this.parameterDomainService
                 .mergeSystemParameterMap(workerDefinitions, taskInstance);
         var businessParameterMap = this.parameterDomainService
