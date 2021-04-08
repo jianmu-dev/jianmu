@@ -1,22 +1,3 @@
-CREATE TABLE `parameter`
-(
-    `id`             int          NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-    `name`           varchar(255) NOT NULL COMMENT '显示名称',
-    `ref`            varchar(255) NOT NULL COMMENT '唯一引用名称',
-    `scope_id`       varchar(255) NOT NULL COMMENT '参数作用域id',
-    `scope_category` varchar(50)  NOT NULL COMMENT '参数作用域分类',
-    `description`    text COMMENT '描述',
-    `source_type`    varchar(50)  NOT NULL COMMENT '参数值来源类型',
-    `source_value`   varchar(255) DEFAULT NULL COMMENT '参数来源值',
-    `value`          blob COMMENT '参数值',
-    `parameter_type` varchar(45)  NOT NULL COMMENT '参数类型',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_scope_ref` (`scope_id`, `scope_category`, `ref`)
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 17
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
-
 CREATE TABLE `workflow`
 (
     `ref_version` varchar(255) NOT NULL COMMENT '流程定义标识，主键',
@@ -48,6 +29,19 @@ CREATE TABLE `workflow_instance`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci;
 
+CREATE TABLE `task_definition`
+(
+    `key`         varchar(45)  NOT NULL COMMENT '唯一Key',
+    `version`     varchar(45)  NOT NULL COMMENT '版本',
+    `name`        varchar(255) NOT NULL COMMENT '显示名称',
+    `description` varchar(255) DEFAULT NULL,
+    `env_type`    varchar(45)  DEFAULT NULL COMMENT '执行环境类型',
+    `key_version` varchar(45)  NOT NULL,
+    PRIMARY KEY (`key_version`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务定义表';
+
 CREATE TABLE `task_instance`
 (
     `id`          varchar(45) NOT NULL COMMENT '主键',
@@ -63,6 +57,39 @@ CREATE TABLE `task_instance`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务实例表';
 
+CREATE TABLE `parameter_definition`
+(
+    `business_id_scope_ref` varchar(255) NOT NULL COMMENT '主键',
+    `name`                  varchar(45)  NOT NULL COMMENT '显示名称',
+    `ref`                   varchar(45)  NOT NULL COMMENT '唯一引用名称',
+    `description`           varchar(255) DEFAULT NULL COMMENT '描述',
+    `business_id`           varchar(45)  NOT NULL COMMENT '外部ID, WorkflowId or TaskDefinitionId or WorkerId',
+    `scope`                 varchar(45)  NOT NULL COMMENT '作用域',
+    `source`                varchar(45)  NOT NULL COMMENT '来源',
+    `type`                  varchar(45)  NOT NULL COMMENT '类型',
+    `value`                 blob,
+    `parameter_type`        varchar(45)  DEFAULT NULL COMMENT '参数类型',
+    PRIMARY KEY (`business_id_scope_ref`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数定义表';
+
+CREATE TABLE `parameter_instance`
+(
+    `business_id_scope_ref` varchar(255) NOT NULL COMMENT '主键',
+    `name`                  varchar(45)  NOT NULL COMMENT '显示名称',
+    `ref`                   varchar(45)  NOT NULL COMMENT '唯一引用名称',
+    `description`           varchar(255) DEFAULT NULL COMMENT '描述',
+    `business_id`           varchar(45)  NOT NULL COMMENT '外部ID, WorkflowId or TaskDefinitionId or WorkerId',
+    `scope`                 varchar(45)  NOT NULL COMMENT '作用域',
+    `type`                  varchar(45)  NOT NULL COMMENT '类型',
+    `value`                 blob,
+    `parameter_type`        varchar(45)  DEFAULT NULL COMMENT '参数类型',
+    PRIMARY KEY (`business_id_scope_ref`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数实例表';
+
 CREATE TABLE `worker`
 (
     `id`     varchar(45) NOT NULL COMMENT 'ID',
@@ -72,4 +99,5 @@ CREATE TABLE `worker`
     PRIMARY KEY (`id`)
 );
 
-insert into worker(id, name, status, type) values ('worker9527', 'Worker1', 'OFFLINE', 'DOCKER');
+insert into worker(id, name, status, type)
+values ('worker9527', 'Worker1', 'OFFLINE', 'DOCKER');

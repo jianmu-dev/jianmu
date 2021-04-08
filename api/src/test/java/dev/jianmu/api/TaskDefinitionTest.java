@@ -25,7 +25,7 @@ import java.util.Map;
  * @create: 2021-04-06 22:36
  **/
 @SpringBootTest(classes = SpringbootApp.class)
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class TaskDefinitionTest {
     @Resource
     private TaskDefinitionRepository taskDefinitionRepository;
