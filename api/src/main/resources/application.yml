@@ -13,7 +13,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1
-    out-of-order: true
+    out-of-order: false
     validate-on-migrate: true
     encoding: UTF-8
 
