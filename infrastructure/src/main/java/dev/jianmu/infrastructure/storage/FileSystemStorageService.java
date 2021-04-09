@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 @Service
 public class FileSystemStorageService implements StorageService, ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(FileSystemStorageService.class);
+    private static final String LogfilePostfix = ".log";
 
     private final Path rootLocation;
 
@@ -50,7 +51,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     public BufferedWriter writeLog(String LogFileName) {
         try {
             return new BufferedWriter(
-                    new FileWriter(this.rootLocation + File.separator + LogFileName, true)
+                    new FileWriter(this.rootLocation + File.separator + LogFileName + LogfilePostfix, true)
             );
         } catch (IOException e) {
             throw new StorageException("Could not create log file", e);
@@ -61,7 +62,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     public BufferedReader readLog(String LogFileName) {
         try {
             return new BufferedReader(
-                    new FileReader(this.rootLocation + File.separator + LogFileName)
+                    new FileReader(this.rootLocation + File.separator + LogFileName + LogfilePostfix)
             );
         } catch (FileNotFoundException e) {
             throw new StorageFileNotFoundException("Could not find log file", e);

@@ -182,7 +182,7 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
             @Override
             public void onNext(TaskOutput taskOutput) {
                 logger.info("get task (id: {}) output", taskOutput.getTaskId());
-                try (var writer = storageService.writeLog(taskOutput.getTaskId() + ".log")) {
+                try (var writer = storageService.writeLog(taskOutput.getTaskId())) {
                     writer.write(taskOutput.getLine());
                     writer.flush();
                 } catch (IOException e) {
