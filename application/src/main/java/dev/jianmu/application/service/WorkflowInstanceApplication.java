@@ -67,7 +67,7 @@ public class WorkflowInstanceApplication {
     }
 
     // 启动流程
-    public WorkflowInstance start(String instanceId) {
+    public WorkflowInstance start(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
                 .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
@@ -77,7 +77,7 @@ public class WorkflowInstanceApplication {
         // TODO 需要查询流程定义对应的参数定义并创建参数实例，Parameter的Domain Service
         instance.setExpressionLanguage(this.expressionLanguage);
         // 启动流程
-        Node start = workflow.findStart();
+        Node start = workflow.findNode(nodeRef);
         workflowInstanceDomainService.activateNode(workflow, instance, start.getRef());
         return this.workflowInstanceRepository.save(instance);
     }

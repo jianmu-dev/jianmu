@@ -23,13 +23,13 @@ public class WorkflowInstanceController {
     }
 
     @PostMapping("/{workflowRef}/{workflowVersion}")
-    public WorkflowInstance start(@PathVariable String workflowRef, @PathVariable String workflowVersion) {
+    public WorkflowInstance create(@PathVariable String workflowRef, @PathVariable String workflowVersion) {
         return this.instanceApplication.createAndStart(workflowRef, workflowVersion);
     }
 
-    @PutMapping("/{instanceId}")
-    public WorkflowInstance start(@PathVariable String instanceId) {
-        return this.instanceApplication.start(instanceId);
+    @PutMapping("/{instanceId}/{nodeRef}")
+    public WorkflowInstance start(@PathVariable String instanceId, @PathVariable String nodeRef) {
+        return this.instanceApplication.start(instanceId, nodeRef);
     }
 
     @PutMapping("/stop")

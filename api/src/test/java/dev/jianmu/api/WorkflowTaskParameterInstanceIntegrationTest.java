@@ -120,7 +120,7 @@ public class WorkflowTaskParameterInstanceIntegrationTest {
 
     @Test
     void test11() {
-        this.workflowInstanceApplication.start("6e8840f303c949b09f3b50cb7ce88bad");
+        this.workflowInstanceApplication.start("6e8840f303c949b09f3b50cb7ce88bad", "start_1");
     }
 
     @Test
