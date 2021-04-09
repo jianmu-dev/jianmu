@@ -1,6 +1,7 @@
 package dev.jianmu.api.grpc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.api.dto.DockerTask;
 import dev.jianmu.application.service.ParameterApplication;
@@ -79,8 +80,20 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
         responseObserver.onCompleted();
     }
 
-    private String getDto(TaskInstance taskInstance) {
-        var p = this.parameterApplication.findTaskParameters(taskInstance);
+    private String getDto(TaskInstance taskInstance)  {
+        var p = this.parameterApplication.findTaskParameters(taskInstance.getId());
+        List<String> entrypoint = null;
+        List<String> args = null;
+        List<DockerTask.TasksEntity.VolumeMountsEntity> volume_mounts = null;
+        List<DockerTask.VolumesEntity> volumes = null;
+        try {
+            entrypoint = this.objectMapper.readValue(p.getLeft().getOrDefault("entrypoint", "[]"), new TypeReference<List<String>>() {});
+            args = this.objectMapper.readValue(p.getLeft().getOrDefault("command", "[]"), new TypeReference<List<String>>() {});
+            volume_mounts = this.objectMapper.readValue(p.getLeft().getOrDefault("volume_mounts", "[]"), new TypeReference<List<DockerTask.TasksEntity.VolumeMountsEntity>>() {});
+            volumes = this.objectMapper.readValue(p.getLeft().getOrDefault("volumes", "{}"), new TypeReference<List<DockerTask.VolumesEntity>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("some thing wrong", e);
+        }
         DockerTask dockerTask = DockerTask.builder()
                 .Tasks(List.of(
                         DockerTask.TasksEntity.builder()
@@ -89,25 +102,13 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                                 .image(p.getLeft().get("image"))
                                 .network(p.getLeft().get("network"))
                                 .working_dir(p.getLeft().get("working_dir"))
-                                .volume_mounts(List.of(
-                                        DockerTask.TasksEntity.VolumeMountsEntity.builder()
-                                                .name("vt2")
-                                                .path(p.getLeft().get("working_dir"))
-                                                .build()
-                                ))
+                                .entrypoint(entrypoint)
+                                .args(args)
+                                .volume_mounts(volume_mounts)
                                 .environment(p.getRight())
                                 .build()
                 ))
-                .volumes(List.of(
-                        DockerTask.VolumesEntity.builder()
-                                .temp(
-                                        DockerTask.VolumesEntity.TempEntity.builder()
-                                                .id("v-test-2")
-                                                .name("vt2")
-                                                .build()
-                                )
-                                .build()
-                ))
+                .volumes(volumes)
                 .build();
         try {
             return objectMapper.writeValueAsString(dockerTask);

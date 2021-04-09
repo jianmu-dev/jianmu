@@ -54,6 +54,7 @@ public class WorkflowApplication {
     }
 
     // 删除流程定义版本与关联参数
+    @Transactional
     public void deleteByRefAndVersion(String ref, String version) {
         // TODO 同步删除相关参数定义
         this.parameterDefinitionRepository.deleteByBusinessId(ref);

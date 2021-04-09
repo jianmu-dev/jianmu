@@ -176,7 +176,7 @@ public class TaskDefinitionTest {
                 .businessId(definition.getKey() + definition.getVersion())
                 .source(ParameterDefinition.Source.INTERNAL)
                 .type(ParameterDefinition.Type.IMMUTABLE)
-                .value("{\"volumes\":[{\"temp\":{\"id\":\"v-test-2\",\"name\":\"vt2\"}}]}")
+                .value("[{\"temp\":{\"id\":\"v-test-2\",\"name\":\"vt2\"}}]")
                 .build();
         this.taskDefinitionRepository.add(definition);
         this.parameterDefinitionRepository.addList(

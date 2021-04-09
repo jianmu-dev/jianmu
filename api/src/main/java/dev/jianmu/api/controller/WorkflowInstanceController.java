@@ -22,6 +22,11 @@ public class WorkflowInstanceController {
         this.instanceApplication = instanceApplication;
     }
 
+    @PostMapping("/{workflowRef}/{workflowVersion}")
+    public WorkflowInstance start(@PathVariable String workflowRef, @PathVariable String workflowVersion) {
+        return this.instanceApplication.createAndStart(workflowRef, workflowVersion);
+    }
+
     @PutMapping("/{instanceId}")
     public WorkflowInstance start(@PathVariable String instanceId) {
         return this.instanceApplication.start(instanceId);

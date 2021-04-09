@@ -1,7 +1,6 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.application.service.WorkflowApplication;
-import dev.jianmu.api.grpc.WorkerStreamServiceImpl;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +20,6 @@ public class WorkflowController {
 
     @Resource
     private WorkflowApplication workflowApplication;
-
-    @Resource
-    private WorkerStreamServiceImpl workerStreamService;
 
     @PostMapping
     public Workflow create(@RequestBody Workflow workflow) {

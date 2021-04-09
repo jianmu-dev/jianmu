@@ -33,16 +33,16 @@ public class ParameterApplication {
         this.parameterDomainService = parameterDomainService;
     }
 
-    public Pair<Map<String, String>, Map<String, String>> findTaskParameters(TaskInstance instance) {
+    public Pair<Map<String, String>, Map<String, String>> findTaskParameters(String instanceId) {
         // TODO 目前这里写死了worker,需要改成动态
         var workerDefinitions = this.parameterDefinitionRepository
                 .findByBusinessIdAndScope("worker9527", WorkerParameterScope);
-        var taskInstance = this.parameterInstanceRepository
-                .findByBusinessIdAndScope(instance.getId(), TaskInputParameterScope);
+        var taskParameterInstance = this.parameterInstanceRepository
+                .findByBusinessIdAndScope(instanceId, TaskInputParameterScope);
         var systemParameterMap = this.parameterDomainService
-                .mergeSystemParameterMap(workerDefinitions, taskInstance);
+                .mergeSystemParameterMap(workerDefinitions, taskParameterInstance);
         var businessParameterMap = this.parameterDomainService
-                .mergeBusinessParameterMap(workerDefinitions, taskInstance);
+                .mergeBusinessParameterMap(workerDefinitions, taskParameterInstance);
 
         return Pair.of(systemParameterMap, businessParameterMap);
     }
