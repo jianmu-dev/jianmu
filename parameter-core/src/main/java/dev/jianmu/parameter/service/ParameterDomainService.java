@@ -1,14 +1,8 @@
 package dev.jianmu.parameter.service;
 
-import dev.jianmu.parameter.aggregate.ParameterDefinition;
-import dev.jianmu.parameter.aggregate.ParameterInstance;
-import dev.jianmu.parameter.aggregate.StringParameterDefinition;
-import dev.jianmu.parameter.aggregate.StringParameterInstance;
+import dev.jianmu.parameter.aggregate.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +14,27 @@ import java.util.stream.Collectors;
 public class ParameterDomainService {
 
     private static final String ParameterPrefix = "JIANMU_";
+
+    public Map<String, Parameter> createParameters(Map<String, Object> parameterMap) {
+        return parameterMap.entrySet().stream()
+                .map(entry -> {
+                    // TODO 未来需要在Parameter上支持多类型
+                    if (!(entry.getValue() instanceof String)) {
+                        throw new RuntimeException("当前不支持非String类型参数");
+                    }
+                    var p = Parameter.Builder.aParameter()
+                            .type("String")
+                            .value((String) entry.getValue())
+                            .build();
+                    return Map.entry(entry.getKey(), p);
+                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Map<String, String> createParameterMap(Map<String, Parameter> parameterMap) {
+        return parameterMap.entrySet().stream()
+                .map(entry -> Map.entry(entry.getKey(), entry.getValue().getId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 
     public List<ParameterInstance<?>> createTaskInputParameterInstance(
             String businessId,

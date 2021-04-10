@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.repositoryimpl.workflow;
+package dev.jianmu.infrastructure.mybatis.workflow;
 
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowMapper;
 import dev.jianmu.workflow.aggregate.definition.Workflow;

@@ -1,5 +1,6 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -25,7 +26,20 @@ public class TaskInstance extends AggregateRoot {
     // 任务运行状态
     private InstanceStatus status = InstanceStatus.WAITING;
 
+    // 输入参数列表
+    private Map<String, String> inputParameters;
+    // 输出参数列表
+    private Map<String, String> outputParameters;
+
     private TaskInstance() {
+    }
+
+    public Map<String, String> getInputParameters() {
+        return Map.copyOf(inputParameters);
+    }
+
+    public Map<String, String> getOutputParameters() {
+        return Map.copyOf(outputParameters);
     }
 
     public void setStatus(InstanceStatus status) {
@@ -75,6 +89,10 @@ public class TaskInstance extends AggregateRoot {
         private String defVersion;
         // 外部业务ID
         private String businessId;
+        // 输入参数列表
+        private Map<String, String> inputParameters;
+        // 输出参数列表
+        private Map<String, String> outputParameters;
 
         private Builder() {
         }
@@ -108,6 +126,15 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
+        public Builder inputParameters(Map<String, String> inputParameters) {
+            this.inputParameters = inputParameters;
+            return this;
+        }
+        public Builder outputParameters(Map<String, String> outputParameters) {
+            this.outputParameters = outputParameters;
+            return this;
+        }
+
         public TaskInstance build() {
             TaskInstance taskInstance = new TaskInstance();
             taskInstance.id = this.id;
@@ -116,6 +143,8 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.description = this.description;
             taskInstance.defVersion = this.defVersion;
             taskInstance.businessId = this.businessId;
+            taskInstance.inputParameters = this.inputParameters;
+            taskInstance.outputParameters = this.outputParameters;
             return taskInstance;
         }
     }

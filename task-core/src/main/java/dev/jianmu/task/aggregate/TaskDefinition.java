@@ -1,5 +1,7 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.Map;
+
 /**
  * @class: TaskDefinition
  * @description: 任务定义
@@ -20,7 +22,28 @@ public class TaskDefinition extends AggregateRoot {
     // 执行环境类型
     private EnvType envType;
 
+    // 输入参数列表
+    private Map<String, String> inputParameters;
+    // 输出参数列表
+    private Map<String, String> outputParameters;
+
     private TaskDefinition() {
+    }
+
+    public Map<String, String> getInputParameters() {
+        return Map.copyOf(inputParameters);
+    }
+
+    public void setInputParameters(Map<String, String> inputParameters) {
+        this.inputParameters = Map.copyOf(inputParameters);
+    }
+
+    public Map<String, String> getOutputParameters() {
+        return Map.copyOf(outputParameters);
+    }
+
+    public void setOutputParameters(Map<String, String> outputParameters) {
+        this.outputParameters = Map.copyOf(outputParameters);
     }
 
     public String getName() {

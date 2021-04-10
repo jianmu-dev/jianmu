@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.repositoryimpl.parameter;
+package dev.jianmu.infrastructure.mybatis.parameter;
 
 import dev.jianmu.infrastructure.mapper.parameter.ParameterDefinitionMapper;
 import dev.jianmu.parameter.aggregate.ParameterDefinition;

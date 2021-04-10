@@ -1,7 +1,9 @@
 package dev.jianmu.infrastructure;
 
 import dev.jianmu.parameter.service.ParameterDomainService;
+import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.task.service.InstanceDomainService;
+import dev.jianmu.task.service.TaskDefinitionDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,17 +28,30 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
+
     @Bean
     public WorkflowInstanceDomainService createWorkflowInstanceDomainService() {
         return new WorkflowInstanceDomainService();
     }
+
     @Bean
     public InstanceDomainService createInstanceDomainService() {
         return new InstanceDomainService();
     }
+
     @Bean
     public ParameterDomainService createParameterDomainService() {
         return new ParameterDomainService();
+    }
+
+    @Bean
+    public ReferenceDomainService createReferenceDomainService() {
+        return new ReferenceDomainService();
+    }
+
+    @Bean
+    public TaskDefinitionDomainService createTaskDefinitionDomainService() {
+        return new TaskDefinitionDomainService();
     }
 
     @Bean

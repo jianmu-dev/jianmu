@@ -1,13 +1,8 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.parameter.aggregate.ParameterDefinition;
-import dev.jianmu.parameter.aggregate.ParameterInstance;
-import dev.jianmu.parameter.repository.ParameterDefinitionRepository;
-import dev.jianmu.parameter.repository.ParameterInstanceRepository;
-import dev.jianmu.parameter.service.ParameterDomainService;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.repository.TaskDefinitionRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
@@ -32,18 +27,16 @@ public class TaskInstanceApplication {
     private final TaskInstanceRepository taskInstanceRepository;
     private final TaskDefinitionRepository taskDefinitionRepository;
     private final InstanceDomainService instanceDomainService;
-    private final ParameterDefinitionRepository parameterDefinitionRepository;
-    private final ParameterInstanceRepository parameterInstanceRepository;
-    private final ParameterDomainService parameterDomainService;
 
     @Inject
-    public TaskInstanceApplication(TaskInstanceRepository taskInstanceRepository, TaskDefinitionRepository taskDefinitionRepository, InstanceDomainService instanceDomainService, WorkflowInstanceApplication workflowInstanceApplication, ParameterDefinitionRepository parameterDefinitionRepository, ParameterInstanceRepository parameterInstanceRepository, ParameterDomainService parameterDomainService) {
+    public TaskInstanceApplication(
+            TaskInstanceRepository taskInstanceRepository,
+            TaskDefinitionRepository taskDefinitionRepository,
+            InstanceDomainService instanceDomainService
+    ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.instanceDomainService = instanceDomainService;
-        this.parameterDefinitionRepository = parameterDefinitionRepository;
-        this.parameterInstanceRepository = parameterInstanceRepository;
-        this.parameterDomainService = parameterDomainService;
     }
 
     @Transactional
@@ -53,14 +46,8 @@ public class TaskInstanceApplication {
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByKeyVersionAndBusinessId(taskRef, businessId);
         TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, taskDefinition, businessId);
-        // 创建任务实例参数
-        var taskInputDefinitions = this.parameterDefinitionRepository
-                .findByBusinessIdAndScope(taskRef, "TaskInput");
-        var parameterInstances = this.parameterDomainService
-                .createTaskInputParameterInstance(taskInstance.getId(), taskInputDefinitions);
-        // 保存
+        // TODO 基础层创建参数保存表
         this.taskInstanceRepository.add(taskInstance);
-        this.parameterInstanceRepository.addList(parameterInstances);
     }
 
     @Transactional

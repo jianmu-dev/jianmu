@@ -1,8 +1,7 @@
-package dev.jianmu.infrastructure.repositoryimpl.task;
+package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskDefinitionMapper;
 import dev.jianmu.task.aggregate.TaskDefinition;
-import dev.jianmu.task.aggregate.EnvType;
 import dev.jianmu.task.repository.TaskDefinitionRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.repositoryimpl.task;
+package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.WorkerMapper;
 import dev.jianmu.task.aggregate.Worker;

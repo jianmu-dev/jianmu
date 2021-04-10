@@ -1,51 +1,69 @@
 package dev.jianmu.parameter.aggregate;
 
+import java.util.UUID;
+
 /**
- * @program: workflow
- * @description: 运行参数父类
+ * @program: Parameter
+ * @description: 参数类
  * @author: Ethan Liu
  * @create: 2021-01-21 13:13
  **/
-public abstract class Parameter<T> {
-    // 显示名称
-    protected String name;
-
-    // 唯一引用名称
-    protected String ref;
-    // 参数作用域
-    protected Scope scope;
-
-    // 描述
-    protected String description;
-
-    // 参数值来源
-    protected Source source;
-
+public class Parameter {
+    // ID
+    private String id;
+    // 参数类型
+    private String type;
     // 参数值
-    private final T value;
+    private String value;
 
-    protected Parameter(T value) {
-        this.value = value;
+    private Parameter() {
     }
 
-    // 获取参数值
-    public T getValue() {
-        return this.value;
+    public String getId() {
+        return id;
     }
 
-    public String getName() {
-        return name;
+    public String getType() {
+        return type;
     }
 
-    public String getRef() {
-        return ref;
+    public String getValue() {
+        return value;
     }
 
-    public Scope getScope() {
-        return scope;
-    }
 
-    public String getDescription() {
-        return description;
+    public static final class Builder {
+        // ID
+        // TODO 暂时使用UUID的值
+        private final String id = UUID.randomUUID().toString().replace("-", "");
+        // 参数类型
+        private String type;
+        // 参数值
+        private String value;
+
+        private Builder() {
+        }
+
+        public static Builder aParameter() {
+            return new Builder();
+        }
+
+        public Builder value(String value) {
+            this.value = value;
+            return this;
+        }
+
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Parameter build() {
+            Parameter parameter = new Parameter();
+            parameter.id = this.id;
+            parameter.type = this.type;
+            parameter.value = this.value;
+            return parameter;
+        }
     }
 }
