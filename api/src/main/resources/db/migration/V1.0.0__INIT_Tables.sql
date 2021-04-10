@@ -90,6 +90,25 @@ CREATE TABLE `parameter_instance`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数实例表';
 
+CREATE TABLE `parameter`
+(
+    `id`    varchar(50)  NOT NULL COMMENT '参数ID',
+    `type`  varchar(45)  NOT NULL COMMENT '参数类型',
+    `value` varchar(255) NOT NULL COMMENT '参数值',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数表';
+
+CREATE TABLE `reference`
+(
+    `linked_parameter_id` varchar(100) DEFAULT NULL COMMENT '被关联参数ID',
+    `parameter_id`        varchar(100) DEFAULT NULL COMMENT '参数ID',
+    UNIQUE KEY `group_id` (`linked_parameter_id`, `parameter_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数引用表';
+
 CREATE TABLE `worker`
 (
     `id`     varchar(45) NOT NULL COMMENT 'ID',

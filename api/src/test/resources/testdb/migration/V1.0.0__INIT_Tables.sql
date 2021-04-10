@@ -78,6 +78,20 @@ CREATE TABLE `parameter_instance`
     PRIMARY KEY (`business_id_scope_ref`)
 );
 
+CREATE TABLE `parameter`
+(
+    `id`    varchar(50)  NOT NULL COMMENT '参数ID',
+    `type`  varchar(45)  NOT NULL COMMENT '参数类型',
+    `value` varchar(255) NOT NULL COMMENT '参数值',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `reference`
+(
+    `linked_parameter_id` varchar(100) DEFAULT NULL COMMENT '被关联参数ID',
+    `parameter_id`        varchar(100) DEFAULT NULL COMMENT '参数ID',
+);
+
 CREATE TABLE `worker`
 (
     `id`     varchar(45) NOT NULL COMMENT 'ID',
@@ -87,7 +101,8 @@ CREATE TABLE `worker`
     PRIMARY KEY (`id`)
 );
 
-insert into worker(id, name, status, type) values ('worker9527', 'Worker1', 'OFFLINE', 'DOCKER');
+insert into worker(id, name, status, type)
+values ('worker9527', 'Worker1', 'OFFLINE', 'DOCKER');
 
 insert into workflow_instance(id, name, description, run_mode, status, workflow_ref, workflow_version, task_instances,
                               start_time, end_time, _version)

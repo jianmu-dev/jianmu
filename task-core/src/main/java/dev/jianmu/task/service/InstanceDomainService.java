@@ -30,6 +30,8 @@ public class InstanceDomainService {
                 .defKey(taskDefinition.getKey())
                 .defVersion(taskDefinition.getVersion())
                 .businessId(businessId)
+                .inputParameters(taskDefinition.getInputParameters())
+                .outputParameters(taskDefinition.getOutputParameters())
                 .build();
     }
 }
