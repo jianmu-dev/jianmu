@@ -31,6 +31,9 @@ public class ParameterRepositoryImpl implements ParameterRepository {
 
     @Override
     public List<Parameter> findByIds(Set<String> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
         return this.parameterMapper.findByIds(ids);
     }
 }

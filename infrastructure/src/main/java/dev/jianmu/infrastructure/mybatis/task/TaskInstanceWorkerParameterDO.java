@@ -1,22 +1,22 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 /**
- * @class: TaskWorkerParameterDO
+ * @class: TaskInstanceWorkerParameterDO
  * @description: TODO
  * @author: Ethan Liu
- * @create: 2021-04-11 17:21
+ * @create: 2021-04-11 19:19
  **/
-public class TaskWorkerParameterDO {
-    private String taskDefinitionId;
+public class TaskInstanceWorkerParameterDO {
+    private String taskInstanceId;
     private String parameterKey;
     private String parameterValue;
 
-    public String getTaskDefinitionId() {
-        return taskDefinitionId;
+    public String getTaskInstanceId() {
+        return taskInstanceId;
     }
 
-    public void setTaskDefinitionId(String taskDefinitionId) {
-        this.taskDefinitionId = taskDefinitionId;
+    public void setTaskInstanceId(String taskInstanceId) {
+        this.taskInstanceId = taskInstanceId;
     }
 
     public String getParameterKey() {

@@ -24,10 +24,9 @@ public interface ParameterMapper {
     void addAll(@Param("parameters") List<Parameter> parameters);
 
     @Select("<script>" +
-            "select * from parameter where id in " +
-            "<foreach collection='ids' item='i' index='index' separator=','>" +
-            "(#{i})" +
-            "</foreach> " +
+            "SELECT * FROM `parameter` WHERE `id` IN" +
+            "<foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
+            "</foreach>" +
             "</script>")
     List<Parameter> findByIds(@Param("ids") Set<String> ids);
 }

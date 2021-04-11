@@ -1,8 +1,10 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
-import dev.jianmu.task.aggregate.TaskInstance;
+import dev.jianmu.infrastructure.mapper.task.TaskInstanceParameterMapper;
+import dev.jianmu.infrastructure.mapper.task.TaskInstanceWorkerParameterMapper;
 import dev.jianmu.task.aggregate.InstanceStatus;
+import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
 import dev.jianmu.task.repository.TaskInstanceRepository;
@@ -25,17 +27,32 @@ import java.util.Optional;
 public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceRepositoryImpl.class);
     private final TaskInstanceMapper taskInstanceMapper;
+    private final TaskInstanceParameterMapper taskInstanceParameterMapper;
+    private final TaskInstanceWorkerParameterMapper taskInstanceWorkerParameterMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Inject
-    public TaskInstanceRepositoryImpl(TaskInstanceMapper taskInstanceMapper, ApplicationEventPublisher applicationEventPublisher) {
+    public TaskInstanceRepositoryImpl(
+            TaskInstanceMapper taskInstanceMapper,
+            TaskInstanceParameterMapper taskInstanceParameterMapper,
+            TaskInstanceWorkerParameterMapper taskInstanceWorkerParameterMapper,
+            ApplicationEventPublisher applicationEventPublisher
+    ) {
         this.taskInstanceMapper = taskInstanceMapper;
+        this.taskInstanceParameterMapper = taskInstanceParameterMapper;
+        this.taskInstanceWorkerParameterMapper = taskInstanceWorkerParameterMapper;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
     public void add(TaskInstance taskInstance) {
         this.taskInstanceMapper.add(taskInstance);
+        if (taskInstance.getParameters().size() > 0) {
+            this.taskInstanceParameterMapper.addAll(taskInstance.getId(), taskInstance.getParameters());
+        }
+        if (taskInstance.getWorkerParameters().size() > 0) {
+            this.taskInstanceWorkerParameterMapper.addAll(taskInstance.getId(), taskInstance.getWorkerParameters());
+        }
         this.applicationEventPublisher.publishEvent(taskInstance);
     }
 

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -81,16 +82,17 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
     }
 
     private String getDto(TaskInstance taskInstance)  {
-        var p = this.parameterApplication.findTaskParameters(taskInstance.getId());
+        var environmentMap = this.taskInstanceApplication.getEnvironmentMap(taskInstance);
+        var workerParameters = taskInstance.getWorkerParameters();
         List<String> entrypoint = null;
         List<String> args = null;
         List<DockerTask.TasksEntity.VolumeMountsEntity> volume_mounts = null;
         List<DockerTask.VolumesEntity> volumes = null;
         try {
-            entrypoint = this.objectMapper.readValue(p.getLeft().getOrDefault("entrypoint", "[]"), new TypeReference<List<String>>() {});
-            args = this.objectMapper.readValue(p.getLeft().getOrDefault("command", "[]"), new TypeReference<List<String>>() {});
-            volume_mounts = this.objectMapper.readValue(p.getLeft().getOrDefault("volume_mounts", "[]"), new TypeReference<List<DockerTask.TasksEntity.VolumeMountsEntity>>() {});
-            volumes = this.objectMapper.readValue(p.getLeft().getOrDefault("volumes", "{}"), new TypeReference<List<DockerTask.VolumesEntity>>() {});
+            entrypoint = this.objectMapper.readValue(workerParameters.getOrDefault("entrypoint", "[]"), new TypeReference<List<String>>() {});
+            args = this.objectMapper.readValue(workerParameters.getOrDefault("command", "[]"), new TypeReference<List<String>>() {});
+            volume_mounts = this.objectMapper.readValue(workerParameters.getOrDefault("volume_mounts", "[]"), new TypeReference<List<DockerTask.TasksEntity.VolumeMountsEntity>>() {});
+            volumes = this.objectMapper.readValue(workerParameters.getOrDefault("volumes", "{}"), new TypeReference<List<DockerTask.VolumesEntity>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException("some thing wrong", e);
         }
@@ -99,13 +101,13 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                         DockerTask.TasksEntity.builder()
                                 .id(taskInstance.getId())
                                 .name(taskInstance.getName())
-                                .image(p.getLeft().get("image"))
-                                .network(p.getLeft().get("network"))
-                                .working_dir(p.getLeft().get("working_dir"))
+                                .image(workerParameters.get("image"))
+                                .network(workerParameters.get("network"))
+                                .working_dir(workerParameters.get("working_dir"))
                                 .entrypoint(entrypoint)
                                 .args(args)
                                 .volume_mounts(volume_mounts)
-                                .environment(p.getRight())
+                                .environment(environmentMap)
                                 .build()
                 ))
                 .volumes(volumes)

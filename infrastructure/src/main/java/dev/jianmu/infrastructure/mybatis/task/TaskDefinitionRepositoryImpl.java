@@ -2,7 +2,7 @@ package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskDefinitionMapper;
 import dev.jianmu.infrastructure.mapper.task.TaskDefinitionParameterMapper;
-import dev.jianmu.infrastructure.mapper.task.TaskWorkerParameterMapper;
+import dev.jianmu.infrastructure.mapper.task.TaskDefinitionWorkerParameterMapper;
 import dev.jianmu.task.aggregate.TaskDefinition;
 import dev.jianmu.task.repository.TaskDefinitionRepository;
 import org.springframework.stereotype.Repository;
@@ -24,16 +24,16 @@ public class TaskDefinitionRepositoryImpl implements TaskDefinitionRepository {
 
     private final TaskDefinitionMapper taskDefinitionMapper;
     private final TaskDefinitionParameterMapper taskDefinitionParameterMapper;
-    private final TaskWorkerParameterMapper taskWorkerParameterMapper;
+    private final TaskDefinitionWorkerParameterMapper taskDefinitionWorkerParameterMapper;
 
     @Inject
     public TaskDefinitionRepositoryImpl(
             TaskDefinitionMapper taskDefinitionMapper,
             TaskDefinitionParameterMapper taskDefinitionParameterMapper,
-            TaskWorkerParameterMapper taskWorkerParameterMapper) {
+            TaskDefinitionWorkerParameterMapper taskDefinitionWorkerParameterMapper) {
         this.taskDefinitionMapper = taskDefinitionMapper;
         this.taskDefinitionParameterMapper = taskDefinitionParameterMapper;
-        this.taskWorkerParameterMapper = taskWorkerParameterMapper;
+        this.taskDefinitionWorkerParameterMapper = taskDefinitionWorkerParameterMapper;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class TaskDefinitionRepositoryImpl implements TaskDefinitionRepository {
             );
         }
         if (taskDefinition.getWorkerParameters().size() > 0) {
-            this.taskWorkerParameterMapper.addAll(
+            this.taskDefinitionWorkerParameterMapper.addAll(
                     taskDefinition.getKey() + taskDefinition.getVersion(),
                     taskDefinition.getWorkerParameters()
             );
@@ -57,7 +57,7 @@ public class TaskDefinitionRepositoryImpl implements TaskDefinitionRepository {
     public Optional<TaskDefinition> findByKeyVersion(String keyVersion) {
         var definitionOptional = this.taskDefinitionMapper.findByKeyVersion(keyVersion);
         var defParameters = this.taskDefinitionParameterMapper.findByTaskDefinitionId(keyVersion);
-        var workerParameters = this.taskWorkerParameterMapper.findByTaskDefinitionId(keyVersion);
+        var workerParameters = this.taskDefinitionWorkerParameterMapper.findByTaskDefinitionId(keyVersion);
         var parameterMap = workerParameters.stream()
                 .map(workerParameterDO -> Map.entry(workerParameterDO.getParameterKey(), workerParameterDO.getParameterValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

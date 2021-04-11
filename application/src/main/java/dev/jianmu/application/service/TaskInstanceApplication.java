@@ -1,5 +1,9 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.parameter.repository.ParameterRepository;
+import dev.jianmu.parameter.repository.ReferenceRepository;
+import dev.jianmu.parameter.service.ParameterDomainService;
+import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
@@ -12,7 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @class: TaskInstanceApplication
@@ -27,16 +34,48 @@ public class TaskInstanceApplication {
     private final TaskInstanceRepository taskInstanceRepository;
     private final TaskDefinitionRepository taskDefinitionRepository;
     private final InstanceDomainService instanceDomainService;
+    private final ReferenceRepository referenceRepository;
+    private final ParameterRepository parameterRepository;
+    private final ReferenceDomainService referenceDomainService;
+    private final ParameterDomainService parameterDomainService;
 
     @Inject
     public TaskInstanceApplication(
             TaskInstanceRepository taskInstanceRepository,
             TaskDefinitionRepository taskDefinitionRepository,
-            InstanceDomainService instanceDomainService
+            InstanceDomainService instanceDomainService,
+            ReferenceRepository referenceRepository,
+            ParameterRepository parameterRepository,
+            ReferenceDomainService referenceDomainService,
+            ParameterDomainService parameterDomainService
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.instanceDomainService = instanceDomainService;
+        this.referenceRepository = referenceRepository;
+        this.parameterRepository = parameterRepository;
+        this.referenceDomainService = referenceDomainService;
+        this.parameterDomainService = parameterDomainService;
+    }
+
+    public Map<String, String> getEnvironmentMap(TaskInstance taskInstance) {
+        var parameterMap = taskInstance.getParameters().stream()
+                .map(taskParameter -> Map.entry(
+                        "JIANMU_" + taskParameter.getRef().toUpperCase(),
+                        taskParameter.getParameterId()
+                        )
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var references = this.referenceRepository
+                .findByContextId(taskInstance.getDefKey() + taskInstance.getDefVersion());
+        var newParameterMap = this.referenceDomainService
+                .calculateIds(parameterMap, references);
+        var parameters = this.parameterRepository
+                .findByIds(new HashSet<>(newParameterMap.values()));
+        return this.parameterDomainService.createParameterMap(newParameterMap, parameters)
+                .entrySet().stream()
+                .map(entry -> Map.entry(entry.getKey(), (String) entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Transactional
@@ -46,7 +85,6 @@ public class TaskInstanceApplication {
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByKeyVersionAndBusinessId(taskRef, businessId);
         TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, taskDefinition, businessId);
-        // TODO 基础层创建参数保存表
         this.taskInstanceRepository.add(taskInstance);
     }
 

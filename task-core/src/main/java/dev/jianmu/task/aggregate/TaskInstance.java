@@ -1,8 +1,6 @@
 package dev.jianmu.task.aggregate;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @class: TaskInstance
@@ -28,9 +26,9 @@ public class TaskInstance extends AggregateRoot {
     private InstanceStatus status = InstanceStatus.WAITING;
 
     // 输入输出参数列表
-    private Set<TaskParameter> parameters;
+    private Set<TaskParameter> parameters = new HashSet<>();
     // Worker参数列表
-    private Map<String, String> workerParameters;
+    private Map<String, String> workerParameters = new HashMap<>();
 
     private TaskInstance() {
     }
@@ -132,7 +130,7 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
-        public Builder workerParameters(Map<String, String> outputParameters) {
+        public Builder workerParameters(Map<String, String> workerParameters) {
             this.workerParameters = workerParameters;
             return this;
         }
