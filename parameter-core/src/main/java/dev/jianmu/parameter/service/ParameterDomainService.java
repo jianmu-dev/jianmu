@@ -18,11 +18,11 @@ public class ParameterDomainService {
 
     private static final String ParameterPrefix = "JIANMU_";
 
+    // TODO 未来需要在Parameter上支持多类型
     public Map<String, Parameter> createParameters(Map<String, Object> parameterMap) {
         return parameterMap.entrySet().stream()
                 .map(entry -> {
-                    // TODO 未来需要在Parameter上支持多类型
-                    if (!(entry.getValue() instanceof String)) {
+                    if (entry.getValue() == null) {
                         throw new RuntimeException("当前不支持非String类型参数");
                     }
                     var p = Parameter.Builder.aParameter()

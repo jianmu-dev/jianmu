@@ -1,6 +1,6 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.parameter.repository.ParameterDefinitionRepository;
+import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.task.aggregate.TaskDefinition;
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @class: TaskDefinitionApplication
@@ -27,7 +28,6 @@ import java.util.Optional;
 public class TaskDefinitionApplication {
     private static final Logger logger = LoggerFactory.getLogger(TaskDefinitionApplication.class);
     private final TaskDefinitionRepository taskDefinitionRepository;
-    private final ParameterDefinitionRepository parameterDefinitionRepository;
     private final ParameterDomainService parameterDomainService;
     private final ParameterRepository parameterRepository;
     private final TaskDefinitionDomainService taskDefinitionDomainService;
@@ -35,27 +35,35 @@ public class TaskDefinitionApplication {
     @Inject
     public TaskDefinitionApplication(
             TaskDefinitionRepository taskDefinitionRepository,
-            ParameterDefinitionRepository parameterDefinitionRepository,
             ParameterDomainService parameterDomainService,
             ParameterRepository parameterRepository,
             TaskDefinitionDomainService taskDefinitionDomainService) {
         this.taskDefinitionRepository = taskDefinitionRepository;
-        this.parameterDefinitionRepository = parameterDefinitionRepository;
         this.parameterDomainService = parameterDomainService;
         this.parameterRepository = parameterRepository;
         this.taskDefinitionDomainService = taskDefinitionDomainService;
     }
 
     @Transactional
-    public void create(TaskDefinition taskDefinition, Map<String, Object> inputParameterMap) {
+    public void create(TaskDefinition taskDefinition) {
         // 创建参数存储
-        var parameters = this.parameterDomainService.createParameters(inputParameterMap);
-        // 保存参数id
-        var paramMap = this.parameterDomainService.createParameterMap(parameters);
-        // 处理输入参数Map TODO 当前只处理了输入参数
-        this.taskDefinitionDomainService.handleInputParameterMap(taskDefinition, paramMap);
+        var parameters = taskDefinition.getParameters().stream()
+                .map(taskParameter ->
+                        Map.entry(
+                                taskParameter.getRef(),
+                                Parameter.Builder.aParameter()
+                                        .type(taskParameter.getType())
+                                        .value(taskParameter.getValue())
+                                        .build()
+                        )
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // 转换为参数ref与参数id Map
+        var parameterMap = this.parameterDomainService.createParameterMap(parameters);
+        // 处理输入参数Map
+        this.taskDefinitionDomainService.handleParameterMap(taskDefinition, taskDefinition.getParameters(), parameterMap);
+        // 保存
         this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
-        // TODO 基础层创建参数保存表
         this.taskDefinitionRepository.add(taskDefinition);
     }
 

@@ -54,6 +54,9 @@ public class Parameter {
         }
 
         public Builder type(String type) {
+            if (!type.equals("String")) {
+                throw new RuntimeException("当前不支持此参数类型: "+ type);
+            }
             this.type = type;
             return this;
         }

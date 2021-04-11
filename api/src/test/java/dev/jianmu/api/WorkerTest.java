@@ -1,5 +1,6 @@
 package dev.jianmu.api;
 
+import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.task.aggregate.Worker;
@@ -28,15 +29,12 @@ import java.util.Map;
 @Transactional
 public class WorkerTest {
     @Resource
-    private WorkerRepository workerRepository;
-    @Resource
-    private ParameterDomainService parameterDomainService;
-    @Resource
-    private ParameterRepository parameterRepository;
+    private WorkerApplication workerApplication;
 
     @Test
+    @Rollback(value = false)
     void test1() {
-        Map<String, String> parameterMap = new HashMap<>();
+        Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("command", "");
         parameterMap.put("entrypoint", "");
         parameterMap.put("image", "");
@@ -44,15 +42,12 @@ public class WorkerTest {
         parameterMap.put("volume_mounts", "");
         parameterMap.put("volumes", "{\"volumes\":[{\"temp\":{\"id\":\"v-test-2\",\"name\":\"vt2\"}}]}");
         parameterMap.put("working_dir", "");
-        var parameters = this.parameterDomainService.createParameters(parameterMap);
-        this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
         Worker worker = Worker.Builder.aWorker()
                 .id("worker9528")
                 .name("Worker2")
                 .type(Worker.Type.DOCKER)
                 .status(Worker.Status.OFFLINE)
                 .build();
-        worker.setParameterMap(parameterMap);
-        this.workerRepository.add(worker);
+        this.workerApplication.add(worker, parameterMap);
     }
 }

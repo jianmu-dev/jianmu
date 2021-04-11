@@ -1,6 +1,9 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @class: TaskDefinition
@@ -22,28 +25,28 @@ public class TaskDefinition extends AggregateRoot {
     // 执行环境类型
     private EnvType envType;
 
-    // 输入参数列表
-    private Map<String, String> inputParameters;
-    // 输出参数列表
-    private Map<String, String> outputParameters;
+    // 输入输出参数列表
+    private Set<TaskParameter> parameters = new HashSet<>();
+    // Worker参数列表
+    private Map<String, String> workerParameters = new HashMap<>();
 
     private TaskDefinition() {
     }
 
-    public Map<String, String> getInputParameters() {
-        return Map.copyOf(inputParameters);
+    public Set<TaskParameter> getParameters() {
+        return Set.copyOf(parameters) ;
     }
 
-    public void setInputParameters(Map<String, String> inputParameters) {
-        this.inputParameters = Map.copyOf(inputParameters);
+    public void setParameters(Set<TaskParameter> parameters) {
+        this.parameters = Set.copyOf(parameters);
     }
 
-    public Map<String, String> getOutputParameters() {
-        return Map.copyOf(outputParameters);
+    public Map<String, String> getWorkerParameters() {
+        return workerParameters;
     }
 
-    public void setOutputParameters(Map<String, String> outputParameters) {
-        this.outputParameters = Map.copyOf(outputParameters);
+    public void setWorkerParameters(Map<String, String> workerParameters) {
+        this.workerParameters = workerParameters;
     }
 
     public String getName() {

@@ -1,13 +1,17 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskDefinitionMapper;
+import dev.jianmu.infrastructure.mapper.task.TaskDefinitionParameterMapper;
+import dev.jianmu.infrastructure.mapper.task.TaskWorkerParameterMapper;
 import dev.jianmu.task.aggregate.TaskDefinition;
 import dev.jianmu.task.repository.TaskDefinitionRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @class: DefinitionRepositoryImpl
@@ -19,30 +23,49 @@ import java.util.Optional;
 public class TaskDefinitionRepositoryImpl implements TaskDefinitionRepository {
 
     private final TaskDefinitionMapper taskDefinitionMapper;
+    private final TaskDefinitionParameterMapper taskDefinitionParameterMapper;
+    private final TaskWorkerParameterMapper taskWorkerParameterMapper;
 
     @Inject
-    public TaskDefinitionRepositoryImpl(TaskDefinitionMapper taskDefinitionMapper) {
+    public TaskDefinitionRepositoryImpl(
+            TaskDefinitionMapper taskDefinitionMapper,
+            TaskDefinitionParameterMapper taskDefinitionParameterMapper,
+            TaskWorkerParameterMapper taskWorkerParameterMapper) {
         this.taskDefinitionMapper = taskDefinitionMapper;
+        this.taskDefinitionParameterMapper = taskDefinitionParameterMapper;
+        this.taskWorkerParameterMapper = taskWorkerParameterMapper;
     }
 
     @Override
     public void add(TaskDefinition taskDefinition) {
         this.taskDefinitionMapper.add(taskDefinition);
-    }
-
-    @Override
-    public Optional<TaskDefinition> findByKeyAndVersion(String key, String version) {
-        return this.taskDefinitionMapper.findByKeyVersion(key + version);
+        if (taskDefinition.getParameters().size() > 0) {
+            this.taskDefinitionParameterMapper.addAll(
+                    taskDefinition.getKey() + taskDefinition.getVersion(),
+                    taskDefinition.getParameters()
+            );
+        }
+        if (taskDefinition.getWorkerParameters().size() > 0) {
+            this.taskWorkerParameterMapper.addAll(
+                    taskDefinition.getKey() + taskDefinition.getVersion(),
+                    taskDefinition.getWorkerParameters()
+            );
+        }
     }
 
     @Override
     public Optional<TaskDefinition> findByKeyVersion(String keyVersion) {
-        return this.taskDefinitionMapper.findByKeyVersion(keyVersion);
-    }
-
-    @Override
-    public List<TaskDefinition> findByKey(String key) {
-        return this.taskDefinitionMapper.findByKey(key);
+        var definitionOptional = this.taskDefinitionMapper.findByKeyVersion(keyVersion);
+        var defParameters = this.taskDefinitionParameterMapper.findByTaskDefinitionId(keyVersion);
+        var workerParameters = this.taskWorkerParameterMapper.findByTaskDefinitionId(keyVersion);
+        var parameterMap = workerParameters.stream()
+                .map(workerParameterDO -> Map.entry(workerParameterDO.getParameterKey(), workerParameterDO.getParameterValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        definitionOptional.ifPresent(taskDefinition -> {
+            taskDefinition.setParameters(defParameters);
+            taskDefinition.setWorkerParameters(parameterMap);
+        });
+        return definitionOptional;
     }
 
     @Override

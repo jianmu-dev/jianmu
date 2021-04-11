@@ -14,11 +14,7 @@ import java.util.Optional;
 public interface TaskDefinitionRepository {
     void add(TaskDefinition taskDefinition);
 
-    Optional<TaskDefinition> findByKeyAndVersion(String key, String version);
-
     Optional<TaskDefinition> findByKeyVersion(String keyVersion);
-
-    List<TaskDefinition> findByKey(String key);
 
     List<TaskDefinition> findAll();
 }
