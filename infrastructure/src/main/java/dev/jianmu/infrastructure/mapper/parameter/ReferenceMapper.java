@@ -17,18 +17,21 @@ import java.util.Set;
 public interface ReferenceMapper {
 
     @Insert("<script>" +
-            "insert into reference(linked_parameter_id, parameter_id) values" +
+            "insert into reference(context_id, linked_parameter_id, parameter_id) values" +
             "<foreach collection='references' item='i' index='index' separator=','>" +
-            "(#{i.linkedParameterId}, #{i.parameterId})" +
+            "(#{i.contextId}, #{i.linkedParameterId}, #{i.parameterId})" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("references") List<Reference> references);
 
     @Select("<script>" +
-            "select * from reference where linked_parameter_id in " +
-            "<foreach collection='linkedParameterIds' item='i' index='index' separator=','>" +
-            "(#{i})" +
+            "select * from reference where context_id in " +
+            "<foreach collection='contextIds' item='i' index='index' open='(' separator=','> close=')'" +
+            "#{i}" +
             "</foreach> " +
             "</script>")
-    List<Reference> findByLinkedParameterIds(@Param("linkedParameterIds") Set<String> linkedParameterIds);
+    List<Reference> findByContextIds(Set<String> contextIds);
+
+    @Select("select * from reference where context_id = #{contextId}")
+    List<Reference> findByContextId(@Param("contextId") String contextId);
 }

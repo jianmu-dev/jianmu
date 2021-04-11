@@ -88,6 +88,7 @@ CREATE TABLE `parameter`
 
 CREATE TABLE `reference`
 (
+    `context_id`          varchar(100) DEFAULT NULL,
     `linked_parameter_id` varchar(100) DEFAULT NULL COMMENT '被关联参数ID',
     `parameter_id`        varchar(100) DEFAULT NULL COMMENT '参数ID',
 );

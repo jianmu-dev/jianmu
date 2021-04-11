@@ -2,7 +2,10 @@ package dev.jianmu.parameter.service;
 
 import dev.jianmu.parameter.aggregate.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +37,16 @@ public class ParameterDomainService {
         return parameterMap.entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().getId()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Map<String, Object> createParameterMap(Map<String, String> parameterMap, List<Parameter> parameters) {
+        return parameterMap.entrySet().stream().map(entry -> {
+            var realValue = parameters.stream()
+                    .filter(parameter -> parameter.getId().equals(entry.getValue()))
+                    .findFirst()
+                    .orElseThrow();
+            return Map.entry(entry.getKey(), realValue.getValue());
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public List<ParameterInstance<?>> createTaskInputParameterInstance(

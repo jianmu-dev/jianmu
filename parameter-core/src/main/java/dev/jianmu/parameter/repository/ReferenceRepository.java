@@ -14,5 +14,7 @@ import java.util.Set;
 public interface ReferenceRepository {
     void addAll(List<Reference> references);
 
-    List<Reference> findByLinkedParameterIds(Set<String> linkedParameterIds);
+    List<Reference> findByContextIds(Set<String> contextIds);
+
+    List<Reference> findByContextId(String contextId);
 }

@@ -12,10 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @class: ParameterApplication
@@ -62,17 +59,28 @@ public class ParameterApplication {
     }
 
     // 创建参数引用
-    public Set<Reference> addReference(String parameterId, Set<String> linkedParameterIds) {
-        var refers = this.referenceDomainService.createReferences(parameterId, linkedParameterIds);
+    public Set<Reference> addReferences(String contextId, String parameterId, Set<String> linkedParameterIds) {
+        var refers = this.referenceDomainService.createReferences(contextId, parameterId, linkedParameterIds);
         this.referenceRepository.addAll(new ArrayList<>(refers));
         return refers;
     }
 
+    // 查询参数引用
+    public List<Reference> findReferences(Set<String> contextIds) {
+        return this.referenceRepository.findByContextIds(contextIds);
+    }
+
+    // 查询参数引用
+    public List<Reference> findReferences(String contextId) {
+        return this.referenceRepository.findByContextId(contextId);
+    }
+
     // 查询参数值
-    public List<Parameter> findParameters(Set<String> linkedParameterIds) {
-        var references = this.referenceRepository.findByLinkedParameterIds(linkedParameterIds);
-        var parameterIds = this.referenceDomainService.calculateIds(references);
-        return this.parameterRepository.findByIds(parameterIds);
+    public Map<String, Object> findParameters(Set<String> contextIds, Map<String, String> parameterMap) {
+        var references = this.referenceRepository.findByContextIds(contextIds);
+        var newParameterMap = this.referenceDomainService.calculateIds(parameterMap, references);
+        var parameters = this.parameterRepository.findByIds(new HashSet<>(newParameterMap.values()));
+        return this.parameterDomainService.createParameterMap(newParameterMap, parameters);
     }
 
     public Pair<Map<String, String>, Map<String, String>> findTaskParameters(String instanceId) {

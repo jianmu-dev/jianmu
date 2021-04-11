@@ -30,7 +30,12 @@ public class ReferenceRepositoryImpl implements ReferenceRepository {
     }
 
     @Override
-    public List<Reference> findByLinkedParameterIds(Set<String> linkedParameterIds) {
-        return this.referenceMapper.findByLinkedParameterIds(linkedParameterIds);
+    public List<Reference> findByContextIds(Set<String> contextIds) {
+        return this.referenceMapper.findByContextIds(contextIds);
+    }
+
+    @Override
+    public List<Reference> findByContextId(String contextId) {
+        return this.referenceMapper.findByContextId(contextId);
     }
 }
