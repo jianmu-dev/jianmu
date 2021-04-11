@@ -1,5 +1,7 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.Map;
+
 /**
  * @class: Worker
  * @description: 任务执行器
@@ -19,6 +21,7 @@ public class Worker {
     private String name;
     private Status status;
     private Type type;
+    private Map<String, String> parameterMap;
 
     private Worker() {
     }
@@ -45,6 +48,14 @@ public class Worker {
 
     public Type getType() {
         return type;
+    }
+
+    public Map<String, String> getParameterMap() {
+        return Map.copyOf(parameterMap);
+    }
+
+    public void setParameterMap(Map<String, String> parameterMap) {
+        this.parameterMap = Map.copyOf(parameterMap);
     }
 
     public static final class Builder {
