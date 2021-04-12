@@ -13,7 +13,12 @@ import java.util.List;
  * @create: 2021-03-27 09:05
  **/
 public class InstanceDomainService {
-    public TaskInstance create(List<TaskInstance> taskInstances, TaskDefinition taskDefinition, String businessId) {
+    public TaskInstance create(
+            List<TaskInstance> taskInstances,
+            TaskDefinition taskDefinition,
+            String businessId,
+            String triggerId
+    ) {
         if (taskInstances.size() > 0) {
             boolean isRunning = taskInstances.stream()
                     .anyMatch(instance ->
@@ -30,6 +35,7 @@ public class InstanceDomainService {
                 .defKey(taskDefinition.getKey())
                 .defVersion(taskDefinition.getVersion())
                 .businessId(businessId)
+                .triggerId(triggerId)
                 .parameters(taskDefinition.getParameters())
                 .workerParameters(taskDefinition.getWorkerParameters())
                 .build();

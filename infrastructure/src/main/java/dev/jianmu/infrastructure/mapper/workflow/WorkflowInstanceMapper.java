@@ -19,6 +19,12 @@ public interface WorkflowInstanceMapper {
     @Select("select * from workflow_instance where workflow_ref = #{workflowRef} " +
             "and workflow_version = #{workflowVersion} and status = #{status}")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByRefAndVersionAndStatus(
             @Param("workflowRef") String workflowRef,
             @Param("workflowVersion") String workflowVersion,
@@ -29,10 +35,14 @@ public interface WorkflowInstanceMapper {
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findById(String instanceId);
 
-    @Insert("insert into workflow_instance(id, name, description, run_mode, status, workflow_ref, workflow_version, task_instances, start_time, end_time, _version) " +
-            "values(#{wk.id},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
+    @Insert("insert into workflow_instance(id, trigger_id, name, description, run_mode, status, workflow_ref, workflow_version, task_instances, start_time, end_time, _version) " +
+            "values(#{wk.id},#{wk.triggerId},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
             "#{wk.asyncTaskInstances, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.TaskInstanceListTypeHandler}," +
             "#{wk.startTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
@@ -49,6 +59,12 @@ public interface WorkflowInstanceMapper {
 
     @Select("select * from workflow_instance")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findAll(
             @Param("pageNum") int pageNum,
             @Param("pageSize") int pageSize

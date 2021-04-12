@@ -31,6 +31,9 @@ public class ReferenceRepositoryImpl implements ReferenceRepository {
 
     @Override
     public List<Reference> findByContextIds(Set<String> contextIds) {
+        if (contextIds.isEmpty()) {
+            return List.of();
+        }
         return this.referenceMapper.findByContextIds(contextIds);
     }
 

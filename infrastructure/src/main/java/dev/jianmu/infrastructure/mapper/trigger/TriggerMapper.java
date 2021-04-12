@@ -20,12 +20,12 @@ public interface TriggerMapper {
     @Delete("delete from trigger where id = #{id}")
     void delete(Trigger trigger);
 
-    @Select("select * from trigger where id = #{triggerId}")
+    @Select("select * from `trigger` where id = #{triggerId}")
     @Result(column = "workflow_id", property = "workflowId")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
     Optional<Trigger> findById(@Param("triggerId") String triggerId);
 
-    @Select("select * from trigger")
+    @Select("select * from `trigger`")
     @Result(column = "workflow_id", property = "workflowId")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
     List<Trigger> findAll();

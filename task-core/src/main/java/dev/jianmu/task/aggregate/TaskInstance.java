@@ -22,6 +22,8 @@ public class TaskInstance extends AggregateRoot {
     private String defVersion;
     // 外部业务ID, 必须唯一
     private String businessId;
+    // 触发器ID
+    private String triggerId;
     // 任务运行状态
     private InstanceStatus status = InstanceStatus.WAITING;
 
@@ -69,6 +71,10 @@ public class TaskInstance extends AggregateRoot {
         return businessId;
     }
 
+    public String getTriggerId() {
+        return triggerId;
+    }
+
     public InstanceStatus getStatus() {
         return status;
     }
@@ -88,6 +94,8 @@ public class TaskInstance extends AggregateRoot {
         private String defVersion;
         // 外部业务ID
         private String businessId;
+        // 触发器ID
+        private String triggerId;
         // 输入输出参数列表
         private Set<TaskParameter> parameters;
         // Worker参数列表
@@ -125,6 +133,11 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
+        public Builder triggerId(String triggerId) {
+            this.triggerId = triggerId;
+            return this;
+        }
+
         public Builder parameters(Set<TaskParameter> parameters) {
             this.parameters = parameters;
             return this;
@@ -143,6 +156,7 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.description = this.description;
             taskInstance.defVersion = this.defVersion;
             taskInstance.businessId = this.businessId;
+            taskInstance.triggerId = this.triggerId;
             taskInstance.parameters = this.parameters;
             taskInstance.workerParameters = this.workerParameters;
             return taskInstance;

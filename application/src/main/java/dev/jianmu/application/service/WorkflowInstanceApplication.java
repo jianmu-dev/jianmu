@@ -44,9 +44,9 @@ public class WorkflowInstanceApplication {
     }
 
     // 创建并启动流程
-    public WorkflowInstance createAndStart(String workflowRef, String workflowVersion) {
+    public WorkflowInstance createAndStart(String triggerId, String workflowRefVersion) {
         Workflow workflow = this.workflowRepository
-                .findByRefAndVersion(workflowRef, workflowVersion)
+                .findByRefVersion(workflowRefVersion)
                 .orElseThrow(() -> new RuntimeException("未找到流程定义"));
         // 检查是否存在运行中的流程
         int i = this.workflowInstanceRepository
@@ -57,7 +57,7 @@ public class WorkflowInstanceApplication {
         }
         // TODO 需要查询流程定义对应的参数定义并创建参数实例，Parameter的Domain Service
         // 创建新的流程实例
-        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(workflow);
+        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, workflow);
         workflowInstance.setExpressionLanguage(this.expressionLanguage);
         // 启动流程
         Node start = workflow.findStart();
@@ -121,6 +121,7 @@ public class WorkflowInstanceApplication {
         instance.taskRun(asyncTaskRef);
         this.workflowInstanceRepository.save(instance);
     }
+
     // 任务已中止命令
     public void taskFail(String instanceId, String asyncTaskRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
@@ -129,6 +130,7 @@ public class WorkflowInstanceApplication {
         instance.taskFail(asyncTaskRef);
         this.workflowInstanceRepository.save(instance);
     }
+
     // 任务已成功命令
     public void taskSucceed(String instanceId, String asyncTaskRef) {
         WorkflowInstance instance = this.workflowInstanceRepository

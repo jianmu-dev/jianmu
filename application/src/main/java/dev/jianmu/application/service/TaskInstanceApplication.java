@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -67,7 +68,14 @@ public class TaskInstanceApplication {
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         var references = this.referenceRepository
-                .findByContextId(taskInstance.getDefKey() + taskInstance.getDefVersion());
+                .findByContextIds(
+                        Set.of(
+                                taskInstance.getTriggerId(),
+                                taskInstance.getBusinessId(),
+                                taskInstance.getDefKey() + taskInstance.getDefVersion()
+                        )
+                );
+        references.forEach(reference -> logger.info("-------------reference parameterId--------: {}", reference.getParameterId()));
         var newParameterMap = this.referenceDomainService
                 .calculateIds(parameterMap, references);
         var parameters = this.parameterRepository
@@ -79,12 +87,12 @@ public class TaskInstanceApplication {
     }
 
     @Transactional
-    public void create(String businessId, String taskRef) {
+    public void create(String businessId, String triggerId, String taskRef) {
         // 创建任务实例
         TaskDefinition taskDefinition = this.taskDefinitionRepository.findByKeyVersion(taskRef)
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByKeyVersionAndBusinessId(taskRef, businessId);
-        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, taskDefinition, businessId);
+        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, taskDefinition, businessId, triggerId);
         this.taskInstanceRepository.add(taskInstance);
     }
 

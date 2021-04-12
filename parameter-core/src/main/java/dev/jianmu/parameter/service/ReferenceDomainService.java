@@ -41,7 +41,7 @@ public class ReferenceDomainService {
     private String findLastId(Map<String, String> aMap, String parameterId) {
         var id = aMap.get(parameterId);
         if (id != null) {
-            return findLastId(aMap, parameterId);
+            return findLastId(aMap, id);
         } else {
             return parameterId;
         }

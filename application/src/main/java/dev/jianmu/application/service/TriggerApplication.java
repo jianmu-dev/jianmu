@@ -28,18 +28,27 @@ public class TriggerApplication {
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
     private final TriggerDomainService triggerDomainService;
+    private final WorkflowInstanceApplication workflowInstanceApplication;
 
     @Inject
     public TriggerApplication(
             TriggerRepository triggerRepository,
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
-            TriggerDomainService triggerDomainService
-    ) {
+            TriggerDomainService triggerDomainService,
+            WorkflowInstanceApplication workflowInstanceApplication) {
         this.triggerRepository = triggerRepository;
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.triggerDomainService = triggerDomainService;
+        this.workflowInstanceApplication = workflowInstanceApplication;
+    }
+
+    @Transactional
+    public void trigger(String triggerId) {
+        var trigger = this.triggerRepository.findById(triggerId)
+                .orElseThrow(() -> new RuntimeException("未找到该触发器"));
+        this.workflowInstanceApplication.createAndStart(trigger.getId(), trigger.getWorkflowId());
     }
 
     @Transactional

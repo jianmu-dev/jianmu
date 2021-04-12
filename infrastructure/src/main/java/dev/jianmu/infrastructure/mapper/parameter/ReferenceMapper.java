@@ -3,6 +3,7 @@ package dev.jianmu.infrastructure.mapper.parameter;
 import dev.jianmu.parameter.aggregate.Reference;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -26,12 +27,18 @@ public interface ReferenceMapper {
 
     @Select("<script>" +
             "select * from reference where context_id in " +
-            "<foreach collection='contextIds' item='i' index='index' open='(' separator=','> close=')'" +
+            "<foreach collection='contextIds' item='i' index='index' open='(' separator=',' close=')'>" +
             "#{i}" +
             "</foreach> " +
             "</script>")
-    List<Reference> findByContextIds(Set<String> contextIds);
+    @Result(column = "context_id", property = "contextId")
+    @Result(column = "linked_parameter_id", property = "linkedParameterId")
+    @Result(column = "parameter_id", property = "parameterId")
+    List<Reference> findByContextIds(@Param("contextIds") Set<String> contextIds);
 
     @Select("select * from reference where context_id = #{contextId}")
+    @Result(column = "context_id", property = "contextId")
+    @Result(column = "linked_parameter_id", property = "linkedParameterId")
+    @Result(column = "parameter_id", property = "parameterId")
     List<Reference> findByContextId(@Param("contextId") String contextId);
 }

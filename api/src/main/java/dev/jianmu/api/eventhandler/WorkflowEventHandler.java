@@ -6,8 +6,6 @@ import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -55,7 +53,8 @@ public class WorkflowEventHandler {
         logger.info(event.getName());
         logger.info(event.getNodeRef());
         logger.info(event.getWorkflowInstanceId());
-        this.taskInstanceApplication.create(event.getWorkflowInstanceId(), event.getNodeRef());
+        logger.info(event.getTriggerId());
+        this.taskInstanceApplication.create(event.getWorkflowInstanceId(), event.getTriggerId(), event.getNodeRef());
         logger.info("-----------------------------------------------------");
     }
 
