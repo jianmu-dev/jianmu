@@ -1,7 +1,6 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.parameter.aggregate.ParameterDefinition;
-import dev.jianmu.parameter.repository.ParameterDefinitionRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.springframework.stereotype.Service;
@@ -21,12 +20,10 @@ import java.util.Optional;
 public class WorkflowApplication {
 
     private final WorkflowRepository workflowRepository;
-    private final ParameterDefinitionRepository parameterDefinitionRepository;
 
     @Inject
-    public WorkflowApplication(WorkflowRepository workflowRepository, ParameterDefinitionRepository parameterDefinitionRepository) {
+    public WorkflowApplication(WorkflowRepository workflowRepository) {
         this.workflowRepository = workflowRepository;
-        this.parameterDefinitionRepository = parameterDefinitionRepository;
     }
 
     // 创建流程定义
@@ -47,8 +44,6 @@ public class WorkflowApplication {
 
         // TODO 同步创建参数定义
         List<ParameterDefinition<?>> parameters = List.of();
-        // 保存参数定义列表
-        this.parameterDefinitionRepository.addList(parameters);
 
         return this.workflowRepository.add(newWorkflow);
     }
@@ -57,7 +52,6 @@ public class WorkflowApplication {
     @Transactional
     public void deleteByRefAndVersion(String ref, String version) {
         // TODO 同步删除相关参数定义
-        this.parameterDefinitionRepository.deleteByBusinessId(ref);
         this.workflowRepository.deleteByRefAndVersion(ref, version);
     }
 

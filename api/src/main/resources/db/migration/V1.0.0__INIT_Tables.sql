@@ -57,39 +57,6 @@ CREATE TABLE `task_instance`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务实例表';
 
-CREATE TABLE `parameter_definition`
-(
-    `business_id_scope_ref` varchar(255) NOT NULL COMMENT '主键',
-    `name`                  varchar(45)  NOT NULL COMMENT '显示名称',
-    `ref`                   varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `description`           varchar(255) DEFAULT NULL COMMENT '描述',
-    `business_id`           varchar(45)  NOT NULL COMMENT '外部ID, WorkflowId or TaskDefinitionId or WorkerId',
-    `scope`                 varchar(45)  NOT NULL COMMENT '作用域',
-    `source`                varchar(45)  NOT NULL COMMENT '来源',
-    `type`                  varchar(45)  NOT NULL COMMENT '类型',
-    `value`                 blob,
-    `parameter_type`        varchar(45)  DEFAULT NULL COMMENT '参数类型',
-    PRIMARY KEY (`business_id_scope_ref`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数定义表';
-
-CREATE TABLE `parameter_instance`
-(
-    `business_id_scope_ref` varchar(255) NOT NULL COMMENT '主键',
-    `name`                  varchar(45)  NOT NULL COMMENT '显示名称',
-    `ref`                   varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `description`           varchar(255) DEFAULT NULL COMMENT '描述',
-    `business_id`           varchar(45)  NOT NULL COMMENT '外部ID, WorkflowId or TaskDefinitionId or WorkerId',
-    `scope`                 varchar(45)  NOT NULL COMMENT '作用域',
-    `type`                  varchar(45)  NOT NULL COMMENT '类型',
-    `value`                 blob,
-    `parameter_type`        varchar(45)  DEFAULT NULL COMMENT '参数类型',
-    PRIMARY KEY (`business_id_scope_ref`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数实例表';
-
 CREATE TABLE `parameter`
 (
     `id`    varchar(50)  NOT NULL COMMENT '参数ID',
