@@ -2,6 +2,7 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.application.service.WorkflowApplication;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -16,6 +17,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("workflows")
+@Tag(name = "流程定义接口", description = "提供流程定义创建删除等API")
 public class WorkflowController {
 
     @Resource

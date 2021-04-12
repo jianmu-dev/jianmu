@@ -1,6 +1,9 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.infrastructure.storage.StorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -19,6 +24,7 @@ import java.nio.charset.StandardCharsets;
  **/
 @RestController
 @RequestMapping("log")
+@Tag(name = "任务日志接口", description = "本接口返回Chunked流，前端代码需要支持才能实时读取文件")
 public class LogController {
     private final StorageService storageService;
 
@@ -28,7 +34,8 @@ public class LogController {
     }
 
     @GetMapping("/{logId}")
-    public StreamingResponseBody logStream(@PathVariable String logId) {
+    @Operation(summary = "日志获取接口", description = "日志获取接口，返回日志流")
+    public StreamingResponseBody logStream(@Parameter(description = "任务实例ID即为日志ID") @PathVariable String logId) {
         BufferedReader reader = storageService.readLog(logId);
         return (os -> {
             readAndWrite(reader, os);

@@ -48,7 +48,11 @@ public class TriggerApplication {
     public void trigger(String triggerId) {
         var trigger = this.triggerRepository.findById(triggerId)
                 .orElseThrow(() -> new RuntimeException("未找到该触发器"));
-        this.workflowInstanceApplication.createAndStart(trigger.getId(), trigger.getWorkflowId());
+        if (trigger.getCategory().equals(Trigger.Category.WORKFLOW)) {
+            this.workflowInstanceApplication.createAndStart(trigger.getId(), trigger.getWorkflowId());
+        } else if (trigger.getCategory().equals(Trigger.Category.TASK)) {
+            // TODO 直接触发任务启动
+        }
     }
 
     @Transactional

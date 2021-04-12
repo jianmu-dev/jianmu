@@ -1,6 +1,9 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.application.service.TriggerApplication;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +19,7 @@ import javax.inject.Inject;
  **/
 @RestController
 @RequestMapping("trigger")
+@Tag(name = "触发器接口", description = "提供触发器管理与触发API")
 public class TriggerController {
     private final TriggerApplication triggerApplication;
 
@@ -25,7 +29,8 @@ public class TriggerController {
     }
 
     @PutMapping("/{triggerId}")
-    public void trigger(@PathVariable String triggerId) {
+    @Operation(summary = "触发接口", description = "触发启动")
+    public void trigger(@Parameter(description = "触发器ID") @PathVariable String triggerId) {
         this.triggerApplication.trigger(triggerId);
     }
 }

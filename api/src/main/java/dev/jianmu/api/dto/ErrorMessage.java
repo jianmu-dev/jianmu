@@ -1,5 +1,6 @@
 package dev.jianmu.api.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,9 +18,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "API 异常信息包装类")
 public class ErrorMessage {
+    @Schema(description = "HTTP 错误码")
     private int statusCode;
+    @Schema(description = "时间戳")
     private LocalDateTime timestamp;
+    @Schema(description = "错误信息")
     private String message;
+    @Schema(description = "描述")
     private String description;
 }
