@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.api.dto.DockerTask;
-import dev.jianmu.application.service.ParameterApplication;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
@@ -22,7 +21,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,7 +34,6 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
     private static final Logger logger = LoggerFactory.getLogger(WorkerStreamServiceImpl.class);
     private final WorkerApplication workerApplication;
     private final TaskInstanceApplication taskInstanceApplication;
-    private final ParameterApplication parameterApplication;
     private final TaskInstanceQueue taskInstanceQueue;
     private final ObjectMapper objectMapper;
     private final StorageService storageService;
@@ -44,10 +41,15 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
     private final ConcurrentHashMap<String, Thread> threadMap = new ConcurrentHashMap<>();
 
     @Inject
-    public WorkerStreamServiceImpl(WorkerApplication workerApplication, TaskInstanceApplication taskInstanceApplication, ParameterApplication parameterApplication, TaskInstanceQueue taskInstanceQueue, ObjectMapper objectMapper, StorageService storageService) {
+    public WorkerStreamServiceImpl(
+            WorkerApplication workerApplication,
+            TaskInstanceApplication taskInstanceApplication,
+            TaskInstanceQueue taskInstanceQueue,
+            ObjectMapper objectMapper,
+            StorageService storageService
+    ) {
         this.workerApplication = workerApplication;
         this.taskInstanceApplication = taskInstanceApplication;
-        this.parameterApplication = parameterApplication;
         this.taskInstanceQueue = taskInstanceQueue;
         this.objectMapper = objectMapper;
         this.storageService = storageService;
@@ -81,21 +83,33 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
         responseObserver.onCompleted();
     }
 
-    private String getDto(TaskInstance taskInstance)  {
+    private String getDto(TaskInstance taskInstance) {
         var environmentMap = this.taskInstanceApplication.getEnvironmentMap(taskInstance);
         var workerParameters = taskInstance.getWorkerParameters();
-        List<String> entrypoint = null;
-        List<String> args = null;
-        List<DockerTask.TasksEntity.VolumeMountsEntity> volume_mounts = null;
-        List<DockerTask.VolumesEntity> volumes = null;
+        List<String> entrypoint;
+        List<String> args;
         try {
-            entrypoint = this.objectMapper.readValue(workerParameters.getOrDefault("entrypoint", "[]"), new TypeReference<List<String>>() {});
-            args = this.objectMapper.readValue(workerParameters.getOrDefault("command", "[]"), new TypeReference<List<String>>() {});
-            volume_mounts = this.objectMapper.readValue(workerParameters.getOrDefault("volume_mounts", "[]"), new TypeReference<List<DockerTask.TasksEntity.VolumeMountsEntity>>() {});
-            volumes = this.objectMapper.readValue(workerParameters.getOrDefault("volumes", "{}"), new TypeReference<List<DockerTask.VolumesEntity>>() {});
+            entrypoint = this.objectMapper.readValue(workerParameters.getOrDefault("entrypoint", "[]"), new TypeReference<>() {
+            });
+            args = this.objectMapper.readValue(workerParameters.getOrDefault("command", "[]"), new TypeReference<>() {
+            });
         } catch (JsonProcessingException e) {
             throw new RuntimeException("some thing wrong", e);
         }
+        var workingDir = "/" + taskInstance.getTriggerId();
+        var volumeId = taskInstance.getTriggerId();
+        var volumeName = taskInstance.getTriggerId();
+        var v = DockerTask.VolumesEntity.builder()
+                .temp(
+                        DockerTask.VolumesEntity.TempEntity.builder()
+                                .id(volumeId)
+                                .name(volumeName)
+                                .build())
+                .build();
+        var vm = DockerTask.TasksEntity.VolumeMountsEntity.builder()
+                .name(volumeName)
+                .path(workingDir)
+                .build();
         DockerTask dockerTask = DockerTask.builder()
                 .Tasks(List.of(
                         DockerTask.TasksEntity.builder()
@@ -103,14 +117,14 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                                 .name(taskInstance.getName())
                                 .image(workerParameters.get("image"))
                                 .network(workerParameters.get("network"))
-                                .working_dir(workerParameters.get("working_dir"))
+                                .working_dir(workingDir)
                                 .entrypoint(entrypoint)
                                 .args(args)
-                                .volume_mounts(volume_mounts)
+                                .volume_mounts(List.of(vm))
                                 .environment(environmentMap)
                                 .build()
                 ))
-                .volumes(volumes)
+                .volumes(List.of(v))
                 .build();
         try {
             return objectMapper.writeValueAsString(dockerTask);

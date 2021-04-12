@@ -58,7 +58,7 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
 
     @Override
     public void updateStatus(TaskInstance taskInstance) {
-        this.taskInstanceMapper.updateStatus(taskInstance.getId(), taskInstance.getStatus());
+        this.taskInstanceMapper.updateStatus(taskInstance);
         if (taskInstance.getStatus().equals(InstanceStatus.EXECUTION_FAILED)) {
             this.applicationEventPublisher.publishEvent(
                     TaskInstanceFailedEvent.Builder.aTaskInstanceFailedEvent()

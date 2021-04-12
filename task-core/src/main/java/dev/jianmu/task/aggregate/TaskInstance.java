@@ -1,5 +1,6 @@
 package dev.jianmu.task.aggregate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -24,6 +25,10 @@ public class TaskInstance extends AggregateRoot {
     private String businessId;
     // 触发器ID
     private String triggerId;
+    // 开始时间
+    private final LocalDateTime startTime = LocalDateTime.now();
+    // 结束时间
+    private LocalDateTime endTime;
     // 任务运行状态
     private InstanceStatus status = InstanceStatus.WAITING;
 
@@ -45,6 +50,7 @@ public class TaskInstance extends AggregateRoot {
 
     public void setStatus(InstanceStatus status) {
         this.status = status;
+        this.endTime = LocalDateTime.now();
     }
 
     public String getId() {
@@ -75,10 +81,17 @@ public class TaskInstance extends AggregateRoot {
         return triggerId;
     }
 
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
     public InstanceStatus getStatus() {
         return status;
     }
-
 
     public static final class Builder {
         // ID

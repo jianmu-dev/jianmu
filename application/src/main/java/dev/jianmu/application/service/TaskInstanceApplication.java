@@ -100,6 +100,7 @@ public class TaskInstanceApplication {
     public void updateStatus(String taskInstanceId, InstanceStatus status) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new RuntimeException("未找到该任务实例"));
+        // TODO 需要更新任务结束时间
         taskInstance.setStatus(status);
         this.taskInstanceRepository.updateStatus(taskInstance);
     }
