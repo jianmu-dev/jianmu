@@ -4,6 +4,7 @@ import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.task.service.TaskDefinitionDomainService;
+import dev.jianmu.trigger.service.TriggerDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,11 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     @Bean
     public TaskDefinitionDomainService createTaskDefinitionDomainService() {
         return new TaskDefinitionDomainService();
+    }
+
+    @Bean
+    public TriggerDomainService createTriggerDomainService() {
+        return new TriggerDomainService();
     }
 
     @Bean

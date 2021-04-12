@@ -1,5 +1,6 @@
 package dev.jianmu.trigger.aggregate;
 
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -14,10 +15,12 @@ public class Trigger {
         EVERY,
         EVENT
     }
+
     public enum Category {
         WORKFLOW,
         TASK
     }
+
     // ID
     private String id;
     // 关联流程定义ID
@@ -30,8 +33,14 @@ public class Trigger {
     private Type type;
     // 触发器类别
     private Category category;
+    // 参数列表
+    private Set<TriggerParameter> triggerParameters;
 
     private Trigger() {
+    }
+
+    public void setTriggerParameters(Set<TriggerParameter> triggerParameters) {
+        this.triggerParameters = triggerParameters;
     }
 
     public String getId() {
@@ -58,6 +67,10 @@ public class Trigger {
         return category;
     }
 
+    public Set<TriggerParameter> getParameters() {
+        return triggerParameters;
+    }
+
     public static final class Builder {
         // ID
         // TODO 暂时使用UUID的值
@@ -78,11 +91,6 @@ public class Trigger {
 
         public static Builder aTrigger() {
             return new Builder();
-        }
-
-        public Builder id(String id) {
-            this.id = id;
-            return this;
         }
 
         public Builder workflowId(String workflowId) {
