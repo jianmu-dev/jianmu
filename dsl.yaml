@@ -2,8 +2,8 @@ workflow:
   name: flow_1
   trigger:
     type: event
-      param:
-        branch_name: dev
+    param:
+      branch_name: dev
   start:
     targets:
       - Git_v1
