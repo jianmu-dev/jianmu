@@ -1,0 +1,50 @@
+workflow:
+  name: flow_1
+  trigger:
+    type: event
+      param:
+        branch_name: dev
+  start:
+    targets:
+      - Git_v1
+  Git_1:
+    type: git_0.1
+    sources:
+      - Start
+    targets:
+      - Maven_0.1
+    input-param:
+      git_repo: https://github/testuser/testproject.git
+      branch_name: ${branch_name}
+  Build_1:
+    type: maven_0.1
+    sources:
+      - Git_0.1
+    targets:
+      - Condition_1
+    input-param:
+      cmd: mvn install
+  Condition_1:
+    type: Condition
+    sources:
+      - Maven_0.1
+    expression: 1+1=2
+    cases:
+      false: Sms_Notice_0.1
+      true: Weixin_Notice_0.1
+  Notice_1:
+    type: Sms_Notice_0.1
+    sources:
+      - Condition_1
+    targets:
+      - End
+  Notice_2:
+    type: Weixin_Notice_0.1
+    sources:
+      - Condition_1
+    targets:
+      - End
+  end:
+    sources:
+      - Sms_Notice_0.1
+      - Weixin_Notice_0.1
