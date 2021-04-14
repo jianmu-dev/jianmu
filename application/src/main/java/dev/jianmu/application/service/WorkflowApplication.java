@@ -1,6 +1,5 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.parameter.aggregate.ParameterDefinition;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.springframework.stereotype.Service;
@@ -41,17 +40,12 @@ public class WorkflowApplication {
                                 .nodes(workflow.getNodes())
                                 .build()
                 );
-
-        // TODO 同步创建参数定义
-        List<ParameterDefinition<?>> parameters = List.of();
-
         return this.workflowRepository.add(newWorkflow);
     }
 
-    // 删除流程定义版本与关联参数
+    // 删除流程定义版本
     @Transactional
     public void deleteByRefAndVersion(String ref, String version) {
-        // TODO 同步删除相关参数定义
         this.workflowRepository.deleteByRefAndVersion(ref, version);
     }
 
