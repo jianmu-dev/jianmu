@@ -24,7 +24,7 @@ workflow:
     sources:
       - Start_1
     targets:
-      - Maven_0.1
+      - Build_1
     param:
       git_user: ${git_user}
       git_pass: ${git_pass}
@@ -33,7 +33,7 @@ workflow:
   Build_1:
     type: maven_0.1
     sources:
-      - Git_0.1
+      - Git_1
     targets:
       - Condition_1
     param:
@@ -41,7 +41,7 @@ workflow:
   Condition_1:
     type: Condition
     sources:
-      - Maven_0.1
+      - Build_1
     expression: ${Build_1.build_status} is True
     cases:
       false: Sms_Notice_0.1
