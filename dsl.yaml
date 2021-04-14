@@ -1,19 +1,33 @@
+trigger:
+  type: event
+
+param:
+  branch_name:
+    type: string
+    value: dev
+  git_return:
+    type: number
+    value: 200
+  git_user:
+    type: security
+  git_pass:
+    type: security
+
 workflow:
   name: flow_1
-  trigger:
-    type: event
-    param:
-      branch_name: dev
-  start:
+  Start_1:
+    type: start
     targets:
       - Git_v1
   Git_1:
     type: git_0.1
     sources:
-      - Start
+      - Start_1
     targets:
       - Maven_0.1
-    input-param:
+    param:
+      git_user: ${git_user}
+      git_pass: ${git_pass}
       git_repo: https://github/testuser/testproject.git
       branch_name: ${branch_name}
   Build_1:
@@ -22,29 +36,34 @@ workflow:
       - Git_0.1
     targets:
       - Condition_1
-    input-param:
+    param:
       cmd: mvn install
   Condition_1:
     type: Condition
     sources:
       - Maven_0.1
-    expression: 1+1=2
+    expression: ${Build_1.build_status} is True
     cases:
       false: Sms_Notice_0.1
       true: Weixin_Notice_0.1
   Notice_1:
     type: Sms_Notice_0.1
+    param:
+      text: `"Build error, msg is: " + ${Build_1.build_error_message}`
     sources:
       - Condition_1
     targets:
-      - End
+      - End_1
   Notice_2:
     type: Weixin_Notice_0.1
+    param:
+      text: ${Build_1.build_info}
     sources:
       - Condition_1
     targets:
-      - End
-  end:
+      - End_1
+  End_1:
+    type: end
     sources:
       - Sms_Notice_0.1
       - Weixin_Notice_0.1
