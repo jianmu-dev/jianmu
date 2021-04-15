@@ -1,4 +1,4 @@
-package dev.jianmu.task.aggregate;
+package dev.jianmu.task.aggregate.spec;
 
 import java.util.List;
 
