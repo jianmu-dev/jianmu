@@ -1,5 +1,10 @@
-trigger:
-  type: event
+cron: * 5/* * * * ? *
+
+event:
+  push_event:
+    branch: ${branch_name} # dev, master
+  tag_event:
+    tag: ${branch_name} # tag_name
 
 param:
   branch_name:
