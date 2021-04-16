@@ -7,6 +7,10 @@ spring:
   config:
     activate:
       on-profile: @profile.active@
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/jianmu?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 12345678
   flyway:
     enabled: true
     clean-disabled: true
@@ -22,3 +26,18 @@ pagehelper:
 logging:
   charset:
     console: UTF-8
+
+grpc:
+  server:
+    port: 5001
+  client:
+    GLOBAL:
+      address: static://127.0.0.1:5001
+      negotiation-type: plaintext
+
+storage:
+  logfile-path: task_log
+embedded:
+  dockerworker:
+    docker-host: tcp://127.0.0.1:2375
+    api-version: v1.39
