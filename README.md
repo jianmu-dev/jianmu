@@ -1,70 +1,23 @@
-# Workflow
+# Jianmu
 
 #### 介绍
-建木流程引擎核心库
+建木自动化集成平台
 
-提供核心流程组件的定义与功能实现，实现了流程编排与流程流转的核心功能。
+以触发器、流程流转、任务分发等核心功能为平台核心，可以用在各类使用场景下，
 
-#### 核心概念
+包括但不限于，CI/CD、DevOps、自动化运维、多业务系统集成等使用场景。
 
-流程定义
+#### 架构设计
 
-流程实例
+可以参考 [这里](https://gitee.com/jianmu_dev/jianmu-architecture-as-code)
 
-节点类型
+#### 运行环境
 
-异步任务实例
+JDK 11 及以上
 
+Docker 18.09.7及以上
 
-#### 节点类型
+Mysql 8.0及以上
 
-当前支持的节点类型如下：
-
-开始节点（Start）
-
-结束节点（End）
-
-条件节点（Condition）
-
-Switch节点（Switch）
-
-For each节点（待实现）
-
-异步任务节点（AsyncTask）
-
-#### 参数类型支持
-
-支持的基本类型如下：
-
-string
-
-number
-
-boolean
-
-datetime
-
-file
-
-password
-
-url
-
-email
-
-支持的复合类型如下：
-
-struct/object
-
-array[any]
-
-map<string, any>
-
-#### 参数引用方式
-
-参数值引用	`${workflow_ref.task_ref.parameter_ref}		`	
-
-参数值为struct	`${workflow_ref.task_ref.parameter_ref.attribute_name}		`	
-
-参数值为array或map	`${workflow_ref.task_ref.parameter_ref}[array_index or map_key]			`
+go 1.15及以上
 
