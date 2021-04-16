@@ -22,6 +22,12 @@ Mysql 8.0及以上
 
 go 1.15及以上
 
+#### 如何编译
+
+`mvn install`
+
+如果提示缺少依赖包，可以clone相关库的代码本地 `mvn install`即可
+
 #### 如何运行
 
 参考 [application.yml](https://gitee.com/jianmu_dev/jianmu-main/blob/master/api/src/main/resources/application.yml) 中的配置
