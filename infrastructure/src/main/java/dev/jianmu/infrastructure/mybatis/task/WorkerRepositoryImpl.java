@@ -20,24 +20,20 @@ import java.util.stream.Collectors;
 @Repository
 public class WorkerRepositoryImpl implements WorkerRepository {
     private final WorkerMapper workerMapper;
-    private final WorkerParameterMapper workerParameterMapper;
 
     @Inject
-    public WorkerRepositoryImpl(WorkerMapper workerMapper, WorkerParameterMapper workerParameterMapper) {
+    public WorkerRepositoryImpl(WorkerMapper workerMapper) {
         this.workerMapper = workerMapper;
-        this.workerParameterMapper = workerParameterMapper;
     }
 
     @Override
     public void add(Worker worker) {
         this.workerMapper.add(worker);
-        this.workerParameterMapper.addAll(worker.getId(), worker.getParameterMap());
     }
 
     @Override
     public void delete(Worker worker) {
         this.workerMapper.delete(worker);
-        this.workerParameterMapper.deleteByWorkerId(worker.getId());
     }
 
     @Override
@@ -47,12 +43,6 @@ public class WorkerRepositoryImpl implements WorkerRepository {
 
     @Override
     public Optional<Worker> findById(String workerId) {
-        var workerOptional = this.workerMapper.findById(workerId);
-        var workerParameters = this.workerParameterMapper.findByWorkerId(workerId);
-        var parameterMap = workerParameters.stream()
-                .map(workerParameterDO -> Map.entry(workerParameterDO.getParameterKey(), workerParameterDO.getParameterValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        workerOptional.ifPresent(worker -> worker.setParameterMap(parameterMap));
-        return workerOptional;
+        return this.workerMapper.findById(workerId);
     }
 }

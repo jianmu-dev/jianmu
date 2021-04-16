@@ -5,6 +5,7 @@ import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.el.ResultType;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import javax.annotation.Resource;
 
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @create: 2021-03-22 15:06
  **/
 @SpringBootTest(classes = SpringbootApp.class)
+@ActiveProfiles("test")
 public class ElServiceTest {
     @Resource
     private ExpressionLanguage expressionLanguage;

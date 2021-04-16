@@ -1,33 +1,34 @@
 CREATE TABLE `workflow`
 (
-    `ref_version` varchar(255) NOT NULL COMMENT '流程定义标识，主键',
-    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `version`     varchar(45)  NOT NULL COMMENT '版本',
-    `name`        varchar(255) DEFAULT NULL COMMENT '显示名称',
-    `description` varchar(255) DEFAULT NULL COMMENT '描述',
+    `ref_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '流程定义标识，主键',
+    `ref`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '唯一引用名称',
+    `version`     varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '版本',
+    `name`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '显示名称',
+    `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '描述',
     `nodes`       longblob COMMENT 'Node列表',
     PRIMARY KEY (`ref_version`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='流程定义表';
 
 CREATE TABLE `workflow_instance`
 (
-    `id`               varchar(45) NOT NULL COMMENT '唯一ID主键',
-    `name`             varchar(255) DEFAULT NULL COMMENT '显示名称',
-    `description`      varchar(255) DEFAULT NULL COMMENT '描述',
-    `run_mode`         varchar(45) NOT NULL COMMENT '运行模式',
-    `status`           varchar(45) NOT NULL COMMENT '运行状态',
-    `workflow_ref`     varchar(45) NOT NULL COMMENT '流程定义唯一引用名称',
-    `workflow_version` varchar(45) NOT NULL COMMENT '流程定义版本',
+    `id`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '唯一ID主键',
+    `trigger_id`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '触发器ID',
+    `name`             varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '显示名称',
+    `description`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '描述',
+    `run_mode`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '运行模式',
+    `status`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '运行状态',
+    `workflow_ref`     varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '流程定义唯一引用名称',
+    `workflow_version` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '流程定义版本',
     `task_instances`   blob COMMENT '任务实例列表',
-    `start_time`       datetime     DEFAULT NULL COMMENT '开始时间',
-    `end_time`         datetime     DEFAULT NULL COMMENT '结束时间',
-    `_version`         int         NOT NULL COMMENT '乐观锁版本字段',
+    `start_time`       datetime                                                      DEFAULT NULL COMMENT '开始时间',
+    `end_time`         datetime                                                      DEFAULT NULL COMMENT '结束时间',
+    `_version`         int                                                          NOT NULL COMMENT '乐观锁版本字段',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci;
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='流程实例表';
 
 CREATE TABLE `task_definition`
 (
@@ -42,6 +43,18 @@ CREATE TABLE `task_definition`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务定义表';
 
+CREATE TABLE `task_parameter`
+(
+    `definition_id` varchar(255) NOT NULL,
+    `name`          varchar(45)  NOT NULL,
+    `ref`           varchar(45)  NOT NULL,
+    `type`          varchar(45)  NOT NULL,
+    `description`   varchar(255) DEFAULT NULL,
+    `parameterId`   varchar(45)  NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务参数表';
+
 CREATE TABLE `task_instance`
 (
     `id`          varchar(45) NOT NULL COMMENT '主键',
@@ -51,28 +64,42 @@ CREATE TABLE `task_instance`
     `name`        varchar(45) NOT NULL COMMENT '显示名称',
     `description` varchar(45) DEFAULT NULL COMMENT '描述',
     `business_id` varchar(45) NOT NULL COMMENT '外部业务ID',
+    `trigger_id`  varchar(45) NOT NULL COMMENT '触发器ID',
+    `start_time`  datetime    DEFAULT NULL COMMENT '开始时间',
+    `end_time`    datetime    DEFAULT NULL COMMENT '结束时间',
     `status`      varchar(45) NOT NULL COMMENT '任务运行状态',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务实例表';
 
+CREATE TABLE `task_instance_parameter`
+(
+    `instance_id` varchar(100) NOT NULL COMMENT '任务实例ID',
+    `name`        varchar(45)  NOT NULL COMMENT '参数显示名',
+    `ref`         varchar(45)  NOT NULL COMMENT '参数名',
+    `type`        varchar(45)  NOT NULL COMMENT '参数类型',
+    `description` varchar(255) NOT NULL COMMENT '描述',
+    `parameterId` varchar(45)  NOT NULL COMMENT '参数存储ID'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务实例参数表';
+
 CREATE TABLE `parameter`
 (
-    `id`    varchar(50)  NOT NULL COMMENT '参数ID',
-    `type`  varchar(45)  NOT NULL COMMENT '参数类型',
-    `value` varchar(255) NOT NULL COMMENT '参数值',
+    `id`    varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '参数ID',
+    `type`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '参数类型',
+    `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '参数值',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数表';
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数存储表';
 
 CREATE TABLE `reference`
 (
     `context_id`          varchar(100) DEFAULT NULL,
     `linked_parameter_id` varchar(100) DEFAULT NULL COMMENT '被关联参数ID',
     `parameter_id`        varchar(100) DEFAULT NULL COMMENT '参数ID',
-    UNIQUE KEY `group_id` (`linked_parameter_id`, `parameter_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数引用表';
@@ -84,7 +111,31 @@ CREATE TABLE `worker`
     `status` varchar(45) DEFAULT NULL COMMENT '状态',
     `type`   varchar(45) DEFAULT NULL COMMENT '类型',
     PRIMARY KEY (`id`)
-);
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务执行器';
 
-insert into worker(id, name, status, type)
-values ('worker9527', 'Worker1', 'OFFLINE', 'DOCKER');
+CREATE TABLE `trigger`
+(
+    `id`                 varchar(45) NOT NULL COMMENT 'ID',
+    `workflow_id`        varchar(45) DEFAULT NULL COMMENT '流程定义ID',
+    `task_definition_id` varchar(45) DEFAULT NULL COMMENT '任务定义ID',
+    `workspace`          varchar(45) DEFAULT NULL COMMENT '工作空间',
+    `type`               varchar(45) NOT NULL COMMENT '触发类型',
+    `category`           varchar(45) NOT NULL COMMENT '流程或任务分类',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='触发器';
+
+CREATE TABLE `trigger_parameter`
+(
+    `trigger_id`  varchar(45) NOT NULL COMMENT '触发器ID',
+    `name`        varchar(45) NOT NULL COMMENT '显示名称',
+    `ref`         varchar(45) NOT NULL COMMENT '唯一引用名称',
+    `type`        varchar(45) NOT NULL COMMENT '类型',
+    `description` varchar(45) DEFAULT NULL COMMENT '描述',
+    `parameterId` varchar(45) NOT NULL COMMENT '参数引用Id'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='触发器参数表';

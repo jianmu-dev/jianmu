@@ -29,17 +29,15 @@ import java.util.concurrent.Semaphore;
  **/
 @SpringBootTest(classes = SpringbootApp.class)
 @ActiveProfiles("test")
-public class WorkflowTaskParameterInstanceIntegrationTest {
+public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
     @Resource
     private WorkflowInstanceRepository workflowInstanceRepository;
-    @Resource
-    private WorkflowInstanceDomainService workflowInstanceDomainService;
     @Resource
     private ExpressionLanguage expressionLanguage;
     @Resource
     private WorkflowInstanceApplication workflowInstanceApplication;
 
-    private static final Logger logger = LoggerFactory.getLogger(WorkflowTaskParameterInstanceIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(WorkflowTaskTriggerParameterInstanceIntegrationTest.class);
 
     private static Workflow workflow;
     private static WorkflowInstance instance;
@@ -107,7 +105,7 @@ public class WorkflowTaskParameterInstanceIntegrationTest {
                 .nodes(nodes)
                 .build();
         WorkflowInstanceDomainService workflowInstanceDomainService = new WorkflowInstanceDomainService();
-        instance = workflowInstanceDomainService.create(workflow);
+        instance = workflowInstanceDomainService.create("trigger567", workflow);
     }
 
     @Test

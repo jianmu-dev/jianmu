@@ -25,7 +25,7 @@ import java.util.Map;
  **/
 @SpringBootTest(classes = SpringbootApp.class)
 @DisplayName("Worker测试类")
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 @Transactional
 public class WorkerTest {
     @Resource
