@@ -26,7 +26,9 @@ public class ParameterRepositoryImpl implements ParameterRepository {
 
     @Override
     public void addAll(List<Parameter> parameters) {
-        this.parameterMapper.addAll(parameters);
+        if (!parameters.isEmpty()) {
+            this.parameterMapper.addAll(parameters);
+        }
     }
 
     @Override

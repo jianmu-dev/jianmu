@@ -1,8 +1,8 @@
 package dev.jianmu.task.service;
 
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.aggregate.InstanceStatus;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class InstanceDomainService {
         if (taskInstances.size() > 0) {
             boolean isRunning = taskInstances.stream()
                     .anyMatch(instance ->
-                                    instance.getStatus().equals(InstanceStatus.WAITING) ||
+                            instance.getStatus().equals(InstanceStatus.WAITING) ||
                                     instance.getStatus().equals(InstanceStatus.RUNNING)
                     );
             if (isRunning) {
@@ -37,7 +37,6 @@ public class InstanceDomainService {
                 .businessId(businessId)
                 .triggerId(triggerId)
                 .parameters(taskDefinition.getParameters())
-                .workerParameters(taskDefinition.getWorkerParameters())
                 .build();
     }
 }

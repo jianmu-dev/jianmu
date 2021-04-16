@@ -1,6 +1,12 @@
 package dev.jianmu.task.service;
 
-import dev.jianmu.task.aggregate.*;
+import dev.jianmu.task.aggregate.DockerTask;
+import dev.jianmu.task.aggregate.DockerTaskDefinition;
+import dev.jianmu.task.aggregate.TaskInstance;
+import dev.jianmu.task.aggregate.spec.ContainerSpec;
+import dev.jianmu.task.aggregate.spec.HostConfig;
+import dev.jianmu.task.aggregate.spec.Mount;
+import dev.jianmu.task.aggregate.spec.MountType;
 
 import java.util.List;
 import java.util.Map;
@@ -13,8 +19,7 @@ import java.util.Map;
  **/
 public class WorkerDomainService {
 
-    public DockerTask createDockerTask(TaskInstance taskInstance, Map<String, String> environmentMap) {
-        var workerParameters = taskInstance.getWorkerParameters();
+    public DockerTask createDockerTask(DockerTaskDefinition taskDefinition, TaskInstance taskInstance, Map<String, String> environmentMap) {
         var env = environmentMap.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
         // 使用TriggerId作为工作目录名称与volume名称
@@ -27,12 +32,13 @@ public class WorkerDomainService {
                 .target(workingDir)
                 .build();
         var hostConfig = HostConfig.Builder.aHostConfig().mounts(List.of(mount)).build();
-        var spec = ContainerSpec.Builder.aContainerSpec()
-                .image(workerParameters.get("image"))
+        var spec = taskDefinition.getSpec();
+        var newSpec = ContainerSpec.Builder.aContainerSpec()
+                .image(spec.getImage())
                 .workingDir(workingDir)
                 .hostConfig(hostConfig)
-                // TODO CMD实现
-//                .cmd()
+                .cmd(spec.getCmd())
+                .entrypoint(spec.getEntrypoint())
                 .env(env)
                 .build();
         return DockerTask.Builder.aDockerTask()
@@ -41,7 +47,7 @@ public class WorkerDomainService {
                 .triggerId(taskInstance.getTriggerId())
                 .defKey(taskInstance.getDefKey())
                 .defVersion(taskInstance.getDefVersion())
-                .spec(spec)
+                .spec(newSpec)
                 .build();
     }
 }

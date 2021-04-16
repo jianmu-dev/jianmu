@@ -1,11 +1,11 @@
 package dev.jianmu.task.service;
 
+import dev.jianmu.task.aggregate.BaseTaskDefinition;
 import dev.jianmu.task.aggregate.TaskDefinition;
 import dev.jianmu.task.aggregate.TaskParameter;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @class: TaskDefinitionDomainService

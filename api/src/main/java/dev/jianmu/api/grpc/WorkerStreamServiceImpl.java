@@ -85,17 +85,8 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
 
     private String getDto(TaskInstance taskInstance) {
         var environmentMap = this.taskInstanceApplication.getEnvironmentMap(taskInstance);
-        var workerParameters = taskInstance.getWorkerParameters();
         List<String> entrypoint;
         List<String> args;
-        try {
-            entrypoint = this.objectMapper.readValue(workerParameters.getOrDefault("entrypoint", "[]"), new TypeReference<>() {
-            });
-            args = this.objectMapper.readValue(workerParameters.getOrDefault("command", "[]"), new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("some thing wrong", e);
-        }
         var workingDir = "/" + taskInstance.getTriggerId();
         var volumeId = taskInstance.getTriggerId();
         var volumeName = taskInstance.getTriggerId();
@@ -115,11 +106,7 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                         DockerTask.TasksEntity.builder()
                                 .id(taskInstance.getId())
                                 .name(taskInstance.getName())
-                                .image(workerParameters.get("image"))
-                                .network(workerParameters.get("network"))
                                 .working_dir(workingDir)
-                                .entrypoint(entrypoint)
-                                .args(args)
                                 .volume_mounts(List.of(vm))
                                 .environment(environmentMap)
                                 .build()

@@ -34,18 +34,12 @@ public class TaskInstance extends AggregateRoot {
 
     // 输入输出参数列表
     private Set<TaskParameter> parameters = new HashSet<>();
-    // Worker参数列表
-    private Map<String, String> workerParameters = new HashMap<>();
 
     private TaskInstance() {
     }
 
     public Set<TaskParameter> getParameters() {
         return parameters;
-    }
-
-    public Map<String, String> getWorkerParameters() {
-        return workerParameters;
     }
 
     public void setStatus(InstanceStatus status) {
@@ -111,8 +105,6 @@ public class TaskInstance extends AggregateRoot {
         private String triggerId;
         // 输入输出参数列表
         private Set<TaskParameter> parameters;
-        // Worker参数列表
-        private Map<String, String> workerParameters;
 
         private Builder() {
         }
@@ -156,11 +148,6 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
-        public Builder workerParameters(Map<String, String> workerParameters) {
-            this.workerParameters = workerParameters;
-            return this;
-        }
-
         public TaskInstance build() {
             TaskInstance taskInstance = new TaskInstance();
             taskInstance.id = this.id;
@@ -171,7 +158,6 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.businessId = this.businessId;
             taskInstance.triggerId = this.triggerId;
             taskInstance.parameters = this.parameters;
-            taskInstance.workerParameters = this.workerParameters;
             return taskInstance;
         }
     }

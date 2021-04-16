@@ -44,7 +44,7 @@ public class ParameterDomainService {
             var realValue = parameters.stream()
                     .filter(parameter -> parameter.getId().equals(entry.getValue()))
                     .findFirst()
-                    .orElseThrow();
+                    .orElse(Parameter.Builder.aParameter().build());
             return Map.entry(entry.getKey(), realValue.getValue());
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

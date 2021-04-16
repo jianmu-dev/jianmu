@@ -9,14 +9,18 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import dev.jianmu.task.aggregate.DockerTask;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +81,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
     }
 
     @Override
+    @Async
     public void runTask(DockerTask dockerTask, BufferedWriter logWriter) {
         var spec = dockerTask.getSpec();
         // 创建容器
@@ -102,6 +107,9 @@ public class EmbeddedDockerWorker implements DockerWorker {
         }
         if (null != spec.getEntrypoint()) {
             createContainerCmd.withEntrypoint(spec.getEntrypoint());
+        }
+        if (null != spec.getCmd()) {
+            createContainerCmd.withCmd(spec.getCmd());
         }
         var containerResponse = createContainerCmd.exec();
         // 启动容器
@@ -134,13 +142,37 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 @Override
                 public void onNext(WaitResponse object) {
                     logger.info("dockerTask {} status code is: {}", dockerTask.getTaskInstanceId(), object.getStatusCode());
-                    // TODO 返回任务结果
-                    publisher.publishEvent("done");
+                    publisher.publishEvent(
+                            TaskResult.builder()
+                                    .taskId(dockerTask.getTaskInstanceId())
+                                    .statusCode(object.getStatusCode())
+                                    .build()
+                    );
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("无法获取容器执行结果:", e);
             throw new RuntimeException("无法获取容器执行结果");
+        }
+        // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
+        var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), "/etc/hostname").exec();
+        var tarStream = new TarArchiveInputStream(stream);
+        try {
+            var tarArchiveEntry = tarStream.getNextTarEntry();
+            if (!tarStream.canReadEntryData(tarArchiveEntry)) {
+                logger.info("不能读取tarArchiveEntry");
+            }
+            if (!tarArchiveEntry.isFile()) {
+                logger.info("执行结果文件必须是文件类型, 不支持目录或其他类型");
+            }
+            var reader = new BufferedReader(new InputStreamReader(tarStream));
+            logger.info("tarArchiveEntry's name: {}", tarArchiveEntry.getName());
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logger.info("结果文件内容: {}", line);
+            }
+        } catch (IOException e) {
+            logger.error("无法获取容器执行结果文件:", e);
         }
         // 清除容器
         this.dockerClient.removeContainerCmd(containerResponse.getId())

@@ -1,6 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.TaskInstanceApplication;
+import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.*;
@@ -27,12 +28,14 @@ public class WorkflowEventHandler {
 
     private final WorkflowInstanceApplication instanceApplication;
     private final TaskInstanceApplication taskInstanceApplication;
+    private final WorkerApplication workerApplication;
     private final ApplicationEventPublisher publisher;
 
     @Inject
-    public WorkflowEventHandler(WorkflowInstanceApplication instanceApplication, TaskInstanceApplication taskInstanceApplication, ApplicationEventPublisher publisher) {
+    public WorkflowEventHandler(WorkflowInstanceApplication instanceApplication, TaskInstanceApplication taskInstanceApplication, WorkerApplication workerApplication, ApplicationEventPublisher publisher) {
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;
+        this.workerApplication = workerApplication;
         this.publisher = publisher;
     }
 
@@ -104,6 +107,8 @@ public class WorkflowEventHandler {
         logger.info("Get WorkflowStartEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getWorkflowInstanceId());
+        logger.info(event.getTriggerId());
+        this.workerApplication.createVolume(event.getTriggerId());
         logger.info("-----------------------------------------------------");
     }
 
@@ -112,6 +117,7 @@ public class WorkflowEventHandler {
         logger.info("Get WorkflowEndEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getWorkflowInstanceId());
+        this.workerApplication.deleteVolume(event.getTriggerId());
         logger.info("-----------------------------------------------------");
     }
 }

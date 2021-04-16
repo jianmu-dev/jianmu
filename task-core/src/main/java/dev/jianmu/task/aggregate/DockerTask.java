@@ -1,7 +1,6 @@
 package dev.jianmu.task.aggregate;
 
-import java.util.List;
-import java.util.Map;
+import dev.jianmu.task.aggregate.spec.ContainerSpec;
 
 /**
  * @class: DockerTask
