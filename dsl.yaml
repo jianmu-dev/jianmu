@@ -1,4 +1,4 @@
-cron: * 5/* * * * ? *
+cron: '* 5/* * * * ? *'
 
 event:
   push_event:
@@ -13,10 +13,6 @@ param:
   git_return:
     type: number
     value: 200
-  git_user:
-    type: security
-  git_pass:
-    type: security
 
 workflow:
   name: flow_1
@@ -31,8 +27,9 @@ workflow:
     targets:
       - Build_1
     param:
-      git_user: ${git_user}
-      git_pass: ${git_pass}
+      git_user: ((git_account_a.user))
+      git_pass: ((git_account_a.pass))
+      git_key: ((git_key))
       git_repo: https://github/testuser/testproject.git
       branch_name: ${branch_name}
   Build_1:
@@ -54,7 +51,7 @@ workflow:
   Notice_1:
     type: Sms_Notice_0.1
     param:
-      text: `"Build error, msg is: " + ${Build_1.build_error_message}`
+      text: '"Build error, msg is: " + ${Build_1.build_error_message}'
     sources:
       - Condition_1
     targets:
