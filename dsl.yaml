@@ -15,7 +15,9 @@ param:
     value: 200
 
 workflow:
-  name: flow_1
+  name: 测试流程1
+  ref: flow_1
+  description: 测试流程1的描述
   Start_1:
     type: start
     targets:
