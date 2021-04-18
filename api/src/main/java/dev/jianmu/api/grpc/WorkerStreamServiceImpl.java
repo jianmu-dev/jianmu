@@ -105,7 +105,6 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                 .Tasks(List.of(
                         DockerTask.TasksEntity.builder()
                                 .id(taskInstance.getId())
-                                .name(taskInstance.getName())
                                 .working_dir(workingDir)
                                 .volume_mounts(List.of(vm))
                                 .environment(environmentMap)
@@ -136,7 +135,6 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                 logger.info(dto);
                 Task task = Task.newBuilder()
                         .setId(taskInstance.getId())
-                        .setName(taskInstance.getName())
                         .setDto(dto)
                         .build();
                 responseObserver.onNext(task);

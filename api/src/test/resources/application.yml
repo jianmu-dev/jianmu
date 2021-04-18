@@ -12,7 +12,7 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
     out-of-order: true
-    validate-on-migrate: true
+    validate-on-migrate: false
 pagehelper:
   support-methods-arguments: true
 grpc:
@@ -21,6 +21,6 @@ grpc:
 storage:
   logfile-path: task_log
 embedded:
-  dockerworker:
+  docker-worker:
     docker-host: tcp://127.0.0.1:2375
     api-version: v1.39

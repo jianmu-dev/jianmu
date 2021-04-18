@@ -15,6 +15,8 @@
         <module>task-core</module>
         <module>parameter-core</module>
         <module>trigger-core</module>
+        <module>dsl-core</module>
+        <module>version-core</module>
     </modules>
 
     <properties>

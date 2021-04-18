@@ -14,8 +14,6 @@ public class DockerTask {
     private String triggerId;
     // 任务定义唯一Key
     private String defKey;
-    // 任务定义版本
-    private String defVersion;
     // 容器规格定义
     private ContainerSpec spec;
 
@@ -38,10 +36,6 @@ public class DockerTask {
         return defKey;
     }
 
-    public String getDefVersion() {
-        return defVersion;
-    }
-
     public ContainerSpec getSpec() {
         return spec;
     }
@@ -52,8 +46,6 @@ public class DockerTask {
         private String triggerId;
         // 任务定义唯一Key
         private String defKey;
-        // 任务定义版本
-        private String defVersion;
         // 容器规格定义
         private ContainerSpec spec;
 
@@ -84,11 +76,6 @@ public class DockerTask {
             return this;
         }
 
-        public Builder defVersion(String defVersion) {
-            this.defVersion = defVersion;
-            return this;
-        }
-
         public Builder spec(ContainerSpec spec) {
             this.spec = spec;
             return this;
@@ -98,7 +85,6 @@ public class DockerTask {
             DockerTask dockerTask = new DockerTask();
             dockerTask.spec = this.spec;
             dockerTask.triggerId = this.triggerId;
-            dockerTask.defVersion = this.defVersion;
             dockerTask.businessId = this.businessId;
             dockerTask.taskInstanceId = this.taskInstanceId;
             dockerTask.defKey = this.defKey;

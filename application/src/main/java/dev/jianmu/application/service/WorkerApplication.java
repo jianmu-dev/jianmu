@@ -4,10 +4,10 @@ import dev.jianmu.infrastructure.docker.DockerWorker;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
-import dev.jianmu.task.aggregate.DockerTaskDefinition;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Worker;
-import dev.jianmu.task.repository.TaskDefinitionRepository;
+import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.WorkerRepository;
 import dev.jianmu.task.service.WorkerDomainService;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ import java.util.Map;
 @Transactional
 public class WorkerApplication {
     private final WorkerRepository workerRepository;
-    private final TaskDefinitionRepository taskDefinitionRepository;
+    private final DefinitionRepository definitionRepository;
     private final TaskInstanceApplication taskInstanceApplication;
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
@@ -38,13 +38,13 @@ public class WorkerApplication {
     @Inject
     public WorkerApplication(
             WorkerRepository workerRepository,
-            TaskDefinitionRepository taskDefinitionRepository, TaskInstanceApplication taskInstanceApplication,
+            DefinitionRepository definitionRepository, TaskInstanceApplication taskInstanceApplication,
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
             StorageService storageService,
             DockerWorker dockerWorker, WorkerDomainService workerDomainService) {
         this.workerRepository = workerRepository;
-        this.taskDefinitionRepository = taskDefinitionRepository;
+        this.definitionRepository = definitionRepository;
         this.taskInstanceApplication = taskInstanceApplication;
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
@@ -81,15 +81,15 @@ public class WorkerApplication {
 
     public void runTask(TaskInstance taskInstance) {
         // 创建DockerTask
-        var taskDefinition = this.taskDefinitionRepository
-                .findByKeyVersion(taskInstance.getDefKey() + taskInstance.getDefVersion())
+        var taskDefinition = this.definitionRepository
+                .findByKey(taskInstance.getDefKey())
                 .orElseThrow(() -> new RuntimeException("未找到该任务定义"));
-        if (!(taskDefinition instanceof DockerTaskDefinition)) {
+        if (!(taskDefinition instanceof DockerDefinition)) {
             throw new RuntimeException("任务定义类型错误");
         }
         var environmentMap = this.taskInstanceApplication.getEnvironmentMap(taskInstance);
         var dockerTask = this.workerDomainService
-                .createDockerTask((DockerTaskDefinition) taskDefinition, taskInstance, environmentMap);
+                .createDockerTask((DockerDefinition) taskDefinition, taskInstance, environmentMap);
         // 创建logWriter
         var logWriter = this.storageService.writeLog(taskInstance.getId());
         // 执行任务

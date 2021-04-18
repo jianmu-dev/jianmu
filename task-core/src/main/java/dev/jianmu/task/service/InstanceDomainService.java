@@ -1,7 +1,7 @@
 package dev.jianmu.task.service;
 
 import dev.jianmu.task.aggregate.InstanceStatus;
-import dev.jianmu.task.aggregate.TaskDefinition;
+import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.TaskInstance;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 public class InstanceDomainService {
     public TaskInstance create(
             List<TaskInstance> taskInstances,
-            TaskDefinition taskDefinition,
+            Definition definition,
             String businessId,
             String triggerId
     ) {
@@ -30,13 +30,10 @@ public class InstanceDomainService {
             }
         }
         return TaskInstance.Builder.anInstance()
-                .name(taskDefinition.getName())
-                .description(taskDefinition.getDescription())
-                .defKey(taskDefinition.getKey())
-                .defVersion(taskDefinition.getVersion())
+                .defKey(definition.getKey())
                 .businessId(businessId)
                 .triggerId(triggerId)
-                .parameters(taskDefinition.getParameters())
+                .parameters(definition.getParameters())
                 .build();
     }
 }

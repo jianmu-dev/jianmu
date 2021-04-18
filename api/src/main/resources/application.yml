@@ -38,6 +38,6 @@ grpc:
 storage:
   logfile-path: task_log
 embedded:
-  dockerworker:
+  docker-worker:
     docker-host: tcp://127.0.0.1:2375
     api-version: v1.39

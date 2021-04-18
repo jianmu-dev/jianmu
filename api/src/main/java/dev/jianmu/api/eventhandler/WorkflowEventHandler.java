@@ -112,11 +112,14 @@ public class WorkflowEventHandler {
         logger.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleWorkflowEndEvent(WorkflowEndEvent event) {
         logger.info("Get WorkflowEndEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getWorkflowInstanceId());
+        logger.info(event.getTriggerId());
+        logger.info("Delete Volume here -------------------------");
         this.workerApplication.deleteVolume(event.getTriggerId());
         logger.info("-----------------------------------------------------");
     }

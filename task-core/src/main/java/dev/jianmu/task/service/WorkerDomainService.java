@@ -1,7 +1,7 @@
 package dev.jianmu.task.service;
 
 import dev.jianmu.task.aggregate.DockerTask;
-import dev.jianmu.task.aggregate.DockerTaskDefinition;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import dev.jianmu.task.aggregate.spec.HostConfig;
@@ -19,7 +19,7 @@ import java.util.Map;
  **/
 public class WorkerDomainService {
 
-    public DockerTask createDockerTask(DockerTaskDefinition taskDefinition, TaskInstance taskInstance, Map<String, String> environmentMap) {
+    public DockerTask createDockerTask(DockerDefinition taskDefinition, TaskInstance taskInstance, Map<String, String> environmentMap) {
         var env = environmentMap.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
         // 使用TriggerId作为工作目录名称与volume名称
@@ -46,7 +46,6 @@ public class WorkerDomainService {
                 .businessId(taskInstance.getBusinessId())
                 .triggerId(taskInstance.getTriggerId())
                 .defKey(taskInstance.getDefKey())
-                .defVersion(taskInstance.getDefVersion())
                 .spec(newSpec)
                 .build();
     }

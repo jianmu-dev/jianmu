@@ -1,6 +1,7 @@
 package dev.jianmu.task.aggregate;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -9,16 +10,9 @@ import java.util.Set;
  * @author: Ethan Liu
  * @create: 2021-03-25 15:44
  **/
-public class BaseTaskDefinition implements TaskDefinition {
-    // 显示名称
-    protected String name;
-    // 描述
-    protected String description;
-
+public class BaseDefinition implements Definition {
     // 唯一Key
     protected String key;
-    // 版本
-    protected String version;
 
     protected Worker.Type type;
 
@@ -30,29 +24,17 @@ public class BaseTaskDefinition implements TaskDefinition {
         return Set.copyOf(parameters);
     }
 
-    @Override
-    public void setParameters(Set<TaskParameter> parameters) {
+    public void setParameters(Set<TaskParameter> parameters, Map<String, String> parameterMap) {
+        parameters.forEach(taskParameter -> {
+            var parameterId = parameterMap.get(taskParameter.getRef());
+            taskParameter.setParameterId(parameterId);
+        });
         this.parameters = Set.copyOf(parameters);
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
     }
 
     @Override
     public String getKey() {
         return key;
-    }
-
-    @Override
-    public String getVersion() {
-        return version;
     }
 
     @Override

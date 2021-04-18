@@ -32,16 +32,25 @@ CREATE TABLE `workflow_instance`
 
 CREATE TABLE `task_definition`
 (
-    `key`         varchar(45)  NOT NULL COMMENT '唯一Key',
-    `version`     varchar(45)  NOT NULL COMMENT '版本',
-    `name`        varchar(255) NOT NULL COMMENT '显示名称',
-    `description` varchar(255) DEFAULT NULL,
-    `env_type`    varchar(45)  DEFAULT NULL COMMENT '执行环境类型',
-    `key_version` varchar(45)  NOT NULL,
-    PRIMARY KEY (`key_version`)
+    `id`   varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `ref`  varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
+    `name` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `ref_UNIQUE` (`ref`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务定义表';
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `task_definition_version`
+(
+    `task_definition_id`  varchar(45) NOT NULL COMMENT '任务定义ID',
+    `name`                varchar(45) NOT NULL COMMENT '版本名称',
+    `task_definition_ref` varchar(45) NOT NULL COMMENT '任务定义唯一引用',
+    `description`         varchar(45) NOT NULL COMMENT '描述',
+    PRIMARY KEY (`task_definition_ref`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务定义版本';
 
 CREATE TABLE `task_parameter`
 (
@@ -58,15 +67,11 @@ CREATE TABLE `task_parameter`
 CREATE TABLE `task_instance`
 (
     `id`          varchar(45) NOT NULL COMMENT '主键',
-    `key_version` varchar(45) NOT NULL COMMENT '辅助索引',
     `def_key`     varchar(45) NOT NULL COMMENT '任务定义唯一Key',
-    `def_version` varchar(45) NOT NULL COMMENT '任务定义版本',
-    `name`        varchar(45) NOT NULL COMMENT '显示名称',
-    `description` varchar(45) DEFAULT NULL COMMENT '描述',
     `business_id` varchar(45) NOT NULL COMMENT '外部业务ID',
     `trigger_id`  varchar(45) NOT NULL COMMENT '触发器ID',
-    `start_time`  datetime    DEFAULT NULL COMMENT '开始时间',
-    `end_time`    datetime    DEFAULT NULL COMMENT '结束时间',
+    `start_time`  datetime DEFAULT NULL COMMENT '开始时间',
+    `end_time`    datetime DEFAULT NULL COMMENT '结束时间',
     `status`      varchar(45) NOT NULL COMMENT '任务运行状态',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB

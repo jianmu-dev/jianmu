@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  **/
 @Data
 @Component
-@ConfigurationProperties(prefix = "embedded.dockerworker")
+@ConfigurationProperties(prefix = "embedded.docker-worker")
 public class EmbeddedDockerWorkerProperties {
     private String dockerHost;
     private String apiVersion;

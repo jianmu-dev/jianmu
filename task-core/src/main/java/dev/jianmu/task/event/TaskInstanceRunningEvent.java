@@ -15,8 +15,6 @@ public class TaskInstanceRunningEvent extends BaseEvent {
         protected String taskInstanceId;
         // 任务定义唯一Key
         protected String defKey;
-        // 任务定义版本
-        protected String defVersion;
         // 外部业务ID, 必须唯一
         protected String businessId;
 
@@ -37,11 +35,6 @@ public class TaskInstanceRunningEvent extends BaseEvent {
             return this;
         }
 
-        public Builder defVersion(String defVersion) {
-            this.defVersion = defVersion;
-            return this;
-        }
-
         public Builder businessId(String businessId) {
             this.businessId = businessId;
             return this;
@@ -50,7 +43,6 @@ public class TaskInstanceRunningEvent extends BaseEvent {
         public TaskInstanceRunningEvent build() {
             TaskInstanceRunningEvent taskInstanceRunningEvent = new TaskInstanceRunningEvent();
             taskInstanceRunningEvent.defKey = this.defKey;
-            taskInstanceRunningEvent.defVersion = this.defVersion;
             taskInstanceRunningEvent.businessId = this.businessId;
             taskInstanceRunningEvent.taskInstanceId = this.taskInstanceId;
             return taskInstanceRunningEvent;

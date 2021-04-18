@@ -21,9 +21,9 @@ public interface TaskInstanceRepository {
 
     List<TaskInstance> findByBusinessId(String businessId);
 
-    List<TaskInstance> findByKeyVersionAndBusinessId(String keyVersion, String businessId);
+    List<TaskInstance> findByDefKeyAndBusinessId(String defKey, String businessId);
 
-    List<TaskInstance> findByKeyVersion(String keyVersion);
+    List<TaskInstance> findByDefKey(String defKey);
 
     List<TaskInstance> findByStatus(InstanceStatus status);
 

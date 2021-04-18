@@ -5,9 +5,9 @@ import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.task.aggregate.InstanceStatus;
-import dev.jianmu.task.aggregate.TaskDefinition;
+import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.repository.TaskDefinitionRepository;
+import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class TaskInstanceApplication {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceApplication.class);
 
     private final TaskInstanceRepository taskInstanceRepository;
-    private final TaskDefinitionRepository taskDefinitionRepository;
+    private final DefinitionRepository definitionRepository;
     private final InstanceDomainService instanceDomainService;
     private final ReferenceRepository referenceRepository;
     private final ParameterRepository parameterRepository;
@@ -43,7 +43,7 @@ public class TaskInstanceApplication {
     @Inject
     public TaskInstanceApplication(
             TaskInstanceRepository taskInstanceRepository,
-            TaskDefinitionRepository taskDefinitionRepository,
+            DefinitionRepository definitionRepository,
             InstanceDomainService instanceDomainService,
             ReferenceRepository referenceRepository,
             ParameterRepository parameterRepository,
@@ -51,7 +51,7 @@ public class TaskInstanceApplication {
             ParameterDomainService parameterDomainService
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
-        this.taskDefinitionRepository = taskDefinitionRepository;
+        this.definitionRepository = definitionRepository;
         this.instanceDomainService = instanceDomainService;
         this.referenceRepository = referenceRepository;
         this.parameterRepository = parameterRepository;
@@ -72,7 +72,7 @@ public class TaskInstanceApplication {
                         Set.of(
                                 taskInstance.getTriggerId(),
                                 taskInstance.getBusinessId(),
-                                taskInstance.getDefKey() + taskInstance.getDefVersion()
+                                taskInstance.getDefKey()
                         )
                 );
         references.forEach(reference -> logger.info("-------------reference parameterId--------: {}", reference.getParameterId()));
@@ -89,10 +89,10 @@ public class TaskInstanceApplication {
     @Transactional
     public void create(String businessId, String triggerId, String taskRef) {
         // 创建任务实例
-        TaskDefinition taskDefinition = this.taskDefinitionRepository.findByKeyVersion(taskRef)
+        Definition definition = this.definitionRepository.findByKey(taskRef)
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
-        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByKeyVersionAndBusinessId(taskRef, businessId);
-        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, taskDefinition, businessId, triggerId);
+        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByDefKeyAndBusinessId(taskRef, businessId);
+        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, triggerId);
         this.taskInstanceRepository.add(taskInstance);
     }
 

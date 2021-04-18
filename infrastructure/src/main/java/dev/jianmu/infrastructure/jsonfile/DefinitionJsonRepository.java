@@ -1,16 +1,14 @@
 package dev.jianmu.infrastructure.jsonfile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import dev.jianmu.infrastructure.jackson2.UnmodifiableSetDeserializer;
 import dev.jianmu.infrastructure.storage.StorageException;
-import dev.jianmu.task.aggregate.TaskDefinition;
+import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.TaskParameter;
-import dev.jianmu.task.repository.TaskDefinitionRepository;
-import dev.jianmu.workflow.aggregate.definition.Start;
+import dev.jianmu.task.repository.DefinitionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -36,8 +34,8 @@ import java.util.Set;
  * @create: 2021-04-15 16:08
  **/
 @Repository
-public class TaskDefinitionJsonRepository implements TaskDefinitionRepository, ApplicationRunner {
-    private static final Logger logger = LoggerFactory.getLogger(TaskDefinitionJsonRepository.class);
+public class DefinitionJsonRepository implements DefinitionRepository, ApplicationRunner {
+    private static final Logger logger = LoggerFactory.getLogger(DefinitionJsonRepository.class);
     private final ObjectMapper objectMapper;
     private static final String POSTFIX = ".json";
 
@@ -54,24 +52,23 @@ public class TaskDefinitionJsonRepository implements TaskDefinitionRepository, A
     }
 
     @Inject
-    public TaskDefinitionJsonRepository(ObjectMapper objectMapper) {
+    public DefinitionJsonRepository(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.rootLocation = Path.of("task_def");
     }
 
     @Override
-    public void add(TaskDefinition taskDefinition) {
+    public void add(Definition definition) {
         try {
             var writer = new FileWriter(
                     this.rootLocation +
                             File.separator +
-                            taskDefinition.getKey() +
-                            taskDefinition.getVersion() +
+                            definition.getKey() +
                             POSTFIX
             );
             this.objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-            this.objectMapper.writerFor(new TypeReference<TaskDefinition>() {
-            }).writeValue(writer, taskDefinition);
+            this.objectMapper.writerFor(new TypeReference<Definition>() {
+            }).writeValue(writer, definition);
         } catch (IOException e) {
             logger.error("无法保存为Json文件", e);
             throw new RuntimeException("任务定义保存失败");
@@ -79,12 +76,12 @@ public class TaskDefinitionJsonRepository implements TaskDefinitionRepository, A
     }
 
     @Override
-    public Optional<TaskDefinition> findByKeyVersion(String keyVersion) {
+    public Optional<Definition> findByKey(String key) {
         try {
             var writer = new FileReader(
                     this.rootLocation +
                             File.separator +
-                            keyVersion +
+                            key +
                             POSTFIX
             );
             this.objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
@@ -94,8 +91,8 @@ public class TaskDefinitionJsonRepository implements TaskDefinitionRepository, A
             module.addDeserializer(type1, new UnmodifiableSetDeserializer());
             module.addDeserializer(type2, new UnmodifiableSetDeserializer());
             this.objectMapper.registerModule(module);
-            TaskDefinition taskDefinition = this.objectMapper.readValue(writer, TaskDefinition.class);
-            return Optional.of(taskDefinition);
+            Definition definition = this.objectMapper.readValue(writer, Definition.class);
+            return Optional.of(definition);
         } catch (IOException e) {
             logger.error("未找到该任务定义", e);
         }
@@ -103,7 +100,7 @@ public class TaskDefinitionJsonRepository implements TaskDefinitionRepository, A
     }
 
     @Override
-    public List<TaskDefinition> findAll() {
+    public List<Definition> findAll() {
         return null;
     }
 

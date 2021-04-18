@@ -56,7 +56,6 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
             this.applicationEventPublisher.publishEvent(
                     TaskInstanceFailedEvent.Builder.aTaskInstanceFailedEvent()
                             .defKey(taskInstance.getDefKey())
-                            .defVersion(taskInstance.getDefVersion())
                             .businessId(taskInstance.getBusinessId())
                             .taskInstanceId(taskInstance.getId())
                             .build()
@@ -65,7 +64,6 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
             this.applicationEventPublisher.publishEvent(
                     TaskInstanceSucceedEvent.Builder.aTaskInstanceSucceedEvent()
                             .defKey(taskInstance.getDefKey())
-                            .defVersion(taskInstance.getDefVersion())
                             .businessId(taskInstance.getBusinessId())
                             .taskInstanceId(taskInstance.getId())
                             .build()
@@ -84,13 +82,13 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
-    public List<TaskInstance> findByKeyVersionAndBusinessId(String keyVersion, String businessId) {
-        return this.taskInstanceMapper.findByKeyVersionAndBusinessId(keyVersion, businessId);
+    public List<TaskInstance> findByDefKeyAndBusinessId(String defKey, String businessId) {
+        return this.taskInstanceMapper.findByDefKeyAndBusinessId(defKey, businessId);
     }
 
     @Override
-    public List<TaskInstance> findByKeyVersion(String keyVersion) {
-        return this.taskInstanceMapper.findByKeyVersion(keyVersion);
+    public List<TaskInstance> findByDefKey(String defKey) {
+        return this.taskInstanceMapper.findByDefKey(defKey);
     }
 
     @Override

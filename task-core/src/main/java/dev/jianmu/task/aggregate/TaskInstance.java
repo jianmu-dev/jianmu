@@ -12,15 +12,9 @@ import java.util.*;
 public class TaskInstance extends AggregateRoot {
     // ID
     private String id;
-    // 显示名称
-    private String name;
-    // 描述
-    private String description;
 
     // 任务定义唯一Key
     private String defKey;
-    // 任务定义版本
-    private String defVersion;
     // 外部业务ID, 必须唯一
     private String businessId;
     // 触发器ID
@@ -51,20 +45,8 @@ public class TaskInstance extends AggregateRoot {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     public String getDefKey() {
         return defKey;
-    }
-
-    public String getDefVersion() {
-        return defVersion;
     }
 
     public String getBusinessId() {
@@ -91,14 +73,8 @@ public class TaskInstance extends AggregateRoot {
         // ID
         // TODO 暂时使用UUID的值
         private String id = UUID.randomUUID().toString().replace("-", "");
-        // 显示名称
-        private String name;
-        // 描述
-        private String description;
         // 任务定义唯一Key
         private String defKey;
-        // 任务定义版本
-        private String defVersion;
         // 外部业务ID
         private String businessId;
         // 触发器ID
@@ -113,23 +89,8 @@ public class TaskInstance extends AggregateRoot {
             return new Builder();
         }
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
         public Builder defKey(String defKey) {
             this.defKey = defKey;
-            return this;
-        }
-
-        public Builder defVersion(String defVersion) {
-            this.defVersion = defVersion;
             return this;
         }
 
@@ -152,9 +113,6 @@ public class TaskInstance extends AggregateRoot {
             TaskInstance taskInstance = new TaskInstance();
             taskInstance.id = this.id;
             taskInstance.defKey = this.defKey;
-            taskInstance.name = this.name;
-            taskInstance.description = this.description;
-            taskInstance.defVersion = this.defVersion;
             taskInstance.businessId = this.businessId;
             taskInstance.triggerId = this.triggerId;
             taskInstance.parameters = this.parameters;

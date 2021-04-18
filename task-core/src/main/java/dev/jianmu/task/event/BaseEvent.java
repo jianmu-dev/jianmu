@@ -21,8 +21,6 @@ public abstract class BaseEvent implements DomainEvent {
     protected String taskInstanceId;
     // 任务定义唯一Key
     protected String defKey;
-    // 任务定义版本
-    protected String defVersion;
     // 外部业务ID, 必须唯一
     protected String businessId;
 
@@ -42,10 +40,6 @@ public abstract class BaseEvent implements DomainEvent {
 
     public String getDefKey() {
         return defKey;
-    }
-
-    public String getDefVersion() {
-        return defVersion;
     }
 
     public String getBusinessId() {
@@ -70,7 +64,6 @@ public abstract class BaseEvent implements DomainEvent {
                 ", name='" + name + '\'' +
                 ", taskInstanceId='" + taskInstanceId + '\'' +
                 ", defKey='" + defKey + '\'' +
-                ", defVersion='" + defVersion + '\'' +
                 ", businessId='" + businessId + '\'' +
                 '}';
     }

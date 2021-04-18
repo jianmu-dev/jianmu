@@ -144,12 +144,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 @Override
                 public void onNext(WaitResponse object) {
                     logger.info("dockerTask {} status code is: {}", dockerTask.getTaskInstanceId(), object.getStatusCode());
-                    publisher.publishEvent(
-                            TaskResult.builder()
-                                    .taskId(dockerTask.getTaskInstanceId())
-                                    .statusCode(object.getStatusCode())
-                                    .build()
-                    );
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
@@ -159,6 +153,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
         var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), "/etc/hostname").exec();
         var tarStream = new TarArchiveInputStream(stream);
+        int statusCode = 0;
         try {
             var tarArchiveEntry = tarStream.getNextTarEntry();
             if (!tarStream.canReadEntryData(tarArchiveEntry)) {
@@ -175,11 +170,18 @@ public class EmbeddedDockerWorker implements DockerWorker {
             }
         } catch (IOException e) {
             logger.error("无法获取容器执行结果文件:", e);
+            statusCode = 1;
         }
         // 清除容器
         this.dockerClient.removeContainerCmd(containerResponse.getId())
                 .withRemoveVolumes(true)
                 .exec();
+        publisher.publishEvent(
+                TaskResult.builder()
+                        .taskId(dockerTask.getTaskInstanceId())
+                        .statusCode(statusCode)
+                        .build()
+        );
     }
 
     @Override
