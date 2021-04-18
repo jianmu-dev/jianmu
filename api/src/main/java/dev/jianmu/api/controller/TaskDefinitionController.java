@@ -1,8 +1,15 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.api.dto.TaskDefinitionDto;
+import dev.jianmu.application.service.TaskDefinitionApplication;
+import dev.jianmu.version.aggregate.TaskDefinition;
+import dev.jianmu.version.aggregate.TaskDefinitionVersion;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.inject.Inject;
+import java.util.List;
 
 /**
  * @class: TaskDefinitionController
@@ -14,5 +21,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("task_definition")
 @Tag(name = "任务定义接口", description = "提供任务定义创建删除等API")
 public class TaskDefinitionController {
+    private final TaskDefinitionApplication taskDefinitionApplication;
 
+    @Inject
+    public TaskDefinitionController(TaskDefinitionApplication taskDefinitionApplication) {
+        this.taskDefinitionApplication = taskDefinitionApplication;
+    }
+
+    @PostMapping
+    @Operation(summary = "创建任务定义", description = "创建任务定义")
+    public void create(TaskDefinitionDto dto) {
+        this.taskDefinitionApplication.createDockerDefinition(dto.getName(), dto.getRef(), dto.getVersion(), dto.getDescription(), dto.getTaskParameters(), dto.getSpec());
+    }
+
+    @PostMapping("/version")
+    @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
+    public void createVersion(TaskDefinitionDto dto) {
+        this.taskDefinitionApplication.createDockerDefinitionVersion(dto.getRef(), dto.getVersion(), dto.getDescription(), dto.getTaskParameters(), dto.getSpec());
+    }
+
+    @GetMapping
+    public List<TaskDefinition> getTaskDefinitions() {
+        return this.taskDefinitionApplication.findAll();
+    }
+
+    @GetMapping("/version/{ref}")
+    public List<TaskDefinitionVersion> getTaskDefinitionVersions(@PathVariable String ref) {
+        return this.taskDefinitionApplication.findVersionByRef(ref);
+    }
 }
