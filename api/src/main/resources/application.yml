@@ -41,3 +41,6 @@ embedded:
   docker-worker:
     docker-host: tcp://127.0.0.1:2375
     api-version: v1.39
+json:
+  repository:
+    repo-path: task_def
