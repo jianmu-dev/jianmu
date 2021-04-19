@@ -43,7 +43,7 @@ workflow:
     param:
       cmd: mvn install
   Condition_1:
-    type: Condition
+    type: condition
     sources:
       - Build_1
     expression: ${Build_1.build_status} is True
