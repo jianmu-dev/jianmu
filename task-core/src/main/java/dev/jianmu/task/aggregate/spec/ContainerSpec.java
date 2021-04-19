@@ -27,9 +27,6 @@ public class ContainerSpec {
     private Map<String, String> labels;
     private List<String> shell;
 
-    private ContainerSpec() {
-    }
-
     public String getName() {
         return name;
     }
