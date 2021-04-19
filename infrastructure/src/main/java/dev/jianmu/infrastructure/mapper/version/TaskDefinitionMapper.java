@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure.mapper.version;
 
 import dev.jianmu.version.aggregate.TaskDefinition;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,5 +30,8 @@ public interface TaskDefinitionMapper {
     void updateName(TaskDefinition taskDefinition);
 
     @Select("select * from task_definition")
-    List<TaskDefinition> findAll();
+    List<TaskDefinition> findAll(
+            @Param("pageNum") int pageNum,
+            @Param("pageSize") int pageSize
+    );
 }

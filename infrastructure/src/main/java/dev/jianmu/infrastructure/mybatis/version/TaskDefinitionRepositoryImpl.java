@@ -45,7 +45,7 @@ public class TaskDefinitionRepositoryImpl implements TaskDefinitionRepository {
     }
 
     @Override
-    public List<TaskDefinition> findAll() {
-        return this.taskDefinitionMapper.findAll();
+    public List<TaskDefinition> findAll(int pageNum, int pageSize) {
+        return this.taskDefinitionMapper.findAll(pageNum, pageSize);
     }
 }

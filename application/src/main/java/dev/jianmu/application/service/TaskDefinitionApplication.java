@@ -141,7 +141,7 @@ public class TaskDefinitionApplication {
         return this.taskDefinitionVersionRepository.findByTaskDefinitionRef(ref);
     }
 
-    public List<TaskDefinition> findAll() {
-        return this.taskDefinitionRepository.findAll();
+    public List<TaskDefinition> findAll(int pageNum, int pageSize) {
+        return this.taskDefinitionRepository.findAll(pageNum, pageSize);
     }
 }

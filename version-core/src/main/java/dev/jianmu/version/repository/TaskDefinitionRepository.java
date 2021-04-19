@@ -20,5 +20,5 @@ public interface TaskDefinitionRepository {
 
     void updateName(TaskDefinition taskDefinition);
 
-    List<TaskDefinition> findAll();
+    List<TaskDefinition> findAll(int pageNum, int pageSize);
 }
