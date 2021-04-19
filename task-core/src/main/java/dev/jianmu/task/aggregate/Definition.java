@@ -11,6 +11,8 @@ import java.util.Set;
 public interface Definition {
     String getKey();
 
+    String getResultFile();
+
     Worker.Type getType();
 
     Set<TaskParameter> getParameters();

@@ -18,12 +18,14 @@ public class DefinitionDomainService {
 
     public Definition createDockerDefinition(
             String key,
+            String resultFile,
             Set<TaskParameter> taskParameters,
             ContainerSpec spec,
             Map<String, String> parameterMap
     ) {
         var definition = DockerDefinition.Builder.aDockerTaskDefinition()
                 .key(key)
+                .resultFile(resultFile)
                 .spec(spec)
                 .build();
         definition.setParameters(taskParameters, parameterMap);

@@ -25,6 +25,7 @@ public class DockerDefinition extends BaseDefinition {
         private ContainerSpec spec;
         // 唯一Key
         private String key;
+        private String resultFile;
 
         private Builder() {
         }
@@ -43,9 +44,15 @@ public class DockerDefinition extends BaseDefinition {
             return this;
         }
 
+        public Builder resultFile(String resultFile) {
+            this.resultFile = resultFile;
+            return this;
+        }
+
         public DockerDefinition build() {
             DockerDefinition dockerTaskDefinition = new DockerDefinition();
             dockerTaskDefinition.key = this.key;
+            dockerTaskDefinition.resultFile = this.resultFile;
             dockerTaskDefinition.spec = this.spec;
             return dockerTaskDefinition;
         }

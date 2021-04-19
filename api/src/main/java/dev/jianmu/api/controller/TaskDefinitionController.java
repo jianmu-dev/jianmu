@@ -32,13 +32,17 @@ public class TaskDefinitionController {
     @PostMapping
     @Operation(summary = "创建任务定义", description = "创建任务定义")
     public void create(TaskDefinitionDto dto) {
-        this.taskDefinitionApplication.createDockerDefinition(dto.getName(), dto.getRef(), dto.getVersion(), dto.getDescription(), dto.getInputParameters(), dto.getSpec());
+        this.taskDefinitionApplication.createDockerDefinition(
+                dto.getName(), dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), dto.getSpec()
+        );
     }
 
     @PostMapping("/versions")
     @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
     public void createVersion(TaskDefinitionVersionDto dto) {
-        this.taskDefinitionApplication.createDockerDefinitionVersion(dto.getRef(), dto.getVersion(), dto.getDescription(), dto.getInputParameters(), dto.getSpec());
+        this.taskDefinitionApplication.createDockerDefinitionVersion(
+                dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), dto.getSpec()
+        );
     }
 
     @GetMapping

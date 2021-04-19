@@ -14,6 +14,8 @@ public class BaseDefinition implements Definition {
     // 唯一Key
     protected String key;
 
+    protected String resultFile;
+
     protected Worker.Type type;
 
     // 输入输出参数列表
@@ -35,6 +37,11 @@ public class BaseDefinition implements Definition {
     @Override
     public String getKey() {
         return key;
+    }
+
+    @Override
+    public String getResultFile() {
+        return this.resultFile;
     }
 
     @Override

@@ -56,7 +56,7 @@ public class TaskDefinitionApplication {
 
     @Transactional
     public void createDockerDefinition(
-            String name, String ref, String version, String description, Set<TaskParameter> taskParameters, ContainerSpec spec
+            String name, String ref, String version, String resultFile, String description, Set<TaskParameter> taskParameters, ContainerSpec spec
     ) {
         var definitionKey = ref + version;
         var taskDefinition = TaskDefinition.Builder.aTaskDefinition().name(name).ref(ref).build();
@@ -83,7 +83,7 @@ public class TaskDefinitionApplication {
         var parameterMap = this.parameterDomainService.createParameterMap(parameters);
         // 生成definition
         var definition = this.definitionDomainService
-                .createDockerDefinition(definitionVersion.getDefinitionKey(), taskParameters, spec, parameterMap);
+                .createDockerDefinition(definitionVersion.getDefinitionKey(), resultFile, taskParameters, spec, parameterMap);
         // 保存
         this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
         this.taskDefinitionRepository.add(taskDefinition);
@@ -93,7 +93,7 @@ public class TaskDefinitionApplication {
 
     @Transactional
     public void createDockerDefinitionVersion(
-            String ref, String version, String description, Set<TaskParameter> taskParameters, ContainerSpec spec
+            String ref, String version, String resultFile, String description, Set<TaskParameter> taskParameters, ContainerSpec spec
     ) {
         var taskDefinition = this.taskDefinitionRepository
                 .findByRef(ref)
@@ -122,7 +122,7 @@ public class TaskDefinitionApplication {
         var parameterMap = this.parameterDomainService.createParameterMap(parameters);
         // 生成definition
         var definition = this.definitionDomainService
-                .createDockerDefinition(definitionVersion.getDefinitionKey(), taskParameters, spec, parameterMap);
+                .createDockerDefinition(definitionVersion.getDefinitionKey(), resultFile, taskParameters, spec, parameterMap);
         // 保存
         this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
         this.taskDefinitionVersionRepository.add(definitionVersion);
