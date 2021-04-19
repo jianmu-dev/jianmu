@@ -24,6 +24,10 @@ go 1.15及以上
 
 #### 如何编译
 
+请使用git clone --recurse-submodules命令clone本项目
+
+否则需要cd到jianmu-grpc-proto目录下，执行 `git submodule init`和`git submodule update`命令， 然后
+
 `mvn install`
 
 如果提示缺少依赖包，可以clone相关库的代码本地 `mvn install`即可
