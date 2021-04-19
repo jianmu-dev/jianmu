@@ -1,13 +1,12 @@
 package dev.jianmu.api.dto;
 
 import dev.jianmu.task.aggregate.TaskParameter;
-import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
 /**
@@ -22,14 +21,15 @@ import java.util.Set;
 @Schema(description = "任务定义版本DTO")
 public class TaskDefinitionVersionDto {
     @Schema(required = true)
+    @NotBlank
     private String ref;
     @Schema(required = true)
+    @NotBlank
     private String version;
     private String description;
-    @Schema(required = true)
     private String resultFile;
     private Set<TaskParameter> inputParameters;
     private Set<TaskParameter> outputParameters;
     @Schema(required = true)
-    private ContainerSpec spec;
+    private ContainerSpecDto spec;
 }

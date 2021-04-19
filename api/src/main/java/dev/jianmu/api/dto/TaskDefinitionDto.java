@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * @class: TaskDefinitionDto
  * @description: 任务定义DTO
@@ -19,7 +21,9 @@ import lombok.NoArgsConstructor;
 @Schema(description = "任务定义DTO")
 public class TaskDefinitionDto extends TaskDefinitionVersionDto {
     @Schema(required = true)
+    @NotBlank
     private String name;
     @Schema(required = true)
+    @NotBlank
     private Worker.Type type;
 }

@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.TaskDefinitionDto;
 import dev.jianmu.api.dto.TaskDefinitionVersionDto;
+import dev.jianmu.api.mapper.ContainerSpecMapper;
 import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
@@ -34,16 +35,18 @@ public class TaskDefinitionController {
     @PostMapping
     @Operation(summary = "创建任务定义", description = "创建任务定义")
     public void create(TaskDefinitionDto dto) {
+        var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
         this.taskDefinitionApplication.createDockerDefinition(
-                dto.getName(), dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), dto.getSpec()
+                dto.getName(), dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), spec
         );
     }
 
     @PostMapping("/versions")
     @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
     public void createVersion(TaskDefinitionVersionDto dto) {
+        var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
         this.taskDefinitionApplication.createDockerDefinitionVersion(
-                dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), dto.getSpec()
+                dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), spec
         );
     }
 
