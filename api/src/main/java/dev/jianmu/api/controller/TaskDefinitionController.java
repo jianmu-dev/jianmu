@@ -1,6 +1,7 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.TaskDefinitionDto;
+import dev.jianmu.api.dto.TaskDefinitionVersionDto;
 import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
@@ -36,7 +37,7 @@ public class TaskDefinitionController {
 
     @PostMapping("/versions")
     @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
-    public void createVersion(TaskDefinitionDto dto) {
+    public void createVersion(TaskDefinitionVersionDto dto) {
         this.taskDefinitionApplication.createDockerDefinitionVersion(dto.getRef(), dto.getVersion(), dto.getDescription(), dto.getInputParameters(), dto.getSpec());
     }
 
