@@ -21,7 +21,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Schema(description = "任务定义版本DTO")
 public class TaskDefinitionVersionDto {
-    private String name;
     @Schema(required = true)
     private String ref;
     @Schema(required = true)

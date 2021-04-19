@@ -18,6 +18,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "任务定义DTO")
 public class TaskDefinitionDto extends TaskDefinitionVersionDto {
+    @Schema(required = true)
     private String name;
+    @Schema(required = true)
     private Worker.Type type;
 }
