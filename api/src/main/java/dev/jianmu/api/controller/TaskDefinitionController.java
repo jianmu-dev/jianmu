@@ -18,7 +18,7 @@ import java.util.List;
  * @create: 2021-04-12 11:44
  **/
 @RestController
-@RequestMapping("task_definition")
+@RequestMapping("task_definitions")
 @Tag(name = "任务定义接口", description = "提供任务定义创建删除等API")
 public class TaskDefinitionController {
     private final TaskDefinitionApplication taskDefinitionApplication;
@@ -34,7 +34,7 @@ public class TaskDefinitionController {
         this.taskDefinitionApplication.createDockerDefinition(dto.getName(), dto.getRef(), dto.getVersion(), dto.getDescription(), dto.getTaskParameters(), dto.getSpec());
     }
 
-    @PostMapping("/version")
+    @PostMapping("/versions")
     @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
     public void createVersion(TaskDefinitionDto dto) {
         this.taskDefinitionApplication.createDockerDefinitionVersion(dto.getRef(), dto.getVersion(), dto.getDescription(), dto.getTaskParameters(), dto.getSpec());
@@ -45,7 +45,7 @@ public class TaskDefinitionController {
         return this.taskDefinitionApplication.findAll();
     }
 
-    @GetMapping("/version/{ref}")
+    @GetMapping("/versions/{ref}")
     public List<TaskDefinitionVersion> getTaskDefinitionVersions(@PathVariable String ref) {
         return this.taskDefinitionApplication.findVersionByRef(ref);
     }
