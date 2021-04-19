@@ -1,7 +1,5 @@
 package dev.jianmu.task.aggregate;
 
-import java.util.Objects;
-
 /**
  * @class: TaskParameter
  * @description: 任务参数

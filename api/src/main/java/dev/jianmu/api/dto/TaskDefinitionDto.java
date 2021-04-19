@@ -1,14 +1,11 @@
 package dev.jianmu.api.dto;
 
-import dev.jianmu.task.aggregate.TaskParameter;
-import dev.jianmu.task.aggregate.spec.ContainerSpec;
+import dev.jianmu.task.aggregate.Worker;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Set;
 
 /**
  * @class: TaskDefinitionDto
@@ -19,13 +16,8 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Schema(description = "任务定义DTO")
-public class TaskDefinitionDto {
+public class TaskDefinitionDto extends TaskDefinitionVersionDto {
     private String name;
-    private String ref;
-    private String version;
-    private String description;
-    private Set<TaskParameter> taskParameters;
-    private ContainerSpec spec;
+    private Worker.Type type;
 }
