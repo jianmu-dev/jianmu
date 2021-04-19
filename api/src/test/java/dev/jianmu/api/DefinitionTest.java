@@ -118,6 +118,7 @@ public class DefinitionTest {
                 "Git Clone",
                 "git_clone",
                 "0.3",
+                "/etc/hostname",
                 "Git Clone Task",
                 taskParameters,
                 spec
@@ -140,6 +141,7 @@ public class DefinitionTest {
                 "Maven",
                 "maven",
                 "0.3",
+                "/etc/hostname",
                 "Maven 3 with Jdk 8",
                 taskParameters,
                 spec
@@ -161,6 +163,7 @@ public class DefinitionTest {
         this.taskDefinitionApplication.createDockerDefinitionVersion(
                 "maven",
                 "11",
+                "/etc/hostname",
                 "Maven 3 with Jdk 11",
                 taskParameters,
                 spec
