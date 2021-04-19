@@ -1,5 +1,7 @@
 package dev.jianmu.application.service;
 
+import com.github.pagehelper.PageInfo;
+import dev.jianmu.infrastructure.mybatis.version.TaskDefinitionRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
@@ -10,7 +12,6 @@ import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.service.DefinitionDomainService;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
-import dev.jianmu.version.repository.TaskDefinitionRepository;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class TaskDefinitionApplication {
     private final DefinitionRepository definitionRepository;
     private final ParameterDomainService parameterDomainService;
     private final ParameterRepository parameterRepository;
-    private final TaskDefinitionRepository taskDefinitionRepository;
+    private final TaskDefinitionRepositoryImpl taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final DefinitionDomainService definitionDomainService;
 
@@ -42,7 +43,7 @@ public class TaskDefinitionApplication {
             DefinitionRepository definitionRepository,
             ParameterDomainService parameterDomainService,
             ParameterRepository parameterRepository,
-            TaskDefinitionRepository taskDefinitionRepository,
+            TaskDefinitionRepositoryImpl taskDefinitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             DefinitionDomainService definitionDomainService
     ) {
@@ -141,7 +142,7 @@ public class TaskDefinitionApplication {
         return this.taskDefinitionVersionRepository.findByTaskDefinitionRef(ref);
     }
 
-    public List<TaskDefinition> findAll(int pageNum, int pageSize) {
+    public PageInfo<TaskDefinition> findAll(int pageNum, int pageSize) {
         return this.taskDefinitionRepository.findAll(pageNum, pageSize);
     }
 }

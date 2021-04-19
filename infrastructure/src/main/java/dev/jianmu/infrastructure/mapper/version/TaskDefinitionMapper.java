@@ -30,8 +30,5 @@ public interface TaskDefinitionMapper {
     void updateName(TaskDefinition taskDefinition);
 
     @Select("select * from task_definition")
-    List<TaskDefinition> findAll(
-            @Param("pageNum") int pageNum,
-            @Param("pageSize") int pageSize
-    );
+    List<TaskDefinition> findAll();
 }

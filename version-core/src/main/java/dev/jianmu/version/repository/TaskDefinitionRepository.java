@@ -2,7 +2,6 @@ package dev.jianmu.version.repository;
 
 import dev.jianmu.version.aggregate.TaskDefinition;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,6 +18,4 @@ public interface TaskDefinitionRepository {
     void delete(TaskDefinition taskDefinition);
 
     void updateName(TaskDefinition taskDefinition);
-
-    List<TaskDefinition> findAll(int pageNum, int pageSize);
 }

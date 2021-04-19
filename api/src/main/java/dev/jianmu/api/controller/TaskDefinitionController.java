@@ -1,5 +1,6 @@
 package dev.jianmu.api.controller;
 
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.TaskDefinitionDto;
 import dev.jianmu.api.dto.TaskDefinitionVersionDto;
@@ -47,7 +48,7 @@ public class TaskDefinitionController {
     }
 
     @GetMapping
-    public List<TaskDefinition> getTaskDefinitions(PageDto pageDto) {
+    public PageInfo<TaskDefinition> getTaskDefinitions(PageDto pageDto) {
         return this.taskDefinitionApplication.findAll(pageDto.getPageNum(), pageDto.getPageSize());
     }
 

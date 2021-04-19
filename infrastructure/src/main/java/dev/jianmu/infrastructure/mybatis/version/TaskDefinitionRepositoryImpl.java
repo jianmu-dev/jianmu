@@ -1,12 +1,13 @@
 package dev.jianmu.infrastructure.mybatis.version;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.mapper.version.TaskDefinitionMapper;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.repository.TaskDefinitionRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.inject.Inject;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -44,8 +45,8 @@ public class TaskDefinitionRepositoryImpl implements TaskDefinitionRepository {
         this.taskDefinitionMapper.updateName(taskDefinition);
     }
 
-    @Override
-    public List<TaskDefinition> findAll(int pageNum, int pageSize) {
-        return this.taskDefinitionMapper.findAll(pageNum, pageSize);
+    public PageInfo<TaskDefinition> findAll(int pageNum, int pageSize) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(this.taskDefinitionMapper::findAll);
     }
 }
