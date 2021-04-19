@@ -20,7 +20,7 @@ import java.util.Set;
  * @create: 2021-04-08 21:01
  **/
 @SpringBootTest(classes = SpringbootApp.class)
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 public class WorkflowTest {
     @Resource
     private WorkflowRepository workflowRepository;
@@ -72,6 +72,7 @@ public class WorkflowTest {
 
     @Test
     @Transactional
+    @Rollback(value = false)
     void test2() {
         Start start = Start.Builder.aStart()
                 .name("Start1")
@@ -80,7 +81,7 @@ public class WorkflowTest {
                 .build();
         AsyncTask gitTask = AsyncTask.Builder.anAsyncTask()
                 .name("Git Clone")
-                .ref("git_clone0.1")
+                .ref("git_clone0.3")
                 .description("Git库下载任务")
                 .build();
         AsyncTask mavenTask = AsyncTask.Builder.anAsyncTask()

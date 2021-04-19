@@ -21,7 +21,7 @@ import java.util.Set;
  * @create: 2021-04-12 08:43
  **/
 @SpringBootTest(classes = SpringbootApp.class)
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 public class TriggerTest {
     @Resource
     private TriggerApplication triggerApplication;
@@ -49,10 +49,10 @@ public class TriggerTest {
     @Transactional
     @Rollback(value = false)
     void test2() {
-        String triggerId = "98dae6f56f8344d2be498cb3f96e9f2a";
-        String parameterId = "57c85759671b424a855f0e99502e80cf";
+        String triggerId = "de576327fc774666add3476e09b8b528";
+        String parameterId = "1271bfc6910f4d53b2d44837f3686832";
         Set<String> linkedParameterIds = new HashSet<>();
-        linkedParameterIds.add("ce0420f9d2794cada359b5bb0ac3cdce");
+        linkedParameterIds.add("c66a1ed100724c5abbaf7fc95a2c927c");
 
         this.parameterApplication.addReferences(triggerId, parameterId, linkedParameterIds);
     }

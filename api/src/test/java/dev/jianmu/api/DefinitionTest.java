@@ -1,9 +1,7 @@
 package dev.jianmu.api;
 
 import dev.jianmu.application.service.TaskDefinitionApplication;
-import dev.jianmu.task.aggregate.BaseTaskDefinition;
-import dev.jianmu.task.aggregate.DockerTaskDefinition;
-import dev.jianmu.task.aggregate.TaskDefinition;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import org.junit.jupiter.api.Test;
@@ -13,9 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -25,23 +21,31 @@ import java.util.Set;
  * @create: 2021-04-06 22:36
  **/
 @SpringBootTest(classes = SpringbootApp.class)
-@ActiveProfiles("test")
-public class TaskDefinitionTest {
+@ActiveProfiles("dev")
+public class DefinitionTest {
 
     @Resource
     private TaskDefinitionApplication taskDefinitionApplication;
 
     @Test
     void test4() {
-        var definitionOptional = this.taskDefinitionApplication.findByKeyVersion("maven", "11");
+        var taskDefinitionOptional = this.taskDefinitionApplication.findByRef("maven");
+        taskDefinitionOptional.ifPresent(taskDefinition -> System.out.println(taskDefinition.getName()));
+        var versions = this.taskDefinitionApplication.findVersionByRef("maven");
+        versions.forEach(taskDefinitionVersion -> {
+            System.out.println(taskDefinitionVersion.getName());
+            System.out.println(taskDefinitionVersion.getTaskDefinitionRef());
+            System.out.println(taskDefinitionVersion.getDefinitionKey());
+        });
+        var definitionOptional = this.taskDefinitionApplication.findByKey("maven11");
         definitionOptional.ifPresent(taskDefinition -> {
             taskDefinition.getParameters().forEach(taskParameter -> {
                 System.out.println(taskParameter.getRef());
                 System.out.println(taskParameter.getParameterId());
             });
             System.out.println("---------------------");
-            if (taskDefinition instanceof DockerTaskDefinition) {
-                var image= ((DockerTaskDefinition) taskDefinition).getSpec().getImage();
+            if (taskDefinition instanceof DockerDefinition) {
+                var image = ((DockerDefinition) taskDefinition).getSpec().getImage();
                 System.out.println(image);
             }
             System.out.println("---------------------");
@@ -50,15 +54,23 @@ public class TaskDefinitionTest {
 
     @Test
     void test3() {
-        var definitionOptional = this.taskDefinitionApplication.findByKeyVersion("git_clone", "0.1");
+        var taskDefinitionOptional = this.taskDefinitionApplication.findByRef("git_clone");
+        taskDefinitionOptional.ifPresent(taskDefinition -> System.out.println(taskDefinition.getName()));
+        var versions = this.taskDefinitionApplication.findVersionByRef("git_clone");
+        versions.forEach(taskDefinitionVersion -> {
+            System.out.println(taskDefinitionVersion.getName());
+            System.out.println(taskDefinitionVersion.getTaskDefinitionRef());
+            System.out.println(taskDefinitionVersion.getDefinitionKey());
+        });
+        var definitionOptional = this.taskDefinitionApplication.findByKey("git_clone0.3");
         definitionOptional.ifPresent(taskDefinition -> {
             taskDefinition.getParameters().forEach(taskParameter -> {
                 System.out.println(taskParameter.getRef());
                 System.out.println(taskParameter.getParameterId());
             });
             System.out.println("---------------------");
-            if (taskDefinition instanceof DockerTaskDefinition) {
-                var image= ((DockerTaskDefinition) taskDefinition).getSpec().getImage();
+            if (taskDefinition instanceof DockerDefinition) {
+                var image = ((DockerDefinition) taskDefinition).getSpec().getImage();
                 System.out.println(image);
             }
             System.out.println("---------------------");
@@ -102,16 +114,14 @@ public class TaskDefinitionTest {
                 .build();
         taskParameters.add(remote_url);
 
-        TaskDefinition definition = DockerTaskDefinition.Builder.aDockerTaskDefinition()
-                .name("Git Clone")
-                .description("Git库下载任务")
-                .key("git_clone")
-                .version("0.1")
-                .spec(spec)
-                .build();
-        definition.setParameters(taskParameters);
-
-        this.taskDefinitionApplication.create(definition);
+        this.taskDefinitionApplication.createDockerDefinition(
+                "Git Clone",
+                "git_clone",
+                "0.3",
+                "Git Clone Task",
+                taskParameters,
+                spec
+        );
     }
 
     @Test
@@ -126,16 +136,14 @@ public class TaskDefinitionTest {
                 .entrypoint(new String[]{"/bin/sh", "-c"})
                 .build();
 
-        TaskDefinition definition = DockerTaskDefinition.Builder.aDockerTaskDefinition()
-                .name("Maven")
-                .description("Maven命令执行环境")
-                .key("maven")
-                .version("0.1")
-                .spec(spec)
-                .build();
-        definition.setParameters(taskParameters);
-
-        this.taskDefinitionApplication.create(definition);
+        this.taskDefinitionApplication.createDockerDefinition(
+                "Maven",
+                "maven",
+                "0.3",
+                "Maven 3 with Jdk 8",
+                taskParameters,
+                spec
+        );
     }
 
     @Test
@@ -150,15 +158,12 @@ public class TaskDefinitionTest {
                 .entrypoint(new String[]{"/bin/sh", "-c"})
                 .build();
 
-        TaskDefinition definition = DockerTaskDefinition.Builder.aDockerTaskDefinition()
-                .name("Maven")
-                .description("Maven命令执行环境")
-                .key("maven")
-                .version("11")
-                .spec(spec)
-                .build();
-        definition.setParameters(taskParameters);
-
-        this.taskDefinitionApplication.create(definition);
+        this.taskDefinitionApplication.createDockerDefinitionVersion(
+                "maven",
+                "11",
+                "Maven 3 with Jdk 11",
+                taskParameters,
+                spec
+        );
     }
 }
