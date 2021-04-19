@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
  * @create: 2021-04-09 08:50
  **/
 @RestController
-@RequestMapping("log")
+@RequestMapping("logs")
 @Tag(name = "任务日志接口", description = "本接口返回Chunked流，前端代码需要支持才能实时读取文件")
 public class LogController {
     private final StorageService storageService;
