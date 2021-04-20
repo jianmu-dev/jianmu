@@ -17,6 +17,7 @@
         <module>trigger-core</module>
         <module>dsl-core</module>
         <module>version-core</module>
+        <module>secret-core</module>
     </modules>
 
     <properties>

@@ -144,3 +144,21 @@ CREATE TABLE `trigger_parameter`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='触发器参数表';
+
+CREATE TABLE `secret_namespace`
+(
+    `name`        varchar(100) NOT NULL COMMENT '名称',
+    `description` varchar(255) DEFAULT NULL COMMENT '描述',
+    PRIMARY KEY (`name`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥命名空间表';
+
+CREATE TABLE `secret_kv_pair`
+(
+    `namespace_name` varchar(100) NOT NULL COMMENT '命名空间名称',
+    `kv_key`         varchar(45)  NOT NULL COMMENT '参数key',
+    `kv_value`       varchar(45)  NOT NULL COMMENT '参数值'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥键值对表';

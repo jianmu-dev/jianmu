@@ -31,7 +31,7 @@ CREATE TABLE `task_definition`
     `id`   varchar(45) NOT NULL COMMENT 'ID',
     `ref`  varchar(45) NOT NULL COMMENT '任务定义唯一引用',
     `name` varchar(45) NOT NULL COMMENT '名称',
-    PRIMARY KEY (`id`),
+    PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `task_definition_version`
@@ -118,4 +118,18 @@ CREATE TABLE `trigger_parameter`
     `type`        varchar(45) NOT NULL COMMENT '类型',
     `description` varchar(45) DEFAULT NULL COMMENT '描述',
     `parameterId` varchar(45) NOT NULL COMMENT '参数引用Id'
+);
+
+CREATE TABLE `secret_namespace`
+(
+    `name`        varchar(100) NOT NULL COMMENT '名称',
+    `description` varchar(255) DEFAULT NULL COMMENT '描述',
+    PRIMARY KEY (`name`)
+);
+
+CREATE TABLE `secret_kv_pair`
+(
+    `namespace_name` varchar(100) NOT NULL COMMENT '命名空间名称',
+    `kv_key`         varchar(45)  NOT NULL COMMENT '参数key',
+    `kv_value`       varchar(45)  NOT NULL COMMENT '参数值'
 );
