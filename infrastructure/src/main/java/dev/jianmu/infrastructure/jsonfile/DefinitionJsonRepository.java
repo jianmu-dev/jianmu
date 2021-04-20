@@ -10,7 +10,10 @@ import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.repository.DefinitionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -31,22 +34,33 @@ public class DefinitionJsonRepository implements DefinitionRepository {
     private static final Logger logger = LoggerFactory.getLogger(DefinitionJsonRepository.class);
     private final ObjectMapper objectMapper;
     private final JsonRepositoryInit init;
+    private final ApplicationEventPublisher publisher;
 
     @Inject
-    public DefinitionJsonRepository(ObjectMapper objectMapper, JsonRepositoryInit init) {
+    public DefinitionJsonRepository(ObjectMapper objectMapper, JsonRepositoryInit init, ApplicationEventPublisher publisher) {
         this.objectMapper = objectMapper;
         this.init = init;
+        this.publisher = publisher;
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
+    public void handleRollback(final RollbackEvent event) {
+        var file = new File(event.getFileName());
+        if (!file.delete()) {
+            throw new RuntimeException("File Rollback Clean up failed");
+        }
     }
 
     @Override
     public void add(Definition definition) {
+        var fileName = init.getRootLocation() +
+                File.separator +
+                definition.getKey() +
+                JsonRepositoryInit.POSTFIX;
+        var event = new RollbackEvent();
+        event.setFileName(fileName);
         try {
-            var writer = new FileWriter(
-                    init.getRootLocation() +
-                            File.separator +
-                            definition.getKey() +
-                            JsonRepositoryInit.POSTFIX
-            );
+            var writer = new FileWriter(fileName);
             this.objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
             this.objectMapper.writerFor(new TypeReference<Definition>() {
             }).writeValue(writer, definition);
@@ -54,6 +68,7 @@ public class DefinitionJsonRepository implements DefinitionRepository {
             logger.error("无法保存为Json文件", e);
             throw new RuntimeException("任务定义保存失败");
         }
+        publisher.publishEvent(event);
     }
 
     @Override
