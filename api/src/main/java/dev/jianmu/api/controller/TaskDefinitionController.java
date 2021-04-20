@@ -5,6 +5,7 @@ import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.TaskDefinitionDto;
 import dev.jianmu.api.dto.TaskDefinitionVersionDto;
 import dev.jianmu.api.mapper.ContainerSpecMapper;
+import dev.jianmu.api.mapper.TaskDefinitionDtoMapper;
 import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.version.aggregate.TaskDefinition;
@@ -38,8 +39,15 @@ public class TaskDefinitionController {
     @Operation(summary = "创建任务定义", description = "创建任务定义")
     public void create(TaskDefinitionDto dto) {
         var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
+        var taskDefinition = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinition(dto);
+        var taskDefinitionVersion = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersion(dto);
         this.taskDefinitionApplication.createDockerDefinition(
-                dto.getName(), dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), spec
+                taskDefinition,
+                taskDefinitionVersion,
+                dto.getResultFile(),
+                dto.getInputParameters(),
+                dto.getOutputParameters(),
+                spec
         );
     }
 
@@ -47,8 +55,14 @@ public class TaskDefinitionController {
     @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
     public void createVersion(TaskDefinitionVersionDto dto) {
         var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
+        var taskDefinitionVersion = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersion(dto);
         this.taskDefinitionApplication.createDockerDefinitionVersion(
-                dto.getRef(), dto.getVersion(), dto.getResultFile(), dto.getDescription(), dto.getInputParameters(), spec
+                taskDefinitionVersion,
+                dto.getResultFile(),
+                dto.getDescription(),
+                dto.getInputParameters(),
+                dto.getOutputParameters(),
+                spec
         );
     }
 

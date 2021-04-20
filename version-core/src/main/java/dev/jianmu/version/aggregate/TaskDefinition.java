@@ -16,9 +16,6 @@ public class TaskDefinition {
     // Ref
     private String ref;
 
-    private TaskDefinition() {
-    }
-
     public String getId() {
         return id;
     }
@@ -29,6 +26,14 @@ public class TaskDefinition {
 
     public String getRef() {
         return ref;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
     }
 
     public static final class Builder {

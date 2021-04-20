@@ -33,7 +33,7 @@ public class InstanceDomainService {
                 .defKey(definition.getKey())
                 .businessId(businessId)
                 .triggerId(triggerId)
-                .parameters(definition.getParameters())
+                .parameters(definition.getInputParameters())
                 .build();
     }
 }

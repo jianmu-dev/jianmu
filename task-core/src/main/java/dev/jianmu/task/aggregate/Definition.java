@@ -15,5 +15,7 @@ public interface Definition {
 
     Worker.Type getType();
 
-    Set<TaskParameter> getParameters();
+    Set<TaskParameter> getInputParameters();
+
+    Set<TaskParameter> getOutputParameters();
 }

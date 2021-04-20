@@ -19,19 +19,18 @@ public class BaseDefinition implements Definition {
     protected Worker.Type type;
 
     // 输入输出参数列表
-    protected Set<TaskParameter> parameters = new HashSet<>();
+    protected Set<TaskParameter> inputParameters = new HashSet<>();
+
+    protected Set<TaskParameter> outputParameters = new HashSet<>();
 
     @Override
-    public Set<TaskParameter> getParameters() {
-        return Set.copyOf(parameters);
+    public Set<TaskParameter> getInputParameters() {
+        return inputParameters;
     }
 
-    public void setParameters(Set<TaskParameter> parameters, Map<String, String> parameterMap) {
-        parameters.forEach(taskParameter -> {
-            var parameterId = parameterMap.get(taskParameter.getRef());
-            taskParameter.setParameterId(parameterId);
-        });
-        this.parameters = Set.copyOf(parameters);
+    @Override
+    public Set<TaskParameter> getOutputParameters() {
+        return outputParameters;
     }
 
     @Override

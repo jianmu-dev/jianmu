@@ -21,7 +21,7 @@ import java.util.Set;
  * @create: 2021-04-12 08:43
  **/
 @SpringBootTest(classes = SpringbootApp.class)
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class TriggerTest {
     @Resource
     private TriggerApplication triggerApplication;

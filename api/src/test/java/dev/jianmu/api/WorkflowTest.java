@@ -20,7 +20,7 @@ import java.util.Set;
  * @create: 2021-04-08 21:01
  **/
 @SpringBootTest(classes = SpringbootApp.class)
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class WorkflowTest {
     @Resource
     private WorkflowRepository workflowRepository;

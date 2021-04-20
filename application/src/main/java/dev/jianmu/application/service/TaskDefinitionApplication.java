@@ -55,24 +55,11 @@ public class TaskDefinitionApplication {
         this.definitionDomainService = definitionDomainService;
     }
 
-    @Transactional
-    public void createDockerDefinition(
-            String name, String ref, String version, String resultFile, String description, Set<TaskParameter> taskParameters, ContainerSpec spec
-    ) {
-        var definitionKey = ref + version;
-        var taskDefinition = TaskDefinition.Builder.aTaskDefinition().name(name).ref(ref).build();
-        var definitionVersion = TaskDefinitionVersion.Builder.aTaskDefinitionVersion()
-                .taskDefinitionId(taskDefinition.getId())
-                .name(version)
-                .taskDefinitionRef(ref)
-                .definitionKey(definitionKey)
-                .description(description)
-                .build();
-        // 创建参数存储
-        var parameters = taskParameters.stream()
+    private List<Parameter> createParameters(Set<TaskParameter> parameters) {
+        var parameterMap = parameters.stream()
                 .map(taskParameter ->
                         Map.entry(
-                                taskParameter.getRef(),
+                                taskParameter,
                                 Parameter.Builder.aParameter()
                                         .type(taskParameter.getType())
                                         .value(taskParameter.getValue())
@@ -80,53 +67,62 @@ public class TaskDefinitionApplication {
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        // 转换为参数ref与参数id Map
-        var parameterMap = this.parameterDomainService.createParameterMap(parameters);
+        parameters.forEach(taskParameter -> {
+            var parameterId = parameterMap.get(taskParameter).getId();
+            taskParameter.setParameterId(parameterId);
+        });
+        return new ArrayList<>(parameterMap.values());
+    }
+
+    @Transactional
+    public void createDockerDefinition(
+            TaskDefinition taskDefinition,
+            TaskDefinitionVersion taskDefinitionVersion,
+            String resultFile,
+            Set<TaskParameter> inputParameters,
+            Set<TaskParameter> outputParameters,
+            ContainerSpec spec
+    ) {
+        var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
+        taskDefinitionVersion.setDefinitionKey(definitionKey);
+        // 创建参数存储
+        var inParameters = this.createParameters(inputParameters);
+        var outParameters = this.createParameters(outputParameters);
+        inParameters.addAll(outParameters);
         // 生成definition
         var definition = this.definitionDomainService
-                .createDockerDefinition(definitionVersion.getDefinitionKey(), resultFile, taskParameters, spec, parameterMap);
+                .createDockerDefinition(taskDefinitionVersion.getDefinitionKey(), resultFile, inputParameters, outputParameters, spec);
         // 保存
-        this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
+        this.parameterRepository.addAll(inParameters);
         this.taskDefinitionRepository.add(taskDefinition);
-        this.taskDefinitionVersionRepository.add(definitionVersion);
+        this.taskDefinitionVersionRepository.add(taskDefinitionVersion);
         this.definitionRepository.add(definition);
     }
 
     @Transactional
     public void createDockerDefinitionVersion(
-            String ref, String version, String resultFile, String description, Set<TaskParameter> taskParameters, ContainerSpec spec
+            TaskDefinitionVersion taskDefinitionVersion,
+            String resultFile,
+            String description,
+            Set<TaskParameter> inputParameters,
+            Set<TaskParameter> outputParameters,
+            ContainerSpec spec
     ) {
         var taskDefinition = this.taskDefinitionRepository
-                .findByRef(ref)
+                .findByRef(taskDefinitionVersion.getTaskDefinitionRef())
                 .orElseThrow(() -> new RuntimeException("未找到该任务定义"));
-        var definitionKey = ref + version;
-        var definitionVersion = TaskDefinitionVersion.Builder.aTaskDefinitionVersion()
-                .taskDefinitionId(taskDefinition.getId())
-                .name(version)
-                .taskDefinitionRef(ref)
-                .definitionKey(definitionKey)
-                .description(description)
-                .build();
+        var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
+        taskDefinitionVersion.setDefinitionKey(definitionKey);
         // 创建参数存储
-        var parameters = taskParameters.stream()
-                .map(taskParameter ->
-                        Map.entry(
-                                taskParameter.getRef(),
-                                Parameter.Builder.aParameter()
-                                        .type(taskParameter.getType())
-                                        .value(taskParameter.getValue())
-                                        .build()
-                        )
-                )
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        // 转换为参数ref与参数id Map
-        var parameterMap = this.parameterDomainService.createParameterMap(parameters);
+        var inParameters = this.createParameters(inputParameters);
+        var outParameters = this.createParameters(outputParameters);
+        inParameters.addAll(outParameters);
         // 生成definition
         var definition = this.definitionDomainService
-                .createDockerDefinition(definitionVersion.getDefinitionKey(), resultFile, taskParameters, spec, parameterMap);
+                .createDockerDefinition(taskDefinitionVersion.getDefinitionKey(), resultFile, inputParameters, outputParameters, spec);
         // 保存
-        this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
-        this.taskDefinitionVersionRepository.add(definitionVersion);
+        this.parameterRepository.addAll(inParameters);
+        this.taskDefinitionVersionRepository.add(taskDefinitionVersion);
         this.definitionRepository.add(definition);
     }
 

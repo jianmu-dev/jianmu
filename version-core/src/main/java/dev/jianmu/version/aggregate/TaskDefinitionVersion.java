@@ -18,9 +18,6 @@ public class TaskDefinitionVersion {
     // 描述
     private String description;
 
-    private TaskDefinitionVersion() {
-    }
-
     public String getTaskDefinitionId() {
         return taskDefinitionId;
     }
@@ -35,6 +32,26 @@ public class TaskDefinitionVersion {
 
     public String getDefinitionKey() {
         return definitionKey;
+    }
+
+    public void setTaskDefinitionId(String taskDefinitionId) {
+        this.taskDefinitionId = taskDefinitionId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setTaskDefinitionRef(String taskDefinitionRef) {
+        this.taskDefinitionRef = taskDefinitionRef;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setDefinitionKey(String definitionKey) {
+        this.definitionKey = definitionKey;
     }
 
     public String getDescription() {
