@@ -46,4 +46,9 @@ public class TaskDefinitionVersionRepositoryImpl implements TaskDefinitionVersio
     public Optional<TaskDefinitionVersion> findByTaskDefinitionRefAndName(String taskDefinitionRef, String name) {
         return this.taskDefinitionVersionMapper.findByTaskDefinitionRefAndName(taskDefinitionRef, name);
     }
+
+    @Override
+    public Optional<TaskDefinitionVersion> findByDefinitionKey(String key) {
+        return this.taskDefinitionVersionMapper.findByDefinitionKey(key);
+    }
 }

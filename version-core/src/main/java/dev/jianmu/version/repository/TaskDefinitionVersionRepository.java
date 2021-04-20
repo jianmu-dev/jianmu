@@ -21,4 +21,6 @@ public interface TaskDefinitionVersionRepository {
     List<TaskDefinitionVersion> findByTaskDefinitionRef(String taskDefinitionRef);
 
     Optional<TaskDefinitionVersion> findByTaskDefinitionRefAndName(String taskDefinitionRef, String name);
+
+    Optional<TaskDefinitionVersion> findByDefinitionKey(String key);
 }

@@ -35,4 +35,10 @@ public interface TaskDefinitionVersionMapper {
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
     Optional<TaskDefinitionVersion> findByTaskDefinitionRefAndName(String taskDefinitionRef, String name);
+
+    @Select("select * from task_definition_version where definition_key = #{key}")
+    @Result(column = "task_definition_id", property = "taskDefinitionId")
+    @Result(column = "task_definition_ref", property = "taskDefinitionRef")
+    @Result(column = "definition_key", property = "definitionKey")
+    Optional<TaskDefinitionVersion> findByDefinitionKey(String key);
 }
