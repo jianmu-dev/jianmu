@@ -64,13 +64,14 @@ public class TaskDefinitionController {
         return this.taskDefinitionApplication.findVersionByRef(ref);
     }
 
-    @GetMapping("/versions/{key}")
-    @Operation(summary = "获取任务定义详情", description = "获取任务定义详情")
-    public Optional<Definition> getDefinition(@PathVariable String key) {
-        return this.taskDefinitionApplication.findByKey(key);
+    @GetMapping("/versions/{ref}/{name}")
+    @Operation(summary = "获取任务定义版本详情", description = "获取任务定义版本详情")
+    public Optional<Definition> getDefinition(@PathVariable String ref, @PathVariable String name) {
+        return this.taskDefinitionApplication.findByKey(ref + name);
     }
 
     @DeleteMapping("/versions/{ref}/{name}")
+    @Operation(summary = "删除任务定义版本", description = "删除任务定义版本")
     public void deleteTaskDefinitionVersion(@PathVariable String ref, @PathVariable String name) {
         this.taskDefinitionApplication.deleteTaskDefinitionVersion(ref, name);
     }
