@@ -57,6 +57,7 @@ public class DefinitionJsonRepository implements DefinitionRepository {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Optional<Definition> findByKey(String key) {
         try {
             var writer = new FileReader(
