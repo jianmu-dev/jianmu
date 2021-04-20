@@ -14,6 +14,7 @@ public class DockerTask {
     private String triggerId;
     // 任务定义唯一Key
     private String defKey;
+    private String resultFile;
     // 容器规格定义
     private ContainerSpec spec;
 
@@ -36,6 +37,10 @@ public class DockerTask {
         return defKey;
     }
 
+    public String getResultFile() {
+        return resultFile;
+    }
+
     public ContainerSpec getSpec() {
         return spec;
     }
@@ -46,6 +51,7 @@ public class DockerTask {
         private String triggerId;
         // 任务定义唯一Key
         private String defKey;
+        private String resultFile;
         // 容器规格定义
         private ContainerSpec spec;
 
@@ -76,6 +82,11 @@ public class DockerTask {
             return this;
         }
 
+        public Builder resultFile(String resultFile) {
+            this.resultFile = resultFile;
+            return this;
+        }
+
         public Builder spec(ContainerSpec spec) {
             this.spec = spec;
             return this;
@@ -88,6 +99,7 @@ public class DockerTask {
             dockerTask.businessId = this.businessId;
             dockerTask.taskInstanceId = this.taskInstanceId;
             dockerTask.defKey = this.defKey;
+            dockerTask.resultFile = this.resultFile;
             return dockerTask;
         }
     }

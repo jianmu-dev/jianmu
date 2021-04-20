@@ -21,22 +21,21 @@ public class DockerDefinition extends BaseDefinition {
         return spec;
     }
 
+
     public static final class Builder {
-        private ContainerSpec spec;
         // 唯一Key
-        private String key;
-        private String resultFile;
+        protected String key;
+        protected String resultFile;
+        // 输入输出参数列表
+        protected Set<TaskParameter> inputParameters = new HashSet<>();
+        protected Set<TaskParameter> outputParameters = new HashSet<>();
+        private ContainerSpec spec;
 
         private Builder() {
         }
 
-        public static Builder aDockerTaskDefinition() {
+        public static Builder aDockerDefinition() {
             return new Builder();
-        }
-
-        public Builder spec(ContainerSpec spec) {
-            this.spec = spec;
-            return this;
         }
 
         public Builder key(String key) {
@@ -49,12 +48,29 @@ public class DockerDefinition extends BaseDefinition {
             return this;
         }
 
+        public Builder inputParameters(Set<TaskParameter> inputParameters) {
+            this.inputParameters = inputParameters;
+            return this;
+        }
+
+        public Builder outputParameters(Set<TaskParameter> outputParameters) {
+            this.outputParameters = outputParameters;
+            return this;
+        }
+
+        public Builder spec(ContainerSpec spec) {
+            this.spec = spec;
+            return this;
+        }
+
         public DockerDefinition build() {
-            DockerDefinition dockerTaskDefinition = new DockerDefinition();
-            dockerTaskDefinition.key = this.key;
-            dockerTaskDefinition.resultFile = this.resultFile;
-            dockerTaskDefinition.spec = this.spec;
-            return dockerTaskDefinition;
+            DockerDefinition dockerDefinition = new DockerDefinition();
+            dockerDefinition.spec = this.spec;
+            dockerDefinition.resultFile = this.resultFile;
+            dockerDefinition.outputParameters = this.outputParameters;
+            dockerDefinition.key = this.key;
+            dockerDefinition.inputParameters = this.inputParameters;
+            return dockerDefinition;
         }
     }
 }

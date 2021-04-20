@@ -46,6 +46,7 @@ public class WorkerDomainService {
                 .businessId(taskInstance.getBusinessId())
                 .triggerId(taskInstance.getTriggerId())
                 .defKey(taskInstance.getDefKey())
+                .resultFile(taskDefinition.getResultFile())
                 .spec(newSpec)
                 .build();
     }
