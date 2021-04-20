@@ -21,7 +21,7 @@ workflow:
   Start_1:
     type: start
     targets:
-      - Git_v1
+      - Git_1
   Git_1:
     type: git_0.1
     sources:
