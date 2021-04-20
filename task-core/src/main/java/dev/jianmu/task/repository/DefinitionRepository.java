@@ -16,5 +16,5 @@ public interface DefinitionRepository {
 
     Optional<Definition> findByKey(String key);
 
-    List<Definition> findAll();
+    void delete(String key);
 }

@@ -6,6 +6,7 @@ import dev.jianmu.api.dto.TaskDefinitionDto;
 import dev.jianmu.api.dto.TaskDefinitionVersionDto;
 import dev.jianmu.api.mapper.ContainerSpecMapper;
 import dev.jianmu.application.service.TaskDefinitionApplication;
+import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @class: TaskDefinitionController
@@ -51,12 +53,25 @@ public class TaskDefinitionController {
     }
 
     @GetMapping
+    @Operation(summary = "任务定义列表", description = "获取任务定义列表")
     public PageInfo<TaskDefinition> getTaskDefinitions(PageDto pageDto) {
         return this.taskDefinitionApplication.findAll(pageDto.getPageNum(), pageDto.getPageSize());
     }
 
     @GetMapping("/versions/{ref}")
+    @Operation(summary = "获取任务定义版本", description = "获取任务定义版本")
     public List<TaskDefinitionVersion> getTaskDefinitionVersions(@PathVariable String ref) {
         return this.taskDefinitionApplication.findVersionByRef(ref);
+    }
+
+    @GetMapping("/versions/{key}")
+    @Operation(summary = "获取任务定义详情", description = "获取任务定义详情")
+    public Optional<Definition> getDefinition(@PathVariable String key) {
+        return this.taskDefinitionApplication.findByKey(key);
+    }
+
+    @DeleteMapping("/versions/{ref}/{name}")
+    public void deleteTaskDefinitionVersion(@PathVariable String ref, @PathVariable String name) {
+        this.taskDefinitionApplication.deleteTaskDefinitionVersion(ref, name);
     }
 }

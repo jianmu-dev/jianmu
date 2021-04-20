@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,7 +81,15 @@ public class DefinitionJsonRepository implements DefinitionRepository {
     }
 
     @Override
-    public List<Definition> findAll() {
-        return null;
+    public void delete(String key) {
+        var file = new File(
+                init.getRootLocation() +
+                        File.separator +
+                        key +
+                        JsonRepositoryInit.POSTFIX
+        );
+        if (!file.delete()) {
+            throw new RuntimeException("任务定义删除失败");
+        }
     }
 }

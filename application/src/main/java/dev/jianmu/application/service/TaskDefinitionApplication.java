@@ -145,4 +145,12 @@ public class TaskDefinitionApplication {
     public PageInfo<TaskDefinition> findAll(int pageNum, int pageSize) {
         return this.taskDefinitionRepository.findAll(pageNum, pageSize);
     }
+
+    public void deleteTaskDefinitionVersion(String ref, String name) {
+        var version = this.taskDefinitionVersionRepository
+                .findByTaskDefinitionRefAndName(ref, name)
+                .orElseThrow(() -> new RuntimeException("未找到该任务定义版本"));
+        this.taskDefinitionVersionRepository.delete(version);
+        this.definitionRepository.delete(version.getDefinitionKey());
+    }
 }
