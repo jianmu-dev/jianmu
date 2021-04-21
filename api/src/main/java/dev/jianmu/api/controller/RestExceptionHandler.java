@@ -1,6 +1,9 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.ErrorMessage;
+import dev.jianmu.application.service.DslApplication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -17,10 +20,12 @@ import java.time.LocalDateTime;
  **/
 @RestControllerAdvice
 public class RestExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage runtimeException(RuntimeException ex, WebRequest request) {
+        logger.error("Got ex: ", ex);
         return ErrorMessage.builder()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
@@ -32,6 +37,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage globalExceptionHandler(Exception ex, WebRequest request) {
+        logger.error("Got ex: ", ex);
         return ErrorMessage.builder()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .timestamp(LocalDateTime.now())
