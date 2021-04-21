@@ -66,8 +66,6 @@ public class WorkerApplication {
     }
 
     public void add(Worker worker, Map<String, Object> parameterMap) {
-        var parameters = this.parameterDomainService.createParameters(parameterMap);
-        this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
         this.workerRepository.add(worker);
     }
 
