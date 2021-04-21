@@ -1,10 +1,9 @@
 package dev.jianmu.infrastructure.mapper.parameter;
 
-import dev.jianmu.parameter.aggregate.Parameter;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import dev.jianmu.parameter.aggregate.*;
+import org.apache.ibatis.annotations.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +17,7 @@ public interface ParameterMapper {
     @Insert("<script>" +
             "insert into parameter(id, type, value) values" +
             "<foreach collection='parameters' item='i' index='index' separator=','>" +
-            "(#{i.id}, #{i.type}, #{i.value})" +
+            "(#{i.id}, #{i.type}, convert(#{i.value}, BINARY))" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("parameters") List<Parameter> parameters);
@@ -28,5 +27,27 @@ public interface ParameterMapper {
             "<foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
             "</foreach>" +
             "</script>")
+    @TypeDiscriminator(column = "type", javaType = String.class, cases = {
+            @Case(value = "STRING", type = StringParameter.class, constructArgs = {
+                    @Arg(column = "value", javaType = String.class)
+            }, results = {
+                    @Result(column = "value", javaType = String.class)
+            }),
+            @Case(value = "SECRET", type = SecretParameter.class, constructArgs = {
+                    @Arg(column = "value", javaType = String.class)
+            }, results = {
+                    @Result(column = "value", javaType = String.class)
+            }),
+            @Case(value = "NUMBER", type = NumberParameter.class, constructArgs = {
+                    @Arg(column = "value", javaType = BigDecimal.class)
+            }, results = {
+                    @Result(column = "value", javaType = BigDecimal.class)
+            }),
+            @Case(value = "BOOL", type = BoolParameter.class, constructArgs = {
+                    @Arg(column = "value", javaType = Boolean.class)
+            }, results = {
+                    @Result(column = "value", javaType = Boolean.class)
+            })
+    })
     List<Parameter> findByIds(@Param("ids") Set<String> ids);
 }

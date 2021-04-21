@@ -1,0 +1,14 @@
+package dev.jianmu.parameter.aggregate;
+
+/**
+ * @class: StringParameter
+ * @description: 字符串参数
+ * @author: Ethan Liu
+ * @create: 2021-04-20 22:49
+ **/
+public class StringParameter extends Parameter<String> {
+    public StringParameter(String value) {
+        super(value);
+        this.type = Type.STRING;
+    }
+}

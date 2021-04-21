@@ -1,5 +1,6 @@
 package dev.jianmu.parameter.aggregate;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -8,65 +9,69 @@ import java.util.UUID;
  * @author: Ethan Liu
  * @create: 2021-01-21 13:13
  **/
-public class Parameter {
-    // ID
-    private String id;
-    // 参数类型
-    private String type;
-    // 参数值
-    private String value;
+public abstract class Parameter<T> {
+    public enum Type {
+        STRING {
+            @Override
+            public Parameter<?> newParameter(Object value) {
+                if (value instanceof String) {
+                    return new StringParameter((String) value);
+                }
+                throw new RuntimeException("非法类型");
+            }
+        },
+        BOOL {
+            @Override
+            public Parameter<?> newParameter(Object value) {
+                if (value instanceof Boolean) {
+                    return new BoolParameter((Boolean) value);
+                }
+                throw new RuntimeException("非法类型");
+            }
+        },
+        SECRET {
+            @Override
+            public Parameter<?> newParameter(Object value) {
+                if (value instanceof String) {
+                    return new SecretParameter((String) value);
+                }
+                throw new RuntimeException("非法类型");
+            }
+        },
+        NUMBER {
+            @Override
+            public Parameter<?> newParameter(Object value) {
+                if (value instanceof BigDecimal) {
+                    return new NumberParameter((BigDecimal) value);
+                }
+                throw new RuntimeException("非法类型");
+            }
+        };
 
-    private Parameter() {
+        public abstract Parameter<?> newParameter(Object value);
+    }
+
+    // ID
+    // TODO 暂时使用UUID的值
+    protected final String id = UUID.randomUUID().toString().replace("-", "");
+    // 参数类型
+    protected Type type;
+    // 参数值
+    protected final T value;
+
+    protected Parameter(T value) {
+        this.value = value;
     }
 
     public String getId() {
         return id;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 
-    public String getValue() {
+    public T getValue() {
         return value;
-    }
-
-
-    public static final class Builder {
-        // ID
-        // TODO 暂时使用UUID的值
-        private final String id = UUID.randomUUID().toString().replace("-", "");
-        // 参数类型
-        private String type;
-        // 参数值
-        private String value;
-
-        private Builder() {
-        }
-
-        public static Builder aParameter() {
-            return new Builder();
-        }
-
-        public Builder value(String value) {
-            this.value = value;
-            return this;
-        }
-
-        public Builder type(String type) {
-            if (!type.equals("String")) {
-                throw new RuntimeException("当前不支持此参数类型: "+ type);
-            }
-            this.type = type;
-            return this;
-        }
-
-        public Parameter build() {
-            Parameter parameter = new Parameter();
-            parameter.id = this.id;
-            parameter.type = this.type;
-            parameter.value = this.value;
-            return parameter;
-        }
     }
 }
