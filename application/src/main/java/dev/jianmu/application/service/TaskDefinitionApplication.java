@@ -19,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -137,8 +140,8 @@ public class TaskDefinitionApplication {
                 .orElseThrow(() -> new RuntimeException("未找到该任务定义版本"));
     }
 
-    public Optional<TaskDefinition> findByRef(String ref) {
-        return this.taskDefinitionRepository.findByRef(ref);
+    public TaskDefinition findByRef(String ref) {
+        return this.taskDefinitionRepository.findByRef(ref).orElseThrow(() -> new RuntimeException("未找到该任务定义"));
     }
 
     public List<TaskDefinitionVersion> findVersionByRef(String ref) {

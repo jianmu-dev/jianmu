@@ -31,5 +31,6 @@ public interface TaskDefinitionDtoMapper {
 
     @Mapping(target = "version", source = "taskDefinitionVersion.name")
     @Mapping(target = "ref", source = "dockerDefinition.key")
-    TaskDefinitionVersionDto toTaskDefinitionVersionDto(DockerDefinition dockerDefinition, TaskDefinitionVersion taskDefinitionVersion);
+    @Mapping(target = "name", source = "taskDefinition.name")
+    TaskDefinitionDto toTaskDefinitionDto(DockerDefinition dockerDefinition, TaskDefinitionVersion taskDefinitionVersion, TaskDefinition taskDefinition);
 }

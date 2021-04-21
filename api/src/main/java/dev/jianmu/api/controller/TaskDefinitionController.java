@@ -78,10 +78,11 @@ public class TaskDefinitionController {
 
     @GetMapping("/versions/{ref}/{name}")
     @Operation(summary = "获取任务定义版本详情", description = "获取任务定义版本详情")
-    public TaskDefinitionVersionDto getDefinition(@PathVariable String ref, @PathVariable String name) {
+    public TaskDefinitionDto getDefinition(@PathVariable String ref, @PathVariable String name) {
+        var taskDefinition = this.taskDefinitionApplication.findByRef(ref);
         var version = this.taskDefinitionApplication.findByRefAndName(ref, name);
         var definition = this.taskDefinitionApplication.findByKey(ref + name);
-        return TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersionDto((DockerDefinition) definition, version);
+        return TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionDto((DockerDefinition) definition, version, taskDefinition);
     }
 
     @DeleteMapping("/versions/{ref}/{name}")
