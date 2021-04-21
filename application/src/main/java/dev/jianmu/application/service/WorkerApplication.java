@@ -113,8 +113,8 @@ public class WorkerApplication {
         var references = this.referenceRepository
                 .findByContextIds(
                         Set.of(
-                                taskInstance.getTriggerId(),
-                                taskInstance.getBusinessId(),
+                                taskInstance.getTriggerId() + taskInstance.getAsyncTaskKey(),
+                                taskInstance.getBusinessId() + taskInstance.getAsyncTaskKey(),
                                 taskInstance.getDefKey()
                         )
                 );
@@ -125,6 +125,7 @@ public class WorkerApplication {
                 .findByIds(new HashSet<>(newParameterMap.values()));
         return this.parameterDomainService.createParameterMap(newParameterMap, parameters)
                 .entrySet().stream()
+                // TODO 处理参数类型
                 .map(entry -> Map.entry(entry.getKey(), (String) entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

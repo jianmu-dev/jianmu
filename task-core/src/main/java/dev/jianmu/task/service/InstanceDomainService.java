@@ -17,7 +17,8 @@ public class InstanceDomainService {
             List<TaskInstance> taskInstances,
             Definition definition,
             String businessId,
-            String triggerId
+            String triggerId,
+            String asyncTaskKey
     ) {
         if (taskInstances.size() > 0) {
             boolean isRunning = taskInstances.stream()
@@ -31,6 +32,7 @@ public class InstanceDomainService {
         }
         return TaskInstance.Builder.anInstance()
                 .defKey(definition.getKey())
+                .asyncTaskKey(asyncTaskKey)
                 .businessId(businessId)
                 .triggerId(triggerId)
                 .parameters(definition.getInputParameters())

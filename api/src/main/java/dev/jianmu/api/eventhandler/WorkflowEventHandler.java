@@ -57,7 +57,7 @@ public class WorkflowEventHandler {
         logger.info(event.getNodeRef());
         logger.info(event.getWorkflowInstanceId());
         logger.info(event.getTriggerId());
-        this.taskInstanceApplication.create(event.getWorkflowInstanceId(), event.getTriggerId(), event.getNodeRef());
+        this.taskInstanceApplication.create(event.getWorkflowInstanceId(), event.getTriggerId(), event.getNodeRef(), event.getKey());
         logger.info("-----------------------------------------------------");
     }
 

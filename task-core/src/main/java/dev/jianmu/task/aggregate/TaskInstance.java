@@ -15,6 +15,8 @@ public class TaskInstance extends AggregateRoot {
 
     // 任务定义唯一Key
     private String defKey;
+    // 流程定义AsyncTask唯一Key
+    private String asyncTaskKey;
     // 外部业务ID, 必须唯一
     private String businessId;
     // 触发器ID
@@ -49,6 +51,10 @@ public class TaskInstance extends AggregateRoot {
         return defKey;
     }
 
+    public String getAsyncTaskKey() {
+        return asyncTaskKey;
+    }
+
     public String getBusinessId() {
         return businessId;
     }
@@ -75,6 +81,8 @@ public class TaskInstance extends AggregateRoot {
         private String id = UUID.randomUUID().toString().replace("-", "");
         // 任务定义唯一Key
         private String defKey;
+        // 流程定义AsyncTask唯一Key
+        private String asyncTaskKey;
         // 外部业务ID
         private String businessId;
         // 触发器ID
@@ -91,6 +99,11 @@ public class TaskInstance extends AggregateRoot {
 
         public Builder defKey(String defKey) {
             this.defKey = defKey;
+            return this;
+        }
+
+        public Builder asyncTaskKey(String asyncTaskKey) {
+            this.asyncTaskKey = asyncTaskKey;
             return this;
         }
 
@@ -113,6 +126,7 @@ public class TaskInstance extends AggregateRoot {
             TaskInstance taskInstance = new TaskInstance();
             taskInstance.id = this.id;
             taskInstance.defKey = this.defKey;
+            taskInstance.asyncTaskKey = this.asyncTaskKey;
             taskInstance.businessId = this.businessId;
             taskInstance.triggerId = this.triggerId;
             taskInstance.parameters = this.parameters;

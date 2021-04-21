@@ -53,7 +53,7 @@ public class DslApplication {
         return dsl;
     }
 
-    private AsyncTask findDefinition(String key) {
+    private AsyncTask findDefinition(String key, String nodeName) {
         var definition = this.definitionRepository
                 .findByKey(key)
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
@@ -66,6 +66,7 @@ public class DslApplication {
         return AsyncTask.Builder.anAsyncTask()
                 .name(taskDefinition.getName())
                 .ref(definition.getKey())
+                .key(nodeName)
                 .description(taskDefinitionVersion.getDescription())
                 .build();
     }
@@ -96,7 +97,7 @@ public class DslApplication {
                 return;
             }
             // 创建任务节点
-            var task = this.findDefinition(node.getType());
+            var task = this.findDefinition(node.getType(), node.getName());
             symbolTable.put(node.getName(), task);
         });
         nodes.forEach(node -> {

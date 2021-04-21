@@ -40,12 +40,12 @@ public class TaskInstanceApplication {
     }
 
     @Transactional
-    public void create(String businessId, String triggerId, String taskRef) {
+    public void create(String businessId, String triggerId, String taskRef, String asyncTaskKey) {
         // 创建任务实例
         Definition definition = this.definitionRepository.findByKey(taskRef)
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByDefKeyAndBusinessId(taskRef, businessId);
-        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, triggerId);
+        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, triggerId, asyncTaskKey);
         this.taskInstanceRepository.add(taskInstance);
     }
 
