@@ -7,12 +7,8 @@ event:
     tag: ${branch_name} # tag_name
 
 param:
-  branch_name:
-    type: string
-    value: dev
-  git_return:
-    type: number
-    value: 200
+  branch_name: dev
+  git_return: 200
 
 workflow:
   name: 测试流程1
