@@ -77,9 +77,9 @@ CREATE TABLE `task_instance_parameter`
 
 CREATE TABLE `parameter`
 (
-    `id`    varchar(50)  NOT NULL COMMENT '参数ID',
-    `type`  varchar(45)  NOT NULL COMMENT '参数类型',
-    `value` varchar(255) NOT NULL COMMENT '参数值',
+    `id`    varchar(50) NOT NULL COMMENT '参数ID',
+    `type`  varchar(45) NOT NULL COMMENT '参数类型',
+    `value` blob        NOT NULL COMMENT '参数值',
     PRIMARY KEY (`id`)
 );
 
