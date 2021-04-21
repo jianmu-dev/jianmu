@@ -38,13 +38,6 @@ public class ParameterApplication {
         this.referenceRepository = referenceRepository;
     }
 
-    // 创建参数
-    public Map<String, Parameter> addParameters(Map<String, Object> parameterMap) {
-        var parameters = this.parameterDomainService.createParameters(parameterMap);
-        this.parameterRepository.addAll(new ArrayList<>(parameters.values()));
-        return parameters;
-    }
-
     // 创建参数引用
     public Set<Reference> addReferences(String contextId, String parameterId, Set<String> linkedParameterIds) {
         var refers = this.referenceDomainService.createReferences(contextId, parameterId, linkedParameterIds);

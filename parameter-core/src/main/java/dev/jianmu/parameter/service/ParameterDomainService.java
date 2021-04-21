@@ -1,11 +1,10 @@
 package dev.jianmu.parameter.service;
 
-import dev.jianmu.parameter.aggregate.*;
+import dev.jianmu.parameter.aggregate.Parameter;
+import dev.jianmu.parameter.aggregate.StringParameter;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -16,24 +15,7 @@ import java.util.stream.Collectors;
  **/
 public class ParameterDomainService {
 
-    private static final String ParameterPrefix = "JIANMU_";
-
-    // TODO 未来需要在Parameter上支持多类型
-    public Map<String, Parameter> createParameters(Map<String, Object> parameterMap) {
-        return parameterMap.entrySet().stream()
-                .map(entry -> {
-                    if (entry.getValue() == null) {
-                        throw new RuntimeException("当前不支持非String类型参数");
-                    }
-                    var p = Parameter.Builder.aParameter()
-                            .type("String")
-                            .value((String) entry.getValue())
-                            .build();
-                    return Map.entry(entry.getKey(), p);
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public Map<String, String> createParameterMap(Map<String, Parameter> parameterMap) {
+    public Map<String, String> createParameterMap(Map<String, ? extends Parameter> parameterMap) {
         return parameterMap.entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().getId()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -44,7 +26,7 @@ public class ParameterDomainService {
             var realValue = parameters.stream()
                     .filter(parameter -> parameter.getId().equals(entry.getValue()))
                     .findFirst()
-                    .orElse(Parameter.Builder.aParameter().build());
+                    .orElse(new StringParameter(""));
             return Map.entry(entry.getKey(), realValue.getValue());
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

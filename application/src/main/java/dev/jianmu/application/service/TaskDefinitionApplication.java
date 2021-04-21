@@ -60,10 +60,9 @@ public class TaskDefinitionApplication {
                 .map(taskParameter ->
                         Map.entry(
                                 taskParameter,
-                                Parameter.Builder.aParameter()
-                                        .type(taskParameter.getType())
-                                        .value(taskParameter.getValue())
-                                        .build()
+                                Parameter.Type
+                                        .valueOf(taskParameter.getType())
+                                        .newParameter(taskParameter.getValue())
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

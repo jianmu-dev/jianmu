@@ -62,10 +62,9 @@ public class TriggerApplication {
                 .map(triggerParameter ->
                         Map.entry(
                                 triggerParameter.getRef(),
-                                Parameter.Builder.aParameter()
-                                        .type(triggerParameter.getType())
-                                        .value(triggerParameter.getValue())
-                                        .build()
+                                Parameter.Type
+                                        .valueOf(triggerParameter.getType())
+                                        .newParameter(triggerParameter.getValue())
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -90,10 +89,9 @@ public class TriggerApplication {
                 .map(triggerParameter ->
                         Map.entry(
                                 triggerParameter.getRef(),
-                                Parameter.Builder.aParameter()
-                                        .type(triggerParameter.getType())
-                                        .value(triggerParameter.getValue())
-                                        .build()
+                                Parameter.Type
+                                        .valueOf(triggerParameter.getType())
+                                        .newParameter(triggerParameter.getValue())
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
