@@ -2,6 +2,7 @@ package dev.jianmu.api.mapper;
 
 import dev.jianmu.api.dto.TaskDefinitionDto;
 import dev.jianmu.api.dto.TaskDefinitionVersionDto;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import org.mapstruct.Mapper;
@@ -27,4 +28,8 @@ public interface TaskDefinitionDtoMapper {
     @Mapping(source = "version", target = "name")
     @Mapping(source = "description", target = "description")
     TaskDefinitionVersion toTaskDefinitionVersion(TaskDefinitionVersionDto taskDefinitionVersionDto);
+
+    @Mapping(target = "version", source = "taskDefinitionVersion.name")
+    @Mapping(target = "ref", source = "dockerDefinition.key")
+    TaskDefinitionVersionDto toTaskDefinitionVersionDto(DockerDefinition dockerDefinition, TaskDefinitionVersion taskDefinitionVersion);
 }

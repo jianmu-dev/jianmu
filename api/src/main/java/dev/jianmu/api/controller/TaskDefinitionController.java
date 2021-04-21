@@ -7,7 +7,7 @@ import dev.jianmu.api.dto.TaskDefinitionVersionDto;
 import dev.jianmu.api.mapper.ContainerSpecMapper;
 import dev.jianmu.api.mapper.TaskDefinitionDtoMapper;
 import dev.jianmu.application.service.TaskDefinitionApplication;
-import dev.jianmu.task.aggregate.Definition;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @class: TaskDefinitionController
@@ -79,8 +78,10 @@ public class TaskDefinitionController {
 
     @GetMapping("/versions/{ref}/{name}")
     @Operation(summary = "获取任务定义版本详情", description = "获取任务定义版本详情")
-    public Optional<Definition> getDefinition(@PathVariable String ref, @PathVariable String name) {
-        return this.taskDefinitionApplication.findByKey(ref + name);
+    public TaskDefinitionVersionDto getDefinition(@PathVariable String ref, @PathVariable String name) {
+        var version = this.taskDefinitionApplication.findByRefAndName(ref, name);
+        var definition = this.taskDefinitionApplication.findByKey(ref + name);
+        return TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersionDto((DockerDefinition) definition, version);
     }
 
     @DeleteMapping("/versions/{ref}/{name}")

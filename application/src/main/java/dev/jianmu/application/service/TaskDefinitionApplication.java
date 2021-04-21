@@ -128,8 +128,13 @@ public class TaskDefinitionApplication {
         this.definitionRepository.add(definition);
     }
 
-    public Optional<Definition> findByKey(String key) {
-        return this.definitionRepository.findByKey(key);
+    public Definition findByKey(String key) {
+        return this.definitionRepository.findByKey(key).orElseThrow(() -> new RuntimeException("未找到该任务定义版本"));
+    }
+
+    public TaskDefinitionVersion findByRefAndName(String ref, String name) {
+        return this.taskDefinitionVersionRepository.findByTaskDefinitionRefAndName(ref, name)
+                .orElseThrow(() -> new RuntimeException("未找到该任务定义版本"));
     }
 
     public Optional<TaskDefinition> findByRef(String ref) {
