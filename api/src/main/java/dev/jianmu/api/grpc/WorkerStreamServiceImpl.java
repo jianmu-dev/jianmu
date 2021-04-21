@@ -1,9 +1,6 @@
 package dev.jianmu.api.grpc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.api.dto.DockerTask;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
@@ -20,7 +17,6 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -83,42 +79,6 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
         responseObserver.onCompleted();
     }
 
-    private String getDto(TaskInstance taskInstance) {
-        var environmentMap = this.taskInstanceApplication.getEnvironmentMap(taskInstance);
-        List<String> entrypoint;
-        List<String> args;
-        var workingDir = "/" + taskInstance.getTriggerId();
-        var volumeId = taskInstance.getTriggerId();
-        var volumeName = taskInstance.getTriggerId();
-        var v = DockerTask.VolumesEntity.builder()
-                .temp(
-                        DockerTask.VolumesEntity.TempEntity.builder()
-                                .id(volumeId)
-                                .name(volumeName)
-                                .build())
-                .build();
-        var vm = DockerTask.TasksEntity.VolumeMountsEntity.builder()
-                .name(volumeName)
-                .path(workingDir)
-                .build();
-        DockerTask dockerTask = DockerTask.builder()
-                .Tasks(List.of(
-                        DockerTask.TasksEntity.builder()
-                                .id(taskInstance.getId())
-                                .working_dir(workingDir)
-                                .volume_mounts(List.of(vm))
-                                .environment(environmentMap)
-                                .build()
-                ))
-                .volumes(List.of(v))
-                .build();
-        try {
-            return objectMapper.writeValueAsString(dockerTask);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("DTO转换失败");
-        }
-    }
-
     @Override
     public void subscribeTask(SubReq request, StreamObserver<Task> responseObserver) {
         for (; ; ) {
@@ -131,11 +91,8 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                 this.threadMap.put(request.getWorkerId(), Thread.currentThread());
                 TaskInstance taskInstance = this.taskInstanceQueue.take();
                 logger.info("get task instance here: id {}, key {}", taskInstance.getId(), taskInstance.getDefKey());
-                var dto = this.getDto(taskInstance);
-                logger.info(dto);
                 Task task = Task.newBuilder()
                         .setId(taskInstance.getId())
-                        .setDto(dto)
                         .build();
                 responseObserver.onNext(task);
             } catch (InterruptedException e) {

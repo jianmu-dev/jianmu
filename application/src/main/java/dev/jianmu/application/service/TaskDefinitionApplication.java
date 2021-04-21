@@ -73,6 +73,14 @@ public class TaskDefinitionApplication {
         return new ArrayList<>(parameterMap.values());
     }
 
+    private List<Parameter> mergeParameters(Set<TaskParameter> inputParameters, Set<TaskParameter> outputParameters) {
+        // 创建参数存储
+        var inParameters = this.createParameters(inputParameters);
+        var outParameters = this.createParameters(outputParameters);
+        inParameters.addAll(outParameters);
+        return inParameters;
+    }
+
     @Transactional
     public void createDockerDefinition(
             TaskDefinition taskDefinition,
@@ -85,16 +93,14 @@ public class TaskDefinitionApplication {
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
         taskDefinitionVersion.setDefinitionKey(definitionKey);
         // 创建参数存储
-        var inParameters = this.createParameters(inputParameters);
-        var outParameters = this.createParameters(outputParameters);
-        inParameters.addAll(outParameters);
+        var parameters = this.mergeParameters(inputParameters, outputParameters);
         // 生成definition
         var definition = this.definitionDomainService
                 .createDockerDefinition(taskDefinitionVersion.getDefinitionKey(), resultFile, inputParameters, outputParameters, spec);
         // 保存
-        this.parameterRepository.addAll(inParameters);
         this.taskDefinitionRepository.add(taskDefinition);
         this.taskDefinitionVersionRepository.add(taskDefinitionVersion);
+        this.parameterRepository.addAll(parameters);
         this.definitionRepository.add(definition);
     }
 
@@ -102,7 +108,6 @@ public class TaskDefinitionApplication {
     public void createDockerDefinitionVersion(
             TaskDefinitionVersion taskDefinitionVersion,
             String resultFile,
-            String description,
             Set<TaskParameter> inputParameters,
             Set<TaskParameter> outputParameters,
             ContainerSpec spec
@@ -113,15 +118,13 @@ public class TaskDefinitionApplication {
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
         taskDefinitionVersion.setDefinitionKey(definitionKey);
         // 创建参数存储
-        var inParameters = this.createParameters(inputParameters);
-        var outParameters = this.createParameters(outputParameters);
-        inParameters.addAll(outParameters);
+        var parameters = this.mergeParameters(inputParameters, outputParameters);
         // 生成definition
         var definition = this.definitionDomainService
                 .createDockerDefinition(taskDefinitionVersion.getDefinitionKey(), resultFile, inputParameters, outputParameters, spec);
         // 保存
-        this.parameterRepository.addAll(inParameters);
         this.taskDefinitionVersionRepository.add(taskDefinitionVersion);
+        this.parameterRepository.addAll(parameters);
         this.definitionRepository.add(definition);
     }
 

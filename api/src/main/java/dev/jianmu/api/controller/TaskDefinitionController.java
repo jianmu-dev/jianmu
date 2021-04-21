@@ -59,7 +59,6 @@ public class TaskDefinitionController {
         this.taskDefinitionApplication.createDockerDefinitionVersion(
                 taskDefinitionVersion,
                 dto.getResultFile(),
-                dto.getDescription(),
                 dto.getInputParameters(),
                 dto.getOutputParameters(),
                 spec
