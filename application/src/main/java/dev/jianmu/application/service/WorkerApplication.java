@@ -125,8 +125,8 @@ public class WorkerApplication {
                 .findByIds(new HashSet<>(newParameterMap.values()));
         return this.parameterDomainService.createParameterMap(newParameterMap, parameters)
                 .entrySet().stream()
-                // TODO 处理参数类型
-                .map(entry -> Map.entry(entry.getKey(), (String) entry.getValue()))
+                // 不同参数类型都转换为String传递
+                .map(entry -> Map.entry(entry.getKey(), entry.getValue().getStringValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

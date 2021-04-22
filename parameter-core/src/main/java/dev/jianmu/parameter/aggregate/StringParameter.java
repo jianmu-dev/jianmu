@@ -11,4 +11,9 @@ public class StringParameter extends Parameter<String> {
         super(value);
         this.type = Type.STRING;
     }
+
+    @Override
+    public String getStringValue() {
+        return value;
+    }
 }

@@ -63,6 +63,8 @@ public abstract class Parameter<T> {
         this.value = value;
     }
 
+    public abstract String getStringValue();
+
     public String getId() {
         return id;
     }

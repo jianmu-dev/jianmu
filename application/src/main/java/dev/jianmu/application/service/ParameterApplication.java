@@ -56,7 +56,7 @@ public class ParameterApplication {
     }
 
     // 查询参数值
-    public Map<String, Object> findParameters(Set<String> contextIds, Map<String, String> parameterMap) {
+    public Map<String, Parameter> findParameters(Set<String> contextIds, Map<String, String> parameterMap) {
         var references = this.referenceRepository.findByContextIds(contextIds);
         var newParameterMap = this.referenceDomainService.calculateIds(parameterMap, references);
         var parameters = this.parameterRepository.findByIds(new HashSet<>(newParameterMap.values()));

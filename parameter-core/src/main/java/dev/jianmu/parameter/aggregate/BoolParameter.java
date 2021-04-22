@@ -11,4 +11,9 @@ public class BoolParameter extends Parameter<Boolean> {
         super(value);
         this.type = Type.BOOL;
     }
+
+    @Override
+    public String getStringValue() {
+        return String.valueOf(value);
+    }
 }

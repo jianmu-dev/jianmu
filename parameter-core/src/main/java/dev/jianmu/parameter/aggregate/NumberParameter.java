@@ -13,4 +13,9 @@ public class NumberParameter extends Parameter<BigDecimal> {
         super(value);
         this.type = Type.NUMBER;
     }
+
+    @Override
+    public String getStringValue() {
+        return value.toPlainString();
+    }
 }

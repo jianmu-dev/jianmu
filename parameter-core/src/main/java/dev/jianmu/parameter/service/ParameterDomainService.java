@@ -21,13 +21,13 @@ public class ParameterDomainService {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Map<String, Object> createParameterMap(Map<String, String> parameterMap, List<Parameter> parameters) {
+    public Map<String, Parameter> createParameterMap(Map<String, String> parameterMap, List<Parameter> parameters) {
         return parameterMap.entrySet().stream().map(entry -> {
             var realValue = parameters.stream()
                     .filter(parameter -> parameter.getId().equals(entry.getValue()))
                     .findFirst()
                     .orElse(new StringParameter(""));
-            return Map.entry(entry.getKey(), realValue.getValue());
+            return Map.entry(entry.getKey(), realValue);
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

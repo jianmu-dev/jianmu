@@ -11,4 +11,9 @@ public class SecretParameter extends Parameter<String> {
         super(value);
         this.type = Type.SECRET;
     }
+
+    @Override
+    public String getStringValue() {
+        return value;
+    }
 }
