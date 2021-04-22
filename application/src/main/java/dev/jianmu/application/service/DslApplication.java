@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.dsl.DslModel;
 import dev.jianmu.dsl.Flow;
+import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.version.repository.TaskDefinitionRepository;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @class: DslApplication
@@ -53,7 +57,7 @@ public class DslApplication {
         return dsl;
     }
 
-    private AsyncTask findDefinition(String key, String nodeName) {
+    private AsyncTask createAsyncTask(String key, String nodeName) {
         var definition = this.definitionRepository
                 .findByKey(key)
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
@@ -97,9 +101,10 @@ public class DslApplication {
                 return;
             }
             // 创建任务节点
-            var task = this.findDefinition(node.getType(), node.getName());
+            var task = this.createAsyncTask(node.getType(), node.getName());
             symbolTable.put(node.getName(), task);
         });
+        // 添加节点引用关系
         nodes.forEach(node -> {
             var n = symbolTable.get(node.getName());
             if (null != n) {
@@ -120,17 +125,33 @@ public class DslApplication {
         return new HashSet<>(symbolTable.values());
     }
 
+    private Set<TaskParameter> findDefinitions(List<dev.jianmu.dsl.Node> nodes) {
+        Set<TaskParameter> parameters = new HashSet<>();
+        nodes.stream()
+                .filter(node -> !node.getType().equals("start"))
+                .filter(node -> !node.getType().equals("end"))
+                .filter(node -> !node.getType().equals("condition"))
+                .filter(distinctByKey(dev.jianmu.dsl.Node::getType))
+                .forEach(node -> {
+                    var ps = this.definitionRepository
+                            .findByKey(node.getType())
+                            .orElseThrow(() -> new RuntimeException("未找到任务定义"))
+                            .getInputParameters();
+                    parameters.addAll(ps);
+                });
+        return parameters;
+    }
+
     public Workflow importDsl() {
         var dsl = this.parseDsl();
         var flow = new Flow(dsl.getWorkflow());
+        var parameters = this.findDefinitions(flow.getNodes());
+        logger.info("size is: {}", parameters.size());
         // 创建节点
         var nodes = this.createNodes(flow.getNodes());
         // 覆盖全局参数
         var param = flow.getParams(dsl.getParam());
-        param.forEach((key, val) -> {
-            logger.info(key);
-            logger.info(val);
-        });
+
         // 创建流程
         return Workflow.Builder.aWorkflow()
                 .name(flow.getName())
@@ -140,5 +161,10 @@ public class DslApplication {
                 .version("1.0")
                 .nodes(nodes)
                 .build();
+    }
+
+    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
+        Map<Object, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }

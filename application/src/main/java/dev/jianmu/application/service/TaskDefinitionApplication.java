@@ -94,6 +94,7 @@ public class TaskDefinitionApplication {
             ContainerSpec spec
     ) {
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
+        taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
         taskDefinitionVersion.setDefinitionKey(definitionKey);
         // 创建参数存储
         var parameters = this.mergeParameters(inputParameters, outputParameters);
@@ -120,6 +121,7 @@ public class TaskDefinitionApplication {
                 .orElseThrow(() -> new RuntimeException("未找到该任务定义"));
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
         taskDefinitionVersion.setDefinitionKey(definitionKey);
+        taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
         // 创建参数存储
         var parameters = this.mergeParameters(inputParameters, outputParameters);
         // 生成definition

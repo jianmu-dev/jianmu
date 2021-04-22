@@ -10,7 +10,8 @@ import java.util.UUID;
  **/
 public class TaskDefinition {
     // ID
-    private String id;
+    // TODO 暂时使用UUID的值
+    private String id = UUID.randomUUID().toString().replace("-", "");
     // 显示名称
     private String name;
     // Ref
@@ -37,9 +38,6 @@ public class TaskDefinition {
     }
 
     public static final class Builder {
-        // ID
-        // TODO 暂时使用UUID的值
-        private String id = UUID.randomUUID().toString().replace("-", "");
         // 显示名称
         private String name;
         // Ref
@@ -64,7 +62,6 @@ public class TaskDefinition {
 
         public TaskDefinition build() {
             TaskDefinition taskDefinition = new TaskDefinition();
-            taskDefinition.id = this.id;
             taskDefinition.name = this.name;
             taskDefinition.ref = this.ref;
             return taskDefinition;

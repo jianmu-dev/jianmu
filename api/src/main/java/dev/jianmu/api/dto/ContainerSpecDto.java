@@ -26,7 +26,7 @@ public class ContainerSpecDto {
     private String[] cmd;
     private String[] entrypoint;
     @Schema(required = true)
-    @NotBlank
+    @NotBlank(message = "image不能为空")
     private String image;
     private String workingDir;
     private HostConfig hostConfig = new HostConfig();

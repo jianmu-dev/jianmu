@@ -33,7 +33,7 @@ public class WorkerDomainService {
                 .build();
         var hostConfig = HostConfig.Builder.aHostConfig().mounts(List.of(mount)).build();
         var spec = taskDefinition.getSpec();
-        var newSpec = ContainerSpec.Builder.aContainerSpec()
+        var newSpec = ContainerSpec.builder()
                 .image(spec.getImage())
                 .workingDir(workingDir)
                 .hostConfig(hostConfig)

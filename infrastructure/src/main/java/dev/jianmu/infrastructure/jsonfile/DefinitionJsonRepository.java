@@ -32,13 +32,12 @@ import java.util.Set;
 @Repository
 public class DefinitionJsonRepository implements DefinitionRepository {
     private static final Logger logger = LoggerFactory.getLogger(DefinitionJsonRepository.class);
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final JsonRepositoryInit init;
     private final ApplicationEventPublisher publisher;
 
     @Inject
-    public DefinitionJsonRepository(ObjectMapper objectMapper, JsonRepositoryInit init, ApplicationEventPublisher publisher) {
-        this.objectMapper = objectMapper;
+    public DefinitionJsonRepository(JsonRepositoryInit init, ApplicationEventPublisher publisher) {
         this.init = init;
         this.publisher = publisher;
     }

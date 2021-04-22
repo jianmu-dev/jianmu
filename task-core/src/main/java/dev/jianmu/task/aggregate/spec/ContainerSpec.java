@@ -91,8 +91,11 @@ public class ContainerSpec {
         return shell;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
 
-    public static final class Builder {
+    public static class Builder {
         private String name;
         private String hostName;
         private String domainName;
@@ -109,13 +112,6 @@ public class ContainerSpec {
         private HostConfig hostConfig = new HostConfig();
         private Map<String, String> labels;
         private List<String> shell;
-
-        private Builder() {
-        }
-
-        public static Builder aContainerSpec() {
-            return new Builder();
-        }
 
         public Builder name(String name) {
             this.name = name;

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 /**
@@ -21,15 +22,18 @@ import java.util.Set;
 @Schema(description = "任务定义版本DTO")
 public class TaskDefinitionVersionDto {
     @Schema(required = true)
-    @NotBlank
+    @NotBlank(message = "ref不能为空")
     private String ref;
     @Schema(required = true)
-    @NotBlank
+    @NotBlank(message = "version不能为空")
     private String version;
     private String description;
     private String resultFile;
+    @NotNull(message = "inputParameters不能为空")
     private Set<TaskParameter> inputParameters;
+    @NotNull(message = "outputParameters不能为空")
     private Set<TaskParameter> outputParameters;
     @Schema(required = true)
+    @NotNull(message = "spec不能为空")
     private ContainerSpecDto spec;
 }

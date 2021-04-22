@@ -12,9 +12,11 @@ import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -36,7 +38,7 @@ public class TaskDefinitionController {
 
     @PostMapping
     @Operation(summary = "创建任务定义", description = "创建任务定义")
-    public void create(TaskDefinitionDto dto) {
+    public void create(@RequestBody @Valid TaskDefinitionDto dto) {
         var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
         var taskDefinition = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinition(dto);
         var taskDefinitionVersion = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersion(dto);
@@ -52,7 +54,7 @@ public class TaskDefinitionController {
 
     @PostMapping("/versions")
     @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
-    public void createVersion(TaskDefinitionVersionDto dto) {
+    public void createVersion(@RequestBody @Valid TaskDefinitionVersionDto dto) {
         var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
         var taskDefinitionVersion = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersion(dto);
         this.taskDefinitionApplication.createDockerDefinitionVersion(

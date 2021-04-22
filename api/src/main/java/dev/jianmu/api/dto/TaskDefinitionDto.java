@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @class: TaskDefinitionDto
@@ -21,9 +22,9 @@ import javax.validation.constraints.NotBlank;
 @Schema(description = "任务定义DTO")
 public class TaskDefinitionDto extends TaskDefinitionVersionDto {
     @Schema(required = true)
-    @NotBlank
+    @NotBlank(message = "name不能为空")
     private String name;
     @Schema(required = true)
-    @NotBlank
+    @NotNull(message = "type不能为空")
     private Worker.Type type;
 }

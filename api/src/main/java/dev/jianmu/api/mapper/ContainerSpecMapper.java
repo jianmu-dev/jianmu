@@ -3,6 +3,7 @@ package dev.jianmu.api.mapper;
 import dev.jianmu.api.dto.ContainerSpecDto;
 import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
