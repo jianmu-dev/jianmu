@@ -2,10 +2,15 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.infrastructure.docker.DockerWorker;
 import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.parameter.aggregate.Parameter;
+import dev.jianmu.parameter.aggregate.SecretParameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
+import dev.jianmu.secret.aggregate.KVPair;
+import dev.jianmu.secret.repository.KVPairRepository;
+import dev.jianmu.secret.repository.NamespaceRepository;
 import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Worker;
@@ -42,6 +47,8 @@ public class WorkerApplication {
     private final WorkerDomainService workerDomainService;
     private final ReferenceRepository referenceRepository;
     private final ReferenceDomainService referenceDomainService;
+    private final NamespaceRepository namespaceRepository;
+    private final KVPairRepository kvPairRepository;
 
     @Inject
     public WorkerApplication(
@@ -52,7 +59,9 @@ public class WorkerApplication {
             StorageService storageService,
             DockerWorker dockerWorker, WorkerDomainService workerDomainService,
             ReferenceRepository referenceRepository,
-            ReferenceDomainService referenceDomainService
+            ReferenceDomainService referenceDomainService,
+            NamespaceRepository namespaceRepository,
+            KVPairRepository kvPairRepository
     ) {
         this.workerRepository = workerRepository;
         this.definitionRepository = definitionRepository;
@@ -63,6 +72,8 @@ public class WorkerApplication {
         this.workerDomainService = workerDomainService;
         this.referenceRepository = referenceRepository;
         this.referenceDomainService = referenceDomainService;
+        this.namespaceRepository = namespaceRepository;
+        this.kvPairRepository = kvPairRepository;
     }
 
     public void online(String workerId) {
@@ -124,7 +135,18 @@ public class WorkerApplication {
         var newParameterMap = this.referenceDomainService
                 .calculateIds(parameterMap, references);
         var parameters = this.parameterRepository
-                .findByIds(new HashSet<>(newParameterMap.values()));
+                .findByIds(new HashSet<>(newParameterMap.values()))
+                // 处理密钥类型参数, 获取值后转换为String类型参数
+                .stream()
+                .map(parameter -> {
+                    if (parameter instanceof SecretParameter) {
+                        var strings = parameter.getStringValue().split("\\.");
+                        var kv = this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1]).orElse(new KVPair());
+                        return Parameter.Type.STRING.newParameter(kv.getValue());
+                    }
+                    return parameter;
+                })
+                .collect(Collectors.toList());
         return this.parameterDomainService.createParameterMap(newParameterMap, parameters)
                 .entrySet().stream()
                 // 不同参数类型都转换为String传递

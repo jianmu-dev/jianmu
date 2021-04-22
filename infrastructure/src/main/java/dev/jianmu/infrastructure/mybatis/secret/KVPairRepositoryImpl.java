@@ -38,8 +38,8 @@ public class KVPairRepositoryImpl implements KVPairRepository {
     }
 
     @Override
-    public Optional<KVPair> findByKey(String key) {
-        return this.kvPairMapper.findByKey(key);
+    public Optional<KVPair> findByNamespaceNameAndKey(String namespaceName, String key) {
+        return this.kvPairMapper.findByNamespaceNameAndKey(namespaceName, key);
     }
 
     @Override

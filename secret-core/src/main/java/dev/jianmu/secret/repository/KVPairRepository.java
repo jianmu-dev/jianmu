@@ -18,7 +18,7 @@ public interface KVPairRepository {
 
     void delete(String namespaceName);
 
-    Optional<KVPair> findByKey(String key);
+    Optional<KVPair> findByNamespaceNameAndKey(String namespaceName, String key);
 
     List<KVPair> findByNamespaceName(String namespaceName);
 }

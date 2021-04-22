@@ -23,11 +23,11 @@ public interface KVPairMapper {
     @Delete("delete from secret_kv_pair where namespace_name = #{namespaceName}")
     void deleteByName(@Param("namespaceName") String namespaceName);
 
-    @Select("select * from secret_kv_pair where kv_key = #{key}")
+    @Select("select * from secret_kv_pair where namespace_name = #{namespaceName} and kv_key = #{key}")
     @Result(column = "namespace_name", property = "namespaceName")
     @Result(column = "kv_key", property = "key")
     @Result(column = "kv_value", property = "value")
-    Optional<KVPair> findByKey(@Param("key") String key);
+    Optional<KVPair> findByNamespaceNameAndKey(@Param("namespaceName") String namespaceName, @Param("key") String key);
 
     @Select("select * from secret_kv_pair namespace_name = #{namespaceName}")
     @Result(column = "namespace_name", property = "namespaceName")
