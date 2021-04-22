@@ -1,11 +1,12 @@
 package dev.jianmu.application.service;
 
+import com.github.pagehelper.PageInfo;
+import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.el.ExpressionLanguage;
-import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import org.slf4j.Logger;
@@ -28,19 +29,23 @@ public class WorkflowInstanceApplication {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceApplication.class);
 
     private final WorkflowRepository workflowRepository;
-    private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final WorkflowInstanceRepositoryImpl workflowInstanceRepository;
     private final WorkflowInstanceDomainService workflowInstanceDomainService;
     private final ExpressionLanguage expressionLanguage;
 
     @Inject
     public WorkflowInstanceApplication(WorkflowRepository workflowRepository,
-                                       WorkflowInstanceRepository workflowInstanceRepository,
+                                       WorkflowInstanceRepositoryImpl workflowInstanceRepository,
                                        WorkflowInstanceDomainService workflowInstanceDomainService,
                                        ExpressionLanguage expressionLanguage) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
         this.expressionLanguage = expressionLanguage;
+    }
+
+    public PageInfo<WorkflowInstance> findAllPage(int pageNum, int pageSize) {
+        return this.workflowInstanceRepository.findAllPage(pageNum, pageSize);
     }
 
     // 创建并启动流程

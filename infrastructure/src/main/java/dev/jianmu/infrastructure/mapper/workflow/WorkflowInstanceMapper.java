@@ -69,4 +69,14 @@ public interface WorkflowInstanceMapper {
             @Param("pageNum") int pageNum,
             @Param("pageSize") int pageSize
     );
+
+    @Select("select * from workflow_instance")
+    @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    List<WorkflowInstance> findAllPage();
 }

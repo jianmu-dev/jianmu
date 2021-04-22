@@ -1,5 +1,10 @@
 package dev.jianmu.api.controller;
 
+import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.mapper.WorkflowInstanceMapper;
+import dev.jianmu.api.vo.PageUtils;
+import dev.jianmu.api.vo.WorkflowInstanceVo;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +29,16 @@ public class WorkflowInstanceController {
     @Inject
     public WorkflowInstanceController(WorkflowInstanceApplication instanceApplication) {
         this.instanceApplication = instanceApplication;
+    }
+
+    @GetMapping
+    public PageInfo<WorkflowInstanceVo> findAll(PageDto pageDto) {
+        var page = this.instanceApplication.findAllPage(pageDto.getPageNum(), pageDto.getPageSize());
+        var instances = page.getList();
+        var newInstances = WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
+        PageInfo<WorkflowInstanceVo> newPage = PageUtils.PageInfo2PageInfoVo(page);
+        newPage.setList(newInstances);
+        return newPage;
     }
 
     @PutMapping("/{instanceId}/{nodeRef}")

@@ -1,7 +1,10 @@
 package dev.jianmu.infrastructure.mybatis.workflow;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowInstanceMapper;
+import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -77,5 +80,10 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     @Override
     public List<WorkflowInstance> findAll(int pageNum, int pageSize) {
         return this.workflowInstanceMapper.findAll(pageNum, pageSize);
+    }
+
+    public PageInfo<WorkflowInstance> findAllPage(int pageNum, int pageSize) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(this.workflowInstanceMapper::findAllPage);
     }
 }
