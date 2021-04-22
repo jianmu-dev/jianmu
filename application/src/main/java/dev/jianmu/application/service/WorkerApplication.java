@@ -113,7 +113,9 @@ public class WorkerApplication {
         var references = this.referenceRepository
                 .findByContextIds(
                         Set.of(
+                                // 使用TriggerId + AsyncTaskKey为参数引用 ContextId
                                 taskInstance.getTriggerId() + taskInstance.getAsyncTaskKey(),
+                                // 使用BusinessId(WorkflowInstanceId) + AsyncTaskKey为参数引用 ContextId
                                 taskInstance.getBusinessId() + taskInstance.getAsyncTaskKey(),
                                 taskInstance.getDefKey()
                         )
