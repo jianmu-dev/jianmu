@@ -6,6 +6,10 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
+import dev.jianmu.version.aggregate.TaskDefinition;
+import dev.jianmu.version.aggregate.TaskDefinitionVersion;
+import dev.jianmu.version.repository.TaskDefinitionRepository;
+import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @class: TaskInstanceApplication
@@ -27,16 +32,34 @@ public class TaskInstanceApplication {
     private final TaskInstanceRepository taskInstanceRepository;
     private final DefinitionRepository definitionRepository;
     private final InstanceDomainService instanceDomainService;
+    private final TaskDefinitionRepository taskDefinitionRepository;
+    private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
 
     @Inject
     public TaskInstanceApplication(
             TaskInstanceRepository taskInstanceRepository,
             DefinitionRepository definitionRepository,
-            InstanceDomainService instanceDomainService
+            InstanceDomainService instanceDomainService,
+            TaskDefinitionRepository taskDefinitionRepository,
+            TaskDefinitionVersionRepository taskDefinitionVersionRepository
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.definitionRepository = definitionRepository;
         this.instanceDomainService = instanceDomainService;
+        this.taskDefinitionRepository = taskDefinitionRepository;
+        this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
+    }
+
+    public List<TaskInstance> findByBusinessId(String businessId) {
+        return this.taskInstanceRepository.findByBusinessId(businessId);
+    }
+
+    public Optional<TaskDefinitionVersion> findByDefKey(String defKey) {
+        return this.taskDefinitionVersionRepository.findByDefinitionKey(defKey);
+    }
+
+    public Optional<TaskDefinition> findByRef(String ref) {
+        return this.taskDefinitionRepository.findByRef(ref);
     }
 
     @Transactional
