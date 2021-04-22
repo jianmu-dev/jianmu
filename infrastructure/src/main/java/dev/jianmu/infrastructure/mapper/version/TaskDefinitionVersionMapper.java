@@ -17,7 +17,7 @@ public interface TaskDefinitionVersionMapper {
             "values(#{taskDefinitionId}, #{name}, #{taskDefinitionRef}, #{definitionKey}, #{description})")
     void add(TaskDefinitionVersion taskDefinitionVersion);
 
-    @Delete("delete from task_definition_version where task_definition_ref = #{taskDefinitionRef}")
+    @Delete("delete from task_definition_version where definition_key = #{definitionKey}")
     void delete(TaskDefinitionVersion taskDefinitionVersion);
 
     @Update("update task_definition_version set description = #{description} " +
@@ -30,11 +30,11 @@ public interface TaskDefinitionVersionMapper {
     @Result(column = "definition_key", property = "definitionKey")
     List<TaskDefinitionVersion> findByTaskDefinitionRef(String taskDefinitionRef);
 
-    @Select("select * from task_definition_version where task_definition_id = #{taskDefinitionId} and name = #{name}")
+    @Select("select * from task_definition_version where task_definition_ref = #{taskDefinitionRef} and name = #{name}")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
-    Optional<TaskDefinitionVersion> findByTaskDefinitionRefAndName(String taskDefinitionRef, String name);
+    Optional<TaskDefinitionVersion> findByTaskDefinitionRefAndName(@Param("taskDefinitionRef") String taskDefinitionRef, @Param("name") String name);
 
     @Select("select * from task_definition_version where definition_key = #{key}")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
