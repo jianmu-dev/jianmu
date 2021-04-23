@@ -6,6 +6,7 @@ import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.dsl.aggregate.DslReference;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,12 @@ public class DslController {
 
     public DslController(DslApplication dslApplication) {
         this.dslApplication = dslApplication;
+    }
+
+    @PostMapping("/trigger/{dslId}")
+    @Operation(summary = "DSL触发接口", description = "触发DSL启动")
+    public void trigger(@Parameter(description = "触发器ID") @PathVariable String dslId) {
+        this.dslApplication.trigger(dslId);
     }
 
     @PutMapping("/{dslId}")

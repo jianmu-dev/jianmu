@@ -21,6 +21,7 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +51,7 @@ public class DslApplication {
     private final DslReferenceRepositoryImpl dslReferenceRepository;
     private final WorkflowRepository workflowRepository;
     private final ObjectMapper mapper;
+    private final ApplicationEventPublisher publisher;
 
     public DslApplication(
             DefinitionRepository definitionRepository,
@@ -58,7 +60,8 @@ public class DslApplication {
             ParameterRepository parameterRepository,
             ReferenceRepository referenceRepository,
             DslReferenceRepositoryImpl dslReferenceRepository,
-            WorkflowRepository workflowRepository
+            WorkflowRepository workflowRepository,
+            ApplicationEventPublisher publisher
     ) {
         this.definitionRepository = definitionRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
@@ -67,8 +70,123 @@ public class DslApplication {
         this.referenceRepository = referenceRepository;
         this.dslReferenceRepository = dslReferenceRepository;
         this.workflowRepository = workflowRepository;
+        this.publisher = publisher;
         this.mapper = new ObjectMapper(new YAMLFactory());
         mapper.findAndRegisterModules();
+    }
+
+    public void trigger(String dslId) {
+        var dslRef = this.dslReferenceRepository.findById(dslId)
+                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
+        publisher.publishEvent(dslRef);
+    }
+
+    @Transactional
+    public Workflow importDsl(String dslUrl) {
+        var dslFile = new File(dslUrl);
+        String dslText;
+        try {
+            dslText = FileUtils.readFileToString(dslFile, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.error("DSL Error: ", e);
+            throw new RuntimeException("无法读取DSL");
+        }
+        // 解析DSL
+        var dsl = this.parseDsl(dslText);
+        var flow = new Flow(dsl.getWorkflow());
+        // 创建节点
+        var nodes = this.createNodes(flow.getNodes());
+        // 创建关联
+        var dslRef = DslReference.Builder.aReference()
+                .dslUrl("test-dsl.yaml")
+                .workflowName(flow.getName())
+                .workflowRef(flow.getRef())
+                .dslText(dslText)
+                .steps(nodes.size() - 2)
+                .lastModifiedBy("admin")
+                .build();
+        // 返回任务定义输入参数列表
+        var parameters = this.findDefinitionParameters(flow.getNodes());
+        var param = flow.getParams(dsl.getParam());
+        // 创建参数Map
+        var ps = this.createParameters(param, parameters);
+        // 创建参数引用
+        var refs = this.createRefs(ps, dslRef.getId() + dslRef.getWorkflowVersion());
+        // 创建流程
+        var workflow = Workflow.Builder.aWorkflow()
+                .name(flow.getName())
+                .ref(flow.getRef())
+                .description(flow.getDescription())
+                .version(dslRef.getWorkflowVersion())
+                .nodes(nodes)
+                .build();
+
+        // 保存
+        this.dslReferenceRepository.add(dslRef);
+        this.workflowRepository.add(workflow);
+        this.parameterRepository.addAll(new ArrayList<>(ps.values()));
+        this.referenceRepository.addAll(refs);
+
+        return workflow;
+    }
+
+    @Transactional
+    public Workflow syncDsl(String dslId) {
+        DslReference dslReference = this.dslReferenceRepository.findById(dslId)
+                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
+        var dslFile = new File(dslReference.getDslUrl());
+        String dslText;
+        try {
+            dslText = FileUtils.readFileToString(dslFile, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.error("DSL Error: ", e);
+            throw new RuntimeException("无法读取DSL");
+        }
+        // 解析DSL
+        var dsl = this.parseDsl(dslText);
+        var flow = new Flow(dsl.getWorkflow());
+        // 创建节点
+        var nodes = this.createNodes(flow.getNodes());
+        dslReference.setDslText(dslText);
+        dslReference.setLastModifiedBy("admin");
+        dslReference.setSteps(nodes.size() - 2);
+        dslReference.setWorkflowName(flow.getName());
+        dslReference.setLastModifiedTime();
+        dslReference.setWorkflowVersion();
+        // 创建流程
+        var workflow = Workflow.Builder.aWorkflow()
+                .name(flow.getName())
+                .ref(flow.getRef())
+                .description(flow.getDescription())
+                .version(dslReference.getWorkflowVersion())
+                .nodes(nodes)
+                .build();
+        // 返回任务定义输入参数列表
+        var parameters = this.findDefinitionParameters(flow.getNodes());
+        var param = flow.getParams(dsl.getParam());
+        // 创建参数Map
+        var ps = this.createParameters(param, parameters);
+        // 创建参数引用
+        var refs = this.createRefs(ps, dslReference.getId() + dslReference.getWorkflowVersion());
+
+        // 保存
+        this.dslReferenceRepository.updateByWorkflowRef(dslReference);
+        this.workflowRepository.add(workflow);
+        this.parameterRepository.addAll(new ArrayList<>(ps.values()));
+        this.referenceRepository.addAll(refs);
+
+        return workflow;
+    }
+
+    public void deleteById(String id) {
+        DslReference dslReference = this.dslReferenceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
+        this.dslReferenceRepository.deleteByWorkflowRef(dslReference.getWorkflowRef());
+        this.workflowRepository.deleteByRef(dslReference.getWorkflowRef());
+    }
+
+    public PageInfo<DslReference> findAll(int pageNum, int pageSize) {
+        return this.dslReferenceRepository.findAll(pageNum, pageSize);
     }
 
     private DslModel parseDsl(String dslText) {
@@ -95,8 +213,8 @@ public class DslApplication {
                 .orElseThrow(() -> new RuntimeException("未找到任务定义"));
         return AsyncTask.Builder.anAsyncTask()
                 .name(taskDefinition.getName())
-                .ref(definition.getKey())
-                .key(nodeName)
+                .ref(nodeName)
+                .type(definition.getKey())
                 .description(taskDefinitionVersion.getDescription())
                 .build();
     }
@@ -120,12 +238,14 @@ public class DslApplication {
                 Map<Boolean, String> targetMap = new HashMap<>();
                 targetMap.put(true, cases.get("true"));
                 targetMap.put(false, cases.get("false"));
+
                 var condition = Condition.Builder.aCondition()
                         .name(node.getName())
                         .ref(node.getName())
                         .expression(node.getExpression())
                         .targetMap(targetMap)
                         .build();
+                condition.setTargets(Set.of(cases.get("true"), cases.get("false")));
                 symbolTable.put(node.getName(), condition);
                 return;
             }
@@ -190,125 +310,13 @@ public class DslApplication {
         return params;
     }
 
-    @Transactional
-    public Workflow importDsl(String dslUrl) {
-        var dslFile = new File(dslUrl);
-        String dslText;
-        try {
-            dslText = FileUtils.readFileToString(dslFile, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.error("DSL Error: ", e);
-            throw new RuntimeException("无法读取DSL");
-        }
-        // 解析DSL
-        var dsl = this.parseDsl(dslText);
-        var flow = new Flow(dsl.getWorkflow());
-        // 创建节点
-        var nodes = this.createNodes(flow.getNodes());
-        // 创建关联
-        var dslRef = DslReference.Builder.aReference()
-                .dslUrl("test-dsl.yaml")
-                .workflowName(flow.getName())
-                .workflowRef(flow.getRef())
-                .dslText(dslText)
-                .steps(nodes.size() - 2)
-                .lastModifiedBy("admin")
-                .build();
-        // 创建流程
-        var workflow = Workflow.Builder.aWorkflow()
-                .name(flow.getName())
-                .ref(flow.getRef())
-                .description(flow.getDescription())
-                .version(dslRef.getWorkflowVersion())
-                .nodes(nodes)
-                .build();
-        // 返回任务定义输入参数列表
-        var parameters = this.findDefinitionParameters(flow.getNodes());
-        var param = flow.getParams(dsl.getParam());
-        // 创建参数Map
-        var ps = this.createParameters(param, parameters);
-        // 创建参数引用
-        var refs = ps.entrySet().stream().map(entry ->
+    private List<Reference> createRefs(Map<DslParameter, Parameter> ps, String contextId) {
+        return ps.entrySet().stream().map(entry ->
                 Reference.Builder.aReference()
-                        .contextId(dslRef.getId() + entry.getKey().getNodeName())
+                        .contextId(contextId + entry.getKey().getNodeName())
                         .parameterId(entry.getValue().getId())
                         .linkedParameterId(entry.getKey().getLinkedParameterId()).build()
         ).collect(Collectors.toList());
-
-        // 保存
-        this.dslReferenceRepository.add(dslRef);
-        this.workflowRepository.add(workflow);
-        this.parameterRepository.addAll(new ArrayList<>(ps.values()));
-        this.referenceRepository.addAll(refs);
-
-        return workflow;
-    }
-
-    public Workflow syncDsl(String dslId) {
-        DslReference dslReference = this.dslReferenceRepository.findById(dslId)
-                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
-        var dslFile = new File(dslReference.getDslUrl());
-        String dslText;
-        try {
-            dslText = FileUtils.readFileToString(dslFile, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.error("DSL Error: ", e);
-            throw new RuntimeException("无法读取DSL");
-        }
-        // 解析DSL
-        var dsl = this.parseDsl(dslText);
-        var flow = new Flow(dsl.getWorkflow());
-        // 创建节点
-        var nodes = this.createNodes(flow.getNodes());
-        dslReference.setDslText(dslText);
-        dslReference.setLastModifiedBy("admin");
-        dslReference.setSteps(nodes.size() - 2);
-        dslReference.setWorkflowName(flow.getName());
-        dslReference.setLastModifiedTime();
-        dslReference.setWorkflowVersion();
-        // 创建流程
-        var workflow = Workflow.Builder.aWorkflow()
-                .name(flow.getName())
-                .ref(flow.getRef())
-                .description(flow.getDescription())
-                .version(dslReference.getWorkflowVersion())
-                .nodes(nodes)
-                .build();
-        // 返回任务定义输入参数列表
-        var parameters = this.findDefinitionParameters(flow.getNodes());
-        var param = flow.getParams(dsl.getParam());
-        // 创建参数Map
-        var ps = this.createParameters(param, parameters);
-        // 创建参数引用
-        var refs = ps.entrySet().stream().map(entry ->
-                Reference.Builder.aReference()
-                        .contextId(dslReference.getId() + entry.getKey().getNodeName())
-                        .parameterId(entry.getValue().getId())
-                        .linkedParameterId(entry.getKey().getLinkedParameterId()).build()
-        ).collect(Collectors.toList());
-
-        // 保存
-        this.dslReferenceRepository.updateByWorkflowRef(dslReference);
-        this.workflowRepository.add(workflow);
-        this.parameterRepository.addAll(new ArrayList<>(ps.values()));
-        this.referenceRepository.addAll(refs);
-
-        return workflow;
-    }
-
-    public void deleteById(String id) {
-        DslReference dslReference = this.dslReferenceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
-        this.dslReferenceRepository.deleteByWorkflowRef(dslReference.getWorkflowRef());
-        this.workflowRepository.deleteByRef(dslReference.getWorkflowRef());
-    }
-
-    public Optional<DslReference> findById(String dslId) {
-        return this.dslReferenceRepository.findById(dslId);
-    }
-
-    public PageInfo<DslReference> findAll(int pageNum, int pageSize) {
-        return this.dslReferenceRepository.findAll(pageNum, pageSize);
     }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
