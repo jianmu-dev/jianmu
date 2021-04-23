@@ -44,8 +44,8 @@ public class WorkflowInstanceApplication {
         this.expressionLanguage = expressionLanguage;
     }
 
-    public PageInfo<WorkflowInstance> findAllPage(int pageNum, int pageSize) {
-        return this.workflowInstanceRepository.findAllPage(pageNum, pageSize);
+    public PageInfo<WorkflowInstance> findAllPage(ProcessStatus status, int pageNum, int pageSize) {
+        return this.workflowInstanceRepository.findAllPage(status, pageNum, pageSize);
     }
 
     // 创建并启动流程

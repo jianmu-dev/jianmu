@@ -70,7 +70,7 @@ public interface WorkflowInstanceMapper {
             @Param("pageSize") int pageSize
     );
 
-    @Select("select * from workflow_instance")
+    @Select("select * from workflow_instance where status = #{status}")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -78,5 +78,5 @@ public interface WorkflowInstanceMapper {
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findAllPage();
+    List<WorkflowInstance> findAllPage(ProcessStatus status);
 }

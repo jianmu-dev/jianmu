@@ -6,6 +6,7 @@ import dev.jianmu.api.mapper.WorkflowInstanceMapper;
 import dev.jianmu.api.vo.PageUtils;
 import dev.jianmu.api.vo.WorkflowInstanceVo;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,8 +33,8 @@ public class WorkflowInstanceController {
     }
 
     @GetMapping
-    public PageInfo<WorkflowInstanceVo> findAll(PageDto pageDto) {
-        var page = this.instanceApplication.findAllPage(pageDto.getPageNum(), pageDto.getPageSize());
+    public PageInfo<WorkflowInstanceVo> findAll(ProcessStatus status, PageDto pageDto) {
+        var page = this.instanceApplication.findAllPage(status, pageDto.getPageNum(), pageDto.getPageSize());
         var instances = page.getList();
         var newInstances = WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
         PageInfo<WorkflowInstanceVo> newPage = PageUtils.PageInfo2PageInfoVo(page);
