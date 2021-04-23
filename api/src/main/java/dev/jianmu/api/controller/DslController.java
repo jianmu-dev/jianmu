@@ -28,14 +28,14 @@ public class DslController {
     @PutMapping("/{dslId}")
     @Operation(summary = "同步DSL定义", description = "同步DSL定义")
     public Workflow sync(@PathVariable String dslId) {
-        var dslRef = this.dslApplication.findById(dslId);
-        return this.dslApplication.importDsl("", true);
+        return this.dslApplication.syncDsl(dslId);
     }
 
     @PostMapping("/{dslUrl}")
     @Operation(summary = "导入DSL定义", description = "导入DSL定义")
     public Workflow importDsl(@PathVariable String dslUrl) {
-        return this.dslApplication.importDsl(dslUrl, false);
+        var tempDslUrl = "test-dsl.yaml";
+        return this.dslApplication.importDsl(tempDslUrl);
     }
 
     @DeleteMapping("/{dslId}")

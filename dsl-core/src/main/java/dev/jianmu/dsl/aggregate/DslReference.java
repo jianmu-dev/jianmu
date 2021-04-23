@@ -27,7 +27,31 @@ public class DslReference {
     // 最后修改者
     private String lastModifiedBy;
     // 最后修改时间
-    private final LocalDateTime lastModifiedTime = LocalDateTime.now();
+    private LocalDateTime lastModifiedTime;
+
+    public void setWorkflowName(String workflowName) {
+        this.workflowName = workflowName;
+    }
+
+    public void setWorkflowVersion() {
+        this.workflowVersion = UUID.randomUUID().toString().replace("-", "");
+    }
+
+    public void setSteps(int steps) {
+        this.steps = steps;
+    }
+
+    public void setDslText(String dslText) {
+        this.dslText = dslText;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public void setLastModifiedTime() {
+        this.lastModifiedTime = LocalDateTime.now();
+    }
 
     public String getId() {
         return id;
@@ -126,6 +150,7 @@ public class DslReference {
             dslReference.workflowRef = this.workflowRef;
             dslReference.dslText = this.dslText;
             dslReference.lastModifiedBy = this.lastModifiedBy;
+            dslReference.lastModifiedTime = LocalDateTime.now();
             return dslReference;
         }
     }
