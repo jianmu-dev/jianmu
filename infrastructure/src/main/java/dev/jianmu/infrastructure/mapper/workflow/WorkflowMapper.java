@@ -33,4 +33,7 @@ public interface WorkflowMapper {
 
     @Delete("delete from workflow where ref_version = #{refVersion}")
     void deleteByRefAndVersion(String refVersion);
+
+    @Delete("delete from workflow where ref = #{ref}")
+    void deleteByRef(String ref);
 }

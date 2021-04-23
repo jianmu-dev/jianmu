@@ -2,23 +2,36 @@ package dev.jianmu.application.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import dev.jianmu.dsl.DslModel;
-import dev.jianmu.dsl.Flow;
+import com.github.pagehelper.PageInfo;
+import dev.jianmu.dsl.aggregate.DslModel;
+import dev.jianmu.dsl.aggregate.DslParameter;
+import dev.jianmu.dsl.aggregate.DslReference;
+import dev.jianmu.dsl.aggregate.Flow;
+import dev.jianmu.infrastructure.mybatis.dsl.DslReferenceRepositoryImpl;
+import dev.jianmu.parameter.aggregate.Parameter;
+import dev.jianmu.parameter.aggregate.Reference;
+import dev.jianmu.parameter.repository.ParameterRepository;
+import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.version.repository.TaskDefinitionRepository;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.definition.*;
+import dev.jianmu.workflow.repository.WorkflowRepository;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @class: DslApplication
@@ -32,23 +45,36 @@ public class DslApplication {
     private final DefinitionRepository definitionRepository;
     private final TaskDefinitionRepository taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
+    private final ParameterRepository parameterRepository;
+    private final ReferenceRepository referenceRepository;
+    private final DslReferenceRepositoryImpl dslReferenceRepository;
+    private final WorkflowRepository workflowRepository;
+    private final ObjectMapper mapper;
 
     public DslApplication(
             DefinitionRepository definitionRepository,
             TaskDefinitionRepository taskDefinitionRepository,
-            TaskDefinitionVersionRepository taskDefinitionVersionRepository
+            TaskDefinitionVersionRepository taskDefinitionVersionRepository,
+            ParameterRepository parameterRepository,
+            ReferenceRepository referenceRepository,
+            DslReferenceRepositoryImpl dslReferenceRepository,
+            WorkflowRepository workflowRepository
     ) {
         this.definitionRepository = definitionRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
+        this.parameterRepository = parameterRepository;
+        this.referenceRepository = referenceRepository;
+        this.dslReferenceRepository = dslReferenceRepository;
+        this.workflowRepository = workflowRepository;
+        this.mapper = new ObjectMapper(new YAMLFactory());
+        mapper.findAndRegisterModules();
     }
 
-    private DslModel parseDsl() {
-        var mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
+    private DslModel parseDsl(File dslFile) {
         DslModel dsl = null;
         try {
-            dsl = mapper.readValue(new File("test-dsl.yaml"), DslModel.class);
+            dsl = mapper.readValue(dslFile, DslModel.class);
         } catch (IOException e) {
             logger.error("Got error: ", e);
             throw new RuntimeException(e);
@@ -75,7 +101,7 @@ public class DslApplication {
                 .build();
     }
 
-    private Set<Node> createNodes(List<dev.jianmu.dsl.Node> nodes) {
+    private Set<Node> createNodes(List<dev.jianmu.dsl.aggregate.Node> nodes) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
         nodes.forEach(node -> {
@@ -91,11 +117,14 @@ public class DslApplication {
             }
             if (node.getType().equals("condition")) {
                 var cases = node.getCases();
+                Map<Boolean, String> targetMap = new HashMap<>();
+                targetMap.put(true, cases.get("true"));
+                targetMap.put(false, cases.get("false"));
                 var condition = Condition.Builder.aCondition()
                         .name(node.getName())
                         .ref(node.getName())
                         .expression(node.getExpression())
-                        .targetMap(Map.of(true, cases.get("true"), false, cases.get("false")))
+                        .targetMap(targetMap)
                         .build();
                 symbolTable.put(node.getName(), condition);
                 return;
@@ -125,42 +154,115 @@ public class DslApplication {
         return new HashSet<>(symbolTable.values());
     }
 
-    private Set<TaskParameter> findDefinitions(List<dev.jianmu.dsl.Node> nodes) {
-        Set<TaskParameter> parameters = new HashSet<>();
+    private Map<String, Set<TaskParameter>> findDefinitionParameters(List<dev.jianmu.dsl.aggregate.Node> nodes) {
+        Map<String, Set<TaskParameter>> parameters = new HashMap<>();
         nodes.stream()
                 .filter(node -> !node.getType().equals("start"))
                 .filter(node -> !node.getType().equals("end"))
                 .filter(node -> !node.getType().equals("condition"))
-                .filter(distinctByKey(dev.jianmu.dsl.Node::getType))
+                .filter(distinctByKey(dev.jianmu.dsl.aggregate.Node::getType))
                 .forEach(node -> {
-                    var ps = this.definitionRepository
+                    var definition = this.definitionRepository
                             .findByKey(node.getType())
-                            .orElseThrow(() -> new RuntimeException("未找到任务定义"))
-                            .getInputParameters();
-                    parameters.addAll(ps);
+                            .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+                    parameters.put(definition.getKey(), definition.getInputParameters());
                 });
         return parameters;
     }
 
-    public Workflow importDsl() {
-        var dsl = this.parseDsl();
+    private Map<DslParameter, Parameter> createParameters(Set<DslParameter> dslParameters, Map<String, Set<TaskParameter>> defParameterMap) {
+        Map<DslParameter, Parameter> params = new HashMap<>();
+        dslParameters.forEach(dslParameter -> {
+            var parameters = defParameterMap.get(dslParameter.getDefinitionKey());
+            if (null != parameters) {
+                var r = parameters.stream()
+                        .filter(p -> p.getRef().equals(dslParameter.getName()))
+                        .findFirst();
+                r.ifPresent(taskParameter -> {
+                            var p = Parameter.Type.valueOf(taskParameter.getType())
+                                    .newParameter(dslParameter.getValue());
+                            dslParameter.setLinkedParameterId(taskParameter.getParameterId());
+                            params.put(dslParameter, p);
+                        }
+                );
+            }
+        });
+        return params;
+    }
+
+    @Transactional
+    public Workflow importDsl(String dslUrl, Boolean update) {
+        var dslFile = new File("test-dsl.yaml");
+        // 解析DSL
+        var dsl = this.parseDsl(dslFile);
         var flow = new Flow(dsl.getWorkflow());
-        var parameters = this.findDefinitions(flow.getNodes());
-        logger.info("size is: {}", parameters.size());
         // 创建节点
         var nodes = this.createNodes(flow.getNodes());
-        // 覆盖全局参数
-        var param = flow.getParams(dsl.getParam());
-
+        // 创建关联
+        String dslText;
+        try {
+            dslText = FileUtils.readFileToString(dslFile, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.error("DSL Error: ", e);
+            throw new RuntimeException("无法读取DSL");
+        }
+        var dslRef = this.dslReferenceRepository.findByWorkflowRef(flow.getRef()).orElse(
+                DslReference.Builder.aReference()
+                        .dslUrl("test-dsl.yaml")
+                        .workflowName(flow.getName())
+                        .workflowRef(flow.getRef())
+                        .dslText(dslText)
+                        .steps(nodes.size() - 2)
+                        .lastModifiedBy("admin")
+                        .build()
+        );
         // 创建流程
-        return Workflow.Builder.aWorkflow()
+        var workflow = Workflow.Builder.aWorkflow()
                 .name(flow.getName())
                 .ref(flow.getRef())
                 .description(flow.getDescription())
-                // TODO 处理版本号
-                .version("1.0")
+                .version(dslRef.getWorkflowVersion())
                 .nodes(nodes)
                 .build();
+        // 返回任务定义输入参数列表
+        var parameters = this.findDefinitionParameters(flow.getNodes());
+        var param = flow.getParams(dsl.getParam());
+        // 创建参数Map
+        var ps = this.createParameters(param, parameters);
+        // 创建参数引用
+        var refs = ps.entrySet().stream().map(entry ->
+                Reference.Builder.aReference()
+                        .contextId(dslRef.getId() + entry.getKey().getNodeName())
+                        .parameterId(entry.getValue().getId())
+                        .linkedParameterId(entry.getKey().getLinkedParameterId()).build()
+        ).collect(Collectors.toList());
+
+        // 保存
+        if (update) {
+            this.dslReferenceRepository.updateByWorkflowRef(dslRef);
+        } else {
+            this.dslReferenceRepository.add(dslRef);
+        }
+        this.workflowRepository.add(workflow);
+        this.parameterRepository.addAll(new ArrayList<>(ps.values()));
+        this.referenceRepository.addAll(refs);
+
+        return workflow;
+    }
+
+    public void deleteById(String id) {
+        DslReference dslReference = this.dslReferenceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
+        this.dslReferenceRepository.deleteByWorkflowRef(dslReference.getWorkflowRef());
+        this.workflowRepository.deleteByRef(dslReference.getWorkflowRef());
+    }
+
+    public Optional<DslReference> findById(String dslId) {
+        return this.dslReferenceRepository.findById(dslId);
+    }
+
+    public PageInfo<DslReference> findAll(int pageNum, int pageSize) {
+        return this.dslReferenceRepository.findAll(pageNum, pageSize);
     }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {

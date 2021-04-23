@@ -48,4 +48,9 @@ public class WorkflowRepositoryImpl implements WorkflowRepository {
     public void deleteByRefAndVersion(String ref, String version) {
         this.workflowMapper.deleteByRefAndVersion(ref + version);
     }
+
+    @Override
+    public void deleteByRef(String ref) {
+        this.workflowMapper.deleteByRef(ref);
+    }
 }

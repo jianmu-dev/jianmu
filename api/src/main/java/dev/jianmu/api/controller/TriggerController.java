@@ -19,7 +19,7 @@ import javax.inject.Inject;
  **/
 @RestController
 @RequestMapping("trigger")
-@Tag(name = "触发器接口", description = "提供触发器管理与触发API")
+@Tag(name = "触发器接口", description = "提供触发API")
 public class TriggerController {
     private final TriggerApplication triggerApplication;
 

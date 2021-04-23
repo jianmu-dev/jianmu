@@ -1,9 +1,6 @@
-package dev.jianmu.dsl;
+package dev.jianmu.dsl.aggregate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,25 +27,43 @@ public class Flow {
         });
     }
 
-    public Map<String, String> getParams(Map<String, String> paramMap) {
-        Map<String, String> newParamMap = new HashMap<>();
+    public Set<DslParameter> getParams(Map<String, String> paramMap) {
+        Set<DslParameter> parameters = new HashSet<>();
         nodes.forEach(node -> node.getParam().forEach((key, val) -> {
                     var valName = findVariable(val);
                     var secretName = findSecret(val);
                     if (null != valName) {
                         if (null != paramMap.get(valName)) {
-                            newParamMap.put(node.getName() + "_" + key, paramMap.get(valName));
+                            var p = DslParameter.Builder.aDslParameter()
+                                    .nodeName(node.getName())
+                                    .definitionKey(node.getType())
+                                    .name(key)
+                                    .value(paramMap.get(valName))
+                                    .build();
+                            parameters.add(p);
                         }
                         return;
                     }
                     if (null != secretName) {
-                        newParamMap.put(node.getName() + "_" + key, secretName);
+                        var p = DslParameter.Builder.aDslParameter()
+                                .nodeName(node.getName())
+                                .definitionKey(node.getType())
+                                .name(key)
+                                .value(secretName)
+                                .build();
+                        parameters.add(p);
                         return;
                     }
-                    newParamMap.put(node.getName() + "_" + key, val);
+                    var p = DslParameter.Builder.aDslParameter()
+                            .nodeName(node.getName())
+                            .definitionKey(node.getType())
+                            .name(key)
+                            .value(val)
+                            .build();
+                    parameters.add(p);
                 })
         );
-        return newParamMap;
+        return parameters;
     }
 
     private String findVariable(String paramValue) {

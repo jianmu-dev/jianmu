@@ -1,4 +1,4 @@
-package dev.jianmu.dsl;
+package dev.jianmu.dsl.aggregate;
 
 import java.util.List;
 import java.util.Map;

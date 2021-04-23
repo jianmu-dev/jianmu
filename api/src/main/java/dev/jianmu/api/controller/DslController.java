@@ -1,11 +1,13 @@
 package dev.jianmu.api.controller;
 
+import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.application.service.DslApplication;
+import dev.jianmu.dsl.aggregate.DslReference;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @class: DslController
@@ -23,8 +25,28 @@ public class DslController {
         this.dslApplication = dslApplication;
     }
 
+    @PutMapping("/{dslId}")
+    @Operation(summary = "同步DSL定义", description = "同步DSL定义")
+    public Workflow sync(@PathVariable String dslId) {
+        var dslRef = this.dslApplication.findById(dslId);
+        return this.dslApplication.importDsl("", true);
+    }
+
+    @PostMapping("/{dslUrl}")
+    @Operation(summary = "导入DSL定义", description = "导入DSL定义")
+    public Workflow importDsl(@PathVariable String dslUrl) {
+        return this.dslApplication.importDsl(dslUrl, false);
+    }
+
+    @DeleteMapping("/{dslId}")
+    @Operation(summary = "删除DSL定义", description = "删除DSL定义")
+    public void deleteById(@PathVariable String dslId) {
+        this.dslApplication.deleteById(dslId);
+    }
+
     @GetMapping
-    public Workflow show() {
-        return this.dslApplication.importDsl();
+    @Operation(summary = "分页查询DSL列表", description = "分页查询DSL列表")
+    public PageInfo<DslReference> findAll(PageDto pageDto) {
+        return this.dslApplication.findAll(pageDto.getPageNum(), pageDto.getPageSize());
     }
 }
