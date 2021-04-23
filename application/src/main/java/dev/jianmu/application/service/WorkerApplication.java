@@ -10,7 +10,6 @@ import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.repository.KVPairRepository;
-import dev.jianmu.secret.repository.NamespaceRepository;
 import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Worker;
@@ -47,7 +46,6 @@ public class WorkerApplication {
     private final WorkerDomainService workerDomainService;
     private final ReferenceRepository referenceRepository;
     private final ReferenceDomainService referenceDomainService;
-    private final NamespaceRepository namespaceRepository;
     private final KVPairRepository kvPairRepository;
 
     @Inject
@@ -57,10 +55,10 @@ public class WorkerApplication {
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
             StorageService storageService,
-            DockerWorker dockerWorker, WorkerDomainService workerDomainService,
+            DockerWorker dockerWorker,
+            WorkerDomainService workerDomainService,
             ReferenceRepository referenceRepository,
             ReferenceDomainService referenceDomainService,
-            NamespaceRepository namespaceRepository,
             KVPairRepository kvPairRepository
     ) {
         this.workerRepository = workerRepository;
@@ -72,7 +70,6 @@ public class WorkerApplication {
         this.workerDomainService = workerDomainService;
         this.referenceRepository = referenceRepository;
         this.referenceDomainService = referenceDomainService;
-        this.namespaceRepository = namespaceRepository;
         this.kvPairRepository = kvPairRepository;
     }
 
@@ -124,11 +121,8 @@ public class WorkerApplication {
         var references = this.referenceRepository
                 .findByContextIds(
                         Set.of(
-                                // 使用TriggerId + AsyncTaskKey为参数引用 ContextId
-                                taskInstance.getTriggerId() + taskInstance.getAsyncTaskKey(),
-                                // 使用BusinessId(WorkflowInstanceId) + AsyncTaskKey为参数引用 ContextId
-                                taskInstance.getBusinessId() + taskInstance.getAsyncTaskKey(),
-                                taskInstance.getDefKey()
+                                // 使用TriggerId + AsyncTaskRef为参数引用 ContextId
+                                taskInstance.getTriggerId() + taskInstance.getAsyncTaskRef()
                         )
                 );
         references.forEach(reference -> logger.info("-------------reference parameterId--------: {}", reference.getParameterId()));

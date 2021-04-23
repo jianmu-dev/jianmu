@@ -63,18 +63,18 @@ public class TaskInstanceEventHandler {
 //        this.taskInstanceQueue.put(taskInstance);
         this.workerApplication.runTask(taskInstance);
         this.taskInstanceApplication.updateStatus(taskInstance.getId(), InstanceStatus.RUNNING);
-        this.workflowInstanceApplication.taskRun(taskInstance.getBusinessId(), taskInstance.getDefKey());
-        logger.info("Task instance id: {}  key: {} is running", taskInstance.getId(), taskInstance.getDefKey());
+        this.workflowInstanceApplication.taskRun(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
+        logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceSucceedEvent(TaskInstanceSucceedEvent event) {
         logger.info("get TaskInstanceSucceedEvent: {}", event);
-        this.workflowInstanceApplication.taskSucceed(event.getBusinessId(), event.getDefKey());
+        this.workflowInstanceApplication.taskSucceed(event.getBusinessId(), event.getAsyncTaskRef());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
-        this.workflowInstanceApplication.taskFail(event.getBusinessId(), event.getDefKey());
+        this.workflowInstanceApplication.taskFail(event.getBusinessId(), event.getAsyncTaskRef());
     }
 }

@@ -21,6 +21,8 @@ public abstract class BaseEvent implements DomainEvent {
     protected String taskInstanceId;
     // 任务定义唯一Key
     protected String defKey;
+    // 流程定义上下文中的AsyncTask唯一标识
+    protected String asyncTaskRef;
     // 外部业务ID, 必须唯一
     protected String businessId;
 
@@ -40,6 +42,10 @@ public abstract class BaseEvent implements DomainEvent {
 
     public String getDefKey() {
         return defKey;
+    }
+
+    public String getAsyncTaskRef() {
+        return asyncTaskRef;
     }
 
     public String getBusinessId() {
@@ -64,6 +70,7 @@ public abstract class BaseEvent implements DomainEvent {
                 ", name='" + name + '\'' +
                 ", taskInstanceId='" + taskInstanceId + '\'' +
                 ", defKey='" + defKey + '\'' +
+                ", asyncTaskRef='" + asyncTaskRef + '\'' +
                 ", businessId='" + businessId + '\'' +
                 '}';
     }
