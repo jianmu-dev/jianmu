@@ -2,7 +2,7 @@ package dev.jianmu.api.dto;
 
 /**
  * @class: AddGroup
- * @description: TODO
+ * @description: AddGroup
  * @author: Ethan Liu
  * @create: 2021-04-19 20:38
  **/
