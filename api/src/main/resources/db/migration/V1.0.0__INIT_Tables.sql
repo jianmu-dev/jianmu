@@ -1,3 +1,20 @@
+CREATE TABLE `jianmu_project`
+(
+    `id`                 varchar(45)  NOT NULL COMMENT 'ID',
+    `dsl_url`            varchar(150) NOT NULL COMMENT 'DSL文件地址',
+    `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
+    `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
+    `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
+    `steps`              int          NOT NULL COMMENT '步骤数量',
+    `dsl_text`           longtext     NOT NULL COMMENT 'DSL内容文本',
+    `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
+    `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目表';
+
 CREATE TABLE `workflow`
 (
     `ref_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '流程定义标识，主键',
