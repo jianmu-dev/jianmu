@@ -42,6 +42,14 @@ public class WorkflowInstanceController {
         return newPage;
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "流程实例详情", description = "流程实例详情")
+    public WorkflowInstanceVo findById(@PathVariable String id) {
+        var instance = this.instanceApplication.findById(id)
+                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+        return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVo(instance);
+    }
+
     @PutMapping("/{instanceId}/{nodeRef}")
     @Operation(summary = "流程启动", description = "流程启动")
     public WorkflowInstance start(

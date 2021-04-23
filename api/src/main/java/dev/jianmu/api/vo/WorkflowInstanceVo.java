@@ -22,7 +22,9 @@ import java.time.LocalDateTime;
 public class WorkflowInstanceVo {
     private String id;
     private String name;
+    private String workflowRef;
     private String workflowVersion;
+    private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ProcessStatus status;

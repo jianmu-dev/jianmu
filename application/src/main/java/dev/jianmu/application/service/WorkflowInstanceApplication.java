@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 /**
  * @program: workflow
@@ -42,6 +43,10 @@ public class WorkflowInstanceApplication {
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
         this.expressionLanguage = expressionLanguage;
+    }
+
+    public Optional<WorkflowInstance> findById(String id) {
+        return this.workflowInstanceRepository.findById(id);
     }
 
     public PageInfo<WorkflowInstance> findAllPage(ProcessStatus status, int pageNum, int pageSize) {

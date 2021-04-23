@@ -7,7 +7,9 @@ import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.secret.repository.KVPairRepository;
 import org.springframework.stereotype.Service;
 
+import java.awt.desktop.OpenFilesEvent;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @class: SecretApplication
@@ -40,6 +42,10 @@ public class SecretApplication {
 
     public void deleteKVPair(String namespaceName, String key) {
         this.kvPairRepository.delete(namespaceName, key);
+    }
+
+    public Optional<Namespace> findById(String name) {
+        return this.namespaceRepository.findByName(name);
     }
 
     public List<KVPair> findAll(String namespaceName) {

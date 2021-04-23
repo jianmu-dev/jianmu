@@ -14,7 +14,7 @@ CREATE TABLE `workflow`
 CREATE TABLE `workflow_instance`
 (
     `id`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '唯一ID主键',
-    `trigger_id`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '触发器ID',
+    `trigger_id`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '触发器ID',
     `name`             varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '显示名称',
     `description`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '描述',
     `run_mode`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '运行模式',
@@ -69,7 +69,7 @@ CREATE TABLE `task_instance`
     `id`          varchar(45) NOT NULL COMMENT '主键',
     `def_key`     varchar(45) NOT NULL COMMENT '任务定义唯一Key',
     `business_id` varchar(45) NOT NULL COMMENT '外部业务ID',
-    `trigger_id`  varchar(45) NOT NULL COMMENT '触发器ID',
+    `trigger_id`  varchar(255) NOT NULL COMMENT '触发器ID',
     `start_time`  datetime DEFAULT NULL COMMENT '开始时间',
     `end_time`    datetime DEFAULT NULL COMMENT '结束时间',
     `status`      varchar(45) NOT NULL COMMENT '任务运行状态',
@@ -104,7 +104,7 @@ CREATE TABLE `reference`
 (
     `context_id`          varchar(100) DEFAULT NULL,
     `linked_parameter_id` varchar(100) DEFAULT NULL COMMENT '被关联参数ID',
-    `parameter_id`        varchar(100) DEFAULT NULL COMMENT '参数ID',
+    `parameter_id`        varchar(100) DEFAULT NULL COMMENT '参数ID'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='参数引用表';
@@ -135,7 +135,7 @@ CREATE TABLE `trigger`
 
 CREATE TABLE `trigger_parameter`
 (
-    `trigger_id`  varchar(45) NOT NULL COMMENT '触发器ID',
+    `trigger_id`  varchar(255) NOT NULL COMMENT '触发器ID',
     `name`        varchar(45) NOT NULL COMMENT '显示名称',
     `ref`         varchar(45) NOT NULL COMMENT '唯一引用名称',
     `type`        varchar(45) NOT NULL COMMENT '类型',

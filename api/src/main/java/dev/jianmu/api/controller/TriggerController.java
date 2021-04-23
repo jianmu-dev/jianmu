@@ -29,7 +29,7 @@ public class TriggerController {
     }
 
     @PutMapping("/{triggerId}")
-    @Operation(summary = "触发接口", description = "触发启动")
+    @Operation(summary = "触发接口", description = "触发启动", hidden = true)
     public void trigger(@Parameter(description = "触发器ID") @PathVariable String triggerId) {
         this.triggerApplication.trigger(triggerId);
     }

@@ -28,6 +28,7 @@ public class TriggerApplication {
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
     private final TriggerDomainService triggerDomainService;
+    // TODO 错误方式，应用层服务不能互相调用
     private final WorkflowInstanceApplication workflowInstanceApplication;
 
     @Inject

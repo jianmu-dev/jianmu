@@ -35,7 +35,7 @@ public class SecretController {
 
     @PostMapping("/namespaces")
     @Operation(summary = "创建命名空间", description = "创建命名空间")
-    public void createNamespace(@Valid NamespaceDto namespaceDto) {
+    public void createNamespace(@RequestBody @Valid NamespaceDto namespaceDto) {
         var namespace = NamespaceDtoMapper.INSTANCE.toNamespace(namespaceDto);
         this.secretApplication.createNamespace(namespace);
     }
@@ -48,7 +48,7 @@ public class SecretController {
 
     @PostMapping("/namespaces/{name}")
     @Operation(summary = "新增键值对", description = "新增键值对")
-    public void createKVPair(@PathVariable String name, @Valid KVPairDto kvPairDto) {
+    public void createKVPair(@PathVariable String name, @RequestBody @Valid KVPairDto kvPairDto) {
         var kv = KVPairDtoMapper.INSTANCE.toKVPair(kvPairDto);
         kv.setNamespaceName(name);
         this.secretApplication.createKVPair(kv);
@@ -60,11 +60,17 @@ public class SecretController {
         this.secretApplication.deleteKVPair(name, key);
     }
 
-    @GetMapping("/namespaces/{name}")
+    @GetMapping("/namespaces/{name}/keys")
     @Operation(summary = "查询键值对列表", description = "查询键值对列表")
     public List<String> findAll(@PathVariable String name) {
         var kvs = this.secretApplication.findAll(name);
         return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
+    }
+
+    @GetMapping("/namespaces/{name}")
+    @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
+    public Namespace findByName(@PathVariable String name) {
+        return this.secretApplication.findById(name).orElseThrow(() -> new RuntimeException("未找到该命名空间"));
     }
 
     @GetMapping("/namespaces")
