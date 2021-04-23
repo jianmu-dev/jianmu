@@ -8,7 +8,7 @@ event:
 
 param:
   branch_name: dev
-  git_return: 200
+  git_site: gitee.com
 
 workflow:
   name: 测试流程1
@@ -19,19 +19,19 @@ workflow:
     targets:
       - Git_1
   Git_1:
-    type: git_0.1
+    type: git_clone0.4
     sources:
       - Start_1
     targets:
       - Build_1
     param:
-      git_user: ((git_account_a.user))
-      git_pass: ((git_account_a.pass))
-      git_key: ((git_key))
-      git_repo: https://github/testuser/testproject.git
-      branch_name: ${branch_name}
+      commit_branch: ${branch_name}
+      remote_url: https://github/testuser/testproject.git
+      netrc_machine: ${git_site}
+      netrc_username: ((gitee.user))
+      netrc_password: ((gitee.pass))
   Build_1:
-    type: maven_0.1
+    type: maven0.3
     sources:
       - Git_1
     targets:
@@ -42,12 +42,12 @@ workflow:
     type: condition
     sources:
       - Build_1
-    expression: ${Build_1.build_status} is True
+    expression: 1+1==2
     cases:
-      false: Sms_Notice_0.1
-      true: Weixin_Notice_0.1
+      false: Notice_1
+      true: Notice_2
   Notice_1:
-    type: Sms_Notice_0.1
+    type: maven11
     param:
       text: '"Build error, msg is: " + ${Build_1.build_error_message}'
     sources:
@@ -55,7 +55,7 @@ workflow:
     targets:
       - End_1
   Notice_2:
-    type: Weixin_Notice_0.1
+    type: maven11
     param:
       text: ${Build_1.build_info}
     sources:
@@ -65,5 +65,5 @@ workflow:
   End_1:
     type: end
     sources:
-      - Sms_Notice_0.1
-      - Weixin_Notice_0.1
+      - Notice_1
+      - Notice_2
