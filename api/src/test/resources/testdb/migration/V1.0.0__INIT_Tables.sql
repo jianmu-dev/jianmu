@@ -11,18 +11,18 @@ CREATE TABLE `workflow`
 
 CREATE TABLE `workflow_instance`
 (
-    `id`               varchar(45) NOT NULL COMMENT '唯一ID主键',
+    `id`               varchar(45)  NOT NULL COMMENT '唯一ID主键',
     `trigger_id`       varchar(255) NOT NULL COMMENT '触发器ID',
     `name`             varchar(255) DEFAULT NULL COMMENT '显示名称',
     `description`      varchar(255) DEFAULT NULL COMMENT '描述',
-    `run_mode`         varchar(45) NOT NULL COMMENT '运行模式',
-    `status`           varchar(45) NOT NULL COMMENT '运行状态',
-    `workflow_ref`     varchar(45) NOT NULL COMMENT '流程定义唯一引用名称',
-    `workflow_version` varchar(45) NOT NULL COMMENT '流程定义版本',
+    `run_mode`         varchar(45)  NOT NULL COMMENT '运行模式',
+    `status`           varchar(45)  NOT NULL COMMENT '运行状态',
+    `workflow_ref`     varchar(45)  NOT NULL COMMENT '流程定义唯一引用名称',
+    `workflow_version` varchar(45)  NOT NULL COMMENT '流程定义版本',
     `task_instances`   blob COMMENT '任务实例列表',
     `start_time`       datetime     DEFAULT NULL COMMENT '开始时间',
     `end_time`         datetime     DEFAULT NULL COMMENT '结束时间',
-    `_version`         int         NOT NULL COMMENT '乐观锁版本字段',
+    `_version`         int          NOT NULL COMMENT '乐观锁版本字段',
     PRIMARY KEY (`id`)
 );
 
@@ -55,13 +55,14 @@ CREATE TABLE `task_parameter`
 
 CREATE TABLE `task_instance`
 (
-    `id`          varchar(45) NOT NULL COMMENT '主键',
-    `def_key`     varchar(45) NOT NULL COMMENT '任务定义唯一Key',
-    `business_id` varchar(45) NOT NULL COMMENT '外部业务ID',
-    `trigger_id`  varchar(255) NOT NULL COMMENT '触发器ID',
-    `start_time`  datetime DEFAULT NULL COMMENT '开始时间',
-    `end_time`    datetime DEFAULT NULL COMMENT '结束时间',
-    `status`      varchar(45) NOT NULL COMMENT '任务运行状态',
+    `id`             varchar(45)  NOT NULL COMMENT '主键',
+    `def_key`        varchar(45)  NOT NULL COMMENT '任务定义唯一Key',
+    `async_task_ref` varchar(45)  NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
+    `business_id`    varchar(45)  NOT NULL COMMENT '外部业务ID',
+    `trigger_id`     varchar(255) NOT NULL COMMENT '触发器ID',
+    `start_time`     datetime DEFAULT NULL COMMENT '开始时间',
+    `end_time`       datetime DEFAULT NULL COMMENT '结束时间',
+    `status`         varchar(45)  NOT NULL COMMENT '任务运行状态',
     PRIMARY KEY (`id`)
 );
 
@@ -113,11 +114,11 @@ CREATE TABLE `trigger`
 CREATE TABLE `trigger_parameter`
 (
     `trigger_id`  varchar(255) NOT NULL COMMENT '触发器ID',
-    `name`        varchar(45) NOT NULL COMMENT '显示名称',
-    `ref`         varchar(45) NOT NULL COMMENT '唯一引用名称',
-    `type`        varchar(45) NOT NULL COMMENT '类型',
+    `name`        varchar(45)  NOT NULL COMMENT '显示名称',
+    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
+    `type`        varchar(45)  NOT NULL COMMENT '类型',
     `description` varchar(45) DEFAULT NULL COMMENT '描述',
-    `parameterId` varchar(45) NOT NULL COMMENT '参数引用Id'
+    `parameterId` varchar(45)  NOT NULL COMMENT '参数引用Id'
 );
 
 CREATE TABLE `secret_namespace`
