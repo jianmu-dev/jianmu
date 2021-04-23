@@ -1,7 +1,7 @@
 package dev.jianmu.task.repository;
 
-import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.InstanceStatus;
+import dev.jianmu.task.aggregate.TaskInstance;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +21,7 @@ public interface TaskInstanceRepository {
 
     List<TaskInstance> findByBusinessId(String businessId);
 
-    List<TaskInstance> findByDefKeyAndBusinessId(String defKey, String businessId);
+    List<TaskInstance> findByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId);
 
     List<TaskInstance> findByDefKey(String defKey);
 

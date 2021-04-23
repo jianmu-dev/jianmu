@@ -20,7 +20,7 @@ public interface TaskInstanceMapper {
 
     @Mapping(target = "taskVersion", source = "version.name")
     @Mapping(target = "taskName", source = "definition.name")
-    @Mapping(target = "nodeName", source = "taskInstance.asyncTaskKey")
+    @Mapping(target = "nodeName", source = "taskInstance.asyncTaskRef")
     @Mapping(target = "instanceId", source = "taskInstance.id")
     TaskInstanceVo toTaskInstanceVo(TaskInstance taskInstance, TaskDefinition definition, TaskDefinitionVersion version);
 }
