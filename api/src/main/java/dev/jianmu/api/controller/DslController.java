@@ -3,7 +3,7 @@ package dev.jianmu.api.controller;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.application.service.DslApplication;
-import dev.jianmu.dsl.aggregate.DslReference;
+import dev.jianmu.dsl.aggregate.Project;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,7 +53,7 @@ public class DslController {
 
     @GetMapping
     @Operation(summary = "分页查询DSL列表", description = "分页查询DSL列表")
-    public PageInfo<DslReference> findAll(PageDto pageDto) {
+    public PageInfo<Project> findAll(PageDto pageDto) {
         return this.dslApplication.findAll(pageDto.getPageNum(), pageDto.getPageSize());
     }
 }

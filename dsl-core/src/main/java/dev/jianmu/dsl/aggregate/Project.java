@@ -9,7 +9,7 @@ import java.util.UUID;
  * @author: Ethan Liu
  * @create: 2021-04-23 10:55
  **/
-public class DslReference {
+public class Project {
     // ID
     private String id;
     // DSL文件地址
@@ -140,18 +140,18 @@ public class DslReference {
             return this;
         }
 
-        public DslReference build() {
-            DslReference dslReference = new DslReference();
-            dslReference.id = UUID.randomUUID().toString().replace("-", "");
-            dslReference.workflowVersion = UUID.randomUUID().toString().replace("-", "");
-            dslReference.workflowName = this.workflowName;
-            dslReference.dslUrl = this.dslUrl;
-            dslReference.steps = this.steps;
-            dslReference.workflowRef = this.workflowRef;
-            dslReference.dslText = this.dslText;
-            dslReference.lastModifiedBy = this.lastModifiedBy;
-            dslReference.lastModifiedTime = LocalDateTime.now();
-            return dslReference;
+        public Project build() {
+            Project project = new Project();
+            project.id = UUID.randomUUID().toString().replace("-", "");
+            project.workflowVersion = UUID.randomUUID().toString().replace("-", "");
+            project.workflowName = this.workflowName;
+            project.dslUrl = this.dslUrl;
+            project.steps = this.steps;
+            project.workflowRef = this.workflowRef;
+            project.dslText = this.dslText;
+            project.lastModifiedBy = this.lastModifiedBy;
+            project.lastModifiedTime = LocalDateTime.now();
+            return project;
         }
     }
 }

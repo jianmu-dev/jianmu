@@ -1,7 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.WorkflowInstanceApplication;
-import dev.jianmu.dsl.aggregate.DslReference;
+import dev.jianmu.dsl.aggregate.Project;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -22,10 +22,10 @@ public class DslEventHandler {
 
     @Async
     @EventListener
-    public void handleTriggerEvent(DslReference dslReference) {
+    public void handleTriggerEvent(Project project) {
         this.workflowInstanceApplication.createAndStart(
-                dslReference.getId() + dslReference.getWorkflowVersion(),
-                dslReference.getWorkflowRef() + dslReference.getWorkflowVersion()
+                project.getId() + project.getWorkflowVersion(),
+                project.getWorkflowRef() + project.getWorkflowVersion()
         );
     }
 }

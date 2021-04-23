@@ -5,9 +5,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.dsl.aggregate.DslModel;
 import dev.jianmu.dsl.aggregate.DslParameter;
-import dev.jianmu.dsl.aggregate.DslReference;
+import dev.jianmu.dsl.aggregate.Project;
 import dev.jianmu.dsl.aggregate.Flow;
-import dev.jianmu.infrastructure.mybatis.dsl.DslReferenceRepositoryImpl;
+import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.aggregate.Reference;
 import dev.jianmu.parameter.repository.ParameterRepository;
@@ -48,7 +48,7 @@ public class DslApplication {
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
     private final ReferenceRepository referenceRepository;
-    private final DslReferenceRepositoryImpl dslReferenceRepository;
+    private final ProjectRepositoryImpl dslReferenceRepository;
     private final WorkflowRepository workflowRepository;
     private final ObjectMapper mapper;
     private final ApplicationEventPublisher publisher;
@@ -59,7 +59,7 @@ public class DslApplication {
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             ParameterRepository parameterRepository,
             ReferenceRepository referenceRepository,
-            DslReferenceRepositoryImpl dslReferenceRepository,
+            ProjectRepositoryImpl dslReferenceRepository,
             WorkflowRepository workflowRepository,
             ApplicationEventPublisher publisher
     ) {
@@ -97,7 +97,7 @@ public class DslApplication {
         // 创建节点
         var nodes = this.createNodes(flow.getNodes());
         // 创建关联
-        var dslRef = DslReference.Builder.aReference()
+        var dslRef = Project.Builder.aReference()
                 .dslUrl("test-dsl.yaml")
                 .workflowName(flow.getName())
                 .workflowRef(flow.getRef())
@@ -132,9 +132,9 @@ public class DslApplication {
 
     @Transactional
     public Workflow syncDsl(String dslId) {
-        DslReference dslReference = this.dslReferenceRepository.findById(dslId)
+        Project project = this.dslReferenceRepository.findById(dslId)
                 .orElseThrow(() -> new RuntimeException("未找到该DSL"));
-        var dslFile = new File(dslReference.getDslUrl());
+        var dslFile = new File(project.getDslUrl());
         String dslText;
         try {
             dslText = FileUtils.readFileToString(dslFile, StandardCharsets.UTF_8);
@@ -147,18 +147,18 @@ public class DslApplication {
         var flow = new Flow(dsl.getWorkflow());
         // 创建节点
         var nodes = this.createNodes(flow.getNodes());
-        dslReference.setDslText(dslText);
-        dslReference.setLastModifiedBy("admin");
-        dslReference.setSteps(nodes.size() - 2);
-        dslReference.setWorkflowName(flow.getName());
-        dslReference.setLastModifiedTime();
-        dslReference.setWorkflowVersion();
+        project.setDslText(dslText);
+        project.setLastModifiedBy("admin");
+        project.setSteps(nodes.size() - 2);
+        project.setWorkflowName(flow.getName());
+        project.setLastModifiedTime();
+        project.setWorkflowVersion();
         // 创建流程
         var workflow = Workflow.Builder.aWorkflow()
                 .name(flow.getName())
                 .ref(flow.getRef())
                 .description(flow.getDescription())
-                .version(dslReference.getWorkflowVersion())
+                .version(project.getWorkflowVersion())
                 .nodes(nodes)
                 .build();
         // 返回任务定义输入参数列表
@@ -167,10 +167,10 @@ public class DslApplication {
         // 创建参数Map
         var ps = this.createParameters(param, parameters);
         // 创建参数引用
-        var refs = this.createRefs(ps, dslReference.getId() + dslReference.getWorkflowVersion());
+        var refs = this.createRefs(ps, project.getId() + project.getWorkflowVersion());
 
         // 保存
-        this.dslReferenceRepository.updateByWorkflowRef(dslReference);
+        this.dslReferenceRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.parameterRepository.addAll(new ArrayList<>(ps.values()));
         this.referenceRepository.addAll(refs);
@@ -179,13 +179,13 @@ public class DslApplication {
     }
 
     public void deleteById(String id) {
-        DslReference dslReference = this.dslReferenceRepository.findById(id)
+        Project project = this.dslReferenceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("未找到该DSL"));
-        this.dslReferenceRepository.deleteByWorkflowRef(dslReference.getWorkflowRef());
-        this.workflowRepository.deleteByRef(dslReference.getWorkflowRef());
+        this.dslReferenceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.workflowRepository.deleteByRef(project.getWorkflowRef());
     }
 
-    public PageInfo<DslReference> findAll(int pageNum, int pageSize) {
+    public PageInfo<Project> findAll(int pageNum, int pageSize) {
         return this.dslReferenceRepository.findAll(pageNum, pageSize);
     }
 
