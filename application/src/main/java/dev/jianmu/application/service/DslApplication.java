@@ -202,6 +202,10 @@ public class DslApplication {
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
     }
 
+    public DslSourceCode findByRefAndVersion(String ref, String version) {
+        return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new RuntimeException("未找到该DSL"));
+    }
+
     public PageInfo<Project> findAll(int pageNum, int pageSize) {
         return this.projectRepository.findAll(pageNum, pageSize);
     }

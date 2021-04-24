@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.application.service.DslApplication;
+import dev.jianmu.dsl.aggregate.DslSourceCode;
 import dev.jianmu.dsl.aggregate.Project;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +50,11 @@ public class DslController {
     @Operation(summary = "删除DSL定义", description = "删除DSL定义")
     public void deleteById(@PathVariable String dslId) {
         this.dslApplication.deleteById(dslId);
+    }
+
+    @GetMapping("/source/{ref}/{version}")
+    public DslSourceCode findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
+        return this.dslApplication.findByRefAndVersion(ref, version);
     }
 
     @GetMapping
