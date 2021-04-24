@@ -2,10 +2,14 @@ package dev.jianmu.api.dto;
 
 import dev.jianmu.task.aggregate.TaskParameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -35,4 +39,6 @@ public class TaskDefinitionVersionDto {
     @Schema(required = true)
     @NotNull(message = "spec不能为空")
     private ContainerSpecDto spec;
+    private LocalDateTime createdTime;
+    private LocalDateTime lastModifiedTime;
 }

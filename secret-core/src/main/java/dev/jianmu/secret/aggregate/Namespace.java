@@ -1,5 +1,7 @@
 package dev.jianmu.secret.aggregate;
 
+import java.time.LocalDateTime;
+
 /**
  * @class: Namespace
  * @description: 命名空间
@@ -9,6 +11,8 @@ package dev.jianmu.secret.aggregate;
 public class Namespace {
     private String name;
     private String description;
+    private LocalDateTime createdTime = LocalDateTime.now();
+    private LocalDateTime lastModifiedTime;
 
     public String getName() {
         return name;
@@ -24,5 +28,17 @@ public class Namespace {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setLastModifiedTime(LocalDateTime lastModifiedTime) {
+        this.lastModifiedTime = lastModifiedTime;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public LocalDateTime getLastModifiedTime() {
+        return lastModifiedTime;
     }
 }
