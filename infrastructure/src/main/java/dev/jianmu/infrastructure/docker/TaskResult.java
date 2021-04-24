@@ -17,5 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TaskResult {
     private String taskId;
+    private int cmdStatusCode;
     private int statusCode;
+    private String resultFile;
 }

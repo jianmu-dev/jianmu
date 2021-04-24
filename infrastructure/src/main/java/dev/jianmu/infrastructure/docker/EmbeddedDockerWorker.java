@@ -10,6 +10,7 @@ import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import dev.jianmu.task.aggregate.DockerTask;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -22,8 +23,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @class: Client
@@ -47,6 +51,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
 
     private static final Logger logger = LoggerFactory.getLogger(EmbeddedDockerWorker.class);
     private DockerClient dockerClient;
+    private Map<String, Integer> runStatusMap = new ConcurrentHashMap<>();
 
     private final ApplicationEventPublisher publisher;
 
@@ -86,7 +91,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
     @Async
     public void runTask(DockerTask dockerTask, BufferedWriter logWriter) {
         var spec = dockerTask.getSpec();
-        // 创建容器
+        // 创建容器参数
         var createContainerCmd = dockerClient.createContainerCmd(spec.getImage());
         if (!spec.getWorkingDir().isBlank()) {
             createContainerCmd.withWorkingDir(spec.getWorkingDir());
@@ -127,16 +132,21 @@ public class EmbeddedDockerWorker implements DockerWorker {
                         @Override
                         public void onNext(Frame object) {
                             try {
-                                logWriter.write(new String(object.getPayload()));
+                                logWriter.write(new String(object.getPayload(), StandardCharsets.UTF_8));
                                 logWriter.flush();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                logger.error("获取容器日志异常:", e);
                             }
                         }
                     }).awaitCompletion();
         } catch (InterruptedException e) {
-            logger.error("无法获取容器日志:", e);
-            throw new RuntimeException("无法获取容器日志");
+            logger.error("获取容器日志操作被中断:", e);
+            try {
+                logWriter.close();
+            } catch (IOException ioException) {
+                logger.error("日志流关闭失败:", e);
+            }
+            Thread.currentThread().interrupt();
         }
         // 等待容器执行结果
         try {
@@ -144,18 +154,20 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 @Override
                 public void onNext(WaitResponse object) {
                     logger.info("dockerTask {} status code is: {}", dockerTask.getTaskInstanceId(), object.getStatusCode());
+                    runStatusMap.put(dockerTask.getTaskInstanceId(), object.getStatusCode());
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
-            logger.error("无法获取容器执行结果:", e);
-            throw new RuntimeException("无法获取容器执行结果");
+            logger.error("获取容器执行结果操作被中断:", e);
+            Thread.currentThread().interrupt();
         }
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
         int statusCode = 0;
+        String resultFile = null;
         if (null != dockerTask.getResultFile()) {
             var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), dockerTask.getResultFile()).exec();
             var tarStream = new TarArchiveInputStream(stream);
-            try {
+            try (var reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))) {
                 var tarArchiveEntry = tarStream.getNextTarEntry();
                 if (!tarStream.canReadEntryData(tarArchiveEntry)) {
                     logger.info("不能读取tarArchiveEntry");
@@ -163,12 +175,12 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 if (!tarArchiveEntry.isFile()) {
                     logger.info("执行结果文件必须是文件类型, 不支持目录或其他类型");
                 }
-                var reader = new BufferedReader(new InputStreamReader(tarStream));
                 logger.info("tarArchiveEntry's name: {}", tarArchiveEntry.getName());
                 String line;
                 while ((line = reader.readLine()) != null) {
                     logger.info("结果文件内容: {}", line);
                 }
+                resultFile = IOUtils.toString(reader);
             } catch (IOException e) {
                 logger.error("无法获取容器执行结果文件:", e);
                 statusCode = 1;
@@ -178,10 +190,13 @@ public class EmbeddedDockerWorker implements DockerWorker {
         this.dockerClient.removeContainerCmd(containerResponse.getId())
                 .withRemoveVolumes(true)
                 .exec();
+        // 发送结果通知
         publisher.publishEvent(
                 TaskResult.builder()
                         .taskId(dockerTask.getTaskInstanceId())
+                        .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
                         .statusCode(statusCode)
+                        .resultFile(resultFile)
                         .build()
         );
     }

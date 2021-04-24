@@ -20,7 +20,9 @@ public class TaskResultDto {
         SUCCEEDED,
         FAILED
     }
+
     private String taskInstanceId;
     private int cmdStatusCode;
     private Status status;
+    private String resultFile;
 }
