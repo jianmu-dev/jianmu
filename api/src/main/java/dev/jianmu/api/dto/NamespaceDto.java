@@ -21,7 +21,7 @@ import javax.validation.constraints.NotBlank;
 @Schema(description = "命名空间Dto")
 public class NamespaceDto {
     @Schema(required = true)
-    @NotBlank
+    @NotBlank(message = "name不能为空")
     private String name;
     private String description;
 }

@@ -8,7 +8,6 @@ import dev.jianmu.api.vo.WorkflowInstanceVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
-import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,11 +52,11 @@ public class WorkflowInstanceController {
 
     @PutMapping("/{instanceId}/{nodeRef}")
     @Operation(summary = "流程启动", description = "流程启动")
-    public WorkflowInstance start(
+    public void start(
             @Parameter(description = "流程实例ID") @PathVariable String instanceId,
             @Parameter(description = "启动节点定义名") @PathVariable String nodeRef
     ) {
-        return this.instanceApplication.start(instanceId, nodeRef);
+        this.instanceApplication.start(instanceId, nodeRef);
     }
 
     @PutMapping("/stop")

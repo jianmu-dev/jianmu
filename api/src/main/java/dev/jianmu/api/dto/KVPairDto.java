@@ -21,9 +21,9 @@ import javax.validation.constraints.NotBlank;
 @Schema(description = "键值对Dto")
 public class KVPairDto {
     @Schema(required = true)
-    @NotBlank
+    @NotBlank(message = "参数Key不能为空")
     private String key;
     @Schema(required = true)
-    @NotBlank
+    @NotBlank(message = "参数Value不能为空")
     private String value;
 }
