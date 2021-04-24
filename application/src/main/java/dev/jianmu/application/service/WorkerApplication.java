@@ -1,5 +1,6 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.docker.DockerWorker;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.parameter.aggregate.Parameter;
@@ -74,13 +75,13 @@ public class WorkerApplication {
     }
 
     public void online(String workerId) {
-        Worker worker = this.workerRepository.findById(workerId).orElseThrow(() -> new RuntimeException("未找到该Worker"));
+        Worker worker = this.workerRepository.findById(workerId).orElseThrow(() -> new DataNotFoundException("未找到该Worker"));
         worker.online();
         this.workerRepository.updateStatus(worker);
     }
 
     public void offline(String workerId) {
-        Worker worker = this.workerRepository.findById(workerId).orElseThrow(() -> new RuntimeException("未找到该Worker"));
+        Worker worker = this.workerRepository.findById(workerId).orElseThrow(() -> new DataNotFoundException("未找到该Worker"));
         worker.offline();
         this.workerRepository.updateStatus(worker);
     }
@@ -97,7 +98,7 @@ public class WorkerApplication {
         // 创建DockerTask
         var taskDefinition = this.definitionRepository
                 .findByKey(taskInstance.getDefKey())
-                .orElseThrow(() -> new RuntimeException("未找到该任务定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
         if (!(taskDefinition instanceof DockerDefinition)) {
             throw new RuntimeException("任务定义类型错误");
         }

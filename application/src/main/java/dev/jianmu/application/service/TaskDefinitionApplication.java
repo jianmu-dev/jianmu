@@ -1,6 +1,7 @@
 package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.mybatis.version.TaskDefinitionRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
@@ -118,7 +119,7 @@ public class TaskDefinitionApplication {
     ) {
         var taskDefinition = this.taskDefinitionRepository
                 .findByRef(taskDefinitionVersion.getTaskDefinitionRef())
-                .orElseThrow(() -> new RuntimeException("未找到该任务定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
         taskDefinitionVersion.setDefinitionKey(definitionKey);
         taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
@@ -134,16 +135,16 @@ public class TaskDefinitionApplication {
     }
 
     public Definition findByKey(String key) {
-        return this.definitionRepository.findByKey(key).orElseThrow(() -> new RuntimeException("未找到该任务定义版本"));
+        return this.definitionRepository.findByKey(key).orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
     }
 
     public TaskDefinitionVersion findByRefAndName(String ref, String name) {
         return this.taskDefinitionVersionRepository.findByTaskDefinitionRefAndName(ref, name)
-                .orElseThrow(() -> new RuntimeException("未找到该任务定义版本"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
     }
 
     public TaskDefinition findByRef(String ref) {
-        return this.taskDefinitionRepository.findByRef(ref).orElseThrow(() -> new RuntimeException("未找到该任务定义"));
+        return this.taskDefinitionRepository.findByRef(ref).orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
     }
 
     public List<TaskDefinitionVersion> findVersionByRef(String ref) {
@@ -157,7 +158,7 @@ public class TaskDefinitionApplication {
     public void deleteTaskDefinitionVersion(String ref, String name) {
         var version = this.taskDefinitionVersionRepository
                 .findByTaskDefinitionRefAndName(ref, name)
-                .orElseThrow(() -> new RuntimeException("未找到该任务定义版本"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
         this.taskDefinitionVersionRepository.delete(version);
         this.definitionRepository.delete(version.getDefinitionKey());
     }

@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.*;
 import dev.jianmu.dsl.repository.DslSourceCodeRepository;
 import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
@@ -79,7 +80,7 @@ public class DslApplication {
 
     public void trigger(String dslId) {
         var dslRef = this.projectRepository.findById(dslId)
-                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         publisher.publishEvent(dslRef);
     }
 
@@ -142,7 +143,7 @@ public class DslApplication {
     @Transactional
     public Workflow syncDsl(String dslId) {
         Project project = this.projectRepository.findById(dslId)
-                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         var dslFile = new File(project.getDslUrl());
         String dslText;
         try {
@@ -197,13 +198,13 @@ public class DslApplication {
 
     public void deleteById(String id) {
         Project project = this.projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("未找到该DSL"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
     }
 
     public DslSourceCode findByRefAndVersion(String ref, String version) {
-        return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new RuntimeException("未找到该DSL"));
+        return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
     }
 
     public PageInfo<Project> findAll(int pageNum, int pageSize) {
@@ -216,7 +217,7 @@ public class DslApplication {
             dsl = mapper.readValue(dslText, DslModel.class);
         } catch (IOException e) {
             logger.error("Got error: ", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException("Dsl解析异常");
         }
         dsl.syntaxCheck();
         return dsl;
@@ -225,13 +226,13 @@ public class DslApplication {
     private AsyncTask createAsyncTask(String key, String nodeName) {
         var definition = this.definitionRepository
                 .findByKey(key)
-                .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         var taskDefinitionVersion = this.taskDefinitionVersionRepository
                 .findByDefinitionKey(key)
-                .orElseThrow(() -> new RuntimeException("未找到任务定义版本"));
+                .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
         var taskDefinition = this.taskDefinitionRepository
                 .findByRef(taskDefinitionVersion.getTaskDefinitionRef())
-                .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         return AsyncTask.Builder.anAsyncTask()
                 .name(taskDefinition.getName())
                 .ref(nodeName)
@@ -305,7 +306,7 @@ public class DslApplication {
                 .forEach(node -> {
                     var definition = this.definitionRepository
                             .findByKey(node.getType())
-                            .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+                            .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
                     parameters.put(definition.getKey(), definition.getInputParameters());
                 });
         return parameters;

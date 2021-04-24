@@ -1,6 +1,7 @@
 package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
@@ -57,7 +58,7 @@ public class WorkflowInstanceApplication {
     public WorkflowInstance createAndStart(String triggerId, String workflowRefVersion) {
         Workflow workflow = this.workflowRepository
                 .findByRefVersion(workflowRefVersion)
-                .orElseThrow(() -> new RuntimeException("未找到流程定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         // 检查是否存在运行中的流程
         int i = this.workflowInstanceRepository
                 .findByRefAndVersionAndStatus(workflow.getRef(), workflow.getVersion(), ProcessStatus.RUNNING)
@@ -80,10 +81,10 @@ public class WorkflowInstanceApplication {
     public WorkflowInstance start(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
-                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
-                .orElseThrow(() -> new RuntimeException("未找到流程定义: " + instance.getWorkflowRef() + instance.getWorkflowVersion()));
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + instance.getWorkflowRef() + instance.getWorkflowVersion()));
         // TODO 需要查询流程定义对应的参数定义并创建参数实例，Parameter的Domain Service
         instance.setExpressionLanguage(this.expressionLanguage);
         // 启动流程
@@ -96,10 +97,10 @@ public class WorkflowInstanceApplication {
     public WorkflowInstance activateNode(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
-                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
-                .orElseThrow(() -> new RuntimeException("未找到流程定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         // TODO 需要查询定义对应的参数定义并创建参数实例，Parameter的Domain Service
         instance.setExpressionLanguage(this.expressionLanguage);
         // 激活节点
@@ -112,10 +113,10 @@ public class WorkflowInstanceApplication {
     public WorkflowInstance terminateNode(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
-                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
-                .orElseThrow(() -> new RuntimeException("未找到流程定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         instance.setExpressionLanguage(this.expressionLanguage);
         // 中止节点
         logger.info("terminateNode: " + nodeRef);
@@ -127,7 +128,7 @@ public class WorkflowInstanceApplication {
     public void taskRun(String instanceId, String asyncTaskRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
-                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         instance.taskRun(asyncTaskRef);
         this.workflowInstanceRepository.save(instance);
     }
@@ -136,7 +137,7 @@ public class WorkflowInstanceApplication {
     public void taskFail(String instanceId, String asyncTaskRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
-                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         instance.taskFail(asyncTaskRef);
         this.workflowInstanceRepository.save(instance);
     }
@@ -145,10 +146,10 @@ public class WorkflowInstanceApplication {
     public void taskSucceed(String instanceId, String asyncTaskRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
-                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
-                .orElseThrow(() -> new RuntimeException("未找到流程定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         // 任务执行成功
         logger.info("taskSucceed: " + asyncTaskRef);
         this.workflowInstanceDomainService.taskSucceed(workflow, instance, asyncTaskRef);

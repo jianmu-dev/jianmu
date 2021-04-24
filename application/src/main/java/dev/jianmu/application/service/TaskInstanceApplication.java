@@ -1,5 +1,6 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
@@ -66,7 +67,7 @@ public class TaskInstanceApplication {
     public void create(String businessId, String triggerId, String asyncTaskRef, String asyncTaskType) {
         // 创建任务实例
         Definition definition = this.definitionRepository.findByKey(asyncTaskType)
-                .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
         TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, triggerId, asyncTaskRef);
         this.taskInstanceRepository.add(taskInstance);
@@ -75,7 +76,7 @@ public class TaskInstanceApplication {
     @Transactional
     public void updateStatus(String taskInstanceId, InstanceStatus status) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
-                .orElseThrow(() -> new RuntimeException("未找到该任务实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         // TODO 需要更新任务结束时间
         taskInstance.setStatus(status);
         this.taskInstanceRepository.updateStatus(taskInstance);

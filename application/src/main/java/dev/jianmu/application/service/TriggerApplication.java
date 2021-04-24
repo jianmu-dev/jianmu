@@ -1,5 +1,6 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
@@ -48,7 +49,7 @@ public class TriggerApplication {
     @Transactional
     public void trigger(String triggerId) {
         var trigger = this.triggerRepository.findById(triggerId)
-                .orElseThrow(() -> new RuntimeException("未找到该触发器"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该触发器"));
         if (trigger.getCategory().equals(Trigger.Category.WORKFLOW)) {
             this.workflowInstanceApplication.createAndStart(trigger.getId(), trigger.getWorkflowId());
         } else if (trigger.getCategory().equals(Trigger.Category.TASK)) {
@@ -113,7 +114,7 @@ public class TriggerApplication {
     @Transactional
     public void delete(String triggerId) {
         var trigger = this.triggerRepository.findById(triggerId)
-                .orElseThrow(() -> new RuntimeException("该触发器不存在"));
+                .orElseThrow(() -> new DataNotFoundException("该触发器不存在"));
         this.triggerRepository.delete(trigger);
     }
 }
