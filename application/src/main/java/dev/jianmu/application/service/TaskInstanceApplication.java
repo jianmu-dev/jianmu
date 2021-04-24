@@ -2,7 +2,6 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.task.aggregate.Definition;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
@@ -74,11 +73,26 @@ public class TaskInstanceApplication {
     }
 
     @Transactional
-    public void updateStatus(String taskInstanceId, InstanceStatus status) {
+    public void executeSucceeded(String taskInstanceId) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        // TODO 需要更新任务结束时间
-        taskInstance.setStatus(status);
+        taskInstance.executeSucceeded();
+        this.taskInstanceRepository.updateStatus(taskInstance);
+    }
+
+    @Transactional
+    public void executeFailed(String taskInstanceId) {
+        TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        taskInstance.executeFailed();
+        this.taskInstanceRepository.updateStatus(taskInstance);
+    }
+
+    @Transactional
+    public void running(String taskInstanceId) {
+        TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        taskInstance.running();
         this.taskInstanceRepository.updateStatus(taskInstance);
     }
 }

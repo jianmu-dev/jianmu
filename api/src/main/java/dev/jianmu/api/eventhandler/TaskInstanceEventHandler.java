@@ -1,12 +1,11 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.api.dto.TaskResultDto;
+import dev.jianmu.api.mapper.TaskResultMapper;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.infrastructure.docker.TaskResult;
 import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
@@ -48,13 +47,11 @@ public class TaskInstanceEventHandler {
 
     @EventListener
     public void handleTaskStatusEvent(TaskResult taskResult) {
-        var taskResultDto = TaskResultDto.builder().taskInstanceId(taskResult.getTaskId()).build();
-        taskResultDto.setStatus(taskResult.getStatusCode() == 0 ? TaskResultDto.Status.SUCCEEDED : TaskResultDto.Status.FAILED);
-        logger.info("update task {} status: {}", taskResultDto.getTaskInstanceId(), taskResultDto.getStatus());
-        if (taskResultDto.getStatus() == TaskResultDto.Status.SUCCEEDED) {
-            this.taskInstanceApplication.updateStatus(taskResultDto.getTaskInstanceId(), InstanceStatus.EXECUTION_SUCCEEDED);
+        var taskResultDto = TaskResultMapper.INSTANCE.toTaskResultDto(taskResult);
+        if (taskResultDto.isSucceeded()) {
+            this.taskInstanceApplication.executeSucceeded(taskResultDto.getTaskInstanceId());
         } else {
-            this.taskInstanceApplication.updateStatus(taskResultDto.getTaskInstanceId(), InstanceStatus.EXECUTION_FAILED);
+            this.taskInstanceApplication.executeFailed(taskResultDto.getTaskInstanceId());
         }
     }
 
@@ -62,7 +59,7 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceEvent(TaskInstance taskInstance) {
 //        this.taskInstanceQueue.put(taskInstance);
         this.workerApplication.runTask(taskInstance);
-        this.taskInstanceApplication.updateStatus(taskInstance.getId(), InstanceStatus.RUNNING);
+        this.taskInstanceApplication.running(taskInstance.getId());
         this.workflowInstanceApplication.taskRun(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
         logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
     }

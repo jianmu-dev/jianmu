@@ -6,7 +6,6 @@ import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
 import dev.jianmu.infrastructure.storage.StorageException;
 import dev.jianmu.infrastructure.storage.StorageService;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -114,13 +113,13 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
         // TODO 需要生成任务记录
         switch (status) {
             case RUNNING:
-                this.taskInstanceApplication.updateStatus(taskId, InstanceStatus.RUNNING);
+                this.taskInstanceApplication.running(taskId);
                 break;
             case FAILED:
-                this.taskInstanceApplication.updateStatus(taskId, InstanceStatus.EXECUTION_FAILED);
+                this.taskInstanceApplication.executeFailed(taskId);
                 break;
             case SUCCEEDED:
-                this.taskInstanceApplication.updateStatus(taskId, InstanceStatus.EXECUTION_SUCCEEDED);
+                this.taskInstanceApplication.executeSucceeded(taskId);
                 break;
             default:
                 logger.info("should never get here");

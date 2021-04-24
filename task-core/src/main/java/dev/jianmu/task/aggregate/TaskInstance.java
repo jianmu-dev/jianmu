@@ -1,7 +1,9 @@
 package dev.jianmu.task.aggregate;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @class: TaskInstance
@@ -38,8 +40,22 @@ public class TaskInstance extends AggregateRoot {
         return parameters;
     }
 
-    public void setStatus(InstanceStatus status) {
-        this.status = status;
+    public void running() {
+        this.status = InstanceStatus.RUNNING;
+    }
+
+    public void executeSucceeded() {
+        this.status = InstanceStatus.EXECUTION_SUCCEEDED;
+        this.endTime = LocalDateTime.now();
+    }
+
+    public void executeFailed() {
+        this.status = InstanceStatus.EXECUTION_FAILED;
+        this.endTime = LocalDateTime.now();
+    }
+
+    public void dispatchFailed() {
+        this.status = InstanceStatus.DISPATCH_FAILED;
         this.endTime = LocalDateTime.now();
     }
 

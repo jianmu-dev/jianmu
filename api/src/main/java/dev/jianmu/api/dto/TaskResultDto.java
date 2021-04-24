@@ -16,13 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TaskResultDto {
-    public enum Status {
-        SUCCEEDED,
-        FAILED
-    }
-
     private String taskInstanceId;
     private int cmdStatusCode;
-    private Status status;
+    private boolean succeeded;
     private String resultFile;
 }
