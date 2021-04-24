@@ -61,7 +61,7 @@ public class ElResult implements EvaluationResult {
         if (this.result instanceof ElVariable) {
             return ResultType.STRUCT;
         }
-        throw new RuntimeException("不支持的类型");
+        throw new ClassCastException("不支持的类型");
     }
 
     @Override

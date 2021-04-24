@@ -53,7 +53,7 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
         }
         Optional<WorkflowInstance> instanceOptional = this.workflowInstanceMapper.findById(workflowInstance.getId());
         publisher.publishEvent(workflowInstance);
-        return instanceOptional.orElseThrow(() -> new RuntimeException("未找到流程实例"));
+        return instanceOptional.orElseThrow(() -> new DBException.DataNotFound("未找到流程实例"));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
         }
         Optional<WorkflowInstance> instanceOptional = this.workflowInstanceMapper.findById(workflowInstance.getId());
         this.publisher.publishEvent(workflowInstance);
-        return instanceOptional.orElseThrow(() -> new RuntimeException("流程实例更新失败"));
+        return instanceOptional.orElseThrow(() -> new DBException.UpdateFailed("流程实例更新失败"));
     }
 
     @Recover

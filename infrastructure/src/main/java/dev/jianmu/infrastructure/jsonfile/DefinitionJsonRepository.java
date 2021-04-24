@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.jackson2.UnmodifiableSetDeserializer;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.TaskParameter;
@@ -46,7 +47,7 @@ public class DefinitionJsonRepository implements DefinitionRepository {
     public void handleRollback(final RollbackEvent event) {
         var file = new File(event.getFileName());
         if (!file.delete()) {
-            throw new RuntimeException("File Rollback Clean up failed");
+            throw new DBException.CleanupFailed("Rollback Clean up failed");
         }
     }
 
@@ -65,7 +66,7 @@ public class DefinitionJsonRepository implements DefinitionRepository {
             }).writeValue(writer, definition);
         } catch (IOException e) {
             logger.error("无法保存为Json文件", e);
-            throw new RuntimeException("任务定义保存失败");
+            throw new DBException.InsertFailed("任务定义保存失败");
         }
         publisher.publishEvent(event);
     }
@@ -104,7 +105,7 @@ public class DefinitionJsonRepository implements DefinitionRepository {
                         JsonRepositoryInit.POSTFIX
         );
         if (!file.delete()) {
-            throw new RuntimeException("任务定义删除失败");
+            throw new DBException.DeleteFailed("任务定义删除失败");
         }
     }
 }

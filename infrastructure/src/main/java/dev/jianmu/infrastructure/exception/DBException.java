@@ -18,4 +18,28 @@ public class DBException {
             super(message);
         }
     }
+
+    public static class UpdateFailed extends RuntimeException {
+        public UpdateFailed(String message) {
+            super(message);
+        }
+    }
+
+    public static class DeleteFailed extends RuntimeException {
+        public DeleteFailed(String message) {
+            super(message);
+        }
+    }
+
+    public static class CleanupFailed extends RuntimeException {
+        public CleanupFailed(String message) {
+            super(message);
+        }
+    }
+
+    public static class DataNotFound extends RuntimeException {
+        public DataNotFound(String message) {
+            super(message);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.workflow;
 
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowMapper;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -41,7 +42,7 @@ public class WorkflowRepositoryImpl implements WorkflowRepository {
         this.workflowMapper.add(workflow);
         Optional<Workflow> workflowOptional = this.workflowMapper
                 .findByRefAndVersion(workflow.getRef() + workflow.getVersion());
-        return workflowOptional.orElseThrow(() -> new RuntimeException("插入失败"));
+        return workflowOptional.orElseThrow(() -> new DBException.InsertFailed("流程定义插入失败"));
     }
 
     @Override
