@@ -2,9 +2,7 @@ package dev.jianmu.api.dto;
 
 import dev.jianmu.task.aggregate.TaskParameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -16,7 +14,8 @@ import java.util.Set;
  * @author: Ethan Liu
  * @create: 2021-04-19 15:59
  **/
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "任务定义版本DTO")
