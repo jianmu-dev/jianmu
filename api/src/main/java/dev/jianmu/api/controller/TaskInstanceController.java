@@ -2,6 +2,7 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.vo.TaskInstanceVo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,9 +37,9 @@ public class TaskInstanceController {
         var taskInstances = this.taskInstanceApplication.findByBusinessId(workflowInstanceId);
         taskInstances.forEach(taskInstance -> {
             var version = this.taskInstanceApplication
-                    .findByDefKey(taskInstance.getDefKey()).orElseThrow(() -> new RuntimeException("未知任务版本"));
+                    .findByDefKey(taskInstance.getDefKey()).orElseThrow(() -> new DataNotFoundException("未知任务版本"));
             var definition = this.taskInstanceApplication
-                    .findByRef(version.getTaskDefinitionRef()).orElseThrow(() -> new RuntimeException("未知定义定义"));
+                    .findByRef(version.getTaskDefinitionRef()).orElseThrow(() -> new DataNotFoundException("未知定义定义"));
             var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance, definition, version);
             list.add(vo);
         });

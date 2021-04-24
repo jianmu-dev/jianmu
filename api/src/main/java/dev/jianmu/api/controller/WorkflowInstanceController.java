@@ -5,6 +5,7 @@ import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
 import dev.jianmu.api.vo.PageUtils;
 import dev.jianmu.api.vo.WorkflowInstanceVo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
@@ -46,7 +47,7 @@ public class WorkflowInstanceController {
     @Operation(summary = "流程实例详情", description = "流程实例详情")
     public WorkflowInstanceVo findById(@PathVariable String id) {
         var instance = this.instanceApplication.findById(id)
-                .orElseThrow(() -> new RuntimeException("未找到该流程实例"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVo(instance);
     }
 

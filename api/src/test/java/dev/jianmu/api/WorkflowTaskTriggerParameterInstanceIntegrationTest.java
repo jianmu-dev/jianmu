@@ -1,5 +1,6 @@
 package dev.jianmu.api;
 
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
@@ -185,7 +186,7 @@ public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
     @Transactional
     void threadTest() throws Exception {
         Optional<WorkflowInstance> instanceOptional = this.workflowInstanceRepository.findById("6e8840f303c949b09f3b50cb7ce88bad");
-        WorkflowInstance workflowInstance = instanceOptional.orElseThrow(() -> new RuntimeException("找不到实例"));
+        WorkflowInstance workflowInstance = instanceOptional.orElseThrow(() -> new DataNotFoundException("找不到实例"));
         int clientTotal = 100;
         // 同时并发执行的线程数
         int threadTotal = 20;

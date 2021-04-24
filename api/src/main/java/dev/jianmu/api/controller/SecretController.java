@@ -6,6 +6,7 @@ import dev.jianmu.api.dto.NamespaceDto;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.mapper.KVPairDtoMapper;
 import dev.jianmu.api.mapper.NamespaceDtoMapper;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.SecretApplication;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -70,7 +71,7 @@ public class SecretController {
     @GetMapping("/namespaces/{name}")
     @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
     public Namespace findByName(@PathVariable String name) {
-        return this.secretApplication.findById(name).orElseThrow(() -> new RuntimeException("未找到该命名空间"));
+        return this.secretApplication.findById(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
     }
 
     @GetMapping("/namespaces")

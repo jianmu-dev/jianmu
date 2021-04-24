@@ -17,7 +17,7 @@ public abstract class Parameter<T> {
                 if (value instanceof String) {
                     return new StringParameter((String) value);
                 }
-                throw new RuntimeException("非法类型");
+                throw new ClassCastException("非法类型");
             }
         },
         BOOL {
@@ -26,7 +26,7 @@ public abstract class Parameter<T> {
                 if (value instanceof Boolean) {
                     return new BoolParameter((Boolean) value);
                 }
-                throw new RuntimeException("非法类型");
+                throw new ClassCastException("非法类型");
             }
         },
         SECRET {
@@ -35,7 +35,7 @@ public abstract class Parameter<T> {
                 if (value instanceof String) {
                     return new SecretParameter((String) value);
                 }
-                throw new RuntimeException("非法类型");
+                throw new ClassCastException("非法类型");
             }
         },
         NUMBER {
@@ -44,7 +44,7 @@ public abstract class Parameter<T> {
                 if (value instanceof BigDecimal) {
                     return new NumberParameter((BigDecimal) value);
                 }
-                throw new RuntimeException("非法类型");
+                throw new ClassCastException("非法类型");
             }
         };
 
