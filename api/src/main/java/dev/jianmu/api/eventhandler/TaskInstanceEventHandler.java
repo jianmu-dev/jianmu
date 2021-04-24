@@ -4,7 +4,8 @@ import dev.jianmu.api.mapper.TaskResultMapper;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
-import dev.jianmu.infrastructure.docker.TaskResult;
+import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
+import dev.jianmu.infrastructure.docker.TaskRunningEvent;
 import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
@@ -46,20 +47,28 @@ public class TaskInstanceEventHandler {
     }
 
     @EventListener
-    public void handleTaskStatusEvent(TaskResult taskResult) {
-        var taskResultDto = TaskResultMapper.INSTANCE.toTaskResultDto(taskResult);
+    public void handleTaskFinishedEvent(TaskFinishedEvent taskFinishedEvent) {
+        var taskResultDto = TaskResultMapper.INSTANCE.toTaskResultDto(taskFinishedEvent);
         if (taskResultDto.isSucceeded()) {
-            this.taskInstanceApplication.executeSucceeded(taskResultDto.getTaskInstanceId());
+            this.taskInstanceApplication.executeSucceeded(
+                    taskResultDto.getTaskInstanceId(), taskResultDto.getResultFile()
+            );
         } else {
             this.taskInstanceApplication.executeFailed(taskResultDto.getTaskInstanceId());
         }
     }
 
+    @EventListener
+    public void handleTaskRunningEvent(TaskRunningEvent taskRunningEvent) {
+        // TODO 运行状态需同步通知调度逻辑
+        this.taskInstanceApplication.running(taskRunningEvent.getTaskId());
+    }
+
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskInstanceEvent(TaskInstance taskInstance) {
 //        this.taskInstanceQueue.put(taskInstance);
+        // TODO 缺少调度逻辑，同时需要处理调度失败场景
         this.workerApplication.runTask(taskInstance);
-        this.taskInstanceApplication.running(taskInstance.getId());
         this.workflowInstanceApplication.taskRun(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
         logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
     }

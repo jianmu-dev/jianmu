@@ -119,7 +119,8 @@ public class WorkerStreamServiceImpl extends WorkerStreamServiceGrpc.WorkerStrea
                 this.taskInstanceApplication.executeFailed(taskId);
                 break;
             case SUCCEEDED:
-                this.taskInstanceApplication.executeSucceeded(taskId);
+                // TODO 未处理返回结果文件
+                this.taskInstanceApplication.executeSucceeded(taskId, "");
                 break;
             default:
                 logger.info("should never get here");

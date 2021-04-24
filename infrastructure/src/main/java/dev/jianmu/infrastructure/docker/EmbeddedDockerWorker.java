@@ -121,6 +121,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
         var containerResponse = createContainerCmd.exec();
         // 启动容器
         this.dockerClient.startContainerCmd(containerResponse.getId()).exec();
+        // 发送任务运行中事件
+        this.publisher.publishEvent(TaskRunningEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
         // 获取日志
         try {
             this.dockerClient.logContainerCmd(containerResponse.getId())
@@ -162,7 +164,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
             Thread.currentThread().interrupt();
         }
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
-        int statusCode = 0;
         String resultFile = null;
         if (null != dockerTask.getResultFile()) {
             var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), dockerTask.getResultFile()).exec();
@@ -183,7 +184,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 resultFile = IOUtils.toString(reader);
             } catch (IOException e) {
                 logger.error("无法获取容器执行结果文件:", e);
-                statusCode = 1;
             }
         }
         // 清除容器
@@ -192,10 +192,9 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 .exec();
         // 发送结果通知
         publisher.publishEvent(
-                TaskResult.builder()
+                TaskFinishedEvent.builder()
                         .taskId(dockerTask.getTaskInstanceId())
                         .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
-                        .statusCode(statusCode)
                         .resultFile(resultFile)
                         .build()
         );
