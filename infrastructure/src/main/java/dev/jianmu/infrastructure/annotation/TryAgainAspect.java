@@ -20,13 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class TryAgainAspect implements Ordered {
 
     // 默认重试3次
-    private static final int DEFAULT_MAX_RETRIES = 3;
+    private static int DEFAULT_MAX_RETRIES = 3;
 
     private int order = 1;
 
     @Override
     public int getOrder() {
         return this.order;
+    }
+
+    public static void setDefaultMaxRetries(int defaultMaxRetries) {
+        DEFAULT_MAX_RETRIES = defaultMaxRetries;
     }
 
     @Pointcut("@annotation(IsTryAgain)")

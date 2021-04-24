@@ -15,6 +15,7 @@ public class DockerDefinition extends BaseDefinition {
     private ContainerSpec spec;
 
     private DockerDefinition() {
+        this.type = Worker.Type.DOCKER;
     }
 
     public ContainerSpec getSpec() {

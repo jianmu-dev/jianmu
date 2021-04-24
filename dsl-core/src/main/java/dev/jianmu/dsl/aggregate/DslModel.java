@@ -59,7 +59,6 @@ public class DslModel {
     private void checkTask(String nodeName, Map<?, ?> node) {
         var sources = node.get("sources");
         var targets = node.get("targets");
-        var param = node.get("param");
         if (!(sources instanceof List) || ((List<?>) sources).isEmpty()) {
             throw new RuntimeException("任务节点" + nodeName + "sources未设置");
         }

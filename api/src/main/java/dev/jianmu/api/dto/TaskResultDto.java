@@ -21,5 +21,6 @@ public class TaskResultDto {
         FAILED
     }
     private String taskInstanceId;
+    private int cmdStatusCode;
     private Status status;
 }

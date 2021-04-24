@@ -10,7 +10,7 @@ import com.github.pagehelper.PageInfo;
  * @create: 2021-04-22 11:10
  **/
 public class PageUtils {
-    public static <P, V> PageInfo<V> PageInfo2PageInfoVo(PageInfo<P> pageInfoPo) {
+    public static <P, V> PageInfo<V> pageInfo2PageInfoVo(PageInfo<P> pageInfoPo) {
         // 创建Page对象，实际上是一个ArrayList类型的集合
         Page<V> page = new Page<>(pageInfoPo.getPageNum(), pageInfoPo.getPageSize());
         page.setTotal(pageInfoPo.getTotal());

@@ -14,6 +14,7 @@ import org.apache.ibatis.type.JdbcType;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class TaskInstanceListTypeHandler extends BaseTypeHandler<List<AsyncTaskI
     public void setNonNullParameter(PreparedStatement ps, int i, List<AsyncTaskInstance> parameter, JdbcType jdbcType) throws SQLException {
         try {
             String tasks = this.objectMapper.writerFor(new TypeReference<List<AsyncTaskInstance>>() {}).writeValueAsString(parameter);
-            Blob blob = new SerialBlob(tasks.getBytes());
+            Blob blob = new SerialBlob(tasks.getBytes(StandardCharsets.UTF_8));
             ps.setBlob(i, blob);
         } catch (IOException e) {
             e.printStackTrace();

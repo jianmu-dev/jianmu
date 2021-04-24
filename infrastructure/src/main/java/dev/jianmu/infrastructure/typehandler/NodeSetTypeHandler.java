@@ -13,6 +13,7 @@ import org.apache.ibatis.type.JdbcType;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Set;
 
@@ -52,7 +53,7 @@ public class NodeSetTypeHandler extends BaseTypeHandler<Set<Node>> {
     public void setNonNullParameter(PreparedStatement ps, int i, Set<Node> parameter, JdbcType jdbcType) throws SQLException {
         try {
             String nodes = this.objectMapper.writerFor(new TypeReference<Set<Node>>() {}).writeValueAsString(parameter);
-            Blob blob = new SerialBlob(nodes.getBytes());
+            Blob blob = new SerialBlob(nodes.getBytes(StandardCharsets.UTF_8));
             ps.setBlob(i, blob);
         } catch (IOException e) {
             e.printStackTrace();

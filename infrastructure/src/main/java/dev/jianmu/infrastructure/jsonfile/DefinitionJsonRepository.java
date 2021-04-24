@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class DefinitionJsonRepository implements DefinitionRepository {
         var event = new RollbackEvent();
         event.setFileName(fileName);
         try {
-            var writer = new FileWriter(fileName);
+            var writer = new FileWriter(fileName, StandardCharsets.UTF_8);
             this.objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
             this.objectMapper.writerFor(new TypeReference<Definition>() {
             }).writeValue(writer, definition);
@@ -79,7 +80,7 @@ public class DefinitionJsonRepository implements DefinitionRepository {
                     init.getRootLocation() +
                             File.separator +
                             key +
-                            JsonRepositoryInit.POSTFIX
+                            JsonRepositoryInit.POSTFIX, StandardCharsets.UTF_8
             );
             this.objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
             SimpleModule module = new SimpleModule();

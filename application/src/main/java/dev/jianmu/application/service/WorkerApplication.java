@@ -9,7 +9,6 @@ import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
-import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
@@ -111,6 +110,15 @@ public class WorkerApplication {
         this.dockerWorker.runTask(dockerTask, logWriter);
     }
 
+    private Parameter<?> findSecret(Parameter<?> parameter) {
+        // 处理密钥类型参数, 获取值后转换为String类型参数
+        var strings = parameter.getStringValue().split("\\.");
+        var kv = this.kvPairRepository
+                .findByNamespaceNameAndKey(strings[0], strings[1])
+                .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
+        return Parameter.Type.STRING.newParameter(kv.getValue());
+    }
+
     private Map<String, String> getEnvironmentMap(TaskInstance taskInstance) {
         var parameterMap = taskInstance.getParameters().stream()
                 .map(taskParameter -> Map.entry(
@@ -122,8 +130,9 @@ public class WorkerApplication {
         var references = this.referenceRepository
                 .findByContextIds(
                         Set.of(
-                                // 使用TriggerId + AsyncTaskRef为参数引用 ContextId
+                                // 使用TriggerId + AsyncTaskRef为参数引用 ContextId, 触发器参数覆盖输入参数场景
                                 taskInstance.getTriggerId() + taskInstance.getAsyncTaskRef()
+                                // TODO 输出参数覆盖输入参数场景未覆盖
                         )
                 );
         references.forEach(reference -> logger.info("-------------reference parameterId--------: {}", reference.getParameterId()));
@@ -131,13 +140,11 @@ public class WorkerApplication {
                 .calculateIds(parameterMap, references);
         var parameters = this.parameterRepository
                 .findByIds(new HashSet<>(newParameterMap.values()))
-                // 处理密钥类型参数, 获取值后转换为String类型参数
                 .stream()
                 .map(parameter -> {
+                    // 处理密钥类型参数
                     if (parameter instanceof SecretParameter) {
-                        var strings = parameter.getStringValue().split("\\.");
-                        var kv = this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1]).orElse(new KVPair());
-                        return Parameter.Type.STRING.newParameter(kv.getValue());
+                        return this.findSecret(parameter);
                     }
                     return parameter;
                 })

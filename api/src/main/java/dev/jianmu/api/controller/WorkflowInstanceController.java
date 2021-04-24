@@ -37,7 +37,7 @@ public class WorkflowInstanceController {
         var page = this.instanceApplication.findAllPage(status, pageDto.getPageNum(), pageDto.getPageSize());
         var instances = page.getList();
         var newInstances = WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
-        PageInfo<WorkflowInstanceVo> newPage = PageUtils.PageInfo2PageInfoVo(page);
+        PageInfo<WorkflowInstanceVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
         newPage.setList(newInstances);
         return newPage;
     }

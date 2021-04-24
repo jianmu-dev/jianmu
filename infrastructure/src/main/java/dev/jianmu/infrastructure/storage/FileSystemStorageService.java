@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +52,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     public BufferedWriter writeLog(String LogFileName) {
         try {
             return new BufferedWriter(
-                    new FileWriter(this.rootLocation + File.separator + LogFileName + LogfilePostfix, true)
+                    new FileWriter(this.rootLocation + File.separator + LogFileName + LogfilePostfix, StandardCharsets.UTF_8, true)
             );
         } catch (IOException e) {
             throw new StorageException("Could not create log file", e);
@@ -62,9 +63,9 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     public BufferedReader readLog(String LogFileName) {
         try {
             return new BufferedReader(
-                    new FileReader(this.rootLocation + File.separator + LogFileName + LogfilePostfix)
+                    new FileReader(this.rootLocation + File.separator + LogFileName + LogfilePostfix, StandardCharsets.UTF_8)
             );
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new StorageFileNotFoundException("Could not find log file", e);
         }
     }
