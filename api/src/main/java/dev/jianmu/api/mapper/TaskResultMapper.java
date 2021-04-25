@@ -17,6 +17,6 @@ public interface TaskResultMapper {
     TaskResultMapper INSTANCE = Mappers.getMapper(TaskResultMapper.class);
 
     @Mapping(target = "taskInstanceId", source = "taskId")
-    @Mapping(target = "succeeded", expression = "java(taskFinishedEvent.getCmdStatusCode() != 0)")
+    @Mapping(target = "succeeded", expression = "java(taskFinishedEvent.getCmdStatusCode() == 0)")
     TaskResultDto toTaskResultDto(TaskFinishedEvent taskFinishedEvent);
 }

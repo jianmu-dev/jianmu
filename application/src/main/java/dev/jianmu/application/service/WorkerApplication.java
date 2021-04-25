@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -171,22 +172,26 @@ public class WorkerApplication {
         });
 
         // 根据参数ID去参数上下文查询参数值， 如果是密钥类型参数则去密钥管理上下文获取值
-        var parameters = this.parameterRepository
-                .findByIds(new HashSet<>(newParameterMap.values()))
-                .stream()
-                .map(parameter -> {
-                    // 处理密钥类型参数
-                    if (parameter instanceof SecretParameter) {
-                        return this.findSecret(parameter);
-                    }
-                    return parameter;
-                })
+        var parameters = this.parameterRepository.findByIds(new HashSet<>(newParameterMap.values()));
+        var secretParameters = parameters.stream()
+                .filter(parameter -> parameter instanceof SecretParameter)
                 .collect(Collectors.toList());
+        this.handleSecretParameter(newParameterMap, secretParameters);
+        this.parameterDomainService.createParameterMap(newParameterMap, parameters);
+
         // 返回输入参数列表
-        return this.parameterDomainService.createParameterMap(newParameterMap, parameters)
-                .entrySet().stream()
-                // 不同参数类型都转换为String传递
-                .map(entry -> Map.entry(entry.getKey(), entry.getValue().getStringValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return newParameterMap;
+    }
+
+    private void handleSecretParameter(Map<String, String> parameterMap, List<Parameter> secretParameters) {
+        parameterMap.forEach((key, val) -> {
+            secretParameters.stream()
+                    .filter(parameter -> parameter.getId().equals(val))
+                    .findFirst()
+                    .ifPresent(parameter -> {
+                        var secretParameter = this.findSecret(parameter);
+                        parameterMap.put(key, secretParameter.getStringValue());
+                    });
+        });
     }
 }
