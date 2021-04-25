@@ -1,6 +1,7 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.dsl.repository.OutputParameterReferRepository;
 import dev.jianmu.infrastructure.docker.DockerWorker;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.parameter.aggregate.Parameter;
@@ -15,6 +16,7 @@ import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Worker;
 import dev.jianmu.task.repository.DefinitionRepository;
+import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.repository.WorkerRepository;
 import dev.jianmu.task.service.WorkerDomainService;
 import org.slf4j.Logger;
@@ -40,11 +42,13 @@ public class WorkerApplication {
     private static final Logger logger = LoggerFactory.getLogger(WorkerApplication.class);
     private final WorkerRepository workerRepository;
     private final DefinitionRepository definitionRepository;
+    private final TaskInstanceRepository taskInstanceRepository;
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
     private final StorageService storageService;
     private final DockerWorker dockerWorker;
     private final WorkerDomainService workerDomainService;
+    private final OutputParameterReferRepository outputParameterReferRepository;
     private final ReferenceRepository referenceRepository;
     private final ReferenceDomainService referenceDomainService;
     private final KVPairRepository kvPairRepository;
@@ -53,22 +57,26 @@ public class WorkerApplication {
     public WorkerApplication(
             WorkerRepository workerRepository,
             DefinitionRepository definitionRepository,
+            TaskInstanceRepository taskInstanceRepository,
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
             StorageService storageService,
             DockerWorker dockerWorker,
             WorkerDomainService workerDomainService,
+            OutputParameterReferRepository outputParameterReferRepository,
             ReferenceRepository referenceRepository,
             ReferenceDomainService referenceDomainService,
             KVPairRepository kvPairRepository
     ) {
         this.workerRepository = workerRepository;
         this.definitionRepository = definitionRepository;
+        this.taskInstanceRepository = taskInstanceRepository;
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.storageService = storageService;
         this.dockerWorker = dockerWorker;
         this.workerDomainService = workerDomainService;
+        this.outputParameterReferRepository = outputParameterReferRepository;
         this.referenceRepository = referenceRepository;
         this.referenceDomainService = referenceDomainService;
         this.kvPairRepository = kvPairRepository;
@@ -121,6 +129,7 @@ public class WorkerApplication {
     }
 
     private Map<String, String> getEnvironmentMap(Definition definition, TaskInstance taskInstance) {
+        // 获得输入参数原始Map
         var parameterMap = definition.getInputParameters().stream()
                 .map(taskParameter -> Map.entry(
                         "JIANMU_" + taskParameter.getRef().toUpperCase(),
@@ -128,6 +137,7 @@ public class WorkerApplication {
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // 根据ContextId查询输入参数引用
         var references = this.referenceRepository
                 .findByContextIds(
                         Set.of(
@@ -137,8 +147,26 @@ public class WorkerApplication {
                         )
                 );
         references.forEach(reference -> logger.info("-------------reference parameterId--------: {}", reference.getParameterId()));
+        // 计算新输入参数Map
         var newParameterMap = this.referenceDomainService
                 .calculateIds(parameterMap, references);
+
+        // 根据ContextId查询输出参数引用
+        var outputParameterRefers = this.outputParameterReferRepository.findByContextId(taskInstance.getTriggerId() + taskInstance.getAsyncTaskRef());
+        outputParameterRefers.forEach(outputParameterRefer -> {
+            logger.info("outputParameterRefer: {}", outputParameterRefer);
+            // 查询最后一次执行的任务实例
+            this.taskInstanceRepository
+                    .limitByAsyncTaskRefAndBusinessId(outputParameterRefer.getOutputNodeType(), taskInstance.getBusinessId())
+                    .flatMap(i -> i.getOutputParameters().stream()
+                            // 查找与输出参数引用关系匹配的输出参数
+                            .filter(taskParameter -> taskParameter.getRef().equals(outputParameterRefer.getOutputParameterRef()))
+                            .findFirst())
+                    // 如果存在，覆盖输入参数Map中的value(ParameterId)
+                    .ifPresent(taskParameter -> newParameterMap.put(taskParameter.getRef(), taskParameter.getParameterId()));
+        });
+
+        // 根据参数ID去参数上下文查询参数值， 如果是密钥类型参数则去密钥管理上下文获取值
         var parameters = this.parameterRepository
                 .findByIds(new HashSet<>(newParameterMap.values()))
                 .stream()
@@ -150,6 +178,7 @@ public class WorkerApplication {
                     return parameter;
                 })
                 .collect(Collectors.toList());
+        // 返回输入参数列表
         return this.parameterDomainService.createParameterMap(newParameterMap, parameters)
                 .entrySet().stream()
                 // 不同参数类型都转换为String传递
