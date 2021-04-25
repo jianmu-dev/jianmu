@@ -17,6 +17,7 @@ public class OutputParameterRefer {
     private String inputNodeType;
     private String inputParameterRef;
     private String inputParameterId;
+    private String contextId;
 
     @Override
     public String toString() {
@@ -31,6 +32,7 @@ public class OutputParameterRefer {
                 ", inputNodeType='" + inputNodeType + '\'' +
                 ", inputParameterRef='" + inputParameterRef + '\'' +
                 ", inputParameterId='" + inputParameterId + '\'' +
+                ", contextId='" + contextId + '\'' +
                 '}';
     }
 
@@ -112,6 +114,15 @@ public class OutputParameterRefer {
 
     public void setInputParameterId(String inputParameterId) {
         this.inputParameterId = inputParameterId;
+    }
+
+    public String getContextId() {
+        return contextId;
+    }
+
+    // contextId规则,使用project id + WorkflowVersion + NodeName
+    public void setContextId() {
+        this.contextId = projectId + workflowVersion + inputNodeName;
     }
 
     public static final class Builder {
