@@ -75,6 +75,11 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
+    public Optional<TaskInstance> limitByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId) {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<TaskInstance> findById(String instanceId) {
         return this.taskInstanceMapper.findById(instanceId);
     }
@@ -87,11 +92,6 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public List<TaskInstance> findByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId) {
         return this.taskInstanceMapper.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
-    }
-
-    @Override
-    public List<TaskInstance> findByDefKey(String defKey) {
-        return this.taskInstanceMapper.findByDefKey(defKey);
     }
 
     @Override

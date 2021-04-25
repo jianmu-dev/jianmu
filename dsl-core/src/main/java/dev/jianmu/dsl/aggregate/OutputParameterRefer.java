@@ -7,16 +7,27 @@ package dev.jianmu.dsl.aggregate;
  * @create: 2021-04-25 11:28
  **/
 public class OutputParameterRefer {
+    // 项目ID
     private String projectId;
+    // 流程定义版本
     private String workflowVersion;
+    // 输出节点名称
     private String outputNodeName;
+    // 输出节点类型
     private String outputNodeType;
+    // 输出参数Ref
     private String outputParameterRef;
+    // 输出参数ID
     private String outputParameterId;
+    // 输入节点名称
     private String inputNodeName;
+    // 输入节点类型
     private String inputNodeType;
+    // 输入参数Ref
     private String inputParameterRef;
+    // 输入参数ID
     private String inputParameterId;
+    // ContextId
     private String contextId;
 
     @Override
@@ -120,7 +131,7 @@ public class OutputParameterRefer {
         return contextId;
     }
 
-    // contextId规则,使用project id + WorkflowVersion + NodeName
+    // contextId规则,使用project id + WorkflowVersion + inputNodeName
     public void setContextId() {
         this.contextId = projectId + workflowVersion + inputNodeName;
     }

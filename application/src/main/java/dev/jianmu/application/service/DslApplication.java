@@ -138,6 +138,7 @@ public class DslApplication {
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
+                .lastModifiedBy("admin")
                 .build();
         // 保存
         this.projectRepository.add(project);
@@ -199,6 +200,7 @@ public class DslApplication {
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
+                .lastModifiedBy("admin")
                 .build();
 
         // 保存
