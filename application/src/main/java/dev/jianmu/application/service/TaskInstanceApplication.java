@@ -102,7 +102,9 @@ public class TaskInstanceApplication {
             var taskParameters = taskInstance.checkOutputParameters(parameterMap);
             // 任务实例输出参数类型创建参数
             var outputParameters = this.handleOutputParameter(parameterMap, taskParameters);
+            // 更新输出参数的参数ID
             taskInstance.updateOutputParameters(outputParameters.keySet());
+            // 保存参数
             this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         }
         taskInstance.executeSucceeded(resultFile);
