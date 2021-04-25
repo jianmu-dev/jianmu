@@ -131,6 +131,7 @@ public class WorkerApplication {
                 .findByContextIds(
                         Set.of(
                                 // 使用TriggerId + AsyncTaskRef为参数引用 ContextId, 触发器参数覆盖输入参数场景
+                                // 参见DSL导入创建参数引用逻辑,DslApplication#createRefs
                                 taskInstance.getTriggerId() + taskInstance.getAsyncTaskRef()
                                 // TODO 输出参数覆盖输入参数场景未覆盖
                         )

@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
+import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -33,16 +34,21 @@ public class WorkflowInstanceApplication {
     private final WorkflowRepository workflowRepository;
     private final WorkflowInstanceRepositoryImpl workflowInstanceRepository;
     private final WorkflowInstanceDomainService workflowInstanceDomainService;
+    private final TaskInstanceRepository taskInstanceRepository;
     private final ExpressionLanguage expressionLanguage;
 
     @Inject
-    public WorkflowInstanceApplication(WorkflowRepository workflowRepository,
-                                       WorkflowInstanceRepositoryImpl workflowInstanceRepository,
-                                       WorkflowInstanceDomainService workflowInstanceDomainService,
-                                       ExpressionLanguage expressionLanguage) {
+    public WorkflowInstanceApplication(
+            WorkflowRepository workflowRepository,
+            WorkflowInstanceRepositoryImpl workflowInstanceRepository,
+            WorkflowInstanceDomainService workflowInstanceDomainService,
+            TaskInstanceRepository taskInstanceRepository,
+            ExpressionLanguage expressionLanguage
+    ) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
+        this.taskInstanceRepository = taskInstanceRepository;
         this.expressionLanguage = expressionLanguage;
     }
 
@@ -125,12 +131,14 @@ public class WorkflowInstanceApplication {
     }
 
     // 任务已启动命令
-    public void taskRun(String instanceId, String asyncTaskRef) {
-        WorkflowInstance instance = this.workflowInstanceRepository
-                .findById(instanceId)
+    public void taskRun(String taskInstanceId) {
+        var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        var workflowInstance = this.workflowInstanceRepository
+                .findById(taskInstance.getBusinessId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        instance.taskRun(asyncTaskRef);
-        this.workflowInstanceRepository.save(instance);
+        workflowInstance.taskRun(taskInstance.getAsyncTaskRef());
+        this.workflowInstanceRepository.save(workflowInstance);
     }
 
     // 任务已中止命令

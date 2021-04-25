@@ -62,14 +62,14 @@ public class TaskInstanceEventHandler {
     public void handleTaskRunningEvent(TaskRunningEvent taskRunningEvent) {
         // TODO 运行状态需同步通知调度逻辑
         this.taskInstanceApplication.running(taskRunningEvent.getTaskId());
+        this.workflowInstanceApplication.taskRun(taskRunningEvent.getTaskId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskInstanceEvent(TaskInstance taskInstance) {
 //        this.taskInstanceQueue.put(taskInstance);
-        // TODO 缺少调度逻辑，同时需要处理调度失败场景
+        // TODO 当前为直接触发,缺少调度逻辑，同时需要处理调度失败场景
         this.workerApplication.runTask(taskInstance);
-        this.workflowInstanceApplication.taskRun(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
         logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
     }
 

@@ -23,6 +23,7 @@ public class DslEventHandler {
     @Async
     @EventListener
     public void handleTriggerEvent(Project project) {
+        // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
         this.workflowInstanceApplication.createAndStart(
                 project.getId() + project.getWorkflowVersion(),
                 project.getWorkflowRef() + project.getWorkflowVersion()

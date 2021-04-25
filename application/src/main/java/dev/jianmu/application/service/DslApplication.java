@@ -15,8 +15,8 @@ import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.version.repository.TaskDefinitionRepository;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
-import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.definition.Node;
+import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -110,10 +110,11 @@ public class DslApplication {
                 .build();
         // 返回任务定义输入参数列表
         var parameters = this.findDefinitionParameters(flow.getNodes());
+        // 返回DSL定义参数列表
         var param = flow.getParams(dsl.getParam());
         // 创建参数Map
         var ps = this.createParameters(param, parameters);
-        // 创建参数引用
+        // 创建参数引用,使用project id + WorkflowVersion + NodeName作为参数引用contextId，参见WorkerApplication#getEnvironmentMap
         var refs = this.createRefs(ps, project.getId() + project.getWorkflowVersion());
         // 创建流程
         var workflow = Workflow.Builder.aWorkflow()
@@ -176,7 +177,7 @@ public class DslApplication {
         var param = flow.getParams(dsl.getParam());
         // 创建参数Map
         var ps = this.createParameters(param, parameters);
-        // 创建参数引用
+        // 创建参数引用,使用project id + WorkflowVersion + NodeName作为参数引用contextId，参见WorkerApplication#getEnvironmentMap
         var refs = this.createRefs(ps, project.getId() + project.getWorkflowVersion());
         // 保存原始DSL
         var dslSource = DslSourceCode.Builder.aDslSourceCode()
