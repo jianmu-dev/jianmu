@@ -43,14 +43,15 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void add(TaskInstance taskInstance) {
         this.taskInstanceMapper.add(taskInstance);
-        if (taskInstance.getParameters().size() > 0) {
-            this.taskInstanceParameterMapper.addAll(taskInstance.getId(), taskInstance.getParameters());
+        if (taskInstance.getOutputParameters().size() > 0) {
+            this.taskInstanceParameterMapper.addAll(taskInstance.getId(), taskInstance.getOutputParameters());
         }
         this.applicationEventPublisher.publishEvent(taskInstance);
     }
 
     @Override
     public void updateStatus(TaskInstance taskInstance) {
+        // TODO 需要同步更新输出参数
         this.taskInstanceMapper.updateStatus(taskInstance);
         if (taskInstance.getStatus().equals(InstanceStatus.EXECUTION_FAILED)) {
             this.applicationEventPublisher.publishEvent(
@@ -91,11 +92,6 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public List<TaskInstance> findByDefKey(String defKey) {
         return this.taskInstanceMapper.findByDefKey(defKey);
-    }
-
-    @Override
-    public List<TaskInstance> findByStatus(InstanceStatus status) {
-        return this.taskInstanceMapper.findByStatus(status);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.dsl.repository.OutputParameterReferRepository;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.repository.ReferenceRepository;
@@ -43,6 +44,7 @@ public class TaskInstanceApplication {
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
     private final ReferenceRepository referenceRepository;
+    private final OutputParameterReferRepository outputParameterReferRepository;
 
     @Inject
     public TaskInstanceApplication(
@@ -52,7 +54,8 @@ public class TaskInstanceApplication {
             TaskDefinitionRepository taskDefinitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             ParameterRepository parameterRepository,
-            ReferenceRepository referenceRepository
+            ReferenceRepository referenceRepository,
+            OutputParameterReferRepository outputParameterReferRepository
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.definitionRepository = definitionRepository;
@@ -61,6 +64,7 @@ public class TaskInstanceApplication {
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
         this.referenceRepository = referenceRepository;
+        this.outputParameterReferRepository = outputParameterReferRepository;
     }
 
     public List<TaskInstance> findByBusinessId(String businessId) {
@@ -92,9 +96,14 @@ public class TaskInstanceApplication {
         var definition = this.definitionRepository.findByKey(taskInstance.getDefKey())
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
         if (definition.getResultFile() != null) {
-            var parameterMap = this.handleOutputParameter(resultFile, definition.getOutputParameters());
-            // TODO 需要创建参数关联
-            this.parameterRepository.addAll(new ArrayList<>(parameterMap.values()));
+            // 解析Json为Map
+            var parameterMap = this.parseJson(resultFile);
+            // 查找需赋值的输出参数
+            var taskParameters = taskInstance.checkOutputParameters(parameterMap);
+            // 任务实例输出参数类型创建参数
+            var outputParameters = this.handleOutputParameter(parameterMap, taskParameters);
+            taskInstance.updateOutputParameters(outputParameters.keySet());
+            this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         }
         taskInstance.executeSucceeded(resultFile);
         this.taskInstanceRepository.updateStatus(taskInstance);
@@ -116,24 +125,30 @@ public class TaskInstanceApplication {
         this.taskInstanceRepository.updateStatus(taskInstance);
     }
 
-    private Map<TaskParameter, Parameter<?>> handleOutputParameter(String resultFile, Set<TaskParameter> outputParameter) {
+    private Map<String, Object> parseJson(String resultFile) {
         if (resultFile == null || resultFile.isBlank()) {
             throw new RuntimeException("任务结果文件为空");
         }
         var objectMapper = new ObjectMapper();
         try {
-            Map<String, Object> parameterMap = objectMapper.readValue(resultFile, new TypeReference<>() {
+            return objectMapper.readValue(resultFile, new TypeReference<>() {
             });
-            return outputParameter.stream()
-                    .filter(taskParameter -> parameterMap.get(taskParameter.getRef()) != null)
-                    .map(taskParameter -> {
-                        var value = parameterMap.get(taskParameter.getRef());
-                        return Map.entry(taskParameter, Parameter.Type.valueOf(taskParameter.getType()).newParameter(value));
-                    })
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (JsonProcessingException e) {
             logger.error("Json转换", e);
             throw new RuntimeException("任务结果文件格式错误");
         }
+    }
+
+    private Map<TaskParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, Set<TaskParameter> outputParameter) {
+        return outputParameter.stream()
+                .map(taskParameter -> {
+                    var value = parameterMap.get(taskParameter.getRef());
+                    // 创建参数
+                    var parameter = Parameter.Type.valueOf(taskParameter.getType()).newParameter(value);
+                    // 更新任务输出参数ID
+                    taskParameter.setParameterId(parameter.getId());
+                    return Map.entry(taskParameter, parameter);
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

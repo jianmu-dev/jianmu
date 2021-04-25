@@ -2,8 +2,10 @@ package dev.jianmu.task.aggregate;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @class: TaskInstance
@@ -31,14 +33,20 @@ public class TaskInstance extends AggregateRoot {
     private InstanceStatus status = InstanceStatus.WAITING;
     // 输出结果文件
     private String resultFile;
-    // 输入输出参数列表
-    private Set<TaskParameter> parameters = new HashSet<>();
+    // 输出参数列表
+    private Set<TaskParameter> outputParameters = new HashSet<>();
 
     private TaskInstance() {
     }
 
-    public Set<TaskParameter> getParameters() {
-        return parameters;
+    public Set<TaskParameter> checkOutputParameters(Map<String, Object> parameterMap) {
+        return outputParameters.stream()
+                .filter(taskParameter -> parameterMap.get(taskParameter.getRef()) != null)
+                .collect(Collectors.toSet());
+    }
+
+    public void updateOutputParameters(Set<TaskParameter> outputParameters) {
+        this.outputParameters = outputParameters;
     }
 
     public void running() {
@@ -97,6 +105,10 @@ public class TaskInstance extends AggregateRoot {
         return resultFile;
     }
 
+    public Set<TaskParameter> getOutputParameters() {
+        return outputParameters;
+    }
+
     public static final class Builder {
         // ID
         // TODO 暂时使用UUID的值
@@ -109,8 +121,8 @@ public class TaskInstance extends AggregateRoot {
         private String businessId;
         // 触发器ID
         private String triggerId;
-        // 输入输出参数列表
-        private Set<TaskParameter> parameters;
+        // 输出参数列表
+        private Set<TaskParameter> outputParameters = new HashSet<>();
 
         private Builder() {
         }
@@ -139,8 +151,8 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
-        public Builder parameters(Set<TaskParameter> parameters) {
-            this.parameters = parameters;
+        public Builder outputParameters(Set<TaskParameter> outputParameters) {
+            this.outputParameters = outputParameters;
             return this;
         }
 
@@ -151,7 +163,7 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.asyncTaskRef = this.asyncTaskRef;
             taskInstance.businessId = this.businessId;
             taskInstance.triggerId = this.triggerId;
-            taskInstance.parameters = this.parameters;
+            taskInstance.outputParameters = this.outputParameters;
             return taskInstance;
         }
     }
