@@ -1,7 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
-import dev.jianmu.infrastructure.mapper.task.TaskInstanceParameterMapper;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
@@ -26,32 +25,25 @@ import java.util.Optional;
 public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceRepositoryImpl.class);
     private final TaskInstanceMapper taskInstanceMapper;
-    private final TaskInstanceParameterMapper taskInstanceParameterMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Inject
     public TaskInstanceRepositoryImpl(
             TaskInstanceMapper taskInstanceMapper,
-            TaskInstanceParameterMapper taskInstanceParameterMapper,
             ApplicationEventPublisher applicationEventPublisher
     ) {
         this.taskInstanceMapper = taskInstanceMapper;
-        this.taskInstanceParameterMapper = taskInstanceParameterMapper;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
     public void add(TaskInstance taskInstance) {
         this.taskInstanceMapper.add(taskInstance);
-        if (taskInstance.getOutputParameters().size() > 0) {
-            this.taskInstanceParameterMapper.addAll(taskInstance.getId(), taskInstance.getOutputParameters());
-        }
         this.applicationEventPublisher.publishEvent(taskInstance);
     }
 
     @Override
     public void updateStatus(TaskInstance taskInstance) {
-        // TODO 需要同步更新输出参数
         this.taskInstanceMapper.updateStatus(taskInstance);
         if (taskInstance.getStatus().equals(InstanceStatus.EXECUTION_FAILED)) {
             this.applicationEventPublisher.publishEvent(
@@ -62,21 +54,25 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
                             .taskInstanceId(taskInstance.getId())
                             .build()
             );
-        } else if (taskInstance.getStatus().equals(InstanceStatus.EXECUTION_SUCCEEDED)) {
-            this.applicationEventPublisher.publishEvent(
-                    TaskInstanceSucceedEvent.Builder.aTaskInstanceSucceedEvent()
-                            .defKey(taskInstance.getDefKey())
-                            .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                            .businessId(taskInstance.getBusinessId())
-                            .taskInstanceId(taskInstance.getId())
-                            .build()
-            );
         }
     }
 
     @Override
+    public void saveSucceeded(TaskInstance taskInstance) {
+        this.taskInstanceMapper.saveSucceeded(taskInstance);
+        this.applicationEventPublisher.publishEvent(
+                TaskInstanceSucceedEvent.Builder.aTaskInstanceSucceedEvent()
+                        .defKey(taskInstance.getDefKey())
+                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                        .businessId(taskInstance.getBusinessId())
+                        .taskInstanceId(taskInstance.getId())
+                        .build()
+        );
+    }
+
+    @Override
     public Optional<TaskInstance> limitByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId) {
-        return Optional.empty();
+        return this.taskInstanceMapper.limitByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
     }
 
     @Override

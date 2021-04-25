@@ -16,6 +16,8 @@ public interface TaskInstanceRepository {
 
     void updateStatus(TaskInstance taskInstance);
 
+    void saveSucceeded(TaskInstance taskInstance);
+
     Optional<TaskInstance> findById(String instanceId);
 
     List<TaskInstance> findByBusinessId(String businessId);
