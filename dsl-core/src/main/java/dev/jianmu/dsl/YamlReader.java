@@ -17,7 +17,16 @@ import java.util.regex.Pattern;
  **/
 public class YamlReader {
     private static String findVariable(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+\\.*[a-zA-Z0-9_-]*)\\}$");
+        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+)\\}$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private static String findOutputVariable(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+\\.+[a-zA-Z0-9_-]*)\\}$");
         Matcher matcher = pattern.matcher(paramValue);
         if (matcher.find()) {
             return matcher.group(1);
@@ -45,12 +54,16 @@ public class YamlReader {
             node.getParam().forEach((key, val) -> {
                 var valName = findVariable(val);
                 var secretName = findSecret(val);
+                var outputVal = findOutputVariable(val);
                 if (null != valName) {
                     var v = param.getOrDefault(valName, "");
                     System.out.println("Param name: " + key + " value is: " + v);
                 }
                 if (null != secretName) {
                     System.out.println("secretName: " + secretName);
+                }
+                if (null != outputVal) {
+                    System.out.println("output param: " + key + " value is:" + outputVal);
                 }
             });
         });

@@ -9,6 +9,8 @@ package dev.jianmu.dsl.aggregate;
 public class DslParameter {
     private String nodeName;
     private String definitionKey;
+    private String outputNodeName;
+    private String outputParameterName;
     private String name;
     private String value;
     private String linkedParameterId;
@@ -19,6 +21,14 @@ public class DslParameter {
 
     public String getDefinitionKey() {
         return definitionKey;
+    }
+
+    public String getOutputNodeName() {
+        return outputNodeName;
+    }
+
+    public String getOutputParameterName() {
+        return outputParameterName;
     }
 
     public String getName() {
@@ -42,6 +52,8 @@ public class DslParameter {
         return "DslParameter{" +
                 "nodeName='" + nodeName + '\'' +
                 ", definitionKey='" + definitionKey + '\'' +
+                ", outputNodeName='" + outputNodeName + '\'' +
+                ", outputParameterName='" + outputParameterName + '\'' +
                 ", name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 ", linkedParameterId='" + linkedParameterId + '\'' +
@@ -51,6 +63,8 @@ public class DslParameter {
     public static final class Builder {
         private String nodeName;
         private String definitionKey;
+        private String outputNodeName;
+        private String outputParameterName;
         private String name;
         private String value;
 
@@ -71,6 +85,16 @@ public class DslParameter {
             return this;
         }
 
+        public Builder outputNodeName(String outputNodeName) {
+            this.outputNodeName = outputNodeName;
+            return this;
+        }
+
+        public Builder outputParameterName(String outputParameterName) {
+            this.outputParameterName = outputParameterName;
+            return this;
+        }
+
         public Builder name(String name) {
             this.name = name;
             return this;
@@ -83,10 +107,12 @@ public class DslParameter {
 
         public DslParameter build() {
             DslParameter dslParameter = new DslParameter();
+            dslParameter.name = this.name;
             dslParameter.value = this.value;
             dslParameter.definitionKey = this.definitionKey;
+            dslParameter.outputParameterName = this.outputParameterName;
             dslParameter.nodeName = this.nodeName;
-            dslParameter.name = this.name;
+            dslParameter.outputNodeName = this.outputNodeName;
             return dslParameter;
         }
     }

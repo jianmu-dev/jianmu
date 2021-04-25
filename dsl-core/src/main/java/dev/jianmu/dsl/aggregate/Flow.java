@@ -27,12 +27,46 @@ public class Flow {
         });
     }
 
+    public Set<OutputParameterRefer> getOutputParameterRefs(String projectId, String workflowVersion) {
+        Set<OutputParameterRefer> refers = new HashSet<>();
+        nodes.forEach(node -> node.getParam().forEach((key, val) -> {
+            var outputVal = findOutputVariable(val);
+            if (null != outputVal) {
+                var strings = outputVal.split("\\.");
+                var refer = OutputParameterRefer.Builder.anOutputParameterRef()
+                        .projectId(projectId)
+                        .workflowVersion(workflowVersion)
+                        .inputNodeName(node.getName())
+                        .inputNodeType(node.getType())
+                        .inputParameterRef(key)
+                        .outputNodeName(strings[0])
+                        .outputParameterRef(strings[1])
+                        .build();
+                refers.add(refer);
+            }
+        }));
+        return refers;
+    }
+
     public Set<DslParameter> getParams(Map<String, String> paramMap) {
         Set<DslParameter> parameters = new HashSet<>();
         nodes.forEach(node -> node.getParam().forEach((key, val) -> {
                     var valName = findVariable(val);
                     var secretName = findSecret(val);
                     if (null != valName) {
+                        // 处理输入参数引用输出参数
+                        if (valName.contains(".")) {
+                            var strings = valName.split("\\.");
+                            var p = DslParameter.Builder.aDslParameter()
+                                    .nodeName(node.getName())
+                                    .definitionKey(node.getType())
+                                    .name(key)
+                                    .outputNodeName(strings[0])
+                                    .outputParameterName(strings[1])
+                                    .build();
+                            parameters.add(p);
+                        }
+                        // 全局参数合并
                         if (null != paramMap.get(valName)) {
                             var p = DslParameter.Builder.aDslParameter()
                                     .nodeName(node.getName())
@@ -44,6 +78,7 @@ public class Flow {
                         }
                         return;
                     }
+                    // 密钥类型参数
                     if (null != secretName) {
                         var p = DslParameter.Builder.aDslParameter()
                                 .nodeName(node.getName())
@@ -54,6 +89,7 @@ public class Flow {
                         parameters.add(p);
                         return;
                     }
+                    // 正常参数
                     var p = DslParameter.Builder.aDslParameter()
                             .nodeName(node.getName())
                             .definitionKey(node.getType())
@@ -66,8 +102,17 @@ public class Flow {
         return parameters;
     }
 
+    private String findOutputVariable(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+\\.+[a-zA-Z0-9_-]*)\\}$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
     private String findVariable(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+\\.*[a-zA-Z0-9_-]*)\\}$");
+        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+)\\}$");
         Matcher matcher = pattern.matcher(paramValue);
         if (matcher.find()) {
             return matcher.group(1);

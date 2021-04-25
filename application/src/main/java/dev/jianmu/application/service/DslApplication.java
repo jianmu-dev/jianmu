@@ -108,14 +108,18 @@ public class DslApplication {
                 .steps(nodes.size() - 2)
                 .lastModifiedBy("admin")
                 .build();
-        // 返回任务定义输入参数列表
+        // 返回任务定义输入输出参数列表
         var parameters = this.findDefinitionParameters(flow.getNodes());
         // 返回DSL定义参数列表
         var param = flow.getParams(dsl.getParam());
+        // 返回DSL定义输出参数引用关系
+        var outputRefs = flow.getOutputParameterRefs(project.getId(), project.getWorkflowVersion());
         // 创建参数Map
         var ps = this.createParameters(param, parameters);
         // 创建参数引用,使用project id + WorkflowVersion + NodeName作为参数引用contextId，参见WorkerApplication#getEnvironmentMap
         var refs = this.createRefs(ps, project.getId() + project.getWorkflowVersion());
+        // 创建输入参数到输出参数的参数引用
+        var outRefs = this.createInputOutputRefs(outputRefs, parameters);
         // 创建流程
         var workflow = Workflow.Builder.aWorkflow()
                 .name(flow.getName())
@@ -136,6 +140,8 @@ public class DslApplication {
         this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
         this.parameterRepository.addAll(new ArrayList<>(ps.values()));
+        // 合并保存参数引用
+        refs.addAll(outRefs);
         this.referenceRepository.addAll(refs);
 
         return workflow;
@@ -172,13 +178,19 @@ public class DslApplication {
                 .version(project.getWorkflowVersion())
                 .nodes(nodes)
                 .build();
-        // 返回任务定义输入参数列表
+        // 返回任务定义输入输出参数列表
         var parameters = this.findDefinitionParameters(flow.getNodes());
+        // 返回DSL定义参数列表
         var param = flow.getParams(dsl.getParam());
+        // 返回DSL定义输出参数引用关系
+        var outputRefs = flow.getOutputParameterRefs(project.getId(), project.getWorkflowVersion());
+        outputRefs.forEach(System.out::println);
         // 创建参数Map
         var ps = this.createParameters(param, parameters);
         // 创建参数引用,使用project id + WorkflowVersion + NodeName作为参数引用contextId，参见WorkerApplication#getEnvironmentMap
         var refs = this.createRefs(ps, project.getId() + project.getWorkflowVersion());
+        // 创建输入参数到输出参数的参数引用
+        var outRefs = this.createInputOutputRefs(outputRefs, parameters);
         // 保存原始DSL
         var dslSource = DslSourceCode.Builder.aDslSourceCode()
                 .projectId(project.getId())
@@ -192,6 +204,8 @@ public class DslApplication {
         this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
         this.parameterRepository.addAll(new ArrayList<>(ps.values()));
+        // 合并保存参数引用
+        refs.addAll(outRefs);
         this.referenceRepository.addAll(refs);
 
         return workflow;
@@ -309,6 +323,7 @@ public class DslApplication {
                             .findByKey(node.getType())
                             .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
                     parameters.put(definition.getKey(), definition.getInputParameters());
+                    parameters.put(node.getName(), definition.getOutputParameters());
                 });
         return parameters;
     }
@@ -316,12 +331,13 @@ public class DslApplication {
     private Map<DslParameter, Parameter> createParameters(Set<DslParameter> dslParameters, Map<String, Set<TaskParameter>> defParameterMap) {
         Map<DslParameter, Parameter> params = new HashMap<>();
         dslParameters.forEach(dslParameter -> {
+            // 正常覆盖输入参数
             var parameters = defParameterMap.get(dslParameter.getDefinitionKey());
             if (null != parameters) {
-                var r = parameters.stream()
+                var taskParameterOptional = parameters.stream()
                         .filter(p -> p.getRef().equals(dslParameter.getName()))
                         .findFirst();
-                r.ifPresent(taskParameter -> {
+                taskParameterOptional.ifPresent(taskParameter -> {
                             var p = Parameter.Type.valueOf(taskParameter.getType())
                                     .newParameter(dslParameter.getValue());
                             dslParameter.setLinkedParameterId(taskParameter.getParameterId());
@@ -331,6 +347,27 @@ public class DslApplication {
             }
         });
         return params;
+    }
+
+    private List<Reference> createInputOutputRefs(Set<OutputParameterRefer> outputParameterRefers, Map<String, Set<TaskParameter>> defParameterMap) {
+        return outputParameterRefers.stream()
+                .map(outputParameterRefer -> {
+                    var inputParameters = defParameterMap.get(outputParameterRefer.getInputNodeType());
+                    var inputParameter = inputParameters.stream()
+                            .filter(p -> p.getRef().equals(outputParameterRefer.getInputParameterRef()))
+                            .findFirst().orElseThrow(() -> new DataNotFoundException("输入参数不存在"));
+                    var outputParameters = defParameterMap.get(outputParameterRefer.getOutputNodeName());
+                    var outParameter = outputParameters.stream()
+                            .filter(p -> p.getRef().equals(outputParameterRefer.getOutputParameterRef()))
+                            .findFirst().orElseThrow(() -> new DataNotFoundException("被引用的输出参数不存在"));
+                    outputParameterRefer.setOutputParameterId(outParameter.getParameterId());
+                    outputParameterRefer.setInputParameterId(inputParameter.getParameterId());
+                    return Reference.Builder.aReference()
+                            // contextId规则,使用project id + WorkflowVersion + NodeName
+                            .contextId(outputParameterRefer.getProjectId() + outputParameterRefer.getWorkflowVersion() + outputParameterRefer.getInputNodeName())
+                            .parameterId(inputParameter.getParameterId())
+                            .linkedParameterId(outParameter.getParameterId()).build();
+                }).collect(Collectors.toList());
     }
 
     private List<Reference> createRefs(Map<DslParameter, Parameter> ps, String contextId) {
