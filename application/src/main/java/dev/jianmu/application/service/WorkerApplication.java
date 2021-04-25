@@ -10,6 +10,7 @@ import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.secret.repository.KVPairRepository;
+import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Worker;
@@ -101,7 +102,7 @@ public class WorkerApplication {
         if (!(taskDefinition instanceof DockerDefinition)) {
             throw new RuntimeException("任务定义类型错误");
         }
-        var environmentMap = this.getEnvironmentMap(taskInstance);
+        var environmentMap = this.getEnvironmentMap(taskDefinition, taskInstance);
         var dockerTask = this.workerDomainService
                 .createDockerTask((DockerDefinition) taskDefinition, taskInstance, environmentMap);
         // 创建logWriter
@@ -119,8 +120,8 @@ public class WorkerApplication {
         return Parameter.Type.STRING.newParameter(kv.getValue());
     }
 
-    private Map<String, String> getEnvironmentMap(TaskInstance taskInstance) {
-        var parameterMap = taskInstance.getParameters().stream()
+    private Map<String, String> getEnvironmentMap(Definition definition, TaskInstance taskInstance) {
+        var parameterMap = definition.getInputParameters().stream()
                 .map(taskParameter -> Map.entry(
                         "JIANMU_" + taskParameter.getRef().toUpperCase(),
                         taskParameter.getParameterId()
@@ -133,7 +134,6 @@ public class WorkerApplication {
                                 // 使用TriggerId + AsyncTaskRef为参数引用 ContextId, 触发器参数覆盖输入参数场景
                                 // 参见DSL导入创建参数引用逻辑,DslApplication#createRefs
                                 taskInstance.getTriggerId() + taskInstance.getAsyncTaskRef()
-                                // TODO 输出参数覆盖输入参数场景未覆盖
                         )
                 );
         references.forEach(reference -> logger.info("-------------reference parameterId--------: {}", reference.getParameterId()));
