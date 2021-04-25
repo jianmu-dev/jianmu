@@ -1,7 +1,7 @@
 package dev.jianmu.task.service;
 
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.Definition;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public class InstanceDomainService {
                 .asyncTaskRef(asyncTaskRef)
                 .businessId(businessId)
                 .triggerId(triggerId)
-                .parameters(definition.getInputParameters())
+                .outputParameters(definition.getOutputParameters())
                 .build();
     }
 }
