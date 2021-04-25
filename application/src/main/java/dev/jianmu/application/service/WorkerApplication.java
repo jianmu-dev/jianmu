@@ -156,14 +156,18 @@ public class WorkerApplication {
         outputParameterRefers.forEach(outputParameterRefer -> {
             logger.info("outputParameterRefer: {}", outputParameterRefer);
             // 查询最后一次执行的任务实例
-            this.taskInstanceRepository
-                    .limitByAsyncTaskRefAndBusinessId(outputParameterRefer.getOutputNodeType(), taskInstance.getBusinessId())
-                    .flatMap(i -> i.getOutputParameters().stream()
-                            // 查找与输出参数引用关系匹配的输出参数
-                            .filter(taskParameter -> taskParameter.getRef().equals(outputParameterRefer.getOutputParameterRef()))
-                            .findFirst())
+            var found = this.taskInstanceRepository
+                    .limitByAsyncTaskRefAndBusinessId(outputParameterRefer.getOutputNodeName(), taskInstance.getBusinessId());
+            found.flatMap(i -> i.getOutputParameters().stream()
+                    // 查找与输出参数引用关系匹配的输出参数
+                    .filter(taskParameter -> taskParameter.getRef().equals(outputParameterRefer.getOutputParameterRef()))
+                    .findFirst())
                     // 如果存在，覆盖输入参数Map中的value(ParameterId)
-                    .ifPresent(taskParameter -> newParameterMap.put(taskParameter.getRef(), taskParameter.getParameterId()));
+                    .ifPresent(taskParameter -> {
+                        logger.info("覆盖输出参数：{} ParameterId: {}", outputParameterRefer.getInputParameterRef(), taskParameter.getParameterId());
+                        var oldId = newParameterMap.put("JIANMU_" + outputParameterRefer.getInputParameterRef().toUpperCase(), taskParameter.getParameterId());
+                        logger.info("覆盖前的值为: {}", oldId);
+                    });
         });
 
         // 根据参数ID去参数上下文查询参数值， 如果是密钥类型参数则去密钥管理上下文获取值

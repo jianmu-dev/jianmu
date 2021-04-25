@@ -108,7 +108,7 @@ public class TaskInstanceApplication {
             this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         }
         taskInstance.executeSucceeded(resultFile);
-        this.taskInstanceRepository.updateStatus(taskInstance);
+        this.taskInstanceRepository.saveSucceeded(taskInstance);
     }
 
     @Transactional
