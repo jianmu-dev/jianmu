@@ -38,9 +38,21 @@ public class RestExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler({DBException.DataNotFound.class, DataNotFoundException.class})
+    @ExceptionHandler(DataNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorMessage DBException(DBException.DataNotFound ex, WebRequest request) {
+    public ErrorMessage dataNotFoundException(DataNotFoundException ex, WebRequest request) {
+        logger.error("数据异常: ", ex);
+        return ErrorMessage.builder()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .message(ex.getMessage())
+                .description(request.getDescription(false))
+                .build();
+    }
+
+    @ExceptionHandler(DBException.DataNotFound.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage dbException(DBException.DataNotFound ex, WebRequest request) {
         logger.error("数据异常: ", ex);
         return ErrorMessage.builder()
                 .statusCode(HttpStatus.NOT_FOUND.value())
