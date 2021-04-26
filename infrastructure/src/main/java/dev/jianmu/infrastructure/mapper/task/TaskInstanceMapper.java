@@ -46,7 +46,7 @@ public interface TaskInstanceMapper {
     @Result(column = "output_parameters", property = "outputParameters", typeHandler = ParameterSetTypeHandler.class)
     Optional<TaskInstance> findById(String instanceId);
 
-    @Select("select * from task_instance where business_id = #{businessId}")
+    @Select("select * from task_instance where business_id = #{businessId} order by start_time asc")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "business_id", property = "businessId")

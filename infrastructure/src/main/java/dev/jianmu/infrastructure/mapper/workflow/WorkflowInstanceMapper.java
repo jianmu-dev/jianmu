@@ -55,7 +55,7 @@ public interface WorkflowInstanceMapper {
             "task_instances=#{wk.asyncTaskInstances , jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.TaskInstanceListTypeHandler}," +
             "end_time=#{wk.endTime},_version= _version+1 " +
             "where id = #{wk.id} and _version = #{version}")
-    boolean save(@Param("wk") WorkflowInstance workflowInstance,@Param("version") int version);
+    boolean save(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
     @Select("select * from workflow_instance")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
@@ -70,7 +70,7 @@ public interface WorkflowInstanceMapper {
             @Param("pageSize") int pageSize
     );
 
-    @Select("select * from workflow_instance where status = #{status}")
+    @Select("select * from workflow_instance where status = #{status} order by end_time desc")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")

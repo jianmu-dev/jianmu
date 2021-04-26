@@ -1,6 +1,5 @@
 package dev.jianmu.api.vo;
 
-import dev.jianmu.task.aggregate.InstanceStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,11 +18,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Schema(description = "任务实例Vo")
 public class TaskInstanceVo {
+    public enum Status {
+        INIT,
+        WAITING,
+        RUNNING,
+        SKIPPED,
+        FAILED,
+        SUCCEEDED,
+    }
+
     private String instanceId;
     private String nodeName;
     private String taskName;
     private String taskVersion;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private InstanceStatus status;
+    private Status status;
 }
