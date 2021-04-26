@@ -45,7 +45,7 @@ public class LogController {
     private void readAndWrite(final BufferedReader reader, OutputStream os) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
-            os.write(line.getBytes(StandardCharsets.UTF_8));
+            os.write((line + "\n").getBytes(StandardCharsets.UTF_8));
         }
     }
 }
