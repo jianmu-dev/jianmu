@@ -1,6 +1,7 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.dsl.aggregate.DslSourceCode;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 /**
  * @class: DslController
@@ -44,6 +47,18 @@ public class DslController {
     public Workflow importDsl(@PathVariable String dslUrl) {
         var tempDslUrl = "test-dsl.yaml";
         return this.dslApplication.importDsl(tempDslUrl);
+    }
+
+    @PutMapping("project/{dslId}")
+    @Operation(summary = "更新项目", description = "更新项目DSL定义")
+    public void updateProject(@PathVariable String dslId, @RequestBody @Valid DslTextDto dslTextDto) {
+        this.dslApplication.updateProject(dslId, dslTextDto.getDslText());
+    }
+
+    @PostMapping("/project")
+    @Operation(summary = "创建项目", description = "上传DSL并创建项目")
+    public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
+        this.dslApplication.createProject(dslTextDto.getDslText());
     }
 
     @DeleteMapping("/{dslId}")

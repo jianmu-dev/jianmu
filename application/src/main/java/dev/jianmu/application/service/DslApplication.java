@@ -88,7 +88,10 @@ public class DslApplication {
         publisher.publishEvent(dslRef);
     }
 
-    @Transactional
+    public void createProject(String dslText) {
+        this.createDsl(dslText);
+    }
+
     public Workflow importDsl(String dslUrl) {
         var dslFile = new File(dslUrl);
         String dslText;
@@ -98,6 +101,11 @@ public class DslApplication {
             logger.error("DSL Error: ", e);
             throw new RuntimeException("无法读取DSL");
         }
+        return createDsl(dslText);
+    }
+
+    @Transactional
+    public Workflow createDsl(String dslText) {
         // 解析DSL
         var dsl = this.parseDsl(dslText);
         var flow = new Flow(dsl.getWorkflow());
@@ -151,7 +159,6 @@ public class DslApplication {
         return workflow;
     }
 
-    @Transactional
     public Workflow syncDsl(String dslId) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
@@ -163,6 +170,17 @@ public class DslApplication {
             logger.error("DSL Error: ", e);
             throw new RuntimeException("无法读取DSL");
         }
+        return this.updateDsl(project, dslText);
+    }
+
+    public void updateProject(String dslId, String dslText) {
+        Project project = this.projectRepository.findById(dslId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+        this.updateDsl(project, dslText);
+    }
+
+    @Transactional
+    public Workflow updateDsl(Project project, String dslText) {
         // 解析DSL
         var dsl = this.parseDsl(dslText);
         var flow = new Flow(dsl.getWorkflow());
