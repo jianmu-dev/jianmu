@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.dsl.aggregate.DslSourceCode;
 import dev.jianmu.dsl.aggregate.Project;
@@ -53,6 +54,12 @@ public class DslController {
     @Operation(summary = "更新项目", description = "更新项目DSL定义")
     public void updateProject(@PathVariable String dslId, @RequestBody @Valid DslTextDto dslTextDto) {
         this.dslApplication.updateProject(dslId, dslTextDto.getDslText());
+    }
+
+    @GetMapping("project/{dslId}")
+    @Operation(summary = "获取项目详情", description = "更新项目DSL定义")
+    public Project getProject(@PathVariable String dslId) {
+        return this.dslApplication.findById(dslId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
     }
 
     @PostMapping("/project")

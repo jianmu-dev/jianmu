@@ -247,6 +247,10 @@ public class DslApplication {
         return this.projectRepository.findAll(pageNum, pageSize);
     }
 
+    public Optional<Project> findById(String dslId) {
+        return this.projectRepository.findById(dslId);
+    }
+
     private DslModel parseDsl(String dslText) {
         DslModel dsl;
         try {
