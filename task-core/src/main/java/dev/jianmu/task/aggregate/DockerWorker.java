@@ -1,6 +1,4 @@
-package dev.jianmu.infrastructure.docker;
-
-import dev.jianmu.task.aggregate.DockerTask;
+package dev.jianmu.task.aggregate;
 
 import java.io.BufferedWriter;
 

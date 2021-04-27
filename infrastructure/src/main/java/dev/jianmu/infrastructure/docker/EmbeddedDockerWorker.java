@@ -9,6 +9,7 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import dev.jianmu.task.aggregate.DockerTask;
+import dev.jianmu.task.aggregate.DockerWorker;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
