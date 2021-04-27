@@ -1,5 +1,6 @@
 package dev.jianmu.version.aggregate;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -16,6 +17,10 @@ public class TaskDefinition {
     private String name;
     // Ref
     private String ref;
+    // 创建时间
+    private final LocalDateTime createdTime = LocalDateTime.now();
+    // 最后修改时间
+    private LocalDateTime lastModifiedTime;
 
     public String getId() {
         return id;
@@ -27,6 +32,14 @@ public class TaskDefinition {
 
     public String getRef() {
         return ref;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public LocalDateTime getLastModifiedTime() {
+        return lastModifiedTime;
     }
 
     public void setName(String name) {
@@ -64,6 +77,7 @@ public class TaskDefinition {
             TaskDefinition taskDefinition = new TaskDefinition();
             taskDefinition.name = this.name;
             taskDefinition.ref = this.ref;
+            taskDefinition.lastModifiedTime = LocalDateTime.now();
             return taskDefinition;
         }
     }

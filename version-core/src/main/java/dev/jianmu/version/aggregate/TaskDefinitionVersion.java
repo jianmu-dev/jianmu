@@ -1,5 +1,7 @@
 package dev.jianmu.version.aggregate;
 
+import java.time.LocalDateTime;
+
 /**
  * @class: TaskDefinitionVersion
  * @description: 任务定义版本
@@ -17,6 +19,10 @@ public class TaskDefinitionVersion {
     private String definitionKey;
     // 描述
     private String description;
+    // 创建时间
+    private final LocalDateTime createdTime = LocalDateTime.now();
+    // 最后修改时间
+    private LocalDateTime lastModifiedTime;
 
     public String getTaskDefinitionId() {
         return taskDefinitionId;
@@ -56,6 +62,14 @@ public class TaskDefinitionVersion {
 
     public String getDescription() {
         return description;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public LocalDateTime getLastModifiedTime() {
+        return lastModifiedTime;
     }
 
     public static final class Builder {
@@ -105,6 +119,7 @@ public class TaskDefinitionVersion {
             taskDefinitionVersion.definitionKey = this.definitionKey;
             taskDefinitionVersion.name = this.name;
             taskDefinitionVersion.description = this.description;
+            taskDefinitionVersion.lastModifiedTime = LocalDateTime.now();
             return taskDefinitionVersion;
         }
     }

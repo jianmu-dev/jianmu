@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-04-18 16:06
  **/
 public interface TaskDefinitionVersionMapper {
-    @Insert("insert into task_definition_version(task_definition_id, name, task_definition_ref, definition_key, description) " +
-            "values(#{taskDefinitionId}, #{name}, #{taskDefinitionRef}, #{definitionKey}, #{description})")
+    @Insert("insert into task_definition_version(task_definition_id, name, task_definition_ref, definition_key, description, created_time, lastModified_time) " +
+            "values(#{taskDefinitionId}, #{name}, #{taskDefinitionRef}, #{definitionKey}, #{description}, #{createdTime}, #{lastModifiedTime})")
     void add(TaskDefinitionVersion taskDefinitionVersion);
 
     @Delete("delete from task_definition_version where definition_key = #{definitionKey}")
@@ -28,17 +28,23 @@ public interface TaskDefinitionVersionMapper {
     @Result(column = "task_definition_id", property = "taskDefinitionId")
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "lastModified_time", property = "lastModifiedTime")
     List<TaskDefinitionVersion> findByTaskDefinitionRef(String taskDefinitionRef);
 
     @Select("select * from task_definition_version where task_definition_ref = #{taskDefinitionRef} and name = #{name}")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "lastModified_time", property = "lastModifiedTime")
     Optional<TaskDefinitionVersion> findByTaskDefinitionRefAndName(@Param("taskDefinitionRef") String taskDefinitionRef, @Param("name") String name);
 
     @Select("select * from task_definition_version where definition_key = #{key}")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "lastModified_time", property = "lastModifiedTime")
     Optional<TaskDefinitionVersion> findByDefinitionKey(String key);
 }
