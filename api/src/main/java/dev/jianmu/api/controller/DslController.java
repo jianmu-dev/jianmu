@@ -57,7 +57,7 @@ public class DslController {
     }
 
     @GetMapping("project/{dslId}")
-    @Operation(summary = "获取项目详情", description = "更新项目DSL定义")
+    @Operation(summary = "获取项目详情", description = "获取项目详情")
     public Project getProject(@PathVariable String dslId) {
         return this.dslApplication.findById(dslId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
     }
