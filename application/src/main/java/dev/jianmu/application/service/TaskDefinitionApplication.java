@@ -156,8 +156,16 @@ public class TaskDefinitionApplication {
     }
 
     public void deleteTaskDefinitionVersion(String ref, String name) {
-        var version = this.taskDefinitionVersionRepository
-                .findByTaskDefinitionRefAndName(ref, name)
+        var versions = this.taskDefinitionVersionRepository
+                .findByTaskDefinitionRef(ref);
+        if (versions.size() == 1) {
+            this.taskDefinitionRepository
+                    .findByRef(versions.get(0).getTaskDefinitionRef())
+                    .ifPresent(this.taskDefinitionRepository::delete);
+        }
+        var version = versions.stream()
+                .filter(v -> v.getName().equals(name))
+                .findFirst()
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
         this.taskDefinitionVersionRepository.delete(version);
         this.definitionRepository.delete(version.getDefinitionKey());
