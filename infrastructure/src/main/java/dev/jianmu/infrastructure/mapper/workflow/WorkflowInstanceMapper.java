@@ -71,12 +71,13 @@ public interface WorkflowInstanceMapper {
     );
 
     @Select("<script>" +
-            "SELECT * FROM `workflow_instance` where status = #{status} " +
-            "<choose>" +
-            "<when test='id != null'> AND `id` like concat('%', #{id}, '%')</when>" +
-            "<when test='name != null'> AND `name` like concat('%', #{name}, '%')</when>" +
-            "<when test='workflowVersion != null'> AND `workflow_version` like concat('%', #{workflowVersion}, '%')</when>" +
-            "</choose>" +
+            "SELECT * FROM `workflow_instance` " +
+            "<where>" +
+            "<if test='status != null'>status = #{status}</if>" +
+            "<if test='!id.isBlank()'> AND `id` like concat('%', #{id}, '%')</if>" +
+            "<if test='!name.isBlank()'> AND `name` like concat('%', #{name}, '%')</if>" +
+            "<if test='!workflowVersion.isBlank()'> AND `workflow_version` like concat('%', #{workflowVersion}, '%')</if>" +
+            "</where>" +
             " order by end_time desc" +
             "</script>")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
