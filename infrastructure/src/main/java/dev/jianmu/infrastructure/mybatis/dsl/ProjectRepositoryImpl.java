@@ -48,8 +48,8 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findByWorkflowRef(workflowRef);
     }
 
-    public PageInfo<Project> findAll(int pageNum, int pageSize) {
+    public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(this.projectMapper::findAll);
+                .doSelectPageInfo(() -> this.projectMapper.findAll(workflowName));
     }
 }

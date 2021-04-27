@@ -44,7 +44,10 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<Project> findByWorkflowRef(String workflowRef);
 
-    @Select("select * from jianmu_project")
+    @Select("<script>" +
+            "SELECT * FROM `jianmu_project` " +
+            "<if test='name != null'> WHERE `workflow_name` like concat('%', #{workflowName}, '%')</if>" +
+            "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_url", property = "dslUrl")
     @Result(column = "workflow_ref", property = "workflowRef")
@@ -52,5 +55,5 @@ public interface ProjectMapper {
     @Result(column = "dsl_text", property = "dslText")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
-    List<Project> findAll();
+    List<Project> findAll(String workflowName);
 }

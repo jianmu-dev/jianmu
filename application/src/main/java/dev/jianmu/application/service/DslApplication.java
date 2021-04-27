@@ -243,8 +243,8 @@ public class DslApplication {
         return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
     }
 
-    public PageInfo<Project> findAll(int pageNum, int pageSize) {
-        return this.projectRepository.findAll(pageNum, pageSize);
+    public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
+        return this.projectRepository.findAll(workflowName, pageNum, pageSize);
     }
 
     public Optional<Project> findById(String dslId) {

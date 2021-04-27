@@ -2,7 +2,7 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.DslTextDto;
-import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.dsl.aggregate.DslSourceCode;
@@ -81,7 +81,7 @@ public class DslController {
 
     @GetMapping
     @Operation(summary = "分页查询DSL列表", description = "分页查询DSL列表")
-    public PageInfo<Project> findAll(PageDto pageDto) {
-        return this.dslApplication.findAll(pageDto.getPageNum(), pageDto.getPageSize());
+    public PageInfo<Project> findAll(ProjectSearchDto searchDto) {
+        return this.dslApplication.findAll(searchDto.getName(), searchDto.getPageNum(), searchDto.getPageSize());
     }
 }
