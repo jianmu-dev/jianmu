@@ -13,18 +13,18 @@ import java.util.Optional;
  * @create: 2021-04-18 16:05
  **/
 public interface TaskDefinitionMapper {
-    @Insert("insert into task_definition(id, ref, name, created_time, lastModified_time) " +
+    @Insert("insert into task_definition(id, ref, name, created_time, last_modified_time) " +
             "values(#{id}, #{ref}, #{name}, #{createdTime}, #{lastModifiedTime})")
     void add(TaskDefinition taskDefinition);
 
     @Select("select * from task_definition where id = #{id}")
     @Result(column = "created_time", property = "createdTime")
-    @Result(column = "lastModified_time", property = "lastModifiedTime")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<TaskDefinition> findById(String id);
 
     @Select("select * from task_definition where ref = #{ref}")
     @Result(column = "created_time", property = "createdTime")
-    @Result(column = "lastModified_time", property = "lastModifiedTime")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<TaskDefinition> findByRef(String ref);
 
     @Delete("delete from task_definition where id = #{id}")
@@ -38,6 +38,6 @@ public interface TaskDefinitionMapper {
             "<if test='name != null'> WHERE `name` like concat('%', #{name}, '%')</if>" +
             "</script>")
     @Result(column = "created_time", property = "createdTime")
-    @Result(column = "lastModified_time", property = "lastModifiedTime")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<TaskDefinition> findAll(String name);
 }

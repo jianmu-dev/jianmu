@@ -1,6 +1,7 @@
 package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.mybatis.secret.NamespaceRepositoryImpl;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -27,6 +28,7 @@ public class SecretApplication {
     }
 
     public void createNamespace(Namespace namespace) {
+        namespace.setLastModifiedTime();
         this.namespaceRepository.add(namespace);
     }
 
@@ -36,10 +38,18 @@ public class SecretApplication {
     }
 
     public void createKVPair(KVPair kvPair) {
+        var namespace = this.namespaceRepository.findByName(kvPair.getNamespaceName())
+                .orElseThrow(() -> new DataNotFoundException("未找到对应的命名空间"));
+        namespace.setLastModifiedTime();
+        this.namespaceRepository.updateLastModifiedTime(namespace);
         this.kvPairRepository.add(kvPair);
     }
 
     public void deleteKVPair(String namespaceName, String key) {
+        var namespace = this.namespaceRepository.findByName(namespaceName)
+                .orElseThrow(() -> new DataNotFoundException("未找到对应的命名空间"));
+        namespace.setLastModifiedTime();
+        this.namespaceRepository.updateLastModifiedTime(namespace);
         this.kvPairRepository.delete(namespaceName, key);
     }
 

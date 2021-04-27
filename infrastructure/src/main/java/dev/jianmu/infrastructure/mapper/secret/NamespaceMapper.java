@@ -1,9 +1,7 @@
 package dev.jianmu.infrastructure.mapper.secret;
 
 import dev.jianmu.secret.aggregate.Namespace;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-04-20 13:32
  **/
 public interface NamespaceMapper {
-    @Insert("insert into secret_namespace(name, description) " +
-            "values(#{name}, #{description})")
+    @Insert("insert into secret_namespace(name, description, created_time, last_modified_time) " +
+            "values(#{name}, #{description}, #{createdTime}, #{lastModifiedTime})")
     void add(Namespace namespace);
 
     @Delete("delete from secret_namespace where name = #{name}")
@@ -25,9 +23,14 @@ public interface NamespaceMapper {
     @Select("select * from secret_namespace where name = #{name}")
     Optional<Namespace> findByName(String name);
 
+    @Update("update secret_namespace set last_modified_time = #{lastModifiedTime} where name = #{name}")
+    void updateLastModifiedTime(Namespace namespace);
+
     @Select("<script>" +
             "SELECT * FROM `secret_namespace` " +
             "<if test='name != null'> WHERE `name` like concat('%', #{name}, '%')</if>" +
             "</script>")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Namespace> findAll(String name);
 }

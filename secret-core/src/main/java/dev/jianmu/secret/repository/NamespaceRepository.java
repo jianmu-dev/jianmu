@@ -16,4 +16,6 @@ public interface NamespaceRepository {
     void delete(String name);
 
     Optional<Namespace> findByName(String name);
+
+    void updateLastModifiedTime(Namespace namespace);
 }

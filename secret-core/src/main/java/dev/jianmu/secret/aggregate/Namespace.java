@@ -30,8 +30,8 @@ public class Namespace {
         this.description = description;
     }
 
-    public void setLastModifiedTime(LocalDateTime lastModifiedTime) {
-        this.lastModifiedTime = lastModifiedTime;
+    public void setLastModifiedTime() {
+        this.lastModifiedTime = LocalDateTime.now();
     }
 
     public LocalDateTime getCreatedTime() {

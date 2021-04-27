@@ -34,6 +34,11 @@ public class NamespaceRepositoryImpl implements NamespaceRepository {
     }
 
     @Override
+    public void updateLastModifiedTime(Namespace namespace) {
+        this.namespaceMapper.updateLastModifiedTime(namespace);
+    }
+
+    @Override
     public Optional<Namespace> findByName(String name) {
         return this.namespaceMapper.findByName(name);
     }
