@@ -151,8 +151,8 @@ public class TaskDefinitionApplication {
         return this.taskDefinitionVersionRepository.findByTaskDefinitionRef(ref);
     }
 
-    public PageInfo<TaskDefinition> findAll(int pageNum, int pageSize) {
-        return this.taskDefinitionRepository.findAll(pageNum, pageSize);
+    public PageInfo<TaskDefinition> findAll(String name, int pageNum, int pageSize) {
+        return this.taskDefinitionRepository.findAll(name, pageNum, pageSize);
     }
 
     public void deleteTaskDefinitionVersion(String ref, String name) {

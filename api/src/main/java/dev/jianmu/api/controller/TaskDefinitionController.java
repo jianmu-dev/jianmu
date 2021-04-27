@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.TaskDefinitionDto;
+import dev.jianmu.api.dto.TaskDefinitionSearchDto;
 import dev.jianmu.api.dto.TaskDefinitionVersionDto;
 import dev.jianmu.api.mapper.ContainerSpecMapper;
 import dev.jianmu.api.mapper.TaskDefinitionDtoMapper;
@@ -68,8 +69,8 @@ public class TaskDefinitionController {
 
     @GetMapping
     @Operation(summary = "任务定义列表", description = "获取任务定义列表")
-    public PageInfo<TaskDefinition> getTaskDefinitions(PageDto pageDto) {
-        return this.taskDefinitionApplication.findAll(pageDto.getPageNum(), pageDto.getPageSize());
+    public PageInfo<TaskDefinition> getTaskDefinitions(TaskDefinitionSearchDto searchDto) {
+        return this.taskDefinitionApplication.findAll(searchDto.getName(), searchDto.getPageNum(), searchDto.getPageSize());
     }
 
     @GetMapping("/versions/{ref}")

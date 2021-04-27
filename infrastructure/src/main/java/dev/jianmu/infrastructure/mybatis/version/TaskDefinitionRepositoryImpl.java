@@ -45,8 +45,8 @@ public class TaskDefinitionRepositoryImpl implements TaskDefinitionRepository {
         this.taskDefinitionMapper.updateName(taskDefinition);
     }
 
-    public PageInfo<TaskDefinition> findAll(int pageNum, int pageSize) {
+    public PageInfo<TaskDefinition> findAll(String name, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(this.taskDefinitionMapper::findAll);
+                .doSelectPageInfo(() -> this.taskDefinitionMapper.findAll(name));
     }
 }

@@ -29,6 +29,9 @@ public interface TaskDefinitionMapper {
     @Update("update task_definition set name = #{name} where id = #{id}")
     void updateName(TaskDefinition taskDefinition);
 
-    @Select("select * from task_definition")
-    List<TaskDefinition> findAll();
+    @Select("<script>" +
+            "SELECT * FROM `task_definition` " +
+            "<if test='name != null'> WHERE `name` like concat('%', #{name}, '%')</if>" +
+            "</script>")
+    List<TaskDefinition> findAll(String name);
 }
