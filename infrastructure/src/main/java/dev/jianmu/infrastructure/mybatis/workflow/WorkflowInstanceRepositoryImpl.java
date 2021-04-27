@@ -81,8 +81,8 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
         return this.workflowInstanceMapper.findAll(pageNum, pageSize);
     }
 
-    public PageInfo<WorkflowInstance> findAllPage(ProcessStatus status, int pageNum, int pageSize) {
+    public PageInfo<WorkflowInstance> findAllPage(String id, String name, String workflowVersion, ProcessStatus status, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.workflowInstanceMapper.findAllPage(status));
+                .doSelectPageInfo(() -> this.workflowInstanceMapper.findAllPage(id, name, workflowVersion, status));
     }
 }

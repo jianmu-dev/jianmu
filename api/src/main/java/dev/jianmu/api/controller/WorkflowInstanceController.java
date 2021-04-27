@@ -1,13 +1,12 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.dto.WorkflowInstanceSearchDto;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
 import dev.jianmu.api.vo.PageUtils;
 import dev.jianmu.api.vo.WorkflowInstanceVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
-import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,8 +32,15 @@ public class WorkflowInstanceController {
     }
 
     @GetMapping
-    public PageInfo<WorkflowInstanceVo> findAll(ProcessStatus status, PageDto pageDto) {
-        var page = this.instanceApplication.findAllPage(status, pageDto.getPageNum(), pageDto.getPageSize());
+    public PageInfo<WorkflowInstanceVo> findAll(WorkflowInstanceSearchDto searchDto) {
+        var page = this.instanceApplication.findAllPage(
+                searchDto.getId(),
+                searchDto.getName(),
+                searchDto.getWorkflowVersion(),
+                searchDto.getStatus(),
+                searchDto.getPageNum(),
+                searchDto.getPageSize()
+        );
         var instances = page.getList();
         var newInstances = WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
         PageInfo<WorkflowInstanceVo> newPage = PageUtils.pageInfo2PageInfoVo(page);

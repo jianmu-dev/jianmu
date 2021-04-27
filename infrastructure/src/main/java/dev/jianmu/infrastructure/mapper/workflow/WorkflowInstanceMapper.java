@@ -70,7 +70,15 @@ public interface WorkflowInstanceMapper {
             @Param("pageSize") int pageSize
     );
 
-    @Select("select * from workflow_instance where status = #{status} order by end_time desc")
+    @Select("<script>" +
+            "SELECT * FROM `workflow_instance` where status = #{status} " +
+            "<choose>" +
+            "<when test='id != null'> AND `id` like concat('%', #{id}, '%')</when>" +
+            "<when test='name != null'> AND `name` like concat('%', #{name}, '%')</when>" +
+            "<when test='workflowVersion != null'> AND `workflow_version` like concat('%', #{workflowVersion}, '%')</when>" +
+            "</choose>" +
+            " order by end_time desc" +
+            "</script>")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -78,5 +86,10 @@ public interface WorkflowInstanceMapper {
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findAllPage(ProcessStatus status);
+    List<WorkflowInstance> findAllPage(
+            @Param("id") String id,
+            @Param("name") String name,
+            @Param("workflowVersion") String workflowVersion,
+            @Param("status") ProcessStatus status
+    );
 }

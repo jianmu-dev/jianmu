@@ -56,8 +56,8 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.findById(id);
     }
 
-    public PageInfo<WorkflowInstance> findAllPage(ProcessStatus status, int pageNum, int pageSize) {
-        return this.workflowInstanceRepository.findAllPage(status, pageNum, pageSize);
+    public PageInfo<WorkflowInstance> findAllPage(String id, String name, String workflowVersion, ProcessStatus status, int pageNum, int pageSize) {
+        return this.workflowInstanceRepository.findAllPage(id, name, workflowVersion, status, pageNum, pageSize);
     }
 
     // 创建并启动流程
