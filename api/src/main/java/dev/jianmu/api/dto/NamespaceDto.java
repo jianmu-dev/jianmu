@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 /**
  * @class: NamespaceDto
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotBlank;
 public class NamespaceDto {
     @Schema(required = true)
     @NotBlank(message = "name不能为空")
+    @Pattern(regexp = "^\\w+$", message = "只能输入由数字、26个英文字母或者下划线组成的字符串")
     private String name;
     private String description;
 }
