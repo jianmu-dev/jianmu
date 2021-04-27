@@ -3,7 +3,7 @@ package dev.jianmu.api.controller;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.KVPairDto;
 import dev.jianmu.api.dto.NamespaceDto;
-import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.mapper.KVPairDtoMapper;
 import dev.jianmu.api.mapper.NamespaceDtoMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
@@ -76,7 +76,7 @@ public class SecretController {
 
     @GetMapping("/namespaces")
     @Operation(summary = "分页查询命名空间列表", description = "分页查询命名空间列表")
-    public PageInfo<Namespace> findAll(PageDto pageDto) {
-        return this.secretApplication.findAll(pageDto.getPageNum(), pageDto.getPageSize());
+    public PageInfo<Namespace> findAll(NamespaceSearchDto namespaceSearchDto) {
+        return this.secretApplication.findAll(namespaceSearchDto.getName(), namespaceSearchDto.getPageNum(), namespaceSearchDto.getPageSize());
     }
 }

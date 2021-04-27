@@ -7,7 +7,6 @@ import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.secret.repository.KVPairRepository;
 import org.springframework.stereotype.Service;
 
-import java.awt.desktop.OpenFilesEvent;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,7 +51,7 @@ public class SecretApplication {
         return this.kvPairRepository.findByNamespaceName(namespaceName);
     }
 
-    public PageInfo<Namespace> findAll(int pageNum, int pageSize) {
-        return this.namespaceRepository.findAll(pageNum, pageSize);
+    public PageInfo<Namespace> findAll(String name, int pageNum, int pageSize) {
+        return this.namespaceRepository.findAll(name, pageNum, pageSize);
     }
 }

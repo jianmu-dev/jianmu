@@ -25,6 +25,9 @@ public interface NamespaceMapper {
     @Select("select * from secret_namespace where name = #{name}")
     Optional<Namespace> findByName(String name);
 
-    @Select("select * from secret_namespace")
-    List<Namespace> findAll();
+    @Select("<script>" +
+            "SELECT * FROM `secret_namespace` " +
+            "<if test='name != null'> WHERE `name` like concat('%', #{name}, '%')</if>" +
+            "</script>")
+    List<Namespace> findAll(String name);
 }

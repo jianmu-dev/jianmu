@@ -7,19 +7,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @class: PageDto
- * @description: 分页DTO
+ * @class: NamespaceSearchDto
+ * @description: NamespaceSearchDto
  * @author: Ethan Liu
- * @create: 2021-04-19 16:42
+ * @create: 2021-04-27 08:45
  **/
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "分页DTO")
-public class PageDto {
-    @Schema(required = true)
-    private int pageNum;
-    @Schema(required = true)
-    private int pageSize;
+@Schema(description = "Namespace查询DTO")
+public class NamespaceSearchDto extends PageDto {
+    private String name;
 }

@@ -38,8 +38,8 @@ public class NamespaceRepositoryImpl implements NamespaceRepository {
         return this.namespaceMapper.findByName(name);
     }
 
-    public PageInfo<Namespace> findAll(int pageNum, int pageSize) {
+    public PageInfo<Namespace> findAll(String name, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(this.namespaceMapper::findAll);
+                .doSelectPageInfo(() -> this.namespaceMapper.findAll(name));
     }
 }
