@@ -2,10 +2,8 @@ package dev.jianmu.task.aggregate;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @class: TaskInstance
@@ -37,16 +35,6 @@ public class TaskInstance extends AggregateRoot {
     private Set<TaskParameter> outputParameters = new HashSet<>();
 
     private TaskInstance() {
-    }
-
-    public Set<TaskParameter> checkOutputParameters(Map<String, Object> parameterMap) {
-        return outputParameters.stream()
-                .filter(taskParameter -> parameterMap.get(taskParameter.getRef()) != null)
-                .collect(Collectors.toSet());
-    }
-
-    public void updateOutputParameters(Set<TaskParameter> outputParameters) {
-        this.outputParameters = outputParameters;
     }
 
     public void running() {

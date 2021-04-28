@@ -1,5 +1,6 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,4 +19,6 @@ public interface Definition {
     Set<TaskParameter> getInputParameters();
 
     Set<TaskParameter> getOutputParameters();
+
+    Set<TaskParameter> matchedOutputParameters(Map<String, Object> parameterMap);
 }

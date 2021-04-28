@@ -3,6 +3,7 @@ package dev.jianmu.task.aggregate;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @class: TaskDefinition
@@ -22,6 +23,13 @@ public class BaseDefinition implements Definition {
     protected Set<TaskParameter> inputParameters = new HashSet<>();
 
     protected Set<TaskParameter> outputParameters = new HashSet<>();
+
+    @Override
+    public Set<TaskParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
+        return outputParameters.stream()
+                .filter(taskParameter -> parameterMap.get(taskParameter.getRef()) != null)
+                .collect(Collectors.toSet());
+    }
 
     @Override
     public Set<TaskParameter> getInputParameters() {
