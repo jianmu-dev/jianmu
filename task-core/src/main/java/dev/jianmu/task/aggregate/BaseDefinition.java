@@ -1,6 +1,7 @@
 package dev.jianmu.task.aggregate;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +24,25 @@ public class BaseDefinition implements Definition {
     protected Set<TaskParameter> inputParameters = new HashSet<>();
 
     protected Set<TaskParameter> outputParameters = new HashSet<>();
+
+    @Override
+    public Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters) {
+        return outputParameters.stream()
+                // 非事件参数覆盖
+                .peek(taskParameter -> inputParameters.stream()
+                        .filter(inputParameter -> !inputParameter.getSource().equals(InputParameter.Source.EVENT))
+                        .filter(inputParameter -> inputParameter.getRef().equals(taskParameter.getRef()))
+                        .findFirst()
+                        .ifPresent(inputParameter -> taskParameter.setParameterId(inputParameter.getParameterId()))
+                )
+                // 事件参数再次覆盖
+                .peek(taskParameter -> inputParameters.stream()
+                        .filter(inputParameter -> inputParameter.getSource().equals(InputParameter.Source.EVENT))
+                        .filter(inputParameter -> inputParameter.getRef().equals(taskParameter.getRef()))
+                        .findFirst()
+                        .ifPresent(inputParameter -> taskParameter.setParameterId(inputParameter.getParameterId())))
+                .collect(Collectors.toSet());
+    }
 
     @Override
     public Set<TaskParameter> matchedOutputParameters(Map<String, Object> parameterMap) {

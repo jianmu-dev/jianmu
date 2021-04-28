@@ -2,7 +2,6 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.repository.OutputParameterReferRepository;
-import dev.jianmu.task.aggregate.DockerWorker;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.aggregate.SecretParameter;
@@ -11,11 +10,9 @@ import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.secret.repository.KVPairRepository;
-import dev.jianmu.task.aggregate.Definition;
-import dev.jianmu.task.aggregate.DockerDefinition;
-import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.aggregate.Worker;
+import dev.jianmu.task.aggregate.*;
 import dev.jianmu.task.repository.DefinitionRepository;
+import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.repository.WorkerRepository;
 import dev.jianmu.task.service.WorkerDomainService;
@@ -28,7 +25,6 @@ import javax.inject.Inject;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -53,6 +49,7 @@ public class WorkerApplication {
     private final ReferenceRepository referenceRepository;
     private final ReferenceDomainService referenceDomainService;
     private final KVPairRepository kvPairRepository;
+    private final InputParameterRepository inputParameterRepository;
 
     @Inject
     public WorkerApplication(
@@ -67,7 +64,8 @@ public class WorkerApplication {
             OutputParameterReferRepository outputParameterReferRepository,
             ReferenceRepository referenceRepository,
             ReferenceDomainService referenceDomainService,
-            KVPairRepository kvPairRepository
+            KVPairRepository kvPairRepository,
+            InputParameterRepository inputParameterRepository
     ) {
         this.workerRepository = workerRepository;
         this.definitionRepository = definitionRepository;
@@ -81,6 +79,7 @@ public class WorkerApplication {
         this.referenceRepository = referenceRepository;
         this.referenceDomainService = referenceDomainService;
         this.kvPairRepository = kvPairRepository;
+        this.inputParameterRepository = inputParameterRepository;
     }
 
     public void online(String workerId) {
@@ -130,57 +129,27 @@ public class WorkerApplication {
     }
 
     private Map<String, String> getEnvironmentMap(Definition definition, TaskInstance taskInstance) {
+        var inputParameters = this.inputParameterRepository
+                .findByBusinessIdAndAsyncTaskRef(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
+        var taskInputParameters = definition.getInputParametersWith(inputParameters);
         // 获得输入参数原始Map
-        var parameterMap = definition.getInputParameters().stream()
+        var parameterMap = taskInputParameters.stream()
                 .map(taskParameter -> Map.entry(
                         "JIANMU_" + taskParameter.getRef().toUpperCase(),
                         taskParameter.getParameterId()
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        // 根据ContextId查询输入参数引用
-        var references = this.referenceRepository
-                .findByContextIds(
-                        Set.of(
-                                // 使用TriggerId + AsyncTaskRef为参数引用 ContextId, 触发器参数覆盖输入参数场景
-                                // 参见DSL导入创建参数引用逻辑,DslApplication#createRefs
-                                taskInstance.getTriggerId() + taskInstance.getAsyncTaskRef()
-                        )
-                );
-        references.forEach(reference -> logger.info("-------------reference parameterId--------: {}", reference.getParameterId()));
-        // 计算新输入参数Map
-        var newParameterMap = this.referenceDomainService
-                .calculateIds(parameterMap, references);
-
-        // 根据ContextId查询输出参数引用
-        var outputParameterRefers = this.outputParameterReferRepository.findByContextId(taskInstance.getTriggerId() + taskInstance.getAsyncTaskRef());
-        outputParameterRefers.forEach(outputParameterRefer -> {
-            logger.info("outputParameterRefer: {}", outputParameterRefer);
-            // 查询最后一次执行的任务实例
-            var found = this.taskInstanceRepository
-                    .limitByAsyncTaskRefAndBusinessId(outputParameterRefer.getOutputNodeName(), taskInstance.getBusinessId());
-            found.flatMap(i -> i.getOutputParameters().stream()
-                    // 查找与输出参数引用关系匹配的输出参数
-                    .filter(taskParameter -> taskParameter.getRef().equals(outputParameterRefer.getOutputParameterRef()))
-                    .findFirst())
-                    // 如果存在，覆盖输入参数Map中的value(ParameterId)
-                    .ifPresent(taskParameter -> {
-                        logger.info("覆盖输出参数：{} ParameterId: {}", outputParameterRefer.getInputParameterRef(), taskParameter.getParameterId());
-                        var oldId = newParameterMap.put("JIANMU_" + outputParameterRefer.getInputParameterRef().toUpperCase(), taskParameter.getParameterId());
-                        logger.info("覆盖前的值为: {}", oldId);
-                    });
-        });
-
         // 根据参数ID去参数上下文查询参数值， 如果是密钥类型参数则去密钥管理上下文获取值
-        var parameters = this.parameterRepository.findByIds(new HashSet<>(newParameterMap.values()));
+        var parameters = this.parameterRepository.findByIds(new HashSet<>(parameterMap.values()));
         var secretParameters = parameters.stream()
                 .filter(parameter -> parameter instanceof SecretParameter)
                 .collect(Collectors.toList());
-        this.handleSecretParameter(newParameterMap, secretParameters);
-        this.parameterDomainService.createParameterMap(newParameterMap, parameters);
+        this.handleSecretParameter(parameterMap, secretParameters);
+        this.parameterDomainService.createParameterMap(parameterMap, parameters);
 
         // 返回输入参数列表
-        return newParameterMap;
+        return parameterMap;
     }
 
     private void handleSecretParameter(Map<String, String> parameterMap, List<Parameter> secretParameters) {

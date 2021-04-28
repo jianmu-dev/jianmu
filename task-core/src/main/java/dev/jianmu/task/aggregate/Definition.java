@@ -1,5 +1,6 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +18,8 @@ public interface Definition {
     Worker.Type getType();
 
     Set<TaskParameter> getInputParameters();
+
+    Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters);
 
     Set<TaskParameter> getOutputParameters();
 

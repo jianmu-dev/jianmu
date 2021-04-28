@@ -7,9 +7,11 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.task.aggregate.Definition;
+import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.DefinitionRepository;
+import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
@@ -23,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +45,7 @@ public class TaskInstanceApplication {
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
     private final InstanceParameterRepository instanceParameterRepository;
+    private final InputParameterRepository inputParameterRepository;
 
     @Inject
     public TaskInstanceApplication(
@@ -55,7 +55,8 @@ public class TaskInstanceApplication {
             TaskDefinitionRepository taskDefinitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             ParameterRepository parameterRepository,
-            InstanceParameterRepository instanceParameterRepository
+            InstanceParameterRepository instanceParameterRepository,
+            InputParameterRepository inputParameterRepository
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.definitionRepository = definitionRepository;
@@ -64,6 +65,7 @@ public class TaskInstanceApplication {
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
         this.instanceParameterRepository = instanceParameterRepository;
+        this.inputParameterRepository = inputParameterRepository;
     }
 
     public List<TaskInstance> findByBusinessId(String businessId) {
@@ -99,8 +101,11 @@ public class TaskInstanceApplication {
             var parameterMap = this.parseJson(resultFile);
             // 创建任务实例输出参数与参数存储参数
             var outputParameters = this.handleOutputParameter(parameterMap, definition, taskInstance);
+            // TODO 需要查关系
+            var inputParameters = this.createInputParameters(outputParameters.keySet(), taskInstance);
             // 保存任务实例输出参数
             this.instanceParameterRepository.addAll(outputParameters.keySet());
+            this.inputParameterRepository.addAll(inputParameters);
             // 保存参数
             this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         }
@@ -136,6 +141,22 @@ public class TaskInstanceApplication {
             logger.error("Json转换", e);
             throw new RuntimeException("任务结果文件格式错误");
         }
+    }
+
+    private List<InputParameter> createInputParameters(Set<InstanceParameter> instanceParameters, TaskInstance taskInstance) {
+        return instanceParameters.stream()
+                .map(instanceParameter -> InputParameter.Builder.anInputParameter()
+                        .businessId(taskInstance.getBusinessId())
+                        // TODO asyncTaskRef和defKey、ref都需要改成输入参数的
+                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                        .defKey(taskInstance.getDefKey())
+                        .ref(instanceParameter.getRef())
+                        .projectId(taskInstance.getTriggerId())
+                        .source(InputParameter.Source.TASK_OUTPUT)
+                        .parameterId(instanceParameter.getParameterId())
+                        .build()
+                )
+                .collect(Collectors.toList());
     }
 
     private Map<InstanceParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, Definition definition, TaskInstance taskInstance) {
