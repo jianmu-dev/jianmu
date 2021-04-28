@@ -154,6 +154,7 @@ public class TaskInstanceApplication {
                             .businessId(taskInstance.getBusinessId())
                             .projectId(taskInstance.getTriggerId())
                             .ref(taskParameter.getRef())
+                            .type(InstanceParameter.Type.OUTPUT)
                             .parameterId(parameter.getId())
                             .build();
                     return Map.entry(instanceParameter, parameter);

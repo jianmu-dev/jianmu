@@ -24,6 +24,8 @@ public class InstanceParameter {
     private String projectId;
     // 参数唯一引用名称
     private String ref;
+    // 输入输出类型
+    private Type type;
     // 参数引用Id
     private String parameterId;
 
@@ -51,6 +53,10 @@ public class InstanceParameter {
         return ref;
     }
 
+    public Type getType() {
+        return type;
+    }
+
     public String getParameterId() {
         return parameterId;
     }
@@ -68,6 +74,8 @@ public class InstanceParameter {
         private String projectId;
         // 参数唯一引用名称
         private String ref;
+        // 输入输出类型
+        private Type type;
         // 参数引用Id
         private String parameterId;
 
@@ -108,6 +116,11 @@ public class InstanceParameter {
             return this;
         }
 
+        public Builder type(Type type) {
+            this.type = type;
+            return this;
+        }
+
         public Builder parameterId(String parameterId) {
             this.parameterId = parameterId;
             return this;
@@ -116,6 +129,7 @@ public class InstanceParameter {
         public InstanceParameter build() {
             InstanceParameter instanceParameter = new InstanceParameter();
             instanceParameter.projectId = this.projectId;
+            instanceParameter.type = this.type;
             instanceParameter.asyncTaskRef = this.asyncTaskRef;
             instanceParameter.parameterId = this.parameterId;
             instanceParameter.defKey = this.defKey;
