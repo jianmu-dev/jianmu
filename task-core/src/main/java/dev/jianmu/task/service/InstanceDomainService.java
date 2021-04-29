@@ -31,6 +31,7 @@ public class InstanceDomainService {
             }
         }
         return TaskInstance.Builder.anInstance()
+                .serialNo(taskInstances.size() + 1)
                 .defKey(definition.getKey())
                 .asyncTaskRef(asyncTaskRef)
                 .businessId(businessId)

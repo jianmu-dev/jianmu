@@ -14,7 +14,8 @@ import java.util.UUID;
 public class TaskInstance extends AggregateRoot {
     // ID
     private String id;
-
+    // 执行顺序号
+    private int serialNo;
     // 任务定义Key, 表示任务定义类型
     private String defKey;
     // 流程定义上下文中的AsyncTask唯一标识
@@ -61,6 +62,10 @@ public class TaskInstance extends AggregateRoot {
         return id;
     }
 
+    public int getSerialNo() {
+        return serialNo;
+    }
+
     public String getDefKey() {
         return defKey;
     }
@@ -101,6 +106,8 @@ public class TaskInstance extends AggregateRoot {
         // ID
         // TODO 暂时使用UUID的值
         private String id = UUID.randomUUID().toString().replace("-", "");
+        // 执行顺序号
+        private int serialNo;
         // 任务定义唯一Key
         private String defKey;
         // 流程定义上下文中的AsyncTask唯一标识
@@ -117,6 +124,11 @@ public class TaskInstance extends AggregateRoot {
 
         public static Builder anInstance() {
             return new Builder();
+        }
+
+        public Builder serialNo(int serialNo) {
+            this.serialNo = serialNo;
+            return this;
         }
 
         public Builder defKey(String defKey) {
@@ -147,6 +159,7 @@ public class TaskInstance extends AggregateRoot {
         public TaskInstance build() {
             TaskInstance taskInstance = new TaskInstance();
             taskInstance.id = this.id;
+            taskInstance.serialNo = this.serialNo;
             taskInstance.defKey = this.defKey;
             taskInstance.asyncTaskRef = this.asyncTaskRef;
             taskInstance.businessId = this.businessId;
