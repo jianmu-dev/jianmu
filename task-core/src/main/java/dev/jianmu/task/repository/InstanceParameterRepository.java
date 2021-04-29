@@ -2,6 +2,7 @@ package dev.jianmu.task.repository;
 
 import dev.jianmu.task.aggregate.InstanceParameter;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,4 +13,6 @@ import java.util.Set;
  **/
 public interface InstanceParameterRepository {
     void addAll(Set<InstanceParameter> instanceParameters);
+
+    List<InstanceParameter> findByBusinessIdAndAsyncTaskRefAndType(String businessId, String asyncTaskRef, InstanceParameter.Type type);
 }

@@ -4,6 +4,7 @@ import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,5 +18,10 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     @Override
     public void addAll(Set<InstanceParameter> instanceParameters) {
 
+    }
+
+    @Override
+    public List<InstanceParameter> findByBusinessIdAndAsyncTaskRefAndType(String businessId, String asyncTaskRef, InstanceParameter.Type type) {
+        return null;
     }
 }

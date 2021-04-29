@@ -21,8 +21,8 @@ public class TaskInstance extends AggregateRoot {
     private String asyncTaskRef;
     // 外部业务ID, 必须唯一
     private String businessId;
-    // 触发器ID
-    private String triggerId;
+    // 项目ID
+    private String projectId;
     // 开始时间
     private final LocalDateTime startTime = LocalDateTime.now();
     // 结束时间
@@ -73,8 +73,8 @@ public class TaskInstance extends AggregateRoot {
         return businessId;
     }
 
-    public String getTriggerId() {
-        return triggerId;
+    public String getProjectId() {
+        return projectId;
     }
 
     public LocalDateTime getStartTime() {
@@ -107,8 +107,8 @@ public class TaskInstance extends AggregateRoot {
         private String asyncTaskRef;
         // 外部业务ID
         private String businessId;
-        // 触发器ID
-        private String triggerId;
+        // 项目ID
+        private String projectId;
         // 输出参数列表
         private Set<TaskParameter> outputParameters = new HashSet<>();
 
@@ -134,8 +134,8 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
-        public Builder triggerId(String triggerId) {
-            this.triggerId = triggerId;
+        public Builder projectId(String projectId) {
+            this.projectId = projectId;
             return this;
         }
 
@@ -150,7 +150,7 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.defKey = this.defKey;
             taskInstance.asyncTaskRef = this.asyncTaskRef;
             taskInstance.businessId = this.businessId;
-            taskInstance.triggerId = this.triggerId;
+            taskInstance.projectId = this.projectId;
             taskInstance.outputParameters = this.outputParameters;
             return taskInstance;
         }

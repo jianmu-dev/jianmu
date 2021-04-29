@@ -7,7 +7,6 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.task.aggregate.Definition;
-import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.DefinitionRepository;
@@ -15,6 +14,7 @@ import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
+import dev.jianmu.task.service.InstanceParameterDomainService;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.version.repository.TaskDefinitionRepository;
@@ -25,7 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -81,12 +84,23 @@ public class TaskInstanceApplication {
     }
 
     @Transactional
-    public void create(String businessId, String triggerId, String asyncTaskRef, String asyncTaskType) {
+    public void create(String businessId, String projectId, String asyncTaskRef, String asyncTaskType) {
         // 创建任务实例
         Definition definition = this.definitionRepository.findByKey(asyncTaskType)
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
-        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, triggerId, asyncTaskRef);
+        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef);
+        // 查询输入参数进行参数值覆盖
+        var inputParameters = this.inputParameterRepository
+                .findByBusinessIdAndAsyncTaskRef(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
+        // 查询输入参数进行参数值覆盖
+        // TODO 查询输出参数关联
+        // TODO 根据输出参数关联查询最后一次执行的任务实例输出参数
+        var taskInputParameters = definition.getInputParametersWith(inputParameters);
+        var instanceParameters = InstanceParameterDomainService
+                .createInstanceParameters(taskInputParameters, taskInstance);
+        // 保存任务实例输入参数
+        this.instanceParameterRepository.addAll(instanceParameters);
         this.taskInstanceRepository.add(taskInstance);
     }
 
@@ -101,11 +115,8 @@ public class TaskInstanceApplication {
             var parameterMap = this.parseJson(resultFile);
             // 创建任务实例输出参数与参数存储参数
             var outputParameters = this.handleOutputParameter(parameterMap, definition, taskInstance);
-            // TODO 需要查关系
-            var inputParameters = this.createInputParameters(outputParameters.keySet(), taskInstance);
             // 保存任务实例输出参数
             this.instanceParameterRepository.addAll(outputParameters.keySet());
-            this.inputParameterRepository.addAll(inputParameters);
             // 保存参数
             this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         }
@@ -143,22 +154,6 @@ public class TaskInstanceApplication {
         }
     }
 
-    private List<InputParameter> createInputParameters(Set<InstanceParameter> instanceParameters, TaskInstance taskInstance) {
-        return instanceParameters.stream()
-                .map(instanceParameter -> InputParameter.Builder.anInputParameter()
-                        .businessId(taskInstance.getBusinessId())
-                        // TODO asyncTaskRef和defKey、ref都需要改成输入参数的
-                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                        .defKey(taskInstance.getDefKey())
-                        .ref(instanceParameter.getRef())
-                        .projectId(taskInstance.getTriggerId())
-                        .source(InputParameter.Source.TASK_OUTPUT)
-                        .parameterId(instanceParameter.getParameterId())
-                        .build()
-                )
-                .collect(Collectors.toList());
-    }
-
     private Map<InstanceParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, Definition definition, TaskInstance taskInstance) {
         // 查找需赋值的输出参数
         var outputParameters = definition.matchedOutputParameters(parameterMap);
@@ -173,7 +168,7 @@ public class TaskInstanceApplication {
                             .asyncTaskRef(taskInstance.getAsyncTaskRef())
                             .defKey(taskInstance.getDefKey())
                             .businessId(taskInstance.getBusinessId())
-                            .projectId(taskInstance.getTriggerId())
+                            .projectId(taskInstance.getProjectId())
                             .ref(taskParameter.getRef())
                             .type(InstanceParameter.Type.OUTPUT)
                             .parameterId(parameter.getId())

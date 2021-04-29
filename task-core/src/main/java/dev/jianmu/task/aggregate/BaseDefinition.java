@@ -28,19 +28,11 @@ public class BaseDefinition implements Definition {
     @Override
     public Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters) {
         return outputParameters.stream()
-                // 非事件参数覆盖
                 .peek(taskParameter -> inputParameters.stream()
-                        .filter(inputParameter -> !inputParameter.getSource().equals(InputParameter.Source.EVENT))
                         .filter(inputParameter -> inputParameter.getRef().equals(taskParameter.getRef()))
                         .findFirst()
                         .ifPresent(inputParameter -> taskParameter.setParameterId(inputParameter.getParameterId()))
                 )
-                // 事件参数再次覆盖
-                .peek(taskParameter -> inputParameters.stream()
-                        .filter(inputParameter -> inputParameter.getSource().equals(InputParameter.Source.EVENT))
-                        .filter(inputParameter -> inputParameter.getRef().equals(taskParameter.getRef()))
-                        .findFirst()
-                        .ifPresent(inputParameter -> taskParameter.setParameterId(inputParameter.getParameterId())))
                 .collect(Collectors.toSet());
     }
 

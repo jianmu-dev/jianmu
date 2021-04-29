@@ -1,19 +1,15 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.dsl.repository.OutputParameterReferRepository;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.aggregate.SecretParameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
-import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
-import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.*;
 import dev.jianmu.task.repository.DefinitionRepository;
-import dev.jianmu.task.repository.InputParameterRepository;
-import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.WorkerRepository;
 import dev.jianmu.task.service.WorkerDomainService;
 import org.slf4j.Logger;
@@ -39,47 +35,35 @@ public class WorkerApplication {
     private static final Logger logger = LoggerFactory.getLogger(WorkerApplication.class);
     private final WorkerRepository workerRepository;
     private final DefinitionRepository definitionRepository;
-    private final TaskInstanceRepository taskInstanceRepository;
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
     private final StorageService storageService;
     private final DockerWorker dockerWorker;
     private final WorkerDomainService workerDomainService;
-    private final OutputParameterReferRepository outputParameterReferRepository;
-    private final ReferenceRepository referenceRepository;
-    private final ReferenceDomainService referenceDomainService;
     private final KVPairRepository kvPairRepository;
-    private final InputParameterRepository inputParameterRepository;
+    private final InstanceParameterRepository instanceParameterRepository;
 
     @Inject
     public WorkerApplication(
             WorkerRepository workerRepository,
             DefinitionRepository definitionRepository,
-            TaskInstanceRepository taskInstanceRepository,
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
             StorageService storageService,
             DockerWorker dockerWorker,
             WorkerDomainService workerDomainService,
-            OutputParameterReferRepository outputParameterReferRepository,
-            ReferenceRepository referenceRepository,
-            ReferenceDomainService referenceDomainService,
             KVPairRepository kvPairRepository,
-            InputParameterRepository inputParameterRepository
+            InstanceParameterRepository instanceParameterRepository
     ) {
         this.workerRepository = workerRepository;
         this.definitionRepository = definitionRepository;
-        this.taskInstanceRepository = taskInstanceRepository;
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.storageService = storageService;
         this.dockerWorker = dockerWorker;
         this.workerDomainService = workerDomainService;
-        this.outputParameterReferRepository = outputParameterReferRepository;
-        this.referenceRepository = referenceRepository;
-        this.referenceDomainService = referenceDomainService;
         this.kvPairRepository = kvPairRepository;
-        this.inputParameterRepository = inputParameterRepository;
+        this.instanceParameterRepository = instanceParameterRepository;
     }
 
     public void online(String workerId) {
@@ -110,7 +94,9 @@ public class WorkerApplication {
         if (!(taskDefinition instanceof DockerDefinition)) {
             throw new RuntimeException("任务定义类型错误");
         }
-        var environmentMap = this.getEnvironmentMap(taskDefinition, taskInstance);
+        var instanceParameters = this.instanceParameterRepository
+                .findByBusinessIdAndAsyncTaskRefAndType(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef(), InstanceParameter.Type.INPUT);
+        var environmentMap = this.getEnvironmentMap(instanceParameters);
         var dockerTask = this.workerDomainService
                 .createDockerTask((DockerDefinition) taskDefinition, taskInstance, environmentMap);
         // 创建logWriter
@@ -128,15 +114,12 @@ public class WorkerApplication {
         return Parameter.Type.STRING.newParameter(kv.getValue());
     }
 
-    private Map<String, String> getEnvironmentMap(Definition definition, TaskInstance taskInstance) {
-        var inputParameters = this.inputParameterRepository
-                .findByBusinessIdAndAsyncTaskRef(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
-        var taskInputParameters = definition.getInputParametersWith(inputParameters);
-        // 获得输入参数原始Map
-        var parameterMap = taskInputParameters.stream()
-                .map(taskParameter -> Map.entry(
-                        "JIANMU_" + taskParameter.getRef().toUpperCase(),
-                        taskParameter.getParameterId()
+    private Map<String, String> getEnvironmentMap(List<InstanceParameter> instanceParameters) {
+        // 创建任务输入参数Map,此时Map value为参数ID
+        var parameterMap = instanceParameters.stream()
+                .map(instanceParameter -> Map.entry(
+                        "JIANMU_" + instanceParameter.getRef().toUpperCase(),
+                        instanceParameter.getParameterId()
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -145,10 +128,12 @@ public class WorkerApplication {
         var secretParameters = parameters.stream()
                 .filter(parameter -> parameter instanceof SecretParameter)
                 .collect(Collectors.toList());
+        // 替换密钥参数值
         this.handleSecretParameter(parameterMap, secretParameters);
+        // 替换实际参数值
         this.parameterDomainService.createParameterMap(parameterMap, parameters);
 
-        // 返回输入参数列表
+        // 返回处理后的输入参数Map
         return parameterMap;
     }
 

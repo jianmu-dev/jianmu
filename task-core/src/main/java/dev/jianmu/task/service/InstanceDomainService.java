@@ -17,7 +17,7 @@ public class InstanceDomainService {
             List<TaskInstance> taskInstances,
             Definition definition,
             String businessId,
-            String triggerId,
+            String projectId,
             String asyncTaskRef
     ) {
         if (taskInstances.size() > 0) {
@@ -34,7 +34,7 @@ public class InstanceDomainService {
                 .defKey(definition.getKey())
                 .asyncTaskRef(asyncTaskRef)
                 .businessId(businessId)
-                .triggerId(triggerId)
+                .projectId(projectId)
                 .outputParameters(definition.getOutputParameters())
                 .build();
     }
