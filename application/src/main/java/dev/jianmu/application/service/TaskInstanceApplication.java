@@ -179,6 +179,7 @@ public class TaskInstanceApplication {
                     // 创建任务实例输出参数
                     var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
                             .instanceId(taskInstance.getId())
+                            .serialNo(taskInstance.getSerialNo())
                             .asyncTaskRef(taskInstance.getAsyncTaskRef())
                             .defKey(taskInstance.getDefKey())
                             .businessId(taskInstance.getBusinessId())

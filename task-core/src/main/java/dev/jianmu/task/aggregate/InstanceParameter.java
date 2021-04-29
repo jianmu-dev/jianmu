@@ -14,6 +14,8 @@ public class InstanceParameter {
 
     // 任务实例ID
     private String instanceId;
+    // 执行顺序号
+    private int serialNo;
     // 任务定义Key, 表示任务定义类型
     private String defKey;
     // 流程定义上下文中的AsyncTask唯一标识
@@ -31,6 +33,10 @@ public class InstanceParameter {
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    public int getSerialNo() {
+        return serialNo;
     }
 
     public String getDefKey() {
@@ -64,6 +70,8 @@ public class InstanceParameter {
     public static final class Builder {
         // 任务实例ID
         private String instanceId;
+        // 执行顺序号
+        private int serialNo;
         // 任务定义Key, 表示任务定义类型
         private String defKey;
         // 流程定义上下文中的AsyncTask唯一标识
@@ -88,6 +96,11 @@ public class InstanceParameter {
 
         public Builder instanceId(String instanceId) {
             this.instanceId = instanceId;
+            return this;
+        }
+
+        public Builder serialNo(int serialNo) {
+            this.serialNo = serialNo;
             return this;
         }
 
@@ -134,6 +147,7 @@ public class InstanceParameter {
             instanceParameter.parameterId = this.parameterId;
             instanceParameter.defKey = this.defKey;
             instanceParameter.instanceId = this.instanceId;
+            instanceParameter.serialNo = this.serialNo;
             instanceParameter.ref = this.ref;
             instanceParameter.businessId = this.businessId;
             return instanceParameter;
