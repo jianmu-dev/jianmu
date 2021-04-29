@@ -19,7 +19,7 @@ public interface Definition {
 
     Set<TaskParameter> getInputParameters();
 
-    Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters);
+    Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters, Map<String, InstanceParameter> instanceOutputParameters);
 
     Set<TaskParameter> getOutputParameters();
 

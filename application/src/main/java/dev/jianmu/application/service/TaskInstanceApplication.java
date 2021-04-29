@@ -97,21 +97,27 @@ public class TaskInstanceApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
         TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef);
+
         // 查询流程定义参数关联
         var refers = this.parameterReferRepository
                 .findByRefAndVersionAndTargetTaskRef(workflowRef, workflowVersion, taskInstance.getAsyncTaskRef());
-        // TODO 根据输出参数关联查询最后一次执行的任务实例输出参数
         // 查询关联输出参数
-        var instanceOutputParameters = this.instanceParameterRepository
-                .findByBusinessIdAndAsyncTaskRefAndType(businessId, "should be refer TaskRef", InstanceParameter.Type.OUTPUT);
+        var instanceOutputParameters = refers.stream().map(refer -> {
+            var instanceParameter = this.instanceParameterRepository
+                    .findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(businessId, refer.getSourceTaskRef(), refer.getSourceParameterRef())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的任务输出参数"));
+            return Map.entry(refer.getTargetParameterRef(), instanceParameter);
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         // 查询输入参数
         var inputParameters = this.inputParameterRepository
                 .findByBusinessIdAndAsyncTaskRef(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
-        // 任务输入参数参数值覆盖
-        var taskInputParameters = definition.getInputParametersWith(inputParameters);
+        // 任务输入参数与关联输出参数的参数值覆盖
+        var taskInputParameters = definition.getInputParametersWith(inputParameters, instanceOutputParameters);
+
         // 创建任务实例输出参数
         var instanceInputParameters = InstanceParameterDomainService
                 .createInstanceParameters(taskInputParameters, taskInstance);
+
         // 保存任务实例输入参数
         this.instanceParameterRepository.addAll(instanceInputParameters);
         // 保存任务实例

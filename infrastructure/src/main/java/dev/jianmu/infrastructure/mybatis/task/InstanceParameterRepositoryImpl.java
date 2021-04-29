@@ -5,6 +5,7 @@ import dev.jianmu.task.repository.InstanceParameterRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -26,7 +27,7 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     }
 
     @Override
-    public List<InstanceParameter> findByBusinessIdAndAsyncTaskRefAndType(String businessId, String asyncTaskRef, InstanceParameter.Type type) {
-        return null;
+    public Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(String businessId, String asyncTaskRef, String ref) {
+        return Optional.empty();
     }
 }

@@ -26,13 +26,19 @@ public class BaseDefinition implements Definition {
     protected Set<TaskParameter> outputParameters = new HashSet<>();
 
     @Override
-    public Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters) {
+    public Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters, Map<String, InstanceParameter> instanceOutputParameters) {
         return outputParameters.stream()
                 .peek(taskParameter -> inputParameters.stream()
                         .filter(inputParameter -> inputParameter.getRef().equals(taskParameter.getRef()))
                         .findFirst()
                         .ifPresent(inputParameter -> taskParameter.setParameterId(inputParameter.getParameterId()))
                 )
+                .peek(taskParameter -> {
+                    var instanceParameter = instanceOutputParameters.get(taskParameter.getRef());
+                    if (instanceParameter != null) {
+                        taskParameter.setParameterId(instanceParameter.getParameterId());
+                    }
+                })
                 .collect(Collectors.toSet());
     }
 
