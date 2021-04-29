@@ -21,6 +21,11 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     }
 
     @Override
+    public List<InstanceParameter> findByInstanceIdAndType(String instanceId, InstanceParameter.Type type) {
+        return null;
+    }
+
+    @Override
     public List<InstanceParameter> findByBusinessIdAndAsyncTaskRefAndType(String businessId, String asyncTaskRef, InstanceParameter.Type type) {
         return null;
     }

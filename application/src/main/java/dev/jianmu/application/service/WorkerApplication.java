@@ -95,7 +95,7 @@ public class WorkerApplication {
             throw new RuntimeException("任务定义类型错误");
         }
         var instanceParameters = this.instanceParameterRepository
-                .findByBusinessIdAndAsyncTaskRefAndType(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef(), InstanceParameter.Type.INPUT);
+                .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
         var environmentMap = this.getEnvironmentMap(instanceParameters);
         var dockerTask = this.workerDomainService
                 .createDockerTask((DockerDefinition) taskDefinition, taskInstance, environmentMap);

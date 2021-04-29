@@ -9,10 +9,7 @@ import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.repository.DefinitionRepository;
-import dev.jianmu.task.repository.InputParameterRepository;
-import dev.jianmu.task.repository.InstanceParameterRepository;
-import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.task.repository.*;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.task.service.InstanceParameterDomainService;
 import dev.jianmu.version.aggregate.TaskDefinition;
@@ -47,6 +44,7 @@ public class TaskInstanceApplication {
     private final TaskDefinitionRepository taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
+    private final ParameterReferRepository parameterReferRepository;
     private final InstanceParameterRepository instanceParameterRepository;
     private final InputParameterRepository inputParameterRepository;
 
@@ -58,6 +56,7 @@ public class TaskInstanceApplication {
             TaskDefinitionRepository taskDefinitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             ParameterRepository parameterRepository,
+            ParameterReferRepository parameterReferRepository,
             InstanceParameterRepository instanceParameterRepository,
             InputParameterRepository inputParameterRepository
     ) {
@@ -67,6 +66,7 @@ public class TaskInstanceApplication {
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
+        this.parameterReferRepository = parameterReferRepository;
         this.instanceParameterRepository = instanceParameterRepository;
         this.inputParameterRepository = inputParameterRepository;
     }
@@ -84,23 +84,37 @@ public class TaskInstanceApplication {
     }
 
     @Transactional
-    public void create(String businessId, String projectId, String asyncTaskRef, String asyncTaskType) {
+    public void create(
+            String businessId,
+            String workflowRef,
+            String workflowVersion,
+            String projectId,
+            String asyncTaskRef,
+            String asyncTaskType
+    ) {
         // 创建任务实例
         Definition definition = this.definitionRepository.findByKey(asyncTaskType)
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
         TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef);
-        // 查询输入参数进行参数值覆盖
+        // 查询流程定义参数关联
+        var refers = this.parameterReferRepository
+                .findByRefAndVersionAndTargetTaskRef(workflowRef, workflowVersion, taskInstance.getAsyncTaskRef());
+        // TODO 根据输出参数关联查询最后一次执行的任务实例输出参数
+        // 查询关联输出参数
+        var instanceOutputParameters = this.instanceParameterRepository
+                .findByBusinessIdAndAsyncTaskRefAndType(businessId, "should be refer TaskRef", InstanceParameter.Type.OUTPUT);
+        // 查询输入参数
         var inputParameters = this.inputParameterRepository
                 .findByBusinessIdAndAsyncTaskRef(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
-        // 查询输入参数进行参数值覆盖
-        // TODO 查询输出参数关联
-        // TODO 根据输出参数关联查询最后一次执行的任务实例输出参数
+        // 任务输入参数参数值覆盖
         var taskInputParameters = definition.getInputParametersWith(inputParameters);
-        var instanceParameters = InstanceParameterDomainService
+        // 创建任务实例输出参数
+        var instanceInputParameters = InstanceParameterDomainService
                 .createInstanceParameters(taskInputParameters, taskInstance);
         // 保存任务实例输入参数
-        this.instanceParameterRepository.addAll(instanceParameters);
+        this.instanceParameterRepository.addAll(instanceInputParameters);
+        // 保存任务实例
         this.taskInstanceRepository.add(taskInstance);
     }
 
