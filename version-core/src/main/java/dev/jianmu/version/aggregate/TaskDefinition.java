@@ -20,7 +20,7 @@ public class TaskDefinition {
     // 创建时间
     private final LocalDateTime createdTime = LocalDateTime.now();
     // 最后修改时间
-    private LocalDateTime lastModifiedTime;
+    private LocalDateTime lastModifiedTime = LocalDateTime.now();
 
     public String getId() {
         return id;
