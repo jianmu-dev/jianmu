@@ -48,10 +48,8 @@ public class DslApplication {
     private final ParameterRepository parameterRepository;
     private final InputParameterRepository inputParameterRepository;
     private final ParameterReferRepository parameterReferRepository;
-    private final ReferenceRepository referenceRepository;
     private final ProjectRepositoryImpl projectRepository;
     private final DslSourceCodeRepository dslSourceCodeRepository;
-    private final OutputParameterReferRepository outputParameterReferRepository;
     private final WorkflowRepository workflowRepository;
     private final ObjectMapper mapper;
     private final ApplicationEventPublisher publisher;
@@ -63,10 +61,8 @@ public class DslApplication {
             ParameterRepository parameterRepository,
             InputParameterRepository inputParameterRepository,
             ParameterReferRepository parameterReferRepository,
-            ReferenceRepository referenceRepository,
             ProjectRepositoryImpl projectRepository,
             DslSourceCodeRepository dslSourceCodeRepository,
-            OutputParameterReferRepository outputParameterReferRepository,
             WorkflowRepository workflowRepository,
             ApplicationEventPublisher publisher
     ) {
@@ -76,10 +72,8 @@ public class DslApplication {
         this.parameterRepository = parameterRepository;
         this.inputParameterRepository = inputParameterRepository;
         this.parameterReferRepository = parameterReferRepository;
-        this.referenceRepository = referenceRepository;
         this.projectRepository = projectRepository;
         this.dslSourceCodeRepository = dslSourceCodeRepository;
-        this.outputParameterReferRepository = outputParameterReferRepository;
         this.workflowRepository = workflowRepository;
         this.publisher = publisher;
         this.mapper = new ObjectMapper(new YAMLFactory());
