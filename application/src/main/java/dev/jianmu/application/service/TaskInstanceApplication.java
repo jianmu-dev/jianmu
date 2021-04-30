@@ -96,7 +96,7 @@ public class TaskInstanceApplication {
         Definition definition = this.definitionRepository.findByKey(asyncTaskType)
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
-        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef);
+        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef, workflowRef, workflowVersion);
 
         // 查询流程定义参数关联
         var refers = this.parameterReferRepository

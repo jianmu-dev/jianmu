@@ -20,6 +20,10 @@ public class TaskInstance extends AggregateRoot {
     private String defKey;
     // 流程定义上下文中的AsyncTask唯一标识
     private String asyncTaskRef;
+    // 流程定义Ref
+    private String workflowRef;
+    // 流程定义版本
+    private String workflowVersion;
     // 外部业务ID, 必须唯一
     private String businessId;
     // 项目ID
@@ -74,6 +78,14 @@ public class TaskInstance extends AggregateRoot {
         return asyncTaskRef;
     }
 
+    public String getWorkflowRef() {
+        return workflowRef;
+    }
+
+    public String getWorkflowVersion() {
+        return workflowVersion;
+    }
+
     public String getBusinessId() {
         return businessId;
     }
@@ -112,6 +124,10 @@ public class TaskInstance extends AggregateRoot {
         private String defKey;
         // 流程定义上下文中的AsyncTask唯一标识
         private String asyncTaskRef;
+        // 流程定义Ref
+        private String workflowRef;
+        // 流程定义版本
+        private String workflowVersion;
         // 外部业务ID
         private String businessId;
         // 项目ID
@@ -141,6 +157,16 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
+        public Builder workflowRef(String workflowRef) {
+            this.workflowRef = workflowRef;
+            return this;
+        }
+
+        public Builder workflowVersion(String workflowVersion) {
+            this.workflowVersion = workflowVersion;
+            return this;
+        }
+
         public Builder businessId(String businessId) {
             this.businessId = businessId;
             return this;
@@ -162,6 +188,8 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.serialNo = this.serialNo;
             taskInstance.defKey = this.defKey;
             taskInstance.asyncTaskRef = this.asyncTaskRef;
+            taskInstance.workflowRef = this.workflowRef;
+            taskInstance.workflowVersion = this.workflowVersion;
             taskInstance.businessId = this.businessId;
             taskInstance.projectId = this.projectId;
             taskInstance.outputParameters = this.outputParameters;

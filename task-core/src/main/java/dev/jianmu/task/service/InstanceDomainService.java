@@ -18,7 +18,9 @@ public class InstanceDomainService {
             Definition definition,
             String businessId,
             String projectId,
-            String asyncTaskRef
+            String asyncTaskRef,
+            String workflowRef,
+            String workflowVersion
     ) {
         if (taskInstances.size() > 0) {
             boolean isRunning = taskInstances.stream()
@@ -34,6 +36,8 @@ public class InstanceDomainService {
                 .serialNo(taskInstances.size() + 1)
                 .defKey(definition.getKey())
                 .asyncTaskRef(asyncTaskRef)
+                .workflowRef(workflowRef)
+                .workflowVersion(workflowVersion)
                 .businessId(businessId)
                 .projectId(projectId)
                 .outputParameters(definition.getOutputParameters())
