@@ -1,9 +1,6 @@
 package dev.jianmu.task.aggregate;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +21,13 @@ public class BaseDefinition implements Definition {
     protected Set<TaskParameter> inputParameters = new HashSet<>();
 
     protected Set<TaskParameter> outputParameters = new HashSet<>();
+
+    @Override
+    public Optional<TaskParameter> getInputParameterBy(String ref) {
+        return inputParameters.stream()
+                .filter(taskParameter -> taskParameter.getRef().equals(ref))
+                .findFirst();
+    }
 
     @Override
     public Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters, Map<String, InstanceParameter> instanceOutputParameters) {
