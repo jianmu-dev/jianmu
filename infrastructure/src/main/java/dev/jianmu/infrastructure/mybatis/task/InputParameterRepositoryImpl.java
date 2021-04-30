@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
+import dev.jianmu.infrastructure.mapper.task.InputParameterMapper;
 import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.repository.InputParameterRepository;
 import org.springframework.stereotype.Repository;
@@ -14,13 +15,19 @@ import java.util.List;
  **/
 @Repository
 public class InputParameterRepositoryImpl implements InputParameterRepository {
+    private final InputParameterMapper inputParameterMapper;
+
+    public InputParameterRepositoryImpl(InputParameterMapper inputParameterMapper) {
+        this.inputParameterMapper = inputParameterMapper;
+    }
+
     @Override
     public void addAll(List<InputParameter> inputParameters) {
-
+        this.inputParameterMapper.addAll(inputParameters);
     }
 
     @Override
     public List<InputParameter> findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(String workflowRef, String workflowVersion, String asyncTaskRef) {
-        return null;
+        return this.inputParameterMapper.findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(workflowRef, workflowVersion, asyncTaskRef);
     }
 }
