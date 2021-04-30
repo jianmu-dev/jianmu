@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.task.InputParameterMapper;
 import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.repository.InputParameterRepository;
@@ -23,6 +24,9 @@ public class InputParameterRepositoryImpl implements InputParameterRepository {
 
     @Override
     public void addAll(List<InputParameter> inputParameters) {
+        if (inputParameters.isEmpty()) {
+            throw new DBException.InsertFailed("输入参数不能为空");
+        }
         this.inputParameterMapper.addAll(inputParameters);
     }
 

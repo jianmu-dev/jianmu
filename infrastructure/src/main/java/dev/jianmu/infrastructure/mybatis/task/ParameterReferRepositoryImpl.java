@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.task.ParameterReferMapper;
 import dev.jianmu.task.aggregate.ParameterRefer;
 import dev.jianmu.task.repository.ParameterReferRepository;
@@ -23,6 +24,9 @@ public class ParameterReferRepositoryImpl implements ParameterReferRepository {
 
     @Override
     public void addAll(List<ParameterRefer> parameterRefers) {
+        if (parameterRefers.isEmpty()) {
+            throw new DBException.InsertFailed("参数引用不能为空");
+        }
         this.parameterReferMapper.addAll(parameterRefers);
     }
 

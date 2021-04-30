@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.mapper.task;
 
 import dev.jianmu.task.aggregate.InputParameter;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
@@ -14,9 +15,13 @@ import java.util.List;
  * @create: 2021-04-30 12:39
  **/
 public interface InputParameterMapper {
-    @Insert("insert into input_parameter(def_key, async_task_ref, workflow_ref, workflow_version, project_id, ref, parameter_id) " +
-            "values(#{defKey}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{projectId}, #{ref}, #{parameterId})")
-    void addAll(List<InputParameter> inputParameters);
+    @Insert("<script>" +
+            "insert into input_parameter(def_key, async_task_ref, workflow_ref, workflow_version, project_id, ref, parameter_id) values" +
+            "<foreach collection='inputParameters' item='i' index='key' separator=','>" +
+            "(#{i.defKey}, #{i.asyncTaskRef}, #{i.workflowRef}, #{i.workflowVersion}, #{i.projectId}, #{i.ref}, #{i.parameterId})" +
+            "</foreach>" +
+            " </script>")
+    void addAll(@Param("inputParameters") List<InputParameter> inputParameters);
 
     @Select("select * from input_parameter where workflow_ref = #{workflowRef} and workflow_version = #{workflowVersion} and async_task_ref = #{asyncTaskRef}")
     @Result(column = "def_key", property = "defKey")

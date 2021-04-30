@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.mapper.task;
 
 import dev.jianmu.task.aggregate.ParameterRefer;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
@@ -14,9 +15,13 @@ import java.util.List;
  * @create: 2021-04-30 12:38
  **/
 public interface ParameterReferMapper {
-    @Insert("insert into parameter_refer(workflow_ref, workflow_version, source_task_ref, source_parameter_ref, target_task_ref, target_parameter_ref) " +
-            "values(#{workflowRef}, #{workflowVersion}, #{sourceTaskRef}, #{sourceParameterRef}, #{targetTaskRef}, #{targetParameterRef})")
-    void addAll(List<ParameterRefer> parameterRefers);
+    @Insert("<script>" +
+            "insert into parameter_refer(workflow_ref, workflow_version, source_task_ref, source_parameter_ref, target_task_ref, target_parameter_ref) values" +
+            "<foreach collection='parameterRefers' item='i' index='key' separator=','>" +
+            "(#{i.workflowRef}, #{i.workflowVersion}, #{i.sourceTaskRef}, #{i.sourceParameterRef}, #{i.targetTaskRef}, #{i.targetParameterRef})" +
+            "</foreach>" +
+            " </script>")
+    void addAll(@Param("parameterRefers") List<ParameterRefer> parameterRefers);
 
     @Select("select * from parameter_refer where workflow_ref = #{workflowRef} and workflow_version = #{workflowVersion} and target_task_ref = #{targetTaskRef}")
     @Result(column = "workflow_ref", property = "workflowRef")
