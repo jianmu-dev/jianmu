@@ -20,7 +20,7 @@ public class InputParameterRepositoryImpl implements InputParameterRepository {
     }
 
     @Override
-    public List<InputParameter> findByBusinessIdAndAsyncTaskRef(String businessId, String asyncTaskRef) {
+    public List<InputParameter> findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(String workflowRef, String workflowVersion, String asyncTaskRef) {
         return null;
     }
 }

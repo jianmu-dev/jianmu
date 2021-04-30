@@ -11,8 +11,10 @@ public class InputParameter {
     private String defKey;
     // 流程定义上下文中的AsyncTask唯一标识
     private String asyncTaskRef;
-    // 外部业务ID, 必须唯一
-    private String businessId;
+    // 流程定义Ref
+    private String workflowRef;
+    // 流程定义版本
+    private String workflowVersion;
     // 项目ID
     private String projectId;
     // 参数唯一引用名称
@@ -28,8 +30,12 @@ public class InputParameter {
         return asyncTaskRef;
     }
 
-    public String getBusinessId() {
-        return businessId;
+    public String getWorkflowRef() {
+        return workflowRef;
+    }
+
+    public String getWorkflowVersion() {
+        return workflowVersion;
     }
 
     public String getProjectId() {
@@ -49,8 +55,10 @@ public class InputParameter {
         private String defKey;
         // 流程定义上下文中的AsyncTask唯一标识
         private String asyncTaskRef;
-        // 外部业务ID, 必须唯一
-        private String businessId;
+        // 流程定义Ref
+        private String workflowRef;
+        // 流程定义版本
+        private String workflowVersion;
         // 项目ID
         private String projectId;
         // 参数唯一引用名称
@@ -75,8 +83,13 @@ public class InputParameter {
             return this;
         }
 
-        public Builder businessId(String businessId) {
-            this.businessId = businessId;
+        public Builder workflowRef(String workflowRef) {
+            this.workflowRef = workflowRef;
+            return this;
+        }
+
+        public Builder workflowVersion(String workflowVersion) {
+            this.workflowVersion = workflowVersion;
             return this;
         }
 
@@ -102,7 +115,8 @@ public class InputParameter {
             inputParameter.ref = this.ref;
             inputParameter.projectId = this.projectId;
             inputParameter.asyncTaskRef = this.asyncTaskRef;
-            inputParameter.businessId = this.businessId;
+            inputParameter.workflowRef = this.workflowRef;
+            inputParameter.workflowVersion = this.workflowVersion;
             return inputParameter;
         }
     }

@@ -13,5 +13,5 @@ import java.util.List;
 public interface InputParameterRepository {
     void addAll(List<InputParameter> inputParameters);
 
-    List<InputParameter> findByBusinessIdAndAsyncTaskRef(String businessId, String asyncTaskRef);
+    List<InputParameter> findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(String workflowRef, String workflowVersion, String asyncTaskRef);
 }

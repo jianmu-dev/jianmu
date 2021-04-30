@@ -110,7 +110,7 @@ public class TaskInstanceApplication {
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         // 查询输入参数
         var inputParameters = this.inputParameterRepository
-                .findByBusinessIdAndAsyncTaskRef(taskInstance.getBusinessId(), taskInstance.getAsyncTaskRef());
+                .findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(workflowRef, workflowVersion, asyncTaskRef);
         // 任务输入参数与关联输出参数的参数值覆盖
         var taskInputParameters = definition.getInputParametersWith(inputParameters, instanceOutputParameters);
 
