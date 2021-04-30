@@ -5,6 +5,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.exception.DBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.validation.BindException;
@@ -57,6 +58,17 @@ public class RestExceptionHandler {
     @ExceptionHandler({SQLIntegrityConstraintViolationException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage sqlIntegrityConstraintViolationException(Exception ex, WebRequest request) {
+        return ErrorMessage.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .message("数据完整性错误")
+                .description(request.getDescription(false))
+                .build();
+    }
+
+    @ExceptionHandler({DuplicateKeyException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage duplicateKeyException(DuplicateKeyException ex, WebRequest request) {
         return ErrorMessage.builder()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
