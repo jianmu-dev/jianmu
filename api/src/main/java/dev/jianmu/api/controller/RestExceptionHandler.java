@@ -6,6 +6,7 @@ import dev.jianmu.infrastructure.exception.DBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.ConstraintViolationException;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,6 +38,29 @@ public class RestExceptionHandler {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .message(fieldErrors.get(0).getDefaultMessage())
+                .description(request.getDescription(false))
+                .build();
+    }
+
+    @ExceptionHandler({BadSqlGrammarException.class, SQLException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage sqlException(Exception ex, WebRequest request) {
+        logger.error("Sql异常: ", ex);
+        return ErrorMessage.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .message("Sql执行错误")
+                .description(request.getDescription(false))
+                .build();
+    }
+
+    @ExceptionHandler({SQLIntegrityConstraintViolationException.class, ConstraintViolationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage sqlIntegrityConstraintViolationException(Exception ex, WebRequest request) {
+        return ErrorMessage.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .message("主键重复")
                 .description(request.getDescription(false))
                 .build();
     }
