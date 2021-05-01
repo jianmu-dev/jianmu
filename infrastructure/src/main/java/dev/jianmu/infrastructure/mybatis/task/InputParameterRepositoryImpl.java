@@ -31,6 +31,11 @@ public class InputParameterRepositoryImpl implements InputParameterRepository {
     }
 
     @Override
+    public void deleteByProjectId(String projectId) {
+        this.inputParameterMapper.deleteByProjectId(projectId);
+    }
+
+    @Override
     public List<InputParameter> findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(String workflowRef, String workflowVersion, String asyncTaskRef) {
         return this.inputParameterMapper.findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(workflowRef, workflowVersion, asyncTaskRef);
     }

@@ -13,5 +13,7 @@ import java.util.List;
 public interface InputParameterRepository {
     void addAll(List<InputParameter> inputParameters);
 
+    void deleteByProjectId(String projectId);
+
     List<InputParameter> findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(String workflowRef, String workflowVersion, String asyncTaskRef);
 }

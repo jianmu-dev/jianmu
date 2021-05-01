@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure.mapper.task;
 
 import dev.jianmu.task.aggregate.InputParameter;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -22,6 +19,9 @@ public interface InputParameterMapper {
             "</foreach>" +
             " </script>")
     void addAll(@Param("inputParameters") List<InputParameter> inputParameters);
+
+    @Delete("delete from input_parameter where project_id = #{projectId}")
+    void deleteByProjectId(String projectId);
 
     @Select("select * from input_parameter where workflow_ref = #{workflowRef} and workflow_version = #{workflowVersion} and async_task_ref = #{asyncTaskRef}")
     @Result(column = "def_key", property = "defKey")

@@ -207,6 +207,7 @@ public class DslApplication {
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.dslSourceCodeRepository.deleteByProjectId(project.getId());
         this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.inputParameterRepository.deleteByProjectId(project.getId());
     }
 
     public DslSourceCode findByRefAndVersion(String ref, String version) {
