@@ -30,5 +30,5 @@ public interface ParameterReferMapper {
     @Result(column = "source_parameter_ref", property = "sourceParameterRef")
     @Result(column = "target_task_ref", property = "targetTaskRef")
     @Result(column = "target_parameter_ref", property = "targetParameterRef")
-    List<ParameterRefer> findByRefAndVersionAndTargetTaskRef(String workflowRef, String workflowVersion, String targetTaskRef);
+    List<ParameterRefer> findByRefAndVersionAndTargetTaskRef(@Param("workflowRef") String workflowRef, @Param("workflowVersion") String workflowVersion, @Param("targetTaskRef") String targetTaskRef);
 }

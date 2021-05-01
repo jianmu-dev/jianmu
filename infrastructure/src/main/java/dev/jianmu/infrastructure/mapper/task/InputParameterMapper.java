@@ -30,5 +30,5 @@ public interface InputParameterMapper {
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "parameter_id", property = "parameterId")
-    List<InputParameter> findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(String workflowRef, String workflowVersion, String asyncTaskRef);
+    List<InputParameter> findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(@Param("workflowRef") String workflowRef, @Param("workflowVersion") String workflowVersion, @Param("asyncTaskRef") String asyncTaskRef);
 }
