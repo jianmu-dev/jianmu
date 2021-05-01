@@ -31,7 +31,7 @@ public class BaseDefinition implements Definition {
 
     @Override
     public Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters, Map<String, InstanceParameter> instanceOutputParameters) {
-        return outputParameters.stream()
+        return this.inputParameters.stream()
                 .peek(taskParameter -> inputParameters.stream()
                         .filter(inputParameter -> inputParameter.getRef().equals(taskParameter.getRef()))
                         .findFirst()
