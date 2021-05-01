@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure.mapper.task;
 
 import dev.jianmu.task.aggregate.ParameterRefer;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -22,6 +19,9 @@ public interface ParameterReferMapper {
             "</foreach>" +
             " </script>")
     void addAll(@Param("parameterRefers") List<ParameterRefer> parameterRefers);
+
+    @Delete("delete from parameter_refer where workflow_ref = #{workflowRef}")
+    void deleteByWorkflowRef(String workflowRef);
 
     @Select("select * from parameter_refer where workflow_ref = #{workflowRef} and workflow_version = #{workflowVersion} and target_task_ref = #{targetTaskRef}")
     @Result(column = "workflow_ref", property = "workflowRef")

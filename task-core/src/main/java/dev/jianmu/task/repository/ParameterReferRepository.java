@@ -13,5 +13,7 @@ import java.util.List;
 public interface ParameterReferRepository {
     void addAll(List<ParameterRefer> parameterRefers);
 
+    void deleteByWorkflowRef(String workflowRef);
+
     List<ParameterRefer> findByRefAndVersionAndTargetTaskRef(String workflowRef, String workflowVersion, String targetTaskRef);
 }

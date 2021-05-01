@@ -31,6 +31,11 @@ public class ParameterReferRepositoryImpl implements ParameterReferRepository {
     }
 
     @Override
+    public void deleteByWorkflowRef(String workflowRef) {
+        this.parameterReferMapper.deleteByWorkflowRef(workflowRef);
+    }
+
+    @Override
     public List<ParameterRefer> findByRefAndVersionAndTargetTaskRef(String workflowRef, String workflowVersion, String targetTaskRef) {
         return this.parameterReferMapper.findByRefAndVersionAndTargetTaskRef(workflowRef, workflowVersion, targetTaskRef);
     }
