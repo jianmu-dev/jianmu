@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
+import dev.jianmu.infrastructure.mapper.task.InstanceParameterMapper;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import org.springframework.stereotype.Repository;
@@ -16,18 +17,26 @@ import java.util.Set;
  **/
 @Repository
 public class InstanceParameterRepositoryImpl implements InstanceParameterRepository {
+    private final InstanceParameterMapper instanceParameterMapper;
+
+    public InstanceParameterRepositoryImpl(InstanceParameterMapper instanceParameterMapper) {
+        this.instanceParameterMapper = instanceParameterMapper;
+    }
+
     @Override
     public void addAll(Set<InstanceParameter> instanceParameters) {
-
+        if (!instanceParameters.isEmpty()) {
+            this.instanceParameterMapper.addAll(instanceParameters);
+        }
     }
 
     @Override
     public List<InstanceParameter> findByInstanceIdAndType(String instanceId, InstanceParameter.Type type) {
-        return null;
+        return this.instanceParameterMapper.findByInstanceIdAndType(instanceId, type);
     }
 
     @Override
     public Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(String businessId, String asyncTaskRef, String ref) {
-        return Optional.empty();
+        return this.instanceParameterMapper.findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(businessId, asyncTaskRef, ref);
     }
 }
