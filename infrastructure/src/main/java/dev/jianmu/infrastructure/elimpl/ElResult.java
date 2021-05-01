@@ -46,20 +46,8 @@ public class ElResult implements EvaluationResult {
         if (this.result instanceof String) {
             return ResultType.STRING;
         }
-        if (this.result instanceof BigDecimal) {
-            return ResultType.NUMBER;
-        }
         if (this.result instanceof Boolean) {
             return ResultType.BOOLEAN;
-        }
-        if (this.result instanceof Array) {
-            return ResultType.ARRAY;
-        }
-        if (this.result instanceof Map) {
-            return ResultType.MAP;
-        }
-        if (this.result instanceof ElVariable) {
-            return ResultType.STRUCT;
         }
         throw new ClassCastException("不支持的类型");
     }
