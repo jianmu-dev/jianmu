@@ -27,6 +27,11 @@ public class DslSourceCodeRepositoryImpl implements DslSourceCodeRepository {
     }
 
     @Override
+    public void deleteByProjectId(String projectId) {
+        this.dslSourceCodeMapper.deleteByProjectId(projectId);
+    }
+
+    @Override
     public Optional<DslSourceCode> findByRefAndVersion(String ref, String version) {
         return this.dslSourceCodeMapper.findByRefAndVersion(ref, version);
     }

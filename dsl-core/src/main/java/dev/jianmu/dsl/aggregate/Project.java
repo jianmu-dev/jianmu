@@ -25,7 +25,7 @@ public class Project {
     // 原始DSL文本
     private String dslText;
     // 创建时间
-    private LocalDateTime createdTime = LocalDateTime.now();
+    private final LocalDateTime createdTime = LocalDateTime.now();
     // 最后修改者
     private String lastModifiedBy;
     // 最后修改时间

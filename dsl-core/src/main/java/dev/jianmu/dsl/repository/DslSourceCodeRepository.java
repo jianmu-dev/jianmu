@@ -13,5 +13,7 @@ import java.util.Optional;
 public interface DslSourceCodeRepository {
     void add(DslSourceCode dslSourceCode);
 
+    void deleteByProjectId(String projectId);
+
     Optional<DslSourceCode> findByRefAndVersion(String ref, String version);
 }

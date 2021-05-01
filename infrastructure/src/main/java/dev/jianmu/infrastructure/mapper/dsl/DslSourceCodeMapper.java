@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure.mapper.dsl;
 
 import dev.jianmu.dsl.aggregate.DslSourceCode;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.Optional;
 
@@ -18,6 +15,9 @@ public interface DslSourceCodeMapper {
     @Insert("insert into dsl_source_code(project_id, workflow_ref, workflow_version, dsl_text, created_time, last_modified_by, last_modified_time) " +
             "values(#{projectId}, #{workflowRef}, #{workflowVersion}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime})")
     void add(DslSourceCode dslSourceCode);
+
+    @Delete("delete from dsl_source_code where project_id = #{projectId}")
+    void deleteByProjectId(String projectId);
 
     @Select("select * from dsl_source_code where workflow_ref = #{ref} and workflow_version = #{version}")
     @Result(column = "project_id", property = "projectId")

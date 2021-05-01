@@ -205,6 +205,7 @@ public class DslApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
+        this.dslSourceCodeRepository.deleteByProjectId(project.getId());
     }
 
     public DslSourceCode findByRefAndVersion(String ref, String version) {
