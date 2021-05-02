@@ -1,15 +1,12 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.WorkerMapper;
-import dev.jianmu.infrastructure.mapper.task.WorkerParameterMapper;
 import dev.jianmu.task.aggregate.Worker;
 import dev.jianmu.task.repository.WorkerRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.inject.Inject;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @class: WorkerRepositoryImpl
