@@ -31,8 +31,8 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     }
 
     @Override
-    public List<InstanceParameter> findByInstanceId(String instanceId) {
-        return this.instanceParameterMapper.findByInstanceId(instanceId);
+    public List<InstanceParameter> findByBusinessId(String businessId) {
+        return this.instanceParameterMapper.findByBusinessId(businessId);
     }
 
     @Override
