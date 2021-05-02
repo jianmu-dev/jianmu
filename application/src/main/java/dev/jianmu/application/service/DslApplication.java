@@ -99,6 +99,7 @@ public class DslApplication {
                 .steps(nodes.size() - 2)
                 .lastModifiedBy("admin")
                 .build();
+        this.projectRepository.add(project);
         this.createWorkflow(project, dsl, dslText);
     }
 
@@ -116,6 +117,7 @@ public class DslApplication {
         project.setWorkflowName(flow.getName());
         project.setLastModifiedTime();
         project.setWorkflowVersion();
+        this.projectRepository.updateByWorkflowRef(project);
         this.createWorkflow(project, dsl, dslText);
     }
 
@@ -192,7 +194,6 @@ public class DslApplication {
                 .collect(Collectors.toList());
         this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
         this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
-        this.projectRepository.add(project);
         this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
         this.parameterReferRepository.addAll(parameterRefers);
