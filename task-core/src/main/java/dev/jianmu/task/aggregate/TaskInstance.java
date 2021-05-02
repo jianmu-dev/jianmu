@@ -36,8 +36,6 @@ public class TaskInstance extends AggregateRoot {
     private InstanceStatus status = InstanceStatus.WAITING;
     // 输出结果文件
     private String resultFile;
-    // 输出参数列表
-    private Set<TaskParameter> outputParameters = new HashSet<>();
 
     private TaskInstance() {
     }
@@ -110,10 +108,6 @@ public class TaskInstance extends AggregateRoot {
         return resultFile;
     }
 
-    public Set<TaskParameter> getOutputParameters() {
-        return outputParameters;
-    }
-
     public static final class Builder {
         // ID
         // TODO 暂时使用UUID的值
@@ -132,8 +126,6 @@ public class TaskInstance extends AggregateRoot {
         private String businessId;
         // 项目ID
         private String projectId;
-        // 输出参数列表
-        private Set<TaskParameter> outputParameters = new HashSet<>();
 
         private Builder() {
         }
@@ -177,11 +169,6 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
-        public Builder outputParameters(Set<TaskParameter> outputParameters) {
-            this.outputParameters = outputParameters;
-            return this;
-        }
-
         public TaskInstance build() {
             TaskInstance taskInstance = new TaskInstance();
             taskInstance.id = this.id;
@@ -192,7 +179,6 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.workflowVersion = this.workflowVersion;
             taskInstance.businessId = this.businessId;
             taskInstance.projectId = this.projectId;
-            taskInstance.outputParameters = this.outputParameters;
             return taskInstance;
         }
     }

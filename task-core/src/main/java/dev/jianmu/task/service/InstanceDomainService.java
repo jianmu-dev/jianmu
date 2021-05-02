@@ -40,7 +40,6 @@ public class InstanceDomainService {
                 .workflowVersion(workflowVersion)
                 .businessId(businessId)
                 .projectId(projectId)
-                .outputParameters(definition.getOutputParameters())
                 .build();
     }
 }
