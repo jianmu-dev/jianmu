@@ -15,6 +15,8 @@ import java.util.Set;
 public interface InstanceParameterRepository {
     void addAll(Set<InstanceParameter> instanceParameters);
 
+    List<InstanceParameter> findByInstanceId(String instanceId);
+
     List<InstanceParameter> findByInstanceIdAndType(String instanceId, InstanceParameter.Type type);
 
     Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(String businessId, String asyncTaskRef, String ref);
