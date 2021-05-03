@@ -78,11 +78,11 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(DataNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage dataNotFoundException(DataNotFoundException ex, WebRequest request) {
         logger.error("数据异常: ", ex);
         return ErrorMessage.builder()
-                .statusCode(HttpStatus.NOT_FOUND.value())
+                .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .message(ex.getMessage())
                 .description(request.getDescription(false))
@@ -90,11 +90,11 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(DBException.DataNotFound.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage dbException(DBException.DataNotFound ex, WebRequest request) {
         logger.error("数据异常: ", ex);
         return ErrorMessage.builder()
-                .statusCode(HttpStatus.NOT_FOUND.value())
+                .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .message(ex.getMessage())
                 .description(request.getDescription(false))
