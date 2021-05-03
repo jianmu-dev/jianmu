@@ -69,4 +69,9 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
             throw new StorageFileNotFoundException("Could not find log file", e);
         }
     }
+
+    @Override
+    public File logFile(String LogFileName) {
+        return new File(this.rootLocation + File.separator + LogFileName + LogfilePostfix);
+    }
 }

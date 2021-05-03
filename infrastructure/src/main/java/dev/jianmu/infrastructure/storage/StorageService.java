@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.storage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 
 /**
  * @class: StorageService
@@ -15,4 +16,6 @@ public interface StorageService {
     BufferedWriter writeLog(String LogFileName);
 
     BufferedReader readLog(String LogFileName);
+
+    File logFile(String LogFileName);
 }
