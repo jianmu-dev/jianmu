@@ -1,8 +1,7 @@
 package dev.jianmu.task.aggregate;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @class: TaskDefinition
@@ -22,6 +21,37 @@ public class BaseDefinition implements Definition {
     protected Set<TaskParameter> inputParameters = new HashSet<>();
 
     protected Set<TaskParameter> outputParameters = new HashSet<>();
+
+    @Override
+    public Optional<TaskParameter> getInputParameterBy(String ref) {
+        return inputParameters.stream()
+                .filter(taskParameter -> taskParameter.getRef().equals(ref))
+                .findFirst();
+    }
+
+    @Override
+    public Set<TaskParameter> getInputParametersWith(List<InputParameter> inputParameters, Map<String, InstanceParameter> instanceOutputParameters) {
+        return this.inputParameters.stream()
+                .peek(taskParameter -> inputParameters.stream()
+                        .filter(inputParameter -> inputParameter.getRef().equals(taskParameter.getRef()))
+                        .findFirst()
+                        .ifPresent(inputParameter -> taskParameter.setParameterId(inputParameter.getParameterId()))
+                )
+                .peek(taskParameter -> {
+                    var instanceParameter = instanceOutputParameters.get(taskParameter.getRef());
+                    if (instanceParameter != null) {
+                        taskParameter.setParameterId(instanceParameter.getParameterId());
+                    }
+                })
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<TaskParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
+        return outputParameters.stream()
+                .filter(taskParameter -> parameterMap.get(taskParameter.getRef()) != null)
+                .collect(Collectors.toSet());
+    }
 
     @Override
     public Set<TaskParameter> getInputParameters() {

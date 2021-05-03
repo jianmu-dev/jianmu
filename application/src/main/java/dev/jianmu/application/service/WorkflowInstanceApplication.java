@@ -2,12 +2,18 @@ package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
+import dev.jianmu.parameter.aggregate.Parameter;
+import dev.jianmu.parameter.repository.ParameterRepository;
+import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
+import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
@@ -17,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @program: workflow
@@ -36,6 +44,8 @@ public class WorkflowInstanceApplication {
     private final WorkflowInstanceDomainService workflowInstanceDomainService;
     private final TaskInstanceRepository taskInstanceRepository;
     private final ExpressionLanguage expressionLanguage;
+    private final InstanceParameterRepository instanceParameterRepository;
+    private final ParameterRepository parameterRepository;
 
     @Inject
     public WorkflowInstanceApplication(
@@ -43,13 +53,17 @@ public class WorkflowInstanceApplication {
             WorkflowInstanceRepositoryImpl workflowInstanceRepository,
             WorkflowInstanceDomainService workflowInstanceDomainService,
             TaskInstanceRepository taskInstanceRepository,
-            ExpressionLanguage expressionLanguage
+            ExpressionLanguage expressionLanguage,
+            InstanceParameterRepository instanceParameterRepository,
+            ParameterRepository parameterRepository
     ) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
         this.taskInstanceRepository = taskInstanceRepository;
         this.expressionLanguage = expressionLanguage;
+        this.instanceParameterRepository = instanceParameterRepository;
+        this.parameterRepository = parameterRepository;
     }
 
     public Optional<WorkflowInstance> findById(String id) {
@@ -58,6 +72,29 @@ public class WorkflowInstanceApplication {
 
     public PageInfo<WorkflowInstance> findAllPage(String id, String name, String workflowVersion, ProcessStatus status, int pageNum, int pageSize) {
         return this.workflowInstanceRepository.findAllPage(id, name, workflowVersion, status, pageNum, pageSize);
+    }
+
+    private EvaluationContext findContext(String instanceId) {
+        var context = new ElContext();
+        var instanceParameters = this.instanceParameterRepository.findByBusinessId(instanceId);
+        var listMap = instanceParameters.stream()
+                .collect(Collectors.groupingBy(InstanceParameter::getAsyncTaskRef));
+        var ids = instanceParameters.stream()
+                .map(InstanceParameter::getParameterId)
+                .collect(Collectors.toSet());
+        var parameters = this.parameterRepository.findByIds(ids);
+        listMap.forEach((key, value) -> {
+            var realValue = value.stream().map(instanceParameter -> {
+                var k = instanceParameter.getRef();
+                var val = parameters.stream()
+                        .filter(parameter -> parameter.getId().equals(instanceParameter.getParameterId()))
+                        .map(Parameter::getValue)
+                        .findFirst().orElseThrow(() -> new DataNotFoundException("未找到匹配的参数"));
+                return Map.entry(k, val);
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            context.add(key, realValue);
+        });
+        return context;
     }
 
     // 创建并启动流程
@@ -72,7 +109,6 @@ public class WorkflowInstanceApplication {
         if (i > 0) {
             throw new RuntimeException("该流程运行中");
         }
-        // TODO 需要查询流程定义对应的参数定义并创建参数实例，Parameter的Domain Service
         // 创建新的流程实例
         WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, workflow);
         workflowInstance.setExpressionLanguage(this.expressionLanguage);
@@ -91,8 +127,9 @@ public class WorkflowInstanceApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + instance.getWorkflowRef() + instance.getWorkflowVersion()));
-        // TODO 需要查询流程定义对应的参数定义并创建参数实例，Parameter的Domain Service
+        EvaluationContext context = this.findContext(instanceId);
         instance.setExpressionLanguage(this.expressionLanguage);
+        instance.setContext(context);
         // 启动流程
         Node start = workflow.findNode(nodeRef);
         workflowInstanceDomainService.activateNode(workflow, instance, start.getRef());
@@ -107,8 +144,9 @@ public class WorkflowInstanceApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        // TODO 需要查询定义对应的参数定义并创建参数实例，Parameter的Domain Service
+        EvaluationContext context = this.findContext(instanceId);
         instance.setExpressionLanguage(this.expressionLanguage);
+        instance.setContext(context);
         // 激活节点
         logger.info("activateNode: " + nodeRef);
         workflowInstanceDomainService.activateNode(workflow, instance, nodeRef);

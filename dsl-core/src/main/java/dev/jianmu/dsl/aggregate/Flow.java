@@ -3,6 +3,7 @@ package dev.jianmu.dsl.aggregate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @class: Workflow
@@ -25,6 +26,15 @@ public class Flow {
                 nodes.add(new Node(key, (Map<?, ?>) val));
             }
         });
+    }
+
+    public Set<String> getNodeTypes() {
+        return nodes.stream()
+                .map(Node::getType)
+                .filter(type -> !type.equals("start"))
+                .filter(type -> !type.equals("end"))
+                .filter(type -> !type.equals("condition"))
+                .collect(Collectors.toSet());
     }
 
     public Set<OutputParameterRefer> getOutputParameterRefs(String projectId, String workflowVersion) {

@@ -17,8 +17,10 @@ public class InstanceDomainService {
             List<TaskInstance> taskInstances,
             Definition definition,
             String businessId,
-            String triggerId,
-            String asyncTaskRef
+            String projectId,
+            String asyncTaskRef,
+            String workflowRef,
+            String workflowVersion
     ) {
         if (taskInstances.size() > 0) {
             boolean isRunning = taskInstances.stream()
@@ -31,11 +33,13 @@ public class InstanceDomainService {
             }
         }
         return TaskInstance.Builder.anInstance()
+                .serialNo(taskInstances.size() + 1)
                 .defKey(definition.getKey())
                 .asyncTaskRef(asyncTaskRef)
+                .workflowRef(workflowRef)
+                .workflowVersion(workflowVersion)
                 .businessId(businessId)
-                .triggerId(triggerId)
-                .outputParameters(definition.getOutputParameters())
+                .projectId(projectId)
                 .build();
     }
 }

@@ -2,10 +2,8 @@ package dev.jianmu.task.aggregate;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @class: TaskInstance
@@ -16,15 +14,20 @@ import java.util.stream.Collectors;
 public class TaskInstance extends AggregateRoot {
     // ID
     private String id;
-
+    // 执行顺序号
+    private int serialNo;
     // 任务定义Key, 表示任务定义类型
     private String defKey;
     // 流程定义上下文中的AsyncTask唯一标识
     private String asyncTaskRef;
+    // 流程定义Ref
+    private String workflowRef;
+    // 流程定义版本
+    private String workflowVersion;
     // 外部业务ID, 必须唯一
     private String businessId;
-    // 触发器ID
-    private String triggerId;
+    // 项目ID
+    private String projectId;
     // 开始时间
     private final LocalDateTime startTime = LocalDateTime.now();
     // 结束时间
@@ -33,20 +36,8 @@ public class TaskInstance extends AggregateRoot {
     private InstanceStatus status = InstanceStatus.WAITING;
     // 输出结果文件
     private String resultFile;
-    // 输出参数列表
-    private Set<TaskParameter> outputParameters = new HashSet<>();
 
     private TaskInstance() {
-    }
-
-    public Set<TaskParameter> checkOutputParameters(Map<String, Object> parameterMap) {
-        return outputParameters.stream()
-                .filter(taskParameter -> parameterMap.get(taskParameter.getRef()) != null)
-                .collect(Collectors.toSet());
-    }
-
-    public void updateOutputParameters(Set<TaskParameter> outputParameters) {
-        this.outputParameters = outputParameters;
     }
 
     public void running() {
@@ -73,6 +64,10 @@ public class TaskInstance extends AggregateRoot {
         return id;
     }
 
+    public int getSerialNo() {
+        return serialNo;
+    }
+
     public String getDefKey() {
         return defKey;
     }
@@ -81,12 +76,20 @@ public class TaskInstance extends AggregateRoot {
         return asyncTaskRef;
     }
 
+    public String getWorkflowRef() {
+        return workflowRef;
+    }
+
+    public String getWorkflowVersion() {
+        return workflowVersion;
+    }
+
     public String getBusinessId() {
         return businessId;
     }
 
-    public String getTriggerId() {
-        return triggerId;
+    public String getProjectId() {
+        return projectId;
     }
 
     public LocalDateTime getStartTime() {
@@ -105,30 +108,35 @@ public class TaskInstance extends AggregateRoot {
         return resultFile;
     }
 
-    public Set<TaskParameter> getOutputParameters() {
-        return outputParameters;
-    }
-
     public static final class Builder {
         // ID
         // TODO 暂时使用UUID的值
         private String id = UUID.randomUUID().toString().replace("-", "");
+        // 执行顺序号
+        private int serialNo;
         // 任务定义唯一Key
         private String defKey;
         // 流程定义上下文中的AsyncTask唯一标识
         private String asyncTaskRef;
+        // 流程定义Ref
+        private String workflowRef;
+        // 流程定义版本
+        private String workflowVersion;
         // 外部业务ID
         private String businessId;
-        // 触发器ID
-        private String triggerId;
-        // 输出参数列表
-        private Set<TaskParameter> outputParameters = new HashSet<>();
+        // 项目ID
+        private String projectId;
 
         private Builder() {
         }
 
         public static Builder anInstance() {
             return new Builder();
+        }
+
+        public Builder serialNo(int serialNo) {
+            this.serialNo = serialNo;
+            return this;
         }
 
         public Builder defKey(String defKey) {
@@ -141,29 +149,36 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
+        public Builder workflowRef(String workflowRef) {
+            this.workflowRef = workflowRef;
+            return this;
+        }
+
+        public Builder workflowVersion(String workflowVersion) {
+            this.workflowVersion = workflowVersion;
+            return this;
+        }
+
         public Builder businessId(String businessId) {
             this.businessId = businessId;
             return this;
         }
 
-        public Builder triggerId(String triggerId) {
-            this.triggerId = triggerId;
-            return this;
-        }
-
-        public Builder outputParameters(Set<TaskParameter> outputParameters) {
-            this.outputParameters = outputParameters;
+        public Builder projectId(String projectId) {
+            this.projectId = projectId;
             return this;
         }
 
         public TaskInstance build() {
             TaskInstance taskInstance = new TaskInstance();
             taskInstance.id = this.id;
+            taskInstance.serialNo = this.serialNo;
             taskInstance.defKey = this.defKey;
             taskInstance.asyncTaskRef = this.asyncTaskRef;
+            taskInstance.workflowRef = this.workflowRef;
+            taskInstance.workflowVersion = this.workflowVersion;
             taskInstance.businessId = this.businessId;
-            taskInstance.triggerId = this.triggerId;
-            taskInstance.outputParameters = this.outputParameters;
+            taskInstance.projectId = this.projectId;
             return taskInstance;
         }
     }

@@ -4,16 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.dsl.repository.OutputParameterReferRepository;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
-import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.task.aggregate.Definition;
+import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.aggregate.TaskParameter;
-import dev.jianmu.task.repository.DefinitionRepository;
-import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.task.repository.*;
 import dev.jianmu.task.service.InstanceDomainService;
+import dev.jianmu.task.service.InstanceParameterDomainService;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.version.repository.TaskDefinitionRepository;
@@ -24,7 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -43,8 +44,9 @@ public class TaskInstanceApplication {
     private final TaskDefinitionRepository taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
-    private final ReferenceRepository referenceRepository;
-    private final OutputParameterReferRepository outputParameterReferRepository;
+    private final ParameterReferRepository parameterReferRepository;
+    private final InstanceParameterRepository instanceParameterRepository;
+    private final InputParameterRepository inputParameterRepository;
 
     @Inject
     public TaskInstanceApplication(
@@ -54,8 +56,9 @@ public class TaskInstanceApplication {
             TaskDefinitionRepository taskDefinitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             ParameterRepository parameterRepository,
-            ReferenceRepository referenceRepository,
-            OutputParameterReferRepository outputParameterReferRepository
+            ParameterReferRepository parameterReferRepository,
+            InstanceParameterRepository instanceParameterRepository,
+            InputParameterRepository inputParameterRepository
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.definitionRepository = definitionRepository;
@@ -63,8 +66,9 @@ public class TaskInstanceApplication {
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
-        this.referenceRepository = referenceRepository;
-        this.outputParameterReferRepository = outputParameterReferRepository;
+        this.parameterReferRepository = parameterReferRepository;
+        this.instanceParameterRepository = instanceParameterRepository;
+        this.inputParameterRepository = inputParameterRepository;
     }
 
     public List<TaskInstance> findByBusinessId(String businessId) {
@@ -80,12 +84,43 @@ public class TaskInstanceApplication {
     }
 
     @Transactional
-    public void create(String businessId, String triggerId, String asyncTaskRef, String asyncTaskType) {
+    public void create(
+            String businessId,
+            String workflowRef,
+            String workflowVersion,
+            String projectId,
+            String asyncTaskRef,
+            String asyncTaskType
+    ) {
         // 创建任务实例
         Definition definition = this.definitionRepository.findByKey(asyncTaskType)
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
-        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, triggerId, asyncTaskRef);
+        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef, workflowRef, workflowVersion);
+
+        // 查询流程定义参数关联
+        var refers = this.parameterReferRepository
+                .findByRefAndVersionAndTargetTaskRef(workflowRef, workflowVersion, taskInstance.getAsyncTaskRef());
+        // 查询关联输出参数
+        var instanceOutputParameters = refers.stream().map(refer -> {
+            var instanceParameter = this.instanceParameterRepository
+                    .findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(businessId, refer.getSourceTaskRef(), refer.getSourceParameterRef())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的任务输出参数"));
+            return Map.entry(refer.getTargetParameterRef(), instanceParameter);
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // 查询输入参数
+        var inputParameters = this.inputParameterRepository
+                .findByWorkflowRefAndWorkflowVersionAndAsyncTaskRef(workflowRef, workflowVersion, asyncTaskRef);
+        // 任务输入参数与关联输出参数的参数值覆盖
+        var taskInputParameters = definition.getInputParametersWith(inputParameters, instanceOutputParameters);
+
+        // 创建任务实例输出参数
+        var instanceInputParameters = InstanceParameterDomainService
+                .createInstanceParameters(taskInputParameters, taskInstance);
+
+        // 保存任务实例输入参数
+        this.instanceParameterRepository.addAll(instanceInputParameters);
+        // 保存任务实例
         this.taskInstanceRepository.add(taskInstance);
     }
 
@@ -98,12 +133,10 @@ public class TaskInstanceApplication {
         if (definition.getResultFile() != null) {
             // 解析Json为Map
             var parameterMap = this.parseJson(resultFile);
-            // 查找需赋值的输出参数
-            var taskParameters = taskInstance.checkOutputParameters(parameterMap);
-            // 任务实例输出参数类型创建参数
-            var outputParameters = this.handleOutputParameter(parameterMap, taskParameters);
-            // 更新输出参数的参数ID
-            taskInstance.updateOutputParameters(outputParameters.keySet());
+            // 创建任务实例输出参数与参数存储参数
+            var outputParameters = this.handleOutputParameter(parameterMap, definition, taskInstance);
+            // 保存任务实例输出参数
+            this.instanceParameterRepository.addAll(outputParameters.keySet());
             // 保存参数
             this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         }
@@ -141,15 +174,27 @@ public class TaskInstanceApplication {
         }
     }
 
-    private Map<TaskParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, Set<TaskParameter> outputParameter) {
-        return outputParameter.stream()
+    private Map<InstanceParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, Definition definition, TaskInstance taskInstance) {
+        // 查找需赋值的输出参数
+        var outputParameters = definition.matchedOutputParameters(parameterMap);
+        return outputParameters.stream()
                 .map(taskParameter -> {
                     var value = parameterMap.get(taskParameter.getRef());
                     // 创建参数
                     var parameter = Parameter.Type.valueOf(taskParameter.getType()).newParameter(value);
-                    // 更新任务输出参数ID
-                    taskParameter.setParameterId(parameter.getId());
-                    return Map.entry(taskParameter, parameter);
+                    // 创建任务实例输出参数
+                    var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
+                            .instanceId(taskInstance.getId())
+                            .serialNo(taskInstance.getSerialNo())
+                            .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                            .defKey(taskInstance.getDefKey())
+                            .businessId(taskInstance.getBusinessId())
+                            .projectId(taskInstance.getProjectId())
+                            .ref(taskParameter.getRef())
+                            .type(InstanceParameter.Type.OUTPUT)
+                            .parameterId(parameter.getId())
+                            .build();
+                    return Map.entry(instanceParameter, parameter);
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

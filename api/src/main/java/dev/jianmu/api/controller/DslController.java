@@ -37,19 +37,6 @@ public class DslController {
         this.dslApplication.trigger(dslId);
     }
 
-    @PutMapping("/{dslId}")
-    @Operation(summary = "同步DSL定义", description = "同步DSL定义")
-    public Workflow sync(@PathVariable String dslId) {
-        return this.dslApplication.syncDsl(dslId);
-    }
-
-    @PostMapping("/{dslUrl}")
-    @Operation(summary = "导入DSL定义", description = "导入DSL定义")
-    public Workflow importDsl(@PathVariable String dslUrl) {
-        var tempDslUrl = "test-dsl.yaml";
-        return this.dslApplication.importDsl(tempDslUrl);
-    }
-
     @PutMapping("project/{dslId}")
     @Operation(summary = "更新项目", description = "更新项目DSL定义")
     public void updateProject(@PathVariable String dslId, @RequestBody @Valid DslTextDto dslTextDto) {
