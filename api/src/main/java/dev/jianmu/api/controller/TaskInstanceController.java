@@ -45,4 +45,12 @@ public class TaskInstanceController {
         });
         return list;
     }
+
+    @GetMapping("/instance/{instanceId}")
+    @Operation(summary = "任务实例详情接口", description = "任务实例详情接口")
+    public TaskInstanceVo findById(@PathVariable String instanceId) {
+        var taskInstance = this.taskInstanceApplication.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        return TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
+    }
 }

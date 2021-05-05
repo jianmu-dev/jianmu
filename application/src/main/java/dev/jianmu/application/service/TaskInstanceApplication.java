@@ -75,6 +75,10 @@ public class TaskInstanceApplication {
         return this.taskInstanceRepository.findByBusinessId(businessId);
     }
 
+    public Optional<TaskInstance> findById(String instanceId) {
+        return this.taskInstanceRepository.findById(instanceId);
+    }
+
     public Optional<TaskDefinitionVersion> findByDefKey(String defKey) {
         return this.taskDefinitionVersionRepository.findByDefinitionKey(defKey);
     }

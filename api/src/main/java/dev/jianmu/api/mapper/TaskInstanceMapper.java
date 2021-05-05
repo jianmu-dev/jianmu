@@ -28,6 +28,10 @@ public interface TaskInstanceMapper {
     @Mapping(target = "instanceId", source = "taskInstance.id")
     TaskInstanceVo toTaskInstanceVo(TaskInstance taskInstance, TaskDefinition definition, TaskDefinitionVersion version);
 
+    @Mapping(target = "instanceId", source = "id")
+    @Mapping(target = "nodeName", source = "asyncTaskRef")
+    TaskInstanceVo toTaskInstanceVo(TaskInstance taskInstance);
+
     @ValueMappings({
             @ValueMapping(target = "WAITING", source = "WAITING"),
             @ValueMapping(target = "RUNNING", source = "RUNNING"),
