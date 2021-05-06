@@ -136,6 +136,20 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.save(instance);
     }
 
+    // 终止流程
+    public void stop(String instanceId) {
+        var workflowInstance = this.workflowInstanceRepository
+                .findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var workflow = this.workflowRepository
+                .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        var end = workflow.findEnd();
+        // 激活End节点
+        workflowInstanceDomainService.activateNode(workflow, workflowInstance, end.getRef());
+        this.workflowInstanceRepository.save(workflowInstance);
+    }
+
     // 节点启动，重做
     public WorkflowInstance activateNode(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository

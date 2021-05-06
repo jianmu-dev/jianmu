@@ -65,13 +65,11 @@ public class WorkflowInstanceController {
         this.instanceApplication.start(instanceId, nodeRef);
     }
 
-    @PutMapping("/stop")
-    // TODO 暂时未实现
-    @Operation(summary = "流程停止", description = "流程停止", hidden = true)
+    @PutMapping("/stop/{instanceId}")
+    @Operation(summary = "流程结束接口", description = "流程结束接口")
     public void stop(
-            @Parameter(description = "流程实例ID") String instanceId,
-            @Parameter(description = "停止节点定义名") String nodeRef
+            @Parameter(description = "流程实例ID") @PathVariable String instanceId
     ) {
-        this.instanceApplication.terminateNode(instanceId, nodeRef);
+        this.instanceApplication.stop(instanceId);
     }
 }
