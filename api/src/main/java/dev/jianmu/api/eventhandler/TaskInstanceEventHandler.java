@@ -10,6 +10,7 @@ import dev.jianmu.infrastructure.docker.TaskRunningEvent;
 import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
+import dev.jianmu.task.event.TaskInstanceRunningEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,8 @@ public class TaskInstanceEventHandler {
 
     @EventListener
     public void handleTaskFinishedEvent(TaskFinishedEvent taskFinishedEvent) {
+        // Worker执行状态事件通知任务上下文
+        // TODO 运行状态需同步通知调度逻辑
         var taskResultDto = TaskResultMapper.INSTANCE.toTaskResultDto(taskFinishedEvent);
         if (taskResultDto.isSucceeded()) {
             this.taskInstanceApplication.executeSucceeded(
@@ -61,13 +64,14 @@ public class TaskInstanceEventHandler {
 
     @EventListener
     public void handleTaskRunningEvent(TaskRunningEvent taskRunningEvent) {
+        // Worker执行状态事件通知任务上下文
         // TODO 运行状态需同步通知调度逻辑
         this.taskInstanceApplication.running(taskRunningEvent.getTaskId());
-        this.workflowInstanceApplication.taskRun(taskRunningEvent.getTaskId());
     }
 
     @EventListener
     public void handleTaskFailedEvent(TaskFailedEvent taskFailedEvent) {
+        // Worker执行状态事件通知任务上下文
         // TODO 运行状态需同步通知调度逻辑
         this.taskInstanceApplication.executeFailed(taskFailedEvent.getTaskId());
     }
@@ -75,19 +79,30 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskInstanceEvent(TaskInstance taskInstance) {
 //        this.taskInstanceQueue.put(taskInstance);
+        // 任务上下文抛出事件通知Worker
         // TODO 当前为直接触发,缺少调度逻辑，同时需要处理调度失败场景
         this.workerApplication.runTask(taskInstance);
         logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handleTaskInstanceRunningEvent(TaskInstanceRunningEvent event) {
+        // 任务上下文抛出事件通知流程上下文
+        logger.info("get TaskInstanceRunningEvent: {}", event);
+        this.workflowInstanceApplication.taskRun(event.getTaskInstanceId());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceSucceedEvent(TaskInstanceSucceedEvent event) {
+        // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceSucceedEvent: {}", event);
         this.workflowInstanceApplication.taskSucceed(event.getTaskInstanceId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
+        // 任务上下文抛出事件通知流程上下文
+        logger.info("get TaskInstanceFailedEvent: {}", event);
         this.workflowInstanceApplication.taskFail(event.getTaskInstanceId());
     }
 }

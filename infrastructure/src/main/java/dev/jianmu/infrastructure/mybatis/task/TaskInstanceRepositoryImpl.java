@@ -4,6 +4,7 @@ import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
+import dev.jianmu.task.event.TaskInstanceRunningEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import org.slf4j.Logger;
@@ -45,6 +46,16 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void updateStatus(TaskInstance taskInstance) {
         this.taskInstanceMapper.updateStatus(taskInstance);
+        if (taskInstance.getStatus().equals(InstanceStatus.RUNNING)) {
+            this.applicationEventPublisher.publishEvent(
+                    TaskInstanceRunningEvent.Builder.aTaskInstanceRunningEvent()
+                            .defKey(taskInstance.getDefKey())
+                            .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                            .businessId(taskInstance.getBusinessId())
+                            .taskInstanceId(taskInstance.getId())
+                            .build()
+            );
+        }
         if (taskInstance.getStatus().equals(InstanceStatus.EXECUTION_FAILED)) {
             this.applicationEventPublisher.publishEvent(
                     TaskInstanceFailedEvent.Builder.aTaskInstanceFailedEvent()
