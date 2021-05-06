@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -121,8 +122,30 @@ public class EmbeddedDockerWorker implements DockerWorker {
         if (null != spec.getCmd()) {
             createContainerCmd.withCmd(spec.getCmd());
         }
-        var containerResponse = createContainerCmd.exec();
+        // 检查镜像是否存在本地
+        boolean imagePull = false;
+        try {
+            this.dockerClient.inspectImageCmd(spec.getImage()).exec();
+        } catch (NotFoundException e) {
+            logger.info("镜像不存在，需要下载");
+            imagePull = true;
+        }
+        // 拉取镜像
+        if (imagePull) {
+            try {
+                this.dockerClient.pullImageCmd(spec.getImage()).exec(new ResultCallback.Adapter<>() {
+                    @Override
+                    public void onNext(PullResponseItem object) {
+                        logger.info("镜像下载成功: {} status: {}", object.getId(), object.getStatus());
+                    }
+                }).awaitCompletion();
+            } catch (InterruptedException e) {
+                logger.error("镜像下载失败:", e);
+                Thread.currentThread().interrupt();
+            }
+        }
         // 启动容器
+        var containerResponse = createContainerCmd.exec();
         this.dockerClient.startContainerCmd(containerResponse.getId()).exec();
         // 发送任务运行中事件
         this.publisher.publishEvent(TaskRunningEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
