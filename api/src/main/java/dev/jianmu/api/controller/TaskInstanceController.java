@@ -36,11 +36,7 @@ public class TaskInstanceController {
         List<TaskInstanceVo> list = new ArrayList<>();
         var taskInstances = this.taskInstanceApplication.findByBusinessId(workflowInstanceId);
         taskInstances.forEach(taskInstance -> {
-            var version = this.taskInstanceApplication
-                    .findByDefKey(taskInstance.getDefKey()).orElseThrow(() -> new DataNotFoundException("未知任务版本"));
-            var definition = this.taskInstanceApplication
-                    .findByRef(version.getTaskDefinitionRef()).orElseThrow(() -> new DataNotFoundException("未知定义定义"));
-            var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance, definition, version);
+            var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
             list.add(vo);
         });
         return list;

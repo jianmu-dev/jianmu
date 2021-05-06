@@ -22,12 +22,6 @@ import org.mapstruct.factory.Mappers;
 public interface TaskInstanceMapper {
     TaskInstanceMapper INSTANCE = Mappers.getMapper(TaskInstanceMapper.class);
 
-    @Mapping(target = "taskVersion", source = "version.name")
-    @Mapping(target = "taskName", source = "definition.name")
-    @Mapping(target = "nodeName", source = "taskInstance.asyncTaskRef")
-    @Mapping(target = "instanceId", source = "taskInstance.id")
-    TaskInstanceVo toTaskInstanceVo(TaskInstance taskInstance, TaskDefinition definition, TaskDefinitionVersion version);
-
     @Mapping(target = "instanceId", source = "id")
     @Mapping(target = "nodeName", source = "asyncTaskRef")
     TaskInstanceVo toTaskInstanceVo(TaskInstance taskInstance);
