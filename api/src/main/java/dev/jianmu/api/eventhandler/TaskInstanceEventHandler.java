@@ -4,6 +4,7 @@ import dev.jianmu.api.mapper.TaskResultMapper;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
 import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
@@ -65,6 +66,12 @@ public class TaskInstanceEventHandler {
         this.workflowInstanceApplication.taskRun(taskRunningEvent.getTaskId());
     }
 
+    @EventListener
+    public void handleTaskFailedEvent(TaskFailedEvent taskFailedEvent) {
+        // TODO 运行状态需同步通知调度逻辑
+        this.taskInstanceApplication.executeFailed(taskFailedEvent.getTaskId());
+    }
+
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskInstanceEvent(TaskInstance taskInstance) {
 //        this.taskInstanceQueue.put(taskInstance);
@@ -76,11 +83,11 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceSucceedEvent(TaskInstanceSucceedEvent event) {
         logger.info("get TaskInstanceSucceedEvent: {}", event);
-        this.workflowInstanceApplication.taskSucceed(event.getBusinessId(), event.getAsyncTaskRef());
+        this.workflowInstanceApplication.taskSucceed(event.getTaskInstanceId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
-        this.workflowInstanceApplication.taskFail(event.getBusinessId(), event.getAsyncTaskRef());
+        this.workflowInstanceApplication.taskFail(event.getTaskInstanceId());
     }
 }

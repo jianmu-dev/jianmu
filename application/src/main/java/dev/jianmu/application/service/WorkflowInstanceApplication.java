@@ -180,26 +180,30 @@ public class WorkflowInstanceApplication {
     }
 
     // 任务已中止命令
-    public void taskFail(String instanceId, String asyncTaskRef) {
-        WorkflowInstance instance = this.workflowInstanceRepository
-                .findById(instanceId)
+    public void taskFail(String taskInstanceId) {
+        var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        var workflowInstance = this.workflowInstanceRepository
+                .findById(taskInstance.getBusinessId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        instance.taskFail(asyncTaskRef);
-        this.workflowInstanceRepository.save(instance);
+        workflowInstance.taskFail(taskInstance.getAsyncTaskRef());
+        this.workflowInstanceRepository.save(workflowInstance);
     }
 
     // 任务已成功命令
-    public void taskSucceed(String instanceId, String asyncTaskRef) {
-        WorkflowInstance instance = this.workflowInstanceRepository
-                .findById(instanceId)
+    public void taskSucceed(String taskInstanceId) {
+        var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        var workflowInstance = this.workflowInstanceRepository
+                .findById(taskInstance.getBusinessId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         Workflow workflow = this.workflowRepository
-                .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
+                .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         // 任务执行成功
-        logger.info("taskSucceed: " + asyncTaskRef);
-        this.workflowInstanceDomainService.taskSucceed(workflow, instance, asyncTaskRef);
-        this.workflowInstanceRepository.save(instance);
+        logger.info("taskSucceed: " + taskInstance.getAsyncTaskRef());
+        this.workflowInstanceDomainService.taskSucceed(workflow, workflowInstance, taskInstance.getAsyncTaskRef());
+        this.workflowInstanceRepository.save(workflowInstance);
     }
     // TODO 任务跳过命令
 }
