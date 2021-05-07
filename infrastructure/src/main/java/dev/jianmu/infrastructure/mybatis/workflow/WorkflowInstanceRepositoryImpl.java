@@ -9,14 +9,11 @@ import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -60,9 +57,8 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
-    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public WorkflowInstance save(WorkflowInstance workflowInstance) {
-        int version = ((WorkflowInstanceRepositoryImpl) AopContext.currentProxy()).getVersion(workflowInstance.getId());
+        int version = this.workflowInstanceMapper.getVersion(workflowInstance.getId());
         logger.info("-------------------------the version is: {}", version);
         boolean succeed = this.workflowInstanceMapper.save(workflowInstance, version);
         if (!succeed) {
@@ -71,18 +67,6 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
         Optional<WorkflowInstance> instanceOptional = this.workflowInstanceMapper.findById(workflowInstance.getId());
         this.publisher.publishEvent(workflowInstance);
         return instanceOptional.orElseThrow(() -> new DBException.UpdateFailed("流程实例更新失败"));
-    }
-
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-    public int getVersion(String id) {
-        return this.workflowInstanceMapper.getVersion(id);
-    }
-
-    @Recover
-    public WorkflowInstance recover(DBException.OptimisticLocking e, WorkflowInstance workflowInstance) {
-        logger.info("WorkflowInstance is: {}", workflowInstance.getId());
-        logger.error("------------超过重试次数-------------", e);
-        return null;
     }
 
     @Override

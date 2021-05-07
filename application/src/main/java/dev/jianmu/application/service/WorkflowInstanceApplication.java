@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
@@ -19,6 +20,9 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +38,6 @@ import java.util.stream.Collectors;
  * @create: 2021-01-22 14:50
  **/
 @Service
-@Transactional
 public class WorkflowInstanceApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceApplication.class);
@@ -98,6 +101,7 @@ public class WorkflowInstanceApplication {
     }
 
     // 创建并启动流程
+    @Transactional
     public WorkflowInstance createAndStart(String triggerId, String workflowRefVersion) {
         Workflow workflow = this.workflowRepository
                 .findByRefVersion(workflowRefVersion)
@@ -120,6 +124,7 @@ public class WorkflowInstanceApplication {
     }
 
     // 启动流程
+    @Transactional
     public WorkflowInstance start(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
@@ -137,6 +142,7 @@ public class WorkflowInstanceApplication {
     }
 
     // 终止流程
+    @Transactional
     public void stop(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository
                 .findById(instanceId)
@@ -151,6 +157,8 @@ public class WorkflowInstanceApplication {
     }
 
     // 节点启动，重做
+    @Transactional
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public WorkflowInstance activateNode(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
@@ -167,7 +175,15 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.save(instance);
     }
 
+    @Recover
+    public WorkflowInstance recoverActivateNode(DBException.OptimisticLocking e, String instanceId, String nodeRef) {
+        logger.info("WorkflowInstance id {} 的节点 {} 无法激活", instanceId, nodeRef);
+        logger.error("------------超过重试次数-------------", e);
+        return null;
+    }
+
     // 任务中止，完成
+    @Transactional
     public WorkflowInstance terminateNode(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
@@ -183,6 +199,8 @@ public class WorkflowInstanceApplication {
     }
 
     // 任务已启动命令
+    @Transactional
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskRun(String taskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
@@ -193,7 +211,15 @@ public class WorkflowInstanceApplication {
         this.workflowInstanceRepository.save(workflowInstance);
     }
 
+    @Recover
+    public void recoverTask(DBException.OptimisticLocking e, String taskInstanceId) {
+        logger.info("taskInstance id {} 的任务无法修改状态", taskInstanceId);
+        logger.error("------------超过重试次数-------------", e);
+    }
+
     // 任务已中止命令
+    @Transactional
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskFail(String taskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
@@ -205,6 +231,8 @@ public class WorkflowInstanceApplication {
     }
 
     // 任务已成功命令
+    @Transactional
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskSucceed(String taskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));

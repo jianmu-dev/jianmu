@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.info.License;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -21,7 +20,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @MapperScan("dev.jianmu.infrastructure.mapper")
 @EnableRetry
 @EnableAsync(proxyTargetClass = true)
-@EnableAspectJAutoProxy(exposeProxy = true)
 @OpenAPIDefinition(
         info = @Info(
                 title = "建木自动化集成平台",
