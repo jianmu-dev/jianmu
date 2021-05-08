@@ -231,7 +231,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 TaskFinishedEvent.builder()
                         .taskId(dockerTask.getTaskInstanceId())
                         .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
-                        .resultFile("{\"build_info\": \"执行成功\"}")
+                        .resultFile(resultFile)
                         .build()
         );
     }
