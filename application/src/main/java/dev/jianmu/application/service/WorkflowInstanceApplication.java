@@ -150,9 +150,8 @@ public class WorkflowInstanceApplication {
         var workflow = this.workflowRepository
                 .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        var end = workflow.findEnd();
         // 激活End节点
-        workflowInstanceDomainService.activateNode(workflow, workflowInstance, end.getRef());
+        workflowInstanceDomainService.finish(workflow, workflowInstance);
         this.workflowInstanceRepository.save(workflowInstance);
     }
 
