@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-04-23 11:39
  **/
 public interface ProjectMapper {
-    @Insert("insert into jianmu_project(id, dsl_url, workflow_name, workflow_ref, workflow_version, steps, dsl_text, last_modified_by, last_modified_time) " +
-            "values(#{id}, #{dslUrl}, #{workflowName}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{lastModifiedBy}, #{lastModifiedTime})")
+    @Insert("insert into jianmu_project(id, dsl_url, workflow_name, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time) " +
+            "values(#{id}, #{dslUrl}, #{workflowName}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime})")
     void add(Project project);
 
     @Delete("delete from jianmu_project where workflow_ref = #{workflowRef}")
@@ -30,6 +30,7 @@ public interface ProjectMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<Project> findById(String id);
@@ -40,6 +41,7 @@ public interface ProjectMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<Project> findByWorkflowRef(String workflowRef);
@@ -53,6 +55,7 @@ public interface ProjectMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Project> findAll(String workflowName);
