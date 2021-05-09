@@ -84,6 +84,43 @@
         </extensions>
         <plugins>
             <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <from>
+                        <image>registry://6ppqyl7y.mirror.aliyuncs.com/library/openjdk:11.0.11-jdk-oracle</image>
+                    </from>
+                    <to>
+                        <image>swr.cn-east-2.myhuaweicloud.com/jianmu/ci-server:1.0</image>
+                        <auth>
+                            <username>${env.JIANMU_REGISTRY_USER}</username>
+                            <password>${env.JIANMU_REGISTRY_PASS}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <!--解决中文乱码-->
+                        <environment>
+                            <LANG>en_US.UTF-8</LANG>
+                            <LANGUAGE>en_US:en</LANGUAGE>
+                            <LC_ALL>en_US.UTF-8</LC_ALL>
+                        </environment>
+                        <!-- 指定镜像时区，保证log输出时间为GMT+8 -->
+                        <jvmFlags>
+                            <jvmFlag>-Duser.timezone=Asia/Shanghai</jvmFlag>
+                        </jvmFlags>
+                    </container>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
