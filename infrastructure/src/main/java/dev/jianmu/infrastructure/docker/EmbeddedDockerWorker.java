@@ -108,6 +108,14 @@ public class EmbeddedDockerWorker implements DockerWorker {
                                 .withSource(m.getSource())
                                 .withTarget(m.getTarget())
                 );
+                // 如果要执行docker客户端镜像则挂载宿主机sock文件
+                if (spec.getImage().startsWith("docker:")) {
+                    mounts.add(
+                            new Mount().withType(MountType.BIND)
+                                    .withTarget("/var/run/docker.sock")
+                                    .withSource("/var/run/docker.sock")
+                    );
+                }
             });
             var hostConfig = HostConfig.newHostConfig().withMounts(mounts);
             createContainerCmd.withHostConfig(hostConfig);
@@ -139,7 +147,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
                         logger.info("镜像下载成功: {} status: {}", object.getId(), object.getStatus());
                     }
                 }).awaitCompletion();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | RuntimeException e) {
                 logger.error("镜像下载失败:", e);
                 this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
                 Thread.currentThread().interrupt();
