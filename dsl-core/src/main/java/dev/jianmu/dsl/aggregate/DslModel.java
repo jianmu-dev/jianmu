@@ -1,5 +1,9 @@
 package dev.jianmu.dsl.aggregate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +18,21 @@ public class DslModel {
     private Map<String, Map<String, String>> event;
     private Map<String, String> param;
     private Map<String, Object> workflow;
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    ;
 
-    public void syntaxCheck() {
+    public static DslModel parse(String dslText) {
+        DslModel dsl = new DslModel();
+        try {
+            dsl = dsl.mapper.readValue(dslText, DslModel.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Dsl解析异常");
+        }
+        dsl.syntaxCheck();
+        return dsl;
+    }
+
+    private void syntaxCheck() {
         if (this.cron.isBlank()) {
             throw new RuntimeException("Cron未设置");
         }

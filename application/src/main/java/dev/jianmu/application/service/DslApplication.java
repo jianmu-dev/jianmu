@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -86,7 +85,7 @@ public class DslApplication {
 
     public void createProject(String dslText) {
         // 解析DSL
-        var dsl = this.parseDsl(dslText);
+        var dsl = DslModel.parse(dslText);
         var flow = new Flow(dsl.getWorkflow());
         // 创建节点
         var nodes = this.createNodes(flow.getNodes());
@@ -107,7 +106,7 @@ public class DslApplication {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         // 解析DSL
-        var dsl = this.parseDsl(dslText);
+        var dsl = DslModel.parse(dslText);
         var flow = new Flow(dsl.getWorkflow());
         // 创建节点
         var nodes = this.createNodes(flow.getNodes());
@@ -219,18 +218,6 @@ public class DslApplication {
 
     public Optional<Project> findById(String dslId) {
         return this.projectRepository.findById(dslId);
-    }
-
-    private DslModel parseDsl(String dslText) {
-        DslModel dsl;
-        try {
-            dsl = mapper.readValue(dslText, DslModel.class);
-        } catch (IOException e) {
-            logger.error("Got error: ", e);
-            throw new RuntimeException("Dsl解析异常");
-        }
-        dsl.syntaxCheck();
-        return dsl;
     }
 
     private AsyncTask createAsyncTask(String key, String nodeName) {
