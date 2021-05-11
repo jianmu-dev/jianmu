@@ -1,4 +1,4 @@
-package dev.jianmu.dsl.aggregate;
+package dev.jianmu.project.aggregate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

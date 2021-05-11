@@ -1,6 +1,7 @@
-package dev.jianmu.dsl.repository;
+package dev.jianmu.project.repository;
 
-import dev.jianmu.dsl.aggregate.Project;
+
+import dev.jianmu.project.aggregate.Project;
 
 import java.util.Optional;
 

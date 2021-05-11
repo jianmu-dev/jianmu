@@ -1,8 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.dsl;
 
-import dev.jianmu.dsl.aggregate.DslSourceCode;
-import dev.jianmu.dsl.repository.DslSourceCodeRepository;
 import dev.jianmu.infrastructure.mapper.dsl.DslSourceCodeMapper;
+import dev.jianmu.project.aggregate.DslSourceCode;
+import dev.jianmu.project.repository.DslSourceCodeRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

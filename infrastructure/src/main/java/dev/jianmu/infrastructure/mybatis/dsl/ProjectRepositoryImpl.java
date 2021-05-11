@@ -2,9 +2,9 @@ package dev.jianmu.infrastructure.mybatis.dsl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.dsl.aggregate.Project;
-import dev.jianmu.dsl.repository.ProjectRepository;
 import dev.jianmu.infrastructure.mapper.dsl.ProjectMapper;
+import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.repository.ProjectRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

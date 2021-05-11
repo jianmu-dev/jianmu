@@ -17,6 +17,7 @@
         <module>dsl-core</module>
         <module>version-core</module>
         <module>secret-core</module>
+        <module>project-core</module>
     </modules>
 
     <properties>

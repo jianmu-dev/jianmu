@@ -1,6 +1,7 @@
-package dev.jianmu.dsl.repository;
+package dev.jianmu.project.repository;
 
-import dev.jianmu.dsl.aggregate.DslSourceCode;
+
+import dev.jianmu.project.aggregate.DslSourceCode;
 
 import java.util.Optional;
 

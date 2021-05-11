@@ -1,6 +1,6 @@
 package dev.jianmu.infrastructure.mapper.dsl;
 
-import dev.jianmu.dsl.aggregate.Project;
+import dev.jianmu.project.aggregate.Project;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

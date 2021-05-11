@@ -1,6 +1,6 @@
 package dev.jianmu.infrastructure.mapper.dsl;
 
-import dev.jianmu.dsl.aggregate.DslSourceCode;
+import dev.jianmu.project.aggregate.DslSourceCode;
 import org.apache.ibatis.annotations.*;
 
 import java.util.Optional;

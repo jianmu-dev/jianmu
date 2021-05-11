@@ -1,7 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.WorkflowInstanceApplication;
-import dev.jianmu.dsl.aggregate.Project;
+import dev.jianmu.project.aggregate.Project;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
