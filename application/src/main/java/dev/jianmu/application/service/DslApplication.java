@@ -1,7 +1,5 @@
 package dev.jianmu.application.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
@@ -48,7 +46,6 @@ public class DslApplication {
     private final ProjectRepositoryImpl projectRepository;
     private final DslSourceCodeRepository dslSourceCodeRepository;
     private final WorkflowRepository workflowRepository;
-    private final ObjectMapper mapper;
     private final ApplicationEventPublisher publisher;
 
     public DslApplication(
@@ -73,8 +70,6 @@ public class DslApplication {
         this.dslSourceCodeRepository = dslSourceCodeRepository;
         this.workflowRepository = workflowRepository;
         this.publisher = publisher;
-        this.mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
     }
 
     public void trigger(String dslId) {
@@ -91,7 +86,7 @@ public class DslApplication {
         var nodes = this.createNodes(flow.getNodes());
         // 创建项目
         var project = Project.Builder.aReference()
-                .dslUrl("test-dsl.yaml")
+                .dslSource(Project.DslSource.LOCAL)
                 .workflowName(flow.getName())
                 .workflowRef(flow.getRef())
                 .dslText(dslText)

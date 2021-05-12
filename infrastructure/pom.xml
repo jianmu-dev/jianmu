@@ -76,6 +76,17 @@
             <artifactId>org.eclipse.jgit</artifactId>
             <version>5.11.0.202103091610-r</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.ssh.jsch</artifactId>
+            <version>5.11.0.202103091610-r</version>
+        </dependency>
+        <!--Jgit SSH操作库，用于GitSsh-->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
 
         <!--Apache 压缩/解压工具类-->
         <dependency>

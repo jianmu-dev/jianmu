@@ -10,10 +10,17 @@ import java.util.UUID;
  * @create: 2021-04-23 10:55
  **/
 public class Project {
+    public enum DslSource {
+        GIT,
+        LOCAL
+    }
+
     // ID
     private String id;
-    // DSL文件地址
-    private String dslUrl;
+    // DSL来源
+    private DslSource dslSource;
+    // Git库Id
+    private String gitRepoId;
     // 关联流程定义名称
     private String workflowName;
     // 关联流程定义Ref
@@ -59,8 +66,12 @@ public class Project {
         return id;
     }
 
-    public String getDslUrl() {
-        return dslUrl;
+    public DslSource getDslSource() {
+        return dslSource;
+    }
+
+    public String getGitRepoId() {
+        return gitRepoId;
     }
 
     public String getWorkflowName() {
@@ -96,8 +107,10 @@ public class Project {
     }
 
     public static final class Builder {
-        // DSL文件地址
-        private String dslUrl;
+        // DSL来源
+        private DslSource dslSource;
+        // Git库Id
+        private String gitRepoId;
         // 关联流程定义名称
         private String workflowName;
         // 关联流程定义Ref
@@ -116,8 +129,13 @@ public class Project {
             return new Builder();
         }
 
-        public Builder dslUrl(String dslUrl) {
-            this.dslUrl = dslUrl;
+        public Builder dslSource(DslSource dslSource) {
+            this.dslSource = dslSource;
+            return this;
+        }
+
+        public Builder gitRepoId(String gitRepoId) {
+            this.gitRepoId = gitRepoId;
             return this;
         }
 
@@ -151,7 +169,8 @@ public class Project {
             project.id = UUID.randomUUID().toString().replace("-", "");
             project.workflowVersion = UUID.randomUUID().toString().replace("-", "");
             project.workflowName = this.workflowName;
-            project.dslUrl = this.dslUrl;
+            project.dslSource = this.dslSource;
+            project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;
