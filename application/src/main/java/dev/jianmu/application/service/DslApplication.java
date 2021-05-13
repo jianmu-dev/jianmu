@@ -4,10 +4,12 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
 import dev.jianmu.dsl.aggregate.Flow;
+import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.project.aggregate.DslSourceCode;
+import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.task.aggregate.InputParameter;
@@ -47,6 +49,7 @@ public class DslApplication {
     private final DslSourceCodeRepository dslSourceCodeRepository;
     private final WorkflowRepository workflowRepository;
     private final ApplicationEventPublisher publisher;
+    private final JgitService jgitService;
 
     public DslApplication(
             DefinitionRepository definitionRepository,
@@ -58,7 +61,8 @@ public class DslApplication {
             ProjectRepositoryImpl projectRepository,
             DslSourceCodeRepository dslSourceCodeRepository,
             WorkflowRepository workflowRepository,
-            ApplicationEventPublisher publisher
+            ApplicationEventPublisher publisher,
+            JgitService jgitService
     ) {
         this.definitionRepository = definitionRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
@@ -70,6 +74,11 @@ public class DslApplication {
         this.dslSourceCodeRepository = dslSourceCodeRepository;
         this.workflowRepository = workflowRepository;
         this.publisher = publisher;
+        this.jgitService = jgitService;
+    }
+
+    public Map<String, Boolean> cloneGitRepo(GitRepo gitRepo) {
+        return this.jgitService.cloneRepo(gitRepo);
     }
 
     public void trigger(String dslId) {
