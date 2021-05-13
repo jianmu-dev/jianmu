@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-04-23 11:39
  **/
 public interface ProjectMapper {
-    @Insert("insert into jianmu_project(id, dsl_url, workflow_name, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time) " +
-            "values(#{id}, #{dslUrl}, #{workflowName}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime})")
+    @Insert("insert into jianmu_project(id, git_repo_id, workflow_name, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time) " +
+            "values(#{id}, #{gitRepoId}, #{workflowName}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime})")
     void add(Project project);
 
     @Delete("delete from jianmu_project where workflow_ref = #{workflowRef}")
@@ -26,7 +26,7 @@ public interface ProjectMapper {
 
     @Select("select * from jianmu_project where id = #{id}")
     @Result(column = "workflow_name", property = "workflowName")
-    @Result(column = "dsl_url", property = "dslUrl")
+    @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "dsl_text", property = "dslText")
@@ -37,7 +37,7 @@ public interface ProjectMapper {
 
     @Select("select * from jianmu_project where workflow_ref = #{workflowRef}")
     @Result(column = "workflow_name", property = "workflowName")
-    @Result(column = "dsl_url", property = "dslUrl")
+    @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "dsl_text", property = "dslText")
@@ -51,7 +51,7 @@ public interface ProjectMapper {
             "<if test='name != null'> WHERE `workflow_name` like concat('%', #{workflowName}, '%')</if>" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
-    @Result(column = "dsl_url", property = "dslUrl")
+    @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "dsl_text", property = "dslText")
