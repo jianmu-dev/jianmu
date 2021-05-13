@@ -5,6 +5,7 @@ import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
+import dev.jianmu.api.vo.GitRepoVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.project.aggregate.DslSourceCode;
@@ -15,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Map;
 
 /**
  * @class: DslController
@@ -76,8 +76,9 @@ public class DslController {
 
     @PostMapping("/git")
     @Operation(summary = "克隆Git库", description = "克隆Git库并返回文件Map")
-    public Map<String, Boolean> cloneGitRepo(@RequestBody @Valid GitRepoDto gitRepoDto) {
+    public GitRepoVo cloneGitRepo(@RequestBody @Valid GitRepoDto gitRepoDto) {
         var gitRepo = GitRepoMapper.INSTANCE.toGitRepo(gitRepoDto);
-        return this.dslApplication.cloneGitRepo(gitRepo);
+        var files = this.dslApplication.cloneGitRepo(gitRepo);
+        return GitRepoVo.builder().gitRepo(gitRepo).files(files).build();
     }
 }
