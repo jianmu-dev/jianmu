@@ -20,6 +20,9 @@ spring:
     out-of-order: false
     validate-on-migrate: true
     encoding: UTF-8
+  jackson:
+    parser:
+      ALLOW_UNQUOTED_CONTROL_CHARS: true
 
 pagehelper:
   support-methods-arguments: true
