@@ -47,12 +47,13 @@ public class JgitService {
         return this.listFile(directory);
     }
 
-    public Map<String, Boolean> cloneRepo(GitRepo gitRepo) {
+    public void cloneRepo(GitRepo gitRepo) {
         File directory = new File("/tmp/" + gitRepo.getDirectory());
         try (
                 Git newlyCloned = Git.cloneRepository()
                         .setDirectory(directory)
                         .setURI(gitRepo.getUri())
+                        .setBranch(gitRepo.getBranch())
                         .setTransportConfigCallback(transport -> {
                             if (transport instanceof TransportHttp) {
                                 ((TransportHttp) transport).setPreemptiveBasicAuthentication(gitRepo.getHttpsUsername(), gitRepo.getHttpsPassword());
@@ -80,6 +81,5 @@ public class JgitService {
             logger.error("Clone Failed:", e);
             throw new RuntimeException("克隆失败");
         }
-        return this.listFile(directory);
     }
 }

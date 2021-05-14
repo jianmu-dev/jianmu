@@ -7,8 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import java.util.Map;
-
 /**
  * @class: GitRepoMapper
  * @description: GitRepoMapper
@@ -24,6 +22,5 @@ public interface GitRepoMapper {
     @Mapping(source = "privateKey", target = "privateKey", defaultValue = "")
     GitRepo toGitRepo(GitRepoDto gitRepoDto);
 
-    @Mapping(source = "files", target = "files")
-    GitRepoVo toGitRepoVo(GitRepo gitRepo, Map<String, Boolean> files);
+    GitRepoVo toGitRepoVo(GitRepo gitRepo);
 }

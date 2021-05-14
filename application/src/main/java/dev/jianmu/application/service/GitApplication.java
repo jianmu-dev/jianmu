@@ -32,11 +32,8 @@ public class GitApplication {
         return jgitService.listFiles(dir);
     }
 
-    public Map<String, Boolean> cloneGitRepo(GitRepo gitRepo) {
-        if (gitRepo.getType().equals(GitRepo.Type.SSH)) {
-            if (gitRepo.getPrivateKey().isBlank()) {
-                throw new IllegalArgumentException("key参数为空");
-            }
+    public void cloneGitRepo(GitRepo gitRepo) {
+        if (gitRepo.getType().equals(GitRepo.Type.SSH) && !gitRepo.getPrivateKey().isBlank()) {
             String[] strings = gitRepo.getPrivateKey().split("\\.");
             if (strings.length != 2) {
                 throw new IllegalArgumentException("key参数不合法");
@@ -44,13 +41,7 @@ public class GitApplication {
             var key = this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1])
                     .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
             gitRepo.setPrivateKey(key.getValue());
-        } else {
-            if (gitRepo.getHttpsUsername().isBlank()) {
-                throw new IllegalArgumentException("username参数为空");
-            }
-            if (gitRepo.getHttpsPassword().isBlank()) {
-                throw new IllegalArgumentException("password参数为空");
-            }
+        } else if (!gitRepo.getHttpsUsername().isBlank() && !gitRepo.getHttpsPassword().isBlank()) {
             var username = gitRepo.getHttpsUsername().split("\\.");
             if (username.length != 2) {
                 throw new IllegalArgumentException("username参数不合法");
@@ -66,6 +57,6 @@ public class GitApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
             gitRepo.setHttpsPassword(pass.getValue());
         }
-        return this.jgitService.cloneRepo(gitRepo);
+        this.jgitService.cloneRepo(gitRepo);
     }
 }

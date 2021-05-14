@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 /**
  * @class: GitRepoVo
  * @description: GitRepoVo
@@ -26,6 +24,4 @@ public class GitRepoVo {
     private GitRepo.Type type;
     private String branch;
     private String directory;
-    private boolean isCloneAllBranches;
-    private Map<String, Boolean> files;
 }
