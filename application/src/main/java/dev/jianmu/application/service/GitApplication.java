@@ -28,6 +28,10 @@ public class GitApplication {
         this.jgitService = jgitService;
     }
 
+    public Map<String, Boolean> listFiles(String dir) {
+        return jgitService.listFiles(dir);
+    }
+
     public Map<String, Boolean> cloneGitRepo(GitRepo gitRepo) {
         if (gitRepo.getType().equals(GitRepo.Type.SSH)) {
             if (gitRepo.getPrivateKey().isBlank()) {

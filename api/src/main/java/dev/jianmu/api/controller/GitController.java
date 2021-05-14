@@ -6,12 +6,10 @@ import dev.jianmu.api.vo.GitRepoVo;
 import dev.jianmu.application.service.GitApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Map;
 
 /**
  * @class: GitController
@@ -27,6 +25,11 @@ public class GitController {
 
     public GitController(GitApplication gitApplication) {
         this.gitApplication = gitApplication;
+    }
+
+    @GetMapping("/list")
+    public Map<String, Boolean> listFiles(@RequestParam("dir") String dir) {
+        return this.gitApplication.listFiles(dir);
     }
 
     @PostMapping("/clone")

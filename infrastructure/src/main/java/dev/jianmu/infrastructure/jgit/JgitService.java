@@ -31,6 +31,22 @@ import java.util.stream.Collectors;
 public class JgitService {
     private static final Logger logger = LoggerFactory.getLogger(JgitService.class);
 
+    private Map<String, Boolean> listFile(File directory) {
+        var files = directory.listFiles();
+        if (files != null) {
+            return Arrays.stream(files)
+                    .map(file -> Map.entry(file.getName(), file.isDirectory()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } else {
+            return Map.of();
+        }
+    }
+
+    public Map<String, Boolean> listFiles(String dir) {
+        File directory = new File("/tmp/" + dir);
+        return this.listFile(directory);
+    }
+
     public Map<String, Boolean> cloneRepo(GitRepo gitRepo) {
         File directory = new File("/tmp/" + gitRepo.getDirectory());
         try (
@@ -64,13 +80,6 @@ public class JgitService {
             logger.error("Clone Failed:", e);
             throw new RuntimeException("克隆失败");
         }
-        var files = directory.listFiles();
-        if (files != null) {
-            return Arrays.stream(files)
-                    .map(file -> Map.entry(file.getName(), file.isDirectory()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        } else {
-            return Map.of();
-        }
+        return this.listFile(directory);
     }
 }
