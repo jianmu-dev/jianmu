@@ -21,6 +21,11 @@ import java.util.Map;
 @NoArgsConstructor
 @Schema(description = "Git仓库Vo")
 public class GitRepoVo {
-    private GitRepo gitRepo;
+    private String id;
+    private String uri;
+    private GitRepo.Type type;
+    private String branch;
+    private String directory;
+    private boolean isCloneAllBranches;
     private Map<String, Boolean> files;
 }

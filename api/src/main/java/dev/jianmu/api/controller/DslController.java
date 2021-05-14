@@ -75,10 +75,10 @@ public class DslController {
     }
 
     @PostMapping("/git")
-    @Operation(summary = "克隆Git库", description = "克隆Git库并返回文件Map")
+    @Operation(summary = "克隆Git库", description = "克隆Git库并返回文件Map，当使用SSH克隆时必须提供key")
     public GitRepoVo cloneGitRepo(@RequestBody @Valid GitRepoDto gitRepoDto) {
         var gitRepo = GitRepoMapper.INSTANCE.toGitRepo(gitRepoDto);
         var files = this.dslApplication.cloneGitRepo(gitRepo);
-        return GitRepoVo.builder().gitRepo(gitRepo).files(files).build();
+        return GitRepoMapper.INSTANCE.toGitRepoVo(gitRepo, files);
     }
 }

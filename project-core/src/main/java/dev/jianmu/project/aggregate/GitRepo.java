@@ -19,7 +19,7 @@ public class GitRepo {
     private Type type;
     private String httpsUsername;
     private String httpsPassword;
-    private String PrivateKey;
+    private String privateKey;
     private String branch;
     private String directory = UUID.randomUUID().toString().replace("-", "");
     private boolean isCloneAllBranches = false;
@@ -45,7 +45,7 @@ public class GitRepo {
     }
 
     public String getPrivateKey() {
-        return PrivateKey;
+        return privateKey;
     }
 
     public String getBranch() {
@@ -77,7 +77,7 @@ public class GitRepo {
     }
 
     public void setPrivateKey(String privateKey) {
-        PrivateKey = privateKey;
+        this.privateKey = privateKey;
     }
 
     public void setBranch(String branch) {
@@ -93,7 +93,7 @@ public class GitRepo {
         private Type type;
         private String httpsUsername;
         private String httpsPassword;
-        private String PrivateKey;
+        private String privateKey;
         private String branch;
         private boolean isCloneAllBranches = false;
 
@@ -124,8 +124,8 @@ public class GitRepo {
             return this;
         }
 
-        public Builder PrivateKey(String PrivateKey) {
-            this.PrivateKey = PrivateKey;
+        public Builder privateKey(String privateKey) {
+            this.privateKey = privateKey;
             return this;
         }
 
@@ -141,7 +141,7 @@ public class GitRepo {
 
         public GitRepo build() {
             GitRepo gitRepo = new GitRepo();
-            gitRepo.PrivateKey = this.PrivateKey;
+            gitRepo.privateKey = this.privateKey;
             gitRepo.uri = this.uri;
             gitRepo.branch = this.branch;
             gitRepo.httpsUsername = this.httpsUsername;

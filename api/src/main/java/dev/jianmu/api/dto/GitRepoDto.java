@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @class: GitRepoDto
@@ -24,10 +25,12 @@ public class GitRepoDto {
     @Schema(required = true)
     @NotBlank(message = "参数Uri不能为空")
     private String uri;
+    @Schema(required = true)
+    @NotNull(message = "参数Type不能为空")
     private GitRepo.Type type;
     private String httpsUsername;
     private String httpsPassword;
-    private String PrivateKey;
+    private String privateKey;
     @Schema(required = true)
     @NotBlank(message = "参数Branch不能为空")
     private String branch;
