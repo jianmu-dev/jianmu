@@ -24,6 +24,30 @@ public class GitRepo {
     private boolean isCloneAllBranches = false;
     private String dslPath;
 
+    public String[] getUsername() {
+        var username = this.httpsUsername.split("\\.");
+        if (username.length != 2) {
+            throw new IllegalArgumentException("username参数不合法");
+        }
+        return username;
+    }
+
+    public String[] getPassword() {
+        var password = this.httpsPassword.split("\\.");
+        if (password.length != 2) {
+            throw new IllegalArgumentException("password参数不合法");
+        }
+        return password;
+    }
+
+    public String[] getKey() {
+        String[] strings = this.privateKey.split("\\.");
+        if (strings.length != 2) {
+            throw new IllegalArgumentException("key参数不合法");
+        }
+        return strings;
+    }
+
     public String getDslPath() {
         return dslPath;
     }

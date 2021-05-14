@@ -34,22 +34,13 @@ public class GitApplication {
 
     public void cloneGitRepo(GitRepo gitRepo) {
         if (gitRepo.getType().equals(GitRepo.Type.SSH) && !gitRepo.getPrivateKey().isBlank()) {
-            String[] strings = gitRepo.getPrivateKey().split("\\.");
-            if (strings.length != 2) {
-                throw new IllegalArgumentException("key参数不合法");
-            }
+            String[] strings = gitRepo.getKey();
             var key = this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1])
                     .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
             gitRepo.setPrivateKey(key.getValue());
         } else if (!gitRepo.getHttpsUsername().isBlank() && !gitRepo.getHttpsPassword().isBlank()) {
-            var username = gitRepo.getHttpsUsername().split("\\.");
-            if (username.length != 2) {
-                throw new IllegalArgumentException("username参数不合法");
-            }
-            var password = gitRepo.getHttpsPassword().split("\\.");
-            if (password.length != 2) {
-                throw new IllegalArgumentException("password参数不合法");
-            }
+            var username = gitRepo.getUsername();
+            var password = gitRepo.getPassword();
             var user = this.kvPairRepository.findByNamespaceNameAndKey(username[0], username[1])
                     .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
             gitRepo.setHttpsUsername(user.getValue());

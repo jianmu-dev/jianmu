@@ -45,10 +45,33 @@ public class JgitService {
         }
     }
 
-    public String readDsl(String dslPath) {
-        try {
-            FileReader fileReader = new FileReader("/tmp/" + dslPath);
-            return IOUtils.toString(fileReader);
+    private boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            if (children == null) {
+                return false;
+            }
+            for (String child : children) {
+                boolean success = deleteDir(new File(dir, child));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return dir.delete();
+    }
+
+    public void cleanUp(String gitRepoId) {
+        File directory = new File("/tmp/" + gitRepoId);
+        var res = this.deleteDir(directory);
+        logger.info("Git缓存文件清除结果为: {}", res);
+    }
+
+    public String readDsl(String gitRepoId, String dslPath) {
+        try (FileReader fileReader = new FileReader("/tmp/" + gitRepoId + "/" + dslPath)) {
+            String dslText = IOUtils.toString(fileReader);
+            fileReader.close();
+            return dslText;
         } catch (IOException e) {
             logger.error("读取DSL异常：", e);
             throw new RuntimeException("读取DSL异常");
