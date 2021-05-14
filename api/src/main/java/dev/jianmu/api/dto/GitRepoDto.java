@@ -34,4 +34,6 @@ public class GitRepoDto {
     @Schema(required = true)
     @NotBlank(message = "参数Branch不能为空")
     private String branch;
+    @NotBlank(message = "参数dslPath不能为空", groups = AddGroup.class)
+    private String dslPath;
 }

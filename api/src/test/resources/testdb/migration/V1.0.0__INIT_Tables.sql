@@ -1,7 +1,7 @@
 CREATE TABLE `jianmu_project`
 (
     `id`                 varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_url`            varchar(150) NOT NULL COMMENT 'DSL文件地址',
+    `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
     `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
     `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
     `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
@@ -10,6 +10,20 @@ CREATE TABLE `jianmu_project`
     `created_time`       datetime    DEFAULT NULL COMMENT '创建时间',
     `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
     `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `jianmu`.`git_repo`
+(
+    `id`                    VARCHAR(45)  NOT NULL COMMENT 'ID',
+    `uri`                   VARCHAR(100) NULL COMMENT '仓库URI',
+    `type`                  VARCHAR(45)  NULL COMMENT '认证类型',
+    `https_username`        VARCHAR(45)  NULL COMMENT 'https用户名',
+    `https_password`        VARCHAR(45)  NULL COMMENT 'https密码',
+    `private_key`           TEXT         NULL COMMENT 'ssh方式私钥',
+    `branch`                VARCHAR(45)  NULL COMMENT '分支名',
+    `is_clone_all_branches` TINYINT(1)   NULL COMMENT '是否Clone全部分支',
+    `dsl_path`              VARCHAR(100) NULL COMMENT 'dsl文件路径',
     PRIMARY KEY (`id`)
 );
 

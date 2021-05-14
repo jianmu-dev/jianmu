@@ -23,5 +23,4 @@ public class GitRepoVo {
     private String uri;
     private GitRepo.Type type;
     private String branch;
-    private String directory;
 }

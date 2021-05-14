@@ -1,7 +1,7 @@
 CREATE TABLE `jianmu_project`
 (
     `id`                 varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_url`            varchar(150) NOT NULL COMMENT 'DSL文件地址',
+    `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
     `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
     `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
     `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
@@ -15,6 +15,23 @@ CREATE TABLE `jianmu_project`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='DSL表';
+
+CREATE TABLE `git_repo`
+(
+    `id`                    VARCHAR(45)  NOT NULL COMMENT 'ID',
+    `uri`                   VARCHAR(100) NULL COMMENT '仓库URI',
+    `type`                  VARCHAR(45)  NULL COMMENT '认证类型',
+    `https_username`        VARCHAR(45)  NULL COMMENT 'https用户名',
+    `https_password`        VARCHAR(45)  NULL COMMENT 'https密码',
+    `private_key`           TEXT         NULL COMMENT 'ssh方式私钥',
+    `branch`                VARCHAR(45)  NULL COMMENT '分支名',
+    `is_clone_all_branches` TINYINT(1)   NULL COMMENT '是否Clone全部分支',
+    `dsl_path`              VARCHAR(100) NULL COMMENT 'dsl文件路径',
+    PRIMARY KEY (`id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARACTER SET = utf8mb4
+    COMMENT = 'Git仓库表';
 
 CREATE TABLE `dsl_source_code`
 (

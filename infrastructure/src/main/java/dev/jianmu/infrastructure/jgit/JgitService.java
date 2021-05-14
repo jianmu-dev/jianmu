@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import dev.jianmu.project.aggregate.GitRepo;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
@@ -42,13 +45,23 @@ public class JgitService {
         }
     }
 
+    public String readDsl(String dslPath) {
+        try {
+            FileReader fileReader = new FileReader("/tmp/" + dslPath);
+            return IOUtils.toString(fileReader);
+        } catch (IOException e) {
+            logger.error("读取DSL异常：", e);
+            throw new RuntimeException("读取DSL异常");
+        }
+    }
+
     public Map<String, Boolean> listFiles(String dir) {
         File directory = new File("/tmp/" + dir);
         return this.listFile(directory);
     }
 
     public void cloneRepo(GitRepo gitRepo) {
-        File directory = new File("/tmp/" + gitRepo.getDirectory());
+        File directory = new File("/tmp/" + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
                         .setDirectory(directory)

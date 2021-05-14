@@ -14,15 +14,23 @@ public class GitRepo {
         SSH
     }
 
-    private String id = UUID.randomUUID().toString().replace("-", "");
+    private final String id = UUID.randomUUID().toString().replace("-", "");
     private String uri;
     private Type type;
     private String httpsUsername;
     private String httpsPassword;
     private String privateKey;
     private String branch;
-    private String directory = UUID.randomUUID().toString().replace("-", "");
     private boolean isCloneAllBranches = false;
+    private String dslPath;
+
+    public String getDslPath() {
+        return dslPath;
+    }
+
+    public void setDslPath(String dslPath) {
+        this.dslPath = dslPath;
+    }
 
     public String getId() {
         return id;
@@ -50,10 +58,6 @@ public class GitRepo {
 
     public String getBranch() {
         return branch;
-    }
-
-    public String getDirectory() {
-        return directory;
     }
 
     public boolean isCloneAllBranches() {
@@ -86,69 +90,5 @@ public class GitRepo {
 
     public void setCloneAllBranches(boolean cloneAllBranches) {
         isCloneAllBranches = cloneAllBranches;
-    }
-
-    public static final class Builder {
-        private String uri;
-        private Type type;
-        private String httpsUsername;
-        private String httpsPassword;
-        private String privateKey;
-        private String branch;
-        private boolean isCloneAllBranches = false;
-
-        private Builder() {
-        }
-
-        public static Builder aGitRepo() {
-            return new Builder();
-        }
-
-        public Builder uri(String uri) {
-            this.uri = uri;
-            return this;
-        }
-
-        public Builder type(Type type) {
-            this.type = type;
-            return this;
-        }
-
-        public Builder httpsUsername(String httpsUsername) {
-            this.httpsUsername = httpsUsername;
-            return this;
-        }
-
-        public Builder httpsPassword(String httpsPassword) {
-            this.httpsPassword = httpsPassword;
-            return this;
-        }
-
-        public Builder privateKey(String privateKey) {
-            this.privateKey = privateKey;
-            return this;
-        }
-
-        public Builder branch(String branch) {
-            this.branch = branch;
-            return this;
-        }
-
-        public Builder isCloneAllBranches(boolean isCloneAllBranches) {
-            this.isCloneAllBranches = isCloneAllBranches;
-            return this;
-        }
-
-        public GitRepo build() {
-            GitRepo gitRepo = new GitRepo();
-            gitRepo.privateKey = this.privateKey;
-            gitRepo.uri = this.uri;
-            gitRepo.branch = this.branch;
-            gitRepo.httpsUsername = this.httpsUsername;
-            gitRepo.httpsPassword = this.httpsPassword;
-            gitRepo.type = this.type;
-            gitRepo.isCloneAllBranches = this.isCloneAllBranches;
-            return gitRepo;
-        }
     }
 }

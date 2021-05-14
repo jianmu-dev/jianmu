@@ -4,12 +4,15 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
 import dev.jianmu.dsl.aggregate.Flow;
+import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.project.aggregate.DslSourceCode;
+import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
+import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.aggregate.ParameterRefer;
 import dev.jianmu.task.repository.DefinitionRepository;
@@ -45,8 +48,10 @@ public class DslApplication {
     private final ParameterReferRepository parameterReferRepository;
     private final ProjectRepositoryImpl projectRepository;
     private final DslSourceCodeRepository dslSourceCodeRepository;
+    private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
     private final ApplicationEventPublisher publisher;
+    private final JgitService jgitService;
 
     public DslApplication(
             DefinitionRepository definitionRepository,
@@ -57,8 +62,10 @@ public class DslApplication {
             ParameterReferRepository parameterReferRepository,
             ProjectRepositoryImpl projectRepository,
             DslSourceCodeRepository dslSourceCodeRepository,
+            GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
-            ApplicationEventPublisher publisher
+            ApplicationEventPublisher publisher,
+            JgitService jgitService
     ) {
         this.definitionRepository = definitionRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
@@ -68,14 +75,32 @@ public class DslApplication {
         this.parameterReferRepository = parameterReferRepository;
         this.projectRepository = projectRepository;
         this.dslSourceCodeRepository = dslSourceCodeRepository;
+        this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
         this.publisher = publisher;
+        this.jgitService = jgitService;
     }
 
     public void trigger(String dslId) {
         var dslRef = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         publisher.publishEvent(dslRef);
+    }
+
+    public void importProject(GitRepo gitRepo) {
+        var dslText = this.jgitService.readDsl(gitRepo.getDslPath());
+        this.createProject(dslText);
+        this.gitRepoRepository.add(gitRepo);
+    }
+
+    public void syncProject(String projectId) {
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
+        this.jgitService.cloneRepo(gitRepo);
+        var dslText = this.jgitService.readDsl(gitRepo.getDslPath());
+        this.updateProject(projectId, dslText);
     }
 
     public void createProject(String dslText) {
