@@ -4,15 +4,12 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
 import dev.jianmu.dsl.aggregate.Flow;
-import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.project.aggregate.DslSourceCode;
-import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
-import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.aggregate.ParameterRefer;
 import dev.jianmu.task.repository.DefinitionRepository;
@@ -49,9 +46,7 @@ public class DslApplication {
     private final ProjectRepositoryImpl projectRepository;
     private final DslSourceCodeRepository dslSourceCodeRepository;
     private final WorkflowRepository workflowRepository;
-    private final KVPairRepository kvPairRepository;
     private final ApplicationEventPublisher publisher;
-    private final JgitService jgitService;
 
     public DslApplication(
             DefinitionRepository definitionRepository,
@@ -63,9 +58,7 @@ public class DslApplication {
             ProjectRepositoryImpl projectRepository,
             DslSourceCodeRepository dslSourceCodeRepository,
             WorkflowRepository workflowRepository,
-            KVPairRepository kvPairRepository,
-            ApplicationEventPublisher publisher,
-            JgitService jgitService
+            ApplicationEventPublisher publisher
     ) {
         this.definitionRepository = definitionRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
@@ -76,46 +69,7 @@ public class DslApplication {
         this.projectRepository = projectRepository;
         this.dslSourceCodeRepository = dslSourceCodeRepository;
         this.workflowRepository = workflowRepository;
-        this.kvPairRepository = kvPairRepository;
         this.publisher = publisher;
-        this.jgitService = jgitService;
-    }
-
-    public Map<String, Boolean> cloneGitRepo(GitRepo gitRepo) {
-        if (gitRepo.getType().equals(GitRepo.Type.SSH)) {
-            if (gitRepo.getPrivateKey().isBlank()) {
-                throw new IllegalArgumentException("key参数为空");
-            }
-            String[] strings = gitRepo.getPrivateKey().split("\\.");
-            if (strings.length != 2) {
-                throw new IllegalArgumentException("key参数不合法");
-            }
-            var key = this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1])
-                    .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
-            gitRepo.setPrivateKey(key.getValue());
-        } else {
-            if (gitRepo.getHttpsUsername().isBlank()) {
-                throw new IllegalArgumentException("username参数为空");
-            }
-            if (gitRepo.getHttpsPassword().isBlank()) {
-                throw new IllegalArgumentException("password参数为空");
-            }
-            var username = gitRepo.getHttpsUsername().split("\\.");
-            if (username.length != 2) {
-                throw new IllegalArgumentException("username参数不合法");
-            }
-            var password = gitRepo.getHttpsPassword().split("\\.");
-            if (password.length != 2) {
-                throw new IllegalArgumentException("password参数不合法");
-            }
-            var user = this.kvPairRepository.findByNamespaceNameAndKey(username[0], username[1])
-                    .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
-            gitRepo.setHttpsUsername(user.getValue());
-            var pass = this.kvPairRepository.findByNamespaceNameAndKey(password[0], password[1])
-                    .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
-            gitRepo.setHttpsPassword(pass.getValue());
-        }
-        return this.jgitService.cloneRepo(gitRepo);
     }
 
     public void trigger(String dslId) {
