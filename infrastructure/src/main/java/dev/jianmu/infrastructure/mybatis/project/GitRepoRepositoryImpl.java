@@ -27,6 +27,11 @@ public class GitRepoRepositoryImpl implements GitRepoRepository {
     }
 
     @Override
+    public void deleteById(String id) {
+        this.gitRepoMapper.deleteById(id);
+    }
+
+    @Override
     public Optional<GitRepo> findById(String id) {
         return this.gitRepoMapper.findById(id);
     }

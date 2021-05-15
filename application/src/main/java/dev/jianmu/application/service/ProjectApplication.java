@@ -13,6 +13,7 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -49,6 +50,7 @@ public class ProjectApplication {
         this.parameterReferRepository = parameterReferRepository;
     }
 
+    @Transactional
     public void deleteById(String id) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
@@ -57,6 +59,7 @@ public class ProjectApplication {
         this.dslSourceCodeRepository.deleteByProjectId(project.getId());
         this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.inputParameterRepository.deleteByProjectId(project.getId());
+        this.gitRepoRepository.deleteById(project.getGitRepoId());
     }
 
     public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {

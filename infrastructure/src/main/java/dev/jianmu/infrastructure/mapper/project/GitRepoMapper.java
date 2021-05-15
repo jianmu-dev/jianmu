@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.mapper.project;
 
 import dev.jianmu.infrastructure.typehandler.CredentialTypeHandler;
 import dev.jianmu.project.aggregate.GitRepo;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
@@ -18,6 +19,9 @@ public interface GitRepoMapper {
     @Insert("insert into git_repo(id, uri, credential, branch, is_clone_all_branches, dsl_path) " +
             "values(#{id}, #{uri}, #{credential, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.CredentialTypeHandler}, #{branch}, #{isCloneAllBranches}, #{dslPath})")
     void add(GitRepo gitRepo);
+
+    @Delete("delete from git_repo where id = #{id}")
+    void deleteById(String id);
 
     @Select("select * from git_repo where id = #{id}")
     @Result(column = "is_clone_all_branches", property = "isCloneAllBranches")

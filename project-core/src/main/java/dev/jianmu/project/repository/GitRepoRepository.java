@@ -13,5 +13,7 @@ import java.util.Optional;
 public interface GitRepoRepository {
     void add(GitRepo gitRepo);
 
+    void deleteById(String id);
+
     Optional<GitRepo> findById(String id);
 }
