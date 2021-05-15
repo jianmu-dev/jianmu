@@ -1,10 +1,12 @@
 package dev.jianmu.api.eventhandler;
 
+import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.project.aggregate.Project;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @class: DslEventHandler
@@ -15,9 +17,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DslEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
+    private final DslApplication dslApplication;
 
-    public DslEventHandler(WorkflowInstanceApplication workflowInstanceApplication) {
+    public DslEventHandler(WorkflowInstanceApplication workflowInstanceApplication, DslApplication dslApplication) {
         this.workflowInstanceApplication = workflowInstanceApplication;
+        this.dslApplication = dslApplication;
     }
 
     @Async
@@ -28,5 +32,10 @@ public class DslEventHandler {
                 project.getId() + project.getWorkflowVersion(),
                 project.getWorkflowRef() + project.getWorkflowVersion()
         );
+    }
+
+    @TransactionalEventListener
+    public void handleGitRepoSyncEvent(String projectId) {
+        this.dslApplication.syncProject(projectId);
     }
 }

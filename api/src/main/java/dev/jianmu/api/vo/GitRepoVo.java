@@ -21,6 +21,5 @@ import lombok.NoArgsConstructor;
 public class GitRepoVo {
     private String id;
     private String uri;
-    private GitRepo.Type type;
     private String branch;
 }

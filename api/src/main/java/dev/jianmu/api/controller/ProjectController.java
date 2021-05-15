@@ -4,6 +4,7 @@ import dev.jianmu.api.dto.AddGroup;
 import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
 import dev.jianmu.application.service.DslApplication;
+import dev.jianmu.application.service.GitApplication;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +20,11 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Project API", description = "Project API")
 public class ProjectController {
     private final DslApplication dslApplication;
+    private final GitApplication gitApplication;
 
-    public ProjectController(DslApplication dslApplication) {
+    public ProjectController(DslApplication dslApplication, GitApplication gitApplication) {
         this.dslApplication = dslApplication;
+        this.gitApplication = gitApplication;
     }
 
     @PostMapping("/import")
@@ -32,6 +35,6 @@ public class ProjectController {
 
     @PutMapping("/sync/{projectId}")
     public void syncProject(@PathVariable String projectId) {
-        this.dslApplication.syncProject(projectId);
+        this.gitApplication.syncGitRepo(projectId);
     }
 }

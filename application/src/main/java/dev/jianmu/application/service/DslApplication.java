@@ -13,7 +13,6 @@ import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
-import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.aggregate.ParameterRefer;
 import dev.jianmu.task.repository.DefinitionRepository;
@@ -52,7 +51,6 @@ public class DslApplication {
     private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
     private final ApplicationEventPublisher publisher;
-    private final KVPairRepository kvPairRepository;
     private final JgitService jgitService;
 
     public DslApplication(
@@ -67,7 +65,6 @@ public class DslApplication {
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
             ApplicationEventPublisher publisher,
-            KVPairRepository kvPairRepository,
             JgitService jgitService
     ) {
         this.definitionRepository = definitionRepository;
@@ -81,7 +78,6 @@ public class DslApplication {
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
         this.publisher = publisher;
-        this.kvPairRepository = kvPairRepository;
         this.jgitService = jgitService;
     }
 
@@ -103,22 +99,6 @@ public class DslApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
-        if (gitRepo.getType().equals(GitRepo.Type.SSH) && !gitRepo.getPrivateKey().isBlank()) {
-            String[] strings = gitRepo.getKey();
-            var key = this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1])
-                    .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
-            gitRepo.setPrivateKey(key.getValue());
-        } else if (!gitRepo.getHttpsUsername().isBlank() && !gitRepo.getHttpsPassword().isBlank()) {
-            var username = gitRepo.getUsername();
-            var password = gitRepo.getPassword();
-            var user = this.kvPairRepository.findByNamespaceNameAndKey(username[0], username[1])
-                    .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
-            gitRepo.setHttpsUsername(user.getValue());
-            var pass = this.kvPairRepository.findByNamespaceNameAndKey(password[0], password[1])
-                    .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
-            gitRepo.setHttpsPassword(pass.getValue());
-        }
-        this.jgitService.cloneRepo(gitRepo);
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
         this.updateProject(projectId, dslText);
         this.jgitService.cleanUp(gitRepo.getId());
@@ -132,7 +112,7 @@ public class DslApplication {
         var nodes = this.createNodes(flow.getNodes());
         // 创建项目
         var project = Project.Builder.aReference()
-                .dslSource(Project.DslSource.LOCAL)
+                .dslSource((gitRepoId == null) ? Project.DslSource.LOCAL : Project.DslSource.GIT)
                 .gitRepoId(gitRepoId)
                 .workflowName(flow.getName())
                 .workflowRef(flow.getRef())

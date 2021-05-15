@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 @Service
 public class JgitService {
     private static final Logger logger = LoggerFactory.getLogger(JgitService.class);
+    private static final String TMPDIR = "/tmp/";
 
     private Map<String, Boolean> listFile(File directory) {
         var files = directory.listFiles();
@@ -83,8 +84,8 @@ public class JgitService {
         return this.listFile(directory);
     }
 
-    public void cloneRepo(GitRepo gitRepo) {
-        File directory = new File("/tmp/" + gitRepo.getId());
+    public void cloneRepoWithUserAndPass(GitRepo gitRepo, String user, String pass) {
+        File directory = new File(TMPDIR + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
                         .setDirectory(directory)
@@ -92,8 +93,26 @@ public class JgitService {
                         .setBranch(gitRepo.getBranch())
                         .setTransportConfigCallback(transport -> {
                             if (transport instanceof TransportHttp) {
-                                ((TransportHttp) transport).setPreemptiveBasicAuthentication(gitRepo.getHttpsUsername(), gitRepo.getHttpsPassword());
+                                ((TransportHttp) transport).setPreemptiveBasicAuthentication(user, pass);
                             }
+                        }).call()
+        ) {
+            logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
+        } catch (GitAPIException e) {
+            logger.error("Clone Failed:", e);
+            throw new RuntimeException("克隆失败");
+        }
+    }
+
+
+    public void cloneRepoWithSshKey(GitRepo gitRepo, String sshKey) {
+        File directory = new File(TMPDIR + gitRepo.getId());
+        try (
+                Git newlyCloned = Git.cloneRepository()
+                        .setDirectory(directory)
+                        .setURI(gitRepo.getUri())
+                        .setBranch(gitRepo.getBranch())
+                        .setTransportConfigCallback(transport -> {
                             if (transport instanceof SshTransport) {
                                 ((SshTransport) transport).setSshSessionFactory(new JschConfigSessionFactory() {
                                     @Override
@@ -104,13 +123,29 @@ public class JgitService {
                                     @Override
                                     protected JSch createDefaultJSch(FS fs) throws JSchException {
                                         JSch sch = super.createDefaultJSch(fs);
-                                        byte[] prvKey = gitRepo.getPrivateKey().getBytes(StandardCharsets.UTF_8);
+                                        byte[] prvKey = sshKey.getBytes(StandardCharsets.UTF_8);
                                         sch.addIdentity("gitKey", prvKey, null, null);
                                         return sch;
                                     }
                                 });
                             }
                         }).call()
+        ) {
+            logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
+        } catch (GitAPIException e) {
+            logger.error("Clone Failed:", e);
+            throw new RuntimeException("克隆失败");
+        }
+    }
+
+    public void cloneRepo(GitRepo gitRepo) {
+        File directory = new File(TMPDIR + gitRepo.getId());
+        try (
+                Git newlyCloned = Git.cloneRepository()
+                        .setDirectory(directory)
+                        .setURI(gitRepo.getUri())
+                        .setBranch(gitRepo.getBranch())
+                        .call()
         ) {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {

@@ -1,6 +1,6 @@
 package dev.jianmu.api.dto;
 
-import dev.jianmu.project.aggregate.GitRepo;
+import dev.jianmu.project.aggregate.Credential;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,11 +26,8 @@ public class GitRepoDto {
     @NotBlank(message = "参数Uri不能为空")
     private String uri;
     @Schema(required = true)
-    @NotNull(message = "参数Type不能为空")
-    private GitRepo.Type type;
-    private String httpsUsername;
-    private String httpsPassword;
-    private String privateKey;
+    @NotNull(message = "参数credential不能为空")
+    private Credential credential;
     @Schema(required = true)
     @NotBlank(message = "参数Branch不能为空")
     private String branch;
