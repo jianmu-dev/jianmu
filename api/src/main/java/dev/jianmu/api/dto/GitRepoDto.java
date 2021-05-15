@@ -22,6 +22,8 @@ import javax.validation.constraints.NotNull;
 @Builder
 @Schema(description = "GitRepoDto")
 public class GitRepoDto {
+    @NotBlank(message = "参数id不能为空", groups = AddGroup.class)
+    private String id;
     @Schema(required = true)
     @NotBlank(message = "参数Uri不能为空")
     private String uri;

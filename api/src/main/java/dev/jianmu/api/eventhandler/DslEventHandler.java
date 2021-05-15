@@ -6,7 +6,6 @@ import dev.jianmu.project.aggregate.Project;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @class: DslEventHandler
@@ -34,7 +33,7 @@ public class DslEventHandler {
         );
     }
 
-    @TransactionalEventListener
+    @EventListener
     public void handleGitRepoSyncEvent(String projectId) {
         this.dslApplication.syncProject(projectId);
     }

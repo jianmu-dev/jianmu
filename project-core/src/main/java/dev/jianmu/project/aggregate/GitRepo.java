@@ -10,12 +10,16 @@ import java.util.UUID;
  **/
 public class GitRepo {
 
-    private final String id = UUID.randomUUID().toString().replace("-", "");
+    private String id = UUID.randomUUID().toString().replace("-", "");
     private String uri;
     private Credential credential;
     private String branch;
     private boolean isCloneAllBranches = false;
     private String dslPath;
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getId() {
         return id;

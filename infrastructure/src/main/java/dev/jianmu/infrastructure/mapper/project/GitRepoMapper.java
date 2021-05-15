@@ -15,8 +15,8 @@ import java.util.Optional;
  * @create: 2021-05-14 19:05
  **/
 public interface GitRepoMapper {
-    @Insert("insert into git_repo(id, uri, type, credential, branch, is_clone_all_branches, dsl_path) " +
-            "values(#{id}, #{uri}, #{type}, #{credential, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.CredentialTypeHandler}, #{branch}, #{isCloneAllBranches}, #{dslPath})")
+    @Insert("insert into git_repo(id, uri, credential, branch, is_clone_all_branches, dsl_path) " +
+            "values(#{id}, #{uri}, #{credential, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.CredentialTypeHandler}, #{branch}, #{isCloneAllBranches}, #{dslPath})")
     void add(GitRepo gitRepo);
 
     @Select("select * from git_repo where id = #{id}")

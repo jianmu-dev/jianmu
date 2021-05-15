@@ -95,6 +95,7 @@ public class DslApplication {
     }
 
     public void syncProject(String projectId) {
+        logger.info("开始同步Git仓库中的DSL");
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
