@@ -34,13 +34,13 @@ public class DslController {
     }
 
     @PostMapping("/trigger/{dslId}")
-    @Operation(summary = "DSL触发接口", description = "触发DSL启动")
+    @Operation(summary = "DSL触发接口", description = "触发DSL启动", deprecated = true)
     public void trigger(@Parameter(description = "触发器ID") @PathVariable String dslId) {
-        this.dslApplication.trigger(dslId);
+        this.projectApplication.trigger(dslId);
     }
 
     @PutMapping("project/{dslId}")
-    @Operation(summary = "更新项目", description = "更新项目DSL定义")
+    @Operation(summary = "更新项目", description = "更新项目DSL定义", deprecated = true)
     public void updateProject(@PathVariable String dslId, @RequestBody @Valid DslTextDto dslTextDto) {
         this.dslApplication.updateProject(dslId, dslTextDto.getDslText());
     }
@@ -52,7 +52,7 @@ public class DslController {
     }
 
     @PostMapping("/project")
-    @Operation(summary = "创建项目", description = "上传DSL并创建项目")
+    @Operation(summary = "创建项目", description = "上传DSL并创建项目", deprecated = true)
     public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
         this.dslApplication.createProject(dslTextDto.getDslText(), null);
     }

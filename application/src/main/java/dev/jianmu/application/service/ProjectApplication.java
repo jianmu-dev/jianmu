@@ -12,6 +12,7 @@ import dev.jianmu.task.repository.ParameterReferRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class ProjectApplication {
     private final WorkflowRepository workflowRepository;
     private final InputParameterRepository inputParameterRepository;
     private final ParameterReferRepository parameterReferRepository;
+    private final ApplicationEventPublisher publisher;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -40,7 +42,8 @@ public class ProjectApplication {
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
             InputParameterRepository inputParameterRepository,
-            ParameterReferRepository parameterReferRepository
+            ParameterReferRepository parameterReferRepository,
+            ApplicationEventPublisher publisher
     ) {
         this.projectRepository = projectRepository;
         this.dslSourceCodeRepository = dslSourceCodeRepository;
@@ -48,6 +51,13 @@ public class ProjectApplication {
         this.workflowRepository = workflowRepository;
         this.inputParameterRepository = inputParameterRepository;
         this.parameterReferRepository = parameterReferRepository;
+        this.publisher = publisher;
+    }
+
+    public void trigger(String projectId) {
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        this.publisher.publishEvent(project);
     }
 
     @Transactional

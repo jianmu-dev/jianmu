@@ -28,6 +28,7 @@ public class GitController {
     }
 
     @GetMapping("/list")
+    @Operation(summary = "返回文件列表", description = "返回文件列表，true为目录，false为文件")
     public Map<String, Boolean> listFiles(@RequestParam("dir") String dir) {
         return this.gitApplication.listFiles(dir);
     }

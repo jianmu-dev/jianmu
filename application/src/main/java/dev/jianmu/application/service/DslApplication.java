@@ -81,12 +81,6 @@ public class DslApplication {
         this.jgitService = jgitService;
     }
 
-    public void trigger(String dslId) {
-        var dslRef = this.projectRepository.findById(dslId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-        publisher.publishEvent(dslRef);
-    }
-
     public void importProject(GitRepo gitRepo) {
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
         this.createProject(dslText, gitRepo.getId());
