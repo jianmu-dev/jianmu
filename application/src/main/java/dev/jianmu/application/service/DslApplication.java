@@ -221,28 +221,6 @@ public class DslApplication {
         this.parameterReferRepository.addAll(parameterRefers);
     }
 
-    public void deleteById(String id) {
-        Project project = this.projectRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-        this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.workflowRepository.deleteByRef(project.getWorkflowRef());
-        this.dslSourceCodeRepository.deleteByProjectId(project.getId());
-        this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.inputParameterRepository.deleteByProjectId(project.getId());
-    }
-
-    public DslSourceCode findByRefAndVersion(String ref, String version) {
-        return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-    }
-
-    public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
-        return this.projectRepository.findAll(workflowName, pageNum, pageSize);
-    }
-
-    public Optional<Project> findById(String dslId) {
-        return this.projectRepository.findById(dslId);
-    }
-
     private AsyncTask createAsyncTask(String key, String nodeName) {
         var definition = this.definitionRepository
                 .findByKey(key)
