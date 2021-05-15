@@ -49,6 +49,7 @@ public interface ProjectMapper {
     @Select("<script>" +
             "SELECT * FROM `jianmu_project` " +
             "<if test='name != null'> WHERE `workflow_name` like concat('%', #{workflowName}, '%')</if>" +
+            " order by last_modified_time desc" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "git_repo_id", property = "gitRepoId")
