@@ -3,9 +3,8 @@ package dev.jianmu.application.service;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
+import dev.jianmu.project.aggregate.Credential;
 import dev.jianmu.project.aggregate.GitRepo;
-import dev.jianmu.project.aggregate.HttpsCredential;
-import dev.jianmu.project.aggregate.SshCredential;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.secret.repository.KVPairRepository;
 import org.slf4j.Logger;
@@ -60,18 +59,16 @@ public class GitApplication {
 
     public void cloneGitRepo(GitRepo gitRepo) {
         var credential = gitRepo.getCredential();
-        if (credential instanceof SshCredential) {
-            var ssh = (SshCredential) credential;
-            var key = this.kvPairRepository.findByNamespaceNameAndKey(ssh.getNamespace(), ssh.getSecretKey())
+        if (credential.getType().equals(Credential.Type.SSH)) {
+            var key = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPrivateKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
             this.jgitService.cloneRepoWithSshKey(gitRepo, key.getKey());
             return;
         }
-        if (credential instanceof HttpsCredential) {
-            var https = (HttpsCredential) credential;
-            var user = this.kvPairRepository.findByNamespaceNameAndKey(https.getNamespace(), https.getUserKey())
+        if (credential.getType().equals(Credential.Type.HTTPS)) {
+            var user = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getUserKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到用户名"));
-            var pass = this.kvPairRepository.findByNamespaceNameAndKey(https.getNamespace(), https.getPassKey())
+            var pass = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPassKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到密码"));
             this.jgitService.cloneRepoWithUserAndPass(gitRepo, user.getValue(), pass.getValue());
             return;

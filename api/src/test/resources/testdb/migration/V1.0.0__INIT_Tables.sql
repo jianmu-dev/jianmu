@@ -13,17 +13,15 @@ CREATE TABLE `jianmu_project`
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `jianmu`.`git_repo`
+CREATE TABLE `git_repo`
 (
-    `id`                    VARCHAR(45)  NOT NULL COMMENT 'ID',
-    `uri`                   VARCHAR(100) NULL COMMENT '仓库URI',
-    `type`                  VARCHAR(45)  NULL COMMENT '认证类型',
-    `https_username`        VARCHAR(45)  NULL COMMENT 'https用户名',
-    `https_password`        VARCHAR(45)  NULL COMMENT 'https密码',
-    `private_key`           TEXT         NULL COMMENT 'ssh方式私钥',
-    `branch`                VARCHAR(45)  NULL COMMENT '分支名',
-    `is_clone_all_branches` TINYINT(1)   NULL COMMENT '是否Clone全部分支',
-    `dsl_path`              VARCHAR(100) NULL COMMENT 'dsl文件路径',
+    `id`                    varchar(45) NOT NULL COMMENT 'ID',
+    `uri`                   varchar(100) DEFAULT NULL COMMENT '仓库URI',
+    `type`                  varchar(45)  DEFAULT NULL COMMENT '认证类型',
+    `credential`            blob COMMENT 'Git库凭据',
+    `branch`                varchar(45)  DEFAULT NULL COMMENT '分支名',
+    `is_clone_all_branches` tinyint(1)   DEFAULT NULL COMMENT '是否Clone全部分支',
+    `dsl_path`              varchar(100) DEFAULT NULL COMMENT 'dsl文件路径',
     PRIMARY KEY (`id`)
 );
 
