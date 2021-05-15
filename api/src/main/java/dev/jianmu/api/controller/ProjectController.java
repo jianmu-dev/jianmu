@@ -57,8 +57,8 @@ public class ProjectController {
 
     @GetMapping("/{projectId}")
     @Operation(summary = "获取项目详情", description = "获取项目详情")
-    public Project getProject(@PathVariable String dslId) {
-        return this.projectApplication.findById(dslId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+    public Project getProject(@PathVariable String projectId) {
+        return this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
     }
 
     @GetMapping("/source/{ref}/{version}")
