@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
 import dev.jianmu.dsl.aggregate.Flow;
+import dev.jianmu.dsl.aggregate.FlowNode;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
@@ -101,7 +102,7 @@ public class DslApplication {
     public void createProject(String dslText, String gitRepoId) {
         // 解析DSL
         var dsl = DslModel.parse(dslText);
-        var flow = new Flow(dsl.getWorkflow());
+        var flow = dsl.getFlow();
         // 创建节点
         var nodes = this.createNodes(flow.getNodes());
         // 创建项目
@@ -232,51 +233,51 @@ public class DslApplication {
                 .build();
     }
 
-    private Set<Node> createNodes(List<dev.jianmu.dsl.aggregate.Node> nodes) {
+    private Set<Node> createNodes(List<FlowNode> flowNodes) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
-        nodes.forEach(node -> {
-            if (node.getType().equals("start")) {
-                var start = Start.Builder.aStart().name(node.getName()).ref(node.getName()).build();
-                symbolTable.put(node.getName(), start);
+        flowNodes.forEach(flowNode -> {
+            if (flowNode.getType().equals("start")) {
+                var start = Start.Builder.aStart().name(flowNode.getName()).ref(flowNode.getName()).build();
+                symbolTable.put(flowNode.getName(), start);
                 return;
             }
-            if (node.getType().equals("end")) {
-                var end = End.Builder.anEnd().name(node.getName()).ref(node.getName()).build();
-                symbolTable.put(node.getName(), end);
+            if (flowNode.getType().equals("end")) {
+                var end = End.Builder.anEnd().name(flowNode.getName()).ref(flowNode.getName()).build();
+                symbolTable.put(flowNode.getName(), end);
                 return;
             }
-            if (node.getType().equals("condition")) {
-                var cases = node.getCases();
+            if (flowNode.getType().equals("condition")) {
+                var cases = flowNode.getCases();
                 Map<Boolean, String> targetMap = new HashMap<>();
                 targetMap.put(true, cases.get("true"));
                 targetMap.put(false, cases.get("false"));
 
                 var condition = Condition.Builder.aCondition()
-                        .name(node.getName())
-                        .ref(node.getName())
-                        .expression(node.getExpression())
+                        .name(flowNode.getName())
+                        .ref(flowNode.getName())
+                        .expression(flowNode.getExpression())
                         .targetMap(targetMap)
                         .build();
                 condition.setTargets(Set.of(cases.get("true"), cases.get("false")));
-                symbolTable.put(node.getName(), condition);
+                symbolTable.put(flowNode.getName(), condition);
                 return;
             }
             // 创建任务节点
-            var task = this.createAsyncTask(node.getType(), node.getName());
-            symbolTable.put(node.getName(), task);
+            var task = this.createAsyncTask(flowNode.getType(), flowNode.getName());
+            symbolTable.put(flowNode.getName(), task);
         });
         // 添加节点引用关系
-        nodes.forEach(node -> {
-            var n = symbolTable.get(node.getName());
+        flowNodes.forEach(flowNode -> {
+            var n = symbolTable.get(flowNode.getName());
             if (null != n) {
-                node.getTargets().forEach(nodeName -> {
+                flowNode.getTargets().forEach(nodeName -> {
                     var target = symbolTable.get(nodeName);
                     if (null != target) {
                         n.addTarget(target.getRef());
                     }
                 });
-                node.getSources().forEach(nodeName -> {
+                flowNode.getSources().forEach(nodeName -> {
                     var source = symbolTable.get(nodeName);
                     if (null != source) {
                         n.addSource(source.getRef());

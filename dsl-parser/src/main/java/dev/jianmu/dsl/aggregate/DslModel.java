@@ -18,8 +18,8 @@ public class DslModel {
     private Map<String, Map<String, String>> event;
     private Map<String, String> param;
     private Map<String, Object> workflow;
+    private Flow flow;
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    ;
 
     public static DslModel parse(String dslText) {
         DslModel dsl = new DslModel();
@@ -29,7 +29,12 @@ public class DslModel {
             throw new RuntimeException("Dsl解析异常");
         }
         dsl.syntaxCheck();
+        dsl.parseFlow();
         return dsl;
+    }
+
+    private void parseFlow() {
+        this.flow = new Flow(this.workflow);
     }
 
     private void syntaxCheck() {
@@ -110,6 +115,10 @@ public class DslModel {
         if (!(targets instanceof List)) {
             throw new RuntimeException("开始节点targets未设置");
         }
+    }
+
+    public Flow getFlow() {
+        return this.flow;
     }
 
     public String getCron() {

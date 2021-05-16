@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * @author: Ethan Liu
  * @create: 2021-04-19 11:17
  **/
-public class Node {
+public class FlowNode {
     private final String name;
     private final String type;
     private final List<String> sources;
@@ -19,7 +19,7 @@ public class Node {
     private final String expression;
     private final Map<String, String> cases;
 
-    public Node(String nodeName, Map<?, ?> node) {
+    public FlowNode(String nodeName, Map<?, ?> node) {
         this.name = nodeName;
         this.type = (String) node.get("type");
         var s = node.get("sources");

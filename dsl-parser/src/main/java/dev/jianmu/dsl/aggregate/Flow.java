@@ -15,7 +15,7 @@ public class Flow {
     private final String name;
     private final String ref;
     private final String description;
-    private final List<Node> nodes = new ArrayList<>();
+    private final List<FlowNode> flowNodes = new ArrayList<>();
 
     public Flow(Map<String, Object> flow) {
         this.name = (String) flow.get("name");
@@ -23,14 +23,14 @@ public class Flow {
         this.description = (String) flow.get("description");
         flow.forEach((key, val) -> {
             if (val instanceof Map) {
-                nodes.add(new Node(key, (Map<?, ?>) val));
+                flowNodes.add(new FlowNode(key, (Map<?, ?>) val));
             }
         });
     }
 
     public Set<String> getNodeTypes() {
-        return nodes.stream()
-                .map(Node::getType)
+        return flowNodes.stream()
+                .map(FlowNode::getType)
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
                 .filter(type -> !type.equals("condition"))
@@ -39,15 +39,15 @@ public class Flow {
 
     public Set<OutputParameterRefer> getOutputParameterRefs(String projectId, String workflowVersion) {
         Set<OutputParameterRefer> refers = new HashSet<>();
-        nodes.forEach(node -> node.getParam().forEach((key, val) -> {
+        flowNodes.forEach(flowNode -> flowNode.getParam().forEach((key, val) -> {
             var outputVal = findOutputVariable(val);
             if (null != outputVal) {
                 var strings = outputVal.split("\\.");
                 var refer = OutputParameterRefer.Builder.anOutputParameterRef()
                         .projectId(projectId)
                         .workflowVersion(workflowVersion)
-                        .inputNodeName(node.getName())
-                        .inputNodeType(node.getType())
+                        .inputNodeName(flowNode.getName())
+                        .inputNodeType(flowNode.getType())
                         .inputParameterRef(key)
                         .outputNodeName(strings[0])
                         .outputParameterRef(strings[1])
@@ -60,7 +60,7 @@ public class Flow {
 
     public Set<DslParameter> getParams(Map<String, String> paramMap) {
         Set<DslParameter> parameters = new HashSet<>();
-        nodes.forEach(node -> node.getParam().forEach((key, val) -> {
+        flowNodes.forEach(flowNode -> flowNode.getParam().forEach((key, val) -> {
                     var valName = findVariable(val);
                     var secretName = findSecret(val);
                     if (null != valName) {
@@ -68,8 +68,8 @@ public class Flow {
                         if (valName.contains(".")) {
                             var strings = valName.split("\\.");
                             var p = DslParameter.Builder.aDslParameter()
-                                    .nodeName(node.getName())
-                                    .definitionKey(node.getType())
+                                    .nodeName(flowNode.getName())
+                                    .definitionKey(flowNode.getType())
                                     .name(key)
                                     .outputNodeName(strings[0])
                                     .outputParameterName(strings[1])
@@ -79,8 +79,8 @@ public class Flow {
                         // 全局参数合并
                         if (null != paramMap.get(valName)) {
                             var p = DslParameter.Builder.aDslParameter()
-                                    .nodeName(node.getName())
-                                    .definitionKey(node.getType())
+                                    .nodeName(flowNode.getName())
+                                    .definitionKey(flowNode.getType())
                                     .name(key)
                                     .value(paramMap.get(valName))
                                     .build();
@@ -91,8 +91,8 @@ public class Flow {
                     // 密钥类型参数
                     if (null != secretName) {
                         var p = DslParameter.Builder.aDslParameter()
-                                .nodeName(node.getName())
-                                .definitionKey(node.getType())
+                                .nodeName(flowNode.getName())
+                                .definitionKey(flowNode.getType())
                                 .name(key)
                                 .value(secretName)
                                 .build();
@@ -101,8 +101,8 @@ public class Flow {
                     }
                     // 正常参数
                     var p = DslParameter.Builder.aDslParameter()
-                            .nodeName(node.getName())
-                            .definitionKey(node.getType())
+                            .nodeName(flowNode.getName())
+                            .definitionKey(flowNode.getType())
                             .name(key)
                             .value(val)
                             .build();
@@ -151,7 +151,7 @@ public class Flow {
         return description;
     }
 
-    public List<Node> getNodes() {
-        return nodes;
+    public List<FlowNode> getNodes() {
+        return flowNodes;
     }
 }
