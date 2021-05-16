@@ -14,7 +14,7 @@
         <module>api</module>
         <module>task-core</module>
         <module>trigger-core</module>
-        <module>dsl-core</module>
+        <module>dsl-parser</module>
         <module>version-core</module>
         <module>secret-core</module>
         <module>project-core</module>

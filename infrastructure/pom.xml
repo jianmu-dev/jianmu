@@ -49,7 +49,7 @@
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
-            <artifactId>dsl-core</artifactId>
+            <artifactId>dsl-parser</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>

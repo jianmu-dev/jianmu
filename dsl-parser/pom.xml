@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dsl-core</artifactId>
+    <artifactId>dsl-parser</artifactId>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
