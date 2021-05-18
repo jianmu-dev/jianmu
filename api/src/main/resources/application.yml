@@ -51,3 +51,4 @@ jianmu:
   api:
     jwtSecret: Hahhahhhaahh
     jwtExpirationMs: 86400000
+    adminPasswd: 123456
