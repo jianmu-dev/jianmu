@@ -44,6 +44,8 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                String newJwt = jwtProvider.generateJwtToken(authentication);
+                response.setHeader("X-Authorization-token", newJwt);
             }
         } catch (RuntimeException e) {
             logger.error("Cannot set user authentication: {}", e);

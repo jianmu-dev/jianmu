@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -43,6 +44,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
                 url = "https://gitee.com/jianmu_dev"
         )
 )
+@ServletComponentScan
 public class SpringbootApp {
     public static void main(String[] args) {
         SpringApplication.run(SpringbootApp.class, args);
