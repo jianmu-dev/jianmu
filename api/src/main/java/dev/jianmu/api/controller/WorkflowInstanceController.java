@@ -9,6 +9,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ import javax.inject.Inject;
 @RestController
 @RequestMapping("workflow_instances")
 @Tag(name = "流程实例接口", description = "提供流程实例启动停止等API")
+@SecurityRequirement(name = "bearerAuth")
 public class WorkflowInstanceController {
     private final WorkflowInstanceApplication instanceApplication;
 

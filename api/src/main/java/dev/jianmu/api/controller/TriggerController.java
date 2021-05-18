@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import dev.jianmu.application.service.TriggerApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,6 +21,7 @@ import javax.inject.Inject;
 @RestController
 @RequestMapping("trigger")
 @Tag(name = "触发器接口", description = "提供触发API")
+@SecurityRequirement(name = "bearerAuth")
 public class TriggerController {
     private final TriggerApplication triggerApplication;
 

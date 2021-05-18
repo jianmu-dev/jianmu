@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import dev.jianmu.infrastructure.storage.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping("logs")
 @Tag(name = "任务日志接口", description = "本接口返回Chunked流，前端代码需要支持才能实时读取文件")
+@SecurityRequirement(name = "bearerAuth")
 public class LogController {
     private static final Logger logger = LoggerFactory.getLogger(LogController.class);
     private final StorageService storageService;

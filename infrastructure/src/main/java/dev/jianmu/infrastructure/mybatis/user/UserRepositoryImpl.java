@@ -16,7 +16,11 @@ import java.util.Optional;
 public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> findByUsername(String username) {
-        return Optional.empty();
+        var user = new User();
+        user.setId(1L);
+        user.setUsername("admin");
+        user.setPassword("$2a$10$rHS0pdYadowR5XTLb2qKNuIqjiOb/VAb.h8haIqv.MEK6homQjxSa");
+        return Optional.of(user);
     }
 
     @Override

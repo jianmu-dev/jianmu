@@ -12,6 +12,7 @@ import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("task_definitions")
 @Tag(name = "任务定义接口", description = "提供任务定义创建删除等API")
+@SecurityRequirement(name = "bearerAuth")
 public class TaskDefinitionController {
     private final TaskDefinitionApplication taskDefinitionApplication;
 
