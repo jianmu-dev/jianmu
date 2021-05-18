@@ -18,6 +18,7 @@
         <module>version-core</module>
         <module>secret-core</module>
         <module>project-core</module>
+        <module>user-core</module>
     </modules>
 
     <properties>
