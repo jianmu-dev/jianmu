@@ -103,13 +103,14 @@ CREATE TABLE `task_definition`
 
 CREATE TABLE `task_definition_version`
 (
-    `task_definition_id`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义ID',
-    `name`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '版本名称',
-    `task_definition_ref` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
-    `definition_key`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一Key',
-    `description`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
-    `created_time`        datetime                                                     NOT NULL COMMENT '创建时间',
-    `last_modified_time`  datetime                                                     NOT NULL COMMENT '修改时间',
+    `task_definition_id`   varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义ID',
+    `task_definition_name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义名称',
+    `name`                 varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '版本名称',
+    `task_definition_ref`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
+    `definition_key`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一Key',
+    `description`          varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
+    `created_time`         datetime                                                     NOT NULL COMMENT '创建时间',
+    `last_modified_time`   datetime                                                     NOT NULL COMMENT '修改时间',
     PRIMARY KEY (`definition_key`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

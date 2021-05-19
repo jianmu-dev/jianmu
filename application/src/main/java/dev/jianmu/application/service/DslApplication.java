@@ -2,24 +2,21 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
-import dev.jianmu.dsl.aggregate.Flow;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
-import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
-import dev.jianmu.task.aggregate.InputParameter;
-import dev.jianmu.task.aggregate.ParameterRefer;
+import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.ParameterReferRepository;
-import dev.jianmu.version.repository.TaskDefinitionRepository;
+import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
-import dev.jianmu.workflow.aggregate.definition.*;
+import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +24,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @class: DslApplication
@@ -40,7 +37,6 @@ import java.util.stream.Collectors;
 public class DslApplication {
     private static final Logger logger = LoggerFactory.getLogger(DslApplication.class);
     private final DefinitionRepository definitionRepository;
-    private final TaskDefinitionRepository taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
     private final InputParameterRepository inputParameterRepository;
@@ -54,7 +50,6 @@ public class DslApplication {
 
     public DslApplication(
             DefinitionRepository definitionRepository,
-            TaskDefinitionRepository taskDefinitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             ParameterRepository parameterRepository,
             InputParameterRepository inputParameterRepository,
@@ -67,7 +62,6 @@ public class DslApplication {
             JgitService jgitService
     ) {
         this.definitionRepository = definitionRepository;
-        this.taskDefinitionRepository = taskDefinitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
         this.inputParameterRepository = inputParameterRepository;
@@ -78,6 +72,47 @@ public class DslApplication {
         this.workflowRepository = workflowRepository;
         this.publisher = publisher;
         this.jgitService = jgitService;
+    }
+
+    private DslModel parseDsl(String dslText) {
+        // 解析DSL
+        var dsl = DslModel.parse(dslText);
+        // 校验任务类型是否存在并创建流程节点关系
+        var types = dsl.getFlow().getAsyncTaskTypes();
+        List<TaskDefinitionVersion> versions = new ArrayList<>();
+        List<Definition> definitions = new ArrayList<>();
+        types.forEach(type -> {
+            var v = this.taskDefinitionVersionRepository
+                    .findByDefinitionKey(type)
+                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
+            var definition = this.definitionRepository
+                    .findByKey(type)
+                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
+            versions.add(v);
+            definitions.add(definition);
+        });
+        dsl.calculate(definitions, versions);
+        return dsl;
+    }
+
+    private Workflow createWorkflow(DslModel dsl, String workflowVersion) {
+        return Workflow.Builder.aWorkflow()
+                .name(dsl.getFlow().getName())
+                .ref(dsl.getFlow().getRef())
+                .description(dsl.getFlow().getDescription())
+                .version(workflowVersion)
+                .nodes(dsl.getFlow().getNodes())
+                .build();
+    }
+
+    private DslSourceCode createDslSourceCode(String projectId, Workflow workflow, String dslText) {
+        return DslSourceCode.Builder.aDslSourceCode()
+                .projectId(projectId)
+                .workflowRef(workflow.getRef())
+                .workflowVersion(workflow.getVersion())
+                .dslText(dslText)
+                .lastModifiedBy("admin")
+                .build();
     }
 
     public void importProject(GitRepo gitRepo) {
@@ -98,115 +133,33 @@ public class DslApplication {
         this.jgitService.cleanUp(gitRepo.getId());
     }
 
+    @Transactional
     public void createProject(String dslText, String gitRepoId) {
         // 解析DSL
-        var dsl = DslModel.parse(dslText);
-        var flow = new Flow(dsl.getWorkflow());
-        // 创建节点
-        var nodes = this.createNodes(flow.getNodes());
+        var dsl = this.parseDsl(dslText);
         // 创建项目
-        var project = Project.Builder.aReference()
-                .dslSource((gitRepoId == null) ? Project.DslSource.LOCAL : Project.DslSource.GIT)
-                .gitRepoId(gitRepoId)
-                .workflowName(flow.getName())
-                .workflowRef(flow.getRef())
+        var builder = Project.Builder.aReference()
+                .workflowName(dsl.getFlow().getName())
+                .workflowRef(dsl.getFlow().getRef())
                 .dslText(dslText)
-                .steps(nodes.size() - 2)
-                .lastModifiedBy("admin")
-                .build();
-        this.projectRepository.add(project);
-        this.createWorkflow(project, dsl, dslText);
-    }
-
-    public void updateProject(String dslId, String dslText) {
-        Project project = this.projectRepository.findById(dslId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-        // 解析DSL
-        var dsl = DslModel.parse(dslText);
-        var flow = new Flow(dsl.getWorkflow());
-        // 创建节点
-        var nodes = this.createNodes(flow.getNodes());
-        project.setDslText(dslText);
-        project.setLastModifiedBy("admin");
-        project.setSteps(nodes.size() - 2);
-        project.setWorkflowName(flow.getName());
-        project.setLastModifiedTime();
-        project.setWorkflowVersion();
-        this.projectRepository.updateByWorkflowRef(project);
-        this.createWorkflow(project, dsl, dslText);
-    }
-
-    @Transactional
-    public void createWorkflow(Project project, DslModel dsl, String dslText) {
-        // 创建节点
-        var flow = new Flow(dsl.getWorkflow());
-        var nodes = this.createNodes(flow.getNodes());
+                .steps(dsl.getSteps())
+                .lastModifiedBy("admin");
+        if (null == gitRepoId) {
+            builder.gitRepoId("").dslSource(Project.DslSource.LOCAL);
+        } else {
+            builder.gitRepoId(gitRepoId).dslSource(Project.DslSource.GIT);
+        }
+        var project = builder.build();
         // 创建流程
-        var workflow = Workflow.Builder.aWorkflow()
-                .name(flow.getName())
-                .ref(flow.getRef())
-                .description(flow.getDescription())
-                .version(project.getWorkflowVersion())
-                .nodes(nodes)
-                .build();
+        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
         // 保存原始DSL
-        var dslSource = DslSourceCode.Builder.aDslSourceCode()
-                .projectId(project.getId())
-                .workflowRef(workflow.getRef())
-                .workflowVersion(workflow.getVersion())
-                .dslText(dslText)
-                .lastModifiedBy("admin")
-                .build();
-        // DSL全局变量处理后的参数列表
-        var dslParameters = flow.getParams(dsl.getParam());
-        // 查找DSL中指定了参数的任务定义列表
-        var definitionMap = flow.getNodeTypes().stream()
-                .filter(key -> dslParameters.stream().anyMatch(dslParameter -> dslParameter.getDefinitionKey().equals(key)))
-                .map(key -> {
-                    var definition = this.definitionRepository
-                            .findByKey(key)
-                            .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-                    return Map.entry(key, definition);
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        // 根据DSL中指定参数的参数名在任务定义的输入参数中匹配，并返回匹配的参数Map
-        var parameterMap = dslParameters.stream()
-                .filter(dslParameter ->
-                        // 由于上面已经验证了任务定义，因此这里的Map#get不会有空值
-                        definitionMap.get(dslParameter.getDefinitionKey())
-                                .getInputParameterBy(dslParameter.getName()).isPresent())
-                .map(dslParameter -> Map.entry(dslParameter, definitionMap.get(dslParameter.getDefinitionKey())
-                        // 由于上面已经验证了参数定义是否存在，因此这里的Optional#get不会有空值
-                        .getInputParameterBy(dslParameter.getName()).get()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
         // 将parameterMap转变为 InputParameter与Parameter参数Map
-        var inputParameterMap = parameterMap.entrySet().stream()
-                .map(entry -> {
-                    var parameter = Parameter.Type.valueOf(entry.getValue().getType())
-                            .newParameter(entry.getKey().getValue());
-                    var inputParameter = InputParameter.Builder.anInputParameter()
-                            .projectId(project.getId())
-                            .defKey(entry.getKey().getDefinitionKey())
-                            .ref(entry.getKey().getName())
-                            .asyncTaskRef(entry.getKey().getNodeName())
-                            .workflowRef(project.getWorkflowRef())
-                            .workflowVersion(project.getWorkflowVersion())
-                            .parameterId(parameter.getId())
-                            .build();
-                    return Map.entry(inputParameter, parameter);
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        // 根据 DSL定义outputRefs 创建 ParameterRefer
-        var outputRefs = flow.getOutputParameterRefs(project.getId(), project.getWorkflowVersion());
-        var parameterRefers = outputRefs.stream()
-                .map(outputParameterRefer -> ParameterRefer.Builder.aParameterRefer()
-                        .sourceParameterRef(outputParameterRefer.getOutputParameterRef())
-                        .sourceTaskRef(outputParameterRefer.getOutputNodeName())
-                        .targetParameterRef(outputParameterRefer.getInputParameterRef())
-                        .targetTaskRef(outputParameterRefer.getInputNodeName())
-                        .workflowRef(project.getWorkflowRef())
-                        .workflowVersion(project.getWorkflowVersion())
-                        .build())
-                .collect(Collectors.toList());
+        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
+        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
+        var parameterRefers = dsl.getFlow()
+                .getParameterRefers(project.getWorkflowVersion());
+        this.projectRepository.add(project);
         this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
         this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
         this.dslSourceCodeRepository.add(dslSource);
@@ -214,76 +167,32 @@ public class DslApplication {
         this.parameterReferRepository.addAll(parameterRefers);
     }
 
-    private AsyncTask createAsyncTask(String key, String nodeName) {
-        var definition = this.definitionRepository
-                .findByKey(key)
-                .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-        var taskDefinitionVersion = this.taskDefinitionVersionRepository
-                .findByDefinitionKey(key)
-                .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
-        var taskDefinition = this.taskDefinitionRepository
-                .findByRef(taskDefinitionVersion.getTaskDefinitionRef())
-                .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-        return AsyncTask.Builder.anAsyncTask()
-                .name(taskDefinition.getName())
-                .ref(nodeName)
-                .type(definition.getKey())
-                .description(taskDefinitionVersion.getDescription())
-                .build();
-    }
-
-    private Set<Node> createNodes(List<dev.jianmu.dsl.aggregate.Node> nodes) {
-        // 创建节点
-        Map<String, Node> symbolTable = new HashMap<>();
-        nodes.forEach(node -> {
-            if (node.getType().equals("start")) {
-                var start = Start.Builder.aStart().name(node.getName()).ref(node.getName()).build();
-                symbolTable.put(node.getName(), start);
-                return;
-            }
-            if (node.getType().equals("end")) {
-                var end = End.Builder.anEnd().name(node.getName()).ref(node.getName()).build();
-                symbolTable.put(node.getName(), end);
-                return;
-            }
-            if (node.getType().equals("condition")) {
-                var cases = node.getCases();
-                Map<Boolean, String> targetMap = new HashMap<>();
-                targetMap.put(true, cases.get("true"));
-                targetMap.put(false, cases.get("false"));
-
-                var condition = Condition.Builder.aCondition()
-                        .name(node.getName())
-                        .ref(node.getName())
-                        .expression(node.getExpression())
-                        .targetMap(targetMap)
-                        .build();
-                condition.setTargets(Set.of(cases.get("true"), cases.get("false")));
-                symbolTable.put(node.getName(), condition);
-                return;
-            }
-            // 创建任务节点
-            var task = this.createAsyncTask(node.getType(), node.getName());
-            symbolTable.put(node.getName(), task);
-        });
-        // 添加节点引用关系
-        nodes.forEach(node -> {
-            var n = symbolTable.get(node.getName());
-            if (null != n) {
-                node.getTargets().forEach(nodeName -> {
-                    var target = symbolTable.get(nodeName);
-                    if (null != target) {
-                        n.addTarget(target.getRef());
-                    }
-                });
-                node.getSources().forEach(nodeName -> {
-                    var source = symbolTable.get(nodeName);
-                    if (null != source) {
-                        n.addSource(source.getRef());
-                    }
-                });
-            }
-        });
-        return new HashSet<>(symbolTable.values());
+    @Transactional
+    public void updateProject(String dslId, String dslText) {
+        Project project = this.projectRepository.findById(dslId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+        // 解析DSL
+        var dsl = this.parseDsl(dslText);
+        project.setDslText(dslText);
+        project.setLastModifiedBy("admin");
+        project.setSteps(dsl.getSteps());
+        project.setWorkflowName(dsl.getFlow().getName());
+        project.setLastModifiedTime();
+        project.setWorkflowVersion();
+        // 创建流程
+        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
+        // 保存原始DSL
+        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
+        // 将parameterMap转变为 InputParameter与Parameter参数Map
+        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
+        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
+        var parameterRefers = dsl.getFlow()
+                .getParameterRefers(project.getWorkflowVersion());
+        this.projectRepository.updateByWorkflowRef(project);
+        this.dslSourceCodeRepository.add(dslSource);
+        this.workflowRepository.add(workflow);
+        this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
+        this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
+        this.parameterReferRepository.addAll(parameterRefers);
     }
 }

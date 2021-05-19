@@ -36,7 +36,7 @@ public class GitController {
     @PostMapping("/clone")
     @Operation(summary = "克隆Git库", description = "克隆Git库并返回文件Map，当使用SSH克隆时必须提供key")
     public GitRepoVo cloneGitRepo(@RequestBody @Valid GitRepoDto gitRepoDto) {
-        var gitRepo = GitRepoMapper.INSTANCE.toGitRepo(gitRepoDto);
+        var gitRepo = GitRepoMapper.INSTANCE.toGitRepoWithoutId(gitRepoDto);
         this.gitApplication.cloneGitRepo(gitRepo);
         return GitRepoMapper.INSTANCE.toGitRepoVo(gitRepo);
     }
