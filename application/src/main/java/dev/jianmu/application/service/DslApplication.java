@@ -222,11 +222,8 @@ public class DslApplication {
         var taskDefinitionVersion = this.taskDefinitionVersionRepository
                 .findByDefinitionKey(key)
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
-        var taskDefinition = this.taskDefinitionRepository
-                .findByRef(taskDefinitionVersion.getTaskDefinitionRef())
-                .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         return AsyncTask.Builder.anAsyncTask()
-                .name(taskDefinition.getName())
+                .name(taskDefinitionVersion.getTaskDefinitionName())
                 .ref(nodeName)
                 .type(definition.getKey())
                 .description(taskDefinitionVersion.getDescription())

@@ -96,6 +96,7 @@ public class TaskDefinitionApplication {
     ) {
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
         taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
+        taskDefinitionVersion.setTaskDefinitionName(taskDefinition.getName());
         taskDefinitionVersion.setDefinitionKey(definitionKey);
         // 创建参数存储
         var parameters = this.mergeParameters(inputParameters, outputParameters);

@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class TaskDefinitionVersion {
     // 任务定义ID
     private String taskDefinitionId;
+    // 任务定义名称
+    private String taskDefinitionName;
     // 版本名称
     private String name;
     // 任务定义Ref
@@ -28,6 +30,10 @@ public class TaskDefinitionVersion {
         return taskDefinitionId;
     }
 
+    public String getTaskDefinitionName() {
+        return taskDefinitionName;
+    }
+
     public String getName() {
         return name;
     }
@@ -42,6 +48,10 @@ public class TaskDefinitionVersion {
 
     public void setTaskDefinitionId(String taskDefinitionId) {
         this.taskDefinitionId = taskDefinitionId;
+    }
+
+    public void setTaskDefinitionName(String taskDefinitionName) {
+        this.taskDefinitionName = taskDefinitionName;
     }
 
     public void setName(String name) {
