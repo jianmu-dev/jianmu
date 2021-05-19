@@ -138,15 +138,18 @@ public class DslApplication {
         // 解析DSL
         var dsl = this.parseDsl(dslText);
         // 创建项目
-        var project = Project.Builder.aReference()
-                .dslSource((gitRepoId == null) ? Project.DslSource.LOCAL : Project.DslSource.GIT)
-                .gitRepoId(gitRepoId)
+        var builder = Project.Builder.aReference()
                 .workflowName(dsl.getFlow().getName())
                 .workflowRef(dsl.getFlow().getRef())
                 .dslText(dslText)
                 .steps(dsl.getSteps())
-                .lastModifiedBy("admin")
-                .build();
+                .lastModifiedBy("admin");
+        if (null == gitRepoId) {
+            builder.gitRepoId("").dslSource(Project.DslSource.LOCAL);
+        } else {
+            builder.gitRepoId(gitRepoId).dslSource(Project.DslSource.GIT);
+        }
+        var project = builder.build();
         // 创建流程
         var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
         // 保存原始DSL
