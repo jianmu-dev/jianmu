@@ -184,31 +184,6 @@ CREATE TABLE `worker`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务执行器';
 
-CREATE TABLE `trigger`
-(
-    `id`                 varchar(45) NOT NULL COMMENT 'ID',
-    `workflow_id`        varchar(45) DEFAULT NULL COMMENT '流程定义ID',
-    `task_definition_id` varchar(45) DEFAULT NULL COMMENT '任务定义ID',
-    `workspace`          varchar(45) DEFAULT NULL COMMENT '工作空间',
-    `type`               varchar(45) NOT NULL COMMENT '触发类型',
-    `category`           varchar(45) NOT NULL COMMENT '流程或任务分类',
-    PRIMARY KEY (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='触发器';
-
-CREATE TABLE `trigger_parameter`
-(
-    `trigger_id`  varchar(255) NOT NULL COMMENT '触发器ID',
-    `name`        varchar(45)  NOT NULL COMMENT '显示名称',
-    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `type`        varchar(45)  NOT NULL COMMENT '类型',
-    `description` varchar(45) DEFAULT NULL COMMENT '描述',
-    `parameterId` varchar(45)  NOT NULL COMMENT '参数引用Id'
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='触发器参数表';
-
 CREATE TABLE `secret_namespace`
 (
     `name`               varchar(100) NOT NULL COMMENT '名称',

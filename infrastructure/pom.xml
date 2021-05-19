@@ -19,11 +19,6 @@
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
-            <artifactId>trigger-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.jianmu</groupId>
             <artifactId>workflow-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
