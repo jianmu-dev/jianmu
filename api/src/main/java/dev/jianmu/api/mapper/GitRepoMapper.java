@@ -4,6 +4,7 @@ import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.vo.GitRepoVo;
 import dev.jianmu.project.aggregate.GitRepo;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -17,6 +18,9 @@ public interface GitRepoMapper {
     GitRepoMapper INSTANCE = Mappers.getMapper(GitRepoMapper.class);
 
     GitRepo toGitRepo(GitRepoDto gitRepoDto);
+
+    @Mapping(target = "id", source = "id", ignore = true)
+    GitRepo toGitRepoWithoutId(GitRepoDto gitRepoDto);
 
     GitRepoVo toGitRepoVo(GitRepo gitRepo);
 }
