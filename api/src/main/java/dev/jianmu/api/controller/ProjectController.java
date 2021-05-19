@@ -27,7 +27,7 @@ import javax.validation.Valid;
  * @create: 2021-05-14 14:00
  **/
 @RestController
-@RequestMapping("project")
+@RequestMapping("projects")
 @Tag(name = "项目API", description = "项目API")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
