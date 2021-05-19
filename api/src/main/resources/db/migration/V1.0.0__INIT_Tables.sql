@@ -103,13 +103,14 @@ CREATE TABLE `task_definition`
 
 CREATE TABLE `task_definition_version`
 (
-    `task_definition_id`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义ID',
-    `name`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '版本名称',
-    `task_definition_ref` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
-    `definition_key`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一Key',
-    `description`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
-    `created_time`        datetime                                                     NOT NULL COMMENT '创建时间',
-    `last_modified_time`  datetime                                                     NOT NULL COMMENT '修改时间',
+    `task_definition_id`   varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义ID',
+    `task_definition_name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义名称',
+    `name`                 varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '版本名称',
+    `task_definition_ref`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
+    `definition_key`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一Key',
+    `description`          varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
+    `created_time`         datetime                                                     NOT NULL COMMENT '创建时间',
+    `last_modified_time`   datetime                                                     NOT NULL COMMENT '修改时间',
     PRIMARY KEY (`definition_key`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -182,31 +183,6 @@ CREATE TABLE `worker`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务执行器';
-
-CREATE TABLE `trigger`
-(
-    `id`                 varchar(45) NOT NULL COMMENT 'ID',
-    `workflow_id`        varchar(45) DEFAULT NULL COMMENT '流程定义ID',
-    `task_definition_id` varchar(45) DEFAULT NULL COMMENT '任务定义ID',
-    `workspace`          varchar(45) DEFAULT NULL COMMENT '工作空间',
-    `type`               varchar(45) NOT NULL COMMENT '触发类型',
-    `category`           varchar(45) NOT NULL COMMENT '流程或任务分类',
-    PRIMARY KEY (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='触发器';
-
-CREATE TABLE `trigger_parameter`
-(
-    `trigger_id`  varchar(255) NOT NULL COMMENT '触发器ID',
-    `name`        varchar(45)  NOT NULL COMMENT '显示名称',
-    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `type`        varchar(45)  NOT NULL COMMENT '类型',
-    `description` varchar(45) DEFAULT NULL COMMENT '描述',
-    `parameterId` varchar(45)  NOT NULL COMMENT '参数引用Id'
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='触发器参数表';
 
 CREATE TABLE `secret_namespace`
 (

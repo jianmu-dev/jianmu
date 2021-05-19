@@ -1,6 +1,6 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.DslApplication;
+import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.project.aggregate.Project;
 import org.springframework.context.event.EventListener;
@@ -16,11 +16,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DslEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
-    private final DslApplication dslApplication;
+    private final ProjectApplication projectApplication;
 
-    public DslEventHandler(WorkflowInstanceApplication workflowInstanceApplication, DslApplication dslApplication) {
+    public DslEventHandler(WorkflowInstanceApplication workflowInstanceApplication, ProjectApplication projectApplication) {
         this.workflowInstanceApplication = workflowInstanceApplication;
-        this.dslApplication = dslApplication;
+        this.projectApplication = projectApplication;
     }
 
     @Async
@@ -34,7 +34,8 @@ public class DslEventHandler {
     }
 
     @EventListener
+    // TODO 不要直接用基本类型传递事件
     public void handleGitRepoSyncEvent(String projectId) {
-        this.dslApplication.syncProject(projectId);
+        this.projectApplication.syncProject(projectId);
     }
 }

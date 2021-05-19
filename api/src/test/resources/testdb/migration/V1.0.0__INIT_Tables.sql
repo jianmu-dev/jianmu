@@ -49,51 +49,52 @@ CREATE TABLE `input_parameter`
 
 CREATE TABLE `workflow`
 (
-    `ref_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义标识，主键',
-    `ref`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '唯一引用名称',
-    `version`     varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '版本',
-    `name`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '显示名称',
-    `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
+    `ref_version` varchar(255) NOT NULL COMMENT '流程定义标识，主键',
+    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
+    `version`     varchar(45)  NOT NULL COMMENT '版本',
+    `name`        varchar(255) DEFAULT NULL COMMENT '显示名称',
+    `description` varchar(255) DEFAULT NULL COMMENT '描述',
     `nodes`       longblob COMMENT 'Node列表',
     PRIMARY KEY (`ref_version`)
 );
 
 CREATE TABLE `workflow_instance`
 (
-    `id`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '唯一ID主键',
-    `trigger_id`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器ID',
-    `name`             varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '显示名称',
-    `description`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
-    `run_mode`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '运行模式',
-    `status`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '运行状态',
-    `workflow_ref`     varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义唯一引用名称',
-    `workflow_version` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义版本',
+    `id`               varchar(45)  NOT NULL COMMENT '唯一ID主键',
+    `trigger_id`       varchar(255) NOT NULL COMMENT '触发器ID',
+    `name`             varchar(255) DEFAULT NULL COMMENT '显示名称',
+    `description`      varchar(255) DEFAULT NULL COMMENT '描述',
+    `run_mode`         varchar(45)  NOT NULL COMMENT '运行模式',
+    `status`           varchar(45)  NOT NULL COMMENT '运行状态',
+    `workflow_ref`     varchar(45)  NOT NULL COMMENT '流程定义唯一引用名称',
+    `workflow_version` varchar(45)  NOT NULL COMMENT '流程定义版本',
     `task_instances`   blob COMMENT '任务实例列表',
-    `start_time`       datetime DEFAULT NULL COMMENT '开始时间',
-    `end_time`         datetime DEFAULT NULL COMMENT '结束时间',
-    `_version`         int NOT NULL COMMENT '乐观锁版本字段',
+    `start_time`       datetime     DEFAULT NULL COMMENT '开始时间',
+    `end_time`         datetime     DEFAULT NULL COMMENT '结束时间',
+    `_version`         int          NOT NULL COMMENT '乐观锁版本字段',
     PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `task_definition`
 (
-    `id`                 varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
-    `ref`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
-    `name`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
-    `created_time`       datetime NOT NULL COMMENT '创建时间',
-    `last_modified_time` datetime NOT NULL COMMENT '修改时间',
+    `id`                 varchar(45) NOT NULL COMMENT 'ID',
+    `ref`                varchar(45) NOT NULL COMMENT '任务定义唯一引用',
+    `name`               varchar(45) NOT NULL COMMENT '名称',
+    `created_time`       datetime    NOT NULL COMMENT '创建时间',
+    `last_modified_time` datetime    NOT NULL COMMENT '修改时间',
     PRIMARY KEY (`id`)
 );
 
 CREATE TABLE `task_definition_version`
 (
-    `task_definition_id`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义ID',
-    `name`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '版本名称',
-    `task_definition_ref` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
-    `definition_key`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一Key',
-    `description`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
-    `created_time`        datetime NOT NULL COMMENT '创建时间',
-    `last_modified_time`  datetime NOT NULL COMMENT '修改时间',
+    `task_definition_id`   varchar(45) NOT NULL COMMENT '任务定义ID',
+    `task_definition_name` varchar(45) NOT NULL COMMENT '任务定义名称',
+    `name`                 varchar(45) NOT NULL COMMENT '版本名称',
+    `task_definition_ref`  varchar(45) NOT NULL COMMENT '任务定义唯一引用',
+    `definition_key`       varchar(45) NOT NULL COMMENT '任务定义唯一Key',
+    `description`          varchar(45) DEFAULT NULL COMMENT '描述',
+    `created_time`         datetime    NOT NULL COMMENT '创建时间',
+    `last_modified_time`   datetime    NOT NULL COMMENT '修改时间',
     PRIMARY KEY (`definition_key`)
 );
 
@@ -109,18 +110,18 @@ CREATE TABLE `parameter_refer`
 
 CREATE TABLE `task_instance`
 (
-    `id`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '主键',
-    `serial_no`         int      DEFAULT NULL COMMENT '执行序号',
-    `def_key`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一Key',
-    `async_task_ref`    varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
-    `workflow_ref`      varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义Ref',
-    `workflow_version`  varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义版本',
-    `business_id`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '外部业务ID',
-    `project_id`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目ID',
-    `start_time`        datetime DEFAULT NULL COMMENT '开始时间',
-    `end_time`          datetime DEFAULT NULL COMMENT '结束时间',
-    `result_file`       longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '执行结果文件',
-    `status`            varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务运行状态',
+    `id`                varchar(45)  NOT NULL COMMENT '主键',
+    `serial_no`         int         DEFAULT NULL COMMENT '执行序号',
+    `def_key`           varchar(45)  NOT NULL COMMENT '任务定义唯一Key',
+    `async_task_ref`    varchar(45)  NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
+    `workflow_ref`      varchar(45) DEFAULT NULL COMMENT '流程定义Ref',
+    `workflow_version`  varchar(45) DEFAULT NULL COMMENT '流程定义版本',
+    `business_id`       varchar(45)  NOT NULL COMMENT '外部业务ID',
+    `project_id`        varchar(255) NOT NULL COMMENT '项目ID',
+    `start_time`        datetime    DEFAULT NULL COMMENT '开始时间',
+    `end_time`          datetime    DEFAULT NULL COMMENT '结束时间',
+    `result_file`       longtext COMMENT '执行结果文件',
+    `status`            varchar(45)  NOT NULL COMMENT '任务运行状态',
     `output_parameters` blob COMMENT '任务实例输出参数',
     PRIMARY KEY (`id`)
 );
@@ -140,9 +141,9 @@ CREATE TABLE `task_instance_parameter`
 
 CREATE TABLE `parameter`
 (
-    `id`    varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数ID',
-    `type`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数类型',
-    `value` blob NOT NULL COMMENT '参数值',
+    `id`    varchar(50) NOT NULL COMMENT '参数ID',
+    `type`  varchar(45) NOT NULL COMMENT '参数类型',
+    `value` blob        NOT NULL COMMENT '参数值',
     PRIMARY KEY (`id`)
 );
 
@@ -153,27 +154,6 @@ CREATE TABLE `worker`
     `status` varchar(45) DEFAULT NULL COMMENT '状态',
     `type`   varchar(45) DEFAULT NULL COMMENT '类型',
     PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `trigger`
-(
-    `id`                 varchar(45) NOT NULL COMMENT 'ID',
-    `workflow_id`        varchar(45) DEFAULT NULL COMMENT '流程定义ID',
-    `task_definition_id` varchar(45) DEFAULT NULL COMMENT '任务定义ID',
-    `workspace`          varchar(45) DEFAULT NULL COMMENT '工作空间',
-    `type`               varchar(45) NOT NULL COMMENT '触发类型',
-    `category`           varchar(45) NOT NULL COMMENT '流程或任务分类',
-    PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `trigger_parameter`
-(
-    `trigger_id`  varchar(255) NOT NULL COMMENT '触发器ID',
-    `name`        varchar(45)  NOT NULL COMMENT '显示名称',
-    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `type`        varchar(45)  NOT NULL COMMENT '类型',
-    `description` varchar(45) DEFAULT NULL COMMENT '描述',
-    `parameterId` varchar(45)  NOT NULL COMMENT '参数引用Id'
 );
 
 CREATE TABLE `secret_namespace`

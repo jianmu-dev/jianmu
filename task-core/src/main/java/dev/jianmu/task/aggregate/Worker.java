@@ -1,7 +1,5 @@
 package dev.jianmu.task.aggregate;
 
-import java.util.Map;
-
 /**
  * @class: Worker
  * @description: 任务执行器
@@ -13,10 +11,12 @@ public class Worker {
         ONLINE,
         OFFLINE
     }
+
     public enum Type {
         DOCKER,
         SHELL
     }
+
     private String id;
     private String name;
     private Status status;

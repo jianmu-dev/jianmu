@@ -5,7 +5,6 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.mybatis.version.TaskDefinitionRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
-import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.aggregate.spec.ContainerSpec;
@@ -36,7 +35,6 @@ import java.util.stream.Collectors;
 public class TaskDefinitionApplication {
     private static final Logger logger = LoggerFactory.getLogger(TaskDefinitionApplication.class);
     private final DefinitionRepository definitionRepository;
-    private final ParameterDomainService parameterDomainService;
     private final ParameterRepository parameterRepository;
     private final TaskDefinitionRepositoryImpl taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
@@ -45,14 +43,12 @@ public class TaskDefinitionApplication {
     @Inject
     public TaskDefinitionApplication(
             DefinitionRepository definitionRepository,
-            ParameterDomainService parameterDomainService,
             ParameterRepository parameterRepository,
             TaskDefinitionRepositoryImpl taskDefinitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             DefinitionDomainService definitionDomainService
     ) {
         this.definitionRepository = definitionRepository;
-        this.parameterDomainService = parameterDomainService;
         this.parameterRepository = parameterRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
@@ -96,6 +92,7 @@ public class TaskDefinitionApplication {
     ) {
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
         taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
+        taskDefinitionVersion.setTaskDefinitionName(taskDefinition.getName());
         taskDefinitionVersion.setDefinitionKey(definitionKey);
         // 创建参数存储
         var parameters = this.mergeParameters(inputParameters, outputParameters);
@@ -123,6 +120,7 @@ public class TaskDefinitionApplication {
         var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
         taskDefinitionVersion.setDefinitionKey(definitionKey);
         taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
+        taskDefinitionVersion.setTaskDefinitionName(taskDefinition.getName());
         // 创建参数存储
         var parameters = this.mergeParameters(inputParameters, outputParameters);
         // 生成definition

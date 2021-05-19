@@ -7,7 +7,6 @@ import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.application.service.GitApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.project.aggregate.DslSourceCode;
@@ -32,12 +31,10 @@ import javax.validation.Valid;
 @Tag(name = "项目API", description = "项目API")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
-    private final DslApplication dslApplication;
     private final ProjectApplication projectApplication;
     private final GitApplication gitApplication;
 
-    public ProjectController(DslApplication dslApplication, ProjectApplication projectApplication, GitApplication gitApplication) {
-        this.dslApplication = dslApplication;
+    public ProjectController(ProjectApplication projectApplication, GitApplication gitApplication) {
         this.projectApplication = projectApplication;
         this.gitApplication = gitApplication;
     }
@@ -51,20 +48,20 @@ public class ProjectController {
     @PostMapping
     @Operation(summary = "创建项目", description = "上传DSL并创建项目")
     public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
-        this.dslApplication.createProject(dslTextDto.getDslText(), null);
+        this.projectApplication.createProject(dslTextDto.getDslText());
     }
 
     @PostMapping("/import")
     @Operation(summary = "导入DSL", description = "导入Git库中的DSL文件创建项目")
     public void importDsl(@RequestBody @Validated(AddGroup.class) GitRepoDto gitRepoDto) {
         var gitRepo = GitRepoMapper.INSTANCE.toGitRepo(gitRepoDto);
-        this.dslApplication.importProject(gitRepo);
+        this.projectApplication.importProject(gitRepo);
     }
 
     @PutMapping("/{projectId}")
     @Operation(summary = "更新项目", description = "更新项目DSL定义")
     public void updateProject(@PathVariable String projectId, @RequestBody @Valid DslTextDto dslTextDto) {
-        this.dslApplication.updateProject(projectId, dslTextDto.getDslText());
+        this.projectApplication.updateProject(projectId, dslTextDto.getDslText());
     }
 
     @PutMapping("/sync/{projectId}")

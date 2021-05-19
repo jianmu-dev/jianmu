@@ -30,14 +30,6 @@ logging:
   charset:
     console: UTF-8
 
-grpc:
-  server:
-    port: 5001
-  client:
-    GLOBAL:
-      address: static://127.0.0.1:5001
-      negotiation-type: plaintext
-
 storage:
   logfile-path: task_log
 embedded:

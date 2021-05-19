@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-04-18 16:06
  **/
 public interface TaskDefinitionVersionMapper {
-    @Insert("insert into task_definition_version(task_definition_id, name, task_definition_ref, definition_key, description, created_time, last_modified_time) " +
-            "values(#{taskDefinitionId}, #{name}, #{taskDefinitionRef}, #{definitionKey}, #{description}, #{createdTime}, #{lastModifiedTime})")
+    @Insert("insert into task_definition_version(task_definition_id, task_definition_name, name, task_definition_ref, definition_key, description, created_time, last_modified_time) " +
+            "values(#{taskDefinitionId}, #{taskDefinitionName}, #{name}, #{taskDefinitionRef}, #{definitionKey}, #{description}, #{createdTime}, #{lastModifiedTime})")
     void add(TaskDefinitionVersion taskDefinitionVersion);
 
     @Delete("delete from task_definition_version where definition_key = #{definitionKey}")
@@ -26,6 +26,7 @@ public interface TaskDefinitionVersionMapper {
 
     @Select("select * from task_definition_version where task_definition_ref = #{taskDefinitionRef}")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
+    @Result(column = "task_definition_name", property = "taskDefinitionName")
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
     @Result(column = "created_time", property = "createdTime")
@@ -34,6 +35,7 @@ public interface TaskDefinitionVersionMapper {
 
     @Select("select * from task_definition_version where task_definition_ref = #{taskDefinitionRef} and name = #{name}")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
+    @Result(column = "task_definition_name", property = "taskDefinitionName")
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
     @Result(column = "created_time", property = "createdTime")
@@ -42,6 +44,7 @@ public interface TaskDefinitionVersionMapper {
 
     @Select("select * from task_definition_version where definition_key = #{key}")
     @Result(column = "task_definition_id", property = "taskDefinitionId")
+    @Result(column = "task_definition_name", property = "taskDefinitionName")
     @Result(column = "task_definition_ref", property = "taskDefinitionRef")
     @Result(column = "definition_key", property = "definitionKey")
     @Result(column = "created_time", property = "createdTime")
