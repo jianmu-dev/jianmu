@@ -60,12 +60,6 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
-        <!--Grpc依赖-->
-        <dependency>
-            <groupId>net.devh</groupId>
-            <artifactId>grpc-spring-boot-starter</artifactId>
-            <version>2.11.0.RELEASE</version>
-        </dependency>
         <!--mapstruct依赖-->
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -145,34 +139,6 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
-                    </protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
-                    </pluginArtifact>
-                    <!-- 这里是 protobuf 文件的路径 -->
-                    <protoSourceRoot>../jianmu-grpc-proto</protoSourceRoot>
-                    <includes>
-                        <!-- 这里写一些包含的文件相对路径 -->
-                        <include>*.proto</include>
-                    </includes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

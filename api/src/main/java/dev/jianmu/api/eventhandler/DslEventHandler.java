@@ -34,6 +34,7 @@ public class DslEventHandler {
     }
 
     @EventListener
+    // TODO 不要直接用基本类型传递事件
     public void handleGitRepoSyncEvent(String projectId) {
         this.projectApplication.syncProject(projectId);
     }

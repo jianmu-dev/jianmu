@@ -7,7 +7,6 @@ import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
-import dev.jianmu.infrastructure.messagequeue.TaskInstanceQueue;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
 import dev.jianmu.task.event.TaskInstanceRunningEvent;
@@ -30,19 +29,16 @@ import javax.inject.Inject;
 @Component
 public class TaskInstanceEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceEventHandler.class);
-    private final TaskInstanceQueue taskInstanceQueue;
     private final TaskInstanceApplication taskInstanceApplication;
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final WorkerApplication workerApplication;
 
     @Inject
     public TaskInstanceEventHandler(
-            TaskInstanceQueue taskInstanceQueue,
             TaskInstanceApplication taskInstanceApplication,
             WorkflowInstanceApplication workflowInstanceApplication,
             WorkerApplication workerApplication
     ) {
-        this.taskInstanceQueue = taskInstanceQueue;
         this.taskInstanceApplication = taskInstanceApplication;
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.workerApplication = workerApplication;
