@@ -4,7 +4,6 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.service.DslApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.Project;
@@ -25,11 +24,9 @@ import javax.validation.Valid;
 @RequestMapping("dsl")
 @Tag(name = "DSL", description = "DSL API")
 public class DslController {
-    private final DslApplication dslApplication;
     private final ProjectApplication projectApplication;
 
-    public DslController(DslApplication dslApplication, ProjectApplication projectApplication) {
-        this.dslApplication = dslApplication;
+    public DslController(ProjectApplication projectApplication) {
         this.projectApplication = projectApplication;
     }
 
@@ -42,7 +39,7 @@ public class DslController {
     @PutMapping("project/{dslId}")
     @Operation(summary = "更新项目", description = "更新项目DSL定义", deprecated = true)
     public void updateProject(@PathVariable String dslId, @RequestBody @Valid DslTextDto dslTextDto) {
-        this.dslApplication.updateProject(dslId, dslTextDto.getDslText());
+        this.projectApplication.updateProject(dslId, dslTextDto.getDslText());
     }
 
     @GetMapping("project/{dslId}")
@@ -54,7 +51,7 @@ public class DslController {
     @PostMapping("/project")
     @Operation(summary = "创建项目", description = "上传DSL并创建项目", deprecated = true)
     public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
-        this.dslApplication.createProject(dslTextDto.getDslText());
+        this.projectApplication.createProject(dslTextDto.getDslText());
     }
 
     @DeleteMapping("/{dslId}")
