@@ -2,11 +2,14 @@ package dev.jianmu.api;
 
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -20,6 +23,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @MapperScan("dev.jianmu.infrastructure.mapper")
 @EnableRetry
 @EnableAsync(proxyTargetClass = true)
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        scheme = "bearer"
+)
 @OpenAPIDefinition(
         info = @Info(
                 title = "建木自动化集成平台",
@@ -35,6 +44,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
                 url = "https://gitee.com/jianmu_dev"
         )
 )
+@ServletComponentScan
 public class SpringbootApp {
     public static void main(String[] args) {
         SpringApplication.run(SpringbootApp.class, args);

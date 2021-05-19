@@ -5,6 +5,7 @@ import dev.jianmu.api.mapper.GitRepoMapper;
 import dev.jianmu.api.vo.GitRepoVo;
 import dev.jianmu.application.service.GitApplication;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("git")
 @Tag(name = "Git", description = "Git API")
+@SecurityRequirement(name = "bearerAuth")
 public class GitController {
     private final GitApplication gitApplication;
 

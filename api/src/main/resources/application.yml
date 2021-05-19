@@ -39,3 +39,8 @@ embedded:
 json:
   repository:
     repo-path: task_def
+jianmu:
+  api:
+    jwtSecret: Hahhahhhaahh
+    jwtExpirationMs: 86400000
+    adminPasswd: 123456

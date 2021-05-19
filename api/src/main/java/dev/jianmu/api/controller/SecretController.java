@@ -11,6 +11,7 @@ import dev.jianmu.application.service.SecretApplication;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("secrets")
 @Tag(name = "密钥管理接口", description = "提供密钥创建删除等API")
+@SecurityRequirement(name = "bearerAuth")
 public class SecretController {
     private final SecretApplication secretApplication;
 

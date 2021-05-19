@@ -5,6 +5,7 @@ import dev.jianmu.api.vo.TaskInstanceVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("task_instances")
 @Tag(name = "任务实例接口", description = "任务实例接口")
+@SecurityRequirement(name = "bearerAuth")
 public class TaskInstanceController {
     private final TaskInstanceApplication taskInstanceApplication;
 
