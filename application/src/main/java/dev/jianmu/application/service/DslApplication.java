@@ -115,13 +115,40 @@ public class DslApplication {
                 .build();
     }
 
+    @Transactional
     public void importProject(GitRepo gitRepo) {
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
-        this.createProject(dslText, gitRepo.getId());
+        // 解析DSL
+        var dsl = this.parseDsl(dslText);
+        var project = Project.Builder.aReference()
+                .workflowName(dsl.getFlow().getName())
+                .workflowRef(dsl.getFlow().getRef())
+                .dslText(dslText)
+                .steps(dsl.getSteps())
+                .gitRepoId(gitRepo.getId())
+                .dslSource(Project.DslSource.GIT)
+                .lastModifiedBy("admin")
+                .build();
+        // 创建流程
+        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
+        // 保存原始DSL
+        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
+        // 将parameterMap转变为 InputParameter与Parameter参数Map
+        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
+        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
+        var parameterRefers = dsl.getFlow()
+                .getParameterRefers(project.getWorkflowVersion());
+        this.projectRepository.add(project);
         this.gitRepoRepository.add(gitRepo);
+        this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
         this.jgitService.cleanUp(gitRepo.getId());
+        this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
+        this.dslSourceCodeRepository.add(dslSource);
+        this.workflowRepository.add(workflow);
+        this.parameterReferRepository.addAll(parameterRefers);
     }
 
+    @Transactional
     public void syncProject(String projectId) {
         logger.info("开始同步Git仓库中的DSL");
         var project = this.projectRepository.findById(projectId)
@@ -129,27 +156,46 @@ public class DslApplication {
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
-        this.updateProject(projectId, dslText);
+        // 解析DSL
+        var dsl = this.parseDsl(dslText);
+        project.setDslText(dslText);
+        project.setLastModifiedBy("admin");
+        project.setSteps(dsl.getSteps());
+        project.setWorkflowName(dsl.getFlow().getName());
+        project.setLastModifiedTime();
+        project.setWorkflowVersion();
+        // 创建流程
+        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
+        // 保存原始DSL
+        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
+        // 将parameterMap转变为 InputParameter与Parameter参数Map
+        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
+        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
+        var parameterRefers = dsl.getFlow()
+                .getParameterRefers(project.getWorkflowVersion());
+        this.projectRepository.updateByWorkflowRef(project);
+        this.dslSourceCodeRepository.add(dslSource);
+        this.workflowRepository.add(workflow);
+        this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
+        this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
+        this.parameterReferRepository.addAll(parameterRefers);
         this.jgitService.cleanUp(gitRepo.getId());
     }
 
     @Transactional
-    public void createProject(String dslText, String gitRepoId) {
+    public void createProject(String dslText) {
         // 解析DSL
         var dsl = this.parseDsl(dslText);
         // 创建项目
-        var builder = Project.Builder.aReference()
+        var project = Project.Builder.aReference()
                 .workflowName(dsl.getFlow().getName())
                 .workflowRef(dsl.getFlow().getRef())
                 .dslText(dslText)
                 .steps(dsl.getSteps())
-                .lastModifiedBy("admin");
-        if (null == gitRepoId) {
-            builder.gitRepoId("").dslSource(Project.DslSource.LOCAL);
-        } else {
-            builder.gitRepoId(gitRepoId).dslSource(Project.DslSource.GIT);
-        }
-        var project = builder.build();
+                .lastModifiedBy("admin")
+                .gitRepoId("")
+                .dslSource(Project.DslSource.LOCAL)
+                .build();
         // 创建流程
         var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
         // 保存原始DSL

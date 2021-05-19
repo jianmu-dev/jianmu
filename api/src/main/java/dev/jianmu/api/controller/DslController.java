@@ -54,7 +54,7 @@ public class DslController {
     @PostMapping("/project")
     @Operation(summary = "创建项目", description = "上传DSL并创建项目", deprecated = true)
     public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
-        this.dslApplication.createProject(dslTextDto.getDslText(), null);
+        this.dslApplication.createProject(dslTextDto.getDslText());
     }
 
     @DeleteMapping("/{dslId}")

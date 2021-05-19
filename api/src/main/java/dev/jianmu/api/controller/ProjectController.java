@@ -49,7 +49,7 @@ public class ProjectController {
     @PostMapping
     @Operation(summary = "创建项目", description = "上传DSL并创建项目")
     public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
-        this.dslApplication.createProject(dslTextDto.getDslText(), null);
+        this.dslApplication.createProject(dslTextDto.getDslText());
     }
 
     @PostMapping("/import")
