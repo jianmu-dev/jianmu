@@ -1,13 +1,8 @@
 package dev.jianmu.infrastructure.elimpl;
 
 
-import dev.jianmu.workflow.el.ElVariable;
 import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.ResultType;
-
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.util.Map;
 
 /**
  * @class: ElResult
@@ -18,7 +13,6 @@ import java.util.Map;
 public class ElResult implements EvaluationResult {
 
     private String expr;
-    private String message = null;
     private Object result;
 
     public ElResult(String expr, Object result) {
@@ -38,7 +32,7 @@ public class ElResult implements EvaluationResult {
 
     @Override
     public String getFailureMessage() {
-        return this.message;
+        return "";
     }
 
     @Override

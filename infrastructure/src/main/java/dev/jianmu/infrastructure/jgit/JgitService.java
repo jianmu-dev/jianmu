@@ -69,7 +69,7 @@ public class JgitService {
     }
 
     public String readDsl(String gitRepoId, String dslPath) {
-        try (FileReader fileReader = new FileReader("/tmp/" + gitRepoId + "/" + dslPath)) {
+        try (FileReader fileReader = new FileReader("/tmp/" + gitRepoId + "/" + dslPath, StandardCharsets.UTF_8)) {
             String dslText = IOUtils.toString(fileReader);
             fileReader.close();
             return dslText;

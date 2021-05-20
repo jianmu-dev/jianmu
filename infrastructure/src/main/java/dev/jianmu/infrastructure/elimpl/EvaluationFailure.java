@@ -46,6 +46,6 @@ public class EvaluationFailure implements EvaluationResult {
 
     @Override
     public Boolean getBoolean() {
-        return null;
+        return false;
     }
 }
