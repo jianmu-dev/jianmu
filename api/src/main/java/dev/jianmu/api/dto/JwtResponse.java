@@ -2,7 +2,6 @@ package dev.jianmu.api.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "JwtResponse")
 public class JwtResponse {
     private String token;
-    private static final String type = "Bearer";
+    private final String type = "Bearer";
     private Long id;
     private String username;
 
