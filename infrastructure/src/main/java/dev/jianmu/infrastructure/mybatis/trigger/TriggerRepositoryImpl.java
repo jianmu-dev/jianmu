@@ -32,6 +32,10 @@ public class TriggerRepositoryImpl implements TriggerRepository {
 
     @Override
     public List<TriggerEntity> findAll() {
-        return List.of();
+        var entity = TriggerEntity.Builder.aTriggerEntity()
+                .triggerId("trigger123")
+                .cron("*/5 * * * * ?")
+                .build();
+        return List.of(entity);
     }
 }

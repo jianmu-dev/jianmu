@@ -8,7 +8,7 @@ package dev.jianmu.trigger.entity;
  **/
 public class TriggerEntity {
     private long id;
-    private String projectId;
+    private String triggerId;
     private String cron;
 
     public long getId() {
@@ -19,12 +19,12 @@ public class TriggerEntity {
         this.id = id;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public String getTriggerId() {
+        return triggerId;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setTriggerId(String triggerId) {
+        this.triggerId = triggerId;
     }
 
     public String getCron() {
@@ -37,7 +37,7 @@ public class TriggerEntity {
 
 
     public static final class Builder {
-        private String projectId;
+        private String triggerId;
         private String cron;
 
         private Builder() {
@@ -47,8 +47,8 @@ public class TriggerEntity {
             return new Builder();
         }
 
-        public Builder projectId(String projectId) {
-            this.projectId = projectId;
+        public Builder triggerId(String triggerId) {
+            this.triggerId = triggerId;
             return this;
         }
 
@@ -59,7 +59,7 @@ public class TriggerEntity {
 
         public TriggerEntity build() {
             TriggerEntity triggerEntity = new TriggerEntity();
-            triggerEntity.setProjectId(projectId);
+            triggerEntity.setTriggerId(triggerId);
             triggerEntity.setCron(cron);
             return triggerEntity;
         }

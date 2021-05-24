@@ -28,9 +28,8 @@ public class SchedulerConfiguration {
 
         @Override
         protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-            Object jobInstance = super.createJobInstance(bundle);
+            final Object jobInstance = super.createJobInstance(bundle);
             this.beanFactory.autowireBean(jobInstance);
-            this.beanFactory.initializeBean(jobInstance, null);
             return jobInstance;
         }
     }

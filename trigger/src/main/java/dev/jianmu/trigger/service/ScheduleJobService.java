@@ -1,6 +1,7 @@
 package dev.jianmu.trigger.service;
 
 import dev.jianmu.trigger.entity.TriggerEntity;
+import dev.jianmu.trigger.job.PublishJob;
 import dev.jianmu.trigger.repository.TriggerRepository;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -26,9 +27,9 @@ public class ScheduleJobService {
     }
 
     @Transactional
-    public void addTrigger(String projectId, String cron) {
+    public void addTrigger(String triggerId, String cron) {
         var entity = TriggerEntity.Builder.aTriggerEntity()
-                .projectId(projectId)
+                .triggerId(triggerId)
                 .cron(cron)
                 .build();
         var jobDetail = this.createJobDetail(entity);
@@ -81,14 +82,16 @@ public class ScheduleJobService {
     private CronTrigger createCronTrigger(TriggerEntity triggerEntity) {
         var builder = CronScheduleBuilder.cronSchedule(triggerEntity.getCron());
         return TriggerBuilder.newTrigger()
-                .withIdentity(TriggerKey.triggerKey(triggerEntity.getProjectId()))
+                .withIdentity(TriggerKey.triggerKey(triggerEntity.getTriggerId()))
+                .usingJobData("triggerId", triggerEntity.getTriggerId())
                 .withSchedule(builder)
                 .build();
     }
 
     private JobDetail createJobDetail(TriggerEntity triggerEntity) {
         return JobBuilder.newJob()
-                .withIdentity(JobKey.jobKey(triggerEntity.getProjectId()))
+                .withIdentity(JobKey.jobKey(triggerEntity.getTriggerId()))
+                .ofType(PublishJob.class)
                 .build();
     }
 }
