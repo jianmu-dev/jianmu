@@ -32,6 +32,6 @@ public class TriggerRepositoryImpl implements TriggerRepository {
 
     @Override
     public List<TriggerEntity> findAll() {
-        return null;
+        return List.of();
     }
 }

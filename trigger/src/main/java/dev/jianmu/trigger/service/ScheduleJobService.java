@@ -60,10 +60,6 @@ public class ScheduleJobService {
 
     public void startTriggers() {
         var triggers = this.triggerRepository.findAll();
-        if (triggers.isEmpty()) {
-            logger.info("没有可加载的触发器");
-            return;
-        }
         triggers.forEach(triggerEntity -> {
             var cronTrigger = this.createCronTrigger(triggerEntity);
             var jobDetail = this.createJobDetail(triggerEntity);
