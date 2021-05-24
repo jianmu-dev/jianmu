@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.mybatis.trigger;
 
 import dev.jianmu.trigger.entity.TriggerEntity;
 import dev.jianmu.trigger.repository.TriggerRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
  * @author: Ethan Liu
  * @create: 2021-05-24 18:31
  **/
+@Repository
 public class TriggerRepositoryImpl implements TriggerRepository {
     @Override
     public void add(TriggerEntity triggerEntity) {
