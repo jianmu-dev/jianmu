@@ -38,4 +38,11 @@ public class TriggerEvent {
             return triggerEvent;
         }
     }
+
+    @Override
+    public String toString() {
+        return "TriggerEvent{" +
+                "triggerId='" + triggerId + '\'' +
+                '}';
+    }
 }

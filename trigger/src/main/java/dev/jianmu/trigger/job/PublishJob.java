@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 /**
  * @class: PublishJob
  * @description: PublishJob
@@ -29,9 +27,7 @@ public class PublishJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         var triggerId = context.getTrigger().getJobDataMap().get("triggerId").toString();
-        logger.info("triggerId: {}", triggerId);
         var evt = TriggerEvent.Builder.aTriggerEvent().triggerId(triggerId).build();
-        logger.info("publishEvent at: {}", LocalDateTime.now());
         this.publisher.publishEvent(evt);
     }
 }
