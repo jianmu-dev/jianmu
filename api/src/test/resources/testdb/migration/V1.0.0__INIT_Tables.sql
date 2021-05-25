@@ -13,6 +13,22 @@ CREATE TABLE `jianmu_project`
     PRIMARY KEY (`id`)
 );
 
+CREATE TABLE `cron_trigger`
+(
+    `id`         varchar(50) NOT NULL COMMENT '触发器ID',
+    `project_id` varchar(45) NOT NULL COMMENT '项目ID',
+    `corn`       varchar(45) NOT NULL COMMENT 'Cron表达式',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `quartz_trigger`
+(
+    `id`         int         NOT NULL COMMENT 'Quartz触发器ID',
+    `trigger_id` varchar(45) NOT NULL COMMENT '触发器ID',
+    `cron`       varchar(45) NOT NULL COMMENT 'Cron表达式',
+    PRIMARY KEY (`id`)
+);
+
 CREATE TABLE `git_repo`
 (
     `id`                    varchar(45) NOT NULL COMMENT 'ID',

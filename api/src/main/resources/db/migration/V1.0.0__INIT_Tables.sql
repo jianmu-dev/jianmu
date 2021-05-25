@@ -16,6 +16,26 @@ CREATE TABLE `jianmu_project`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='DSL表';
 
+CREATE TABLE `cron_trigger`
+(
+    `id`         varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器ID',
+    `project_id` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目ID',
+    `corn`       varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Cron表达式',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='cron触发器表';
+
+CREATE TABLE `quartz_trigger`
+(
+    `id`         int                                    NOT NULL COMMENT 'Quartz触发器ID',
+    `trigger_id` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器ID',
+    `cron`       varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Cron表达式',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='Quartz触发器';
+
 CREATE TABLE `git_repo`
 (
     `id`                    varchar(45) NOT NULL COMMENT 'ID',
