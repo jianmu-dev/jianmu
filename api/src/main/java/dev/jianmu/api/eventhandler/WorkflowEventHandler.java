@@ -99,6 +99,8 @@ public class WorkflowEventHandler {
         logger.info(event.getName());
         logger.info(event.getNodeRef());
         logger.info("-----------------------------------------------------");
+        this.instanceApplication.stop(event.getWorkflowInstanceId());
+        this.workerApplication.deleteVolume(event.getTriggerId());
     }
 
     @Async
