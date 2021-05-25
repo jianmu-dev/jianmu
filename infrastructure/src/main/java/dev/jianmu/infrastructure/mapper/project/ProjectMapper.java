@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.mapper.dsl;
+package dev.jianmu.infrastructure.mapper.project;
 
 import dev.jianmu.project.aggregate.Project;
 import org.apache.ibatis.annotations.*;
