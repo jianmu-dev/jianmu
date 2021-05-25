@@ -4,17 +4,20 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
 import dev.jianmu.infrastructure.jgit.JgitService;
-import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
+import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.parameter.repository.ParameterRepository;
+import dev.jianmu.project.aggregate.CronTrigger;
 import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.repository.CronTriggerRepository;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.ParameterReferRepository;
+import dev.jianmu.trigger.service.ScheduleJobService;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
@@ -41,6 +44,8 @@ public class ProjectApplication {
 
     private final ProjectRepositoryImpl projectRepository;
     private final DslSourceCodeRepository dslSourceCodeRepository;
+    private final CronTriggerRepository cronTriggerRepository;
+    private final ScheduleJobService scheduleJobService;
     private final DefinitionRepository definitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final GitRepoRepository gitRepoRepository;
@@ -54,6 +59,8 @@ public class ProjectApplication {
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
             DslSourceCodeRepository dslSourceCodeRepository,
+            CronTriggerRepository cronTriggerRepository,
+            ScheduleJobService scheduleJobService,
             DefinitionRepository definitionRepository,
             TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             GitRepoRepository gitRepoRepository,
@@ -66,6 +73,8 @@ public class ProjectApplication {
     ) {
         this.projectRepository = projectRepository;
         this.dslSourceCodeRepository = dslSourceCodeRepository;
+        this.cronTriggerRepository = cronTriggerRepository;
+        this.scheduleJobService = scheduleJobService;
         this.definitionRepository = definitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.gitRepoRepository = gitRepoRepository;
@@ -81,6 +90,12 @@ public class ProjectApplication {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         this.publisher.publishEvent(project);
+    }
+
+    public void triggerFromCron(String triggerId) {
+        var cronTrigger = this.cronTriggerRepository.findById(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该触发器"));
+        this.trigger(cronTrigger.getProjectId());
     }
 
     private DslModel parseDsl(String dslText) {
@@ -147,6 +162,15 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
+        // 创建触发器
+        if (null != dsl.getCron()) {
+            var trigger = CronTrigger.Builder.aCronTrigger()
+                    .projectId(project.getId())
+                    .corn(dsl.getCron())
+                    .build();
+            this.cronTriggerRepository.add(trigger);
+            this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
+        }
         this.projectRepository.add(project);
         this.gitRepoRepository.add(gitRepo);
         this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
@@ -164,6 +188,7 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
+        var triggers = this.cronTriggerRepository.findByProjectId(projectId);
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
         // 解析DSL
         var dsl = this.parseDsl(dslText);
@@ -182,6 +207,20 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
+        // 删除原有触发器
+        this.cronTriggerRepository.deleteByProjectId(project.getId());
+        triggers.forEach(cronTrigger -> {
+            this.scheduleJobService.deleteTrigger(cronTrigger.getId());
+        });
+        // 创建新触发器
+        if (null != dsl.getCron()) {
+            var newTrigger = CronTrigger.Builder.aCronTrigger()
+                    .projectId(projectId)
+                    .corn(dsl.getCron())
+                    .build();
+            this.cronTriggerRepository.add(newTrigger);
+            this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
+        }
         this.projectRepository.updateByWorkflowRef(project);
         this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
@@ -214,6 +253,15 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
+        // 创建触发器
+        if (null != dsl.getCron()) {
+            var trigger = CronTrigger.Builder.aCronTrigger()
+                    .projectId(project.getId())
+                    .corn(dsl.getCron())
+                    .build();
+            this.cronTriggerRepository.add(trigger);
+            this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
+        }
         this.projectRepository.add(project);
         this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
         this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
@@ -226,6 +274,7 @@ public class ProjectApplication {
     public void updateProject(String dslId, String dslText) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+        var triggers = this.cronTriggerRepository.findByProjectId(project.getId());
         // 解析DSL
         var dsl = this.parseDsl(dslText);
         project.setDslText(dslText);
@@ -243,8 +292,22 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
-        this.projectRepository.updateByWorkflowRef(project);
+        // 删除原有触发器
+        this.cronTriggerRepository.deleteByProjectId(project.getId());
+        triggers.forEach(cronTrigger -> {
+            this.scheduleJobService.deleteTrigger(cronTrigger.getId());
+        });
+        // 创建新触发器
+        if (null != dsl.getCron()) {
+            var newTrigger = CronTrigger.Builder.aCronTrigger()
+                    .projectId(project.getId())
+                    .corn(dsl.getCron())
+                    .build();
+            this.cronTriggerRepository.add(newTrigger);
+            this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
+        }
         this.dslSourceCodeRepository.add(dslSource);
+        this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
         this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
@@ -258,6 +321,7 @@ public class ProjectApplication {
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.dslSourceCodeRepository.deleteByProjectId(project.getId());
+        this.cronTriggerRepository.deleteByProjectId(project.getId());
         this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.inputParameterRepository.deleteByProjectId(project.getId());
         this.gitRepoRepository.deleteById(project.getGitRepoId());

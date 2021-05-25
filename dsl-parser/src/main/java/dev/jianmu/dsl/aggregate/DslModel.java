@@ -61,9 +61,6 @@ public class DslModel {
 
     // DSL语法校验
     private void syntaxCheck() {
-        if (this.cron.isBlank()) {
-            throw new RuntimeException("Cron未设置");
-        }
         if (null == this.workflow) {
             throw new RuntimeException("workflow未设置");
         }
