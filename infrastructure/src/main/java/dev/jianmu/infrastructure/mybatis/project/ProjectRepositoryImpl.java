@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.mybatis.dsl;
+package dev.jianmu.infrastructure.mybatis.project;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.mybatis.dsl;
+package dev.jianmu.infrastructure.mybatis.project;
 
 import dev.jianmu.infrastructure.mapper.dsl.DslSourceCodeMapper;
 import dev.jianmu.project.aggregate.DslSourceCode;

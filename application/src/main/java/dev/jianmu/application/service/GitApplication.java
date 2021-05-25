@@ -2,7 +2,7 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.jgit.JgitService;
-import dev.jianmu.infrastructure.mybatis.dsl.ProjectRepositoryImpl;
+import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.Credential;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.repository.GitRepoRepository;
