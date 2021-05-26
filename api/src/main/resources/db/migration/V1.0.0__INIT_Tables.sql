@@ -1,6 +1,7 @@
 CREATE TABLE `jianmu_project`
 (
     `id`                 varchar(45)  NOT NULL COMMENT 'ID',
+    `dsl_source`         varchar(45) DEFAULT NULL COMMENT 'DSL来源',
     `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
     `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
     `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
