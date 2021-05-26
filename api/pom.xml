@@ -90,9 +90,9 @@
                     <container>
                         <!--解决中文乱码-->
                         <environment>
-                            <LANG>en_US.UTF-8</LANG>
-                            <LANGUAGE>en_US:en</LANGUAGE>
-                            <LC_ALL>en_US.UTF-8</LC_ALL>
+                            <LANG>C.UTF-8</LANG>
+                            <LANGUAGE>C.UTF-8</LANGUAGE>
+                            <LC_ALL>C.UTF-8</LC_ALL>
                         </environment>
                         <!-- 指定镜像时区，保证log输出时间为GMT+8 -->
                         <jvmFlags>
