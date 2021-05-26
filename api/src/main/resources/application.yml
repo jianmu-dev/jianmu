@@ -24,6 +24,9 @@ spring:
     parser:
       ALLOW_UNQUOTED_CONTROL_CHARS: true
 
+springdoc:
+  packages-to-scan: dev.jianmu.api.controller
+
 pagehelper:
   support-methods-arguments: true
 logging:
