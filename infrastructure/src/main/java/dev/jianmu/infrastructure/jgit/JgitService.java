@@ -145,7 +145,16 @@ public class JgitService {
                         .setDirectory(directory)
                         .setURI(gitRepo.getUri())
                         .setBranch(gitRepo.getBranch())
-                        .call()
+                        .setTransportConfigCallback(transport -> {
+                            if (transport instanceof SshTransport) {
+                                ((SshTransport) transport).setSshSessionFactory(new JschConfigSessionFactory() {
+                                    @Override
+                                    protected void configure(OpenSshConfig.Host hc, Session session) {
+                                        session.setConfig("StrictHostKeyChecking", "no");
+                                    }
+                                });
+                            }
+                        }).call()
         ) {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {
