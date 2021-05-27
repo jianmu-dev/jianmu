@@ -37,6 +37,19 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>${env.JIANMU_MAVEN_RELEASE_ID}</id>
+            <name>Nexus Maven2 Release Repository</name>
+            <url>${env.JIANMU_MAVEN_RELEASE_URL}</url>
+        </repository>
+        <snapshotRepository>
+            <id>${env.JIANMU_MAVEN_SNAPSHOT_ID}</id>
+            <name>Nexus Maven2 Snapshot Repository</name>
+            <url>${env.JIANMU_MAVEN_SNAPSHOT_URL}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <profiles>
         <profile>
             <id>dev</id>
