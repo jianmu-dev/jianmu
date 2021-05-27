@@ -59,6 +59,10 @@ public class GitApplication {
 
     public void cloneGitRepo(GitRepo gitRepo) {
         var credential = gitRepo.getCredential();
+        if (null == credential.getType()) {
+            this.jgitService.cloneRepo(gitRepo);
+            return;
+        }
         if (credential.getType().equals(Credential.Type.SSH)) {
             var key = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPrivateKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
@@ -71,8 +75,6 @@ public class GitApplication {
             var pass = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPassKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到密码"));
             this.jgitService.cloneRepoWithUserAndPass(gitRepo, user.getValue(), pass.getValue());
-            return;
         }
-        this.jgitService.cloneRepo(gitRepo);
     }
 }
