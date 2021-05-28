@@ -81,10 +81,10 @@
                         <image>registry://6ppqyl7y.mirror.aliyuncs.com/library/openjdk:11.0.11-jdk-oracle</image>
                     </from>
                     <to>
-                        <image>swr.cn-east-2.myhuaweicloud.com/jianmu/ci-server:1.0</image>
+                        <image>${env.JIANMU_DOCKER_USERNAME}/${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
                         <auth>
-                            <username>${env.JIANMU_REGISTRY_USER}</username>
-                            <password>${env.JIANMU_REGISTRY_PASS}</password>
+                            <username>${env.JIANMU_DOCKER_USERNAME}</username>
+                            <password>${env.JIANMU_DOCKER_PASSWORD}</password>
                         </auth>
                     </to>
                     <container>
@@ -102,7 +102,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>deploy</phase>
+                        <phase>install</phase>
                         <goals>
                             <goal>build</goal>
                         </goals>
