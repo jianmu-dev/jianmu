@@ -5,7 +5,6 @@ import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.aggregate.spec.ContainerSpec;
 
-import java.util.Map;
 import java.util.Set;
 
 /**

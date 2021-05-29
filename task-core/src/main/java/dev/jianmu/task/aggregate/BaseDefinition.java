@@ -13,6 +13,10 @@ public class BaseDefinition implements Definition {
     // 唯一Key
     protected String key;
 
+    protected String ref;
+
+    protected String version;
+
     protected String resultFile;
 
     protected Worker.Type type;
@@ -21,6 +25,8 @@ public class BaseDefinition implements Definition {
     protected Set<TaskParameter> inputParameters = new HashSet<>();
 
     protected Set<TaskParameter> outputParameters = new HashSet<>();
+
+    protected MetaData metaData;
 
     @Override
     public Optional<TaskParameter> getInputParameterBy(String ref) {
@@ -54,6 +60,11 @@ public class BaseDefinition implements Definition {
     }
 
     @Override
+    public MetaData getMetaData() {
+        return metaData;
+    }
+
+    @Override
     public Set<TaskParameter> getInputParameters() {
         return inputParameters;
     }
@@ -66,6 +77,16 @@ public class BaseDefinition implements Definition {
     @Override
     public String getKey() {
         return key;
+    }
+
+    @Override
+    public String getRef() {
+        return ref;
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
     }
 
     @Override

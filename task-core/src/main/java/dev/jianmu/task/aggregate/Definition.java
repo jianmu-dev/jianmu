@@ -14,6 +14,10 @@ import java.util.Set;
 public interface Definition {
     String getKey();
 
+    String getRef();
+
+    String getVersion();
+
     String getResultFile();
 
     Worker.Type getType();
@@ -27,4 +31,6 @@ public interface Definition {
     Set<TaskParameter> getOutputParameters();
 
     Set<TaskParameter> matchedOutputParameters(Map<String, Object> parameterMap);
+
+    MetaData getMetaData();
 }
