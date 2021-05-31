@@ -24,4 +24,6 @@ public class EmbeddedDockerWorkerProperties {
     private String dockerCertPath;
 
     private Boolean dockerTlsVerify;
+
+    private String sockFile;
 }

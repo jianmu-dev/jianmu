@@ -52,6 +52,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
 
     private Boolean dockerTlsVerify;
 
+    private String sockFile;
+
     private static final Logger logger = LoggerFactory.getLogger(EmbeddedDockerWorker.class);
     private DockerClient dockerClient;
     private Map<String, Integer> runStatusMap = new ConcurrentHashMap<>();
@@ -69,6 +71,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         this.dockerConfig = properties.getDockerConfig();
         this.dockerCertPath = properties.getDockerCertPath();
         this.dockerTlsVerify = properties.getDockerTlsVerify();
+        this.sockFile = properties.getSockFile();
         this.publisher = publisher;
         this.connect();
     }
@@ -109,11 +112,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
                                 .withTarget(m.getTarget())
                 );
                 // 如果要执行docker客户端镜像则挂载宿主机sock文件
-                if (spec.getImage().startsWith("docker:")) {
+                if (spec.getImage().startsWith("docker:") && !this.sockFile.isBlank()) {
                     mounts.add(
                             new Mount().withType(MountType.BIND)
                                     .withTarget("/var/run/docker.sock")
-                                    .withSource("/var/run/docker.sock")
+                                    .withSource(this.sockFile)
                     );
                 }
             });
@@ -121,8 +124,17 @@ public class EmbeddedDockerWorker implements DockerWorker {
             createContainerCmd.withHostConfig(hostConfig);
         }
         if (null != spec.getEnv()) {
-            Arrays.stream(spec.getEnv()).forEach(System.out::println);
-            createContainerCmd.withEnv(spec.getEnv());
+            String[] envArray;
+            // 如果要执行docker客户端镜像则添加DOCKER_HOST环境变量
+            if (spec.getImage().startsWith("docker:")) {
+                var envs = new ArrayList<>(Arrays.asList(spec.getEnv()));
+                envs.add("DOCKER_HOST=" + this.dockerHost);
+                envArray = envs.toArray(spec.getEnv());
+            } else {
+                envArray = spec.getEnv();
+            }
+            Arrays.stream(envArray).forEach(System.out::println);
+            createContainerCmd.withEnv(envArray);
         }
         if (null != spec.getEntrypoint()) {
             createContainerCmd.withEntrypoint(spec.getEntrypoint());
