@@ -23,8 +23,6 @@ public class DockerDefinition extends BaseDefinition {
     }
 
     public static final class Builder {
-        // 唯一Key
-        protected String key;
         protected String ref;
         protected String version;
         protected String resultFile;
@@ -40,11 +38,6 @@ public class DockerDefinition extends BaseDefinition {
 
         public static Builder aDockerDefinition() {
             return new Builder();
-        }
-
-        public Builder key(String key) {
-            this.key = key;
-            return this;
         }
 
         public Builder ref(String ref) {
@@ -96,7 +89,6 @@ public class DockerDefinition extends BaseDefinition {
             dockerDefinition.type = this.type;
             dockerDefinition.spec = this.spec;
             dockerDefinition.inputParameters = this.inputParameters;
-            dockerDefinition.key = this.key;
             dockerDefinition.version = this.version;
             return dockerDefinition;
         }

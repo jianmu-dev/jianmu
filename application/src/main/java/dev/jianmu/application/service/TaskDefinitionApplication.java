@@ -6,6 +6,7 @@ import dev.jianmu.infrastructure.mybatis.version.TaskDefinitionRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.task.aggregate.Definition;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import dev.jianmu.task.repository.DefinitionRepository;
@@ -82,6 +83,15 @@ public class TaskDefinitionApplication {
     }
 
     @Transactional
+    public void createDockerDefinition(DockerDefinition dockerDefinition) {
+        // 创建参数存储
+        var parameters = this.mergeParameters(dockerDefinition.getInputParameters(), dockerDefinition.getOutputParameters());
+        // 保存
+        this.parameterRepository.addAll(parameters);
+        this.definitionRepository.add(dockerDefinition);
+    }
+
+    @Transactional
     public void createDockerDefinition(
             TaskDefinition taskDefinition,
             TaskDefinitionVersion taskDefinitionVersion,
@@ -133,7 +143,7 @@ public class TaskDefinitionApplication {
     }
 
     public Definition findByKey(String key) {
-        return this.definitionRepository.findByKey(key).orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
+        return this.definitionRepository.findByRefAndVersion(key).orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
     }
 
     public TaskDefinitionVersion findByRefAndName(String ref, String name) {

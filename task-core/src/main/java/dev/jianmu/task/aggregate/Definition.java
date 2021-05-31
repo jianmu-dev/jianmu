@@ -12,8 +12,6 @@ import java.util.Set;
  * @create: 2021-04-15 10:45
  **/
 public interface Definition {
-    String getKey();
-
     String getRef();
 
     String getVersion();

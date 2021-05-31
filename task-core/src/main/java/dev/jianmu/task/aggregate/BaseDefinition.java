@@ -10,9 +10,6 @@ import java.util.stream.Collectors;
  * @create: 2021-03-25 15:44
  **/
 public class BaseDefinition implements Definition {
-    // 唯一Key
-    protected String key;
-
     protected String ref;
 
     protected String version;
@@ -72,11 +69,6 @@ public class BaseDefinition implements Definition {
     @Override
     public Set<TaskParameter> getOutputParameters() {
         return outputParameters;
-    }
-
-    @Override
-    public String getKey() {
-        return key;
     }
 
     @Override

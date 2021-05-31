@@ -110,7 +110,7 @@ public class ProjectApplication {
                     .findByDefinitionKey(type)
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
             var definition = this.definitionRepository
-                    .findByKey(type)
+                    .findByRefAndVersion(type)
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             versions.add(v);
             definitions.add(definition);

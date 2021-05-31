@@ -56,7 +56,8 @@ public class DefinitionJsonRepository implements DefinitionRepository {
     public void add(Definition definition) {
         var fileName = init.getRootLocation() +
                 File.separator +
-                definition.getKey() +
+                definition.getResultFile() +
+                definition.getVersion() +
                 JsonRepositoryInit.POSTFIX;
         var event = new RollbackEvent();
         event.setFileName(fileName);
@@ -73,13 +74,37 @@ public class DefinitionJsonRepository implements DefinitionRepository {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Definition> findByKey(String key) {
+    public Optional<Definition> findByRefAndVersion(String refVersion) {
         try {
             var writer = new FileReader(
                     init.getRootLocation() +
                             File.separator +
-                            key +
+                            refVersion +
+                            JsonRepositoryInit.POSTFIX, StandardCharsets.UTF_8
+            );
+            this.objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
+            SimpleModule module = new SimpleModule();
+            Class type1 = Set.of(TaskParameter.Builder.aTaskParameter().build()).getClass();
+            Class type2 = Set.of().getClass();
+            module.addDeserializer(type1, new UnmodifiableSetDeserializer());
+            module.addDeserializer(type2, new UnmodifiableSetDeserializer());
+            this.objectMapper.registerModule(module);
+            Definition definition = this.objectMapper.readValue(writer, Definition.class);
+            return Optional.of(definition);
+        } catch (IOException e) {
+            logger.error("未找到该任务定义", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Definition> findByRefAndVersion(String ref, String version) {
+        try {
+            var writer = new FileReader(
+                    init.getRootLocation() +
+                            File.separator +
+                            ref +
+                            version +
                             JsonRepositoryInit.POSTFIX, StandardCharsets.UTF_8
             );
             this.objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);

@@ -12,10 +12,6 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.*;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.task.service.InstanceParameterDomainService;
-import dev.jianmu.version.aggregate.TaskDefinition;
-import dev.jianmu.version.aggregate.TaskDefinitionVersion;
-import dev.jianmu.version.repository.TaskDefinitionRepository;
-import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,8 +37,6 @@ public class TaskInstanceApplication {
     private final TaskInstanceRepository taskInstanceRepository;
     private final DefinitionRepository definitionRepository;
     private final InstanceDomainService instanceDomainService;
-    private final TaskDefinitionRepository taskDefinitionRepository;
-    private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
     private final ParameterReferRepository parameterReferRepository;
     private final InstanceParameterRepository instanceParameterRepository;
@@ -53,8 +47,6 @@ public class TaskInstanceApplication {
             TaskInstanceRepository taskInstanceRepository,
             DefinitionRepository definitionRepository,
             InstanceDomainService instanceDomainService,
-            TaskDefinitionRepository taskDefinitionRepository,
-            TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             ParameterRepository parameterRepository,
             ParameterReferRepository parameterReferRepository,
             InstanceParameterRepository instanceParameterRepository,
@@ -63,8 +55,6 @@ public class TaskInstanceApplication {
         this.taskInstanceRepository = taskInstanceRepository;
         this.definitionRepository = definitionRepository;
         this.instanceDomainService = instanceDomainService;
-        this.taskDefinitionRepository = taskDefinitionRepository;
-        this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
         this.parameterReferRepository = parameterReferRepository;
         this.instanceParameterRepository = instanceParameterRepository;
@@ -79,14 +69,6 @@ public class TaskInstanceApplication {
         return this.taskInstanceRepository.findById(instanceId);
     }
 
-    public Optional<TaskDefinitionVersion> findByDefKey(String defKey) {
-        return this.taskDefinitionVersionRepository.findByDefinitionKey(defKey);
-    }
-
-    public Optional<TaskDefinition> findByRef(String ref) {
-        return this.taskDefinitionRepository.findByRef(ref);
-    }
-
     @Transactional
     public void create(
             String businessId,
@@ -97,7 +79,7 @@ public class TaskInstanceApplication {
             String asyncTaskType
     ) {
         // 创建任务实例
-        Definition definition = this.definitionRepository.findByKey(asyncTaskType)
+        Definition definition = this.definitionRepository.findByRefAndVersion(asyncTaskType)
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
         TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef, workflowRef, workflowVersion);
@@ -118,7 +100,7 @@ public class TaskInstanceApplication {
         // 任务输入参数与关联输出参数的参数值覆盖
         var taskInputParameters = definition.getInputParametersWith(inputParameters, instanceOutputParameters);
 
-        // 创建任务实例输出参数
+        // 创建任务实例输入参数
         var instanceInputParameters = InstanceParameterDomainService
                 .createInstanceParameters(taskInputParameters, taskInstance);
 
@@ -132,7 +114,7 @@ public class TaskInstanceApplication {
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        var definition = this.definitionRepository.findByKey(taskInstance.getDefKey())
+        var definition = this.definitionRepository.findByRefAndVersion(taskInstance.getDefKey())
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
         if (definition.getResultFile() != null) {
             // 解析Json为Map

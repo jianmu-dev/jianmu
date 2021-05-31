@@ -89,7 +89,7 @@ public class WorkerApplication {
     public void runTask(TaskInstance taskInstance) {
         // 创建DockerTask
         var taskDefinition = this.definitionRepository
-                .findByKey(taskInstance.getDefKey())
+                .findByRefAndVersion(taskInstance.getDefKey())
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
         if (!(taskDefinition instanceof DockerDefinition)) {
             throw new RuntimeException("任务定义类型错误");

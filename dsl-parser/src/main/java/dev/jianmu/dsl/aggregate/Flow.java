@@ -1,8 +1,6 @@
 package dev.jianmu.dsl.aggregate;
 
-import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.ParameterRefer;
-import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.workflow.aggregate.definition.*;
 
@@ -109,6 +107,13 @@ public class Flow {
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
                 .filter(type -> !type.equals("condition"))
+                .map(type -> {
+                    String[] strings = type.split(":");
+                    if (strings.length == 0) {
+                        return type + ":latest";
+                    }
+                    return type;
+                })
                 .collect(Collectors.toSet());
     }
 
