@@ -38,3 +38,10 @@ spec:
     entrypoint:
       - /bin/sh
       - '-c'
+matadata:
+  name: 文件上传
+  group: Tools
+  icon: upload.png
+  description: 文件上传组件
+  tags: 官方组件,上传下载
+  docs: https://docs.jianmu.dev/file_upload
