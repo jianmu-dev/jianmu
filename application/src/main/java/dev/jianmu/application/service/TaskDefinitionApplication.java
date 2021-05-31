@@ -8,9 +8,7 @@ import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskParameter;
-import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import dev.jianmu.task.repository.DefinitionRepository;
-import dev.jianmu.task.service.DefinitionDomainService;
 import dev.jianmu.version.aggregate.TaskDefinition;
 import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
@@ -39,21 +37,18 @@ public class TaskDefinitionApplication {
     private final ParameterRepository parameterRepository;
     private final TaskDefinitionRepositoryImpl taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
-    private final DefinitionDomainService definitionDomainService;
 
     @Inject
     public TaskDefinitionApplication(
             DefinitionRepository definitionRepository,
             ParameterRepository parameterRepository,
             TaskDefinitionRepositoryImpl taskDefinitionRepository,
-            TaskDefinitionVersionRepository taskDefinitionVersionRepository,
-            DefinitionDomainService definitionDomainService
+            TaskDefinitionVersionRepository taskDefinitionVersionRepository
     ) {
         this.definitionRepository = definitionRepository;
         this.parameterRepository = parameterRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
-        this.definitionDomainService = definitionDomainService;
     }
 
     private List<Parameter> createParameters(Set<TaskParameter> parameters) {
@@ -89,57 +84,6 @@ public class TaskDefinitionApplication {
         // 保存
         this.parameterRepository.addAll(parameters);
         this.definitionRepository.add(dockerDefinition);
-    }
-
-    @Transactional
-    public void createDockerDefinition(
-            TaskDefinition taskDefinition,
-            TaskDefinitionVersion taskDefinitionVersion,
-            String resultFile,
-            Set<TaskParameter> inputParameters,
-            Set<TaskParameter> outputParameters,
-            ContainerSpec spec
-    ) {
-        var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
-        taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
-        taskDefinitionVersion.setTaskDefinitionName(taskDefinition.getName());
-        taskDefinitionVersion.setDefinitionKey(definitionKey);
-        // 创建参数存储
-        var parameters = this.mergeParameters(inputParameters, outputParameters);
-        // 生成definition
-        var definition = this.definitionDomainService
-                .createDockerDefinition(taskDefinitionVersion.getDefinitionKey(), resultFile, inputParameters, outputParameters, spec);
-        // 保存
-        this.taskDefinitionRepository.add(taskDefinition);
-        this.taskDefinitionVersionRepository.add(taskDefinitionVersion);
-        this.parameterRepository.addAll(parameters);
-        this.definitionRepository.add(definition);
-    }
-
-    @Transactional
-    public void createDockerDefinitionVersion(
-            TaskDefinitionVersion taskDefinitionVersion,
-            String resultFile,
-            Set<TaskParameter> inputParameters,
-            Set<TaskParameter> outputParameters,
-            ContainerSpec spec
-    ) {
-        var taskDefinition = this.taskDefinitionRepository
-                .findByRef(taskDefinitionVersion.getTaskDefinitionRef())
-                .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
-        var definitionKey = taskDefinition.getRef() + taskDefinitionVersion.getName();
-        taskDefinitionVersion.setDefinitionKey(definitionKey);
-        taskDefinitionVersion.setTaskDefinitionId(taskDefinition.getId());
-        taskDefinitionVersion.setTaskDefinitionName(taskDefinition.getName());
-        // 创建参数存储
-        var parameters = this.mergeParameters(inputParameters, outputParameters);
-        // 生成definition
-        var definition = this.definitionDomainService
-                .createDockerDefinition(taskDefinitionVersion.getDefinitionKey(), resultFile, inputParameters, outputParameters, spec);
-        // 保存
-        this.taskDefinitionVersionRepository.add(taskDefinitionVersion);
-        this.parameterRepository.addAll(parameters);
-        this.definitionRepository.add(definition);
     }
 
     public Definition findByKey(String key) {

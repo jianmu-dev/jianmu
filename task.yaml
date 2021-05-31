@@ -1,0 +1,40 @@
+ref: file_upload
+version: 0.2
+resultFile: /etc/hostname
+type: DOCKER
+inputParameters:
+  - ref: minio_secret_key
+    name: Minio的Secret Key
+    type: SECRET
+    value: minioadmin
+  - name: 源文件
+    ref: file_source
+    type: STRING
+    value: /etc/hostname
+  - name: 目标目录
+    ref: file_dest
+    type: STRING
+    description: 目标目录
+    value: minio/artifacts
+  - name: Minio的Access Key
+    ref: minio_access_key
+    type: SECRET
+    value: minioadmin
+  - name: Minio主机地址
+    ref: minio_host
+    type: STRING
+    value: 'http://192.168.1.24:9000'
+outputParameters:
+  - ref: aaa
+    name: AAA
+    type: STRING
+    value: a1
+spec:
+  - image: 'minio/mc:latest'
+    cmd:
+      - >-
+        mc alias set minio $JIANMU_MINIO_HOST $JIANMU_MINIO_ACCESS_KEY
+        $JIANMU_MINIO_SECRET_KEY && mc cp $JIANMU_FILE_SOURCE $JIANMU_FILE_DEST
+    entrypoint:
+      - /bin/sh
+      - '-c'

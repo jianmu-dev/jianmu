@@ -1,11 +1,8 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.TaskDefinitionDto;
 import dev.jianmu.api.dto.TaskDefinitionSearchDto;
-import dev.jianmu.api.dto.TaskDefinitionVersionDto;
-import dev.jianmu.api.mapper.ContainerSpecMapper;
 import dev.jianmu.api.mapper.TaskDefinitionDtoMapper;
 import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.task.aggregate.DockerDefinition;
@@ -14,11 +11,9 @@ import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -37,36 +32,6 @@ public class TaskDefinitionController {
     @Inject
     public TaskDefinitionController(TaskDefinitionApplication taskDefinitionApplication) {
         this.taskDefinitionApplication = taskDefinitionApplication;
-    }
-
-    @PostMapping
-    @Operation(summary = "创建任务定义", description = "创建任务定义")
-    public void create(@RequestBody @Valid TaskDefinitionDto dto) {
-        var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
-        var taskDefinition = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinition(dto);
-        var taskDefinitionVersion = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersion(dto);
-        this.taskDefinitionApplication.createDockerDefinition(
-                taskDefinition,
-                taskDefinitionVersion,
-                dto.getResultFile(),
-                dto.getInputParameters(),
-                dto.getOutputParameters(),
-                spec
-        );
-    }
-
-    @PostMapping("/versions")
-    @Operation(summary = "创建任务定义版本", description = "创建任务定义版本")
-    public void createVersion(@RequestBody @Valid TaskDefinitionVersionDto dto) {
-        var spec = ContainerSpecMapper.INSTANCE.toContainerSpec(dto.getSpec());
-        var taskDefinitionVersion = TaskDefinitionDtoMapper.INSTANCE.toTaskDefinitionVersion(dto);
-        this.taskDefinitionApplication.createDockerDefinitionVersion(
-                taskDefinitionVersion,
-                dto.getResultFile(),
-                dto.getInputParameters(),
-                dto.getOutputParameters(),
-                spec
-        );
     }
 
     @GetMapping

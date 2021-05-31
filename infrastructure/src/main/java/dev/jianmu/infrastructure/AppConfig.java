@@ -2,7 +2,6 @@ package dev.jianmu.infrastructure;
 
 import dev.jianmu.parameter.service.ParameterDomainService;
 import dev.jianmu.parameter.service.ReferenceDomainService;
-import dev.jianmu.task.service.DefinitionDomainService;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.task.service.WorkerDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
@@ -48,11 +47,6 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     @Bean
     public ReferenceDomainService createReferenceDomainService() {
         return new ReferenceDomainService();
-    }
-
-    @Bean
-    public DefinitionDomainService createTaskDefinitionDomainService() {
-        return new DefinitionDomainService();
     }
 
     @Bean
