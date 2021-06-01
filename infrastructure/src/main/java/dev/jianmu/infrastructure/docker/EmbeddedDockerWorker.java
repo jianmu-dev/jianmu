@@ -112,7 +112,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
                                 .withTarget(m.getTarget())
                 );
                 // 如果要执行docker客户端镜像则挂载宿主机sock文件
-                if (spec.getImage().startsWith("docker:") && !this.sockFile.isBlank()) {
+                if (spec.getImage().startsWith("docker:") && null != this.sockFile) {
                     mounts.add(
                             new Mount().withType(MountType.BIND)
                                     .withTarget("/var/run/docker.sock")
