@@ -6,6 +6,7 @@ import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.aggregate.SecretParameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
+import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.*;
 import dev.jianmu.task.repository.DefinitionRepository;
@@ -21,6 +22,7 @@ import javax.inject.Inject;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -105,13 +107,11 @@ public class WorkerApplication {
         this.dockerWorker.runTask(dockerTask, logWriter);
     }
 
-    private Parameter<?> findSecret(Parameter<?> parameter) {
+    private Optional<KVPair> findSecret(Parameter<?> parameter) {
+        Parameter<?> secretParameter;
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = parameter.getStringValue().split("\\.");
-        var kv = this.kvPairRepository
-                .findByNamespaceNameAndKey(strings[0], strings[1])
-                .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
-        return Parameter.Type.STRING.newParameter(kv.getValue());
+        return this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1]);
     }
 
     private Map<String, String> getEnvironmentMap(List<InstanceParameter> instanceParameters) {
@@ -127,6 +127,7 @@ public class WorkerApplication {
         var parameters = this.parameterRepository.findByIds(new HashSet<>(parameterMap.values()));
         var secretParameters = parameters.stream()
                 .filter(parameter -> parameter instanceof SecretParameter)
+                .filter(parameter -> parameter.getStringValue().split("\\.").length == 2)
                 .collect(Collectors.toList());
         // 替换密钥参数值
         this.handleSecretParameter(parameterMap, secretParameters);
@@ -143,8 +144,11 @@ public class WorkerApplication {
                     .filter(parameter -> parameter.getId().equals(val))
                     .findFirst()
                     .ifPresent(parameter -> {
-                        var secretParameter = this.findSecret(parameter);
-                        parameterMap.put(key, secretParameter.getStringValue());
+                        var kvPairOptional = this.findSecret(parameter);
+                        kvPairOptional.ifPresent(kv -> {
+                            var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
+                            parameterMap.put(key, secretParameter.getStringValue());
+                        });
                     });
         });
     }
