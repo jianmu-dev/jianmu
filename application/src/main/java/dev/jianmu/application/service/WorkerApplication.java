@@ -127,6 +127,7 @@ public class WorkerApplication {
         var parameters = this.parameterRepository.findByIds(new HashSet<>(parameterMap.values()));
         var secretParameters = parameters.stream()
                 .filter(parameter -> parameter instanceof SecretParameter)
+                // 过滤非正常语法
                 .filter(parameter -> parameter.getStringValue().split("\\.").length == 2)
                 .collect(Collectors.toList());
         // 替换密钥参数值
