@@ -22,6 +22,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -71,6 +72,11 @@ public class DefinitionJsonRepository implements DefinitionRepository {
             throw new DBException.InsertFailed("任务定义保存失败");
         }
         publisher.publishEvent(event);
+    }
+
+    @Override
+    public List<Definition> findByRef(String ref) {
+        return null;
     }
 
     @Override

@@ -2,6 +2,7 @@ package dev.jianmu.task.repository;
 
 import dev.jianmu.task.aggregate.Definition;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -12,6 +13,8 @@ import java.util.Optional;
  **/
 public interface DefinitionRepository {
     void add(Definition definition);
+
+    List<Definition> findByRef(String ref);
 
     Optional<Definition> findByRefAndVersion(String refVersion);
 
