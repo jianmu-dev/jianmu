@@ -34,7 +34,7 @@ public class InstanceDomainService {
         }
         return TaskInstance.Builder.anInstance()
                 .serialNo(taskInstances.size() + 1)
-                .defKey(definition.getKey())
+                .defKey(definition.getRef() + ":" + definition.getVersion())
                 .asyncTaskRef(asyncTaskRef)
                 .workflowRef(workflowRef)
                 .workflowVersion(workflowVersion)

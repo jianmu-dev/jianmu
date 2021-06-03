@@ -213,7 +213,7 @@ public class DslModel {
         definitions.forEach(definition -> {
             dslParameters.forEach(dslParameter -> {
                 // 如果dsl参数覆盖的是该任务定义输入参数
-                if (dslParameter.getDefinitionKey().equals(definition.getKey())) {
+                if (dslParameter.getDefinitionKey().equals(definition.getRef() + ":" + definition.getVersion())) {
                     definition.getInputParameterBy(dslParameter.getName()).ifPresent(taskParameter -> {
                         parameterMap.put(dslParameter, taskParameter);
                     });
