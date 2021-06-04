@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @class: WorkflowInstanceVo
- * @description: 流程实例VO
+ * @class: InstanceVo
+ * @description: InstanceVo
  * @author: Ethan Liu
- * @create: 2021-04-22 10:49
+ * @create: 2021-06-04 19:25
  **/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "流程实例VO")
-public class WorkflowInstanceVo {
+public class InstanceVo {
     private String id;
     // 执行顺序号
     private int serialNo;

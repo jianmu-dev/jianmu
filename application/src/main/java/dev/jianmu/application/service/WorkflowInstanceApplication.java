@@ -77,6 +77,10 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.findAllPage(id, name, workflowVersion, status, pageNum, pageSize);
     }
 
+    public PageInfo<WorkflowInstance> findByWorkflowRef(String workflowRef) {
+        return this.workflowInstanceRepository.findByWorkflowRef(workflowRef, 0, 20);
+    }
+
     private EvaluationContext findContext(String instanceId) {
         var context = new ElContext();
         var instanceParameters = this.instanceParameterRepository.findByBusinessId(instanceId);
