@@ -2,6 +2,7 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.ProjectSearchDto;
+import dev.jianmu.api.mapper.ProjectMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
 import dev.jianmu.api.vo.PageUtils;
@@ -9,6 +10,7 @@ import dev.jianmu.api.vo.ProjectVo;
 import dev.jianmu.api.vo.TaskInstanceVo;
 import dev.jianmu.api.vo.WorkflowInstanceVo;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,14 +34,17 @@ import java.util.List;
 @RequestMapping("view")
 @Tag(name = "查询API", description = "查询API")
 public class ViewController {
+    private final ProjectApplication projectApplication;
     private final WorkflowInstanceApplication instanceApplication;
     private final TaskInstanceApplication taskInstanceApplication;
 
     @Inject
     public ViewController(
+            ProjectApplication projectApplication,
             WorkflowInstanceApplication instanceApplication,
             TaskInstanceApplication taskInstanceApplication
     ) {
+        this.projectApplication = projectApplication;
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;
     }
@@ -47,7 +52,12 @@ public class ViewController {
     @GetMapping("/projects")
     @Operation(summary = "分页查询项目列表", description = "分页查询项目列表")
     public PageInfo<ProjectVo> findAll(ProjectSearchDto searchDto) {
-        return PageInfo.of(List.of());
+        var page = this.projectApplication.findAll(searchDto.getName(), searchDto.getPageNum(), searchDto.getPageSize());
+        var projects = page.getList();
+        var projectVos = ProjectMapper.INSTANCE.toProjectVoList(projects);
+        PageInfo<ProjectVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
+        newPage.setList(projectVos);
+        return newPage;
     }
 
     @GetMapping("/workflow_instances/{workflowRef}")
