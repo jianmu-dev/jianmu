@@ -338,4 +338,8 @@ public class ProjectApplication {
     public DslSourceCode findByRefAndVersion(String ref, String version) {
         return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
     }
+
+    public GitRepo findGitRepoById(String gitRepoId) {
+        return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
+    }
 }

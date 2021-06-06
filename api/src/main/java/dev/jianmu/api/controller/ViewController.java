@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +60,12 @@ public class ViewController {
         PageInfo<ProjectVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
         newPage.setList(projectVos);
         return newPage;
+    }
+
+    @GetMapping("/repo/{gitRepoId}")
+    public void gotoRepo(@PathVariable String gitRepoId, HttpServletResponse response) throws IOException {
+        var repo = this.projectApplication.findGitRepoById(gitRepoId);
+        response.sendRedirect(repo.getUri());
     }
 
     @GetMapping("/workflow_instances/{workflowRef}")

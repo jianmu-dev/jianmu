@@ -40,8 +40,8 @@ public class ProjectVo {
     private String name;
     @Schema(description = "项目来源")
     private Source source;
-    @Schema(description = "Git库地址")
-    private String gitRepoUrl;
+    @Schema(description = "Git库ID")
+    private String gitRepoId;
     @Schema(description = "最后执行时间")
     private LocalDateTime latestTime;
     @Schema(description = "下次执行时间")
