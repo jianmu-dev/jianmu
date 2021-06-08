@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -81,6 +82,10 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.findByWorkflowRef(workflowRef, 0, 20);
     }
 
+    public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {
+        return this.workflowInstanceRepository.findByRefAndSerialNoMax(workflowRef);
+    }
+
     private EvaluationContext findContext(String instanceId) {
         var context = new ElContext();
         var instanceParameters = this.instanceParameterRepository.findByBusinessId(instanceId);
@@ -117,8 +122,12 @@ public class WorkflowInstanceApplication {
         if (i > 0) {
             throw new RuntimeException("该流程运行中");
         }
+        // 查询serialNo
+        AtomicInteger serialNo = new AtomicInteger(1);
+        this.workflowInstanceRepository.findByRefAndSerialNoMax(workflow.getRef())
+                .ifPresent(workflowInstance -> serialNo.set(workflowInstance.getSerialNo() + 1));
         // 创建新的流程实例
-        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, workflow);
+        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, serialNo.get(), workflow);
         workflowInstance.setExpressionLanguage(this.expressionLanguage);
         // 启动流程
         Node start = workflow.findStart();

@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @class: ProjectViewController
@@ -56,7 +57,10 @@ public class ViewController {
     public PageInfo<ProjectVo> findAll(ProjectSearchDto searchDto) {
         var page = this.projectApplication.findAll(searchDto.getName(), searchDto.getPageNum(), searchDto.getPageSize());
         var projects = page.getList();
-        var projectVos = ProjectMapper.INSTANCE.toProjectVoList(projects);
+        var projectVos = projects.stream().map(project -> this.instanceApplication
+                .findByRefAndSerialNoMax(project.getWorkflowRef())
+                .map(workflowInstance -> ProjectMapper.INSTANCE.toProjectVo(project, workflowInstance))
+                .orElseGet(() -> ProjectMapper.INSTANCE.toProjectVo(project))).collect(Collectors.toList());
         PageInfo<ProjectVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
         newPage.setList(projectVos);
         return newPage;

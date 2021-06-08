@@ -19,6 +19,7 @@ public interface WorkflowInstanceMapper {
     @Select("select * from workflow_instance where workflow_ref = #{workflowRef} " +
             "and workflow_version = #{workflowVersion} and status = #{status}")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
@@ -33,6 +34,7 @@ public interface WorkflowInstanceMapper {
 
     @Select("select * from workflow_instance where id = #{instanceId}")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
@@ -41,8 +43,8 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findById(String instanceId);
 
-    @Insert("insert into workflow_instance(id, trigger_id, name, description, run_mode, status, workflow_ref, workflow_version, task_instances, start_time, end_time, _version) " +
-            "values(#{wk.id},#{wk.triggerId},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
+    @Insert("insert into workflow_instance(id, serial_no, trigger_id, name, description, run_mode, status, workflow_ref, workflow_version, task_instances, start_time, end_time, _version) " +
+            "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
             "#{wk.asyncTaskInstances, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.TaskInstanceListTypeHandler}," +
             "#{wk.startTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
@@ -59,6 +61,7 @@ public interface WorkflowInstanceMapper {
 
     @Select("select * from workflow_instance")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
@@ -81,6 +84,7 @@ public interface WorkflowInstanceMapper {
             " order by end_time desc" +
             "</script>")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
@@ -96,6 +100,7 @@ public interface WorkflowInstanceMapper {
 
     @Select("select * from workflow_instance where workflow_ref = #{workflowRef}")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
@@ -103,4 +108,15 @@ public interface WorkflowInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByWorkflowRef(@Param("workflowRef") String workflowRef);
+
+    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit 1")
+    @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    Optional<WorkflowInstance> findByRefAndSerialNoMax(@Param("workflowRef") String workflowRef);
 }
