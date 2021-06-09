@@ -71,6 +71,10 @@ public class TaskInstanceApplication {
         this.inputParameterRepository = inputParameterRepository;
     }
 
+    public List<InstanceParameter> findParameters(String instanceId) {
+        return this.instanceParameterRepository.findByInstanceId(instanceId);
+    }
+
     public List<TaskInstance> findByBusinessId(String businessId) {
         return this.taskInstanceRepository.findByBusinessId(businessId);
     }

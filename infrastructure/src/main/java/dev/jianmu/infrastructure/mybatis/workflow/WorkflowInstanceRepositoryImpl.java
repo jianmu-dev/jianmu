@@ -10,9 +10,6 @@ import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -74,8 +71,17 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
         return this.workflowInstanceMapper.findAll(pageNum, pageSize);
     }
 
+    @Override
+    public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {
+        return this.workflowInstanceMapper.findByRefAndSerialNoMax(workflowRef);
+    }
+
     public PageInfo<WorkflowInstance> findAllPage(String id, String name, String workflowVersion, ProcessStatus status, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> this.workflowInstanceMapper.findAllPage(id, name, workflowVersion, status));
+    }
+
+    public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
+        return this.workflowInstanceMapper.findByWorkflowRef(workflowRef);
     }
 }
