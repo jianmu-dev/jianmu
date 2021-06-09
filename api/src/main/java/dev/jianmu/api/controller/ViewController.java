@@ -5,15 +5,14 @@ import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.api.mapper.ProjectMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
-import dev.jianmu.api.vo.PageUtils;
-import dev.jianmu.api.vo.ProjectVo;
-import dev.jianmu.api.vo.TaskInstanceVo;
-import dev.jianmu.api.vo.WorkflowInstanceVo;
+import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.service.ParameterApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.task.aggregate.InstanceParameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,16 +40,19 @@ public class ViewController {
     private final ProjectApplication projectApplication;
     private final WorkflowInstanceApplication instanceApplication;
     private final TaskInstanceApplication taskInstanceApplication;
+    private final ParameterApplication parameterApplication;
 
     @Inject
     public ViewController(
             ProjectApplication projectApplication,
             WorkflowInstanceApplication instanceApplication,
-            TaskInstanceApplication taskInstanceApplication
+            TaskInstanceApplication taskInstanceApplication,
+            ParameterApplication parameterApplication
     ) {
         this.projectApplication = projectApplication;
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;
+        this.parameterApplication = parameterApplication;
     }
 
     @GetMapping("/projects")
@@ -104,5 +106,25 @@ public class ViewController {
         var taskInstance = this.taskInstanceApplication.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         return TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
+    }
+
+    @GetMapping("/task_instance/{instanceId}/parameters")
+    @Operation(summary = "查询任务实例参数接口", description = "查询任务实例参数接口")
+    public List<InstanceParameterVo> findParameters(@PathVariable String instanceId) {
+        var instanceParameters = this.taskInstanceApplication.findParameters(instanceId);
+        var ids = instanceParameters.stream().map(InstanceParameter::getParameterId).collect(Collectors.toSet());
+        var parameters = this.parameterApplication.findParameters(ids);
+        return parameters.stream()
+                .map(parameter -> {
+                    var instanceParameterVo = new InstanceParameterVo();
+                    instanceParameters.forEach(instanceParameter -> {
+                        if (instanceParameter.getParameterId().equals(parameter.getId())) {
+                            instanceParameterVo.setRef(instanceParameter.getRef());
+                            instanceParameterVo.setType(instanceParameter.getType().toString());
+                            instanceParameterVo.setValue(parameter.getStringValue());
+                        }
+                    });
+                    return instanceParameterVo;
+                }).collect(Collectors.toList());
     }
 }
