@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,8 +79,8 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.findAllPage(id, name, workflowVersion, status, pageNum, pageSize);
     }
 
-    public PageInfo<WorkflowInstance> findByWorkflowRef(String workflowRef) {
-        return this.workflowInstanceRepository.findByWorkflowRef(workflowRef, 0, 20);
+    public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
+        return this.workflowInstanceRepository.findByWorkflowRef(workflowRef);
     }
 
     public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {

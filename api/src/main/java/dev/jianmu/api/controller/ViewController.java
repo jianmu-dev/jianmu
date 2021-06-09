@@ -74,13 +74,9 @@ public class ViewController {
 
     @GetMapping("/workflow_instances/{workflowRef}")
     @Operation(summary = "根据workflowRef查询流程实例列表", description = "根据workflowRef查询流程实例列表")
-    public PageInfo<WorkflowInstanceVo> findByWorkflowRef(@PathVariable String workflowRef) {
-        var page = this.instanceApplication.findByWorkflowRef(workflowRef);
-        var instances = page.getList();
-        var newInstances = WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
-        PageInfo<WorkflowInstanceVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
-        newPage.setList(newInstances);
-        return newPage;
+    public List<WorkflowInstanceVo> findByWorkflowRef(@PathVariable String workflowRef) {
+        var instances = this.instanceApplication.findByWorkflowRef(workflowRef);
+        return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
     }
 
     @GetMapping("/task_instances/{workflowInstanceId}")
