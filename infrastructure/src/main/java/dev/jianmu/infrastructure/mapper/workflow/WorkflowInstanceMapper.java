@@ -98,7 +98,7 @@ public interface WorkflowInstanceMapper {
             @Param("status") ProcessStatus status
     );
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef}")
+    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
