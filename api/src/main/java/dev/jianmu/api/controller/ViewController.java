@@ -13,6 +13,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.project.aggregate.Project;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,6 +65,12 @@ public class ViewController {
         PageInfo<ProjectVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
         newPage.setList(projectVos);
         return newPage;
+    }
+
+    @GetMapping("/projects/{projectId}")
+    @Operation(summary = "获取项目详情", description = "获取项目详情")
+    public Project getProject(@PathVariable String projectId) {
+        return this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
     }
 
     @GetMapping("/repo/{gitRepoId}")
