@@ -25,7 +25,7 @@ public interface ProjectMapper {
     @Mapping(target = "source", source = "project.dslSource")
     @Mapping(target = "name", source = "project.workflowName")
     @Mapping(target = "latestTime", source = "instance.endTime")
-    @Mapping(target = "status", expression = "java(instance.findLatestAsyncTaskInstance().map(AsyncTaskInstance::getStatus).map(TaskStatus::name).orElse(\"\"))")
+    @Mapping(target = "status", defaultValue = "INIT", expression = "java(instance.findLatestAsyncTaskInstance().map(AsyncTaskInstance::getStatus).map(TaskStatus::name).orElse(\"\"))")
     ProjectVo toProjectVo(Project project, WorkflowInstance instance);
 
     @Mapping(target = "source", source = "dslSource")
