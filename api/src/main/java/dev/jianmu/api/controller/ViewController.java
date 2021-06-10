@@ -1,11 +1,12 @@
 package dev.jianmu.api.controller;
 
-import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.api.mapper.ProjectMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
-import dev.jianmu.api.vo.*;
+import dev.jianmu.api.vo.InstanceParameterVo;
+import dev.jianmu.api.vo.ProjectVo;
+import dev.jianmu.api.vo.TaskInstanceVo;
+import dev.jianmu.api.vo.WorkflowInstanceVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.ParameterApplication;
 import dev.jianmu.application.service.ProjectApplication;
@@ -56,17 +57,13 @@ public class ViewController {
     }
 
     @GetMapping("/projects")
-    @Operation(summary = "分页查询项目列表", description = "分页查询项目列表")
-    public PageInfo<ProjectVo> findAll(ProjectSearchDto searchDto) {
-        var page = this.projectApplication.findAll(searchDto.getName(), searchDto.getPageNum(), searchDto.getPageSize());
-        var projects = page.getList();
-        var projectVos = projects.stream().map(project -> this.instanceApplication
+    @Operation(summary = "查询项目列表", description = "查询项目列表")
+    public List<ProjectVo> findAll() {
+        var projects = this.projectApplication.findAll();
+        return projects.stream().map(project -> this.instanceApplication
                 .findByRefAndSerialNoMax(project.getWorkflowRef())
                 .map(workflowInstance -> ProjectMapper.INSTANCE.toProjectVo(project, workflowInstance))
                 .orElseGet(() -> ProjectMapper.INSTANCE.toProjectVo(project))).collect(Collectors.toList());
-        PageInfo<ProjectVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
-        newPage.setList(projectVos);
-        return newPage;
     }
 
     @GetMapping("/projects/{projectId}")

@@ -331,6 +331,10 @@ public class ProjectApplication {
         return this.projectRepository.findAll(workflowName, pageNum, pageSize);
     }
 
+    public List<Project> findAll() {
+        return this.projectRepository.findAll();
+    }
+
     public Optional<Project> findById(String dslId) {
         return this.projectRepository.findById(dslId);
     }
