@@ -62,8 +62,8 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
-    List<Project> findAll(String workflowName);
-    
+    List<Project> findAllPage(String workflowName);
+
     @Select("select * from jianmu_project order by last_modified_time desc")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")

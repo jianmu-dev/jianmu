@@ -328,7 +328,7 @@ public class ProjectApplication {
     }
 
     public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
-        return this.projectRepository.findAll(workflowName, pageNum, pageSize);
+        return this.projectRepository.findAllPage(workflowName, pageNum, pageSize);
     }
 
     public List<Project> findAll() {
