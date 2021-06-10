@@ -121,6 +121,7 @@ public class ViewController {
                         if (instanceParameter.getParameterId().equals(parameter.getId())) {
                             instanceParameterVo.setRef(instanceParameter.getRef());
                             instanceParameterVo.setType(instanceParameter.getType().toString());
+                            instanceParameterVo.setValueType(parameter.getType().toString());
                             instanceParameterVo.setValue(parameter.getStringValue());
                         }
                     });

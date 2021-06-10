@@ -22,6 +22,8 @@ public class InstanceParameterVo {
     private String ref;
     // 输入输出类型
     private String type;
+    // 参数类型
+    private String valueType;
     // 参数值
     private String value;
 }
