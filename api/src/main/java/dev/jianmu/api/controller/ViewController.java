@@ -12,10 +12,14 @@ import dev.jianmu.application.service.ParameterApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,18 +46,21 @@ public class ViewController {
     private final WorkflowInstanceApplication instanceApplication;
     private final TaskInstanceApplication taskInstanceApplication;
     private final ParameterApplication parameterApplication;
+    private final StorageService storageService;
 
     @Inject
     public ViewController(
             ProjectApplication projectApplication,
             WorkflowInstanceApplication instanceApplication,
             TaskInstanceApplication taskInstanceApplication,
-            ParameterApplication parameterApplication
+            ParameterApplication parameterApplication,
+            StorageService storageService
     ) {
         this.projectApplication = projectApplication;
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;
         this.parameterApplication = parameterApplication;
+        this.storageService = storageService;
     }
 
     @GetMapping("/projects")
@@ -124,5 +131,14 @@ public class ViewController {
                     });
                     return instanceParameterVo;
                 }).collect(Collectors.toList());
+    }
+
+    @GetMapping("/{logId}")
+    @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取")
+    public ResponseEntity<FileSystemResource> getLog(@PathVariable String logId) {
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(new FileSystemResource(this.storageService.logFile(logId)));
     }
 }
