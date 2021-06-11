@@ -133,7 +133,7 @@ public class ViewController {
                 }).collect(Collectors.toList());
     }
 
-    @GetMapping("/{logId}")
+    @GetMapping("/logs/{logId}")
     @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取")
     public ResponseEntity<FileSystemResource> getLog(@PathVariable String logId) {
         return ResponseEntity
