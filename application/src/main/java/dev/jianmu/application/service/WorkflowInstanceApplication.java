@@ -161,11 +161,8 @@ public class WorkflowInstanceApplication {
         var workflowInstance = this.workflowInstanceRepository
                 .findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        var workflow = this.workflowRepository
-                .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        // 激活End节点
-        workflowInstanceDomainService.finish(workflow, workflowInstance);
+        // 终止流程
+        workflowInstance.terminate();
         this.workflowInstanceRepository.save(workflowInstance);
     }
 
