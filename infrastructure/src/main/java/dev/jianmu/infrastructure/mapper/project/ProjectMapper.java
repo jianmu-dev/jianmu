@@ -64,7 +64,7 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Project> findAllPage(String workflowName);
 
-    @Select("select * from jianmu_project order by last_modified_time desc")
+    @Select("select * from jianmu_project order by created_time desc")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
     @Result(column = "git_repo_id", property = "gitRepoId")
