@@ -3,7 +3,6 @@ package dev.jianmu.api.mapper;
 import dev.jianmu.api.vo.ProjectVo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
-import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -19,13 +18,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(imports = {AsyncTaskInstance.class})
 public interface ProjectMapper {
     ProjectMapper INSTANCE = Mappers.getMapper(ProjectMapper.class);
-
-    @Mapping(target = "id", source = "project.id")
-    @Mapping(target = "source", source = "project.dslSource")
-    @Mapping(target = "name", source = "project.workflowName")
-    @Mapping(target = "latestTime", source = "instance.endTime")
-    @Mapping(target = "status", expression = "java(instance.findLatestAsyncTaskInstance().orElse(AsyncTaskInstance.Builder.anAsyncTaskInstance().build()).getStatus().name())")
-    ProjectVo toProjectVo(Project project, WorkflowInstance instance);
 
     @Mapping(target = "source", source = "dslSource")
     @Mapping(target = "name", source = "workflowName")

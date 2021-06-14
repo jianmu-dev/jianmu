@@ -15,6 +15,8 @@ import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
+import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
@@ -69,7 +71,19 @@ public class ViewController {
         var projects = this.projectApplication.findAll();
         return projects.stream().map(project -> this.instanceApplication
                 .findByRefAndSerialNoMax(project.getWorkflowRef())
-                .map(workflowInstance -> ProjectMapper.INSTANCE.toProjectVo(project, workflowInstance))
+                .map(workflowInstance -> {
+                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                    projectVo.setLatestTime(workflowInstance.getEndTime());
+                    if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
+                        projectVo.setStatus("FAILED");
+                    } else {
+                        projectVo.setStatus(workflowInstance.findLatestAsyncTaskInstance()
+                                .orElse(AsyncTaskInstance.Builder.anAsyncTaskInstance().build())
+                                .getStatus().name()
+                        );
+                    }
+                    return projectVo;
+                })
                 .orElseGet(() -> ProjectMapper.INSTANCE.toProjectVo(project))).collect(Collectors.toList());
     }
 
