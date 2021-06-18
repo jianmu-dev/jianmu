@@ -1,6 +1,5 @@
 package dev.jianmu.api.vo;
 
-import dev.jianmu.project.aggregate.GitRepo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -7,6 +7,7 @@ import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.ProjectRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -48,8 +49,12 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findByWorkflowRef(workflowRef);
     }
 
-    public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
+    public PageInfo<Project> findAllPage(String workflowName, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.projectMapper.findAll(workflowName));
+                .doSelectPageInfo(() -> this.projectMapper.findAllPage(workflowName));
+    }
+
+    public List<Project> findAll() {
+        return this.projectMapper.findAll();
     }
 }

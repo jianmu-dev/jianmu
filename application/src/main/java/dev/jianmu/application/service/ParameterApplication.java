@@ -1,6 +1,8 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.aggregate.Reference;
+import dev.jianmu.parameter.aggregate.SecretParameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.parameter.repository.ReferenceRepository;
 import dev.jianmu.parameter.service.ParameterDomainService;
@@ -11,6 +13,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @class: ParameterApplication
@@ -37,6 +40,11 @@ public class ParameterApplication {
         this.referenceDomainService = referenceDomainService;
         this.parameterRepository = parameterRepository;
         this.referenceRepository = referenceRepository;
+    }
+
+    public List<Parameter> findParameters(Set<String> ids) {
+        var parameters = this.parameterRepository.findByIds(ids);
+        return parameters.stream().filter(parameter -> (!(parameter instanceof SecretParameter))).collect(Collectors.toList());
     }
 
     // 创建参数引用

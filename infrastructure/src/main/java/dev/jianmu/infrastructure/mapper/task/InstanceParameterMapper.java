@@ -35,6 +35,16 @@ public interface InstanceParameterMapper {
     @Result(column = "parameter_id", property = "parameterId")
     List<InstanceParameter> findByBusinessId(String businessId);
 
+    @Select("select * from task_instance_parameter where instance_id = #{instanceId}")
+    @Result(column = "instance_id", property = "instanceId")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "def_key", property = "defKey")
+    @Result(column = "async_task_ref", property = "asyncTaskRef")
+    @Result(column = "business_id", property = "businessId")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "parameter_id", property = "parameterId")
+    List<InstanceParameter> findByInstanceId(@Param("instanceId") String instanceId);
+
     @Select("select * from task_instance_parameter where instance_id = #{instanceId} and type = #{type}")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")

@@ -328,7 +328,11 @@ public class ProjectApplication {
     }
 
     public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
-        return this.projectRepository.findAll(workflowName, pageNum, pageSize);
+        return this.projectRepository.findAllPage(workflowName, pageNum, pageSize);
+    }
+
+    public List<Project> findAll() {
+        return this.projectRepository.findAll();
     }
 
     public Optional<Project> findById(String dslId) {
@@ -337,5 +341,9 @@ public class ProjectApplication {
 
     public DslSourceCode findByRefAndVersion(String ref, String version) {
         return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+    }
+
+    public GitRepo findGitRepoById(String gitRepoId) {
+        return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
     }
 }

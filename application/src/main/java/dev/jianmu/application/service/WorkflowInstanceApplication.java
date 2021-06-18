@@ -27,8 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -77,6 +79,14 @@ public class WorkflowInstanceApplication {
         return this.workflowInstanceRepository.findAllPage(id, name, workflowVersion, status, pageNum, pageSize);
     }
 
+    public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
+        return this.workflowInstanceRepository.findByWorkflowRef(workflowRef);
+    }
+
+    public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {
+        return this.workflowInstanceRepository.findByRefAndSerialNoMax(workflowRef);
+    }
+
     private EvaluationContext findContext(String instanceId) {
         var context = new ElContext();
         var instanceParameters = this.instanceParameterRepository.findByBusinessId(instanceId);
@@ -113,8 +123,12 @@ public class WorkflowInstanceApplication {
         if (i > 0) {
             throw new RuntimeException("该流程运行中");
         }
+        // 查询serialNo
+        AtomicInteger serialNo = new AtomicInteger(1);
+        this.workflowInstanceRepository.findByRefAndSerialNoMax(workflow.getRef())
+                .ifPresent(workflowInstance -> serialNo.set(workflowInstance.getSerialNo() + 1));
         // 创建新的流程实例
-        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, workflow);
+        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, serialNo.get(), workflow);
         workflowInstance.setExpressionLanguage(this.expressionLanguage);
         // 启动流程
         Node start = workflow.findStart();
@@ -147,11 +161,8 @@ public class WorkflowInstanceApplication {
         var workflowInstance = this.workflowInstanceRepository
                 .findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        var workflow = this.workflowRepository
-                .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        // 激活End节点
-        workflowInstanceDomainService.finish(workflow, workflowInstance);
+        // 终止流程
+        workflowInstance.terminate();
         this.workflowInstanceRepository.save(workflowInstance);
     }
 

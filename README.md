@@ -2,15 +2,9 @@
 
 #### 介绍
 
-建木自动化集成平台
+建木CI/CD
 
-以触发器、流程流转、任务分发等核心功能为平台核心，可以用在各类使用场景下，
-
-包括但不限于，CI/CD、DevOps、自动化运维、多业务系统集成等使用场景。
-
-#### 架构设计
-
-可以参考 [这里](https://gitee.com/jianmu_dev/jianmu-architecture-as-code)
+基于建木自动化集成平台实现的CI/CD平台
 
 #### 运行环境
 
@@ -24,13 +18,7 @@ go 1.15及以上
 
 #### 如何编译
 
-请使用git clone --recurse-submodules命令clone本项目
-
-否则需要cd到jianmu-grpc-proto目录下，执行 `git submodule init`和`git submodule update`命令， 然后
-
-`mvn install`
-
-如果提示缺少依赖包，可以clone相关库的代码本地 `mvn install`即可
+暂缺
 
 #### 如何运行
 
