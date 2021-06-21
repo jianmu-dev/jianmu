@@ -1,7 +1,7 @@
 package dev.jianmu.dsl.aggregate;
 
+import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.ParameterRefer;
-import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.workflow.aggregate.definition.*;
 
 import java.util.*;
@@ -33,7 +33,7 @@ public class Flow {
         });
     }
 
-    public void calculateNodes(List<TaskDefinitionVersion> taskDefinitionVersions) {
+    public void calculateNodes(List<Definition> definitions) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
         flowNodes.forEach(flowNode -> {
@@ -64,11 +64,11 @@ public class Flow {
                 return;
             }
             // 创建任务节点
-            var version = taskDefinitionVersions.stream()
-                    .filter(taskDefinitionVersion -> taskDefinitionVersion.getDefinitionKey().equals(flowNode.getType()))
+            var d = definitions.stream()
+                    .filter(definition -> flowNode.getType().equals(definition.getRef() + ":" + definition.getVersion()))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("未找到任务定义"));
-            var task = this.createAsyncTask(flowNode.getType(), flowNode.getName(), version);
+            var task = this.createAsyncTask(flowNode.getType(), flowNode.getName(), d);
             symbolTable.put(flowNode.getName(), task);
         });
         // 添加节点引用关系
@@ -92,12 +92,12 @@ public class Flow {
         this.nodes = new HashSet<>(symbolTable.values());
     }
 
-    private AsyncTask createAsyncTask(String key, String nodeName, TaskDefinitionVersion version) {
+    private AsyncTask createAsyncTask(String key, String nodeName, Definition definition) {
         return AsyncTask.Builder.anAsyncTask()
-                .name(version.getTaskDefinitionName())
+                .name(definition.getMetaData().getName())
                 .ref(nodeName)
                 .type(key)
-                .description(version.getDescription())
+                .description(definition.getMetaData().getDescription())
                 .build();
     }
 

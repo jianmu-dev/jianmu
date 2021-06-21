@@ -6,7 +6,6 @@ import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.InputParameter;
 import dev.jianmu.task.aggregate.TaskParameter;
-import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,7 +26,6 @@ public class DslModel {
     private Map<String, Object> workflow;
     private Flow flow;
     private Set<DslParameter> dslParameters;
-    private List<TaskDefinitionVersion> taskDefinitionVersions;
     private List<Definition> definitions;
     Map<DslParameter, TaskParameter> parameterMap = new HashMap<>();
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -46,10 +44,9 @@ public class DslModel {
     }
 
     // 关系、参数计算
-    public void calculate(List<Definition> definitions, List<TaskDefinitionVersion> taskDefinitionVersions) {
+    public void calculate(List<Definition> definitions) {
         this.definitions = List.copyOf(definitions);
-        this.taskDefinitionVersions = List.copyOf(taskDefinitionVersions);
-        this.flow.calculateNodes(this.taskDefinitionVersions);
+        this.flow.calculateNodes(this.definitions);
         this.extractDslParameters();
         this.calculateParameters();
     }

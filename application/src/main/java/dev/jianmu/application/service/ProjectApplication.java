@@ -18,7 +18,6 @@ import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.ParameterReferRepository;
 import dev.jianmu.trigger.service.ScheduleJobService;
-import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -103,20 +102,15 @@ public class ProjectApplication {
         var dsl = DslModel.parse(dslText);
         // 校验任务类型是否存在并创建流程节点关系
         var types = dsl.getFlow().getAsyncTaskTypes();
-        List<TaskDefinitionVersion> versions = new ArrayList<>();
         List<Definition> definitions = new ArrayList<>();
         types.forEach(type -> {
             String[] strings = type.split(":");
-            var v = this.taskDefinitionVersionRepository
-                    .findByDefinitionKey(type)
-                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
             var definition = this.definitionRepository
                     .findByRefAndVersion(strings[0], strings[1])
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-            versions.add(v);
             definitions.add(definition);
         });
-        dsl.calculate(definitions, versions);
+        dsl.calculate(definitions);
         return dsl;
     }
 

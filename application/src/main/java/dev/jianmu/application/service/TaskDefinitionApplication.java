@@ -2,6 +2,7 @@ package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.infrastructure.mybatis.version.TaskDefinitionRepositoryImpl;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
@@ -37,18 +38,21 @@ public class TaskDefinitionApplication {
     private final ParameterRepository parameterRepository;
     private final TaskDefinitionRepositoryImpl taskDefinitionRepository;
     private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
+    private final RegistryClient registryClient;
 
     @Inject
     public TaskDefinitionApplication(
             DefinitionRepository definitionRepository,
             ParameterRepository parameterRepository,
             TaskDefinitionRepositoryImpl taskDefinitionRepository,
-            TaskDefinitionVersionRepository taskDefinitionVersionRepository
+            TaskDefinitionVersionRepository taskDefinitionVersionRepository,
+            RegistryClient registryClient
     ) {
         this.definitionRepository = definitionRepository;
         this.parameterRepository = parameterRepository;
         this.taskDefinitionRepository = taskDefinitionRepository;
         this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
+        this.registryClient = registryClient;
     }
 
     private List<Parameter> createParameters(Set<TaskParameter> parameters) {
@@ -79,6 +83,19 @@ public class TaskDefinitionApplication {
 
     @Transactional
     public void createDockerDefinition(DockerDefinition dockerDefinition) {
+        // 创建参数存储
+        var parameters = this.mergeParameters(dockerDefinition.getInputParameters(), dockerDefinition.getOutputParameters());
+        // 保存
+        this.parameterRepository.addAll(parameters);
+        this.definitionRepository.add(dockerDefinition);
+    }
+
+    @Transactional
+    public void installDefinition(String ref, String version) {
+        var dockerDefinition = this.registryClient.findByRefAndVersion(ref, version)
+                .filter(definition -> definition instanceof DockerDefinition)
+                .map(definition -> (DockerDefinition) definition)
+                .orElseThrow(() -> new DataNotFoundException("未找到该组件定义"));
         // 创建参数存储
         var parameters = this.mergeParameters(dockerDefinition.getInputParameters(), dockerDefinition.getOutputParameters());
         // 保存
