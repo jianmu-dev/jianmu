@@ -87,7 +87,8 @@ public class TaskDefinitionApplication {
     }
 
     public Definition findByKey(String key) {
-        return this.definitionRepository.findByRefAndVersion(key).orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
+        String[] strings = key.split(":");
+        return this.definitionRepository.findByRefAndVersion(strings[0], strings[1]).orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
     }
 
     public TaskDefinitionVersion findByRefAndName(String ref, String name) {
@@ -119,7 +120,8 @@ public class TaskDefinitionApplication {
                 .filter(v -> v.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务定义版本"));
+        var strings = version.getDefinitionKey().split(":");
         this.taskDefinitionVersionRepository.delete(version);
-        this.definitionRepository.delete(version.getDefinitionKey());
+        this.definitionRepository.delete(strings[0], strings[1]);
     }
 }

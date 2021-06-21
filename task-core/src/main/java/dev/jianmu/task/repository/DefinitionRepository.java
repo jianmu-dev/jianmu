@@ -14,11 +14,9 @@ import java.util.Optional;
 public interface DefinitionRepository {
     void add(Definition definition);
 
-    List<Definition> findByRef(String ref);
+    void addAll(List<Definition> definitions);
 
-    Optional<Definition> findByRefAndVersion(String refVersion);
+    Optional<? extends Definition> findByRefAndVersion(String ref, String version);
 
-    Optional<Definition> findByRefAndVersion(String ref, String version);
-
-    void delete(String key);
+    void delete(String ref, String version);
 }

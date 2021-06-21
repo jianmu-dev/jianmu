@@ -106,11 +106,12 @@ public class ProjectApplication {
         List<TaskDefinitionVersion> versions = new ArrayList<>();
         List<Definition> definitions = new ArrayList<>();
         types.forEach(type -> {
+            String[] strings = type.split(":");
             var v = this.taskDefinitionVersionRepository
                     .findByDefinitionKey(type)
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
             var definition = this.definitionRepository
-                    .findByRefAndVersion(type)
+                    .findByRefAndVersion(strings[0], strings[1])
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             versions.add(v);
             definitions.add(definition);

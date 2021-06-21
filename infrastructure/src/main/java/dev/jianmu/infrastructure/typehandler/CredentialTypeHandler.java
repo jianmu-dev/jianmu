@@ -38,8 +38,8 @@ public class CredentialTypeHandler extends BaseTypeHandler<Credential> {
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, Credential credential, JdbcType jdbcType) throws SQLException {
         try {
-            String nodes = this.objectMapper.writeValueAsString(credential);
-            Blob blob = new SerialBlob(nodes.getBytes(StandardCharsets.UTF_8));
+            String credentialString = this.objectMapper.writeValueAsString(credential);
+            Blob blob = new SerialBlob(credentialString.getBytes(StandardCharsets.UTF_8));
             ps.setBlob(i, blob);
         } catch (IOException e) {
             e.printStackTrace();

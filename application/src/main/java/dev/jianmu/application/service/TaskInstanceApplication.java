@@ -83,7 +83,8 @@ public class TaskInstanceApplication {
             String asyncTaskType
     ) {
         // 创建任务实例
-        Definition definition = this.definitionRepository.findByRefAndVersion(asyncTaskType)
+        String[] strings = asyncTaskType.split(":");
+        Definition definition = this.definitionRepository.findByRefAndVersion(strings[0], strings[1])
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
         TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef, workflowRef, workflowVersion);
@@ -118,7 +119,8 @@ public class TaskInstanceApplication {
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        var definition = this.definitionRepository.findByRefAndVersion(taskInstance.getDefKey())
+        String[] strings = taskInstance.getDefKey().split(":");
+        var definition = this.definitionRepository.findByRefAndVersion(strings[0], strings[1])
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
         if (definition.getResultFile() != null) {
             // 解析Json为Map
