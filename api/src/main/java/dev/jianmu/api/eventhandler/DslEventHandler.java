@@ -1,5 +1,6 @@
 package dev.jianmu.api.eventhandler;
 
+import dev.jianmu.application.event.InstallDefinitionsEvent;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
@@ -8,7 +9,6 @@ import dev.jianmu.task.aggregate.Definition;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 
@@ -50,8 +50,9 @@ public class DslEventHandler {
         this.projectApplication.syncProject(projectId);
     }
 
-    @TransactionalEventListener
-    public void handleDefinitionsFromRegistry(List<Definition> definitionsFromRegistry) {
+    @EventListener
+    public void handleDefinitionsFromRegistry(InstallDefinitionsEvent event) {
+        List<Definition> definitionsFromRegistry = event.getDefinitions();
         this.taskDefinitionApplication.installDefinitions(definitionsFromRegistry);
     }
 }

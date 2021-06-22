@@ -1,6 +1,7 @@
 package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.application.event.InstallDefinitionsEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
 import dev.jianmu.infrastructure.client.RegistryClient;
@@ -122,7 +123,7 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             definitions.add(definition);
         });
-        this.publisher.publishEvent(definitionsFromRegistry);
+        this.publisher.publishEvent(InstallDefinitionsEvent.builder().definitions(definitionsFromRegistry).build());
         dsl.calculate(definitions);
         return dsl;
     }

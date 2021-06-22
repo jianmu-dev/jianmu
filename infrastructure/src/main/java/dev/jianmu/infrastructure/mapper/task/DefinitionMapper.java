@@ -4,10 +4,7 @@ import dev.jianmu.infrastructure.typehandler.ContainerSpecTypeHandler;
 import dev.jianmu.infrastructure.typehandler.MetaDataTypeHandler;
 import dev.jianmu.infrastructure.typehandler.TaskParameterSetTypeHandler;
 import dev.jianmu.task.aggregate.DockerDefinition;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +34,7 @@ public interface DefinitionMapper {
             "#{i.spec, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.ContainerSpecTypeHandler})" +
             "</foreach>" +
             " </script>")
-    void addAll(List<DockerDefinition> dockerDefinitions);
+    void addAll(@Param("dockerDefinitions") List<DockerDefinition> dockerDefinitions);
 
     @Select("select * from task_definition where ref = #{ref} and version = #{version}")
     @Result(column = "result_file", property = "resultFile")
@@ -45,8 +42,8 @@ public interface DefinitionMapper {
     @Result(column = "output_parameters", property = "outputParameters", typeHandler = TaskParameterSetTypeHandler.class)
     @Result(column = "meta_data", property = "metaData", typeHandler = MetaDataTypeHandler.class)
     @Result(column = "spec", property = "spec", typeHandler = ContainerSpecTypeHandler.class)
-    Optional<DockerDefinition> findByRefAndVersion(String ref, String version);
+    Optional<DockerDefinition> findByRefAndVersion(@Param("ref") String ref, @Param("version") String version);
 
     @Delete("delete from task_definition where ref = #{ref} and version = #{version}")
-    void delete(String ref, String version);
+    void delete(@Param("ref") String ref, @Param("version") String version);
 }
