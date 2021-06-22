@@ -112,16 +112,17 @@ CREATE TABLE `workflow_instance`
 
 CREATE TABLE `task_definition`
 (
-    `id`                 varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
-    `ref`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
-    `name`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '名称',
-    `created_time`       datetime                                                     NOT NULL COMMENT '创建时间',
-    `last_modified_time` datetime                                                     NOT NULL COMMENT '修改时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `ref_UNIQUE` (`ref`)
+    `ref`               varchar(255) NOT NULL COMMENT '唯一引用',
+    `version`           varchar(45)  NOT NULL COMMENT '版本',
+    `result_file`       varchar(45) DEFAULT NULL COMMENT '结果文件',
+    `type`              varchar(45)  NOT NULL COMMENT '类型',
+    `input_parameters`  blob COMMENT '输入参数',
+    `output_parameters` blob COMMENT '输出参数',
+    `meta_data`         blob COMMENT '元数据',
+    `spec`              blob COMMENT '容器规格'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='任务定义表';
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务定义表';
 
 CREATE TABLE `task_definition_version`
 (
