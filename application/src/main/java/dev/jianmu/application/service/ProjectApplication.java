@@ -123,7 +123,9 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             definitions.add(definition);
         });
-        this.publisher.publishEvent(InstallDefinitionsEvent.builder().definitions(definitionsFromRegistry).build());
+        if (!definitionsFromRegistry.isEmpty()) {
+            this.publisher.publishEvent(InstallDefinitionsEvent.builder().definitions(definitionsFromRegistry).build());
+        }
         dsl.calculate(definitions);
         return dsl;
     }

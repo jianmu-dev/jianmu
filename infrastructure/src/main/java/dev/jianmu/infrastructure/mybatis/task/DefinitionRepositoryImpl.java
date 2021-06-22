@@ -37,6 +37,9 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
                 .filter(definition -> definition instanceof DockerDefinition)
                 .map(definition -> (DockerDefinition) definition)
                 .collect(Collectors.toList());
+        if (dockerDefinitions.isEmpty()) {
+            return;
+        }
         this.definitionMapper.addAll(dockerDefinitions);
     }
 
