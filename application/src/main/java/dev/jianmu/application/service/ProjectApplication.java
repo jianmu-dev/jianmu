@@ -21,7 +21,6 @@ import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.ParameterReferRepository;
 import dev.jianmu.trigger.service.ScheduleJobService;
-import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
@@ -64,7 +63,6 @@ public class ProjectApplication {
             CronTriggerRepository cronTriggerRepository,
             ScheduleJobService scheduleJobService,
             DefinitionRepository definitionRepository,
-            TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
             ParameterRepository parameterRepository,

@@ -3,8 +3,6 @@ package dev.jianmu.api.mapper;
 import dev.jianmu.api.vo.TaskInstanceVo;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.version.aggregate.TaskDefinition;
-import dev.jianmu.version.aggregate.TaskDefinitionVersion;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
