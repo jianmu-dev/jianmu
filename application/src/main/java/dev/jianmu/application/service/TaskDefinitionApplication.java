@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -101,6 +98,20 @@ public class TaskDefinitionApplication {
         // 保存
         this.parameterRepository.addAll(parameters);
         this.definitionRepository.add(dockerDefinition);
+    }
+
+    @Transactional
+    public void installDefinitions(List<Definition> definitions) {
+        // 创建参数存储
+        var parameters = definitions.stream()
+                .filter(definition -> definition instanceof DockerDefinition)
+                .map(definition -> (DockerDefinition) definition)
+                .map(dockerDefinition -> this.mergeParameters(dockerDefinition.getInputParameters(), dockerDefinition.getOutputParameters()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        // 批量保存
+        this.parameterRepository.addAll(parameters);
+        this.definitionRepository.addAll(definitions);
     }
 
     public Definition findByKey(String key) {

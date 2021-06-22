@@ -15,6 +15,7 @@ import dev.jianmu.project.repository.CronTriggerRepository;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.aggregate.Definition;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.ParameterReferRepository;
@@ -112,15 +113,16 @@ public class ProjectApplication {
                     .findByRefAndVersion(strings[0], strings[1])
                     .map(d -> (Definition) d)
                     .or(() -> {
-                        var fromRegistry = this.registryClient.findByRefAndVersion(strings[0], strings[1]);
-                        fromRegistry.ifPresent(definitionsFromRegistry::add);
-                        return fromRegistry;
+                        var dockerDefinition = this.registryClient.findByRefAndVersion(strings[0], strings[1])
+                                .filter(fromRegistry -> fromRegistry instanceof DockerDefinition)
+                                .map(fromRegistry -> (DockerDefinition) fromRegistry);
+                        dockerDefinition.ifPresent(definitionsFromRegistry::add);
+                        return dockerDefinition;
                     })
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             definitions.add(definition);
         });
-        // 批量保存从Registry获取的任务定义
-        this.definitionRepository.addAll(definitionsFromRegistry);
+        this.publisher.publishEvent(definitionsFromRegistry);
         dsl.calculate(definitions);
         return dsl;
     }
