@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
+import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.parameter.repository.ParameterRepository;
@@ -46,12 +47,12 @@ public class ProjectApplication {
     private final CronTriggerRepository cronTriggerRepository;
     private final ScheduleJobService scheduleJobService;
     private final DefinitionRepository definitionRepository;
-    private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
     private final ParameterRepository parameterRepository;
     private final InputParameterRepository inputParameterRepository;
     private final ParameterReferRepository parameterReferRepository;
+    private final RegistryClient registryClient;
     private final ApplicationEventPublisher publisher;
     private final JgitService jgitService;
 
@@ -67,6 +68,7 @@ public class ProjectApplication {
             ParameterRepository parameterRepository,
             InputParameterRepository inputParameterRepository,
             ParameterReferRepository parameterReferRepository,
+            RegistryClient registryClient,
             ApplicationEventPublisher publisher,
             JgitService jgitService
     ) {
@@ -75,12 +77,12 @@ public class ProjectApplication {
         this.cronTriggerRepository = cronTriggerRepository;
         this.scheduleJobService = scheduleJobService;
         this.definitionRepository = definitionRepository;
-        this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
         this.parameterRepository = parameterRepository;
         this.inputParameterRepository = inputParameterRepository;
         this.parameterReferRepository = parameterReferRepository;
+        this.registryClient = registryClient;
         this.publisher = publisher;
         this.jgitService = jgitService;
     }
@@ -103,13 +105,22 @@ public class ProjectApplication {
         // 校验任务类型是否存在并创建流程节点关系
         var types = dsl.getFlow().getAsyncTaskTypes();
         List<Definition> definitions = new ArrayList<>();
+        List<Definition> definitionsFromRegistry = new ArrayList<>();
         types.forEach(type -> {
             String[] strings = type.split(":");
             var definition = this.definitionRepository
                     .findByRefAndVersion(strings[0], strings[1])
+                    .map(d -> (Definition) d)
+                    .or(() -> {
+                        var fromRegistry = this.registryClient.findByRefAndVersion(strings[0], strings[1]);
+                        fromRegistry.ifPresent(definitionsFromRegistry::add);
+                        return fromRegistry;
+                    })
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             definitions.add(definition);
         });
+        // 批量保存从Registry获取的任务定义
+        this.definitionRepository.addAll(definitionsFromRegistry);
         dsl.calculate(definitions);
         return dsl;
     }

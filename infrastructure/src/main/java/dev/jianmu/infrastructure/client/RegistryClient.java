@@ -28,7 +28,7 @@ public class RegistryClient {
         this.registryProperties = registryProperties;
     }
 
-    public Optional<Definition> findByRefAndVersion(String ref, String version) {
+    public Optional<? extends Definition> findByRefAndVersion(String ref, String version) {
         DockerDefinition definition = null;
         try {
             var dto = this.restTemplate.getForObject(registryProperties.getUrl() + "/definition/" + ref + "/" + version, DefinitionDto.class);
