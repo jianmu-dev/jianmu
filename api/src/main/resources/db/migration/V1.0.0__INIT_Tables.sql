@@ -124,21 +124,6 @@ CREATE TABLE `task_definition`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务定义表';
 
-CREATE TABLE `task_definition_version`
-(
-    `task_definition_id`   varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义ID',
-    `task_definition_name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义名称',
-    `name`                 varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '版本名称',
-    `task_definition_ref`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一引用',
-    `definition_key`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务定义唯一Key',
-    `description`          varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
-    `created_time`         datetime                                                     NOT NULL COMMENT '创建时间',
-    `last_modified_time`   datetime                                                     NOT NULL COMMENT '修改时间',
-    PRIMARY KEY (`definition_key`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='任务定义版本表';
-
 CREATE TABLE `parameter_refer`
 (
     `workflow_ref`         varchar(45) NOT NULL COMMENT '流程定义Ref',
