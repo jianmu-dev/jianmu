@@ -23,6 +23,8 @@ spring:
   jackson:
     parser:
       ALLOW_UNQUOTED_CONTROL_CHARS: true
+  main:
+    banner-mode: off
 
 springdoc:
   packages-to-scan: dev.jianmu.api.controller
