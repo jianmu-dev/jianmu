@@ -31,7 +31,7 @@ public class RegistryClient {
     public Optional<? extends Definition> findByRefAndVersion(String ref, String version) {
         DockerDefinition definition = null;
         try {
-            var dto = this.restTemplate.getForObject(registryProperties.getUrl() + "/definitions/" + ref + "/" + version, DefinitionDto.class);
+            var dto = this.restTemplate.getForObject(registryProperties.getUrl() + "/definition_versions/" + ref + "/" + version, DefinitionDto.class);
             var type = Worker.Type.valueOf(dto.getType());
             var metaData = MetaData.Builder.aMetaData()
                     .name(dto.getMetaData().getName())
