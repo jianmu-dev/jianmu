@@ -41,7 +41,7 @@ public class Project {
     private LocalDateTime lastModifiedTime;
 
     public void generateWebhook() {
-        this.webhook = "/webhook/" + this.id + "/" + UUID.randomUUID().toString().replace("-", "");
+        this.webhook = UUID.randomUUID().toString().replace("-", "");
     }
 
     public void setWorkflowName(String workflowName) {
@@ -80,8 +80,8 @@ public class Project {
         return gitRepoId;
     }
 
-    public String getWebhook() {
-        return webhook;
+    public String getWebHookUrl() {
+        return "/webhook/" + this.id + "/" + this.webhook;
     }
 
     public String getWorkflowName() {

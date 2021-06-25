@@ -341,7 +341,7 @@ public class ProjectApplication {
         var project = this.projectRepository.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到项目"));
         project.generateWebhook();
         this.projectRepository.updateByWorkflowRef(project);
-        return project.getWebhook();
+        return project.getWebHookUrl();
     }
 
     public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
