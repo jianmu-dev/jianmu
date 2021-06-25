@@ -35,6 +35,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/v2/api-docs",
             "/v3/api-docs",
             "/view/**",
+            "/webhook/**",
             "/webjars/**"
     };
 

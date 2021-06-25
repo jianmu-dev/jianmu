@@ -99,6 +99,12 @@ public class ProjectApplication {
         this.trigger(cronTrigger.getProjectId());
     }
 
+    public void triggerByWebHook(String projectId, String webhook) {
+        var project = this.projectRepository.findByIdAndWebhook(projectId, webhook)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        this.publisher.publishEvent(project);
+    }
+
     private DslModel parseDsl(String dslText) {
         // 解析DSL
         var dsl = DslModel.parse(dslText);
