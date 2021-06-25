@@ -336,6 +336,14 @@ public class ProjectApplication {
         this.gitRepoRepository.deleteById(project.getGitRepoId());
     }
 
+    @Transactional
+    public String getWebhookUrl(String projectId) {
+        var project = this.projectRepository.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到项目"));
+        project.generateWebhook();
+        this.projectRepository.updateByWorkflowRef(project);
+        return project.getWebhook();
+    }
+
     public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
         return this.projectRepository.findAllPage(workflowName, pageNum, pageSize);
     }

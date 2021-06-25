@@ -20,7 +20,7 @@ public interface ProjectMapper {
     @Delete("delete from jianmu_project where workflow_ref = #{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
-    @Update("update jianmu_project set workflow_name = #{workflowName}, workflow_version = #{workflowVersion}, steps = #{steps}, dsl_text = #{dslText} , last_modified_by = #{lastModifiedBy}, last_modified_time = #{lastModifiedTime} " +
+    @Update("update jianmu_project set webhook = #{webhook}, workflow_name = #{workflowName}, workflow_version = #{workflowVersion}, steps = #{steps}, dsl_text = #{dslText} , last_modified_by = #{lastModifiedBy}, last_modified_time = #{lastModifiedTime} " +
             "where workflow_ref = #{workflowRef}")
     void updateByWorkflowRef(Project project);
 

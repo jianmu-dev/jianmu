@@ -21,6 +21,8 @@ public class Project {
     private DslSource dslSource;
     // Git库Id
     private String gitRepoId;
+    // WebHook URL
+    private String webhook = "";
     // 关联流程定义名称
     private String workflowName;
     // 关联流程定义Ref
@@ -37,6 +39,10 @@ public class Project {
     private String lastModifiedBy;
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
+
+    public void generateWebhook() {
+        this.webhook = "/webhook/" + this.id + "/" + UUID.randomUUID().toString().replace("-", "");
+    }
 
     public void setWorkflowName(String workflowName) {
         this.workflowName = workflowName;
@@ -72,6 +78,10 @@ public class Project {
 
     public String getGitRepoId() {
         return gitRepoId;
+    }
+
+    public String getWebhook() {
+        return webhook;
     }
 
     public String getWorkflowName() {
