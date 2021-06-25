@@ -23,6 +23,8 @@ spring:
   jackson:
     parser:
       ALLOW_UNQUOTED_CONTROL_CHARS: true
+  main:
+    banner-mode: off
 
 springdoc:
   packages-to-scan: dev.jianmu.api.controller
@@ -39,9 +41,6 @@ embedded:
   docker-worker:
     docker-host: tcp://127.0.0.1:2375
     api-version: v1.39
-json:
-  repository:
-    repo-path: task_def
 jianmu:
   api:
     jwtSecret: Hahhahhhaahh

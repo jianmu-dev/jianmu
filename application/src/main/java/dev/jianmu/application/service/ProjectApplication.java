@@ -1,8 +1,10 @@
 package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.application.event.InstallDefinitionsEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
+import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.parameter.repository.ParameterRepository;
@@ -14,12 +16,11 @@ import dev.jianmu.project.repository.CronTriggerRepository;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.aggregate.Definition;
+import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.ParameterReferRepository;
 import dev.jianmu.trigger.service.ScheduleJobService;
-import dev.jianmu.version.aggregate.TaskDefinitionVersion;
-import dev.jianmu.version.repository.TaskDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
@@ -47,12 +48,12 @@ public class ProjectApplication {
     private final CronTriggerRepository cronTriggerRepository;
     private final ScheduleJobService scheduleJobService;
     private final DefinitionRepository definitionRepository;
-    private final TaskDefinitionVersionRepository taskDefinitionVersionRepository;
     private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
     private final ParameterRepository parameterRepository;
     private final InputParameterRepository inputParameterRepository;
     private final ParameterReferRepository parameterReferRepository;
+    private final RegistryClient registryClient;
     private final ApplicationEventPublisher publisher;
     private final JgitService jgitService;
 
@@ -62,12 +63,12 @@ public class ProjectApplication {
             CronTriggerRepository cronTriggerRepository,
             ScheduleJobService scheduleJobService,
             DefinitionRepository definitionRepository,
-            TaskDefinitionVersionRepository taskDefinitionVersionRepository,
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
             ParameterRepository parameterRepository,
             InputParameterRepository inputParameterRepository,
             ParameterReferRepository parameterReferRepository,
+            RegistryClient registryClient,
             ApplicationEventPublisher publisher,
             JgitService jgitService
     ) {
@@ -76,12 +77,12 @@ public class ProjectApplication {
         this.cronTriggerRepository = cronTriggerRepository;
         this.scheduleJobService = scheduleJobService;
         this.definitionRepository = definitionRepository;
-        this.taskDefinitionVersionRepository = taskDefinitionVersionRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
         this.parameterRepository = parameterRepository;
         this.inputParameterRepository = inputParameterRepository;
         this.parameterReferRepository = parameterReferRepository;
+        this.registryClient = registryClient;
         this.publisher = publisher;
         this.jgitService = jgitService;
     }
@@ -103,19 +104,27 @@ public class ProjectApplication {
         var dsl = DslModel.parse(dslText);
         // 校验任务类型是否存在并创建流程节点关系
         var types = dsl.getFlow().getAsyncTaskTypes();
-        List<TaskDefinitionVersion> versions = new ArrayList<>();
         List<Definition> definitions = new ArrayList<>();
+        List<Definition> definitionsFromRegistry = new ArrayList<>();
         types.forEach(type -> {
-            var v = this.taskDefinitionVersionRepository
-                    .findByDefinitionKey(type)
-                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义版本"));
+            String[] strings = type.split(":");
             var definition = this.definitionRepository
-                    .findByKey(type)
+                    .findByRefAndVersion(strings[0], strings[1])
+                    .map(d -> (Definition) d)
+                    .or(() -> {
+                        var dockerDefinition = this.registryClient.findByRefAndVersion(strings[0], strings[1])
+                                .filter(fromRegistry -> fromRegistry instanceof DockerDefinition)
+                                .map(fromRegistry -> (DockerDefinition) fromRegistry);
+                        dockerDefinition.ifPresent(definitionsFromRegistry::add);
+                        return dockerDefinition;
+                    })
                     .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-            versions.add(v);
             definitions.add(definition);
         });
-        dsl.calculate(definitions, versions);
+        if (!definitionsFromRegistry.isEmpty()) {
+            this.publisher.publishEvent(InstallDefinitionsEvent.builder().definitions(definitionsFromRegistry).build());
+        }
+        dsl.calculate(definitions);
         return dsl;
     }
 

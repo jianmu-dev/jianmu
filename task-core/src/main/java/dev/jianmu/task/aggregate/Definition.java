@@ -12,7 +12,9 @@ import java.util.Set;
  * @create: 2021-04-15 10:45
  **/
 public interface Definition {
-    String getKey();
+    String getRef();
+
+    String getVersion();
 
     String getResultFile();
 
@@ -27,4 +29,6 @@ public interface Definition {
     Set<TaskParameter> getOutputParameters();
 
     Set<TaskParameter> matchedOutputParameters(Map<String, Object> parameterMap);
+
+    MetaData getMetaData();
 }

@@ -1,11 +1,16 @@
 package dev.jianmu.api.eventhandler;
 
+import dev.jianmu.application.event.InstallDefinitionsEvent;
 import dev.jianmu.application.service.ProjectApplication;
+import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.task.aggregate.Definition;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @class: DslEventHandler
@@ -17,10 +22,16 @@ import org.springframework.stereotype.Component;
 public class DslEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final ProjectApplication projectApplication;
+    private final TaskDefinitionApplication taskDefinitionApplication;
 
-    public DslEventHandler(WorkflowInstanceApplication workflowInstanceApplication, ProjectApplication projectApplication) {
+    public DslEventHandler(
+            WorkflowInstanceApplication workflowInstanceApplication,
+            ProjectApplication projectApplication,
+            TaskDefinitionApplication taskDefinitionApplication
+    ) {
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.projectApplication = projectApplication;
+        this.taskDefinitionApplication = taskDefinitionApplication;
     }
 
     @Async
@@ -37,5 +48,11 @@ public class DslEventHandler {
     // TODO 不要直接用基本类型传递事件
     public void handleGitRepoSyncEvent(String projectId) {
         this.projectApplication.syncProject(projectId);
+    }
+
+    @EventListener
+    public void handleDefinitionsFromRegistry(InstallDefinitionsEvent event) {
+        List<Definition> definitionsFromRegistry = event.getDefinitions();
+        this.taskDefinitionApplication.installDefinitions(definitionsFromRegistry);
     }
 }

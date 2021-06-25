@@ -95,25 +95,14 @@ CREATE TABLE `workflow_instance`
 
 CREATE TABLE `task_definition`
 (
-    `id`                 varchar(45) NOT NULL COMMENT 'ID',
-    `ref`                varchar(45) NOT NULL COMMENT '任务定义唯一引用',
-    `name`               varchar(45) NOT NULL COMMENT '名称',
-    `created_time`       datetime    NOT NULL COMMENT '创建时间',
-    `last_modified_time` datetime    NOT NULL COMMENT '修改时间',
-    PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `task_definition_version`
-(
-    `task_definition_id`   varchar(45) NOT NULL COMMENT '任务定义ID',
-    `task_definition_name` varchar(45) NOT NULL COMMENT '任务定义名称',
-    `name`                 varchar(45) NOT NULL COMMENT '版本名称',
-    `task_definition_ref`  varchar(45) NOT NULL COMMENT '任务定义唯一引用',
-    `definition_key`       varchar(45) NOT NULL COMMENT '任务定义唯一Key',
-    `description`          varchar(45) DEFAULT NULL COMMENT '描述',
-    `created_time`         datetime    NOT NULL COMMENT '创建时间',
-    `last_modified_time`   datetime    NOT NULL COMMENT '修改时间',
-    PRIMARY KEY (`definition_key`)
+    `ref`               varchar(255) NOT NULL COMMENT '唯一引用',
+    `version`           varchar(45)  NOT NULL COMMENT '版本',
+    `result_file`       varchar(45) DEFAULT NULL COMMENT '结果文件',
+    `type`              varchar(45)  NOT NULL COMMENT '类型',
+    `input_parameters`  blob COMMENT '输入参数',
+    `output_parameters` blob COMMENT '输出参数',
+    `meta_data`         blob COMMENT '元数据',
+    `spec`              blob COMMENT '容器规格'
 );
 
 CREATE TABLE `parameter_refer`

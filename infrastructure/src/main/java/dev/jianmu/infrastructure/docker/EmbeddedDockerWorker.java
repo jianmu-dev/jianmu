@@ -136,10 +136,10 @@ public class EmbeddedDockerWorker implements DockerWorker {
             Arrays.stream(envArray).forEach(System.out::println);
             createContainerCmd.withEnv(envArray);
         }
-        if (null != spec.getEntrypoint()) {
+        if (null != spec.getEntrypoint() && spec.getEntrypoint().length > 0) {
             createContainerCmd.withEntrypoint(spec.getEntrypoint());
         }
-        if (null != spec.getCmd()) {
+        if (null != spec.getCmd() && spec.getCmd().length > 0) {
             createContainerCmd.withCmd(spec.getCmd());
         }
         // 检查镜像是否存在本地

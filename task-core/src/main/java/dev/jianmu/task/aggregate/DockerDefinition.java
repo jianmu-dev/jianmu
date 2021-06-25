@@ -22,14 +22,15 @@ public class DockerDefinition extends BaseDefinition {
         return spec;
     }
 
-
     public static final class Builder {
-        // 唯一Key
-        protected String key;
+        protected String ref;
+        protected String version;
         protected String resultFile;
+        protected Worker.Type type;
         // 输入输出参数列表
         protected Set<TaskParameter> inputParameters = new HashSet<>();
         protected Set<TaskParameter> outputParameters = new HashSet<>();
+        protected MetaData metaData;
         private ContainerSpec spec;
 
         private Builder() {
@@ -39,13 +40,23 @@ public class DockerDefinition extends BaseDefinition {
             return new Builder();
         }
 
-        public Builder key(String key) {
-            this.key = key;
+        public Builder ref(String ref) {
+            this.ref = ref;
+            return this;
+        }
+
+        public Builder version(String version) {
+            this.version = version;
             return this;
         }
 
         public Builder resultFile(String resultFile) {
             this.resultFile = resultFile;
+            return this;
+        }
+
+        public Builder type(Worker.Type type) {
+            this.type = type;
             return this;
         }
 
@@ -59,6 +70,11 @@ public class DockerDefinition extends BaseDefinition {
             return this;
         }
 
+        public Builder metaData(MetaData metaData) {
+            this.metaData = metaData;
+            return this;
+        }
+
         public Builder spec(ContainerSpec spec) {
             this.spec = spec;
             return this;
@@ -66,11 +82,14 @@ public class DockerDefinition extends BaseDefinition {
 
         public DockerDefinition build() {
             DockerDefinition dockerDefinition = new DockerDefinition();
-            dockerDefinition.spec = this.spec;
+            dockerDefinition.ref = this.ref;
             dockerDefinition.resultFile = this.resultFile;
+            dockerDefinition.metaData = this.metaData;
             dockerDefinition.outputParameters = this.outputParameters;
-            dockerDefinition.key = this.key;
+            dockerDefinition.type = this.type;
+            dockerDefinition.spec = this.spec;
             dockerDefinition.inputParameters = this.inputParameters;
+            dockerDefinition.version = this.version;
             return dockerDefinition;
         }
     }
