@@ -59,7 +59,7 @@ public class RegistryClient {
                         .build();
             }
         } catch (HttpClientErrorException | NullPointerException e) {
-            log.info("未找到组件定义: {}", e.getMessage());
+            log.info("未找到节点定义或节点定义内容不正确: {}", e.getMessage());
         }
         return Optional.ofNullable(definition);
     }
