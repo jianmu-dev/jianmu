@@ -31,7 +31,7 @@ public class RegistryClient {
     public Optional<? extends Definition> findByRefAndVersion(String ref, String version) {
         DockerDefinition definition = null;
         try {
-            var downloadUrl = registryProperties.getUrl() + "/definition_versions/" + ref + "/" + version;
+            var downloadUrl = registryProperties.getUrl() + "/definitions/" + ref + "/" + version;
             log.info("从 {} 下载节点定义: {}:{} ", downloadUrl, ref, version);
             var dto = this.restTemplate.getForObject(downloadUrl, DefinitionDto.class);
             log.info("已下载节点定义: {}:{} 内容为: {}", ref, version, dto);
