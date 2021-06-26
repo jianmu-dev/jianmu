@@ -88,6 +88,12 @@ public class ProjectController {
         return this.projectApplication.findByRefAndVersion(ref, version);
     }
 
+    @GetMapping("/webhook/{projectId}")
+    @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
+    public String getWebhookUrl(@PathVariable String projectId) {
+        return this.projectApplication.getWebhookUrl(projectId);
+    }
+
     @GetMapping
     @Operation(summary = "分页查询项目列表", description = "分页查询项目列表")
     public PageInfo<Project> findAll(ProjectSearchDto searchDto) {

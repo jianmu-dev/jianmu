@@ -45,6 +45,11 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     @Override
+    public Optional<Project> findByIdAndWebhook(String id, String webhook) {
+        return this.projectMapper.findByIdAndWebhook(id, webhook);
+    }
+
+    @Override
     public Optional<Project> findByWorkflowRef(String workflowRef) {
         return this.projectMapper.findByWorkflowRef(workflowRef);
     }

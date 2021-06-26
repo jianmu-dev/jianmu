@@ -20,7 +20,7 @@ public interface ProjectMapper {
     @Delete("delete from jianmu_project where workflow_ref = #{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
-    @Update("update jianmu_project set workflow_name = #{workflowName}, workflow_version = #{workflowVersion}, steps = #{steps}, dsl_text = #{dslText} , last_modified_by = #{lastModifiedBy}, last_modified_time = #{lastModifiedTime} " +
+    @Update("update jianmu_project set webhook = #{webhook}, workflow_name = #{workflowName}, workflow_version = #{workflowVersion}, steps = #{steps}, dsl_text = #{dslText} , last_modified_by = #{lastModifiedBy}, last_modified_time = #{lastModifiedTime} " +
             "where workflow_ref = #{workflowRef}")
     void updateByWorkflowRef(Project project);
 
@@ -35,6 +35,18 @@ public interface ProjectMapper {
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<Project> findById(String id);
+
+    @Select("select * from jianmu_project where id = #{id} and webhook = #{webhook}")
+    @Result(column = "workflow_name", property = "workflowName")
+    @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "git_repo_id", property = "gitRepoId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    Optional<Project> findByIdAndWebhook(@Param("id") String id, @Param("webhook") String webhook);
 
     @Select("select * from jianmu_project where workflow_ref = #{workflowRef}")
     @Result(column = "workflow_name", property = "workflowName")

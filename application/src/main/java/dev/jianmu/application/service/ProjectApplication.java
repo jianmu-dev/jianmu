@@ -99,6 +99,12 @@ public class ProjectApplication {
         this.trigger(cronTrigger.getProjectId());
     }
 
+    public void triggerByWebHook(String projectId, String webhook) {
+        var project = this.projectRepository.findByIdAndWebhook(projectId, webhook)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        this.publisher.publishEvent(project);
+    }
+
     private DslModel parseDsl(String dslText) {
         // 解析DSL
         var dsl = DslModel.parse(dslText);
@@ -334,6 +340,14 @@ public class ProjectApplication {
         this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.inputParameterRepository.deleteByProjectId(project.getId());
         this.gitRepoRepository.deleteById(project.getGitRepoId());
+    }
+
+    @Transactional
+    public String getWebhookUrl(String projectId) {
+        var project = this.projectRepository.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到项目"));
+        project.generateWebhook();
+        this.projectRepository.updateByWorkflowRef(project);
+        return project.getWebHookUrl();
     }
 
     public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
