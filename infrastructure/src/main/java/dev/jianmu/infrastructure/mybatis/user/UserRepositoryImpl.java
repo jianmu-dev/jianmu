@@ -28,9 +28,12 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByUsername(String username) {
+        if (!username.equals("admin")) {
+            return Optional.empty();
+        }
         var user = new User();
         user.setId(1L);
-        user.setUsername("admin");
+        user.setUsername(username);
         user.setPassword(passwordEncoder.encode(jwtProperties.getAdminPasswd()));
         return Optional.of(user);
     }
