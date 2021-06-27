@@ -203,6 +203,14 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 logger.error("日志流关闭失败:", e);
             }
             Thread.currentThread().interrupt();
+        } catch (RuntimeException e) {
+            logger.error("获取容器日志失败", e);
+            try {
+                logWriter.close();
+            } catch (IOException ioException) {
+                logger.error("日志流关闭失败:", e);
+            }
+            Thread.currentThread().interrupt();
         }
         // 等待容器执行结果
         try {
@@ -215,6 +223,10 @@ public class EmbeddedDockerWorker implements DockerWorker {
             }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器执行结果操作被中断:", e);
+            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            Thread.currentThread().interrupt();
+        } catch (RuntimeException e) {
+            logger.error("获取容器执行结果失败", e);
             this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
             Thread.currentThread().interrupt();
         }
