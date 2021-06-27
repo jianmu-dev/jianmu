@@ -1,68 +1,62 @@
 cron: '* 5/* * * * ? *'
 
-event:
-  push_event:
-    branch: ${branch_name} # dev, master
-  tag_event:
-    tag: ${branch_name} # tag_name
-
 param:
   branch_name: master
   git_site: gitee.com
 
 workflow:
-  name: 测试流程1
-  ref: flow_1
-  description: 测试流程1的描述1
-  Start_1:
+  name: CI_Flow
+  ref: ci_flow
+  description: jianmu-workflow-core CI Flow
+  Start:
     type: start
     targets:
-      - Git_1
-  Git_1:
-    type: git_clone0.4
+      - GitClone
+  GitClone:
+    type: git_clone:0.4
     sources:
-      - Start_1
+      - Start
     targets:
-      - Build_1
+      - Build
     param:
       commit_branch: ${branch_name}
       remote_url: https://gitee.com/jianmu_dev/jianmu-workflow-core.git
       netrc_machine: ${git_site}
       netrc_username: ((gitee.user))
       netrc_password: ((gitee.pass))
-  Build_1:
-    type: maven13
+  Build:
+    type: maven:11
     sources:
-      - Git_1
+      - GitClone
     targets:
-      - Condition_1
+      - Condition
     param:
       cmd: mvn install
-  Condition_1:
+  Condition:
     type: condition
     sources:
-      - Build_1
+      - Build
     expression: Git_1["commit_branch"] == "dev"
     cases:
       false: Notice_1
       true: Notice_2
   Notice_1:
-    type: maven11
+    type: sms:0.1
     param:
       text: '"Build error, msg is: " + ${Build_1.build_error_message}'
     sources:
-      - Condition_1
+      - Condition
     targets:
-      - End_1
+      - End
   Notice_2:
-    type: maven12
+    type: weixin:0.1
     param:
       text: ${Build_1.build_info}
     sources:
-      - Condition_1
+      - Condition
     targets:
-      - End_1
-  End_1:
+      - End
+  End:
     type: end
     sources:
       - Notice_1

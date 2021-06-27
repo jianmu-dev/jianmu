@@ -20,5 +20,7 @@ public interface ProjectRepository {
 
     Optional<Project> findById(String id);
 
+    Optional<Project> findByIdAndWebhook(String id, String webhook);
+
     Optional<Project> findByWorkflowRef(String workflowRef);
 }

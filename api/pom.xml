@@ -81,7 +81,11 @@
                         <image>registry://6ppqyl7y.mirror.aliyuncs.com/library/openjdk:11.0.11-jdk-oracle</image>
                     </from>
                     <to>
-                        <image>${env.JIANMU_DOCKER_USERNAME}/${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
+                        <image>${env.JIANMU_IMAGE_NAME}</image>
+                        <tags>
+                            <tag>${env.JIANMU_IMAGE_TAG}</tag>
+                            <tag>latest</tag>
+                        </tags>
                         <auth>
                             <username>${env.JIANMU_DOCKER_USERNAME}</username>
                             <password>${env.JIANMU_DOCKER_PASSWORD}</password>
