@@ -28,7 +28,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByUsername(String username) {
-        if (!username.equals("admin")) {
+        if (!username.equals(jwtProperties.getAdminUser())) {
             return Optional.empty();
         }
         var user = new User();

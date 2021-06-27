@@ -16,5 +16,6 @@ import org.springframework.stereotype.Component;
 public class JwtProperties {
     private String jwtSecret;
     private int jwtExpirationMs;
+    private String adminUser = "admin";
     private String adminPasswd;
 }
