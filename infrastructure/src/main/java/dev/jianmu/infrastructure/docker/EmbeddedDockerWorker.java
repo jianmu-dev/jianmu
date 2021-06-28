@@ -137,6 +137,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
             createContainerCmd.withEnv(envArray);
         }
         if (null != spec.getEntrypoint() && spec.getEntrypoint().length > 0) {
+            logger.info("Entrypoint is: {}", Arrays.asList(spec.getEntrypoint()));
             createContainerCmd.withEntrypoint(spec.getEntrypoint());
         }
         if (null != spec.getCmd() && spec.getCmd().length > 0) {
