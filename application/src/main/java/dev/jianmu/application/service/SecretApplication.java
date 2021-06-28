@@ -2,6 +2,7 @@ package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.RepeatFoundException;
 import dev.jianmu.infrastructure.mybatis.secret.NamespaceRepositoryImpl;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -41,6 +42,12 @@ public class SecretApplication {
         var namespace = this.namespaceRepository.findByName(kvPair.getNamespaceName())
                 .orElseThrow(() -> new DataNotFoundException("未找到对应的命名空间"));
         namespace.setLastModifiedTime();
+
+        var existedKvPair = this.kvPairRepository.findByNamespaceNameAndKey(kvPair.getNamespaceName(), kvPair.getKey());
+        if (existedKvPair.isPresent()) {
+            throw new RepeatFoundException("秘钥名称在该命名空间下已存在");
+        }
+
         this.namespaceRepository.updateLastModifiedTime(namespace);
         this.kvPairRepository.add(kvPair);
     }
