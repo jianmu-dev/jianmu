@@ -46,3 +46,5 @@ jianmu:
     jwtSecret: Hahhahhhaahh
     jwtExpirationMs: 86400000
     adminPasswd: 123456
+registry:
+  url: https://hub.jianmu.dev
