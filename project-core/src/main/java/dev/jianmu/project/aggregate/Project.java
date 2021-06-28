@@ -81,7 +81,11 @@ public class Project {
     }
 
     public String getWebHookUrl() {
-        return "/webhook/" + this.id + "/" + this.webhook;
+        if (webhook.isBlank()) {
+            return webhook;
+        } else {
+            return "/webhook/" + this.id + "/" + this.webhook;
+        }
     }
 
     public String getWorkflowName() {
