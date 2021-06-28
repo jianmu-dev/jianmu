@@ -1,5 +1,6 @@
 package dev.jianmu.api.mapper;
 
+import dev.jianmu.api.vo.ProjectDetailVo;
 import dev.jianmu.api.vo.ProjectVo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
@@ -28,4 +29,6 @@ public interface ProjectMapper {
     @ValueMapping(source = "LOCAL", target = "LOCAL")
     @ValueMapping(source = MappingConstants.NULL, target = "LOCAL")
     ProjectVo.Source enumConverter(Project.DslSource dslSource);
+
+    ProjectDetailVo toProjectDetailVo(Project project);
 }

@@ -3,17 +3,13 @@ package dev.jianmu.api.controller;
 import dev.jianmu.api.mapper.ProjectMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
-import dev.jianmu.api.vo.InstanceParameterVo;
-import dev.jianmu.api.vo.ProjectVo;
-import dev.jianmu.api.vo.TaskInstanceVo;
-import dev.jianmu.api.vo.WorkflowInstanceVo;
+import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.ParameterApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.infrastructure.storage.StorageService;
-import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -89,8 +85,9 @@ public class ViewController {
 
     @GetMapping("/projects/{projectId}")
     @Operation(summary = "获取项目详情", description = "获取项目详情")
-    public Project getProject(@PathVariable String projectId) {
-        return this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+    public ProjectDetailVo getProject(@PathVariable String projectId) {
+        var project = this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        return ProjectMapper.INSTANCE.toProjectDetailVo(project);
     }
 
     @GetMapping("/repo/{gitRepoId}")

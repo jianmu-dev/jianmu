@@ -343,10 +343,15 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public String getWebhookUrl(String projectId) {
+    public String generateWebhook(String projectId) {
         var project = this.projectRepository.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到项目"));
         project.generateWebhook();
         this.projectRepository.updateByWorkflowRef(project);
+        return project.getWebHookUrl();
+    }
+
+    public String getWebhookUrl(String projectId) {
+        var project = this.projectRepository.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到项目"));
         return project.getWebHookUrl();
     }
 
