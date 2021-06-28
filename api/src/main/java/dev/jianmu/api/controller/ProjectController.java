@@ -6,6 +6,7 @@ import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
+import dev.jianmu.api.vo.WebhookVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitApplication;
 import dev.jianmu.application.service.ProjectApplication;
@@ -88,10 +89,11 @@ public class ProjectController {
         return this.projectApplication.findByRefAndVersion(ref, version);
     }
 
-    @GetMapping("/webhook/{projectId}")
+    @PatchMapping("/webhook/{projectId}")
     @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
-    public String getWebhookUrl(@PathVariable String projectId) {
-        return this.projectApplication.getWebhookUrl(projectId);
+    public WebhookVo getWebhookUrl(@PathVariable String projectId) {
+        var webhook = this.projectApplication.getWebhookUrl(projectId);
+        return WebhookVo.builder().webhook(webhook).build();
     }
 
     @GetMapping
