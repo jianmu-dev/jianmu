@@ -6,6 +6,7 @@ import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.task.aggregate.Definition;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import java.util.List;
  * @create: 2021-04-23 17:21
  **/
 @Component
+@Slf4j
 public class DslEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final ProjectApplication projectApplication;
@@ -53,6 +55,9 @@ public class DslEventHandler {
     @EventListener
     public void handleDefinitionsFromRegistry(InstallDefinitionsEvent event) {
         List<Definition> definitionsFromRegistry = event.getDefinitions();
+        definitionsFromRegistry.forEach(definition -> {
+            log.info("安装节点定义: {}:{}", definition.getRef(), definition.getVersion());
+        });
         this.taskDefinitionApplication.installDefinitions(definitionsFromRegistry);
     }
 }
