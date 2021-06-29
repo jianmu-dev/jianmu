@@ -1,6 +1,8 @@
 package dev.jianmu.project.aggregate;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -84,7 +86,9 @@ public class Project {
         if (webhook.isBlank()) {
             return webhook;
         } else {
-            return "/webhook/" + this.id + "/" + this.webhook;
+            var hookId = this.id + "_" + this.webhook;
+            var hook = Base64.getEncoder().encodeToString(hookId.getBytes(StandardCharsets.UTF_8));
+            return "/webhook/" + hook;
         }
     }
 
