@@ -86,7 +86,7 @@ public class Project {
         if (webhook.isBlank()) {
             return webhook;
         } else {
-            var hookId = this.id + "_" + this.webhook;
+            var hookId = this.webhook + "_" + this.id;
             var hook = Base64.getEncoder().encodeToString(hookId.getBytes(StandardCharsets.UTF_8));
             return "/webhook/" + hook;
         }

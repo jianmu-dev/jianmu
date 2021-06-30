@@ -32,6 +32,6 @@ public class WebHookController {
     public void trigger(@PathVariable String webhook) {
         var bytes = Base64.getDecoder().decode(webhook);
         var strings = new String(bytes, StandardCharsets.UTF_8).split("_");
-        this.projectApplication.triggerByWebHook(strings[0], strings[1]);
+        this.projectApplication.triggerByWebHook(strings[1], strings[0]);
     }
 }
