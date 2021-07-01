@@ -70,6 +70,7 @@ public class ViewController {
                 .map(workflowInstance -> {
                     var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
                     projectVo.setLatestTime(workflowInstance.getEndTime());
+                    projectVo.setNextTime(this.projectApplication.getNextFireTime(project.getId()));
                     if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
                         projectVo.setStatus("FAILED");
                     } else {

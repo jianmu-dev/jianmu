@@ -374,4 +374,13 @@ public class ProjectApplication {
     public GitRepo findGitRepoById(String gitRepoId) {
         return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
     }
+
+    public String getNextFireTime(String projectId) {
+        var cronTriggers = this.cronTriggerRepository.findByProjectId(projectId);
+        if (!cronTriggers.isEmpty()) {
+            var c = cronTriggers.get(0);
+            return this.scheduleJobService.getNextFireTime(c.getId());
+        }
+        return "";
+    }
 }

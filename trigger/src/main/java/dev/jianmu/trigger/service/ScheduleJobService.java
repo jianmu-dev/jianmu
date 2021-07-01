@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
+
 /**
  * @class: ScheduleJobService
  * @description: ScheduleJobService
@@ -57,6 +59,19 @@ public class ScheduleJobService {
             throw new RuntimeException("触发器删除失败");
         }
         this.triggerRepository.deleteByTriggerId(triggerId);
+    }
+
+    public String getNextFireTime(String triggerId) {
+        String nextFireTime = "";
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            var date = scheduler.getTrigger(TriggerKey.triggerKey(triggerId)).getNextFireTime();
+            nextFireTime = sdf.format(date);
+        } catch (SchedulerException e) {
+            logger.info("未找到触发器： {}", e.getMessage());
+            throw new RuntimeException("未找到触发器");
+        }
+        return nextFireTime;
     }
 
     public void startTriggers() {
