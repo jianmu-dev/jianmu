@@ -78,7 +78,7 @@
                 <version>3.0.0</version>
                 <configuration>
                     <from>
-                        <image>registry://6ppqyl7y.mirror.aliyuncs.com/library/openjdk:11.0.11-jdk-oracle</image>
+                        <image>registry://openjdk:11.0.11-jdk-oracle</image>
                     </from>
                     <to>
                         <image>${env.JIANMU_IMAGE_NAME}</image>
