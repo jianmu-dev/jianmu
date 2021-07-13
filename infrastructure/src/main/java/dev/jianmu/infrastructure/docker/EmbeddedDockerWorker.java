@@ -245,11 +245,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
                     logger.info("执行结果文件必须是文件类型, 不支持目录或其他类型");
                 }
                 logger.info("tarArchiveEntry's name: {}", tarArchiveEntry.getName());
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    logger.info("结果文件内容: {}", line);
-                }
                 resultFile = IOUtils.toString(reader);
+                logger.info("结果文件内容: {}", resultFile);
             } catch (IOException e) {
                 logger.error("无法获取容器执行结果文件:", e);
                 this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
