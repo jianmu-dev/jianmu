@@ -20,10 +20,17 @@ import java.util.stream.Collectors;
  * @create: 2021-04-16 20:29
  **/
 public class DslModel {
+    public enum Type {
+        WORKFLOW,
+        PIPELINE
+    }
+
     private String cron;
     private Map<String, Map<String, String>> event;
     private Map<String, String> param;
     private Map<String, Object> workflow;
+    private Map<String, Object> pipeline;
+    private Type type = Type.WORKFLOW;
     private Flow flow;
     private Set<DslParameter> dslParameters;
     private List<Definition> definitions;
@@ -39,7 +46,9 @@ public class DslModel {
             throw new RuntimeException("Dsl解析异常");
         }
         dsl.syntaxCheck();
-        dsl.parseFlow();
+        if (dsl.type.equals(Type.WORKFLOW)) {
+            dsl.parseFlow();
+        }
         return dsl;
     }
 
@@ -58,9 +67,20 @@ public class DslModel {
 
     // DSL语法校验
     private void syntaxCheck() {
-        if (null == this.workflow) {
-            throw new RuntimeException("workflow未设置");
+        if (null != this.workflow) {
+            this.workflowSyntaxCheck();
+            this.type = Type.WORKFLOW;
+            return;
         }
+        if (null != this.pipeline) {
+            this.type = Type.PIPELINE;
+            System.out.println(this.pipeline);
+            return;
+        }
+        throw new RuntimeException("workflow或pipeline未设置");
+    }
+
+    private void workflowSyntaxCheck() {
         var flow = this.workflow;
         if (null == flow.get("name")) {
             throw new RuntimeException("workflow name未设置");
@@ -276,5 +296,17 @@ public class DslModel {
 
     public void setWorkflow(Map<String, Object> workflow) {
         this.workflow = workflow;
+    }
+
+    public Map<String, Object> getPipeline() {
+        return pipeline;
+    }
+
+    public void setPipeline(Map<String, Object> pipeline) {
+        this.pipeline = pipeline;
+    }
+
+    public Type getType() {
+        return type;
     }
 }
