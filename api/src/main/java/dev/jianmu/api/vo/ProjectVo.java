@@ -25,11 +25,9 @@ public class ProjectVo {
         LOCAL
     }
 
-    public enum Status {
-        INIT,
-        RUNNING,
-        FAILED,
-        SUCCEEDED,
+    public enum DslType {
+        WORKFLOW,
+        PIPELINE
     }
 
     // ID
@@ -40,6 +38,8 @@ public class ProjectVo {
     private String name;
     @Schema(description = "项目来源")
     private Source source;
+    @Schema(description = "DSL类型")
+    private DslType dslType;
     @Schema(description = "Git库ID")
     private String gitRepoId;
     @Schema(description = "最后执行时间")

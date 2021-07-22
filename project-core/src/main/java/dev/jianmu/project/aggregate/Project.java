@@ -17,10 +17,17 @@ public class Project {
         LOCAL
     }
 
+    public enum DslType {
+        WORKFLOW,
+        PIPELINE
+    }
+
     // ID
     private String id;
     // DSL来源
     private DslSource dslSource;
+    // DSL类型
+    private DslType dslType = DslType.WORKFLOW;
     // Git库Id
     private String gitRepoId;
     // WebHook URL
@@ -76,6 +83,10 @@ public class Project {
 
     public DslSource getDslSource() {
         return dslSource;
+    }
+
+    public DslType getDslType() {
+        return dslType;
     }
 
     public String getGitRepoId() {
