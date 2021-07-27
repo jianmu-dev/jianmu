@@ -24,6 +24,8 @@ public class ProjectDetailVo {
     private String id;
     // DSL来源
     private String dslSource;
+    // DSL类型
+    private String dslType;
     // Git库Id
     private String gitRepoId;
     // 关联流程定义名称
