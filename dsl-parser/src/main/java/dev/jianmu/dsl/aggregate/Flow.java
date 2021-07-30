@@ -5,6 +5,9 @@ import dev.jianmu.task.aggregate.ParameterRefer;
 import dev.jianmu.workflow.aggregate.definition.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,6 +34,40 @@ public class Flow {
                 flowNodes.add(new FlowNode(key, (Map<?, ?>) val));
             }
         });
+    }
+
+    public void calculatePipeNodes(List<Definition> definitions) {
+        // 创建节点
+        Map<String, Node> symbolTable = new HashMap<>();
+        flowNodes.forEach(flowNode -> {
+            // 创建任务节点
+            var d = definitions.stream()
+                    .filter(definition -> flowNode.getType().equals(definition.getRef() + ":" + definition.getVersion()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+            var task = this.createAsyncTask(flowNode.getType(), flowNode.getName(), d);
+            symbolTable.put(flowNode.getName(), task);
+        });
+        // 添加节点引用关系
+        flowNodes.forEach(withCounter((i, flowNode) -> {
+            var n = symbolTable.get(flowNode.getName());
+            if (null != n && i > 0) {
+                var targetNode = flowNodes.get(i - 1);
+                var target = symbolTable.get(targetNode.getName());
+                n.addTarget(target.getRef());
+            }
+            if (null != n && i < flowNodes.size()) {
+                var sourceNode = flowNodes.get(i + 1);
+                var source = symbolTable.get(sourceNode.getName());
+                n.addSource(source.getRef());
+            }
+        }));
+        this.nodes = new HashSet<>(symbolTable.values());
+    }
+
+    public static <T> Consumer<T> withCounter(BiConsumer<Integer, T> consumer) {
+        AtomicInteger counter = new AtomicInteger(0);
+        return item -> consumer.accept(counter.getAndIncrement(), item);
     }
 
     public void calculateNodes(List<Definition> definitions) {

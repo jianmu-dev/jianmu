@@ -48,21 +48,34 @@ public class DslModel {
         dsl.syntaxCheck();
         if (dsl.type.equals(Type.WORKFLOW)) {
             dsl.parseFlow();
+        } else {
+            dsl.parsePipe();
         }
         return dsl;
     }
 
     // 关系、参数计算
     public void calculate(List<Definition> definitions) {
-        this.definitions = List.copyOf(definitions);
-        this.flow.calculateNodes(this.definitions);
-        this.extractDslParameters();
-        this.calculateParameters();
+        if (this.type.equals(Type.WORKFLOW)) {
+            this.definitions = List.copyOf(definitions);
+            this.flow.calculateNodes(this.definitions);
+            this.extractDslParameters();
+            this.calculateParameters();
+        } else {
+            this.definitions = List.copyOf(definitions);
+            this.flow.calculatePipeNodes(this.definitions);
+            this.extractDslParameters();
+            this.calculateParameters();
+        }
     }
 
     // 流程二次解析
     private void parseFlow() {
         this.flow = new Flow(this.workflow);
+    }
+
+    private void parsePipe() {
+        this.flow = new Flow(this.pipeline);
     }
 
     // DSL语法校验
@@ -73,11 +86,33 @@ public class DslModel {
             return;
         }
         if (null != this.pipeline) {
+            this.pipelineSyntaxCheck();
             this.type = Type.PIPELINE;
-            System.out.println(this.pipeline);
             return;
         }
         throw new RuntimeException("workflow或pipeline未设置");
+    }
+
+    private void pipelineSyntaxCheck() {
+        var pipe = this.pipeline;
+        if (null == pipe.get("name")) {
+            throw new RuntimeException("pipeline name未设置");
+        }
+        if (null == pipe.get("ref")) {
+            throw new RuntimeException("pipeline ref未设置");
+        }
+        pipe.forEach((key, val) -> {
+            if (val instanceof Map) {
+                this.checkPipeNode(key, (Map<?, ?>) val);
+            }
+        });
+    }
+
+    private void checkPipeNode(String nodeName, Map<?, ?> node) {
+        var type = node.get("type");
+        if (null == type) {
+            throw new RuntimeException("Node type未设置");
+        }
     }
 
     private void workflowSyntaxCheck() {
@@ -226,7 +261,7 @@ public class DslModel {
         this.dslParameters = parameters;
     }
 
-    public void calculateParameters() {
+    private void calculateParameters() {
         definitions.forEach(definition -> {
             dslParameters.forEach(dslParameter -> {
                 // 如果dsl参数覆盖的是该任务定义输入参数
