@@ -39,6 +39,12 @@ public class Flow {
     public void calculatePipeNodes(List<Definition> definitions) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
+        // 添加开始节点
+        var start = Start.Builder.aStart().name("Start").ref("Start").build();
+        symbolTable.put("Start", start);
+        // 添加结束节点
+        var end = End.Builder.anEnd().name("End").ref("End").build();
+        symbolTable.put("End", end);
         flowNodes.forEach(flowNode -> {
             // 创建任务节点
             var d = definitions.stream()
@@ -51,12 +57,20 @@ public class Flow {
         // 添加节点引用关系
         flowNodes.forEach(withCounter((i, flowNode) -> {
             var n = symbolTable.get(flowNode.getName());
+            if (null != n && i == 0) {
+                var target = symbolTable.get("Start");
+                n.addTarget(target.getRef());
+            }
+            if (null != n && i == flowNodes.size()) {
+                var source = symbolTable.get("End");
+                n.addSource(source.getRef());
+            }
             if (null != n && i > 0) {
                 var targetNode = flowNodes.get(i - 1);
                 var target = symbolTable.get(targetNode.getName());
                 n.addTarget(target.getRef());
             }
-            if (null != n && i < flowNodes.size()) {
+            if (null != n && i < (flowNodes.size() - 1)) {
                 var sourceNode = flowNodes.get(i + 1);
                 var source = symbolTable.get(sourceNode.getName());
                 n.addSource(source.getRef());

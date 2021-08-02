@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-04-23 11:39
  **/
 public interface ProjectMapper {
-    @Insert("insert into jianmu_project(id, dsl_source, git_repo_id, workflow_name, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time) " +
-            "values(#{id}, #{dslSource}, #{gitRepoId}, #{workflowName}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime})")
+    @Insert("insert into jianmu_project(id, dsl_source, dsl_type, git_repo_id, workflow_name, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time) " +
+            "values(#{id}, #{dslSource}, #{dslType}, #{gitRepoId}, #{workflowName}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime})")
     void add(Project project);
 
     @Delete("delete from jianmu_project where workflow_ref = #{workflowRef}")
@@ -27,6 +27,7 @@ public interface ProjectMapper {
     @Select("select * from jianmu_project where id = #{id}")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
     @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -39,6 +40,7 @@ public interface ProjectMapper {
     @Select("select * from jianmu_project where id = #{id} and webhook = #{webhook}")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
     @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -51,6 +53,7 @@ public interface ProjectMapper {
     @Select("select * from jianmu_project where workflow_ref = #{workflowRef}")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
     @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -67,6 +70,7 @@ public interface ProjectMapper {
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
     @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -79,6 +83,7 @@ public interface ProjectMapper {
     @Select("select * from jianmu_project order by created_time desc")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
     @Result(column = "git_repo_id", property = "gitRepoId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
