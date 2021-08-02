@@ -20,10 +20,17 @@ import java.util.stream.Collectors;
  * @create: 2021-04-16 20:29
  **/
 public class DslModel {
+    public enum Type {
+        WORKFLOW,
+        PIPELINE
+    }
+
     private String cron;
     private Map<String, Map<String, String>> event;
     private Map<String, String> param;
     private Map<String, Object> workflow;
+    private Map<String, Object> pipeline;
+    private Type type;
     private Flow flow;
     private Set<DslParameter> dslParameters;
     private List<Definition> definitions;
@@ -39,16 +46,27 @@ public class DslModel {
             throw new RuntimeException("Dsl解析异常");
         }
         dsl.syntaxCheck();
-        dsl.parseFlow();
+        if (dsl.type.equals(Type.WORKFLOW)) {
+            dsl.parseFlow();
+        } else {
+            dsl.parsePipe();
+        }
         return dsl;
     }
 
     // 关系、参数计算
     public void calculate(List<Definition> definitions) {
-        this.definitions = List.copyOf(definitions);
-        this.flow.calculateNodes(this.definitions);
-        this.extractDslParameters();
-        this.calculateParameters();
+        if (this.type.equals(Type.WORKFLOW)) {
+            this.definitions = List.copyOf(definitions);
+            this.flow.calculateNodes(this.definitions);
+            this.extractDslParameters();
+            this.calculateParameters();
+        } else {
+            this.definitions = List.copyOf(definitions);
+            this.flow.calculatePipeNodes(this.definitions);
+            this.extractDslParameters();
+            this.calculateParameters();
+        }
     }
 
     // 流程二次解析
@@ -56,11 +74,48 @@ public class DslModel {
         this.flow = new Flow(this.workflow);
     }
 
+    private void parsePipe() {
+        this.flow = new Flow(this.pipeline);
+    }
+
     // DSL语法校验
     private void syntaxCheck() {
-        if (null == this.workflow) {
-            throw new RuntimeException("workflow未设置");
+        if (null != this.workflow) {
+            this.workflowSyntaxCheck();
+            this.type = Type.WORKFLOW;
+            return;
         }
+        if (null != this.pipeline) {
+            this.pipelineSyntaxCheck();
+            this.type = Type.PIPELINE;
+            return;
+        }
+        throw new RuntimeException("workflow或pipeline未设置");
+    }
+
+    private void pipelineSyntaxCheck() {
+        var pipe = this.pipeline;
+        if (null == pipe.get("name")) {
+            throw new RuntimeException("pipeline name未设置");
+        }
+        if (null == pipe.get("ref")) {
+            throw new RuntimeException("pipeline ref未设置");
+        }
+        pipe.forEach((key, val) -> {
+            if (val instanceof Map) {
+                this.checkPipeNode(key, (Map<?, ?>) val);
+            }
+        });
+    }
+
+    private void checkPipeNode(String nodeName, Map<?, ?> node) {
+        var type = node.get("type");
+        if (null == type) {
+            throw new RuntimeException("Node type未设置");
+        }
+    }
+
+    private void workflowSyntaxCheck() {
         var flow = this.workflow;
         if (null == flow.get("name")) {
             throw new RuntimeException("workflow name未设置");
@@ -206,7 +261,7 @@ public class DslModel {
         this.dslParameters = parameters;
     }
 
-    public void calculateParameters() {
+    private void calculateParameters() {
         definitions.forEach(definition -> {
             dslParameters.forEach(dslParameter -> {
                 // 如果dsl参数覆盖的是该任务定义输入参数
@@ -276,5 +331,17 @@ public class DslModel {
 
     public void setWorkflow(Map<String, Object> workflow) {
         this.workflow = workflow;
+    }
+
+    public Map<String, Object> getPipeline() {
+        return pipeline;
+    }
+
+    public void setPipeline(Map<String, Object> pipeline) {
+        this.pipeline = pipeline;
+    }
+
+    public Type getType() {
+        return type;
     }
 }

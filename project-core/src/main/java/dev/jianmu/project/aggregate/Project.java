@@ -27,7 +27,7 @@ public class Project {
     // DSL来源
     private DslSource dslSource;
     // DSL类型
-    private DslType dslType = DslType.WORKFLOW;
+    private DslType dslType;
     // Git库Id
     private String gitRepoId;
     // WebHook URL
@@ -67,6 +67,10 @@ public class Project {
 
     public void setDslText(String dslText) {
         this.dslText = dslText;
+    }
+
+    public void setDslType(DslType dslType) {
+        this.dslType = dslType;
     }
 
     public void setLastModifiedBy(String lastModifiedBy) {
@@ -138,6 +142,8 @@ public class Project {
     public static final class Builder {
         // DSL来源
         private DslSource dslSource;
+        // DSL类型
+        private DslType dslType;
         // Git库Id
         private String gitRepoId;
         // 关联流程定义名称
@@ -160,6 +166,11 @@ public class Project {
 
         public Builder dslSource(DslSource dslSource) {
             this.dslSource = dslSource;
+            return this;
+        }
+
+        public Builder dslType(DslType dslType) {
+            this.dslType = dslType;
             return this;
         }
 
@@ -199,6 +210,7 @@ public class Project {
             project.workflowVersion = UUID.randomUUID().toString().replace("-", "");
             project.workflowName = this.workflowName;
             project.dslSource = this.dslSource;
+            project.dslType = this.dslType;
             project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
             project.workflowRef = this.workflowRef;
