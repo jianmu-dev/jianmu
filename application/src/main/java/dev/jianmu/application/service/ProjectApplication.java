@@ -166,6 +166,7 @@ public class ProjectApplication {
                 .steps(dsl.getSteps())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
+                .dslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .lastModifiedBy("admin")
                 .build();
         // 创建流程
@@ -208,6 +209,7 @@ public class ProjectApplication {
         // 解析DSL
         var dsl = this.parseDsl(dslText);
         project.setDslText(dslText);
+        project.setDslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setLastModifiedBy("admin");
         project.setSteps(dsl.getSteps());
         project.setWorkflowName(dsl.getFlow().getName());
@@ -258,6 +260,7 @@ public class ProjectApplication {
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
+                .dslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
         // 创建流程
         var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
@@ -293,6 +296,7 @@ public class ProjectApplication {
         // 解析DSL
         var dsl = this.parseDsl(dslText);
         project.setDslText(dslText);
+        project.setDslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setLastModifiedBy("admin");
         project.setSteps(dsl.getSteps());
         project.setWorkflowName(dsl.getFlow().getName());

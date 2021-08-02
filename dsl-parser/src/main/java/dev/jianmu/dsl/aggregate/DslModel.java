@@ -30,7 +30,7 @@ public class DslModel {
     private Map<String, String> param;
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
-    private Type type = Type.WORKFLOW;
+    private Type type;
     private Flow flow;
     private Set<DslParameter> dslParameters;
     private List<Definition> definitions;
