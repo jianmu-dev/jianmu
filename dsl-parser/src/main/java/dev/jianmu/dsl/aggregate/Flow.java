@@ -58,22 +58,24 @@ public class Flow {
         flowNodes.forEach(withCounter((i, flowNode) -> {
             var n = symbolTable.get(flowNode.getName());
             if (null != n && i == 0) {
-                var target = symbolTable.get("Start");
-                n.addTarget(target.getRef());
+                var startNode = symbolTable.get("Start");
+                n.addSource(startNode.getRef());
+                startNode.addTarget(n.getRef());
             }
-            if (null != n && i == flowNodes.size()) {
-                var source = symbolTable.get("End");
-                n.addSource(source.getRef());
+            if (null != n && i == (flowNodes.size() - 1)) {
+                var endNode = symbolTable.get("End");
+                n.addTarget(endNode.getRef());
+                endNode.addSource(n.getRef());
             }
             if (null != n && i > 0) {
-                var targetNode = flowNodes.get(i - 1);
-                var target = symbolTable.get(targetNode.getName());
-                n.addTarget(target.getRef());
-            }
-            if (null != n && i < (flowNodes.size() - 1)) {
-                var sourceNode = flowNodes.get(i + 1);
+                var sourceNode = flowNodes.get(i - 1);
                 var source = symbolTable.get(sourceNode.getName());
                 n.addSource(source.getRef());
+            }
+            if (null != n && i < (flowNodes.size() - 1)) {
+                var targetNode = flowNodes.get(i + 1);
+                var target = symbolTable.get(targetNode.getName());
+                n.addTarget(target.getRef());
             }
         }));
         this.nodes = new HashSet<>(symbolTable.values());
