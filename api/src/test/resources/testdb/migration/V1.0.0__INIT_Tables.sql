@@ -1,7 +1,8 @@
 CREATE TABLE `jianmu_project`
 (
     `id`                 varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_source`         varchar(45) DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_source`         varchar(45)  DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_type`           varchar(45)  DEFAULT NULL COMMENT 'DSL类型',
     `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
     `webhook`            varchar(255) DEFAULT NULL COMMENT 'WebHook Url',
     `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
@@ -9,8 +10,8 @@ CREATE TABLE `jianmu_project`
     `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
     `steps`              int          NOT NULL COMMENT '步骤数量',
     `dsl_text`           longtext     NOT NULL COMMENT 'DSL内容文本',
-    `created_time`       datetime    DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
+    `created_time`       datetime     DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`   varchar(45)  DEFAULT NULL COMMENT '最后修改人',
     `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`)
 );
@@ -25,7 +26,7 @@ CREATE TABLE `cron_trigger`
 
 CREATE TABLE `quartz_trigger`
 (
-    `id`         int         NOT NULL COMMENT 'Quartz触发器ID',
+    `id`         int         NOT NULL AUTO_INCREMENT COMMENT 'Quartz触发器ID',
     `trigger_id` varchar(45) NOT NULL COMMENT '触发器ID',
     `cron`       varchar(45) NOT NULL COMMENT 'Cron表达式',
     PRIMARY KEY (`id`)

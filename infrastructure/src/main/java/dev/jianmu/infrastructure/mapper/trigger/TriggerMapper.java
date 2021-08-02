@@ -16,8 +16,8 @@ import java.util.Optional;
  * @create: 2021-05-25 15:29
  **/
 public interface TriggerMapper {
-    @Insert("insert into quartz_trigger(id, trigger_id, cron) " +
-            "values(#{id}, #{triggerId}, #{cron})")
+    @Insert("insert into quartz_trigger(trigger_id, cron) " +
+            "values(#{triggerId}, #{cron})")
     void add(TriggerEntity triggerEntity);
 
     @Delete("delete from quartz_trigger where trigger_id = #{triggerId}")
