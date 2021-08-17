@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -167,13 +168,21 @@ public class EmbeddedDockerWorker implements DockerWorker {
             }
         }
         // 创建容器
-        var containerResponse = createContainerCmd.exec();
+        CreateContainerResponse containerResponse;
+        try {
+            containerResponse = createContainerCmd.exec();
+        } catch (RuntimeException e) {
+            logger.error("无法创建容器", e);
+            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            return;
+        }
         // 启动容器
         try {
             this.dockerClient.startContainerCmd(containerResponse.getId()).exec();
         } catch (RuntimeException e) {
             logger.error("容器启动失败:", e);
             this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            return;
         }
         // 发送任务运行中事件
         this.publisher.publishEvent(TaskRunningEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
