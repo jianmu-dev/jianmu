@@ -41,9 +41,8 @@ public class Target {
         return transformers;
     }
 
-    // TODO 临时代码，需要删除
-    public void setId(String id) {
-        this.id = id;
+    public void setTransformers(Set<Transformer> transformers) {
+        this.transformers = transformers;
     }
 
     public static final class Builder {

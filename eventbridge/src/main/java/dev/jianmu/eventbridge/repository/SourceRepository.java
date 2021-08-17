@@ -2,7 +2,6 @@ package dev.jianmu.eventbridge.repository;
 
 import dev.jianmu.eventbridge.aggregate.Source;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -14,7 +13,5 @@ import java.util.Optional;
 public interface SourceRepository {
     Optional<Source> findById(String id);
 
-    List<Source> findByType(Source.Type type);
-
-    List<Source> findAll();
+    void save(Source source);
 }

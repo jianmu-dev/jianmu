@@ -4,6 +4,8 @@ import dev.jianmu.eventbridge.aggregate.Payload;
 import dev.jianmu.eventbridge.aggregate.Transformer;
 import dev.jianmu.parameter.aggregate.Parameter;
 
+import java.util.Locale;
+
 /**
  * @class: HeaderTransformer
  * @description: HeaderTransformer
@@ -14,7 +16,7 @@ public class HeaderTransformer extends Transformer<Parameter<?>> {
     @Override
     public Parameter<?> extractParameter(Payload payload) {
         var header = payload.getHeader();
-        var list = header.get(this.getExpression());
+        var list = header.get(this.getExpression().toLowerCase(Locale.ROOT));
         if (list != null && !list.isEmpty()) {
             var variable = String.join(",", list);
             return Parameter.Type.valueOf(this.getVariableType()).newParameter(variable);

@@ -30,11 +30,6 @@ public class Source {
         return type;
     }
 
-    // TODO 临时测试代码，需要删除
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public static final class Builder {
         private String name;
         private Type type;

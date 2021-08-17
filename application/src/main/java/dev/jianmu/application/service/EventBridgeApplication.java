@@ -9,6 +9,7 @@ import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,6 +73,7 @@ public class EventBridgeApplication {
         });
     }
 
+    @Transactional
     public void eventHandling(ConnectionEvent connectionEvent) {
         var target = this.targetRepository.findById(connectionEvent.getTargetId())
                 .orElseThrow(() -> new RuntimeException("未找到该Target: " + connectionEvent.getTargetId()));
@@ -90,6 +92,7 @@ public class EventBridgeApplication {
         var targetEvent = TargetEvent.Builder.aTargetEvent()
                 .sourceId(connectionEvent.getSourceId())
                 .targetId(target.getId())
+                .destinationId(target.getDestinationId())
                 .payload(connectionEvent.getPayload())
                 .eventParameters(eventParameters)
                 .build();

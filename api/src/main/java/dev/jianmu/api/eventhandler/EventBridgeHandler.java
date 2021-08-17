@@ -28,6 +28,9 @@ public class EventBridgeHandler {
 
     @EventListener
     public void sourceEventHandle(SourceEvent sourceEvent) {
+        sourceEvent.getPayload().getHeader().forEach((k, v) -> {
+            log.info("header key: {}  value: {}", k, v);
+        });
         this.eventBridgeApplication.dispatchEvent(sourceEvent);
     }
 
@@ -38,7 +41,8 @@ public class EventBridgeHandler {
 
     @EventListener
     public void targetEventHandle(TargetEvent targetEvent) {
-        log.info("get targetEvent here: {}", targetEvent.getId());
+        log.info("get targetEvent here ID: {}", targetEvent.getId());
+        log.info("get targetEvent here DestinationId: {}", targetEvent.getDestinationId());
         targetEvent.getEventParameters().forEach(eventParameter -> {
             log.info("eventParameter {} type is {}", eventParameter.getName(), eventParameter.getType());
         });

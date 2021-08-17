@@ -12,4 +12,6 @@ import java.util.Optional;
  **/
 public interface TargetRepository {
     Optional<Target> findById(String id);
+
+    void save(Target target);
 }

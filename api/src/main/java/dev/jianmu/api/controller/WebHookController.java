@@ -1,5 +1,6 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.application.service.EventBridgeSettingApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,9 +23,11 @@ import java.util.Base64;
 @Tag(name = "WebHook API", description = "WebHook API")
 public class WebHookController {
     private final ProjectApplication projectApplication;
+    private final EventBridgeSettingApplication eventBridgeSettingApplication;
 
-    public WebHookController(ProjectApplication projectApplication) {
+    public WebHookController(ProjectApplication projectApplication, EventBridgeSettingApplication eventBridgeSettingApplication) {
         this.projectApplication = projectApplication;
+        this.eventBridgeSettingApplication = eventBridgeSettingApplication;
     }
 
     @GetMapping("/{webhook}")
@@ -33,5 +36,10 @@ public class WebHookController {
         var bytes = Base64.getDecoder().decode(webhook);
         var strings = new String(bytes, StandardCharsets.UTF_8).split("_");
         this.projectApplication.triggerByWebHook(strings[1], strings[0]);
+    }
+
+    @GetMapping("/test/{projectId}")
+    public void addWebhook(@PathVariable String projectId) {
+        this.eventBridgeSettingApplication.addWebhook(projectId);
     }
 }

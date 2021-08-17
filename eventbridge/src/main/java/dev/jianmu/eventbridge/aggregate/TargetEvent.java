@@ -41,6 +41,10 @@ public class TargetEvent {
         return eventParameters;
     }
 
+    public void setEventParameters(Set<EventParameter> eventParameters) {
+        this.eventParameters = eventParameters;
+    }
+
     public static final class Builder {
         private String sourceId;
         private String targetId;

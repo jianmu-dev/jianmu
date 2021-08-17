@@ -21,12 +21,12 @@ import java.util.List;
  **/
 @Component
 @Slf4j
-public class DslEventHandler {
+public class ProjectEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final ProjectApplication projectApplication;
     private final TaskDefinitionApplication taskDefinitionApplication;
 
-    public DslEventHandler(
+    public ProjectEventHandler(
             WorkflowInstanceApplication workflowInstanceApplication,
             ProjectApplication projectApplication,
             TaskDefinitionApplication taskDefinitionApplication

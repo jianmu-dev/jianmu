@@ -1,7 +1,8 @@
-package dev.jianmu.infrastructure.mybatis.eventbrige;
+package dev.jianmu.infrastructure.mybatis.eventbridge;
 
 import dev.jianmu.eventbridge.aggregate.Connection;
 import dev.jianmu.eventbridge.repository.ConnectionRepository;
+import dev.jianmu.infrastructure.mapper.eventbrdige.ConnectionMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,15 +15,19 @@ import java.util.List;
  **/
 @Repository
 public class ConnectionRepositoryImpl implements ConnectionRepository {
+    private final ConnectionMapper connectionMapper;
+
+    public ConnectionRepositoryImpl(ConnectionMapper connectionMapper) {
+        this.connectionMapper = connectionMapper;
+    }
+
     @Override
     public List<Connection> findBySourceId(String sourceId) {
-        if (sourceId.equals("12345678")) {
-            var connection = Connection.Builder.aConnection()
-                    .sourceId("12345678")
-                    .targetId("87654321")
-                    .build();
-            return List.of(connection);
-        }
-        return List.of();
+        return this.connectionMapper.findBySourceId(sourceId);
+    }
+
+    @Override
+    public void save(Connection connection) {
+        this.connectionMapper.save(connection);
     }
 }
