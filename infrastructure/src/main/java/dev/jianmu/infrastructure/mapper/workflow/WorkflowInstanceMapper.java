@@ -59,6 +59,9 @@ public interface WorkflowInstanceMapper {
             "where id = #{wk.id} and _version = #{version}")
     boolean save(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
+    @Delete("delete from workflow_instance where workflow_ref=#{workflowRef}")
+    void deleteByWorkflowRef(String workflowRef);
+
     @Select("select * from workflow_instance")
     @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
     @Result(column = "serial_no", property = "serialNo")

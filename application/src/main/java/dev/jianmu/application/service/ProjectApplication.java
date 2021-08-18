@@ -21,8 +21,10 @@ import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InputParameterRepository;
 import dev.jianmu.task.repository.ParameterReferRepository;
+import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.service.ScheduleJobService;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
+import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,8 @@ public class ProjectApplication {
     private final DefinitionRepository definitionRepository;
     private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
+    private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final TaskInstanceRepository taskInstanceRepository;
     private final ParameterRepository parameterRepository;
     private final InputParameterRepository inputParameterRepository;
     private final ParameterReferRepository parameterReferRepository;
@@ -66,6 +70,8 @@ public class ProjectApplication {
             DefinitionRepository definitionRepository,
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
+            WorkflowInstanceRepository workflowInstanceRepository,
+            TaskInstanceRepository taskInstanceRepository,
             ParameterRepository parameterRepository,
             InputParameterRepository inputParameterRepository,
             ParameterReferRepository parameterReferRepository,
@@ -80,6 +86,8 @@ public class ProjectApplication {
         this.definitionRepository = definitionRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
+        this.workflowInstanceRepository = workflowInstanceRepository;
+        this.taskInstanceRepository = taskInstanceRepository;
         this.parameterRepository = parameterRepository;
         this.inputParameterRepository = inputParameterRepository;
         this.parameterReferRepository = parameterReferRepository;
@@ -358,6 +366,8 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
+        this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.dslSourceCodeRepository.deleteByProjectId(project.getId());
         this.cronTriggerRepository.deleteByProjectId(project.getId());
         this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
