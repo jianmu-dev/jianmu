@@ -12,6 +12,7 @@ import dev.jianmu.project.aggregate.CronTrigger;
 import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.CronTriggerRepository;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
@@ -87,16 +88,34 @@ public class ProjectApplication {
         this.jgitService = jgitService;
     }
 
+    public void trigger(String projectId, String triggerId) {
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
+                .projectId(project.getId())
+                .triggerId(triggerId)
+                .workflowRef(project.getWorkflowRef())
+                .workflowVersion(project.getWorkflowVersion())
+                .build();
+        this.publisher.publishEvent(triggerEvent);
+    }
+
     public void trigger(String projectId) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        this.publisher.publishEvent(project);
+        var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
+                .projectId(project.getId())
+                .triggerId(project.getId() + project.getWorkflowVersion())
+                .workflowRef(project.getWorkflowRef())
+                .workflowVersion(project.getWorkflowVersion())
+                .build();
+        this.publisher.publishEvent(triggerEvent);
     }
 
     public void triggerFromCron(String triggerId) {
         var cronTrigger = this.cronTriggerRepository.findById(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该触发器"));
-        this.trigger(cronTrigger.getProjectId());
+        this.trigger(cronTrigger.getProjectId(), triggerId);
     }
 
     public void triggerByWebHook(String projectId, String webhook) {

@@ -46,6 +46,6 @@ public class EventBridgeHandler {
         targetEvent.getEventParameters().forEach(eventParameter -> {
             log.info("eventParameter {} type is {}", eventParameter.getName(), eventParameter.getType());
         });
-//        this.projectApplication.trigger(targetEvent.getDestinationId());
+        this.projectApplication.trigger(targetEvent.getDestinationId(), targetEvent.getId());
     }
 }

@@ -4,7 +4,7 @@ import dev.jianmu.application.event.InstallDefinitionsEvent;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
-import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.task.aggregate.Definition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -38,11 +38,11 @@ public class ProjectEventHandler {
 
     @Async
     @EventListener
-    public void handleTriggerEvent(Project project) {
+    public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
         this.workflowInstanceApplication.createAndStart(
-                project.getId() + project.getWorkflowVersion(),
-                project.getWorkflowRef() + project.getWorkflowVersion()
+                triggerEvent.getTriggerId(),
+                triggerEvent.getWorkflowRef() + triggerEvent.getWorkflowVersion()
         );
     }
 
