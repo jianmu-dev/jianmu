@@ -24,7 +24,7 @@ public interface TaskInstanceRepository {
 
     List<TaskInstance> findByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId);
 
-    Optional<TaskInstance> limitByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId);
-
     List<TaskInstance> findAll(int pageNum, int pageSize);
+
+    void deleteByWorkflowRef(String workflowRef);
 }

@@ -82,11 +82,6 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
-    public Optional<TaskInstance> limitByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId) {
-        return this.taskInstanceMapper.limitByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
-    }
-
-    @Override
     public Optional<TaskInstance> findById(String instanceId) {
         return this.taskInstanceMapper.findById(instanceId);
     }
@@ -104,5 +99,10 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public List<TaskInstance> findAll(int pageNum, int pageSize) {
         return this.taskInstanceMapper.findAll(pageNum, pageSize);
+    }
+
+    @Override
+    public void deleteByWorkflowRef(String workflowRef) {
+        this.taskInstanceMapper.deleteByWorkflowRef(workflowRef);
     }
 }

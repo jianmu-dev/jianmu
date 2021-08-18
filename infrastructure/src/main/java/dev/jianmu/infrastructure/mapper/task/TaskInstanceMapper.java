@@ -23,17 +23,8 @@ public interface TaskInstanceMapper {
     @Update("update task_instance set result_file = #{resultFile}, status = #{status}, end_time = #{endTime} where id = #{id}")
     void saveSucceeded(TaskInstance taskInstance);
 
-    @Select("select * from task_instance where async_task_ref = #{asyncTaskRef} and business_id = #{businessId} order by end_time desc limit 1")
-    @Result(column = "serial_no", property = "serialNo")
-    @Result(column = "def_key", property = "defKey")
-    @Result(column = "async_task_ref", property = "asyncTaskRef")
-    @Result(column = "workflow_ref", property = "workflowRef")
-    @Result(column = "workflow_version", property = "workflowVersion")
-    @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
-    @Result(column = "start_time", property = "startTime")
-    @Result(column = "end_time", property = "endTime")
-    Optional<TaskInstance> limitByAsyncTaskRefAndBusinessId(@Param("asyncTaskRef") String asyncTaskRef, @Param("businessId") String businessId);
+    @Delete("delete from task_instance where workflow_ref = #{workflowRef}")
+    void deleteByWorkflowRef(String workflowRef);
 
     @Select("select * from task_instance where id = #{instanceId}")
     @Result(column = "serial_no", property = "serialNo")
