@@ -78,7 +78,7 @@ public class TaskInstanceApplication {
             String businessId,
             String workflowRef,
             String workflowVersion,
-            String projectId,
+            String triggerId,
             String asyncTaskRef,
             String asyncTaskType
     ) {
@@ -87,7 +87,7 @@ public class TaskInstanceApplication {
         Definition definition = this.definitionRepository.findByRefAndVersion(strings[0], strings[1])
                 .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
-        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, projectId, asyncTaskRef, workflowRef, workflowVersion);
+        TaskInstance taskInstance = this.instanceDomainService.create(taskInstances, definition, businessId, triggerId, asyncTaskRef, workflowRef, workflowVersion);
 
         // 查询流程定义参数关联
         var refers = this.parameterReferRepository
@@ -181,7 +181,7 @@ public class TaskInstanceApplication {
                             .asyncTaskRef(taskInstance.getAsyncTaskRef())
                             .defKey(taskInstance.getDefKey())
                             .businessId(taskInstance.getBusinessId())
-                            .projectId(taskInstance.getProjectId())
+                            .triggerId(taskInstance.getTriggerId())
                             .ref(taskParameter.getRef())
                             .type(InstanceParameter.Type.OUTPUT)
                             .parameterId(parameter.getId())

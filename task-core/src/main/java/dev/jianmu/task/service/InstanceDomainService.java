@@ -17,7 +17,7 @@ public class InstanceDomainService {
             List<TaskInstance> taskInstances,
             Definition definition,
             String businessId,
-            String projectId,
+            String triggerId,
             String asyncTaskRef,
             String workflowRef,
             String workflowVersion
@@ -39,7 +39,7 @@ public class InstanceDomainService {
                 .workflowRef(workflowRef)
                 .workflowVersion(workflowVersion)
                 .businessId(businessId)
-                .projectId(projectId)
+                .triggerId(triggerId)
                 .build();
     }
 }

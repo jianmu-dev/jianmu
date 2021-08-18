@@ -18,9 +18,9 @@ import java.util.Set;
  **/
 public interface InstanceParameterMapper {
     @Insert("<script>" +
-            "insert into task_instance_parameter(instance_id, serial_no, def_key, async_task_ref, business_id, project_id, ref, `type`, parameter_id) values" +
+            "insert into task_instance_parameter(instance_id, serial_no, def_key, async_task_ref, business_id, trigger_id, ref, `type`, parameter_id) values" +
             "<foreach collection='instanceParameters' item='i' index='key' separator=','>" +
-            "(#{i.instanceId}, #{i.serialNo}, #{i.defKey}, #{i.asyncTaskRef}, #{i.businessId}, #{i.projectId}, #{i.ref}, #{i.type}, #{i.parameterId})" +
+            "(#{i.instanceId}, #{i.serialNo}, #{i.defKey}, #{i.asyncTaskRef}, #{i.businessId}, #{i.triggerId}, #{i.ref}, #{i.type}, #{i.parameterId})" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("instanceParameters") Set<InstanceParameter> instanceParameters);
@@ -31,7 +31,7 @@ public interface InstanceParameterMapper {
     @Result(column = "def_key", property = "defKey")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
     List<InstanceParameter> findByBusinessId(String businessId);
 
@@ -41,7 +41,7 @@ public interface InstanceParameterMapper {
     @Result(column = "def_key", property = "defKey")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
     List<InstanceParameter> findByInstanceId(@Param("instanceId") String instanceId);
 
@@ -51,7 +51,7 @@ public interface InstanceParameterMapper {
     @Result(column = "def_key", property = "defKey")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
     List<InstanceParameter> findByInstanceIdAndType(@Param("instanceId") String instanceId, @Param("type") InstanceParameter.Type type);
 
@@ -61,7 +61,7 @@ public interface InstanceParameterMapper {
     @Result(column = "def_key", property = "defKey")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
     Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(@Param("businessId") String businessId, @Param("asyncTaskRef") String asyncTaskRef, @Param("ref") String ref);
 }
