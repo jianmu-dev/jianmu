@@ -174,6 +174,7 @@ public class Flow {
         List<ParameterRefer> parameterRefers = new ArrayList<>();
         flowNodes.forEach(flowNode -> flowNode.getParam().forEach((key, val) -> {
             var outputVal = findOutputVariable(val);
+            var eventVal = findEventVariable(val);
             if (null != outputVal) {
                 var strings = outputVal.split("\\.");
                 var parameterRefer = ParameterRefer.Builder.aParameterRefer()
@@ -186,12 +187,32 @@ public class Flow {
                         .build();
                 parameterRefers.add(parameterRefer);
             }
+            if (null != eventVal) {
+                var parameterRefer = ParameterRefer.Builder.aParameterRefer()
+                        .sourceParameterRef(eventVal)
+                        .sourceTaskRef("Event")
+                        .targetParameterRef(key)
+                        .targetTaskRef(flowNode.getName())
+                        .workflowRef(this.ref)
+                        .workflowVersion(workflowVersion)
+                        .build();
+                parameterRefers.add(parameterRefer);
+            }
         }));
         return parameterRefers;
     }
 
     private String findOutputVariable(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+\\.+[a-zA-Z0-9_-]*)\\}$");
+        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+\\.+[a-zA-Z0-9_-]*)}$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private String findEventVariable(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\$\\(([a-zA-Z0-9_-]+)\\)$");
         Matcher matcher = pattern.matcher(paramValue);
         if (matcher.find()) {
             return matcher.group(1);

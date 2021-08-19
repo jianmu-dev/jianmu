@@ -16,7 +16,6 @@ import java.util.Set;
  **/
 public interface TargetEventParameterMapper {
     @Select("SELECT * FROM `eb_target_event_parameter` WHERE target_event_id = #{targetEventId}")
-    @Result(column = "target_event_id", property = "targetEventId")
     @Result(column = "parameter_id", property = "parameterId")
     Set<EventParameter> findById(String targetEventId);
 

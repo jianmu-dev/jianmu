@@ -1,5 +1,6 @@
 package dev.jianmu.eventbridge.aggregate;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,6 +40,12 @@ public class TargetEvent {
 
     public Set<EventParameter> getEventParameters() {
         return eventParameters;
+    }
+
+    public Optional<EventParameter> getEventParameter(String name) {
+        return this.eventParameters.stream()
+                .filter(eventParameter -> eventParameter.getName().equals(name))
+                .findFirst();
     }
 
     public void setEventParameters(Set<EventParameter> eventParameters) {

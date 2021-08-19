@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.parameter.aggregate.Parameter;
 import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.task.aggregate.Definition;
@@ -39,6 +40,7 @@ public class TaskInstanceApplication {
     private final InstanceDomainService instanceDomainService;
     private final ParameterRepository parameterRepository;
     private final ParameterReferRepository parameterReferRepository;
+    private final TargetEventRepository targetEventRepository;
     private final InstanceParameterRepository instanceParameterRepository;
     private final InputParameterRepository inputParameterRepository;
 
@@ -49,6 +51,7 @@ public class TaskInstanceApplication {
             InstanceDomainService instanceDomainService,
             ParameterRepository parameterRepository,
             ParameterReferRepository parameterReferRepository,
+            TargetEventRepository targetEventRepository,
             InstanceParameterRepository instanceParameterRepository,
             InputParameterRepository inputParameterRepository
     ) {
@@ -57,6 +60,7 @@ public class TaskInstanceApplication {
         this.instanceDomainService = instanceDomainService;
         this.parameterRepository = parameterRepository;
         this.parameterReferRepository = parameterReferRepository;
+        this.targetEventRepository = targetEventRepository;
         this.instanceParameterRepository = instanceParameterRepository;
         this.inputParameterRepository = inputParameterRepository;
     }
@@ -92,12 +96,25 @@ public class TaskInstanceApplication {
         // 查询流程定义参数关联
         var refers = this.parameterReferRepository
                 .findByRefAndVersionAndTargetTaskRef(workflowRef, workflowVersion, taskInstance.getAsyncTaskRef());
-        // 查询关联输出参数
+        // 查询关联事件参数与任务输出参数
         var instanceOutputParameters = refers.stream().map(refer -> {
-            var instanceParameter = this.instanceParameterRepository
-                    .findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(businessId, refer.getSourceTaskRef(), refer.getSourceParameterRef())
-                    .orElseThrow(() -> new DataNotFoundException("未找到关联的任务输出参数"));
-            return Map.entry(refer.getTargetParameterRef(), instanceParameter);
+            // 查询关联的事件参数
+            if (refer.getSourceTaskRef().equals("Event")) {
+                var targetEvent = this.targetEventRepository.findById(triggerId)
+                        .orElseThrow(() -> new DataNotFoundException("未找到事件" + triggerId));
+                var eventParameter = targetEvent.getEventParameter(refer.getSourceParameterRef())
+                        .orElseThrow(() -> new DataNotFoundException("未找到该事件参数" + refer.getSourceParameterRef()));
+                var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
+                        .parameterId(eventParameter.getParameterId())
+                        .build();
+                return Map.entry(refer.getTargetParameterRef(), instanceParameter);
+            } else {
+                // 查询关联的任务输出参数
+                var instanceParameter = this.instanceParameterRepository
+                        .findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(businessId, refer.getSourceTaskRef(), refer.getSourceParameterRef())
+                        .orElseThrow(() -> new DataNotFoundException("未找到关联的任务输出参数"));
+                return Map.entry(refer.getTargetParameterRef(), instanceParameter);
+            }
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         // 查询输入参数
         var inputParameters = this.inputParameterRepository

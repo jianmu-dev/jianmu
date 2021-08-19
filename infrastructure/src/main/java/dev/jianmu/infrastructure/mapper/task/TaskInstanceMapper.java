@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create: 2021-03-25 21:39
  **/
 public interface TaskInstanceMapper {
-    @Insert("insert into task_instance(id, serial_no, def_key, async_task_ref, workflow_ref, workflow_version, business_id, project_id, start_time, end_time, status) " +
-            "values(#{id}, #{serialNo}, #{defKey}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{projectId}, #{startTime}, #{endTime}, #{status})")
+    @Insert("insert into task_instance(id, serial_no, def_key, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status) " +
+            "values(#{id}, #{serialNo}, #{defKey}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status})")
     void add(TaskInstance taskInstance);
 
     @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
@@ -33,7 +33,7 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findById(String instanceId);
@@ -45,7 +45,7 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByBusinessId(String businessId);
@@ -57,7 +57,7 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByAsyncTaskRefAndBusinessId(@Param("asyncTaskRef") String asyncTaskRef, @Param("businessId") String businessId);
@@ -70,7 +70,7 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
-    @Result(column = "project_id", property = "projectId")
+    @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findAll(
