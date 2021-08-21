@@ -27,7 +27,17 @@ public class ConnectionRepositoryImpl implements ConnectionRepository {
     }
 
     @Override
+    public List<Connection> findByTargetId(String targetId) {
+        return this.connectionMapper.findByTargetId(targetId);
+    }
+
+    @Override
     public void save(Connection connection) {
         this.connectionMapper.save(connection);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        this.connectionMapper.deleteById(id);
     }
 }

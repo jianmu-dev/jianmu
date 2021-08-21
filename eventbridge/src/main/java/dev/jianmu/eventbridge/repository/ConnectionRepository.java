@@ -13,5 +13,9 @@ import java.util.List;
 public interface ConnectionRepository {
     List<Connection> findBySourceId(String sourceId);
 
+    List<Connection> findByTargetId(String targetId);
+
     void save(Connection connection);
+
+    void deleteById(String id);
 }

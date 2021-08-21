@@ -4,7 +4,10 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.event.InstallDefinitionsEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.dsl.aggregate.DslModel;
+import dev.jianmu.eventbridge.aggregate.Transformer;
 import dev.jianmu.infrastructure.client.RegistryClient;
+import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
+import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.parameter.repository.ParameterRepository;
@@ -12,6 +15,8 @@ import dev.jianmu.project.aggregate.CronTrigger;
 import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.event.CreatedEvent;
+import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.CronTriggerRepository;
 import dev.jianmu.project.repository.DslSourceCodeRepository;
@@ -35,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @class: ProjectApplication
@@ -126,12 +132,6 @@ public class ProjectApplication {
         this.trigger(cronTrigger.getProjectId(), triggerId);
     }
 
-    public void triggerByWebHook(String projectId, String webhook) {
-        var project = this.projectRepository.findByIdAndWebhook(projectId, webhook)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        this.publisher.publishEvent(project);
-    }
-
     private DslModel parseDsl(String dslText) {
         // 解析DSL
         var dsl = DslModel.parse(dslText);
@@ -193,6 +193,7 @@ public class ProjectApplication {
                 .steps(dsl.getSteps())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
+                .triggerType(Project.TriggerType.MANUAL)
                 .dslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .lastModifiedBy("admin")
                 .build();
@@ -205,6 +206,9 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
+        if (dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
+        }
         // 创建触发器
         if (null != dsl.getCron()) {
             var trigger = CronTrigger.Builder.aCronTrigger()
@@ -222,6 +226,7 @@ public class ProjectApplication {
         this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
         this.parameterReferRepository.addAll(parameterRefers);
+        this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }
 
     @Transactional
@@ -251,6 +256,10 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
+        if (!project.getTriggerType().equals(Project.TriggerType.WEBHOOK) && dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
+            this.publisher.publishEvent(new CreatedEvent(project.getId()));
+        }
         // 删除原有触发器
         this.cronTriggerRepository.deleteByProjectId(project.getId());
         triggers.forEach(cronTrigger -> {
@@ -287,6 +296,7 @@ public class ProjectApplication {
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
+                .triggerType(Project.TriggerType.MANUAL)
                 .dslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
         // 创建流程
@@ -298,6 +308,9 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
+        if (dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
+        }
         // 创建触发器
         if (null != dsl.getCron()) {
             var trigger = CronTrigger.Builder.aCronTrigger()
@@ -313,6 +326,7 @@ public class ProjectApplication {
         this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
         this.parameterReferRepository.addAll(parameterRefers);
+        this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }
 
     @Transactional
@@ -338,6 +352,10 @@ public class ProjectApplication {
         // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
         var parameterRefers = dsl.getFlow()
                 .getParameterRefers(project.getWorkflowVersion());
+        if (!project.getTriggerType().equals(Project.TriggerType.WEBHOOK) && dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
+            this.publisher.publishEvent(new CreatedEvent(project.getId()));
+        }
         // 删除原有触发器
         this.cronTriggerRepository.deleteByProjectId(project.getId());
         triggers.forEach(cronTrigger -> {
@@ -373,19 +391,7 @@ public class ProjectApplication {
         this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.inputParameterRepository.deleteByProjectId(project.getId());
         this.gitRepoRepository.deleteById(project.getGitRepoId());
-    }
-
-    @Transactional
-    public String generateWebhook(String projectId) {
-        var project = this.projectRepository.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到项目"));
-        project.generateWebhook();
-        this.projectRepository.updateByWorkflowRef(project);
-        return project.getWebHookUrl();
-    }
-
-    public String getWebhookUrl(String projectId) {
-        var project = this.projectRepository.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到项目"));
-        return project.getWebHookUrl();
+        this.publisher.publishEvent(new DeletedEvent(project.getId()));
     }
 
     public PageInfo<Project> findAll(String workflowName, int pageNum, int pageSize) {
@@ -415,5 +421,34 @@ public class ProjectApplication {
             return this.scheduleJobService.getNextFireTime(c.getId());
         }
         return "";
+    }
+
+    private Set<Transformer> transformerTemplate() {
+        var refTf = BodyTransformer.Builder.aBodyTransformer()
+                .variableName("gitlab_ref")
+                .variableType("STRING")
+                .expression("$.ref")
+                .build();
+        var objectKindTf = BodyTransformer.Builder.aBodyTransformer()
+                .variableName("gitlab_object_kind")
+                .variableType("STRING")
+                .expression("$.object_kind")
+                .build();
+        var beforeTf = BodyTransformer.Builder.aBodyTransformer()
+                .variableName("gitlab_before")
+                .variableType("STRING")
+                .expression("$.before")
+                .build();
+        var afterTf = BodyTransformer.Builder.aBodyTransformer()
+                .variableName("gitlab_after")
+                .variableType("STRING")
+                .expression("$.after")
+                .build();
+        var eventTf = HeaderTransformer.Builder.aHeaderTransformer()
+                .variableName("gitlab_event_name")
+                .variableType("STRING")
+                .expression("X-Gitlab-Event")
+                .build();
+        return Set.of(refTf, objectKindTf, beforeTf, afterTf, eventTf);
     }
 }

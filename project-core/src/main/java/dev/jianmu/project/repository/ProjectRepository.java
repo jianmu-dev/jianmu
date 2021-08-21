@@ -19,8 +19,4 @@ public interface ProjectRepository {
     void updateByWorkflowRef(Project project);
 
     Optional<Project> findById(String id);
-
-    Optional<Project> findByIdAndWebhook(String id, String webhook);
-
-    Optional<Project> findByWorkflowRef(String workflowRef);
 }

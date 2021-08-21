@@ -35,10 +35,25 @@ public class TargetRepositoryImpl implements TargetRepository {
     }
 
     @Override
+    public Optional<Target> findByDestinationId(String destinationId) {
+        return this.targetMapper.findByDestinationId(destinationId).map(target -> {
+            var transformers = this.targetTransformerMapper.findByTargetId(target.getId());
+            target.setTransformers(transformers);
+            return target;
+        });
+    }
+
+    @Override
     public void save(Target target) {
         this.targetMapper.save(target);
         target.getTransformers().forEach(transformer -> {
             this.targetTransformerMapper.save(target.getId(), transformer, transformer.getClass().getSimpleName());
         });
+    }
+
+    @Override
+    public void deleteById(String id) {
+        this.targetMapper.deleteById(id);
+        this.targetTransformerMapper.deleteByTargetId(id);
     }
 }

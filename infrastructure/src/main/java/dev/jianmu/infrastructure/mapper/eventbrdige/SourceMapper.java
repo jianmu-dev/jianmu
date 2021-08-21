@@ -1,8 +1,10 @@
 package dev.jianmu.infrastructure.mapper.eventbrdige;
 
 import dev.jianmu.eventbridge.aggregate.Source;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.Optional;
 
@@ -16,7 +18,13 @@ public interface SourceMapper {
     @Select("SELECT * FROM `eb_source` WHERE id = #{id}")
     Optional<Source> findById(String id);
 
-    @Insert("insert into eb_source(id, name, type) " +
-            "values(#{id}, #{name}, #{type})")
+    @Update("update eb_source set token = #{token} WHERE id = #{id}")
+    void updateTokenById(Source source);
+
+    @Insert("insert into eb_source(id, name, type, token) " +
+            "values(#{id}, #{name}, #{type}, #{token})")
     void save(Source source);
+
+    @Delete("delete FROM eb_source WHERE id = #{id}")
+    void deleteById(String id);
 }

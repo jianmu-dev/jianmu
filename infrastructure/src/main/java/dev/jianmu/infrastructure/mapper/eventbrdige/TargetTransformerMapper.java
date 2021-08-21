@@ -29,4 +29,7 @@ public interface TargetTransformerMapper {
     @Insert("insert into eb_target_transformer(target_id, variable_name, variable_type, expression, class_type) " +
             "values(#{targetId}, #{tf.variableName}, #{tf.variableType}, #{tf.expression}, #{classType})")
     void save(@Param("targetId") String targetId, @Param("tf") Transformer<?> transformer, @Param("classType") String classType);
+
+    @Delete("delete from eb_target_transformer WHERE target_id = #{targetId}")
+    void deleteByTargetId(String targetId);
 }

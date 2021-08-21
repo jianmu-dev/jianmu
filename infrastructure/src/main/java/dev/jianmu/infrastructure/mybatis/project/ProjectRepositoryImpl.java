@@ -44,16 +44,6 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findById(id);
     }
 
-    @Override
-    public Optional<Project> findByIdAndWebhook(String id, String webhook) {
-        return this.projectMapper.findByIdAndWebhook(id, webhook);
-    }
-
-    @Override
-    public Optional<Project> findByWorkflowRef(String workflowRef) {
-        return this.projectMapper.findByWorkflowRef(workflowRef);
-    }
-
     public PageInfo<Project> findAllPage(String workflowName, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> this.projectMapper.findAllPage(workflowName));

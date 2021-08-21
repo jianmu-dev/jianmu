@@ -27,7 +27,17 @@ public class SourceRepositoryImpl implements SourceRepository {
     }
 
     @Override
+    public void updateTokenById(Source source) {
+        this.sourceMapper.updateTokenById(source);
+    }
+
+    @Override
     public void save(Source source) {
         this.sourceMapper.save(source);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        this.sourceMapper.deleteById(id);
     }
 }

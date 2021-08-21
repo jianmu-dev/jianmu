@@ -13,5 +13,9 @@ import java.util.Optional;
 public interface SourceRepository {
     Optional<Source> findById(String id);
 
+    void updateTokenById(Source source);
+
     void save(Source source);
+
+    void deleteById(String id);
 }

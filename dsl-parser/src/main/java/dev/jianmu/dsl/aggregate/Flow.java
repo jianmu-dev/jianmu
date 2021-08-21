@@ -170,6 +170,10 @@ public class Flow {
                 .collect(Collectors.toSet());
     }
 
+    public boolean hasEventParameterRefer(List<ParameterRefer> refers) {
+        return refers.stream().anyMatch(parameterRefer -> parameterRefer.getSourceTaskRef().equals("Event"));
+    }
+
     public List<ParameterRefer> getParameterRefers(String workflowVersion) {
         List<ParameterRefer> parameterRefers = new ArrayList<>();
         flowNodes.forEach(flowNode -> flowNode.getParam().forEach((key, val) -> {

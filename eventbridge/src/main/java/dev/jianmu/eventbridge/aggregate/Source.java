@@ -1,5 +1,7 @@
 package dev.jianmu.eventbridge.aggregate;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -17,6 +19,7 @@ public class Source {
     private String id;
     private String name;
     private Type type;
+    private String token;
 
     public String getId() {
         return id;
@@ -28,6 +31,24 @@ public class Source {
 
     public Type getType() {
         return type;
+    }
+
+    public void generateToken() {
+        this.token = UUID.randomUUID().toString().replace("-", "");
+    }
+
+    public boolean isValidToken(String token) {
+        return this.token.equals(token);
+    }
+
+    public String getWebHookUrl() {
+        if (token.isBlank()) {
+            return token;
+        } else {
+            var hookId = this.token + "_" + this.id;
+            var hook = Base64.getEncoder().encodeToString(hookId.getBytes(StandardCharsets.UTF_8));
+            return "/webhook/" + hook;
+        }
     }
 
     public static final class Builder {
