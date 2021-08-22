@@ -19,7 +19,7 @@ public class Source {
     private String id;
     private String name;
     private Type type;
-    private String token;
+    private String token = "";
 
     public String getId() {
         return id;
