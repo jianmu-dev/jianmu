@@ -40,6 +40,10 @@ public class ProjectVo {
     private Source source;
     @Schema(description = "DSL类型")
     private DslType dslType;
+    @Schema(description = "Event Bridge Source Id")
+    private String eventBridgeSourceId;
+    @Schema(description = "触发类型")
+    private String triggerType;
     @Schema(description = "Git库ID")
     private String gitRepoId;
     @Schema(description = "最后执行时间")
