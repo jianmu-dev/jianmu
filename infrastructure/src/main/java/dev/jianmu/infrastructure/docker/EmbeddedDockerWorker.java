@@ -234,9 +234,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
         String resultFile = null;
         if (null != dockerTask.getResultFile()) {
-            var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), dockerTask.getResultFile()).exec();
-            var tarStream = new TarArchiveInputStream(stream);
-            try (var reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))) {
+            try (
+                    var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), dockerTask.getResultFile()).exec();
+                    var tarStream = new TarArchiveInputStream(stream);
+                    var reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))
+            ) {
                 var tarArchiveEntry = tarStream.getNextTarEntry();
                 if (!tarStream.canReadEntryData(tarArchiveEntry)) {
                     logger.info("不能读取tarArchiveEntry");
