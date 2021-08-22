@@ -5,13 +5,18 @@ import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.task.service.WorkerDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -52,6 +57,16 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     @Bean
     public WorkerDomainService createWorkerDomainService() {
         return new WorkerDomainService();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        HttpClient httpClient = HttpClientBuilder.create()
+                .setRedirectStrategy(new LaxRedirectStrategy())
+                .build();
+        factory.setHttpClient(httpClient);
+        return new RestTemplate(factory);
     }
 
     @Bean
