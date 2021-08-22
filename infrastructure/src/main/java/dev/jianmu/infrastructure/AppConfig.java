@@ -60,16 +60,6 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     }
 
     @Bean
-    public RestTemplate restTemplate() {
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        HttpClient httpClient = HttpClientBuilder.create()
-                .setRedirectStrategy(new LaxRedirectStrategy())
-                .build();
-        factory.setHttpClient(httpClient);
-        return new RestTemplate(factory);
-    }
-
-    @Bean
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
