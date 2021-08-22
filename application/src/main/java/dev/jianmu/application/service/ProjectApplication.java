@@ -422,33 +422,4 @@ public class ProjectApplication {
         }
         return "";
     }
-
-    private Set<Transformer> transformerTemplate() {
-        var refTf = BodyTransformer.Builder.aBodyTransformer()
-                .variableName("gitlab_ref")
-                .variableType("STRING")
-                .expression("$.ref")
-                .build();
-        var objectKindTf = BodyTransformer.Builder.aBodyTransformer()
-                .variableName("gitlab_object_kind")
-                .variableType("STRING")
-                .expression("$.object_kind")
-                .build();
-        var beforeTf = BodyTransformer.Builder.aBodyTransformer()
-                .variableName("gitlab_before")
-                .variableType("STRING")
-                .expression("$.before")
-                .build();
-        var afterTf = BodyTransformer.Builder.aBodyTransformer()
-                .variableName("gitlab_after")
-                .variableType("STRING")
-                .expression("$.after")
-                .build();
-        var eventTf = HeaderTransformer.Builder.aHeaderTransformer()
-                .variableName("gitlab_event_name")
-                .variableType("STRING")
-                .expression("X-Gitlab-Event")
-                .build();
-        return Set.of(refTf, objectKindTf, beforeTf, afterTf, eventTf);
-    }
 }

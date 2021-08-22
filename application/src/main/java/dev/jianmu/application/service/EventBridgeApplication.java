@@ -242,6 +242,21 @@ public class EventBridgeApplication {
                 .variableType("STRING")
                 .expression("X-Gitlab-Event")
                 .build();
-        return Set.of(refTf, objectKindTf, beforeTf, afterTf, eventTf);
+        var giteeRefTf = BodyTransformer.Builder.aBodyTransformer()
+                .variableName("gitee_ref")
+                .variableType("STRING")
+                .expression("$.ref")
+                .build();
+        var giteeBeforeTf = BodyTransformer.Builder.aBodyTransformer()
+                .variableName("gitlab_before")
+                .variableType("STRING")
+                .expression("$.before")
+                .build();
+        var giteeAfterTf = BodyTransformer.Builder.aBodyTransformer()
+                .variableName("gitlab_after")
+                .variableType("STRING")
+                .expression("$.after")
+                .build();
+        return Set.of(refTf, objectKindTf, beforeTf, afterTf, eventTf, giteeRefTf, giteeBeforeTf, giteeAfterTf);
     }
 }
