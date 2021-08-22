@@ -1,8 +1,6 @@
 package dev.jianmu.project.aggregate;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -22,16 +20,24 @@ public class Project {
         PIPELINE
     }
 
+    public enum TriggerType {
+        WEBHOOK,
+        CRON,
+        MANUAL
+    }
+
     // ID
     private String id;
     // DSL来源
     private DslSource dslSource;
     // DSL类型
     private DslType dslType;
+    // Event Bridge Source Id
+    private String eventBridgeSourceId;
+    // 触发类型
+    private TriggerType triggerType;
     // Git库Id
     private String gitRepoId;
-    // WebHook URL
-    private String webhook = "";
     // 关联流程定义名称
     private String workflowName;
     // 关联流程定义Ref
@@ -48,10 +54,6 @@ public class Project {
     private String lastModifiedBy;
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
-
-    public void generateWebhook() {
-        this.webhook = UUID.randomUUID().toString().replace("-", "");
-    }
 
     public void setWorkflowName(String workflowName) {
         this.workflowName = workflowName;
@@ -71,6 +73,14 @@ public class Project {
 
     public void setDslType(DslType dslType) {
         this.dslType = dslType;
+    }
+
+    public void setTriggerType(TriggerType triggerType) {
+        this.triggerType = triggerType;
+    }
+
+    public void setEventBridgeSourceId(String eventBridgeSourceId) {
+        this.eventBridgeSourceId = eventBridgeSourceId;
     }
 
     public void setLastModifiedBy(String lastModifiedBy) {
@@ -93,18 +103,16 @@ public class Project {
         return dslType;
     }
 
-    public String getGitRepoId() {
-        return gitRepoId;
+    public TriggerType getTriggerType() {
+        return triggerType;
     }
 
-    public String getWebHookUrl() {
-        if (webhook.isBlank()) {
-            return webhook;
-        } else {
-            var hookId = this.webhook + "_" + this.id;
-            var hook = Base64.getEncoder().encodeToString(hookId.getBytes(StandardCharsets.UTF_8));
-            return "/webhook/" + hook;
-        }
+    public String getEventBridgeSourceId() {
+        return eventBridgeSourceId;
+    }
+
+    public String getGitRepoId() {
+        return gitRepoId;
     }
 
     public String getWorkflowName() {
@@ -144,6 +152,10 @@ public class Project {
         private DslSource dslSource;
         // DSL类型
         private DslType dslType;
+        // Event Bridge Source Id
+        private String eventBridgeSourceId;
+        // 触发类型
+        private TriggerType triggerType;
         // Git库Id
         private String gitRepoId;
         // 关联流程定义名称
@@ -171,6 +183,16 @@ public class Project {
 
         public Builder dslType(DslType dslType) {
             this.dslType = dslType;
+            return this;
+        }
+
+        public Builder eventBridgeSourceId(String eventBridgeSourceId) {
+            this.eventBridgeSourceId = eventBridgeSourceId;
+            return this;
+        }
+
+        public Builder triggerType(TriggerType triggerType) {
+            this.triggerType = triggerType;
             return this;
         }
 
@@ -211,6 +233,8 @@ public class Project {
             project.workflowName = this.workflowName;
             project.dslSource = this.dslSource;
             project.dslType = this.dslType;
+            project.triggerType = this.triggerType;
+            project.eventBridgeSourceId = this.eventBridgeSourceId;
             project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
             project.workflowRef = this.workflowRef;

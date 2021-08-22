@@ -18,7 +18,7 @@ public class InstanceParameterDomainService {
         return taskParameters.stream()
                 .map(taskParameter -> InstanceParameter.Builder.anInstanceParameter()
                         .instanceId(taskInstance.getId())
-                        .projectId(taskInstance.getProjectId())
+                        .triggerId(taskInstance.getTriggerId())
                         .defKey(taskInstance.getDefKey())
                         .asyncTaskRef(taskInstance.getAsyncTaskRef())
                         .businessId(taskInstance.getBusinessId())

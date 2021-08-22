@@ -1,7 +1,7 @@
 package dev.jianmu.task.service;
 
-import dev.jianmu.task.aggregate.DockerTask;
 import dev.jianmu.task.aggregate.DockerDefinition;
+import dev.jianmu.task.aggregate.DockerTask;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import dev.jianmu.task.aggregate.spec.HostConfig;
@@ -23,8 +23,8 @@ public class WorkerDomainService {
         var env = environmentMap.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
         // 使用TriggerId作为工作目录名称与volume名称
-        var workingDir = "/" + taskInstance.getProjectId();
-        var volumeName = taskInstance.getProjectId();
+        var workingDir = "/" + taskInstance.getTriggerId();
+        var volumeName = taskInstance.getTriggerId();
 
         var mount = Mount.Builder.aMount()
                 .type(MountType.VOLUME)
@@ -44,7 +44,7 @@ public class WorkerDomainService {
         return DockerTask.Builder.aDockerTask()
                 .taskInstanceId(taskInstance.getId())
                 .businessId(taskInstance.getBusinessId())
-                .projectId(taskInstance.getProjectId())
+                .triggerId(taskInstance.getTriggerId())
                 .defKey(taskInstance.getDefKey())
                 .resultFile(taskDefinition.getResultFile())
                 .spec(newSpec)

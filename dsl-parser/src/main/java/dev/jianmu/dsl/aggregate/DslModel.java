@@ -43,6 +43,7 @@ public class DslModel {
         try {
             dsl = dsl.mapper.readValue(dslText, DslModel.class);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException("Dsl解析异常");
         }
         dsl.syntaxCheck();
@@ -190,7 +191,7 @@ public class DslModel {
     }
 
     private String findVariable(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+)\\}$");
+        Pattern pattern = Pattern.compile("^\\$\\{([a-zA-Z0-9_-]+)}$");
         Matcher matcher = pattern.matcher(paramValue);
         if (matcher.find()) {
             return matcher.group(1);
@@ -213,18 +214,6 @@ public class DslModel {
                     var valName = findVariable(val);
                     var secretName = findSecret(val);
                     if (null != valName) {
-                        // 处理输入参数引用输出参数
-                        if (valName.contains(".")) {
-                            var strings = valName.split("\\.");
-                            var p = DslParameter.Builder.aDslParameter()
-                                    .nodeName(flowNode.getName())
-                                    .definitionKey(flowNode.getType())
-                                    .name(key)
-                                    .outputNodeName(strings[0])
-                                    .outputParameterName(strings[1])
-                                    .build();
-                            parameters.add(p);
-                        }
                         // 全局参数合并
                         if (null != this.param.get(valName)) {
                             var p = DslParameter.Builder.aDslParameter()
@@ -237,7 +226,7 @@ public class DslModel {
                         }
                         return;
                     }
-                    // 密钥类型参数
+                    // 密钥类型参数 TODO 需要与任务定义校验
                     if (null != secretName) {
                         var p = DslParameter.Builder.aDslParameter()
                                 .nodeName(flowNode.getName())

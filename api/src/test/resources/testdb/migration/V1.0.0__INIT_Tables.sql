@@ -1,18 +1,19 @@
 CREATE TABLE `jianmu_project`
 (
-    `id`                 varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_source`         varchar(45)  DEFAULT NULL COMMENT 'DSL来源',
-    `dsl_type`           varchar(45)  DEFAULT NULL COMMENT 'DSL类型',
-    `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
-    `webhook`            varchar(255) DEFAULT NULL COMMENT 'WebHook Url',
-    `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
-    `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
-    `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
-    `steps`              int          NOT NULL COMMENT '步骤数量',
-    `dsl_text`           longtext     NOT NULL COMMENT 'DSL内容文本',
-    `created_time`       datetime     DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`   varchar(45)  DEFAULT NULL COMMENT '最后修改人',
-    `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
+    `id`                     varchar(45)  NOT NULL COMMENT 'ID',
+    `dsl_source`             varchar(45) DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_type`               varchar(45) DEFAULT NULL COMMENT 'DSL 类型',
+    `event_bridge_source_id` varchar(45) DEFAULT NULL COMMENT 'Event Bridge Source Id',
+    `trigger_type`           varchar(45) DEFAULT NULL COMMENT '触发类型',
+    `git_repo_id`            varchar(150) NOT NULL COMMENT 'Git仓库ID',
+    `workflow_name`          varchar(45)  NOT NULL COMMENT '流程定义显示名称',
+    `workflow_ref`           varchar(45)  NOT NULL COMMENT '流程定义Ref',
+    `workflow_version`       varchar(45)  NOT NULL COMMENT '流程定义版本',
+    `steps`                  int          NOT NULL COMMENT '步骤数量',
+    `dsl_text`               longtext     NOT NULL COMMENT 'DSL内容文本',
+    `created_time`           datetime    DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`       varchar(45) DEFAULT NULL COMMENT '最后修改人',
+    `last_modified_time`     datetime     NOT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`)
 );
 
@@ -126,7 +127,7 @@ CREATE TABLE `task_instance`
     `workflow_ref`      varchar(45) DEFAULT NULL COMMENT '流程定义Ref',
     `workflow_version`  varchar(45) DEFAULT NULL COMMENT '流程定义版本',
     `business_id`       varchar(45)  NOT NULL COMMENT '外部业务ID',
-    `project_id`        varchar(255) NOT NULL COMMENT '项目ID',
+    `trigger_id`        varchar(255) NOT NULL COMMENT 'Trigger ID',
     `start_time`        datetime    DEFAULT NULL COMMENT '开始时间',
     `end_time`          datetime    DEFAULT NULL COMMENT '结束时间',
     `result_file`       longtext COMMENT '执行结果文件',
@@ -179,4 +180,56 @@ CREATE TABLE `secret_kv_pair`
     `namespace_name` varchar(100) NOT NULL COMMENT '命名空间名称',
     `kv_key`         varchar(45)  NOT NULL COMMENT '参数key',
     `kv_value`       text         NOT NULL COMMENT '参数值'
+);
+
+CREATE TABLE `eb_source`
+(
+    `id`    varchar(45) NOT NULL COMMENT 'ID',
+    `name`  varchar(45) DEFAULT NULL COMMENT '名称',
+    `type`  varchar(45) DEFAULT NULL COMMENT '类型',
+    `token` varchar(45) DEFAULT NULL COMMENT '外部token',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `eb_target`
+(
+    `id`             varchar(45) NOT NULL COMMENT 'ID',
+    `name`           varchar(45) DEFAULT NULL COMMENT '名称',
+    `type`           varchar(45) DEFAULT NULL COMMENT '类型',
+    `destination_id` varchar(45) DEFAULT NULL COMMENT '目标ID',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `eb_connection`
+(
+    `id`        varchar(45) NOT NULL COMMENT 'ID',
+    `source_id` varchar(45) DEFAULT NULL COMMENT 'Source ID',
+    `target_id` varchar(45) DEFAULT NULL COMMENT 'Target ID',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `eb_target_event`
+(
+    `id`             varchar(45) NOT NULL COMMENT 'ID',
+    `source_id`      varchar(45) DEFAULT NULL COMMENT 'Source ID',
+    `target_id`      varchar(45) DEFAULT NULL COMMENT 'Target ID',
+    `destination_id` varchar(45) DEFAULT NULL COMMENT 'Destination ID',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `eb_target_event_parameter`
+(
+    `target_event_id` varchar(45) NOT NULL COMMENT '关联Target Event ID',
+    `name`            varchar(45) NOT NULL COMMENT '名称',
+    `type`            varchar(45) NOT NULL COMMENT '类型',
+    `parameter_id`    varchar(45) NOT NULL COMMENT '关联parameter id'
+);
+
+CREATE TABLE `eb_target_transformer`
+(
+    `target_id`     varchar(45) NOT NULL COMMENT '关联的Target ID',
+    `variable_name` varchar(45) NOT NULL COMMENT '变量名',
+    `variable_type` varchar(45) NOT NULL COMMENT '变量类型',
+    `expression`    varchar(45) NOT NULL COMMENT '表达式',
+    `class_type`    varchar(45) NOT NULL COMMENT 'Transformer类型'
 );

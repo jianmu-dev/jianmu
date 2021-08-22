@@ -89,20 +89,6 @@ public class ProjectController {
         return this.projectApplication.findByRefAndVersion(ref, version);
     }
 
-    @GetMapping("/webhook/{projectId}")
-    @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
-    public WebhookVo getWebhookUrl(@PathVariable String projectId) {
-        var webhook = this.projectApplication.getWebhookUrl(projectId);
-        return WebhookVo.builder().webhook(webhook).build();
-    }
-
-    @PatchMapping("/webhook/{projectId}")
-    @Operation(summary = "生成WebHook Url", description = "生成WebHook Url")
-    public WebhookVo generateWebhook(@PathVariable String projectId) {
-        var webhook = this.projectApplication.generateWebhook(projectId);
-        return WebhookVo.builder().webhook(webhook).build();
-    }
-
     @GetMapping
     @Operation(summary = "分页查询项目列表", description = "分页查询项目列表")
     public PageInfo<Project> findAll(ProjectSearchDto searchDto) {

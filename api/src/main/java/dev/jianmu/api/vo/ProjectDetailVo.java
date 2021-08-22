@@ -26,6 +26,10 @@ public class ProjectDetailVo {
     private String dslSource;
     // DSL类型
     private String dslType;
+    // Event Bridge Source Id
+    private String eventBridgeSourceId;
+    // 触发类型
+    private String triggerType;
     // Git库Id
     private String gitRepoId;
     // 关联流程定义名称

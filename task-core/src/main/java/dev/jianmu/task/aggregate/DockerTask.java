@@ -11,7 +11,8 @@ import dev.jianmu.task.aggregate.spec.ContainerSpec;
 public class DockerTask {
     private String taskInstanceId;
     private String businessId;
-    private String projectId;
+    // 外部触发ID，流程实例唯一
+    private String triggerId;
     // 任务定义唯一Key
     private String defKey;
     private String resultFile;
@@ -29,8 +30,8 @@ public class DockerTask {
         return businessId;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public String getTriggerId() {
+        return triggerId;
     }
 
     public String getDefKey() {
@@ -48,7 +49,7 @@ public class DockerTask {
     public static final class Builder {
         private String taskInstanceId;
         private String businessId;
-        private String projectId;
+        private String triggerId;
         // 任务定义唯一Key
         private String defKey;
         private String resultFile;
@@ -72,8 +73,8 @@ public class DockerTask {
             return this;
         }
 
-        public Builder projectId(String projectId) {
-            this.projectId = projectId;
+        public Builder triggerId(String triggerId) {
+            this.triggerId = triggerId;
             return this;
         }
 
@@ -95,7 +96,7 @@ public class DockerTask {
         public DockerTask build() {
             DockerTask dockerTask = new DockerTask();
             dockerTask.spec = this.spec;
-            dockerTask.projectId = this.projectId;
+            dockerTask.triggerId = this.triggerId;
             dockerTask.businessId = this.businessId;
             dockerTask.taskInstanceId = this.taskInstanceId;
             dockerTask.defKey = this.defKey;

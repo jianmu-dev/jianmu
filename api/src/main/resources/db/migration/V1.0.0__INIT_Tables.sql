@@ -1,18 +1,19 @@
 CREATE TABLE `jianmu_project`
 (
-    `id`                 varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_source`         varchar(45)  DEFAULT NULL COMMENT 'DSL来源',
-    `dsl_type`           varchar(45)  DEFAULT NULL COMMENT 'DSL类型',
-    `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
-    `webhook`            varchar(255) DEFAULT NULL COMMENT 'WebHook Url',
-    `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
-    `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
-    `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
-    `steps`              int          NOT NULL COMMENT '步骤数量',
-    `dsl_text`           longtext     NOT NULL COMMENT 'DSL内容文本',
-    `created_time`       datetime     DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`   varchar(45)  DEFAULT NULL COMMENT '最后修改人',
-    `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
+    `id`                     varchar(45)  NOT NULL COMMENT 'ID',
+    `dsl_source`             varchar(45) DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_type`               varchar(45) DEFAULT NULL COMMENT 'DSL 类型',
+    `event_bridge_source_id` varchar(45) DEFAULT NULL COMMENT 'Event Bridge Source Id',
+    `trigger_type`           varchar(45) DEFAULT NULL COMMENT '触发类型',
+    `git_repo_id`            varchar(150) NOT NULL COMMENT 'Git仓库ID',
+    `workflow_name`          varchar(45)  NOT NULL COMMENT '流程定义显示名称',
+    `workflow_ref`           varchar(45)  NOT NULL COMMENT '流程定义Ref',
+    `workflow_version`       varchar(45)  NOT NULL COMMENT '流程定义版本',
+    `steps`                  int          NOT NULL COMMENT '步骤数量',
+    `dsl_text`               longtext     NOT NULL COMMENT 'DSL内容文本',
+    `created_time`           datetime    DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`       varchar(45) DEFAULT NULL COMMENT '最后修改人',
+    `last_modified_time`     datetime     NOT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`)
 ) ENGINE = InnoDB
@@ -141,15 +142,15 @@ CREATE TABLE `parameter_refer`
 CREATE TABLE `task_instance`
 (
     `id`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '主键',
-    `serial_no`         int                                    DEFAULT NULL COMMENT '执行序号',
+    `serial_no`         int                                                          DEFAULT NULL COMMENT '执行序号',
     `def_key`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务定义唯一Key',
     `async_task_ref`    varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
-    `workflow_ref`      varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义Ref',
-    `workflow_version`  varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义版本',
+    `workflow_ref`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义Ref',
+    `workflow_version`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义版本',
     `business_id`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '外部业务ID',
-    `project_id`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目ID',
-    `start_time`        datetime                               DEFAULT NULL COMMENT '开始时间',
-    `end_time`          datetime                               DEFAULT NULL COMMENT '结束时间',
+    `trigger_id`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Trigger ID',
+    `start_time`        datetime                                                     DEFAULT NULL COMMENT '开始时间',
+    `end_time`          datetime                                                     DEFAULT NULL COMMENT '结束时间',
     `result_file`       longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '执行结果文件',
     `status`            varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务运行状态',
     `output_parameters` blob COMMENT '任务实例输出参数',
@@ -165,7 +166,7 @@ CREATE TABLE `task_instance_parameter`
     `def_key`        varchar(45)  NOT NULL COMMENT '任务定义Key（类型）',
     `async_task_ref` varchar(45)  NOT NULL COMMENT '任务节点ref',
     `business_id`    varchar(45)  NOT NULL COMMENT '流程实例ID',
-    `project_id`     varchar(255) NOT NULL COMMENT '项目ID',
+    `trigger_id`     varchar(255) NOT NULL COMMENT '外部触发ID，流程实例唯一',
     `ref`            varchar(45)  NOT NULL COMMENT '参数ref',
     `type`           varchar(45)  NOT NULL COMMENT '参数类型',
     `parameter_id`   varchar(45)  NOT NULL COMMENT '参数引用ID'
@@ -213,3 +214,67 @@ CREATE TABLE `secret_kv_pair`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥键值对表';
+
+CREATE TABLE `eb_source`
+(
+    `id`    varchar(45) NOT NULL COMMENT 'ID',
+    `name`  varchar(45) DEFAULT NULL COMMENT '名称',
+    `type`  varchar(45) DEFAULT NULL COMMENT '类型',
+    `token` varchar(45) DEFAULT NULL COMMENT '外部token',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='Source表';
+
+CREATE TABLE `eb_target`
+(
+    `id`             varchar(45) NOT NULL COMMENT 'ID',
+    `name`           varchar(45) DEFAULT NULL COMMENT '名称',
+    `type`           varchar(45) DEFAULT NULL COMMENT '类型',
+    `destination_id` varchar(45) DEFAULT NULL COMMENT '目标ID',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='Target表';
+
+CREATE TABLE `eb_connection`
+(
+    `id`        varchar(45) NOT NULL COMMENT 'ID',
+    `source_id` varchar(45) DEFAULT NULL COMMENT 'Source ID',
+    `target_id` varchar(45) DEFAULT NULL COMMENT 'Target ID',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='Connection表';
+
+CREATE TABLE `eb_target_event`
+(
+    `id`             varchar(45) NOT NULL COMMENT 'ID',
+    `source_id`      varchar(45) DEFAULT NULL COMMENT 'Source ID',
+    `target_id`      varchar(45) DEFAULT NULL COMMENT 'Target ID',
+    `destination_id` varchar(45) DEFAULT NULL COMMENT 'Destination ID',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='Target Event表';
+
+CREATE TABLE `eb_target_event_parameter`
+(
+    `target_event_id` varchar(45) NOT NULL COMMENT '关联Target Event ID',
+    `name`            varchar(45) NOT NULL COMMENT '名称',
+    `type`            varchar(45) NOT NULL COMMENT '类型',
+    `parameter_id`    varchar(45) NOT NULL COMMENT '关联parameter id'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='Target Event Parameter表';
+
+CREATE TABLE `eb_target_transformer`
+(
+    `target_id`     varchar(45) NOT NULL COMMENT '关联的Target ID',
+    `variable_name` varchar(45) NOT NULL COMMENT '变量名',
+    `variable_type` varchar(45) NOT NULL COMMENT '变量类型',
+    `expression`    varchar(45) NOT NULL COMMENT '表达式',
+    `class_type`    varchar(45) NOT NULL COMMENT 'Transformer类型'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='Target Transformer表';

@@ -1,10 +1,13 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.event.InstallDefinitionsEvent;
+import dev.jianmu.application.service.EventBridgeApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
-import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.event.CreatedEvent;
+import dev.jianmu.project.event.DeletedEvent;
+import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.task.aggregate.Definition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -21,28 +24,30 @@ import java.util.List;
  **/
 @Component
 @Slf4j
-public class DslEventHandler {
+public class ProjectEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final ProjectApplication projectApplication;
+    private final EventBridgeApplication eventBridgeApplication;
     private final TaskDefinitionApplication taskDefinitionApplication;
 
-    public DslEventHandler(
+    public ProjectEventHandler(
             WorkflowInstanceApplication workflowInstanceApplication,
             ProjectApplication projectApplication,
-            TaskDefinitionApplication taskDefinitionApplication
+            EventBridgeApplication eventBridgeApplication, TaskDefinitionApplication taskDefinitionApplication
     ) {
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.projectApplication = projectApplication;
+        this.eventBridgeApplication = eventBridgeApplication;
         this.taskDefinitionApplication = taskDefinitionApplication;
     }
 
     @Async
     @EventListener
-    public void handleTriggerEvent(Project project) {
+    public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
         this.workflowInstanceApplication.createAndStart(
-                project.getId() + project.getWorkflowVersion(),
-                project.getWorkflowRef() + project.getWorkflowVersion()
+                triggerEvent.getTriggerId(),
+                triggerEvent.getWorkflowRef() + triggerEvent.getWorkflowVersion()
         );
     }
 
@@ -59,5 +64,15 @@ public class DslEventHandler {
             log.info("安装节点定义: {}:{}", definition.getRef(), definition.getVersion());
         });
         this.taskDefinitionApplication.installDefinitions(definitionsFromRegistry);
+    }
+
+    @EventListener
+    public void handleProjectCreate(CreatedEvent createdEvent) {
+        this.eventBridgeApplication.create(createdEvent.getProjectId());
+    }
+
+    @EventListener
+    public void handleProjectDelete(DeletedEvent deletedEvent) {
+        this.eventBridgeApplication.delete(deletedEvent.getProjectId());
     }
 }

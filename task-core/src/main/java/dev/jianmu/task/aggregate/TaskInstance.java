@@ -1,8 +1,6 @@
 package dev.jianmu.task.aggregate;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -26,8 +24,8 @@ public class TaskInstance extends AggregateRoot {
     private String workflowVersion;
     // 外部业务ID, 必须唯一
     private String businessId;
-    // 项目ID
-    private String projectId;
+    // 外部触发ID，流程实例唯一
+    private String triggerId;
     // 开始时间
     private final LocalDateTime startTime = LocalDateTime.now();
     // 结束时间
@@ -88,8 +86,8 @@ public class TaskInstance extends AggregateRoot {
         return businessId;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public String getTriggerId() {
+        return triggerId;
     }
 
     public LocalDateTime getStartTime() {
@@ -124,8 +122,8 @@ public class TaskInstance extends AggregateRoot {
         private String workflowVersion;
         // 外部业务ID
         private String businessId;
-        // 项目ID
-        private String projectId;
+        // 外部触发ID，流程实例唯一
+        private String triggerId;
 
         private Builder() {
         }
@@ -164,8 +162,8 @@ public class TaskInstance extends AggregateRoot {
             return this;
         }
 
-        public Builder projectId(String projectId) {
-            this.projectId = projectId;
+        public Builder triggerId(String triggerId) {
+            this.triggerId = triggerId;
             return this;
         }
 
@@ -178,7 +176,7 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.workflowRef = this.workflowRef;
             taskInstance.workflowVersion = this.workflowVersion;
             taskInstance.businessId = this.businessId;
-            taskInstance.projectId = this.projectId;
+            taskInstance.triggerId = this.triggerId;
             return taskInstance;
         }
     }

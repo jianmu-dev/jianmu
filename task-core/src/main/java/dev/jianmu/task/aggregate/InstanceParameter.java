@@ -22,8 +22,8 @@ public class InstanceParameter {
     private String asyncTaskRef;
     // 外部业务ID, 必须唯一
     private String businessId;
-    // 项目ID
-    private String projectId;
+    // 外部触发ID，流程实例唯一
+    private String triggerId;
     // 参数唯一引用名称
     private String ref;
     // 输入输出类型
@@ -51,8 +51,8 @@ public class InstanceParameter {
         return businessId;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public String getTriggerId() {
+        return triggerId;
     }
 
     public String getRef() {
@@ -78,8 +78,8 @@ public class InstanceParameter {
         private String asyncTaskRef;
         // 外部业务ID, 必须唯一
         private String businessId;
-        // 项目ID
-        private String projectId;
+        // 外部触发ID，流程实例唯一
+        private String triggerId;
         // 参数唯一引用名称
         private String ref;
         // 输入输出类型
@@ -119,8 +119,8 @@ public class InstanceParameter {
             return this;
         }
 
-        public Builder projectId(String projectId) {
-            this.projectId = projectId;
+        public Builder triggerId(String triggerId) {
+            this.triggerId = triggerId;
             return this;
         }
 
@@ -141,7 +141,7 @@ public class InstanceParameter {
 
         public InstanceParameter build() {
             InstanceParameter instanceParameter = new InstanceParameter();
-            instanceParameter.projectId = this.projectId;
+            instanceParameter.triggerId = this.triggerId;
             instanceParameter.type = this.type;
             instanceParameter.asyncTaskRef = this.asyncTaskRef;
             instanceParameter.parameterId = this.parameterId;
