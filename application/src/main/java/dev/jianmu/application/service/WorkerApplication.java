@@ -100,6 +100,7 @@ public class WorkerApplication {
         var instanceParameters = this.instanceParameterRepository
                 .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
         var environmentMap = this.getEnvironmentMap(instanceParameters);
+        environmentMap.put("JIANMU_SHARE_DIR", "/" + taskInstance.getTriggerId());
         var dockerTask = this.workerDomainService
                 .createDockerTask((DockerDefinition) taskDefinition, taskInstance, environmentMap);
         // 创建logWriter

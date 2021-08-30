@@ -35,7 +35,7 @@ public class WorkerDomainService {
         var spec = taskDefinition.getSpec();
         var newSpec = ContainerSpec.builder()
                 .image(spec.getImage())
-                .workingDir(workingDir)
+                .workingDir("")
                 .hostConfig(hostConfig)
                 .cmd(spec.getCmd())
                 .entrypoint(spec.getEntrypoint())
