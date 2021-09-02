@@ -104,6 +104,12 @@ public class ViewController {
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
     }
 
+    @GetMapping("/workflow/{ref}/{version}")
+    @Operation(summary = "获取DSL源码", description = "获取DSL源码")
+    public String findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
+        return this.projectApplication.findByRefAndVersion(ref, version).getDslText();
+    }
+
     @GetMapping("/task_instances/{workflowInstanceId}")
     @Operation(summary = "任务实例列表接口", description = "任务实例列表接口")
     public List<TaskInstanceVo> findByBusinessId(@PathVariable String workflowInstanceId) {
