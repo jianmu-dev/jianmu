@@ -7,14 +7,12 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.CronTrigger;
-import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.CronTriggerRepository;
-import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.service.ScheduleJobService;
@@ -43,7 +41,6 @@ public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
 
     private final ProjectRepositoryImpl projectRepository;
-    private final DslSourceCodeRepository dslSourceCodeRepository;
     private final CronTriggerRepository cronTriggerRepository;
     private final ScheduleJobService scheduleJobService;
     private final GitRepoRepository gitRepoRepository;
@@ -56,7 +53,6 @@ public class ProjectApplication {
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
-            DslSourceCodeRepository dslSourceCodeRepository,
             CronTriggerRepository cronTriggerRepository,
             ScheduleJobService scheduleJobService,
             GitRepoRepository gitRepoRepository,
@@ -68,7 +64,6 @@ public class ProjectApplication {
             JgitService jgitService
     ) {
         this.projectRepository = projectRepository;
-        this.dslSourceCodeRepository = dslSourceCodeRepository;
         this.cronTriggerRepository = cronTriggerRepository;
         this.scheduleJobService = scheduleJobService;
         this.gitRepoRepository = gitRepoRepository;
@@ -297,8 +292,9 @@ public class ProjectApplication {
         return this.projectRepository.findById(dslId);
     }
 
-    public DslSourceCode findByRefAndVersion(String ref, String version) {
-        return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+    public Workflow findByRefAndVersion(String ref, String version) {
+        return this.workflowRepository.findByRefAndVersion(ref, version)
+                .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
     }
 
     public GitRepo findGitRepoById(String gitRepoId) {
