@@ -1,4 +1,6 @@
-package dev.jianmu.dsl.aggregate;
+package dev.jianmu.application.dsl;
+
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +12,8 @@ import java.util.stream.Collectors;
  * @author: Ethan Liu
  * @create: 2021-04-19 11:17
  **/
-public class FlowNode {
+@Getter
+public class DslNode {
     private final String name;
     private final String type;
     private final List<String> sources;
@@ -19,7 +22,7 @@ public class FlowNode {
     private final String expression;
     private final Map<String, String> cases;
 
-    public FlowNode(String nodeName, Map<?, ?> node) {
+    public DslNode(String nodeName, Map<?, ?> node) {
         this.name = nodeName;
         this.type = (String) node.get("type");
         var s = node.get("sources");
@@ -60,31 +63,14 @@ public class FlowNode {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
     public String getType() {
+        if (type.equals("start") || type.equals("end")) {
+            return type;
+        }
+        String[] strings = type.split(":");
+        if (strings.length == 1) {
+            return type + ":latest";
+        }
         return type;
-    }
-
-    public List<String> getSources() {
-        return sources;
-    }
-
-    public List<String> getTargets() {
-        return targets;
-    }
-
-    public Map<String, String> getParam() {
-        return param;
-    }
-
-    public String getExpression() {
-        return expression;
-    }
-
-    public Map<String, String> getCases() {
-        return cases;
     }
 }

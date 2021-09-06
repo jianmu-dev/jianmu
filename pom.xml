@@ -13,12 +13,12 @@
         <module>infrastructure</module>
         <module>api</module>
         <module>task-core</module>
-        <module>dsl-parser</module>
         <module>secret-core</module>
         <module>project-core</module>
         <module>user-core</module>
         <module>trigger</module>
         <module>eventbridge</module>
+        <module>hub-integration</module>
     </modules>
 
     <properties>

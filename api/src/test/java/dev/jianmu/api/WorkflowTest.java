@@ -63,7 +63,6 @@ public class WorkflowTest {
         var workflow = Workflow.Builder.aWorkflow()
                 .name("Java CI")
                 .ref("java_ci")
-                .version("1.0")
                 .description("CI流程 for Java")
                 .nodes(nodes)
                 .build();
@@ -109,7 +108,6 @@ public class WorkflowTest {
         var workflow = Workflow.Builder.aWorkflow()
                 .name("Java CI")
                 .ref("java_ci")
-                .version("1.1")
                 .description("CI流程 for Java 11")
                 .nodes(nodes)
                 .build();

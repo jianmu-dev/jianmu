@@ -27,8 +27,11 @@ public interface WorkflowMapper {
     @Result(column = "nodes", property = "nodes", typeHandler = NodeSetTypeHandler.class)
     List<Workflow> findByRef(String ref);
 
-    @Insert("insert into workflow(ref_version, ref, version, name, description, nodes)" +
-            "values('${ref + version}', #{ref}, #{version}, #{name}, #{description}, #{nodes, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeSetTypeHandler})")
+    @Insert("insert into workflow(ref_version, ref, version, type, name, description, nodes, global_parameters, dsl_text)" +
+            "values('${ref + version}', #{ref}, #{version}, #{type}, #{name}, #{description}, " +
+            "#{nodes, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeSetTypeHandler}, " +
+            "#{globalParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.ParameterSetTypeHandler}, " +
+            "#{dslText})")
     void add(Workflow workflow);
 
     @Delete("delete from workflow where ref_version = #{refVersion}")

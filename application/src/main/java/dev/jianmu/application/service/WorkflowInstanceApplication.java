@@ -212,6 +212,7 @@ public class WorkflowInstanceApplication {
     @Transactional
     @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskRun(String taskInstanceId) {
+        // TODO 这里可以通过优化传入参数减少查询
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         var workflowInstance = this.workflowInstanceRepository
@@ -231,6 +232,7 @@ public class WorkflowInstanceApplication {
     @Transactional
     @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskFail(String taskInstanceId) {
+        // TODO 这里可以通过优化传入参数减少查询
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         var workflowInstance = this.workflowInstanceRepository
@@ -244,6 +246,7 @@ public class WorkflowInstanceApplication {
     @Transactional
     @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskSucceed(String taskInstanceId) {
+        // TODO 这里可以通过优化传入参数减少查询
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         var workflowInstance = this.workflowInstanceRepository

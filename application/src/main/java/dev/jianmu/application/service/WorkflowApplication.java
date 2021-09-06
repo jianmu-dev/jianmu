@@ -36,7 +36,6 @@ public class WorkflowApplication {
                                 .name(workflow.getName())
                                 .ref(workflow.getRef())
                                 .description(workflow.getDescription())
-                                .version(workflow.getVersion())
                                 .nodes(workflow.getNodes())
                                 .build()
                 );

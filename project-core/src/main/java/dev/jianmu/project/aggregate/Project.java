@@ -59,8 +59,8 @@ public class Project {
         this.workflowName = workflowName;
     }
 
-    public void setWorkflowVersion() {
-        this.workflowVersion = UUID.randomUUID().toString().replace("-", "");
+    public void setWorkflowVersion(String workflowVersion) {
+        this.workflowVersion = workflowVersion;
     }
 
     public void setSteps(int steps) {
@@ -162,6 +162,8 @@ public class Project {
         private String workflowName;
         // 关联流程定义Ref
         private String workflowRef;
+        // 关联流程定义版本
+        private String workflowVersion;
         // 流程节点数量
         private int steps;
         // 原始DSL文本
@@ -211,6 +213,11 @@ public class Project {
             return this;
         }
 
+        public Builder workflowVersion(String workflowVersion) {
+            this.workflowVersion = workflowVersion;
+            return this;
+        }
+
         public Builder steps(int steps) {
             this.steps = steps;
             return this;
@@ -229,7 +236,7 @@ public class Project {
         public Project build() {
             Project project = new Project();
             project.id = UUID.randomUUID().toString().replace("-", "");
-            project.workflowVersion = UUID.randomUUID().toString().replace("-", "");
+            project.workflowVersion = this.workflowVersion;
             project.workflowName = this.workflowName;
             project.dslSource = this.dslSource;
             project.dslType = this.dslType;
