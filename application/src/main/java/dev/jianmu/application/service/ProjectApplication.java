@@ -38,6 +38,7 @@ import java.util.Set;
  * @author: Ethan Liu
  * @create: 2021-05-15 22:13
  **/
+@Service
 public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
 
