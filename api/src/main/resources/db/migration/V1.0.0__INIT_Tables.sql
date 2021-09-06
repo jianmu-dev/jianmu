@@ -82,12 +82,15 @@ CREATE TABLE `input_parameter`
 
 CREATE TABLE `workflow`
 (
-    `ref_version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义标识，主键',
-    `ref`         varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '唯一引用名称',
-    `version`     varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '版本',
-    `name`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '显示名称',
-    `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
-    `nodes`       longblob COMMENT 'Node列表',
+    `ref_version`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义标识，主键',
+    `ref`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '唯一引用名称',
+    `version`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '版本',
+    `type`              varchar(45) COLLATE utf8mb4_unicode_ci                        NOT NULL COMMENT 'DSL 类型',
+    `name`              varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '显示名称',
+    `description`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
+    `nodes`             longblob COMMENT 'Node列表',
+    `global_parameters` blob COMMENT '全局参数',
+    `dsl_text`          longtext COLLATE utf8mb4_unicode_ci                           NOT NULL COMMENT 'DSL内容',
     PRIMARY KEY (`ref_version`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

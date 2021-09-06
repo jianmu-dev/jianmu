@@ -69,12 +69,15 @@ CREATE TABLE `input_parameter`
 
 CREATE TABLE `workflow`
 (
-    `ref_version` varchar(255) NOT NULL COMMENT '流程定义标识，主键',
-    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `version`     varchar(45)  NOT NULL COMMENT '版本',
-    `name`        varchar(255) DEFAULT NULL COMMENT '显示名称',
-    `description` varchar(255) DEFAULT NULL COMMENT '描述',
-    `nodes`       longblob COMMENT 'Node列表',
+    `ref_version`       varchar(255) NOT NULL COMMENT '流程定义标识，主键',
+    `ref`               varchar(45)  NOT NULL COMMENT '唯一引用名称',
+    `version`           varchar(45)  NOT NULL COMMENT '版本',
+    `type`              varchar(45)  NOT NULL COMMENT 'DSL 类型',
+    `name`              varchar(255) DEFAULT NULL COMMENT '显示名称',
+    `description`       varchar(255) DEFAULT NULL COMMENT '描述',
+    `nodes`             longblob COMMENT 'Node列表',
+    `global_parameters` blob COMMENT '全局参数',
+    `dsl_text`          longtext     NOT NULL COMMENT 'DSL内容',
     PRIMARY KEY (`ref_version`)
 );
 
