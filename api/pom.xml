@@ -81,14 +81,14 @@
                         <image>registry://openjdk:11.0.11-jdk-oracle</image>
                     </from>
                     <to>
-                        <image>swr.cn-east-2.myhuaweicloud.com/jianmu/ci-server</image>
+                        <image>${env.JIANMU_IMAGE_NAME}</image>
                         <tags>
-                            <tag>1.0</tag>
+                            <tag>${env.JIANMU_IMAGE_TAG}</tag>
                             <tag>latest</tag>
                         </tags>
                         <auth>
-                            <username>cn-east-2@K0T2EN0TL3EWVP2SCDQV</username>
-                            <password>1f98922a290afc131dfa35f9fc1aa6f981d5a432aff6091bff692f78b294f94f</password>
+                            <username>${env.JIANMU_DOCKER_USERNAME}</username>
+                            <password>${env.JIANMU_DOCKER_PASSWORD}</password>
                         </auth>
                     </to>
                     <container>
