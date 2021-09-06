@@ -63,8 +63,11 @@ public class WorkflowTest {
         var workflow = Workflow.Builder.aWorkflow()
                 .name("Java CI")
                 .ref("java_ci")
+                .type(Workflow.Type.WORKFLOW)
                 .description("CI流程 for Java")
                 .nodes(nodes)
+                .globalParameters(Set.of())
+                .dslText("")
                 .build();
         this.workflowRepository.add(workflow);
     }
@@ -108,8 +111,11 @@ public class WorkflowTest {
         var workflow = Workflow.Builder.aWorkflow()
                 .name("Java CI")
                 .ref("java_ci")
+                .type(Workflow.Type.PIPELINE)
                 .description("CI流程 for Java 11")
                 .nodes(nodes)
+                .globalParameters(Set.of())
+                .dslText("")
                 .build();
         this.workflowRepository.add(workflow);
     }
