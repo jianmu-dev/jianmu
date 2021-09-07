@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.elimpl;
 
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.ResultType;
 
@@ -35,17 +36,9 @@ public class EvaluationFailure implements EvaluationResult {
     }
 
     @Override
-    public ResultType getType() {
+    public Parameter<?> getValue() {
         return null;
     }
 
-    @Override
-    public String getString() {
-        return null;
-    }
 
-    @Override
-    public Boolean getBoolean() {
-        return false;
-    }
 }
