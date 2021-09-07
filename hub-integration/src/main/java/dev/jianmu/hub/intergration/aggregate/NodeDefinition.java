@@ -18,4 +18,48 @@ public class NodeDefinition {
     private String ref;
     private String sourceLink;
     private String documentLink;
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public String getOwnerRef() {
+        return ownerRef;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public String getCreatorRef() {
+        return creatorRef;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public String getSourceLink() {
+        return sourceLink;
+    }
+
+    public String getDocumentLink() {
+        return documentLink;
+    }
 }
