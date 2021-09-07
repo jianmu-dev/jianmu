@@ -5,7 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import dev.jianmu.eventbridge.aggregate.Payload;
 import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.parameter.aggregate.Parameter;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 
 /**
  * @class: BodyTransformer

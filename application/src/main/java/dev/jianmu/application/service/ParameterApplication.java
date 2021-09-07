@@ -1,8 +1,8 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.parameter.aggregate.Parameter;
-import dev.jianmu.parameter.aggregate.SecretParameter;
-import dev.jianmu.parameter.repository.ParameterRepository;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
+import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;

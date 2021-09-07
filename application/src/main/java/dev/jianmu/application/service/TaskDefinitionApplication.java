@@ -2,12 +2,12 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.client.RegistryClient;
-import dev.jianmu.parameter.aggregate.Parameter;
-import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.DockerDefinition;
 import dev.jianmu.task.aggregate.TaskParameter;
 import dev.jianmu.task.repository.DefinitionRepository;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.repository.ParameterRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

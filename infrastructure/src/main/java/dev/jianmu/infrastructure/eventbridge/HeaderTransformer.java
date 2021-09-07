@@ -2,7 +2,7 @@ package dev.jianmu.infrastructure.eventbridge;
 
 import dev.jianmu.eventbridge.aggregate.Payload;
 import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.parameter.aggregate.Parameter;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 
 import java.util.Locale;
 
