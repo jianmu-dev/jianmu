@@ -64,4 +64,14 @@ public interface InstanceParameterMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
     Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(@Param("businessId") String businessId, @Param("asyncTaskRef") String asyncTaskRef, @Param("ref") String ref);
+
+    @Select("select * from task_instance_parameter where business_id = #{businessId} and trigger_id = #{triggerId} and type = 'INPUT'")
+    @Result(column = "instance_id", property = "instanceId")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "def_key", property = "defKey")
+    @Result(column = "async_task_ref", property = "asyncTaskRef")
+    @Result(column = "business_id", property = "businessId")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "parameter_id", property = "parameterId")
+    List<InstanceParameter> findInputParamByBusinessIdAndTriggerId(@Param("businessId") String businessId, @Param("triggerId") String triggerId);
 }

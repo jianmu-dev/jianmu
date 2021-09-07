@@ -22,4 +22,6 @@ public interface InstanceParameterRepository {
     List<InstanceParameter> findByInstanceIdAndType(String instanceId, InstanceParameter.Type type);
 
     Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(String businessId, String asyncTaskRef, String ref);
+
+    List<InstanceParameter> findInputParamByBusinessIdAndTriggerId(String businessId, String triggerId);
 }
