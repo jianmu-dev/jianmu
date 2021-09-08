@@ -102,7 +102,6 @@ public class WorkerApplication {
                 .image(nodeDef.getSpec().getImage())
                 .entrypoint(nodeDef.getSpec().getEntrypoint())
                 .cmd(nodeDef.getSpec().getCmd())
-                .env(nodeDef.getSpec().getEnv())
                 .build();
         var taskDefinition = DockerDefinition.Builder.aDockerDefinition()
                 .spec(spec)
