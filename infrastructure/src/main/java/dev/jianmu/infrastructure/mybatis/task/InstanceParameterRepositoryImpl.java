@@ -46,12 +46,7 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     }
 
     @Override
-    public Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(String businessId, String asyncTaskRef, String ref) {
-        return this.instanceParameterMapper.findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(businessId, asyncTaskRef, ref);
-    }
-
-    @Override
-    public List<InstanceParameter> findInputParamByBusinessIdAndTriggerId(String businessId, String triggerId) {
-        return this.instanceParameterMapper.findInputParamByBusinessIdAndTriggerId(businessId, triggerId);
+    public List<InstanceParameter> findOutputParamByBusinessIdAndTriggerId(String businessId, String triggerId) {
+        return this.instanceParameterMapper.findOutputParamByBusinessIdAndTriggerId(businessId, triggerId);
     }
 }
