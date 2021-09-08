@@ -1,6 +1,6 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.hub.intergration.aggregate.NodeDef;
+import dev.jianmu.application.query.NodeDef;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class HubApplication {
     public List<NodeDef> findByTypes(Set<String> types) {
         return types.stream().map(type -> {
             String[] strings = type.split(":");
-            return NodeDef.Builder.aNodeDef()
+            return NodeDef.builder()
                     .name(strings[0])
                     .description("")
                     .type(type)

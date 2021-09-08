@@ -2,7 +2,7 @@ package dev.jianmu.application.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import dev.jianmu.hub.intergration.aggregate.NodeDef;
+import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.workflow.aggregate.definition.*;
 import lombok.extern.slf4j.Slf4j;
 

@@ -2,7 +2,7 @@ package dev.jianmu.api.query;
 
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.service.HubApplication;
-import dev.jianmu.hub.intergration.aggregate.NodeDef;
+import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ public class NodeDefApiImpl implements NodeDefApi {
     }
 
     @Override
-    public Optional<NodeDefinitionVersion> findByType(String type) {
+    public Optional<NodeDef> findByType(String type) {
         return Optional.empty();
     }
 }
