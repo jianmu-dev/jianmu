@@ -1,10 +1,12 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.*;
+import dev.jianmu.task.aggregate.spec.ContainerSpec;
 import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.WorkerRepository;
@@ -18,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,9 +44,9 @@ public class WorkerApplication {
     private final DockerWorker dockerWorker;
     private final WorkerDomainService workerDomainService;
     private final KVPairRepository kvPairRepository;
+    private final NodeDefApi nodeDefApi;
     private final InstanceParameterRepository instanceParameterRepository;
 
-    @Inject
     public WorkerApplication(
             WorkerRepository workerRepository,
             DefinitionRepository definitionRepository,
@@ -55,6 +56,7 @@ public class WorkerApplication {
             DockerWorker dockerWorker,
             WorkerDomainService workerDomainService,
             KVPairRepository kvPairRepository,
+            NodeDefApi nodeDefApi,
             InstanceParameterRepository instanceParameterRepository
     ) {
         this.workerRepository = workerRepository;
@@ -65,6 +67,7 @@ public class WorkerApplication {
         this.dockerWorker = dockerWorker;
         this.workerDomainService = workerDomainService;
         this.kvPairRepository = kvPairRepository;
+        this.nodeDefApi = nodeDefApi;
         this.instanceParameterRepository = instanceParameterRepository;
     }
 
@@ -90,18 +93,26 @@ public class WorkerApplication {
 
     public void runTask(TaskInstance taskInstance) {
         // 创建DockerTask
-        String[] strings = taskInstance.getDefKey().split(":");
-        var taskDefinition = this.definitionRepository
-                .findByRefAndVersion(strings[0], strings[1])
-                .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
-        if (!(taskDefinition instanceof DockerDefinition)) {
-            throw new RuntimeException("任务定义类型错误");
+        var nodeDef = this.nodeDefApi.findByType(taskInstance.getDefKey())
+                .orElseThrow(() -> new DataNotFoundException("未找到该节点定义"));
+        if (!nodeDef.getType().equals("DOCKER")) {
+            throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
         }
+        var spec = ContainerSpec.builder()
+                .image(nodeDef.getSpec().getImage())
+                .entrypoint(nodeDef.getSpec().getEntrypoint())
+                .cmd(nodeDef.getSpec().getCmd())
+                .env(nodeDef.getSpec().getEnv())
+                .build();
+        var taskDefinition = DockerDefinition.Builder.aDockerDefinition()
+                .spec(spec)
+                .resultFile(nodeDef.getResultFile())
+                .build();
         var instanceParameters = this.instanceParameterRepository
                 .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
         var environmentMap = this.getEnvironmentMap(instanceParameters);
         var dockerTask = this.workerDomainService
-                .createDockerTask((DockerDefinition) taskDefinition, taskInstance, environmentMap);
+                .createDockerTask(taskDefinition, taskInstance, environmentMap);
         // 创建logWriter
         var logWriter = this.storageService.writeLog(taskInstance.getId());
         // 执行任务
