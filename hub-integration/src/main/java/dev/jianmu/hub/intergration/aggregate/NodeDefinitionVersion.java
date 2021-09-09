@@ -15,6 +15,7 @@ public class NodeDefinitionVersion {
         SHELL
     }
 
+    private String id;
     private String ref;
     private String version;
     private String resultFile;
@@ -24,6 +25,10 @@ public class NodeDefinitionVersion {
     private Set<NodeParameter> outputParameters = new HashSet<>();
 
     private String spec;
+
+    public String getId() {
+        return id;
+    }
 
     public String getRef() {
         return ref;
@@ -53,8 +58,8 @@ public class NodeDefinitionVersion {
         return spec;
     }
 
-
     public static final class Builder {
+        private String id;
         private String ref;
         private String version;
         private String resultFile;
@@ -68,6 +73,11 @@ public class NodeDefinitionVersion {
 
         public static Builder aNodeDefinitionVersion() {
             return new Builder();
+        }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
         }
 
         public Builder ref(String ref) {
@@ -107,6 +117,7 @@ public class NodeDefinitionVersion {
 
         public NodeDefinitionVersion build() {
             NodeDefinitionVersion nodeDefinitionVersion = new NodeDefinitionVersion();
+            nodeDefinitionVersion.id = this.id;
             nodeDefinitionVersion.outputParameters = this.outputParameters;
             nodeDefinitionVersion.inputParameters = this.inputParameters;
             nodeDefinitionVersion.version = this.version;
