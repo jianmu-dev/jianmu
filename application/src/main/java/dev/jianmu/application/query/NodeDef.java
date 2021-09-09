@@ -20,6 +20,7 @@ public class NodeDef {
     private String name;
     private String description;
     private String type;
+    private String workerType;
     private Set<NodeParameter> inputParameters;
     private Set<NodeParameter> outputParameters;
     private String resultFile;

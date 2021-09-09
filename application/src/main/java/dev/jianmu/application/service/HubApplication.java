@@ -128,6 +128,8 @@ public class HubApplication {
         var nodeDef = NodeDef.builder()
                 .name(node.getName())
                 .description(node.getDescription())
+                .type(type)
+                .workerType(node.getType().name())
                 .resultFile(version.getResultFile())
                 .inputParameters(version.getInputParameters())
                 .outputParameters(version.getOutputParameters())

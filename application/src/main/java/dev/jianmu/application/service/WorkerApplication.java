@@ -95,7 +95,7 @@ public class WorkerApplication {
     public void runTask(TaskInstance taskInstance) {
         // 创建DockerTask
         var nodeDef = this.nodeDefApi.findByType(taskInstance.getDefKey());
-        if (!nodeDef.getType().equals("DOCKER")) {
+        if (!nodeDef.getWorkerType().equals("DOCKER")) {
             throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
         }
         try {

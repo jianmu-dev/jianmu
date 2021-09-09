@@ -1,5 +1,7 @@
 package dev.jianmu.infrastructure.client;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class NodeDefinitionDto {
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private String icon;
     private String name;
     private String ownerName;
@@ -21,6 +24,7 @@ public class NodeDefinitionDto {
     private String creatorName;
     private String creatorRef;
     private NodeDefinition.Type type;
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private String description;
     private String ref;
     private String sourceLink;
