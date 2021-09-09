@@ -44,8 +44,8 @@ public class ParameterSetTypeHandler extends BaseTypeHandler<Set<GlobalParameter
     private Set<GlobalParameter> toGlobalParameterSet(Blob blob) {
         JavaType javaType = this.objectMapper.getTypeFactory().constructCollectionType(Set.class, GlobalParameter.class);
         try {
-            Set<GlobalParameter> GlobalParameters = this.objectMapper.readValue(blob.getBytes(1, (int) blob.length()), javaType);
-            return GlobalParameters;
+            Set<GlobalParameter> globalParameters = this.objectMapper.readValue(blob.getBytes(1, (int) blob.length()), javaType);
+            return globalParameters;
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
@@ -53,10 +53,10 @@ public class ParameterSetTypeHandler extends BaseTypeHandler<Set<GlobalParameter
     }
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, Set<GlobalParameter> GlobalParameters, JdbcType jdbcType) throws SQLException {
+    public void setNonNullParameter(PreparedStatement ps, int i, Set<GlobalParameter> globalParameters, JdbcType jdbcType) throws SQLException {
         try {
-            String nodes = this.objectMapper.writerFor(new TypeReference<Set<GlobalParameter>>() {}).writeValueAsString(GlobalParameters);
-            Blob blob = new SerialBlob(nodes.getBytes(StandardCharsets.UTF_8));
+            String parameters = this.objectMapper.writerFor(new TypeReference<Set<GlobalParameter>>() {}).writeValueAsString(globalParameters);
+            Blob blob = new SerialBlob(parameters.getBytes(StandardCharsets.UTF_8));
             ps.setBlob(i, blob);
         } catch (IOException e) {
             e.printStackTrace();
