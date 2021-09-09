@@ -1,11 +1,9 @@
 package dev.jianmu.application.query;
 
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
-import dev.jianmu.hub.intergration.aggregate.spec.ContainerSpec;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -23,5 +21,5 @@ public class NodeDef {
     private Set<NodeParameter> inputParameters;
     private Set<NodeParameter> outputParameters;
     private String resultFile;
-    private ContainerSpec spec;
+    private String spec;
 }

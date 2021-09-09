@@ -20,10 +20,6 @@ public class NodeParameter {
     // 参数值
     private String value;
 
-    public void setParameterId(String parameterId) {
-        this.parameterId = parameterId;
-    }
-
     public String getName() {
         return name;
     }
@@ -48,6 +44,7 @@ public class NodeParameter {
         return value;
     }
 
+
     public static final class Builder {
         // 显示名称
         private String name;
@@ -57,13 +54,15 @@ public class NodeParameter {
         private String type;
         // 描述
         private String description;
+        // 参数引用Id
+        private String parameterId;
         // 参数值
         private String value;
 
         private Builder() {
         }
 
-        public static Builder aTaskParameter() {
+        public static Builder aNodeParameter() {
             return new Builder();
         }
 
@@ -87,6 +86,11 @@ public class NodeParameter {
             return this;
         }
 
+        public Builder parameterId(String parameterId) {
+            this.parameterId = parameterId;
+            return this;
+        }
+
         public Builder value(String value) {
             this.value = value;
             return this;
@@ -94,11 +98,12 @@ public class NodeParameter {
 
         public NodeParameter build() {
             NodeParameter nodeParameter = new NodeParameter();
-            nodeParameter.name = this.name;
             nodeParameter.type = this.type;
-            nodeParameter.value = this.value;
-            nodeParameter.description = this.description;
+            nodeParameter.parameterId = this.parameterId;
             nodeParameter.ref = this.ref;
+            nodeParameter.name = this.name;
+            nodeParameter.description = this.description;
+            nodeParameter.value = this.value;
             return nodeParameter;
         }
     }

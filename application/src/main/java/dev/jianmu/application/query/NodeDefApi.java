@@ -1,9 +1,6 @@
 package dev.jianmu.application.query;
 
-import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -15,5 +12,5 @@ import java.util.Set;
 public interface NodeDefApi {
     List<NodeDef> findByTypes(Set<String> types);
 
-    Optional<NodeDef> findByType(String type);
+    NodeDef findByType(String type);
 }

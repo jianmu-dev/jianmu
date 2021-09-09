@@ -93,8 +93,7 @@ public class TaskInstanceApplication {
         var workflow = this.workflowRepository.findByRefAndVersion(event.getWorkflowRef(), event.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + event.getWorkflowRef()));
         var asyncTask = workflow.findNode(event.getNodeRef());
-        var nodeDef = this.nodeDefApi.findByType(asyncTask.getType())
-                .orElseThrow(() -> new DataNotFoundException("未找到节点定义：" + asyncTask.getType()));
+        var nodeDef = this.nodeDefApi.findByType(asyncTask.getType());
         // 创建任务实例
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(event.getNodeRef(), event.getWorkflowInstanceId());
         // 运行前检查规则
