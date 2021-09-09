@@ -7,6 +7,11 @@ package dev.jianmu.hub.intergration.aggregate;
  * @create: 2021-09-03 14:56
  **/
 public class NodeDefinition {
+    public enum Type {
+        DOCKER,
+        SHELL
+    }
+
     private String id;
     private String icon;
     private String name;
@@ -15,6 +20,7 @@ public class NodeDefinition {
     private String ownerRef;
     private String creatorName;
     private String creatorRef;
+    private Type type;
     private String description;
     private String ref;
     private String sourceLink;
@@ -52,6 +58,10 @@ public class NodeDefinition {
         return creatorRef;
     }
 
+    public Type getType() {
+        return type;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -77,6 +87,7 @@ public class NodeDefinition {
         private String ownerRef;
         private String creatorName;
         private String creatorRef;
+        private Type type;
         private String description;
         private String ref;
         private String sourceLink;
@@ -129,6 +140,11 @@ public class NodeDefinition {
             return this;
         }
 
+        public Builder type(Type type) {
+            this.type = type;
+            return this;
+        }
+
         public Builder description(String description) {
             this.description = description;
             return this;
@@ -151,18 +167,19 @@ public class NodeDefinition {
 
         public NodeDefinition build() {
             NodeDefinition nodeDefinition = new NodeDefinition();
-            nodeDefinition.description = this.description;
             nodeDefinition.id = this.id;
-            nodeDefinition.ownerRef = this.ownerRef;
-            nodeDefinition.creatorName = this.creatorName;
             nodeDefinition.name = this.name;
             nodeDefinition.documentLink = this.documentLink;
-            nodeDefinition.creatorRef = this.creatorRef;
-            nodeDefinition.ref = this.ref;
-            nodeDefinition.sourceLink = this.sourceLink;
-            nodeDefinition.ownerType = this.ownerType;
             nodeDefinition.icon = this.icon;
+            nodeDefinition.type = this.type;
+            nodeDefinition.ownerType = this.ownerType;
+            nodeDefinition.ref = this.ref;
+            nodeDefinition.description = this.description;
+            nodeDefinition.creatorRef = this.creatorRef;
             nodeDefinition.ownerName = this.ownerName;
+            nodeDefinition.ownerRef = this.ownerRef;
+            nodeDefinition.sourceLink = this.sourceLink;
+            nodeDefinition.creatorName = this.creatorName;
             return nodeDefinition;
         }
     }

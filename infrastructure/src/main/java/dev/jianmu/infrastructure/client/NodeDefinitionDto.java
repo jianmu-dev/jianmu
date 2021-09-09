@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.client;
 
+import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,7 @@ public class NodeDefinitionDto {
     private String ownerRef;
     private String creatorName;
     private String creatorRef;
+    private NodeDefinition.Type type;
     private String description;
     private String ref;
     private String sourceLink;

@@ -63,6 +63,7 @@ public class HubApplication {
                 .ownerRef(defDto.getOwnerRef())
                 .creatorName(defDto.getCreatorName())
                 .creatorRef(defDto.getCreatorRef())
+                .type(defDto.getType())
                 .description(defDto.getDescription())
                 .ref(defDto.getRef())
                 .sourceLink(defDto.getSourceLink())
@@ -103,9 +104,12 @@ public class HubApplication {
         this.parameterRepository.addAll(parameters);
 
         return NodeDefinitionVersion.Builder.aNodeDefinitionVersion()
+                .id(dto.getRef() + ":" + dto.getVersion())
+                .ownerRef(dto.getOwnerRef())
                 .ref(dto.getRef())
+                .creatorName(dto.getCreatorName())
+                .creatorRef(dto.getCreatorRef())
                 .version(dto.getVersion())
-                .type(NodeDefinitionVersion.Type.valueOf(dto.getType()))
                 .resultFile(dto.getResultFile())
                 .inputParameters(inputParameters)
                 .outputParameters(outputParameters)

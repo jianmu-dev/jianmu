@@ -24,10 +24,10 @@ public interface NodeDefinitionMapper {
     @Result(column = "document_link", property = "documentLink")
     Optional<NodeDefinition> findById(String id);
 
-    @Insert("insert into hub_node_definition(id, icon, name, owner_name, owner_type, owner_ref, creator_name, creator_ref, description, ref, source_link, document_link) " +
-            "values(#{id}, #{icon}, #{name}, #{ownerName}, #{ownerType}, #{ownerRef}, #{creatorName}, #{creatorRef}, #{description}, #{ref}, #{sourceLink}, #{documentLink})" +
+    @Insert("insert into hub_node_definition(id, icon, name, owner_name, owner_type, owner_ref, creator_name, creator_ref, type, description, ref, source_link, document_link) " +
+            "values(#{id}, #{icon}, #{name}, #{ownerName}, #{ownerType}, #{ownerRef}, #{creatorName}, #{creatorRef}, #{type}, #{description}, #{ref}, #{sourceLink}, #{documentLink})" +
             " ON DUPLICATE KEY UPDATE SET " +
-            "icon=#{icon}, name=#{name}, owner_name=#{ownerName}, owner_type=#{ownerType}, owner_ref=#{ownerType}, creator_name=#{creatorName}, creator_ref=#{creatorRef}, description=#{description}, ref=#{ref}, source_link=#{sourceLink}, document_link=#{documentLink}" +
+            "icon=#{icon}, name=#{name}, owner_name=#{ownerName}, owner_type=#{ownerType}, owner_ref=#{ownerType}, creator_name=#{creatorName}, creator_ref=#{creatorRef}, type=#{type}, description=#{description}, ref=#{ref}, source_link=#{sourceLink}, document_link=#{documentLink}" +
             " WHERE id=#{id}")
     void saveOrUpdate(NodeDefinition nodeDefinition);
 }

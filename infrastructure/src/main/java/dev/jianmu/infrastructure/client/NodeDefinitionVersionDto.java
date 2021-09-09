@@ -14,10 +14,12 @@ import java.util.Set;
 @NoArgsConstructor
 @Data
 public class NodeDefinitionVersionDto {
+    private String ownerRef;
     private String ref;
+    private String creatorName;
+    private String creatorRef;
     private String version;
     private String resultFile;
-    private String type;
     private Set<Parameter> inputParameters;
     private Set<Parameter> outputParameters;
     private String spec;

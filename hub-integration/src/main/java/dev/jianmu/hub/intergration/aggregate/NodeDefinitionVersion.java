@@ -10,16 +10,14 @@ import java.util.Set;
  * @create: 2021-09-03 14:58
  **/
 public class NodeDefinitionVersion {
-    public enum Type {
-        DOCKER,
-        SHELL
-    }
 
     private String id;
+    private String ownerRef;
     private String ref;
+    private String creatorName;
+    private String creatorRef;
     private String version;
     private String resultFile;
-    private Type type;
 
     private Set<NodeParameter> inputParameters = new HashSet<>();
     private Set<NodeParameter> outputParameters = new HashSet<>();
@@ -30,8 +28,20 @@ public class NodeDefinitionVersion {
         return id;
     }
 
+    public String getOwnerRef() {
+        return ownerRef;
+    }
+
     public String getRef() {
         return ref;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public String getCreatorRef() {
+        return creatorRef;
     }
 
     public String getVersion() {
@@ -40,10 +50,6 @@ public class NodeDefinitionVersion {
 
     public String getResultFile() {
         return resultFile;
-    }
-
-    public Type getType() {
-        return type;
     }
 
     public Set<NodeParameter> getInputParameters() {
@@ -60,10 +66,12 @@ public class NodeDefinitionVersion {
 
     public static final class Builder {
         private String id;
+        private String ownerRef;
         private String ref;
+        private String creatorName;
+        private String creatorRef;
         private String version;
         private String resultFile;
-        private Type type;
         private Set<NodeParameter> inputParameters = new HashSet<>();
         private Set<NodeParameter> outputParameters = new HashSet<>();
         private String spec;
@@ -80,8 +88,23 @@ public class NodeDefinitionVersion {
             return this;
         }
 
+        public Builder ownerRef(String ownerRef) {
+            this.ownerRef = ownerRef;
+            return this;
+        }
+
         public Builder ref(String ref) {
             this.ref = ref;
+            return this;
+        }
+
+        public Builder creatorName(String creatorName) {
+            this.creatorName = creatorName;
+            return this;
+        }
+
+        public Builder creatorRef(String creatorRef) {
+            this.creatorRef = creatorRef;
             return this;
         }
 
@@ -92,11 +115,6 @@ public class NodeDefinitionVersion {
 
         public Builder resultFile(String resultFile) {
             this.resultFile = resultFile;
-            return this;
-        }
-
-        public Builder type(Type type) {
-            this.type = type;
             return this;
         }
 
@@ -119,10 +137,12 @@ public class NodeDefinitionVersion {
             NodeDefinitionVersion nodeDefinitionVersion = new NodeDefinitionVersion();
             nodeDefinitionVersion.id = this.id;
             nodeDefinitionVersion.outputParameters = this.outputParameters;
+            nodeDefinitionVersion.creatorRef = this.creatorRef;
             nodeDefinitionVersion.inputParameters = this.inputParameters;
             nodeDefinitionVersion.version = this.version;
-            nodeDefinitionVersion.type = this.type;
+            nodeDefinitionVersion.ownerRef = this.ownerRef;
             nodeDefinitionVersion.ref = this.ref;
+            nodeDefinitionVersion.creatorName = this.creatorName;
             nodeDefinitionVersion.spec = this.spec;
             nodeDefinitionVersion.resultFile = this.resultFile;
             return nodeDefinitionVersion;
