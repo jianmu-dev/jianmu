@@ -9,10 +9,8 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
-import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.repository.DefinitionRepository;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
@@ -43,7 +41,6 @@ public class TaskInstanceApplication {
 
     private final TaskInstanceRepository taskInstanceRepository;
     private final WorkflowRepository workflowRepository;
-    private final DefinitionRepository definitionRepository;
     private final InstanceDomainService instanceDomainService;
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
@@ -56,7 +53,6 @@ public class TaskInstanceApplication {
     public TaskInstanceApplication(
             TaskInstanceRepository taskInstanceRepository,
             WorkflowRepository workflowRepository,
-            DefinitionRepository definitionRepository,
             InstanceDomainService instanceDomainService,
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
@@ -67,7 +63,6 @@ public class TaskInstanceApplication {
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.workflowRepository = workflowRepository;
-        this.definitionRepository = definitionRepository;
         this.instanceDomainService = instanceDomainService;
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
@@ -188,11 +183,8 @@ public class TaskInstanceApplication {
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        String[] strings = taskInstance.getDefKey().split(":");
-        var definition = this.definitionRepository.findByRefAndVersion(strings[0], strings[1])
-                .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
-        if (definition.getResultFile() != null) {
+        if (nodeVersion.getResultFile() != null) {
             // 解析Json为Map
             var parameterMap = this.parseJson(resultFile);
             // 创建任务实例输出参数与参数存储参数
