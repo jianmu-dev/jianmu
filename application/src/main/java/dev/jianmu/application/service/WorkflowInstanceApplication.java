@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.eventbridge.aggregate.TargetEvent;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
@@ -28,10 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -98,8 +96,8 @@ public class WorkflowInstanceApplication {
     private EvaluationContext findContext(Workflow workflow, String instanceId, String triggerId) {
         // 查询参数源
         var eventParameters = this.targetEventRepository.findById(triggerId)
-                .orElseThrow(() -> new DataNotFoundException("未找到事件" + triggerId))
-                .getEventParameters();
+                .map(TargetEvent::getEventParameters)
+                .orElseGet(Set::of);
         var instanceParameters = this.instanceParameterRepository
                 .findOutputParamByBusinessIdAndTriggerId(instanceId, triggerId);
         // 创建表达式上下文

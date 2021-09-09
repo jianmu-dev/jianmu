@@ -7,6 +7,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.eventbridge.aggregate.TargetEvent;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -105,8 +106,8 @@ public class TaskInstanceApplication {
                 .build();
         // 查询参数源
         var eventParameters = this.targetEventRepository.findById(event.getTriggerId())
-                .orElseThrow(() -> new DataNotFoundException("未找到事件" + event.getTriggerId()))
-                .getEventParameters();
+                .map(TargetEvent::getEventParameters)
+                .orElseGet(Set::of);
         var instanceParameters = this.instanceParameterRepository
                 .findOutputParamByBusinessIdAndTriggerId(event.getWorkflowInstanceId(), event.getTriggerId());
         // 创建表达式上下文
