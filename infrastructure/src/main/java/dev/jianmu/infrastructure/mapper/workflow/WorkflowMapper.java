@@ -22,12 +22,12 @@ public interface WorkflowMapper {
 
     @Select("select * from workflow where ref_version = #{refVersion}")
     @Result(column = "nodes", property = "nodes", typeHandler = NodeSetTypeHandler.class)
-    @Result(column = "globalParameters", property = "global_parameters", typeHandler = ParameterSetTypeHandler.class)
+    @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     Optional<Workflow> findByRefAndVersion(String refVersion);
 
     @Select("select * from workflow where ref = #{ref}")
     @Result(column = "nodes", property = "nodes", typeHandler = NodeSetTypeHandler.class)
-    @Result(column = "globalParameters", property = "global_parameters", typeHandler = ParameterSetTypeHandler.class)
+    @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     List<Workflow> findByRef(String ref);
 
     @Insert("insert into workflow(ref_version, ref, version, type, name, description, nodes, global_parameters, dsl_text)" +
