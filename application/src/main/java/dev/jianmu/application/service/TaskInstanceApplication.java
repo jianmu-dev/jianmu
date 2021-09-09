@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
@@ -190,11 +191,12 @@ public class TaskInstanceApplication {
         String[] strings = taskInstance.getDefKey().split(":");
         var definition = this.definitionRepository.findByRefAndVersion(strings[0], strings[1])
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务定义"));
+        var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         if (definition.getResultFile() != null) {
             // 解析Json为Map
             var parameterMap = this.parseJson(resultFile);
             // 创建任务实例输出参数与参数存储参数
-            var outputParameters = this.handleOutputParameter(parameterMap, definition, taskInstance);
+            var outputParameters = this.handleOutputParameter(parameterMap, nodeVersion, taskInstance);
             // 保存任务实例输出参数
             this.instanceParameterRepository.addAll(outputParameters.keySet());
             // 保存参数
@@ -234,9 +236,9 @@ public class TaskInstanceApplication {
         }
     }
 
-    private Map<InstanceParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, Definition definition, TaskInstance taskInstance) {
+    private Map<InstanceParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, NodeDef nodeDef, TaskInstance taskInstance) {
         // 查找需赋值的输出参数
-        var outputParameters = definition.matchedOutputParameters(parameterMap);
+        var outputParameters = nodeDef.matchedOutputParameters(parameterMap);
         return outputParameters.stream()
                 .map(taskParameter -> {
                     var value = parameterMap.get(taskParameter.getRef());

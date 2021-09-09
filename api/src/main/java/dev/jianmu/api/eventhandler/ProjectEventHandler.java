@@ -1,20 +1,15 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.event.InstallDefinitionsEvent;
 import dev.jianmu.application.service.EventBridgeApplication;
 import dev.jianmu.application.service.ProjectApplication;
-import dev.jianmu.application.service.TaskDefinitionApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
-import dev.jianmu.task.aggregate.Definition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @class: DslEventHandler
@@ -28,17 +23,15 @@ public class ProjectEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final ProjectApplication projectApplication;
     private final EventBridgeApplication eventBridgeApplication;
-    private final TaskDefinitionApplication taskDefinitionApplication;
 
     public ProjectEventHandler(
             WorkflowInstanceApplication workflowInstanceApplication,
             ProjectApplication projectApplication,
-            EventBridgeApplication eventBridgeApplication, TaskDefinitionApplication taskDefinitionApplication
+            EventBridgeApplication eventBridgeApplication
     ) {
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.projectApplication = projectApplication;
         this.eventBridgeApplication = eventBridgeApplication;
-        this.taskDefinitionApplication = taskDefinitionApplication;
     }
 
     @Async
@@ -55,15 +48,6 @@ public class ProjectEventHandler {
     // TODO 不要直接用基本类型传递事件
     public void handleGitRepoSyncEvent(String projectId) {
         this.projectApplication.syncProject(projectId);
-    }
-
-    @EventListener
-    public void handleDefinitionsFromRegistry(InstallDefinitionsEvent event) {
-        List<Definition> definitionsFromRegistry = event.getDefinitions();
-        definitionsFromRegistry.forEach(definition -> {
-            log.info("安装节点定义: {}:{}", definition.getRef(), definition.getVersion());
-        });
-        this.taskDefinitionApplication.installDefinitions(definitionsFromRegistry);
     }
 
     @EventListener
