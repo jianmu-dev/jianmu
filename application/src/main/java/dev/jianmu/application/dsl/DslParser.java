@@ -228,6 +228,13 @@ public class DslParser {
         if (null == type) {
             throw new RuntimeException("Node type未设置");
         }
+        // 验证保留关键字
+        if (nodeName.equals("event")) {
+            throw new RuntimeException("节点名称不能使用event");
+        }
+        if (nodeName.equals("global")) {
+            throw new RuntimeException("节点名称不能使用global");
+        }
     }
 
     private void workflowSyntaxCheck() {
@@ -264,6 +271,13 @@ public class DslParser {
         if (type.equals("condition")) {
             this.checkCondition(node);
             return;
+        }
+        // 验证保留关键字
+        if (nodeName.equals("event")) {
+            throw new RuntimeException("节点名称不能使用event");
+        }
+        if (nodeName.equals("global")) {
+            throw new RuntimeException("节点名称不能使用global");
         }
         this.checkTask(nodeName, node);
     }
