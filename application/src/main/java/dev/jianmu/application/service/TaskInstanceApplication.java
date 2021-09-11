@@ -233,10 +233,10 @@ public class TaskInstanceApplication {
         // 查找需赋值的输出参数
         var outputParameters = nodeDef.matchedOutputParameters(parameterMap);
         return outputParameters.stream()
-                .map(taskParameter -> {
-                    var value = parameterMap.get(taskParameter.getRef());
+                .map(nodeParameter -> {
+                    var value = parameterMap.get(nodeParameter.getRef());
                     // 创建参数
-                    var parameter = Parameter.Type.valueOf(taskParameter.getType()).newParameter(value);
+                    var parameter = Parameter.Type.valueOf(nodeParameter.getType()).newParameter(value);
                     // 创建任务实例输出参数
                     var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
                             .instanceId(taskInstance.getId())
@@ -245,7 +245,7 @@ public class TaskInstanceApplication {
                             .defKey(taskInstance.getDefKey())
                             .businessId(taskInstance.getBusinessId())
                             .triggerId(taskInstance.getTriggerId())
-                            .ref(taskParameter.getRef())
+                            .ref(nodeParameter.getRef())
                             .type(InstanceParameter.Type.OUTPUT)
                             .parameterId(parameter.getId())
                             .build();

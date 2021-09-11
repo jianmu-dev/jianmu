@@ -28,7 +28,7 @@ public class NodeDef {
 
     public Set<NodeParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
         return outputParameters.stream()
-                .filter(taskParameter -> parameterMap.get(taskParameter.getRef()) != null)
+                .filter(nodeParameter -> parameterMap.get(nodeParameter.getRef()) != null)
                 .collect(Collectors.toSet());
     }
 }
