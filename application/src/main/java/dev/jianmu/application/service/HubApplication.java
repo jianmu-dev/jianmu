@@ -44,7 +44,12 @@ public class HubApplication {
     }
 
     private String getRef(String type) {
-        return type.split(":")[0];
+        var ref = type.split(":")[0];
+        var strings = ref.split("/");
+        if (strings.length == 1) {
+            return "_/" + ref;
+        }
+        return ref;
     }
 
     private String getVersion(String type) {
