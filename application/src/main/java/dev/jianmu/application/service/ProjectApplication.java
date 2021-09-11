@@ -1,33 +1,22 @@
 package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.application.event.InstallDefinitionsEvent;
+import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.dsl.aggregate.DslModel;
-import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.infrastructure.client.RegistryClient;
-import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
-import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
+import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
-import dev.jianmu.parameter.repository.ParameterRepository;
 import dev.jianmu.project.aggregate.CronTrigger;
-import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.CronTriggerRepository;
-import dev.jianmu.project.repository.DslSourceCodeRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
-import dev.jianmu.task.aggregate.Definition;
-import dev.jianmu.task.aggregate.DockerDefinition;
-import dev.jianmu.task.repository.DefinitionRepository;
-import dev.jianmu.task.repository.InputParameterRepository;
-import dev.jianmu.task.repository.ParameterReferRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.service.ScheduleJobService;
+import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -37,7 +26,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -53,51 +41,36 @@ public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
 
     private final ProjectRepositoryImpl projectRepository;
-    private final DslSourceCodeRepository dslSourceCodeRepository;
     private final CronTriggerRepository cronTriggerRepository;
     private final ScheduleJobService scheduleJobService;
-    private final DefinitionRepository definitionRepository;
     private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final TaskInstanceRepository taskInstanceRepository;
-    private final ParameterRepository parameterRepository;
-    private final InputParameterRepository inputParameterRepository;
-    private final ParameterReferRepository parameterReferRepository;
-    private final RegistryClient registryClient;
+    private final NodeDefApi nodeDefApi;
     private final ApplicationEventPublisher publisher;
     private final JgitService jgitService;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
-            DslSourceCodeRepository dslSourceCodeRepository,
             CronTriggerRepository cronTriggerRepository,
             ScheduleJobService scheduleJobService,
-            DefinitionRepository definitionRepository,
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
             TaskInstanceRepository taskInstanceRepository,
-            ParameterRepository parameterRepository,
-            InputParameterRepository inputParameterRepository,
-            ParameterReferRepository parameterReferRepository,
-            RegistryClient registryClient,
+            NodeDefApi nodeDefApi,
             ApplicationEventPublisher publisher,
             JgitService jgitService
     ) {
         this.projectRepository = projectRepository;
-        this.dslSourceCodeRepository = dslSourceCodeRepository;
         this.cronTriggerRepository = cronTriggerRepository;
         this.scheduleJobService = scheduleJobService;
-        this.definitionRepository = definitionRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.taskInstanceRepository = taskInstanceRepository;
-        this.parameterRepository = parameterRepository;
-        this.inputParameterRepository = inputParameterRepository;
-        this.parameterReferRepository = parameterReferRepository;
-        this.registryClient = registryClient;
+        this.nodeDefApi = nodeDefApi;
         this.publisher = publisher;
         this.jgitService = jgitService;
     }
@@ -132,100 +105,59 @@ public class ProjectApplication {
         this.trigger(cronTrigger.getProjectId(), triggerId);
     }
 
-    private DslModel parseDsl(String dslText) {
-        // 解析DSL
-        var dsl = DslModel.parse(dslText);
-        // 校验任务类型是否存在并创建流程节点关系
-        var types = dsl.getFlow().getAsyncTaskTypes();
-        List<Definition> definitions = new ArrayList<>();
-        List<Definition> definitionsFromRegistry = new ArrayList<>();
-        types.forEach(type -> {
-            String[] strings = type.split(":");
-            var definition = this.definitionRepository
-                    .findByRefAndVersion(strings[0], strings[1])
-                    .map(d -> (Definition) d)
-                    .or(() -> {
-                        var dockerDefinition = this.registryClient.findByRefAndVersion(strings[0], strings[1])
-                                .filter(fromRegistry -> fromRegistry instanceof DockerDefinition)
-                                .map(fromRegistry -> (DockerDefinition) fromRegistry);
-                        dockerDefinition.ifPresent(definitionsFromRegistry::add);
-                        return dockerDefinition;
-                    })
-                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-            definitions.add(definition);
-        });
-        if (!definitionsFromRegistry.isEmpty()) {
-            this.publisher.publishEvent(InstallDefinitionsEvent.builder().definitions(definitionsFromRegistry).build());
+    private Workflow createWorkflow(DslParser parser, String dslText) {
+        // 查询相关的节点定义
+        var types = parser.getAsyncTaskTypes();
+        var nodeDefs = this.nodeDefApi.findByTypes(types);
+
+        // 根据节点定义与DSL节点列表创建Workflow
+        var nodes = parser.createNodes(nodeDefs);
+        Set<GlobalParameter> globalParameters = Set.of();
+        if (parser.getParam() != null) {
+            globalParameters = Workflow.createGlobalParameters(parser.getParam());
         }
-        dsl.calculate(definitions);
-        return dsl;
-    }
-
-    private Workflow createWorkflow(DslModel dsl, String workflowVersion) {
         return Workflow.Builder.aWorkflow()
-                .name(dsl.getFlow().getName())
-                .ref(dsl.getFlow().getRef())
-                .description(dsl.getFlow().getDescription())
-                .version(workflowVersion)
-                .nodes(dsl.getFlow().getNodes())
-                .build();
-    }
-
-    private DslSourceCode createDslSourceCode(String projectId, Workflow workflow, String dslText) {
-        return DslSourceCode.Builder.aDslSourceCode()
-                .projectId(projectId)
-                .workflowRef(workflow.getRef())
-                .workflowVersion(workflow.getVersion())
+                .ref(parser.getRef())
+                .type(parser.getType())
+                .name(parser.getName())
+                .description(parser.getDescription())
+                .nodes(nodes)
+                .globalParameters(globalParameters)
                 .dslText(dslText)
-                .lastModifiedBy("admin")
                 .build();
     }
 
     @Transactional
     public void importProject(GitRepo gitRepo) {
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
-        // 解析DSL
-        var dsl = this.parseDsl(dslText);
+        // 解析DSL,语法检查
+        var parser = DslParser.parse(dslText);
+        var workflow = this.createWorkflow(parser, dslText);
         var project = Project.Builder.aReference()
-                .workflowName(dsl.getFlow().getName())
-                .workflowRef(dsl.getFlow().getRef())
+                .workflowName(parser.getName())
+                .workflowRef(parser.getRef())
+                .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
-                .steps(dsl.getSteps())
+                .steps(parser.getSteps())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
                 .triggerType(Project.TriggerType.MANUAL)
-                .dslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
+                .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .lastModifiedBy("admin")
                 .build();
-        // 创建流程
-        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
-        // 保存原始DSL
-        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
-        // 将parameterMap转变为 InputParameter与Parameter参数Map
-        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
-        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
-        var parameterRefers = dsl.getFlow()
-                .getParameterRefers(project.getWorkflowVersion());
-        if (dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-        }
         // 创建触发器
-        if (null != dsl.getCron()) {
+        if (null != parser.getCron()) {
             var trigger = CronTrigger.Builder.aCronTrigger()
                     .projectId(project.getId())
-                    .corn(dsl.getCron())
+                    .corn(parser.getCron())
                     .build();
             this.cronTriggerRepository.add(trigger);
             this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
         }
         this.projectRepository.add(project);
         this.gitRepoRepository.add(gitRepo);
-        this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
         this.jgitService.cleanUp(gitRepo.getId());
-        this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
-        this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
-        this.parameterReferRepository.addAll(parameterRefers);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }
 
@@ -238,94 +170,64 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
         var triggers = this.cronTriggerRepository.findByProjectId(projectId);
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
-        // 解析DSL
-        var dsl = this.parseDsl(dslText);
+        // 解析DSL,语法检查
+        var parser = DslParser.parse(dslText);
+        var workflow = this.createWorkflow(parser, dslText);
         project.setDslText(dslText);
-        project.setDslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
+        project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setLastModifiedBy("admin");
-        project.setSteps(dsl.getSteps());
-        project.setWorkflowName(dsl.getFlow().getName());
+        project.setSteps(parser.getSteps());
+        project.setWorkflowName(parser.getName());
         project.setLastModifiedTime();
-        project.setWorkflowVersion();
-        // 创建流程
-        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
-        // 保存原始DSL
-        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
-        // 将parameterMap转变为 InputParameter与Parameter参数Map
-        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
-        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
-        var parameterRefers = dsl.getFlow()
-                .getParameterRefers(project.getWorkflowVersion());
-        if (!project.getTriggerType().equals(Project.TriggerType.WEBHOOK) && dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-            this.publisher.publishEvent(new CreatedEvent(project.getId()));
-        }
+        project.setWorkflowVersion(workflow.getVersion());
         // 删除原有触发器
         this.cronTriggerRepository.deleteByProjectId(project.getId());
         triggers.forEach(cronTrigger -> {
             this.scheduleJobService.deleteTrigger(cronTrigger.getId());
         });
         // 创建新触发器
-        if (null != dsl.getCron()) {
+        if (null != parser.getCron()) {
             var newTrigger = CronTrigger.Builder.aCronTrigger()
                     .projectId(projectId)
-                    .corn(dsl.getCron())
+                    .corn(parser.getCron())
                     .build();
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
         this.projectRepository.updateByWorkflowRef(project);
-        this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
-        this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
-        this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
-        this.parameterReferRepository.addAll(parameterRefers);
         this.jgitService.cleanUp(gitRepo.getId());
     }
 
     @Transactional
     public void createProject(String dslText) {
-        // 解析DSL
-        var dsl = this.parseDsl(dslText);
+        // 解析DSL,语法检查
+        var parser = DslParser.parse(dslText);
+        var workflow = this.createWorkflow(parser, dslText);
         // 创建项目
         var project = Project.Builder.aReference()
-                .workflowName(dsl.getFlow().getName())
-                .workflowRef(dsl.getFlow().getRef())
+                .workflowName(workflow.getName())
+                .workflowRef(workflow.getRef())
+                .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
-                .steps(dsl.getSteps())
+                .steps(parser.getSteps())
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
                 .triggerType(Project.TriggerType.MANUAL)
-                .dslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
+                .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
-        // 创建流程
-        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
-        // 保存原始DSL
-        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
-        // 将parameterMap转变为 InputParameter与Parameter参数Map
-        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
-        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
-        var parameterRefers = dsl.getFlow()
-                .getParameterRefers(project.getWorkflowVersion());
-        if (dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-        }
         // 创建触发器
-        if (null != dsl.getCron()) {
+        if (null != parser.getCron()) {
             var trigger = CronTrigger.Builder.aCronTrigger()
                     .projectId(project.getId())
-                    .corn(dsl.getCron())
+                    .corn(parser.getCron())
                     .build();
             this.cronTriggerRepository.add(trigger);
             this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
         }
         this.projectRepository.add(project);
-        this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
-        this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
-        this.dslSourceCodeRepository.add(dslSource);
         this.workflowRepository.add(workflow);
-        this.parameterReferRepository.addAll(parameterRefers);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }
 
@@ -334,48 +236,35 @@ public class ProjectApplication {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         var triggers = this.cronTriggerRepository.findByProjectId(project.getId());
-        // 解析DSL
-        var dsl = this.parseDsl(dslText);
-        project.setDslText(dslText);
-        project.setDslType(dsl.getType().equals(DslModel.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
-        project.setLastModifiedBy("admin");
-        project.setSteps(dsl.getSteps());
-        project.setWorkflowName(dsl.getFlow().getName());
-        project.setLastModifiedTime();
-        project.setWorkflowVersion();
-        // 创建流程
-        var workflow = this.createWorkflow(dsl, project.getWorkflowVersion());
-        // 保存原始DSL
-        var dslSource = this.createDslSourceCode(project.getId(), workflow, dslText);
-        // 将parameterMap转变为 InputParameter与Parameter参数Map
-        var inputParameterMap = dsl.getInputParameterMap(project.getId(), project.getWorkflowVersion());
-        // 返回DSL定义中的任务输入输出参数引用关系 ParameterRefer
-        var parameterRefers = dsl.getFlow()
-                .getParameterRefers(project.getWorkflowVersion());
-        if (!project.getTriggerType().equals(Project.TriggerType.WEBHOOK) && dsl.getFlow().hasEventParameterRefer(parameterRefers)) {
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-            this.publisher.publishEvent(new CreatedEvent(project.getId()));
+        // 解析DSL,语法检查
+        var parser = DslParser.parse(dslText);
+        if (!parser.getRef().equals(project.getWorkflowRef())) {
+            throw new RuntimeException("ref不一致");
         }
+        var workflow = this.createWorkflow(parser, dslText);
+        project.setDslText(dslText);
+        project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
+        project.setLastModifiedBy("admin");
+        project.setSteps(parser.getSteps());
+        project.setWorkflowName(parser.getName());
+        project.setLastModifiedTime();
+        project.setWorkflowVersion(workflow.getVersion());
         // 删除原有触发器
         this.cronTriggerRepository.deleteByProjectId(project.getId());
         triggers.forEach(cronTrigger -> {
             this.scheduleJobService.deleteTrigger(cronTrigger.getId());
         });
         // 创建新触发器
-        if (null != dsl.getCron()) {
+        if (null != parser.getCron()) {
             var newTrigger = CronTrigger.Builder.aCronTrigger()
                     .projectId(project.getId())
-                    .corn(dsl.getCron())
+                    .corn(parser.getCron())
                     .build();
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
-        this.dslSourceCodeRepository.add(dslSource);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
-        this.parameterRepository.addAll(new ArrayList<>(inputParameterMap.values()));
-        this.inputParameterRepository.addAll(new ArrayList<>(inputParameterMap.keySet()));
-        this.parameterReferRepository.addAll(parameterRefers);
     }
 
     @Transactional
@@ -386,10 +275,7 @@ public class ProjectApplication {
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.dslSourceCodeRepository.deleteByProjectId(project.getId());
         this.cronTriggerRepository.deleteByProjectId(project.getId());
-        this.parameterReferRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.inputParameterRepository.deleteByProjectId(project.getId());
         this.gitRepoRepository.deleteById(project.getGitRepoId());
         this.publisher.publishEvent(new DeletedEvent(project.getId()));
     }
@@ -406,8 +292,9 @@ public class ProjectApplication {
         return this.projectRepository.findById(dslId);
     }
 
-    public DslSourceCode findByRefAndVersion(String ref, String version) {
-        return this.dslSourceCodeRepository.findByRefAndVersion(ref, version).orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+    public Workflow findByRefAndVersion(String ref, String version) {
+        return this.workflowRepository.findByRefAndVersion(ref, version)
+                .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
     }
 
     public GitRepo findGitRepoById(String gitRepoId) {

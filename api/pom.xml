@@ -78,7 +78,7 @@
                 <version>3.0.0</version>
                 <configuration>
                     <from>
-                        <image>registry://openjdk:11.0.11-jdk-oracle</image>
+                        <image>registry://jianmudev/openjdk:11.0.11-jdk-oracle-wait-for-it</image>
                     </from>
                     <to>
                         <image>${env.JIANMU_IMAGE_NAME}</image>

@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -55,7 +54,7 @@ public interface InstanceParameterMapper {
     @Result(column = "parameter_id", property = "parameterId")
     List<InstanceParameter> findByInstanceIdAndType(@Param("instanceId") String instanceId, @Param("type") InstanceParameter.Type type);
 
-    @Select("select * from task_instance_parameter where business_id = #{businessId} and async_task_ref = #{asyncTaskRef} and ref = #{ref}")
+    @Select("select * from task_instance_parameter where business_id = #{businessId} and trigger_id = #{triggerId} and type = 'OUTPUT'")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
@@ -63,5 +62,5 @@ public interface InstanceParameterMapper {
     @Result(column = "business_id", property = "businessId")
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
-    Optional<InstanceParameter> findInputParamByBusinessIdAndTaskRefAndRefAndMaxSerial(@Param("businessId") String businessId, @Param("asyncTaskRef") String asyncTaskRef, @Param("ref") String ref);
+    List<InstanceParameter> findOutputParamByBusinessIdAndTriggerId(@Param("businessId") String businessId, @Param("triggerId") String triggerId);
 }

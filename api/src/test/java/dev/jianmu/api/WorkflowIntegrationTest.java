@@ -88,7 +88,6 @@ public class WorkflowIntegrationTest {
         workflow = Workflow.Builder.aWorkflow()
                 .name("TestWL")
                 .ref("test_wl1")
-                .version("1.1")
                 .description("测试流程1")
                 .nodes(nodes)
                 .build();

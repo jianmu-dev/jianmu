@@ -165,6 +165,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 logger.error("镜像下载失败:", e);
                 this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
                 Thread.currentThread().interrupt();
+                return;
             }
         }
         // 创建容器
@@ -213,14 +214,17 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 logger.error("日志流关闭失败:", e);
             }
             Thread.currentThread().interrupt();
+            return;
         } catch (RuntimeException e) {
             logger.error("获取容器日志失败", e);
+            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
             try {
                 logWriter.close();
             } catch (IOException ioException) {
                 logger.error("日志流关闭失败:", e);
             }
             Thread.currentThread().interrupt();
+            return;
         }
         // 等待容器执行结果
         try {
@@ -235,10 +239,12 @@ public class EmbeddedDockerWorker implements DockerWorker {
             logger.error("获取容器执行结果操作被中断:", e);
             this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
             Thread.currentThread().interrupt();
+            return;
         } catch (RuntimeException e) {
             logger.error("获取容器执行结果失败", e);
             this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
             Thread.currentThread().interrupt();
+            return;
         }
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
         String resultFile = null;
@@ -258,9 +264,10 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 logger.info("tarArchiveEntry's name: {}", tarArchiveEntry.getName());
                 resultFile = IOUtils.toString(reader);
                 logger.info("结果文件内容: {}", resultFile);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("无法获取容器执行结果文件:", e);
                 this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+                return;
             }
         }
         // 清除容器

@@ -1,6 +1,5 @@
 package dev.jianmu.task.service;
 
-import dev.jianmu.task.aggregate.Definition;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 
@@ -13,15 +12,8 @@ import java.util.List;
  * @create: 2021-03-27 09:05
  **/
 public class InstanceDomainService {
-    public TaskInstance create(
-            List<TaskInstance> taskInstances,
-            Definition definition,
-            String businessId,
-            String triggerId,
-            String asyncTaskRef,
-            String workflowRef,
-            String workflowVersion
-    ) {
+
+    public void runningCheck(List<TaskInstance> taskInstances) {
         if (taskInstances.size() > 0) {
             boolean isRunning = taskInstances.stream()
                     .anyMatch(instance ->
@@ -32,14 +24,5 @@ public class InstanceDomainService {
                 throw new RuntimeException("已有任务运行中，不能重复触发");
             }
         }
-        return TaskInstance.Builder.anInstance()
-                .serialNo(taskInstances.size() + 1)
-                .defKey(definition.getRef() + ":" + definition.getVersion())
-                .asyncTaskRef(asyncTaskRef)
-                .workflowRef(workflowRef)
-                .workflowVersion(workflowVersion)
-                .businessId(businessId)
-                .triggerId(triggerId)
-                .build();
     }
 }

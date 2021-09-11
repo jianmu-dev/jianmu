@@ -45,36 +45,17 @@ CREATE TABLE `git_repo`
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `dsl_source_code`
-(
-    `project_id`         varchar(255) NOT NULL COMMENT '项目ID',
-    `workflow_ref`       varchar(45)  NOT NULL COMMENT '关联流程定义Ref',
-    `workflow_version`   varchar(45)  NOT NULL COMMENT '关联流程定义版本',
-    `dsl_text`           longtext     NOT NULL COMMENT '原始DSL文本',
-    `created_time`       datetime     NOT NULL COMMENT '创建时间',
-    `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改者',
-    `last_modified_time` datetime    DEFAULT NULL COMMENT '最后修改时间'
-);
-
-CREATE TABLE `input_parameter`
-(
-    `def_key`          varchar(45)  NOT NULL COMMENT '任务定义Key, 表示任务定义类型',
-    `async_task_ref`   varchar(45)  NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
-    `workflow_ref`     varchar(45)  NOT NULL COMMENT '流程定义Ref',
-    `workflow_version` varchar(45)  NOT NULL COMMENT '流程定义版本',
-    `project_id`       varchar(100) NOT NULL COMMENT '项目ID',
-    `ref`              varchar(45)  NOT NULL COMMENT '参数唯一引用名称',
-    `parameter_id`     varchar(45)  NOT NULL COMMENT '参数引用Id'
-);
-
 CREATE TABLE `workflow`
 (
-    `ref_version` varchar(255) NOT NULL COMMENT '流程定义标识，主键',
-    `ref`         varchar(45)  NOT NULL COMMENT '唯一引用名称',
-    `version`     varchar(45)  NOT NULL COMMENT '版本',
-    `name`        varchar(255) DEFAULT NULL COMMENT '显示名称',
-    `description` varchar(255) DEFAULT NULL COMMENT '描述',
-    `nodes`       longblob COMMENT 'Node列表',
+    `ref_version`       varchar(255) NOT NULL COMMENT '流程定义标识，主键',
+    `ref`               varchar(45)  NOT NULL COMMENT '唯一引用名称',
+    `version`           varchar(45)  NOT NULL COMMENT '版本',
+    `type`              varchar(45)  NOT NULL COMMENT 'DSL 类型',
+    `name`              varchar(255) DEFAULT NULL COMMENT '显示名称',
+    `description`       varchar(255) DEFAULT NULL COMMENT '描述',
+    `nodes`             longblob COMMENT 'Node列表',
+    `global_parameters` blob COMMENT '全局参数',
+    `dsl_text`          longtext     NOT NULL COMMENT 'DSL内容',
     PRIMARY KEY (`ref_version`)
 );
 
@@ -94,28 +75,6 @@ CREATE TABLE `workflow_instance`
     `end_time`         datetime     DEFAULT NULL COMMENT '结束时间',
     `_version`         int          NOT NULL COMMENT '乐观锁版本字段',
     PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `task_definition`
-(
-    `ref`               varchar(255) NOT NULL COMMENT '唯一引用',
-    `version`           varchar(45)  NOT NULL COMMENT '版本',
-    `result_file`       varchar(45) DEFAULT NULL COMMENT '结果文件',
-    `type`              varchar(45)  NOT NULL COMMENT '类型',
-    `input_parameters`  blob COMMENT '输入参数',
-    `output_parameters` blob COMMENT '输出参数',
-    `meta_data`         blob COMMENT '元数据',
-    `spec`              blob COMMENT '容器规格'
-);
-
-CREATE TABLE `parameter_refer`
-(
-    `workflow_ref`         varchar(45) NOT NULL COMMENT '流程定义Ref',
-    `workflow_version`     varchar(45) NOT NULL COMMENT '流程定义版本',
-    `source_task_ref`      varchar(45) NOT NULL COMMENT '源任务(输出的任务)Ref',
-    `source_parameter_ref` varchar(45) NOT NULL COMMENT '源参数Ref',
-    `target_task_ref`      varchar(45) NOT NULL COMMENT '目标任务(引用的任务)Ref',
-    `target_parameter_ref` varchar(45) NOT NULL COMMENT '目标参数Ref'
 );
 
 CREATE TABLE `task_instance`
@@ -232,4 +191,38 @@ CREATE TABLE `eb_target_transformer`
     `variable_type` varchar(45) NOT NULL COMMENT '变量类型',
     `expression`    varchar(45) NOT NULL COMMENT '表达式',
     `class_type`    varchar(45) NOT NULL COMMENT 'Transformer类型'
+);
+
+CREATE TABLE `hub_node_definition`
+(
+    `id`            varchar(45) NOT NULL COMMENT 'ID',
+    `icon`          varchar(255) DEFAULT NULL COMMENT '图标地址',
+    `name`          varchar(45)  DEFAULT NULL COMMENT '名称',
+    `owner_name`    varchar(45)  DEFAULT NULL COMMENT '所有者名称',
+    `owner_type`    varchar(45)  DEFAULT NULL COMMENT '所有者类型',
+    `owner_ref`     varchar(45)  DEFAULT NULL COMMENT '所有者唯一引用',
+    `creator_name`  varchar(45)  DEFAULT NULL COMMENT '创建者名称',
+    `creator_ref`   varchar(45)  DEFAULT NULL COMMENT '创建者唯一引用',
+    `type`          varchar(45)  DEFAULT NULL COMMENT '节点类型',
+    `description`   tinytext COMMENT '描述',
+    `ref`           varchar(45)  DEFAULT NULL COMMENT '唯一引用',
+    `source_link`   varchar(255) DEFAULT NULL COMMENT '源码链接',
+    `document_link` varchar(255) DEFAULT NULL COMMENT '下载链接',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `hub_node_definition_version`
+(
+    `id`                varchar(45) NOT NULL COMMENT 'ID',
+    `owner_ref`         varchar(45) DEFAULT NULL COMMENT '所有者唯一引用',
+    `ref`               varchar(45) DEFAULT NULL COMMENT '唯一引用',
+    `creator_name`      varchar(45) DEFAULT NULL COMMENT '创建者名称',
+    `creator_ref`       varchar(45) DEFAULT NULL COMMENT '创建者唯一引用',
+    `version`           varchar(45) DEFAULT NULL COMMENT '版本',
+    `result_file`       varchar(45) DEFAULT NULL COMMENT '结果文件',
+    `type`              varchar(45) DEFAULT NULL COMMENT '类型',
+    `input_parameters`  blob COMMENT '输入参数列表',
+    `output_parameters` blob COMMENT '输出参数列表',
+    `spec`              longtext COMMENT '规格',
+    PRIMARY KEY (`id`)
 );

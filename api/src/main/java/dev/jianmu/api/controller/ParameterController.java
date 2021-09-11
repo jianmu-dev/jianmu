@@ -1,6 +1,6 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.parameter.aggregate.Parameter;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

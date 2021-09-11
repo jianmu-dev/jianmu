@@ -1,6 +1,6 @@
 package dev.jianmu.infrastructure.mapper.parameter;
 
-import dev.jianmu.parameter.aggregate.*;
+import dev.jianmu.workflow.aggregate.parameter.*;
 import org.apache.ibatis.annotations.*;
 
 import java.math.BigDecimal;

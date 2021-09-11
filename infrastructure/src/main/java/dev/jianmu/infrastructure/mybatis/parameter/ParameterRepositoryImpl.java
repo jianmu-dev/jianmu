@@ -1,8 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.parameter;
 
 import dev.jianmu.infrastructure.mapper.parameter.ParameterMapper;
-import dev.jianmu.parameter.aggregate.Parameter;
-import dev.jianmu.parameter.repository.ParameterRepository;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.inject.Inject;

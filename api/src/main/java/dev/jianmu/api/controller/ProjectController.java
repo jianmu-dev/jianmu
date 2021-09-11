@@ -6,11 +6,9 @@ import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.dto.ProjectSearchDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
-import dev.jianmu.api.vo.WebhookVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitApplication;
 import dev.jianmu.application.service.ProjectApplication;
-import dev.jianmu.project.aggregate.DslSourceCode;
 import dev.jianmu.project.aggregate.Project;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -81,17 +79,5 @@ public class ProjectController {
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public Project getProject(@PathVariable String projectId) {
         return this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-    }
-
-    @GetMapping("/source/{ref}/{version}")
-    @Operation(summary = "获取DSL源码", description = "获取DSL源码")
-    public DslSourceCode findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
-        return this.projectApplication.findByRefAndVersion(ref, version);
-    }
-
-    @GetMapping
-    @Operation(summary = "分页查询项目列表", description = "分页查询项目列表")
-    public PageInfo<Project> findAll(ProjectSearchDto searchDto) {
-        return this.projectApplication.findAll(searchDto.getName(), searchDto.getPageNum(), searchDto.getPageSize());
     }
 }

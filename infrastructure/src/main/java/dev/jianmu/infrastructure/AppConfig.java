@@ -1,9 +1,8 @@
 package dev.jianmu.infrastructure;
 
-import dev.jianmu.parameter.service.ParameterDomainService;
-import dev.jianmu.parameter.service.ReferenceDomainService;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.task.service.WorkerDomainService;
+import dev.jianmu.workflow.service.ParameterDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -47,11 +46,6 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     @Bean
     public ParameterDomainService createParameterDomainService() {
         return new ParameterDomainService();
-    }
-
-    @Bean
-    public ReferenceDomainService createReferenceDomainService() {
-        return new ReferenceDomainService();
     }
 
     @Bean

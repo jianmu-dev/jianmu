@@ -1,8 +1,8 @@
 package dev.jianmu.api;
 
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
-import dev.jianmu.workflow.el.ResultType;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,7 +28,7 @@ public class ElServiceTest {
         Expression expression = this.expressionLanguage.parseExpression("1+1==2");
         var rs = this.expressionLanguage.evaluateExpression(expression, null);
 
-        assertEquals(rs.getType(), ResultType.BOOLEAN);
-        assertEquals(rs.getBoolean(), true);
+        assertEquals(rs.getValue().getType().name(), Parameter.Type.BOOL.name());
+        assertEquals(rs.getValue().getValue(), true);
     }
 }
