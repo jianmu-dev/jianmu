@@ -93,7 +93,7 @@ public class HubApplication {
                     .build();
         }).collect(Collectors.toSet());
 
-        var outputParameters = dto.getInputParameters().stream().map(parameter -> {
+        var outputParameters = dto.getOutputParameters().stream().map(parameter -> {
             var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
