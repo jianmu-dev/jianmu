@@ -3,6 +3,7 @@ package dev.jianmu.infrastructure.client;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -20,7 +21,7 @@ public class NodeDefinitionVersionDto {
     private String creatorRef;
     private String version;
     private String resultFile;
-    private Set<Parameter> inputParameters;
-    private Set<Parameter> outputParameters;
+    private Set<Parameter> inputParameters = new HashSet<>();
+    private Set<Parameter> outputParameters = new HashSet<>();
     private String spec;
 }
