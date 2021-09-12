@@ -76,8 +76,7 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceEvent(TaskInstance taskInstance) {
 //        this.taskInstanceQueue.put(taskInstance);
         // 任务上下文抛出事件通知Worker
-        // TODO 当前为直接触发,缺少调度逻辑，同时需要处理调度失败场景
-        this.workerApplication.runTask(taskInstance);
+        this.workerApplication.dispatchTask(taskInstance);
         logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
     }
 

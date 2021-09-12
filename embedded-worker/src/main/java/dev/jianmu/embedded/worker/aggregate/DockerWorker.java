@@ -1,4 +1,4 @@
-package dev.jianmu.task.aggregate;
+package dev.jianmu.embedded.worker.aggregate;
 
 import java.io.BufferedWriter;
 
