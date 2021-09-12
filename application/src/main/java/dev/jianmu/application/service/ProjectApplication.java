@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @class: ProjectApplication
@@ -90,9 +91,10 @@ public class ProjectApplication {
     public void trigger(String projectId) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        var triggerId = UUID.randomUUID().toString().replace("-", "");
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(project.getId())
-                .triggerId(project.getId() + project.getWorkflowVersion())
+                .triggerId(triggerId)
                 .workflowRef(project.getWorkflowRef())
                 .workflowVersion(project.getWorkflowVersion())
                 .build();
