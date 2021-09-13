@@ -13,8 +13,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
-import javax.inject.Inject;
-
 /**
  * @class: WorkflowInstanceController
  * @description: 流程实例接口类
@@ -28,7 +26,6 @@ import javax.inject.Inject;
 public class WorkflowInstanceController {
     private final WorkflowInstanceApplication instanceApplication;
 
-    @Inject
     public WorkflowInstanceController(WorkflowInstanceApplication instanceApplication) {
         this.instanceApplication = instanceApplication;
     }

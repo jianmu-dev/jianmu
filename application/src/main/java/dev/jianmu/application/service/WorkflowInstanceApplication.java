@@ -28,7 +28,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -54,7 +53,6 @@ public class WorkflowInstanceApplication {
     private final TargetEventRepository targetEventRepository;
     private final ParameterRepository parameterRepository;
 
-    @Inject
     public WorkflowInstanceApplication(
             WorkflowRepository workflowRepository,
             WorkflowInstanceRepositoryImpl workflowInstanceRepository,

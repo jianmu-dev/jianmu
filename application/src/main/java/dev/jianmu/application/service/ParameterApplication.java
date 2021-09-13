@@ -5,7 +5,6 @@ import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,7 +20,6 @@ public class ParameterApplication {
 
     private final ParameterRepository parameterRepository;
 
-    @Inject
     public ParameterApplication(
             ParameterRepository parameterRepository
     ) {

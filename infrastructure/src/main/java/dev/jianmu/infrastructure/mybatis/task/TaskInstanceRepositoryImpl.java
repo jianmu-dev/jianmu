@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +27,6 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     private final TaskInstanceMapper taskInstanceMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    @Inject
     public TaskInstanceRepositoryImpl(
             TaskInstanceMapper taskInstanceMapper,
             ApplicationEventPublisher applicationEventPublisher

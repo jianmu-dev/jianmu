@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,7 +49,6 @@ public class TaskInstanceApplication {
     private final NodeDefApi nodeDefApi;
     private final ExpressionLanguage expressionLanguage;
 
-    @Inject
     public TaskInstanceApplication(
             TaskInstanceRepository taskInstanceRepository,
             WorkflowRepository workflowRepository,
