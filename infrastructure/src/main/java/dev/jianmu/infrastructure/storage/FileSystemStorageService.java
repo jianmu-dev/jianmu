@@ -6,7 +6,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
@@ -27,7 +26,6 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     private final Path rootLocation;
 
-    @Inject
     public FileSystemStorageService(StorageProperties properties) {
         this.rootLocation = Paths.get(properties.getLogfilePath());
     }

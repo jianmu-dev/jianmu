@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import javax.inject.Inject;
-
 /**
  * @class: TaskInstanceEventHandler
  * @description: 任务实例事件处理器
@@ -33,7 +31,6 @@ public class TaskInstanceEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final WorkerApplication workerApplication;
 
-    @Inject
     public TaskInstanceEventHandler(
             TaskInstanceApplication taskInstanceApplication,
             WorkflowInstanceApplication workflowInstanceApplication,

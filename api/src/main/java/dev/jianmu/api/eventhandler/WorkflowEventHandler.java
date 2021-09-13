@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import javax.inject.Inject;
-
 /**
  * @class: WorkflowEventHandler
  * @description: 流程事件处理器
@@ -31,7 +29,6 @@ public class WorkflowEventHandler {
     private final WorkerApplication workerApplication;
     private final ApplicationEventPublisher publisher;
 
-    @Inject
     public WorkflowEventHandler(WorkflowInstanceApplication instanceApplication, TaskInstanceApplication taskInstanceApplication, WorkerApplication workerApplication, ApplicationEventPublisher publisher) {
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;

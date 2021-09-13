@@ -21,7 +21,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -61,7 +60,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
 
     private final ApplicationEventPublisher publisher;
 
-    @Inject
     public EmbeddedDockerWorker(EmbeddedDockerWorkerProperties properties, ApplicationEventPublisher publisher) {
         this.dockerHost = properties.getDockerHost();
         this.apiVersion = properties.getApiVersion();

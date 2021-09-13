@@ -5,7 +5,6 @@ import dev.jianmu.task.aggregate.Worker;
 import dev.jianmu.task.repository.WorkerRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.inject.Inject;
 import java.util.Optional;
 
 /**
@@ -18,7 +17,6 @@ import java.util.Optional;
 public class WorkerRepositoryImpl implements WorkerRepository {
     private final WorkerMapper workerMapper;
 
-    @Inject
     public WorkerRepositoryImpl(WorkerMapper workerMapper) {
         this.workerMapper = workerMapper;
     }

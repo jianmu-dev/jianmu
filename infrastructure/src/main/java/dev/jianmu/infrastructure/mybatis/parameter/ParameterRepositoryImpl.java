@@ -5,7 +5,6 @@ import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +18,6 @@ import java.util.Set;
 public class ParameterRepositoryImpl implements ParameterRepository {
     private final ParameterMapper parameterMapper;
 
-    @Inject
     public ParameterRepositoryImpl(ParameterMapper parameterMapper) {
         this.parameterMapper = parameterMapper;
     }
