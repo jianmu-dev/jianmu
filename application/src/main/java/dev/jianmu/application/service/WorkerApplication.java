@@ -85,7 +85,7 @@ public class WorkerApplication {
             throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
         }
         // 查找空闲Worker
-        // TODO 暂时分配给内置Worker
+        // TODO 暂时全部分配给内置Worker
         var worker = this.workerRepository.findByType(Worker.Type.EMBEDDED);
         // 创建WorkerTask
         var instanceParameters = this.instanceParameterRepository
@@ -93,6 +93,7 @@ public class WorkerApplication {
         var parameterMap = this.getParameterMap(instanceParameters);
         var workerTask = WorkerTask.Builder.aWorkerTask()
                 .workerId(worker.getId())
+                .type(worker.getType())
                 .taskInstanceId(taskInstance.getId())
                 .businessId(taskInstance.getBusinessId())
                 .triggerId(taskInstance.getTriggerId())

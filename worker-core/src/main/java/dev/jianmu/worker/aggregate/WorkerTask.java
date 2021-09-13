@@ -10,6 +10,7 @@ import java.util.Map;
  **/
 public class WorkerTask {
     private String workerId;
+    private Worker.Type type;
     private String taskInstanceId;
     private String businessId;
     // 外部触发ID，流程实例唯一
@@ -23,6 +24,10 @@ public class WorkerTask {
 
     public String getWorkerId() {
         return workerId;
+    }
+
+    public Worker.Type getType() {
+        return type;
     }
 
     public String getTaskInstanceId() {
@@ -55,6 +60,7 @@ public class WorkerTask {
 
     public static final class Builder {
         private String workerId;
+        private Worker.Type type;
         private String taskInstanceId;
         private String businessId;
         // 外部触发ID，流程实例唯一
@@ -75,6 +81,11 @@ public class WorkerTask {
 
         public Builder workerId(String workerId) {
             this.workerId = workerId;
+            return this;
+        }
+
+        public Builder type(Worker.Type type) {
+            this.type = type;
             return this;
         }
 
@@ -115,14 +126,15 @@ public class WorkerTask {
 
         public WorkerTask build() {
             WorkerTask workerTask = new WorkerTask();
-            workerTask.businessId = this.businessId;
-            workerTask.resultFile = this.resultFile;
             workerTask.triggerId = this.triggerId;
+            workerTask.defKey = this.defKey;
+            workerTask.type = this.type;
+            workerTask.businessId = this.businessId;
+            workerTask.parameterMap = this.parameterMap;
             workerTask.spec = this.spec;
             workerTask.taskInstanceId = this.taskInstanceId;
+            workerTask.resultFile = this.resultFile;
             workerTask.workerId = this.workerId;
-            workerTask.defKey = this.defKey;
-            workerTask.parameterMap = this.parameterMap;
             return workerTask;
         }
     }
