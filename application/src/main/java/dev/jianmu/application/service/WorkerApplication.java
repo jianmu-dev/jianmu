@@ -1,30 +1,16 @@
 package dev.jianmu.application.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
-import dev.jianmu.embedded.worker.aggregate.DockerTask;
-import dev.jianmu.embedded.worker.aggregate.DockerWorker;
-import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
-import dev.jianmu.embedded.worker.aggregate.spec.HostConfig;
-import dev.jianmu.embedded.worker.aggregate.spec.Mount;
-import dev.jianmu.embedded.worker.aggregate.spec.MountType;
-import dev.jianmu.infrastructure.storage.StorageService;
-import dev.jianmu.secret.aggregate.KVPair;
-import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
+import dev.jianmu.worker.event.CleanupWorkspaceEvent;
+import dev.jianmu.worker.event.CreateWorkspaceEvent;
 import dev.jianmu.worker.repository.WorkerRepository;
-import dev.jianmu.workflow.aggregate.parameter.Parameter;
-import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +31,6 @@ import java.util.stream.Collectors;
 public class WorkerApplication {
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
-    private final DockerWorker dockerWorker;
     private final NodeDefApi nodeDefApi;
     private final WorkerRepository workerRepository;
     private final ApplicationEventPublisher publisher;
@@ -55,7 +39,6 @@ public class WorkerApplication {
     public WorkerApplication(
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
-            DockerWorker dockerWorker,
             NodeDefApi nodeDefApi,
             WorkerRepository workerRepository,
             ApplicationEventPublisher publisher,
@@ -63,19 +46,39 @@ public class WorkerApplication {
     ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
-        this.dockerWorker = dockerWorker;
         this.nodeDefApi = nodeDefApi;
         this.workerRepository = workerRepository;
         this.publisher = publisher;
         this.instanceParameterRepository = instanceParameterRepository;
     }
 
-    public void createVolume(String volumeName) {
-        this.dockerWorker.createVolume(volumeName);
+    private Worker findWorker() {
+        // 查找符合条件的Worker
+        // TODO 暂时全部分配给内置Worker
+        var worker = this.workerRepository.findByType(Worker.Type.EMBEDDED);
+        return worker;
     }
 
-    public void deleteVolume(String volumeName) {
-        this.dockerWorker.deleteVolume(volumeName);
+    public void createWorkspace(String triggerId) {
+        var worker = this.findWorker();
+        this.publisher.publishEvent(
+                CreateWorkspaceEvent.Builder.aCreateWorkspaceEvent()
+                        .workerId(worker.getId())
+                        .workerType(worker.getType().name())
+                        .workspaceName(triggerId)
+                        .build()
+        );
+    }
+
+    public void cleanupWorkspace(String triggerId) {
+        var worker = this.findWorker();
+        this.publisher.publishEvent(
+                CleanupWorkspaceEvent.Builder.aCleanupWorkspaceEvent()
+                        .workerId(worker.getId())
+                        .workerType(worker.getType().name())
+                        .workspaceName(triggerId)
+                        .build()
+        );
     }
 
     public void dispatchTask(TaskInstance taskInstance) {
@@ -84,9 +87,7 @@ public class WorkerApplication {
         if (!nodeDef.getWorkerType().equals("DOCKER")) {
             throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
         }
-        // 查找空闲Worker
-        // TODO 暂时全部分配给内置Worker
-        var worker = this.workerRepository.findByType(Worker.Type.EMBEDDED);
+        var worker = this.findWorker();
         // 创建WorkerTask
         var instanceParameters = this.instanceParameterRepository
                 .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);

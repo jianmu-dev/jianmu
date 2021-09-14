@@ -57,6 +57,14 @@ public class EmbeddedWorkerApplication {
         this.objectMapper = objectMapper;
     }
 
+    public void createVolume(String volumeName) {
+        this.dockerWorker.createVolume(volumeName);
+    }
+
+    public void deleteVolume(String volumeName) {
+        this.dockerWorker.deleteVolume(volumeName);
+    }
+
     public void runTask(WorkerTask workerTask) {
         var parameterMap = workerTask.getParameterMap().entrySet().stream()
                 .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue()))

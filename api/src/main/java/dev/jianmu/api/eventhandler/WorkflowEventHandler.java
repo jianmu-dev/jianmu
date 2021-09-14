@@ -90,7 +90,7 @@ public class WorkflowEventHandler {
         logger.info(event.getNodeRef());
         logger.info("-----------------------------------------------------");
         this.instanceApplication.stop(event.getWorkflowInstanceId());
-        this.workerApplication.deleteVolume(event.getTriggerId());
+        this.workerApplication.cleanupWorkspace(event.getTriggerId());
     }
 
     @Async
@@ -108,7 +108,7 @@ public class WorkflowEventHandler {
         logger.info(event.getName());
         logger.info(event.getWorkflowInstanceId());
         logger.info(event.getTriggerId());
-        this.workerApplication.createVolume(event.getTriggerId());
+        this.workerApplication.createWorkspace(event.getTriggerId());
         logger.info("-----------------------------------------------------");
     }
 
@@ -120,7 +120,7 @@ public class WorkflowEventHandler {
         logger.info(event.getWorkflowInstanceId());
         logger.info(event.getTriggerId());
         logger.info("Delete Volume here -------------------------");
-        this.workerApplication.deleteVolume(event.getTriggerId());
+        this.workerApplication.cleanupWorkspace(event.getTriggerId());
         logger.info("-----------------------------------------------------");
     }
 }
