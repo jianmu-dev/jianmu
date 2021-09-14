@@ -7,6 +7,7 @@ import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -49,6 +50,7 @@ public class WorkflowEventHandler {
     @Async
     @EventListener
     public void handleTaskActivatingEvent(TaskActivatingEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskActivatingEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
@@ -61,6 +63,7 @@ public class WorkflowEventHandler {
 
     @EventListener
     public void handleTaskTerminatingEvent(TaskTerminatingEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskTerminatingEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
@@ -69,6 +72,7 @@ public class WorkflowEventHandler {
 
     @EventListener
     public void handleTaskRunningEvent(TaskRunningEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskRunningEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
@@ -77,6 +81,7 @@ public class WorkflowEventHandler {
 
     @EventListener
     public void handleTaskSucceededEvent(TaskSucceededEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskSucceededEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
@@ -85,6 +90,7 @@ public class WorkflowEventHandler {
 
     @EventListener
     public void handleTaskFailedEvent(TaskFailedEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskFailedEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
@@ -96,6 +102,7 @@ public class WorkflowEventHandler {
     @Async
     @EventListener
     public void handleNodeActivatingEvent(NodeActivatingEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get NodeActivatingEvent here -------------------------");
         logger.info(event.getNodeRef());
         this.instanceApplication.activateNode(event.getWorkflowInstanceId(), event.getNodeRef());
@@ -104,6 +111,7 @@ public class WorkflowEventHandler {
 
     @EventListener
     public void handleWorkflowStartEvent(WorkflowStartEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get WorkflowStartEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getWorkflowInstanceId());
@@ -115,6 +123,7 @@ public class WorkflowEventHandler {
     @Async
     @EventListener
     public void handleWorkflowEndEvent(WorkflowEndEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
         logger.info("Get WorkflowEndEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getWorkflowInstanceId());

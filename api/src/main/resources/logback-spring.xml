@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- use Spring default values -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <appender name="Sifting" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <!--discriminator鉴别器，设置运行时动态属性,siftingAppender根据这个属性来输出日志到不同文件 -->
+        <!--discriminator鉴别器，根据workflowInstanceId这个key对应的value鉴别日志事件，然后委托给具体appender写日志-->
+        <discriminator>
+            <key>triggerId</key>
+            <defaultValue>unknown</defaultValue>
+        </discriminator>
+        <sift>
+            <!--具体的写日志appender，每一个triggerId创建一个文件-->
+            <appender name="${triggerId}" class="ch.qos.logback.core.FileAppender">
+                <append>true</append>
+                <encoder charset="UTF-8">
+                    <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] %-5level [%thread] %file:%line - %msg%n</pattern>
+                </encoder>
+                <file>./workflow_log/${triggerId}.log</file>
+            </appender>
+        </sift>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="Sifting"/>
+    </root>
+    <logger name="org.springframework.web" level="INFO"/>
+</configuration>

@@ -22,6 +22,7 @@ import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +78,7 @@ public class ProjectApplication {
     }
 
     public void trigger(String projectId, String triggerId) {
+        MDC.put("triggerId", triggerId);
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
@@ -92,6 +94,7 @@ public class ProjectApplication {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var triggerId = UUID.randomUUID().toString().replace("-", "");
+        MDC.put("triggerId", triggerId);
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(project.getId())
                 .triggerId(triggerId)
@@ -102,6 +105,7 @@ public class ProjectApplication {
     }
 
     public void triggerFromCron(String triggerId) {
+        MDC.put("triggerId", triggerId);
         var cronTrigger = this.cronTriggerRepository.findById(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该触发器"));
         this.trigger(cronTrigger.getProjectId(), triggerId);
