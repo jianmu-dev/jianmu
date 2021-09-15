@@ -2,9 +2,11 @@ package dev.jianmu.infrastructure.mapper.hub;
 
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,6 +25,19 @@ public interface NodeDefinitionMapper {
     @Result(column = "source_link", property = "sourceLink")
     @Result(column = "document_link", property = "documentLink")
     Optional<NodeDefinition> findById(String id);
+
+    @Select("SELECT * FROM hub_node_definition")
+    @Result(column = "owner_name", property = "ownerName")
+    @Result(column = "owner_type", property = "ownerType")
+    @Result(column = "owner_ref", property = "ownerRef")
+    @Result(column = "creator_name", property = "creatorName")
+    @Result(column = "creator_ref", property = "creatorRef")
+    @Result(column = "source_link", property = "sourceLink")
+    @Result(column = "document_link", property = "documentLink")
+    List<NodeDefinition> findAll(
+            @Param("pageNum") int pageNum,
+            @Param("pageSize") int pageSize
+    );
 
     @Insert("insert into hub_node_definition(id, icon, name, owner_name, owner_type, owner_ref, creator_name, creator_ref, type, description, ref, source_link, document_link) " +
             "values(#{id}, #{icon}, #{name}, #{ownerName}, #{ownerType}, #{ownerRef}, #{creatorName}, #{creatorRef}, #{type}, #{description}, #{ref}, #{sourceLink}, #{documentLink})" +

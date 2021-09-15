@@ -4,9 +4,11 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
+import dev.jianmu.hub.intergration.aggregate.NodeLibrary;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.hub.intergration.repository.NodeDefinitionRepository;
 import dev.jianmu.hub.intergration.repository.NodeDefinitionVersionRepository;
+import dev.jianmu.hub.intergration.repository.NodeLibraryRepository;
 import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -26,21 +28,36 @@ import java.util.stream.Collectors;
  **/
 @Service
 public class HubApplication {
+    private final NodeLibraryRepository nodeLibraryRepository;
     private final NodeDefinitionRepository nodeDefinitionRepository;
     private final NodeDefinitionVersionRepository nodeDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
     private final RegistryClient registryClient;
 
     public HubApplication(
+            NodeLibraryRepository nodeLibraryRepository,
             NodeDefinitionRepository nodeDefinitionRepository,
             NodeDefinitionVersionRepository nodeDefinitionVersionRepository,
             ParameterRepository parameterRepository,
             RegistryClient registryClient
     ) {
+        this.nodeLibraryRepository = nodeLibraryRepository;
         this.nodeDefinitionRepository = nodeDefinitionRepository;
         this.nodeDefinitionVersionRepository = nodeDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
         this.registryClient = registryClient;
+    }
+
+    public List<NodeLibrary> findLibAll() {
+        return this.nodeLibraryRepository.findAll();
+    }
+
+    public List<NodeDefinition> findNodeAll(int pageNum, int pageSize) {
+        return this.nodeDefinitionRepository.findAll(pageNum, pageSize);
+    }
+
+    public List<NodeDefinitionVersion> findByRef(String ref) {
+        return this.nodeDefinitionVersionRepository.findByRef(ref);
     }
 
     private String getRef(String type) {

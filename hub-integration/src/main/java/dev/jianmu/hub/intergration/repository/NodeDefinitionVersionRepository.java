@@ -2,6 +2,7 @@ package dev.jianmu.hub.intergration.repository;
 
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -12,6 +13,8 @@ import java.util.Optional;
  **/
 public interface NodeDefinitionVersionRepository {
     Optional<NodeDefinitionVersion> findByRefAndVersion(String ref, String version);
+
+    List<NodeDefinitionVersion> findByRef(String ref);
 
     void saveOrUpdate(NodeDefinitionVersion nodeDefinitionVersion);
 }

@@ -5,6 +5,7 @@ import dev.jianmu.hub.intergration.repository.NodeDefinitionVersionRepository;
 import dev.jianmu.infrastructure.mapper.hub.NodeDefinitionVersionMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,6 +25,11 @@ public class NodeDefinitionVersionRepositoryImpl implements NodeDefinitionVersio
     @Override
     public Optional<NodeDefinitionVersion> findByRefAndVersion(String ref, String version) {
         return this.nodeDefinitionVersionMapper.findByRefAndVersion(ref, version);
+    }
+
+    @Override
+    public List<NodeDefinitionVersion> findByRef(String ref) {
+        return this.nodeDefinitionVersionMapper.findByRef(ref);
     }
 
     @Override

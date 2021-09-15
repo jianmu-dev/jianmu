@@ -2,6 +2,7 @@ package dev.jianmu.hub.intergration.repository;
 
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -12,6 +13,8 @@ import java.util.Optional;
  **/
 public interface NodeDefinitionRepository {
     Optional<NodeDefinition> findById(String id);
+
+    List<NodeDefinition> findAll(int pageNum, int pageSize);
 
     void saveOrUpdate(NodeDefinition nodeDefinition);
 }

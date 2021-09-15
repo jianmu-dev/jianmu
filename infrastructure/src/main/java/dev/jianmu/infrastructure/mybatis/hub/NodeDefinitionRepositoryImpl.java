@@ -5,6 +5,7 @@ import dev.jianmu.hub.intergration.repository.NodeDefinitionRepository;
 import dev.jianmu.infrastructure.mapper.hub.NodeDefinitionMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,6 +25,11 @@ public class NodeDefinitionRepositoryImpl implements NodeDefinitionRepository {
     @Override
     public Optional<NodeDefinition> findById(String id) {
         return this.nodeDefinitionMapper.findById(id);
+    }
+
+    @Override
+    public List<NodeDefinition> findAll(int pageNum, int pageSize) {
+        return this.nodeDefinitionMapper.findAll(pageNum, pageSize);
     }
 
     @Override

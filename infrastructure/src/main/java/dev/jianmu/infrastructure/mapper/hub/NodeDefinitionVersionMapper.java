@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -24,6 +25,15 @@ public interface NodeDefinitionVersionMapper {
     @Result(column = "input_parameters", property = "inputParameters", typeHandler = NodeParameterSetTypeHandler.class)
     @Result(column = "output_parameters", property = "outputParameters", typeHandler = NodeParameterSetTypeHandler.class)
     Optional<NodeDefinitionVersion> findByRefAndVersion(@Param("ref") String ref, @Param("version") String version);
+
+    @Select("SELECT * FROM hub_node_definition_version WHERE ref = #{ref}")
+    @Result(column = "result_file", property = "resultFile")
+    @Result(column = "owner_ref", property = "ownerRef")
+    @Result(column = "creator_name", property = "creatorName")
+    @Result(column = "creator_ref", property = "creatorRef")
+    @Result(column = "input_parameters", property = "inputParameters", typeHandler = NodeParameterSetTypeHandler.class)
+    @Result(column = "output_parameters", property = "outputParameters", typeHandler = NodeParameterSetTypeHandler.class)
+    List<NodeDefinitionVersion> findByRef(@Param("ref") String ref);
 
     @Insert("insert into hub_node_definition_version(id, owner_ref, ref, creator_name, creator_ref, version, result_file, input_parameters, output_parameters, spec) " +
             "values(#{id}, #{ownerRef}, #{ref}, #{creatorName}, #{creatorRef}, #{version}, #{resultFile}, " +
