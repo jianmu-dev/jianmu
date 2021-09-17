@@ -1,6 +1,8 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.secret.aggregate.KVPair;
+import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
@@ -9,6 +11,8 @@ import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
 import dev.jianmu.worker.event.CreateWorkspaceEvent;
 import dev.jianmu.worker.repository.WorkerRepository;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +36,7 @@ import java.util.stream.Collectors;
 public class WorkerApplication {
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
+    private final KVPairRepository kvPairRepository;
     private final NodeDefApi nodeDefApi;
     private final WorkerRepository workerRepository;
     private final ApplicationEventPublisher publisher;
@@ -39,6 +45,7 @@ public class WorkerApplication {
     public WorkerApplication(
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
+            KVPairRepository kvPairRepository,
             NodeDefApi nodeDefApi,
             WorkerRepository workerRepository,
             ApplicationEventPublisher publisher,
@@ -46,6 +53,7 @@ public class WorkerApplication {
     ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
+        this.kvPairRepository = kvPairRepository;
         this.nodeDefApi = nodeDefApi;
         this.workerRepository = workerRepository;
         this.publisher = publisher;
@@ -117,8 +125,37 @@ public class WorkerApplication {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         // 查询参数值
         var parameters = this.parameterRepository.findByIds(new HashSet<>(parameterMap.values()));
+        var secretParameters = parameters.stream()
+                .filter(parameter -> parameter instanceof SecretParameter)
+                // 过滤非正常语法
+                .filter(parameter -> parameter.getStringValue().split("\\.").length == 2)
+                .collect(Collectors.toList());
+        // 替换密钥参数值
+        this.handleSecretParameter(parameterMap, secretParameters);
         // 替换实际参数值
         this.parameterDomainService.createParameterMap(parameterMap, parameters);
         return parameterMap;
+    }
+
+    private void handleSecretParameter(Map<String, String> parameterMap, List<Parameter> secretParameters) {
+        parameterMap.forEach((key, val) -> {
+            secretParameters.stream()
+                    .filter(parameter -> parameter.getId().equals(val))
+                    .findFirst()
+                    .ifPresent(parameter -> {
+                        var kvPairOptional = this.findSecret(parameter);
+                        kvPairOptional.ifPresent(kv -> {
+                            var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
+                            parameterMap.put(key, secretParameter.getStringValue());
+                        });
+                    });
+        });
+    }
+
+    private Optional<KVPair> findSecret(Parameter<?> parameter) {
+        Parameter<?> secretParameter;
+        // 处理密钥类型参数, 获取值后转换为String类型参数
+        var strings = parameter.getStringValue().split("\\.");
+        return this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1]);
     }
 }
