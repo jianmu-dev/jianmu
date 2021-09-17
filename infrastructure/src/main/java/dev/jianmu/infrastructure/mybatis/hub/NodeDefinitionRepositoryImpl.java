@@ -1,11 +1,12 @@
 package dev.jianmu.infrastructure.mybatis.hub;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import dev.jianmu.hub.intergration.repository.NodeDefinitionRepository;
 import dev.jianmu.infrastructure.mapper.hub.NodeDefinitionMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,9 +28,10 @@ public class NodeDefinitionRepositoryImpl implements NodeDefinitionRepository {
         return this.nodeDefinitionMapper.findById(id);
     }
 
-    @Override
-    public List<NodeDefinition> findAll(int pageNum, int pageSize) {
-        return this.nodeDefinitionMapper.findAll(pageNum, pageSize);
+
+    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(this.nodeDefinitionMapper::findPage);
     }
 
     @Override

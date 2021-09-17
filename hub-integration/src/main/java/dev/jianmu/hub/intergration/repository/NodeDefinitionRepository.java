@@ -14,7 +14,5 @@ import java.util.Optional;
 public interface NodeDefinitionRepository {
     Optional<NodeDefinition> findById(String id);
 
-    List<NodeDefinition> findAll(int pageNum, int pageSize);
-
     void saveOrUpdate(NodeDefinition nodeDefinition);
 }

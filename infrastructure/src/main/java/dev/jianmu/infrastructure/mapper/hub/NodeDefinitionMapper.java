@@ -34,10 +34,7 @@ public interface NodeDefinitionMapper {
     @Result(column = "creator_ref", property = "creatorRef")
     @Result(column = "source_link", property = "sourceLink")
     @Result(column = "document_link", property = "documentLink")
-    List<NodeDefinition> findAll(
-            @Param("pageNum") int pageNum,
-            @Param("pageSize") int pageSize
-    );
+    List<NodeDefinition> findPage();
 
     @Insert("insert into hub_node_definition(id, icon, name, owner_name, owner_type, owner_ref, creator_name, creator_ref, type, description, ref, source_link, document_link) " +
             "values(#{id}, #{icon}, #{name}, #{ownerName}, #{ownerType}, #{ownerRef}, #{creatorName}, #{creatorRef}, #{type}, #{description}, #{ref}, #{sourceLink}, #{documentLink})" +
