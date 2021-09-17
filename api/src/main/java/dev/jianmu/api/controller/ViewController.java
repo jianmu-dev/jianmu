@@ -157,4 +157,13 @@ public class ViewController {
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(new FileSystemResource(this.storageService.logFile(logId)));
     }
+
+    @GetMapping("/logs/workflow/{logId}")
+    @Operation(summary = "流程日志获取接口", description = "流程日志获取接口,可以使用Range方式分段获取")
+    public ResponseEntity<FileSystemResource> getWorkflowLog(@PathVariable String logId) {
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(new FileSystemResource(this.storageService.workflowLogFile(logId)));
+    }
 }
