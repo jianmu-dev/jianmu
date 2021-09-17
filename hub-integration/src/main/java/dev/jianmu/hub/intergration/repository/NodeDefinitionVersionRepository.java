@@ -12,9 +12,11 @@ import java.util.Optional;
  * @create: 2021-09-03 20:44
  **/
 public interface NodeDefinitionVersionRepository {
-    Optional<NodeDefinitionVersion> findByRefAndVersion(String ref, String version);
+    Optional<NodeDefinitionVersion> findByOwnerRefAndRefAndVersion(String ownerRef, String ref, String version);
 
-    List<NodeDefinitionVersion> findByRef(String ref);
+    List<NodeDefinitionVersion> findByOwnerRefAndRef(String ownerRef, String ref);
 
     void saveOrUpdate(NodeDefinitionVersion nodeDefinitionVersion);
+
+    void deleteByOwnerRefAndRef(String ownerRef, String ref);
 }

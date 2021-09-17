@@ -44,21 +44,47 @@ public class HubApplication {
         this.registryClient = registryClient;
     }
 
+    @Transactional
+    public void syncNode(String ownerRef, String ref) {
+        var node = this.downloadNodeDef(ownerRef + "/" + ref);
+        var versions = this.nodeDefinitionVersionRepository.findByOwnerRefAndRef(ownerRef, ref);
+        versions.forEach(nodeDefinitionVersion -> {
+            var version = this.downloadNodeDefVersion(ownerRef, ref, nodeDefinitionVersion.getVersion());
+            this.nodeDefinitionVersionRepository.saveOrUpdate(version);
+        });
+        this.nodeDefinitionRepository.saveOrUpdate(node);
+    }
+
+    @Transactional
+    public void deleteNode(String ownerRef, String ref) {
+        this.nodeDefinitionRepository.deleteById(ownerRef + "/" + ref);
+        this.nodeDefinitionVersionRepository.deleteByOwnerRefAndRef(ownerRef, ref);
+    }
+
     public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {
         return this.nodeDefinitionRepository.findPage(pageNum, pageSize);
     }
 
-    public List<NodeDefinitionVersion> findByRef(String ref) {
-        return this.nodeDefinitionVersionRepository.findByRef(ref);
+    public List<NodeDefinitionVersion> findByOwnerRefAndRef(String ownerRef, String ref) {
+        return this.nodeDefinitionVersionRepository.findByOwnerRefAndRef(ownerRef, ref);
+    }
+
+    private String getOwnerRef(String type) {
+        var ref = type.split(":")[0];
+        var strings = ref.split("/");
+        if (strings.length == 1) {
+            return "_";
+        }
+        return strings[0];
     }
 
     private String getRef(String type) {
         var ref = type.split(":")[0];
         var strings = ref.split("/");
         if (strings.length == 1) {
-            return "_/" + ref;
+            return ref;
         }
-        return ref;
+        return strings[1];
     }
 
     private String getVersion(String type) {
@@ -66,7 +92,7 @@ public class HubApplication {
     }
 
     private NodeDefinition downloadNodeDef(String type) {
-        var defDto = this.registryClient.findByRef(getRef(type))
+        var defDto = this.registryClient.findByRef(getOwnerRef(type) + "/" + getRef(type))
                 .orElseThrow(() -> new DataNotFoundException("未找到节点定义"));
         return NodeDefinition.Builder.aNodeDefinition()
                 .id(defDto.getOwnerRef() + "/" + defDto.getRef())
@@ -85,8 +111,8 @@ public class HubApplication {
                 .build();
     }
 
-    private NodeDefinitionVersion downloadNodeDefVersion(String ref, String version) {
-        var dto = this.registryClient.findByRefAndVersion(ref, version)
+    private NodeDefinitionVersion downloadNodeDefVersion(String ownerRef, String ref, String version) {
+        var dto = this.registryClient.findByRefAndVersion(ownerRef + "/" + ref, version)
                 .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本"));
         List<Parameter> parameters = new ArrayList<>();
         var inputParameters = dto.getInputParameters().stream().map(parameter -> {
@@ -118,7 +144,7 @@ public class HubApplication {
         this.parameterRepository.addAll(parameters);
 
         return NodeDefinitionVersion.Builder.aNodeDefinitionVersion()
-                .id(dto.getRef() + ":" + dto.getVersion())
+                .id(dto.getOwnerRef() + "/" + dto.getRef() + ":" + dto.getVersion())
                 .ownerRef(dto.getOwnerRef())
                 .ref(dto.getRef())
                 .creatorName(dto.getCreatorName())
@@ -133,11 +159,11 @@ public class HubApplication {
 
     @Transactional
     public NodeDef findByType(String type) {
-        var node = this.nodeDefinitionRepository.findById(getRef(type))
+        var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
                 .orElseGet(() -> this.downloadNodeDef(type));
         var version =
-                this.nodeDefinitionVersionRepository.findByRefAndVersion(getRef(type), getVersion(type))
-                        .orElseGet(() -> this.downloadNodeDefVersion(getRef(type), getVersion(type)));
+                this.nodeDefinitionVersionRepository.findByOwnerRefAndRefAndVersion(getOwnerRef(type), getRef(type), getVersion(type))
+                        .orElseGet(() -> this.downloadNodeDefVersion(getOwnerRef(type), getRef(type), getVersion(type)));
 
         var nodeDef = NodeDef.builder()
                 .name(node.getName())

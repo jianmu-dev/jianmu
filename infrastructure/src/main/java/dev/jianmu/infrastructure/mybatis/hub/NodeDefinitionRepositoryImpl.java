@@ -38,4 +38,9 @@ public class NodeDefinitionRepositoryImpl implements NodeDefinitionRepository {
     public void saveOrUpdate(NodeDefinition nodeDefinition) {
         this.nodeDefinitionMapper.saveOrUpdate(nodeDefinition);
     }
+
+    @Override
+    public void deleteById(String id) {
+        this.nodeDefinitionMapper.deleteById(id);
+    }
 }

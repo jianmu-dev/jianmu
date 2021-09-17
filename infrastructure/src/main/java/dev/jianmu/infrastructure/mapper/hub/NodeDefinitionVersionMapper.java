@@ -2,10 +2,7 @@ package dev.jianmu.infrastructure.mapper.hub;
 
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.typehandler.NodeParameterSetTypeHandler;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,23 +14,23 @@ import java.util.Optional;
  * @create: 2021-09-09 12:56
  **/
 public interface NodeDefinitionVersionMapper {
-    @Select("SELECT * FROM hub_node_definition_version WHERE ref = #{ref} and version = #{version}")
+    @Select("SELECT * FROM hub_node_definition_version WHERE owner_ref = #{ownerRef} and ref = #{ref} and version = #{version}")
     @Result(column = "result_file", property = "resultFile")
     @Result(column = "owner_ref", property = "ownerRef")
     @Result(column = "creator_name", property = "creatorName")
     @Result(column = "creator_ref", property = "creatorRef")
     @Result(column = "input_parameters", property = "inputParameters", typeHandler = NodeParameterSetTypeHandler.class)
     @Result(column = "output_parameters", property = "outputParameters", typeHandler = NodeParameterSetTypeHandler.class)
-    Optional<NodeDefinitionVersion> findByRefAndVersion(@Param("ref") String ref, @Param("version") String version);
+    Optional<NodeDefinitionVersion> findByOwnerRefAndRefAndVersion(@Param("ownerRef") String ownerRef, @Param("ref") String ref, @Param("version") String version);
 
-    @Select("SELECT * FROM hub_node_definition_version WHERE ref = #{ref}")
+    @Select("SELECT * FROM hub_node_definition_version WHERE owner_ref = #{ownerRef} and ref = #{ref}")
     @Result(column = "result_file", property = "resultFile")
     @Result(column = "owner_ref", property = "ownerRef")
     @Result(column = "creator_name", property = "creatorName")
     @Result(column = "creator_ref", property = "creatorRef")
     @Result(column = "input_parameters", property = "inputParameters", typeHandler = NodeParameterSetTypeHandler.class)
     @Result(column = "output_parameters", property = "outputParameters", typeHandler = NodeParameterSetTypeHandler.class)
-    List<NodeDefinitionVersion> findByRef(@Param("ref") String ref);
+    List<NodeDefinitionVersion> findByOwnerRefAndRef(@Param("ownerRef") String ownerRef, @Param("ref") String ref);
 
     @Insert("insert into hub_node_definition_version(id, owner_ref, ref, creator_name, creator_ref, version, result_file, input_parameters, output_parameters, spec) " +
             "values(#{id}, #{ownerRef}, #{ref}, #{creatorName}, #{creatorRef}, #{version}, #{resultFile}, " +
@@ -46,4 +43,7 @@ public interface NodeDefinitionVersionMapper {
             "output_parameters=#{outputParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeParameterSetTypeHandler}, " +
             "spec=#{spec}")
     void saveOrUpdate(NodeDefinitionVersion nodeDefinitionVersion);
+
+    @Delete("delete from hub_node_definition_version where owner_ref = #{ownerRef} and ref = #{ref}")
+    void deleteByOwnerRefAndRef(@Param("ownerRef") String ownerRef, @Param("ref") String ref);
 }
