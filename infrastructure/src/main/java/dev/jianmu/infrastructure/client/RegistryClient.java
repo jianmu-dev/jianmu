@@ -26,7 +26,7 @@ public class RegistryClient {
 
     public Optional<NodeDefinitionDto> findByRef(String ref) {
         try {
-            var downloadUrl = registryProperties.getUrl() + "/download/node_definitions/" + ref;
+            var downloadUrl = registryProperties.getUrl() + "/hub/download/node_definitions/" + ref;
             log.info("从 {} 下载节点定义", downloadUrl);
             var dto = this.restTemplate.getForObject(downloadUrl, NodeDefinitionDto.class);
             log.info("已下载节点定义: {} 内容为: {}", ref, dto);
@@ -39,7 +39,7 @@ public class RegistryClient {
 
     public Optional<NodeDefinitionVersionDto> findByRefAndVersion(String ref, String version) {
         try {
-            var downloadUrl = registryProperties.getUrl() + "/download/node_definitions/" + ref + "/versions/" + version;
+            var downloadUrl = registryProperties.getUrl() + "/hub/download/node_definitions/" + ref + "/versions/" + version;
             log.info("从 {} 下载节点定义版本", downloadUrl);
             var dto = this.restTemplate.getForObject(downloadUrl, NodeDefinitionVersionDto.class);
             log.info("已下载节点定义版本: {}:{} 内容为: {}", ref, version, dto);
