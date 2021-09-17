@@ -102,6 +102,8 @@
                         <jvmFlags>
                             <jvmFlag>-Duser.timezone=Asia/Shanghai</jvmFlag>
                         </jvmFlags>
+                        <!-- 指定镜像生成时间 -->
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                     </container>
                 </configuration>
                 <executions>
