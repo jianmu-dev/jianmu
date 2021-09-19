@@ -11,6 +11,7 @@ import dev.jianmu.eventbridge.aggregate.TargetEvent;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
@@ -93,9 +94,24 @@ public class TaskInstanceApplication {
         List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(event.getNodeRef(), event.getWorkflowInstanceId());
         // 运行前检查规则
         this.instanceDomainService.runningCheck(taskInstances);
+        var nodeInfo = NodeInfo.Builder.aNodeDef()
+                .name(nodeDef.getName())
+                .icon(nodeDef.getIcon())
+                .description(nodeDef.getDescription())
+                .creatorName(nodeDef.getCreatorName())
+                .creatorRef(nodeDef.getCreatorRef())
+                .ownerName(nodeDef.getOwnerName())
+                .ownerRef(nodeDef.getOwnerRef())
+                .ownerType(nodeDef.getOwnerType())
+                .workerType(nodeDef.getWorkerType())
+                .type(nodeDef.getType())
+                .documentLink(nodeDef.getDocumentLink())
+                .sourceLink(nodeDef.getSourceLink())
+                .build();
         var taskInstance = TaskInstance.Builder.anInstance()
                 .serialNo(taskInstances.size() + 1)
                 .defKey(asyncTask.getType())
+                .nodeInfo(nodeInfo)
                 .asyncTaskRef(asyncTask.getRef())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())

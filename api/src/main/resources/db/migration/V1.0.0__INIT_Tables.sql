@@ -92,19 +92,19 @@ CREATE TABLE `workflow_instance`
 
 CREATE TABLE `task_instance`
 (
-    `id`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '主键',
-    `serial_no`         int                                                          DEFAULT NULL COMMENT '执行序号',
-    `def_key`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务定义唯一Key',
-    `async_task_ref`    varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
-    `workflow_ref`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义Ref',
-    `workflow_version`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义版本',
-    `business_id`       varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '外部业务ID',
-    `trigger_id`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Trigger ID',
-    `start_time`        datetime                                                     DEFAULT NULL COMMENT '开始时间',
-    `end_time`          datetime                                                     DEFAULT NULL COMMENT '结束时间',
-    `result_file`       longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '执行结果文件',
-    `status`            varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务运行状态',
-    `output_parameters` blob COMMENT '任务实例输出参数',
+    `id`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '主键',
+    `serial_no`        int                                                          DEFAULT NULL COMMENT '执行序号',
+    `def_key`          varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务定义唯一Key',
+    `node_info`        blob                                                          NOT NULL COMMENT '节点定义快照',
+    `async_task_ref`   varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
+    `workflow_ref`     varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义Ref',
+    `workflow_version` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义版本',
+    `business_id`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '外部业务ID',
+    `trigger_id`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Trigger ID',
+    `start_time`       datetime                                                     DEFAULT NULL COMMENT '开始时间',
+    `end_time`         datetime                                                     DEFAULT NULL COMMENT '结束时间',
+    `result_file`      longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '执行结果文件',
+    `status`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务运行状态',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
