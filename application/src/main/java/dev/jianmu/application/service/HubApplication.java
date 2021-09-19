@@ -93,7 +93,7 @@ public class HubApplication {
 
     private NodeDefinition downloadNodeDef(String type) {
         var defDto = this.registryClient.findByRef(getOwnerRef(type) + "/" + getRef(type))
-                .orElseThrow(() -> new DataNotFoundException("未找到节点定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义: " + type));
         return NodeDefinition.Builder.aNodeDefinition()
                 .id(defDto.getOwnerRef() + "/" + defDto.getRef())
                 .icon(defDto.getIcon())
@@ -113,7 +113,7 @@ public class HubApplication {
 
     private NodeDefinitionVersion downloadNodeDefVersion(String ownerRef, String ref, String version) {
         var dto = this.registryClient.findByRefAndVersion(ownerRef + "/" + ref, version)
-                .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本"));
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + ownerRef + "/" + ref + ":" + version));
         List<Parameter> parameters = new ArrayList<>();
         var inputParameters = dto.getInputParameters().stream().map(parameter -> {
             var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
