@@ -1,7 +1,7 @@
 package dev.jianmu.infrastructure.docker;
 
-import dev.jianmu.task.aggregate.DockerTask;
-import dev.jianmu.task.aggregate.DockerWorker;
+import dev.jianmu.embedded.worker.aggregate.DockerTask;
+import dev.jianmu.embedded.worker.aggregate.DockerWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;

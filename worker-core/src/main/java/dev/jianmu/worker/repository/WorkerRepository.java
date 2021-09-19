@@ -1,6 +1,6 @@
-package dev.jianmu.task.repository;
+package dev.jianmu.worker.repository;
 
-import dev.jianmu.task.aggregate.Worker;
+import dev.jianmu.worker.aggregate.Worker;
 
 import java.util.Optional;
 
@@ -18,4 +18,6 @@ public interface WorkerRepository {
     void updateStatus(Worker worker);
 
     Optional<Worker> findById(String workerId);
+
+    Worker findByType(Worker.Type type);
 }

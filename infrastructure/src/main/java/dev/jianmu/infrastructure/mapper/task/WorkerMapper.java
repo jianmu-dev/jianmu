@@ -1,6 +1,6 @@
 package dev.jianmu.infrastructure.mapper.task;
 
-import dev.jianmu.task.aggregate.Worker;
+import dev.jianmu.worker.aggregate.Worker;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;

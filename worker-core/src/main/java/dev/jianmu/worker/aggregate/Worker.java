@@ -1,10 +1,10 @@
-package dev.jianmu.task.aggregate;
+package dev.jianmu.worker.aggregate;
 
 /**
- * @class: Worker
- * @description: 任务执行器
+ * @class: DockerWorkerClient
+ * @description: DockerWorkerClient接口
  * @author: Ethan Liu
- * @create: 2021-03-26 16:28
+ * @create: 2021-04-14 18:45
  **/
 public class Worker {
     public enum Status {
@@ -13,25 +13,15 @@ public class Worker {
     }
 
     public enum Type {
+        EMBEDDED,
         DOCKER,
         SHELL
     }
 
     private String id;
     private String name;
-    private Status status;
     private Type type;
-
-    private Worker() {
-    }
-
-    public void online() {
-        this.status = Status.ONLINE;
-    }
-
-    public void offline() {
-        this.status = Status.OFFLINE;
-    }
+    private Status status;
 
     public String getId() {
         return id;
@@ -41,19 +31,19 @@ public class Worker {
         return name;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
     public Type getType() {
         return type;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     public static final class Builder {
         private String id;
         private String name;
-        private Status status;
         private Type type;
+        private Status status;
 
         private Builder() {
         }
@@ -72,22 +62,22 @@ public class Worker {
             return this;
         }
 
-        public Builder status(Status status) {
-            this.status = status;
+        public Builder type(Type type) {
+            this.type = type;
             return this;
         }
 
-        public Builder type(Type type) {
-            this.type = type;
+        public Builder status(Status status) {
+            this.status = status;
             return this;
         }
 
         public Worker build() {
             Worker worker = new Worker();
             worker.id = this.id;
-            worker.type = this.type;
             worker.status = this.status;
             worker.name = this.name;
+            worker.type = this.type;
             return worker;
         }
     }
