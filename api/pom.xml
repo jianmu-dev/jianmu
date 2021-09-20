@@ -84,7 +84,6 @@
                         <image>${env.JIANMU_IMAGE_NAME}</image>
                         <tags>
                             <tag>${env.JIANMU_IMAGE_TAG}</tag>
-                            <tag>latest</tag>
                         </tags>
                         <auth>
                             <username>${env.JIANMU_DOCKER_USERNAME}</username>
