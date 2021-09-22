@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 @Schema(description = "流程实例VO")
 public class WorkflowInstanceVo {
     private String id;
+    private String triggerId;
     // 执行顺序号
     private int serialNo;
     private String name;
