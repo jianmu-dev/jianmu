@@ -41,7 +41,7 @@ public class DslNode {
         if (p instanceof Map) {
             this.param = ((Map<?, ?>) p)
                     .entrySet().stream()
-                    .map(entry -> Map.entry((String) entry.getKey(), (String) entry.getValue()))
+                    .map(entry -> Map.entry((String) entry.getKey(), entry.getValue().toString()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } else {
             this.param = Map.of();
