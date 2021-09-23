@@ -1,8 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.WorkerMapper;
-import dev.jianmu.task.aggregate.Worker;
-import dev.jianmu.task.repository.WorkerRepository;
+import dev.jianmu.worker.aggregate.Worker;
+import dev.jianmu.worker.repository.WorkerRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -39,5 +39,15 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     @Override
     public Optional<Worker> findById(String workerId) {
         return this.workerMapper.findById(workerId);
+    }
+
+    @Override
+    public Worker findByType(Worker.Type type) {
+        return Worker.Builder.aWorker()
+                .id("embedded-worker-1")
+                .name("Embedded-Worker")
+                .type(Worker.Type.EMBEDDED)
+                .status(Worker.Status.ONLINE)
+                .build();
     }
 }

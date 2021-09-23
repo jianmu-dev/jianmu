@@ -1,6 +1,6 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.task.aggregate.Worker;
+import dev.jianmu.worker.aggregate.Worker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

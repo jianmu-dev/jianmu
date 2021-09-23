@@ -1,4 +1,4 @@
-package dev.jianmu.task.aggregate.spec;
+package dev.jianmu.embedded.worker.aggregate.spec;
 
 import java.util.List;
 import java.util.Map;

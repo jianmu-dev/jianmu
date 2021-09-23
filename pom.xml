@@ -19,6 +19,8 @@
         <module>trigger</module>
         <module>eventbridge</module>
         <module>hub-integration</module>
+        <module>embedded-worker</module>
+        <module>worker-core</module>
     </modules>
 
     <properties>

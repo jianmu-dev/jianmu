@@ -1,6 +1,7 @@
-package dev.jianmu.task.aggregate;
+package dev.jianmu.embedded.worker.aggregate;
 
-import dev.jianmu.task.aggregate.spec.ContainerSpec;
+
+import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 
 /**
  * @class: DockerTask

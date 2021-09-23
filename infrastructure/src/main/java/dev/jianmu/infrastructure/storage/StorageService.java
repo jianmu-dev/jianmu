@@ -18,4 +18,6 @@ public interface StorageService {
     BufferedReader readLog(String LogFileName);
 
     File logFile(String LogFileName);
+
+    File workflowLogFile(String LogFileName);
 }

@@ -72,4 +72,9 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     public File logFile(String LogFileName) {
         return new File(this.rootLocation + File.separator + LogFileName + LogfilePostfix);
     }
+
+    @Override
+    public File workflowLogFile(String LogFileName) {
+        return new File("workflow_log" + File.separator + LogFileName + LogfilePostfix);
+    }
 }
