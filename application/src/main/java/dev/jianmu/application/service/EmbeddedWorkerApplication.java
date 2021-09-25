@@ -53,6 +53,7 @@ public class EmbeddedWorkerApplication {
                 .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
+        parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
         try {
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
