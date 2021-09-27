@@ -5,6 +5,7 @@ import dev.jianmu.hub.intergration.repository.NodeDefinitionVersionRepository;
 import dev.jianmu.infrastructure.mapper.hub.NodeDefinitionVersionMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,12 +23,22 @@ public class NodeDefinitionVersionRepositoryImpl implements NodeDefinitionVersio
     }
 
     @Override
-    public Optional<NodeDefinitionVersion> findByRefAndVersion(String ref, String version) {
-        return this.nodeDefinitionVersionMapper.findByRefAndVersion(ref, version);
+    public Optional<NodeDefinitionVersion> findByOwnerRefAndRefAndVersion(String ownerRef, String ref, String version) {
+        return this.nodeDefinitionVersionMapper.findByOwnerRefAndRefAndVersion(ownerRef, ref, version);
+    }
+
+    @Override
+    public List<NodeDefinitionVersion> findByOwnerRefAndRef(String ownerRef, String ref) {
+        return this.nodeDefinitionVersionMapper.findByOwnerRefAndRef(ownerRef, ref);
     }
 
     @Override
     public void saveOrUpdate(NodeDefinitionVersion nodeDefinitionVersion) {
         this.nodeDefinitionVersionMapper.saveOrUpdate(nodeDefinitionVersion);
+    }
+
+    @Override
+    public void deleteByOwnerRefAndRef(String ownerRef, String ref) {
+        this.nodeDefinitionVersionMapper.deleteByOwnerRefAndRef(ownerRef, ref);
     }
 }

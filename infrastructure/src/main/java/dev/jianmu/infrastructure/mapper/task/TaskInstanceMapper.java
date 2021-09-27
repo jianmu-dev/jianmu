@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.mapper.task;
 
+import dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler;
 import dev.jianmu.task.aggregate.TaskInstance;
 import org.apache.ibatis.annotations.*;
 
@@ -13,8 +14,8 @@ import java.util.Optional;
  * @create: 2021-03-25 21:39
  **/
 public interface TaskInstanceMapper {
-    @Insert("insert into task_instance(id, serial_no, def_key, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status) " +
-            "values(#{id}, #{serialNo}, #{defKey}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status})")
+    @Insert("insert into task_instance(id, serial_no, def_key, node_info, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status) " +
+            "values(#{id}, #{serialNo}, #{defKey}, #{nodeInfo, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status})")
     void add(TaskInstance taskInstance);
 
     @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
@@ -29,6 +30,7 @@ public interface TaskInstanceMapper {
     @Select("select * from task_instance where id = #{instanceId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -41,6 +43,7 @@ public interface TaskInstanceMapper {
     @Select("select * from task_instance where business_id = #{businessId} order by start_time asc")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -53,6 +56,7 @@ public interface TaskInstanceMapper {
     @Select("select * from task_instance where async_task_ref = #{asyncTaskRef} and business_id = #{businessId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -66,6 +70,7 @@ public interface TaskInstanceMapper {
     @Select("select * from task_instance")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")

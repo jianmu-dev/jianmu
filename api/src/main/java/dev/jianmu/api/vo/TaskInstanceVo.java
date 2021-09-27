@@ -1,5 +1,6 @@
 package dev.jianmu.api.vo;
 
+import dev.jianmu.task.aggregate.NodeInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class TaskInstanceVo {
     private String instanceId;
     private String nodeName;
     private String defKey;
+    private NodeInfo nodeInfo;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Status status;

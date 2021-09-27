@@ -17,14 +17,22 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class NodeDef {
-    private String name;
-    private String description;
-    private String type;
-    private String workerType;
-    private Set<NodeParameter> inputParameters;
-    private Set<NodeParameter> outputParameters;
-    private String resultFile;
-    private String spec;
+    private final String name;
+    private final String description;
+    private final String icon;
+    private final String ownerName;
+    private final String ownerType;
+    private final String ownerRef;
+    private final String creatorName;
+    private final String creatorRef;
+    private final String sourceLink;
+    private final String documentLink;
+    private final String type;
+    private final String workerType;
+    private final Set<NodeParameter> inputParameters;
+    private final Set<NodeParameter> outputParameters;
+    private final String resultFile;
+    private final String spec;
 
     public Set<NodeParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
         return outputParameters.stream()
