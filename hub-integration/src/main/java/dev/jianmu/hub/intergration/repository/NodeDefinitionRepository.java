@@ -14,4 +14,6 @@ public interface NodeDefinitionRepository {
     Optional<NodeDefinition> findById(String id);
 
     void saveOrUpdate(NodeDefinition nodeDefinition);
+
+    void deleteById(String id);
 }

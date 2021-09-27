@@ -16,6 +16,8 @@ public class TaskInstance extends AggregateRoot {
     private int serialNo;
     // 任务定义Key, 表示任务定义类型
     private String defKey;
+    // 节点定义快照
+    private NodeInfo nodeInfo;
     // 流程定义上下文中的AsyncTask唯一标识
     private String asyncTaskRef;
     // 流程定义Ref
@@ -70,6 +72,10 @@ public class TaskInstance extends AggregateRoot {
         return defKey;
     }
 
+    public NodeInfo getNodeInfo() {
+        return nodeInfo;
+    }
+
     public String getAsyncTaskRef() {
         return asyncTaskRef;
     }
@@ -114,6 +120,8 @@ public class TaskInstance extends AggregateRoot {
         private int serialNo;
         // 任务定义唯一Key
         private String defKey;
+        // 节点定义快照
+        private NodeInfo nodeInfo;
         // 流程定义上下文中的AsyncTask唯一标识
         private String asyncTaskRef;
         // 流程定义Ref
@@ -139,6 +147,11 @@ public class TaskInstance extends AggregateRoot {
 
         public Builder defKey(String defKey) {
             this.defKey = defKey;
+            return this;
+        }
+
+        public Builder nodeInfo(NodeInfo nodeInfo) {
+            this.nodeInfo = nodeInfo;
             return this;
         }
 
@@ -172,6 +185,7 @@ public class TaskInstance extends AggregateRoot {
             taskInstance.id = this.id;
             taskInstance.serialNo = this.serialNo;
             taskInstance.defKey = this.defKey;
+            taskInstance.nodeInfo = this.nodeInfo;
             taskInstance.asyncTaskRef = this.asyncTaskRef;
             taskInstance.workflowRef = this.workflowRef;
             taskInstance.workflowVersion = this.workflowVersion;

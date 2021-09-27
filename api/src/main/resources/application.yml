@@ -47,4 +47,4 @@ jianmu:
     jwtExpirationMs: 86400000
     adminPasswd: 123456
 registry:
-  url: https://api.jianmu.run/hub
+  url: https://hub.jianmu.dev

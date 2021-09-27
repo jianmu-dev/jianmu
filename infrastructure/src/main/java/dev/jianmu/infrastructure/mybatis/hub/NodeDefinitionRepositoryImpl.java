@@ -1,5 +1,7 @@
 package dev.jianmu.infrastructure.mybatis.hub;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import dev.jianmu.hub.intergration.repository.NodeDefinitionRepository;
 import dev.jianmu.infrastructure.mapper.hub.NodeDefinitionMapper;
@@ -26,8 +28,19 @@ public class NodeDefinitionRepositoryImpl implements NodeDefinitionRepository {
         return this.nodeDefinitionMapper.findById(id);
     }
 
+
+    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(this.nodeDefinitionMapper::findPage);
+    }
+
     @Override
     public void saveOrUpdate(NodeDefinition nodeDefinition) {
         this.nodeDefinitionMapper.saveOrUpdate(nodeDefinition);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        this.nodeDefinitionMapper.deleteById(id);
     }
 }
