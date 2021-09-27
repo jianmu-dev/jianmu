@@ -10,4 +10,6 @@ import dev.jianmu.eventbridge.aggregate.Bridge;
  **/
 public interface BridgeRepository {
     void saveOrUpdate(Bridge bridge);
+
+    void deleteById(String id);
 }

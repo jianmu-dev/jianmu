@@ -17,22 +17,28 @@ import java.util.Optional;
 public interface TargetMapper {
     @Select("SELECT * FROM `eb_target` WHERE id = #{id}")
     @Result(column = "destination_id", property = "destinationId")
+    @Result(column = "bridge_id", property = "bridgeId")
     Optional<Target> findById(String id);
 
     @Select("SELECT * FROM `eb_target` WHERE ref = #{ref}")
     @Result(column = "destination_id", property = "destinationId")
+    @Result(column = "bridge_id", property = "bridgeId")
     Optional<Target> findByRef(String ref);
 
     @Select("SELECT * FROM `eb_target` WHERE destination_id = #{destinationId}")
     @Result(column = "destination_id", property = "destinationId")
+    @Result(column = "bridge_id", property = "bridgeId")
     Optional<Target> findByDestinationId(String destinationId);
 
-    @Insert("insert into eb_target(id, ref, name, type, destination_id) " +
-            "values(#{id}, #{ref}, #{name}, #{type}, #{destinationId})" +
+    @Insert("insert into eb_target(id, ref, bridge_id, name, type, destination_id) " +
+            "values(#{id}, #{ref}, #{bridgeId}, #{name}, #{type}, #{destinationId})" +
             " ON DUPLICATE KEY UPDATE " +
             "ref=#{ref}, name=#{name}, type=#{type}, destination_id=#{destinationId}")
     void saveOrUpdate(Target target);
 
     @Delete("DELETE FROM eb_target WHERE id = #{id}")
     void deleteById(String id);
+
+    @Delete("DELETE FROM eb_target WHERE bridge_id = #{bridgeId}")
+    void deleteByBridgeId(String bridgeId);
 }

@@ -150,18 +150,11 @@ public class EventBridgeApplication {
     }
 
     @Transactional
-    public void delete(String projectId) {
-        this.targetRepository.findByDestinationId(projectId)
-                .ifPresent(target -> {
-                    var connections = this.connectionRepository.findByTargetId(target.getId());
-                    connections.forEach(connection -> {
-                        var source = this.sourceRepository.findById(connection.getSourceId())
-                                .orElseThrow(() -> new DataNotFoundException("未找到Source"));
-                        this.connectionRepository.deleteById(connection.getId());
-                        this.sourceRepository.deleteById(source.getId());
-                    });
-                    this.targetRepository.deleteById(target.getId());
-                });
+    public void delete(String bridgeId) {
+        this.bridgeRepository.deleteById(bridgeId);
+        this.sourceRepository.deleteByBridgeId(bridgeId);
+        this.targetRepository.deleteByBridgeId(bridgeId);
+        this.connectionRepository.deleteByBridgeId(bridgeId);
     }
 
     public void receiveHttpEvent(String token, String sourceId, HttpServletRequest request) {

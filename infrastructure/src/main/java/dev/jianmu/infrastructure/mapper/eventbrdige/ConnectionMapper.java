@@ -41,4 +41,7 @@ public interface ConnectionMapper {
 
     @Delete("delete from eb_connection where id = #{id}")
     void deleteById(String id);
+
+    @Delete("delete from eb_connection where bridge_id = #{bridgeId}")
+    void deleteByBridgeId(String bridgeId);
 }

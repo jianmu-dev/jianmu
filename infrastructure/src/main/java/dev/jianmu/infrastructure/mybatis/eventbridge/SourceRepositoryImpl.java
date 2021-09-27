@@ -45,4 +45,9 @@ public class SourceRepositoryImpl implements SourceRepository {
     public void deleteById(String id) {
         this.sourceMapper.deleteById(id);
     }
+
+    @Override
+    public void deleteByBridgeId(String bridgeId) {
+        this.sourceMapper.deleteByBridgeId(bridgeId);
+    }
 }

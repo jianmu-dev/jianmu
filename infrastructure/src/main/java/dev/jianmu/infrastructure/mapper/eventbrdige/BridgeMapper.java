@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.mapper.eventbrdige;
 
 import dev.jianmu.eventbridge.aggregate.Bridge;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 
 /**
@@ -16,4 +17,7 @@ public interface BridgeMapper {
             " ON DUPLICATE KEY UPDATE " +
             "name=#{name}, last_modified_by=#{lastModifiedBy}, last_modified_time=#{lastModifiedTime}")
     void saveOrUpdate(Bridge bridge);
+
+    @Delete("delete from eb_bridge where id = #{id}")
+    void deleteById(String id);
 }

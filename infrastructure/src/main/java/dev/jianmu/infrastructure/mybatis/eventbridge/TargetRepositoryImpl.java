@@ -57,7 +57,7 @@ public class TargetRepositoryImpl implements TargetRepository {
         this.targetMapper.saveOrUpdate(target);
         target.getTransformers().forEach(transformer -> {
             this.targetTransformerMapper.deleteByTargetId(target.getId());
-            this.targetTransformerMapper.save(target.getId(), transformer, transformer.getClass().getSimpleName());
+            this.targetTransformerMapper.save(target.getBridgeId(), target.getId(), transformer, transformer.getClass().getSimpleName());
         });
     }
 
@@ -70,5 +70,11 @@ public class TargetRepositoryImpl implements TargetRepository {
     public void deleteById(String id) {
         this.targetMapper.deleteById(id);
         this.targetTransformerMapper.deleteByTargetId(id);
+    }
+
+    @Override
+    public void deleteByBridgeId(String bridgeId) {
+        this.targetMapper.deleteByBridgeId(bridgeId);
+        this.targetTransformerMapper.deleteByBridgeId(bridgeId);
     }
 }

@@ -21,4 +21,6 @@ public interface ConnectionRepository {
     void saveOrUpdateList(Set<Connection> connections);
 
     void deleteById(String id);
+
+    void deleteByBridgeId(String bridgeId);
 }

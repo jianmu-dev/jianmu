@@ -31,4 +31,7 @@ public interface SourceMapper {
 
     @Delete("delete FROM eb_source WHERE id = #{id}")
     void deleteById(String id);
+
+    @Delete("delete FROM eb_source WHERE bridge_id = #{bridgeId}")
+    void deleteByBridgeId(String bridgeId);
 }

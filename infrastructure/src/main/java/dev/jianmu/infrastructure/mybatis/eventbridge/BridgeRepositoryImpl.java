@@ -23,4 +23,9 @@ public class BridgeRepositoryImpl implements BridgeRepository {
     public void saveOrUpdate(Bridge bridge) {
         this.bridgeMapper.saveOrUpdate(bridge);
     }
+
+    @Override
+    public void deleteById(String id) {
+        this.bridgeMapper.deleteById(id);
+    }
 }

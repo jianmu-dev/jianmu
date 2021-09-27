@@ -46,4 +46,9 @@ public class ConnectionRepositoryImpl implements ConnectionRepository {
     public void deleteById(String id) {
         this.connectionMapper.deleteById(id);
     }
+
+    @Override
+    public void deleteByBridgeId(String bridgeId) {
+        this.connectionMapper.deleteByBridgeId(bridgeId);
+    }
 }

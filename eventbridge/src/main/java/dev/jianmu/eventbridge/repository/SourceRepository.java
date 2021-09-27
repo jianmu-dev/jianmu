@@ -20,4 +20,6 @@ public interface SourceRepository {
     void saveOrUpdate(Source source);
 
     void deleteById(String id);
+
+    void deleteByBridgeId(String bridgeId);
 }

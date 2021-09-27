@@ -23,4 +23,6 @@ public interface TargetRepository {
     void saveOrUpdateList(Set<Target> targets);
 
     void deleteById(String id);
+
+    void deleteByBridgeId(String bridgeId);
 }

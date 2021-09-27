@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @class: EventBridgeController
@@ -34,5 +31,11 @@ public class EventBridgeController {
     public void save(@RequestBody @Validated EbDto ebDto) {
         var targets = TargetMapper.INSTANCE.toTargetList(ebDto.getTargets());
         this.eventBridgeApplication.saveOrUpdate(ebDto.getBridge(), ebDto.getSource(), targets);
+    }
+
+    @DeleteMapping("/{bridgeId}")
+    @Operation(summary = "删除EventBridge接口", description = "删除EventBridge")
+    public void delete(@PathVariable String bridgeId) {
+        this.eventBridgeApplication.delete(bridgeId);
     }
 }
