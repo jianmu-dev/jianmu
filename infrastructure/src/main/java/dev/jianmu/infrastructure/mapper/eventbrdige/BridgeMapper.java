@@ -3,6 +3,10 @@ package dev.jianmu.infrastructure.mapper.eventbrdige;
 import dev.jianmu.eventbridge.aggregate.Bridge;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @class: BridgeMapper
@@ -20,4 +24,10 @@ public interface BridgeMapper {
 
     @Delete("delete from eb_bridge where id = #{id}")
     void deleteById(String id);
+
+    @Select("SELECT * FROM eb_bridge")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    List<Bridge> findAll();
 }

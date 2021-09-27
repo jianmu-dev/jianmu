@@ -9,6 +9,7 @@ import dev.jianmu.api.mapper.WorkflowInstanceMapper;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
+import dev.jianmu.eventbridge.aggregate.Bridge;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.secret.aggregate.KVPair;
@@ -45,6 +46,7 @@ public class ViewController {
     private final ProjectApplication projectApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
+    private final EventBridgeApplication eventBridgeApplication;
     private final WorkflowInstanceApplication instanceApplication;
     private final TaskInstanceApplication taskInstanceApplication;
     private final ParameterApplication parameterApplication;
@@ -54,6 +56,7 @@ public class ViewController {
             ProjectApplication projectApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
+            EventBridgeApplication eventBridgeApplication,
             WorkflowInstanceApplication instanceApplication,
             TaskInstanceApplication taskInstanceApplication,
             ParameterApplication parameterApplication,
@@ -62,10 +65,17 @@ public class ViewController {
         this.projectApplication = projectApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
+        this.eventBridgeApplication = eventBridgeApplication;
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;
         this.parameterApplication = parameterApplication;
         this.storageService = storageService;
+    }
+
+    @GetMapping("/event_bridges")
+    @Operation(summary = "分页查询event bridges列表", description = "分页查询event bridges列表")
+    public PageInfo<Bridge> findAllEb(PageDto dto) {
+        return this.eventBridgeApplication.findAll(dto.getPageNum(), dto.getPageSize());
     }
 
     @GetMapping("/namespaces")
@@ -82,7 +92,7 @@ public class ViewController {
     }
 
     @GetMapping("/nodes")
-    @Operation(summary = "节点定义列表", description = "节点定义列表查询")
+    @Operation(summary = "分页查询节点定义列表", description = "分页查询节点定义列表")
     public PageInfo<NodeDefVo> findNodeAll(PageDto dto) {
         var page = this.hubApplication.findPage(
                 dto.getPageNum(),

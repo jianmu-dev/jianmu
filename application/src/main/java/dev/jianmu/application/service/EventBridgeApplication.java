@@ -2,11 +2,13 @@ package dev.jianmu.application.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.eventbridge.aggregate.*;
 import dev.jianmu.eventbridge.repository.*;
 import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
 import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
+import dev.jianmu.infrastructure.mybatis.eventbridge.BridgeRepositoryImpl;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
@@ -14,6 +16,7 @@ import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -30,7 +33,7 @@ import java.util.stream.Collectors;
 @Service
 public class EventBridgeApplication {
     private final ProjectRepository projectRepository;
-    private final BridgeRepository bridgeRepository;
+    private final BridgeRepositoryImpl bridgeRepository;
     private final SourceRepository sourceRepository;
     private final TargetEventRepository targetEventRepository;
     private final ConnectionRepository connectionRepository;
@@ -41,7 +44,7 @@ public class EventBridgeApplication {
 
     public EventBridgeApplication(
             ProjectRepository projectRepository,
-            BridgeRepository bridgeRepository,
+            BridgeRepositoryImpl bridgeRepository,
             SourceRepository sourceRepository,
             TargetEventRepository targetEventRepository,
             ConnectionRepository connectionRepository,
@@ -59,6 +62,10 @@ public class EventBridgeApplication {
         this.parameterRepository = parameterRepository;
         this.publisher = publisher;
         this.objectMapper = objectMapper;
+    }
+
+    public PageInfo<Bridge> findAll(int pageNum, int pageSize) {
+        return this.bridgeRepository.findAllPage(pageNum, pageSize);
     }
 
     @Transactional

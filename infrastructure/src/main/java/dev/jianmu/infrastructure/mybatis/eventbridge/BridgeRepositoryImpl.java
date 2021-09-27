@@ -1,5 +1,7 @@
 package dev.jianmu.infrastructure.mybatis.eventbridge;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.eventbridge.aggregate.Bridge;
 import dev.jianmu.eventbridge.repository.BridgeRepository;
 import dev.jianmu.infrastructure.mapper.eventbrdige.BridgeMapper;
@@ -27,5 +29,10 @@ public class BridgeRepositoryImpl implements BridgeRepository {
     @Override
     public void deleteById(String id) {
         this.bridgeMapper.deleteById(id);
+    }
+
+    public PageInfo<Bridge> findAllPage(int pageNum, int pageSize) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(this.bridgeMapper::findAll);
     }
 }
