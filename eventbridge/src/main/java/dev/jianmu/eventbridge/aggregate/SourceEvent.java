@@ -10,11 +10,16 @@ import java.util.UUID;
  **/
 public class SourceEvent {
     private String id;
+    private String bridgeId;
     private String sourceId;
     private Payload payload;
 
     public String getId() {
         return id;
+    }
+
+    public String getBridgeId() {
+        return bridgeId;
     }
 
     public String getSourceId() {
@@ -27,6 +32,7 @@ public class SourceEvent {
 
 
     public static final class Builder {
+        private String bridgeId;
         private String sourceId;
         private Payload payload;
 
@@ -35,6 +41,11 @@ public class SourceEvent {
 
         public static Builder anOriginalEvent() {
             return new Builder();
+        }
+
+        public Builder bridgeId(String bridgeId) {
+            this.bridgeId = bridgeId;
+            return this;
         }
 
         public Builder sourceId(String sourceId) {
@@ -50,6 +61,7 @@ public class SourceEvent {
         public SourceEvent build() {
             SourceEvent sourceEvent = new SourceEvent();
             sourceEvent.id = UUID.randomUUID().toString().replace("-", "");
+            sourceEvent.bridgeId = this.bridgeId;
             sourceEvent.sourceId = this.sourceId;
             sourceEvent.payload = this.payload;
             return sourceEvent;

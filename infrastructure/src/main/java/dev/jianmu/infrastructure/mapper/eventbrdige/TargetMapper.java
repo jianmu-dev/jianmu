@@ -19,13 +19,19 @@ public interface TargetMapper {
     @Result(column = "destination_id", property = "destinationId")
     Optional<Target> findById(String id);
 
+    @Select("SELECT * FROM `eb_target` WHERE ref = #{ref}")
+    @Result(column = "destination_id", property = "destinationId")
+    Optional<Target> findByRef(String ref);
+
     @Select("SELECT * FROM `eb_target` WHERE destination_id = #{destinationId}")
     @Result(column = "destination_id", property = "destinationId")
     Optional<Target> findByDestinationId(String destinationId);
 
-    @Insert("insert into eb_target(id, name, type, destination_id) " +
-            "values(#{id}, #{name}, #{type}, #{destinationId})")
-    void save(Target target);
+    @Insert("insert into eb_target(id, ref, name, type, destination_id) " +
+            "values(#{id}, #{ref}, #{name}, #{type}, #{destinationId})" +
+            " ON DUPLICATE KEY UPDATE " +
+            "ref=#{ref}, name=#{name}, type=#{type}, destination_id=#{destinationId}")
+    void saveOrUpdate(Target target);
 
     @Delete("DELETE FROM eb_target WHERE id = #{id}")
     void deleteById(String id);

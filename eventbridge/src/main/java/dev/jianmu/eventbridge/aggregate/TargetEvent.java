@@ -12,8 +12,9 @@ import java.util.UUID;
  **/
 public class TargetEvent {
     private String id;
+    private String bridgeId;
     private String sourceId;
-    private String targetId;
+    private String targetRef;
     private String destinationId;
     private Payload payload;
     private Set<EventParameter> eventParameters;
@@ -22,12 +23,16 @@ public class TargetEvent {
         return id;
     }
 
+    public String getBridgeId() {
+        return bridgeId;
+    }
+
     public String getSourceId() {
         return sourceId;
     }
 
-    public String getTargetId() {
-        return targetId;
+    public String getTargetRef() {
+        return targetRef;
     }
 
     public String getDestinationId() {
@@ -53,8 +58,9 @@ public class TargetEvent {
     }
 
     public static final class Builder {
+        private String bridgeId;
         private String sourceId;
-        private String targetId;
+        private String targetRef;
         private String destinationId;
         private Payload payload;
         private Set<EventParameter> eventParameters;
@@ -66,13 +72,18 @@ public class TargetEvent {
             return new Builder();
         }
 
+        public Builder bridgeId(String bridgeId) {
+            this.bridgeId = bridgeId;
+            return this;
+        }
+
         public Builder sourceId(String sourceId) {
             this.sourceId = sourceId;
             return this;
         }
 
-        public Builder targetId(String targetId) {
-            this.targetId = targetId;
+        public Builder targetRef(String targetRef) {
+            this.targetRef = targetRef;
             return this;
         }
 
@@ -94,8 +105,9 @@ public class TargetEvent {
         public TargetEvent build() {
             TargetEvent targetEvent = new TargetEvent();
             targetEvent.id = UUID.randomUUID().toString().replace("-", "");
+            targetEvent.bridgeId = this.bridgeId;
             targetEvent.sourceId = this.sourceId;
-            targetEvent.targetId = this.targetId;
+            targetEvent.targetRef = this.targetRef;
             targetEvent.destinationId = this.destinationId;
             targetEvent.payload = this.payload;
             targetEvent.eventParameters = this.eventParameters;

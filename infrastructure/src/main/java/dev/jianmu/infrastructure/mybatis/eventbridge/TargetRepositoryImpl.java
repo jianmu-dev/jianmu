@@ -7,6 +7,7 @@ import dev.jianmu.infrastructure.mapper.eventbrdige.TargetTransformerMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @class: TargetRepositoryImpl
@@ -27,11 +28,19 @@ public class TargetRepositoryImpl implements TargetRepository {
     @Override
     public Optional<Target> findById(String id) {
         return this.targetMapper.findById(id).map(target -> {
+            var transformers = this.targetTransformerMapper.findByTargetId(target.getRef());
+            target.setTransformers(transformers);
+            return target;
+        });
+    }
+
+    @Override
+    public Optional<Target> findByRef(String ref) {
+        return this.targetMapper.findByRef(ref).map(target -> {
             var transformers = this.targetTransformerMapper.findByTargetId(target.getId());
             target.setTransformers(transformers);
             return target;
         });
-
     }
 
     @Override
@@ -45,10 +54,16 @@ public class TargetRepositoryImpl implements TargetRepository {
 
     @Override
     public void save(Target target) {
-        this.targetMapper.save(target);
+        this.targetMapper.saveOrUpdate(target);
         target.getTransformers().forEach(transformer -> {
+            this.targetTransformerMapper.deleteByTargetId(target.getId());
             this.targetTransformerMapper.save(target.getId(), transformer, transformer.getClass().getSimpleName());
         });
+    }
+
+    @Override
+    public void saveOrUpdateList(Set<Target> targets) {
+        targets.forEach(this::save);
     }
 
     @Override

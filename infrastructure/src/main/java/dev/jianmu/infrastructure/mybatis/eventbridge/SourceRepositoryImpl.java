@@ -27,13 +27,18 @@ public class SourceRepositoryImpl implements SourceRepository {
     }
 
     @Override
+    public Optional<Source> findByBridgeId(String bridgeId) {
+        return this.sourceMapper.findByBridgeId(bridgeId);
+    }
+
+    @Override
     public void updateTokenById(Source source) {
         this.sourceMapper.updateTokenById(source);
     }
 
     @Override
-    public void save(Source source) {
-        this.sourceMapper.save(source);
+    public void saveOrUpdate(Source source) {
+        this.sourceMapper.saveOrUpdate(source);
     }
 
     @Override

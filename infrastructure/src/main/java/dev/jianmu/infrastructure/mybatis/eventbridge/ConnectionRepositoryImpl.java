@@ -6,6 +6,7 @@ import dev.jianmu.infrastructure.mapper.eventbrdige.ConnectionMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @class: ConnectionRepositoryImpl
@@ -34,6 +35,11 @@ public class ConnectionRepositoryImpl implements ConnectionRepository {
     @Override
     public void save(Connection connection) {
         this.connectionMapper.save(connection);
+    }
+
+    @Override
+    public void saveOrUpdateList(Set<Connection> connections) {
+        this.connectionMapper.saveOrUpdateList(connections);
     }
 
     @Override

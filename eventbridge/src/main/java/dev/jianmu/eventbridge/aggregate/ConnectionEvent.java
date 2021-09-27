@@ -10,12 +10,17 @@ import java.util.UUID;
  **/
 public class ConnectionEvent {
     private String id;
+    private String bridgeId;
     private String sourceId;
     private String targetId;
     private Payload payload;
 
     public String getId() {
         return id;
+    }
+
+    public String getBridgeId() {
+        return bridgeId;
     }
 
     public String getSourceId() {
@@ -32,6 +37,7 @@ public class ConnectionEvent {
 
 
     public static final class Builder {
+        private String bridgeId;
         private String sourceId;
         private String targetId;
         private Payload payload;
@@ -41,6 +47,11 @@ public class ConnectionEvent {
 
         public static Builder aConnectionEvent() {
             return new Builder();
+        }
+
+        public Builder bridgeId(String bridgeId) {
+            this.bridgeId = bridgeId;
+            return this;
         }
 
         public Builder sourceId(String sourceId) {
@@ -61,6 +72,7 @@ public class ConnectionEvent {
         public ConnectionEvent build() {
             ConnectionEvent connectionEvent = new ConnectionEvent();
             connectionEvent.id = UUID.randomUUID().toString().replace("-", "");
+            connectionEvent.bridgeId = this.bridgeId;
             connectionEvent.sourceId = this.sourceId;
             connectionEvent.targetId = this.targetId;
             connectionEvent.payload = this.payload;

@@ -3,6 +3,7 @@ package dev.jianmu.eventbridge.repository;
 import dev.jianmu.eventbridge.aggregate.Connection;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @class: ConnectionRepository
@@ -16,6 +17,8 @@ public interface ConnectionRepository {
     List<Connection> findByTargetId(String targetId);
 
     void save(Connection connection);
+
+    void saveOrUpdateList(Set<Connection> connections);
 
     void deleteById(String id);
 }

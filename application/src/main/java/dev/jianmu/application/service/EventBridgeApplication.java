@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.eventbridge.aggregate.*;
-import dev.jianmu.eventbridge.repository.ConnectionRepository;
-import dev.jianmu.eventbridge.repository.SourceRepository;
-import dev.jianmu.eventbridge.repository.TargetEventRepository;
-import dev.jianmu.eventbridge.repository.TargetRepository;
+import dev.jianmu.eventbridge.repository.*;
 import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
 import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
 import dev.jianmu.project.aggregate.Project;
@@ -33,6 +30,7 @@ import java.util.stream.Collectors;
 @Service
 public class EventBridgeApplication {
     private final ProjectRepository projectRepository;
+    private final BridgeRepository bridgeRepository;
     private final SourceRepository sourceRepository;
     private final TargetEventRepository targetEventRepository;
     private final ConnectionRepository connectionRepository;
@@ -43,6 +41,7 @@ public class EventBridgeApplication {
 
     public EventBridgeApplication(
             ProjectRepository projectRepository,
+            BridgeRepository bridgeRepository,
             SourceRepository sourceRepository,
             TargetEventRepository targetEventRepository,
             ConnectionRepository connectionRepository,
@@ -52,6 +51,7 @@ public class EventBridgeApplication {
             ObjectMapper objectMapper
     ) {
         this.projectRepository = projectRepository;
+        this.bridgeRepository = bridgeRepository;
         this.sourceRepository = sourceRepository;
         this.targetEventRepository = targetEventRepository;
         this.connectionRepository = connectionRepository;
@@ -97,10 +97,56 @@ public class EventBridgeApplication {
                 .build();
         project.setEventBridgeSourceId(source.getId());
 
-        this.sourceRepository.save(source);
+        this.sourceRepository.saveOrUpdate(source);
         this.targetRepository.save(target);
         this.connectionRepository.save(connection);
         this.projectRepository.updateByWorkflowRef(project);
+    }
+
+    @Transactional
+    public void saveOrUpdate(Bridge bridge, Source source, List<Target> targets) {
+        // ID不存在为新增
+        if (bridge.getId() == null) {
+            bridge = Bridge.Builder.aBridge()
+                    .name(bridge.getName())
+                    .lastModifiedBy("admin")
+                    .build();
+            source = Source.Builder.aSource()
+                    .bridgeId(bridge.getId())
+                    .name(source.getName())
+                    .type(Source.Type.WEBHOOK)
+                    .build();
+        } else {
+            var oldSource = this.sourceRepository.findByBridgeId(bridge.getId())
+                    .orElseThrow(() -> new RuntimeException("未找到Source"));
+            oldSource.setName(source.getName());
+            source = oldSource;
+        }
+        bridge.setLastModifiedBy("admin");
+        bridge.setLastModifiedTime();
+        var bridgeId = bridge.getId();
+        var sourceId = source.getId();
+        var ts = targets.stream().map(target ->
+                Target.Builder.aTarget()
+                        .bridgeId(bridgeId)
+                        .name(target.getName())
+                        .ref(target.getRef())
+                        .type(Target.Type.WORKFLOW)
+                        .transformers(target.getTransformers())
+                        .build()
+        ).collect(Collectors.toSet());
+        var cons = ts.stream().map(target ->
+                Connection.Builder.aConnection()
+                        .bridgeId(bridgeId)
+                        .sourceId(sourceId)
+                        .targetId(target.getId())
+                        .build()
+        ).collect(Collectors.toSet());
+
+        this.bridgeRepository.saveOrUpdate(bridge);
+        this.sourceRepository.saveOrUpdate(source);
+        this.targetRepository.saveOrUpdateList(ts);
+        this.connectionRepository.saveOrUpdateList(cons);
     }
 
     @Transactional
@@ -166,7 +212,7 @@ public class EventBridgeApplication {
         });
         var targetEvent = TargetEvent.Builder.aTargetEvent()
                 .sourceId(connectionEvent.getSourceId())
-                .targetId(target.getId())
+                .targetRef(target.getRef())
                 .destinationId(target.getDestinationId())
                 .payload(connectionEvent.getPayload())
                 .eventParameters(eventParameters)
