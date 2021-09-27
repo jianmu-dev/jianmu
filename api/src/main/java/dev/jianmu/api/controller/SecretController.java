@@ -64,7 +64,7 @@ public class SecretController {
     }
 
     @GetMapping("/namespaces/{name}/keys")
-    @Operation(summary = "查询键值对列表", description = "查询键值对列表")
+    @Operation(summary = "查询键值对列表", description = "查询键值对列表", deprecated = true)
     public List<String> findAll(@PathVariable String name) {
         var kvs = this.secretApplication.findAll(name);
         return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
@@ -77,7 +77,7 @@ public class SecretController {
     }
 
     @GetMapping("/namespaces")
-    @Operation(summary = "分页查询命名空间列表", description = "分页查询命名空间列表")
+    @Operation(summary = "分页查询命名空间列表", description = "分页查询命名空间列表", deprecated = true)
     public PageInfo<Namespace> findAll(NamespaceSearchDto namespaceSearchDto) {
         return this.secretApplication.findAll(namespaceSearchDto.getName(), namespaceSearchDto.getPageNum(), namespaceSearchDto.getPageSize());
     }

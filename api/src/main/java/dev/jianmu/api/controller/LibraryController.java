@@ -32,7 +32,7 @@ public class LibraryController {
     }
 
     @GetMapping("/nodes")
-    @Operation(summary = "节点定义列表", description = "节点定义列表查询")
+    @Operation(summary = "节点定义列表", description = "节点定义列表查询", deprecated = true)
     public PageInfo<NodeDefVo> findNodeAll(PageDto dto) {
         var page = this.hubApplication.findPage(
                 dto.getPageNum(),
