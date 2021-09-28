@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,6 +20,11 @@ public interface TargetMapper {
     @Result(column = "destination_id", property = "destinationId")
     @Result(column = "bridge_id", property = "bridgeId")
     Optional<Target> findById(String id);
+
+    @Select("SELECT * FROM `eb_target` WHERE bridge_id = #{bridgeId}")
+    @Result(column = "destination_id", property = "destinationId")
+    @Result(column = "bridge_id", property = "bridgeId")
+    List<Target> findByBridgeId(String bridgeId);
 
     @Select("SELECT * FROM `eb_target` WHERE ref = #{ref}")
     @Result(column = "destination_id", property = "destinationId")

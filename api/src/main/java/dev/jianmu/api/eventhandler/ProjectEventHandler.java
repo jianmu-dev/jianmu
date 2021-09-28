@@ -1,6 +1,5 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.EventBridgeApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.project.event.CreatedEvent;
@@ -22,16 +21,13 @@ import org.springframework.stereotype.Component;
 public class ProjectEventHandler {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final ProjectApplication projectApplication;
-    private final EventBridgeApplication eventBridgeApplication;
 
     public ProjectEventHandler(
             WorkflowInstanceApplication workflowInstanceApplication,
-            ProjectApplication projectApplication,
-            EventBridgeApplication eventBridgeApplication
+            ProjectApplication projectApplication
     ) {
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.projectApplication = projectApplication;
-        this.eventBridgeApplication = eventBridgeApplication;
     }
 
     @Async
@@ -51,12 +47,12 @@ public class ProjectEventHandler {
     }
 
     @EventListener
+    // 项目创建事件
     public void handleProjectCreate(CreatedEvent createdEvent) {
-        this.eventBridgeApplication.create(createdEvent.getProjectId());
     }
 
     @EventListener
+    // 项目删除事件
     public void handleProjectDelete(DeletedEvent deletedEvent) {
-        this.eventBridgeApplication.delete(deletedEvent.getProjectId());
     }
 }

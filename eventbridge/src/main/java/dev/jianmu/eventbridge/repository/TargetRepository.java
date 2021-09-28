@@ -2,6 +2,7 @@ package dev.jianmu.eventbridge.repository;
 
 import dev.jianmu.eventbridge.aggregate.Target;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,6 +18,8 @@ public interface TargetRepository {
     Optional<Target> findByRef(String ref);
 
     Optional<Target> findByDestinationId(String destinationId);
+
+    List<Target> findByBridgeId(String bridgeId);
 
     void save(Target target);
 

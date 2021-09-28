@@ -5,18 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.eventbridge.aggregate.*;
-import dev.jianmu.eventbridge.repository.*;
+import dev.jianmu.eventbridge.repository.ConnectionRepository;
+import dev.jianmu.eventbridge.repository.SourceRepository;
+import dev.jianmu.eventbridge.repository.TargetEventRepository;
+import dev.jianmu.eventbridge.repository.TargetRepository;
 import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
 import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
 import dev.jianmu.infrastructure.mybatis.eventbridge.BridgeRepositoryImpl;
-import dev.jianmu.project.aggregate.Project;
-import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
  **/
 @Service
 public class EventBridgeApplication {
-    private final ProjectRepository projectRepository;
     private final BridgeRepositoryImpl bridgeRepository;
     private final SourceRepository sourceRepository;
     private final TargetEventRepository targetEventRepository;
@@ -43,7 +42,6 @@ public class EventBridgeApplication {
     private final ObjectMapper objectMapper;
 
     public EventBridgeApplication(
-            ProjectRepository projectRepository,
             BridgeRepositoryImpl bridgeRepository,
             SourceRepository sourceRepository,
             TargetEventRepository targetEventRepository,
@@ -53,7 +51,6 @@ public class EventBridgeApplication {
             ApplicationEventPublisher publisher,
             ObjectMapper objectMapper
     ) {
-        this.projectRepository = projectRepository;
         this.bridgeRepository = bridgeRepository;
         this.sourceRepository = sourceRepository;
         this.targetEventRepository = targetEventRepository;
@@ -68,6 +65,20 @@ public class EventBridgeApplication {
         return this.bridgeRepository.findAllPage(pageNum, pageSize);
     }
 
+    public Bridge findBridgeById(String bridgeId) {
+        return this.bridgeRepository.findById(bridgeId)
+                .orElseThrow(() -> new DataNotFoundException("未找到Bridge"));
+    }
+
+    public Source findSourceByBridgeId(String bridgeId) {
+        return this.sourceRepository.findByBridgeId(bridgeId)
+                .orElseThrow(() -> new DataNotFoundException("未找到Source"));
+    }
+
+    public List<Target> findTargetsByBridgeId(String bridgeId) {
+        return this.targetRepository.findByBridgeId(bridgeId);
+    }
+
     @Transactional
     public String generateWebhook(String sourceId) {
         var source = this.sourceRepository.findById(sourceId).orElseThrow(() -> new DataNotFoundException("未找到源"));
@@ -79,35 +90,6 @@ public class EventBridgeApplication {
     public String getWebhookUrl(String sourceId) {
         var source = this.sourceRepository.findById(sourceId).orElseThrow(() -> new DataNotFoundException("未找到源"));
         return source.getWebHookUrl();
-    }
-
-    @Transactional
-    public void create(String projectId) {
-        var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目"));
-        if (!project.getTriggerType().equals(Project.TriggerType.WEBHOOK)) {
-            return;
-        }
-        var source = Source.Builder.aSource()
-                .name(project.getWorkflowName() + "_webhook")
-                .type(Source.Type.WEBHOOK)
-                .build();
-        var target = Target.Builder.aTarget()
-                .name(project.getWorkflowName())
-                .type(Target.Type.WORKFLOW)
-                .destinationId(project.getId())
-                .build();
-        target.setTransformers(this.transformerTemplate());
-        var connection = Connection.Builder.aConnection()
-                .sourceId(source.getId())
-                .targetId(target.getId())
-                .build();
-        project.setEventBridgeSourceId(source.getId());
-
-        this.sourceRepository.saveOrUpdate(source);
-        this.targetRepository.save(target);
-        this.connectionRepository.save(connection);
-        this.projectRepository.updateByWorkflowRef(project);
     }
 
     @Transactional
@@ -262,7 +244,7 @@ public class EventBridgeApplication {
         return true;
     }
 
-    private Set<Transformer> transformerTemplate() {
+    public List<Transformer> gitlabTemplates() {
         var refTf = BodyTransformer.Builder.aBodyTransformer()
                 .variableName("gitlab_ref")
                 .variableType("STRING")
@@ -288,21 +270,25 @@ public class EventBridgeApplication {
                 .variableType("STRING")
                 .expression("X-Gitlab-Event")
                 .build();
+        return List.of(refTf, objectKindTf, beforeTf, afterTf, eventTf);
+    }
+
+    public List<Transformer> giteeTemplates() {
         var giteeRefTf = BodyTransformer.Builder.aBodyTransformer()
                 .variableName("gitee_ref")
                 .variableType("STRING")
                 .expression("$.ref")
                 .build();
         var giteeBeforeTf = BodyTransformer.Builder.aBodyTransformer()
-                .variableName("gitlab_before")
+                .variableName("gitee_before")
                 .variableType("STRING")
                 .expression("$.before")
                 .build();
         var giteeAfterTf = BodyTransformer.Builder.aBodyTransformer()
-                .variableName("gitlab_after")
+                .variableName("gitee_after")
                 .variableType("STRING")
                 .expression("$.after")
                 .build();
-        return Set.of(refTf, objectKindTf, beforeTf, afterTf, eventTf, giteeRefTf, giteeBeforeTf, giteeAfterTf);
+        return List.of(giteeRefTf, giteeBeforeTf, giteeAfterTf);
     }
 }

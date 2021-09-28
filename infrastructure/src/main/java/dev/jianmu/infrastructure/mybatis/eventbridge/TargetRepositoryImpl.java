@@ -6,8 +6,10 @@ import dev.jianmu.infrastructure.mapper.eventbrdige.TargetMapper;
 import dev.jianmu.infrastructure.mapper.eventbrdige.TargetTransformerMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @class: TargetRepositoryImpl
@@ -50,6 +52,15 @@ public class TargetRepositoryImpl implements TargetRepository {
             target.setTransformers(transformers);
             return target;
         });
+    }
+
+    @Override
+    public List<Target> findByBridgeId(String bridgeId) {
+        var targets = this.targetMapper.findByBridgeId(bridgeId);
+        return targets.stream().peek(target -> {
+            var transformers = this.targetTransformerMapper.findByTargetId(target.getId());
+            target.setTransformers(transformers);
+        }).collect(Collectors.toList());
     }
 
     @Override

@@ -1,8 +1,10 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.dto.EbDto;
 import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.mapper.EbDtoMapper;
 import dev.jianmu.api.mapper.ProjectMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
@@ -76,6 +78,14 @@ public class ViewController {
     @Operation(summary = "分页查询event bridges列表", description = "分页查询event bridges列表")
     public PageInfo<Bridge> findAllEb(PageDto dto) {
         return this.eventBridgeApplication.findAll(dto.getPageNum(), dto.getPageSize());
+    }
+
+    @GetMapping("/event_bridges/{bridgeId}")
+    public EbDto findEbById(@PathVariable String bridgeId) {
+        var bridge = this.eventBridgeApplication.findBridgeById(bridgeId);
+        var source = this.eventBridgeApplication.findSourceByBridgeId(bridgeId);
+        var targets = this.eventBridgeApplication.findTargetsByBridgeId(bridgeId);
+        return EbDtoMapper.INSTANCE.toEbDto(bridge, source, targets);
     }
 
     @GetMapping("/namespaces")

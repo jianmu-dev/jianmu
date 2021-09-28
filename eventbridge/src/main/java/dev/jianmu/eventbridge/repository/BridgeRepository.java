@@ -2,6 +2,8 @@ package dev.jianmu.eventbridge.repository;
 
 import dev.jianmu.eventbridge.aggregate.Bridge;
 
+import java.util.Optional;
+
 /**
  * @class: BridgeRepository
  * @description: BridgeRepository
@@ -12,4 +14,6 @@ public interface BridgeRepository {
     void saveOrUpdate(Bridge bridge);
 
     void deleteById(String id);
+
+    Optional<Bridge> findById(String id);
 }

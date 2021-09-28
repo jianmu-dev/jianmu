@@ -1,13 +1,18 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.EbDto;
+import dev.jianmu.api.dto.TransformerDto;
+import dev.jianmu.api.mapper.EbDtoMapper;
 import dev.jianmu.api.mapper.TargetMapper;
 import dev.jianmu.application.service.EventBridgeApplication;
+import dev.jianmu.eventbridge.aggregate.Transformer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @class: EventBridgeController
@@ -37,5 +42,22 @@ public class EventBridgeController {
     @Operation(summary = "删除EventBridge接口", description = "删除EventBridge")
     public void delete(@PathVariable String bridgeId) {
         this.eventBridgeApplication.delete(bridgeId);
+    }
+
+    @GetMapping("/templates")
+    public List<String> findTemplates() {
+        return List.of("Gitee", "Gitlab");
+    }
+
+    @GetMapping("/templates/{name}")
+    public List<TransformerDto> findTemplate(@PathVariable String name) {
+        List<Transformer> temps = List.of();
+        if (name.equals("Gitee")) {
+            temps = this.eventBridgeApplication.giteeTemplates();
+        }
+        if (name.equals("Gitlab")) {
+            temps = this.eventBridgeApplication.gitlabTemplates();
+        }
+        return EbDtoMapper.INSTANCE.toTransformerDtos(temps);
     }
 }

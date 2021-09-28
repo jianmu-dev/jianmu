@@ -7,6 +7,8 @@ import dev.jianmu.eventbridge.repository.BridgeRepository;
 import dev.jianmu.infrastructure.mapper.eventbrdige.BridgeMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * @class: BridgeRepositoryImpl
  * @description: BridgeRepositoryImpl
@@ -29,6 +31,11 @@ public class BridgeRepositoryImpl implements BridgeRepository {
     @Override
     public void deleteById(String id) {
         this.bridgeMapper.deleteById(id);
+    }
+
+    @Override
+    public Optional<Bridge> findById(String id) {
+        return this.bridgeMapper.findById(id);
     }
 
     public PageInfo<Bridge> findAllPage(int pageNum, int pageSize) {

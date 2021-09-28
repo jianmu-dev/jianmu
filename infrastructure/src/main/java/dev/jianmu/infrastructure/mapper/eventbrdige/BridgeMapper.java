@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @class: BridgeMapper
@@ -30,4 +31,7 @@ public interface BridgeMapper {
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Bridge> findAll();
+
+    @Select("SELECT * FROM eb_bridge WHERE id = #{id}")
+    Optional<Bridge> findById(String id);
 }
