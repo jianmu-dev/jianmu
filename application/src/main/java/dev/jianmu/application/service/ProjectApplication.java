@@ -217,6 +217,14 @@ public class ProjectApplication {
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
+        // 删除原有EB关联
+        if (!project.getEventBridgeSourceId().isBlank()) {
+            this.targetRepository.findByDestinationId(project.getId())
+                    .ifPresent(target -> {
+                        target.setDestinationId("");
+                        this.targetRepository.save(target);
+                    });
+        }
         // 关联EB
         if (null != parser.getEb()) {
             var target = this.targetRepository.findByRef(parser.getEb())
@@ -305,6 +313,14 @@ public class ProjectApplication {
                     .build();
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
+        }
+        // 删除原有EB关联
+        if (!project.getEventBridgeSourceId().isBlank()) {
+            this.targetRepository.findByDestinationId(project.getId())
+                    .ifPresent(target -> {
+                        target.setDestinationId("");
+                        this.targetRepository.save(target);
+                    });
         }
         // 关联EB
         if (null != parser.getEb()) {
