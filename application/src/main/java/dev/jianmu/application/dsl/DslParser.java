@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DslParser {
     private String cron;
+    private String eb;
     private Map<String, String> param;
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
@@ -339,6 +340,10 @@ public class DslParser {
 
     public String getCron() {
         return cron;
+    }
+
+    public String getEb() {
+        return eb;
     }
 
     public Map<String, String> getParam() {

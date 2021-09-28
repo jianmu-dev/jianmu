@@ -41,6 +41,10 @@ public class EventBridgeHandler {
 
     @EventListener
     public void targetEventHandle(TargetEvent targetEvent) {
+        if (targetEvent.getDestinationId() == null) {
+            log.info("get targetEvent here with no destination in mind");
+            return;
+        }
         log.info("get targetEvent here ID: {}", targetEvent.getId());
         log.info("get targetEvent here DestinationId: {}", targetEvent.getDestinationId());
         targetEvent.getEventParameters().forEach(eventParameter -> {

@@ -1,9 +1,10 @@
 package dev.jianmu.application.service;
 
-import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.eventbridge.repository.SourceRepository;
+import dev.jianmu.eventbridge.repository.TargetRepository;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.CronTrigger;
@@ -44,6 +45,8 @@ public class ProjectApplication {
 
     private final ProjectRepositoryImpl projectRepository;
     private final CronTriggerRepository cronTriggerRepository;
+    private final TargetRepository targetRepository;
+    private final SourceRepository sourceRepository;
     private final ScheduleJobService scheduleJobService;
     private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
@@ -56,6 +59,8 @@ public class ProjectApplication {
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
             CronTriggerRepository cronTriggerRepository,
+            TargetRepository targetRepository,
+            SourceRepository sourceRepository,
             ScheduleJobService scheduleJobService,
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
@@ -67,6 +72,8 @@ public class ProjectApplication {
     ) {
         this.projectRepository = projectRepository;
         this.cronTriggerRepository = cronTriggerRepository;
+        this.targetRepository = targetRepository;
+        this.sourceRepository = sourceRepository;
         this.scheduleJobService = scheduleJobService;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
@@ -160,6 +167,16 @@ public class ProjectApplication {
             this.cronTriggerRepository.add(trigger);
             this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
         }
+        // 关联EB
+        if (null != parser.getEb()) {
+            var target = this.targetRepository.findByRef(parser.getEb())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            target.setDestinationId(project.getId());
+            project.setEventBridgeSourceId(source.getId());
+            this.targetRepository.save(target);
+        }
         this.projectRepository.add(project);
         this.gitRepoRepository.add(gitRepo);
         this.jgitService.cleanUp(gitRepo.getId());
@@ -200,6 +217,16 @@ public class ProjectApplication {
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
+        // 关联EB
+        if (null != parser.getEb()) {
+            var target = this.targetRepository.findByRef(parser.getEb())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            target.setDestinationId(project.getId());
+            project.setEventBridgeSourceId(source.getId());
+            this.targetRepository.save(target);
+        }
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.jgitService.cleanUp(gitRepo.getId());
@@ -231,6 +258,16 @@ public class ProjectApplication {
                     .build();
             this.cronTriggerRepository.add(trigger);
             this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
+        }
+        // 关联EB
+        if (null != parser.getEb()) {
+            var target = this.targetRepository.findByRef(parser.getEb())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            target.setDestinationId(project.getId());
+            project.setEventBridgeSourceId(source.getId());
+            this.targetRepository.save(target);
         }
         this.projectRepository.add(project);
         this.workflowRepository.add(workflow);
@@ -269,6 +306,16 @@ public class ProjectApplication {
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
+        // 关联EB
+        if (null != parser.getEb()) {
+            var target = this.targetRepository.findByRef(parser.getEb())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            target.setDestinationId(project.getId());
+            project.setEventBridgeSourceId(source.getId());
+            this.targetRepository.save(target);
+        }
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
     }
@@ -276,7 +323,13 @@ public class ProjectApplication {
     @Transactional
     public void deleteById(String id) {
         Project project = this.projectRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        // 删除EB关联
+        this.targetRepository.findByDestinationId(project.getId())
+                .ifPresent(target -> {
+                    target.setDestinationId("");
+                    this.targetRepository.save(target);
+                });
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
