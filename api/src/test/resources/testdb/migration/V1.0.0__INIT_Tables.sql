@@ -143,10 +143,10 @@ CREATE TABLE `secret_kv_pair`
 
 CREATE TABLE `eb_bridge`
 (
-    `id`                 varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
-    `name`               varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '名称',
+    `id`                 varchar(45) NOT NULL COMMENT 'ID',
+    `name`               varchar(45) DEFAULT NULL COMMENT '名称',
     `created_time`       datetime DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`   varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '最后修改人',
+    `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
     `last_modified_time` datetime DEFAULT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`)
 );
