@@ -4,8 +4,8 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.EbDto;
 import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.dto.PageDto;
-import dev.jianmu.api.mapper.EbDtoMapper;
 import dev.jianmu.api.mapper.ProjectMapper;
+import dev.jianmu.api.mapper.TargetMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
 import dev.jianmu.api.vo.*;
@@ -14,6 +14,7 @@ import dev.jianmu.application.service.*;
 import dev.jianmu.eventbridge.aggregate.Bridge;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -84,8 +85,21 @@ public class ViewController {
     public EbDto findEbById(@PathVariable String bridgeId) {
         var bridge = this.eventBridgeApplication.findBridgeById(bridgeId);
         var source = this.eventBridgeApplication.findSourceByBridgeId(bridgeId);
-        var targets = this.eventBridgeApplication.findTargetsByBridgeId(bridgeId);
-        return EbDtoMapper.INSTANCE.toEbDto(bridge, source, targets);
+        var targets = this.eventBridgeApplication.findTargetsByBridgeId(bridgeId).stream()
+                .map(target -> {
+                    var projectName = "";
+                    if (target.getDestinationId() != null) {
+                        projectName = this.projectApplication.findById(target.getDestinationId())
+                                .map(Project::getWorkflowName).orElse("");
+                    }
+                    return TargetMapper.INSTANCE.toTargetDto(target, projectName);
+                })
+                .collect(Collectors.toList());
+        return EbDto.builder()
+                .bridge(bridge)
+                .source(source)
+                .targets(targets)
+                .build();
     }
 
     @GetMapping("/namespaces")

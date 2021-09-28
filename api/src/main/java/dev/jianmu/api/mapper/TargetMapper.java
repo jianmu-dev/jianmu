@@ -8,6 +8,7 @@ import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
 import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
 import dev.jianmu.infrastructure.eventbridge.QueryTransformer;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ObjectFactory;
 import org.mapstruct.factory.Mappers;
 
@@ -25,6 +26,10 @@ public interface TargetMapper {
     TargetMapper INSTANCE = Mappers.getMapper(TargetMapper.class);
 
     Target toTarget(TargetDto dto);
+
+    @Mapping(target = "relatedProjectName", source = "projectName")
+    @Mapping(source = "target.destinationId", target = "relatedProjectId", defaultValue = "")
+    TargetDto toTargetDto(Target target, String projectName);
 
     List<Target> toTargetList(List<TargetDto> dtos);
 
@@ -56,5 +61,35 @@ public interface TargetMapper {
             default:
                 throw new RuntimeException("非法Transformer类型");
         }
+    }
+
+    List<TransformerDto> toTransformerDtos(List<Transformer> transformers);
+
+    default TransformerDto toTransformerDto(Transformer transformer) {
+        if (transformer instanceof BodyTransformer) {
+            return TransformerDto.builder()
+                    .type(TransformerDto.Type.BODY)
+                    .variableName(transformer.getVariableName())
+                    .variableType(transformer.getVariableType())
+                    .expression(transformer.getExpression())
+                    .build();
+        }
+        if (transformer instanceof HeaderTransformer) {
+            return TransformerDto.builder()
+                    .type(TransformerDto.Type.HEADER)
+                    .variableName(transformer.getVariableName())
+                    .variableType(transformer.getVariableType())
+                    .expression(transformer.getExpression())
+                    .build();
+        }
+        if (transformer instanceof QueryTransformer) {
+            return TransformerDto.builder()
+                    .type(TransformerDto.Type.QUERY)
+                    .variableName(transformer.getVariableName())
+                    .variableType(transformer.getVariableType())
+                    .expression(transformer.getExpression())
+                    .build();
+        }
+        throw new RuntimeException("错误的转换器类型");
     }
 }

@@ -33,5 +33,8 @@ public interface BridgeMapper {
     List<Bridge> findAll();
 
     @Select("SELECT * FROM eb_bridge WHERE id = #{id}")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<Bridge> findById(String id);
 }

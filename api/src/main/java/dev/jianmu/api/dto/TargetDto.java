@@ -25,5 +25,7 @@ public class TargetDto {
     private String ref;
     @NotBlank
     private String name;
+    private String relatedProjectId;
+    private String relatedProjectName;
     private Set<TransformerDto> transformers;
 }

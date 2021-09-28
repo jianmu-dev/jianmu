@@ -2,7 +2,6 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.EbDto;
 import dev.jianmu.api.dto.TransformerDto;
-import dev.jianmu.api.mapper.EbDtoMapper;
 import dev.jianmu.api.mapper.TargetMapper;
 import dev.jianmu.application.service.EventBridgeApplication;
 import dev.jianmu.eventbridge.aggregate.Transformer;
@@ -58,6 +57,6 @@ public class EventBridgeController {
         if (name.equals("Gitlab")) {
             temps = this.eventBridgeApplication.gitlabTemplates();
         }
-        return EbDtoMapper.INSTANCE.toTransformerDtos(temps);
+        return TargetMapper.INSTANCE.toTransformerDtos(temps);
     }
 }
