@@ -16,11 +16,12 @@ import java.util.Optional;
 public interface TargetEventMapper {
     @Select("SELECT * FROM `eb_target_event` WHERE id = #{id}")
     @Result(column = "source_id", property = "sourceId")
+    @Result(column = "target_id", property = "targetId")
     @Result(column = "target_ref", property = "targetRef")
     @Result(column = "destination_id", property = "destinationId")
     Optional<TargetEvent> findById(String id);
 
-    @Insert("insert into eb_target_event(id, source_id, target_ref, destination_id) " +
-            "values(#{id}, #{sourceId}, #{targetRef}, #{destinationId})")
+    @Insert("insert into eb_target_event(id, source_id, target_id, target_ref, destination_id) " +
+            "values(#{id}, #{sourceId}, #{targetId}, #{targetRef}, #{destinationId})")
     void save(TargetEvent targetEvent);
 }

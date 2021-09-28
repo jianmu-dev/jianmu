@@ -166,12 +166,25 @@ CREATE TABLE `secret_kv_pair`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥键值对表';
 
+CREATE TABLE `eb_bridge`
+(
+    `id`                 varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `name`               varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '名称',
+    `created_time`       datetime                               DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`   varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '最后修改人',
+    `last_modified_time` datetime                               DEFAULT NULL COMMENT '最后修改时间',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='bridge表';
+
 CREATE TABLE `eb_source`
 (
-    `id`    varchar(45) NOT NULL COMMENT 'ID',
-    `name`  varchar(45) DEFAULT NULL COMMENT '名称',
-    `type`  varchar(45) DEFAULT NULL COMMENT '类型',
-    `token` varchar(45) DEFAULT NULL COMMENT '外部token',
+    `id`        varchar(45) NOT NULL COMMENT 'ID',
+    `bridge_id` varchar(45) DEFAULT NULL COMMENT 'Bridge ID',
+    `name`      varchar(45) DEFAULT NULL COMMENT '名称',
+    `type`      varchar(45) DEFAULT NULL COMMENT '类型',
+    `token`     varchar(45) DEFAULT NULL COMMENT '外部token',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -180,17 +193,21 @@ CREATE TABLE `eb_source`
 CREATE TABLE `eb_target`
 (
     `id`             varchar(45) NOT NULL COMMENT 'ID',
+    `ref`            varchar(45) NOT NULL COMMENT 'Ref',
+    `bridge_id`      varchar(45) DEFAULT NULL COMMENT 'Bridge ID',
     `name`           varchar(45) DEFAULT NULL COMMENT '名称',
     `type`           varchar(45) DEFAULT NULL COMMENT '类型',
     `destination_id` varchar(45) DEFAULT NULL COMMENT '目标ID',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `ref_UNIQUE` (`ref`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='Target表';
 
 CREATE TABLE `eb_connection`
 (
-    `id`        varchar(45) NOT NULL COMMENT 'ID',
+    `id`        varchar(255) NOT NULL COMMENT 'ID',
+    `bridge_id` varchar(45) DEFAULT NULL COMMENT 'bridge ID',
     `source_id` varchar(45) DEFAULT NULL COMMENT 'Source ID',
     `target_id` varchar(45) DEFAULT NULL COMMENT 'Target ID',
     PRIMARY KEY (`id`)
@@ -203,6 +220,7 @@ CREATE TABLE `eb_target_event`
     `id`             varchar(45) NOT NULL COMMENT 'ID',
     `source_id`      varchar(45) DEFAULT NULL COMMENT 'Source ID',
     `target_id`      varchar(45) DEFAULT NULL COMMENT 'Target ID',
+    `target_ref`     varchar(45) DEFAULT NULL COMMENT 'Target Ref',
     `destination_id` varchar(45) DEFAULT NULL COMMENT 'Destination ID',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -221,6 +239,7 @@ CREATE TABLE `eb_target_event_parameter`
 
 CREATE TABLE `eb_target_transformer`
 (
+    `bridge_id`     varchar(45) NOT NULL COMMENT 'Bridge ID',
     `target_id`     varchar(45) NOT NULL COMMENT '关联的Target ID',
     `variable_name` varchar(45) NOT NULL COMMENT '变量名',
     `variable_type` varchar(45) NOT NULL COMMENT '变量类型',
