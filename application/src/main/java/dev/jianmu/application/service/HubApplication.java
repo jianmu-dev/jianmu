@@ -53,7 +53,7 @@ public class HubApplication {
                 .name(name)
                 .description(description)
                 .ref(nodeDsl.getRef())
-                .ownerName("local")
+                .ownerName("本地")
                 .ownerType("LOCAL")
                 .ownerRef("local")
                 .creatorName("local")
