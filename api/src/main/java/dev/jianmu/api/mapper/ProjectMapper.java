@@ -2,6 +2,7 @@ package dev.jianmu.api.mapper;
 
 import dev.jianmu.api.vo.ProjectDetailVo;
 import dev.jianmu.api.vo.ProjectVo;
+import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import org.mapstruct.Mapper;
@@ -9,6 +10,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ValueMapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * @class: ProjectMapper
@@ -30,5 +33,5 @@ public interface ProjectMapper {
     @ValueMapping(source = MappingConstants.NULL, target = "LOCAL")
     ProjectVo.Source enumConverter(Project.DslSource dslSource);
 
-    ProjectDetailVo toProjectDetailVo(Project project);
+    ProjectDetailVo toProjectDetailVo(Project project, List<NodeDef> nodeDefs);
 }

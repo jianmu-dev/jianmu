@@ -1,8 +1,8 @@
 package dev.jianmu.application.service;
 
-import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
@@ -17,6 +17,7 @@ import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.service.ScheduleJobService;
 import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
+import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @class: ProjectApplication
@@ -292,6 +294,18 @@ public class ProjectApplication {
 
     public Optional<Project> findById(String dslId) {
         return this.projectRepository.findById(dslId);
+    }
+
+    public List<NodeDef> findNodes(String ref, String version) {
+        var workflow = this.workflowRepository.findByRefAndVersion(ref, version)
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        var types = workflow.getNodes().stream()
+                .map(Node::getType)
+                .filter(type -> !type.equals("Start"))
+                .filter(type -> !type.equals("End"))
+                .collect(Collectors.toSet());
+        types.forEach(System.out::println);
+        return this.nodeDefApi.findByTypes(types);
     }
 
     public Workflow findByRefAndVersion(String ref, String version) {
