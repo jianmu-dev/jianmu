@@ -71,7 +71,7 @@ public class SecretController {
     }
 
     @GetMapping("/namespaces/{name}")
-    @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
+    @Operation(summary = "查询命名空间详情", description = "查询命名空间详情", deprecated = true)
     public Namespace findByName(@PathVariable String name) {
         return this.secretApplication.findById(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
     }
