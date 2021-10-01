@@ -108,6 +108,12 @@ public class ViewController {
         return this.secretApplication.findAll(namespaceSearchDto.getName(), namespaceSearchDto.getPageNum(), namespaceSearchDto.getPageSize());
     }
 
+    @GetMapping("/namespaces/{name}")
+    @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
+    public Namespace findByName(@PathVariable String name) {
+        return this.secretApplication.findById(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
+    }
+
     @GetMapping("/namespaces/{name}/keys")
     @Operation(summary = "查询键值对列表", description = "查询键值对列表")
     public List<String> findAll(@PathVariable String name) {
