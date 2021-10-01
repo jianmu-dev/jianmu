@@ -299,12 +299,9 @@ public class ProjectApplication {
     public List<NodeDef> findNodes(String ref, String version) {
         var workflow = this.workflowRepository.findByRefAndVersion(ref, version)
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        var types = workflow.getNodes().stream()
+        var types = workflow.findTasks().stream()
                 .map(Node::getType)
-                .filter(type -> !type.equals("Start"))
-                .filter(type -> !type.equals("End"))
                 .collect(Collectors.toSet());
-        types.forEach(System.out::println);
         return this.nodeDefApi.findByTypes(types);
     }
 
