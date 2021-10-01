@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -49,12 +50,12 @@ public class NodeDsl {
     /**
      * 输入参数
      */
-    private Set<NodeParameter> inputParameters;
+    private Set<NodeParameter> inputParameters = new HashSet<>();
 
     /**
      * 输出参数
      */
-    private Set<NodeParameter> outputParameters;
+    private Set<NodeParameter> outputParameters = new HashSet<>();
 
     /**
      * 镜像规格信息
