@@ -22,7 +22,6 @@ import javax.validation.constraints.NotBlank;
 public class NodeDefinitionDto {
     @NotBlank
     private String name;
-    @NotBlank
     private String description;
     @NotBlank
     private String dsl;
