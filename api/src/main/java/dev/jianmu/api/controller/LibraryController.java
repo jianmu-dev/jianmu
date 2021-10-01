@@ -1,6 +1,7 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.dto.NodeDefinitionDto;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.vo.NodeDefVo;
 import dev.jianmu.api.vo.PageUtils;
@@ -9,6 +10,7 @@ import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -73,5 +75,11 @@ public class LibraryController {
     @Operation(summary = "删除节点定义", description = "删除节点定义")
     public void delete(@PathVariable String ownerRef, @PathVariable String ref) {
         this.hubApplication.deleteNode(ownerRef, ref);
+    }
+
+    @PostMapping("/nodes")
+    @Operation(summary = "新增节点定义", description = "新增节点定义")
+    public void create(@RequestBody @Validated NodeDefinitionDto dto) {
+        this.hubApplication.addNode(dto.getName(), dto.getDescription(), dto.getDsl());
     }
 }

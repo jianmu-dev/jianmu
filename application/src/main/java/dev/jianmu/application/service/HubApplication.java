@@ -1,6 +1,7 @@
 package dev.jianmu.application.service;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.application.dsl.NodeDsl;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
@@ -42,6 +43,67 @@ public class HubApplication {
         this.nodeDefinitionVersionRepository = nodeDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
         this.registryClient = registryClient;
+    }
+
+    @Transactional
+    public void addNode(String name, String description, String dsl) {
+        var nodeDsl = NodeDsl.parseDsl(dsl);
+        var def = NodeDefinition.Builder.aNodeDefinition()
+                .id("local/" + nodeDsl.getRef())
+                .name(name)
+                .description(description)
+                .ref(nodeDsl.getRef())
+                .ownerName("local")
+                .ownerType("LOCAL")
+                .ownerRef("local")
+                .creatorName("local")
+                .creatorRef("local")
+                .type(NodeDefinition.Type.DOCKER)
+                .build();
+
+        List<Parameter> parameters = new ArrayList<>();
+        var inputParameters = nodeDsl.getInputParameters().stream().map(parameter -> {
+            var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
+            parameters.add(p);
+            return NodeParameter.Builder.aNodeParameter()
+                    .name(parameter.getName())
+                    .description(parameter.getDescription())
+                    .ref(parameter.getRef())
+                    .type(parameter.getType())
+                    .parameterId(p.getId())
+                    .value(parameter.getValue())
+                    .build();
+        }).collect(Collectors.toSet());
+
+        var outputParameters = nodeDsl.getOutputParameters().stream().map(parameter -> {
+            var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
+            parameters.add(p);
+            return NodeParameter.Builder.aNodeParameter()
+                    .name(parameter.getName())
+                    .description(parameter.getDescription())
+                    .ref(parameter.getRef())
+                    .type(parameter.getType())
+                    .parameterId(p.getId())
+                    .value(parameter.getValue())
+                    .build();
+        }).collect(Collectors.toSet());
+
+        this.parameterRepository.addAll(parameters);
+
+        var version = NodeDefinitionVersion.Builder.aNodeDefinitionVersion()
+                .id("local/" + nodeDsl.getRef() + ":" + nodeDsl.getVersion())
+                .creatorName("local")
+                .creatorRef("local")
+                .ownerRef("local")
+                .ref(nodeDsl.getRef())
+                .version(nodeDsl.getVersion())
+                .resultFile(nodeDsl.getResultFile())
+                .inputParameters(inputParameters)
+                .outputParameters(outputParameters)
+                .spec(nodeDsl.getSpecString())
+                .build();
+        this.nodeDefinitionRepository.saveOrUpdate(def);
+        this.nodeDefinitionVersionRepository.saveOrUpdate(version);
     }
 
     @Transactional
