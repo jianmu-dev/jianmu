@@ -33,38 +33,6 @@ public class LibraryController {
         this.hubApplication = hubApplication;
     }
 
-    @GetMapping("/nodes")
-    @Operation(summary = "节点定义列表", description = "节点定义列表查询", deprecated = true)
-    public PageInfo<NodeDefVo> findNodeAll(PageDto dto) {
-        var page = this.hubApplication.findPage(
-                dto.getPageNum(),
-                dto.getPageSize()
-        );
-        var nodes = page.getList();
-        List<NodeDefVo> nodeDefVos = nodes.stream().map(nodeDefinition -> {
-            var versions = this.hubApplication.findByOwnerRefAndRef(nodeDefinition.getOwnerRef(), nodeDefinition.getRef()).stream()
-                    .map(NodeDefinitionVersion::getVersion).collect(Collectors.toList());
-            return NodeDefVo.builder()
-                    .icon(nodeDefinition.getIcon())
-                    .name(nodeDefinition.getName())
-                    .ownerName(nodeDefinition.getOwnerName())
-                    .ownerType(nodeDefinition.getOwnerType())
-                    .ownerRef(nodeDefinition.getOwnerRef())
-                    .creatorName(nodeDefinition.getCreatorName())
-                    .creatorRef(nodeDefinition.getCreatorRef())
-                    .type(nodeDefinition.getType())
-                    .description(nodeDefinition.getDescription())
-                    .ref(nodeDefinition.getRef())
-                    .sourceLink(nodeDefinition.getSourceLink())
-                    .documentLink(nodeDefinition.getDocumentLink())
-                    .versions(versions)
-                    .build();
-        }).collect(Collectors.toList());
-        PageInfo<NodeDefVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
-        newPage.setList(nodeDefVos);
-        return newPage;
-    }
-
     @PutMapping("/{ownerRef}/{ref}")
     @Operation(summary = "节点定义同步", description = "节点定义同步")
     public void sync(@PathVariable String ownerRef, @PathVariable String ref) {

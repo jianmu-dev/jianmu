@@ -62,23 +62,4 @@ public class SecretController {
     public void deleteKVPair(@PathVariable String name, @PathVariable String key) {
         this.secretApplication.deleteKVPair(name, key);
     }
-
-    @GetMapping("/namespaces/{name}/keys")
-    @Operation(summary = "查询键值对列表", description = "查询键值对列表", deprecated = true)
-    public List<String> findAll(@PathVariable String name) {
-        var kvs = this.secretApplication.findAll(name);
-        return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
-    }
-
-    @GetMapping("/namespaces/{name}")
-    @Operation(summary = "查询命名空间详情", description = "查询命名空间详情", deprecated = true)
-    public Namespace findByName(@PathVariable String name) {
-        return this.secretApplication.findById(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
-    }
-
-    @GetMapping("/namespaces")
-    @Operation(summary = "分页查询命名空间列表", description = "分页查询命名空间列表", deprecated = true)
-    public PageInfo<Namespace> findAll(NamespaceSearchDto namespaceSearchDto) {
-        return this.secretApplication.findAll(namespaceSearchDto.getName(), namespaceSearchDto.getPageNum(), namespaceSearchDto.getPageSize());
-    }
 }

@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.EbDto;
 import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.dto.TransformerDto;
 import dev.jianmu.api.mapper.ProjectMapper;
 import dev.jianmu.api.mapper.TargetMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
@@ -12,12 +13,14 @@ import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.eventbridge.aggregate.Bridge;
+import dev.jianmu.eventbridge.aggregate.Transformer;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,6 +78,12 @@ public class ViewController {
         this.storageService = storageService;
     }
 
+    @GetMapping("/parameters/types")
+    @Operation(summary = "参数类型获取接口", description = "参数类型获取接口")
+    public Parameter.Type[] getTypes() {
+        return Parameter.Type.values();
+    }
+
     @GetMapping("/event_bridges")
     @Operation(summary = "分页查询event bridges列表", description = "分页查询event bridges列表")
     public PageInfo<Bridge> findAllEb(PageDto dto) {
@@ -82,6 +91,7 @@ public class ViewController {
     }
 
     @GetMapping("/event_bridges/{bridgeId}")
+    @Operation(summary = "查询event bridge", description = "查询event bridge")
     public EbDto findEbById(@PathVariable String bridgeId) {
         var bridge = this.eventBridgeApplication.findBridgeById(bridgeId);
         var source = this.eventBridgeApplication.findSourceByBridgeId(bridgeId);
@@ -100,6 +110,25 @@ public class ViewController {
                 .source(source)
                 .targets(targets)
                 .build();
+    }
+
+    @GetMapping("/templates")
+    @Operation(summary = "转换器模版列表", description = "转换器模版列表")
+    public List<String> findTemplates() {
+        return List.of("Gitee", "Gitlab");
+    }
+
+    @GetMapping("/templates/{name}")
+    @Operation(summary = "转换器模版详情", description = "转换器模版详情")
+    public List<TransformerDto> findTemplate(@PathVariable String name) {
+        List<Transformer> temps = List.of();
+        if (name.equals("Gitee")) {
+            temps = this.eventBridgeApplication.giteeTemplates();
+        }
+        if (name.equals("Gitlab")) {
+            temps = this.eventBridgeApplication.gitlabTemplates();
+        }
+        return TargetMapper.INSTANCE.toTransformerDtos(temps);
     }
 
     @GetMapping("/namespaces")

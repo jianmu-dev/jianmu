@@ -42,21 +42,4 @@ public class EventBridgeController {
     public void delete(@PathVariable String bridgeId) {
         this.eventBridgeApplication.delete(bridgeId);
     }
-
-    @GetMapping("/templates")
-    public List<String> findTemplates() {
-        return List.of("Gitee", "Gitlab");
-    }
-
-    @GetMapping("/templates/{name}")
-    public List<TransformerDto> findTemplate(@PathVariable String name) {
-        List<Transformer> temps = List.of();
-        if (name.equals("Gitee")) {
-            temps = this.eventBridgeApplication.giteeTemplates();
-        }
-        if (name.equals("Gitlab")) {
-            temps = this.eventBridgeApplication.gitlabTemplates();
-        }
-        return TargetMapper.INSTANCE.toTransformerDtos(temps);
-    }
 }
