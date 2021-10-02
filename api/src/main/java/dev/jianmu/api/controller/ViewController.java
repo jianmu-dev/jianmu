@@ -112,13 +112,13 @@ public class ViewController {
                 .build();
     }
 
-    @GetMapping("/templates")
+    @GetMapping("/event_bridges/templates")
     @Operation(summary = "转换器模版列表", description = "转换器模版列表")
     public List<String> findTemplates() {
         return List.of("Gitee", "Gitlab");
     }
 
-    @GetMapping("/templates/{name}")
+    @GetMapping("/event_bridges/templates/{name}")
     @Operation(summary = "转换器模版详情", description = "转换器模版详情")
     public List<TransformerDto> findTemplate(@PathVariable String name) {
         List<Transformer> temps = List.of();
