@@ -81,10 +81,7 @@
                         <image>registry://jianmudev/openjdk:11.0.11-jdk-oracle-wait-for-it</image>
                     </from>
                     <to>
-                        <image>${env.JIANMU_IMAGE_NAME}</image>
-                        <tags>
-                            <tag>${env.JIANMU_IMAGE_TAG}</tag>
-                        </tags>
+                        <image>${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
                         <auth>
                             <username>${env.JIANMU_DOCKER_USERNAME}</username>
                             <password>${env.JIANMU_DOCKER_PASSWORD}</password>
