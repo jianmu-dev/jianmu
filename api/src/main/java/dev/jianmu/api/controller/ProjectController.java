@@ -76,7 +76,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    @Operation(summary = "获取项目详情", description = "获取项目详情")
+    @Operation(summary = "获取项目详情", description = "获取项目详情", deprecated = true)
     public Project getProject(@PathVariable String projectId) {
         return this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
     }
