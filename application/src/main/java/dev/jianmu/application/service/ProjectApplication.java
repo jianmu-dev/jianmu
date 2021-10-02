@@ -23,6 +23,7 @@ import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -221,7 +222,7 @@ public class ProjectApplication {
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
         // 删除原有EB关联
-        if (!project.getEventBridgeSourceId().isBlank()) {
+        if (!StringUtils.isBlank(project.getEventBridgeSourceId())) {
             this.targetRepository.findByDestinationId(project.getId())
                     .ifPresent(target -> {
                         target.setDestinationId("");
@@ -318,7 +319,7 @@ public class ProjectApplication {
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
         // 删除原有EB关联
-        if (!project.getEventBridgeSourceId().isBlank()) {
+        if (!StringUtils.isBlank(project.getEventBridgeSourceId())) {
             this.targetRepository.findByDestinationId(project.getId())
                     .ifPresent(target -> {
                         target.setDestinationId("");
