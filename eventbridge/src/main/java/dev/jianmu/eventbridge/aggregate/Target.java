@@ -90,9 +90,6 @@ public class Target {
         }
 
         public Builder ref(String ref) {
-            if (ref == null)
-                throw new RuntimeException("ref不能为空");
-            this.ref = ref;
             return this;
         }
 

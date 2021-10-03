@@ -105,6 +105,7 @@ public class EventBridgeApplication {
                     .name(source.getName())
                     .type(Source.Type.WEBHOOK)
                     .build();
+            this.generateWebhook(source.getId());
         } else {
             var oldSource = this.sourceRepository.findByBridgeId(bridge.getId())
                     .orElseThrow(() -> new RuntimeException("未找到Source"));
@@ -115,6 +116,15 @@ public class EventBridgeApplication {
         bridge.setLastModifiedTime();
         var bridgeId = bridge.getId();
         var sourceId = source.getId();
+        // 校验Target Ref唯一性
+        var countMap = targets.stream()
+                .filter(target -> target.getRef() != null)
+                .collect(Collectors.groupingBy(Target::getRef, Collectors.counting()));
+        countMap.values().forEach(i -> {
+            if (i > 1)
+                throw new RuntimeException("Target Ref不能重复");
+        });
+
         var ts = targets.stream().map(target ->
                 Target.Builder.aTarget()
                         .bridgeId(bridgeId)

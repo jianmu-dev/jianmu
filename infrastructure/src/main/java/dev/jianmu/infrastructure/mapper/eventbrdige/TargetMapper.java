@@ -39,7 +39,7 @@ public interface TargetMapper {
     @Insert("insert into eb_target(id, ref, bridge_id, name, type, destination_id) " +
             "values(#{id}, #{ref}, #{bridgeId}, #{name}, #{type}, #{destinationId})" +
             " ON DUPLICATE KEY UPDATE " +
-            "name=#{name}, type=#{type}, destination_id=#{destinationId}")
+            "id=#{id}, ref=#{ref}, name=#{name}, type=#{type}, destination_id=#{destinationId}")
     void saveOrUpdate(Target target);
 
     @Delete("DELETE FROM eb_target WHERE id = #{id}")

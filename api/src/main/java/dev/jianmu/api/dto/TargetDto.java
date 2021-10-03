@@ -22,7 +22,7 @@ import java.util.Set;
 @Builder
 @Schema(description = "TargetDto")
 public class TargetDto {
-    @NotBlank
+    private String id;
     private String ref;
     @NotBlank
     private String name;
