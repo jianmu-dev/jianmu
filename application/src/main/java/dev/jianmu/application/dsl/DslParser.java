@@ -216,6 +216,7 @@ public class DslParser {
         }
         this.name = (String) pipe.get("name");
         this.ref = (String) pipe.get("ref");
+        RefChecker.check(this.ref);
         this.description = (String) pipe.get("description");
         pipe.forEach((key, val) -> {
             if (val instanceof Map) {
@@ -248,6 +249,7 @@ public class DslParser {
         }
         this.name = (String) flow.get("name");
         this.ref = (String) flow.get("ref");
+        RefChecker.check(this.ref);
         this.description = (String) flow.get("description");
         flow.forEach((key, val) -> {
             if (val instanceof Map) {

@@ -94,6 +94,7 @@ public class NodeDsl {
         if (ObjectUtils.isEmpty(this.ref)) {
             throw new RuntimeException("节点定义DSL格式不正确");
         }
+        RefChecker.check(this.ref);
     }
 
     public String getSpecString() {
