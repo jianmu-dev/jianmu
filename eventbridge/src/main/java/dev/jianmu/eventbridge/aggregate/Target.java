@@ -1,6 +1,7 @@
 package dev.jianmu.eventbridge.aggregate;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @class: Target
@@ -48,6 +49,10 @@ public class Target {
 
     public Set<Transformer> getTransformers() {
         return transformers;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setRef(String ref) {
@@ -127,7 +132,7 @@ public class Target {
         public Target build() {
             Target target = new Target();
             target.type = this.type;
-            target.id = this.bridgeId + this.ref;
+            target.id = UUID.randomUUID().toString().replace("-", "");
             target.ref = this.ref;
             target.name = this.name;
             target.bridgeId = this.bridgeId;

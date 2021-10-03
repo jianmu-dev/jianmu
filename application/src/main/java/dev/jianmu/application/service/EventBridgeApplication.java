@@ -105,7 +105,7 @@ public class EventBridgeApplication {
                     .name(source.getName())
                     .type(Source.Type.WEBHOOK)
                     .build();
-            this.generateWebhook(source.getId());
+            source.generateToken();
         } else {
             var oldSource = this.sourceRepository.findByBridgeId(bridge.getId())
                     .orElseThrow(() -> new RuntimeException("未找到Source"));
@@ -125,15 +125,22 @@ public class EventBridgeApplication {
                 throw new RuntimeException("Target Ref不能重复");
         });
 
-        var ts = targets.stream().map(target ->
-                Target.Builder.aTarget()
-                        .bridgeId(bridgeId)
-                        .name(target.getName())
-                        .ref(target.getRef())
-                        .type(Target.Type.WORKFLOW)
-                        .transformers(target.getTransformers())
-                        .build()
-        ).collect(Collectors.toSet());
+        var ts = targets.stream().map(target -> {
+            var t = this.targetRepository.findById(target.getId())
+                    .orElse(Target.Builder.aTarget()
+                            .bridgeId(bridgeId)
+                            .name(target.getName())
+                            .ref(target.getRef())
+                            .type(Target.Type.WORKFLOW)
+                            .transformers(target.getTransformers())
+                            .build());
+            t.setBridgeId(bridgeId);
+            t.setName(target.getName());
+            t.setRef(target.getRef());
+            t.setType(Target.Type.WORKFLOW);
+            t.setTransformers(target.getTransformers());
+            return t;
+        }).collect(Collectors.toSet());
         var cons = ts.stream().map(target ->
                 Connection.Builder.aConnection()
                         .bridgeId(bridgeId)
