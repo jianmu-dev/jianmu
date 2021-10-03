@@ -93,7 +93,7 @@ public class EventBridgeApplication {
     }
 
     @Transactional
-    public void saveOrUpdate(Bridge bridge, Source source, List<Target> targets) {
+    public Bridge saveOrUpdate(Bridge bridge, Source source, List<Target> targets) {
         // ID不存在为新增
         if (bridge.getId() == null) {
             bridge = Bridge.Builder.aBridge()
@@ -136,6 +136,7 @@ public class EventBridgeApplication {
         this.sourceRepository.saveOrUpdate(source);
         this.targetRepository.saveOrUpdateList(ts);
         this.connectionRepository.saveOrUpdateList(cons);
+        return bridge;
     }
 
     @Transactional
