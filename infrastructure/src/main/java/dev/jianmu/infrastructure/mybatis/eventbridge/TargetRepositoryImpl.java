@@ -30,7 +30,7 @@ public class TargetRepositoryImpl implements TargetRepository {
     @Override
     public Optional<Target> findById(String id) {
         return this.targetMapper.findById(id).map(target -> {
-            var transformers = this.targetTransformerMapper.findByTargetId(target.getRef());
+            var transformers = this.targetTransformerMapper.findByTargetId(target.getId());
             target.setTransformers(transformers);
             return target;
         });

@@ -212,6 +212,7 @@ public class EventBridgeApplication {
         });
         var targetEvent = TargetEvent.Builder.aTargetEvent()
                 .sourceId(connectionEvent.getSourceId())
+                .targetId(target.getId())
                 .targetRef(target.getRef())
                 .destinationId(target.getDestinationId())
                 .payload(connectionEvent.getPayload())
