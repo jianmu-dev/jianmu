@@ -56,6 +56,8 @@ public class Target {
     }
 
     public void setRef(String ref) {
+        if (ref != null)
+            RefChecker.check(ref);
         this.ref = ref;
     }
 
@@ -95,6 +97,9 @@ public class Target {
         }
 
         public Builder ref(String ref) {
+            if (ref != null)
+                RefChecker.check(ref);
+            this.ref = ref;
             return this;
         }
 
