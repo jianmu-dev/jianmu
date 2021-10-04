@@ -14,6 +14,7 @@ import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
 import dev.jianmu.infrastructure.mybatis.eventbridge.BridgeRepositoryImpl;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,7 +96,7 @@ public class EventBridgeApplication {
     @Transactional
     public Bridge saveOrUpdate(Bridge bridge, Source source, List<Target> targets) {
         // ID不存在为新增
-        if (bridge.getId() == null) {
+        if (StringUtils.isBlank(bridge.getId())) {
             bridge = Bridge.Builder.aBridge()
                     .name(bridge.getName())
                     .lastModifiedBy("admin")
@@ -118,14 +119,34 @@ public class EventBridgeApplication {
         var sourceId = source.getId();
         // 校验Target Ref唯一性
         var countMap = targets.stream()
-                .filter(target -> target.getRef() != null)
+                .filter(target -> !StringUtils.isBlank(target.getRef()))
                 .collect(Collectors.groupingBy(Target::getRef, Collectors.counting()));
         countMap.values().forEach(i -> {
             if (i > 1)
                 throw new RuntimeException("Target Ref不能重复");
         });
 
-        var ts = targets.stream().map(target -> {
+        var oldTargets = this.targetRepository.findByBridgeId(bridgeId)
+                .stream().filter(target -> !StringUtils.isBlank(target.getDestinationId()))
+                .collect(Collectors.toList());
+        oldTargets.forEach(target -> {
+            long count = 0;
+            count = targets.stream()
+                    .filter(inTarget -> inTarget.getId().equals(target.getId()))
+                    .count();
+            if (count < oldTargets.size()) {
+                throw new RuntimeException("已关联项目的目标不能删除");
+            }
+            count = targets.stream()
+                    .filter(inTarget -> inTarget.getId().equals(target.getId()))
+                    .filter(inTarget -> !inTarget.getRef().equals(target.getRef()))
+                    .count();
+            if (count > 0) {
+                throw new RuntimeException("已关联项目的Ref不能修改");
+            }
+        });
+
+        var newTargets = targets.stream().map(target -> {
             var t = this.targetRepository.findById(target.getId())
                     .orElse(Target.Builder.aTarget()
                             .bridgeId(bridgeId)
@@ -141,7 +162,8 @@ public class EventBridgeApplication {
             t.setTransformers(target.getTransformers());
             return t;
         }).collect(Collectors.toSet());
-        var cons = ts.stream().map(target ->
+
+        var cons = newTargets.stream().map(target ->
                 Connection.Builder.aConnection()
                         .bridgeId(bridgeId)
                         .sourceId(sourceId)
@@ -151,13 +173,19 @@ public class EventBridgeApplication {
 
         this.bridgeRepository.saveOrUpdate(bridge);
         this.sourceRepository.saveOrUpdate(source);
-        this.targetRepository.saveOrUpdateList(ts);
+        this.targetRepository.saveOrUpdateList(newTargets);
         this.connectionRepository.saveOrUpdateList(cons);
         return bridge;
     }
 
     @Transactional
     public void delete(String bridgeId) {
+        var targets = this.targetRepository.findByBridgeId(bridgeId);
+        var count = targets.stream()
+                .filter(target -> !StringUtils.isBlank(target.getDestinationId()))
+                .count();
+        if (count > 0)
+            throw new RuntimeException("该EventBridge存在关联项目，无法删除");
         this.bridgeRepository.deleteById(bridgeId);
         this.sourceRepository.deleteByBridgeId(bridgeId);
         this.targetRepository.deleteByBridgeId(bridgeId);
