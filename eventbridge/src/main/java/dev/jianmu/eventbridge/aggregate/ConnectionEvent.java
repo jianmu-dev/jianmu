@@ -12,6 +12,7 @@ public class ConnectionEvent {
     private String id;
     private String bridgeId;
     private String sourceId;
+    private String sourceEventId;
     private String targetId;
     private Payload payload;
 
@@ -27,6 +28,10 @@ public class ConnectionEvent {
         return sourceId;
     }
 
+    public String getSourceEventId() {
+        return sourceEventId;
+    }
+
     public String getTargetId() {
         return targetId;
     }
@@ -39,6 +44,7 @@ public class ConnectionEvent {
     public static final class Builder {
         private String bridgeId;
         private String sourceId;
+        private String sourceEventId;
         private String targetId;
         private Payload payload;
 
@@ -59,6 +65,11 @@ public class ConnectionEvent {
             return this;
         }
 
+        public Builder sourceEventId(String sourceEventId) {
+            this.sourceEventId = sourceEventId;
+            return this;
+        }
+
         public Builder targetId(String targetId) {
             this.targetId = targetId;
             return this;
@@ -74,6 +85,7 @@ public class ConnectionEvent {
             connectionEvent.id = UUID.randomUUID().toString().replace("-", "");
             connectionEvent.bridgeId = this.bridgeId;
             connectionEvent.sourceId = this.sourceId;
+            connectionEvent.sourceEventId = this.sourceEventId;
             connectionEvent.targetId = this.targetId;
             connectionEvent.payload = this.payload;
             return connectionEvent;

@@ -14,6 +14,8 @@ public class TargetEvent {
     private String id;
     private String bridgeId;
     private String sourceId;
+    private String sourceEventId;
+    private String connectionEventId;
     private String targetId;
     private String targetRef;
     private String destinationId;
@@ -30,6 +32,14 @@ public class TargetEvent {
 
     public String getSourceId() {
         return sourceId;
+    }
+
+    public String getSourceEventId() {
+        return sourceEventId;
+    }
+
+    public String getConnectionEventId() {
+        return connectionEventId;
     }
 
     public String getTargetId() {
@@ -65,6 +75,8 @@ public class TargetEvent {
     public static final class Builder {
         private String bridgeId;
         private String sourceId;
+        private String sourceEventId;
+        private String connectionEventId;
         private String targetId;
         private String targetRef;
         private String destinationId;
@@ -80,6 +92,16 @@ public class TargetEvent {
 
         public Builder bridgeId(String bridgeId) {
             this.bridgeId = bridgeId;
+            return this;
+        }
+
+        public Builder sourceEventId(String sourceEventId) {
+            this.sourceEventId = sourceEventId;
+            return this;
+        }
+
+        public Builder connectionEventId(String connectionEventId) {
+            this.connectionEventId = connectionEventId;
             return this;
         }
 
@@ -118,6 +140,8 @@ public class TargetEvent {
             targetEvent.id = UUID.randomUUID().toString().replace("-", "");
             targetEvent.bridgeId = this.bridgeId;
             targetEvent.sourceId = this.sourceId;
+            targetEvent.sourceEventId = this.sourceEventId;
+            targetEvent.connectionEventId = this.connectionEventId;
             targetEvent.targetId = this.targetId;
             targetEvent.targetRef = this.targetRef;
             targetEvent.destinationId = this.destinationId;

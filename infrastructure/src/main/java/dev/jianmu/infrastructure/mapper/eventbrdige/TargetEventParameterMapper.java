@@ -19,7 +19,7 @@ public interface TargetEventParameterMapper {
     @Result(column = "parameter_id", property = "parameterId")
     Set<EventParameter> findById(String targetEventId);
 
-    @Insert("insert into eb_target_event_parameter(target_event_id, name, type, parameter_id) " +
-            "values(#{targetEventId}, #{ep.name}, #{ep.type}, #{ep.parameterId})")
+    @Insert("insert into eb_target_event_parameter(target_event_id, name, type, value, parameter_id) " +
+            "values(#{targetEventId}, #{ep.name}, #{ep.type}, #{ep.value}, #{ep.parameterId})")
     void save(@Param("targetEventId") String targetEventId, @Param("ep") EventParameter eventParameter);
 }

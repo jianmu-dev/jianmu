@@ -62,6 +62,12 @@ public class EventBridgeApplication {
         this.objectMapper = objectMapper;
     }
 
+    public TargetEvent findTargetEvent(String targetEventId) {
+        var event = this.targetEventRepository.findById(targetEventId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该触发事件"));
+        return event;
+    }
+
     public PageInfo<Bridge> findAll(int pageNum, int pageSize) {
         return this.bridgeRepository.findAllPage(pageNum, pageSize);
     }
@@ -215,6 +221,7 @@ public class EventBridgeApplication {
                     .orElseThrow(() -> new RuntimeException("未找到该Target: " + connection.getTargetId()));
             var connectionEvent = ConnectionEvent.Builder.aConnectionEvent()
                     .sourceId(connection.getSourceId())
+                    .sourceEventId(sourceEvent.getId())
                     .targetId(target.getId())
                     .payload(sourceEvent.getPayload())
                     .build();
@@ -233,6 +240,7 @@ public class EventBridgeApplication {
             var eventParameter = EventParameter.Builder.anEventParameter()
                     .name(transformer.getVariableName())
                     .type(transformer.getVariableType())
+                    .value(parameter.getStringValue())
                     .parameterId(parameter.getId())
                     .build();
             parameters.add(parameter);
@@ -240,6 +248,8 @@ public class EventBridgeApplication {
         });
         var targetEvent = TargetEvent.Builder.aTargetEvent()
                 .sourceId(connectionEvent.getSourceId())
+                .sourceEventId(connectionEvent.getSourceEventId())
+                .connectionEventId(connectionEvent.getId())
                 .targetId(target.getId())
                 .targetRef(target.getRef())
                 .destinationId(target.getDestinationId())

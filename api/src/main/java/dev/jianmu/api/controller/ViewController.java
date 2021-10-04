@@ -13,6 +13,7 @@ import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.eventbridge.aggregate.Bridge;
+import dev.jianmu.eventbridge.aggregate.TargetEvent;
 import dev.jianmu.eventbridge.aggregate.Transformer;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
@@ -110,6 +111,12 @@ public class ViewController {
                 .source(source)
                 .targets(targets)
                 .build();
+    }
+
+    @GetMapping("/target_events/{triggerId}")
+    @Operation(summary = "查询目标event参数", description = "查询目标event参数")
+    public TargetEvent findTargetEvent(@PathVariable String triggerId) {
+        return this.eventBridgeApplication.findTargetEvent(triggerId);
     }
 
     @GetMapping("/event_bridges/templates")

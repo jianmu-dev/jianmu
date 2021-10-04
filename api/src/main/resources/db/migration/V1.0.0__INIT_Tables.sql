@@ -217,11 +217,14 @@ CREATE TABLE `eb_connection`
 
 CREATE TABLE `eb_target_event`
 (
-    `id`             varchar(45) NOT NULL COMMENT 'ID',
-    `source_id`      varchar(45) DEFAULT NULL COMMENT 'Source ID',
-    `target_id`      varchar(45) DEFAULT NULL COMMENT 'Target ID',
-    `target_ref`     varchar(45) DEFAULT NULL COMMENT 'Target Ref',
-    `destination_id` varchar(45) DEFAULT NULL COMMENT 'Destination ID',
+    `id`                  varchar(45) NOT NULL COMMENT 'ID',
+    `source_id`           varchar(45) DEFAULT NULL COMMENT 'Source ID',
+    `source_event_id`     varchar(45) DEFAULT NULL COMMENT 'Source Event Id',
+    `connection_event_id` varchar(45) DEFAULT NULL COMMENT 'Connection Event Id',
+    `target_id`           varchar(45) DEFAULT NULL COMMENT 'Target ID',
+    `target_ref`          varchar(45) DEFAULT NULL COMMENT 'Target Ref',
+    `destination_id`      varchar(45) DEFAULT NULL COMMENT 'Destination ID',
+    `payload`             blob COMMENT 'Http payload',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
