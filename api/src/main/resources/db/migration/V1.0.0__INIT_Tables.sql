@@ -193,7 +193,7 @@ CREATE TABLE `eb_source`
 CREATE TABLE `eb_target`
 (
     `id`             varchar(45) NOT NULL COMMENT 'ID',
-    `ref`            varchar(45) NOT NULL COMMENT 'Ref',
+    `ref`            varchar(45) DEFAULT NULL COMMENT 'Ref',
     `bridge_id`      varchar(45) DEFAULT NULL COMMENT 'Bridge ID',
     `name`           varchar(45) DEFAULT NULL COMMENT '名称',
     `type`           varchar(45) DEFAULT NULL COMMENT '类型',
