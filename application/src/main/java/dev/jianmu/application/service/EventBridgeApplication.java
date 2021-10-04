@@ -135,14 +135,14 @@ public class EventBridgeApplication {
                     .filter(inTarget -> inTarget.getId().equals(target.getId()))
                     .count();
             if (count < oldTargets.size()) {
-                throw new RuntimeException("已关联项目的目标不能删除");
+                throw new RuntimeException("已关联项目，禁止操作，若要继续，请先在项目中，移除关联关系。");
             }
             count = targets.stream()
                     .filter(inTarget -> inTarget.getId().equals(target.getId()))
                     .filter(inTarget -> !inTarget.getRef().equals(target.getRef()))
                     .count();
             if (count > 0) {
-                throw new RuntimeException("已关联项目的Ref不能修改");
+                throw new RuntimeException("已关联项目，禁止操作，若要继续，请先在项目中，移除关联关系。");
             }
         });
 
@@ -185,7 +185,7 @@ public class EventBridgeApplication {
                 .filter(target -> !StringUtils.isBlank(target.getDestinationId()))
                 .count();
         if (count > 0)
-            throw new RuntimeException("该EventBridge存在关联项目，无法删除");
+            throw new RuntimeException("已关联项目，禁止操作，若要继续，请先在项目中，移除关联关系。");
         this.bridgeRepository.deleteById(bridgeId);
         this.sourceRepository.deleteByBridgeId(bridgeId);
         this.targetRepository.deleteByBridgeId(bridgeId);
