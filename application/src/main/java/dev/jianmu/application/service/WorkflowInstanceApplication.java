@@ -124,7 +124,7 @@ public class WorkflowInstanceApplication {
 
     // 创建并启动流程
     @Transactional
-    public WorkflowInstance createAndStart(String triggerId, String workflowRefVersion) {
+    public WorkflowInstance createAndStart(String triggerId, String triggerType, String workflowRefVersion) {
         Workflow workflow = this.workflowRepository
                 .findByRefVersion(workflowRefVersion)
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
@@ -140,7 +140,7 @@ public class WorkflowInstanceApplication {
         this.workflowInstanceRepository.findByRefAndSerialNoMax(workflow.getRef())
                 .ifPresent(workflowInstance -> serialNo.set(workflowInstance.getSerialNo() + 1));
         // 创建新的流程实例
-        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, serialNo.get(), workflow);
+        WorkflowInstance workflowInstance = workflowInstanceDomainService.create(triggerId, triggerType, serialNo.get(), workflow);
         workflowInstance.setExpressionLanguage(this.expressionLanguage);
         // 启动流程
         Node start = workflow.findStart();

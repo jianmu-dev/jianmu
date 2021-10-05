@@ -41,7 +41,7 @@ public class ProjectController {
     @PostMapping("/trigger/{projectId}")
     @Operation(summary = "触发项目", description = "触发项目启动")
     public void trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {
-        this.projectApplication.trigger(projectId);
+        this.projectApplication.triggerByManual(projectId);
     }
 
     @PostMapping

@@ -64,6 +64,7 @@ CREATE TABLE `workflow_instance`
     `id`               varchar(45)  NOT NULL COMMENT '唯一ID主键',
     `serial_no`        int          NOT NULL COMMENT '执行顺序',
     `trigger_id`       varchar(255) NOT NULL COMMENT '触发器ID',
+    `trigger_type`     varchar(45)  DEFAULT NULL COMMENT 'Trigger Type',
     `name`             varchar(255) DEFAULT NULL COMMENT '显示名称',
     `description`      varchar(255) DEFAULT NULL COMMENT '描述',
     `run_mode`         varchar(45)  NOT NULL COMMENT '运行模式',

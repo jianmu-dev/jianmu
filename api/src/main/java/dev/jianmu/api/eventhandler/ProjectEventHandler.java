@@ -36,6 +36,7 @@ public class ProjectEventHandler {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
         this.workflowInstanceApplication.createAndStart(
                 triggerEvent.getTriggerId(),
+                triggerEvent.getTriggerType(),
                 triggerEvent.getWorkflowRef() + triggerEvent.getWorkflowVersion()
         );
     }

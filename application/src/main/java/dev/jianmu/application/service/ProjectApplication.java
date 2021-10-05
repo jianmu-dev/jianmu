@@ -88,20 +88,21 @@ public class ProjectApplication {
         this.jgitService = jgitService;
     }
 
-    public void trigger(String projectId, String triggerId) {
+    public void trigger(String projectId, String triggerId, String triggerType) {
         MDC.put("triggerId", triggerId);
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(project.getId())
                 .triggerId(triggerId)
+                .triggerType(triggerType)
                 .workflowRef(project.getWorkflowRef())
                 .workflowVersion(project.getWorkflowVersion())
                 .build();
         this.publisher.publishEvent(triggerEvent);
     }
 
-    public void trigger(String projectId) {
+    public void triggerByManual(String projectId) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var triggerId = UUID.randomUUID().toString().replace("-", "");
@@ -109,6 +110,7 @@ public class ProjectApplication {
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(project.getId())
                 .triggerId(triggerId)
+                .triggerType("MANUAL")
                 .workflowRef(project.getWorkflowRef())
                 .workflowVersion(project.getWorkflowVersion())
                 .build();
@@ -119,7 +121,7 @@ public class ProjectApplication {
         MDC.put("triggerId", triggerId);
         var cronTrigger = this.cronTriggerRepository.findById(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该触发器"));
-        this.trigger(cronTrigger.getProjectId(), triggerId);
+        this.trigger(cronTrigger.getProjectId(), triggerId, "CRON");
     }
 
     private Workflow createWorkflow(DslParser parser, String dslText) {
