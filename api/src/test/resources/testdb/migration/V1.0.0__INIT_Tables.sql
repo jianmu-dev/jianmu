@@ -200,6 +200,7 @@ CREATE TABLE `eb_target_event_parameter`
     `target_event_id` varchar(45) NOT NULL COMMENT '关联Target Event ID',
     `name`            varchar(45) NOT NULL COMMENT '名称',
     `type`            varchar(45) NOT NULL COMMENT '类型',
+    `value`           tinytext    NOT NULL COMMENT '参数值',
     `parameter_id`    varchar(45) NOT NULL COMMENT '关联parameter id'
 );
 
