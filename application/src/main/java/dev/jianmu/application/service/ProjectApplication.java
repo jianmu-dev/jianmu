@@ -168,6 +168,7 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .corn(parser.getCron())
                     .build();
+            project.setTriggerType(Project.TriggerType.CRON);
             this.cronTriggerRepository.add(trigger);
             this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
         }
@@ -179,6 +180,7 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
             project.setEventBridgeSourceId(source.getId());
+            project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
         this.projectRepository.add(project);
@@ -218,6 +220,7 @@ public class ProjectApplication {
                     .projectId(projectId)
                     .corn(parser.getCron())
                     .build();
+            project.setTriggerType(Project.TriggerType.CRON);
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
@@ -237,6 +240,7 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
             project.setEventBridgeSourceId(source.getId());
+            project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
         this.projectRepository.updateByWorkflowRef(project);
@@ -268,6 +272,7 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .corn(parser.getCron())
                     .build();
+            project.setTriggerType(Project.TriggerType.CRON);
             this.cronTriggerRepository.add(trigger);
             this.scheduleJobService.addTrigger(trigger.getId(), trigger.getCorn());
         }
@@ -279,6 +284,7 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
             project.setEventBridgeSourceId(source.getId());
+            project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
         this.projectRepository.add(project);
@@ -315,6 +321,7 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .corn(parser.getCron())
                     .build();
+            project.setTriggerType(Project.TriggerType.CRON);
             this.cronTriggerRepository.add(newTrigger);
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
@@ -334,6 +341,7 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
             project.setEventBridgeSourceId(source.getId());
+            project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
         this.projectRepository.updateByWorkflowRef(project);

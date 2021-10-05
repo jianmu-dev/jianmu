@@ -183,6 +183,9 @@ public class DslParser {
 
     // DSL语法校验
     private void syntaxCheck() {
+        if (this.cron != null && this.eb != null) {
+            throw new RuntimeException("不能同时使用Cron与EventBridge");
+        }
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
