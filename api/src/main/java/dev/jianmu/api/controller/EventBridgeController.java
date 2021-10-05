@@ -2,6 +2,7 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.EbDto;
 import dev.jianmu.api.mapper.TargetMapper;
+import dev.jianmu.api.vo.WebhookVo;
 import dev.jianmu.application.service.EventBridgeApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.project.aggregate.Project;
@@ -30,6 +31,22 @@ public class EventBridgeController {
     public EventBridgeController(EventBridgeApplication eventBridgeApplication, ProjectApplication projectApplication) {
         this.eventBridgeApplication = eventBridgeApplication;
         this.projectApplication = projectApplication;
+    }
+
+    @GetMapping("/webhook/{sourceId}")
+    @ResponseBody
+    @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
+    public WebhookVo getWebhookUrl(@PathVariable String sourceId) {
+        var webhook = this.eventBridgeApplication.getWebhookUrl(sourceId);
+        return WebhookVo.builder().webhook(webhook).build();
+    }
+
+    @PatchMapping("/webhook/{sourceId}")
+    @ResponseBody
+    @Operation(summary = "生成WebHook Url", description = "生成WebHook Url")
+    public WebhookVo generateWebhook(@PathVariable String sourceId) {
+        var webhook = this.eventBridgeApplication.generateWebhook(sourceId);
+        return WebhookVo.builder().webhook(webhook).build();
     }
 
     @PutMapping

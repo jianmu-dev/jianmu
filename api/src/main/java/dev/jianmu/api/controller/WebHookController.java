@@ -37,20 +37,4 @@ public class WebHookController {
         var sourceId = strings[1];
         this.eventBridgeApplication.receiveHttpEvent(token, sourceId, request);
     }
-
-    @GetMapping("/{sourceId}")
-    @ResponseBody
-    @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
-    public WebhookVo getWebhookUrl(@PathVariable String sourceId) {
-        var webhook = this.eventBridgeApplication.getWebhookUrl(sourceId);
-        return WebhookVo.builder().webhook(webhook).build();
-    }
-
-    @PatchMapping("/{sourceId}")
-    @ResponseBody
-    @Operation(summary = "生成WebHook Url", description = "生成WebHook Url")
-    public WebhookVo generateWebhook(@PathVariable String sourceId) {
-        var webhook = this.eventBridgeApplication.generateWebhook(sourceId);
-        return WebhookVo.builder().webhook(webhook).build();
-    }
 }
