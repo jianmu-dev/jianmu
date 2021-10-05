@@ -32,8 +32,8 @@ public class Project {
     private DslSource dslSource;
     // DSL类型
     private DslType dslType;
-    // Event Bridge Source Id
-    private String eventBridgeSourceId;
+    // Event Bridge Id
+    private String eventBridgeId;
     // 触发类型
     private TriggerType triggerType;
     // Git库Id
@@ -79,8 +79,8 @@ public class Project {
         this.triggerType = triggerType;
     }
 
-    public void setEventBridgeSourceId(String eventBridgeSourceId) {
-        this.eventBridgeSourceId = eventBridgeSourceId;
+    public void setEventBridgeId(String eventBridgeId) {
+        this.eventBridgeId = eventBridgeId;
     }
 
     public void setLastModifiedBy(String lastModifiedBy) {
@@ -107,8 +107,8 @@ public class Project {
         return triggerType;
     }
 
-    public String getEventBridgeSourceId() {
-        return eventBridgeSourceId;
+    public String getEventBridgeId() {
+        return eventBridgeId;
     }
 
     public String getGitRepoId() {
@@ -152,8 +152,8 @@ public class Project {
         private DslSource dslSource;
         // DSL类型
         private DslType dslType;
-        // Event Bridge Source Id
-        private String eventBridgeSourceId;
+        // Event Bridge Id
+        private String eventBridgeId;
         // 触发类型
         private TriggerType triggerType;
         // Git库Id
@@ -188,8 +188,8 @@ public class Project {
             return this;
         }
 
-        public Builder eventBridgeSourceId(String eventBridgeSourceId) {
-            this.eventBridgeSourceId = eventBridgeSourceId;
+        public Builder eventBridgeId(String eventBridgeId) {
+            this.eventBridgeId = eventBridgeId;
             return this;
         }
 
@@ -241,7 +241,7 @@ public class Project {
             project.dslSource = this.dslSource;
             project.dslType = this.dslType;
             project.triggerType = this.triggerType;
-            project.eventBridgeSourceId = this.eventBridgeSourceId;
+            project.eventBridgeId = this.eventBridgeId;
             project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
             project.workflowRef = this.workflowRef;

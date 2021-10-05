@@ -1,19 +1,19 @@
 CREATE TABLE `jianmu_project`
 (
-    `id`                     varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_source`             varchar(45) DEFAULT NULL COMMENT 'DSL来源',
-    `dsl_type`               varchar(45) DEFAULT NULL COMMENT 'DSL 类型',
-    `event_bridge_source_id` varchar(45) DEFAULT NULL COMMENT 'Event Bridge Source Id',
-    `trigger_type`           varchar(45) DEFAULT NULL COMMENT '触发类型',
-    `git_repo_id`            varchar(150) NOT NULL COMMENT 'Git仓库ID',
-    `workflow_name`          varchar(45)  NOT NULL COMMENT '流程定义显示名称',
-    `workflow_ref`           varchar(45)  NOT NULL COMMENT '流程定义Ref',
-    `workflow_version`       varchar(45)  NOT NULL COMMENT '流程定义版本',
-    `steps`                  int          NOT NULL COMMENT '步骤数量',
-    `dsl_text`               longtext     NOT NULL COMMENT 'DSL内容文本',
-    `created_time`           datetime    DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`       varchar(45) DEFAULT NULL COMMENT '最后修改人',
-    `last_modified_time`     datetime     NOT NULL COMMENT '最后修改时间',
+    `id`                 varchar(45)  NOT NULL COMMENT 'ID',
+    `dsl_source`         varchar(45) DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_type`           varchar(45) DEFAULT NULL COMMENT 'DSL 类型',
+    `event_bridge_id`    varchar(45) DEFAULT NULL COMMENT 'Event Bridge Id',
+    `trigger_type`       varchar(45) DEFAULT NULL COMMENT '触发类型',
+    `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
+    `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
+    `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
+    `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
+    `steps`              int          NOT NULL COMMENT '步骤数量',
+    `dsl_text`           longtext     NOT NULL COMMENT 'DSL内容文本',
+    `created_time`       datetime    DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
+    `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`)
 );
 

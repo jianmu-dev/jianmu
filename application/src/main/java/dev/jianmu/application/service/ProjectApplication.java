@@ -179,7 +179,7 @@ public class ProjectApplication {
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
-            project.setEventBridgeSourceId(source.getId());
+            project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
@@ -225,7 +225,7 @@ public class ProjectApplication {
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
         // 删除原有EB关联
-        if (!StringUtils.isBlank(project.getEventBridgeSourceId())) {
+        if (!StringUtils.isBlank(project.getEventBridgeId())) {
             this.targetRepository.findByDestinationId(project.getId())
                     .ifPresent(target -> {
                         target.setDestinationId("");
@@ -239,7 +239,7 @@ public class ProjectApplication {
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
-            project.setEventBridgeSourceId(source.getId());
+            project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
@@ -283,7 +283,7 @@ public class ProjectApplication {
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
-            project.setEventBridgeSourceId(source.getId());
+            project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
@@ -326,7 +326,7 @@ public class ProjectApplication {
             this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
         }
         // 删除原有EB关联
-        if (!StringUtils.isBlank(project.getEventBridgeSourceId())) {
+        if (!StringUtils.isBlank(project.getEventBridgeId())) {
             this.targetRepository.findByDestinationId(project.getId())
                     .ifPresent(target -> {
                         target.setDestinationId("");
@@ -340,7 +340,7 @@ public class ProjectApplication {
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             target.setDestinationId(project.getId());
-            project.setEventBridgeSourceId(source.getId());
+            project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
             this.targetRepository.save(target);
         }
