@@ -5,10 +5,7 @@ import dev.jianmu.api.dto.EbDto;
 import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.TransformerDto;
-import dev.jianmu.api.mapper.ProjectMapper;
-import dev.jianmu.api.mapper.TargetMapper;
-import dev.jianmu.api.mapper.TaskInstanceMapper;
-import dev.jianmu.api.mapper.WorkflowInstanceMapper;
+import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
@@ -96,6 +93,7 @@ public class ViewController {
     public EbDto findEbById(@PathVariable String bridgeId) {
         var bridge = this.eventBridgeApplication.findBridgeById(bridgeId);
         var source = this.eventBridgeApplication.findSourceByBridgeId(bridgeId);
+        var sourceDto = SourceMapper.INSTANCE.toSourceDto(source);
         var targets = this.eventBridgeApplication.findTargetsByBridgeId(bridgeId).stream()
                 .map(target -> {
                     var projectName = "";
@@ -108,7 +106,7 @@ public class ViewController {
                 .collect(Collectors.toList());
         return EbDto.builder()
                 .bridge(bridge)
-                .source(source)
+                .source(sourceDto)
                 .targets(targets)
                 .build();
     }

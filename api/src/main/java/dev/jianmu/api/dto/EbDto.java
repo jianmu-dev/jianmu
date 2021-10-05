@@ -1,7 +1,6 @@
 package dev.jianmu.api.dto;
 
 import dev.jianmu.eventbridge.aggregate.Bridge;
-import dev.jianmu.eventbridge.aggregate.Source;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +26,7 @@ public class EbDto {
     @NotNull
     private Bridge bridge;
     @NotNull
-    private Source source;
+    private SourceDto source;
     @NotEmpty
     private List<TargetDto> targets;
 }

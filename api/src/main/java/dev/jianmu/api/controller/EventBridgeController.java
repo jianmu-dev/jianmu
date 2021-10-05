@@ -1,6 +1,7 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.EbDto;
+import dev.jianmu.api.mapper.SourceMapper;
 import dev.jianmu.api.mapper.TargetMapper;
 import dev.jianmu.api.vo.WebhookVo;
 import dev.jianmu.application.service.EventBridgeApplication;
@@ -53,8 +54,10 @@ public class EventBridgeController {
     @Operation(summary = "保存EventBridge接口", description = "新建或更新EventBridge")
     public EbDto save(@RequestBody @Validated EbDto ebDto) {
         var targets = TargetMapper.INSTANCE.toTargetList(ebDto.getTargets());
-        var bridge = this.eventBridgeApplication.saveOrUpdate(ebDto.getBridge(), ebDto.getSource(), targets);
-        var source = this.eventBridgeApplication.findSourceByBridgeId(bridge.getId());
+        var source = SourceMapper.INSTANCE.toSource(ebDto.getSource());
+        var bridge = this.eventBridgeApplication.saveOrUpdate(ebDto.getBridge(), source, targets);
+        var sourceByBridgeId = this.eventBridgeApplication.findSourceByBridgeId(bridge.getId());
+        var sourceDto = SourceMapper.INSTANCE.toSourceDto(sourceByBridgeId);
         var newTargets = this.eventBridgeApplication.findTargetsByBridgeId(bridge.getId()).stream()
                 .map(target -> {
                     var projectName = "";
@@ -67,7 +70,7 @@ public class EventBridgeController {
                 .collect(Collectors.toList());
         return EbDto.builder()
                 .bridge(bridge)
-                .source(source)
+                .source(sourceDto)
                 .targets(newTargets)
                 .build();
     }
