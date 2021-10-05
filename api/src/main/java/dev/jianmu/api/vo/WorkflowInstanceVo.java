@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 public class WorkflowInstanceVo {
     private String id;
     private String triggerId;
+    private String triggerType;
     // 执行顺序号
     private int serialNo;
     private String name;
