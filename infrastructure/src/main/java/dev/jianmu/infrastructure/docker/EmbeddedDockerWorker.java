@@ -316,7 +316,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
             } catch (IOException ioException) {
                 logger.error("日志流关闭失败:", e);
             }
-            Thread.currentThread().interrupt();
+            if (e instanceof NotFoundException) {
+                return;
+            } else {
+                Thread.currentThread().interrupt();
+            }
         }
         // 等待容器执行结果
         try {
