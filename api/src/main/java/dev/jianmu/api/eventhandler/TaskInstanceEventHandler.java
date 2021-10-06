@@ -13,7 +13,9 @@ import dev.jianmu.task.event.TaskInstanceRunningEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -73,7 +75,7 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceEvent(TaskInstance taskInstance) {
 //        this.taskInstanceQueue.put(taskInstance);
         // 任务上下文抛出事件通知Worker
-        this.workerApplication.dispatchTask(taskInstance);
+        this.workerApplication.dispatchTask(taskInstance, false);
         logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
     }
 
@@ -96,5 +98,16 @@ public class TaskInstanceEventHandler {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceFailedEvent: {}", event);
         this.workflowInstanceApplication.taskFail(event.getTaskInstanceId());
+    }
+
+    @EventListener
+    @Async
+    public void handleApplicationReadyEvent(ApplicationReadyEvent event) {
+        var taskInstances = this.taskInstanceApplication.findRunningTask();
+        logger.info("恢复仍在运行中的任务数量：{}", taskInstances.size());
+        taskInstances.forEach(taskInstance -> {
+            this.workerApplication.dispatchTask(taskInstance, true);
+            logger.info("Task instance id: {}  ref: {} is resumed", taskInstance.getId(), taskInstance.getAsyncTaskRef());
+        });
     }
 }

@@ -90,6 +90,11 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
+    public List<TaskInstance> findRunningTask() {
+        return this.taskInstanceMapper.findRunningTask();
+    }
+
+    @Override
     public List<TaskInstance> findByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId) {
         return this.taskInstanceMapper.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
     }

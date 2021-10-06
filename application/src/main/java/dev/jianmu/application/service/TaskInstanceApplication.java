@@ -84,6 +84,10 @@ public class TaskInstanceApplication {
         return this.taskInstanceRepository.findById(instanceId);
     }
 
+    public List<TaskInstance> findRunningTask() {
+        return this.taskInstanceRepository.findRunningTask();
+    }
+
     @Transactional
     public void create(TaskActivatingEvent event) {
         var workflow = this.workflowRepository.findByRefAndVersion(event.getWorkflowRef(), event.getWorkflowVersion())

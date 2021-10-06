@@ -89,7 +89,7 @@ public class WorkerApplication {
         );
     }
 
-    public void dispatchTask(TaskInstance taskInstance) {
+    public void dispatchTask(TaskInstance taskInstance, boolean resumed) {
         // 查找节点定义
         var nodeDef = this.nodeDefApi.findByType(taskInstance.getDefKey());
         if (!nodeDef.getWorkerType().equals("DOCKER")) {
@@ -110,6 +110,7 @@ public class WorkerApplication {
                 .resultFile(nodeDef.getResultFile())
                 .spec(nodeDef.getSpec())
                 .parameterMap(parameterMap)
+                .resumed(resumed)
                 .build();
         // 发送给Worker执行
         this.publisher.publishEvent(workerTask);

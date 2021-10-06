@@ -22,6 +22,8 @@ public interface TaskInstanceRepository {
 
     List<TaskInstance> findByBusinessId(String businessId);
 
+    List<TaskInstance> findRunningTask();
+
     List<TaskInstance> findByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId);
 
     List<TaskInstance> findAll(int pageNum, int pageSize);

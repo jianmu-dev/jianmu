@@ -127,7 +127,7 @@ public class ProjectApplication {
     private Workflow createWorkflow(DslParser parser, String dslText) {
         // 查询相关的节点定义
         var types = parser.getAsyncTaskTypes();
-        var nodeDefs = this.nodeDefApi.findByTypes(types);
+        var nodeDefs = this.nodeDefApi.getByTypes(types);
 
         // 根据节点定义与DSL节点列表创建Workflow
         var nodes = parser.createNodes(nodeDefs);

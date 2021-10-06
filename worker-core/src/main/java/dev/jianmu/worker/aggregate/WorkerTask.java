@@ -21,6 +21,8 @@ public class WorkerTask {
     // 容器规格定义
     private String spec;
     private Map<String, String> parameterMap;
+    // 是否为恢复执行
+    private boolean resumed;
 
     public String getWorkerId() {
         return workerId;
@@ -58,6 +60,10 @@ public class WorkerTask {
         return parameterMap;
     }
 
+    public boolean isResumed() {
+        return resumed;
+    }
+
     public static final class Builder {
         private String workerId;
         private Worker.Type type;
@@ -71,6 +77,8 @@ public class WorkerTask {
         // 容器规格定义
         private String spec;
         private Map<String, String> parameterMap;
+        // 是否为恢复执行
+        private boolean resumed;
 
         private Builder() {
         }
@@ -124,6 +132,11 @@ public class WorkerTask {
             return this;
         }
 
+        public Builder resumed(boolean resumed) {
+            this.resumed = resumed;
+            return this;
+        }
+
         public WorkerTask build() {
             WorkerTask workerTask = new WorkerTask();
             workerTask.triggerId = this.triggerId;
@@ -135,6 +148,7 @@ public class WorkerTask {
             workerTask.taskInstanceId = this.taskInstanceId;
             workerTask.resultFile = this.resultFile;
             workerTask.workerId = this.workerId;
+            workerTask.resumed = this.resumed;
             return workerTask;
         }
     }

@@ -14,4 +14,6 @@ public interface DockerWorker {
     void deleteVolume(String volumeName);
 
     void runTask(DockerTask dockerTask, BufferedWriter logWriter);
+
+    void resumeTask(DockerTask dockerTask, BufferedWriter logWriter);
 }

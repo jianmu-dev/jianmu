@@ -53,6 +53,19 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByBusinessId(String businessId);
 
+    @Select("select * from task_instance where status = 'RUNNING'")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
+    @Result(column = "async_task_ref", property = "asyncTaskRef")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "business_id", property = "businessId")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    List<TaskInstance> findRunningTask();
+
     @Select("select * from task_instance where async_task_ref = #{asyncTaskRef} and business_id = #{businessId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")

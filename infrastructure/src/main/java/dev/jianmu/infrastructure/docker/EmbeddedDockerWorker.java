@@ -97,7 +97,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
     public void runTask(DockerTask dockerTask, BufferedWriter logWriter) {
         var spec = dockerTask.getSpec();
         // 创建容器参数
-        var createContainerCmd = dockerClient.createContainerCmd(spec.getImage());
+        var createContainerCmd = dockerClient.createContainerCmd(spec.getImage())
+                .withName(dockerTask.getTaskInstanceId());
         if (!spec.getWorkingDir().isBlank()) {
             createContainerCmd.withWorkingDir(spec.getWorkingDir());
         }
@@ -265,6 +266,101 @@ public class EmbeddedDockerWorker implements DockerWorker {
         }
         // 清除容器
         this.dockerClient.removeContainerCmd(containerResponse.getId())
+                .withRemoveVolumes(true)
+                .withForce(true)
+                .exec();
+        // 发送结果通知
+        this.publisher.publishEvent(
+                TaskFinishedEvent.builder()
+                        .taskId(dockerTask.getTaskInstanceId())
+                        .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
+                        .resultFile(resultFile)
+                        .build()
+        );
+    }
+
+    @Override
+    public void resumeTask(DockerTask dockerTask, BufferedWriter logWriter) {
+        // 获取日志
+        try {
+            this.dockerClient.logContainerCmd(dockerTask.getTaskInstanceId())
+                    .withStdOut(true)
+                    .withStdErr(true)
+                    .withTailAll()
+                    .withFollowStream(true)
+                    .exec(new ResultCallback.Adapter<>() {
+                        @Override
+                        public void onNext(Frame object) {
+                            try {
+                                logWriter.write(new String(object.getPayload(), StandardCharsets.UTF_8));
+                                logWriter.flush();
+                            } catch (IOException e) {
+                                logger.error("获取容器日志异常:", e);
+                            }
+                        }
+                    }).awaitCompletion();
+        } catch (InterruptedException e) {
+            logger.error("获取容器日志操作被中断:", e);
+            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            try {
+                logWriter.close();
+            } catch (IOException ioException) {
+                logger.error("日志流关闭失败:", e);
+            }
+            Thread.currentThread().interrupt();
+        } catch (RuntimeException e) {
+            logger.error("获取容器日志失败", e);
+            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            try {
+                logWriter.close();
+            } catch (IOException ioException) {
+                logger.error("日志流关闭失败:", e);
+            }
+            Thread.currentThread().interrupt();
+        }
+        // 等待容器执行结果
+        try {
+            this.dockerClient.waitContainerCmd(dockerTask.getTaskInstanceId()).exec(new ResultCallback.Adapter<>() {
+                @Override
+                public void onNext(WaitResponse object) {
+                    logger.info("dockerTask {} status code is: {}", dockerTask.getTaskInstanceId(), object.getStatusCode());
+                    runStatusMap.put(dockerTask.getTaskInstanceId(), object.getStatusCode());
+                }
+            }).awaitCompletion();
+        } catch (InterruptedException e) {
+            logger.error("获取容器执行结果操作被中断:", e);
+            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            Thread.currentThread().interrupt();
+        } catch (RuntimeException e) {
+            logger.error("获取容器执行结果失败", e);
+            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            Thread.currentThread().interrupt();
+        }
+        // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
+        String resultFile = null;
+        if (null != dockerTask.getResultFile()) {
+            try (
+                    var stream = this.dockerClient.copyArchiveFromContainerCmd(dockerTask.getTaskInstanceId(), dockerTask.getResultFile()).exec();
+                    var tarStream = new TarArchiveInputStream(stream);
+                    var reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))
+            ) {
+                var tarArchiveEntry = tarStream.getNextTarEntry();
+                if (!tarStream.canReadEntryData(tarArchiveEntry)) {
+                    logger.info("不能读取tarArchiveEntry");
+                }
+                if (!tarArchiveEntry.isFile()) {
+                    logger.info("执行结果文件必须是文件类型, 不支持目录或其他类型");
+                }
+                logger.info("tarArchiveEntry's name: {}", tarArchiveEntry.getName());
+                resultFile = IOUtils.toString(reader);
+                logger.info("结果文件内容: {}", resultFile);
+            } catch (Exception e) {
+                logger.error("无法获取容器执行结果文件:", e);
+                this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            }
+        }
+        // 清除容器
+        this.dockerClient.removeContainerCmd(dockerTask.getTaskInstanceId())
                 .withRemoveVolumes(true)
                 .withForce(true)
                 .exec();
