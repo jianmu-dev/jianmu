@@ -23,6 +23,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
@@ -38,13 +39,14 @@ public interface WorkflowInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findById(String instanceId);
 
-    @Insert("insert into workflow_instance(id, serial_no, trigger_id, name, description, run_mode, status, workflow_ref, workflow_version, task_instances, start_time, end_time, _version) " +
-            "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
+    @Insert("insert into workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, task_instances, start_time, end_time, _version) " +
+            "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
             "#{wk.asyncTaskInstances, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.TaskInstanceListTypeHandler}," +
             "#{wk.startTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
@@ -68,6 +70,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
@@ -91,6 +94,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
@@ -107,6 +111,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
@@ -118,6 +123,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")

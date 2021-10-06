@@ -41,11 +41,15 @@ public class EventBridgeHandler {
 
     @EventListener
     public void targetEventHandle(TargetEvent targetEvent) {
+        if (targetEvent.getDestinationId() == null || targetEvent.getDestinationId().isBlank()) {
+            log.info("get targetEvent here with no destination in mind");
+            return;
+        }
         log.info("get targetEvent here ID: {}", targetEvent.getId());
         log.info("get targetEvent here DestinationId: {}", targetEvent.getDestinationId());
         targetEvent.getEventParameters().forEach(eventParameter -> {
             log.info("eventParameter {} type is {}", eventParameter.getName(), eventParameter.getType());
         });
-        this.projectApplication.trigger(targetEvent.getDestinationId(), targetEvent.getId());
+        this.projectApplication.trigger(targetEvent.getDestinationId(), targetEvent.getId(), "EVENT_BRIDGE");
     }
 }

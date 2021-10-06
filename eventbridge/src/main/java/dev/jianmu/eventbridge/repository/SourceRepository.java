@@ -13,9 +13,13 @@ import java.util.Optional;
 public interface SourceRepository {
     Optional<Source> findById(String id);
 
+    Optional<Source> findByBridgeId(String bridgeId);
+
     void updateTokenById(Source source);
 
-    void save(Source source);
+    void saveOrUpdate(Source source);
 
     void deleteById(String id);
+
+    void deleteByBridgeId(String bridgeId);
 }

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DslParser {
     private String cron;
+    private String eb;
     private Map<String, String> param;
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
@@ -182,6 +183,9 @@ public class DslParser {
 
     // DSL语法校验
     private void syntaxCheck() {
+        if (this.cron != null && this.eb != null) {
+            throw new RuntimeException("不能同时使用Cron与EventBridge");
+        }
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
@@ -215,6 +219,7 @@ public class DslParser {
         }
         this.name = (String) pipe.get("name");
         this.ref = (String) pipe.get("ref");
+        RefChecker.check(this.ref);
         this.description = (String) pipe.get("description");
         pipe.forEach((key, val) -> {
             if (val instanceof Map) {
@@ -247,6 +252,7 @@ public class DslParser {
         }
         this.name = (String) flow.get("name");
         this.ref = (String) flow.get("ref");
+        RefChecker.check(this.ref);
         this.description = (String) flow.get("description");
         flow.forEach((key, val) -> {
             if (val instanceof Map) {
@@ -339,6 +345,10 @@ public class DslParser {
 
     public String getCron() {
         return cron;
+    }
+
+    public String getEb() {
+        return eb;
     }
 
     public Map<String, String> getParam() {

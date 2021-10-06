@@ -34,4 +34,9 @@ public class TestDockerWorker implements DockerWorker {
     public void runTask(DockerTask dockerTask, BufferedWriter logWriter) {
         logger.info("runTask: {}", dockerTask);
     }
+
+    @Override
+    public void resumeTask(DockerTask dockerTask, BufferedWriter logWriter) {
+        logger.info("resumeTask: {}", dockerTask);
+    }
 }

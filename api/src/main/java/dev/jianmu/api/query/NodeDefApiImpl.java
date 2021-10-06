@@ -6,7 +6,6 @@ import dev.jianmu.application.service.HubApplication;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,7 +28,17 @@ public class NodeDefApiImpl implements NodeDefApi {
     }
 
     @Override
+    public List<NodeDef> getByTypes(Set<String> types) {
+        return this.hubApplication.getByTypes(types);
+    }
+
+    @Override
     public NodeDef findByType(String type) {
         return this.hubApplication.findByType(type);
+    }
+
+    @Override
+    public NodeDef getByType(String type) {
+        return this.hubApplication.getByType(type);
     }
 }

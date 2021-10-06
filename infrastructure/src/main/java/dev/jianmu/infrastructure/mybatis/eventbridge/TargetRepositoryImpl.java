@@ -6,7 +6,10 @@ import dev.jianmu.infrastructure.mapper.eventbrdige.TargetMapper;
 import dev.jianmu.infrastructure.mapper.eventbrdige.TargetTransformerMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @class: TargetRepositoryImpl
@@ -31,7 +34,15 @@ public class TargetRepositoryImpl implements TargetRepository {
             target.setTransformers(transformers);
             return target;
         });
+    }
 
+    @Override
+    public Optional<Target> findByRef(String ref) {
+        return this.targetMapper.findByRef(ref).map(target -> {
+            var transformers = this.targetTransformerMapper.findByTargetId(target.getId());
+            target.setTransformers(transformers);
+            return target;
+        });
     }
 
     @Override
@@ -44,16 +55,42 @@ public class TargetRepositoryImpl implements TargetRepository {
     }
 
     @Override
+    public List<Target> findByBridgeId(String bridgeId) {
+        var targets = this.targetMapper.findByBridgeId(bridgeId);
+        return targets.stream().peek(target -> {
+            var transformers = this.targetTransformerMapper.findByTargetId(target.getId());
+            target.setTransformers(transformers);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public void save(Target target) {
-        this.targetMapper.save(target);
+        var t = this.targetMapper.checkTargetExists(target.getId());
+        if (t) {
+            this.targetMapper.update(target);
+        } else {
+            this.targetMapper.add(target);
+        }
+        this.targetTransformerMapper.deleteByTargetId(target.getId());
         target.getTransformers().forEach(transformer -> {
-            this.targetTransformerMapper.save(target.getId(), transformer, transformer.getClass().getSimpleName());
+            this.targetTransformerMapper.save(target.getBridgeId(), target.getId(), transformer, transformer.getClass().getSimpleName());
         });
+    }
+
+    @Override
+    public void saveOrUpdateList(Set<Target> targets) {
+        targets.forEach(this::save);
     }
 
     @Override
     public void deleteById(String id) {
         this.targetMapper.deleteById(id);
         this.targetTransformerMapper.deleteByTargetId(id);
+    }
+
+    @Override
+    public void deleteByBridgeId(String bridgeId) {
+        this.targetMapper.deleteByBridgeId(bridgeId);
+        this.targetTransformerMapper.deleteByBridgeId(bridgeId);
     }
 }

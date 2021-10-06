@@ -35,6 +35,10 @@ logging:
   charset:
     console: UTF-8
 
+mybatis:
+  configuration:
+    jdbc-type-for-null: null
+
 storage:
   logfile-path: task_log
 embedded:

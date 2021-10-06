@@ -58,8 +58,13 @@ public class EmbeddedWorkerApplication {
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
             var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId());
-            // 执行任务
-            this.dockerWorker.runTask(dockerTask, logWriter);
+            if (workerTask.isResumed()) {
+                // 恢复任务执行
+                this.dockerWorker.resumeTask(dockerTask, logWriter);
+            } else {
+                // 执行任务
+                this.dockerWorker.runTask(dockerTask, logWriter);
+            }
         } catch (RuntimeException | JsonProcessingException e) {
             log.error("任务执行失败：", e);
             throw new RuntimeException("任务执行失败");

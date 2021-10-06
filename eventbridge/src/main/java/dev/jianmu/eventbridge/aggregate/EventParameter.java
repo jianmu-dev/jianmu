@@ -9,6 +9,7 @@ package dev.jianmu.eventbridge.aggregate;
 public class EventParameter {
     private String name;
     private String type;
+    private String value;
     private String parameterId;
 
     public String getName() {
@@ -19,6 +20,10 @@ public class EventParameter {
         return type;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     public String getParameterId() {
         return parameterId;
     }
@@ -26,6 +31,7 @@ public class EventParameter {
     public static final class Builder {
         private String name;
         private String type;
+        private String value;
         private String parameterId;
 
         private Builder() {
@@ -45,6 +51,11 @@ public class EventParameter {
             return this;
         }
 
+        public Builder value(String value) {
+            this.value = value;
+            return this;
+        }
+
         public Builder parameterId(String parameterId) {
             this.parameterId = parameterId;
             return this;
@@ -55,6 +66,7 @@ public class EventParameter {
             eventParameter.name = this.name;
             eventParameter.parameterId = this.parameterId;
             eventParameter.type = this.type;
+            eventParameter.value = this.value;
             return eventParameter;
         }
     }

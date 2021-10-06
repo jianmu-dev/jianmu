@@ -1,7 +1,5 @@
 package dev.jianmu.eventbridge.aggregate;
 
-import java.util.UUID;
-
 /**
  * @class: Connection
  * @description: Connection
@@ -10,11 +8,16 @@ import java.util.UUID;
  **/
 public class Connection {
     private String id;
+    private String bridgeId;
     private String sourceId;
     private String targetId;
 
     public String getId() {
         return id;
+    }
+
+    public String getBridgeId() {
+        return bridgeId;
     }
 
     public String getSourceId() {
@@ -25,8 +28,8 @@ public class Connection {
         return targetId;
     }
 
-
     public static final class Builder {
+        private String bridgeId;
         private String sourceId;
         private String targetId;
 
@@ -37,7 +40,16 @@ public class Connection {
             return new Builder();
         }
 
+        public Builder bridgeId(String bridgeId) {
+            if (bridgeId == null)
+                throw new RuntimeException("bridgeId不能为空");
+            this.bridgeId = bridgeId;
+            return this;
+        }
+
         public Builder sourceId(String sourceId) {
+            if (sourceId == null)
+                throw new RuntimeException("sourceId不能为空");
             this.sourceId = sourceId;
             return this;
         }
@@ -49,7 +61,8 @@ public class Connection {
 
         public Connection build() {
             Connection connection = new Connection();
-            connection.id = UUID.randomUUID().toString().replace("-", "");
+            connection.id = this.bridgeId + this.sourceId + this.targetId;
+            connection.bridgeId = this.bridgeId;
             connection.targetId = this.targetId;
             connection.sourceId = this.sourceId;
             return connection;

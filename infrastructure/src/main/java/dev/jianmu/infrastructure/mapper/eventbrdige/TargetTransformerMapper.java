@@ -26,10 +26,18 @@ public interface TargetTransformerMapper {
     })
     Set<Transformer> findByTargetId(String targetId);
 
-    @Insert("insert into eb_target_transformer(target_id, variable_name, variable_type, expression, class_type) " +
-            "values(#{targetId}, #{tf.variableName}, #{tf.variableType}, #{tf.expression}, #{classType})")
-    void save(@Param("targetId") String targetId, @Param("tf") Transformer<?> transformer, @Param("classType") String classType);
+    @Insert("insert into eb_target_transformer(bridge_id, target_id, variable_name, variable_type, expression, class_type) " +
+            "values(#{bridgeId}, #{targetId}, #{tf.variableName}, #{tf.variableType}, #{tf.expression}, #{classType})")
+    void save(
+            @Param("bridgeId") String bridgeId,
+            @Param("targetId") String targetId,
+            @Param("tf") Transformer<?> transformer,
+            @Param("classType") String classType
+    );
 
     @Delete("delete from eb_target_transformer WHERE target_id = #{targetId}")
     void deleteByTargetId(String targetId);
+
+    @Delete("delete from eb_target_transformer WHERE bridge_id = #{bridgeId}")
+    void deleteByBridgeId(String bridgeId);
 }

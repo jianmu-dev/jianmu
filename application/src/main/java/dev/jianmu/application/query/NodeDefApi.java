@@ -12,5 +12,9 @@ import java.util.Set;
 public interface NodeDefApi {
     List<NodeDef> findByTypes(Set<String> types);
 
+    List<NodeDef> getByTypes(Set<String> types);
+
     NodeDef findByType(String type);
+
+    NodeDef getByType(String type);
 }

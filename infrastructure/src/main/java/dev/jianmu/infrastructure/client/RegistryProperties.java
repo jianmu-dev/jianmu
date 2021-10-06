@@ -15,4 +15,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "registry")
 public class RegistryProperties {
     private String url;
+    private String ak;
+    private String sk;
 }

@@ -9,6 +9,7 @@ package dev.jianmu.project.event;
 public class TriggerEvent {
     private String projectId;
     private String triggerId;
+    private String triggerType;
     private String workflowRef;
     private String workflowVersion;
 
@@ -18,6 +19,10 @@ public class TriggerEvent {
 
     public String getTriggerId() {
         return triggerId;
+    }
+
+    public String getTriggerType() {
+        return triggerType;
     }
 
     public String getWorkflowRef() {
@@ -31,6 +36,7 @@ public class TriggerEvent {
     public static final class Builder {
         private String projectId;
         private String triggerId;
+        private String triggerType;
         private String workflowRef;
         private String workflowVersion;
 
@@ -51,6 +57,11 @@ public class TriggerEvent {
             return this;
         }
 
+        public Builder triggerType(String triggerType) {
+            this.triggerType = triggerType;
+            return this;
+        }
+
         public Builder workflowRef(String workflowRef) {
             this.workflowRef = workflowRef;
             return this;
@@ -67,6 +78,7 @@ public class TriggerEvent {
             triggerEvent.workflowRef = this.workflowRef;
             triggerEvent.projectId = this.projectId;
             triggerEvent.triggerId = this.triggerId;
+            triggerEvent.triggerType = this.triggerType;
             return triggerEvent;
         }
     }

@@ -62,15 +62,4 @@ public class DslNode {
             this.expression = "";
         }
     }
-
-    public String getType() {
-        if (type.equals("start") || type.equals("end")) {
-            return type;
-        }
-        String[] strings = type.split(":");
-        if (strings.length == 1) {
-            return type + ":latest";
-        }
-        return type;
-    }
 }

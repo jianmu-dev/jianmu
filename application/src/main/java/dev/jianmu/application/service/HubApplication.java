@@ -220,7 +220,7 @@ public class HubApplication {
     }
 
     @Transactional
-    public NodeDef findByType(String type) {
+    public NodeDef getByType(String type) {
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
                 .orElseGet(() -> this.downloadNodeDef(type));
         var version =
@@ -249,6 +249,38 @@ public class HubApplication {
         this.nodeDefinitionRepository.saveOrUpdate(node);
         this.nodeDefinitionVersionRepository.saveOrUpdate(version);
         return nodeDef;
+    }
+
+    public List<NodeDef> getByTypes(Set<String> types) {
+        return types.stream().map(this::getByType)
+                .collect(Collectors.toList());
+    }
+
+    public NodeDef findByType(String type) {
+        var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义"));
+        var version =
+                this.nodeDefinitionVersionRepository.findByOwnerRefAndRefAndVersion(getOwnerRef(type), getRef(type), getVersion(type))
+                        .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本"));
+
+        return NodeDef.builder()
+                .name(node.getName())
+                .description(node.getDescription())
+                .icon(node.getIcon())
+                .ownerName(node.getOwnerName())
+                .ownerType(node.getOwnerType())
+                .ownerRef(node.getOwnerRef())
+                .creatorName(node.getCreatorName())
+                .creatorRef(node.getCreatorRef())
+                .sourceLink(node.getSourceLink())
+                .documentLink(node.getDocumentLink())
+                .type(type)
+                .workerType(node.getType().name())
+                .resultFile(version.getResultFile())
+                .inputParameters(version.getInputParameters())
+                .outputParameters(version.getOutputParameters())
+                .spec(version.getSpec())
+                .build();
     }
 
     public List<NodeDef> findByTypes(Set<String> types) {
