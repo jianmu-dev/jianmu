@@ -14,11 +14,9 @@ Docker 18.09.7及以上
 
 Mysql 8.0及以上
 
-go 1.15及以上
-
 #### 如何编译
 
-暂缺
+`mvn package`
 
 #### 如何运行
 
@@ -26,7 +24,23 @@ go 1.15及以上
 
 创建你自己的 `application-dev.yml` 配置文件来覆盖需要配置的值，如datasource.url（当前必须使用名为dev的profile）
 
-注意以下配置：
+配置admin用户的密码：
+
+```yaml
+jianmu:
+  api:
+    adminPasswd: 123456
+```
+
+配置Hub的AK/SK
+
+```yaml
+registry:
+  ak: 703a46428d8f411c9f3233a53af56749
+  sk: 8db2979bcc964c95921d18ce8a0c1e1e
+```
+
+配置docker API的地址：
 
 ```yaml
 embedded:
