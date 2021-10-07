@@ -180,6 +180,9 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            if (!StringUtils.isBlank(target.getDestinationId())) {
+                throw new RuntimeException("该事件桥接器已关联其他项目");
+            }
             target.setDestinationId(project.getId());
             project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
@@ -242,6 +245,9 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            if (!StringUtils.isBlank(target.getDestinationId())) {
+                throw new RuntimeException("该事件桥接器已关联其他项目");
+            }
             target.setDestinationId(project.getId());
             project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
@@ -286,6 +292,9 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            if (!StringUtils.isBlank(target.getDestinationId())) {
+                throw new RuntimeException("该事件桥接器已关联其他项目");
+            }
             target.setDestinationId(project.getId());
             project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
@@ -345,6 +354,9 @@ public class ProjectApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
             var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
                     .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            if (!StringUtils.isBlank(target.getDestinationId())) {
+                throw new RuntimeException("该事件桥接器已关联其他项目");
+            }
             target.setDestinationId(project.getId());
             project.setEventBridgeId(source.getBridgeId());
             project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
