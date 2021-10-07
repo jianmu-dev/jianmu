@@ -55,7 +55,11 @@ public class DslParser {
     }
 
     public int getSteps() {
-        return this.dslNodes.size() - 2;
+        if (this.pipeline != null) {
+            return this.dslNodes.size();
+        } else {
+            return this.dslNodes.size() - 2;
+        }
     }
 
     private Set<Node> calculateWorkflowNodes(List<NodeDef> nodeDefs) {
