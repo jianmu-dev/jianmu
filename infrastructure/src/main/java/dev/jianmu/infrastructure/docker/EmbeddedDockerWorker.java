@@ -392,4 +392,9 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 清除Volume
         this.dockerClient.removeVolumeCmd(volumeName).exec();
     }
+
+    @Override
+    public void deleteImage(String imageName) {
+        this.dockerClient.removeImageCmd(imageName).exec();
+    }
 }

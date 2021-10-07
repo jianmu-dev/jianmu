@@ -1,10 +1,12 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.EmbeddedWorkerApplication;
+import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
 import dev.jianmu.worker.event.CreateWorkspaceEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
  * @create: 2021-09-12 22:18
  **/
 @Component
+@Slf4j
 public class WorkerEventHandler {
     private final EmbeddedWorkerApplication embeddedWorkerApplication;
 
@@ -45,6 +48,13 @@ public class WorkerEventHandler {
             System.out.println("dockerWorker is here");
             System.out.println("dockerWorker got task: " + workerTask.getTaskInstanceId());
         }
+    }
+
+    @EventListener
+    public void nodeDeletedEventHandle(NodeDeletedEvent event) {
+        log.info("get NodeDeletedEvent here");
+        log.info("删除节点定义版本: {}/{}:{}", event.getOwnerRef(), event.getRef(), event.getVersion());
+        this.embeddedWorkerApplication.deleteImage(event);
     }
 
     @EventListener

@@ -383,7 +383,7 @@ public class ProjectApplication {
         var types = workflow.findTasks().stream()
                 .map(Node::getType)
                 .collect(Collectors.toSet());
-        return this.nodeDefApi.findByTypes(types);
+        return this.nodeDefApi.getByTypes(types);
     }
 
     public Workflow findByRefAndVersion(String ref, String version) {

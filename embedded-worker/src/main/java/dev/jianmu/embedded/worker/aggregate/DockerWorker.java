@@ -16,4 +16,6 @@ public interface DockerWorker {
     void runTask(DockerTask dockerTask, BufferedWriter logWriter);
 
     void resumeTask(DockerTask dockerTask, BufferedWriter logWriter);
+
+    void deleteImage(String imageName);
 }

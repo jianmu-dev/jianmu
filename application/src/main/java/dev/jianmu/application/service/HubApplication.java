@@ -7,11 +7,13 @@ import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
+import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
 import dev.jianmu.hub.intergration.repository.NodeDefinitionVersionRepository;
 import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.infrastructure.mybatis.hub.NodeDefinitionRepositoryImpl;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,17 +34,20 @@ public class HubApplication {
     private final NodeDefinitionVersionRepository nodeDefinitionVersionRepository;
     private final ParameterRepository parameterRepository;
     private final RegistryClient registryClient;
+    private final ApplicationEventPublisher publisher;
 
     public HubApplication(
             NodeDefinitionRepositoryImpl nodeDefinitionRepository,
             NodeDefinitionVersionRepository nodeDefinitionVersionRepository,
             ParameterRepository parameterRepository,
-            RegistryClient registryClient
+            RegistryClient registryClient,
+            ApplicationEventPublisher publisher
     ) {
         this.nodeDefinitionRepository = nodeDefinitionRepository;
         this.nodeDefinitionVersionRepository = nodeDefinitionVersionRepository;
         this.parameterRepository = parameterRepository;
         this.registryClient = registryClient;
+        this.publisher = publisher;
     }
 
     @Transactional
@@ -119,8 +124,19 @@ public class HubApplication {
 
     @Transactional
     public void deleteNode(String ownerRef, String ref) {
+        var versions = this.nodeDefinitionVersionRepository.findByOwnerRefAndRef(ownerRef, ref);
         this.nodeDefinitionRepository.deleteById(ownerRef + "/" + ref);
         this.nodeDefinitionVersionRepository.deleteByOwnerRefAndRef(ownerRef, ref);
+        var events = versions.stream()
+                .map(nodeDefinitionVersion -> NodeDeletedEvent.Builder.aNodeDeletedEvent()
+                        .ref(nodeDefinitionVersion.getRef())
+                        .ownerRef(nodeDefinitionVersion.getOwnerRef())
+                        .version(nodeDefinitionVersion.getVersion())
+                        .spec(nodeDefinitionVersion.getSpec())
+                        .build()
+                )
+                .collect(Collectors.toList());
+        events.forEach(this.publisher::publishEvent);
     }
 
     public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {

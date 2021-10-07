@@ -39,4 +39,9 @@ public class TestDockerWorker implements DockerWorker {
     public void resumeTask(DockerTask dockerTask, BufferedWriter logWriter) {
         logger.info("resumeTask: {}", dockerTask);
     }
+
+    @Override
+    public void deleteImage(String imageName) {
+        logger.info("deleteImage: {}", imageName);
+    }
 }
