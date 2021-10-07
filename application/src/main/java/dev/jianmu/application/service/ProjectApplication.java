@@ -206,6 +206,7 @@ public class ProjectApplication {
         var workflow = this.createWorkflow(parser, dslText);
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
+        project.setTriggerType(Project.TriggerType.MANUAL);
         project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
         project.setWorkflowName(parser.getName());
@@ -233,6 +234,7 @@ public class ProjectApplication {
                         target.setDestinationId("");
                         this.targetRepository.save(target);
                     });
+            project.setEventBridgeId("");
         }
         // 关联EB
         if (null != parser.getEb()) {
@@ -307,6 +309,7 @@ public class ProjectApplication {
         var workflow = this.createWorkflow(parser, dslText);
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
+        project.setTriggerType(Project.TriggerType.MANUAL);
         project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
         project.setWorkflowName(parser.getName());
@@ -334,6 +337,7 @@ public class ProjectApplication {
                         target.setDestinationId("");
                         this.targetRepository.save(target);
                     });
+            project.setEventBridgeId("");
         }
         // 关联EB
         if (null != parser.getEb()) {
