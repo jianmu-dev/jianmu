@@ -13,6 +13,7 @@ import dev.jianmu.task.event.TaskInstanceRunningEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -47,6 +48,7 @@ public class TaskInstanceEventHandler {
     public void handleTaskFinishedEvent(TaskFinishedEvent taskFinishedEvent) {
         // Worker执行状态事件通知任务上下文
         // TODO 运行状态需同步通知调度逻辑
+        MDC.put("triggerId", taskFinishedEvent.getTriggerId());
         var taskResultDto = TaskResultMapper.INSTANCE.toTaskResultDto(taskFinishedEvent);
         if (taskResultDto.isSucceeded()) {
             this.taskInstanceApplication.executeSucceeded(
@@ -68,6 +70,8 @@ public class TaskInstanceEventHandler {
     public void handleTaskFailedEvent(TaskFailedEvent taskFailedEvent) {
         // Worker执行状态事件通知任务上下文
         // TODO 运行状态需同步通知调度逻辑
+        MDC.put("triggerId", taskFailedEvent.getTriggerId());
+        logger.info("task {} is failed, due to: {}", taskFailedEvent.getTaskId(), taskFailedEvent.getErrorMsg());
         this.taskInstanceApplication.executeFailed(taskFailedEvent.getTaskId());
     }
 
