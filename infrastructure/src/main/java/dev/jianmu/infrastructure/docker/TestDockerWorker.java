@@ -44,4 +44,9 @@ public class TestDockerWorker implements DockerWorker {
     public void deleteImage(String imageName) {
         logger.info("deleteImage: {}", imageName);
     }
+
+    @Override
+    public void updateImage(String imageName) {
+        logger.info("updateImage: {}", imageName);
+    }
 }

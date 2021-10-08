@@ -8,6 +8,7 @@ import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
 import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
+import dev.jianmu.hub.intergration.event.NodeUpdatedEvent;
 import dev.jianmu.hub.intergration.repository.NodeDefinitionVersionRepository;
 import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.infrastructure.mybatis.hub.NodeDefinitionRepositoryImpl;
@@ -120,6 +121,16 @@ public class HubApplication {
             this.nodeDefinitionVersionRepository.saveOrUpdate(version);
         });
         this.nodeDefinitionRepository.saveOrUpdate(node);
+        var events = versions.stream()
+                .map(nodeDefinitionVersion -> NodeUpdatedEvent.Builder.aNodeUpdatedEvent()
+                        .ref(nodeDefinitionVersion.getRef())
+                        .ownerRef(nodeDefinitionVersion.getOwnerRef())
+                        .version(nodeDefinitionVersion.getVersion())
+                        .spec(nodeDefinitionVersion.getSpec())
+                        .build()
+                )
+                .collect(Collectors.toList());
+        events.forEach(this.publisher::publishEvent);
     }
 
     @Transactional

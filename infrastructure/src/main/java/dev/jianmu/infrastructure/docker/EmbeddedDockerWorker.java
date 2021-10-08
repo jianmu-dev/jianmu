@@ -451,4 +451,25 @@ public class EmbeddedDockerWorker implements DockerWorker {
     public void deleteImage(String imageName) {
         this.dockerClient.removeImageCmd(imageName).exec();
     }
+
+    @Override
+    public void updateImage(String imageName) {
+        // 检查镜像是否存在本地
+        try {
+            this.dockerClient.inspectImageCmd(imageName).exec();
+        } catch (NotFoundException e) {
+            logger.info("镜像不存在，无需更新");
+        }
+        // 拉取镜像
+        try {
+            this.dockerClient.pullImageCmd(imageName).exec(new ResultCallback.Adapter<>() {
+                @Override
+                public void onNext(PullResponseItem object) {
+                    logger.info("镜像更新成功: {} status: {}", object.getId(), object.getStatus());
+                }
+            }).awaitCompletion();
+        } catch (InterruptedException | RuntimeException e) {
+            logger.error("镜像更新失败:", e);
+        }
+    }
 }

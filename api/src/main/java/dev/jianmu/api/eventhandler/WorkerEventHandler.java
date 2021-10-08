@@ -2,6 +2,7 @@ package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.EmbeddedWorkerApplication;
 import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
+import dev.jianmu.hub.intergration.event.NodeUpdatedEvent;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
@@ -55,6 +56,13 @@ public class WorkerEventHandler {
         log.info("get NodeDeletedEvent here");
         log.info("删除节点定义版本: {}/{}:{}", event.getOwnerRef(), event.getRef(), event.getVersion());
         this.embeddedWorkerApplication.deleteImage(event);
+    }
+
+    @EventListener
+    public void nodeUpdatedEventHandle(NodeUpdatedEvent event) {
+        log.info("get NodeUpdatedEvent here");
+        log.info("更新节点定义版本: {}/{}:{}", event.getOwnerRef(), event.getRef(), event.getVersion());
+        this.embeddedWorkerApplication.updateImage(event);
     }
 
     @EventListener

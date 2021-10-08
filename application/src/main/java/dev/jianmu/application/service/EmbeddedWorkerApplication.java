@@ -9,6 +9,7 @@ import dev.jianmu.embedded.worker.aggregate.spec.HostConfig;
 import dev.jianmu.embedded.worker.aggregate.spec.Mount;
 import dev.jianmu.embedded.worker.aggregate.spec.MountType;
 import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
+import dev.jianmu.hub.intergration.event.NodeUpdatedEvent;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +80,16 @@ public class EmbeddedWorkerApplication {
             this.dockerWorker.deleteImage(spec.getImage());
         } catch (Exception e) {
             log.error("节点镜像删除失败：", e);
+        }
+    }
+
+    public void updateImage(NodeUpdatedEvent event) {
+        try {
+            var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
+            log.info("更新镜像: {}", spec.getImage());
+            this.dockerWorker.updateImage(spec.getImage());
+        } catch (JsonProcessingException e) {
+            log.error("节点镜像更新失败：", e);
         }
     }
 
