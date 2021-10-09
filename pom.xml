@@ -21,6 +21,8 @@
         <module>hub-integration</module>
         <module>embedded-worker</module>
         <module>worker-core</module>
+        <module>workflow-core</module>
+        <module>el</module>
     </modules>
 
     <properties>
