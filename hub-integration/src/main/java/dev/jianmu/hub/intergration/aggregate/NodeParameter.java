@@ -18,7 +18,7 @@ public class NodeParameter {
     // 参数引用Id
     private String parameterId;
     // 参数值
-    private String value;
+    private Object value;
 
     public String getName() {
         return name;
@@ -40,7 +40,7 @@ public class NodeParameter {
         return parameterId;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -57,7 +57,7 @@ public class NodeParameter {
         // 参数引用Id
         private String parameterId;
         // 参数值
-        private String value;
+        private Object value;
 
         private Builder() {
         }
@@ -91,7 +91,7 @@ public class NodeParameter {
             return this;
         }
 
-        public Builder value(String value) {
+        public Builder value(Object value) {
             this.value = value;
             return this;
         }
