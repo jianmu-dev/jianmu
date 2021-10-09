@@ -459,6 +459,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
             this.dockerClient.inspectImageCmd(imageName).exec();
         } catch (NotFoundException e) {
             logger.info("镜像不存在，无需更新");
+            return;
         }
         // 拉取镜像
         try {
