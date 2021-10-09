@@ -14,6 +14,7 @@ import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.infrastructure.mybatis.hub.NodeDefinitionRepositoryImpl;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +70,7 @@ public class HubApplication {
 
         List<Parameter> parameters = new ArrayList<>();
         var inputParameters = nodeDsl.getInputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())
@@ -82,7 +83,7 @@ public class HubApplication {
         }).collect(Collectors.toSet());
 
         var outputParameters = nodeDsl.getOutputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())
@@ -205,7 +206,7 @@ public class HubApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + ownerRef + "/" + ref + ":" + version));
         List<Parameter> parameters = new ArrayList<>();
         var inputParameters = dto.getInputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())
@@ -218,7 +219,7 @@ public class HubApplication {
         }).collect(Collectors.toSet());
 
         var outputParameters = dto.getOutputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.valueOf(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())

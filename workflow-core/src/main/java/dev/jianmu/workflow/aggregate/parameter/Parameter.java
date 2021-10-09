@@ -1,6 +1,7 @@
 package dev.jianmu.workflow.aggregate.parameter;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ public abstract class Parameter<T> {
                 if (value instanceof String) {
                     return new StringParameter((String) value);
                 }
-                throw new ClassCastException("非法类型");
+                throw new ClassCastException("参数值与类型不匹配，无法转换");
             }
 
             @Override
@@ -32,7 +33,7 @@ public abstract class Parameter<T> {
                 if (value instanceof Boolean) {
                     return new BoolParameter((Boolean) value);
                 }
-                throw new ClassCastException("非法类型");
+                throw new ClassCastException("参数值与类型不匹配，无法转换");
             }
 
             @Override
@@ -46,7 +47,7 @@ public abstract class Parameter<T> {
                 if (value instanceof String) {
                     return new SecretParameter((String) value);
                 }
-                throw new ClassCastException("非法类型");
+                throw new ClassCastException("参数值与类型不匹配，无法转换");
             }
 
             @Override
@@ -60,7 +61,7 @@ public abstract class Parameter<T> {
                 if (value instanceof Number) {
                     return new NumberParameter(new BigDecimal(value.toString()));
                 }
-                throw new ClassCastException("非法类型");
+                throw new ClassCastException("参数值与类型不匹配，无法转换");
             }
 
             @Override
@@ -84,6 +85,13 @@ public abstract class Parameter<T> {
         public abstract Parameter<?> newParameter(Object value);
 
         public abstract Parameter<?> defaultParameter();
+
+        public static Type getTypeByName(String typeName) {
+            return Arrays.stream(Type.values())
+                    .filter(t -> t.name().equals(typeName))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("定义的参数类型未找到"));
+        }
     }
 
     // ID

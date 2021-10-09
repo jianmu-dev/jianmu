@@ -19,9 +19,9 @@ public class BodyTransformer extends Transformer<Parameter<?>> {
         Object document = Configuration.defaultConfiguration().jsonProvider().parse(payload.getBody());
         try {
             var variable = JsonPath.read(document, this.getExpression());
-            return Parameter.Type.valueOf(this.getVariableType()).newParameter(variable);
+            return Parameter.Type.getTypeByName(this.getVariableType()).newParameter(variable);
         } catch (PathNotFoundException e) {
-            return Parameter.Type.valueOf(this.getVariableType()).defaultParameter();
+            return Parameter.Type.getTypeByName(this.getVariableType()).defaultParameter();
         }
     }
 

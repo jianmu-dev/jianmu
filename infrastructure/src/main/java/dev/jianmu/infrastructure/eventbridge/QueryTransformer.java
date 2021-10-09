@@ -17,9 +17,9 @@ public class QueryTransformer extends Transformer<Parameter<?>> {
         var strings = query.get(this.getExpression());
         if (strings != null && strings.length > 0) {
             var variable = String.join(",", strings);
-            return Parameter.Type.valueOf(this.getVariableType()).newParameter(variable);
+            return Parameter.Type.getTypeByName(this.getVariableType()).newParameter(variable);
         }
-        return Parameter.Type.valueOf(this.getVariableType()).defaultParameter();
+        return Parameter.Type.getTypeByName(this.getVariableType()).defaultParameter();
     }
 
     public static final class Builder {
