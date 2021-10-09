@@ -26,7 +26,7 @@ public interface BridgeMapper {
     @Delete("delete from eb_bridge where id = #{id}")
     void deleteById(String id);
 
-    @Select("SELECT * FROM eb_bridge")
+    @Select("SELECT * FROM eb_bridge order by created_time desc")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
