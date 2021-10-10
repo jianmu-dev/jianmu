@@ -2,6 +2,7 @@
   "name": "jianmu-ci-ui",
   "version": "1.0.0",
   "repository": "https://gitee.com/jianmu-dev/jianmu-ci-ui.git",
+  "license": "MulanPubL-2.0",
   "scripts": {
     "serve": "vite",
     "build": "vite build",
