@@ -111,13 +111,13 @@ export default defineComponent({
           // 忽略超时错误
           console.warn(err.message);
         } else if (err instanceof HttpError) {
-          const { response: { status } } = err as HttpError;
+          const { response } = err as HttpError;
 
-          if (status !== 502) {
+          if (response && response.status !== 502) {
             throw err;
           }
 
-          // 忽略502错误
+          // 忽略错误
           console.warn(err.message);
         }
       }
