@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>add</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="系统设计规范" transform="translate(-924.000000, -5253.000000)">
+            <g id="add" transform="translate(924.000000, 5253.000000)">
+                <rect id="矩形" x="0" y="0" width="16" height="16"></rect>
+                <path d="M8,1 C8.27614237,1 8.5,1.22385763 8.5,1.5 L8.5,7.5 L14.5,7.5 C14.7761424,7.5 15,7.72385763 15,8 C15,8.27614237 14.7761424,8.5 14.5,8.5 L8.499,8.5 L8.5,14.5 C8.5,14.7761424 8.27614237,15 8,15 C7.72385763,15 7.5,14.7761424 7.5,14.5 L7.499,8.5 L1.5,8.5 C1.22385763,8.5 1,8.27614237 1,8 C1,7.72385763 1.22385763,7.5 1.5,7.5 L7.5,7.5 L7.5,1.5 C7.5,1.22385763 7.72385763,1 8,1 Z" id="矩形-3" fill="#595959"></path>
+            </g>
+        </g>
+    </g>
+</svg>
