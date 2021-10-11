@@ -457,6 +457,7 @@ export default defineComponent({
 
         .operation {
           display: flex;
+          justify-content: flex-end;
           align-items: center;
 
           button + button {
