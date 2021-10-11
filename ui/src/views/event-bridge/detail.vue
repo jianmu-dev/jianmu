@@ -482,15 +482,15 @@ export default defineComponent({
             }
 
             &.copy {
-              background-image: url('@/assets/svgs/btn/copy.svg');
+              background-image: url('@/assets/svgs/event-bridge/copy.svg');
             }
 
             &.refresh {
-              background-image: url('@/assets/svgs/btn/refresh.svg');
+              background-image: url('@/assets/svgs/event-bridge/refresh.svg');
             }
 
             &.setting {
-              background-image: url('@/assets/svgs/btn/setting.svg');
+              background-image: url('@/assets/svgs/event-bridge/setting.svg');
             }
 
             &.del {
@@ -548,7 +548,7 @@ export default defineComponent({
           left: 120px;
           width: 25px;
           height: 25px;
-          background-image: url('@/assets/svgs/event-bridge/connection.png');
+          background-image: url('@/assets/svgs/event-bridge/connection.svg');
           background-position: center center;
           background-repeat: no-repeat;
           background-size: contain;
