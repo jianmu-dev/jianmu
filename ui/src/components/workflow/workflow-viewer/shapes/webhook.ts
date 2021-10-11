@@ -1,5 +1,5 @@
 import _G6 from '@antv/g6';
-import img from '../svgs/shape/webhook.png';
+import img from '../svgs/shape/webhook.svg';
 import { NodeTypeEnum } from '../utils/enumeration';
 
 export default function (G6: typeof _G6) {
@@ -24,7 +24,7 @@ export default function (G6: typeof _G6) {
       style: {
         fill: '#FFFFFF',
         lineWidth: 2,
-        stroke: '#FA6400',
+        stroke: '#35474F',
         radius: 80 * 0.242,
         shadowOffsetX: 0,
         shadowOffsetY: 0,
