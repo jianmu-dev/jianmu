@@ -557,16 +557,15 @@ export default defineComponent({
 
         &::after {
           position: absolute;
-          top: -20px;
-          right: -22px;
+          top: -9px;
+          right: -3px;
           content: '';
-          width: 0;
-          height: 0;
-          margin: 10px;
-          border-bottom: 10px transparent solid;
-          border-right: 10px transparent solid;
-          border-left: 10px #B5BDC6 solid;
-          border-top: 10px transparent solid;
+          width: 17px;
+          height: 17px;
+          background-image: url('@/assets/svgs/event-bridge/arrow.svg');
+          background-position: center center;
+          background-repeat: no-repeat;
+          background-size: contain;
         }
       }
     }
