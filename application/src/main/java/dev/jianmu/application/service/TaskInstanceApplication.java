@@ -204,14 +204,21 @@ public class TaskInstanceApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         if (nodeVersion.getResultFile() != null) {
-            // 解析Json为Map
-            var parameterMap = this.parseJson(resultFile);
-            // 创建任务实例输出参数与参数存储参数
-            var outputParameters = this.handleOutputParameter(parameterMap, nodeVersion, taskInstance);
-            // 保存任务实例输出参数
-            this.instanceParameterRepository.addAll(outputParameters.keySet());
-            // 保存参数
-            this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
+            try {
+                // 解析Json为Map
+                var parameterMap = this.parseJson(resultFile);
+                // 创建任务实例输出参数与参数存储参数
+                var outputParameters = this.handleOutputParameter(parameterMap, nodeVersion, taskInstance);
+                // 保存任务实例输出参数
+                this.instanceParameterRepository.addAll(outputParameters.keySet());
+                // 保存参数
+                this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
+            } catch (RuntimeException e) {
+                logger.warn("e: ", e);
+                taskInstance.executeFailed();
+                this.taskInstanceRepository.updateStatus(taskInstance);
+                return;
+            }
         }
         taskInstance.executeSucceeded(resultFile);
         this.taskInstanceRepository.saveSucceeded(taskInstance);
