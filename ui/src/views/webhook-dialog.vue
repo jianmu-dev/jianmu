@@ -49,6 +49,7 @@ export default defineComponent({
     const { toClipboard } = useClipboard();
     const dialogVisible = ref<boolean>(true);
     const loading = ref<boolean>(false);
+    const sourceId = ref<string>('');
     const webhook = ref<string>();
     const regenerating = ref<boolean>(false);
     const link = computed<string | undefined>(
@@ -63,8 +64,9 @@ export default defineComponent({
       try {
         loading.value = true;
 
-        const { source: { id: sourceId } } = await fetchEventBridgeDetail(props.eventBridgeId);
-        const { webhook: webhookUri } = await fetchWebhook(sourceId);
+        const { source: { id } } = await fetchEventBridgeDetail(props.eventBridgeId);
+        const { webhook: webhookUri } = await fetchWebhook(id);
+        sourceId.value = id;
         webhook.value = webhookUri;
       } catch (err) {
         if (!(err instanceof HttpError)) {
@@ -103,7 +105,7 @@ export default defineComponent({
           try {
             regenerating.value = true;
 
-            const { webhook: webhookUri } = await regenerateWebhook(props.sourceId);
+            const { webhook: webhookUri } = await regenerateWebhook(sourceId.value);
             webhook.value = webhookUri;
           } catch (err) {
             proxy.$throw(err, proxy);
@@ -114,6 +116,10 @@ export default defineComponent({
         });
       },
       copy: async () => {
+        if (!link.value) {
+          return;
+        }
+
         try {
           await toClipboard(link.value);
           proxy.$success('复制成功');

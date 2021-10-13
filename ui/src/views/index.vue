@@ -64,13 +64,13 @@
                 <jm-tooltip content="触发" placement="bottom">
                   <button :class="{execute: true, doing: executings[project.id]}" @click="execute(project.id)"></button>
                 </jm-tooltip>
-                <!--                <jm-tooltip v-if="project.eventBridgeId" content="Webhook" placement="bottom">-->
-                <!--                  <button class="webhook" @click="selectedWebhookId = project.eventBridgeId"></button>-->
-                <!--                </jm-tooltip>-->
                 <jm-tooltip v-if="project.eventBridgeId" content="Webhook" placement="bottom">
-                  <button class="webhook"
-                          @click="$router.push({name: 'event-bridge-detail', params: {id: project.eventBridgeId}})"></button>
+                  <button class="webhook" @click="selectedWebhookId = project.eventBridgeId"></button>
                 </jm-tooltip>
+                <!--                <jm-tooltip v-if="project.eventBridgeId" content="Webhook" placement="bottom">-->
+                <!--                  <button class="webhook"-->
+                <!--                          @click="$router.push({name: 'event-bridge-detail', params: {id: project.eventBridgeId}})"></button>-->
+                <!--                </jm-tooltip>-->
                 <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" content="编辑" placement="bottom">
                   <button class="edit" @click="edit(project.id)"></button>
                 </jm-tooltip>
