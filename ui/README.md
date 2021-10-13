@@ -17,4 +17,4 @@ npm run build 或 yarn build
 ```
 
 #### 开源协议
-本项目基于Apache License 2.0协议。
+本项目基于MulanPubL-2.0协议。
