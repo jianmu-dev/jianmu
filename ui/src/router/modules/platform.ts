@@ -131,6 +131,13 @@ export default [
       title: '新增项目',
     },
   }, {
+    name: 'create-process-templates',
+    path: 'process-templates',
+    component: () => import('@/views/process-templates/manager.vue'),
+    meta: {
+      title: '流程模版',
+    },
+  }, {
     name: 'update-workflow-definition',
     path: 'workflow-definition/editor/:id',
     component: () => import('@/views/workflow-definition/editor.vue'),
