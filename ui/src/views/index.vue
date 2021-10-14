@@ -467,7 +467,7 @@ export default defineComponent({
 
           .content {
             position: relative;
-            padding: 15px;
+            padding: 10px 15px;
 
             .git-label {
               position: absolute;
@@ -558,8 +558,8 @@ export default defineComponent({
 
                 &.del {
                   position: absolute;
-                  right: 3px;
-                  top: 5px;
+                  right: 0;
+                  top: 3px;
                   display: none;
                   background-image: url('@/assets/svgs/btn/del.svg');
                 }
