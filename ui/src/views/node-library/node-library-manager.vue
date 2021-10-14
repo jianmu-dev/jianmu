@@ -141,12 +141,15 @@ export default defineComponent({
 
     // 删除
     const deleteNode = (i: INode) => {
+      if (i.isDel) {
+        return;
+      }
+      i.isDel = true;
       proxy.$confirm('确定要删除节点吗?', '删除节点', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       }).then(() => {
-        i.isDel = true;
         deleteNodeLibrary(i.ownerRef, i.ref).then(() => {
           proxy.$success('删除成功');
           deleteNodeLibraryListData(i);
