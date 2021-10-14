@@ -558,7 +558,7 @@ export default defineComponent({
 
                 &.del {
                   position: absolute;
-                  right: 5px;
+                  right: 3px;
                   top: 5px;
                   display: none;
                   background-image: url('@/assets/svgs/btn/del.svg');
