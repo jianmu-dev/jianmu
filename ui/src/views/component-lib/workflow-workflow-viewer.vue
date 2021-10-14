@@ -1,17 +1,19 @@
 <template>
   <div class="workflow-workflow-viewer">
     流程查看器：
-    <jm-workflow-viewer :dsl="workflow"/>
-    <jm-workflow-viewer :dsl="pipeline"/>
+    <jm-workflow-viewer :dsl="workflow" :trigger-type="TriggerTypeEnum.MANUAL"/>
+    <jm-workflow-viewer :dsl="pipeline" :trigger-type="TriggerTypeEnum.MANUAL"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { TriggerTypeEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   setup() {
     return {
+      TriggerTypeEnum,
       workflow: 'cron: \'* 5/* * * * ? *\'\n' +
         '\n' +
         'event:\n' +
