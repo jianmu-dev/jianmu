@@ -55,9 +55,6 @@
               <div class="time">最后执行时间：{{ datetimeFormatter(project.latestTime) }}</div>
               <div class="time">下次执行时间：{{ datetimeFormatter(project.nextTime) }}</div>
               <div class="operation">
-                <jm-tooltip content="删除" placement="top">
-                  <button :class="{del: true, doing: deletings[project.id]}" @click="del(project.id)"></button>
-                </jm-tooltip>
                 <jm-tooltip content="触发" placement="bottom">
                   <button :class="{execute: true, doing: executings[project.id]}" @click="execute(project.id)"></button>
                 </jm-tooltip>
@@ -79,6 +76,9 @@
                 </jm-tooltip>
                 <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="查看管道DSL" placement="bottom">
                   <button class="pipeline-label" @click="viewDsl(project)"></button>
+                </jm-tooltip>
+                <jm-tooltip content="删除" placement="top">
+                  <button :class="{del: true, doing: deletings[project.id]}" @click="del(project.id)"></button>
                 </jm-tooltip>
               </div>
             </div>
