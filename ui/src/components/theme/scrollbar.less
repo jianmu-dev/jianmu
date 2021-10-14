@@ -1,0 +1,39 @@
+@thumb-color: #667085;
+
+.el-scrollbar__thumb {
+  background-color: @thumb-color;
+  opacity: 0.7;
+
+  &:hover {
+    background-color: @thumb-color;
+    opacity: 1;
+  }
+}
+
+.el-scrollbar {
+  &.jm-table-scrollbar {
+    .el-scrollbar__view > .el-table {
+      position: static;
+      overflow: visible;
+
+      .el-table__header-wrapper, .el-table__body-wrapper {
+        overflow: visible;
+      }
+
+      .el-table__fixed, .el-table__fixed-right {
+        z-index: 0;
+      }
+
+      &.el-table--border {
+        > .el-table__fixed {
+          top: 1px;
+          left: 1px;
+        }
+
+        > .el-table__fixed-right {
+          top: 1px;
+        }
+      }
+    }
+  }
+}

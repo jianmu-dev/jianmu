@@ -1,0 +1,61 @@
+.el-table {
+  border-radius: 4px 4px 0 0;
+
+  th {
+    color: #333333;
+    background-color: #F6F8FB;
+  }
+
+  .cell {
+    white-space: nowrap;
+  }
+}
+
+.el-table th.el-table-column--selection > .cell {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.el-checkbox__input {
+  &.is-indeterminate {
+    .el-checkbox__inner {
+      background-color: transparent;
+      border-color: transparent;
+    }
+
+    .el-checkbox__inner:before {
+      left: -8px;
+      top: -8px;
+      width: 28px;
+      height: 28px;
+      background-color: transparent;
+      background-image: url("./svgs/indeterminate.svg");
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+  }
+}
+
+.el-table__expand-icon {
+  line-height: 20px;
+
+  .el-icon {
+    top: 35%;
+    width: 16px;
+    height: 16px;
+    background-image: url("./svgs/expand.svg");
+
+    &::before {
+      content: '';
+    }
+  }
+
+  &.el-table__expand-icon--expanded {
+    -webkit-transform: none;
+    transform: none;
+
+    .el-icon {
+      background-image: url("./svgs/expanded.svg");
+    }
+  }
+}

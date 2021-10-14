@@ -1,0 +1,73 @@
+.el-message {
+  padding: 0 11px 0 16px;
+  height: 36px;
+
+  &.el-message--success {
+    background-color: #DFFFFF;
+    border-color: #A3F7F7;
+
+    .el-message__content {
+      color: #4A4A4A;
+    }
+  }
+
+  &.el-message--warning {
+    background-color: #FFFBE6;
+    border-color: #FFD7AD;
+
+    .el-message__content {
+      color: #666666;
+    }
+  }
+
+  &.el-message--info {
+    background-color: #E4F5FD;
+    border-color: #AEE0FF;
+
+    .el-message__content {
+      color: #666666;
+    }
+  }
+
+  &.el-message--error {
+    background-color: #FFF1F0;
+    border-color: #FFBCBC;
+
+    .el-message__content {
+      color: #666666;
+    }
+  }
+
+  .el-message__closeBtn {
+    color: #8696B6;
+  }
+}
+
+.el-message__icon {
+  &[class*=el-icon-]::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center center;
+  }
+
+  &.el-icon-success::before {
+    background-image: url("./svgs/success.svg");
+  }
+
+  &.el-icon-warning::before {
+    background-image: url("./svgs/warning.svg");
+  }
+
+  &.el-icon-info::before {
+    background-image: url("./svgs/info.svg");
+  }
+
+  &.el-icon-error::before {
+    background-image: url("./svgs/error.svg");
+  }
+}
