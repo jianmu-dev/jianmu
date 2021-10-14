@@ -18,5 +18,5 @@ public class Parameter {
     private String name;
     private String description;
     private String type;
-    private String value;
+    private Object value;
 }

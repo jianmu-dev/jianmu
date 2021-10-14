@@ -254,7 +254,7 @@ public class TaskInstanceApplication {
                 .map(nodeParameter -> {
                     var value = parameterMap.get(nodeParameter.getRef());
                     // 创建参数
-                    var parameter = Parameter.Type.valueOf(nodeParameter.getType()).newParameter(value);
+                    var parameter = Parameter.Type.getTypeByName(nodeParameter.getType()).newParameter(value);
                     // 创建任务实例输出参数
                     var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
                             .instanceId(taskInstance.getId())

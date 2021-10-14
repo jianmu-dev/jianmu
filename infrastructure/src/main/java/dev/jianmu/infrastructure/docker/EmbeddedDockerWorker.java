@@ -162,7 +162,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 }).awaitCompletion();
             } catch (InterruptedException | RuntimeException e) {
                 logger.error("镜像下载失败:", e);
-                this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+                this.publisher.publishEvent(TaskFailedEvent.builder()
+                        .triggerId(dockerTask.getTriggerId())
+                        .taskId(dockerTask.getTaskInstanceId())
+                        .errorMsg(e.getMessage())
+                        .build());
                 Thread.currentThread().interrupt();
                 return;
             }
@@ -173,7 +177,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
             containerResponse = createContainerCmd.exec();
         } catch (RuntimeException e) {
             logger.error("无法创建容器", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             return;
         }
         // 启动容器
@@ -181,7 +189,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
             this.dockerClient.startContainerCmd(containerResponse.getId()).exec();
         } catch (RuntimeException e) {
             logger.error("容器启动失败:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             return;
         }
         // 发送任务运行中事件
@@ -206,7 +218,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
                     }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器日志操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             try {
                 logWriter.close();
             } catch (IOException ioException) {
@@ -215,7 +231,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
             logger.error("获取容器日志失败", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             try {
                 logWriter.close();
             } catch (IOException ioException) {
@@ -234,11 +254,19 @@ public class EmbeddedDockerWorker implements DockerWorker {
             }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器执行结果操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
             logger.error("获取容器执行结果失败", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             Thread.currentThread().interrupt();
         }
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
@@ -261,7 +289,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 logger.info("结果文件内容: {}", resultFile);
             } catch (Exception e) {
                 logger.error("无法获取容器执行结果文件:", e);
-                this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+                this.publisher.publishEvent(TaskFailedEvent.builder()
+                        .triggerId(dockerTask.getTriggerId())
+                        .taskId(dockerTask.getTaskInstanceId())
+                        .errorMsg(e.getMessage())
+                        .build());
             }
         }
         // 清除容器
@@ -272,6 +304,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 发送结果通知
         this.publisher.publishEvent(
                 TaskFinishedEvent.builder()
+                        .triggerId(dockerTask.getTriggerId())
                         .taskId(dockerTask.getTaskInstanceId())
                         .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
                         .resultFile(resultFile)
@@ -301,7 +334,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
                     }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器日志操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             try {
                 logWriter.close();
             } catch (IOException ioException) {
@@ -310,7 +347,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
             logger.error("获取容器日志失败", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             try {
                 logWriter.close();
             } catch (IOException ioException) {
@@ -333,11 +374,19 @@ public class EmbeddedDockerWorker implements DockerWorker {
             }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器执行结果操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
             logger.error("获取容器执行结果失败", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(dockerTask.getTriggerId())
+                    .taskId(dockerTask.getTaskInstanceId())
+                    .errorMsg(e.getMessage())
+                    .build());
             Thread.currentThread().interrupt();
         }
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
@@ -360,7 +409,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 logger.info("结果文件内容: {}", resultFile);
             } catch (Exception e) {
                 logger.error("无法获取容器执行结果文件:", e);
-                this.publisher.publishEvent(TaskFailedEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+                this.publisher.publishEvent(TaskFailedEvent.builder()
+                        .triggerId(dockerTask.getTriggerId())
+                        .taskId(dockerTask.getTaskInstanceId())
+                        .errorMsg(e.getMessage())
+                        .build());
             }
         }
         // 清除容器
@@ -371,6 +424,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 发送结果通知
         this.publisher.publishEvent(
                 TaskFinishedEvent.builder()
+                        .triggerId(dockerTask.getTriggerId())
                         .taskId(dockerTask.getTaskInstanceId())
                         .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
                         .resultFile(resultFile)
@@ -396,5 +450,27 @@ public class EmbeddedDockerWorker implements DockerWorker {
     @Override
     public void deleteImage(String imageName) {
         this.dockerClient.removeImageCmd(imageName).exec();
+    }
+
+    @Override
+    public void updateImage(String imageName) {
+        // 检查镜像是否存在本地
+        try {
+            this.dockerClient.inspectImageCmd(imageName).exec();
+        } catch (NotFoundException e) {
+            logger.info("镜像不存在，无需更新");
+            return;
+        }
+        // 拉取镜像
+        try {
+            this.dockerClient.pullImageCmd(imageName).exec(new ResultCallback.Adapter<>() {
+                @Override
+                public void onNext(PullResponseItem object) {
+                    logger.info("镜像更新成功: {} status: {}", object.getId(), object.getStatus());
+                }
+            }).awaitCompletion();
+        } catch (InterruptedException | RuntimeException e) {
+            logger.error("镜像更新失败:", e);
+        }
     }
 }

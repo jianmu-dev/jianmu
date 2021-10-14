@@ -1,0 +1,63 @@
+.el-pagination {
+  span.el-pagination__total:not([class*=suffix]),
+  span.el-pagination__jump:not([class*=suffix]),
+  .el-input .el-input__inner,
+  .el-select .el-input .el-input__inner,
+  button.btn-prev,
+  button.btn-next,
+  .el-pager li.number,
+  .el-pager li.el-icon-more,
+  li:hover {
+    height: 32px;
+    line-height: 32px;
+  }
+
+  .el-pagination__total::before {
+    content: "总";
+  }
+
+  .el-pagination__jump {
+    margin-left: auto;
+    position: relative;
+
+    &::before {
+      content: "跳至 ";
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+    }
+  }
+
+  .el-pagination__total, .el-pagination__jump, .el-input__inner {
+    color: #999;
+  }
+
+  .el-input .el-input__inner,
+  .el-select .el-input .el-input__inner {
+    border-radius: 2px;
+  }
+
+  button.btn-prev, button.btn-next {
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 0;
+
+    .el-icon {
+      display: inline;
+    }
+  }
+
+  .el-pager {
+    li.number {
+      border-radius: 2px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      padding: 0;
+      margin: 0 4px;
+    }
+
+    li.el-icon-more::before {
+      color: rgba(0, 0, 0, 0.25);
+    }
+  }
+}

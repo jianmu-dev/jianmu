@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 5</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.498319404">
+        <g id="建木自动化-首页" transform="translate(-1428.000000, -117.000000)">
+            <g id="编组-5" transform="translate(1428.000000, 117.000000)">
+                <rect id="矩形" fill="#FFFFFF" opacity="0" x="0" y="0" width="48" height="48"></rect>
+                <path d="M24,3 C35.5979797,3 45,12.4020203 45,24 C45,35.5979797 35.5979797,45 24,45 C12.4020203,45 3,35.5979797 3,24 C3,12.4020203 12.4020203,3 24,3 Z M24.1313737,8.00742188 L18.7053388,17.2463462 L18.6992284,17.2555118 L14.6816406,24.0961042 L23.6425417,24.0961042 L23.6425417,39.2804474 L23.7158665,39.2804474 L33.3183596,22.9351283 L24.1313737,22.9351283 L24.1313737,8.00742188 Z" id="椭圆形-3" fill="#7B8C9C" fill-rule="nonzero"></path>
+            </g>
+        </g>
+    </g>
+</svg>

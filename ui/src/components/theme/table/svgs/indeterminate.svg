@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon_xuanze_selected</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="系统设计规范" transform="translate(-1398.000000, -5014.000000)" fill-rule="nonzero">
+            <g id="编组-36" transform="translate(1398.000000, 5014.000000)">
+                <rect id="选择框" stroke="#BAC3D0" x="0.5" y="0.5" width="15" height="15" rx="2"></rect>
+                <rect id="fill" fill="#096DD9" x="4" y="4" width="8" height="8"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

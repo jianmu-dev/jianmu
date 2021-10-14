@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>list_icon_default</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="系统设计规范" transform="translate(-658.000000, -4958.000000)">
+            <g id="list_icon_default" transform="translate(658.000000, 4958.000000)">
+                <rect id="矩形" stroke="#F0F0F0" x="0.5" y="0.5" width="15" height="15" rx="2"></rect>
+                <line x1="4" y1="8" x2="12" y2="8" id="直线-2" stroke="#096DD9" stroke-linecap="square"></line>
+                <line x1="4" y1="8" x2="12" y2="8" id="直线-2备份" stroke="#096DD9" stroke-linecap="square" transform="translate(8.000000, 8.000000) rotate(90.000000) translate(-8.000000, -8.000000) "></line>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,16 @@
+@primary-color: #096DD9;
+
+.el-loading-spinner {
+  &::before {
+    font-family: 'jm-icon-button';
+    content: '\e806';
+    font-size: 30px;
+    display: inline-block;
+    animation: rotating 2s linear infinite;
+    color: @primary-color;
+  }
+
+  svg {
+    display: none;
+  }
+}

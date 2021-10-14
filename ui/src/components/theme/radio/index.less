@@ -1,0 +1,22 @@
+@primary-color: #096DD9;
+@secondary-color: #0091FF;
+
+.el-radio__inner {
+  border-color: #BAC3D0;
+
+  &:hover {
+    border-color: @secondary-color;
+  }
+}
+
+.el-radio__input.is-checked {
+  .el-radio__inner {
+    background-color: transparent;
+
+    &::after {
+      width: 7px;
+      height: 7px;
+      background-color: @primary-color;
+    }
+  }
+}

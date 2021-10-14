@@ -1,0 +1,38 @@
+.el-button {
+  border-radius: 2px;
+
+  .el-icon-loading::before {
+    font-family: 'jm-icon-button';
+    content: '\e806';
+    letter-spacing: 0;
+  }
+
+  &.is-loading {
+    &[class^="jm-icon-"]:before,
+    &[class*=" jm-icon-"]:before {
+      width: auto;
+      margin: auto;
+    }
+  }
+}
+
+.el-button--primary {
+  box-shadow: 0 6px 14px 0 #ACC3EE;
+
+  &:hover {
+    background-color: #0091FF;
+    border-color: #0091FF;
+  }
+}
+
+.el-button--default {
+  color: #333333;
+  border-color: #CAD6EE;
+  box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
+
+  &:hover {
+    color: #0091FF;
+    border-color: #0091FF;
+    background-color: transparent;
+  }
+}

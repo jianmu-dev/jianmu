@@ -1,0 +1,70 @@
+@default-border-color: #D0E0ED;
+@primary-border-color: #096DD9;
+@secondary-border-color: #0091FF;
+@disabled-border-color: #E8E8E8;
+
+.el-input.is-disabled .el-input__inner, .el-textarea.is-disabled .el-textarea__inner {
+  background-color: #F6F8FB;
+  border-color: @disabled-border-color;
+}
+
+.el-input__inner, .el-textarea__inner {
+  border-radius: 2px;
+  border-color: @default-border-color;
+  color: #333333;
+
+  &:hover {
+    border-color: @secondary-border-color;
+  }
+
+  &:focus {
+    border-color: @primary-border-color;
+  }
+}
+
+.el-input {
+  .el-input__prefix {
+    .el-input__icon {
+      font-size: 18px;
+    }
+  }
+
+  .el-input__suffix {
+    .el-input__suffix-inner {
+      .el-icon-circle-close::before {
+        content: '\e6db';
+        color: #8696B6;
+      }
+
+      .jm-icon-button-search::before {
+        color: #6F8794;
+      }
+
+      .el-icon-view::before {
+        position: absolute;
+        right: 0;
+        font-family: 'jm-icon-input';
+        color: #999999;
+        font-size: 24px;
+      }
+
+      .el-icon-view {
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center center;
+      }
+    }
+  }
+
+  input.el-input__inner[type=password] ~ .el-input__suffix {
+    .el-icon-view::before {
+      content: '\e803';
+    }
+  }
+
+  input.el-input__inner[type=text] ~ .el-input__suffix {
+    .el-icon-view::before {
+      content: '\e800';
+    }
+  }
+}

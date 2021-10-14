@@ -19,9 +19,9 @@ public class HeaderTransformer extends Transformer<Parameter<?>> {
         var list = header.get(this.getExpression().toLowerCase(Locale.ROOT));
         if (list != null && !list.isEmpty()) {
             var variable = String.join(",", list);
-            return Parameter.Type.valueOf(this.getVariableType()).newParameter(variable);
+            return Parameter.Type.getTypeByName(this.getVariableType()).newParameter(variable);
         }
-        return Parameter.Type.valueOf(this.getVariableType()).defaultParameter();
+        return Parameter.Type.getTypeByName(this.getVariableType()).defaultParameter();
     }
 
     public static final class Builder {

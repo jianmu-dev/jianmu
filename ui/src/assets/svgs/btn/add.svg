@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="49px" viewBox="0 0 48 49" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ZS加号</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="建木自动化-密钥管理" transform="translate(-304.000000, -217.000000)">
+            <g id="ZS加号" transform="translate(304.000000, 218.000000)">
+                <rect id="矩形" fill="#000000" fill-rule="nonzero" opacity="0" x="0" y="0" width="48" height="48"></rect>
+                <path d="M46,21.6 L26.4,21.6 L26.4,2 C26.4,0.800000016 25.6,0 24.4,0 L23.6,0 C22.4,0 21.6,0.800000016 21.6,2 L21.6,21.6 L2,21.6 C0.800000016,21.6 0,22.4 0,23.6 L0,24.4 C0,25.6 0.800000016,26.4 2,26.4 L21.6,26.4 L21.6,46 C21.6,47.2 22.4,48 23.6,48 L24.4,48 C25.6,48 26.4,47.2 26.4,46 L26.4,26.4 L46,26.4 C47.2,26.4 48,25.6 48,24.4 L48,23.6 C48,22.4 47.2,21.6 46,21.6 Z" id="路径" fill="#6B7B8D" opacity="0.498302641"></path>
+            </g>
+        </g>
+    </g>
+</svg>
