@@ -96,7 +96,7 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
  */
 export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined,
   nodeInfos: INodeInfoVo[], container: HTMLElement): Graph | undefined {
-  if (!dsl || !triggerType || nodeInfos.length === 0) {
+  if (!dsl || !triggerType) {
     return undefined;
   }
 
