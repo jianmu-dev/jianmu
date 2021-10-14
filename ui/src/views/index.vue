@@ -42,12 +42,6 @@
           <div v-for="project of projects" :key="project.id" class="item">
             <div :class="{'state-bar': true, [project.status.toLowerCase()]: true}"></div>
             <div class="content">
-              <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="查看流程DSL" placement="top">
-                <div class="workflow-label" title="workflow" @click="viewDsl(project)"/>
-              </jm-tooltip>
-              <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="查看管道DSL" placement="top">
-                <div class="pipeline-label" title="pipeline" @click="viewDsl(project)"/>
-              </jm-tooltip>
               <jm-tooltip v-if="project.source === DslSourceEnum.GIT" content="打开git仓库" placement="top">
                 <a :class="{'git-label': true, [project.status === ProjectStatusEnum.INIT? 'init': 'normal']: true}"
                    :href="`/view/repo/${project.gitRepoId}`"
@@ -61,6 +55,9 @@
               <div class="time">最后执行时间：{{ datetimeFormatter(project.latestTime) }}</div>
               <div class="time">下次执行时间：{{ datetimeFormatter(project.nextTime) }}</div>
               <div class="operation">
+                <jm-tooltip content="删除" placement="top">
+                  <button :class="{del: true, doing: deletings[project.id]}" @click="del(project.id)"></button>
+                </jm-tooltip>
                 <jm-tooltip content="触发" placement="bottom">
                   <button :class="{execute: true, doing: executings[project.id]}" @click="execute(project.id)"></button>
                 </jm-tooltip>
@@ -77,8 +74,11 @@
                 <jm-tooltip v-else content="同步DSL" placement="bottom">
                   <button :class="{sync: true, doing: synchronizings[project.id]}" @click="sync(project.id)"></button>
                 </jm-tooltip>
-                <jm-tooltip content="删除" placement="bottom">
-                  <button :class="{del: true, doing: deletings[project.id]}" @click="del(project.id)"></button>
+                <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="查看流程DSL" placement="bottom">
+                  <button class="workflow-label" @click="viewDsl(project)"></button>
+                </jm-tooltip>
+                <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="查看管道DSL" placement="bottom">
+                  <button class="pipeline-label" @click="viewDsl(project)"></button>
                 </jm-tooltip>
               </div>
             </div>
@@ -432,6 +432,16 @@ export default defineComponent({
           background-color: #FFFFFF;
           box-shadow: 0 0 8px 0 #9EB1C5;
 
+          &:hover {
+            .content {
+              .operation {
+                button.del {
+                  display: block;
+                }
+              }
+            }
+          }
+
           .state-bar {
             height: 8px;
             overflow: hidden;
@@ -461,7 +471,7 @@ export default defineComponent({
 
             .git-label {
               position: absolute;
-              top: 2px;
+              bottom: 5px;
               right: 0;
               width: 45px;
               height: 20px;
@@ -481,26 +491,6 @@ export default defineComponent({
               &.init {
                 background-image: url('@/assets/svgs/index/git-label2.svg');
               }
-            }
-
-            .workflow-label, .pipeline-label {
-              position: absolute;
-              right: 6px;
-              bottom: 6px;
-              width: 20px;
-              height: 20px;
-              background-repeat: no-repeat;
-              background-position: right bottom;
-              background-size: contain;
-              cursor: pointer;
-            }
-
-            .workflow-label {
-              background-image: url('@/assets/svgs/index/workflow-label.svg');
-            }
-
-            .pipeline-label {
-              background-image: url('@/assets/svgs/index/pipeline-label.svg');
             }
 
             a {
@@ -567,7 +557,19 @@ export default defineComponent({
                 }
 
                 &.del {
+                  position: absolute;
+                  right: 5px;
+                  top: 5px;
+                  display: none;
                   background-image: url('@/assets/svgs/btn/del.svg');
+                }
+
+                &.workflow-label {
+                  background-image: url('@/assets/svgs/index/workflow-label.svg');
+                }
+
+                &.pipeline-label {
+                  background-image: url('@/assets/svgs/index/pipeline-label.svg');
                 }
 
                 &.doing {
