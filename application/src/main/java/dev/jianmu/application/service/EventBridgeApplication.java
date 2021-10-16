@@ -362,7 +362,7 @@ public class EventBridgeApplication {
         var eventTf = Transformer.Builder.aTransformer()
                 .variableName("gitlab_event_name")
                 .variableType("STRING")
-                .expression("$.header.X-Gitlab-Event")
+                .expression("$.header.x-gitlab-event[0]")
                 .build();
         return List.of(refTf, objectKindTf, beforeTf, afterTf, eventTf);
     }
