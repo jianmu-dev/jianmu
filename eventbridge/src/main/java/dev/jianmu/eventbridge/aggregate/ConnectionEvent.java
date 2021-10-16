@@ -14,7 +14,7 @@ public class ConnectionEvent {
     private String sourceId;
     private String sourceEventId;
     private String targetId;
-    private Payload payload;
+    private String payload;
 
     public String getId() {
         return id;
@@ -36,7 +36,7 @@ public class ConnectionEvent {
         return targetId;
     }
 
-    public Payload getPayload() {
+    public String getPayload() {
         return payload;
     }
 
@@ -46,7 +46,7 @@ public class ConnectionEvent {
         private String sourceId;
         private String sourceEventId;
         private String targetId;
-        private Payload payload;
+        private String payload;
 
         private Builder() {
         }
@@ -75,7 +75,7 @@ public class ConnectionEvent {
             return this;
         }
 
-        public Builder payload(Payload payload) {
+        public Builder payload(String payload) {
             this.payload = payload;
             return this;
         }

@@ -12,7 +12,7 @@ public class SourceEvent {
     private String id;
     private String bridgeId;
     private String sourceId;
-    private Payload payload;
+    private String payload;
 
     public String getId() {
         return id;
@@ -26,7 +26,7 @@ public class SourceEvent {
         return sourceId;
     }
 
-    public Payload getPayload() {
+    public String getPayload() {
         return payload;
     }
 
@@ -34,7 +34,7 @@ public class SourceEvent {
     public static final class Builder {
         private String bridgeId;
         private String sourceId;
-        private Payload payload;
+        private String payload;
 
         private Builder() {
         }
@@ -53,7 +53,7 @@ public class SourceEvent {
             return this;
         }
 
-        public Builder payload(Payload payload) {
+        public Builder payload(String payload) {
             this.payload = payload;
             return this;
         }

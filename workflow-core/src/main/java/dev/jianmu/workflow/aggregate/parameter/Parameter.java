@@ -16,6 +16,9 @@ public abstract class Parameter<T> {
         STRING {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof String) {
                     return new StringParameter((String) value);
                 }
@@ -30,6 +33,9 @@ public abstract class Parameter<T> {
         BOOL {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof Boolean) {
                     return new BoolParameter((Boolean) value);
                 }
@@ -44,6 +50,9 @@ public abstract class Parameter<T> {
         SECRET {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof String) {
                     return new SecretParameter((String) value);
                 }
@@ -58,6 +67,9 @@ public abstract class Parameter<T> {
         NUMBER {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof Number) {
                     return new NumberParameter(new BigDecimal(value.toString()));
                 }

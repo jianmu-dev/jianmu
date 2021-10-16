@@ -19,7 +19,7 @@ public class TargetEvent {
     private String targetId;
     private String targetRef;
     private String destinationId;
-    private Payload payload;
+    private String payload;
     private Set<EventParameter> eventParameters;
 
     public String getId() {
@@ -54,7 +54,7 @@ public class TargetEvent {
         return destinationId;
     }
 
-    public Payload getPayload() {
+    public String getPayload() {
         return payload;
     }
 
@@ -80,7 +80,7 @@ public class TargetEvent {
         private String targetId;
         private String targetRef;
         private String destinationId;
-        private Payload payload;
+        private String payload;
         private Set<EventParameter> eventParameters;
 
         private Builder() {
@@ -125,7 +125,7 @@ public class TargetEvent {
             return this;
         }
 
-        public Builder payload(Payload payload) {
+        public Builder payload(String payload) {
             this.payload = payload;
             return this;
         }

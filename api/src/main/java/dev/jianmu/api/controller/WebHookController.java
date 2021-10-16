@@ -1,6 +1,5 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.api.vo.WebhookVo;
 import dev.jianmu.application.service.EventBridgeApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,14 +26,18 @@ public class WebHookController {
         this.eventBridgeApplication = eventBridgeApplication;
     }
 
-    @RequestMapping(value = "/{webhook}", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/{webhook}", method = RequestMethod.POST, consumes = {"application/json", "application/x-www-form-urlencoded", "text/plain"})
     @ResponseBody
     @Operation(summary = "触发项目", description = "触发项目启动")
-    public void receivePostJsonEvent(HttpServletRequest request, @PathVariable String webhook) {
+    public void receivePostJsonEvent(
+            HttpServletRequest request,
+            @RequestHeader("Content-Type") String contentType,
+            @PathVariable String webhook
+    ) {
         var bytes = Base64.getDecoder().decode(webhook);
         var strings = new String(bytes, StandardCharsets.UTF_8).split("_");
         var token = strings[0];
         var sourceId = strings[1];
-        this.eventBridgeApplication.receiveHttpEvent(token, sourceId, request);
+        this.eventBridgeApplication.receiveHttpEvent(token, sourceId, request, contentType);
     }
 }

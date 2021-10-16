@@ -192,7 +192,7 @@ CREATE TABLE `eb_target_event`
     `target_id`           varchar(45) DEFAULT NULL COMMENT 'Target ID',
     `target_ref`          varchar(45) DEFAULT NULL COMMENT 'Target Ref',
     `destination_id`      varchar(45) DEFAULT NULL COMMENT 'Destination ID',
-    `payload`             blob COMMENT 'Http payload',
+    `payload`             longtext COMMENT 'Http payload',
     PRIMARY KEY (`id`)
 );
 
@@ -211,8 +211,7 @@ CREATE TABLE `eb_target_transformer`
     `target_id`     varchar(45) NOT NULL COMMENT '关联的Target ID',
     `variable_name` varchar(45) NOT NULL COMMENT '变量名',
     `variable_type` varchar(45) NOT NULL COMMENT '变量类型',
-    `expression`    varchar(45) NOT NULL COMMENT '表达式',
-    `class_type`    varchar(45) NOT NULL COMMENT 'Transformer类型'
+    `expression`    varchar(45) NOT NULL COMMENT '表达式'
 );
 
 CREATE TABLE `hub_node_definition`

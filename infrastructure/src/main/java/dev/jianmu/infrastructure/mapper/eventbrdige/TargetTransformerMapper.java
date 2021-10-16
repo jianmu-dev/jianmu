@@ -1,9 +1,6 @@
 package dev.jianmu.infrastructure.mapper.eventbrdige;
 
 import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
-import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
-import dev.jianmu.infrastructure.eventbridge.QueryTransformer;
 import org.apache.ibatis.annotations.*;
 
 import java.util.Set;
@@ -19,20 +16,14 @@ public interface TargetTransformerMapper {
     @Result(column = "variable_name", property = "variableName")
     @Result(column = "variable_type", property = "variableType")
     @Result(column = "expression", property = "expression")
-    @TypeDiscriminator(column = "class_type", javaType = String.class, cases = {
-            @Case(value = "BodyTransformer", type = BodyTransformer.class),
-            @Case(value = "HeaderTransformer", type = HeaderTransformer.class),
-            @Case(value = "QueryTransformer", type = QueryTransformer.class)
-    })
     Set<Transformer> findByTargetId(String targetId);
 
-    @Insert("insert into eb_target_transformer(bridge_id, target_id, variable_name, variable_type, expression, class_type) " +
-            "values(#{bridgeId}, #{targetId}, #{tf.variableName}, #{tf.variableType}, #{tf.expression}, #{classType})")
+    @Insert("insert into eb_target_transformer(bridge_id, target_id, variable_name, variable_type, expression) " +
+            "values(#{bridgeId}, #{targetId}, #{tf.variableName}, #{tf.variableType}, #{tf.expression})")
     void save(
             @Param("bridgeId") String bridgeId,
             @Param("targetId") String targetId,
-            @Param("tf") Transformer<?> transformer,
-            @Param("classType") String classType
+            @Param("tf") Transformer transformer
     );
 
     @Delete("delete from eb_target_transformer WHERE target_id = #{targetId}")

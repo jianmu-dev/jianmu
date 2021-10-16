@@ -9,8 +9,6 @@ import dev.jianmu.eventbridge.repository.ConnectionRepository;
 import dev.jianmu.eventbridge.repository.SourceRepository;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.eventbridge.repository.TargetRepository;
-import dev.jianmu.infrastructure.eventbridge.BodyTransformer;
-import dev.jianmu.infrastructure.eventbridge.HeaderTransformer;
 import dev.jianmu.infrastructure.mybatis.eventbridge.BridgeRepositoryImpl;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -18,12 +16,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * @class: EventBridgeApplication
@@ -198,8 +203,8 @@ public class EventBridgeApplication {
         this.connectionRepository.deleteByBridgeId(bridgeId);
     }
 
-    public void receiveHttpEvent(String token, String sourceId, HttpServletRequest request) {
-        var payload = this.createPayload(request);
+    public void receiveHttpEvent(String token, String sourceId, HttpServletRequest request, String contentType) {
+        var payload = this.createPayload(request, contentType);
         var source = this.sourceRepository.findById(sourceId)
                 .orElseThrow(() -> new RuntimeException("未找到该Source: " + sourceId));
         if (!source.isValidToken(token)) {
@@ -235,8 +240,10 @@ public class EventBridgeApplication {
                 .orElseThrow(() -> new RuntimeException("未找到该Target: " + connectionEvent.getTargetId()));
         Set<EventParameter> eventParameters = new HashSet<>();
         List<Parameter> parameters = new ArrayList<>();
-        target.getTransformers().stream().map(transformer -> (Transformer<Parameter<?>>) transformer).forEach(transformer -> {
-            Parameter<?> parameter = transformer.extractParameter(connectionEvent.getPayload());
+        target.getTransformers().forEach(transformer -> {
+            Parameter<?> parameter = Parameter.Type
+                    .getTypeByName(transformer.getVariableType())
+                    .newParameter(transformer.extractParameter(connectionEvent.getPayload()));
             var eventParameter = EventParameter.Builder.anEventParameter()
                     .name(transformer.getVariableName())
                     .type(transformer.getVariableType())
@@ -261,7 +268,8 @@ public class EventBridgeApplication {
         this.publisher.publishEvent(targetEvent);
     }
 
-    private Payload createPayload(HttpServletRequest request) {
+    private String createPayload(HttpServletRequest request, String contentType) {
+        // Get body
         String body = null;
         try {
             body = request.getReader()
@@ -270,81 +278,110 @@ public class EventBridgeApplication {
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
-        var valid = this.isValidJSON(body);
-        if (!valid) {
-            throw new RuntimeException("无效的Body");
-        }
+        // Create root node
+        var root = this.objectMapper.createObjectNode();
+        // Headers node
         Map<String, List<String>> headers = Collections.list(request.getHeaderNames())
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
                         h -> Collections.list(request.getHeaders(h))
                 ));
-        var path = request.getRequestURI();
-        var query = request.getParameterMap();
-        return Payload.Builder.aPayload()
-                .body(body)
-                .header(headers)
-                .query(query)
-                .path(path)
-                .build();
+        var headerNode = root.putObject("header");
+        headers.forEach((key, value) -> {
+            var item = headerNode.putArray(key);
+            value.forEach(item::add);
+        });
+        // Query String node
+        var url = request.getRequestURL().toString();
+        var queryString = request.getQueryString();
+        MultiValueMap<String, String> parameters =
+                UriComponentsBuilder.fromUriString(url + "?" + queryString).build().getQueryParams();
+        var queryNode = root.putObject("query");
+        parameters.forEach((key, value) -> {
+            var item = queryNode.putArray(key);
+            value.forEach(item::add);
+        });
+        // Body node
+        var bodyNode = root.putObject("body");
+        // Body Json node
+        if (contentType.startsWith("application/json")) {
+            try {
+                var bodyJson = this.objectMapper.readTree(body);
+                bodyNode.set("json", bodyJson);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Body格式错误");
+            }
+        }
+        // Body Form node
+        if (contentType.startsWith("application/x-www-form-urlencoded")) {
+            var formNode = bodyNode.putObject("form");
+            var formMap = Pattern.compile("&")
+                    .splitAsStream(body)
+                    .map(s -> Arrays.copyOf(s.split("=", 2), 2))
+                    .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
+            formMap.forEach((key, value) -> {
+                var item = formNode.putArray(key);
+                value.forEach(item::add);
+            });
+        }
+        // Body Text node
+        if (contentType.startsWith("text/plain")) {
+            bodyNode.put("text", body);
+        }
+        return root.toPrettyString();
     }
 
-    private boolean isValidJSON(final String json) {
-        if (json.isBlank())
-            return false;
-        try {
-            this.objectMapper.readTree(json);
-        } catch (JsonProcessingException e) {
-            return false;
-        }
-        return true;
+    private static String decode(final String encoded) {
+        return Optional.ofNullable(encoded)
+                .map(e -> URLDecoder.decode(e, StandardCharsets.UTF_8))
+                .orElse(null);
     }
 
     public List<Transformer> gitlabTemplates() {
-        var refTf = BodyTransformer.Builder.aBodyTransformer()
+        var refTf = Transformer.Builder.aTransformer()
                 .variableName("gitlab_ref")
                 .variableType("STRING")
-                .expression("$.ref")
+                .expression("$.body.json.ref")
                 .build();
-        var objectKindTf = BodyTransformer.Builder.aBodyTransformer()
+        var objectKindTf = Transformer.Builder.aTransformer()
                 .variableName("gitlab_object_kind")
                 .variableType("STRING")
-                .expression("$.object_kind")
+                .expression("$.body.json.object_kind")
                 .build();
-        var beforeTf = BodyTransformer.Builder.aBodyTransformer()
+        var beforeTf = Transformer.Builder.aTransformer()
                 .variableName("gitlab_before")
                 .variableType("STRING")
-                .expression("$.before")
+                .expression("$.body.json.before")
                 .build();
-        var afterTf = BodyTransformer.Builder.aBodyTransformer()
+        var afterTf = Transformer.Builder.aTransformer()
                 .variableName("gitlab_after")
                 .variableType("STRING")
-                .expression("$.after")
+                .expression("$.body.json.after")
                 .build();
-        var eventTf = HeaderTransformer.Builder.aHeaderTransformer()
+        var eventTf = Transformer.Builder.aTransformer()
                 .variableName("gitlab_event_name")
                 .variableType("STRING")
-                .expression("X-Gitlab-Event")
+                .expression("$.header.X-Gitlab-Event")
                 .build();
         return List.of(refTf, objectKindTf, beforeTf, afterTf, eventTf);
     }
 
     public List<Transformer> giteeTemplates() {
-        var giteeRefTf = BodyTransformer.Builder.aBodyTransformer()
+        var giteeRefTf = Transformer.Builder.aTransformer()
                 .variableName("gitee_ref")
                 .variableType("STRING")
-                .expression("$.ref")
+                .expression("$.body.json.ref")
                 .build();
-        var giteeBeforeTf = BodyTransformer.Builder.aBodyTransformer()
+        var giteeBeforeTf = Transformer.Builder.aTransformer()
                 .variableName("gitee_before")
                 .variableType("STRING")
-                .expression("$.before")
+                .expression("$.body.json.before")
                 .build();
-        var giteeAfterTf = BodyTransformer.Builder.aBodyTransformer()
+        var giteeAfterTf = Transformer.Builder.aTransformer()
                 .variableName("gitee_after")
                 .variableType("STRING")
-                .expression("$.after")
+                .expression("$.body.json.after")
                 .build();
         return List.of(giteeRefTf, giteeBeforeTf, giteeAfterTf);
     }

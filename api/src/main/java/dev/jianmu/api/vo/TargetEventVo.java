@@ -29,6 +29,6 @@ public class TargetEventVo {
     private String targetId;
     private String targetRef;
     private String destinationId;
-    private PayloadVo payload;
+    private String payload;
     private Set<EventParameter> eventParameters;
 }
