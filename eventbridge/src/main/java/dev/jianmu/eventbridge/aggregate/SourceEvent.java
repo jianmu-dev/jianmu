@@ -12,6 +12,7 @@ public class SourceEvent {
     private String id;
     private String bridgeId;
     private String sourceId;
+    private Source.Type sourceType;
     private String payload;
 
     public String getId() {
@@ -26,6 +27,10 @@ public class SourceEvent {
         return sourceId;
     }
 
+    public Source.Type getSourceType() {
+        return sourceType;
+    }
+
     public String getPayload() {
         return payload;
     }
@@ -34,6 +39,7 @@ public class SourceEvent {
     public static final class Builder {
         private String bridgeId;
         private String sourceId;
+        private Source.Type sourceType;
         private String payload;
 
         private Builder() {
@@ -53,6 +59,11 @@ public class SourceEvent {
             return this;
         }
 
+        public Builder sourceType(Source.Type sourceType) {
+            this.sourceType = sourceType;
+            return this;
+        }
+
         public Builder payload(String payload) {
             this.payload = payload;
             return this;
@@ -63,6 +74,7 @@ public class SourceEvent {
             sourceEvent.id = UUID.randomUUID().toString().replace("-", "");
             sourceEvent.bridgeId = this.bridgeId;
             sourceEvent.sourceId = this.sourceId;
+            sourceEvent.sourceType = this.sourceType;
             sourceEvent.payload = this.payload;
             return sourceEvent;
         }

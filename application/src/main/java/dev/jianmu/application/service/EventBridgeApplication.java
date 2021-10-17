@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
+import com.jayway.jsonpath.JsonPath;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.eventbridge.aggregate.*;
 import dev.jianmu.eventbridge.repository.ConnectionRepository;
@@ -12,6 +13,8 @@ import dev.jianmu.eventbridge.repository.TargetRepository;
 import dev.jianmu.infrastructure.mybatis.eventbridge.BridgeRepositoryImpl;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
+import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,7 @@ import static java.util.stream.Collectors.*;
  * @create: 2021-08-12 17:13
  **/
 @Service
+@Slf4j
 public class EventBridgeApplication {
     private final BridgeRepositoryImpl bridgeRepository;
     private final SourceRepository sourceRepository;
@@ -207,16 +211,29 @@ public class EventBridgeApplication {
         var payload = this.createPayload(request, contentType);
         var source = this.sourceRepository.findById(sourceId)
                 .orElseThrow(() -> new RuntimeException("未找到该Source: " + sourceId));
+        var sourceEvent = SourceEvent.Builder.anOriginalEvent()
+                .sourceId(sourceId)
+                .sourceType(source.getType())
+                .payload(payload)
+                .build();
+        // Check Token
         if (!source.isValidToken(token)) {
             throw new RuntimeException("无效的Token");
         }
-        if (source.getType().equals(Source.Type.WEBHOOK)) {
-            var sourceEvent = SourceEvent.Builder.anOriginalEvent()
-                    .sourceId(sourceId)
-                    .payload(payload)
-                    .build();
-            this.publisher.publishEvent(sourceEvent);
+        // Check Type
+        if (!source.getType().equals(Source.Type.WEBHOOK)) {
+            throw new RuntimeException("Source类型不匹配");
         }
+        // isMatched
+        if (source.getMatcher() != null) {
+            if (this.isMatched(source.getMatcher(), payload)) {
+                log.info("符合匹配规则: {}", source.getMatcher());
+            } else {
+                log.info("不符合匹配规则: {}", source.getMatcher());
+                return;
+            }
+        }
+        this.publisher.publishEvent(sourceEvent);
     }
 
     public void dispatchEvent(SourceEvent sourceEvent) {
@@ -329,7 +346,12 @@ public class EventBridgeApplication {
         if (contentType.startsWith("text/plain")) {
             bodyNode.put("text", body);
         }
-        return root.toPrettyString();
+        return root.toString();
+    }
+
+    private boolean isMatched(String expression, String json) {
+        var variable = JsonPath.read(json, expression);
+        return !((JSONArray) variable).isEmpty();
     }
 
     private static String decode(final String encoded) {

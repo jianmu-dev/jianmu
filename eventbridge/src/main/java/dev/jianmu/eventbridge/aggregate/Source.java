@@ -21,6 +21,7 @@ public class Source {
     private String name;
     private Type type;
     private String token = "";
+    private String matcher;
 
     public void setName(String name) {
         this.name = name;
@@ -40,6 +41,10 @@ public class Source {
 
     public Type getType() {
         return type;
+    }
+
+    public String getMatcher() {
+        return matcher;
     }
 
     public void generateToken() {
@@ -64,6 +69,7 @@ public class Source {
         private String name;
         private String bridgeId;
         private Type type;
+        private String matcher;
 
         private Builder() {
         }
@@ -86,6 +92,11 @@ public class Source {
             return this;
         }
 
+        public Builder matcher(String matcher) {
+            this.matcher = matcher;
+            return this;
+        }
+
         public Builder type(Type type) {
             if (type == null)
                 throw new RuntimeException("type不能为空");
@@ -98,6 +109,7 @@ public class Source {
             source.id = UUID.randomUUID().toString().replace("-", "");
             source.name = this.name;
             source.bridgeId = this.bridgeId;
+            source.matcher = this.matcher;
             source.type = this.type;
             return source;
         }

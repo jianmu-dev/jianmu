@@ -23,10 +23,10 @@ public interface SourceMapper {
     @Update("update eb_source set token = #{token} WHERE id = #{id}")
     void updateTokenById(Source source);
 
-    @Insert("insert into eb_source(id, bridge_id, name, type, token) " +
-            "values(#{id}, #{bridgeId}, #{name}, #{type}, #{token})" +
+    @Insert("insert into eb_source(id, bridge_id, name, type, token, matcher) " +
+            "values(#{id}, #{bridgeId}, #{name}, #{type}, #{token}, #{matcher})" +
             " ON DUPLICATE KEY UPDATE " +
-            "name=#{name}, type=#{type}, token=#{token}")
+            "name=#{name}, type=#{type}, token=#{token}, #{matcher}")
     void saveOrUpdate(Source source);
 
     @Delete("delete FROM eb_source WHERE id = #{id}")
