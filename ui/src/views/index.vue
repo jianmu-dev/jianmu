@@ -272,7 +272,7 @@ export default defineComponent({
 
         let msg = '<div>确定要删除项目吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
-        
+
         proxy.$confirm(msg, '删除项目', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -571,6 +571,11 @@ export default defineComponent({
                   //display: none;
                   background-image: url('@/assets/svgs/btn/del.svg');
                   background-size: contain;
+                  opacity: 0.65;
+
+                  &:hover {
+                    opacity: 1;
+                  }
                 }
 
                 &.workflow-label {
