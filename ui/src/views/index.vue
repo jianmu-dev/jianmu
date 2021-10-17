@@ -432,15 +432,15 @@ export default defineComponent({
           background-color: #FFFFFF;
           box-shadow: 0 0 8px 0 #9EB1C5;
 
-          &:hover {
-            .content {
-              .operation {
-                button.del {
-                  display: block;
-                }
-              }
-            }
-          }
+          //&:hover {
+          //  .content {
+          //    .operation {
+          //      button.del {
+          //        display: block;
+          //      }
+          //    }
+          //  }
+          //}
 
           .state-bar {
             height: 8px;
@@ -467,14 +467,14 @@ export default defineComponent({
 
           .content {
             position: relative;
-            padding: 10px 15px;
+            padding: 16px 20px;
 
             .git-label {
               position: absolute;
-              bottom: 5px;
+              bottom: 0;
               right: 0;
-              width: 45px;
-              height: 20px;
+              width: 40px;
+              height: 40px;
               overflow: hidden;
               background-position: center center;
               background-repeat: no-repeat;
@@ -558,10 +558,13 @@ export default defineComponent({
 
                 &.del {
                   position: absolute;
-                  right: 0;
-                  top: 3px;
-                  display: none;
+                  right: 3px;
+                  top: 5px;
+                  width: 22px;
+                  height: 22px;
+                  //display: none;
                   background-image: url('@/assets/svgs/btn/del.svg');
+                  background-size: contain;
                 }
 
                 &.workflow-label {
