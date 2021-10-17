@@ -122,10 +122,14 @@ export default defineComponent({
           return;
         }
 
-        proxy.$confirm('确定要删除吗?', '删除命名空间', {
+        let msg = '<div>确定要删除命名空间吗?</div>';
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+
+        proxy.$confirm(msg, '删除命名空间', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
+          dangerouslyUseHTMLString: true,
         }).then(() => {
           deletings.value[name] = true;
 

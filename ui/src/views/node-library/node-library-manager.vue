@@ -144,10 +144,15 @@ export default defineComponent({
       if (i.isDel) {
         return;
       }
-      proxy.$confirm('确定要删除节点吗?', '删除节点', {
+
+      let msg = '<div>确定要删除节点吗?</div>';
+      msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${i.name}</div>`;
+
+      proxy.$confirm(msg, '删除节点', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
+        dangerouslyUseHTMLString: true,
       }).then(() => {
         i.isDel = true;
         deleteNodeLibrary(i.ownerRef, i.ref).then(() => {
