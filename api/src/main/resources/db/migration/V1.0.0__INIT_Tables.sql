@@ -186,6 +186,7 @@ CREATE TABLE `eb_source`
     `name`      varchar(45) DEFAULT NULL COMMENT '名称',
     `type`      varchar(45) DEFAULT NULL COMMENT '类型',
     `token`     varchar(45) DEFAULT NULL COMMENT '外部token',
+    `matcher`   varchar(45) DEFAULT NULL COMMENT '事件匹配规则',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
