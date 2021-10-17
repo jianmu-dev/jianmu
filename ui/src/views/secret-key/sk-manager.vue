@@ -263,16 +263,17 @@ export default defineComponent({
         .operation {
           display: none;
           position: absolute;
-          right: 10px;
-          top: 10px;
+          right: 6px;
+          top: 8px;
 
           button {
-            width: 30px;
-            height: 30px;
+            width: 22px;
+            height: 22px;
             background-color: #FFFFFF;
             border: 0;
             background-position: center center;
             background-repeat: no-repeat;
+            background-size: contain;
             cursor: pointer;
 
             &:active {
