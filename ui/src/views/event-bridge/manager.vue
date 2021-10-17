@@ -118,10 +118,16 @@ export default defineComponent({
           return;
         }
 
-        proxy.$confirm('确定要删除吗?', '删除事件桥接器', {
+        const { name } = eventBridges.value.find(item => item.id === id) as IEventBridgeVo;
+
+        let msg = '<div>确定要删除吗?</div>';
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+
+        proxy.$confirm(msg, '删除事件桥接器', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
+          dangerouslyUseHTMLString: true,
         }).then(() => {
           deletings.value[id] = true;
 
