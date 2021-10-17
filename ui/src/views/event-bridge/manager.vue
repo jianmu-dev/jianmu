@@ -120,7 +120,7 @@ export default defineComponent({
 
         const { name } = eventBridges.value.find(item => item.id === id) as IEventBridgeVo;
 
-        let msg = '<div>确定要删除吗?</div>';
+        let msg = '<div>确定要删除事件桥接器吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
 
         proxy.$confirm(msg, '删除事件桥接器', {
