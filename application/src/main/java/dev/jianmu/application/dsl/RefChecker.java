@@ -14,7 +14,7 @@ public class RefChecker {
     public static void check(String ref) {
         var result = Pattern.matches(REF_REG, ref);
         if (!result) {
-            throw new RuntimeException("Ref定义不符合规则");
+            throw new RuntimeException("唯一标识以英文字母开头，且由下划线、数字和英文字母组成的4-30位字符串");
         }
     }
 }
