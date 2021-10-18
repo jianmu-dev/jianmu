@@ -110,7 +110,7 @@
                    :tab-type="webhookLogForm.tabType"/>
     </jm-drawer>
   </div>
-</template>fetchTargetEvent
+</template>
 
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, ref } from 'vue';
