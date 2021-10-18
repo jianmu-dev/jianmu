@@ -8,6 +8,7 @@ import dev.jianmu.workflow.event.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @program: workflow
@@ -137,6 +138,20 @@ public class WorkflowInstance extends AggregateRoot {
         }
         if (node instanceof Gateway) {
             String nextNodeRef = ((Gateway) node).calculateTarget(expressionLanguage, context);
+            // 发布其他节点跳过事件
+            var targets = node.getTargets().stream()
+                    .filter(targetRef -> !targetRef.equals(nextNodeRef))
+                    .collect(Collectors.toList());
+            targets.forEach(targetRef -> {
+                var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                        .nodeRef(targetRef)
+                        .triggerId(this.triggerId)
+                        .workflowInstanceId(this.id)
+                        .workflowRef(this.workflowRef)
+                        .workflowVersion(this.workflowVersion)
+                        .build();
+                this.raiseEvent(nodeSkipEvent);
+            });
             // 发布下一个节点激活事件并返回
             NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
                     .nodeRef(nextNodeRef)
@@ -173,7 +188,45 @@ public class WorkflowInstance extends AggregateRoot {
         });
     }
 
-    // 中止节点, 非任务类节点是否无法中止
+    // 跳过节点
+    public void skipNode(Node node) {
+        if (node instanceof End) {
+            return;
+        }
+        if (node instanceof AsyncTask) {
+            // 跳过任务节点时也需要创建任务实例，状态为已跳过
+            AsyncTaskInstance taskInstance = this.findInstanceByRef(node.getRef())
+                    .orElse(
+                            AsyncTaskInstance.Builder
+                                    .anAsyncTaskInstance()
+                                    .name(node.getName())
+                                    .description(node.getDescription())
+                                    .asyncTaskRef(node.getRef())
+                                    .asyncTaskType(node.getType())
+                                    .build()
+                    );
+            taskInstance.skip();
+            // 处理反序列化后asyncTaskInstances为不可变List的情况
+            List<AsyncTaskInstance> instances = new ArrayList<>(this.asyncTaskInstances);
+            instances.removeIf(i -> i.getAsyncTaskRef().equals(node.getRef()));
+            instances.add(taskInstance);
+            this.asyncTaskInstances = instances;
+        }
+        // 发布下游节点跳过事件
+        var targets = node.getTargets();
+        targets.forEach(targetRef -> {
+            var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                    .nodeRef(targetRef)
+                    .triggerId(this.triggerId)
+                    .workflowInstanceId(this.id)
+                    .workflowRef(this.workflowRef)
+                    .workflowVersion(this.workflowVersion)
+                    .build();
+            this.raiseEvent(nodeSkipEvent);
+        });
+    }
+
+    // 中止节点, 非任务类节点无法中止
     public void terminateNode(Node node) {
         if (this.getStatus().equals(ProcessStatus.FINISHED)) {
             throw new RuntimeException("该流程实例已结束");

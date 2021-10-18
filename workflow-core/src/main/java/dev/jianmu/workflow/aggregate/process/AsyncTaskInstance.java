@@ -41,6 +41,7 @@ public class AsyncTaskInstance {
 
     void skip() {
         this.status = TaskStatus.SKIPPED;
+        this.startTime = LocalDateTime.now();
         this.endTime = LocalDateTime.now();
     }
 
