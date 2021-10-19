@@ -1,7 +1,7 @@
 <template>
   <div class="workflow-workflow-viewer">
     流程查看器：
-    <jm-workflow-viewer :dsl="workflow" :trigger-type="TriggerTypeEnum.MANUAL"/>
+    <jm-workflow-viewer :dsl="workflow" readonly :trigger-type="TriggerTypeEnum.MANUAL"/>
     <jm-workflow-viewer :dsl="pipeline" :trigger-type="TriggerTypeEnum.MANUAL"/>
   </div>
 </template>
