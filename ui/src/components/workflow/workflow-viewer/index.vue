@@ -150,6 +150,8 @@ export default defineComponent({
 
       const parentElement = container.value.parentElement as HTMLElement;
       graph.value.changeSize(parentElement.clientWidth, parentElement.clientHeight);
+      console.log( parentElement.clientHeight, 'container.value.parentElement');
+      
     }, 500));
 
     onUnmounted(() => {
