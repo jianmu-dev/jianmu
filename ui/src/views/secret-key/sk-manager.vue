@@ -95,10 +95,14 @@ export default defineComponent({
           return;
         }
 
-        proxy.$confirm('确定要删除吗?', '删除密钥', {
+        let msg = '<div>确定要删除密钥吗?</div>';
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+
+        proxy.$confirm(msg, '删除密钥', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
+          dangerouslyUseHTMLString: true,
         }).then(() => {
           deletings.value[name] = true;
 
@@ -263,16 +267,17 @@ export default defineComponent({
         .operation {
           display: none;
           position: absolute;
-          right: 10px;
-          top: 10px;
+          right: 6px;
+          top: 8px;
 
           button {
-            width: 30px;
-            height: 30px;
+            width: 22px;
+            height: 22px;
             background-color: #FFFFFF;
             border: 0;
             background-position: center center;
             background-repeat: no-repeat;
+            background-size: contain;
             cursor: pointer;
 
             &:active {

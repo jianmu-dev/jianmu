@@ -110,6 +110,15 @@ public class WorkflowEventHandler {
     }
 
     @EventListener
+    public void handleNodeSkipEvent(NodeSkipEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        logger.info("Get NodeSkipEvent here -------------------------");
+        logger.info(event.getNodeRef());
+        this.instanceApplication.skipNode(event.getWorkflowInstanceId(), event.getNodeRef());
+        logger.info("handle NodeSkipEvent end-----------------------------------------------------");
+    }
+
+    @EventListener
     public void handleWorkflowStartEvent(WorkflowStartEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get WorkflowStartEvent here -------------------------");

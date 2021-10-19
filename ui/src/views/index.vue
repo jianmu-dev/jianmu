@@ -268,10 +268,16 @@ export default defineComponent({
           return;
         }
 
-        proxy.$confirm('确定要删除项目吗?', '删除项目', {
+        const { name } = projects.value.find(item => item.id === id) as IProjectVo;
+
+        let msg = '<div>确定要删除项目吗?</div>';
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+
+        proxy.$confirm(msg, '删除项目', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
+          dangerouslyUseHTMLString: true,
         }).then(() => {
           deletings.value[id] = true;
 
@@ -432,15 +438,15 @@ export default defineComponent({
           background-color: #FFFFFF;
           box-shadow: 0 0 8px 0 #9EB1C5;
 
-          &:hover {
-            .content {
-              .operation {
-                button.del {
-                  display: block;
-                }
-              }
-            }
-          }
+          //&:hover {
+          //  .content {
+          //    .operation {
+          //      button.del {
+          //        display: block;
+          //      }
+          //    }
+          //  }
+          //}
 
           .state-bar {
             height: 8px;
@@ -467,14 +473,14 @@ export default defineComponent({
 
           .content {
             position: relative;
-            padding: 10px 15px;
+            padding: 16px 20px;
 
             .git-label {
               position: absolute;
-              bottom: 5px;
+              bottom: 0;
               right: 0;
-              width: 45px;
-              height: 20px;
+              width: 40px;
+              height: 40px;
               overflow: hidden;
               background-position: center center;
               background-repeat: no-repeat;
@@ -558,10 +564,18 @@ export default defineComponent({
 
                 &.del {
                   position: absolute;
-                  right: 0;
-                  top: 3px;
-                  display: none;
+                  right: 3px;
+                  top: 5px;
+                  width: 22px;
+                  height: 22px;
+                  //display: none;
                   background-image: url('@/assets/svgs/btn/del.svg');
+                  background-size: contain;
+                  opacity: 0.65;
+
+                  &:hover {
+                    opacity: 1;
+                  }
                 }
 
                 &.workflow-label {

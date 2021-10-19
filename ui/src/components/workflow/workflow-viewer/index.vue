@@ -61,7 +61,18 @@ export default defineComponent({
     const nodeActionConfigured = ref<boolean>(false);
     const taskInstanceId = ref<string>();
     const nodeEvent = ref<INodeMouseoverEvent>();
+    const destroyNodeToolbar = () => {
+      taskInstanceId.value = undefined;
+      nodeEvent.value = undefined;
+    };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
+      if (nodeEvent.value) {
+        // 上一个事件尚未释放时，保证先释放完，再触发
+        destroyNodeToolbar();
+        proxy.$nextTick(() => mouseoverNode(evt));
+        return;
+      }
+
       switch (evt.type) {
         case NodeTypeEnum.ASYNC_TASK: {
           const task = (props.tasks as ITaskExecutionRecordVo[]).find(item => item.nodeName === evt.id);
@@ -92,8 +103,7 @@ export default defineComponent({
       }
 
       if (isOut) {
-        taskInstanceId.value = undefined;
-        nodeEvent.value = undefined;
+        destroyNodeToolbar();
       }
     };
     const zoom = ref<number>();

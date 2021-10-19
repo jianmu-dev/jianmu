@@ -119,9 +119,8 @@ export default defineComponent({
 
       try {
         // 初始化Webhook
-        const { payload: { path, query, header, body }, eventParameters } = await fetchTargetEvent(props.triggerId);
+        const { payload: { query, header, body }, eventParameters } = await fetchTargetEvent(props.triggerId);
         webhookLog.value = 'Webhook:\n' +
-          // `path: ${path}\n` +
           `query: ${JSON.stringify(query)}\n` +
           `header：${JSON.stringify(header)}\n` +
           `body：${body}\n`;

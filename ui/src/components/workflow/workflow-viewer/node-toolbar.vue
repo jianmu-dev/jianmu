@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, PropType, ref, SetupContext } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref, SetupContext } from 'vue';
 import { INodeMouseoverEvent } from './utils/model';
 import { MAX_LABEL_LENGTH } from './utils/dsl';
 import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
@@ -38,10 +38,9 @@ export default defineComponent({
   },
   emits: ['node-click'],
   setup(props: any, { emit }: SetupContext) {
-    const { proxy } = getCurrentInstance() as any;
     const toolbar = ref();
 
-    proxy.$nextTick(() => {
+    onMounted(() => {
       const z = props.zoom / 100;
       const w = props.nodeEvent.width + 10;
       const h = props.nodeEvent.height + 10;

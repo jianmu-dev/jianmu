@@ -83,7 +83,6 @@ export interface IEventBridgeSavingDto extends Readonly<{
  * 目标事件payload vo
  */
 export interface ITargetEventPayloadVo {
-  path: string;
   query: {
     [key: string]: string[];
   };

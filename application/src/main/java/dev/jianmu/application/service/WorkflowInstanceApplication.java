@@ -204,6 +204,22 @@ public class WorkflowInstanceApplication {
         return null;
     }
 
+    // 节点跳过
+    @Transactional
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
+    public void skipNode(String instanceId, String nodeRef) {
+        WorkflowInstance instance = this.workflowInstanceRepository
+                .findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        Workflow workflow = this.workflowRepository
+                .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        // 跳过节点
+        logger.info("skipNode: " + nodeRef);
+        workflowInstanceDomainService.skipNode(workflow, instance, nodeRef);
+        this.workflowInstanceRepository.save(instance);
+    }
+
     // 任务中止，完成
     @Transactional
     public WorkflowInstance terminateNode(String instanceId, String nodeRef) {
@@ -213,7 +229,6 @@ public class WorkflowInstanceApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        instance.setExpressionLanguage(this.expressionLanguage);
         // 中止节点
         logger.info("terminateNode: " + nodeRef);
         workflowInstanceDomainService.terminateNode(workflow, instance, nodeRef);
@@ -272,5 +287,4 @@ public class WorkflowInstanceApplication {
         this.workflowInstanceDomainService.taskSucceed(workflow, workflowInstance, taskInstance.getAsyncTaskRef());
         this.workflowInstanceRepository.save(workflowInstance);
     }
-    // TODO 任务跳过命令
 }
