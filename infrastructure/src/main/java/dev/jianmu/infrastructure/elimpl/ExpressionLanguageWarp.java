@@ -5,6 +5,7 @@ import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
  * @create: 2021-02-21 11:08
  **/
 @Service
+@Slf4j
 public class ExpressionLanguageWarp implements ExpressionLanguage {
     @Override
     public Expression parseExpression(String expression) {
@@ -26,7 +28,7 @@ public class ExpressionLanguageWarp implements ExpressionLanguage {
             Object rawResult = ((El) expression).eval(context);
             return new ElResult(expression.getExpression(), rawResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("表达式执行错误：{}", e.getMessage());
             return new EvaluationFailure(expression.getExpression(), e.getMessage());
         }
     }
