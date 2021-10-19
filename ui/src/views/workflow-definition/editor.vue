@@ -4,6 +4,9 @@
       <router-link :to="{name: 'index'}">
         <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
       </router-link>
+      <router-link :to="{name: 'process-templates'}">
+        <jm-button type="primary" class="jm-icon-button-back" size="small">上一步</jm-button>
+      </router-link>
       <jm-button type="primary" class="jm-icon-button-preserve" size="small"
                  @click="save" :loading="loading">保存
       </jm-button>
@@ -115,6 +118,7 @@ export default defineComponent({
     right: 20px;
     top: 78px;
 
+    .jm-icon-button-back::before,
     .jm-icon-button-cancel::before,
     .jm-icon-button-preserve::before {
       font-weight: bold;

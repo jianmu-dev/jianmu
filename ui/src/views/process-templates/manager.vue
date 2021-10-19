@@ -55,6 +55,7 @@
                                     </div>
                                     <jm-workflow-viewer style="height: 360px;"
                                                         :dsl="item.dsl"
+                                                        readonly
                                                         :trigger-type="TriggerTypeEnum.MANUAL"
                                                     />
                                 </li>
@@ -75,7 +76,7 @@ import { defineComponent, reactive, ref } from 'vue';
 import { workflowTemplatesCategories, viewWorkflowTemplates } from '@/api/process-templates';
 import { ICategories, IWorkflowTemplateViewingDto, ITemplateList, IContent } from '@/api/dto/process-templates';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
-
+import router from '@/router';
 
 export default defineComponent({
   setup() {
@@ -150,6 +151,9 @@ export default defineComponent({
     const next = () =>{
       processTemplatesDom.value.validate((valid: boolean) => {
         if(!valid) return false;
+        router.push({ 
+          name:'create-workflow-definition',
+        });
       });
     };
     
@@ -183,9 +187,6 @@ export default defineComponent({
     padding: 16px 0px 25px 0px;
     li{
         list-style:none;
-    }
-    ::v-deep(.jm-workflow-viewer-toolbar){
-        display:none;
     }
     .right-top-btn {
         position: fixed;

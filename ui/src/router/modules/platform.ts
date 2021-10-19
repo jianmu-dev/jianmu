@@ -131,7 +131,7 @@ export default [
       title: '新增项目',
     },
   }, {
-    name: 'create-process-templates',
+    name: 'process-templates',
     path: 'process-templates',
     component: () => import('@/views/process-templates/manager.vue'),
     meta: {
