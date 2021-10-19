@@ -1,7 +1,7 @@
 import { restProxy } from '@/api';
 import { ICategories, IWorkflowTemplateViewingDto, ITemplateList } from '@/api/dto/process-templates';
 
-export const baseUrl = 'https://api.test.jianmu.dev';
+export const baseUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 
 /**
  * 查看流程模版分类列表

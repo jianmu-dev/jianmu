@@ -22,6 +22,7 @@
                         <ul>
                             <li v-for="i in categoriesList"
                                 :key="i.id"
+                                @click="liClick(i)"
                             >{{ i.name }}</li>
                         </ul>
                     </jm-scrollbar>
@@ -38,7 +39,7 @@
                 </div>
                 <div class="ptf-r-b">
                     <div class="ptf-r-b-t">
-                        <jm-input  @input="searchsTemplate"  v-model="search" placeholder="请输入模版名称">
+                        <jm-input  @input="searchsTemplate"  v-model="workflowTemplates.name" placeholder="请输入模版名称">
                             <template #prefix>
                                 <i class="el-input__icon el-icon-search"></i>
                             </template>
@@ -46,14 +47,13 @@
                     </div>
                     <div  class="ptf-r-b-b">
                         <p>选择流程模版</p>
-                        <jm-scrollbar v-loading="templateLoading"  height="736px">
-                            <ul>
+                            <ul v-loading="templateLoading">
                                 <li v-for="item in templatesListCopy"
                                     :key="item.id">
                                     <div class="templates-tit">
                                         <p>{{ item.name }}</p>
                                     </div>
-                                    <jm-workflow-viewer style="max-height: 360px;"
+                                    <jm-workflow-viewer style="height: 360px;"
                                                         :dsl="item.dsl"
                                                         :trigger-type="TriggerTypeEnum.MANUAL"
                                                     />
@@ -63,9 +63,6 @@
                                         <i class="btm-down" :class="{'btn-loading':bottomLoading}"></i>
                                 </p>
                             </ul>
-                           
-                        </jm-scrollbar>
-                        
                     </div>
                 </div>
             </div>
@@ -81,7 +78,6 @@ import { TriggerTypeEnum } from '@/api/dto/enumeration';
 
 
 export default defineComponent({
-
   setup() {
     
     const categoriesList = reactive<ICategories[]>([]);
@@ -89,14 +85,13 @@ export default defineComponent({
       name:'',
     });
     const workflowTemplates = reactive<{pageNum:number; pageSize:number; name:string;templateCategoryId:number}>({
-      pageNum: 0,
+      pageNum: 1,
       pageSize: 10,
-    //   name: '',
-    //   templateCategoryId: 0,
+      name: '',
+      templateCategoryId: 0,
     });
     const templatesList:IContent[] = [];
     const templatesListCopy = reactive<IContent[]>([]);
-    const search = ref<string>('');
     const rules = {
       name:[
         { 
@@ -110,9 +105,6 @@ export default defineComponent({
     const templateLoading = ref<boolean>(true);
     const bottomLoading = ref<boolean>(false);
     const processTemplatesDom = ref<any>(null);
-    workflowTemplatesCategories().then((res:ICategories[]) => {
-      categoriesList.push(...res);
-    });
     const getTemplatesList = (workflowTemplates:IWorkflowTemplateViewingDto) => {
       viewWorkflowTemplates(workflowTemplates).then((res:ITemplateList) => {
         if(res.content.length <= 0) {
@@ -126,15 +118,20 @@ export default defineComponent({
         bottomLoading.value = false;
       });
     };
-    getTemplatesList(workflowTemplates);
+    workflowTemplatesCategories().then((res:ICategories[]) => {
+      categoriesList.push(...res);
+      workflowTemplates.templateCategoryId = categoriesList[0].id;
+      getTemplatesList(workflowTemplates);
+    });
+    
     
     const searchsTemplate = (name:string) => {
+      templatesListCopy.length = 0;
       if(name === ''){
         templatesListCopy.push(...templatesList);
         isShowMore.value = true;
         return;
       }
-      templatesListCopy.length = 0;
       isShowMore.value = false;
       templatesList.forEach((item:IContent) => {
         if(item.name.includes(name)){
@@ -166,22 +163,29 @@ export default defineComponent({
       categoriesList,
       processTemplatesForm,
       rules,
-      search,
       TriggerTypeEnum,
       templatesListCopy,
       templatesList,
       templateLoading,
+      workflowTemplates,
+      liClick:(i:ICategories) => {
+        workflowTemplates.templateCategoryId = i.id;
+        getTemplatesList(workflowTemplates);
+      },
     };
   },
 });
 </script>
 
-<style lang="less">
+<style scoped lang="less">
 
 .process-templates{
     padding: 16px 0px 25px 0px;
     li{
         list-style:none;
+    }
+    ::v-deep(.jm-workflow-viewer-toolbar){
+        display:none;
     }
     .right-top-btn {
         position: fixed;
