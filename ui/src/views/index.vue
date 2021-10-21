@@ -39,7 +39,8 @@
           <span class="desc">（共有 {{ projects.length }} 个项目）</span>
         </div>
         <div class="projects">
-          <div v-for="project of projects" :key="project.id" class="item">
+          <jm-empty v-if="projects.length === 0"/>
+          <div v-else v-for="project of projects" :key="project.id" class="item">
             <div :class="{'state-bar': true, [project.status.toLowerCase()]: true}"></div>
             <div class="content">
               <jm-tooltip v-if="project.source === DslSourceEnum.GIT" content="打开git仓库" placement="bottom">
