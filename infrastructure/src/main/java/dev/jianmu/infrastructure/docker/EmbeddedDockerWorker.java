@@ -218,11 +218,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
                     }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器日志操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
-                    .errorMsg(e.getMessage())
-                    .build());
             try {
                 logWriter.close();
             } catch (IOException ioException) {
@@ -254,11 +249,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
             }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器执行结果操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
-                    .errorMsg(e.getMessage())
-                    .build());
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
             logger.error("获取容器执行结果失败", e);
@@ -334,11 +324,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
                     }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器日志操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
-                    .errorMsg(e.getMessage())
-                    .build());
             try {
                 logWriter.close();
             } catch (IOException ioException) {
@@ -374,11 +359,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
             }).awaitCompletion();
         } catch (InterruptedException e) {
             logger.error("获取容器执行结果操作被中断:", e);
-            this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
-                    .errorMsg(e.getMessage())
-                    .build());
             Thread.currentThread().interrupt();
         } catch (RuntimeException e) {
             logger.error("获取容器执行结果失败", e);
