@@ -1,6 +1,6 @@
 <template>
   <router-view v-if="childRoute"/>
-  <div v-else class="secret-key-ns-manager" v-loading="loading">
+  <div v-else class="secret-key-ns-manager">
     <div class="right-top-btn">
       <router-link :to="{name: 'index'}">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
@@ -15,8 +15,9 @@
       <span>命名空间</span>
       <span class="desc">（共有 {{ totalElements }} 个命名空间）</span>
     </div>
-    <div class="content">
-      <div class="item" v-for="ns of namespaces" :key="ns.name">
+    <div class="content" v-loading="loading">
+      <jm-empty v-if="namespaces.length === 0"/>
+      <div v-else class="item" v-for="ns of namespaces" :key="ns.name">
         <div class="wrapper">
           <router-link :to="{name: 'manage-secret-key', params: { namespace: ns.name }}">
             <div class="name ellipsis">{{ ns.name }}</div>

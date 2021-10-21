@@ -1,5 +1,5 @@
 <template>
-  <div class="secret-key-sk-manager" v-loading="loading">
+  <div class="secret-key-sk-manager">
     <div class="right-top-btn">
       <router-link :to="{name: 'secret-key'}">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
@@ -19,8 +19,9 @@
           <div class="label">新增密钥</div>
         </button>
       </div>
-      <div class="content">
-        <div class="item" v-for="{id, name} of keys" :key="id">
+      <div class="content" v-loading="loading">
+        <jm-empty v-if="keys.length === 0"/>
+        <div v-else class="item" v-for="{id, name} of keys" :key="id">
           <div class="wrapper">
             <div class="name ellipsis">{{ name }}</div>
           </div>

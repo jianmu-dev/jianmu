@@ -16,7 +16,9 @@
     </div>
 
     <div v-loading="firstLoading" class="content">
+      <jm-empty v-if="nodeLibraryListData.length === 0"/>
       <div
+        v-else
         v-for="(i,idx) in nodeLibraryListData"
         :key="idx"
         class="item">

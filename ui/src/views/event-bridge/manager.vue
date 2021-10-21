@@ -1,6 +1,6 @@
 <template>
   <router-view v-if="childRoute"/>
-  <div v-else class="event-bridge-manager" v-loading="loading">
+  <div v-else class="event-bridge-manager">
     <div class="right-top-btn">
       <router-link :to="{name: 'index'}">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
@@ -15,8 +15,9 @@
       <span>事件桥接器</span>
       <span class="desc">（共有 {{ eventBridges.length }} 个事件桥接器）</span>
     </div>
-    <div class="content">
-      <div class="item" v-for="eb of eventBridges" :key="eb.id">
+    <div class="content" v-loading="loading">
+      <jm-empty v-if="eventBridges.length === 0"/>
+      <div v-else class="item" v-for="eb of eventBridges" :key="eb.id">
         <div class="wrapper">
           <router-link :to="{name: 'event-bridge-detail', params: { id: eb.id }}">
             <div class="name ellipsis">{{ eb.name }}</div>
