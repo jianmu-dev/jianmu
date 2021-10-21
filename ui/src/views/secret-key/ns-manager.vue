@@ -1,6 +1,6 @@
 <template>
   <router-view v-if="childRoute"/>
-  <div v-else class="secret-key-ns-manager" v-loading="loading">
+  <div v-else class="secret-key-ns-manager">
     <div class="right-top-btn">
       <router-link :to="{name: 'index'}">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
@@ -15,8 +15,9 @@
       <span>命名空间</span>
       <span class="desc">（共有 {{ totalElements }} 个命名空间）</span>
     </div>
-    <div class="content">
-      <div class="item" v-for="ns of namespaces" :key="ns.name">
+    <div class="content" v-loading="loading">
+      <jm-empty v-if="namespaces.length === 0"/>
+      <div v-else class="item" v-for="ns of namespaces" :key="ns.name">
         <div class="wrapper">
           <router-link :to="{name: 'manage-secret-key', params: { namespace: ns.name }}">
             <div class="name ellipsis">{{ ns.name }}</div>
@@ -122,10 +123,14 @@ export default defineComponent({
           return;
         }
 
-        proxy.$confirm('确定要删除吗?', '删除命名空间', {
+        let msg = '<div>确定要删除命名空间吗?</div>';
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+
+        proxy.$confirm(msg, '删除命名空间', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
+          dangerouslyUseHTMLString: true,
         }).then(() => {
           deletings.value[name] = true;
 
@@ -133,7 +138,7 @@ export default defineComponent({
             proxy.$success('删除成功');
 
             delete deletings.value[name];
-            
+
             // 同步命名空间列表（vuex状态）
             proxy.mutateNamespaceDeletion(name);
           }).catch((err: Error) => {
@@ -278,16 +283,17 @@ export default defineComponent({
       .operation {
         display: none;
         position: absolute;
-        right: 10px;
-        top: 10px;
+        right: 6px;
+        top: 8px;
 
         button {
-          width: 30px;
-          height: 30px;
+          width: 22px;
+          height: 22px;
           background-color: #FFFFFF;
           border: 0;
           background-position: center center;
           background-repeat: no-repeat;
+          background-size: contain;
           cursor: pointer;
 
           &:active {

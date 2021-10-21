@@ -90,11 +90,12 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
 /**
  * 初始化
  * @param dsl
+ * @param readonly
  * @param triggerType
  * @param nodeInfos
  * @param container
  */
-export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined,
+export function init(dsl: string | undefined, readonly: boolean, triggerType: TriggerTypeEnum | undefined,
   nodeInfos: INodeInfoVo[], container: HTMLElement): Graph | undefined {
   if (!dsl || !triggerType) {
     return undefined;
@@ -106,7 +107,7 @@ export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | und
 
   const graph = new Graph({
     modes: {
-      default: [
+      default: readonly ? [] : [
         // 画布行为
         'drag-canvas',
         // 'scroll-canvas',

@@ -1,11 +1,11 @@
 <template>
   <div class="jm-workflow-viewer">
-    <div v-if="graph && tasks.length > 0" class="task-states">
+    <div v-if="!readonly && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"/>
     </div>
-    <toolbar v-if="graph" :zoom-value="zoom" @click-process-log="clickProcessLog" @on-zoom="handleZoom"/>
-    <node-toolbar v-if="nodeEvent"
+    <toolbar v-if="!readonly && graph" :zoom-value="zoom" @click-process-log="clickProcessLog" @on-zoom="handleZoom"/>
+    <node-toolbar v-if="!readonly && nodeEvent"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
                   @node-click="clickNode"
                   @mouseout="handleNodeBarMouseout"/>
@@ -43,6 +43,10 @@ export default defineComponent({
   components: { TaskState, Toolbar, NodeToolbar },
   props: {
     dsl: String,
+    readonly: {
+      type: Boolean,
+      default: false,
+    },
     triggerType: String as PropType<TriggerTypeEnum>,
     nodeInfos: {
       type: Array,
@@ -61,7 +65,18 @@ export default defineComponent({
     const nodeActionConfigured = ref<boolean>(false);
     const taskInstanceId = ref<string>();
     const nodeEvent = ref<INodeMouseoverEvent>();
+    const destroyNodeToolbar = () => {
+      taskInstanceId.value = undefined;
+      nodeEvent.value = undefined;
+    };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
+      if (nodeEvent.value) {
+        // 上一个事件尚未释放时，保证先释放完，再触发
+        destroyNodeToolbar();
+        proxy.$nextTick(() => mouseoverNode(evt));
+        return;
+      }
+
       switch (evt.type) {
         case NodeTypeEnum.ASYNC_TASK: {
           const task = (props.tasks as ITaskExecutionRecordVo[]).find(item => item.nodeName === evt.id);
@@ -92,8 +107,7 @@ export default defineComponent({
       }
 
       if (isOut) {
-        taskInstanceId.value = undefined;
-        nodeEvent.value = undefined;
+        destroyNodeToolbar();
       }
     };
     const zoom = ref<number>();
@@ -115,7 +129,7 @@ export default defineComponent({
 
     proxy.$nextTick(() => {
       // 保证整个视图都渲染完毕，才能确定图的宽高
-      graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+      graph.value = init(props.dsl, props.readonly, props.triggerType, props.nodeInfos, container.value as HTMLElement);
 
       updateZoom();
 
@@ -125,7 +139,7 @@ export default defineComponent({
 
     onBeforeUpdate(() => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+        graph.value = init(props.dsl, props.readonly, props.triggerType, props.nodeInfos, container.value as HTMLElement);
 
         updateZoom();
       }
