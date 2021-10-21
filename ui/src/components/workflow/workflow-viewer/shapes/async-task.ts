@@ -156,7 +156,10 @@ export default function (G6: typeof _G6) {
       }
     },
     afterDraw(cfg, group) {
+      const width = 84;
+      const height = 84;
       const { iconUrl } = group?.cfg.item.getModel();
+
       if (!iconUrl) {
         const width = 44;
         const height = 44;
@@ -171,25 +174,21 @@ export default function (G6: typeof _G6) {
           },
           name: 'async_task_default_icon',
         });
-
-        return;
+      } else {
+        group?.addShape('image', {
+          attrs: {
+            x: -width / 2,
+            y: -height / 2,
+            width,
+            height,
+            img: `${iconUrl}?imageView2/2/w/84/h/84/interlace/1/q/100%7CroundPic/radius/!25.5p`,
+          },
+          name: 'async_task_icon',
+        });
       }
 
-      const width = 84;
-      const height = 84;
-      group?.addShape('image', {
-        attrs: {
-          x: -width / 2,
-          y: -height / 2,
-          width,
-          height,
-          img: `${iconUrl}?imageView2/2/w/84/h/84/interlace/1/q/100%7CroundPic/radius/!25.5p`,
-        },
-        name: 'async_task_icon',
-      });
-
-      const indicatorW = 5;
-      const indicatorH = 5;
+      const indicatorW = 6;
+      const indicatorH = 6;
       group?.addShape('rect', {
         attrs: {
           x: width / 2,
@@ -197,7 +196,7 @@ export default function (G6: typeof _G6) {
           width: indicatorW,
           height: indicatorH,
           fill: 'transparent',
-          radius: 2.5,
+          radius: 3,
         },
         // must be assigned in G6 3.3 and later versions. it can be any value you want
         name: 'async_task_state_indicator',

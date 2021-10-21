@@ -21,6 +21,7 @@ import dev.jianmu.trigger.service.ScheduleJobService;
 import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
+import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.apache.commons.lang3.StringUtils;
@@ -370,6 +371,12 @@ public class ProjectApplication {
     public void deleteById(String id) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        var running = this.workflowInstanceRepository
+                .findByRefAndVersionAndStatus(project.getWorkflowRef(), project.getWorkflowVersion(), ProcessStatus.RUNNING)
+                .size();
+        if (running > 0) {
+            throw new RuntimeException("仍有流程执行中，不能删除");
+        }
         // 删除EB关联
         this.targetRepository.findByDestinationId(project.getId())
                 .ifPresent(target -> {

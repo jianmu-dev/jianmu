@@ -1,5 +1,5 @@
 <template>
-  <div class="secret-key-sk-manager" v-loading="loading">
+  <div class="secret-key-sk-manager">
     <div class="right-top-btn">
       <router-link :to="{name: 'secret-key'}">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
@@ -19,8 +19,9 @@
           <div class="label">新增密钥</div>
         </button>
       </div>
-      <div class="content">
-        <div class="item" v-for="{id, name} of keys" :key="id">
+      <div class="content" v-loading="loading">
+        <jm-empty v-if="keys.length === 0"/>
+        <div v-else class="item" v-for="{id, name} of keys" :key="id">
           <div class="wrapper">
             <div class="name ellipsis">{{ name }}</div>
           </div>
@@ -95,10 +96,14 @@ export default defineComponent({
           return;
         }
 
-        proxy.$confirm('确定要删除吗?', '删除密钥', {
+        let msg = '<div>确定要删除密钥吗?</div>';
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+
+        proxy.$confirm(msg, '删除密钥', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
+          dangerouslyUseHTMLString: true,
         }).then(() => {
           deletings.value[name] = true;
 
@@ -263,16 +268,17 @@ export default defineComponent({
         .operation {
           display: none;
           position: absolute;
-          right: 10px;
-          top: 10px;
+          right: 6px;
+          top: 8px;
 
           button {
-            width: 30px;
-            height: 30px;
+            width: 22px;
+            height: 22px;
             background-color: #FFFFFF;
             border: 0;
             background-position: center center;
             background-repeat: no-repeat;
+            background-size: contain;
             cursor: pointer;
 
             &:active {

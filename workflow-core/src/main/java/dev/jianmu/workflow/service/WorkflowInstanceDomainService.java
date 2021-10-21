@@ -54,6 +54,12 @@ public class WorkflowInstanceDomainService {
         workflowInstance.activateNode(node);
     }
 
+    // 跳过节点
+    public void skipNode(Workflow workflow, WorkflowInstance workflowInstance, String nodeRef) {
+        Node node = workflow.findNode(nodeRef);
+        workflowInstance.skipNode(node);
+    }
+
     // 中止节点
     public void terminateNode(Workflow workflow, WorkflowInstance workflowInstance, String nodeRef) {
         if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {

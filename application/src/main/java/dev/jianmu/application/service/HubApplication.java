@@ -17,6 +17,7 @@ import dev.jianmu.workflow.repository.ParameterRepository;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class HubApplication {
         this.publisher = publisher;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void addNode(String name, String description, String dsl) {
         var nodeDsl = NodeDsl.parseDsl(dsl);
         var def = NodeDefinition.Builder.aNodeDefinition()
@@ -113,7 +114,7 @@ public class HubApplication {
         this.nodeDefinitionVersionRepository.saveOrUpdate(version);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void syncNode(String ownerRef, String ref) {
         var node = this.downloadNodeDef(ownerRef + "/" + ref);
         var versions = this.nodeDefinitionVersionRepository.findByOwnerRefAndRef(ownerRef, ref);
@@ -134,7 +135,7 @@ public class HubApplication {
         events.forEach(this.publisher::publishEvent);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteNode(String ownerRef, String ref) {
         var versions = this.nodeDefinitionVersionRepository.findByOwnerRefAndRef(ownerRef, ref);
         this.nodeDefinitionRepository.deleteById(ownerRef + "/" + ref);
@@ -247,7 +248,7 @@ public class HubApplication {
                 .build();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public NodeDef getByType(String type) {
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
                 .orElseGet(() -> this.downloadNodeDef(type));
