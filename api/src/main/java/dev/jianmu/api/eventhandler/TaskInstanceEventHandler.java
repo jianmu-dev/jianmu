@@ -115,7 +115,7 @@ public class TaskInstanceEventHandler {
                 logger.info("Task instance id: {}  ref: {} is resumed", taskInstance.getId(), taskInstance.getAsyncTaskRef());
             } catch (Exception e) {
                 logger.warn("Task instance id: {}  ref: {} is resume failed, due to: {}", taskInstance.getId(), taskInstance.getAsyncTaskRef(), e.getMessage());
-                this.taskInstanceApplication.executeFailed(taskInstance.getId());
+                this.taskInstanceInternalApplication.executeFailed(taskInstance.getId());
             }
         });
     }
