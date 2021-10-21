@@ -18,7 +18,6 @@ import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
-import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -199,11 +198,12 @@ public class ViewController {
                     projectVo.setNextTime(this.projectApplication.getNextFireTime(project.getId()));
                     if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
                         projectVo.setStatus("FAILED");
-                    } else {
-                        projectVo.setStatus(workflowInstance.findLatestAsyncTaskInstance()
-                                .orElse(AsyncTaskInstance.Builder.anAsyncTaskInstance().build())
-                                .getStatus().name()
-                        );
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
+                        projectVo.setStatus("SUCCEEDED");
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
+                        projectVo.setStatus("RUNNING");
                     }
                     return projectVo;
                 })
