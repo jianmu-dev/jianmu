@@ -1,9 +1,9 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.api.mapper.TaskResultMapper;
-import dev.jianmu.application.service.TaskInstanceApplication;
-import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
+import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
@@ -30,16 +30,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class TaskInstanceEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceEventHandler.class);
-    private final TaskInstanceApplication taskInstanceApplication;
+    private final TaskInstanceInternalApplication taskInstanceInternalApplication;
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final WorkerApplication workerApplication;
 
     public TaskInstanceEventHandler(
-            TaskInstanceApplication taskInstanceApplication,
+            TaskInstanceInternalApplication taskInstanceInternalApplication,
             WorkflowInstanceApplication workflowInstanceApplication,
             WorkerApplication workerApplication
     ) {
-        this.taskInstanceApplication = taskInstanceApplication;
+        this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.workerApplication = workerApplication;
     }
@@ -51,11 +51,11 @@ public class TaskInstanceEventHandler {
         MDC.put("triggerId", taskFinishedEvent.getTriggerId());
         var taskResultDto = TaskResultMapper.INSTANCE.toTaskResultDto(taskFinishedEvent);
         if (taskResultDto.isSucceeded()) {
-            this.taskInstanceApplication.executeSucceeded(
+            this.taskInstanceInternalApplication.executeSucceeded(
                     taskResultDto.getTaskInstanceId(), taskResultDto.getResultFile()
             );
         } else {
-            this.taskInstanceApplication.executeFailed(taskResultDto.getTaskInstanceId());
+            this.taskInstanceInternalApplication.executeFailed(taskResultDto.getTaskInstanceId());
         }
     }
 
@@ -63,7 +63,7 @@ public class TaskInstanceEventHandler {
     public void handleTaskRunningEvent(TaskRunningEvent taskRunningEvent) {
         // Worker执行状态事件通知任务上下文
         // TODO 运行状态需同步通知调度逻辑
-        this.taskInstanceApplication.running(taskRunningEvent.getTaskId());
+        this.taskInstanceInternalApplication.running(taskRunningEvent.getTaskId());
     }
 
     @EventListener
@@ -72,7 +72,7 @@ public class TaskInstanceEventHandler {
         // TODO 运行状态需同步通知调度逻辑
         MDC.put("triggerId", taskFailedEvent.getTriggerId());
         logger.info("task {} is failed, due to: {}", taskFailedEvent.getTaskId(), taskFailedEvent.getErrorMsg());
-        this.taskInstanceApplication.executeFailed(taskFailedEvent.getTaskId());
+        this.taskInstanceInternalApplication.executeFailed(taskFailedEvent.getTaskId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -107,7 +107,7 @@ public class TaskInstanceEventHandler {
     @EventListener
     @Async
     public void handleApplicationReadyEvent(ApplicationReadyEvent event) {
-        var taskInstances = this.taskInstanceApplication.findRunningTask();
+        var taskInstances = this.taskInstanceInternalApplication.findRunningTask();
         logger.info("恢复仍在运行中的任务数量：{}", taskInstances.size());
         taskInstances.forEach(taskInstance -> {
             this.workerApplication.dispatchTask(taskInstance, true);

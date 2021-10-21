@@ -1,8 +1,8 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.TaskInstanceApplication;
-import dev.jianmu.application.service.WorkerApplication;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
+import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.*;
 import org.slf4j.Logger;
@@ -26,13 +26,13 @@ public class WorkflowEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowEventHandler.class);
 
     private final WorkflowInstanceApplication instanceApplication;
-    private final TaskInstanceApplication taskInstanceApplication;
+    private final TaskInstanceInternalApplication taskInstanceInternalApplication;
     private final WorkerApplication workerApplication;
     private final ApplicationEventPublisher publisher;
 
-    public WorkflowEventHandler(WorkflowInstanceApplication instanceApplication, TaskInstanceApplication taskInstanceApplication, WorkerApplication workerApplication, ApplicationEventPublisher publisher) {
+    public WorkflowEventHandler(WorkflowInstanceApplication instanceApplication, TaskInstanceInternalApplication taskInstanceInternalApplication, WorkerApplication workerApplication, ApplicationEventPublisher publisher) {
         this.instanceApplication = instanceApplication;
-        this.taskInstanceApplication = taskInstanceApplication;
+        this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.workerApplication = workerApplication;
         this.publisher = publisher;
     }
@@ -57,7 +57,7 @@ public class WorkflowEventHandler {
         logger.info(event.getNodeType());
         logger.info(event.getWorkflowInstanceId());
         logger.info(event.getTriggerId());
-        this.taskInstanceApplication.create(event);
+        this.taskInstanceInternalApplication.create(event);
         logger.info("-----------------------------------------------------");
     }
 
