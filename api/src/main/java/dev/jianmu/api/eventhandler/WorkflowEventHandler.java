@@ -1,8 +1,8 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkerApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.*;
 import org.slf4j.Logger;
@@ -25,13 +25,18 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class WorkflowEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowEventHandler.class);
 
-    private final WorkflowInstanceApplication instanceApplication;
+    private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
     private final WorkerApplication workerApplication;
     private final ApplicationEventPublisher publisher;
 
-    public WorkflowEventHandler(WorkflowInstanceApplication instanceApplication, TaskInstanceInternalApplication taskInstanceInternalApplication, WorkerApplication workerApplication, ApplicationEventPublisher publisher) {
-        this.instanceApplication = instanceApplication;
+    public WorkflowEventHandler(
+            WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
+            TaskInstanceInternalApplication taskInstanceInternalApplication,
+            WorkerApplication workerApplication,
+            ApplicationEventPublisher publisher
+    ) {
+        this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.workerApplication = workerApplication;
         this.publisher = publisher;
@@ -95,7 +100,7 @@ public class WorkflowEventHandler {
         logger.info(event.getName());
         logger.info(event.getNodeRef());
         logger.info("-----------------------------------------------------");
-        this.instanceApplication.stop(event.getWorkflowInstanceId());
+        this.workflowInstanceInternalApplication.stop(event.getWorkflowInstanceId());
         this.workerApplication.cleanupWorkspace(event.getTriggerId());
     }
 
@@ -105,7 +110,7 @@ public class WorkflowEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get NodeActivatingEvent here -------------------------");
         logger.info(event.getNodeRef());
-        this.instanceApplication.activateNode(event.getWorkflowInstanceId(), event.getNodeRef());
+        this.workflowInstanceInternalApplication.activateNode(event.getWorkflowInstanceId(), event.getNodeRef());
         logger.info("handle NodeActivatingEvent end-----------------------------------------------------");
     }
 
@@ -114,7 +119,7 @@ public class WorkflowEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get NodeSkipEvent here -------------------------");
         logger.info(event.getNodeRef());
-        this.instanceApplication.skipNode(event.getWorkflowInstanceId(), event.getNodeRef());
+        this.workflowInstanceInternalApplication.skipNode(event.getWorkflowInstanceId(), event.getNodeRef());
         logger.info("handle NodeSkipEvent end-----------------------------------------------------");
     }
 

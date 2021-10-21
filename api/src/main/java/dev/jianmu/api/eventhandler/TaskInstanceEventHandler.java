@@ -1,9 +1,9 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.api.mapper.TaskResultMapper;
-import dev.jianmu.application.service.WorkflowInstanceApplication;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkerApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
@@ -31,16 +31,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class TaskInstanceEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceEventHandler.class);
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
-    private final WorkflowInstanceApplication workflowInstanceApplication;
+    private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final WorkerApplication workerApplication;
 
     public TaskInstanceEventHandler(
             TaskInstanceInternalApplication taskInstanceInternalApplication,
-            WorkflowInstanceApplication workflowInstanceApplication,
+            WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             WorkerApplication workerApplication
     ) {
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
-        this.workflowInstanceApplication = workflowInstanceApplication;
+        this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.workerApplication = workerApplication;
     }
 
@@ -87,21 +87,21 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceRunningEvent(TaskInstanceRunningEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceRunningEvent: {}", event);
-        this.workflowInstanceApplication.taskRun(event.getTaskInstanceId());
+        this.workflowInstanceInternalApplication.taskRun(event.getTaskInstanceId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceSucceedEvent(TaskInstanceSucceedEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceSucceedEvent: {}", event);
-        this.workflowInstanceApplication.taskSucceed(event.getTaskInstanceId());
+        this.workflowInstanceInternalApplication.taskSucceed(event.getTaskInstanceId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceFailedEvent: {}", event);
-        this.workflowInstanceApplication.taskFail(event.getTaskInstanceId());
+        this.workflowInstanceInternalApplication.taskFail(event.getTaskInstanceId());
     }
 
     @EventListener

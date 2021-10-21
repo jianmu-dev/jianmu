@@ -1,7 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.ProjectApplication;
-import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
@@ -19,14 +19,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class ProjectEventHandler {
-    private final WorkflowInstanceApplication workflowInstanceApplication;
+    private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final ProjectApplication projectApplication;
 
     public ProjectEventHandler(
-            WorkflowInstanceApplication workflowInstanceApplication,
+            WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             ProjectApplication projectApplication
     ) {
-        this.workflowInstanceApplication = workflowInstanceApplication;
+        this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.projectApplication = projectApplication;
     }
 
@@ -34,7 +34,7 @@ public class ProjectEventHandler {
     @EventListener
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
-        this.workflowInstanceApplication.createAndStart(
+        this.workflowInstanceInternalApplication.createAndStart(
                 triggerEvent.getTriggerId(),
                 triggerEvent.getTriggerType(),
                 triggerEvent.getWorkflowRef() + triggerEvent.getWorkflowVersion()

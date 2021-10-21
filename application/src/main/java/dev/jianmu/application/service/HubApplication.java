@@ -14,7 +14,6 @@ import dev.jianmu.infrastructure.client.RegistryClient;
 import dev.jianmu.infrastructure.mybatis.hub.NodeDefinitionRepositoryImpl;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -287,10 +286,10 @@ public class HubApplication {
 
     public NodeDef findByType(String type) {
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
-                .orElseThrow(() -> new DataNotFoundException("未找到节点定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义: " + type));
         var version =
                 this.nodeDefinitionVersionRepository.findByOwnerRefAndRefAndVersion(getOwnerRef(type), getRef(type), getVersion(type))
-                        .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本"));
+                        .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + type));
 
         return NodeDef.builder()
                 .name(node.getName())
