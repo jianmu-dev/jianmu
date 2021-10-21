@@ -16,7 +16,7 @@
                     <span>流程模版</span>
                 </div>
 
-                <div class="ptf-l-b">
+                <div v-if="categoriesList.length > 0" class="ptf-l-b">
                     <p>分类</p>
                     <jm-scrollbar max-height="50vh">
                         <ul>
@@ -49,19 +49,25 @@
                         <p>选择流程模版</p>
                             <ul v-loading="templateLoading">
                                 <li v-for="item in templatesListCopy"
-                                    :key="item.id">
+                                    :key="item.id"
+                                    :class="{click:templatesData.id === item.id}"
+                                    @click="templatesItem(item)"
+                                    >
                                     <div class="templates-tit">
+                                        <h3 :style="{backgroundColor:'#' + ('00000' + (('0.'+item.id) * 0x1000000 << 0).toString(16)).substr(-6)}"
+                                            class="templates-tit-h3">{{ titName }}</h3>
                                         <p>{{ item.name }}</p>
                                     </div>
                                     <jm-workflow-viewer style="height: 360px;"
                                                         :dsl="item.dsl"
                                                         readonly
+                                                        :node-infos="item.nodeDefs"
                                                         :trigger-type="TriggerTypeEnum.MANUAL"
                                                     />
                                 </li>
                                 <p v-if="isShowMore" @click="showMore" class="show-more">
-                                        <span>显示更多</span>
-                                        <i class="btm-down" :class="{'btn-loading':bottomLoading}"></i>
+                                    <span>显示更多</span>
+                                    <i class="btm-down" :class="{'btn-loading':bottomLoading}"></i>
                                 </p>
                             </ul>
                     </div>
@@ -72,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
+import { defineComponent, reactive, ref, getCurrentInstance } from 'vue';
 import { workflowTemplatesCategories, viewWorkflowTemplates } from '@/api/process-templates';
 import { ICategories, IWorkflowTemplateViewingDto, ITemplateList, IContent } from '@/api/dto/process-templates';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
@@ -80,9 +86,9 @@ import router from '@/router';
 
 export default defineComponent({
   setup() {
-    
+    const { proxy } = getCurrentInstance() as any;
     const categoriesList = reactive<ICategories[]>([]);
-    const processTemplatesForm = reactive<{ name:string}>({
+    const processTemplatesForm = reactive<{ name:string }>({
       name:'',
     });
     const workflowTemplates = reactive<{pageNum:number; pageSize:number; name:string;templateCategoryId:number}>({
@@ -102,11 +108,20 @@ export default defineComponent({
         },
       ],
     };
+    const titName = ref<string>('');
+    const templatesData = reactive<{id:number;name:string}>({
+      id:0,
+      name:'',
+    });
     const isShowMore = ref<boolean>(true);
     const templateLoading = ref<boolean>(true);
     const bottomLoading = ref<boolean>(false);
     const processTemplatesDom = ref<any>(null);
+    // 流程模版
     const getTemplatesList = (workflowTemplates:IWorkflowTemplateViewingDto) => {
+      templatesList.length = 0;
+      templatesListCopy.length = 0;
+      templateLoading.value = true;
       viewWorkflowTemplates(workflowTemplates).then((res:ITemplateList) => {
         if(res.content.length <= 0) {
           isShowMore.value = false;
@@ -119,9 +134,11 @@ export default defineComponent({
         bottomLoading.value = false;
       });
     };
+    // 列表
     workflowTemplatesCategories().then((res:ICategories[]) => {
       categoriesList.push(...res);
       workflowTemplates.templateCategoryId = categoriesList[0].id;
+      titName.value = categoriesList[0].name[0].toUpperCase();
       getTemplatesList(workflowTemplates);
     });
     
@@ -151,11 +168,20 @@ export default defineComponent({
     const next = () =>{
       processTemplatesDom.value.validate((valid: boolean) => {
         if(!valid) return false;
+        // if(!templatesData.id){
+        //   proxy.$warning('请选择模版');
+        //   return;
+        // }
         router.push({ 
           name:'create-workflow-definition',
+          query:{
+            processTemplatesName:templatesData.name,
+            processTemplatesId:templatesData.id,
+          },
         });
       });
     };
+
     
     return {
       searchsTemplate,
@@ -172,16 +198,28 @@ export default defineComponent({
       templatesList,
       templateLoading,
       workflowTemplates,
-      liClick:(i:ICategories) => {
+      titName,
+      liClick(i:ICategories){
+        titName.value = i.name[0].toUpperCase();
+        workflowTemplates.name = '';
         workflowTemplates.templateCategoryId = i.id;
         getTemplatesList(workflowTemplates);
+      },
+      templatesData,
+      templatesItem(item:IContent){
+        templatesData.id = item.id;
+        if(!processTemplatesForm.name){
+          templatesData.name = item.name;
+        }else{
+          templatesData.name = processTemplatesForm.name;
+        }
       },
     };
   },
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less">
 
 .process-templates{
     padding: 16px 0px 25px 0px;
@@ -245,6 +283,7 @@ export default defineComponent({
                     li:hover{
                         color: #096DD9;
                         cursor: pointer;
+                       
                     }
                 }
                 
@@ -290,18 +329,40 @@ export default defineComponent({
                         margin-bottom:20px;
                     }
                     ul{
+                        .click{
+                            border: 1px solid #096DD9;
+                            box-shadow: 0px 0px 16px 4px #DCE3EF;
+                        }
                         li{
                             border-radius: 4px;
                             border: 1px solid #B9CFE6;
                             max-height: 360px;
                             position: relative;
                             margin-bottom:20px;
+                            
+                            &:hover{
+                                border: 1px solid #096DD9;
+                                box-shadow: 0px 0px 16px 4px #DCE3EF;
+                            }
                             .templates-tit{
                                 position: absolute;
                                 top: 20px;
                                 left: 20px;
                                 font-size: 16px;
                                 color: #3F536E;
+                                display: flex;
+                                align-items: center;
+                                .templates-tit-h3{
+                                    background-color: red;
+                                    border-radius: 50%;
+                                    width: 30px;
+                                    height: 30px;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    color: #fff;
+                                    margin-right: 14px;;
+                                }
                             }
                         }
                         .show-more{

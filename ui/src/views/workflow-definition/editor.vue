@@ -26,8 +26,9 @@ import { useRouter } from 'vue-router';
 import { save } from '@/api/workflow-definition';
 import { ISaveForm } from '@/model/modules/workflow-definition';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-import { fetchProjectDetail } from '@/api/view-no-auth';
-
+import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
+import { useRoute } from 'vue-router';
+import {  IProcessTemplate } from '@/api/dto/project';
 const autoHeight: IAutoHeight = {
   elementId: 'workflow-definition-editor',
   offsetTop: 215,
@@ -41,14 +42,24 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const reloadMain = inject('reloadMain') as () => void;
-
+    const route = useRoute();
     const editMode = !!props.id;
     const editorForm = ref<ISaveForm>({
       id: props.id,
       dslText: '',
     });
     const loading = ref<boolean>(false);
-
+    if(route.query.processTemplatesId){
+      editorForm.value.id = route.query.id as string;
+      getProcessTemplate(route.query.processTemplatesId as unknown as number).then((res:IProcessTemplate) => {
+        let dsl = res.dsl;
+        if(route.query.processTemplatesName !== res.name){
+          editorForm.value.dslText = dsl.replace(/pipeline:\n {2}name: 发妹子图流程\n/, `pipeline:\n  name: ${route.query.processTemplatesName}\n`);
+        }
+      });
+    }else{
+      editorForm.value.dslText = `workflow:\n  name: ${route.query.processTemplatesName}\n`;
+    }
     if (editMode) {
       loading.value = !loading.value;
 
