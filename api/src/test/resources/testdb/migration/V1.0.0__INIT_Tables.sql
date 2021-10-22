@@ -163,6 +163,17 @@ CREATE TABLE `eb_source`
     PRIMARY KEY (`id`)
 );
 
+CREATE TABLE `eb_source_event`
+(
+    `id`            varchar(45) NOT NULL COMMENT 'ID',
+    `source_id`     varchar(45) NOT NULL COMMENT '来源ID',
+    `bridge_id`     varchar(45) NOT NULL COMMENT '桥接器ID',
+    `source_type`   varchar(45) NOT NULL COMMENT '来源类型',
+    `payload`       longtext COMMENT '事件载荷',
+    `occurred_time` datetime    NOT NULL COMMENT '触发时间',
+    PRIMARY KEY (`id`)
+);
+
 CREATE TABLE `eb_target`
 (
     `id`             varchar(45) NOT NULL COMMENT 'ID',

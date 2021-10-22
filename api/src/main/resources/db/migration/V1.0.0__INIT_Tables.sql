@@ -192,6 +192,19 @@ CREATE TABLE `eb_source`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='Source表';
 
+CREATE TABLE `eb_source_event`
+(
+    `id`            varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `source_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '来源ID',
+    `bridge_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '桥接器ID',
+    `source_type`   varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '来源类型',
+    `payload`       longtext COLLATE utf8mb4_unicode_ci COMMENT '事件载荷',
+    `occurred_time` datetime                               NOT NULL COMMENT '触发时间',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='来源事件表';
+
 CREATE TABLE `eb_target`
 (
     `id`             varchar(45) NOT NULL COMMENT 'ID',

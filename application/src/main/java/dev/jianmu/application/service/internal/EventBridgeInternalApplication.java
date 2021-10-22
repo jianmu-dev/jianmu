@@ -73,6 +73,7 @@ public class EventBridgeInternalApplication {
                 .orElseThrow(() -> new RuntimeException("未找到该Source: " + sourceId));
         var sourceEvent = SourceEvent.Builder.anOriginalEvent()
                 .sourceId(sourceId)
+                .bridgeId(source.getBridgeId())
                 .sourceType(source.getType())
                 .payload(payload)
                 .build();
