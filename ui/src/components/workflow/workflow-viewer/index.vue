@@ -135,6 +135,9 @@ export default defineComponent({
 
       // 配置节点行为
       nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
+
+      // 更新状态
+      updateNodeStates(props.tasks, graph.value);
     });
 
     onBeforeUpdate(() => {
@@ -150,10 +153,8 @@ export default defineComponent({
         nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
       }
 
-      if (graph.value) {
-        // 更新状态
-        updateNodeStates(props.tasks, graph.value);
-      }
+      // 更新状态
+      updateNodeStates(props.tasks, graph.value);
     });
 
     // 监控容器大小变化

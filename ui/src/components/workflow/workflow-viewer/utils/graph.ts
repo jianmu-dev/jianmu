@@ -162,7 +162,11 @@ export function init(dsl: string | undefined, readonly: boolean, triggerType: Tr
  * @param tasks
  * @param graph
  */
-export function updateNodeStates(tasks: ITaskExecutionRecordVo[], graph: Graph) {
+export function updateNodeStates(tasks: ITaskExecutionRecordVo[], graph?: Graph) {
+  if (!graph) {
+    return;
+  }
+  
   graph
     .getNodes()
     .filter(node => node.getModel().type === NodeTypeEnum.ASYNC_TASK)
