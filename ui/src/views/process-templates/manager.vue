@@ -48,11 +48,11 @@
                     </div>
                     
                     <div  class="ptf-r-b-b">
-                        <jm-empty v-if="templatesListCopy.length <= 0 && !templateLoading" />
+                        <jm-empty v-if="templatesList.length <= 0 && !templateLoading" />
                         <template v-else>
                             <p>选择流程模版</p>
                             <ul v-loading="templateLoading">
-                                <li v-for="item in templatesListCopy"
+                                <li v-for="item in templatesList"
                                     :key="item.id"
                                     :class="{click:templatesCLickData.templateId === item.id}"
                                     @click="templatesItem(item)"
@@ -71,11 +71,12 @@
                                                         :trigger-type="TriggerTypeEnum.MANUAL"
                                                     />
                                 </li>
-                                <p v-if="isShowMore" @click="showMore" class="show-more">
-                                    <span>显示更多</span>
-                                    <i class="btm-down" :class="{'btn-loading':bottomLoading}"></i>
-                                </p>
+                                
                             </ul>
+                            <div v-if="isShowMore" @click="showMore" class="show-more">
+                                <span>显示更多</span>
+                                <i class="btm-down" :class="{'btn-loading':bottomLoading}"></i>
+                            </div>
                         </template>
                     </div>
                 </div>
@@ -105,8 +106,7 @@ export default defineComponent({
       name: '',
       templateCategoryId: undefined,
     });
-    const templatesList:IContentVo[] = [];
-    const templatesListCopy = reactive<IContentVo[]>([]);
+    const templatesList = reactive<IContentVo[]>([]);
     const rules = {
       name:[
         { 
@@ -137,7 +137,6 @@ export default defineComponent({
         }
         isShowMore.value = true;
         templatesList.push(...res.content);
-        templatesListCopy.push(...res.content);
       }).finally(() => {
         templateLoading.value = false;
         bottomLoading.value = false;
@@ -154,18 +153,13 @@ export default defineComponent({
     
     
     const searchsTemplate = (name:string) => {
-      templatesListCopy.length = 0;
+      workflowTemplates.name = name;
+      workflowTemplates.pageNum = 1;
       if(name === ''){
-        templatesListCopy.push(...templatesList);
-        isShowMore.value = true;
-        return;
+        workflowTemplates.templateCategoryId = templatesCLickData.classifyId;
       }
-      isShowMore.value = false;
-      templatesList.forEach((item:IContentVo) => {
-        if(item.name.includes(name)){
-          templatesListCopy.push(item);
-        }
-      });
+      templatesList.length = 0;
+      getTemplatesList(workflowTemplates);
         
     };
 
@@ -201,7 +195,6 @@ export default defineComponent({
       processTemplatesForm,
       rules,
       TriggerTypeEnum,
-      templatesListCopy,
       templatesList,
       templateLoading,
       workflowTemplates,
@@ -216,7 +209,6 @@ export default defineComponent({
           workflowTemplates.templateCategoryId = i.id;
         }
         templatesList.length = 0;
-        templatesListCopy.length = 0;
         
         isShowMore.value = true;
         workflowTemplates.pageNum = 1;
@@ -361,6 +353,7 @@ export default defineComponent({
                     }
                     ul{
                         min-height: 500px;
+                       position:relative;
                         .click{
                             border: 1px solid #096DD9;
                             box-shadow: 0px 0px 16px 4px #DCE3EF;
@@ -397,13 +390,18 @@ export default defineComponent({
                                 }
                             }
                         }
-                        .show-more{
+                        
+                    }
+                    .show-more{
                             color: #7B8C9C;
                             font-size: 14px;
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             cursor: pointer;
+                            // position: absolute;
+                            // bottom: 0;
+                            // width: 100%;
                             .btm-down {
                                 width: 16px;
                                 height: 16px;
@@ -425,8 +423,6 @@ export default defineComponent({
                                 }
                             }
                         }
-                    }
-
                     
                 }
                 
