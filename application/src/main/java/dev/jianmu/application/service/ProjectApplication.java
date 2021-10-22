@@ -125,7 +125,7 @@ public class ProjectApplication {
         this.trigger(cronTrigger.getProjectId(), triggerId, "CRON");
     }
 
-    private Workflow createWorkflow(DslParser parser, String dslText) {
+    private Workflow createWorkflow(DslParser parser, String dslText, String ref) {
         // 查询相关的节点定义
         var types = parser.getAsyncTaskTypes();
         var nodeDefs = this.nodeDefApi.getByTypes(types);
@@ -137,7 +137,7 @@ public class ProjectApplication {
             globalParameters = Workflow.createGlobalParameters(parser.getParam());
         }
         return Workflow.Builder.aWorkflow()
-                .ref(parser.getRef())
+                .ref(ref)
                 .type(parser.getType())
                 .name(parser.getName())
                 .description(parser.getDescription())
@@ -152,10 +152,12 @@ public class ProjectApplication {
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
-        var workflow = this.createWorkflow(parser, dslText);
+        // 生成流程Ref
+        var ref = UUID.randomUUID().toString().replace("-", "");
+        var workflow = this.createWorkflow(parser, dslText, ref);
         var project = Project.Builder.aReference()
                 .workflowName(parser.getName())
-                .workflowRef(parser.getRef())
+                .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
                 .steps(parser.getSteps())
@@ -207,7 +209,7 @@ public class ProjectApplication {
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
-        var workflow = this.createWorkflow(parser, dslText);
+        var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(Project.TriggerType.MANUAL);
@@ -263,7 +265,9 @@ public class ProjectApplication {
     public void createProject(String dslText) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
-        var workflow = this.createWorkflow(parser, dslText);
+        // 生成流程Ref
+        var ref = UUID.randomUUID().toString().replace("-", "");
+        var workflow = this.createWorkflow(parser, dslText, ref);
         // 创建项目
         var project = Project.Builder.aReference()
                 .workflowName(workflow.getName())
@@ -313,10 +317,7 @@ public class ProjectApplication {
         var triggers = this.cronTriggerRepository.findByProjectId(project.getId());
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
-        if (!parser.getRef().equals(project.getWorkflowRef())) {
-            throw new RuntimeException("ref不一致");
-        }
-        var workflow = this.createWorkflow(parser, dslText);
+        var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(Project.TriggerType.MANUAL);
