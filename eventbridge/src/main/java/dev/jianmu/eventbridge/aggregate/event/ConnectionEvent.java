@@ -1,6 +1,4 @@
-package dev.jianmu.eventbridge.aggregate;
-
-import java.util.UUID;
+package dev.jianmu.eventbridge.aggregate.event;
 
 /**
  * @class: ConnectionEvent
@@ -8,17 +6,12 @@ import java.util.UUID;
  * @author: Ethan Liu
  * @create: 2021-08-14 17:23
  **/
-public class ConnectionEvent {
-    private String id;
+public class ConnectionEvent extends BaseEvent {
     private String bridgeId;
     private String sourceId;
     private String sourceEventId;
     private String targetId;
     private String payload;
-
-    public String getId() {
-        return id;
-    }
 
     public String getBridgeId() {
         return bridgeId;
@@ -82,7 +75,6 @@ public class ConnectionEvent {
 
         public ConnectionEvent build() {
             ConnectionEvent connectionEvent = new ConnectionEvent();
-            connectionEvent.id = UUID.randomUUID().toString().replace("-", "");
             connectionEvent.bridgeId = this.bridgeId;
             connectionEvent.sourceId = this.sourceId;
             connectionEvent.sourceEventId = this.sourceEventId;

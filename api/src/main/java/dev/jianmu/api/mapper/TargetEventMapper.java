@@ -1,7 +1,7 @@
 package dev.jianmu.api.mapper;
 
 import dev.jianmu.api.vo.TargetEventVo;
-import dev.jianmu.eventbridge.aggregate.TargetEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

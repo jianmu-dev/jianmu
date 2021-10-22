@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.eventbridge.aggregate.*;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import dev.jianmu.eventbridge.repository.ConnectionRepository;
 import dev.jianmu.eventbridge.repository.SourceRepository;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;

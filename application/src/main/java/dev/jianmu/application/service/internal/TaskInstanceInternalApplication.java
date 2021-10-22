@@ -7,7 +7,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
-import dev.jianmu.eventbridge.aggregate.TargetEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;

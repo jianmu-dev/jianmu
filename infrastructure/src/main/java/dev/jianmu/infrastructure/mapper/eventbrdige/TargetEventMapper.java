@@ -1,6 +1,6 @@
 package dev.jianmu.infrastructure.mapper.eventbrdige;
 
-import dev.jianmu.eventbridge.aggregate.TargetEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
@@ -21,9 +21,10 @@ public interface TargetEventMapper {
     @Result(column = "target_id", property = "targetId")
     @Result(column = "target_ref", property = "targetRef")
     @Result(column = "destination_id", property = "destinationId")
+    @Result(column = "occurred_time", property = "occurredTime")
     Optional<TargetEvent> findById(String id);
 
-    @Insert("insert into eb_target_event(id, source_id, source_event_id, connection_event_id, target_id, target_ref, destination_id, payload) " +
-            "values(#{id}, #{sourceId}, #{sourceEventId}, #{connectionEventId}, #{targetId}, #{targetRef}, #{destinationId}, #{payload})")
+    @Insert("insert into eb_target_event(id, source_id, source_event_id, connection_event_id, target_id, target_ref, destination_id, payload, occurred_time) " +
+            "values(#{id}, #{sourceId}, #{sourceEventId}, #{connectionEventId}, #{targetId}, #{targetRef}, #{destinationId}, #{payload}, #{occurredTime})")
     void save(TargetEvent targetEvent);
 }

@@ -1,11 +1,10 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.EventBridgeApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.internal.EventBridgeInternalApplication;
-import dev.jianmu.eventbridge.aggregate.ConnectionEvent;
-import dev.jianmu.eventbridge.aggregate.SourceEvent;
-import dev.jianmu.eventbridge.aggregate.TargetEvent;
+import dev.jianmu.eventbridge.aggregate.event.ConnectionEvent;
+import dev.jianmu.eventbridge.aggregate.event.SourceEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

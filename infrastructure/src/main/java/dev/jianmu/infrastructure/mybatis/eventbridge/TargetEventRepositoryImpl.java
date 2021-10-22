@@ -1,6 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.eventbridge;
 
-import dev.jianmu.eventbridge.aggregate.TargetEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.infrastructure.mapper.eventbrdige.TargetEventMapper;
 import dev.jianmu.infrastructure.mapper.eventbrdige.TargetEventParameterMapper;

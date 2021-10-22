@@ -1,8 +1,9 @@
-package dev.jianmu.eventbridge.aggregate;
+package dev.jianmu.eventbridge.aggregate.event;
+
+import dev.jianmu.eventbridge.aggregate.EventParameter;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * @class: Event
@@ -10,8 +11,7 @@ import java.util.UUID;
  * @author: Ethan Liu
  * @create: 2021-08-10 11:43
  **/
-public class TargetEvent {
-    private String id;
+public class TargetEvent extends BaseEvent {
     private String bridgeId;
     private String sourceId;
     private String sourceEventId;
@@ -21,10 +21,6 @@ public class TargetEvent {
     private String destinationId;
     private String payload;
     private Set<EventParameter> eventParameters;
-
-    public String getId() {
-        return id;
-    }
 
     public String getBridgeId() {
         return bridgeId;
@@ -137,7 +133,6 @@ public class TargetEvent {
 
         public TargetEvent build() {
             TargetEvent targetEvent = new TargetEvent();
-            targetEvent.id = UUID.randomUUID().toString().replace("-", "");
             targetEvent.bridgeId = this.bridgeId;
             targetEvent.sourceId = this.sourceId;
             targetEvent.sourceEventId = this.sourceEventId;

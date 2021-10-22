@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import dev.jianmu.eventbridge.aggregate.*;
-import dev.jianmu.eventbridge.repository.ConnectionRepository;
-import dev.jianmu.eventbridge.repository.SourceRepository;
-import dev.jianmu.eventbridge.repository.TargetEventRepository;
-import dev.jianmu.eventbridge.repository.TargetRepository;
+import dev.jianmu.eventbridge.aggregate.event.ConnectionEvent;
+import dev.jianmu.eventbridge.aggregate.event.SourceEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
+import dev.jianmu.eventbridge.repository.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +39,7 @@ import static java.util.stream.Collectors.*;
 @Slf4j
 public class EventBridgeInternalApplication {
     private final SourceRepository sourceRepository;
+    private final SourceEventRepository sourceEventRepository;
     private final TargetEventRepository targetEventRepository;
     private final ConnectionRepository connectionRepository;
     private final TargetRepository targetRepository;
@@ -48,6 +49,7 @@ public class EventBridgeInternalApplication {
 
     public EventBridgeInternalApplication(
             SourceRepository sourceRepository,
+            SourceEventRepository sourceEventRepository,
             TargetEventRepository targetEventRepository,
             ConnectionRepository connectionRepository,
             TargetRepository targetRepository,
@@ -56,6 +58,7 @@ public class EventBridgeInternalApplication {
             ObjectMapper objectMapper
     ) {
         this.sourceRepository = sourceRepository;
+        this.sourceEventRepository = sourceEventRepository;
         this.targetEventRepository = targetEventRepository;
         this.connectionRepository = connectionRepository;
         this.targetRepository = targetRepository;
@@ -73,6 +76,7 @@ public class EventBridgeInternalApplication {
                 .sourceType(source.getType())
                 .payload(payload)
                 .build();
+        this.sourceEventRepository.add(sourceEvent);
         // Check Token
         if (!source.isValidToken(token)) {
             throw new RuntimeException("无效的Token");

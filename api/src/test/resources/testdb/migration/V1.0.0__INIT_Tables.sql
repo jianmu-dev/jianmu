@@ -194,6 +194,7 @@ CREATE TABLE `eb_target_event`
     `target_ref`          varchar(45) DEFAULT NULL COMMENT 'Target Ref',
     `destination_id`      varchar(45) DEFAULT NULL COMMENT 'Destination ID',
     `payload`             longtext COMMENT 'Http payload',
+    `occurred_time`       datetime    DEFAULT NULL COMMENT '触发时间',
     PRIMARY KEY (`id`)
 );
 
