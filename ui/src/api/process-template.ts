@@ -1,5 +1,5 @@
 import { restProxy } from '@/api';
-import { ICategories, IWorkflowTemplateViewingDto, ITemplateList } from '@/api/dto/process-templates';
+import { ICategoriesVo, IWorkflowTemplateViewingDto, ITemplateListVo } from '@/api/dto/process-template';
 
 export const baseUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 
@@ -7,11 +7,10 @@ export const baseUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
  * 查看流程模版分类列表
  * @param dto
  */
-export function workflowTemplatesCategories(): Promise<ICategories[]> {
-  return restProxy<ICategories[]>({
+export function workflowTemplateCategories(): Promise<ICategoriesVo[]> {
+  return restProxy<ICategoriesVo[]>({
     url: `${baseUrl}/hub/view/workflow_templates/categories`,
     method: 'get',
-    auth: true,
   });
 }
 
@@ -19,11 +18,10 @@ export function workflowTemplatesCategories(): Promise<ICategories[]> {
  * 查看流程列表
  * @param dto
  */
-export function viewWorkflowTemplates(dto:IWorkflowTemplateViewingDto): Promise<ITemplateList> {
-  return restProxy<ITemplateList>({
+export function viewWorkflowTemplate(dto:IWorkflowTemplateViewingDto): Promise<ITemplateListVo> {
+  return restProxy<ITemplateListVo>({
     url: `${baseUrl}/hub/view/workflow_templates`,
     method: 'get',
-    auth: true,
     payload: dto,
   });
 }

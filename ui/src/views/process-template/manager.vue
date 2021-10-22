@@ -1,5 +1,5 @@
 <template>
-    <div class="process-templates">
+    <div class="process-template">
         <div class="right-top-btn">
             <router-link :to="{name: 'index'}">
                 <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
@@ -8,7 +8,7 @@
             <jm-button @click="next" type="primary" class="jm-icon-button-next" size="small">下一步</jm-button>
            
         </div>
-        <div  class="process-templates-flex">
+        <div  class="process-template-flex">
             <!-- left -->
             <div v-if="categoriesList.length > 0 " class="ptf-l">
                 <div class="ptf-l-t">
@@ -22,7 +22,7 @@
                         <ul>
                             <li v-for="i in categoriesList"
                                 :key="i.id"
-                                :class="{click:templatesCLickData.classifyId === i.id}"
+                                :class="{click:templatesClickData.classifyId === i.id}"
                                 @click="classifyClic(i)"
                             >
                             <img v-if="i.icon" :src="i.icon">
@@ -37,8 +37,8 @@
             <div class="ptf-r">
                 <div class="ptf-r-t">
                     <jm-form ref="processTemplatesDom" :model="processTemplatesForm" :rules="rules"  label-position="top">
-                        <jm-form-item prop="name" label="项目名称">
-                            <jm-input placeholder="请输入项目名称" style="width:65%" v-model="processTemplatesForm.name"></jm-input>
+                        <jm-form-item prop="processTemplatesName" label="项目名称">
+                            <jm-input placeholder="请输入项目名称" style="width:65%" v-model="processTemplatesForm.processTemplatesName"></jm-input>
                         </jm-form-item>
                     </jm-form>
                 </div>
@@ -58,12 +58,12 @@
                             <ul v-loading="templateLoading">
                                 <li v-for="item in templatesList"
                                     :key="item.id"
-                                    :class="{click:templatesCLickData.templateId === item.id}"
+                                    :class="{click:templatesClickData.templateId === item.id}"
                                     @click="templatesItem(item)"
                                     >
-                                    <div class="templates-tit">
+                                    <div class="template-tit">
                                         <h3 :style="{backgroundColor:'#' + ('00000' + (('0.'+item.id) * 0x1000000 << 0).toString(16)).substr(-6)}"
-                                            class="templates-tit-h3">
+                                            class="template-tit-h3">
                                             {{ item.type[0] }}
                                             </h3>
                                         <p>{{ item.name }}</p>
@@ -91,18 +91,19 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
-import { workflowTemplatesCategories, viewWorkflowTemplates } from '@/api/process-templates';
-import { ICategories, ITemplateListVo, IContentVo } from '@/api/dto/process-templates';
+import { workflowTemplateCategories, viewWorkflowTemplate } from '@/api/process-template';
+import { ICategoriesVo, ITemplateListVo, IContentVo } from '@/api/dto/process-template';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
-import { IWorkflowTemplateViewingForm, templatesCLickData }from '@/model/modules/process-templates';
+import { IWorkflowTemplateViewingForm, ITemplatesCLickData, IProcessTemplatesForm }from '@/model/modules/process-template';
 import router from '@/router';
-import { useRoute } from 'vue-router';
 export default defineComponent({
-  setup() {
-    const route = useRoute();
-    const categoriesList = reactive<ICategories[]>([]);
-    const processTemplatesForm = reactive<{ name:string }>({
-      name:route.query.processTemplatesName as string || '',
+  props:{
+    processTemplatesName:String,
+  },
+  setup(propx) {
+    const categoriesList = reactive<ICategoriesVo[]>([]);
+    const processTemplatesForm = reactive<IProcessTemplatesForm>({
+      processTemplatesName:propx.processTemplatesName || '',
     });
     const workflowTemplates = reactive<IWorkflowTemplateViewingForm>({
       pageNum: 1,
@@ -112,17 +113,17 @@ export default defineComponent({
     });
     const templatesList = reactive<IContentVo[]>([]);
     const rules = {
-      name:[
-        { 
+      processTemplatesName:[
+        {
           required: true,
           message: '请输入项目名称',
           trigger: 'change',
         },
       ],
     };
-    const templatesCLickData = reactive<templatesCLickData>({
+    const templatesClickData = reactive<ITemplatesCLickData>({
       templateId:undefined,
-      templateName:'',
+      templateName:propx.processTemplatesName || '',
       classifyId:undefined,
     });
     const isShowMore = ref<boolean>(false);
@@ -134,7 +135,7 @@ export default defineComponent({
     const getTemplatesList = (workflowTemplates:IWorkflowTemplateViewingForm) => {
       templateLoading.value = true;
       isShowMore.value = false;
-      viewWorkflowTemplates(workflowTemplates).then((res:ITemplateListVo) => {
+      viewWorkflowTemplate(workflowTemplates).then((res:ITemplateListVo) => {
         if(res.content.length <= 0) {
           isShowMore.value = false;
           return;
@@ -148,7 +149,7 @@ export default defineComponent({
       });
     };
     // 列表
-    workflowTemplatesCategories().then((res:ICategories[]) => {
+    workflowTemplateCategories().then((res:ICategoriesVo[]) => {
       categoriesList.push(...res);
       getTemplatesList(workflowTemplates);
     }).finally(() => {
@@ -160,7 +161,7 @@ export default defineComponent({
       workflowTemplates.name = name;
       workflowTemplates.pageNum = 1;
       if(name === ''){
-        workflowTemplates.templateCategoryId = templatesCLickData.classifyId;
+        workflowTemplates.templateCategoryId = templatesClickData.classifyId;
       }
       templatesList.length = 0;
       getTemplatesList(workflowTemplates);
@@ -179,8 +180,8 @@ export default defineComponent({
         router.push({ 
           name:'create-workflow-definition',
           query:{
-            processTemplatesName:processTemplatesForm.name,
-            processTemplatesId:templatesCLickData.templateId,
+            processTemplatesName:processTemplatesForm.processTemplatesName,
+            templateId:templatesClickData.templateId,
             source:'processTemplates',
           },
         });
@@ -202,38 +203,37 @@ export default defineComponent({
       templatesList,
       templateLoading,
       workflowTemplates,
-      classifyClic(i:ICategories){
+      classifyClic(i:ICategoriesVo){
         if(!classifyClickKey) return; 
         classifyClickKey = false;
-        if(i.id === templatesCLickData.classifyId){
-          templatesCLickData.classifyId = undefined;
+        if(i.id === templatesClickData.classifyId){
+          templatesClickData.classifyId = undefined;
           workflowTemplates.templateCategoryId = undefined;
         }else{
-          templatesCLickData.classifyId = i.id;
+          templatesClickData.classifyId = i.id;
           workflowTemplates.templateCategoryId = i.id;
         }
         templatesList.length = 0;
-        
         isShowMore.value = true;
         workflowTemplates.pageNum = 1;
         workflowTemplates.name = '';
         getTemplatesList(workflowTemplates);
       },
-      templatesCLickData,
+      templatesClickData,
       templatesItem(item:IContentVo){
-        if(templatesCLickData.templateId === item.id){
-          templatesCLickData.templateId = undefined;
-          templatesCLickData.templateName = '';
-          if(processTemplatesForm.name === item.name){
-            processTemplatesForm.name = '';
+        if(templatesClickData.templateId === item.id){
+          templatesClickData.templateId = undefined;
+          templatesClickData.templateName = '';
+          if(processTemplatesForm.processTemplatesName === item.name){
+            processTemplatesForm.processTemplatesName = '';
           }
         }else{
-          templatesCLickData.templateId = item.id;
+          templatesClickData.templateId = item.id;
           // 和上一次不一样就说明修改过
-          if(processTemplatesForm.name === templatesCLickData.templateName || processTemplatesForm.name === ''){
-            processTemplatesForm.name = item.name;
+          if(processTemplatesForm.processTemplatesName === templatesClickData.templateName || processTemplatesForm.processTemplatesName === ''){
+            processTemplatesForm.processTemplatesName = item.name;
           }
-          templatesCLickData.templateName = item.name;
+          templatesClickData.templateName = item.name;
         }
       },
     };
@@ -241,9 +241,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="less">
-
-.process-templates{
+<style scoped lang="less">
+.process-template{
     padding: 16px 0px 25px 0px;
     li{
         list-style:none;
@@ -262,12 +261,10 @@ export default defineComponent({
         }
         .jm-icon-button-next::before,
         .jm-icon-button-cancel::before {
-            font-weight: bold;
-            
+            font-weight: bold; 
         }
     }
-
-    .process-templates-flex{
+    .process-template-flex{
         display:flex;
         .ptf-l{
             .ptf-l-t{
@@ -277,14 +274,13 @@ export default defineComponent({
                 padding-left: 20px;
                 margin-bottom:30px;
                 align-items:center;
-                background-image: url("@/assets/svgs/process-templates/bj.png");
+                background-image: url("@/assets/images/process-template/bj.png");
                 &>i{
                     display:inline-block;
                     width: 54px;
                     height: 54px;
                     margin-right: 12px;
-                    background-image: url("@/assets/svgs/process-templates/process-templates.svg");
-                    
+                    background-image: url("@/assets/svgs/process-template/process-template.svg");
                 }
                 &>span{
                     font-weight: 500;
@@ -292,7 +288,6 @@ export default defineComponent({
                     font-size: 16px;
                 }
             }
-
             .ptf-l-b{
                 padding-left:20px;
                 font-size: 16px;
@@ -335,21 +330,17 @@ export default defineComponent({
                             max-width: 200px;
                         }
                     }
-                    
                     li:hover{
                         color: #096DD9;
                         cursor: pointer;
-                       
                     }
                 }
-                
             }
         }
 
         .ptf-r{
             margin-left: 30px;
             flex-grow: 1;
-            // width: 0;
             .ptf-r-t{
                 background-color: #fff;
                 padding:20px 30px 24px 30px;
@@ -361,7 +352,6 @@ export default defineComponent({
                     margin:0;
                 }
             }
-
             .ptf-r-b{
                 .ptf-r-b-t{
                     background-color:#F6FAFE;
@@ -374,7 +364,6 @@ export default defineComponent({
                         border:none;
                     }
                 }
-
                 .ptf-r-b-b{
                     padding: 20px 24px 20px 24px;
                     background-color: #fff;
@@ -397,12 +386,11 @@ export default defineComponent({
                             max-height: 360px;
                             position: relative;
                             margin-bottom:20px;
-                            
                             &:hover{
                                 border: 1px solid #096DD9;
                                 box-shadow: 0px 0px 16px 4px #DCE3EF;
                             }
-                            .templates-tit{
+                            .template-tit{
                                 position: absolute;
                                 top: 20px;
                                 left: 20px;
@@ -410,7 +398,7 @@ export default defineComponent({
                                 color: #3F536E;
                                 display: flex;
                                 align-items: center;
-                                .templates-tit-h3{
+                                .template-tit-h3{
                                     border-radius: 50%;
                                     width: 30px;
                                     height: 30px;
@@ -423,45 +411,36 @@ export default defineComponent({
                                 }
                             }
                         }
-                        
                     }
                     .show-more{
-                            color: #7B8C9C;
-                            font-size: 14px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            cursor: pointer;
-                            // position: absolute;
-                            // bottom: 0;
-                            // width: 100%;
-                            .btm-down {
-                                width: 16px;
-                                height: 16px;
-                                background-image: url('@/assets/svgs/node-library/drop-down.svg');
-                                margin-left: 6px;
-                                }
-
-                                .btm-down.btn-loading {
-                                animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43) infinite;
-                                background-image: url('@/assets/svgs/node-library/loading.svg');
-                                }
-
-                                @keyframes rotate {
-                                0% {
-                                    transform: rotate(0deg);
-                                }
-                                100% {
-                                    transform: rotate(360deg);
-                                }
+                        color: #7B8C9C;
+                        font-size: 14px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        .btm-down {
+                            width: 16px;
+                            height: 16px;
+                            background-image: url('@/assets/svgs/node-library/drop-down.svg');
+                            margin-left: 6px;
+                            }
+                            .btm-down.btn-loading {
+                            animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43) infinite;
+                            background-image: url('@/assets/svgs/node-library/loading.svg');
+                            }
+                            @keyframes rotate {
+                            0% {
+                                transform: rotate(0deg);
+                            }
+                            100% {
+                                transform: rotate(360deg);
                             }
                         }
-                    
+                    }
                 }
-                
             }
         }
     }
-
 }
 </style>
