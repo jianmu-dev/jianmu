@@ -24,7 +24,11 @@
                                 :key="i.id"
                                 :class="{click:templatesCLickData.classifyId === i.id}"
                                 @click="classifyClic(i)"
-                            >{{ i.name }}</li>
+                            >
+                            <img v-if="i.icon" :src="i.icon">
+                            <i v-else>{{ i.name[0].toUpperCase() }}</i>
+                            <span class="ellipsis"> {{ i.name }} </span>
+                            </li>
                         </ul>
                     </jm-scrollbar>
                 </div>
@@ -244,6 +248,11 @@ export default defineComponent({
     li{
         list-style:none;
     }
+    .ellipsis {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     .right-top-btn {
         position: fixed;
         right: 20px;
@@ -275,6 +284,7 @@ export default defineComponent({
                     height: 54px;
                     margin-right: 12px;
                     background-image: url("@/assets/svgs/process-templates/process-templates.svg");
+                    
                 }
                 &>span{
                     font-weight: 500;
@@ -291,16 +301,39 @@ export default defineComponent({
                     margin-bottom:22px;
                 }
                 ul{
-                    padding-left:40px;
+                    padding-left:15px;
                     .click{
                         color: #096DD9;
                         cursor: pointer;
                     }
                     li{
+                        width: 100%;
                         height: 24px;
                         color: #082340;
                         margin-bottom:7%;
-                        
+                        display:flex;
+                        align-items: center;
+                        &>img{
+                            margin-right: 14px;
+                            width: 24px;
+                            height: 24px;
+                        }
+                        &>i{
+                            display:flex;
+                            margin-right: 14px;
+                            width: 24px;
+                            height: 24px;
+                            justify-content: center;
+                            align-items: center;
+                            border-radius: 50%;
+                            background-color: #7B8C9C;
+                            color: #fff;
+                            font-size:13px;
+                            font-style: inherit;
+                        }
+                        &>span{
+                            max-width: 200px;
+                        }
                     }
                     
                     li:hover{
@@ -345,15 +378,15 @@ export default defineComponent({
                 .ptf-r-b-b{
                     padding: 20px 24px 20px 24px;
                     background-color: #fff;
-                    min-height: 500px;
+                    min-height: 220px;
                     &>p{
                         font-size: 14px;
                         color: #082340;
                         margin-bottom:20px;
                     }
                     ul{
-                        min-height: 500px;
-                       position:relative;
+                        min-height: 220px;
+                        position:relative;
                         .click{
                             border: 1px solid #096DD9;
                             box-shadow: 0px 0px 16px 4px #DCE3EF;
