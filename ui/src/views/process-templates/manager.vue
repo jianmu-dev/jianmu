@@ -8,21 +8,22 @@
             <jm-button @click="next" type="primary" class="jm-icon-button-next" size="small">下一步</jm-button>
            
         </div>
-        <div class="process-templates-flex">
+        <div  class="process-templates-flex">
             <!-- left -->
-            <div class="ptf-l">
+            <div v-if="categoriesList.length > 0 " class="ptf-l">
                 <div class="ptf-l-t">
                     <i></i>
                     <span>流程模版</span>
                 </div>
 
-                <div v-if="categoriesList.length > 0" class="ptf-l-b">
+                <div  class="ptf-l-b">
                     <p>分类</p>
                     <jm-scrollbar max-height="50vh">
                         <ul>
                             <li v-for="i in categoriesList"
                                 :key="i.id"
-                                @click="liClick(i)"
+                                :class="{click:templatesCLickData.classifyId === i.id}"
+                                @click="classifyClic(i)"
                             >{{ i.name }}</li>
                         </ul>
                     </jm-scrollbar>
@@ -39,23 +40,28 @@
                 </div>
                 <div class="ptf-r-b">
                     <div class="ptf-r-b-t">
-                        <jm-input  @input="searchsTemplate"  v-model="workflowTemplates.name" placeholder="请输入模版名称">
+                        <jm-input  @change="searchsTemplate"  v-model="workflowTemplates.name" placeholder="请输入模版名称">
                             <template #prefix>
                                 <i class="el-input__icon el-icon-search"></i>
                             </template>
                         </jm-input>
                     </div>
+                    
                     <div  class="ptf-r-b-b">
-                        <p>选择流程模版</p>
+                        <jm-empty v-if="templatesListCopy.length <= 0 && !templateLoading" />
+                        <template v-else>
+                            <p>选择流程模版</p>
                             <ul v-loading="templateLoading">
                                 <li v-for="item in templatesListCopy"
                                     :key="item.id"
-                                    :class="{click:templatesData.id === item.id}"
+                                    :class="{click:templatesCLickData.templateId === item.id}"
                                     @click="templatesItem(item)"
                                     >
                                     <div class="templates-tit">
                                         <h3 :style="{backgroundColor:'#' + ('00000' + (('0.'+item.id) * 0x1000000 << 0).toString(16)).substr(-6)}"
-                                            class="templates-tit-h3">{{ titName }}</h3>
+                                            class="templates-tit-h3">
+                                            {{ item.type[0] }}
+                                            </h3>
                                         <p>{{ item.name }}</p>
                                     </div>
                                     <jm-workflow-viewer style="height: 360px;"
@@ -70,6 +76,7 @@
                                     <i class="btm-down" :class="{'btn-loading':bottomLoading}"></i>
                                 </p>
                             </ul>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -78,68 +85,71 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, getCurrentInstance } from 'vue';
+import { defineComponent, reactive, ref } from 'vue';
 import { workflowTemplatesCategories, viewWorkflowTemplates } from '@/api/process-templates';
-import { ICategories, IWorkflowTemplateViewingDto, ITemplateList, IContent } from '@/api/dto/process-templates';
+import { ICategories, ITemplateListVo, IContentVo } from '@/api/dto/process-templates';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { IWorkflowTemplateViewingForm, templatesCLickData }from '@/model/modules/process-templates';
 import router from '@/router';
-
+import { useRoute } from 'vue-router';
 export default defineComponent({
   setup() {
-    const { proxy } = getCurrentInstance() as any;
+    const route = useRoute();
     const categoriesList = reactive<ICategories[]>([]);
     const processTemplatesForm = reactive<{ name:string }>({
-      name:'',
+      name:route.query.processTemplatesName as string || '',
     });
-    const workflowTemplates = reactive<{pageNum:number; pageSize:number; name:string;templateCategoryId:number}>({
+    const workflowTemplates = reactive<IWorkflowTemplateViewingForm>({
       pageNum: 1,
       pageSize: 10,
       name: '',
-      templateCategoryId: 0,
+      templateCategoryId: undefined,
     });
-    const templatesList:IContent[] = [];
-    const templatesListCopy = reactive<IContent[]>([]);
+    const templatesList:IContentVo[] = [];
+    const templatesListCopy = reactive<IContentVo[]>([]);
     const rules = {
       name:[
         { 
           required: true,
           message: '请输入项目名称',
-          trigger: 'blur',
+          trigger: 'change',
         },
       ],
     };
-    const titName = ref<string>('');
-    const templatesData = reactive<{id:number;name:string}>({
-      id:0,
-      name:'',
+    const templatesCLickData = reactive<templatesCLickData>({
+      templateId:undefined,
+      templateName:'',
+      classifyId:undefined,
     });
-    const isShowMore = ref<boolean>(true);
+    const isShowMore = ref<boolean>(false);
     const templateLoading = ref<boolean>(true);
     const bottomLoading = ref<boolean>(false);
     const processTemplatesDom = ref<any>(null);
+    let classifyClickKey = true;
     // 流程模版
-    const getTemplatesList = (workflowTemplates:IWorkflowTemplateViewingDto) => {
-      templatesList.length = 0;
-      templatesListCopy.length = 0;
+    const getTemplatesList = (workflowTemplates:IWorkflowTemplateViewingForm) => {
       templateLoading.value = true;
-      viewWorkflowTemplates(workflowTemplates).then((res:ITemplateList) => {
+      isShowMore.value = false;
+      viewWorkflowTemplates(workflowTemplates).then((res:ITemplateListVo) => {
         if(res.content.length <= 0) {
           isShowMore.value = false;
           return;
         }
+        isShowMore.value = true;
         templatesList.push(...res.content);
         templatesListCopy.push(...res.content);
       }).finally(() => {
         templateLoading.value = false;
         bottomLoading.value = false;
+        classifyClickKey = true;
       });
     };
     // 列表
     workflowTemplatesCategories().then((res:ICategories[]) => {
       categoriesList.push(...res);
-      workflowTemplates.templateCategoryId = categoriesList[0].id;
-      titName.value = categoriesList[0].name[0].toUpperCase();
       getTemplatesList(workflowTemplates);
+    }).finally(() => {
+      templateLoading.value = false;
     });
     
     
@@ -151,7 +161,7 @@ export default defineComponent({
         return;
       }
       isShowMore.value = false;
-      templatesList.forEach((item:IContent) => {
+      templatesList.forEach((item:IContentVo) => {
         if(item.name.includes(name)){
           templatesListCopy.push(item);
         }
@@ -168,15 +178,12 @@ export default defineComponent({
     const next = () =>{
       processTemplatesDom.value.validate((valid: boolean) => {
         if(!valid) return false;
-        // if(!templatesData.id){
-        //   proxy.$warning('请选择模版');
-        //   return;
-        // }
         router.push({ 
           name:'create-workflow-definition',
           query:{
-            processTemplatesName:templatesData.name,
-            processTemplatesId:templatesData.id,
+            processTemplatesName:processTemplatesForm.name,
+            processTemplatesId:templatesCLickData.templateId,
+            source:'processTemplates',
           },
         });
       });
@@ -198,20 +205,39 @@ export default defineComponent({
       templatesList,
       templateLoading,
       workflowTemplates,
-      titName,
-      liClick(i:ICategories){
-        titName.value = i.name[0].toUpperCase();
+      classifyClic(i:ICategories){
+        if(!classifyClickKey) return; 
+        classifyClickKey = false;
+        if(i.id === templatesCLickData.classifyId){
+          templatesCLickData.classifyId = undefined;
+          workflowTemplates.templateCategoryId = undefined;
+        }else{
+          templatesCLickData.classifyId = i.id;
+          workflowTemplates.templateCategoryId = i.id;
+        }
+        templatesList.length = 0;
+        templatesListCopy.length = 0;
+        
+        isShowMore.value = true;
+        workflowTemplates.pageNum = 1;
         workflowTemplates.name = '';
-        workflowTemplates.templateCategoryId = i.id;
         getTemplatesList(workflowTemplates);
       },
-      templatesData,
-      templatesItem(item:IContent){
-        templatesData.id = item.id;
-        if(!processTemplatesForm.name){
-          templatesData.name = item.name;
+      templatesCLickData,
+      templatesItem(item:IContentVo){
+        if(templatesCLickData.templateId === item.id){
+          templatesCLickData.templateId = undefined;
+          templatesCLickData.templateName = '';
+          if(processTemplatesForm.name === item.name){
+            processTemplatesForm.name = '';
+          }
         }else{
-          templatesData.name = processTemplatesForm.name;
+          templatesCLickData.templateId = item.id;
+          // 和上一次不一样就说明修改过
+          if(processTemplatesForm.name === templatesCLickData.templateName || processTemplatesForm.name === ''){
+            processTemplatesForm.name = item.name;
+          }
+          templatesCLickData.templateName = item.name;
         }
       },
     };
@@ -274,12 +300,17 @@ export default defineComponent({
                 }
                 ul{
                     padding-left:40px;
+                    .click{
+                        color: #096DD9;
+                        cursor: pointer;
+                    }
                     li{
                         height: 24px;
                         color: #082340;
                         margin-bottom:7%;
                         
                     }
+                    
                     li:hover{
                         color: #096DD9;
                         cursor: pointer;
@@ -322,13 +353,14 @@ export default defineComponent({
                 .ptf-r-b-b{
                     padding: 20px 24px 20px 24px;
                     background-color: #fff;
-                    // min-height: 736px;
+                    min-height: 500px;
                     &>p{
                         font-size: 14px;
                         color: #082340;
                         margin-bottom:20px;
                     }
                     ul{
+                        min-height: 500px;
                         .click{
                             border: 1px solid #096DD9;
                             box-shadow: 0px 0px 16px 4px #DCE3EF;
@@ -353,7 +385,6 @@ export default defineComponent({
                                 display: flex;
                                 align-items: center;
                                 .templates-tit-h3{
-                                    background-color: red;
                                     border-radius: 50%;
                                     width: 30px;
                                     height: 30px;
@@ -362,6 +393,7 @@ export default defineComponent({
                                     align-items: center;
                                     color: #fff;
                                     margin-right: 14px;;
+                                    font-size: 17px;
                                 }
                             }
                         }

@@ -8,20 +8,20 @@ export interface ICategories extends Readonly<{
 
 
 export interface IWorkflowTemplateViewingDto extends Readonly<IPageDto & {
-    name: string
-    templateCategoryId:number
+    name?: string
+    templateCategoryId?:number
   }> {
   }
 
-export interface IContent extends Readonly<{
+export interface IContentVo extends Readonly<{
     id: number
     name: string
     type: string
     dsl:string
   }> {
   }
-export interface ITemplateList extends Readonly<{
-  content: IContent[] | [],
+export interface ITemplateListVo extends Readonly<{
+  content: IContentVo[] | [],
   pageable: {
     sort: {
       empty: boolean,
