@@ -21,14 +21,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 @Schema(description = "TransformerDto")
 public class TransformerDto {
-    public enum Type {
-        BODY,
-        HEADER,
-        QUERY
-    }
-
-    @NotNull
-    private Type type;
     @NotBlank
     private String variableName;
     @NotBlank

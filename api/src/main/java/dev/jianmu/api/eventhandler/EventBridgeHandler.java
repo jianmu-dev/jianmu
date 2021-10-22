@@ -1,10 +1,10 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.EventBridgeApplication;
 import dev.jianmu.application.service.ProjectApplication;
-import dev.jianmu.eventbridge.aggregate.ConnectionEvent;
-import dev.jianmu.eventbridge.aggregate.SourceEvent;
-import dev.jianmu.eventbridge.aggregate.TargetEvent;
+import dev.jianmu.application.service.internal.EventBridgeInternalApplication;
+import dev.jianmu.eventbridge.aggregate.event.ConnectionEvent;
+import dev.jianmu.eventbridge.aggregate.event.SourceEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -18,25 +18,22 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class EventBridgeHandler {
-    private final EventBridgeApplication eventBridgeApplication;
+    private final EventBridgeInternalApplication eventBridgeInternalApplication;
     private final ProjectApplication projectApplication;
 
-    public EventBridgeHandler(EventBridgeApplication eventBridgeApplication, ProjectApplication projectApplication) {
-        this.eventBridgeApplication = eventBridgeApplication;
+    public EventBridgeHandler(EventBridgeInternalApplication eventBridgeInternalApplication, ProjectApplication projectApplication) {
+        this.eventBridgeInternalApplication = eventBridgeInternalApplication;
         this.projectApplication = projectApplication;
     }
 
     @EventListener
     public void sourceEventHandle(SourceEvent sourceEvent) {
-        sourceEvent.getPayload().getHeader().forEach((k, v) -> {
-            log.info("header key: {}  value: {}", k, v);
-        });
-        this.eventBridgeApplication.dispatchEvent(sourceEvent);
+        this.eventBridgeInternalApplication.dispatchEvent(sourceEvent);
     }
 
     @EventListener
     public void connectionEventHandle(ConnectionEvent connectionEvent) {
-        this.eventBridgeApplication.eventHandling(connectionEvent);
+        this.eventBridgeInternalApplication.eventHandling(connectionEvent);
     }
 
     @EventListener

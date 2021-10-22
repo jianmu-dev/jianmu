@@ -27,7 +27,6 @@ public class DslParser {
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
     private String name;
-    private String ref;
     private String description;
     private Workflow.Type type;
     private final List<DslNode> dslNodes = new ArrayList<>();
@@ -218,12 +217,7 @@ public class DslParser {
         if (null == pipe.get("name")) {
             throw new RuntimeException("pipeline name未设置");
         }
-        if (null == pipe.get("ref")) {
-            throw new RuntimeException("pipeline ref未设置");
-        }
         this.name = (String) pipe.get("name");
-        this.ref = (String) pipe.get("ref");
-        RefChecker.check(this.ref);
         this.description = (String) pipe.get("description");
         pipe.forEach((key, val) -> {
             if (val instanceof Map) {
@@ -251,12 +245,7 @@ public class DslParser {
         if (null == flow.get("name")) {
             throw new RuntimeException("workflow name未设置");
         }
-        if (null == flow.get("ref")) {
-            throw new RuntimeException("workflow ref未设置");
-        }
         this.name = (String) flow.get("name");
-        this.ref = (String) flow.get("ref");
-        RefChecker.check(this.ref);
         this.description = (String) flow.get("description");
         flow.forEach((key, val) -> {
             if (val instanceof Map) {
@@ -369,10 +358,6 @@ public class DslParser {
 
     public String getName() {
         return name;
-    }
-
-    public String getRef() {
-        return ref;
     }
 
     public String getDescription() {

@@ -31,5 +31,4 @@ public class WorkflowInstanceVo {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ProcessStatus status;
-    private String latestTaskStatus;
 }

@@ -1,6 +1,6 @@
-package dev.jianmu.eventbridge.aggregate;
+package dev.jianmu.eventbridge.aggregate.event;
 
-import java.util.UUID;
+import dev.jianmu.eventbridge.aggregate.Source;
 
 /**
  * @class: OriginalEvent
@@ -8,15 +8,11 @@ import java.util.UUID;
  * @author: Ethan Liu
  * @create: 2021-08-14 17:10
  **/
-public class SourceEvent {
-    private String id;
+public class SourceEvent extends BaseEvent {
     private String bridgeId;
     private String sourceId;
-    private Payload payload;
-
-    public String getId() {
-        return id;
-    }
+    private Source.Type sourceType;
+    private String payload;
 
     public String getBridgeId() {
         return bridgeId;
@@ -26,15 +22,19 @@ public class SourceEvent {
         return sourceId;
     }
 
-    public Payload getPayload() {
-        return payload;
+    public Source.Type getSourceType() {
+        return sourceType;
     }
 
+    public String getPayload() {
+        return payload;
+    }
 
     public static final class Builder {
         private String bridgeId;
         private String sourceId;
-        private Payload payload;
+        private Source.Type sourceType;
+        private String payload;
 
         private Builder() {
         }
@@ -53,16 +53,21 @@ public class SourceEvent {
             return this;
         }
 
-        public Builder payload(Payload payload) {
+        public Builder sourceType(Source.Type sourceType) {
+            this.sourceType = sourceType;
+            return this;
+        }
+
+        public Builder payload(String payload) {
             this.payload = payload;
             return this;
         }
 
         public SourceEvent build() {
             SourceEvent sourceEvent = new SourceEvent();
-            sourceEvent.id = UUID.randomUUID().toString().replace("-", "");
             sourceEvent.bridgeId = this.bridgeId;
             sourceEvent.sourceId = this.sourceId;
+            sourceEvent.sourceType = this.sourceType;
             sourceEvent.payload = this.payload;
             return sourceEvent;
         }

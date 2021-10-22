@@ -186,10 +186,24 @@ CREATE TABLE `eb_source`
     `name`      varchar(45) DEFAULT NULL COMMENT '名称',
     `type`      varchar(45) DEFAULT NULL COMMENT '类型',
     `token`     varchar(45) DEFAULT NULL COMMENT '外部token',
+    `matcher`   varchar(45) DEFAULT NULL COMMENT '事件匹配规则',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='Source表';
+
+CREATE TABLE `eb_source_event`
+(
+    `id`            varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `source_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '来源ID',
+    `bridge_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '桥接器ID',
+    `source_type`   varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '来源类型',
+    `payload`       longtext COLLATE utf8mb4_unicode_ci COMMENT '事件载荷',
+    `occurred_time` datetime                               NOT NULL COMMENT '触发时间',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='来源事件表';
 
 CREATE TABLE `eb_target`
 (
@@ -225,7 +239,8 @@ CREATE TABLE `eb_target_event`
     `target_id`           varchar(45) DEFAULT NULL COMMENT 'Target ID',
     `target_ref`          varchar(45) DEFAULT NULL COMMENT 'Target Ref',
     `destination_id`      varchar(45) DEFAULT NULL COMMENT 'Destination ID',
-    `payload`             blob COMMENT 'Http payload',
+    `payload`             longtext COMMENT 'Http payload',
+    `occurred_time`       datetime    DEFAULT NULL COMMENT '触发时间',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -248,8 +263,7 @@ CREATE TABLE `eb_target_transformer`
     `target_id`     varchar(45) NOT NULL COMMENT '关联的Target ID',
     `variable_name` varchar(45) NOT NULL COMMENT '变量名',
     `variable_type` varchar(45) NOT NULL COMMENT '变量类型',
-    `expression`    varchar(45) NOT NULL COMMENT '表达式',
-    `class_type`    varchar(45) NOT NULL COMMENT 'Transformer类型'
+    `expression`    varchar(45) NOT NULL COMMENT '表达式'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='Target Transformer表';

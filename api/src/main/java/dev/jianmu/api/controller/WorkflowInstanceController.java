@@ -1,17 +1,14 @@
 package dev.jianmu.api.controller;
 
-import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.WorkflowInstanceSearchDto;
-import dev.jianmu.api.mapper.WorkflowInstanceMapper;
-import dev.jianmu.api.vo.PageUtils;
-import dev.jianmu.api.vo.WorkflowInstanceVo;
-import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @class: WorkflowInstanceController
@@ -24,35 +21,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "流程实例接口", description = "提供流程实例启动停止等API")
 @SecurityRequirement(name = "bearerAuth")
 public class WorkflowInstanceController {
-    private final WorkflowInstanceApplication instanceApplication;
+    private final WorkflowInstanceInternalApplication instanceApplication;
 
-    public WorkflowInstanceController(WorkflowInstanceApplication instanceApplication) {
+    public WorkflowInstanceController(WorkflowInstanceInternalApplication instanceApplication) {
         this.instanceApplication = instanceApplication;
-    }
-
-    @GetMapping
-    public PageInfo<WorkflowInstanceVo> findAll(WorkflowInstanceSearchDto searchDto) {
-        var page = this.instanceApplication.findAllPage(
-                searchDto.getId(),
-                searchDto.getName(),
-                searchDto.getWorkflowVersion(),
-                searchDto.getStatus(),
-                searchDto.getPageNum(),
-                searchDto.getPageSize()
-        );
-        var instances = page.getList();
-        var newInstances = WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
-        PageInfo<WorkflowInstanceVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
-        newPage.setList(newInstances);
-        return newPage;
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "流程实例详情", description = "流程实例详情")
-    public WorkflowInstanceVo findById(@PathVariable String id) {
-        var instance = this.instanceApplication.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVo(instance);
     }
 
     @PutMapping("/{instanceId}/{nodeRef}")

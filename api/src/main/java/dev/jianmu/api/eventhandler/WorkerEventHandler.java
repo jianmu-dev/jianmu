@@ -1,6 +1,6 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.EmbeddedWorkerApplication;
+import dev.jianmu.application.service.internal.EmbeddedWorkerApplication;
 import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
 import dev.jianmu.hub.intergration.event.NodeUpdatedEvent;
 import dev.jianmu.worker.aggregate.Worker;

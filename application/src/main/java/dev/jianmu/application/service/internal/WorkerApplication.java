@@ -1,4 +1,4 @@
-package dev.jianmu.application.service;
+package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.secret.aggregate.KVPair;

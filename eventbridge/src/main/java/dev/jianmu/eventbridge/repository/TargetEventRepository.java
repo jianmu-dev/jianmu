@@ -1,6 +1,6 @@
 package dev.jianmu.eventbridge.repository;
 
-import dev.jianmu.eventbridge.aggregate.TargetEvent;
+import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 
 import java.util.Optional;
 
