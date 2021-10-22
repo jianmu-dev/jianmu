@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.workflow.aggregate.definition.*;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -23,13 +24,14 @@ import java.util.stream.Collectors;
 public class DslParser {
     private String cron;
     private String eb;
-    private Map<String, String> param;
+    private Map<String, Object> param;
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
     private String name;
     private String description;
     private Workflow.Type type;
     private final List<DslNode> dslNodes = new ArrayList<>();
+    private Set<GlobalParameter> globalParameters = new HashSet<>();
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -38,6 +40,7 @@ public class DslParser {
         try {
             parser = parser.mapper.readValue(dslText, DslParser.class);
             parser.syntaxCheck();
+            parser.createGlobalParameters();
         } catch (IOException e) {
             log.error("DSL解析异常:", e);
             throw new RuntimeException("DSL解析异常");
@@ -120,6 +123,26 @@ public class DslParser {
         return new HashSet<>(symbolTable.values());
     }
 
+    private void createGlobalParameters() {
+        this.globalParameters = this.param.entrySet().stream().map(entry -> {
+            String type = null;
+            Object value = null;
+            if (entry.getValue() instanceof String) {
+                value = entry.getValue().toString();
+                type = "STRING";
+            }
+            if (entry.getValue() instanceof Map) {
+                value = ((Map<?, ?>) entry.getValue()).get("value");
+                type = ((Map<String, String>) entry.getValue()).get("type");
+            }
+            return GlobalParameter.Builder.aGlobalParameter()
+                    .name(entry.getKey())
+                    .type(type)
+                    .value(value)
+                    .build();
+        }).collect(Collectors.toSet());
+    }
+
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
@@ -189,6 +212,7 @@ public class DslParser {
         if (this.cron != null && this.eb != null) {
             throw new RuntimeException("不能同时使用Cron与EventBridge");
         }
+        this.paramSyntaxCheck();
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
@@ -210,6 +234,19 @@ public class DslParser {
             return;
         }
         throw new RuntimeException("workflow或pipeline未设置");
+    }
+
+    private void paramSyntaxCheck() {
+        if (this.param == null) {
+            return;
+        }
+        this.param.forEach((k, v) -> {
+            if (v instanceof Map) {
+                var type = ((Map<String, String>) v).get("type");
+                var value = ((Map<?, ?>) v).get("value");
+                Parameter.Type.getTypeByName(type).newParameter(value);
+            }
+        });
     }
 
     private void pipelineSyntaxCheck() {
@@ -344,7 +381,7 @@ public class DslParser {
         return eb;
     }
 
-    public Map<String, String> getParam() {
+    public Map<String, Object> getParam() {
         return param;
     }
 
@@ -370,5 +407,9 @@ public class DslParser {
 
     public List<DslNode> getDslNodes() {
         return dslNodes;
+    }
+
+    public Set<GlobalParameter> getGlobalParameters() {
+        return globalParameters;
     }
 }

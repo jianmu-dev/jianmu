@@ -8,19 +8,25 @@ package dev.jianmu.workflow.aggregate.definition;
  **/
 public class GlobalParameter {
     private String name;
-    private String value;
+    private String type;
+    private Object value;
 
     public String getName() {
         return name;
     }
 
-    public String getValue() {
+    public String getType() {
+        return type;
+    }
+
+    public Object getValue() {
         return value;
     }
 
     public static final class Builder {
         private String name;
-        private String value;
+        private String type;
+        private Object value;
 
         private Builder() {
         }
@@ -34,7 +40,12 @@ public class GlobalParameter {
             return this;
         }
 
-        public Builder value(String value) {
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder value(Object value) {
             this.value = value;
             return this;
         }
@@ -42,6 +53,7 @@ public class GlobalParameter {
         public GlobalParameter build() {
             GlobalParameter globalParameter = new GlobalParameter();
             globalParameter.value = this.value;
+            globalParameter.type = this.type;
             globalParameter.name = this.name;
             return globalParameter;
         }

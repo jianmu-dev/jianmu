@@ -132,17 +132,13 @@ public class ProjectApplication {
 
         // 根据节点定义与DSL节点列表创建Workflow
         var nodes = parser.createNodes(nodeDefs);
-        Set<GlobalParameter> globalParameters = Set.of();
-        if (parser.getParam() != null) {
-            globalParameters = Workflow.createGlobalParameters(parser.getParam());
-        }
         return Workflow.Builder.aWorkflow()
                 .ref(ref)
                 .type(parser.getType())
                 .name(parser.getName())
                 .description(parser.getDescription())
                 .nodes(nodes)
-                .globalParameters(globalParameters)
+                .globalParameters(parser.getGlobalParameters())
                 .dslText(dslText)
                 .build();
     }
