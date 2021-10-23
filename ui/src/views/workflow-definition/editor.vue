@@ -29,7 +29,7 @@
 import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { save } from '@/api/project';
-import { ISaveForm } from '@/model/modules/workflow-definition';
+import { ISaveForm } from '@/model/modules/project';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
 import { IProcessTemplate } from '@/api/dto/project';

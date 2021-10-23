@@ -52,7 +52,7 @@
 
 <script lang="ts">
 import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
-import { IGitCloneForm } from '@/model/modules/workflow-definition';
+import { IGitCloneForm } from '@/model/modules/project';
 import { ProjectImporterTypeEnum } from '@/api/dto/enumeration';
 import { listSecretKey, queryNamespace } from '@/api/view-no-auth';
 import { cloneGit } from '@/api/project';

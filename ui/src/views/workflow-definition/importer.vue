@@ -23,7 +23,7 @@ import StepOne from './import-step-one.vue';
 import StepTwo from './import-step-two.vue';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { IGitVo } from '@/api/dto/project';
-import { IGitCloneForm } from '@/model/modules/workflow-definition';
+import { IGitCloneForm } from '@/model/modules/project';
 
 const autoHeight: IAutoHeight = {
   elementId: 'workflow-definition-importer-step',
