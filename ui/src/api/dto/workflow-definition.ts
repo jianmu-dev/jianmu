@@ -25,12 +25,3 @@ export interface IGitVo extends Readonly<{
   branch: string;
 }> {
 }
-
-/**
- * 导入流程定义dto
- */
-export interface IWorkflowDefinitionImportingDto extends Readonly<IGitCloningDto & {
-  id: string;
-  dslPath: string;
-}> {
-}

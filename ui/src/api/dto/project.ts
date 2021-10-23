@@ -1,6 +1,7 @@
 import { BaseVo } from '@/api/dto/common';
 import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeInfoVo } from '@/api/dto/workflow-execution-record';
+import { IGitCloningDto } from '@/api/dto/workflow-definition';
 
 /**
  * 保存项目dto
@@ -8,6 +9,15 @@ import { INodeInfoVo } from '@/api/dto/workflow-execution-record';
 export interface IProjectSavingDto extends Readonly<{
   id?: string;
   dslText: string;
+}> {
+}
+
+/**
+ * 导入项目dto
+ */
+export interface IProjectImportingDto extends Readonly<IGitCloningDto & {
+  id: string;
+  dslPath: string;
 }> {
 }
 

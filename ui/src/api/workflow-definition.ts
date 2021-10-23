@@ -1,6 +1,6 @@
 import { restProxy } from '@/api';
-import { IGitCloningDto, IGitVo, IWorkflowDefinitionImportingDto } from '@/api/dto/workflow-definition';
-import { IProjectSavingDto } from '@/api/dto/project';
+import { IGitCloningDto, IGitVo } from '@/api/dto/workflow-definition';
+import { IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
 
 export const baseUrl = {
   project: '/projects',
@@ -80,10 +80,10 @@ export function listGit(id: string, dir?: string): Promise<{
 }
 
 /**
- * 导入流程定义
+ * 导入项目
  * @param dto
  */
-export function _import(dto: IWorkflowDefinitionImportingDto): Promise<void> {
+export function _import(dto: IProjectImportingDto): Promise<void> {
   return restProxy({
     url: `${baseUrl.project}/import`,
     method: 'post',
