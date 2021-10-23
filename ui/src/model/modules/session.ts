@@ -5,20 +5,6 @@ import { ISessionCreatingDto, ISessionVo } from '@/api/dto/session';
  * 用户设置
  */
 export interface IUserSettings {
-  /**
-   * 每页个数
-   */
-  pageSize?: {
-    /**
-     * 场景
-     */
-    [key: string]: number;
-  }
-
-  /**
-   * 是否折叠主菜单
-   */
-  mainMenuCollapsed?: boolean;
 }
 
 /**
