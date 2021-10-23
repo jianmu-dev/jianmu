@@ -103,7 +103,7 @@ import { IProjectVo } from '@/api/dto/project';
 import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
 import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum } from '@/api/dto/enumeration';
-import { del, executeImmediately, synchronize } from '@/api/workflow-definition';
+import { del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter } from '@/utils/formatter';
 import WebhookDialog from './webhook-dialog.vue';
