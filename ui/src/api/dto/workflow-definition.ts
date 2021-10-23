@@ -1,4 +1,4 @@
-import { WorkflowDefinitionImporterTypeEnum } from '@/api/dto/enumeration';
+import { ProjectImporterTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 创建流程定义dto
@@ -15,7 +15,7 @@ export interface IWorkflowDefinitionSavingDto extends Readonly<{
 export interface IGitCloningDto extends Readonly<{
   uri: string;
   credential: {
-    type?: WorkflowDefinitionImporterTypeEnum;
+    type?: ProjectImporterTypeEnum;
     namespace?: string;
     userKey?: string;
     passKey?: string;

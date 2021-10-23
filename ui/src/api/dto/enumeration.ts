@@ -30,9 +30,9 @@ export enum TaskStatusEnum {
 }
 
 /**
- * 流程定义导入类型
+ * 项目导入类型
  */
-export enum WorkflowDefinitionImporterTypeEnum {
+export enum ProjectImporterTypeEnum {
   SSH = 'SSH',
   HTTPS = 'HTTPS',
 }
