@@ -1,10 +1,7 @@
 import { ActionContext, Module } from 'vuex';
 import { IRootState } from '@/model';
-import { IQueryForm, IState } from '@/model/modules/workflow-execution-record';
-import { query } from '@/api/workflow-execution-record';
-import { IPageVo } from '@/api/dto/common';
+import { IState } from '@/model/modules/workflow-execution-record';
 import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { fetchDsl, fetchProjectDetail, listTask, listWorkflowExecutionRecord } from '@/api/view-no-auth';
 import yaml from 'yaml';
 import { IProjectDetailVo } from '@/api/dto/project';
@@ -18,20 +15,6 @@ export default {
   namespaced: true,
   state: () => {
     return {
-      totalElements: {
-        executing: 0,
-        completed: 0,
-      },
-      executing: {
-        total: 0,
-        pages: 0,
-        list: [],
-      },
-      completed: {
-        total: 0,
-        pages: 0,
-        list: [],
-      },
       recordDetail: {
         project: undefined,
         navScrollLeft: 0,
@@ -44,41 +27,14 @@ export default {
     };
   },
   mutations: {
-    mutationTotalElement(state: IState, { status, totalElement }: {
-      status: WorkflowExecutionRecordStatusEnum;
-      totalElement: number;
-    }) {
-      switch (status) {
-        case WorkflowExecutionRecordStatusEnum.RUNNING:
-          state.totalElements.executing = totalElement;
-          break;
-        case WorkflowExecutionRecordStatusEnum.FINISHED:
-          state.totalElements.completed = totalElement;
-          break;
-      }
-    },
-    mutateRecords(state: IState, { payload, page }: {
-      payload: IQueryForm,
-      page: IPageVo<IWorkflowExecutionRecordVo>,
-    }) {
-      const noQuery = !payload.id && !payload.name && !payload.workflowVersion;
-
-      switch (payload.status) {
-        case WorkflowExecutionRecordStatusEnum.RUNNING:
-          if (noQuery) {
-            state.totalElements.executing = page.total;
-          }
-          state.executing = page;
-          break;
-        case WorkflowExecutionRecordStatusEnum.FINISHED:
-          if (noQuery) {
-            state.totalElements.completed = page.total;
-          }
-          state.completed = page;
-          break;
-      }
-    },
-    mutateRecordDetail(state: IState, { project, allRecords = [], record, recordDsl, taskRecords = [], nodeInfos = [] }: Partial<{
+    mutateRecordDetail(state: IState, {
+      project,
+      allRecords = [],
+      record,
+      recordDsl,
+      taskRecords = [],
+      nodeInfos = [],
+    }: Partial<{
       project: IProjectDetailVo;
       allRecords: IWorkflowExecutionRecordVo[];
       record: IWorkflowExecutionRecordVo;
@@ -100,23 +56,6 @@ export default {
     },
   },
   actions: {
-    async fetchTotalElement({ commit }: ActionContext<IState, IRootState>, status: WorkflowExecutionRecordStatusEnum): Promise<void> {
-      const page = await query({
-        id: '',
-        name: '',
-        workflowVersion: '',
-        status,
-        pageNum: 1,
-        pageSize: 0,
-      });
-      commit('mutationTotalElement', { status, totalElement: page.total });
-    },
-
-    async query({ commit }: ActionContext<IState, IRootState>, payload: IQueryForm): Promise<void> {
-      const page = await query(payload);
-      commit('mutateRecords', { payload, page });
-    },
-
     async fetchDetail({ commit }: ActionContext<IState, IRootState>, { projectId, workflowExecutionRecordId }: {
       projectId: string;
       workflowExecutionRecordId?: string;

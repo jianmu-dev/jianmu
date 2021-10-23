@@ -1,16 +1,9 @@
-import { IPageDto } from '@/api/dto/common';
-import { TaskParamTypeEnum, TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
-
-/**
- * 查询流程执行记录dto
- */
-export interface IWorkflowExecutionRecordQueryingDto extends Readonly<IPageDto & {
-  id: string;
-  name: string;
-  workflowVersion: string;
-  status: WorkflowExecutionRecordStatusEnum,
-}> {
-}
+import {
+  TaskParamTypeEnum,
+  TaskStatusEnum,
+  TriggerTypeEnum,
+  WorkflowExecutionRecordStatusEnum,
+} from '@/api/dto/enumeration';
 
 /**
  * 流程执行记录vo
@@ -25,7 +18,6 @@ export interface IWorkflowExecutionRecordVo extends Readonly<{
   startTime: string;
   endTime?: string;
   status: WorkflowExecutionRecordStatusEnum | '';
-  latestTaskStatus?: TaskStatusEnum;
   triggerId: string;
   triggerType: TriggerTypeEnum;
 }> {

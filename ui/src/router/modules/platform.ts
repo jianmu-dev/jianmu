@@ -87,13 +87,6 @@ export default [
     },
   },
   {
-    // 流程执行记录
-    // path: 'workflow-execution-record',
-    // component: () => import('@/views/workflow-execution-record/manager.vue'),
-    // meta: {
-    //   title: '流程执行中心',
-    // },
-    // children: [{
     name: 'workflow-execution-record-detail',
     path: 'workflow-execution-record/detail',
     component: () => import('@/views/workflow-execution-record/detail.vue'),
@@ -104,6 +97,5 @@ export default [
     meta: {
       title: '执行记录',
     },
-    // }],
   },
 ] as RouteRecordRaw[];
