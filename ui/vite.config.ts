@@ -24,16 +24,10 @@ export default (
       proxy: {
         // 会话
         '/auth': { target, changeOrigin },
-        // 参数
-        '/parameters': { target, changeOrigin },
         // worker
         '/workers': { target, changeOrigin },
-        // 会话
-        '/sessions': { target, changeOrigin },
         // 密钥管理
         '/secrets': { target, changeOrigin },
-        // 任务定义
-        '/task_definitions': { target, changeOrigin },
         // 流程定义
         '/projects': { target, changeOrigin },
         '/git': { target, changeOrigin },
