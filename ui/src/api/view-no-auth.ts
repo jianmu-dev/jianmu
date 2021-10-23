@@ -1,6 +1,6 @@
 import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProjectDetailVo, IProjectQueryingDto, IProjectVo } from '@/api/dto/project';
+import { IProjectDetailVo, IProjectQueryingDto, IProjectVo, IProcessTemplate } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespaceQueryingDto, INamespaceVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
@@ -19,8 +19,12 @@ export const baseUrl = {
   eventBridge: '/view/event_bridges',
   parameter: '/view/parameters',
   targetEvent: '/view/target_events',
+  
 };
-
+const hubUrl= import.meta.env.VITE_JIANMU_API_BASE_URL;
+const baseHubUrl = {
+  processTemplate:'/hub/view/workflow_templates',
+};
 /**
  * 查询项目
  * @param dto
@@ -30,6 +34,16 @@ export function queryProject(dto: IProjectQueryingDto): Promise<IProjectVo[]> {
     url: baseUrl.project,
     method: 'get',
     payload: dto,
+  });
+}
+/**
+ * 获取流程模版
+ * @param dto
+ */
+export function getProcessTemplate(id: number): Promise<IProcessTemplate> {
+  return restProxy({
+    url:`${hubUrl}${baseHubUrl.processTemplate}/${id}`,
+    method: 'get',
   });
 }
 

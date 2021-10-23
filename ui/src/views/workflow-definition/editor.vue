@@ -4,6 +4,14 @@
       <router-link :to="{name: 'index'}">
         <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
       </router-link>
+        <jm-button 
+                  v-if="source === 'processTemplates'" 
+                  type="primary" 
+                  class="jm-icon-button-previous" 
+                  size="small"
+                  @click="previousStep"
+                  >上一步</jm-button>
+      
       <jm-button type="primary" class="jm-icon-button-preserve" size="small"
                  @click="save" :loading="loading">保存
       </jm-button>
@@ -23,8 +31,9 @@ import { useRouter } from 'vue-router';
 import { save } from '@/api/workflow-definition';
 import { ISaveForm } from '@/model/modules/workflow-definition';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-import { fetchProjectDetail } from '@/api/view-no-auth';
-
+import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
+import { useRoute } from 'vue-router';
+import {  IProcessTemplate } from '@/api/dto/project';
 const autoHeight: IAutoHeight = {
   elementId: 'workflow-definition-editor',
   offsetTop: 215,
@@ -38,13 +47,24 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const reloadMain = inject('reloadMain') as () => void;
-
+    const route = useRoute();
     const editMode = !!props.id;
     const editorForm = ref<ISaveForm>({
       id: props.id,
       dslText: '',
     });
     const loading = ref<boolean>(false);
+    if(route.query.processTemplatesId){
+      getProcessTemplate(route.query.processTemplatesId as unknown as number).then((res:IProcessTemplate) => {
+        let dsl = res.dsl;
+        let name = `name: ${res.name}`;
+        if(route.query.processTemplatesName !== res.name){
+          editorForm.value.dslText = dsl.replace(name, `name: ${route.query.processTemplatesName}`);
+        }
+      });
+    }else{
+      editorForm.value.dslText = `workflow:\n  name: ${route.query.processTemplatesName}\n`;
+    }
 
     if (editMode) {
       loading.value = !loading.value;
@@ -71,6 +91,16 @@ export default defineComponent({
       editorForm,
       loading,
       activatedTab: ref<string>('dsl'),
+      source:route.query.source,
+      previousStep: () => {
+        router.push({ 
+          name:'process-templates',
+          query:{
+            processTemplatesName:route.query.processTemplatesName,
+           
+          },
+        });
+      },
       save: () => {
         if (editorForm.value.dslText === '') {
           proxy.$error('DSL不能为空');
@@ -115,6 +145,7 @@ export default defineComponent({
     right: 20px;
     top: 78px;
 
+    .jm-icon-button-back::before,
     .jm-icon-button-cancel::before,
     .jm-icon-button-preserve::before {
       font-weight: bold;

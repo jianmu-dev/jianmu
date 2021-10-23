@@ -104,3 +104,26 @@ export interface IProjectWebhookVo extends Readonly<{
   webhook: string;
 }> {
 }
+
+/**
+ * 
+ */
+export interface IProcessTemplate extends Readonly<{
+  id: number
+  name: string
+  type: string
+  dsl: string
+  nodeDefs: [
+    {
+      name: string
+      description: string
+      type: string
+      icon: string
+      ownerRef: string
+      sourceLink: string
+      documentLink: string
+      workType: string
+    }
+  ]
+}> {
+}
