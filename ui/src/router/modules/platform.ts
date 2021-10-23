@@ -64,25 +64,6 @@ export default [
     }],
   },
   {
-    // 流程定义路由
-    // name: 'workflow-definition',
-    // path: 'workflow-definition',
-    // component: () => import('@/views/workflow-definition/manager.vue'),
-    // meta: {
-    //   title: '流程定义',
-    // },
-    // children: [{
-    //   name: 'workflow-definition-detail',
-    //   path: 'detail',
-    //   component: () => import('@/views/workflow-definition/detail.vue'),
-    //   props: ({ query: { workflowRef, workflowVersion } }: RouteLocationNormalizedLoaded) => ({
-    //     workflowRef,
-    //     workflowVersion,
-    //   }),
-    //   meta: {
-    //     title: '详情',
-    //   },
-    // }, {
     name: 'import-workflow-definition',
     path: 'workflow-definition/importer',
     component: () => import('@/views/workflow-definition/importer.vue'),
@@ -104,7 +85,6 @@ export default [
     meta: {
       title: '编辑项目',
     },
-    // }],
   },
   {
     // 流程执行记录

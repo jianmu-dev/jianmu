@@ -1,47 +1,10 @@
-import { BaseVo, IPageDto } from '@/api/dto/common';
-import { DslSourceEnum, DslTypeEnum, WorkflowDefinitionImporterTypeEnum } from '@/api/dto/enumeration';
-
-/**
- * 查询流程定义dto
- */
-export interface IWorkflowDefinitionQueryingDto extends Readonly<IPageDto & {
-  name: string;
-}> {
-}
-
-/**
- * 流程定义vo
- */
-export interface IWorkflowDefinitionVo extends Readonly<BaseVo & {
-  id: string;
-  dslUrl: string;
-  dslSource: DslSourceEnum;
-  dslType: DslTypeEnum;
-  gitRepoId?: string;
-  workflowName: string;
-  workflowRef: string;
-  workflowVersion: string;
-  steps: number;
-  dslText: string;
-}> {
-}
+import { WorkflowDefinitionImporterTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 创建流程定义dto
  */
 export interface IWorkflowDefinitionSavingDto extends Readonly<{
   id?: string;
-  dslText: string;
-}> {
-}
-
-/**
- * 流程定义源码vo
- */
-export interface IWorkflowDefinitionSourceVo extends Readonly<BaseVo & {
-  projectId: string;
-  workflowRef: string;
-  workflowVersion: string;
   dslText: string;
 }> {
 }
