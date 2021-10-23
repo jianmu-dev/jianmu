@@ -177,7 +177,7 @@ export default defineComponent({
       processTemplatesDom.value.validate((valid: boolean) => {
         if(!valid) return false;
         router.push({ 
-          name:'create-workflow-definition',
+          name:'create-project',
           query:{
             processTemplatesName:processTemplatesForm.name,
             processTemplatesId:templatesCLickData.templateId,

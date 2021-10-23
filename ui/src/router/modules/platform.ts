@@ -64,16 +64,16 @@ export default [
     }],
   },
   {
-    name: 'import-workflow-definition',
-    path: 'workflow-definition/importer',
-    component: () => import('@/views/workflow-definition/importer.vue'),
+    name: 'import-project',
+    path: 'project/importer',
+    component: () => import('@/views/project/importer.vue'),
     meta: {
       title: '导入项目',
     },
   }, {
-    name: 'create-workflow-definition',
-    path: 'workflow-definition/editor',
-    component: () => import('@/views/workflow-definition/editor.vue'),
+    name: 'create-project',
+    path: 'project/editor',
+    component: () => import('@/views/project/editor.vue'),
     meta: {
       title: '新增项目',
     },
@@ -85,9 +85,9 @@ export default [
       title: '流程模版',
     },
   }, {
-    name: 'update-workflow-definition',
-    path: 'workflow-definition/editor/:id',
-    component: () => import('@/views/workflow-definition/editor.vue'),
+    name: 'update-project',
+    path: 'project/editor/:id',
+    component: () => import('@/views/project/editor.vue'),
     props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
     meta: {
       title: '编辑项目',

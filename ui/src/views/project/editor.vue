@@ -1,5 +1,5 @@
 <template>
-  <div class="workflow-definition-editor" v-loading="loading">
+  <div class="project-editor" v-loading="loading">
     <div class="right-top-btn">
       <router-link :to="{name: 'index'}">
         <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
@@ -19,7 +19,7 @@
     <jm-tabs v-model="activatedTab" class="tabs">
       <jm-tab-pane name="dsl" lazy>
         <template #label><i class="jm-icon-tab-dsl"></i> DSL模式</template>
-        <jm-dsl-editor id="workflow-definition-editor" class="dsl-editor" v-model:value="editorForm.dslText"/>
+        <jm-dsl-editor id="project-editor" class="dsl-editor" v-model:value="editorForm.dslText"/>
       </jm-tab-pane>
     </jm-tabs>
   </div>
@@ -35,7 +35,7 @@ import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
 import { IProcessTemplate } from '@/api/dto/project';
 
 const autoHeight: IAutoHeight = {
-  elementId: 'workflow-definition-editor',
+  elementId: 'project-editor',
   offsetTop: 215,
 };
 
@@ -134,7 +134,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.workflow-definition-editor {
+.project-editor {
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;

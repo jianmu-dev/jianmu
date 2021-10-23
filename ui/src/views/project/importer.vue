@@ -1,5 +1,5 @@
 <template>
-  <div class="workflow-definition-importer">
+  <div class="project-importer">
     <div class="steps">
       <div>
         <jm-steps :active="step" finish-status="success">
@@ -8,7 +8,7 @@
         </jm-steps>
       </div>
     </div>
-    <div class="step" id="workflow-definition-importer-step">
+    <div class="step" id="project-importer-step">
       <jm-scrollbar>
         <step-one v-show="step === 0"/>
         <step-two v-if="step === 1" :data="stepTwoData"/>
@@ -26,7 +26,7 @@ import { IGitVo } from '@/api/dto/project';
 import { IGitCloneForm } from '@/model/modules/project';
 
 const autoHeight: IAutoHeight = {
-  elementId: 'workflow-definition-importer-step',
+  elementId: 'project-importer-step',
   offsetTop: 250,
 };
 
@@ -60,7 +60,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.workflow-definition-importer {
+.project-importer {
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
