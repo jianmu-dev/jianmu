@@ -64,40 +64,6 @@ export default [
     }],
   },
   {
-    // 任务定义路由
-    name: 'task-definition',
-    path: 'task-definition',
-    component: () => import('@/views/task-definition/manager.vue'),
-    meta: {
-      title: '任务定义',
-      auth: true,
-    },
-    children: [{
-      name: 'task-definition-version-detail',
-      path: 'detail/version',
-      component: () => import('@/views/task-definition/detail.vue'),
-      props: ({ query: { taskDefRef, taskDefVersion } }: RouteLocationNormalizedLoaded) => ({ taskDefRef, taskDefVersion }),
-      meta: {
-        title: '详情',
-      },
-    }, {
-      name: 'create-task-definition',
-      path: 'editor',
-      component: () => import('@/views/task-definition/editor.vue'),
-      meta: {
-        title: '新增',
-      },
-    }, {
-      name: 'upgrade-task-definition-version',
-      path: 'editor/upgrade',
-      component: () => import('@/views/task-definition/editor.vue'),
-      props: ({ query: { taskDefRef, taskDefVersion } }: RouteLocationNormalizedLoaded) => ({ taskDefRef, taskDefVersion }),
-      meta: {
-        title: '升级版本',
-      },
-    }],
-  },
-  {
     // 流程定义路由
     // name: 'workflow-definition',
     // path: 'workflow-definition',
