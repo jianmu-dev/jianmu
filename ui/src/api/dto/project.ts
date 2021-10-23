@@ -1,7 +1,12 @@
 import { BaseVo } from '@/api/dto/common';
-import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import {
+  DslSourceEnum,
+  DslTypeEnum,
+  ProjectImporterTypeEnum,
+  ProjectStatusEnum,
+  TriggerTypeEnum,
+} from '@/api/dto/enumeration';
 import { INodeInfoVo } from '@/api/dto/workflow-execution-record';
-import { IGitCloningDto } from '@/api/dto/workflow-definition';
 
 /**
  * 保存项目dto
@@ -9,6 +14,33 @@ import { IGitCloningDto } from '@/api/dto/workflow-definition';
 export interface IProjectSavingDto extends Readonly<{
   id?: string;
   dslText: string;
+}> {
+}
+
+
+/**
+ * 克隆Git库dto
+ */
+export interface IGitCloningDto extends Readonly<{
+  uri: string;
+  credential: {
+    type?: ProjectImporterTypeEnum;
+    namespace?: string;
+    userKey?: string;
+    passKey?: string;
+    privateKey?: string
+  };
+  branch: string;
+}> {
+}
+
+/**
+ * git值对象
+ */
+export interface IGitVo extends Readonly<{
+  id: string;
+  uri: string;
+  branch: string;
 }> {
 }
 

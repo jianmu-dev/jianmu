@@ -57,7 +57,7 @@ import { ProjectImporterTypeEnum } from '@/api/dto/enumeration';
 import { listSecretKey, queryNamespace } from '@/api/view-no-auth';
 import { cloneGit } from '@/api/workflow-definition';
 import { START_PAGE_NUM } from '@/utils/constants';
-import { IGitVo } from '@/api/dto/workflow-definition';
+import { IGitVo } from '@/api/dto/project';
 
 export default defineComponent({
   setup() {

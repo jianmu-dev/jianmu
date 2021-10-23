@@ -1,6 +1,5 @@
 import { Mutable } from '@/utils/lib';
-import { IGitCloningDto } from '@/api/dto/workflow-definition';
-import { IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
+import { IGitCloningDto, IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
 
 /**
  * 保存表单
