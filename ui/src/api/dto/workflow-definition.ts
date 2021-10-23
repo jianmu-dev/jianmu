@@ -1,15 +1,6 @@
 import { ProjectImporterTypeEnum } from '@/api/dto/enumeration';
 
 /**
- * 创建流程定义dto
- */
-export interface IWorkflowDefinitionSavingDto extends Readonly<{
-  id?: string;
-  dslText: string;
-}> {
-}
-
-/**
  * 克隆Git库dto
  */
 export interface IGitCloningDto extends Readonly<{

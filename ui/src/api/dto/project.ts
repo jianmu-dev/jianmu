@@ -3,6 +3,15 @@ import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '
 import { INodeInfoVo } from '@/api/dto/workflow-execution-record';
 
 /**
+ * 保存项目dto
+ */
+export interface IProjectSavingDto extends Readonly<{
+  id?: string;
+  dslText: string;
+}> {
+}
+
+/**
  * 查询项目dto
  */
 export interface IProjectQueryingDto extends Readonly<{

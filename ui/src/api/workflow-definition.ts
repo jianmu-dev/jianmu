@@ -1,10 +1,6 @@
 import { restProxy } from '@/api';
-import {
-  IGitCloningDto,
-  IGitVo,
-  IWorkflowDefinitionImportingDto,
-  IWorkflowDefinitionSavingDto,
-} from '@/api/dto/workflow-definition';
+import { IGitCloningDto, IGitVo, IWorkflowDefinitionImportingDto } from '@/api/dto/workflow-definition';
+import { IProjectSavingDto } from '@/api/dto/project';
 
 export const baseUrl = {
   project: '/projects',
@@ -12,10 +8,10 @@ export const baseUrl = {
 };
 
 /**
- * 保存流程定义
+ * 保存项目
  * @param dto
  */
-export function save(dto: IWorkflowDefinitionSavingDto): Promise<void> {
+export function save(dto: IProjectSavingDto): Promise<void> {
   const url = `${baseUrl.project}${dto.id ? `/${dto.id}` : ''}`;
   const method = dto.id ? 'put' : 'post';
 
