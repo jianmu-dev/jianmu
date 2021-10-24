@@ -23,4 +23,5 @@ public class SourceDto {
     private String bridgeId;
     private String name;
     private Source.Type type;
+    private String matcher;
 }

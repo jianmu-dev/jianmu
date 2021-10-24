@@ -27,6 +27,10 @@ public class Source {
         this.name = name;
     }
 
+    public void setMatcher(String matcher) {
+        this.matcher = matcher;
+    }
+
     public String getId() {
         return id;
     }
