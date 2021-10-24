@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class DslParser {
     private String cron;
     private String eb;
-    private Map<String, Object> param;
+    private Map<String, Object> param = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
     private String name;
