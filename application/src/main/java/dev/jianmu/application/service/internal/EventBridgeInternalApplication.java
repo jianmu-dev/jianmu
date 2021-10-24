@@ -214,8 +214,13 @@ public class EventBridgeInternalApplication {
     }
 
     private boolean isMatched(String expression, String json) {
-        var variable = JsonPath.read(json, expression);
-        return !((JSONArray) variable).isEmpty();
+        try {
+            var variable = JsonPath.read(json, expression);
+            return !((JSONArray) variable).isEmpty();
+        } catch (RuntimeException e) {
+            log.warn("匹配规则表达式执行异常： {}", e.getMessage());
+            return false;
+        }
     }
 
     private static String decode(final String encoded) {
