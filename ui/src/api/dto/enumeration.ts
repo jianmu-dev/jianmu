@@ -94,12 +94,3 @@ export enum EventBridgeSourceTypeEnum {
   WEBHOOK = 'WEBHOOK',
   SERVICE = 'SERVICE',
 }
-
-/**
- * 事件桥接器目标转换器类型枚举
- */
-export enum EventBridgeTargetTransformerTypeEnum {
-  QUERY = 'QUERY',
-  HEADER = 'HEADER',
-  BODY = 'BODY',
-}

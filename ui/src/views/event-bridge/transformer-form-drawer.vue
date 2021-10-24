@@ -31,18 +31,10 @@
                      :key="uuidv4() + index">
                   <div class="del-btn" @click="del(index)"></div>
                   <div class="line">
-                    <jm-form-item label="转换器类型" :prop="`transformers.${index}.type`" :rules="editorRule.type">
-                      <jm-select v-model="transformer.type" clearable placeholder="请选择转换器类型">
-                        <jm-option v-for="transformerType in transformerTypes"
-                                   :key="transformerType" :label="transformerType" :value="transformerType"/>
-                      </jm-select>
+                    <jm-form-item label="变量名" :prop="`transformers.${index}.variableName`"
+                                  :rules="editorRule.variableName">
+                      <jm-input v-model="transformer.variableName" clearable placeholder="请输入变量名"/>
                     </jm-form-item>
-                    <jm-form-item label="转换器表达式" :prop="`transformers.${index}.expression`"
-                                  :rules="editorRule.expression">
-                      <jm-input v-model="transformer.expression" clearable placeholder="请输入转换器表达式"/>
-                    </jm-form-item>
-                  </div>
-                  <div class="line">
                     <jm-form-item label="变量类型" :prop="`transformers.${index}.variableType`"
                                   :rules="editorRule.variableType">
                       <jm-select v-model="transformer.variableType" clearable placeholder="请选择变量类型">
@@ -50,9 +42,12 @@
                                    :key="parameterType" :label="parameterType" :value="parameterType"/>
                       </jm-select>
                     </jm-form-item>
-                    <jm-form-item label="变量名" :prop="`transformers.${index}.variableName`"
-                                  :rules="editorRule.variableName">
-                      <jm-input v-model="transformer.variableName" clearable placeholder="请输入变量名"/>
+                  </div>
+                  <div class="line">
+                    <jm-form-item label="转换器表达式" :prop="`transformers.${index}.expression`"
+                                  :style="{width: '100%'}"
+                                  :rules="editorRule.expression">
+                      <jm-input v-model="transformer.expression" clearable placeholder="请输入转换器表达式"/>
                     </jm-form-item>
                   </div>
                 </div>
@@ -75,7 +70,6 @@
 <script lang="ts">
 import { defineComponent, onBeforeMount, ref, SetupContext, watch } from 'vue';
 import { IEventBridgeTargetTransformerVo } from '@/api/dto/event-bridge';
-import { EventBridgeTargetTransformerTypeEnum } from '@/api/dto/enumeration';
 import {
   fetchEventBridgeTargetTransformerTemplate,
   fetchEventBridgeTargetTransformerTemplateName,
@@ -99,7 +93,6 @@ export default defineComponent({
     const editorFormRef = ref<any>(null);
     const editorForm = ref<{
       transformers: {
-        type: EventBridgeTargetTransformerTypeEnum | '';
         variableName: string;
         variableType: string;
         expression: string;
@@ -108,14 +101,10 @@ export default defineComponent({
       transformers: [],
     });
     const editorRule = ref<{
-      type: any[];
       expression: any[];
       variableType: any[];
       variableName: any[];
     }>({
-      type: [
-        { required: true, message: '请选择转换器类型', trigger: 'change' },
-      ],
       expression: [
         { required: true, message: '请输入转换器表达式', trigger: 'blur' },
       ],
@@ -150,7 +139,6 @@ export default defineComponent({
       editorFormRef,
       editorForm,
       editorRule,
-      transformerTypes: Object.values(EventBridgeTargetTransformerTypeEnum),
       transformerTemplateNames,
       parameterTypes,
       changeDialogVisible,
@@ -159,7 +147,6 @@ export default defineComponent({
       },
       add: () => {
         editorForm.value.transformers.push({
-          type: '',
           variableName: '',
           variableType: '',
           expression: '',

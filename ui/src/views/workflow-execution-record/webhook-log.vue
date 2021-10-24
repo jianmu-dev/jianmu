@@ -119,11 +119,9 @@ export default defineComponent({
 
       try {
         // 初始化Webhook
-        const { payload: { query, header, body }, eventParameters } = await fetchTargetEvent(props.triggerId);
+        const { payload, eventParameters } = await fetchTargetEvent(props.triggerId);
         webhookLog.value = 'Webhook:\n' +
-          `query: ${JSON.stringify(query)}\n` +
-          `header：${JSON.stringify(header)}\n` +
-          `body：${body}\n`;
+          `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`;
         webhookParams.value = eventParameters;
       } catch (err) {
         proxy.$throw(err, proxy);

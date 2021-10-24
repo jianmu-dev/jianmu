@@ -31,13 +31,23 @@
                 <router-link v-else :to="{name: 'login'}">登录后可查看</router-link>
               </div>
             </jm-tooltip>
-            <div class="operation">
-              <jm-tooltip content="重新生成链接" placement="bottom">
-                <button :class="{'refresh': true, 'doing': regeneratingWebhook}" @click="regenerateWebhookUrl"></button>
+            <div class="matcher">
+              <jm-tooltip content="匹配规则" placement="left">
+                <div>
+                  <jm-editable-text v-model="sourceSubForm.matcher"
+                                    default-text="点击设置匹配规则"
+                                    @change="save"/>
+                </div>
               </jm-tooltip>
-              <jm-tooltip :content="link? '复制链接' : '登录后，可复制链接'" placement="bottom">
-                <button :class="{'copy': true, 'disabled': !link}" @click="copy(link)"></button>
-              </jm-tooltip>
+              <div class="operation">
+                <jm-tooltip content="重新生成链接" placement="bottom">
+                  <button :class="{'refresh': true, 'doing': regeneratingWebhook}"
+                          @click="regenerateWebhookUrl"></button>
+                </jm-tooltip>
+                <jm-tooltip :content="link? '复制链接' : '登录后，可复制链接'" placement="bottom">
+                  <button :class="{'copy': true, 'disabled': !link}" @click="copy(link)"></button>
+                </jm-tooltip>
+              </div>
             </div>
           </div>
         </div>
@@ -435,6 +445,19 @@ export default defineComponent({
           font-size: 13.5px;
         }
 
+        .matcher {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-left: 0;
+
+          > :first-child {
+            width: 190px;
+            height: inherit;
+            padding-left: 15px;
+          }
+        }
+
         .ref .setting-forbidden:hover {
           opacity: 0.5;
           cursor: not-allowed;
@@ -444,6 +467,11 @@ export default defineComponent({
           display: flex;
           justify-content: space-between;
           align-items: center;
+          padding-left: 0;
+
+          > :first-child {
+            padding-left: 15px;
+          }
 
           a {
             width: 70%;
@@ -518,14 +546,6 @@ export default defineComponent({
 
     .targets .item {
       cursor: pointer;
-
-      > div.project {
-        padding-left: 0;
-
-        > :first-child {
-          padding-left: 15px;
-        }
-      }
     }
 
     .connection {
