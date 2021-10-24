@@ -43,10 +43,7 @@ export default defineComponent({
       writable,
       changeWritable: (val: boolean) => {
         if (!val) {
-          if (!text.value) {
-            // 恢复初始值
-            text.value = props.modelValue;
-          } else if (props.modelValue !== text.value) {
+          if (props.modelValue !== text.value) {
             emit('update:model-value', text.value);
             emit('change', text.value);
           }
