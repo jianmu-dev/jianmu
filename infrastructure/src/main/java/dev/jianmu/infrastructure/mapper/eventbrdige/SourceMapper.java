@@ -26,7 +26,7 @@ public interface SourceMapper {
     @Insert("insert into eb_source(id, bridge_id, name, type, token, matcher) " +
             "values(#{id}, #{bridgeId}, #{name}, #{type}, #{token}, #{matcher})" +
             " ON DUPLICATE KEY UPDATE " +
-            "name=#{name}, type=#{type}, token=#{token}, #{matcher}")
+            "name=#{name}, type=#{type}, token=#{token}, matcher=#{matcher}")
     void saveOrUpdate(Source source);
 
     @Delete("delete FROM eb_source WHERE id = #{id}")
