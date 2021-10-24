@@ -66,6 +66,7 @@
     </dependencies>
 
     <build>
+        <finalName>jianmu-ci-server</finalName>
         <extensions>
             <extension>
                 <groupId>kr.motd.maven</groupId>
