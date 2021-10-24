@@ -3,7 +3,8 @@ package dev.jianmu.application.service.internal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import dev.jianmu.eventbridge.aggregate.*;
+import dev.jianmu.eventbridge.aggregate.EventParameter;
+import dev.jianmu.eventbridge.aggregate.Source;
 import dev.jianmu.eventbridge.aggregate.event.ConnectionEvent;
 import dev.jianmu.eventbridge.aggregate.event.SourceEvent;
 import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
@@ -12,6 +13,7 @@ import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,7 +89,7 @@ public class EventBridgeInternalApplication {
             throw new RuntimeException("Source类型不匹配");
         }
         // isMatched
-        if (source.getMatcher() != null) {
+        if (!StringUtils.isBlank(source.getMatcher())) {
             if (this.isMatched(source.getMatcher(), payload)) {
                 log.info("符合匹配规则: {}", source.getMatcher());
             } else {
@@ -212,8 +214,13 @@ public class EventBridgeInternalApplication {
     }
 
     private boolean isMatched(String expression, String json) {
-        var variable = JsonPath.read(json, expression);
-        return !((JSONArray) variable).isEmpty();
+        try {
+            var variable = JsonPath.read(json, expression);
+            return !((JSONArray) variable).isEmpty();
+        } catch (RuntimeException e) {
+            log.warn("匹配规则表达式执行异常： {}", e.getMessage());
+            return false;
+        }
     }
 
     private static String decode(final String encoded) {
