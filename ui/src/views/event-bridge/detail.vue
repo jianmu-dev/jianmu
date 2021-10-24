@@ -34,7 +34,14 @@
             <div class="matcher">
               <jm-tooltip content="匹配规则" placement="left">
                 <div>
-                  <jm-editable-text v-model="sourceSubForm.matcher"
+                  <jm-tooltip v-if="sourceSubForm.matcher" :content="sourceSubForm.matcher" placement="top-start"
+                              effect="light">
+                    <jm-editable-text v-model="sourceSubForm.matcher"
+                                      default-text="点击设置匹配规则"
+                                      @change="save"/>
+                  </jm-tooltip>
+                  <jm-editable-text v-else
+                                    v-model="sourceSubForm.matcher"
                                     default-text="点击设置匹配规则"
                                     @change="save"/>
                 </div>
