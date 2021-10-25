@@ -36,7 +36,7 @@ export default defineComponent({
   color: #FFFFFF;
   text-align: center;
 
-  &:nth-child(n+2) {
+  > :nth-child(n+2) {
     margin-left: 30px;
   }
 
