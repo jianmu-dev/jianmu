@@ -4,9 +4,9 @@
       <router-link to="/">
         <div class="logo"/>
       </router-link>
-      <div class="separator"/>
+      <!--      <div class="separator"/>-->
       <div class="title">
-        <span>自动化集成平台</span>
+        <!--        <span>自动化集成平台</span>-->
         <span class="version">v{{ version }}</span>
       </div>
     </div>
@@ -83,34 +83,37 @@ export default defineComponent({
   .left {
     display: flex;
     align-items: center;
+    position: relative;
 
     .logo {
-      width: 130px;
-      height: 35px;
-      background-image: url('@/assets/svgs/logo/secondary.svg');
+      width: 160px;
+      height: 50px;
+      background-image: url('@/assets/svgs/logo/main.svg');
       background-repeat: no-repeat;
       background-size: contain;
       background-position: center center;
       cursor: pointer;
     }
 
-    .separator {
-      margin: 0 18px;
-      width: 1px;
-      height: 20px;
-      background-color: #C2DFFF;
-      border-radius: 1px;
-      overflow: hidden;
-    }
-
+    //.separator {
+    //  margin: 0 18px;
+    //  width: 1px;
+    //  height: 20px;
+    //  background-color: #C2DFFF;
+    //  border-radius: 1px;
+    //  overflow: hidden;
+    //}
+    //
     .title {
-      font-size: 24px;
+      //font-size: 24px;
       font-weight: bold;
-      color: #042749;
-      letter-spacing: 1px;
+      //color: #042749;
+      //letter-spacing: 1px;
 
       .version {
-        margin-left: 10px;
+        position: absolute;
+        right: -45px;
+        bottom: 10px;
         font-size: 12px;
         color: #082340;
         opacity: 0.5;
