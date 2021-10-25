@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -111,9 +111,10 @@ export default defineComponent({
 
     proxy.$nextTick(() => adaptHeight(autoHeights[tabActiveName.value]));
 
-    onBeforeMount(async () => {
+    onMounted(async () => {
       if (!props.triggerId) {
         // 尚未触发
+        webhookLog.value = '尚未触发\n';
         return;
       }
 
