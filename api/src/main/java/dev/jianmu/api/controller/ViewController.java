@@ -281,10 +281,18 @@ public class ViewController {
     @GetMapping("/logs/{logId}")
     @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取")
     public ResponseEntity<FileSystemResource> getLog(@PathVariable String logId) {
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.TEXT_PLAIN)
-                .body(new FileSystemResource(this.storageService.logFile(logId)));
+        var fileSystemResource = new FileSystemResource(this.storageService.logFile(logId));
+        if (fileSystemResource.exists()) {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(fileSystemResource);
+        } else {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .build();
+        }
     }
 
     @GetMapping("/logs/workflow/{logId}")
