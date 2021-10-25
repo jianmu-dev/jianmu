@@ -124,6 +124,21 @@ public class DslParser {
                 });
             }
         });
+        // 校验并发网关上游下游语法
+        symbolTable.values().forEach(node -> {
+            node.getTargets().forEach(nodeName -> {
+                var target = symbolTable.get(nodeName);
+                if (!target.getSources().contains(node.getRef())) {
+                    throw new RuntimeException("节点" + nodeName + "未指定source: " + node.getRef());
+                }
+            });
+            node.getSources().forEach(nodeName -> {
+                var source = symbolTable.get(nodeName);
+                if (!source.getTargets().contains(node.getRef())) {
+                    throw new RuntimeException("节点" + nodeName + "未指定target: " + node.getRef());
+                }
+            });
+        });
         return new HashSet<>(symbolTable.values());
     }
 
