@@ -8,7 +8,7 @@
               <button class="add"></button>
             </jm-tooltip>
           </router-link>
-          <router-link :to="{name: 'import-workflow-definition'}">
+          <router-link :to="{name: 'import-project'}">
             <jm-tooltip content="导入项目" placement="top">
               <button class="git"></button>
             </jm-tooltip>
@@ -103,7 +103,7 @@ import { IProjectVo } from '@/api/dto/project';
 import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
 import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum } from '@/api/dto/enumeration';
-import { del, executeImmediately, synchronize } from '@/api/workflow-definition';
+import { del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter } from '@/utils/formatter';
 import WebhookDialog from './webhook-dialog.vue';
@@ -235,7 +235,7 @@ export default defineComponent({
         });
       },
       edit: (id: string) => {
-        router.push({ name: 'update-workflow-definition', params: { id } });
+        router.push({ name: 'update-project', params: { id } });
       },
       sync: (id: string) => {
         if (synchronizings.value[id]) {

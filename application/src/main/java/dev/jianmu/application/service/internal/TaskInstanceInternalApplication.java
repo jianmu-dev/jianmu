@@ -118,7 +118,11 @@ public class TaskInstanceInternalApplication {
         var context = new ElContext();
         // 全局参数加入上下文
         workflow.getGlobalParameters()
-                .forEach(globalParameter -> context.add("global", globalParameter.getName(), Parameter.Type.STRING.newParameter(globalParameter.getValue())));
+                .forEach(globalParameter -> context.add(
+                        "global",
+                        globalParameter.getName(),
+                        Parameter.Type.getTypeByName(globalParameter.getType()).newParameter(globalParameter.getValue()))
+                );
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
                 .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))

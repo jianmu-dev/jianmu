@@ -123,7 +123,7 @@ import TaskLog from '@/views/workflow-execution-record/task-log.vue';
 import ProcessLog from '@/views/workflow-execution-record/process-log.vue';
 import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
 import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { executeImmediately } from '@/api/workflow-definition';
+import { executeImmediately } from '@/api/project';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import sleep from '@/utils/sleep';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';

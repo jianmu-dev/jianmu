@@ -27,7 +27,7 @@
               <jm-option v-for="type in types" :key="type" :label="type" :value="type"></jm-option>
             </jm-select>
           </jm-form-item>
-          <template v-if="gitCloneForm.credential.type === WorkflowDefinitionImporterTypeEnum.HTTPS">
+          <template v-if="gitCloneForm.credential.type === ProjectImporterTypeEnum.HTTPS">
             <jm-form-item label="用户名" prop="credential.userKey">
               <jm-cascader :props="cascaderProps" clearable placeholder="请选择用户名"
                            @change="handleUserKeyChange"/>
@@ -39,7 +39,7 @@
               </jm-select>
             </jm-form-item>
           </template>
-          <jm-form-item v-else-if="gitCloneForm.credential.type === WorkflowDefinitionImporterTypeEnum.SSH" label="私钥"
+          <jm-form-item v-else-if="gitCloneForm.credential.type === ProjectImporterTypeEnum.SSH" label="私钥"
                         prop="credential.privateKey">
             <jm-cascader :props="cascaderProps" clearable placeholder="请选择私钥"
                          @change="handlePrivateKeyChange"/>
@@ -52,12 +52,12 @@
 
 <script lang="ts">
 import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
-import { IGitCloneForm } from '@/model/modules/workflow-definition';
-import { WorkflowDefinitionImporterTypeEnum } from '@/api/dto/enumeration';
+import { IGitCloneForm } from '@/model/modules/project';
+import { ProjectImporterTypeEnum } from '@/api/dto/enumeration';
 import { listSecretKey, queryNamespace } from '@/api/view-no-auth';
-import { cloneGit } from '@/api/workflow-definition';
+import { cloneGit } from '@/api/project';
 import { START_PAGE_NUM } from '@/utils/constants';
-import { IGitVo } from '@/api/dto/workflow-definition';
+import { IGitVo } from '@/api/dto/project';
 
 export default defineComponent({
   setup() {
@@ -67,7 +67,7 @@ export default defineComponent({
     const gitCloneForm = ref<IGitCloneForm>({
       uri: '',
       credential: {
-        type: WorkflowDefinitionImporterTypeEnum.HTTPS,
+        type: ProjectImporterTypeEnum.HTTPS,
       },
       branch: 'master',
     });
@@ -103,10 +103,10 @@ export default defineComponent({
       passKeys,
       loading,
       authe,
-      types: Object.values(WorkflowDefinitionImporterTypeEnum),
+      types: Object.values(ProjectImporterTypeEnum),
       handleAutheChange: () => {
         if (authe.value) {
-          gitCloneForm.value.credential.type = WorkflowDefinitionImporterTypeEnum.HTTPS;
+          gitCloneForm.value.credential.type = ProjectImporterTypeEnum.HTTPS;
 
           return;
         }
@@ -122,7 +122,7 @@ export default defineComponent({
 
         passKeys.value = [];
       },
-      WorkflowDefinitionImporterTypeEnum,
+      ProjectImporterTypeEnum,
       cascaderProps: {
         lazy: true,
         lazyLoad: async (node: any, resolve: any) => {

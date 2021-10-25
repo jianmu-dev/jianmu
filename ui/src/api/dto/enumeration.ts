@@ -30,9 +30,9 @@ export enum TaskStatusEnum {
 }
 
 /**
- * 流程定义导入类型
+ * 项目导入类型
  */
-export enum WorkflowDefinitionImporterTypeEnum {
+export enum ProjectImporterTypeEnum {
   SSH = 'SSH',
   HTTPS = 'HTTPS',
 }
@@ -93,13 +93,4 @@ export enum OwnerTypeEnum {
 export enum EventBridgeSourceTypeEnum {
   WEBHOOK = 'WEBHOOK',
   SERVICE = 'SERVICE',
-}
-
-/**
- * 事件桥接器目标转换器类型枚举
- */
-export enum EventBridgeTargetTransformerTypeEnum {
-  QUERY = 'QUERY',
-  HEADER = 'HEADER',
-  BODY = 'BODY',
 }

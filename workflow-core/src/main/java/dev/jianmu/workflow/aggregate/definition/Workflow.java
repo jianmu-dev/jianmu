@@ -58,15 +58,6 @@ public class Workflow {
         this.context = context;
     }
 
-    public static Set<GlobalParameter> createGlobalParameters(Map<String, String> param) {
-        return param.entrySet().stream().map(entry ->
-                GlobalParameter.Builder.aGlobalParameter()
-                        .name(entry.getKey())
-                        .value(entry.getValue())
-                        .build()
-        ).collect(Collectors.toSet());
-    }
-
     public Map<String, Parameter<?>> calculateTaskParams(String taskRef) {
         var asyncTask = this.findTask(taskRef);
         return asyncTask.getTaskParameters().stream().map(taskParameter -> {

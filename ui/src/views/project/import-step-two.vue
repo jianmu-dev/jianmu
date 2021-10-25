@@ -30,8 +30,8 @@
 
 <script lang="ts">
 import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
-import { _import, listGit } from '@/api/workflow-definition';
-import { IImportForm } from '@/model/modules/workflow-definition';
+import { _import, listGit } from '@/api/project';
+import { IImportForm } from '@/model/modules/project';
 import { useRouter } from 'vue-router';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 

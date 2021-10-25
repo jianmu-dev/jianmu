@@ -1,5 +1,5 @@
 import { BaseVo, IPageDto } from '@/api/dto/common';
-import { EventBridgeSourceTypeEnum, EventBridgeTargetTransformerTypeEnum } from '@/api/dto/enumeration';
+import { EventBridgeSourceTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 查询事件桥接器dto
@@ -24,6 +24,7 @@ export interface IEventBridgeSourceVo extends Readonly<{
   bridgeId: string;
   name: string;
   type: EventBridgeSourceTypeEnum;
+  matcher: string;
 }> {
 }
 
@@ -31,7 +32,6 @@ export interface IEventBridgeSourceVo extends Readonly<{
  * 事件桥接器目标转换器vo
  */
 export interface IEventBridgeTargetTransformerVo extends Readonly<{
-  type: EventBridgeTargetTransformerTypeEnum;
   variableName: string;
   variableType: string;
   expression: string;
@@ -80,19 +80,6 @@ export interface IEventBridgeSavingDto extends Readonly<{
 }
 
 /**
- * 目标事件payload vo
- */
-export interface ITargetEventPayloadVo {
-  query: {
-    [key: string]: string[];
-  };
-  header: {
-    [key: string]: string[];
-  };
-  body: string;
-}
-
-/**
  * 事件参数vo
  */
 export interface IEventParameterVo {
@@ -114,6 +101,6 @@ export interface ITargetEventVo {
   targetId: string;
   targetRef: string;
   destinationId: string;
-  payload: ITargetEventPayloadVo;
+  payload: string;
   eventParameters: IEventParameterVo[];
 }

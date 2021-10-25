@@ -1,17 +1,17 @@
 <template>
-  <div class="workflow-definition-editor" v-loading="loading">
+  <div class="project-editor" v-loading="loading">
     <div class="right-top-btn">
       <router-link :to="{name: 'index'}">
         <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
       </router-link>
-        <jm-button 
-                  v-if="source === 'processTemplates'" 
-                  type="primary" 
-                  class="jm-icon-button-previous" 
+        <jm-button
+                  v-if="source === 'processTemplates'"
+                  type="primary"
+                  class="jm-icon-button-previous"
                   size="small"
                   @click="previousStep"
                   >上一步</jm-button>
-      
+
       <jm-button type="primary" class="jm-icon-button-preserve" size="small"
                  @click="save" :loading="loading">保存
       </jm-button>
@@ -19,7 +19,7 @@
     <jm-tabs v-model="activatedTab" class="tabs">
       <jm-tab-pane name="dsl" lazy>
         <template #label><i class="jm-icon-tab-dsl"></i> DSL模式</template>
-        <jm-dsl-editor id="workflow-definition-editor" class="dsl-editor" v-model:value="editorForm.dslText"/>
+        <jm-dsl-editor id="project-editor" class="dsl-editor" v-model:value="editorForm.dslText"/>
       </jm-tab-pane>
     </jm-tabs>
   </div>
@@ -27,15 +27,15 @@
 
 <script lang="ts">
 import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { save } from '@/api/workflow-definition';
-import { ISaveForm } from '@/model/modules/workflow-definition';
+import { useRoute, useRouter } from 'vue-router';
+import { save } from '@/api/project';
+import { ISaveForm } from '@/model/modules/project';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
-import { useRoute } from 'vue-router';
-import {  IProcessTemplate } from '@/api/dto/project';
+import { IProcessTemplate } from '@/api/dto/project';
+
 const autoHeight: IAutoHeight = {
-  elementId: 'workflow-definition-editor',
+  elementId: 'project-editor',
   offsetTop: 215,
 };
 
@@ -54,19 +54,18 @@ export default defineComponent({
       dslText: '',
     });
     const loading = ref<boolean>(false);
-    if(route.query.templateId){
-      console.log(22);
-      
-      getProcessTemplate(route.query.templateId as unknown as number).then((res:IProcessTemplate) => {
+
+    if (route.query.templateId) {
+      getProcessTemplate(route.query.templateId as unknown as number).then((res: IProcessTemplate) => {
         let dsl = res.dsl;
-        if(route.query.processTemplatesName !== res.name){
+        if (route.query.processTemplatesName !== res.name) {
           let name = `name: ${res.name}`;
           editorForm.value.dslText = dsl.replace(name, `name: ${route.query.processTemplatesName}`);
         }else{
           editorForm.value.dslText = dsl;
         }
       });
-    }else{
+    } else {
       editorForm.value.dslText = `workflow:\n  name: ${route.query.processTemplatesName}\n`;
     }
 
@@ -95,13 +94,12 @@ export default defineComponent({
       editorForm,
       loading,
       activatedTab: ref<string>('dsl'),
-      source:route.query.source,
+      source: route.query.source,
       previousStep: () => {
         router.push({ 
           name:'process-template',
           query:{
             processTemplatesName:route.query.processTemplatesName,
-           
           },
         });
       },
@@ -139,7 +137,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.workflow-definition-editor {
+.project-editor {
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;

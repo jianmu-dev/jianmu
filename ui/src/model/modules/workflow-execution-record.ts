@@ -1,6 +1,4 @@
-import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordQueryingDto, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { Mutable } from '@/utils/lib';
-import { IPageVo } from '@/api/dto/common';
+import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 
@@ -8,12 +6,6 @@ import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/ut
  * vuex状态
  */
 export interface IState {
-  totalElements: {
-    executing: number;
-    completed: number;
-  };
-  executing: IPageVo<IWorkflowExecutionRecordVo>;
-  completed: IPageVo<IWorkflowExecutionRecordVo>;
   recordDetail: {
     project?: IProjectDetailVo;
     navScrollLeft: number;
@@ -23,12 +15,6 @@ export interface IState {
     taskRecords: ITaskExecutionRecordVo[];
     nodeInfos: INodeInfoVo[];
   };
-}
-
-/**
- * 查询表单
- */
-export interface IQueryForm extends Mutable<IWorkflowExecutionRecordQueryingDto> {
 }
 
 /**

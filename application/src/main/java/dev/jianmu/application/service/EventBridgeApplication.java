@@ -94,6 +94,7 @@ public class EventBridgeApplication {
             source = Source.Builder.aSource()
                     .bridgeId(bridge.getId())
                     .name(source.getName())
+                    .matcher(source.getMatcher())
                     .type(Source.Type.WEBHOOK)
                     .build();
             source.generateToken();
@@ -101,6 +102,7 @@ public class EventBridgeApplication {
             var oldSource = this.sourceRepository.findByBridgeId(bridge.getId())
                     .orElseThrow(() -> new RuntimeException("未找到Source"));
             oldSource.setName(source.getName());
+            oldSource.setMatcher(source.getMatcher());
             source = oldSource;
         }
         bridge.setLastModifiedBy("admin");

@@ -104,22 +104,6 @@ export default {
 
       saveState(state);
     },
-
-    mutationPageSize(state: IState, { key, value }: { key: string; value: number; }) {
-      if (!state.userSettings.pageSize) {
-        state.userSettings.pageSize = {};
-      }
-
-      state.userSettings.pageSize[key] = value;
-
-      saveState(state);
-    },
-
-    mutationMainMenu(state: IState, collapsed: boolean) {
-      state.userSettings.mainMenuCollapsed = collapsed;
-
-      saveState(state);
-    },
   },
   actions: {
     async create({ commit }: ActionContext<IState, IRootState>, loginForm: ILoginForm): Promise<void> {

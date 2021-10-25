@@ -1,14 +1,5 @@
 import { restProxy } from '@/api';
-import {
-  IGitCloningDto,
-  IGitVo,
-  IWorkflowDefinitionImportingDto,
-  IWorkflowDefinitionQueryingDto,
-  IWorkflowDefinitionSavingDto,
-  IWorkflowDefinitionSourceVo,
-  IWorkflowDefinitionVo,
-} from '@/api/dto/workflow-definition';
-import { IPageVo } from '@/api/dto/common';
+import { IGitCloningDto, IGitVo, IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
 
 export const baseUrl = {
   project: '/projects',
@@ -16,23 +7,10 @@ export const baseUrl = {
 };
 
 /**
- * 查询流程定义
+ * 保存项目
  * @param dto
  */
-export function query(dto: IWorkflowDefinitionQueryingDto): Promise<IPageVo<IWorkflowDefinitionVo>> {
-  return restProxy({
-    url: baseUrl.project,
-    method: 'get',
-    payload: dto,
-    auth: true,
-  });
-}
-
-/**
- * 保存流程定义
- * @param dto
- */
-export function save(dto: IWorkflowDefinitionSavingDto): Promise<void> {
+export function save(dto: IProjectSavingDto): Promise<void> {
   const url = `${baseUrl.project}${dto.id ? `/${dto.id}` : ''}`;
   const method = dto.id ? 'put' : 'post';
 
@@ -40,19 +18,6 @@ export function save(dto: IWorkflowDefinitionSavingDto): Promise<void> {
     url,
     method,
     payload: dto,
-    auth: true,
-  });
-}
-
-/**
- * 获取流程定义源码
- * @param workflowRef
- * @param workflowVersion
- */
-export function fetchSource(workflowRef: string, workflowVersion: string): Promise<IWorkflowDefinitionSourceVo> {
-  return restProxy({
-    url: `${baseUrl.project}/source/${workflowRef}/${workflowVersion}`,
-    method: 'get',
     auth: true,
   });
 }
@@ -70,7 +35,7 @@ export function executeImmediately(id: string): Promise<void> {
 }
 
 /**
- * 删除流程定义
+ * 删除
  * @param id
  */
 export function del(id: string): Promise<void> {
@@ -114,10 +79,10 @@ export function listGit(id: string, dir?: string): Promise<{
 }
 
 /**
- * 导入流程定义
+ * 导入项目
  * @param dto
  */
-export function _import(dto: IWorkflowDefinitionImportingDto): Promise<void> {
+export function _import(dto: IProjectImportingDto): Promise<void> {
   return restProxy({
     url: `${baseUrl.project}/import`,
     method: 'post',
