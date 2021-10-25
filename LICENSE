@@ -1,180 +1,128 @@
-木兰公共许可证, 第2版
-木兰公共许可证, 第2版
+                     木兰宽松许可证, 第2版
 
-2021年5月 http://license.coscl.org.cn/MulanPubL-2.0
+   木兰宽松许可证， 第2版 
+   2020年1月 http://license.coscl.org.cn/MulanPSL2
 
-您对“贡献”的复制、使用、修改及分发受木兰公共许可证,第2版（以下简称“本许可证”）的如下条款的约束：
 
-0.   定义
+   您对“软件”的复制、使用、修改及分发受木兰宽松许可证，第2版（“本许可证”）的如下条款的约束：
 
-“贡献” 是指由“贡献者”许可在“本许可证”下的受版权法保护的作品，包括最初“贡献者”许可在“本许可证”下的作品及后续“贡献者”许可在“本许可证”下的“衍生作品”。
+   0. 定义
 
-“贡献者” 是指将受版权法保护的作品许可在“本许可证”下的自然人或“法人实体”。
+      “软件”是指由“贡献”构成的许可在“本许可证”下的程序和相关文档的集合。
 
-“法人实体” 是指提交贡献的机构及其“关联实体”。
+      “贡献”是指由任一“贡献者”许可在“本许可证”下的受版权法保护的作品。
 
-“关联实体” 是指，对“本许可证”下的行为方而言，控制、受控制或与其共同受控制的机构，此处的“控制”是指拥有受控方或共同受控方至少50%直接或间接的投票权、资金或其他有价证券。
+      “贡献者”是指将受版权法保护的作品许可在“本许可证”下的自然人或“法人实体”。
 
-“衍生作品” 是指基于“贡献”创作的作品，具体包括对全部或部分“贡献”进行修改、重写、翻译、注释、组合或与之链接（包括动态链接或静态链接）而形成的作品。仅与“贡献”进行进程间通信或系统调用的作品是独立作品，不属于“衍生作品”。
+      “法人实体”是指提交贡献的机构及其“关联实体”。
 
-“对应源代码” 是指生成、安装和(对于可执行作品)运行目标代码所需的所有源文件和与之关联的接口定义文件，以及控制这些活动的脚本，但不包括编译环境、编译工具、云服务平台（如果有）。
+      “关联实体”是指，对“本许可证”下的行为方而言，控制、受控制或与其共同受控制的机构，此处的控制是指有受控方或共同受控方至少50%直接或间接的投票权、资金或其他有价证券。
 
-“分发” 是指通过任何媒介向他人提供“贡献”或“衍生作品”的行为，以及利用“贡献”或“衍生作品”通过网络远程给用户提供服务的行为，例如：通过利用“贡献”或“衍生作品”搭建的云服务平台提供在线服务的行为。
+   1. 授予版权许可
 
-1.   授予版权许可
+      每个“贡献者”根据“本许可证”授予您永久性的、全球性的、免费的、非独占的、不可撤销的版权许可，您可以复制、使用、修改、分发其“贡献”，不论修改与否。
 
-每个“贡献者”根据“本许可证”授予您永久性的、全球性的、免费的、非独占的、不可撤销的版权许可，您可以复制、使用、修改、“分发”其“贡献”或“衍生作品”，不论修改与否。
+   2. 授予专利许可
 
-2.   授予专利许可
+      每个“贡献者”根据“本许可证”授予您永久性的、全球性的、免费的、非独占的、不可撤销的（根据本条规定撤销除外）专利许可，供您制造、委托制造、使用、许诺销售、销售、进口其“贡献”或以其他方式转移其“贡献”。前述专利许可仅限于“贡献者”现在或将来拥有或控制的其“贡献”本身或其“贡献”与许可“贡献”时的“软件”结合而将必然会侵犯的专利权利要求，不包括对“贡献”的修改或包含“贡献”的其他结合。如果您或您的“关联实体”直接或间接地，就“软件”或其中的“贡献”对任何人发起专利侵权诉讼（包括反诉或交叉诉讼）或其他专利维权行动，指控其侵犯专利权，则“本许可证”授予您对“软件”的专利许可自您提起诉讼或发起维权行动之日终止。
 
-每个“贡献者”根据“本许可证”授予您永久性的、全球性的、免费的、非独占的、不可撤销的（根据本条规定撤销的情形除外）专利许可，供您使用、制造、委托制造、销售、许诺销售、进口其“贡献”或以其他方式转移其“贡献”。前述专利许可仅限于“贡献者”现在或将来拥有或控制的其“贡献”中的专利权利要求，而不包括仅因您对“贡献”的修改而将必然会侵犯到的专利权利要求。如果您或您的“关联实体”直接或间接地，就“贡献”对任何人发起专利侵权诉讼（包括在诉讼中提出反诉请求或交叉请求）或发起其他专利维权行动，则“贡献者”根据“本许可证”授予您的专利许可自您发起专利诉讼或专利维权行动之日终止。
+   3. 无商标许可
 
-3.   无商标许可
+      “本许可证”不提供对“贡献者”的商品名称、商标、服务标志或产品名称的商标许可，但您为满足第4条规定的声明义务而必须使用除外。
 
-“贡献者”在“本许可证”下不提供对其商品名称、商标、服务标识或产品名称的商标许可，但您为满足第4条规定的声明义务而必须使用的情形除外。
+   4. 分发限制
 
-4.   分发限制
+      您可以在任何媒介中将“软件”以源程序形式或可执行形式重新分发，不论修改与否，但您必须向接收者提供“本许可证”的副本，并保留“软件”中的版权、商标、专利及免责声明。
 
-您可以将您接收到的“贡献”或您的“衍生作品”以源程序形式或可执行形式重新“分发”，但必须满足下列条件：
+   5. 免责声明与责任限制
 
-（1）您必须向接收者提供“本许可证”的副本，并保留“贡献”中的版权、商标、专利及免责声明；并且，
+      “软件”及其中的“贡献”在提供时不带任何明示或默示的担保。在任何情况下，“贡献者”或版权所有者不对任何人因使用“软件”或其中的“贡献”而引发的任何直接或间接损失承担责任，不论因何种原因导致或者基于何种法律理论，即使其曾被建议有此种损失的可能性。 
 
-（2）如果您“分发”您接收到的“贡献”，您必须使用“本许可证”提供该“贡献”的源代码副本；如果您 “分发”您的“衍生作品”，您必须：
+   6. 语言
+      “本许可证”以中英文双语表述，中英文版本具有同等法律效力。如果中英文版本存在任何冲突不一致，以中文版为准。
 
-（i）随“衍生作品”提供使用“本许可证”“分发”的您的“衍生作品”的“对应源代码”。如果您通过下载链接提供前述“对应源代码”，则您应将下载链接地址置于“衍生作品”或其随附文档中的明显位置，有效期自该“衍生作品”“分发”之日起不少于三年，并确保接收者可以获得“对应源代码”；或者，
+   条款结束 
 
-（ii）随“衍生作品”向接收者提供一个书面要约，表明您愿意提供根据“本许可证”“分发”的您“衍生作品”的“对应源代码”。该书面要约应置于“衍生作品”中的明显位置，并确保接收者根据书面要约可获取“对应源代码”的时间从您接到该请求之日起不得超过三个月，且有效期自该“衍生作品”“分发”之日起不少于三年。
+   如何将木兰宽松许可证，第2版，应用到您的软件
+   
+   如果您希望将木兰宽松许可证，第2版，应用到您的新软件，为了方便接收者查阅，建议您完成如下三步：
 
-5.   违约与终止
+      1， 请您补充如下声明中的空白，包括软件名、软件的首次发表年份以及您作为版权人的名字；
 
-如果您违反“本许可证”，任何“贡献者”有权书面通知您终止其根据“本许可证”授予您的许可。该“贡献者”授予您的许可自您接到其终止通知之日起终止。仅在如下两种情形下，即使您收到“贡献者”的通知也并不终止其授予您的许可：
+      2， 请您在软件包的一级目录下创建以“LICENSE”为名的文件，将整个许可证文本放入该文件中；
 
-（1）您在接到该终止通知之前已停止所有违反行为；
+      3， 请将如下声明文本放入每个源文件的头部注释中。
 
-（2）您是首次收到该“贡献者”根据“本许可证”发出的书面终止通知，并且您在收到该通知后30天内已停止所有违反行为。
+   Copyright (c) 2021 浙江九州云信息科技有限公司
 
-只要您下游的接收者遵守“本许可证”的相关规定，即使您在“本许可证”下被授予的许可终止，不影响下游的接收者根据“本许可证”享有的权利。
+   jianmu is licensed under Mulan PSL v2.
+   You can use this software according to the terms and conditions of the Mulan PSL v2. 
+   You may obtain a copy of Mulan PSL v2 at:
+            http://license.coscl.org.cn/MulanPSL2 
+   THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+   See the Mulan PSL v2 for more details.  
 
-6.   例外
 
-如果您将“贡献”与采用GNU AFFERO GENERAL PUBLIC LICENSE Version 3（以下简称“AGPLv3”）或其后续版本的作品结合形成新的“衍生作品”，且根据“AGPLv3”或其后续版本的要求您有义务将新形成的“衍生作品”以“AGPLv3”或其后续版本进行许可的，您可以根据“AGPLv3”或其后续版本进行许可，只要您在“分发”该“衍生作品”的同时向接收者提供“本许可证”的副本，并保留“贡献”中的版权、商标、专利及免责声明。但任何“贡献者”不会因您选择“AGPLv3”或其后续版本而授予该“衍生作品”的接收者更多权利。
+                     Mulan Permissive Software License，Version 2
 
-7.   免责声明与责任限制
+   Mulan Permissive Software License，Version 2 (Mulan PSL v2)
+   January 2020 http://license.coscl.org.cn/MulanPSL2
 
-“贡献”在提供时不带有任何明示或默示的担保。在任何情况下，“贡献者”或版权人不对任何人因使用“贡献”而引发的任何直接或间接损失承担任何责任，不论该等损失因何种原因导致或者基于何种法律理论,即使其曾被告知有该等损失的可能性。
+   Your reproduction, use, modification and distribution of the Software shall be subject to Mulan PSL v2 (this License) with the following terms and conditions: 
+   
+   0. Definition
+   
+      Software means the program and related documents which are licensed under this License and comprise all Contribution(s). 
+   
+      Contribution means the copyrightable work licensed by a particular Contributor under this License.
+   
+      Contributor means the Individual or Legal Entity who licenses its copyrightable work under this License.
+   
+      Legal Entity means the entity making a Contribution and all its Affiliates.
+   
+      Affiliates means entities that control, are controlled by, or are under common control with the acting entity under this License, ‘control’ means direct or indirect ownership of at least fifty percent (50%) of the voting power, capital or other securities of controlled or commonly controlled entity.
 
-8.   语言
+   1. Grant of Copyright License
 
-“本许可证”以中英文双语表述，中英文版本具有同等法律效力。如果中英文版本存在任何不一致，以中文版为准。
+      Subject to the terms and conditions of this License, each Contributor hereby grants to you a perpetual, worldwide, royalty-free, non-exclusive, irrevocable copyright license to reproduce, use, modify, or distribute its Contribution, with modification or not.
 
-条款结束
+   2. Grant of Patent License 
 
-如何将木兰公共许可证，第2版，应用到您的软件
+      Subject to the terms and conditions of this License, each Contributor hereby grants to you a perpetual, worldwide, royalty-free, non-exclusive, irrevocable (except for revocation under this Section) patent license to make, have made, use, offer for sale, sell, import or otherwise transfer its Contribution, where such patent license is only limited to the patent claims owned or controlled by such Contributor now or in future which will be necessarily infringed by its Contribution alone, or by combination of the Contribution with the Software to which the Contribution was contributed. The patent license shall not apply to any modification of the Contribution, and any other combination which includes the Contribution. If you or your Affiliates directly or indirectly institute patent litigation (including a cross claim or counterclaim in a litigation) or other patent enforcement activities against any individual or entity by alleging that the Software or any Contribution in it infringes patents, then any patent license granted to you under this License for the Software shall terminate as of the date such litigation or activity is filed or taken.
 
-如果您希望将木兰公共许可证，第2版，应用到您的软件，为了方便接收者查阅，建议您完成如下三步：
+   3. No Trademark License
 
-1， 请您补充如下声明中的空白，包括软件名、软件的首次发表年份以及您作为版权人的名字；
+      No trademark license is granted to use the trade names, trademarks, service marks, or product names of Contributor, except as required to fulfill notice requirements in Section 4.
 
-2， 请您在软件包的一级目录下创建以“LICENSE”为名的文件，将整个许可证文本放入该文件中；
+   4. Distribution Restriction
 
-3， 请将如下声明文本放入每个源文件的头部注释中。
+      You may distribute the Software in any medium with or without modification, whether in source or executable forms, provided that you provide recipients with a copy of this License and retain copyright, patent, trademark and disclaimer statements in the Software.
 
-Copyright (c) 2021 99cloud, Inc.
-Jianmu is licensed under Mulan PubL v2.
-You can use this software according to the terms and conditions of the Mulan PubL v2.
-You may obtain a copy of Mulan PubL v2 at:
-         http://license.coscl.org.cn/MulanPubL-2.0
-THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-See the Mulan PubL v2 for more details.
-Mulan Public License，Version 2
-Mulan Public License，Version 2 (Mulan PubL v2)
+   5. Disclaimer of Warranty and Limitation of Liability
 
-May 2021 http://license.coscl.org.cn/MulanPubL-2.0
+      THE SOFTWARE AND CONTRIBUTION IN IT ARE PROVIDED WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. IN NO EVENT SHALL ANY CONTRIBUTOR OR COPYRIGHT HOLDER BE LIABLE TO YOU FOR ANY DAMAGES, INCLUDING, BUT NOT LIMITED TO ANY DIRECT, OR INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING FROM YOUR USE OR INABILITY TO USE THE SOFTWARE OR THE CONTRIBUTION IN IT, NO MATTER HOW IT’S CAUSED OR BASED ON WHICH LEGAL THEORY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-Your reproduction, use, modification and Distribution of the Contribution shall be subject to Mulan Public License, Version 2 (this License) with following terms and conditions:
+   6. Language
 
-0. Definition
+      THIS LICENSE IS WRITTEN IN BOTH CHINESE AND ENGLISH, AND THE CHINESE VERSION AND ENGLISH VERSION SHALL HAVE THE SAME LEGAL EFFECT. IN THE CASE OF DIVERGENCE BETWEEN THE CHINESE AND ENGLISH VERSIONS, THE CHINESE VERSION SHALL PREVAIL.
 
-Contribution means the copyrightable work licensed by a particular Contributor under this License, including the work licensed by the initial Contributor under this License and its Derivative Work licensed by any subsequent Contributor under this License.
+   END OF THE TERMS AND CONDITIONS
 
-Contributor means the Individual or Legal Entity who licenses its copyrightable work under this License.
+   How to Apply the Mulan Permissive Software License，Version 2 (Mulan PSL v2) to Your Software
 
-Legal Entity means the entity making a Contribution and all its Affiliates.
+      To apply the Mulan PSL v2 to your work, for easy identification by recipients, you are suggested to complete following three steps:
 
-Affiliates mmeans entities that control, are controlled by, or are under common control with the acting entity under this License, ‘control’ means direct or indirect ownership of at least fifty percent (50%) of the voting power, capital or other securities of controlled or commonly controlled entity.
+      i Fill in the blanks in following statement, including insert your software name, the year of the first publication of your software, and your name identified as the copyright owner; 
 
-Derivative Work means works created based on Contribution, specifically including works formed by modifying, rewriting, translating, annotating, combining or linking to all or part of Contribution (including dynamic linking or static linking). Works which only communicate with Contribution through inter-process communication or system call, are independent works, rather than Derivative Work.
+      ii Create a file named “LICENSE” which contains the whole context of this License in the first directory of your software package;
 
-Corresponding Source Code means all the source code needed to generate, install, and (for an executable work) run the object code including the interface definition files associated with source files for the work, and scripts to control those activities, excluding of compilation environment and compilation tools, cloud services platform (if any).
+      iii Attach the statement to the appropriate annotated syntax at the beginning of each source file.
 
-Distribute (or Distribution) means the act of making the Contribution or Derivative Work available to others through any medium, and using the Contribution or Derivative Work to provide online services to users, such as the act of providing online services through a cloud service platform built using Contributions or Derivative Works.
 
-1. Grant of Copyright License
-
-Subject to the terms and conditions of this License, each Contributor hereby grants to you a perpetual, worldwide, royalty-free, non-exclusive, irrevocable copyright license to reproduce, use, modify, or Distribute its Contribution or Derivative Work, with modification or not.
-
-2. Grant of Patent License
-
-Subject to the terms and conditions of this License, each Contributor hereby grants to you a perpetual, worldwide, royalty-free, non-exclusive, irrevocable (except for revocation under this Section) patent license to use, make, have made, sell, offer for sale, import or otherwise transfer its Contribution, where such patent license is only limited to the patent claims owned or controlled by such Contributor now or in future which will be necessarily infringed by its Contribution alone, excluding of any patent claims solely be infringed by your modification. If you or your Affiliates directly or indirectly institute patent litigation (including a cross claim or counterclaim in a litigation) or other patent enforcement activities against any individual or entity by alleging that any Contribution infringes patents, then any patent license granted to you under this License for the Contribution shall terminate as of the date such litigation or activity is filed or taken.
-
-3. No Trademark License
-
-No trademark license is granted to use the trade names, trademarks, service marks, or product names of Contributor, except as required to fulfill notice requirements in Section 4.
-
-4. Distribution Restriction
-
-You may Distribute the Contribution you received or your Derivative Work, whether in source or executable forms, provided that you meet the following conditions:
-
-1) You must provide recipients with a copy of this License and retain copyright, trademark, patent and disclaimer statements in the Contribution; and,
-
-2) If you Distribute the Contribution you received, you must provide copies of the Contribution’s source code under this License;
-
-If you Distribute your Derivative Work, you have to:
-
-(i) accompanying the Derivative work, provide recipients with Corresponding Source Code of your Derivative Work under this License. If you provide the Corresponding Source Code through a download link, you should place such link address prominently in the Derivative Work or its accompanying documents, and be valid no less than three years from your Distribution of the particular Derivative Work, and ensure that the recipients can acquire the Corresponding Source Code through the link; or,
-
-(ii) accompanying the Derivative Work, provide recipients with a written offer indicating your willingness to provide the Corresponding Source Code of the Derivative Work licensed under this License. Such written offer shall be placed prominently in the Derivative Work or its accompanying documents. Without reasonable excuse, the recipient shall be able to acquire the Corresponding Source code of the Derivative work for no more than three months from your receipt of a valid request, and be valid no less than three years from your Distribution of the particular Derivative Work.
-
-5. Breach and Termination
-
-If you breach this License, any Contributor has the right to notify you in writing to terminate its license granted to you under this License. The license granted to you by such Contributor terminates upon your receipt of such notice of termination. Notwithstanding the foregoing, your license will not be terminated even if you receive a notice of termination from Contributor, provided that:
-
-1) you have cured all the breaches prior to receiving such notice of termination; or,
-
-2) it’s your first time to receive a notice of termination from such Contributor pursuant to this License, and you have cured all the breaches within 30 days of receipt of such notice.
-
-Termination of your license under this License shall not affect the downstream recipient's rights under this License, provided that the downstream recipient complies with this License.
-
-6. Exceptions
-
-If you combine Contribution or your Derivative Work with a work licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 (hereinafter referred to as “AGPLv3”) or its subsequent versions, and according to the AGPLv3 or its subsequent versions, you have an obligation to make the combined work to be licensed under the corresponding license, you can license such combined work under the license, provided that when you Distribute the combined work, you also provide a copy of this License to the recipients, and retain copyright, trademarks, patents, and disclaimer statements in the Contribution. No Contributor will grant additional rights to the recipients of the combined work for your license under AGPLv3 or its subsequent versions.
-
-7. Disclaimer of Warranty and Limitation of liability
-
-CONTRIBUTION ARE PROVIDED WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. IN NO EVENT SHALL ANY CONTRIBUTOR OR COPYRIGHT HOLDER BE LIABLE TO YOU FOR ANY DAMAGES, INCLUDING, BUT NOT LIMITED TO ANY DIRECT, OR INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING FROM YOUR USE OR INABILITY TO USE THE CONTRIBUTION, NO MATTER HOW IT’S CAUSED OR BASED ON WHICH LEGAL THEORY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-
-8. Language
-
-THIS LICENSE IS WRITTEN IN BOTH CHINESE AND ENGLISH, AND THE CHINESE VERSION AND ENGLISH VERSION SHALL HAVE THE SAME LEGAL EFFECT. IN THE CASE OF DIVERGENCE BETWEEN THE CHINESE AND ENGLISH VERSIONS, THE CHINESE VERSION SHALL PREVAIL.
-
-END OF THE TERMS AND CONDITIONS
-
-How to apply the Mulan Public License，Version 2 (Mulan PubL v2), to your software
-
-To apply the Mulan Public License，Version 2 to your work, for easy identification by recipients, you are suggested to complete following three steps:
-
-Fill in the blanks in following statement, including insert your software name, the year of the first publication of your software, and your name identified as the copyright owner;
-Create a file named “LICENSE” which contains the whole context of this License in the first directory of your software package;
-Attach the statement to the appropriate annotated syntax at the beginning of each source file.
-
-Copyright (c) 2021 99cloud, Inc.
-Jianmu is licensed under Mulan PubL v2.
-You can use this software according to the terms and conditions of the Mulan PubL v2.
-You may obtain a copy of Mulan PubL v2 at:
-         http://license.coscl.org.cn/MulanPubL-2.0
-THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-See the Mulan PubL v2 for more details.
+   Copyright (c) 2021 浙江九州云信息科技有限公司
+   jianmu is licensed under Mulan PSL v2.
+   You can use this software according to the terms and conditions of the Mulan PSL v2. 
+   You may obtain a copy of Mulan PSL v2 at:
+               http://license.coscl.org.cn/MulanPSL2 
+   THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+   See the Mulan PSL v2 for more details.  
