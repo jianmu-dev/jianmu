@@ -78,9 +78,15 @@ export default [
       title: '新增项目',
     },
   }, {
-    name: 'process-templates',
-    path: 'process-templates',
-    component: () => import('@/views/process-templates/manager.vue'),
+    name: 'process-template',
+    path: 'process-template',
+    component: () => import('@/views/process-template/manager.vue'),
+    props: ({ query: { 
+      processTemplatesName,
+     
+    } }: RouteLocationNormalizedLoaded) => ({  
+      processTemplatesName,
+    }),
     meta: {
       title: '流程模版',
     },

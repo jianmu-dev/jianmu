@@ -54,12 +54,15 @@ export default defineComponent({
       dslText: '',
     });
     const loading = ref<boolean>(false);
-    if (route.query.processTemplatesId) {
-      getProcessTemplate(route.query.processTemplatesId as unknown as number).then((res: IProcessTemplate) => {
+
+    if (route.query.templateId) {
+      getProcessTemplate(route.query.templateId as unknown as number).then((res: IProcessTemplate) => {
         let dsl = res.dsl;
-        let name = `name: ${res.name}`;
         if (route.query.processTemplatesName !== res.name) {
+          let name = `name: ${res.name}`;
           editorForm.value.dslText = dsl.replace(name, `name: ${route.query.processTemplatesName}`);
+        }else{
+          editorForm.value.dslText = dsl;
         }
       });
     } else {
@@ -93,10 +96,10 @@ export default defineComponent({
       activatedTab: ref<string>('dsl'),
       source: route.query.source,
       previousStep: () => {
-        router.push({
-          name: 'process-templates',
-          query: {
-            processTemplatesName: route.query.processTemplatesName,
+        router.push({ 
+          name:'process-template',
+          query:{
+            processTemplatesName:route.query.processTemplatesName,
           },
         });
       },
