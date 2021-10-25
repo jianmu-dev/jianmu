@@ -1,10 +1,11 @@
 <template>
   <div v-if="true"></div>
   <div v-else class="bottom-nav">
-    <a href="https://portal.mulanos.cn" target="_blank" class="copyright">木兰社区孵化项目</a>
-    <a href="https://jianmu.dev" target="_blank" class="company">jianmu.dev</a>
-    <a v-if="icpVisible" href="https://beian.miit.gov.cn" target="_blank" class="icp">浙ICP备12032350号-5</a>
-    <span class="email">邮箱：<a href="mailto:support@jianmu.dev">support@jianmu.dev</a></span>
+    <a href="https://portal.mulanos.cn" target="_blank">木兰社区孵化项目</a>
+    <a href="https://jianmu.dev" target="_blank">关于建木</a>
+    <a href="https://docs.jianmu.dev" target="_blank">使用手册</a>
+    <a href="mailto:support@jianmu.dev">联系我们</a>
+    <a v-if="icpVisible" href="https://beian.miit.gov.cn" target="_blank">浙ICP备12032350号-5</a>
   </div>
 </template>
 
@@ -35,7 +36,7 @@ export default defineComponent({
   color: #FFFFFF;
   text-align: center;
 
-  .company, .icp, .email {
+  &:nth-child(n+2) {
     margin-left: 30px;
   }
 
