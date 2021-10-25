@@ -51,12 +51,12 @@ public class EmbeddedWorkerApplication {
     }
 
     public void runTask(WorkerTask workerTask) {
-        var parameterMap = workerTask.getParameterMap().entrySet().stream()
-                .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
-        parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
         try {
+            var parameterMap = workerTask.getParameterMap().entrySet().stream()
+                    .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
+            parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
             var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId());

@@ -156,18 +156,23 @@ public class TaskInstanceInternalApplication {
     }
 
     private Set<InstanceParameter> createInstanceParameters(Map<String, Parameter<?>> parameterMap, TaskInstance taskInstance, Set<NodeParameter> nodeParameters) {
-        var instanceParameters = parameterMap.entrySet().stream().map(entry ->
-                InstanceParameter.Builder.anInstanceParameter()
-                        .instanceId(taskInstance.getId())
-                        .triggerId(taskInstance.getTriggerId())
-                        .defKey(taskInstance.getDefKey())
-                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                        .businessId(taskInstance.getBusinessId())
-                        .ref(entry.getKey())
-                        .parameterId(entry.getValue().getId())
-                        .type(InstanceParameter.Type.INPUT)
-                        .build()
-        ).collect(Collectors.toSet());
+        var instanceParameters = parameterMap.entrySet().stream()
+                .filter(entry ->
+                        nodeParameters.stream()
+                                .anyMatch(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
+                )
+                .map(entry ->
+                        InstanceParameter.Builder.anInstanceParameter()
+                                .instanceId(taskInstance.getId())
+                                .triggerId(taskInstance.getTriggerId())
+                                .defKey(taskInstance.getDefKey())
+                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                                .businessId(taskInstance.getBusinessId())
+                                .ref(entry.getKey())
+                                .parameterId(entry.getValue().getId())
+                                .type(InstanceParameter.Type.INPUT)
+                                .build()
+                ).collect(Collectors.toSet());
         // 合并节点定义的默认参数与DSL中指定的参数
         nodeParameters.forEach(nodeParameter -> {
             // 如果不存在则使用默认参数

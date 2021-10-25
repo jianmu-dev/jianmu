@@ -39,6 +39,8 @@ public class WorkerEventHandler {
     @EventListener
     public void embeddedWorkerTask(WorkerTask workerTask) {
         if (workerTask.getType() == Worker.Type.EMBEDDED) {
+            log.info("embedded docker worker running task id: {}", workerTask.getTaskInstanceId());
+            log.info("embedded docker worker running task type: {}", workerTask.getDefKey());
             this.embeddedWorkerApplication.runTask(workerTask);
         }
     }
