@@ -1,10 +1,9 @@
 <template>
   <div class="bottom-nav">
-    <span class="copyright">2020-{{ currentYear }}</span>
+    <a href="https://portal.mulanos.cn" target="_blank" class="copyright">木兰社区孵化项目</a>
     <a href="https://jianmu.dev" target="_blank" class="company">jianmu.dev</a>
-    <a v-if="icpVisible" href="http://beian.miit.gov.cn/" target="_blank" class="icp">浙ICP备12032350号-5</a>
+    <a v-if="icpVisible" href="https://beian.miit.gov.cn" target="_blank" class="icp">浙ICP备12032350号-5</a>
     <span class="email">邮箱：<a href="mailto:support@jianmu.dev">support@jianmu.dev</a></span>
-    <span class="email">商务合作：<a href="mailto:bd@jianmu.dev">bd@jianmu.dev</a></span>
   </div>
 </template>
 
