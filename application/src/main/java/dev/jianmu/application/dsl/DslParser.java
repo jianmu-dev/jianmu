@@ -110,12 +110,16 @@ public class DslParser {
                     var target = symbolTable.get(nodeName);
                     if (null != target) {
                         n.addTarget(target.getRef());
+                    } else {
+                        throw new RuntimeException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
                     }
                 });
                 dslNode.getSources().forEach(nodeName -> {
                     var source = symbolTable.get(nodeName);
                     if (null != source) {
                         n.addSource(source.getRef());
+                    } else {
+                        throw new RuntimeException("节点" + dslNode.getName() + "指定的source: " + nodeName + "不存在");
                     }
                 });
             }
