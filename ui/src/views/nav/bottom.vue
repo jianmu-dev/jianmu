@@ -1,10 +1,11 @@
 <template>
   <div v-if="true"></div>
   <div v-else class="bottom-nav">
-    <span class="copyright">&copy;2020-{{ currentYear }} 版权所有</span>
-    <span class="company">九州云信息科技有限公司</span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" class="icp">浙ICP备12032350号-5</a>
-    <span class="email">邮箱：<a href=mailto:support@jianmu.dev>support@jianmu.dev</a></span>
+    <span class="copyright">2020-{{ currentYear }}</span>
+    <a href="https://jianmu.dev" target="_blank" class="company">jianmu.dev</a>
+    <a v-if="icpVisible" href="http://beian.miit.gov.cn/" target="_blank" class="icp">浙ICP备12032350号-5</a>
+    <span class="email">邮箱：<a href="mailto:support@jianmu.dev">support@jianmu.dev</a></span>
+    <span class="email">商务合作：<a href="mailto:bd@jianmu.dev">bd@jianmu.dev</a></span>
   </div>
 </template>
 
@@ -15,6 +16,7 @@ export default defineComponent({
   setup() {
     return {
       currentYear: new Date().getFullYear(),
+      icpVisible: import.meta.env.mode === 'cdn',
     };
   },
 });
@@ -34,11 +36,7 @@ export default defineComponent({
   color: #FFFFFF;
   text-align: center;
 
-  .copyright {
-    margin-right: 5px;
-  }
-
-  .icp, .email {
+  .company, .icp, .email {
     margin-left: 30px;
   }
 
