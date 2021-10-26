@@ -68,7 +68,7 @@
                                             </h3>
                                         <p>{{ item.name }}</p>
                                     </div>
-                                    <jm-workflow-viewer style="height: 360px;"
+                                    <jm-workflow-viewer style="height: 360px;pointer-events: none;"
                                                         :dsl="item.dsl"
                                                         readonly
                                                         :node-infos="item.nodeDefs"
@@ -97,13 +97,14 @@ import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { IWorkflowTemplateViewingForm, ITemplatesCLickData, IProcessTemplatesForm }from '@/model/modules/process-template';
 import router from '@/router';
 export default defineComponent({
+  name:'process-template',
   props:{
     processTemplatesName:String,
   },
-  setup(propx) {
+  setup() {
     const categoriesList = reactive<ICategoriesVo[]>([]);
     const processTemplatesForm = reactive<IProcessTemplatesForm>({
-      processTemplatesName:propx.processTemplatesName || '',
+      processTemplatesName:'',
     });
     const workflowTemplates = reactive<IWorkflowTemplateViewingForm>({
       pageNum: 1,
@@ -123,7 +124,7 @@ export default defineComponent({
     };
     const templatesClickData = reactive<ITemplatesCLickData>({
       templateId:undefined,
-      templateName:propx.processTemplatesName || '',
+      templateName:'',
       classifyId:undefined,
     });
     const isShowMore = ref<boolean>(false);
@@ -142,6 +143,8 @@ export default defineComponent({
         }
         isShowMore.value = true;
         templatesList.push(...res.content);
+      }).catch((err:Error) => {
+        console.warn(err.message);
       }).finally(() => {
         templateLoading.value = false;
         bottomLoading.value = false;
@@ -152,6 +155,8 @@ export default defineComponent({
     workflowTemplateCategories().then((res:ICategoriesVo[]) => {
       categoriesList.push(...res);
       getTemplatesList(workflowTemplates);
+    }).catch((err:Error) => {
+      console.warn(err.message);
     }).finally(() => {
       templateLoading.value = false;
     });
@@ -386,6 +391,7 @@ export default defineComponent({
                             max-height: 360px;
                             position: relative;
                             margin-bottom:20px;
+                            cursor:pointer;
                             &:hover{
                                 border: 1px solid #096DD9;
                                 box-shadow: 0px 0px 16px 4px #DCE3EF;

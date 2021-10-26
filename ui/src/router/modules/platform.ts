@@ -89,6 +89,7 @@ export default [
     }),
     meta: {
       title: '流程模版',
+      keepAlive:true,
     },
   }, {
     name: 'update-project',

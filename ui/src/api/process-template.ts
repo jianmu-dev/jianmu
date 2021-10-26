@@ -5,7 +5,6 @@ export const baseUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 
 /**
  * 查看流程模版分类列表
- * @param dto
  */
 export function workflowTemplateCategories(): Promise<ICategoriesVo[]> {
   return restProxy<ICategoriesVo[]>({

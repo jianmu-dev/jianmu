@@ -64,6 +64,8 @@ export default defineComponent({
         }else{
           editorForm.value.dslText = dsl;
         }
+      }).catch((err:Error) => {
+        console.warn(err.message);
       });
     } else {
       editorForm.value.dslText = `workflow:\n  name: ${route.query.processTemplatesName}\n`;
@@ -98,9 +100,6 @@ export default defineComponent({
       previousStep: () => {
         router.push({ 
           name:'process-template',
-          query:{
-            processTemplatesName:route.query.processTemplatesName,
-          },
         });
       },
       save: () => {
