@@ -62,7 +62,7 @@ function buildPathNav(pathNavs: Ref<IPathNav[]>, route: RouteLocationNormalizedL
 
 export default defineComponent({
   components: { TopNav },
-  setup() {    
+  setup() {
     const { proxy } = getCurrentInstance() as any;
     const route = useRoute();
     const bufferList = reactive<string[]>([]);
@@ -75,6 +75,10 @@ export default defineComponent({
     proxy.$nextTick(() => adaptHeight(autoHeight));
     buildPathNav(pathNavs, useRoute());
 
+    // 直接访问要被缓冲的路由地址时，添加缓冲
+    if(route.meta.keepAlive){
+      bufferList.push(route.name as string);
+    }
     onBeforeRouteUpdate(to => {
       if(to.meta.keepAlive && !bufferList.includes(to.name as string)){
         bufferList.push(to.name as string);
@@ -82,7 +86,6 @@ export default defineComponent({
       if(to.name === 'index' ){
         bufferList.length = 0;
       }
-      
       autoHeight.offsetTop = to.path !== PLATFORM_INDEX ? 125 : 65;
 
       proxy.$nextTick(() => adaptHeight(autoHeight));
