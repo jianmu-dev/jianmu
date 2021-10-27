@@ -272,12 +272,12 @@ export default defineComponent({
     .process-template-flex{
         display:flex;
         .ptf-l{
+          background-color: #fff;
             .ptf-l-t{
                 display:flex;
                 width: 264px;
                 height: 82px;
                 padding-left: 20px;
-                margin-bottom:30px;
                 align-items:center;
                 background-image: url("@/assets/images/process-template/bj.png");
                 &>i{
@@ -296,6 +296,8 @@ export default defineComponent({
             .ptf-l-b{
                 padding-left:20px;
                 font-size: 16px;
+                padding-top: 30px;
+                border-top: 1px solid #eff4f9;
                 &>p{
                     color: #6B7B8D;
                     margin-bottom:22px;
