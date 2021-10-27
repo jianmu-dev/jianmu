@@ -23,7 +23,7 @@
                             <li v-for="i in categoriesList"
                                 :key="i.id"
                                 :class="{click:templatesClickData.classifyId === i.id}"
-                                @click="classifyClic(i)"
+                                @click="classifyClick(i)"
                             >
                             <img v-if="i.icon" :src="i.icon">
                             <i v-else>{{ i.name[0].toUpperCase() }}</i>
@@ -137,12 +137,12 @@ export default defineComponent({
       templateLoading.value = true;
       isShowMore.value = false;
       viewWorkflowTemplate(workflowTemplates).then((res:ITemplateListVo) => {
-        if(res.content.length <= 0) {
-          isShowMore.value = false;
-          return;
-        }
-        isShowMore.value = true;
         templatesList.push(...res.content);
+        if(templatesList.length < res.totalElements){
+          isShowMore.value = true;
+        }else{
+          isShowMore.value = false;
+        }
       }).catch((err:Error) => {
         console.warn(err.message);
       }).finally(() => {
@@ -208,7 +208,7 @@ export default defineComponent({
       templatesList,
       templateLoading,
       workflowTemplates,
-      classifyClic(i:ICategoriesVo){
+      classifyClick(i:ICategoriesVo){
         if(!classifyClickKey) return; 
         classifyClickKey = false;
         if(i.id === templatesClickData.classifyId){
