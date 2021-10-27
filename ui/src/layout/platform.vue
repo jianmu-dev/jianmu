@@ -76,7 +76,7 @@ export default defineComponent({
     buildPathNav(pathNavs, useRoute());
 
     // 直接访问要被缓冲的路由地址时，添加缓冲
-    if(route.meta.keepAlive){
+    if(route.meta.keepAlive && !bufferList.includes(route.name as string)){
       bufferList.push(route.name as string);
     }
     onBeforeRouteUpdate(to => {
