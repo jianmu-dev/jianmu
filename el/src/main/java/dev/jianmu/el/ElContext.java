@@ -97,11 +97,6 @@ public class ElContext implements EvaluationContext {
         return this;
     }
 
-    public EvaluationContext add(String scope, String name, String type, Object value) {
-        this.map.put(scope + "." + name, Parameter.Type.getTypeByName(type).newParameter(value));
-        return this;
-    }
-
     @Override
     public Object getVariable(String variableName) {
         var value = this.map.get(variableName);

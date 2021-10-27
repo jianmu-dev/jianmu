@@ -9,7 +9,6 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
 import dev.jianmu.eventbridge.repository.TargetEventRepository;
-import dev.jianmu.eventbridge.service.EventParameterDomainService;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.NodeInfo;
@@ -17,7 +16,6 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
-import dev.jianmu.task.service.InstanceParameterDomainService;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.event.TaskActivatingEvent;
@@ -123,17 +121,21 @@ public class TaskInstanceInternalApplication {
                 .forEach(globalParameter -> context.add(
                         "global",
                         globalParameter.getName(),
-                        globalParameter.getType(),
-                        globalParameter.getValue())
+                        Parameter.Type.getTypeByName(globalParameter.getType()).newParameter(globalParameter.getValue()))
                 );
         // 事件参数加入上下文
-        var eventParams = EventParameterDomainService.convertParamMap(eventParameters);
+        var eventParams = eventParameters.stream()
+                .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
         // 事件参数scope为event
         eventMap.forEach((key, val) -> context.add("event", key, val));
         // 任务输出参数加入上下文
-        var outParams = InstanceParameterDomainService.convertParamMap(instanceParameters);
+        var outParams = instanceParameters.stream()
+                // 输出参数scope为asyncTaskRef
+                .map(instanceParameter -> Map.entry(instanceParameter.getAsyncTaskRef() + "." + instanceParameter.getRef(), instanceParameter.getParameterId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         var outParamValues = this.parameterRepository.findByIds(new HashSet<>(outParams.values()));
         var outMap = this.parameterDomainService.matchParameters(outParams, outParamValues);
         outMap.forEach(context::add);
