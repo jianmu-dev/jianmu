@@ -78,16 +78,16 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.4</version>
                 <configuration>
                     <from>
                         <image>registry://jianmudev/openjdk:11.0.11-jdk-oracle-wait-for-it</image>
                     </from>
                     <to>
-                        <image>${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
+                        <image>jianmudev/jianmu-ci-server:2.0.0</image>
                         <auth>
-                            <username>${env.JIANMU_DOCKER_USERNAME}</username>
-                            <password>${env.JIANMU_DOCKER_PASSWORD}</password>
+                            <username>jianmudev</username>
+                            <password>99cloud@BJ</password>
                         </auth>
                     </to>
                     <container>
