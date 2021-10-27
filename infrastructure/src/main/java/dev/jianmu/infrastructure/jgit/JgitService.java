@@ -100,6 +100,7 @@ public class JgitService {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {
             logger.error("Clone Failed:", e);
+            this.cleanUp(gitRepo.getId());
             throw new RuntimeException("克隆失败");
         }
     }
@@ -134,6 +135,7 @@ public class JgitService {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {
             logger.error("Clone Failed:", e);
+            this.cleanUp(gitRepo.getId());
             throw new RuntimeException("克隆失败");
         }
     }
@@ -159,6 +161,7 @@ public class JgitService {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {
             logger.error("Clone Failed:", e);
+            this.cleanUp(gitRepo.getId());
             throw new RuntimeException("克隆失败");
         }
     }
