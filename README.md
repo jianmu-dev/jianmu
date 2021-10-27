@@ -32,7 +32,7 @@ jianmu:
     adminPasswd: 123456
 ```
 
-配置Hub的AK/SK
+[配置Hub](https://hub.jianmu.run/user-center/api-key)的AK/SK
 
 ```yaml
 registry:
