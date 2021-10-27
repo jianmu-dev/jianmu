@@ -40,9 +40,9 @@ export function queryProject(dto: IProjectQueryingDto): Promise<IProjectVo[]> {
  * 获取流程模版
  * @param dto
  */
-export function getProcessTemplate(id: number): Promise<IProcessTemplate> {
+export function getProcessTemplate(dto: number): Promise<IProcessTemplate> {
   return restProxy({
-    url:`${hubUrl}${baseHubUrl.processTemplate}/${id}`,
+    url:`${hubUrl}${baseHubUrl.processTemplate}/${dto}`,
     method: 'get',
   });
 }
