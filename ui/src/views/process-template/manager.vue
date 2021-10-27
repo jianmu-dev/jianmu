@@ -34,7 +34,7 @@
                 </div>
             </div>
             <!-- right -->
-            <div class="ptf-r">
+            <div class="ptf-r" :style="{'margin-left':categoriesList.length > 0?'30px':'0px'}">
                 <div class="ptf-r-t">
                     <jm-form ref="processTemplatesDom" :model="processTemplatesForm" :rules="rules"  label-position="top">
                         <jm-form-item prop="processTemplatesName" label="项目名称">
@@ -346,7 +346,6 @@ export default defineComponent({
         }
 
         .ptf-r{
-            margin-left: 30px;
             flex-grow: 1;
             .ptf-r-t{
                 background-color: #fff;
