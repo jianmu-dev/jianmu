@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, provide, reactive, Ref, ref, watch } from 'vue';
+import { computed, defineComponent, getCurrentInstance, provide, reactive, Ref, ref } from 'vue';
 import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLoaded, useRoute } from 'vue-router';
 import TopNav from '@/views/nav/top.vue';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
