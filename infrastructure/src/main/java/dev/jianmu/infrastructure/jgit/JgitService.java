@@ -85,6 +85,7 @@ public class JgitService {
     }
 
     public void cloneRepoWithUserAndPass(GitRepo gitRepo, String user, String pass) {
+        this.cleanUp(gitRepo.getId());
         File directory = new File(TMPDIR + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
@@ -107,6 +108,7 @@ public class JgitService {
 
 
     public void cloneRepoWithSshKey(GitRepo gitRepo, String sshKey) {
+        this.cleanUp(gitRepo.getId());
         File directory = new File(TMPDIR + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
@@ -141,6 +143,7 @@ public class JgitService {
     }
 
     public void cloneRepo(GitRepo gitRepo) {
+        this.cleanUp(gitRepo.getId());
         File directory = new File(TMPDIR + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
