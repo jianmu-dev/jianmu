@@ -218,6 +218,14 @@ public class ViewController {
         return ProjectMapper.INSTANCE.toProjectDetailVo(project, nodeDefs);
     }
 
+    @GetMapping("/projects/{projectId}/dsl")
+    @Operation(summary = "获取项目DSL", description = "获取项目DSL")
+    public String getProjectDsl(@PathVariable String projectId) {
+        return this.projectApplication.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"))
+                .getDslText();
+    }
+
     @GetMapping("/repo/{gitRepoId}")
     public void gotoRepo(@PathVariable String gitRepoId, HttpServletResponse response) throws IOException {
         var repo = this.projectApplication.findGitRepoById(gitRepoId);
