@@ -263,7 +263,10 @@ public class DslParser {
             if (v instanceof Map) {
                 var type = ((Map<String, String>) v).get("type");
                 var value = ((Map<?, ?>) v).get("value");
-                Parameter.Type.getTypeByName(type).newParameter(value);
+                var p = Parameter.Type.getTypeByName(type).newParameter(value);
+                if (Parameter.Type.SECRET == p.getType()) {
+                    throw new RuntimeException("全局参数不支持使用SECRET类型");
+                }
             }
         });
     }
