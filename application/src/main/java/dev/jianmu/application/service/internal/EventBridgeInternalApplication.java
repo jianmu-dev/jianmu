@@ -3,6 +3,7 @@ package dev.jianmu.application.service.internal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.eventbridge.aggregate.EventParameter;
 import dev.jianmu.eventbridge.aggregate.Source;
 import dev.jianmu.eventbridge.aggregate.event.ConnectionEvent;
@@ -72,7 +73,7 @@ public class EventBridgeInternalApplication {
     public void receiveHttpEvent(String token, String sourceId, HttpServletRequest request, String contentType) {
         var payload = this.createPayload(request, contentType);
         var source = this.sourceRepository.findById(sourceId)
-                .orElseThrow(() -> new RuntimeException("未找到该Source: " + sourceId));
+                .orElseThrow(() -> new DataNotFoundException("未找到该Source: " + sourceId));
         var sourceEvent = SourceEvent.Builder.anOriginalEvent()
                 .sourceId(sourceId)
                 .bridgeId(source.getBridgeId())
@@ -82,11 +83,11 @@ public class EventBridgeInternalApplication {
         this.sourceEventRepository.add(sourceEvent);
         // Check Token
         if (!source.isValidToken(token)) {
-            throw new RuntimeException("无效的Token");
+            throw new IllegalArgumentException("无效的Token");
         }
         // Check Type
         if (!source.getType().equals(Source.Type.WEBHOOK)) {
-            throw new RuntimeException("Source类型不匹配");
+            throw new IllegalArgumentException("Source类型不匹配");
         }
         // isMatched
         if (!StringUtils.isBlank(source.getMatcher())) {
@@ -104,7 +105,7 @@ public class EventBridgeInternalApplication {
         var connections = this.connectionRepository.findBySourceId(sourceEvent.getSourceId());
         connections.forEach(connection -> {
             var target = this.targetRepository.findById(connection.getTargetId())
-                    .orElseThrow(() -> new RuntimeException("未找到该Target: " + connection.getTargetId()));
+                    .orElseThrow(() -> new DataNotFoundException("未找到该Target: " + connection.getTargetId()));
             var connectionEvent = ConnectionEvent.Builder.aConnectionEvent()
                     .sourceId(connection.getSourceId())
                     .sourceEventId(sourceEvent.getId())
@@ -118,7 +119,7 @@ public class EventBridgeInternalApplication {
     @Transactional
     public void eventHandling(ConnectionEvent connectionEvent) {
         var target = this.targetRepository.findById(connectionEvent.getTargetId())
-                .orElseThrow(() -> new RuntimeException("未找到该Target: " + connectionEvent.getTargetId()));
+                .orElseThrow(() -> new DataNotFoundException("未找到该Target: " + connectionEvent.getTargetId()));
         Set<EventParameter> eventParameters = new HashSet<>();
         List<Parameter> parameters = new ArrayList<>();
         target.getTransformers().forEach(transformer -> {
@@ -191,7 +192,7 @@ public class EventBridgeInternalApplication {
                 var bodyJson = this.objectMapper.readTree(body);
                 bodyNode.set("json", bodyJson);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("Body格式错误");
+                throw new IllegalArgumentException("Body格式错误");
             }
         }
         // Body Form node

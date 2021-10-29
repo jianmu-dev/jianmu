@@ -3,6 +3,7 @@ package dev.jianmu.application.dsl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import dev.jianmu.application.exception.DslException;
 import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import lombok.AllArgsConstructor;
@@ -83,7 +84,7 @@ public class NodeDsl {
             return dslVo;
         } catch (JsonProcessingException e) {
             log.error("e:", e);
-            throw new RuntimeException("节点定义DSL格式不正确");
+            throw new DslException("节点定义DSL格式不正确");
         }
     }
 
@@ -92,7 +93,7 @@ public class NodeDsl {
      */
     private void checkRef() {
         if (ObjectUtils.isEmpty(this.ref)) {
-            throw new RuntimeException("节点定义DSL格式不正确");
+            throw new DslException("节点定义DSL格式不正确");
         }
         RefChecker.check(this.ref);
     }
@@ -102,7 +103,7 @@ public class NodeDsl {
         try {
             return mapper.writeValueAsString(this.spec);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("无法序列化Spec");
+            throw new DslException("无法序列化Spec");
         }
     }
 }

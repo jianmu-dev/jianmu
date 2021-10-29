@@ -2,6 +2,8 @@ package dev.jianmu.application.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
@@ -43,7 +45,7 @@ public class DslParser {
             parser.createGlobalParameters();
         } catch (IOException e) {
             log.error("DSL解析异常:", e);
-            throw new RuntimeException("DSL解析异常");
+            throw new DslException("DSL解析异常");
         }
         return parser;
     }
@@ -98,7 +100,7 @@ public class DslParser {
             var n = nodeDefs.stream()
                     .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             var task = this.createAsyncTask(dslNode, n);
             symbolTable.put(dslNode.getName(), task);
         });
@@ -111,7 +113,7 @@ public class DslParser {
                     if (null != target) {
                         n.addTarget(target.getRef());
                     } else {
-                        throw new RuntimeException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
+                        throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
                     }
                 });
                 dslNode.getSources().forEach(nodeName -> {
@@ -119,7 +121,7 @@ public class DslParser {
                     if (null != source) {
                         n.addSource(source.getRef());
                     } else {
-                        throw new RuntimeException("节点" + dslNode.getName() + "指定的source: " + nodeName + "不存在");
+                        throw new DslException("节点" + dslNode.getName() + "指定的source: " + nodeName + "不存在");
                     }
                 });
             }
@@ -129,13 +131,13 @@ public class DslParser {
             node.getTargets().forEach(nodeName -> {
                 var target = symbolTable.get(nodeName);
                 if (!target.getSources().contains(node.getRef())) {
-                    throw new RuntimeException("节点" + nodeName + "未指定source: " + node.getRef());
+                    throw new DslException("节点" + nodeName + "未指定source: " + node.getRef());
                 }
             });
             node.getSources().forEach(nodeName -> {
                 var source = symbolTable.get(nodeName);
                 if (!source.getTargets().contains(node.getRef())) {
-                    throw new RuntimeException("节点" + nodeName + "未指定target: " + node.getRef());
+                    throw new DslException("节点" + nodeName + "未指定target: " + node.getRef());
                 }
             });
         });
@@ -176,7 +178,7 @@ public class DslParser {
             var d = nodeDefs.stream()
                     .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("未找到任务定义"));
+                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
             var task = this.createAsyncTask(dslNode, d);
             symbolTable.put(dslNode.getName(), task);
         });
@@ -229,7 +231,7 @@ public class DslParser {
     // DSL语法校验
     private void syntaxCheck() {
         if (this.cron != null && this.eb != null) {
-            throw new RuntimeException("不能同时使用Cron与EventBridge");
+            throw new DslException("不能同时使用Cron与EventBridge");
         }
         this.paramSyntaxCheck();
         if (null != this.workflow) {
@@ -252,7 +254,7 @@ public class DslParser {
             });
             return;
         }
-        throw new RuntimeException("workflow或pipeline未设置");
+        throw new DslException("workflow或pipeline未设置");
     }
 
     private void paramSyntaxCheck() {
@@ -265,7 +267,7 @@ public class DslParser {
                 var value = ((Map<?, ?>) v).get("value");
                 var p = Parameter.Type.getTypeByName(type).newParameter(value);
                 if (Parameter.Type.SECRET == p.getType()) {
-                    throw new RuntimeException("全局参数不支持使用SECRET类型");
+                    throw new DslException("全局参数不支持使用SECRET类型");
                 }
             }
         });
@@ -274,7 +276,7 @@ public class DslParser {
     private void pipelineSyntaxCheck() {
         var pipe = this.pipeline;
         if (null == pipe.get("name")) {
-            throw new RuntimeException("pipeline name未设置");
+            throw new DslException("pipeline name未设置");
         }
         this.name = (String) pipe.get("name");
         this.description = (String) pipe.get("description");
@@ -288,21 +290,21 @@ public class DslParser {
     private void checkPipeNode(String nodeName, Map<?, ?> node) {
         var type = node.get("type");
         if (null == type) {
-            throw new RuntimeException("Node type未设置");
+            throw new DslException("Node type未设置");
         }
         // 验证保留关键字
         if (nodeName.equals("event")) {
-            throw new RuntimeException("节点名称不能使用event");
+            throw new DslException("节点名称不能使用event");
         }
         if (nodeName.equals("global")) {
-            throw new RuntimeException("节点名称不能使用global");
+            throw new DslException("节点名称不能使用global");
         }
     }
 
     private void workflowSyntaxCheck() {
         var flow = this.workflow;
         if (null == flow.get("name")) {
-            throw new RuntimeException("workflow name未设置");
+            throw new DslException("workflow name未设置");
         }
         this.name = (String) flow.get("name");
         this.description = (String) flow.get("description");
@@ -316,7 +318,7 @@ public class DslParser {
     private void checkNode(String nodeName, Map<?, ?> node) {
         var type = node.get("type");
         if (null == type) {
-            throw new RuntimeException("Node type未设置");
+            throw new DslException("Node type未设置");
         }
         if (type.equals("start")) {
             this.checkStart(node);
@@ -332,10 +334,10 @@ public class DslParser {
         }
         // 验证保留关键字
         if (nodeName.equals("event")) {
-            throw new RuntimeException("节点名称不能使用event");
+            throw new DslException("节点名称不能使用event");
         }
         if (nodeName.equals("global")) {
-            throw new RuntimeException("节点名称不能使用global");
+            throw new DslException("节点名称不能使用global");
         }
         this.checkTask(nodeName, node);
     }
@@ -344,10 +346,10 @@ public class DslParser {
         var sources = node.get("sources");
         var targets = node.get("targets");
         if (!(sources instanceof List) || ((List<?>) sources).isEmpty()) {
-            throw new RuntimeException("任务节点" + nodeName + "sources未设置");
+            throw new DslException("任务节点" + nodeName + "sources未设置");
         }
         if (!(targets instanceof List) || ((List<?>) targets).isEmpty()) {
-            throw new RuntimeException("任务节点" + nodeName + "targets未设置");
+            throw new DslException("任务节点" + nodeName + "targets未设置");
         }
     }
 
@@ -355,27 +357,27 @@ public class DslParser {
         var expression = node.get("expression");
         var cases = node.get("cases");
         if (null == expression) {
-            throw new RuntimeException("条件网关expression未设置");
+            throw new DslException("条件网关expression未设置");
         }
         if (!(cases instanceof Map<?, ?>)) {
-            throw new RuntimeException("条件网关cases未设置");
+            throw new DslException("条件网关cases未设置");
         }
         if (((Map<?, ?>) cases).size() != 2) {
-            throw new RuntimeException("cases数量错误");
+            throw new DslException("cases数量错误");
         }
     }
 
     private void checkEnd(Map<?, ?> node) {
         var sources = node.get("sources");
         if (!(sources instanceof List)) {
-            throw new RuntimeException("结束节点sources未设置");
+            throw new DslException("结束节点sources未设置");
         }
     }
 
     private void checkStart(Map<?, ?> node) {
         var targets = node.get("targets");
         if (!(targets instanceof List)) {
-            throw new RuntimeException("开始节点targets未设置");
+            throw new DslException("开始节点targets未设置");
         }
     }
 

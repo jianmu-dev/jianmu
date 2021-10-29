@@ -237,7 +237,7 @@ public class TaskInstanceInternalApplication {
 
     private Map<String, Object> parseJson(String resultFile) {
         if (resultFile == null || resultFile.isBlank()) {
-            throw new RuntimeException("任务结果文件为空");
+            throw new IllegalArgumentException("任务结果文件为空");
         }
         var objectMapper = new ObjectMapper();
         try {
@@ -245,7 +245,7 @@ public class TaskInstanceInternalApplication {
             });
         } catch (JsonProcessingException e) {
             log.error("Json转换", e);
-            throw new RuntimeException("任务结果文件格式错误");
+            throw new IllegalArgumentException("任务结果文件格式错误");
         }
     }
 

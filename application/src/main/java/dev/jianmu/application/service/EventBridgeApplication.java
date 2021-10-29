@@ -100,7 +100,7 @@ public class EventBridgeApplication {
             source.generateToken();
         } else {
             var oldSource = this.sourceRepository.findByBridgeId(bridge.getId())
-                    .orElseThrow(() -> new RuntimeException("未找到Source"));
+                    .orElseThrow(() -> new DataNotFoundException("未找到Source"));
             oldSource.setName(source.getName());
             oldSource.setMatcher(source.getMatcher());
             source = oldSource;
@@ -115,7 +115,7 @@ public class EventBridgeApplication {
                 .collect(Collectors.groupingBy(Target::getRef, Collectors.counting()));
         countMap.values().forEach(i -> {
             if (i > 1)
-                throw new RuntimeException("Target Ref不能重复");
+                throw new IllegalArgumentException("Target Ref不能重复");
         });
 
         var oldTargets = this.targetRepository.findByBridgeId(bridgeId)
@@ -127,14 +127,14 @@ public class EventBridgeApplication {
                     .filter(inTarget -> inTarget.getId().equals(target.getId()))
                     .count();
             if (count < oldTargets.size()) {
-                throw new RuntimeException("已关联项目，禁止操作，若要继续，请先在项目中，移除关联关系。");
+                throw new IllegalArgumentException("已关联项目，禁止操作，若要继续，请先在项目中，移除关联关系。");
             }
             count = targets.stream()
                     .filter(inTarget -> inTarget.getId().equals(target.getId()))
                     .filter(inTarget -> !inTarget.getRef().equals(target.getRef()))
                     .count();
             if (count > 0) {
-                throw new RuntimeException("已关联项目，禁止操作，若要继续，请先在项目中，移除关联关系。");
+                throw new IllegalArgumentException("已关联项目，禁止操作，若要继续，请先在项目中，移除关联关系。");
             }
         });
 
