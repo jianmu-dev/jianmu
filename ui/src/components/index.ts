@@ -27,7 +27,12 @@ export default {
     Object.values(import.meta.globEager('./**/index.vue'))
       .concat(Object.values(import.meta.globEager('./**/index.ts')))
       // 全局注册组件
-      .forEach(({ default: component }) => app.component(component.name, component));
+      .forEach(({ default: component }) => {
+        if (!component.name) {
+          return;
+        }
+        app.component(component.name, component);
+      });
 
     // 全局注册指令
     app.directive('loading', JmLoading.directive);
