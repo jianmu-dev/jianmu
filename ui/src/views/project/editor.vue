@@ -4,13 +4,14 @@
       <router-link :to="{name: 'index'}">
         <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
       </router-link>
-        <jm-button
-                  v-if="source === 'processTemplates'"
-                  type="primary"
-                  class="jm-icon-button-previous"
-                  size="small"
-                  @click="previousStep"
-                  >上一步</jm-button>
+      <jm-button
+        v-if="source === 'processTemplates'"
+        type="primary"
+        class="jm-icon-button-previous"
+        size="small"
+        @click="previousStep"
+      >上一步
+      </jm-button>
 
       <jm-button type="primary" class="jm-icon-button-preserve" size="small"
                  @click="save" :loading="loading">保存
@@ -31,7 +32,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { save } from '@/api/project';
 import { ISaveForm } from '@/model/modules/project';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
+import { fetchProjectDsl, getProcessTemplate } from '@/api/view-no-auth';
 import { IProcessTemplate } from '@/api/dto/project';
 
 const autoHeight: IAutoHeight = {
@@ -61,10 +62,10 @@ export default defineComponent({
         if (route.query.processTemplatesName !== res.name) {
           let name = `name: ${res.name}`;
           editorForm.value.dslText = dsl.replace(name, `name: ${route.query.processTemplatesName}`);
-        }else{
+        } else {
           editorForm.value.dslText = dsl;
         }
-      }).catch((err:Error) => {
+      }).catch((err: Error) => {
         console.warn(err.message);
       });
     } else {
@@ -74,7 +75,7 @@ export default defineComponent({
     if (editMode) {
       loading.value = !loading.value;
 
-      fetchProjectDetail(props.id).then(({ dslText }) => {
+      fetchProjectDsl(props.id).then((dslText: string) => {
         editorForm.value.dslText = dslText;
 
         loading.value = !loading.value;
@@ -98,8 +99,8 @@ export default defineComponent({
       activatedTab: ref<string>('dsl'),
       source: route.query.source,
       previousStep: () => {
-        router.push({ 
-          name:'process-template',
+        router.push({
+          name: 'process-template',
         });
       },
       save: () => {

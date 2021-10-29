@@ -1,10 +1,16 @@
 import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProjectDetailVo, IProjectQueryingDto, IProjectVo, IProcessTemplate } from '@/api/dto/project';
+import { IProcessTemplate, IProjectDetailVo, IProjectQueryingDto, IProjectVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespaceQueryingDto, INamespaceVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
-import { IEventBridgeDetailVo, IEventBridgeQueryingDto, IEventBridgeTargetTransformerVo, IEventBridgeVo, ITargetEventVo } from '@/api/dto/event-bridge';
+import {
+  IEventBridgeDetailVo,
+  IEventBridgeQueryingDto,
+  IEventBridgeTargetTransformerVo,
+  IEventBridgeVo,
+  ITargetEventVo,
+} from '@/api/dto/event-bridge';
 
 export const baseUrl = {
   project: '/view/projects',
@@ -19,12 +25,12 @@ export const baseUrl = {
   eventBridge: '/view/event_bridges',
   parameter: '/view/parameters',
   targetEvent: '/view/target_events',
-  
 };
-const hubUrl= import.meta.env.VITE_JIANMU_API_BASE_URL;
+const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 const baseHubUrl = {
-  processTemplate:'/hub/view/workflow_templates',
+  processTemplate: '/hub/view/workflow_templates',
 };
+
 /**
  * 查询项目
  * @param dto
@@ -36,13 +42,14 @@ export function queryProject(dto: IProjectQueryingDto): Promise<IProjectVo[]> {
     payload: dto,
   });
 }
+
 /**
  * 获取流程模版
  * @param dto
  */
 export function getProcessTemplate(dto: number): Promise<IProcessTemplate> {
   return restProxy({
-    url:`${hubUrl}${baseHubUrl.processTemplate}/${dto}`,
+    url: `${hubUrl}${baseHubUrl.processTemplate}/${dto}`,
     method: 'get',
   });
 }
@@ -54,6 +61,17 @@ export function getProcessTemplate(dto: number): Promise<IProcessTemplate> {
 export function fetchProjectDetail(projectId: string): Promise<IProjectDetailVo> {
   return restProxy({
     url: `${baseUrl.project}/${projectId}`,
+    method: 'get',
+  });
+}
+
+/**
+ * 获取项目dsl
+ * @param projectId
+ */
+export function fetchProjectDsl(projectId: string): Promise<string> {
+  return restProxy({
+    url: `${baseUrl.project}/${projectId}/dsl`,
     method: 'get',
   });
 }
