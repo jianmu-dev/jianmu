@@ -51,4 +51,6 @@ jianmu:
     jwtExpirationMs: 86400000
     adminPasswd: 123456
 registry:
+  version: @project.version@
+  type: @project.build.finalName@
   url: https://hub.jianmu.dev

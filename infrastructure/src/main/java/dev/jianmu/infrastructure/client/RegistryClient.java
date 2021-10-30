@@ -41,6 +41,8 @@ public class RegistryClient {
         }
         try {
             var signature = HmacSha1.encrypt(path, registryProperties.getSk());
+            headers.add("X-Client-Type", registryProperties.getType());
+            headers.add("X-Client-Version", registryProperties.getVersion());
             headers.add("X-Access-Key", registryProperties.getAk());
             headers.add("X-Signature", signature);
             return headers;
