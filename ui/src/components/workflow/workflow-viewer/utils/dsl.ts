@@ -1,8 +1,8 @@
 import { EdgeConfig, NodeConfig } from '@antv/g6';
 import yaml from 'yaml';
 import { NodeTypeEnum } from '../utils/enumeration';
-import { INodeInfoVo } from '@/api/dto/workflow-execution-record';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { INodeDefVo } from '@/api/dto/project';
 
 /**
  * 节点标签最长长度
@@ -227,7 +227,7 @@ function parsePipeline(pipeline: any): {
  * @param triggerType
  * @param nodeInfos
  */
-export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined, nodeInfos?: INodeInfoVo[]): {
+export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined, nodeInfos?: INodeDefVo[]): {
   nodes: NodeConfig[];
   edges: EdgeConfig[];
 } {

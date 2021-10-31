@@ -122,14 +122,14 @@ import { TaskStatusEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enu
 import TaskLog from '@/views/workflow-execution-record/task-log.vue';
 import ProcessLog from '@/views/workflow-execution-record/process-log.vue';
 import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
-import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { executeImmediately } from '@/api/project';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import sleep from '@/utils/sleep';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { terminate } from '@/api/workflow-execution-record';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
-import { IProjectDetailVo } from '@/api/dto/project';
+import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 
 const { mapActions, mapMutations } = createNamespacedHelpers(namespace);
@@ -268,7 +268,7 @@ export default defineComponent({
       data,
       loading,
       dslSourceCode: computed<string | undefined>(() => state.recordDetail.recordDsl),
-      nodeInfos: computed<INodeInfoVo[]>(() => state.recordDetail.nodeInfos),
+      nodeInfos: computed<INodeDefVo[]>(() => state.recordDetail.nodeInfos),
       taskLogForm,
       webhookLogForm,
       ...mapMutations({

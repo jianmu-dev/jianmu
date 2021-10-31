@@ -183,3 +183,22 @@ export interface IWorkflowVo extends Readonly<{
   dslText: string;
 }> {
 }
+
+/**
+ * 节点定义vo
+ */
+export interface INodeDefVo extends Readonly<{
+  name: string;
+  description?: string;
+  icon?: string;
+  ownerName: string;
+  ownerType: string;
+  ownerRef: string;
+  creatorName: string;
+  creatorRef: string;
+  sourceLink?: string;
+  documentLink?: string;
+  type: string;
+  workerType: string;
+}> {
+}

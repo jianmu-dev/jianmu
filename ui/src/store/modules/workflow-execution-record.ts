@@ -1,10 +1,10 @@
 import { ActionContext, Module } from 'vuex';
 import { IRootState } from '@/model';
 import { IState } from '@/model/modules/workflow-execution-record';
-import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { fetchProjectDetail, fetchWorkflow, listTask, listWorkflowExecutionRecord } from '@/api/view-no-auth';
 import yaml from 'yaml';
-import { IProjectDetailVo } from '@/api/dto/project';
+import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 
 /**
  * 命名空间
@@ -40,7 +40,7 @@ export default {
       record: IWorkflowExecutionRecordVo;
       recordDsl: string;
       taskRecords: ITaskExecutionRecordVo[];
-      nodeInfos: INodeInfoVo[];
+      nodeInfos: INodeDefVo[];
     }>) {
       const { recordDetail } = state;
       recordDetail.project = project;
