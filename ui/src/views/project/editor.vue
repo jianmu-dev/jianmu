@@ -32,7 +32,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { save } from '@/api/project';
 import { ISaveForm } from '@/model/modules/project';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-import { fetchProjectDsl, getProcessTemplate } from '@/api/view-no-auth';
+import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
 import { IProcessTemplateVo } from '@/api/dto/project';
 
 const autoHeight: IAutoHeight = {
@@ -75,7 +75,7 @@ export default defineComponent({
     if (editMode) {
       loading.value = !loading.value;
 
-      fetchProjectDsl(props.id).then((dslText: string) => {
+      fetchProjectDetail(props.id).then(({ dslText }) => {
         editorForm.value.dslText = dslText;
 
         loading.value = !loading.value;

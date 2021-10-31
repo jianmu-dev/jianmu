@@ -66,17 +66,6 @@ export function fetchProjectDetail(projectId: string): Promise<IProjectDetailVo>
 }
 
 /**
- * 获取项目dsl
- * @param projectId
- */
-export function fetchProjectDsl(projectId: string): Promise<string> {
-  return restProxy({
-    url: `${baseUrl.project}/${projectId}/dsl`,
-    method: 'get',
-  });
-}
-
-/**
  * 获取流程执行记录列表
  * @param workflowRef
  */
