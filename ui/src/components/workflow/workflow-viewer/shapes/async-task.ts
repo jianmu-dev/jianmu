@@ -66,11 +66,11 @@ const states: {
   [TaskStatusEnum.SKIPPED]: {
     img: SKIPPED,
     style: {
-      fill: '#FFF6E3',
-      stroke: '#FFAC00',
+      fill: '#EEEEEE',
+      stroke: '#979797',
     },
     indicatorStyle: {
-      fill: '#FFAC00',
+      fill: '#979797',
     },
   },
   [TaskStatusEnum.FAILED]: {
