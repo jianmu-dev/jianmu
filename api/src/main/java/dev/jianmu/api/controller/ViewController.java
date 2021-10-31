@@ -19,6 +19,7 @@ import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 @Tag(name = "查询API", description = "查询API")
 public class ViewController {
     private final ProjectApplication projectApplication;
+    private final WorkflowInstanceApplication workflowInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
     private final EventBridgeApplication eventBridgeApplication;
@@ -56,6 +58,7 @@ public class ViewController {
 
     public ViewController(
             ProjectApplication projectApplication,
+            WorkflowInstanceApplication workflowInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
             EventBridgeApplication eventBridgeApplication,
@@ -65,6 +68,7 @@ public class ViewController {
             StorageService storageService
     ) {
         this.projectApplication = projectApplication;
+        this.workflowInstanceApplication = workflowInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
         this.eventBridgeApplication = eventBridgeApplication;
@@ -214,12 +218,11 @@ public class ViewController {
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
         var project = this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        var nodeDefs = this.projectApplication.findNodes(project.getWorkflowRef(), project.getWorkflowVersion());
-        return ProjectMapper.INSTANCE.toProjectDetailVo(project, nodeDefs);
+        return ProjectMapper.INSTANCE.toProjectDetailVo(project);
     }
 
     @GetMapping("/projects/{projectId}/dsl")
-    @Operation(summary = "获取项目DSL", description = "获取项目DSL")
+    @Operation(summary = "获取项目DSL", description = "获取项目DSL", deprecated = true)
     public String getProjectDsl(@PathVariable String projectId) {
         return this.projectApplication.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"))
@@ -240,9 +243,10 @@ public class ViewController {
     }
 
     @GetMapping("/workflow/{ref}/{version}")
-    @Operation(summary = "获取DSL源码", description = "获取DSL源码")
-    public String findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
-        return this.projectApplication.findByRefAndVersion(ref, version).getDslText();
+    @Operation(summary = "获取流程定义", description = "获取流程定义")
+    public WorkflowVo findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
+        var workflow = this.projectApplication.findByRefAndVersion(ref, version);
+        return WorkflowMapper.INSTANCE.toWorkflowVo(workflow);
     }
 
     @GetMapping("/task_instances/{workflowInstanceId}")
@@ -250,6 +254,16 @@ public class ViewController {
     public List<TaskInstanceVo> findByBusinessId(@PathVariable String workflowInstanceId) {
         List<TaskInstanceVo> list = new ArrayList<>();
         var taskInstances = this.taskInstanceApplication.findByBusinessId(workflowInstanceId);
+        this.workflowInstanceApplication.findById(workflowInstanceId)
+                .ifPresent(workflowInstance -> {
+                    workflowInstance.getAsyncTaskInstances()
+                            .stream()
+                            .filter(asyncTaskInstance -> asyncTaskInstance.getStatus().equals(TaskStatus.SKIPPED))
+                            .forEach(asyncTaskInstance -> {
+                                var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
+                                list.add(vo);
+                            });
+                });
         taskInstances.forEach(taskInstance -> {
             var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
             list.add(vo);

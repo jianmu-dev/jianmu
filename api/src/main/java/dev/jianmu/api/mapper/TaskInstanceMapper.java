@@ -3,6 +3,7 @@ package dev.jianmu.api.mapper;
 import dev.jianmu.api.vo.TaskInstanceVo;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
+import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -23,6 +24,10 @@ public interface TaskInstanceMapper {
     @Mapping(target = "instanceId", source = "id")
     @Mapping(target = "nodeName", source = "asyncTaskRef")
     TaskInstanceVo toTaskInstanceVo(TaskInstance taskInstance);
+
+    @Mapping(target = "defKey", source = "asyncTaskType")
+    @Mapping(target = "nodeName", source = "asyncTaskRef")
+    TaskInstanceVo asyncTaskInstanceToTaskInstanceVo(AsyncTaskInstance asyncTaskInstance);
 
     @ValueMappings({
             @ValueMapping(target = "WAITING", source = "WAITING"),

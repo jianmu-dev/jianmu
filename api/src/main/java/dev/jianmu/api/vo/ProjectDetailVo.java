@@ -50,6 +50,4 @@ public class ProjectDetailVo {
     private String lastModifiedBy;
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
-    // 节点列表
-    private List<NodeDef> nodeDefs;
 }
