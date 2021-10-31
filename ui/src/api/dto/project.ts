@@ -2,6 +2,7 @@ import { BaseVo } from '@/api/dto/common';
 import {
   DslSourceEnum,
   DslTypeEnum,
+  NodeTypeEnum,
   ProjectImporterTypeEnum,
   ProjectStatusEnum,
   TriggerTypeEnum,
@@ -199,6 +200,6 @@ export interface INodeDefVo extends Readonly<{
   sourceLink?: string;
   documentLink?: string;
   type: string;
-  workerType: string;
+  workerType: NodeTypeEnum;
 }> {
 }
