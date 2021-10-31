@@ -149,8 +149,8 @@ export function fetchProcessLog(processExecutionRecordId: string): Promise<strin
  * @param workflowRef
  * @param workflowVersion
  */
-export function fetchDsl(workflowRef: string, workflowVersion: string): Promise<string> {
-  return restProxy<string>({
+export function fetchWorkflow(workflowRef: string, workflowVersion: string): Promise<IWorkflowVo> {
+  return restProxy<IWorkflowVo>({
     url: `${baseUrl.dsl}/${workflowRef}/${workflowVersion}`,
     method: 'get',
   });

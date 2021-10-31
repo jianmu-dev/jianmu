@@ -125,3 +125,61 @@ export interface IProcessTemplateVo extends Readonly<{
   ]
 }> {
 }
+
+/**
+ * 任务参数vo
+ */
+export interface ITaskParameterVo extends Readonly<{
+  ref: string;
+  expression: string;
+}> {
+}
+
+/**
+ * 流程节点vo
+ */
+export interface IWorkflowNodeVo extends Readonly<{
+  /**
+   * 节点定义名称
+   */
+  name: string;
+  /**
+   * 节点定义描述
+   */
+  description?: string;
+  /**
+   * 节点定义
+   */
+  metadata?: string;
+  ref: string;
+  type: string;
+  taskParameters: ITaskParameterVo[];
+  sources: string[];
+  targets: string[];
+}> {
+}
+
+/**
+ * 全局参数vo
+ */
+export interface IGlobalParameterVo extends Readonly<{
+  name: string;
+  type: string;
+  value: string | number | boolean;
+}> {
+}
+
+/**
+ * 流程vo
+ */
+export interface IWorkflowVo extends Readonly<{
+  name: string;
+  ref: string;
+  type: DslTypeEnum;
+  description?: string;
+  version: string;
+  nodes: IWorkflowNodeVo[];
+  globalParameters: IGlobalParameterVo[];
+  dslText: string;
+}> {
+}
