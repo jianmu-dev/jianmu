@@ -23,6 +23,9 @@ export interface IWorkflowExecutionRecordVo extends Readonly<{
 }> {
 }
 
+/**
+ * 节点信息vo
+ */
 export interface INodeInfoVo extends Readonly<{
   name: string;
   description?: string;
