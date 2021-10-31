@@ -33,7 +33,7 @@ import { save } from '@/api/project';
 import { ISaveForm } from '@/model/modules/project';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { fetchProjectDsl, getProcessTemplate } from '@/api/view-no-auth';
-import { IProcessTemplate } from '@/api/dto/project';
+import { IProcessTemplateVo } from '@/api/dto/project';
 
 const autoHeight: IAutoHeight = {
   elementId: 'project-editor',
@@ -57,7 +57,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
 
     if (route.query.templateId) {
-      getProcessTemplate(route.query.templateId as unknown as number).then((res: IProcessTemplate) => {
+      getProcessTemplate(route.query.templateId as unknown as number).then((res: IProcessTemplateVo) => {
         let dsl = res.dsl;
         if (route.query.processTemplatesName !== res.name) {
           let name = `name: ${res.name}`;

@@ -1,6 +1,6 @@
 import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProcessTemplate, IProjectDetailVo, IProjectQueryingDto, IProjectVo } from '@/api/dto/project';
+import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespaceQueryingDto, INamespaceVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
@@ -47,7 +47,7 @@ export function queryProject(dto: IProjectQueryingDto): Promise<IProjectVo[]> {
  * 获取流程模版
  * @param dto
  */
-export function getProcessTemplate(dto: number): Promise<IProcessTemplate> {
+export function getProcessTemplate(dto: number): Promise<IProcessTemplateVo> {
   return restProxy({
     url: `${hubUrl}${baseHubUrl.processTemplate}/${dto}`,
     method: 'get',

@@ -6,7 +6,6 @@ import {
   ProjectStatusEnum,
   TriggerTypeEnum,
 } from '@/api/dto/enumeration';
-import { INodeInfoVo } from '@/api/dto/workflow-execution-record';
 
 /**
  * 保存项目dto
@@ -93,7 +92,6 @@ export interface IProjectDetailVo extends Readonly<BaseVo & {
   dslText: string;
   eventBridgeId?: string;
   triggerType: TriggerTypeEnum;
-  nodeDefs: INodeInfoVo[];
 }> {
 }
 
@@ -106,9 +104,9 @@ export interface IProjectWebhookVo extends Readonly<{
 }
 
 /**
- * 
+ * 流程模板vo
  */
-export interface IProcessTemplate extends Readonly<{
+export interface IProcessTemplateVo extends Readonly<{
   id: number
   name: string
   type: string
