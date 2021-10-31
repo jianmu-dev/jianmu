@@ -19,6 +19,7 @@ import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 @Tag(name = "查询API", description = "查询API")
 public class ViewController {
     private final ProjectApplication projectApplication;
+    private final WorkflowInstanceApplication workflowInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
     private final EventBridgeApplication eventBridgeApplication;
@@ -56,6 +58,7 @@ public class ViewController {
 
     public ViewController(
             ProjectApplication projectApplication,
+            WorkflowInstanceApplication workflowInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
             EventBridgeApplication eventBridgeApplication,
@@ -65,6 +68,7 @@ public class ViewController {
             StorageService storageService
     ) {
         this.projectApplication = projectApplication;
+        this.workflowInstanceApplication = workflowInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
         this.eventBridgeApplication = eventBridgeApplication;
@@ -250,6 +254,16 @@ public class ViewController {
     public List<TaskInstanceVo> findByBusinessId(@PathVariable String workflowInstanceId) {
         List<TaskInstanceVo> list = new ArrayList<>();
         var taskInstances = this.taskInstanceApplication.findByBusinessId(workflowInstanceId);
+        this.workflowInstanceApplication.findById(workflowInstanceId)
+                .ifPresent(workflowInstance -> {
+                    workflowInstance.getAsyncTaskInstances()
+                            .stream()
+                            .filter(asyncTaskInstance -> asyncTaskInstance.getStatus().equals(TaskStatus.SKIPPED))
+                            .forEach(asyncTaskInstance -> {
+                                var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
+                                list.add(vo);
+                            });
+                });
         taskInstances.forEach(taskInstance -> {
             var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
             list.add(vo);
