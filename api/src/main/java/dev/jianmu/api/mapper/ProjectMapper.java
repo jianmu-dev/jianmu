@@ -33,5 +33,5 @@ public interface ProjectMapper {
     @ValueMapping(source = MappingConstants.NULL, target = "LOCAL")
     ProjectVo.Source enumConverter(Project.DslSource dslSource);
 
-    ProjectDetailVo toProjectDetailVo(Project project, List<NodeDef> nodeDefs);
+    ProjectDetailVo toProjectDetailVo(Project project);
 }

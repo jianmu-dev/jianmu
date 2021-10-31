@@ -21,6 +21,9 @@ public interface Node {
     // 返回节点类型
     String getType();
 
+    // 返回节点元数据快照
+    String getMetadata();
+
     // 返回上游节点列表
     Set<String> getSources();
 
