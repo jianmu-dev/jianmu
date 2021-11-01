@@ -12,7 +12,7 @@
           </jm-breadcrumb>
         </jm-header>
         <jm-main class="main" id="platform-main">
-          <jm-scrollbar >
+          <jm-scrollbar>
             <template v-if="loadMain">
               <router-view v-slot="{ Component }">
                 <keep-alive :include="bufferList">
@@ -33,6 +33,7 @@ import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLo
 import TopNav from '@/views/nav/top.vue';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { PLATFORM_INDEX } from '@/router/path-def';
+
 const autoHeight: IAutoHeight = {
   elementId: 'platform-main',
   offsetTop: 0,
@@ -76,14 +77,14 @@ export default defineComponent({
     buildPathNav(pathNavs, useRoute());
 
     // 直接访问要被缓冲的路由地址时，添加缓冲
-    if(route.meta.keepAlive && !bufferList.includes(route.name as string)){
+    if (route.meta.keepAlive && !bufferList.includes(route.name as string)) {
       bufferList.push(route.name as string);
     }
     onBeforeRouteUpdate(to => {
-      if(to.meta.keepAlive && !bufferList.includes(to.name as string)){
+      if (to.meta.keepAlive && !bufferList.includes(to.name as string)) {
         bufferList.push(to.name as string);
       }
-      if(to.name === 'index' ){
+      if (to.name === 'index') {
         bufferList.length = 0;
       }
       autoHeight.offsetTop = to.path !== PLATFORM_INDEX ? 125 : 65;
