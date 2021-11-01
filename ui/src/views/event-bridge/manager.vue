@@ -1,9 +1,11 @@
 <template>
-  <router-view v-if="childRoute"/>
-  <div v-else class="event-bridge-manager">
+  <router-view v-if="childRoute" />
+  <div v-else class="event-bridge-manager" v-scroll.current="loadMore">
     <div class="right-top-btn">
-      <router-link :to="{name: 'index'}">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
+      <router-link :to="{ name: 'index' }">
+        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
+          >关闭</jm-button
+        >
       </router-link>
     </div>
     <div class="menu-bar">
@@ -16,24 +18,41 @@
       <span class="desc">（共有 {{ eventBridges.length }} 个事件桥接器）</span>
     </div>
     <div class="content" v-loading="loading">
-      <jm-empty v-if="eventBridges.length === 0"/>
+      <jm-empty v-if="eventBridges.length === 0" />
       <div v-else class="item" v-for="eb of eventBridges" :key="eb.id">
         <div class="wrapper">
-          <router-link :to="{name: 'event-bridge-detail', params: { id: eb.id }}">
+          <router-link
+            :to="{ name: 'event-bridge-detail', params: { id: eb.id } }"
+          >
             <div class="name ellipsis">{{ eb.name }}</div>
           </router-link>
-          <div class="time">最后修改时间：{{ datetimeFormatter(eb.lastModifiedTime) }}</div>
+          <div class="time">
+            最后修改时间：{{ datetimeFormatter(eb.lastModifiedTime) }}
+          </div>
         </div>
         <div class="operation">
-          <button :class="{del: true, doing: deletings[eb.id]}" @click="del(eb.id)"></button>
+          <button
+            :class="{ del: true, doing: deletings[eb.id] }"
+            @click="del(eb.id)"
+          ></button>
         </div>
       </div>
+    </div>
+    <div v-if="isShowMore" @click="loadMore" class="bottom">
+      <span>显示更多</span>
+      <i class="btm-down" :class="{ 'btn-loading': moreLoading }"></i>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, ref, Ref } from 'vue';
+import {
+  defineComponent,
+  getCurrentInstance,
+  onBeforeMount,
+  ref,
+  Ref,
+} from 'vue';
 import {
   onBeforeRouteUpdate,
   RouteLocationNormalized,
@@ -43,62 +62,78 @@ import {
 } from 'vue-router';
 import { START_PAGE_NUM } from '@/utils/constants';
 import { datetimeFormatter } from '@/utils/formatter';
-import { IQueryForm } from '@/model/modules/event-bridge';
 import { queryEventBridge } from '@/api/view-no-auth';
 import { deleteEventBridge, saveEventBridge } from '@/api/event-bridge';
 import { IEventBridgeVo } from '@/api/dto/event-bridge';
 import { EventBridgeSourceTypeEnum } from '@/api/dto/enumeration';
+import { IPageVo } from '@/api/dto/common';
 
-function changeView(childRoute: Ref<boolean>, route: RouteLocationNormalizedLoaded | RouteLocationNormalized) {
+function changeView(
+  childRoute: Ref<boolean>,
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
+) {
   childRoute.value = route.matched.length > 2;
 }
 
 export default defineComponent({
   setup() {
-    const initQueryForm: IQueryForm = {
-      pageNum: START_PAGE_NUM,
-      // 一次性获取10w条，达到获取所有目的
-      pageSize: 100 * 1000,
-    };
-
+    const count = ref<number>(START_PAGE_NUM);
+    const isShowMore = ref<boolean>(false);
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
-    const queryForm = ref<IQueryForm>({ ...initQueryForm });
     const eventBridges = ref<IEventBridgeVo[]>([]);
+    const eventBridgesResult = ref<IPageVo<IEventBridgeVo>>();
     const loading = ref<boolean>(false);
+    const moreLoading = ref<boolean>(false);
     const deletings = ref<{ [name: string]: boolean }>({});
-
-    const loadEventBridge = async (reset?: boolean) => {
-      if (reset) {
-        queryForm.value = { ...initQueryForm };
-      }
-
+    const loadEventBridge = async (page?: boolean) => {
+      const l = page ? moreLoading : loading;
+      page ? (count.value += 1) : count.value;
       try {
-        loading.value = true;
-        const { list } = await queryEventBridge({ ...queryForm.value });
-        eventBridges.value = list;
+        l.value = true;
+        eventBridgesResult.value = await queryEventBridge({
+          pageNum: count.value,
+          pageSize: 10,
+        });
+        eventBridges.value.push(...eventBridgesResult.value.list);
+        if (count.value >= eventBridgesResult.value.pages) {
+          isShowMore.value = false;
+        } else {
+          isShowMore.value = true;
+        }
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
-        loading.value = false;
+        l.value = false;
       }
     };
-
+    const loadMore = async () => {
+      if (
+        !eventBridgesResult.value ||
+        count.value >= eventBridgesResult.value.pages
+      ) {
+        return;
+      }
+      await loadEventBridge(true);
+    };
     // 初始化事件桥接器列表
     onBeforeMount(() => loadEventBridge());
-
     const childRoute = ref<boolean>(false);
     changeView(childRoute, useRoute());
     onBeforeRouteUpdate(to => changeView(childRoute, to));
 
     return {
+      isShowMore,
+      moreLoading,
       childRoute,
       loading,
       deletings,
       datetimeFormatter,
       eventBridges,
       create: async () => {
-        const { bridge: { id } } = await saveEventBridge({
+        const {
+          bridge: { id },
+        } = await saveEventBridge({
           bridge: {
             name: 'Webhook',
           },
@@ -106,11 +141,13 @@ export default defineComponent({
             name: '',
             type: EventBridgeSourceTypeEnum.WEBHOOK,
           },
-          targets: [{
-            // ref: '',
-            name: '',
-            transformers: [],
-          }],
+          targets: [
+            {
+              // ref: '',
+              name: '',
+              transformers: [],
+            },
+          ],
         });
         await router.push({ name: 'event-bridge-detail', params: { id } });
       },
@@ -119,32 +156,40 @@ export default defineComponent({
           return;
         }
 
-        const { name } = eventBridges.value.find(item => item.id === id) as IEventBridgeVo;
+        const { name } = eventBridges.value.find(
+          item => item.id === id,
+        ) as IEventBridgeVo;
 
         let msg = '<div>确定要删除事件桥接器吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
 
-        proxy.$confirm(msg, '删除事件桥接器', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          dangerouslyUseHTMLString: true,
-        }).then(() => {
-          deletings.value[id] = true;
+        proxy
+          .$confirm(msg, '删除事件桥接器', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+            dangerouslyUseHTMLString: true,
+          })
+          .then(() => {
+            deletings.value[id] = true;
 
-          deleteEventBridge(id).then(() => {
-            proxy.$success('删除成功');
+            deleteEventBridge(id)
+              .then(() => {
+                proxy.$success('删除成功');
 
-            const index = eventBridges.value.findIndex(eb => eb.id === id);
-            eventBridges.value.splice(index, 1);
-          }).catch((err: Error) => {
-            proxy.$throw(err, proxy);
-          }).finally(() => {
-            delete deletings.value[id];
-          });
-        }).catch(() => {
-        });
+                const index = eventBridges.value.findIndex(eb => eb.id === id);
+                eventBridges.value.splice(index, 1);
+              })
+              .catch((err: Error) => {
+                proxy.$throw(err, proxy);
+              })
+              .finally(() => {
+                delete deletings.value[id];
+              });
+          })
+          .catch(() => {});
       },
+      loadMore,
     };
   },
 });
@@ -153,8 +198,8 @@ export default defineComponent({
 <style scoped lang="less">
 .event-bridge-manager {
   padding: 15px;
-  background-color: #FFFFFF;
-
+  background-color: #ffffff;
+  min-height: 70vh;
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -176,7 +221,7 @@ export default defineComponent({
         width: 100%;
         text-align: center;
         font-size: 18px;
-        color: #B5BDC6;
+        color: #b5bdc6;
       }
 
       &.add {
@@ -184,8 +229,8 @@ export default defineComponent({
         width: 19%;
         min-width: 260px;
         height: 120px;
-        background-color: #FFFFFF;
-        border: 1px dashed #B5BDC6;
+        background-color: #ffffff;
+        border: 1px dashed #b5bdc6;
         background-image: url('@/assets/svgs/btn/add.svg');
         background-position: center 20px;
         background-repeat: no-repeat;
@@ -221,11 +266,11 @@ export default defineComponent({
       width: 19%;
       min-width: 260px;
       height: 120px;
-      background-color: #FFFFFF;
-      box-shadow: 0 0 8px 0 #9EB1C5;
+      background-color: #ffffff;
+      box-shadow: 0 0 8px 0 #9eb1c5;
 
       &:hover {
-        box-shadow: 0 0 12px 0 #9EB1C5;
+        box-shadow: 0 0 12px 0 #9eb1c5;
 
         .operation {
           display: block;
@@ -238,7 +283,7 @@ export default defineComponent({
         height: 88px;
 
         &:hover {
-          border-color: #096DD9;
+          border-color: #096dd9;
         }
 
         a {
@@ -267,7 +312,7 @@ export default defineComponent({
         left: 15px;
         bottom: 15px;
         font-size: 13px;
-        color: #6B7B8D;
+        color: #6b7b8d;
       }
 
       .operation {
@@ -279,7 +324,7 @@ export default defineComponent({
         button {
           width: 22px;
           height: 22px;
-          background-color: #FFFFFF;
+          background-color: #ffffff;
           border: 0;
           background-position: center center;
           background-repeat: no-repeat;
@@ -287,7 +332,7 @@ export default defineComponent({
           cursor: pointer;
 
           &:active {
-            background-color: #EFF7FF;
+            background-color: #eff7ff;
             border-radius: 4px;
           }
 
@@ -304,6 +349,36 @@ export default defineComponent({
             }
           }
         }
+      }
+    }
+  }
+  .bottom {
+    margin-top: 25px;
+    color: #7b8c9c;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    .btm-down {
+      width: 16px;
+      height: 16px;
+      background-image: url('@/assets/svgs/node-library/drop-down.svg');
+      margin-left: 6px;
+    }
+
+    .btm-down.btn-loading {
+      animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43) infinite;
+      background-image: url('@/assets/svgs/node-library/loading.svg');
+    }
+
+    @keyframes rotate {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
       }
     }
   }

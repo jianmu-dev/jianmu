@@ -3,17 +3,19 @@ import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 import { name, version } from './package.json';
 
+// const target = 'http://172.20.148.86/';
 const target = 'http://localhost:8081';
 const changeOrigin = true;
 
 // https://vitejs.dev/config/
-export default (
-  { command, mode }: ConfigEnv,
-): UserConfigExport => {
+export default ({ command, mode }: ConfigEnv): UserConfigExport => {
   return {
     plugins: [vue()],
     // base public path
-    base: command === 'build' && mode === 'cdn' ? `https://cdn.jianmu.run/${name}/v${version}/` : '/',
+    base:
+      command === 'build' && mode === 'cdn'
+        ? `https://cdn.jianmu.run/${name}/v${version}/`
+        : '/',
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),

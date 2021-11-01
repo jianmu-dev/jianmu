@@ -1,8 +1,10 @@
 <template>
-  <div class="node-library-manager">
+  <div class="node-library-manager" v-scroll.current="btnDown">
     <div class="right-top-btn">
-      <router-link :to="{name: 'index'}">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
+      <router-link :to="{ name: 'index' }">
+        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
+          >关闭</jm-button
+        >
       </router-link>
     </div>
     <div class="menu-bar">
@@ -16,60 +18,102 @@
     </div>
 
     <div v-loading="firstLoading" class="content">
-      <jm-empty v-if="nodeLibraryListData.length === 0"/>
+      <jm-empty v-if="nodeLibraryListData.length === 0" />
       <div
         v-else
-        v-for="(i,idx) in nodeLibraryListData"
+        v-for="(i, idx) in nodeLibraryListData"
         :key="idx"
-        class="item">
+        class="item"
+      >
         <div class="item-t">
-          <span class="item-t-t ellipsis" v-if="i.ownerType === OwnerTypeEnum.LOCAL">{{ i.name }}</span>
-          <a v-else target="_blank" class="item-t-t ellipsis" :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}`">{{
-              i.name
-            }}</a>
+          <span
+            class="item-t-t ellipsis"
+            v-if="i.ownerType === OwnerTypeEnum.LOCAL"
+            >{{ i.name }}</span
+          >
+          <a
+            v-else
+            target="_blank"
+            class="item-t-t ellipsis"
+            :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}`"
+            >{{ i.name }}</a
+          >
           <p class="item-t-mid ellipsis">{{ i.ownerName }} / {{ i.ref }}</p>
           <p class="item-t-btm ellipsis">{{ i.description || '无' }}</p>
         </div>
-        <div class="item-mid" :class="{'is-background':!i.isDirectionDown}">
-          <i @click="clickVersion(i)" class="down" :class="{'direction-down': i.isDirectionDown}"></i>
+        <div class="item-mid" :class="{ 'is-background': !i.isDirectionDown }">
+          <i
+            @click="clickVersion(i)"
+            class="down"
+            :class="{ 'direction-down': i.isDirectionDown }"
+          ></i>
           <jm-scrollbar max-height="75px">
-            <div class="item-mid-items" :class="{'is-scroll':i.isDirectionDown}">
+            <div
+              class="item-mid-items"
+              :class="{ 'is-scroll': i.isDirectionDown }"
+            >
               <div
-                v-for="(version,versionIdx) in i.versions"
+                v-for="(version, versionIdx) in i.versions"
                 :key="versionIdx"
-                class="item-mid-item ellipsis">
-                <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">{{ version }}</span>
-                <a v-else target="_blank" :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}/${version}`">{{
-                    version
-                  }}</a>
+                class="item-mid-item ellipsis"
+              >
+                <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">{{
+                  version
+                }}</span>
+                <a
+                  v-else
+                  target="_blank"
+                  :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}/${version}`"
+                  >{{ version }}</a
+                >
               </div>
             </div>
           </jm-scrollbar>
         </div>
         <div v-show="!i.isDirectionDown" class="item-btm">
           <div>
-            <jm-tooltip v-if="i.ownerType !== OwnerTypeEnum.LOCAL" content="同步" placement="top">
-              <button @click="syncNode(i)" class="sync" :class="{doing:i.isSync}"></button>
+            <jm-tooltip
+              v-if="i.ownerType !== OwnerTypeEnum.LOCAL"
+              content="同步"
+              placement="top"
+            >
+              <button
+                @click="syncNode(i)"
+                class="sync"
+                :class="{ doing: i.isSync }"
+              ></button>
             </jm-tooltip>
             <jm-tooltip content="删除" placement="top">
-              <button @click="deleteNode(i)" class="del" :class="{doing:i.isDel}"></button>
+              <button
+                @click="deleteNode(i)"
+                class="del"
+                :class="{ doing: i.isDel }"
+              ></button>
             </jm-tooltip>
           </div>
-          <div class="item-btm-r ellipsis">
-            by {{ i.creatorName }}
-          </div>
+          <div class="item-btm-r ellipsis">by {{ i.creatorName }}</div>
         </div>
-        <div class="item-pos" :class="{'node-definition-default-icon':!i.icon}">
-          <img v-if="i.icon" :src="`${i.icon}?imageView2/2/w/54/h/54/interlace/1/q/100`">
+        <div
+          class="item-pos"
+          :class="{ 'node-definition-default-icon': !i.icon }"
+        >
+          <img
+            v-if="i.icon"
+            :src="`${i.icon}?imageView2/2/w/54/h/54/interlace/1/q/100`"
+          />
         </div>
       </div>
     </div>
 
     <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
       <span>显示更多</span>
-      <i class="btm-down" :class="{'btn-loading':bottomLoading}"></i>
+      <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
     </div>
-    <node-editor v-if="creationActivated" @closed="creationActivated = false" @completed="handleCreation"/>
+    <node-editor
+      v-if="creationActivated"
+      @closed="creationActivated = false"
+      @completed="handleCreation"
+    />
   </div>
 </template>
 
@@ -87,7 +131,10 @@ export default defineComponent({
   },
   setup() {
     const { proxy } = getCurrentInstance() as any;
-    const nodeLibraryListParameter = reactive<{ pageNum: number, pageSize: number }>({
+    const nodeLibraryListParameter = reactive<{
+      pageNum: number;
+      pageSize: number;
+    }>({
       pageNum: 1,
       pageSize: 16,
     });
@@ -98,25 +145,39 @@ export default defineComponent({
     const creationActivated = ref<boolean>(false);
 
     // 获取数据
-    const nodeListData = (nodeLibraryListData: INode[], nodeLibraryListParameter: { pageNum: number, pageSize: number }, loading: Ref<boolean>, noMore: Ref<boolean>, total: Ref<number>) => {
+    const nodeListData = (
+      nodeLibraryListData: INode[],
+      nodeLibraryListParameter: { pageNum: number; pageSize: number },
+      loading: Ref<boolean>,
+      noMore: Ref<boolean>,
+      total: Ref<number>,
+    ) => {
       if (!noMore.value) return;
-      fetchNodeLibraryList(nodeLibraryListParameter).then(res => {
-        total.value = res.total;
-        loading.value = false;
-        if (res.list.length === 0) {
-          noMore.value = false;
-          return;
-        }
-        if (res.list.length === res.total) {
-          noMore.value = false;
-        }
-        nodeLibraryListData.push(...res.list);
-      }).catch((err: Error) => {
-        proxy.$throw(err, proxy);
-      });
+      fetchNodeLibraryList(nodeLibraryListParameter)
+        .then(res => {
+          total.value = res.total;
+          loading.value = false;
+          if (res.list.length === 0) {
+            noMore.value = false;
+            return;
+          }
+          if (res.list.length === res.total) {
+            noMore.value = false;
+          }
+          nodeLibraryListData.push(...res.list);
+        })
+        .catch((err: Error) => {
+          proxy.$throw(err, proxy);
+        });
     };
 
-    nodeListData(nodeLibraryListData, nodeLibraryListParameter, firstLoading, noMore, total);
+    nodeListData(
+      nodeLibraryListData,
+      nodeLibraryListParameter,
+      firstLoading,
+      noMore,
+      total,
+    );
 
     // 加载更多
     const loadMore = () => {
@@ -126,7 +187,13 @@ export default defineComponent({
         if (!noMore.value) return;
         nodeLibraryListParameter.pageNum++;
         bottomLoading.value = true;
-        nodeListData(nodeLibraryListData, nodeLibraryListParameter, bottomLoading, noMore, total);
+        nodeListData(
+          nodeLibraryListData,
+          nodeLibraryListParameter,
+          bottomLoading,
+          noMore,
+          total,
+        );
       };
       return {
         bottomLoading,
@@ -150,22 +217,27 @@ export default defineComponent({
       let msg = '<div>确定要删除节点吗?</div>';
       msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${i.name}</div>`;
 
-      proxy.$confirm(msg, '删除节点', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-        dangerouslyUseHTMLString: true,
-      }).then(() => {
-        i.isDel = true;
-        deleteNodeLibrary(i.ownerRef, i.ref).then(() => {
-          proxy.$success('删除成功');
-          deleteNodeLibraryListData(i);
-        }).catch((err: Error) => {
-          proxy.$throw(err, proxy);
-        }).finally(() => {
-          i.isDel = false;
+      proxy
+        .$confirm(msg, '删除节点', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          dangerouslyUseHTMLString: true,
+        })
+        .then(() => {
+          i.isDel = true;
+          deleteNodeLibrary(i.ownerRef, i.ref)
+            .then(() => {
+              proxy.$success('删除成功');
+              deleteNodeLibraryListData(i);
+            })
+            .catch((err: Error) => {
+              proxy.$throw(err, proxy);
+            })
+            .finally(() => {
+              i.isDel = false;
+            });
         });
-      });
     };
 
     // 点击版本
@@ -175,20 +247,25 @@ export default defineComponent({
 
     // 同步
     const syncNode = (i: INode) => {
-      proxy.$confirm('确定要同步吗?', '同步DSL', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'info',
-      }).then(() => {
-        i.isSync = true;
-        syncNodeLibrary(i.ownerRef, i.ref).then(() => {
-          proxy.$success('同步成功');
-        }).catch((err: Error) => {
-          proxy.$throw(err, proxy);
-        }).finally(() => {
-          i.isSync = false;
+      proxy
+        .$confirm('确定要同步吗?', '同步DSL', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info',
+        })
+        .then(() => {
+          i.isSync = true;
+          syncNodeLibrary(i.ownerRef, i.ref)
+            .then(() => {
+              proxy.$success('同步成功');
+            })
+            .catch((err: Error) => {
+              proxy.$throw(err, proxy);
+            })
+            .finally(() => {
+              i.isSync = false;
+            });
         });
-      });
     };
     return {
       clickVersion,
@@ -207,7 +284,13 @@ export default defineComponent({
         firstLoading.value = true;
         noMore.value = true;
         total.value = 0;
-        nodeListData(nodeLibraryListData, nodeLibraryListParameter, firstLoading, noMore, total);
+        nodeListData(
+          nodeLibraryListData,
+          nodeLibraryListParameter,
+          firstLoading,
+          noMore,
+          total,
+        );
       },
       OwnerTypeEnum,
     };
@@ -216,11 +299,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-
 .node-library-manager {
   padding: 16px 20px 25px 16px;
-  background-color: #FFFFFF;
-
+  background-color: #ffffff;
+  min-height: 80vh;
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -248,7 +330,7 @@ export default defineComponent({
         width: 100%;
         text-align: center;
         font-size: 18px;
-        color: #B5BDC6;
+        color: #b5bdc6;
       }
 
       &.add {
@@ -256,8 +338,8 @@ export default defineComponent({
         width: 24%;
         min-width: 230px;
         height: 200px;
-        background-color: #FFFFFF;
-        border: 1px dashed #B5BDC6;
+        background-color: #ffffff;
+        border: 1px dashed #b5bdc6;
         background-image: url('@/assets/svgs/btn/add.svg');
         background-position: center 55px;
         background-repeat: no-repeat;
@@ -293,7 +375,7 @@ export default defineComponent({
       margin: 0.5%;
       width: 24%;
       min-width: 230px;
-      background-color: #FFFFFF;
+      background-color: #ffffff;
       box-shadow: 0 0 12px 4px #edf1f8;
       padding: 15px;
       position: relative;
@@ -331,7 +413,7 @@ export default defineComponent({
       }
 
       .item-mid {
-        background: #F8FCFF;
+        background: #f8fcff;
         margin: 0px -15px 0px -15px;
         padding: 6px 0px 6px 15px;
         position: relative;
@@ -349,7 +431,7 @@ export default defineComponent({
         }
 
         .down.direction-down {
-          transform: rotate(180deg)
+          transform: rotate(180deg);
         }
 
         .item-mid-items {
@@ -364,7 +446,7 @@ export default defineComponent({
             padding: 5px;
             font-size: 12px;
             color: #385775;
-            background: #EFF4F8;
+            background: #eff4f8;
             border-radius: 2px;
             margin-right: 10px;
             overflow-y: auto;
@@ -385,12 +467,11 @@ export default defineComponent({
         .item-mid-items.is-scroll {
           height: auto;
           overflow: auto;
-
         }
       }
 
       .item-mid.is-background {
-        background: #FFFFFF;
+        background: #ffffff;
         min-height: auto;
         overflow: hidden;
         height: 26px;
@@ -441,7 +522,7 @@ export default defineComponent({
 
         .item-btm-r {
           justify-content: end;
-          color: #7C91A5;
+          color: #7c91a5;
           font-size: 14px;
         }
       }
@@ -466,12 +547,11 @@ export default defineComponent({
         background-size: 100%;
       }
     }
-
   }
 
   .bottom {
     margin-top: 25px;
-    color: #7B8C9C;
+    color: #7b8c9c;
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -499,6 +579,5 @@ export default defineComponent({
       }
     }
   }
-
 }
 </style>
