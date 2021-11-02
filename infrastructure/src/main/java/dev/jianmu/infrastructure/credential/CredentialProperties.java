@@ -17,5 +17,5 @@ public class CredentialProperties {
     private String type;
     private String url;
     private String token;
-    private String path;
+    private String vaultEngineName;
 }

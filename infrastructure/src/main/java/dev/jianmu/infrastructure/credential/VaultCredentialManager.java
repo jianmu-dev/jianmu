@@ -55,7 +55,7 @@ public class VaultCredentialManager implements CredentialManager {
 
     @Override
     public Optional<Namespace> findNamespaceByName(String name) {
-        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .get(name);
         if (res == null) {
             return Optional.empty();
@@ -66,7 +66,7 @@ public class VaultCredentialManager implements CredentialManager {
     @Override
     public List<KVPair> findAllKVByNamespaceName(String namespaceName) {
         List<KVPair> kvPairs = new ArrayList<>();
-        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .get(namespaceName);
         if (res != null && res.getData() != null) {
             res.getData().forEach((k, v) ->
@@ -82,7 +82,7 @@ public class VaultCredentialManager implements CredentialManager {
 
     @Override
     public List<Namespace> findAllNamespace() {
-        var list = vaultOperations.list(this.credentialProperties.getPath());
+        var list = vaultOperations.list(this.credentialProperties.getVaultEngineName());
         if (list == null) {
             return List.of();
         }
@@ -94,7 +94,7 @@ public class VaultCredentialManager implements CredentialManager {
     @Override
     public Optional<KVPair> findByNamespaceNameAndKey(String namespaceName, String key) {
         List<KVPair> kvPairs = new ArrayList<>();
-        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .get(namespaceName);
         if (res != null && res.getData() != null) {
             return res.getData().entrySet().stream()
