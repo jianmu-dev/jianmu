@@ -1,7 +1,7 @@
 import { ActionContext, Module } from 'vuex';
 import { IRootState } from '@/model';
-import { IQueryNamespaceForm, IState } from '@/model/modules/secret-key';
-import { queryNamespace } from '@/api/view-no-auth';
+import { IState } from '@/model/modules/secret-key';
+import { listNamespace } from '@/api/view-no-auth';
 import { IPageVo } from '@/api/dto/common';
 import { INamespaceVo } from '@/api/dto/secret-key';
 
@@ -31,8 +31,8 @@ export default {
     },
   },
   actions: {
-    async queryNamespace({ commit }: ActionContext<IState, IRootState>, payload: IQueryNamespaceForm): Promise<void> {
-      const page = await queryNamespace(payload);
+    async listNamespace({ commit }: ActionContext<IState, IRootState>): Promise<void> {
+      const page = await listNamespace();
       commit('mutateNamespaces', page);
     },
   },
