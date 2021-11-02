@@ -26,11 +26,8 @@ public interface NamespaceMapper {
     @Update("update secret_namespace set last_modified_time = #{lastModifiedTime} where name = #{name}")
     void updateLastModifiedTime(Namespace namespace);
 
-    @Select("<script>" +
-            "SELECT * FROM `secret_namespace` " +
-            "<if test='name != null'> WHERE `name` like concat('%', #{name}, '%')</if>" +
-            "</script>")
+    @Select("SELECT * FROM `secret_namespace`")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
-    List<Namespace> findAll(String name);
+    List<Namespace> findAll();
 }

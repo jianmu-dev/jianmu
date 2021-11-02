@@ -2,7 +2,6 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.EbDto;
-import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.TransformerDto;
 import dev.jianmu.api.mapper.*;
@@ -140,21 +139,21 @@ public class ViewController {
     }
 
     @GetMapping("/namespaces")
-    @Operation(summary = "分页查询命名空间列表", description = "分页查询命名空间列表")
-    public PageInfo<Namespace> findAll(NamespaceSearchDto namespaceSearchDto) {
-        return this.secretApplication.findAll(namespaceSearchDto.getName(), namespaceSearchDto.getPageNum(), namespaceSearchDto.getPageSize());
+    @Operation(summary = "查询命名空间列表", description = "查询命名空间列表")
+    public List<Namespace> findAllNamespace() {
+        return this.secretApplication.findAll();
     }
 
     @GetMapping("/namespaces/{name}")
     @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
     public Namespace findByName(@PathVariable String name) {
-        return this.secretApplication.findById(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
+        return this.secretApplication.findByName(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
     }
 
     @GetMapping("/namespaces/{name}/keys")
     @Operation(summary = "查询键值对列表", description = "查询键值对列表")
     public List<String> findAll(@PathVariable String name) {
-        var kvs = this.secretApplication.findAll(name);
+        var kvs = this.secretApplication.findAllByNamespaceName(name);
         return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
     }
 
