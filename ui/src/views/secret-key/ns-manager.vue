@@ -7,7 +7,7 @@
       </router-link>
     </div>
     <div class="menu-bar">
-      <button class="add" @click="creationActivated = true">
+      <button class="add" @click="add">
         <div class="label">新增命名空间</div>
       </button>
     </div>
@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, Ref, ref, toRefs } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, Ref, ref, toRefs } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/secret-key';
 import { IState } from '@/model/modules/secret-key';
@@ -47,6 +47,7 @@ import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLo
 import { deleteNamespace } from '@/api/secret-key';
 import NsEditor from './ns-editor.vue';
 import { datetimeFormatter } from '@/utils/formatter';
+import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
 
 const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
@@ -61,6 +62,7 @@ export default defineComponent({
   setup() {
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
+    const credentialManagerType = computed<CredentialManagerTypeEnum>(() => state.credentialManagerType);
     const loading = ref<boolean>(false);
     const creationActivated = ref<boolean>(false);
     const deletings = ref<{ [name: string]: boolean }>({});
@@ -97,7 +99,19 @@ export default defineComponent({
       }),
       datetimeFormatter,
       loadNamespace,
+      add: () => {
+        if (credentialManagerType.value !== CredentialManagerTypeEnum.LOCAL) {
+          proxy.$info(`密钥管理类型为${credentialManagerType.value}，请到${credentialManagerType.value}控制台继续操作。`);
+          return;
+        }
+        creationActivated.value = true;
+      },
       del: (name: string) => {
+        if (credentialManagerType.value !== CredentialManagerTypeEnum.LOCAL) {
+          proxy.$info(`密钥管理类型为${credentialManagerType.value}，请到${credentialManagerType.value}控制台继续操作。`);
+          return;
+        }
+
         if (deletings.value[name]) {
           return;
         }
