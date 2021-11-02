@@ -34,4 +34,40 @@ public class KVPair {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public static final class Builder {
+        private String namespaceName;
+        private String key;
+        private String value;
+
+        private Builder() {
+        }
+
+        public static Builder aKVPair() {
+            return new Builder();
+        }
+
+        public Builder namespaceName(String namespaceName) {
+            this.namespaceName = namespaceName;
+            return this;
+        }
+
+        public Builder key(String key) {
+            this.key = key;
+            return this;
+        }
+
+        public Builder value(String value) {
+            this.value = value;
+            return this;
+        }
+
+        public KVPair build() {
+            KVPair kVPair = new KVPair();
+            kVPair.setNamespaceName(namespaceName);
+            kVPair.setKey(key);
+            kVPair.setValue(value);
+            return kVPair;
+        }
+    }
 }

@@ -1,8 +1,8 @@
 package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
-import dev.jianmu.secret.repository.KVPairRepository;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class WorkerApplication {
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
-    private final KVPairRepository kvPairRepository;
+    private final CredentialManager credentialManager;
     private final NodeDefApi nodeDefApi;
     private final WorkerRepository workerRepository;
     private final ApplicationEventPublisher publisher;
@@ -45,7 +45,7 @@ public class WorkerApplication {
     public WorkerApplication(
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
-            KVPairRepository kvPairRepository,
+            CredentialManager credentialManager,
             NodeDefApi nodeDefApi,
             WorkerRepository workerRepository,
             ApplicationEventPublisher publisher,
@@ -53,7 +53,7 @@ public class WorkerApplication {
     ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
-        this.kvPairRepository = kvPairRepository;
+        this.credentialManager = credentialManager;
         this.nodeDefApi = nodeDefApi;
         this.workerRepository = workerRepository;
         this.publisher = publisher;
@@ -157,6 +157,6 @@ public class WorkerApplication {
         Parameter<?> secretParameter;
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = parameter.getStringValue().split("\\.");
-        return this.kvPairRepository.findByNamespaceNameAndKey(strings[0], strings[1]);
+        return this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1]);
     }
 }
