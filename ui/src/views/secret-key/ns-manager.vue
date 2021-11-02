@@ -13,7 +13,7 @@
     </div>
     <div class="title">
       <span>命名空间</span>
-      <span class="desc">（共有 {{ totalElements }} 个命名空间）</span>
+      <span class="desc">（共有 {{ namespaces.length }} 个命名空间）</span>
     </div>
     <div class="content" v-loading="loading">
       <jm-empty v-if="namespaces.length === 0"/>
