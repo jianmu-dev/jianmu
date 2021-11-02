@@ -49,4 +49,8 @@ public class SecretApplication {
     public List<Namespace> findAll() {
         return this.credentialManager.findAllNamespace();
     }
+
+    public String getCredentialManagerType() {
+        return this.credentialManager.getType();
+    }
 }

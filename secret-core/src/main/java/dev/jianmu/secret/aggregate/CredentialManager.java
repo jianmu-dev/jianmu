@@ -10,6 +10,9 @@ import java.util.Optional;
  * @create: 2021-11-01 21:15
  **/
 public interface CredentialManager {
+
+    String getType();
+
     void createNamespace(Namespace namespace);
 
     void deleteNamespace(String name);

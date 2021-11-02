@@ -29,6 +29,11 @@ public class LocalCredentialManager implements CredentialManager {
     }
 
     @Override
+    public String getType() {
+        return "local";
+    }
+
+    @Override
     public void createNamespace(Namespace namespace) {
         namespace.setLastModifiedTime();
         this.namespaceMapper.add(namespace);

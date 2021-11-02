@@ -140,8 +140,13 @@ public class ViewController {
 
     @GetMapping("/namespaces")
     @Operation(summary = "查询命名空间列表", description = "查询命名空间列表")
-    public List<Namespace> findAllNamespace() {
-        return this.secretApplication.findAll();
+    public NameSpacesVo findAllNamespace() {
+        var type = this.secretApplication.getCredentialManagerType();
+        var list = this.secretApplication.findAll();
+        return NameSpacesVo.builder()
+                .credentialManagerType(type)
+                .list(list)
+                .build();
     }
 
     @GetMapping("/namespaces/{name}")

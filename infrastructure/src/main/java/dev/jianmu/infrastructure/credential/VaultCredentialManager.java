@@ -31,6 +31,11 @@ public class VaultCredentialManager implements CredentialManager {
     }
 
     @Override
+    public String getType() {
+        return "vault";
+    }
+
+    @Override
     public void createNamespace(Namespace namespace) {
     }
 
