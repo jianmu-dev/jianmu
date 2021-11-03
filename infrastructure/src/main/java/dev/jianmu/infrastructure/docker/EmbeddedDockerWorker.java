@@ -133,7 +133,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
             } else {
                 envArray = spec.getEnv();
             }
-            Arrays.stream(envArray).forEach(System.out::println);
             createContainerCmd.withEnv(envArray);
         }
         if (null != spec.getEntrypoint() && spec.getEntrypoint().length > 0) {
