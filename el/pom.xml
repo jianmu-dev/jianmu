@@ -16,7 +16,11 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>workflow-core</artifactId>
+<<<<<<< HEAD
             <version>1.0-SNAPSHOT</version>
+=======
+            <version>1.1.2</version>
+>>>>>>> origin/master
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
