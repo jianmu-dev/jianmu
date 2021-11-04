@@ -130,13 +130,15 @@ export default defineComponent({
     NodeEditor,
   },
   setup() {
+    const librayManager =
+      document.getElementsByClassName('el-scrollbar__wrap')[0];
     const { proxy } = getCurrentInstance() as any;
     const nodeLibraryListParameter = reactive<{
       pageNum: number;
       pageSize: number;
     }>({
       pageNum: 1,
-      pageSize: 16,
+      pageSize: 10,
     });
     const nodeLibraryListData = reactive<INode[]>([]);
     const firstLoading = ref<boolean>(true);
@@ -268,6 +270,7 @@ export default defineComponent({
         });
     };
     return {
+      librayManager,
       clickVersion,
       ...loadMore(),
       deleteNode,
@@ -280,7 +283,7 @@ export default defineComponent({
       handleCreation: () => {
         nodeLibraryListData.length = 0;
         nodeLibraryListParameter.pageNum = 1;
-        nodeLibraryListParameter.pageSize = 16;
+        nodeLibraryListParameter.pageSize = 10;
         firstLoading.value = true;
         noMore.value = true;
         total.value = 0;
@@ -302,7 +305,7 @@ export default defineComponent({
 .node-library-manager {
   padding: 16px 20px 25px 16px;
   background-color: #ffffff;
-  min-height: 80vh;
+  height: calc(100vh - 155px);
   .right-top-btn {
     position: fixed;
     right: 20px;

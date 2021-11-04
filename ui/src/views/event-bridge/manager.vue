@@ -15,10 +15,12 @@
     </div>
     <div class="title">
       <span>事件桥接器</span>
-      <span class="desc">（共有 {{ eventBridges.length }} 个事件桥接器）</span>
+      <span class="desc"
+        >（共有 {{ eventBridgesResult?.total }} 个事件桥接器）</span
+      >
     </div>
     <div class="content" v-loading="loading">
-      <jm-empty v-if="eventBridges.length === 0" />
+      <jm-empty v-if="eventBridgesResult?.total === 0" />
       <div v-else class="item" v-for="eb of eventBridges" :key="eb.id">
         <div class="wrapper">
           <router-link
@@ -52,6 +54,7 @@ import {
   onBeforeMount,
   ref,
   Ref,
+  onMounted,
 } from 'vue';
 import {
   onBeforeRouteUpdate,
@@ -77,6 +80,8 @@ function changeView(
 
 export default defineComponent({
   setup() {
+    const bridgeManager =
+      document.getElementsByClassName('el-scrollbar__wrap')[0];
     const count = ref<number>(START_PAGE_NUM);
     const isShowMore = ref<boolean>(false);
     const { proxy } = getCurrentInstance() as any;
@@ -123,6 +128,7 @@ export default defineComponent({
     onBeforeRouteUpdate(to => changeView(childRoute, to));
 
     return {
+      bridgeManager,
       isShowMore,
       moreLoading,
       childRoute,
@@ -130,6 +136,7 @@ export default defineComponent({
       deletings,
       datetimeFormatter,
       eventBridges,
+      eventBridgesResult,
       create: async () => {
         const {
           bridge: { id },
@@ -199,7 +206,7 @@ export default defineComponent({
 .event-bridge-manager {
   padding: 15px;
   background-color: #ffffff;
-  min-height: 70vh;
+  height: calc(100vh - 155px);
   .right-top-btn {
     position: fixed;
     right: 20px;
