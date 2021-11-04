@@ -31,17 +31,17 @@ import org.springframework.scheduling.annotation.EnableAsync;
 )
 @OpenAPIDefinition(
         info = @Info(
-                title = "建木自动化集成平台",
-                version = "2.0",
-                description = "建木自动化集成平台",
+                title = "建木持续集成平台",
+                version = "2.0.0",
+                description = "建木持续集成平台",
                 license = @License(
-                        name = "Apache-2.0",
-                        url = "http://www.apache.org/licenses/LICENSE-2.0"
+                        name = "Mulan PSL v2",
+                        url = "http://license.coscl.org.cn/MulanPSL2"
                 )
         ),
         externalDocs = @ExternalDocumentation(
                 description = "建木项目地址",
-                url = "https://gitee.com/jianmu_dev"
+                url = "https://gitee.com/jianmu-dev"
         )
 )
 @ServletComponentScan
