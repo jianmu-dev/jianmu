@@ -16,9 +16,7 @@
 
 #### 如何运行
 
-参考 [application.yml](https://gitee.com/jianmu-dev/jianmu-ci-server/blob/master/api/src/main/resources/application.yml) 中的配置
-
-创建你自己的 `application-dev.yml` 配置文件来覆盖需要配置的值，如datasource.url（当前必须使用名为dev的profile）
+参考 [application.yml](https://gitee.com/jianmu-dev/jianmu-ci-server/blob/master/api/src/main/resources/application.yml) 中的配置创建你自己的 `application-dev.yml` 配置文件来覆盖需要配置的值，如datasource.url（当前必须使用名为dev的profile）。
 
 配置admin用户的密码：
 
@@ -28,7 +26,7 @@ jianmu:
     adminPasswd: 123456
 ```
 
-[配置Hub](https://hub.jianmu.run/user-center/api-key)的AK/SK
+[配置Hub](https://hub.jianmu.run/user-center/api-key)的AK/SK：
 
 ```yaml
 registry:
