@@ -2,8 +2,6 @@ import { ConfigEnv, UserConfigExport } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 import { name, version } from './package.json';
-
-// const target = 'http://172.20.148.86/';
 const target = 'http://localhost:8081';
 const changeOrigin = true;
 
