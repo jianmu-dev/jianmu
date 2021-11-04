@@ -1,10 +1,10 @@
 import { ActionContext, Module } from 'vuex';
 import { IRootState } from '@/model';
 import { IState } from '@/model/modules/workflow-execution-record';
-import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { fetchDsl, fetchProjectDetail, listTask, listWorkflowExecutionRecord } from '@/api/view-no-auth';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { fetchProjectDetail, fetchWorkflow, listTask, listWorkflowExecutionRecord } from '@/api/view-no-auth';
 import yaml from 'yaml';
-import { IProjectDetailVo } from '@/api/dto/project';
+import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 
 /**
  * 命名空间
@@ -40,7 +40,7 @@ export default {
       record: IWorkflowExecutionRecordVo;
       recordDsl: string;
       taskRecords: ITaskExecutionRecordVo[];
-      nodeInfos: INodeInfoVo[];
+      nodeInfos: INodeDefVo[];
     }>) {
       const { recordDetail } = state;
       recordDetail.project = project;
@@ -63,7 +63,13 @@ export default {
       const project = await fetchProjectDetail(projectId);
       const allRecords = await listWorkflowExecutionRecord(project.workflowRef);
       let record = allRecords.length === 0 ? undefined : (workflowExecutionRecordId ? allRecords.find(item => item.id === workflowExecutionRecordId) : allRecords[0]);
-      const recordDsl = record ? await fetchDsl(record.workflowRef, record.workflowVersion) : project.dslText;
+      const { dslText, nodes } = await fetchWorkflow(
+        record ? record.workflowRef : project.workflowRef,
+        record ? record.workflowVersion : project.workflowVersion);
+      const recordDsl = dslText;
+      const nodeInfos = nodes
+        .filter(({ metadata }) => metadata)
+        .map(({ metadata }) => JSON.parse(metadata as string));
       if (!record) {
         const dsl = yaml.parse(recordDsl);
         const description = dsl.workflow?.description || dsl.pipeline?.description;
@@ -82,9 +88,6 @@ export default {
         };
       }
       const taskRecords = !record.id ? [] : await listTask(record.id);
-      // 优先匹配快照
-      const nodeInfos = taskRecords.map(taskRecord => taskRecord.nodeInfo);
-      nodeInfos.push(...project.nodeDefs);
       commit('mutateRecordDetail', { project, allRecords, record, recordDsl, taskRecords, nodeInfos });
     },
   },

@@ -32,6 +32,8 @@ public class RegistryClient {
 
     private HttpHeaders createHeaders(String path) {
         var headers = new HttpHeaders();
+        headers.add("X-Client-Type", registryProperties.getType());
+        headers.add("X-Client-Version", registryProperties.getVersion());
         if (registryProperties.getAk() == null ||
                 registryProperties.getSk() == null ||
                 registryProperties.getAk().isBlank() ||

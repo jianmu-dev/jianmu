@@ -23,22 +23,6 @@ export interface IWorkflowExecutionRecordVo extends Readonly<{
 }> {
 }
 
-export interface INodeInfoVo extends Readonly<{
-  name: string;
-  description?: string;
-  icon?: string;
-  ownerName: string;
-  ownerType: string;
-  ownerRef: string;
-  creatorName: string;
-  creatorRef: string;
-  sourceLink?: string;
-  documentLink?: string;
-  type: string;
-  workerType: string;
-}> {
-}
-
 /**
  * 任务执行记录vo
  */
@@ -46,7 +30,6 @@ export interface ITaskExecutionRecordVo extends Readonly<{
   instanceId: string;
   nodeName: string;
   defKey: string;
-  nodeInfo: INodeInfoVo;
   startTime: string;
   endTime?: string;
   status: TaskStatusEnum;

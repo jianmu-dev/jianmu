@@ -7,13 +7,13 @@
       </router-link>
     </div>
     <div class="menu-bar">
-      <button class="add" @click="creationActivated = true">
+      <button class="add" @click="add">
         <div class="label">新增命名空间</div>
       </button>
     </div>
     <div class="title">
       <span>命名空间</span>
-      <span class="desc">（共有 {{ totalElements }} 个命名空间）</span>
+      <span class="desc">（共有 {{ namespaces.length }} 个命名空间）</span>
     </div>
     <div class="content" v-loading="loading">
       <jm-empty v-if="namespaces.length === 0"/>
@@ -34,20 +34,20 @@
         </div>
       </div>
     </div>
-    <ns-editor v-if="creationActivated" @closed="creationActivated = false" @completed="loadNamespace(true)"/>
+    <ns-editor v-if="creationActivated" @closed="creationActivated = false" @completed="loadNamespace()"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, Ref, ref, toRefs } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, Ref, ref, toRefs } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/secret-key';
-import { IQueryNamespaceForm, IState } from '@/model/modules/secret-key';
-import { START_PAGE_NUM } from '@/utils/constants';
+import { IState } from '@/model/modules/secret-key';
 import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLoaded, useRoute } from 'vue-router';
 import { deleteNamespace } from '@/api/secret-key';
 import NsEditor from './ns-editor.vue';
 import { datetimeFormatter } from '@/utils/formatter';
+import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
 
 const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
@@ -60,28 +60,17 @@ export default defineComponent({
     NsEditor,
   },
   setup() {
-    const initQueryForm: IQueryNamespaceForm = {
-      name: '',
-      pageNum: START_PAGE_NUM,
-      // 一次性获取10w条，达到获取所有目的
-      pageSize: 100 * 1000,
-    };
-
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
-    const queryForm = ref<IQueryNamespaceForm>({ ...initQueryForm });
+    const credentialManagerType = computed<CredentialManagerTypeEnum>(() => state.credentialManagerType);
     const loading = ref<boolean>(false);
     const creationActivated = ref<boolean>(false);
     const deletings = ref<{ [name: string]: boolean }>({});
 
-    const loadNamespace = async (reset?: boolean) => {
-      if (reset) {
-        queryForm.value = { ...initQueryForm };
-      }
-
+    const loadNamespace = async () => {
       try {
         loading.value = true;
-        await proxy.queryNamespace({ ...queryForm.value });
+        await proxy.listNamespace();
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
@@ -99,7 +88,6 @@ export default defineComponent({
     return {
       ...toRefs(state),
       childRoute,
-      // queryForm,
       loading,
       creationActivated,
       deletings,
@@ -107,18 +95,23 @@ export default defineComponent({
         mutateNamespaceDeletion: 'mutateNamespaceDeletion',
       }),
       ...mapActions({
-        queryNamespace: 'queryNamespace',
+        listNamespace: 'listNamespace',
       }),
       datetimeFormatter,
       loadNamespace,
-      // query: (resetPageNum: boolean) => {
-      //   if (resetPageNum) {
-      //     queryForm.value.pageNum = START_PAGE_NUM;
-      //   }
-      //
-      //   loadNamespace();
-      // },
+      add: () => {
+        if (credentialManagerType.value !== CredentialManagerTypeEnum.LOCAL) {
+          proxy.$info(`密钥管理类型为${credentialManagerType.value}，请到${credentialManagerType.value}控制台继续操作。`);
+          return;
+        }
+        creationActivated.value = true;
+      },
       del: (name: string) => {
+        if (credentialManagerType.value !== CredentialManagerTypeEnum.LOCAL) {
+          proxy.$info(`密钥管理类型为${credentialManagerType.value}，请到${credentialManagerType.value}控制台继续操作。`);
+          return;
+        }
+
         if (deletings.value[name]) {
           return;
         }

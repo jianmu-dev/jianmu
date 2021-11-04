@@ -28,7 +28,7 @@ const states: {
     label: '执行中',
   },
   [TaskStatusEnum.SKIPPED]: {
-    signal: '#FFAC00',
+    signal: '#979797',
     label: '已跳过',
   },
   [TaskStatusEnum.FAILED]: {

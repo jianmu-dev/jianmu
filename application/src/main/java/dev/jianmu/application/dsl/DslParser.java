@@ -220,6 +220,7 @@ public class DslParser {
                 .type(dslNode.getType())
                 .taskParameters(taskParameters)
                 .description(nodeDef.getDescription())
+                .metadata(nodeDef.toJsonString())
                 .build();
     }
 

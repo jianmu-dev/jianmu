@@ -1,12 +1,5 @@
-import { BaseVo, IPageDto } from '@/api/dto/common';
-
-/**
- * 查询命名空间dto
- */
-export interface INamespaceQueryingDto extends Readonly<IPageDto & {
-  name?: string;
-}> {
-}
+import { BaseVo } from '@/api/dto/common';
+import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 命名空间vo
@@ -14,6 +7,15 @@ export interface INamespaceQueryingDto extends Readonly<IPageDto & {
 export interface INamespaceVo extends Readonly<BaseVo & {
   name: string;
   description?: string;
+}> {
+}
+
+/**
+ * 命名空间列表vo
+ */
+export interface INamespacesVo extends Readonly<{
+  credentialManagerType: CredentialManagerTypeEnum;
+  list: INamespaceVo[];
 }> {
 }
 

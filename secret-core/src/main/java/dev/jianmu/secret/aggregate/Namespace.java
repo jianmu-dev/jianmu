@@ -41,4 +41,34 @@ public class Namespace {
     public LocalDateTime getLastModifiedTime() {
         return lastModifiedTime;
     }
+
+
+    public static final class Builder {
+        private String name;
+        private String description;
+
+        private Builder() {
+        }
+
+        public static Builder aNamespace() {
+            return new Builder();
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Namespace build() {
+            Namespace namespace = new Namespace();
+            namespace.setName(name);
+            namespace.setDescription(description);
+            return namespace;
+        }
+    }
 }

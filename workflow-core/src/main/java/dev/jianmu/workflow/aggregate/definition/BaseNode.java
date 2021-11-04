@@ -22,6 +22,8 @@ public abstract class BaseNode implements Node {
     protected Set<String> targets = new HashSet<>();
     // 类型
     protected String type;
+    // 节点元数据快照
+    protected String metadata;
     // 参数列表
     protected Set<TaskParameter> taskParameters;
 
@@ -66,6 +68,11 @@ public abstract class BaseNode implements Node {
     @Override
     public String getType() {
         return this.type;
+    }
+
+    @Override
+    public String getMetadata() {
+        return this.metadata;
     }
 
     @Override

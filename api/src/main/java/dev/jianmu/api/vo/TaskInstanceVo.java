@@ -31,7 +31,6 @@ public class TaskInstanceVo {
     private String instanceId;
     private String nodeName;
     private String defKey;
-    private NodeInfo nodeInfo;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Status status;

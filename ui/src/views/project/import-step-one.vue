@@ -54,9 +54,8 @@
 import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
 import { IGitCloneForm } from '@/model/modules/project';
 import { ProjectImporterTypeEnum } from '@/api/dto/enumeration';
-import { listSecretKey, queryNamespace } from '@/api/view-no-auth';
+import { listNamespace, listSecretKey } from '@/api/view-no-auth';
 import { cloneGit } from '@/api/project';
-import { START_PAGE_NUM } from '@/utils/constants';
 import { IGitVo } from '@/api/dto/project';
 
 export default defineComponent({
@@ -130,11 +129,7 @@ export default defineComponent({
           const nodes: object[] = [];
 
           if (level === 0) {
-            const { list } = await queryNamespace({
-              pageNum: START_PAGE_NUM,
-              // 一次性获取10w条，达到获取所有目的
-              pageSize: 100 * 1000,
-            });
+            const { list } = await listNamespace();
             list.forEach(({ name }) => nodes.push({
               value: name,
               label: name,

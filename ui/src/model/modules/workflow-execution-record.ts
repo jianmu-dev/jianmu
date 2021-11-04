@@ -1,5 +1,5 @@
-import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProjectDetailVo } from '@/api/dto/project';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 
 /**
@@ -13,7 +13,7 @@ export interface IState {
     record?: IWorkflowExecutionRecordVo;
     recordDsl?: string;
     taskRecords: ITaskExecutionRecordVo[];
-    nodeInfos: INodeInfoVo[];
+    nodeInfos: INodeDefVo[];
   };
 }
 

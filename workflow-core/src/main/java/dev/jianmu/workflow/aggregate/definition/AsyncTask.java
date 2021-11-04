@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
  * @create: 2021-01-21 20:42
  **/
 public class AsyncTask extends BaseNode {
-
     private AsyncTask() {
     }
 
@@ -34,6 +33,8 @@ public class AsyncTask extends BaseNode {
         // 类型
         protected String type;
         private Set<TaskParameter> taskParameters;
+        // 节点元数据快照
+        protected String metadata;
 
         private Builder() {
         }
@@ -67,6 +68,11 @@ public class AsyncTask extends BaseNode {
             return this;
         }
 
+        public Builder metadata(String metadata) {
+            this.metadata = metadata;
+            return this;
+        }
+
         public AsyncTask build() {
             AsyncTask asyncTask = new AsyncTask();
             asyncTask.name = this.name;
@@ -74,6 +80,7 @@ public class AsyncTask extends BaseNode {
             asyncTask.description = this.description;
             asyncTask.taskParameters = this.taskParameters;
             asyncTask.type = this.type;
+            asyncTask.metadata = this.metadata;
             return asyncTask;
         }
     }

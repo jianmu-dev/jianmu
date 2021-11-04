@@ -94,3 +94,11 @@ export enum EventBridgeSourceTypeEnum {
   WEBHOOK = 'WEBHOOK',
   SERVICE = 'SERVICE',
 }
+
+/**
+ * 密钥管理器类型
+ */
+export enum CredentialManagerTypeEnum {
+  LOCAL = 'local',
+  VAULT = 'vault',
+}

@@ -1,7 +1,7 @@
 import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProcessTemplate, IProjectDetailVo, IProjectQueryingDto, IProjectVo } from '@/api/dto/project';
-import { INamespaceDetailVo, INamespaceQueryingDto, INamespaceVo } from '@/api/dto/secret-key';
+import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
+import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
 import {
@@ -47,7 +47,7 @@ export function queryProject(dto: IProjectQueryingDto): Promise<IProjectVo[]> {
  * 获取流程模版
  * @param dto
  */
-export function getProcessTemplate(dto: number): Promise<IProcessTemplate> {
+export function getProcessTemplate(dto: number): Promise<IProcessTemplateVo> {
   return restProxy({
     url: `${hubUrl}${baseHubUrl.processTemplate}/${dto}`,
     method: 'get',
@@ -61,17 +61,6 @@ export function getProcessTemplate(dto: number): Promise<IProcessTemplate> {
 export function fetchProjectDetail(projectId: string): Promise<IProjectDetailVo> {
   return restProxy({
     url: `${baseUrl.project}/${projectId}`,
-    method: 'get',
-  });
-}
-
-/**
- * 获取项目dsl
- * @param projectId
- */
-export function fetchProjectDsl(projectId: string): Promise<string> {
-  return restProxy({
-    url: `${baseUrl.project}/${projectId}/dsl`,
     method: 'get',
   });
 }
@@ -160,22 +149,20 @@ export function fetchProcessLog(processExecutionRecordId: string): Promise<strin
  * @param workflowRef
  * @param workflowVersion
  */
-export function fetchDsl(workflowRef: string, workflowVersion: string): Promise<string> {
-  return restProxy<string>({
+export function fetchWorkflow(workflowRef: string, workflowVersion: string): Promise<IWorkflowVo> {
+  return restProxy<IWorkflowVo>({
     url: `${baseUrl.dsl}/${workflowRef}/${workflowVersion}`,
     method: 'get',
   });
 }
 
 /**
- * 查询命名空间
- * @param dto
+ * 获取命名空间列表
  */
-export function queryNamespace(dto: INamespaceQueryingDto): Promise<IPageVo<INamespaceVo>> {
-  return restProxy<IPageVo<INamespaceVo>>({
+export function listNamespace(): Promise<INamespacesVo> {
+  return restProxy<INamespacesVo>({
     url: baseUrl.secretKey,
     method: 'get',
-    payload: dto,
   });
 }
 

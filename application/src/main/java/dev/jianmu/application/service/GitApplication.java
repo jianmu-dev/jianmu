@@ -6,7 +6,7 @@ import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.Credential;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.repository.GitRepoRepository;
-import dev.jianmu.secret.repository.KVPairRepository;
+import dev.jianmu.secret.aggregate.CredentialManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,20 +26,20 @@ public class GitApplication {
 
     private final ProjectRepositoryImpl projectRepository;
     private final GitRepoRepository gitRepoRepository;
-    private final KVPairRepository kvPairRepository;
+    private final CredentialManager credentialManager;
     private final ApplicationEventPublisher publisher;
     private final JgitService jgitService;
 
     public GitApplication(
             ProjectRepositoryImpl projectRepository,
             GitRepoRepository gitRepoRepository,
-            KVPairRepository kvPairRepository,
+            CredentialManager credentialManager,
             ApplicationEventPublisher publisher,
             JgitService jgitService
     ) {
         this.projectRepository = projectRepository;
         this.gitRepoRepository = gitRepoRepository;
-        this.kvPairRepository = kvPairRepository;
+        this.credentialManager = credentialManager;
         this.publisher = publisher;
         this.jgitService = jgitService;
     }
@@ -64,15 +64,15 @@ public class GitApplication {
             return;
         }
         if (credential.getType().equals(Credential.Type.SSH)) {
-            var key = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPrivateKey())
+            var key = this.credentialManager.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPrivateKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
             this.jgitService.cloneRepoWithSshKey(gitRepo, key.getKey());
             return;
         }
         if (credential.getType().equals(Credential.Type.HTTPS)) {
-            var user = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getUserKey())
+            var user = this.credentialManager.findByNamespaceNameAndKey(credential.getNamespace(), credential.getUserKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到用户名"));
-            var pass = this.kvPairRepository.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPassKey())
+            var pass = this.credentialManager.findByNamespaceNameAndKey(credential.getNamespace(), credential.getPassKey())
                     .orElseThrow(() -> new DataNotFoundException("未找到密码"));
             this.jgitService.cloneRepoWithUserAndPass(gitRepo, user.getValue(), pass.getValue());
         }
