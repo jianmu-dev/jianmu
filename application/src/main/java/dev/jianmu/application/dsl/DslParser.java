@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
+import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
@@ -210,6 +211,7 @@ public class DslParser {
     }
 
     private AsyncTask createAsyncTask(DslNode dslNode, NodeDef nodeDef) {
+        this.checkNodeParamRequired(dslNode, nodeDef);
         Set<TaskParameter> taskParameters = Set.of();
         if (dslNode.getParam() != null) {
             taskParameters = AsyncTask.createTaskParameters(dslNode.getParam());
@@ -227,6 +229,23 @@ public class DslParser {
     private static <T> Consumer<T> withCounter(BiConsumer<Integer, T> consumer) {
         AtomicInteger counter = new AtomicInteger(0);
         return item -> consumer.accept(counter.getAndIncrement(), item);
+    }
+
+    /**
+     * 校验节点必填参数
+     */
+    private void checkNodeParamRequired(DslNode dslNode, NodeDef nodeDef) {
+        nodeDef.getInputParameters().stream()
+                .filter(NodeParameter::getRequired)
+                .forEach(param -> {
+                    var value = dslNode.getParam().keySet().stream()
+                            .filter(k -> param.getRef().equals(k))
+                            .findFirst()
+                            .orElseThrow(() -> new DslException(dslNode.getName() + "节点的必填参数不能为空"));
+                    if (value == null) {
+                        throw new DslException(dslNode.getName() + "节点的必填参数不能为空");
+                    }
+                });
     }
 
     // DSL语法校验
