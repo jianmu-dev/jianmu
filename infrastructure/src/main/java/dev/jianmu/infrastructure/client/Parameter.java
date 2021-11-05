@@ -19,4 +19,5 @@ public class Parameter {
     private String description;
     private String type;
     private Object value;
+    private Boolean required;
 }

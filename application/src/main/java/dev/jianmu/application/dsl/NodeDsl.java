@@ -81,6 +81,7 @@ public class NodeDsl {
                 dslVo.ownerRef = "local";
             }
             dslVo.checkRef();
+            dslVo.checkParameter();
             return dslVo;
         } catch (JsonProcessingException e) {
             log.error("e:", e);
@@ -105,5 +106,27 @@ public class NodeDsl {
         } catch (JsonProcessingException e) {
             throw new DslException("无法序列化Spec");
         }
+    }
+
+    /**
+     * 校验参数
+     */
+    public void checkParameter() {
+        this.checkParameterRequired(this.inputParameters);
+        this.checkParameterRequired(this.outputParameters);
+    }
+
+    /**
+     * 校验参数是否必填
+     */
+    private void checkParameterRequired(Set<NodeParameter> set) {
+        set.forEach(nodeParameter -> {
+            if (nodeParameter.getRequired() && nodeParameter.getValue() != null) {
+                throw new DslException("必填参数不能定义默认值");
+            }
+            if (!nodeParameter.getRequired() && nodeParameter.getValue() == null) {
+                throw new DslException("非必填参数的默认值未定义");
+            }
+        });
     }
 }
