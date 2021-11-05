@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.vault.VaultException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -73,6 +74,18 @@ public class RestExceptionHandler {
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .message("主键重复")
+                .description(request.getDescription(false))
+                .build();
+    }
+
+    @ExceptionHandler(VaultException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage vaultException(VaultException ex, WebRequest request) {
+        logger.warn("Vault异常: {}", ex.getMessage());
+        return ErrorMessage.builder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .message(ex.getMessage())
                 .description(request.getDescription(false))
                 .build();
     }
