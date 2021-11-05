@@ -54,7 +54,6 @@ import {
   onBeforeMount,
   ref,
   Ref,
-  onMounted,
 } from 'vue';
 import {
   onBeforeRouteUpdate,
