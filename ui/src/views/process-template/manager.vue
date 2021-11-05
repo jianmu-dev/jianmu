@@ -157,7 +157,7 @@ export default defineComponent({
     });
     const workflowTemplates = reactive<IWorkflowTemplateViewingForm>({
       pageNum: 1,
-      pageSize: 2,
+      pageSize: 10,
       name: '',
       templateCategoryId: undefined,
     });
@@ -184,7 +184,7 @@ export default defineComponent({
     let classifyClickKey = true;
     // 流程模版
     const getTemplatesList = (
-      workflowTemplates: IWorkflowTemplateViewingForm,
+      workflowTemplates: IWorkflowTemplateViewingForm
     ) => {
       templateLoading.value = true;
       isShowMore.value = false;
