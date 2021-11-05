@@ -145,7 +145,9 @@ public class DslParser {
     }
 
     private void createGlobalParameters() {
-        this.globalParameters = this.param.entrySet().stream().map(entry -> {
+        this.globalParameters = this.param.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .map(entry -> {
             String type = null;
             Object value = null;
             if (entry.getValue() instanceof String) {
