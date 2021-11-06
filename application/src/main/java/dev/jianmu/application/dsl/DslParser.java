@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class DslParser {
     private String cron;
     private String eb;
-    private Map<String, Object> param = new HashMap<>();
+    private Map<String, Map<String, Object>> global = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
     private String name;
@@ -145,25 +145,29 @@ public class DslParser {
     }
 
     private void createGlobalParameters() {
-        this.globalParameters = this.param.entrySet().stream()
+        var globalParam = this.global.get("param");
+        if (globalParam == null) {
+            return;
+        }
+        this.globalParameters = globalParam.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)
                 .map(entry -> {
-            String type = null;
-            Object value = null;
-            if (entry.getValue() instanceof String) {
-                value = entry.getValue().toString();
-                type = "STRING";
-            }
-            if (entry.getValue() instanceof Map) {
-                value = ((Map<?, ?>) entry.getValue()).get("value");
-                type = ((Map<String, String>) entry.getValue()).get("type");
-            }
-            return GlobalParameter.Builder.aGlobalParameter()
-                    .name(entry.getKey())
-                    .type(type)
-                    .value(value)
-                    .build();
-        }).collect(Collectors.toSet());
+                    String type = null;
+                    Object value = null;
+                    if (entry.getValue() instanceof String) {
+                        value = entry.getValue().toString();
+                        type = "STRING";
+                    }
+                    if (entry.getValue() instanceof Map) {
+                        value = ((Map<?, ?>) entry.getValue()).get("value");
+                        type = ((Map<String, String>) entry.getValue()).get("type");
+                    }
+                    return GlobalParameter.Builder.aGlobalParameter()
+                            .name(entry.getKey())
+                            .type(type)
+                            .value(value)
+                            .build();
+                }).collect(Collectors.toSet());
     }
 
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
@@ -236,7 +240,7 @@ public class DslParser {
         if (this.cron != null && this.eb != null) {
             throw new DslException("不能同时使用Cron与EventBridge");
         }
-        this.paramSyntaxCheck();
+        this.globalParamSyntaxCheck();
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
@@ -260,11 +264,12 @@ public class DslParser {
         throw new DslException("workflow或pipeline未设置");
     }
 
-    private void paramSyntaxCheck() {
-        if (this.param == null) {
+    private void globalParamSyntaxCheck() {
+        var globalParam = this.global.get("param");
+        if (globalParam == null) {
             return;
         }
-        this.param.forEach((k, v) -> {
+        globalParam.forEach((k, v) -> {
             if (v instanceof Map) {
                 var type = ((Map<String, String>) v).get("type");
                 var value = ((Map<?, ?>) v).get("value");
@@ -408,8 +413,8 @@ public class DslParser {
         return eb;
     }
 
-    public Map<String, Object> getParam() {
-        return param;
+    public Map<String, Map<String, Object>> getGlobal() {
+        return global;
     }
 
     public Map<String, Object> getWorkflow() {

@@ -1,5 +1,7 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.Locale;
+
 /**
  * @class: InstanceParameter
  * @description: 任务实例参数
@@ -28,6 +30,8 @@ public class InstanceParameter {
     private String ref;
     // 输入输出类型
     private Type type;
+    // 流程类型
+    private String workflowType;
     // 参数引用Id
     private String parameterId;
 
@@ -63,6 +67,10 @@ public class InstanceParameter {
         return type;
     }
 
+    public String getWorkflowType() {
+        return workflowType;
+    }
+
     public String getParameterId() {
         return parameterId;
     }
@@ -84,6 +92,8 @@ public class InstanceParameter {
         private String ref;
         // 输入输出类型
         private Type type;
+        // 流程类型
+        private String workflowType;
         // 参数引用Id
         private String parameterId;
 
@@ -134,6 +144,11 @@ public class InstanceParameter {
             return this;
         }
 
+        public Builder workflowType(String workflowType) {
+            this.workflowType = workflowType.toLowerCase(Locale.ROOT);
+            return this;
+        }
+
         public Builder parameterId(String parameterId) {
             this.parameterId = parameterId;
             return this;
@@ -143,6 +158,7 @@ public class InstanceParameter {
             InstanceParameter instanceParameter = new InstanceParameter();
             instanceParameter.triggerId = this.triggerId;
             instanceParameter.type = this.type;
+            instanceParameter.workflowType = this.workflowType;
             instanceParameter.asyncTaskRef = this.asyncTaskRef;
             instanceParameter.parameterId = this.parameterId;
             instanceParameter.defKey = this.defKey;

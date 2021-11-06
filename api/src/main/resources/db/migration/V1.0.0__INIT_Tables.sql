@@ -121,6 +121,7 @@ CREATE TABLE `task_instance_parameter`
     `trigger_id`     varchar(255) NOT NULL COMMENT '外部触发ID，流程实例唯一',
     `ref`            varchar(45)  NOT NULL COMMENT '参数ref',
     `type`           varchar(45)  NOT NULL COMMENT '参数类型',
+    `workflow_type`  varchar(45)  NOT NULL COMMENT '流程类型',
     `parameter_id`   varchar(45)  NOT NULL COMMENT '参数引用ID'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -182,10 +183,10 @@ CREATE TABLE `eb_bridge`
 CREATE TABLE `eb_source`
 (
     `id`        varchar(45) NOT NULL COMMENT 'ID',
-    `bridge_id` varchar(45) DEFAULT NULL COMMENT 'Bridge ID',
-    `name`      varchar(45) DEFAULT NULL COMMENT '名称',
-    `type`      varchar(45) DEFAULT NULL COMMENT '类型',
-    `token`     varchar(45) DEFAULT NULL COMMENT '外部token',
+    `bridge_id` varchar(45)  DEFAULT NULL COMMENT 'Bridge ID',
+    `name`      varchar(45)  DEFAULT NULL COMMENT '名称',
+    `type`      varchar(45)  DEFAULT NULL COMMENT '类型',
+    `token`     varchar(45)  DEFAULT NULL COMMENT '外部token',
     `matcher`   varchar(512) DEFAULT NULL COMMENT '事件匹配规则',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
