@@ -15,7 +15,8 @@ CREATE TABLE `jianmu_project`
     `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
     `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`)
+    UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`),
+    UNIQUE KEY `workflow_name_UNIQUE` (`workflow_name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='DSL表';
