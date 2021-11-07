@@ -455,15 +455,6 @@ public class ProjectApplication {
         return this.projectRepository.findById(dslId);
     }
 
-    public List<NodeDef> findNodes(String ref, String version) {
-        var workflow = this.workflowRepository.findByRefAndVersion(ref, version)
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        var types = workflow.findTasks().stream()
-                .map(Node::getType)
-                .collect(Collectors.toSet());
-        return this.nodeDefApi.getByTypes(types);
-    }
-
     public Workflow findByRefAndVersion(String ref, String version) {
         return this.workflowRepository.findByRefAndVersion(ref, version)
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
