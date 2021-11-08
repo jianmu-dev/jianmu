@@ -87,7 +87,7 @@ public class Workflow {
                     " 计算错误: " + evaluationResult.getFailureMessage();
             throw new RuntimeException(errorMsg);
         }
-        return evaluationResult.getValue();
+        return evaluationResult.getValue().setRequired(taskParameter.getRequired());
     }
 
     private boolean isEl(String paramValue) {
