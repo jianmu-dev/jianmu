@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import dev.jianmu.hub.intergration.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.infrastructure.jackson2.UnmodifiableSetDeserializer;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

@@ -18,7 +18,7 @@
         <module>user-core</module>
         <module>trigger</module>
         <module>eventbridge</module>
-        <module>hub-integration</module>
+        <module>node-definition</module>
         <module>embedded-worker</module>
         <module>worker-core</module>
         <module>workflow-core</module>

@@ -1,12 +1,12 @@
-package dev.jianmu.hub.intergration.event;
+package dev.jianmu.node.definition.event;
 
 /**
- * @class: NodeUpdatedEvent
- * @description: NodeUpdatedEvent
+ * @class: NodeDeletedEvent
+ * @description: NodeDeletedEvent
  * @author: Ethan Liu
- * @create: 2021-10-08 16:21
+ * @create: 2021-10-07 07:54
  **/
-public class NodeUpdatedEvent {
+public class NodeDeletedEvent {
     private String ownerRef;
     private String ref;
     private String version;
@@ -28,7 +28,6 @@ public class NodeUpdatedEvent {
         return spec;
     }
 
-
     public static final class Builder {
         private String ownerRef;
         private String ref;
@@ -38,7 +37,7 @@ public class NodeUpdatedEvent {
         private Builder() {
         }
 
-        public static Builder aNodeUpdatedEvent() {
+        public static Builder aNodeDeletedEvent() {
             return new Builder();
         }
 
@@ -62,13 +61,13 @@ public class NodeUpdatedEvent {
             return this;
         }
 
-        public NodeUpdatedEvent build() {
-            NodeUpdatedEvent nodeUpdatedEvent = new NodeUpdatedEvent();
-            nodeUpdatedEvent.ref = this.ref;
-            nodeUpdatedEvent.spec = this.spec;
-            nodeUpdatedEvent.version = this.version;
-            nodeUpdatedEvent.ownerRef = this.ownerRef;
-            return nodeUpdatedEvent;
+        public NodeDeletedEvent build() {
+            NodeDeletedEvent nodeDeletedEvent = new NodeDeletedEvent();
+            nodeDeletedEvent.ownerRef = this.ownerRef;
+            nodeDeletedEvent.version = this.version;
+            nodeDeletedEvent.ref = this.ref;
+            nodeDeletedEvent.spec = this.spec;
+            return nodeDeletedEvent;
         }
     }
 }

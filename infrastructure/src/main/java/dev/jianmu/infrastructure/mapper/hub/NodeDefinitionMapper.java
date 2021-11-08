@@ -1,6 +1,6 @@
 package dev.jianmu.infrastructure.mapper.hub;
 
-import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
+import dev.jianmu.node.definition.aggregate.NodeDefinition;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

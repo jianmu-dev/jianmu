@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
-            <artifactId>hub-integration</artifactId>
+            <artifactId>node-definition</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>

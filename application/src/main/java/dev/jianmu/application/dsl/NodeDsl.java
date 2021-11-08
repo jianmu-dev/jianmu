@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
-import dev.jianmu.hub.intergration.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

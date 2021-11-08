@@ -2,7 +2,7 @@ package dev.jianmu.infrastructure.client;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
-import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
+import dev.jianmu.node.definition.aggregate.NodeDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
