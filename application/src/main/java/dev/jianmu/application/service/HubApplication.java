@@ -70,7 +70,7 @@ public class HubApplication {
 
         List<Parameter> parameters = new ArrayList<>();
         var inputParameters = nodeDsl.getInputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue()).setRequired(parameter.getRequired());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())
@@ -84,7 +84,7 @@ public class HubApplication {
         }).collect(Collectors.toSet());
 
         var outputParameters = nodeDsl.getOutputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue()).setRequired(parameter.getRequired());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())
@@ -208,7 +208,7 @@ public class HubApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + ownerRef + "/" + ref + ":" + version));
         List<Parameter> parameters = new ArrayList<>();
         var inputParameters = dto.getInputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue()).setRequired(parameter.getRequired());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())
@@ -222,7 +222,7 @@ public class HubApplication {
         }).collect(Collectors.toSet());
 
         var outputParameters = dto.getOutputParameters().stream().map(parameter -> {
-            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
+            var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue()).setRequired(parameter.getRequired());
             parameters.add(p);
             return NodeParameter.Builder.aNodeParameter()
                     .name(parameter.getName())

@@ -24,6 +24,8 @@ public class InstanceParameterVo {
     private String type;
     // 参数类型
     private String valueType;
+    // 参数是否必填
+    private Boolean required;
     // 参数值
     private String value;
 }

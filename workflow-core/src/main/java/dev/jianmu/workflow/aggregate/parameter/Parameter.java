@@ -113,6 +113,8 @@ public abstract class Parameter<T> {
     protected Type type;
     // 参数值
     protected final T value;
+    // 是否必填
+    protected  Boolean required;
 
     protected Parameter(T value) {
         this.value = value;
@@ -130,5 +132,12 @@ public abstract class Parameter<T> {
 
     public T getValue() {
         return value;
+    }
+
+    public Boolean getRequired(){return required;}
+
+    public Parameter<?> setRequired(Boolean required) {
+        this.required = required;
+        return this;
     }
 }
