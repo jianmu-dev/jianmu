@@ -229,7 +229,7 @@ public class TaskInstanceInternalApplication {
                 return;
             }
         }
-        taskInstance.executeSucceeded(resultFile);
+        taskInstance.executeSucceeded();
         this.taskInstanceRepository.saveSucceeded(taskInstance);
     }
 
