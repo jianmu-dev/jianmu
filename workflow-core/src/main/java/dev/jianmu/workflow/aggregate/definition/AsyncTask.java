@@ -14,13 +14,19 @@ public class AsyncTask extends BaseNode {
     private AsyncTask() {
     }
 
-    public static Set<TaskParameter> createTaskParameters(Map<String, String> param) {
-        return param.entrySet().stream().map(entry ->
-                TaskParameter.Builder.aTaskParameter()
-                        .ref(entry.getKey())
-                        .expression(entry.getValue())
-                        .build()
-        ).collect(Collectors.toSet());
+    public static Set<TaskParameter> createTaskParameters(Map<String, String> param, Map<String, Boolean> requiredList) {
+        return param.entrySet().stream().map(entry -> {
+            var required = requiredList.entrySet().stream()
+                    .filter(requiredEntry -> entry.getKey().equals(requiredEntry.getKey()))
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .orElse(false);
+            return TaskParameter.Builder.aTaskParameter()
+                    .ref(entry.getKey())
+                    .expression(entry.getValue())
+                    .required(required)
+                    .build();
+        }).collect(Collectors.toSet());
     }
 
     public static final class Builder {
