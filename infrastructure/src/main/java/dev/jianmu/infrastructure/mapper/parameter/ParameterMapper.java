@@ -15,9 +15,9 @@ import java.util.Set;
  **/
 public interface ParameterMapper {
     @Insert("<script>" +
-            "insert into parameter(id, type, value) values" +
+            "insert into parameter(id, type, value, required) values" +
             "<foreach collection='parameters' item='i' index='index' separator=','>" +
-            "(#{i.id}, #{i.type}, convert(#{i.value}, BINARY))" +
+            "(#{i.id}, #{i.type}, convert(#{i.value}, BINARY)), #{i.required}" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("parameters") List<Parameter> parameters);
