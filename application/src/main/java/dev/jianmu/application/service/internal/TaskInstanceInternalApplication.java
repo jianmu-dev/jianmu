@@ -132,10 +132,13 @@ public class TaskInstanceInternalApplication {
         // 事件参数scope为event
         eventMap.forEach((key, val) -> context.add("event", key, val));
         // 任务输出参数加入上下文
-        var outParams = instanceParameters.stream()
-                // 输出参数scope为asyncTaskRef
-                .map(instanceParameter -> Map.entry(instanceParameter.getAsyncTaskRef() + "." + instanceParameter.getRef(), instanceParameter.getParameterId()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> outParams = new HashMap<>();
+        instanceParameters.forEach(instanceParameter -> {
+            // 输出参数scope为workflowType.asyncTaskRef
+            outParams.put(instanceParameter.getWorkflowType() + "." + instanceParameter.getAsyncTaskRef() + "." + instanceParameter.getRef(), instanceParameter.getParameterId());
+            // 输出参数scope为asyncTaskRef
+            outParams.put(instanceParameter.getAsyncTaskRef() + "." + instanceParameter.getRef(), instanceParameter.getParameterId());
+        });
         var outParamValues = this.parameterRepository.findByIds(new HashSet<>(outParams.values()));
         var outMap = this.parameterDomainService.matchParameters(outParams, outParamValues);
         outMap.forEach(context::add);
@@ -145,7 +148,7 @@ public class TaskInstanceInternalApplication {
         var params = workflow.calculateTaskParams(asyncTask.getRef());
 
         // 创建任务实例输入参数
-        var instanceInputParameters = this.createInstanceParameters(params, taskInstance, nodeDef.getInputParameters());
+        var instanceInputParameters = this.createInstanceParameters(params, taskInstance, workflow.getType().name(), nodeDef.getInputParameters());
 
         // 保存参数
         this.parameterRepository.addAll(new ArrayList<>(params.values()));
@@ -155,7 +158,12 @@ public class TaskInstanceInternalApplication {
         this.taskInstanceRepository.add(taskInstance);
     }
 
-    private Set<InstanceParameter> createInstanceParameters(Map<String, Parameter<?>> parameterMap, TaskInstance taskInstance, Set<NodeParameter> nodeParameters) {
+    private Set<InstanceParameter> createInstanceParameters(
+            Map<String, Parameter<?>> parameterMap,
+            TaskInstance taskInstance,
+            String workflowType,
+            Set<NodeParameter> nodeParameters
+    ) {
         var instanceParameters = parameterMap.entrySet().stream()
                 .filter(entry ->
                         nodeParameters.stream()
@@ -171,6 +179,7 @@ public class TaskInstanceInternalApplication {
                                 .ref(entry.getKey())
                                 .parameterId(entry.getValue().getId())
                                 .type(InstanceParameter.Type.INPUT)
+                                .workflowType(workflowType)
                                 .build()
                 ).collect(Collectors.toSet());
         // 合并节点定义的默认参数与DSL中指定的参数
@@ -186,6 +195,7 @@ public class TaskInstanceInternalApplication {
                         .ref(nodeParameter.getRef())
                         .parameterId(nodeParameter.getParameterId())
                         .type(InstanceParameter.Type.INPUT)
+                        .workflowType(workflowType)
                         .build();
                 instanceParameters.add(p);
             }
@@ -197,13 +207,17 @@ public class TaskInstanceInternalApplication {
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         if (nodeVersion.getResultFile() != null) {
             try {
                 // 解析Json为Map
                 var parameterMap = this.parseJson(resultFile);
                 // 创建任务实例输出参数与参数存储参数
-                var outputParameters = this.handleOutputParameter(parameterMap, nodeVersion, taskInstance);
+                var outputParameters = this.handleOutputParameter(
+                        parameterMap, nodeVersion, workflow.getType().name(), taskInstance
+                );
                 // 保存任务实例输出参数
                 this.instanceParameterRepository.addAll(outputParameters.keySet());
                 // 保存参数
@@ -249,7 +263,12 @@ public class TaskInstanceInternalApplication {
         }
     }
 
-    private Map<InstanceParameter, Parameter<?>> handleOutputParameter(Map<String, Object> parameterMap, NodeDef nodeDef, TaskInstance taskInstance) {
+    private Map<InstanceParameter, Parameter<?>> handleOutputParameter(
+            Map<String, Object> parameterMap,
+            NodeDef nodeDef,
+            String workflowType,
+            TaskInstance taskInstance
+    ) {
         // 查找需赋值的输出参数
         var outputParameters = nodeDef.matchedOutputParameters(parameterMap);
         return outputParameters.stream()
@@ -267,6 +286,7 @@ public class TaskInstanceInternalApplication {
                             .triggerId(taskInstance.getTriggerId())
                             .ref(nodeParameter.getRef())
                             .type(InstanceParameter.Type.OUTPUT)
+                            .workflowType(workflowType)
                             .parameterId(parameter.getId())
                             .build();
                     return Map.entry(instanceParameter, parameter);

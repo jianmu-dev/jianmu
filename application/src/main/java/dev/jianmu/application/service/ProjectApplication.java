@@ -365,6 +365,64 @@ public class ProjectApplication {
     }
 
     @Transactional
+    public void updateProjectByName(String dslText) {
+        var parser = DslParser.parse(dslText);
+        Project project = this.projectRepository.findByName(parser.getName())
+                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+        var triggers = this.cronTriggerRepository.findByProjectId(project.getId());
+        // 解析DSL,语法检查
+        var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
+        project.setDslText(dslText);
+        project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
+        project.setTriggerType(Project.TriggerType.MANUAL);
+        project.setLastModifiedBy("admin");
+        project.setSteps(parser.getSteps());
+        project.setWorkflowName(parser.getName());
+        project.setLastModifiedTime();
+        project.setWorkflowVersion(workflow.getVersion());
+        // 删除原有触发器
+        this.cronTriggerRepository.deleteByProjectId(project.getId());
+        triggers.forEach(cronTrigger -> {
+            this.scheduleJobService.deleteTrigger(cronTrigger.getId());
+        });
+        // 创建新触发器
+        if (null != parser.getCron()) {
+            var newTrigger = CronTrigger.Builder.aCronTrigger()
+                    .projectId(project.getId())
+                    .corn(parser.getCron())
+                    .build();
+            project.setTriggerType(Project.TriggerType.CRON);
+            this.cronTriggerRepository.add(newTrigger);
+            this.scheduleJobService.addTrigger(newTrigger.getId(), newTrigger.getCorn());
+        }
+        // 删除原有EB关联
+        if (!StringUtils.isBlank(project.getEventBridgeId())) {
+            this.targetRepository.findByDestinationId(project.getId())
+                    .ifPresent(target -> {
+                        target.setDestinationId("");
+                        this.targetRepository.save(target);
+                    });
+            project.setEventBridgeId("");
+        }
+        // 关联EB
+        if (null != parser.getEb()) {
+            var target = this.targetRepository.findByRef(parser.getEb())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            var source = this.sourceRepository.findByBridgeId(target.getBridgeId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到关联的EventBridge"));
+            if (!StringUtils.isBlank(target.getDestinationId())) {
+                throw new RuntimeException("该事件桥接器已关联其他项目");
+            }
+            target.setDestinationId(project.getId());
+            project.setEventBridgeId(source.getBridgeId());
+            project.setTriggerType(Project.TriggerType.EVENT_BRIDGE);
+            this.targetRepository.save(target);
+        }
+        this.projectRepository.updateByWorkflowRef(project);
+        this.workflowRepository.add(workflow);
+    }
+
+    @Transactional
     public void deleteById(String id) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
@@ -395,15 +453,6 @@ public class ProjectApplication {
 
     public Optional<Project> findById(String dslId) {
         return this.projectRepository.findById(dslId);
-    }
-
-    public List<NodeDef> findNodes(String ref, String version) {
-        var workflow = this.workflowRepository.findByRefAndVersion(ref, version)
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        var types = workflow.findTasks().stream()
-                .map(Node::getType)
-                .collect(Collectors.toSet());
-        return this.nodeDefApi.getByTypes(types);
     }
 
     public Workflow findByRefAndVersion(String ref, String version) {

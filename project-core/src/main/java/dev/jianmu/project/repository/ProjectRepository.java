@@ -19,4 +19,6 @@ public interface ProjectRepository {
     void updateByWorkflowRef(Project project);
 
     Optional<Project> findById(String id);
+
+    Optional<Project> findByName(String name);
 }
