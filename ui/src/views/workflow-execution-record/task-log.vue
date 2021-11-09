@@ -21,7 +21,11 @@
       </div>
       <div>
         <div class="param-key">启动时间：</div>
-        <jm-tooltip :content="datetimeFormatter(task.startTime)" placement="bottom" effect="light">
+        <jm-tooltip
+          :content="datetimeFormatter(task.startTime)"
+          placement="bottom"
+          effect="light"
+        >
           <div class="param-value">{{ datetimeFormatter(task.startTime) }}</div>
         </jm-tooltip>
       </div>
@@ -34,7 +38,7 @@
       <div>
         <div class="param-key">执行状态：</div>
         <div>
-          <task-state :status="task.status"/>
+          <task-state :status="task.status" />
         </div>
       </div>
     </div>
@@ -52,8 +56,12 @@
                   加载中...
                 </jm-button>
               </div>
-              <jm-log-viewer id="task-log" :filename="`${task.nodeName}.txt`" :value="taskLog"
-                             :auto-scroll="taskLogAutoScroll"/>
+              <jm-log-viewer
+                id="task-log"
+                :filename="`${task.nodeName}.txt`"
+                :value="taskLog"
+                :auto-scroll="taskLogAutoScroll"
+              />
             </div>
           </div>
         </jm-tab-pane>
@@ -68,41 +76,134 @@
                   <div class="title">输入参数</div>
                   <jm-table
                     :data="taskInputParams"
-                    border>
+                    :border="true"
+                    :cell-class-name="
+                      ({ row, columnIndex }) =>
+                        row.required && columnIndex === 0 ? 'required-cell' : ''
+                    "
+                  >
                     <jm-table-column
                       label="参数唯一标识"
-                      align="center"
-                      prop="ref">
+                      header-align="center"
+                      width="200px"
+                      prop="ref"
+                    >
+                      <template #default="scope">
+                        <div>
+                          <span>{{ scope.row.ref }}</span>
+                          <el-tooltip
+                            content="必填项"
+                            placement="top"
+                            v-if="scope.row.required"
+                          >
+                            <img
+                              src="~@/assets/svgs/node-library/required.svg"
+                              alt=""
+                            />
+                          </el-tooltip>
+                        </div>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
+                      header-align="center"
                       label="参数类型"
+                      width="110px"
                       align="center"
-                      prop="valueType">
+                      prop="valueType"
+                    >
+                    </jm-table-column>
+                    <jm-table-column
+                      label="是/否必填"
+                      header-align="center"
+                      align="center"
+                      width="110px"
+                      prop="required"
+                    >
+                      <template #default="scope">
+                        <span
+                          :class="[scope.row.required ? 'is-required' : '']"
+                        >
+                          {{ scope.row.required ? '是' : '否' }}
+                        </span>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="参数值"
-                      align="center"
-                      prop="value">
+                      prop="value"
+                      header-align="center"
+                    >
+                      <template #default="scope">
+                        <img
+                          src="~@/assets/svgs/node-library/no-content.svg"
+                          alt=""
+                          v-if="scope.row.required"
+                        /><span v-else>
+                          {{ scope.row.value }}
+                        </span>
+                      </template>
                     </jm-table-column>
                   </jm-table>
                   <div class="title separator">输出参数</div>
-                  <jm-table
-                    :data="taskOutputParams"
-                    border>
+                  <jm-table :data="taskOutputParams" border>
                     <jm-table-column
+                      header-align="center"
                       label="参数唯一标识"
-                      align="center"
-                      prop="ref">
+                      width="200px"
+                      prop="ref"
+                    >
+                      <template #default="scope">
+                        <div>
+                          <span>{{ scope.row.ref }}</span>
+                          <el-tooltip
+                            content="必填项"
+                            placement="top"
+                            v-if="scope.row.required"
+                          >
+                            <img
+                              src="~@/assets/svgs/node-library/required.svg"
+                              alt=""
+                            />
+                          </el-tooltip>
+                        </div>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
+                      header-align="center"
                       label="参数类型"
                       align="center"
-                      prop="valueType">
+                      width="110px"
+                      prop="valueType"
+                    >
+                    </jm-table-column>
+                    <jm-table-column
+                      header-align="center"
+                      label="是/否必填"
+                      width="110px"
+                      align="center"
+                      prop="required"
+                    >
+                      <template #default="scope">
+                        <span
+                          :class="[scope.row.required ? 'is-required' : '']"
+                        >
+                          {{ scope.row.required ? '是' : '否' }}
+                        </span>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="参数值"
-                      align="center"
-                      prop="value">
+                      prop="value"
+                      header-align="center"
+                    >
+                      <template #default="scope">
+                        <img
+                          src="~@/assets/svgs/node-library/no-content.svg"
+                          alt=""
+                          v-if="scope.row.required"
+                        /><span v-else>
+                          {{ scope.row.value }}
+                        </span>
+                      </template>
                     </jm-table-column>
                   </jm-table>
                 </div>
@@ -116,11 +217,21 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  getCurrentInstance,
+  onBeforeMount,
+  onBeforeUnmount,
+  ref,
+} from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
-import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
+import {
+  ITaskExecutionRecordVo,
+  ITaskParamVo,
+} from '@/api/dto/workflow-execution-record';
 import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
@@ -157,9 +268,26 @@ export default defineComponent({
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
-    const task = computed<ITaskExecutionRecordVo>(() => state.recordDetail.taskRecords.find(item => item.instanceId === props.id) as ITaskExecutionRecordVo);
-    const executing = computed<boolean>(() => [TaskStatusEnum.INIT, TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(task.value.status));
-    const executionTime = computed<string>(() => executionTimeFormatter(task.value.startTime, task.value.endTime, executing.value));
+    const task = computed<ITaskExecutionRecordVo>(
+      () =>
+        state.recordDetail.taskRecords.find(
+          item => item.instanceId === props.id
+        ) as ITaskExecutionRecordVo
+    );
+    const executing = computed<boolean>(() =>
+      [
+        TaskStatusEnum.INIT,
+        TaskStatusEnum.WAITING,
+        TaskStatusEnum.RUNNING,
+      ].includes(task.value.status)
+    );
+    const executionTime = computed<string>(() =>
+      executionTimeFormatter(
+        task.value.startTime,
+        task.value.endTime,
+        executing.value
+      )
+    );
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskLogAutoScroll = ref<boolean>(false);
@@ -232,8 +360,12 @@ export default defineComponent({
       tabActiveName,
       taskLog,
       taskLogAutoScroll,
-      taskInputParams: computed<ITaskParamVo[]>(() => taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT)),
-      taskOutputParams: computed<ITaskParamVo[]>(() => taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT)),
+      taskInputParams: computed<ITaskParamVo[]>(() =>
+        taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT)
+      ),
+      taskOutputParams: computed<ITaskParamVo[]>(() =>
+        taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT)
+      ),
       datetimeFormatter,
       handleTabClick: ({ props: { name } }: any) => {
         proxy.$nextTick(() => adaptHeight(autoHeights[name]));
@@ -248,7 +380,7 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   height: 100%;
 
   .basic-section {
@@ -256,7 +388,7 @@ export default defineComponent({
     padding: 16px 20px 0;
     display: flex;
     justify-content: space-between;
-    box-shadow: 0 0 8px 0 #9EB1C5;
+    box-shadow: 0 0 8px 0 #9eb1c5;
 
     > div {
       margin-bottom: 16px;
@@ -266,7 +398,7 @@ export default defineComponent({
       cursor: default;
 
       .param-key {
-        color: #6B7B8D;
+        color: #6b7b8d;
         margin-bottom: 8px;
       }
 
@@ -296,7 +428,7 @@ export default defineComponent({
           width: 120px;
           height: 40px;
           text-align: center;
-          background-color: #EEF0F3;
+          background-color: #eef0f3;
           color: #082340;
           border-radius: 6px 6px 0 0;
         }
@@ -304,7 +436,7 @@ export default defineComponent({
         &.is-active {
           .tab {
             background-color: #082340;
-            color: #FFFFFF;
+            color: #ffffff;
           }
         }
       }
@@ -323,7 +455,47 @@ export default defineComponent({
     }
 
     .tab-content {
-      border: 1px solid #EEF0F7;
+      border: 1px solid #eef0f7;
+      ::v-deep(.el-table) {
+        td {
+          &.required-cell {
+            .cell {
+              padding-right: 40px;
+            }
+          }
+          .cell {
+            padding: 0 20px;
+            div {
+              display: inline-block;
+              max-width: 100%;
+              position: relative;
+              span {
+                display: inline-block;
+                max-width: 100%;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+              }
+              img {
+                position: absolute;
+                right: -20px;
+                bottom: 10px;
+              }
+            }
+          }
+          &.is-center {
+            .cell {
+              padding: 0px 10px;
+            }
+          }
+        }
+
+        .cell {
+          .is-required {
+            color: #ff0000;
+          }
+        }
+      }
 
       .log {
         margin: 16px;
@@ -343,7 +515,7 @@ export default defineComponent({
       }
 
       .params {
-        background-color: #FFFFFF;
+        background-color: #ffffff;
         border-radius: 4px;
         color: #082340;
 
@@ -356,12 +528,13 @@ export default defineComponent({
 
             &.separator {
               margin-top: 16px;
-              border-top: 1px solid #ECEEF6;
+              border-top: 1px solid #eceef6;
             }
           }
 
           ::v-deep(.el-table) {
-            th, td {
+            th,
+            td {
               color: #082340;
             }
           }
