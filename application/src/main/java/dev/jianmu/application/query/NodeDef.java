@@ -3,14 +3,15 @@ package dev.jianmu.application.query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.jianmu.application.exception.OutputParamNotFoundException;
 import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @class: NodeDef
@@ -44,9 +45,16 @@ public class NodeDef {
     private final String spec;
 
     public Set<NodeParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
-        return outputParameters.stream()
-                .filter(nodeParameter -> parameterMap.get(nodeParameter.getRef()) != null)
-                .collect(Collectors.toSet());
+        var nodeParameters = new HashSet<NodeParameter>();
+        outputParameters.forEach(nodeParameter -> {
+            if (nodeParameter.getRequired() && parameterMap.get(nodeParameter.getRef()) == null) {
+                throw new OutputParamNotFoundException(name + "节点的必填输出参数" + nodeParameter.getRef() + "为空");
+            }
+            if (parameterMap.get(nodeParameter.getRef()) != null) {
+                nodeParameters.add(nodeParameter);
+            }
+        });
+        return nodeParameters;
     }
 
     public String toJsonString() {

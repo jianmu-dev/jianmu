@@ -178,6 +178,12 @@ public class TaskInstanceInternalApplication {
                                 .businessId(taskInstance.getBusinessId())
                                 .ref(entry.getKey())
                                 .parameterId(entry.getValue().getId())
+                                .required(nodeParameters.stream()
+                                        .filter(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
+                                        .findFirst()
+                                        .map(NodeParameter::getRequired)
+                                        .orElse(false)
+                                )
                                 .type(InstanceParameter.Type.INPUT)
                                 .workflowType(workflowType)
                                 .build()
@@ -195,6 +201,7 @@ public class TaskInstanceInternalApplication {
                         .ref(nodeParameter.getRef())
                         .parameterId(nodeParameter.getParameterId())
                         .type(InstanceParameter.Type.INPUT)
+                        .required(nodeParameter.getRequired())
                         .workflowType(workflowType)
                         .build();
                 instanceParameters.add(p);
@@ -286,6 +293,7 @@ public class TaskInstanceInternalApplication {
                             .triggerId(taskInstance.getTriggerId())
                             .ref(nodeParameter.getRef())
                             .type(InstanceParameter.Type.OUTPUT)
+                            .required(nodeParameter.getRequired())
                             .workflowType(workflowType)
                             .parameterId(parameter.getId())
                             .build();
