@@ -3,15 +3,14 @@ package dev.jianmu.application.query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.application.exception.OutputParamNotFoundException;
-import dev.jianmu.hub.intergration.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 

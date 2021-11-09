@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.node.definition.aggregate.ShellNode;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
