@@ -26,6 +26,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -98,10 +99,13 @@ public class WorkflowInstanceInternalApplication {
         // 事件参数scope为event
         eventMap.forEach((key, val) -> context.add("event", key, val));
         // 任务输出参数加入上下文
-        var outParams = instanceParameters.stream()
-                // 输出参数scope为asyncTaskRef
-                .map(instanceParameter -> Map.entry(instanceParameter.getAsyncTaskRef() + "." + instanceParameter.getRef(), instanceParameter.getParameterId()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> outParams = new HashMap<>();
+        instanceParameters.forEach(instanceParameter -> {
+            // 输出参数scope为workflowType.asyncTaskRef
+            outParams.put(instanceParameter.getWorkflowType() + "." + instanceParameter.getAsyncTaskRef() + "." + instanceParameter.getRef(), instanceParameter.getParameterId());
+            // 输出参数scope为asyncTaskRef
+            outParams.put(instanceParameter.getAsyncTaskRef() + "." + instanceParameter.getRef(), instanceParameter.getParameterId());
+        });
         var outParamValues = this.parameterRepository.findByIds(new HashSet<>(outParams.values()));
         var outMap = this.parameterDomainService.matchParameters(outParams, outParamValues);
         outMap.forEach(context::add);

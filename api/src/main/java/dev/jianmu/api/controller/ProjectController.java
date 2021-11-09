@@ -54,9 +54,15 @@ public class ProjectController {
     }
 
     @PutMapping("/{projectId}")
-    @Operation(summary = "更新项目", description = "更新项目DSL定义")
+    @Operation(summary = "更新项目", description = "根据ID更新项目DSL定义")
     public void updateProject(@PathVariable String projectId, @RequestBody @Valid DslTextDto dslTextDto) {
         this.projectApplication.updateProject(projectId, dslTextDto.getDslText());
+    }
+
+    @PutMapping("/name")
+    @Operation(summary = "更新项目", description = "根据名字更新项目DSL定义")
+    public void updateProjectByName(@RequestBody @Valid DslTextDto dslTextDto) {
+        this.projectApplication.updateProjectByName(dslTextDto.getDslText());
     }
 
     @PutMapping("/sync/{projectId}")

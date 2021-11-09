@@ -19,6 +19,8 @@ public class NodeParameter {
     private String parameterId;
     // 参数值
     private Object value;
+    // 是否必填
+    private Boolean required = false;
 
     public String getName() {
         return name;
@@ -44,6 +46,10 @@ public class NodeParameter {
         return value;
     }
 
+    public Boolean getRequired() {
+        return required;
+    }
+
 
     public static final class Builder {
         // 显示名称
@@ -58,6 +64,8 @@ public class NodeParameter {
         private String parameterId;
         // 参数值
         private Object value;
+        // 是否必填
+        private Boolean required;
 
         private Builder() {
         }
@@ -96,6 +104,11 @@ public class NodeParameter {
             return this;
         }
 
+        public Builder required(Boolean required) {
+            this.required = required;
+            return this;
+        }
+
         public NodeParameter build() {
             NodeParameter nodeParameter = new NodeParameter();
             nodeParameter.type = this.type;
@@ -104,6 +117,7 @@ public class NodeParameter {
             nodeParameter.name = this.name;
             nodeParameter.description = this.description;
             nodeParameter.value = this.value;
+            nodeParameter.required = this.required;
             return nodeParameter;
         }
     }

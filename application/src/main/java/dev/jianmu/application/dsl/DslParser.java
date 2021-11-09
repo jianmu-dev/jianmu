@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
+import dev.jianmu.hub.intergration.aggregate.NodeParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 public class DslParser {
     private String cron;
     private String eb;
-    private Map<String, Object> param = new HashMap<>();
+    private Map<String, Map<String, Object>> global = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
     private String name;
@@ -145,23 +146,29 @@ public class DslParser {
     }
 
     private void createGlobalParameters() {
-        this.globalParameters = this.param.entrySet().stream().map(entry -> {
-            String type = null;
-            Object value = null;
-            if (entry.getValue() instanceof String) {
-                value = entry.getValue().toString();
-                type = "STRING";
-            }
-            if (entry.getValue() instanceof Map) {
-                value = ((Map<?, ?>) entry.getValue()).get("value");
-                type = ((Map<String, String>) entry.getValue()).get("type");
-            }
-            return GlobalParameter.Builder.aGlobalParameter()
-                    .name(entry.getKey())
-                    .type(type)
-                    .value(value)
-                    .build();
-        }).collect(Collectors.toSet());
+        var globalParam = this.global.get("param");
+        if (globalParam == null) {
+            return;
+        }
+        this.globalParameters = globalParam.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .map(entry -> {
+                    String type = null;
+                    Object value = null;
+                    if (entry.getValue() instanceof String) {
+                        value = entry.getValue().toString();
+                        type = "STRING";
+                    }
+                    if (entry.getValue() instanceof Map) {
+                        value = ((Map<?, ?>) entry.getValue()).get("value");
+                        type = ((Map<String, String>) entry.getValue()).get("type");
+                    }
+                    return GlobalParameter.Builder.aGlobalParameter()
+                            .name(entry.getKey())
+                            .type(type)
+                            .value(value)
+                            .build();
+                }).collect(Collectors.toSet());
     }
 
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
@@ -210,6 +217,7 @@ public class DslParser {
     }
 
     private AsyncTask createAsyncTask(DslNode dslNode, NodeDef nodeDef) {
+        this.checkNodeParamRequired(dslNode, nodeDef);
         Set<TaskParameter> taskParameters = Set.of();
         if (dslNode.getParam() != null) {
             taskParameters = AsyncTask.createTaskParameters(dslNode.getParam());
@@ -229,12 +237,29 @@ public class DslParser {
         return item -> consumer.accept(counter.getAndIncrement(), item);
     }
 
+    /**
+     * 校验节点必填参数
+     */
+    private void checkNodeParamRequired(DslNode dslNode, NodeDef nodeDef) {
+        nodeDef.getInputParameters().stream()
+                .filter(NodeParameter::getRequired)
+                .forEach(param -> {
+                    var value = dslNode.getParam().keySet().stream()
+                            .filter(k -> param.getRef().equals(k))
+                            .findFirst()
+                            .orElseThrow(() -> new DslException(dslNode.getName() + "节点的必填参数不能为空"));
+                    if (value == null) {
+                        throw new DslException(dslNode.getName() + "节点的必填参数不能为空");
+                    }
+                });
+    }
+
     // DSL语法校验
     private void syntaxCheck() {
         if (this.cron != null && this.eb != null) {
             throw new DslException("不能同时使用Cron与EventBridge");
         }
-        this.paramSyntaxCheck();
+        this.globalParamSyntaxCheck();
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
@@ -258,11 +283,12 @@ public class DslParser {
         throw new DslException("workflow或pipeline未设置");
     }
 
-    private void paramSyntaxCheck() {
-        if (this.param == null) {
+    private void globalParamSyntaxCheck() {
+        var globalParam = this.global.get("param");
+        if (globalParam == null) {
             return;
         }
-        this.param.forEach((k, v) -> {
+        globalParam.forEach((k, v) -> {
             if (v instanceof Map) {
                 var type = ((Map<String, String>) v).get("type");
                 var value = ((Map<?, ?>) v).get("value");
@@ -406,8 +432,8 @@ public class DslParser {
         return eb;
     }
 
-    public Map<String, Object> getParam() {
-        return param;
+    public Map<String, Map<String, Object>> getGlobal() {
+        return global;
     }
 
     public Map<String, Object> getWorkflow() {
