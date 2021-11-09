@@ -9,7 +9,6 @@ package dev.jianmu.workflow.aggregate.definition;
 public class TaskParameter {
     private String ref;
     private String expression;
-    private Boolean required;
 
     public String getRef() {
         return ref;
@@ -19,14 +18,9 @@ public class TaskParameter {
         return expression;
     }
 
-    public Boolean getRequired() {
-        return required;
-    }
-
     public static final class Builder {
         private String ref;
         private String expression;
-        private Boolean required;
 
         private Builder() {
         }
@@ -45,16 +39,10 @@ public class TaskParameter {
             return this;
         }
 
-        public Builder required(Boolean required) {
-            this.required = required;
-            return this;
-        }
-
         public TaskParameter build() {
             TaskParameter taskParameter = new TaskParameter();
             taskParameter.expression = this.expression;
             taskParameter.ref = this.ref;
-            taskParameter.required = this.required;
             return taskParameter;
         }
     }

@@ -178,7 +178,12 @@ public class TaskInstanceInternalApplication {
                                 .businessId(taskInstance.getBusinessId())
                                 .ref(entry.getKey())
                                 .parameterId(entry.getValue().getId())
-                                .required(entry.getValue().getRequired())
+                                .required(nodeParameters.stream()
+                                        .filter(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
+                                        .findFirst()
+                                        .map(NodeParameter::getRequired)
+                                        .orElse(false)
+                                )
                                 .type(InstanceParameter.Type.INPUT)
                                 .workflowType(workflowType)
                                 .build()
@@ -196,6 +201,7 @@ public class TaskInstanceInternalApplication {
                         .ref(nodeParameter.getRef())
                         .parameterId(nodeParameter.getParameterId())
                         .type(InstanceParameter.Type.INPUT)
+                        .required(nodeParameter.getRequired())
                         .workflowType(workflowType)
                         .build();
                 instanceParameters.add(p);
@@ -276,7 +282,7 @@ public class TaskInstanceInternalApplication {
                 .map(nodeParameter -> {
                     var value = parameterMap.get(nodeParameter.getRef());
                     // 创建参数
-                    var parameter = Parameter.Type.getTypeByName(nodeParameter.getType()).newParameter(value).setRequired(nodeParameter.getRequired());
+                    var parameter = Parameter.Type.getTypeByName(nodeParameter.getType()).newParameter(value);
                     // 创建任务实例输出参数
                     var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
                             .instanceId(taskInstance.getId())
@@ -286,8 +292,8 @@ public class TaskInstanceInternalApplication {
                             .businessId(taskInstance.getBusinessId())
                             .triggerId(taskInstance.getTriggerId())
                             .ref(nodeParameter.getRef())
-                            .required(nodeParameter.getRequired())
                             .type(InstanceParameter.Type.OUTPUT)
+                            .required(nodeParameter.getRequired())
                             .workflowType(workflowType)
                             .parameterId(parameter.getId())
                             .build();

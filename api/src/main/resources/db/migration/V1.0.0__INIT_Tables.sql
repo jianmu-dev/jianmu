@@ -133,7 +133,6 @@ CREATE TABLE `parameter`
     `id`    varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数ID',
     `type`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数类型',
     `value` blob                                                         NOT NULL COMMENT '参数值',
-    `required` bit(1)                                                    NOT NULL COMMENT '是否必填',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

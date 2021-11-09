@@ -298,7 +298,7 @@ public class ViewController {
                             instanceParameterVo.setType(instanceParameter.getType().toString());
                             instanceParameterVo.setValueType(parameter.getType().toString());
                             instanceParameterVo.setValue(parameter.getStringValue());
-                            instanceParameterVo.setRequired(parameter.getRequired());
+                            instanceParameterVo.setRequired(instanceParameter.getRequired());
                         }
                     });
                     return instanceParameterVo;
