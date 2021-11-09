@@ -50,6 +50,7 @@
             :model="processTemplatesForm"
             :rules="rules"
             label-position="top"
+            @submit.prevent
           >
             <jm-form-item prop="processTemplatesName" label="项目名称">
               <jm-input
@@ -184,7 +185,7 @@ export default defineComponent({
     let classifyClickKey = true;
     // 流程模版
     const getTemplatesList = (
-      workflowTemplates: IWorkflowTemplateViewingForm,
+      workflowTemplates: IWorkflowTemplateViewingForm
     ) => {
       templateLoading.value = true;
       isShowMore.value = false;

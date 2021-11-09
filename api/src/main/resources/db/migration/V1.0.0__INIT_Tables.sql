@@ -123,7 +123,8 @@ CREATE TABLE `task_instance_parameter`
     `ref`            varchar(45)  NOT NULL COMMENT '参数ref',
     `type`           varchar(45)  NOT NULL COMMENT '参数类型',
     `workflow_type`  varchar(45)  NOT NULL COMMENT '流程类型',
-    `parameter_id`   varchar(45)  NOT NULL COMMENT '参数引用ID'
+    `parameter_id`   varchar(45)  NOT NULL COMMENT '参数引用ID',
+    `required`       bit(1)       NOT NULL COMMENT '是否必填'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务实例参数表';

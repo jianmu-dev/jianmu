@@ -34,6 +34,8 @@ public class InstanceParameter {
     private String workflowType;
     // 参数引用Id
     private String parameterId;
+    // 参数是否必填
+    private Boolean required;
 
     public String getInstanceId() {
         return instanceId;
@@ -75,6 +77,10 @@ public class InstanceParameter {
         return parameterId;
     }
 
+    public Boolean getRequired() {
+        return required;
+    }
+
     public static final class Builder {
         // 任务实例ID
         private String instanceId;
@@ -96,6 +102,8 @@ public class InstanceParameter {
         private String workflowType;
         // 参数引用Id
         private String parameterId;
+        // 参数是否必填
+        private Boolean required;
 
         private Builder() {
         }
@@ -154,6 +162,11 @@ public class InstanceParameter {
             return this;
         }
 
+        public Builder required(Boolean required) {
+            this.required = required;
+            return this;
+        }
+
         public InstanceParameter build() {
             InstanceParameter instanceParameter = new InstanceParameter();
             instanceParameter.triggerId = this.triggerId;
@@ -166,6 +179,7 @@ public class InstanceParameter {
             instanceParameter.serialNo = this.serialNo;
             instanceParameter.ref = this.ref;
             instanceParameter.businessId = this.businessId;
+            instanceParameter.required = this.required;
             return instanceParameter;
         }
     }

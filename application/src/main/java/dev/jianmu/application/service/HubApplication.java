@@ -89,6 +89,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
@@ -102,6 +103,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
@@ -225,6 +227,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
@@ -238,6 +241,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
