@@ -105,7 +105,6 @@ CREATE TABLE `task_instance`
     `trigger_id`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Trigger ID',
     `start_time`       datetime                                                     DEFAULT NULL COMMENT '开始时间',
     `end_time`         datetime                                                     DEFAULT NULL COMMENT '结束时间',
-    `result_file`      longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '执行结果文件',
     `status`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务运行状态',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
@@ -308,3 +307,12 @@ CREATE TABLE `hub_node_definition_version`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='节点定义版本表';
+
+CREATE TABLE `shell_node_def`
+(
+    `id`         varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `shell_node` text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '序列化对象',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='Shell节点定义表';
