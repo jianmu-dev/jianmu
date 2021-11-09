@@ -53,7 +53,12 @@
                   <div class="title ellipsis">{{ project.name }}</div>
                 </jm-tooltip>
               </router-link>
-              <div class="time">最后执行时间：{{ datetimeFormatter(project.latestTime) }}</div>
+              <div class="time">
+                <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
+                    executionTimeFormatter(project.startTime, undefined, true)
+                  }}</span>
+                <span v-else>最后执行时间：{{ datetimeFormatter(project.latestTime) }}</span>
+              </div>
               <div class="time">下次执行时间：{{ datetimeFormatter(project.nextTime) }}</div>
               <div class="operation">
                 <jm-tooltip content="触发" placement="bottom">
@@ -105,7 +110,7 @@ import { IQueryForm } from '@/model/modules/project';
 import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum } from '@/api/dto/enumeration';
 import { del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
-import { datetimeFormatter } from '@/utils/formatter';
+import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import WebhookDialog from './webhook-dialog.vue';
 import DslDialog from './dsl-dialog.vue';
 import BottomNav from '@/views/nav/bottom2.vue';
@@ -187,6 +192,7 @@ export default defineComponent({
       DslTypeEnum,
       ProjectStatusEnum,
       datetimeFormatter,
+      executionTimeFormatter,
       projects,
       queryForm,
       executings,

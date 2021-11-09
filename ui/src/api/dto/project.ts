@@ -70,6 +70,7 @@ export interface IProjectVo extends Readonly<BaseVo & {
   source: DslSourceEnum;
   dslType: DslTypeEnum;
   gitRepoId?: string;
+  startTime: string;
   latestTime?: string;
   nextTime?: string;
   status: ProjectStatusEnum;
