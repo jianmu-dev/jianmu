@@ -3,6 +3,7 @@ import yaml from 'yaml';
 import { NodeTypeEnum } from '../utils/enumeration';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
+import shellIcon from '../svgs/shape/shell.svg';
 
 /**
  * 节点标签最长长度
@@ -254,6 +255,10 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
   if (nodeInfos) {
     // 匹配icon
     nodes.forEach((node: NodeConfig) => {
+      if (!node.uniqueKey) {
+        node.iconUrl = shellIcon;
+        return;
+      }
       node.iconUrl = nodeInfos.find(nodeInfo => nodeInfo.type === node.uniqueKey)?.icon;
     });
   }
