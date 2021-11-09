@@ -261,3 +261,10 @@ CREATE TABLE `hub_node_definition_version`
     `spec`              longtext COMMENT '规格',
     PRIMARY KEY (`id`)
 );
+
+CREATE TABLE `shell_node_def`
+(
+    `id`         varchar(100) NOT NULL COMMENT 'ID',
+    `shell_node` text         NOT NULL COMMENT '序列化对象',
+    PRIMARY KEY (`id`)
+);

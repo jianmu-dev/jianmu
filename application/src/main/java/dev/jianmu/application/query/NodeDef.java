@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.OutputParamNotFoundException;
-import dev.jianmu.hub.intergration.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +44,13 @@ public class NodeDef {
     private final String resultFile;
     @JsonIgnore
     private final String spec;
+    // Shell Node
+    // 镜像名称
+    @JsonIgnore
+    private final String image;
+    // 命令列表
+    @JsonIgnore
+    private final List<String> script;
 
     public Set<NodeParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
         var nodeParameters = new HashSet<NodeParameter>();

@@ -1,4 +1,4 @@
-package dev.jianmu.hub.intergration.aggregate;
+package dev.jianmu.node.definition.aggregate;
 
 /**
  * @class: TaskParameter

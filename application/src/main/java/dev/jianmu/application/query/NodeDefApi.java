@@ -1,5 +1,7 @@
 package dev.jianmu.application.query;
 
+import dev.jianmu.node.definition.aggregate.ShellNode;
+
 import java.util.List;
 import java.util.Set;
 
@@ -17,4 +19,6 @@ public interface NodeDefApi {
     NodeDef findByType(String type);
 
     NodeDef getByType(String type);
+
+    void addShellNodes(List<ShellNode> shellNodes);
 }

@@ -1,8 +1,8 @@
-package dev.jianmu.infrastructure.mybatis.hub;
+package dev.jianmu.infrastructure.mybatis.node;
 
-import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
-import dev.jianmu.hub.intergration.repository.NodeDefinitionVersionRepository;
-import dev.jianmu.infrastructure.mapper.hub.NodeDefinitionVersionMapper;
+import dev.jianmu.infrastructure.mapper.node.NodeDefinitionVersionMapper;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
+import dev.jianmu.node.definition.repository.NodeDefinitionVersionRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

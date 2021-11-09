@@ -1,6 +1,6 @@
-package dev.jianmu.infrastructure.mapper.hub;
+package dev.jianmu.infrastructure.mapper.node;
 
-import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.typehandler.NodeParameterSetTypeHandler;
 import org.apache.ibatis.annotations.*;
 

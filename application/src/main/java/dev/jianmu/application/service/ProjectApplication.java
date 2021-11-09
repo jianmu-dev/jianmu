@@ -126,6 +126,10 @@ public class ProjectApplication {
     }
 
     private Workflow createWorkflow(DslParser parser, String dslText, String ref) {
+        // 保存Shell node定义
+        var shellNodes = parser.getShellNodes();
+        this.nodeDefApi.addShellNodes(shellNodes);
+
         // 查询相关的节点定义
         var types = parser.getAsyncTaskTypes();
         var nodeDefs = this.nodeDefApi.getByTypes(types);
