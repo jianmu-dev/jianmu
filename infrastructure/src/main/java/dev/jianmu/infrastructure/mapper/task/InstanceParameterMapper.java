@@ -17,9 +17,9 @@ import java.util.Set;
  **/
 public interface InstanceParameterMapper {
     @Insert("<script>" +
-            "insert into task_instance_parameter(instance_id, serial_no, def_key, async_task_ref, business_id, trigger_id, ref, `type`, workflow_type, parameter_id) values" +
+            "insert into task_instance_parameter(instance_id, serial_no, def_key, async_task_ref, business_id, trigger_id, ref, `type`, workflow_type, parameter_id, required) values" +
             "<foreach collection='instanceParameters' item='i' index='key' separator=','>" +
-            "(#{i.instanceId}, #{i.serialNo}, #{i.defKey}, #{i.asyncTaskRef}, #{i.businessId}, #{i.triggerId}, #{i.ref}, #{i.type}, #{i.workflowType}, #{i.parameterId})" +
+            "(#{i.instanceId}, #{i.serialNo}, #{i.defKey}, #{i.asyncTaskRef}, #{i.businessId}, #{i.triggerId}, #{i.ref}, #{i.type}, #{i.workflowType}, #{i.parameterId}, #{i.required})" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("instanceParameters") Set<InstanceParameter> instanceParameters);
