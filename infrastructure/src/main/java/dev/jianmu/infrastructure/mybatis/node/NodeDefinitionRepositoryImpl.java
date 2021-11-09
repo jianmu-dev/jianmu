@@ -2,7 +2,7 @@ package dev.jianmu.infrastructure.mybatis.node;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.infrastructure.mapper.hub.NodeDefinitionMapper;
+import dev.jianmu.infrastructure.mapper.node.NodeDefinitionMapper;
 import dev.jianmu.node.definition.aggregate.NodeDefinition;
 import dev.jianmu.node.definition.repository.NodeDefinitionRepository;
 import org.springframework.stereotype.Repository;

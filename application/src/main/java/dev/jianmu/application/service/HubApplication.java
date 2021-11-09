@@ -287,7 +287,7 @@ public class HubApplication {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public NodeDef getByType(String type) {
         if (type.startsWith("shell:")) {
-            return this.findByType(type);
+            return this.findShellNodeDef(type);
         }
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
                 .orElseGet(() -> this.downloadNodeDef(type));
@@ -326,7 +326,7 @@ public class HubApplication {
 
     public NodeDef findByType(String type) {
         if (type.startsWith("shell:")) {
-            return this.findByType(type);
+            return this.findShellNodeDef(type);
         }
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
                 .orElseThrow(() -> new DataNotFoundException("未找到节点定义: " + type));

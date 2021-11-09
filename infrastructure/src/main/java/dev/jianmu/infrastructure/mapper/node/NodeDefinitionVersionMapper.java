@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.mapper.hub;
+package dev.jianmu.infrastructure.mapper.node;
 
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.typehandler.NodeParameterSetTypeHandler;

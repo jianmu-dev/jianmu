@@ -21,7 +21,7 @@ public interface TaskInstanceMapper {
     @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void updateStatus(TaskInstance taskInstance);
 
-    @Update("update task_instance set result_file = #{resultFile}, status = #{status}, end_time = #{endTime} where id = #{id}")
+    @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void saveSucceeded(TaskInstance taskInstance);
 
     @Delete("delete from task_instance where workflow_ref = #{workflowRef}")

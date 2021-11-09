@@ -118,7 +118,6 @@ public class EmbeddedWorkerApplication {
     }
 
     private DockerTask createDockerTask(WorkerTask workerTask, Map<String, String> environmentMap) throws JsonProcessingException {
-        var spec = objectMapper.readValue(workerTask.getSpec(), ContainerSpec.class);
         // 使用TriggerId作为工作目录名称与volume名称
         var workingDir = "/" + workerTask.getTriggerId();
         var volumeName = workerTask.getTriggerId();
@@ -146,6 +145,7 @@ public class EmbeddedWorkerApplication {
                     .env(env)
                     .build();
         } else {
+            var spec = objectMapper.readValue(workerTask.getSpec(), ContainerSpec.class);
             var env = environmentMap.entrySet().stream()
                     .map(entry -> entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
             newSpec = ContainerSpec.builder()

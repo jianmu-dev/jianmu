@@ -1,5 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.node;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.jianmu.infrastructure.mapper.node.ShellNodeMapper;
 import dev.jianmu.node.definition.aggregate.ShellNode;
 import dev.jianmu.node.definition.repository.ShellNodeRepository;
 import org.springframework.stereotype.Repository;
@@ -15,16 +18,37 @@ import java.util.Optional;
  */
 @Repository
 public class ShellNodeRepositoryImpl implements ShellNodeRepository {
+    private final ShellNodeMapper shellNodeMapper;
+    private final ObjectMapper mapper;
+
+    public ShellNodeRepositoryImpl(ShellNodeMapper shellNodeMapper, ObjectMapper mapper) {
+        this.shellNodeMapper = shellNodeMapper;
+        this.mapper = mapper;
+    }
+
     @Override
     public void addAll(List<ShellNode> shellNodes) {
         shellNodes.forEach(shellNode -> {
-            System.out.println(shellNode.getId());
-            System.out.println(shellNode.getImage());
+            String s = null;
+            try {
+                s = this.mapper.writeValueAsString(shellNode);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            this.shellNodeMapper.add(shellNode.getId(), s);
         });
     }
 
     @Override
     public Optional<ShellNode> findById(String id) {
-        return Optional.empty();
+        return this.shellNodeMapper.findById(id)
+                .map(s -> {
+                    try {
+                        return this.mapper.readValue(s, ShellNode.class);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                });
     }
 }

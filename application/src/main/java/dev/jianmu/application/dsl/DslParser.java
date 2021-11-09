@@ -99,12 +99,18 @@ public class DslParser {
                 symbolTable.put(dslNode.getName(), condition);
                 return;
             }
-            // 创建任务节点
-            var n = nodeDefs.stream()
-                    .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
-                    .findFirst()
-                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-            var task = this.createAsyncTask(dslNode, n);
+            AsyncTask task;
+            if (dslNode.getImage() != null) {
+                // 创建Shell Node类型的任务节点
+                task = this.createAsyncTask(dslNode);
+            } else {
+                // 创建任务节点
+                var d = nodeDefs.stream()
+                        .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
+                        .findFirst()
+                        .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
+                task = this.createAsyncTask(dslNode, d);
+            }
             symbolTable.put(dslNode.getName(), task);
         });
         // 添加节点引用关系
@@ -183,12 +189,18 @@ public class DslParser {
         var end = End.Builder.anEnd().name("End").ref("End").build();
         symbolTable.put("End", end);
         dslNodes.forEach(dslNode -> {
-            // 创建任务节点
-            var d = nodeDefs.stream()
-                    .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
-                    .findFirst()
-                    .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
-            var task = this.createAsyncTask(dslNode, d);
+            AsyncTask task;
+            if (dslNode.getImage() != null) {
+                // 创建Shell Node类型的任务节点
+                task = this.createAsyncTask(dslNode);
+            } else {
+                // 创建任务节点
+                var d = nodeDefs.stream()
+                        .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
+                        .findFirst()
+                        .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
+                task = this.createAsyncTask(dslNode, d);
+            }
             symbolTable.put(dslNode.getName(), task);
         });
         // 添加节点引用关系
@@ -218,14 +230,26 @@ public class DslParser {
         return new HashSet<>(symbolTable.values());
     }
 
+    private AsyncTask createAsyncTask(DslNode dslNode) {
+        Set<TaskParameter> taskParameters = Set.of();
+        if (dslNode.getEnvironment() != null) {
+            taskParameters = AsyncTask.createTaskParameters(dslNode.getEnvironment());
+        }
+        return AsyncTask.Builder.anAsyncTask()
+                .name("Shell Node")
+                .ref(dslNode.getName())
+                .type(dslNode.getType())
+                .taskParameters(taskParameters)
+                .description("Shell Node")
+                .metadata("{}")
+                .build();
+    }
+
     private AsyncTask createAsyncTask(DslNode dslNode, NodeDef nodeDef) {
         this.checkNodeParamRequired(dslNode, nodeDef);
         Set<TaskParameter> taskParameters = Set.of();
         if (dslNode.getParam() != null) {
             taskParameters = AsyncTask.createTaskParameters(dslNode.getParam());
-        }
-        if (dslNode.getEnvironment() != null) {
-            taskParameters = AsyncTask.createTaskParameters(dslNode.getEnvironment());
         }
         return AsyncTask.Builder.anAsyncTask()
                 .name(nodeDef.getName())
@@ -340,16 +364,21 @@ public class DslParser {
     }
 
     private void checkPipeNode(String nodeName, Map<?, ?> node) {
-        var type = node.get("type");
-        if (null == type) {
-            throw new DslException("Node type未设置");
-        }
         // 验证保留关键字
         if (nodeName.equals("event")) {
             throw new DslException("节点名称不能使用event");
         }
         if (nodeName.equals("global")) {
             throw new DslException("节点名称不能使用global");
+        }
+        // 如果为Shell Node，不校验type
+        var image = node.get("image");
+        if (image != null) {
+            return;
+        }
+        var type = node.get("type");
+        if (null == type) {
+            throw new DslException("Node type未设置");
         }
     }
 
@@ -439,6 +468,7 @@ public class DslParser {
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
                 .filter(type -> !type.equals("condition"))
+                .filter(type -> !type.startsWith("shell:"))
                 .map(type -> {
                     String[] strings = type.split(":");
                     if (strings.length == 0) {
