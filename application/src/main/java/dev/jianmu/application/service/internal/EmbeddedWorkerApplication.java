@@ -8,14 +8,16 @@ import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 import dev.jianmu.embedded.worker.aggregate.spec.HostConfig;
 import dev.jianmu.embedded.worker.aggregate.spec.Mount;
 import dev.jianmu.embedded.worker.aggregate.spec.MountType;
+import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.event.NodeDeletedEvent;
 import dev.jianmu.node.definition.event.NodeUpdatedEvent;
-import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,9 @@ public class EmbeddedWorkerApplication {
     private final StorageService storageService;
     private final DockerWorker dockerWorker;
     private final ObjectMapper objectMapper;
+
+    private final String optionScript = "set -e";
+    private final String traceScript = "\necho + %s\n%s";
 
     public EmbeddedWorkerApplication(
             StorageService storageService,
@@ -52,9 +57,16 @@ public class EmbeddedWorkerApplication {
 
     public void runTask(WorkerTask workerTask) {
         try {
-            var parameterMap = workerTask.getParameterMap().entrySet().stream()
-                    .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            Map<String, String> parameterMap;
+            if (workerTask.isShellTask()) {
+                parameterMap = workerTask.getParameterMap().entrySet().stream()
+                        .map(entry -> Map.entry(entry.getKey().toUpperCase(), entry.getValue()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            } else {
+                parameterMap = workerTask.getParameterMap().entrySet().stream()
+                        .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            }
             parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
             parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
@@ -93,10 +105,20 @@ public class EmbeddedWorkerApplication {
         }
     }
 
+    private String createScript(List<String> commands) {
+        var sb = new StringBuilder();
+        sb.append(optionScript);
+        var formatter = new Formatter(sb, Locale.ROOT);
+        commands.forEach(cmd -> {
+            var escaped = String.format("%s", cmd);
+            escaped = escaped.replace("$", "\\$");
+            formatter.format(traceScript, escaped, cmd);
+        });
+        return sb.toString();
+    }
+
     private DockerTask createDockerTask(WorkerTask workerTask, Map<String, String> environmentMap) throws JsonProcessingException {
         var spec = objectMapper.readValue(workerTask.getSpec(), ContainerSpec.class);
-        var env = environmentMap.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
         // 使用TriggerId作为工作目录名称与volume名称
         var workingDir = "/" + workerTask.getTriggerId();
         var volumeName = workerTask.getTriggerId();
@@ -107,14 +129,34 @@ public class EmbeddedWorkerApplication {
                 .target(workingDir)
                 .build();
         var hostConfig = HostConfig.Builder.aHostConfig().mounts(List.of(mount)).build();
-        var newSpec = ContainerSpec.builder()
-                .image(spec.getImage())
-                .workingDir("")
-                .hostConfig(hostConfig)
-                .cmd(spec.getCmd())
-                .entrypoint(spec.getEntrypoint())
-                .env(env)
-                .build();
+        ContainerSpec newSpec;
+        if (workerTask.isShellTask()) {
+            var script = this.createScript(workerTask.getScript());
+            environmentMap.put("JIANMU_SCRIPT", script);
+            var env = environmentMap.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
+            String[] entrypoint = {"/bin/sh", "-c"};
+            String[] cmd = {"echo \"$JIANMU_SCRIPT\" | /bin/sh"};
+            newSpec = ContainerSpec.builder()
+                    .image(workerTask.getImage())
+                    .workingDir("")
+                    .hostConfig(hostConfig)
+                    .cmd(cmd)
+                    .entrypoint(entrypoint)
+                    .env(env)
+                    .build();
+        } else {
+            var env = environmentMap.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue()).toArray(String[]::new);
+            newSpec = ContainerSpec.builder()
+                    .image(spec.getImage())
+                    .workingDir("")
+                    .hostConfig(hostConfig)
+                    .cmd(spec.getCmd())
+                    .entrypoint(spec.getEntrypoint())
+                    .env(env)
+                    .build();
+        }
         return DockerTask.Builder.aDockerTask()
                 .taskInstanceId(workerTask.getTaskInstanceId())
                 .businessId(workerTask.getBusinessId())

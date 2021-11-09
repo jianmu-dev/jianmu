@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
+import dev.jianmu.node.definition.aggregate.ShellNode;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class DslParser {
     private String description;
     private Workflow.Type type;
     private final List<DslNode> dslNodes = new ArrayList<>();
+    private final List<ShellNode> shellNodes = new ArrayList<>();
     private Set<GlobalParameter> globalParameters = new HashSet<>();
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -220,6 +222,9 @@ public class DslParser {
         if (dslNode.getParam() != null) {
             taskParameters = AsyncTask.createTaskParameters(dslNode.getParam());
         }
+        if (dslNode.getEnvironment() != null) {
+            taskParameters = AsyncTask.createTaskParameters(dslNode.getEnvironment());
+        }
         return AsyncTask.Builder.anAsyncTask()
                 .name(nodeDef.getName())
                 .ref(dslNode.getName())
@@ -246,7 +251,17 @@ public class DslParser {
             this.type = Workflow.Type.WORKFLOW;
             this.workflow.forEach((key, val) -> {
                 if (val instanceof Map) {
-                    dslNodes.add(new DslNode(key, (Map<?, ?>) val));
+                    var dslNode = DslNode.of(key, (Map<?, ?>) val);
+                    if (dslNode.getImage() != null) {
+                        var shellNode = ShellNode.Builder.aShellNode()
+                                .image(dslNode.getImage())
+                                .environment(dslNode.getEnvironment())
+                                .script(dslNode.getScript())
+                                .build();
+                        dslNode.setType("shell:" + shellNode.getId());
+                        shellNodes.add(shellNode);
+                    }
+                    dslNodes.add(dslNode);
                 }
             });
             return;
@@ -256,7 +271,17 @@ public class DslParser {
             this.type = Workflow.Type.PIPELINE;
             this.pipeline.forEach((key, val) -> {
                 if (val instanceof Map) {
-                    dslNodes.add(new DslNode(key, (Map<?, ?>) val));
+                    var dslNode = DslNode.of(key, (Map<?, ?>) val);
+                    if (dslNode.getImage() != null) {
+                        var shellNode = ShellNode.Builder.aShellNode()
+                                .image(dslNode.getImage())
+                                .environment(dslNode.getEnvironment())
+                                .script(dslNode.getScript())
+                                .build();
+                        dslNode.setType("shell:" + shellNode.getId());
+                        shellNodes.add(shellNode);
+                    }
+                    dslNodes.add(dslNode);
                 }
             });
             return;
@@ -439,6 +464,10 @@ public class DslParser {
 
     public List<DslNode> getDslNodes() {
         return dslNodes;
+    }
+
+    public List<ShellNode> getShellNodes() {
+        return shellNodes;
     }
 
     public Set<GlobalParameter> getGlobalParameters() {
