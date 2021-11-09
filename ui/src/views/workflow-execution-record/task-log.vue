@@ -97,7 +97,7 @@
                             v-if="scope.row.required"
                           >
                             <img
-                              src="~@/assets/svgs/node-library/required.svg"
+                              src="~@/assets/svgs/task-log/required.svg"
                               alt=""
                             />
                           </el-tooltip>
@@ -134,7 +134,7 @@
                     >
                       <template #default="scope">
                         <img
-                          src="~@/assets/svgs/node-library/no-content.svg"
+                          src="~@/assets/svgs/task-log/no-content.svg"
                           alt=""
                           v-if="scope.row.required"
                         /><span v-else>
@@ -160,7 +160,7 @@
                             v-if="scope.row.required"
                           >
                             <img
-                              src="~@/assets/svgs/node-library/required.svg"
+                              src="~@/assets/svgs/task-log/required.svg"
                               alt=""
                             />
                           </el-tooltip>
@@ -197,7 +197,7 @@
                     >
                       <template #default="scope">
                         <img
-                          src="~@/assets/svgs/node-library/no-content.svg"
+                          src="~@/assets/svgs/task-log/no-content.svg"
                           alt=""
                           v-if="scope.row.required"
                         /><span v-else>

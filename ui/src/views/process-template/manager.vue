@@ -148,9 +148,9 @@ import {
 import router from '@/router';
 export default defineComponent({
   name: 'process-template',
-  // props: {
-  //   processTemplatesName: String,
-  // },
+  props: {
+    processTemplatesName: String,
+  },
   setup() {
     const categoriesList = reactive<ICategoriesVo[]>([]);
     const processTemplatesForm = reactive<IProcessTemplatesForm>({
@@ -255,9 +255,6 @@ export default defineComponent({
     };
 
     return {
-      projectName(name: string) {
-        console.log(name);
-      },
       searchsTemplate,
       next,
       processTemplatesDom,
