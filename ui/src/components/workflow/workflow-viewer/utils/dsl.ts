@@ -122,10 +122,12 @@ function parseWorkflow(workflow: any): {
       case NodeTypeEnum.CONDITION:
         description += `<br/>${workflow[key].expression}`;
         break;
-      default:
+      default: {
         type = NodeTypeEnum.ASYNC_TASK;
-        uniqueKey = workflow[key].type || SHELL_NODE_TYPE;
+        const { image } = workflow[key];
+        uniqueKey = image ? SHELL_NODE_TYPE : workflow[key].type;
         break;
+      }
     }
 
     nodes.push({
@@ -210,13 +212,14 @@ function parsePipeline(pipeline: any): {
     }
 
     const label = key.length > MAX_LABEL_LENGTH ? `${key.substr(0, MAX_LABEL_LENGTH)}...` : key;
+    const { image, type } = pipeline[key];
 
     nodes.push({
       id: key,
       label,
       description: key,
       type: NodeTypeEnum.ASYNC_TASK,
-      uniqueKey: pipeline[key].type || SHELL_NODE_TYPE,
+      uniqueKey: image ? SHELL_NODE_TYPE : type,
     });
   });
 
