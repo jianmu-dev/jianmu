@@ -2,6 +2,7 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.event.CronEvent;
+import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.jgit.JgitService;
@@ -13,6 +14,7 @@ import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -149,7 +151,15 @@ public class ProjectApplication {
         }
         // 创建Webhook触发器
         if (null != parser.getWebhook()) {
-
+            var webhook = Webhook.Builder.aWebhook()
+                    .auth(parser.getWebhook().getAuth())
+                    .param(parser.getWebhook().getParam())
+                    .build();
+            var webhookEvent = WebhookEvent.builder()
+                    .projectId(project.getId())
+                    .webhook(webhook)
+                    .build();
+            this.publisher.publishEvent(webhookEvent);
         }
         this.projectRepository.add(project);
         this.gitRepoRepository.add(gitRepo);
@@ -186,6 +196,18 @@ public class ProjectApplication {
             this.publisher.publishEvent(cronEvent);
             project.setTriggerType(Project.TriggerType.CRON);
         }
+        // 创建Webhook触发器
+        if (null != parser.getWebhook()) {
+            var webhook = Webhook.Builder.aWebhook()
+                    .auth(parser.getWebhook().getAuth())
+                    .param(parser.getWebhook().getParam())
+                    .build();
+            var webhookEvent = WebhookEvent.builder()
+                    .projectId(project.getId())
+                    .webhook(webhook)
+                    .build();
+            this.publisher.publishEvent(webhookEvent);
+        }
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.jgitService.cleanUp(gitRepo.getId());
@@ -220,6 +242,18 @@ public class ProjectApplication {
             this.publisher.publishEvent(cronEvent);
             project.setTriggerType(Project.TriggerType.CRON);
         }
+        // 创建Webhook触发器
+        if (null != parser.getWebhook()) {
+            var webhook = Webhook.Builder.aWebhook()
+                    .auth(parser.getWebhook().getAuth())
+                    .param(parser.getWebhook().getParam())
+                    .build();
+            var webhookEvent = WebhookEvent.builder()
+                    .projectId(project.getId())
+                    .webhook(webhook)
+                    .build();
+            this.publisher.publishEvent(webhookEvent);
+        }
         this.projectRepository.add(project);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
@@ -251,6 +285,18 @@ public class ProjectApplication {
                     .build();
             this.publisher.publishEvent(cronEvent);
             project.setTriggerType(Project.TriggerType.CRON);
+        }
+        // 创建Webhook触发器
+        if (null != parser.getWebhook()) {
+            var webhook = Webhook.Builder.aWebhook()
+                    .auth(parser.getWebhook().getAuth())
+                    .param(parser.getWebhook().getParam())
+                    .build();
+            var webhookEvent = WebhookEvent.builder()
+                    .projectId(project.getId())
+                    .webhook(webhook)
+                    .build();
+            this.publisher.publishEvent(webhookEvent);
         }
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);

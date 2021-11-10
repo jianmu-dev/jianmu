@@ -24,12 +24,12 @@ import java.text.SimpleDateFormat;
 @Slf4j
 public class TriggerApplication {
     private final TriggerRepository triggerRepository;
-    private final Scheduler scheduler;
+    private final Scheduler quartzScheduler;
     private final ApplicationEventPublisher publisher;
 
-    public TriggerApplication(TriggerRepository triggerRepository, Scheduler scheduler, ApplicationEventPublisher publisher) {
+    public TriggerApplication(TriggerRepository triggerRepository, Scheduler quartzScheduler, ApplicationEventPublisher publisher) {
         this.triggerRepository = triggerRepository;
-        this.scheduler = scheduler;
+        this.quartzScheduler = quartzScheduler;
         this.publisher = publisher;
     }
 
@@ -46,14 +46,19 @@ public class TriggerApplication {
 
     @Transactional
     public void saveOrUpdate(String projectId, Webhook webhook) {
-        var trigger = this.triggerRepository.findByProjectId(projectId)
-                .orElse(
-                        Trigger.Builder.aTrigger()
-                                .projectId(projectId)
-                                .type(Trigger.Type.WEBHOOK)
-                                .webhook(webhook)
-                                .build()
-                );
+        this.triggerRepository.findByProjectId(projectId)
+                .ifPresentOrElse(trigger -> {
+                    trigger.setType(Trigger.Type.WEBHOOK);
+                    trigger.setWebhook(webhook);
+                    this.triggerRepository.updateById(trigger);
+                }, () -> {
+                    var trigger = Trigger.Builder.aTrigger()
+                            .projectId(projectId)
+                            .type(Trigger.Type.WEBHOOK)
+                            .webhook(webhook)
+                            .build();
+                    this.triggerRepository.add(trigger);
+                });
     }
 
     @Transactional
@@ -63,15 +68,16 @@ public class TriggerApplication {
                     try {
                         // 更新schedule
                         trigger.setSchedule(schedule);
+                        trigger.setType(Trigger.Type.CRON);
                         // 停止触发器
-                        scheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
+                        this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
                         // 卸载任务
-                        scheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
+                        this.quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
                         // 删除任务
-                        scheduler.deleteJob(JobKey.jobKey(trigger.getId()));
+                        this.quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
                         var jobDetail = this.createJobDetail(trigger);
                         var cronTrigger = this.createCronTrigger(trigger);
-                        scheduler.scheduleJob(jobDetail, cronTrigger);
+                        this.quartzScheduler.scheduleJob(jobDetail, cronTrigger);
                     } catch (SchedulerException e) {
                         log.error("触发器更新失败: {}", e.getMessage());
                         throw new RuntimeException("触发器更新失败");
@@ -86,7 +92,7 @@ public class TriggerApplication {
                     try {
                         var jobDetail = this.createJobDetail(trigger);
                         var cronTrigger = this.createCronTrigger(trigger);
-                        scheduler.scheduleJob(jobDetail, cronTrigger);
+                        quartzScheduler.scheduleJob(jobDetail, cronTrigger);
                     } catch (SchedulerException e) {
                         log.error("触发器加载失败: {}", e.getMessage());
                         throw new RuntimeException("触发器加载失败");
@@ -101,11 +107,11 @@ public class TriggerApplication {
                 .ifPresent(trigger -> {
                     try {
                         // 停止触发器
-                        scheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
+                        quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
                         // 卸载任务
-                        scheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
+                        quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
                         // 删除任务
-                        scheduler.deleteJob(JobKey.jobKey(trigger.getId()));
+                        quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
                     } catch (SchedulerException e) {
                         log.error("触发器删除失败: {}", e.getMessage());
                         throw new RuntimeException("触发器删除失败");
@@ -116,6 +122,7 @@ public class TriggerApplication {
 
     public String getNextFireTime(String projectId) {
         var triggerId = this.triggerRepository.findByProjectId(projectId)
+                .filter(trigger -> trigger.getType() == Trigger.Type.CRON)
                 .map(Trigger::getId)
                 .orElse("");
         if (triggerId.isBlank()) {
@@ -123,8 +130,12 @@ public class TriggerApplication {
         }
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            var date = scheduler.getTrigger(TriggerKey.triggerKey(triggerId)).getNextFireTime();
-            return sdf.format(date);
+            var schedulerTrigger = this.quartzScheduler.getTrigger(TriggerKey.triggerKey(triggerId));
+            if (schedulerTrigger != null) {
+                var date = schedulerTrigger.getNextFireTime();
+                return sdf.format(date);
+            }
+            return "";
         } catch (SchedulerException e) {
             log.info("未找到触发器： {}", e.getMessage());
             throw new RuntimeException("未找到触发器");
@@ -137,14 +148,14 @@ public class TriggerApplication {
             var cronTrigger = this.createCronTrigger(trigger);
             var jobDetail = this.createJobDetail(trigger);
             try {
-                scheduler.scheduleJob(jobDetail, cronTrigger);
+                quartzScheduler.scheduleJob(jobDetail, cronTrigger);
             } catch (SchedulerException e) {
                 log.error("触发器加载失败: {}", e.getMessage());
                 throw new RuntimeException("触发器加载失败");
             }
         });
         try {
-            scheduler.start();
+            quartzScheduler.start();
         } catch (SchedulerException e) {
             log.error("触发器启动失败: {}", e.getMessage());
             throw new RuntimeException("触发器启动失败");

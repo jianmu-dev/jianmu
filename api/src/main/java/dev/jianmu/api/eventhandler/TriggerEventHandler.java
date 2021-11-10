@@ -1,6 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.event.CronEvent;
+import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.infrastructure.quartz.CronTriggerEvent;
@@ -47,5 +48,11 @@ public class TriggerEventHandler {
     public void handleCronEvent(CronEvent cronEvent) {
         // 创建Cron触发器
         this.triggerApplication.saveOrUpdate(cronEvent.getProjectId(), cronEvent.getSchedule());
+    }
+
+    @TransactionalEventListener
+    public void handleWebhookEvent(WebhookEvent webhookEvent) {
+        // 创建Webhook触发器
+        this.triggerApplication.saveOrUpdate(webhookEvent.getProjectId(), webhookEvent.getWebhook());
     }
 }

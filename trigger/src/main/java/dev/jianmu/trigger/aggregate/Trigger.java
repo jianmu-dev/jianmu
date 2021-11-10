@@ -40,8 +40,16 @@ public class Trigger {
         return webhook;
     }
 
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public void setSchedule(String schedule) {
         this.schedule = schedule;
+    }
+
+    public void setWebhook(Webhook webhook) {
+        this.webhook = webhook;
     }
 
     public static final class Builder {
