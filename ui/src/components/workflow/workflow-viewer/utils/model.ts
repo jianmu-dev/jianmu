@@ -1,5 +1,8 @@
 import { NodeTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 
+// shell节点类型
+export const SHELL_NODE_TYPE = 'shell';
+
 /**
  * 节点鼠标滑过事件
  */

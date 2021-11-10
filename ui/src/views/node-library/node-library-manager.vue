@@ -138,7 +138,7 @@ export default defineComponent({
       pageSize: number;
     }>({
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 12,
     });
     const nodeLibraryListData = reactive<INode[]>([]);
     const firstLoading = ref<boolean>(true);
@@ -283,7 +283,7 @@ export default defineComponent({
       handleCreation: () => {
         nodeLibraryListData.length = 0;
         nodeLibraryListParameter.pageNum = 1;
-        nodeLibraryListParameter.pageSize = 10;
+        nodeLibraryListParameter.pageSize = 12;
         firstLoading.value = true;
         noMore.value = true;
         total.value = 0;
@@ -305,7 +305,7 @@ export default defineComponent({
 .node-library-manager {
   padding: 16px 20px 25px 16px;
   background-color: #ffffff;
-  height: calc(100vh - 155px);
+  height: calc(100vh - 185px);
   .right-top-btn {
     position: fixed;
     right: 20px;

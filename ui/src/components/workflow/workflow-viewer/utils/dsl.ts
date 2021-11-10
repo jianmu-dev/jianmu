@@ -3,6 +3,8 @@ import yaml from 'yaml';
 import { NodeTypeEnum } from '../utils/enumeration';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
+import shellIcon from '../svgs/shape/shell.svg';
+import { SHELL_NODE_TYPE } from './model';
 
 /**
  * 节点标签最长长度
@@ -120,10 +122,12 @@ function parseWorkflow(workflow: any): {
       case NodeTypeEnum.CONDITION:
         description += `<br/>${workflow[key].expression}`;
         break;
-      default:
+      default: {
         type = NodeTypeEnum.ASYNC_TASK;
-        uniqueKey = workflow[key].type;
+        const { image } = workflow[key];
+        uniqueKey = image ? SHELL_NODE_TYPE : workflow[key].type;
         break;
+      }
     }
 
     nodes.push({
@@ -208,13 +212,14 @@ function parsePipeline(pipeline: any): {
     }
 
     const label = key.length > MAX_LABEL_LENGTH ? `${key.substr(0, MAX_LABEL_LENGTH)}...` : key;
+    const { image, type } = pipeline[key];
 
     nodes.push({
       id: key,
       label,
       description: key,
       type: NodeTypeEnum.ASYNC_TASK,
-      uniqueKey: pipeline[key].type,
+      uniqueKey: image ? SHELL_NODE_TYPE : type,
     });
   });
 
@@ -254,6 +259,10 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
   if (nodeInfos) {
     // 匹配icon
     nodes.forEach((node: NodeConfig) => {
+      if (node.uniqueKey === SHELL_NODE_TYPE) {
+        node.iconUrl = shellIcon;
+        return;
+      }
       node.iconUrl = nodeInfos.find(nodeInfo => nodeInfo.type === node.uniqueKey)?.icon;
     });
   }
