@@ -8,17 +8,25 @@ package dev.jianmu.trigger.event;
  **/
 public class TriggerEvent {
     private String triggerId;
+    private String projectId;
+    private String type;
 
     public String getTriggerId() {
         return triggerId;
     }
 
-    public void setTriggerId(String triggerId) {
-        this.triggerId = triggerId;
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public static final class Builder {
         private String triggerId;
+        private String projectId;
+        private String type;
 
         private Builder() {
         }
@@ -32,9 +40,21 @@ public class TriggerEvent {
             return this;
         }
 
+        public Builder projectId(String projectId) {
+            this.projectId = projectId;
+            return this;
+        }
+
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
         public TriggerEvent build() {
             TriggerEvent triggerEvent = new TriggerEvent();
-            triggerEvent.setTriggerId(triggerId);
+            triggerEvent.projectId = this.projectId;
+            triggerEvent.triggerId = this.triggerId;
+            triggerEvent.type = this.type;
             return triggerEvent;
         }
     }
@@ -43,6 +63,7 @@ public class TriggerEvent {
     public String toString() {
         return "TriggerEvent{" +
                 "triggerId='" + triggerId + '\'' +
+                ", projectId='" + projectId + '\'' +
                 '}';
     }
 }

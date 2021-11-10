@@ -1,4 +1,4 @@
-package dev.jianmu.trigger.config;
+package dev.jianmu.infrastructure.quartz;
 
 import org.quartz.Scheduler;
 import org.quartz.spi.TriggerFiredBundle;

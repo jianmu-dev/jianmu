@@ -10,8 +10,8 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.eventbridge.aggregate.Bridge;
 import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 @Tag(name = "查询API", description = "查询API")
 public class ViewController {
     private final ProjectApplication projectApplication;
+    private final TriggerApplication triggerApplication;
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
@@ -57,6 +58,7 @@ public class ViewController {
 
     public ViewController(
             ProjectApplication projectApplication,
+            TriggerApplication triggerApplication,
             WorkflowInstanceApplication workflowInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
@@ -67,6 +69,7 @@ public class ViewController {
             StorageService storageService
     ) {
         this.projectApplication = projectApplication;
+        this.triggerApplication = triggerApplication;
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
@@ -203,7 +206,7 @@ public class ViewController {
                 .map(workflowInstance -> {
                     var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
                     projectVo.setLatestTime(workflowInstance.getEndTime());
-                    projectVo.setNextTime(this.projectApplication.getNextFireTime(project.getId()));
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
                     if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
                         projectVo.setStatus("FAILED");
                     }

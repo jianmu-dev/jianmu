@@ -1,6 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.ProjectApplication;
+import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
@@ -21,13 +22,16 @@ import org.springframework.stereotype.Component;
 public class ProjectEventHandler {
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final ProjectApplication projectApplication;
+    private final TriggerApplication triggerApplication;
 
     public ProjectEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
-            ProjectApplication projectApplication
+            ProjectApplication projectApplication,
+            TriggerApplication triggerApplication
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.projectApplication = projectApplication;
+        this.triggerApplication = triggerApplication;
     }
 
     @Async
@@ -53,7 +57,8 @@ public class ProjectEventHandler {
     }
 
     @EventListener
-    // 项目删除事件
     public void handleProjectDelete(DeletedEvent deletedEvent) {
+        // 项目删除事件, 删除相关的Trigger
+        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId());
     }
 }
