@@ -11,7 +11,6 @@ import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
-import dev.jianmu.project.repository.CronTriggerRepository;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;

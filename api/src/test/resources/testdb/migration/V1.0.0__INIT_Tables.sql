@@ -17,19 +17,13 @@ CREATE TABLE `jianmu_project`
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `cron_trigger`
+CREATE TABLE `jianmu_trigger`
 (
-    `id`         varchar(50) NOT NULL COMMENT '触发器ID',
+    `id`         varchar(45) NOT NULL COMMENT 'ID',
     `project_id` varchar(45) NOT NULL COMMENT '项目ID',
-    `corn`       varchar(45) NOT NULL COMMENT 'Cron表达式',
-    PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `quartz_trigger`
-(
-    `id`         int         NOT NULL AUTO_INCREMENT COMMENT 'Quartz触发器ID',
-    `trigger_id` varchar(45) NOT NULL COMMENT '触发器ID',
-    `cron`       varchar(45) NOT NULL COMMENT 'Cron表达式',
+    `type`       varchar(45) NOT NULL COMMENT '触发器类型',
+    `schedule`   varchar(45) DEFAULT NULL COMMENT 'Cron表达式',
+    `webhook`    blob COMMENT 'webhook对象',
     PRIMARY KEY (`id`)
 );
 
