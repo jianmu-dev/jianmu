@@ -1,4 +1,4 @@
-package dev.jianmu.hub.intergration.aggregate;
+package dev.jianmu.node.definition.aggregate;
 
 import java.util.HashSet;
 import java.util.Set;

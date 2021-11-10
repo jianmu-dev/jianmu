@@ -10,7 +10,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.eventbridge.aggregate.Bridge;
 import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;

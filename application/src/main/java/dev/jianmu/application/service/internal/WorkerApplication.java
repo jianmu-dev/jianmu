@@ -100,19 +100,38 @@ public class WorkerApplication {
         var instanceParameters = this.instanceParameterRepository
                 .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
         var parameterMap = this.getParameterMap(instanceParameters);
-        var workerTask = WorkerTask.Builder.aWorkerTask()
-                .workerId(worker.getId())
-                .type(worker.getType())
-                .taskInstanceId(taskInstance.getId())
-                .businessId(taskInstance.getBusinessId())
-                .triggerId(taskInstance.getTriggerId())
-                .defKey(taskInstance.getDefKey())
-                .resultFile(nodeDef.getResultFile())
-                .spec(nodeDef.getSpec())
-                .parameterMap(parameterMap)
-                .resumed(resumed)
-                .build();
-        // 发送给Worker执行
+        WorkerTask workerTask;
+        if (nodeDef.getImage() != null) {
+            workerTask = WorkerTask.Builder.aWorkerTask()
+                    .workerId(worker.getId())
+                    .type(worker.getType())
+                    .taskInstanceId(taskInstance.getId())
+                    .businessId(taskInstance.getBusinessId())
+                    .triggerId(taskInstance.getTriggerId())
+                    .defKey(taskInstance.getDefKey())
+                    .parameterMap(parameterMap)
+                    .resumed(resumed)
+                    .shellTask(true)
+                    .image(nodeDef.getImage())
+                    .script(nodeDef.getScript())
+                    .build();
+            // 发送给Worker执行
+        } else {
+            workerTask = WorkerTask.Builder.aWorkerTask()
+                    .workerId(worker.getId())
+                    .type(worker.getType())
+                    .taskInstanceId(taskInstance.getId())
+                    .businessId(taskInstance.getBusinessId())
+                    .triggerId(taskInstance.getTriggerId())
+                    .defKey(taskInstance.getDefKey())
+                    .resultFile(nodeDef.getResultFile())
+                    .spec(nodeDef.getSpec())
+                    .parameterMap(parameterMap)
+                    .resumed(resumed)
+                    .shellTask(false)
+                    .build();
+            // 发送给Worker执行
+        }
         this.publisher.publishEvent(workerTask);
     }
 

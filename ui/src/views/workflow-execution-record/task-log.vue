@@ -91,7 +91,7 @@
                       <template #default="scope">
                         <div>
                           <span>{{ scope.row.ref }}</span>
-                          <el-tooltip
+                          <jm-tooltip
                             content="必填项"
                             placement="top"
                             v-if="scope.row.required"
@@ -100,7 +100,7 @@
                               src="~@/assets/svgs/task-log/required.svg"
                               alt=""
                             />
-                          </el-tooltip>
+                          </jm-tooltip>
                         </div>
                       </template>
                     </jm-table-column>
@@ -154,7 +154,7 @@
                       <template #default="scope">
                         <div>
                           <span>{{ scope.row.ref }}</span>
-                          <el-tooltip
+                          <jm-tooltip
                             content="必填项"
                             placement="top"
                             v-if="scope.row.required"
@@ -163,7 +163,7 @@
                               src="~@/assets/svgs/task-log/required.svg"
                               alt=""
                             />
-                          </el-tooltip>
+                          </jm-tooltip>
                         </div>
                       </template>
                     </jm-table-column>

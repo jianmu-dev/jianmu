@@ -59,12 +59,6 @@ public class ProjectController {
         this.projectApplication.updateProject(projectId, dslTextDto.getDslText());
     }
 
-    @PutMapping("/name")
-    @Operation(summary = "更新项目", description = "根据名字更新项目DSL定义")
-    public void updateProjectByName(@RequestBody @Valid DslTextDto dslTextDto) {
-        this.projectApplication.updateProjectByName(dslTextDto.getDslText());
-    }
-
     @PutMapping("/sync/{projectId}")
     @Operation(summary = "同步DSL", description = "同步Git库中的DSL文件更新项目")
     public void syncProject(@PathVariable String projectId) {
