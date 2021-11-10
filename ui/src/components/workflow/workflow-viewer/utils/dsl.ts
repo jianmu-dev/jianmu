@@ -4,6 +4,7 @@ import { NodeTypeEnum } from '../utils/enumeration';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
 import shellIcon from '../svgs/shape/shell.svg';
+import { SHELL_NODE_TYPE } from './model';
 
 /**
  * 节点标签最长长度
@@ -123,7 +124,7 @@ function parseWorkflow(workflow: any): {
         break;
       default:
         type = NodeTypeEnum.ASYNC_TASK;
-        uniqueKey = workflow[key].type;
+        uniqueKey = workflow[key].type || SHELL_NODE_TYPE;
         break;
     }
 
@@ -215,7 +216,7 @@ function parsePipeline(pipeline: any): {
       label,
       description: key,
       type: NodeTypeEnum.ASYNC_TASK,
-      uniqueKey: pipeline[key].type,
+      uniqueKey: pipeline[key].type || SHELL_NODE_TYPE,
     });
   });
 
@@ -255,7 +256,7 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
   if (nodeInfos) {
     // 匹配icon
     nodes.forEach((node: NodeConfig) => {
-      if (!node.uniqueKey) {
+      if (node.uniqueKey === SHELL_NODE_TYPE) {
         node.iconUrl = shellIcon;
         return;
       }

@@ -14,9 +14,9 @@
         </jm-tooltip>
       </div>
       <div>
-        <div class="param-key">任务定义：</div>
-        <jm-tooltip :content="task.defKey" placement="bottom" effect="light">
-          <div class="param-value">{{ task.defKey }}</div>
+        <div class="param-key">节点定义：</div>
+        <jm-tooltip :content="nodeDef" placement="bottom" effect="light">
+          <div class="param-value">{{ nodeDef }}</div>
         </jm-tooltip>
       </div>
       <div>
@@ -38,7 +38,7 @@
       <div>
         <div class="param-key">执行状态：</div>
         <div>
-          <task-state :status="task.status" />
+          <task-state :status="task.status"/>
         </div>
       </div>
     </div>
@@ -217,21 +217,11 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  getCurrentInstance,
-  onBeforeMount,
-  onBeforeUnmount,
-  ref,
-} from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
-import {
-  ITaskExecutionRecordVo,
-  ITaskParamVo,
-} from '@/api/dto/workflow-execution-record';
+import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
 import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
@@ -239,6 +229,7 @@ import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import sleep from '@/utils/sleep';
 import { TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
+import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
 
 const autoHeights: {
   [key: string]: IAutoHeight;
@@ -271,22 +262,22 @@ export default defineComponent({
     const task = computed<ITaskExecutionRecordVo>(
       () =>
         state.recordDetail.taskRecords.find(
-          item => item.instanceId === props.id
-        ) as ITaskExecutionRecordVo
+          item => item.instanceId === props.id,
+        ) as ITaskExecutionRecordVo,
     );
     const executing = computed<boolean>(() =>
       [
         TaskStatusEnum.INIT,
         TaskStatusEnum.WAITING,
         TaskStatusEnum.RUNNING,
-      ].includes(task.value.status)
+      ].includes(task.value.status),
     );
     const executionTime = computed<string>(() =>
       executionTimeFormatter(
         task.value.startTime,
         task.value.endTime,
-        executing.value
-      )
+        executing.value,
+      ),
     );
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
@@ -360,11 +351,12 @@ export default defineComponent({
       tabActiveName,
       taskLog,
       taskLogAutoScroll,
+      nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
-        taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT)
+        taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT),
       ),
       taskOutputParams: computed<ITaskParamVo[]>(() =>
-        taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT)
+        taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT),
       ),
       datetimeFormatter,
       handleTabClick: ({ props: { name } }: any) => {
@@ -456,6 +448,7 @@ export default defineComponent({
 
     .tab-content {
       border: 1px solid #eef0f7;
+
       ::v-deep(.el-table) {
         td {
           &.required-cell {
@@ -463,12 +456,15 @@ export default defineComponent({
               padding-right: 40px;
             }
           }
+
           .cell {
             padding: 0 20px;
+
             div {
               display: inline-block;
               max-width: 100%;
               position: relative;
+
               span {
                 display: inline-block;
                 max-width: 100%;
@@ -476,6 +472,7 @@ export default defineComponent({
                 overflow: hidden;
                 white-space: nowrap;
               }
+
               img {
                 position: absolute;
                 right: -20px;
@@ -483,6 +480,7 @@ export default defineComponent({
               }
             }
           }
+
           &.is-center {
             .cell {
               padding: 0px 10px;
