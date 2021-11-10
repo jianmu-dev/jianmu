@@ -305,7 +305,7 @@ export default defineComponent({
 .node-library-manager {
   padding: 16px 20px 25px 16px;
   background-color: #ffffff;
-  height: calc(100vh - 155px);
+  height: calc(100vh - 185px);
   .right-top-btn {
     position: fixed;
     right: 20px;
