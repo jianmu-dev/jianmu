@@ -397,6 +397,11 @@ public class DslParser {
     }
 
     private void checkNode(String nodeName, Map<?, ?> node) {
+        // 如果为Shell Node，不校验type
+        var image = node.get("image");
+        if (image != null) {
+            return;
+        }
         var type = node.get("type");
         if (null == type) {
             throw new DslException("Node type未设置");
