@@ -50,6 +50,9 @@ public class TriggerEvent {
     }
 
     public List<TriggerEventParameter> getParameters() {
+        if (parameters == null) {
+            return List.of();
+        }
         return parameters;
     }
 
