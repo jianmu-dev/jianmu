@@ -1,8 +1,8 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.internal.EmbeddedWorkerApplication;
-import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
-import dev.jianmu.hub.intergration.event.NodeUpdatedEvent;
+import dev.jianmu.node.definition.event.NodeDeletedEvent;
+import dev.jianmu.node.definition.event.NodeUpdatedEvent;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;

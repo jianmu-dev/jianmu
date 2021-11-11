@@ -34,8 +34,6 @@ public class TaskInstance extends AggregateRoot {
     private LocalDateTime endTime;
     // 任务运行状态
     private InstanceStatus status = InstanceStatus.WAITING;
-    // 输出结果文件
-    private String resultFile;
 
     private TaskInstance() {
     }
@@ -44,8 +42,7 @@ public class TaskInstance extends AggregateRoot {
         this.status = InstanceStatus.RUNNING;
     }
 
-    public void executeSucceeded(String resultFile) {
-        this.resultFile = resultFile;
+    public void executeSucceeded() {
         this.status = InstanceStatus.EXECUTION_SUCCEEDED;
         this.endTime = LocalDateTime.now();
     }
@@ -106,10 +103,6 @@ public class TaskInstance extends AggregateRoot {
 
     public InstanceStatus getStatus() {
         return status;
-    }
-
-    public String getResultFile() {
-        return resultFile;
     }
 
     public static final class Builder {

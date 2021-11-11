@@ -1,6 +1,6 @@
-package dev.jianmu.hub.intergration.repository;
+package dev.jianmu.node.definition.repository;
 
-import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
+import dev.jianmu.node.definition.aggregate.NodeDefinition;
 
 import java.util.Optional;
 

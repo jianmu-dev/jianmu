@@ -3,6 +3,7 @@ package dev.jianmu.api.query;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.service.HubApplication;
+import dev.jianmu.node.definition.aggregate.ShellNode;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -40,5 +41,10 @@ public class NodeDefApiImpl implements NodeDefApi {
     @Override
     public NodeDef getByType(String type) {
         return this.hubApplication.getByType(type);
+    }
+
+    @Override
+    public void addShellNodes(List<ShellNode> shellNodes) {
+        this.hubApplication.addShellNodes(shellNodes);
     }
 }
