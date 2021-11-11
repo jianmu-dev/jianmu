@@ -25,10 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -121,6 +118,14 @@ public class ViewController {
     public TargetEventVo findTargetEvent(@PathVariable String triggerId) {
         var targetEvent = this.eventBridgeApplication.findTargetEvent(triggerId);
         return TargetEventMapper.INSTANCE.toTargetEventVo(targetEvent);
+    }
+
+    @GetMapping("/trigger/webhook/{projectId}")
+    @ResponseBody
+    @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
+    public WebhookVo getWebhookUrl(@PathVariable String projectId) {
+        var webhook = this.triggerApplication.getWebhookUrl(projectId);
+        return WebhookVo.builder().webhook(webhook).build();
     }
 
     @GetMapping("/trigger_events/{triggerId}")

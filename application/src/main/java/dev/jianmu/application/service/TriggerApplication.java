@@ -104,14 +104,21 @@ public class TriggerApplication {
             List<Parameter> parameters,
             String payload
     ) {
+        // 过滤SECRET类型参数不保存
+        var eventParametersClean = eventParameters.stream()
+                .filter(triggerEventParameter -> !triggerEventParameter.getType().equals("SECRET"))
+                .collect(Collectors.toList());
+        var parametersClean = parameters.stream()
+                .filter(parameter -> !(parameter.getType() == Parameter.Type.SECRET))
+                .collect(Collectors.toList());
         var event = TriggerEvent.Builder.aTriggerEvent()
                 .triggerId(trigger.getId())
                 .projectId(trigger.getProjectId())
                 .payload(payload)
-                .parameters(eventParameters)
+                .parameters(eventParametersClean)
                 .triggerType(trigger.getType().name())
                 .build();
-        this.parameterRepository.addAll(parameters);
+        this.parameterRepository.addAll(parametersClean);
         this.triggerEventRepository.save(event);
         this.publisher.publishEvent(event);
     }
@@ -256,6 +263,12 @@ public class TriggerApplication {
         return event;
     }
 
+    public String getWebhookUrl(String projectId) {
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        return "/webhook/" + project.getWorkflowName();
+    }
+
     public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
         var payload = this.createPayload(request, contentType);
         var project = this.projectRepository.findByName(projectName)
@@ -291,7 +304,7 @@ public class TriggerApplication {
             var authToken = this.calculateExp(auth.getToken(), context);
             var authValue = this.findSecret(auth.getValue());
             if (authToken.getType() != Parameter.Type.STRING) {
-                log.warn("Auth Token的值必须为字符串");
+                log.warn("Auth Token表达式计算错误");
                 return;
             }
             if (!authToken.getValue().equals(authValue)) {
@@ -332,6 +345,11 @@ public class TriggerApplication {
     }
 
     private Parameter<?> calculateExp(String exp, EvaluationContext context) {
+        // 密钥类型单独处理
+        var secret = this.isSecret(exp);
+        if (secret != null) {
+            return Parameter.Type.SECRET.newParameter(secret);
+        }
         String el;
         if (isEl(exp)) {
             el = exp;
