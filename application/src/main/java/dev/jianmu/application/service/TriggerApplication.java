@@ -9,6 +9,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.quartz.PublishJob;
 import dev.jianmu.project.repository.ProjectRepository;
+import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.event.TriggerEvent;
@@ -55,6 +56,7 @@ public class TriggerApplication {
     private final TriggerEventRepository triggerEventRepository;
     private final ParameterRepository parameterRepository;
     private final ProjectRepository projectRepository;
+    private final CredentialManager credentialManager;
     private final Scheduler quartzScheduler;
     private final ApplicationEventPublisher publisher;
     private final ObjectMapper objectMapper;
@@ -66,6 +68,7 @@ public class TriggerApplication {
             TriggerEventRepository triggerEventRepository,
             ParameterRepository parameterRepository,
             ProjectRepository projectRepository,
+            CredentialManager credentialManager,
             Scheduler quartzScheduler,
             ApplicationEventPublisher publisher,
             ObjectMapper objectMapper,
@@ -74,6 +77,7 @@ public class TriggerApplication {
         this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
         this.projectRepository = projectRepository;
+        this.credentialManager = credentialManager;
         this.quartzScheduler = quartzScheduler;
         this.publisher = publisher;
         this.objectMapper = objectMapper;
@@ -282,27 +286,63 @@ public class TriggerApplication {
             context.add("trigger", eventParameter.getName(), parameter);
         });
         // 验证Auth
+        if (webhook.getAuth() != null) {
+            var auth = webhook.getAuth();
+            var authToken = this.calculateExp(auth.getToken(), context);
+            var authValue = this.findSecret(auth.getValue());
+            if (authToken.getType() != Parameter.Type.STRING) {
+                log.warn("Auth Token的值必须为字符串");
+                return;
+            }
+            if (!authToken.getValue().equals(authValue)) {
+                log.warn("Webhook密钥不匹配");
+                return;
+            }
+        }
         // 验证Matcher
-        var res = this.calculateMatcher(webhook.getMatcher(), context);
-        if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
-            log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
-            return;
+        if (webhook.getMatcher() != null) {
+            var res = this.calculateExp(webhook.getMatcher(), context);
+            if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
+                log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
+                return;
+            }
         }
         this.trigger(trigger, eventParameters, parameters, payload);
     }
 
-    private Parameter<?> calculateMatcher(String matcher, EvaluationContext context) {
+    private String findSecret(String secretExp) {
+        var secret = this.isSecret(secretExp);
+        if (secret == null) {
+            throw new IllegalArgumentException("密钥参数格式错误：" + secretExp);
+        }
+        // 处理密钥类型参数, 获取值后转换为String类型参数
+        var strings = secret.split("\\.");
+        var kv = this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1])
+                .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
+        return kv.getValue();
+    }
+
+    private String isSecret(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(\\(([a-zA-Z0-9_-]+\\.*[a-zA-Z0-9_-]+)\\)\\)$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private Parameter<?> calculateExp(String exp, EvaluationContext context) {
         String el;
-        if (isEl(matcher)) {
-            el = matcher;
+        if (isEl(exp)) {
+            el = exp;
         } else {
-            el = "`" + matcher + "`";
+            el = "`" + exp + "`";
         }
         // 计算参数表达式
         Expression expression = expressionLanguage.parseExpression(el);
         EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
         if (evaluationResult.isFailure()) {
-            var errorMsg = "Matcher：" + matcher +
+            var errorMsg = "表达式：" + exp +
                     " 计算错误: " + evaluationResult.getFailureMessage();
             throw new RuntimeException(errorMsg);
         }
