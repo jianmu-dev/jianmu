@@ -16,6 +16,8 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
+import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.event.TaskActivatingEvent;
@@ -43,7 +45,7 @@ public class TaskInstanceInternalApplication {
     private final InstanceDomainService instanceDomainService;
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
-    private final TargetEventRepository targetEventRepository;
+    private final TriggerEventRepository triggerEventRepository;
     private final InstanceParameterRepository instanceParameterRepository;
     private final NodeDefApi nodeDefApi;
     private final ExpressionLanguage expressionLanguage;
@@ -54,7 +56,7 @@ public class TaskInstanceInternalApplication {
             InstanceDomainService instanceDomainService,
             ParameterRepository parameterRepository,
             ParameterDomainService parameterDomainService,
-            TargetEventRepository targetEventRepository,
+            TriggerEventRepository triggerEventRepository,
             InstanceParameterRepository instanceParameterRepository,
             NodeDefApi nodeDefApi,
             ExpressionLanguage expressionLanguage
@@ -64,7 +66,7 @@ public class TaskInstanceInternalApplication {
         this.instanceDomainService = instanceDomainService;
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
-        this.targetEventRepository = targetEventRepository;
+        this.triggerEventRepository = triggerEventRepository;
         this.instanceParameterRepository = instanceParameterRepository;
         this.nodeDefApi = nodeDefApi;
         this.expressionLanguage = expressionLanguage;
@@ -109,9 +111,9 @@ public class TaskInstanceInternalApplication {
                 .triggerId(event.getTriggerId())
                 .build();
         // 查询参数源
-        var eventParameters = this.targetEventRepository.findById(event.getTriggerId())
-                .map(TargetEvent::getEventParameters)
-                .orElseGet(Set::of);
+        var eventParameters = this.triggerEventRepository.findById(event.getTriggerId())
+                .map(TriggerEvent::getParameters)
+                .orElseGet(List::of);
         var instanceParameters = this.instanceParameterRepository
                 .findOutputParamByBusinessIdAndTriggerId(event.getWorkflowInstanceId(), event.getTriggerId());
         // 创建表达式上下文
@@ -130,7 +132,7 @@ public class TaskInstanceInternalApplication {
         var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
         // 事件参数scope为event
-        eventMap.forEach((key, val) -> context.add("event", key, val));
+        eventMap.forEach((key, val) -> context.add("trigger", key, val));
         // 任务输出参数加入上下文
         Map<String, String> outParams = new HashMap<>();
         instanceParameters.forEach(instanceParameter -> {

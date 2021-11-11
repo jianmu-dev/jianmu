@@ -40,8 +40,8 @@ public class TriggerEventHandler {
     @EventListener
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 触发项目模块
-        log.info("Got TriggerEvent: {} at: {}", triggerEvent, LocalDateTime.now());
-        this.projectApplication.trigger(triggerEvent.getProjectId(), triggerEvent.getTriggerId(), triggerEvent.getType());
+        log.info("Got TriggerEvent: {} at: {}", triggerEvent, triggerEvent.getOccurredTime());
+        this.projectApplication.trigger(triggerEvent.getProjectId(), triggerEvent.getId(), triggerEvent.getTriggerType());
     }
 
     @TransactionalEventListener

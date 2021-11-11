@@ -1,18 +1,46 @@
 package dev.jianmu.application.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.quartz.PublishJob;
+import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.trigger.event.TriggerEventParameter;
+import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.repository.TriggerRepository;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.el.EvaluationContext;
+import dev.jianmu.workflow.el.EvaluationResult;
+import dev.jianmu.workflow.el.Expression;
+import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.repository.ParameterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * @class: TriggerApplication
@@ -24,24 +52,64 @@ import java.text.SimpleDateFormat;
 @Slf4j
 public class TriggerApplication {
     private final TriggerRepository triggerRepository;
+    private final TriggerEventRepository triggerEventRepository;
+    private final ParameterRepository parameterRepository;
+    private final ProjectRepository projectRepository;
     private final Scheduler quartzScheduler;
     private final ApplicationEventPublisher publisher;
+    private final ObjectMapper objectMapper;
+    // 表达式计算服务
+    private final ExpressionLanguage expressionLanguage;
 
-    public TriggerApplication(TriggerRepository triggerRepository, Scheduler quartzScheduler, ApplicationEventPublisher publisher) {
+    public TriggerApplication(
+            TriggerRepository triggerRepository,
+            TriggerEventRepository triggerEventRepository,
+            ParameterRepository parameterRepository,
+            ProjectRepository projectRepository,
+            Scheduler quartzScheduler,
+            ApplicationEventPublisher publisher,
+            ObjectMapper objectMapper,
+            ExpressionLanguage expressionLanguage) {
         this.triggerRepository = triggerRepository;
+        this.triggerEventRepository = triggerEventRepository;
+        this.parameterRepository = parameterRepository;
+        this.projectRepository = projectRepository;
         this.quartzScheduler = quartzScheduler;
         this.publisher = publisher;
+        this.objectMapper = objectMapper;
+        this.expressionLanguage = expressionLanguage;
     }
 
+    @Transactional
     public void trigger(String triggerId) {
         var trigger = this.triggerRepository.findByTriggerId(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
         var evt = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(trigger.getProjectId())
                 .triggerId(trigger.getId())
-                .type(trigger.getType().name())
+                .triggerType(trigger.getType().name())
                 .build();
+        this.triggerEventRepository.save(evt);
         this.publisher.publishEvent(evt);
+    }
+
+    @Transactional
+    public void trigger(
+            Trigger trigger,
+            List<TriggerEventParameter> eventParameters,
+            List<Parameter> parameters,
+            String payload
+    ) {
+        var event = TriggerEvent.Builder.aTriggerEvent()
+                .triggerId(trigger.getId())
+                .projectId(trigger.getProjectId())
+                .payload(payload)
+                .parameters(eventParameters)
+                .triggerType(trigger.getType().name())
+                .build();
+        this.parameterRepository.addAll(parameters);
+        this.triggerEventRepository.save(event);
+        this.publisher.publishEvent(event);
     }
 
     @Transactional
@@ -176,5 +244,153 @@ public class TriggerApplication {
                 .withIdentity(JobKey.jobKey(trigger.getId()))
                 .ofType(PublishJob.class)
                 .build();
+    }
+
+    public TriggerEvent findTriggerEvent(String triggerEventId) {
+        var event = this.triggerEventRepository.findById(triggerEventId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该触发事件"));
+        return event;
+    }
+
+    public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
+        var payload = this.createPayload(request, contentType);
+        var project = this.projectRepository.findByName(projectName)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目: " + projectName));
+        var trigger = this.triggerRepository.findByProjectId(project.getId())
+                .orElseThrow(() -> new DataNotFoundException("项目：" + projectName + " 未找到触发器"));
+        if (trigger.getType() != Trigger.Type.WEBHOOK) {
+            throw new IllegalArgumentException("项目：" + projectName + "触发器类型错误");
+        }
+        // 创建表达式上下文
+        var context = new ElContext();
+        // 提取参数
+        var webhook = trigger.getWebhook();
+        List<TriggerEventParameter> eventParameters = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
+        webhook.getParam().forEach(webhookParameter -> {
+            Parameter<?> parameter = Parameter.Type
+                    .getTypeByName(webhookParameter.getType())
+                    .newParameter(this.extractParameter(payload, webhookParameter.getExp()));
+            var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                    .name(webhookParameter.getName())
+                    .type(webhookParameter.getType())
+                    .value(parameter.getStringValue())
+                    .parameterId(parameter.getId())
+                    .build();
+            parameters.add(parameter);
+            eventParameters.add(eventParameter);
+            context.add("trigger", eventParameter.getName(), parameter);
+        });
+        // 验证Auth
+        // 验证Matcher
+        var res = this.calculateMatcher(webhook.getMatcher(), context);
+        if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
+            log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
+            return;
+        }
+        this.trigger(trigger, eventParameters, parameters, payload);
+    }
+
+    private Parameter<?> calculateMatcher(String matcher, EvaluationContext context) {
+        String el;
+        if (isEl(matcher)) {
+            el = matcher;
+        } else {
+            el = "`" + matcher + "`";
+        }
+        // 计算参数表达式
+        Expression expression = expressionLanguage.parseExpression(el);
+        EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
+        if (evaluationResult.isFailure()) {
+            var errorMsg = "Matcher：" + matcher +
+                    " 计算错误: " + evaluationResult.getFailureMessage();
+            throw new RuntimeException(errorMsg);
+        }
+        return evaluationResult.getValue();
+    }
+
+    private boolean isEl(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(");
+        Matcher matcher = pattern.matcher(paramValue);
+        return matcher.lookingAt();
+    }
+
+    private Object extractParameter(String payload, String exp) {
+        Object document = Configuration.defaultConfiguration().jsonProvider().parse(payload);
+        try {
+            return JsonPath.read(document, exp);
+        } catch (PathNotFoundException e) {
+            return null;
+        }
+    }
+
+    private String createPayload(HttpServletRequest request, String contentType) {
+        // Get body
+        String body = null;
+        try {
+            body = request.getReader()
+                    .lines()
+                    .collect(Collectors.joining(System.lineSeparator()));
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        // Create root node
+        var root = this.objectMapper.createObjectNode();
+        // Headers node
+        Map<String, List<String>> headers = Collections.list(request.getHeaderNames())
+                .stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        h -> Collections.list(request.getHeaders(h))
+                ));
+        var headerNode = root.putObject("header");
+        headers.forEach((key, value) -> {
+            var item = headerNode.putArray(key);
+            value.forEach(item::add);
+        });
+        // Query String node
+        var url = request.getRequestURL().toString();
+        var queryString = request.getQueryString();
+        MultiValueMap<String, String> parameters =
+                UriComponentsBuilder.fromUriString(url + "?" + queryString).build().getQueryParams();
+        var queryNode = root.putObject("query");
+        parameters.forEach((key, value) -> {
+            var item = queryNode.putArray(key);
+            value.forEach(item::add);
+        });
+        // Body node
+        var bodyNode = root.putObject("body");
+        // Body Json node
+        if (contentType.startsWith("application/json")) {
+            try {
+                var bodyJson = this.objectMapper.readTree(body);
+                bodyNode.set("json", bodyJson);
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Body格式错误");
+            }
+        }
+        // Body Form node
+        if (contentType.startsWith("application/x-www-form-urlencoded")) {
+            var formNode = bodyNode.putObject("form");
+            var formMap = Pattern.compile("&")
+                    .splitAsStream(body)
+                    .map(s -> Arrays.copyOf(s.split("=", 2), 2))
+                    .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
+            formMap.forEach((key, value) -> {
+                var item = formNode.putArray(key);
+                value.forEach(item::add);
+            });
+        }
+        // Body Text node
+        if (contentType.startsWith("text/plain")) {
+            bodyNode.put("text", body);
+        }
+        return root.toString();
+    }
+
+    private static String decode(final String encoded) {
+        return Optional.ofNullable(encoded)
+                .map(e -> URLDecoder.decode(e, StandardCharsets.UTF_8))
+                .orElse(null);
     }
 }

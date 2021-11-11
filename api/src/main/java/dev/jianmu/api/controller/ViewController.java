@@ -16,6 +16,7 @@ import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
@@ -120,6 +121,12 @@ public class ViewController {
     public TargetEventVo findTargetEvent(@PathVariable String triggerId) {
         var targetEvent = this.eventBridgeApplication.findTargetEvent(triggerId);
         return TargetEventMapper.INSTANCE.toTargetEventVo(targetEvent);
+    }
+
+    @GetMapping("/trigger_events/{triggerId}")
+    @Operation(summary = "查询触发事件", description = "查询触发事件")
+    public TriggerEvent findTriggerEvent(@PathVariable String triggerId) {
+        return this.triggerApplication.findTriggerEvent(triggerId);
     }
 
     @GetMapping("/event_bridges/templates")

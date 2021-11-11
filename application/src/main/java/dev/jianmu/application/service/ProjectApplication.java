@@ -152,6 +152,7 @@ public class ProjectApplication {
         // 创建Webhook触发器
         if (null != parser.getWebhook()) {
             var webhook = Webhook.Builder.aWebhook()
+                    .matcher(parser.getWebhook().getMatcher())
                     .auth(parser.getWebhook().getAuth())
                     .param(parser.getWebhook().getParam())
                     .build();
@@ -199,6 +200,7 @@ public class ProjectApplication {
         // 创建Webhook触发器
         if (null != parser.getWebhook()) {
             var webhook = Webhook.Builder.aWebhook()
+                    .matcher(parser.getWebhook().getMatcher())
                     .auth(parser.getWebhook().getAuth())
                     .param(parser.getWebhook().getParam())
                     .build();
@@ -245,6 +247,7 @@ public class ProjectApplication {
         // 创建Webhook触发器
         if (null != parser.getWebhook()) {
             var webhook = Webhook.Builder.aWebhook()
+                    .matcher(parser.getWebhook().getMatcher())
                     .auth(parser.getWebhook().getAuth())
                     .param(parser.getWebhook().getParam())
                     .build();
@@ -289,6 +292,7 @@ public class ProjectApplication {
         // 创建Webhook触发器
         if (null != parser.getWebhook()) {
             var webhook = Webhook.Builder.aWebhook()
+                    .matcher(parser.getWebhook().getMatcher())
                     .auth(parser.getWebhook().getAuth())
                     .param(parser.getWebhook().getParam())
                     .build();

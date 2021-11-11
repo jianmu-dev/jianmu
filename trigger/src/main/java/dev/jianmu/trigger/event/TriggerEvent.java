@@ -1,5 +1,9 @@
 package dev.jianmu.trigger.event;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
 /**
  * @class: TriggerEvent
  * @description: TriggerEvent
@@ -7,26 +11,55 @@ package dev.jianmu.trigger.event;
  * @create: 2021-05-25 08:25
  **/
 public class TriggerEvent {
-    private String triggerId;
+    private String id;
     private String projectId;
-    private String type;
+    private String triggerId;
+    private String triggerType;
+    // Payload
+    private String payload;
+    // 触发时间
+    private LocalDateTime occurredTime;
+    private List<TriggerEventParameter> parameters;
 
-    public String getTriggerId() {
-        return triggerId;
+    public void setParameters(List<TriggerEventParameter> parameters) {
+        this.parameters = parameters;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getProjectId() {
         return projectId;
     }
 
-    public String getType() {
-        return type;
+    public String getTriggerId() {
+        return triggerId;
+    }
+
+    public String getTriggerType() {
+        return triggerType;
+    }
+
+    public String getPayload() {
+        return payload;
+    }
+
+    public LocalDateTime getOccurredTime() {
+        return occurredTime;
+    }
+
+    public List<TriggerEventParameter> getParameters() {
+        return parameters;
     }
 
     public static final class Builder {
-        private String triggerId;
         private String projectId;
-        private String type;
+        private String triggerId;
+        private String triggerType;
+        // Payload
+        private String payload;
+        private List<TriggerEventParameter> parameters;
 
         private Builder() {
         }
@@ -35,26 +68,40 @@ public class TriggerEvent {
             return new Builder();
         }
 
-        public Builder triggerId(String triggerId) {
-            this.triggerId = triggerId;
-            return this;
-        }
-
         public Builder projectId(String projectId) {
             this.projectId = projectId;
             return this;
         }
 
-        public Builder type(String type) {
-            this.type = type;
+        public Builder triggerId(String triggerId) {
+            this.triggerId = triggerId;
+            return this;
+        }
+
+        public Builder triggerType(String triggerType) {
+            this.triggerType = triggerType;
+            return this;
+        }
+
+        public Builder payload(String payload) {
+            this.payload = payload;
+            return this;
+        }
+
+        public Builder parameters(List<TriggerEventParameter> parameters) {
+            this.parameters = parameters;
             return this;
         }
 
         public TriggerEvent build() {
             TriggerEvent triggerEvent = new TriggerEvent();
+            triggerEvent.id = UUID.randomUUID().toString().replace("-", "");
+            triggerEvent.occurredTime = LocalDateTime.now();
+            triggerEvent.parameters = this.parameters;
             triggerEvent.projectId = this.projectId;
             triggerEvent.triggerId = this.triggerId;
-            triggerEvent.type = this.type;
+            triggerEvent.triggerType = this.triggerType;
+            triggerEvent.payload = this.payload;
             return triggerEvent;
         }
     }
@@ -62,8 +109,12 @@ public class TriggerEvent {
     @Override
     public String toString() {
         return "TriggerEvent{" +
-                "triggerId='" + triggerId + '\'' +
+                "id='" + id + '\'' +
                 ", projectId='" + projectId + '\'' +
+                ", triggerId='" + triggerId + '\'' +
+                ", triggerType='" + triggerType + '\'' +
+                ", occurredTime=" + occurredTime +
+                ", parameters=" + parameters +
                 '}';
     }
 }
