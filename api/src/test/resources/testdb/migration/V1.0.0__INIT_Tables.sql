@@ -27,6 +27,26 @@ CREATE TABLE `jianmu_trigger`
     PRIMARY KEY (`id`)
 );
 
+CREATE TABLE `jianmu_trigger_event`
+(
+    `id`            varchar(45) NOT NULL COMMENT '事件ID',
+    `project_id`    varchar(45) NOT NULL COMMENT '项目ID',
+    `trigger_id`    varchar(45) NOT NULL COMMENT '触发器ID',
+    `trigger_type`  varchar(45) NOT NULL COMMENT '触发器类型',
+    `payload`       text        NOT NULL COMMENT '事件载荷',
+    `occurred_time` datetime    NOT NULL COMMENT '触发时间',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `jianmu_trigger_event_parameter`
+(
+    `trigger_event_id` varchar(45) NOT NULL COMMENT '触发器事件ID',
+    `name`             varchar(45) NOT NULL COMMENT '参数名',
+    `type`             varchar(45) NOT NULL COMMENT '参数类型',
+    `value`            varchar(45) NOT NULL COMMENT '参数值',
+    `parameter_id`     varchar(45) NOT NULL COMMENT '参数引用ID'
+);
+
 CREATE TABLE `git_repo`
 (
     `id`                    varchar(45) NOT NULL COMMENT 'ID',
