@@ -10,8 +10,8 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.eventbridge.aggregate.Bridge;
 import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -211,6 +211,7 @@ public class ViewController {
                         projectVo.setStatus("SUCCEEDED");
                     }
                     if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
+                        projectVo.setStartTime(workflowInstance.getStartTime());
                         projectVo.setStatus("RUNNING");
                     }
                     return projectVo;
