@@ -13,26 +13,19 @@ export const MAX_LABEL_LENGTH = 10;
 
 /**
  * 解析webhook节点
- * @param eb
  * @param nodes
  * @param edges
  * @param isWorkflow
  */
-function parseWebhook(eb: string | undefined, nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
-  if (!eb) {
-    // 不存在时，忽略
-    return;
-  }
-
-  const key = eb;
-  const label = key.length > MAX_LABEL_LENGTH ? `${key.substr(0, MAX_LABEL_LENGTH)}...` : key;
-  const description = eb;
+function parseWebhook(nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
+  const key = 'webhook';
+  const label = key;
   const type = NodeTypeEnum.WEBHOOK;
 
   nodes.push({
     id: key,
     label,
-    description,
+    description: key,
     type,
   });
 
@@ -66,7 +59,7 @@ function parseCron(cron: string | undefined, nodes: NodeConfig[], edges: EdgeCon
 
   const key = NodeTypeEnum.CRON;
   // const label = cron.length > MAX_LABEL_LENGTH ? `${cron.substr(0, MAX_LABEL_LENGTH)}...` : cron;
-  const label = 'Cron';
+  const label = 'cron';
   const description = cron;
   const type = NodeTypeEnum.CRON;
 
@@ -240,7 +233,7 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
     return { nodes: [], edges: [] };
   }
 
-  const { eb, cron, workflow, pipeline } = yaml.parse(dsl);
+  const { trigger, workflow, pipeline } = yaml.parse(dsl);
 
   // 解析workflow节点
   const { nodes, edges } = workflow ? parseWorkflow(workflow) : parsePipeline(pipeline);
@@ -248,11 +241,12 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
   switch (triggerType) {
     case TriggerTypeEnum.CRON:
       // 解析cron节点
-      parseCron(cron, nodes, edges, !!workflow);
+      parseCron(trigger.schedule, nodes, edges, !!workflow);
       break;
     case TriggerTypeEnum.EVENT_BRIDGE:
+    case TriggerTypeEnum.WEBHOOK:
       // 解析webhook节点
-      parseWebhook(eb, nodes, edges, !!workflow);
+      parseWebhook(nodes, edges, !!workflow);
       break;
   }
 

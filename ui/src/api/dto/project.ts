@@ -17,7 +17,6 @@ export interface IProjectSavingDto extends Readonly<{
 }> {
 }
 
-
 /**
  * 克隆Git库dto
  */
@@ -94,14 +93,6 @@ export interface IProjectDetailVo extends Readonly<BaseVo & {
   dslText: string;
   eventBridgeId?: string;
   triggerType: TriggerTypeEnum;
-}> {
-}
-
-/**
- * 项目webhook vo
- */
-export interface IProjectWebhookVo extends Readonly<{
-  webhook: string;
 }> {
 }
 
