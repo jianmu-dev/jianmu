@@ -2,8 +2,6 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
-import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
-import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
@@ -13,6 +11,7 @@ import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
@@ -28,7 +27,10 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -164,6 +166,16 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         // 终止流程
         workflowInstance.terminate();
+        // 同时终止运行中的任务
+        Workflow workflow = this.workflowRepository
+                .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        workflowInstance.getAsyncTaskInstances().stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
+                .forEach(asyncTaskInstance -> {
+                    log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
+                    workflowInstanceDomainService.terminateNode(workflow, workflowInstance, asyncTaskInstance.getAsyncTaskRef());
+                });
         this.workflowInstanceRepository.save(workflowInstance);
     }
 
@@ -211,17 +223,20 @@ public class WorkflowInstanceInternalApplication {
 
     // 任务中止，完成
     @Transactional
-    public WorkflowInstance terminateNode(String instanceId, String nodeRef) {
+    public WorkflowInstance terminateNode(String instanceId) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        instance.setExpressionLanguage(this.expressionLanguage);
+        instance.getAsyncTaskInstances().stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
+                .forEach(asyncTaskInstance -> {
+                    log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
+                    workflowInstanceDomainService.terminateNode(workflow, instance, asyncTaskInstance.getAsyncTaskRef());
+                });
         // 中止节点
-        log.info("terminateNode: " + nodeRef);
-        workflowInstanceDomainService.terminateNode(workflow, instance, nodeRef);
         return this.workflowInstanceRepository.save(instance);
     }
 
@@ -235,7 +250,7 @@ public class WorkflowInstanceInternalApplication {
         var workflowInstance = this.workflowInstanceRepository
                 .findById(taskInstance.getBusinessId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        workflowInstance.taskRun(taskInstance.getAsyncTaskRef());
+        workflowInstance.taskRun(taskInstance.getAsyncTaskRef(), taskInstanceId);
         this.workflowInstanceRepository.save(workflowInstance);
     }
 

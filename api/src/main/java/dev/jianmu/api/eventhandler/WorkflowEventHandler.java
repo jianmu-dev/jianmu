@@ -66,12 +66,18 @@ public class WorkflowEventHandler {
         logger.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleTaskTerminatingEvent(TaskTerminatingEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskTerminatingEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
+        logger.info(event.getNodeType());
+        logger.info(event.getWorkflowInstanceId());
+        logger.info(event.getTriggerId());
+        logger.info(event.getExternalId());
+        this.workerApplication.terminateTask(event.getExternalId());
         logger.info("-----------------------------------------------------");
     }
 
@@ -81,6 +87,10 @@ public class WorkflowEventHandler {
         logger.info("Get TaskRunningEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
+        logger.info(event.getNodeType());
+        logger.info(event.getWorkflowInstanceId());
+        logger.info(event.getTriggerId());
+        logger.info(event.getExternalId());
         logger.info("-----------------------------------------------------");
     }
 
@@ -90,6 +100,10 @@ public class WorkflowEventHandler {
         logger.info("Get TaskSucceededEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
+        logger.info(event.getNodeType());
+        logger.info(event.getWorkflowInstanceId());
+        logger.info(event.getTriggerId());
+        logger.info(event.getExternalId());
         logger.info("-----------------------------------------------------");
     }
 
@@ -99,6 +113,10 @@ public class WorkflowEventHandler {
         logger.info("Get TaskFailedEvent here -------------------------");
         logger.info(event.getName());
         logger.info(event.getNodeRef());
+        logger.info(event.getNodeType());
+        logger.info(event.getWorkflowInstanceId());
+        logger.info(event.getTriggerId());
+        logger.info(event.getExternalId());
         logger.info("-----------------------------------------------------");
         this.workflowInstanceInternalApplication.stop(event.getWorkflowInstanceId());
         this.workerApplication.cleanupWorkspace(event.getTriggerId());

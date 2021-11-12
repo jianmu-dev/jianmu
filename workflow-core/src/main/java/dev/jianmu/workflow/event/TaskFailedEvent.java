@@ -11,6 +11,7 @@ public class TaskFailedEvent extends BaseEvent {
     private TaskFailedEvent() {
     }
 
+
     public static final class Builder {
         // 流程定义唯一引用名称
         protected String workflowRef;
@@ -24,6 +25,8 @@ public class TaskFailedEvent extends BaseEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
+        // 任务外部ID
+        protected String externalId;
 
         private Builder() {
         }
@@ -62,14 +65,20 @@ public class TaskFailedEvent extends BaseEvent {
             return this;
         }
 
+        public Builder externalId(String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
         public TaskFailedEvent build() {
             TaskFailedEvent taskFailedEvent = new TaskFailedEvent();
-            taskFailedEvent.triggerId = this.triggerId;
-            taskFailedEvent.workflowRef = this.workflowRef;
             taskFailedEvent.workflowVersion = this.workflowVersion;
             taskFailedEvent.workflowInstanceId = this.workflowInstanceId;
-            taskFailedEvent.nodeRef = this.nodeRef;
             taskFailedEvent.nodeType = this.nodeType;
+            taskFailedEvent.triggerId = this.triggerId;
+            taskFailedEvent.workflowRef = this.workflowRef;
+            taskFailedEvent.nodeRef = this.nodeRef;
+            taskFailedEvent.externalId = this.externalId;
             return taskFailedEvent;
         }
     }

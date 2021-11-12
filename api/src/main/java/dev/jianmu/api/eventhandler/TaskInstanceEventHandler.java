@@ -103,20 +103,4 @@ public class TaskInstanceEventHandler {
         logger.info("get TaskInstanceFailedEvent: {}", event);
         this.workflowInstanceInternalApplication.taskFail(event.getTaskInstanceId());
     }
-
-    @EventListener
-    @Async
-    public void handleApplicationReadyEvent(ApplicationReadyEvent event) {
-        var taskInstances = this.taskInstanceInternalApplication.findRunningTask();
-        logger.info("恢复仍在运行中的任务数量：{}", taskInstances.size());
-        taskInstances.forEach(taskInstance -> {
-            try {
-                this.workerApplication.dispatchTask(taskInstance, true);
-                logger.info("Task instance id: {}  ref: {} is resumed", taskInstance.getId(), taskInstance.getAsyncTaskRef());
-            } catch (Exception e) {
-                logger.warn("Task instance id: {}  ref: {} is resume failed, due to: {}", taskInstance.getId(), taskInstance.getAsyncTaskRef(), e.getMessage());
-                this.taskInstanceInternalApplication.executeFailed(taskInstance.getId());
-            }
-        });
-    }
 }

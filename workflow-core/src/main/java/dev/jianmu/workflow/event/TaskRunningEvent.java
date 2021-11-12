@@ -24,6 +24,8 @@ public class TaskRunningEvent extends BaseEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
+        // 任务外部ID
+        protected String externalId;
 
         private Builder() {
         }
@@ -62,14 +64,20 @@ public class TaskRunningEvent extends BaseEvent {
             return this;
         }
 
+        public Builder externalId(String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
         public TaskRunningEvent build() {
             TaskRunningEvent taskRunningEvent = new TaskRunningEvent();
-            taskRunningEvent.triggerId = this.triggerId;
-            taskRunningEvent.workflowRef = this.workflowRef;
             taskRunningEvent.workflowVersion = this.workflowVersion;
             taskRunningEvent.workflowInstanceId = this.workflowInstanceId;
-            taskRunningEvent.nodeRef = this.nodeRef;
             taskRunningEvent.nodeType = this.nodeType;
+            taskRunningEvent.triggerId = this.triggerId;
+            taskRunningEvent.workflowRef = this.workflowRef;
+            taskRunningEvent.nodeRef = this.nodeRef;
+            taskRunningEvent.externalId = this.externalId;
             return taskRunningEvent;
         }
     }
