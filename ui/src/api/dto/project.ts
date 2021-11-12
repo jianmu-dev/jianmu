@@ -97,6 +97,14 @@ export interface IProjectDetailVo extends Readonly<BaseVo & {
 }
 
 /**
+ * 项目webhook vo
+ */
+export interface IProjectWebhookVo extends Readonly<{
+  webhook: string;
+}> {
+}
+
+/**
  * 流程模板vo
  */
 export interface IProcessTemplateVo extends Readonly<{
