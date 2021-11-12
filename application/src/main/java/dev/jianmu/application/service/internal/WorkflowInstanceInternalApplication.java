@@ -21,6 +21,7 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
@@ -165,6 +166,7 @@ public class WorkflowInstanceInternalApplication {
                 .findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         // 终止流程
+        MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
         // 同时终止运行中的任务
         Workflow workflow = this.workflowRepository
