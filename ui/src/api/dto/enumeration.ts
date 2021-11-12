@@ -66,6 +66,7 @@ export enum TaskParamTypeEnum {
  */
 export enum TriggerTypeEnum {
   EVENT_BRIDGE = 'EVENT_BRIDGE',
+  WEBHOOK = 'WEBHOOK',
   CRON = 'CRON',
   MANUAL = 'MANUAL',
 }
