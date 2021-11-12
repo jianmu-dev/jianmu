@@ -21,6 +21,7 @@ import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.event.TaskActivatingEvent;
+import dev.jianmu.workflow.event.TaskTerminatingEvent;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
@@ -160,56 +161,10 @@ public class TaskInstanceInternalApplication {
         this.taskInstanceRepository.add(taskInstance);
     }
 
-    private Set<InstanceParameter> createInstanceParameters(
-            Map<String, Parameter<?>> parameterMap,
-            TaskInstance taskInstance,
-            String workflowType,
-            Set<NodeParameter> nodeParameters
-    ) {
-        var instanceParameters = parameterMap.entrySet().stream()
-                .filter(entry ->
-                        nodeParameters.stream()
-                                .anyMatch(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
-                )
-                .map(entry ->
-                        InstanceParameter.Builder.anInstanceParameter()
-                                .instanceId(taskInstance.getId())
-                                .triggerId(taskInstance.getTriggerId())
-                                .defKey(taskInstance.getDefKey())
-                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                                .businessId(taskInstance.getBusinessId())
-                                .ref(entry.getKey())
-                                .parameterId(entry.getValue().getId())
-                                .required(nodeParameters.stream()
-                                        .filter(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
-                                        .findFirst()
-                                        .map(NodeParameter::getRequired)
-                                        .orElse(false)
-                                )
-                                .type(InstanceParameter.Type.INPUT)
-                                .workflowType(workflowType)
-                                .build()
-                ).collect(Collectors.toSet());
-        // 合并节点定义的默认参数与DSL中指定的参数
-        nodeParameters.forEach(nodeParameter -> {
-            // 如果不存在则使用默认参数
-            if (!parameterMap.containsKey(nodeParameter.getRef())) {
-                var p = InstanceParameter.Builder.anInstanceParameter()
-                        .instanceId(taskInstance.getId())
-                        .triggerId(taskInstance.getTriggerId())
-                        .defKey(taskInstance.getDefKey())
-                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                        .businessId(taskInstance.getBusinessId())
-                        .ref(nodeParameter.getRef())
-                        .parameterId(nodeParameter.getParameterId())
-                        .type(InstanceParameter.Type.INPUT)
-                        .required(nodeParameter.getRequired())
-                        .workflowType(workflowType)
-                        .build();
-                instanceParameters.add(p);
-            }
-        });
-        return instanceParameters;
+    @Transactional
+    public void terminate(String instanceId) {
+        var taskInstance = this.taskInstanceRepository.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到要终止的任务"));
     }
 
     @Transactional
@@ -270,6 +225,58 @@ public class TaskInstanceInternalApplication {
             log.error("Json转换", e);
             throw new IllegalArgumentException("任务结果文件格式错误");
         }
+    }
+
+    private Set<InstanceParameter> createInstanceParameters(
+            Map<String, Parameter<?>> parameterMap,
+            TaskInstance taskInstance,
+            String workflowType,
+            Set<NodeParameter> nodeParameters
+    ) {
+        var instanceParameters = parameterMap.entrySet().stream()
+                .filter(entry ->
+                        nodeParameters.stream()
+                                .anyMatch(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
+                )
+                .map(entry ->
+                        InstanceParameter.Builder.anInstanceParameter()
+                                .instanceId(taskInstance.getId())
+                                .triggerId(taskInstance.getTriggerId())
+                                .defKey(taskInstance.getDefKey())
+                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                                .businessId(taskInstance.getBusinessId())
+                                .ref(entry.getKey())
+                                .parameterId(entry.getValue().getId())
+                                .required(nodeParameters.stream()
+                                        .filter(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
+                                        .findFirst()
+                                        .map(NodeParameter::getRequired)
+                                        .orElse(false)
+                                )
+                                .type(InstanceParameter.Type.INPUT)
+                                .workflowType(workflowType)
+                                .build()
+                ).collect(Collectors.toSet());
+        // 合并节点定义的默认参数与DSL中指定的参数
+        nodeParameters.forEach(nodeParameter -> {
+            // 如果不存在则使用默认参数
+            if (!parameterMap.containsKey(nodeParameter.getRef())) {
+                var p = InstanceParameter.Builder.anInstanceParameter()
+                        .instanceId(taskInstance.getId())
+                        .triggerId(taskInstance.getTriggerId())
+                        .defKey(taskInstance.getDefKey())
+                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                        .businessId(taskInstance.getBusinessId())
+                        .ref(nodeParameter.getRef())
+                        .parameterId(nodeParameter.getParameterId())
+                        .type(InstanceParameter.Type.INPUT)
+                        .required(nodeParameter.getRequired())
+                        .workflowType(workflowType)
+                        .build();
+                instanceParameters.add(p);
+            }
+        });
+        return instanceParameters;
     }
 
     private Map<InstanceParameter, Parameter<?>> handleOutputParameter(
