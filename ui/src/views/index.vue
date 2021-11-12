@@ -64,13 +64,9 @@
                 <jm-tooltip content="触发" placement="bottom">
                   <button :class="{execute: true, doing: executings[project.id]}" @click="execute(project.id)"></button>
                 </jm-tooltip>
-                <jm-tooltip v-if="project.eventBridgeId" content="Webhook" placement="bottom">
-                  <button class="webhook" @click="selectedWebhookId = project.eventBridgeId"></button>
+                <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
+                  <button class="webhook" @click="selectedWebhookId = project.id"></button>
                 </jm-tooltip>
-                <!--                <jm-tooltip v-if="project.eventBridgeId" content="Webhook" placement="bottom">-->
-                <!--                  <button class="webhook"-->
-                <!--                          @click="$router.push({name: 'event-bridge-detail', params: {id: project.eventBridgeId}})"></button>-->
-                <!--                </jm-tooltip>-->
                 <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" content="编辑" placement="bottom">
                   <button class="edit" @click="edit(project.id)"></button>
                 </jm-tooltip>
@@ -93,7 +89,7 @@
       </div>
     </div>
     <bottom-nav/>
-    <webhook-dialog v-if="selectedWebhookId" :event-bridge-id="selectedWebhookId"
+    <webhook-dialog v-if="selectedWebhookId" :project-id="selectedWebhookId"
                     @close="selectedWebhookId = undefined"/>
     <dsl-dialog v-if="selectedDslId && selectedDslType"
                 :project-id="selectedDslId"
@@ -107,7 +103,7 @@ import { defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, re
 import { IProjectVo } from '@/api/dto/project';
 import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
-import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum } from '@/api/dto/enumeration';
+import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
@@ -191,6 +187,7 @@ export default defineComponent({
       DslSourceEnum,
       DslTypeEnum,
       ProjectStatusEnum,
+      TriggerTypeEnum,
       datetimeFormatter,
       executionTimeFormatter,
       projects,
@@ -206,12 +203,12 @@ export default defineComponent({
           return;
         }
 
-        const { eventBridgeId } = projects.value.find(item => item.id === id) as IProjectVo;
-        const isWarning = !!eventBridgeId;
+        const { triggerType } = projects.value.find(item => item.id === id) as IProjectVo;
+        const isWarning = triggerType === TriggerTypeEnum.WEBHOOK;
 
         let msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
-          msg += '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已关联事件桥接器，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
+          msg += '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
         }
 
         proxy.$confirm(msg, '触发项目执行', {

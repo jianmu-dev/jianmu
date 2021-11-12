@@ -11,7 +11,7 @@ import {
   IEventBridgeVo,
   ITargetEventVo,
 } from '@/api/dto/event-bridge';
-import { ITriggerEventVo } from '@/api/dto/trigger';
+import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 
 export const baseUrl = {
   project: '/view/projects',
@@ -27,6 +27,7 @@ export const baseUrl = {
   parameter: '/view/parameters',
   targetEvent: '/view/target_events',
   triggerEvent: '/view/trigger_events',
+  trigger: '/view/trigger',
 };
 const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 const baseHubUrl = {
@@ -278,5 +279,17 @@ export function fetchTriggerEvent(triggerId: string): Promise<ITriggerEventVo> {
   return restProxy<ITriggerEventVo>({
     url: `${baseUrl.triggerEvent}/${triggerId}`,
     method: 'get',
+  });
+}
+
+/**
+ * 获取触发器webhook
+ * @param projectId
+ */
+export function fetchTriggerWebhook(projectId: string): Promise<ITriggerWebhookVo> {
+  return restProxy({
+    url: `${baseUrl.trigger}/webhook/${projectId}`,
+    method: 'get',
+    auth: true,
   });
 }

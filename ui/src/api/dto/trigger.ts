@@ -22,3 +22,11 @@ export interface ITriggerEventVo {
   occurredTime: string;
   parameters: IEventParameterVo[];
 }
+
+/**
+ * 触发器webhook vo
+ */
+export interface ITriggerWebhookVo extends Readonly<{
+  webhook: string;
+}> {
+}

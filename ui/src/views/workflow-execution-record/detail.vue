@@ -119,7 +119,7 @@ import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IOpenTaskLogForm, IOpenWebhookLogForm, IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import { TaskStatusEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
+import { TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import TaskLog from '@/views/workflow-execution-record/task-log.vue';
 import ProcessLog from '@/views/workflow-execution-record/process-log.vue';
 import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
@@ -302,10 +302,10 @@ export default defineComponent({
       datetimeFormatter,
       executionTimeFormatter,
       execute: () => {
-        const isWarning = !!data.value.project?.eventBridgeId;
+        const isWarning = data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
         let msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
-          msg += '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已关联事件桥接器，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
+          msg += '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
         }
 
         proxy.$confirm(msg, '触发项目执行', {
