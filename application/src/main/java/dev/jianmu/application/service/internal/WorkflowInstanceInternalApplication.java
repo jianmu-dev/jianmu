@@ -2,8 +2,6 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
-import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
-import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
@@ -28,7 +26,10 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -235,7 +236,7 @@ public class WorkflowInstanceInternalApplication {
         var workflowInstance = this.workflowInstanceRepository
                 .findById(taskInstance.getBusinessId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        workflowInstance.taskRun(taskInstance.getAsyncTaskRef());
+        workflowInstance.taskRun(taskInstance.getAsyncTaskRef(), taskInstanceId);
         this.workflowInstanceRepository.save(workflowInstance);
     }
 

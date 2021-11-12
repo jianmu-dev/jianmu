@@ -245,16 +245,17 @@ public class WorkflowInstance extends AggregateRoot {
                     .workflowRef(this.workflowRef)
                     .workflowVersion(this.workflowVersion)
                     .nodeType(taskInstance.getAsyncTaskType())
+                    .externalId(taskInstance.getExternalId())
                     .build();
             this.raiseEvent(terminatingEvent);
         }
     }
 
     // 异步任务开始执行
-    public void taskRun(String asyncTaskRef) {
+    public void taskRun(String asyncTaskRef, String externalId) {
         AsyncTaskInstance taskInstance = this.findInstanceByRef(asyncTaskRef)
                 .orElseThrow(() -> new RuntimeException("未找到该任务"));
-        taskInstance.run();
+        taskInstance.run(externalId);
         // 发布任务开始执行事件
         this.raiseEvent(
                 TaskRunningEvent.Builder.aTaskRunningEvent()
@@ -264,6 +265,7 @@ public class WorkflowInstance extends AggregateRoot {
                         .workflowRef(this.getWorkflowRef())
                         .workflowVersion(this.getWorkflowVersion())
                         .nodeType(taskInstance.getAsyncTaskType())
+                        .externalId(taskInstance.getExternalId())
                         .build()
         );
     }
@@ -282,6 +284,7 @@ public class WorkflowInstance extends AggregateRoot {
                         .workflowRef(this.getWorkflowRef())
                         .workflowVersion(this.getWorkflowVersion())
                         .nodeType(taskInstance.getAsyncTaskType())
+                        .externalId(taskInstance.getExternalId())
                         .build()
         );
     }
@@ -300,6 +303,7 @@ public class WorkflowInstance extends AggregateRoot {
                         .workflowRef(this.getWorkflowRef())
                         .workflowVersion(this.getWorkflowVersion())
                         .nodeType(taskInstance.getAsyncTaskType())
+                        .externalId(taskInstance.getExternalId())
                         .build()
         );
         // 发布所有下游节点激活事件
