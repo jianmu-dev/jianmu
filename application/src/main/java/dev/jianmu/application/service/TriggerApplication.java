@@ -374,6 +374,9 @@ public class TriggerApplication {
     }
 
     private Object extractParameter(String payload, String exp) {
+        if (exp.startsWith("$.header.")) {
+            exp = exp.toLowerCase(Locale.ROOT);
+        }
         Object document = Configuration.defaultConfiguration().jsonProvider().parse(payload);
         try {
             return JsonPath.read(document, exp);
@@ -403,8 +406,12 @@ public class TriggerApplication {
                 ));
         var headerNode = root.putObject("header");
         headers.forEach((key, value) -> {
-            var item = headerNode.putArray(key);
-            value.forEach(item::add);
+            if (value.size() > 1) {
+                var item = headerNode.putArray(key);
+                value.forEach(item::add);
+            } else {
+                headerNode.put(key, value.get(0));
+            }
         });
         // Query String node
         var url = request.getRequestURL().toString();
@@ -413,8 +420,15 @@ public class TriggerApplication {
                 UriComponentsBuilder.fromUriString(url + "?" + queryString).build().getQueryParams();
         var queryNode = root.putObject("query");
         parameters.forEach((key, value) -> {
-            var item = queryNode.putArray(key);
-            value.forEach(item::add);
+            if ("null".equals(key)) {
+                return;
+            }
+            if (value.size() > 1) {
+                var item = queryNode.putArray(key);
+                value.forEach(item::add);
+            } else {
+                queryNode.put(key, value.get(0));
+            }
         });
         // Body node
         var bodyNode = root.putObject("body");
@@ -435,8 +449,12 @@ public class TriggerApplication {
                     .map(s -> Arrays.copyOf(s.split("=", 2), 2))
                     .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
             formMap.forEach((key, value) -> {
-                var item = formNode.putArray(key);
-                value.forEach(item::add);
+                if (value.size() > 1) {
+                    var item = formNode.putArray(key);
+                    value.forEach(item::add);
+                } else {
+                    formNode.put(key, value.get(0));
+                }
             });
         }
         // Body Text node
