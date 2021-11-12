@@ -1,6 +1,6 @@
 package dev.jianmu.api.runner;
 
-import dev.jianmu.trigger.service.ScheduleJobService;
+import dev.jianmu.application.service.TriggerApplication;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class TriggerRunner implements ApplicationRunner {
-    private final ScheduleJobService jobService;
+    private final TriggerApplication triggerApplication;
 
-    public TriggerRunner(ScheduleJobService jobService) {
-        this.jobService = jobService;
+    public TriggerRunner(TriggerApplication triggerApplication) {
+        this.triggerApplication = triggerApplication;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        this.jobService.startTriggers();
+        this.triggerApplication.startTriggers();
     }
 }

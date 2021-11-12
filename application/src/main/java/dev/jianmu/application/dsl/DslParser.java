@@ -7,6 +7,8 @@ import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.node.definition.aggregate.ShellNode;
+import dev.jianmu.trigger.aggregate.WebhookAuth;
+import dev.jianmu.trigger.aggregate.WebhookParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +28,10 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 public class DslParser {
+    private Map<String, Object> trigger;
+    private Webhook webhook;
     private String cron;
-    private String eb;
-    private Map<String, Map<String, Object>> global = new HashMap<>();
+    private final Map<String, Map<String, Object>> global = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
     private String name;
@@ -285,9 +288,7 @@ public class DslParser {
 
     // DSL语法校验
     private void syntaxCheck() {
-        if (this.cron != null && this.eb != null) {
-            throw new DslException("不能同时使用Cron与EventBridge");
-        }
+        this.triggerSyntaxCheck();
         this.globalParamSyntaxCheck();
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
@@ -330,6 +331,69 @@ public class DslParser {
             return;
         }
         throw new DslException("workflow或pipeline未设置");
+    }
+
+    private void triggerSyntaxCheck() {
+        var triggerType = this.trigger.get("type");
+        if (!(triggerType instanceof String)) {
+            throw new IllegalArgumentException("trigger type配置错误");
+        }
+        triggerType = triggerType.toString();
+        if (triggerType.equals("cron")) {
+            var schedule = this.trigger.get("schedule");
+            if (!(schedule instanceof String)) {
+                throw new IllegalArgumentException("schedule未配置");
+            }
+            this.cron = (String) schedule;
+        }
+        if (triggerType.equals("webhook")) {
+            var param = this.trigger.get("param");
+            var auth = this.trigger.get("auth");
+            var matcher = this.trigger.get("matcher");
+            var webhookBuilder = Webhook.builder();
+            if (matcher instanceof String) {
+                webhookBuilder.matcher((String) matcher);
+            }
+            if (auth instanceof Map) {
+                var token = ((Map<?, ?>) auth).get("token");
+                var value = ((Map<?, ?>) auth).get("value");
+                if (token instanceof String && value instanceof String) {
+                    webhookBuilder.auth(
+                            WebhookAuth.Builder.aWebhookAuth()
+                                    .token((String) token)
+                                    .value((String) value)
+                                    .build()
+                    );
+                }
+            }
+            if (param instanceof List) {
+                var ps = ((List<?>) param).stream()
+                        .filter(p -> p instanceof Map)
+                        .map(p -> (Map<String, Object>) p)
+                        .map(p -> {
+                            var name = p.get("name");
+                            var type = p.get("type");
+                            var exp = p.get("exp");
+                            if (!(name instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数名配置错误");
+                            }
+                            if (!(type instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数类型配置错误");
+                            }
+                            if (!(exp instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数表达式配置错误");
+                            }
+                            Parameter.Type.getTypeByName((String) type);
+                            return WebhookParameter.Builder.aWebhookParameter()
+                                    .name((String) name)
+                                    .type((String) type)
+                                    .exp((String) exp)
+                                    .build();
+                        }).collect(Collectors.toList());
+                webhookBuilder.param(ps);
+            }
+            this.webhook = webhookBuilder.build();
+        }
     }
 
     private void globalParamSyntaxCheck() {
@@ -488,8 +552,12 @@ public class DslParser {
         return cron;
     }
 
-    public String getEb() {
-        return eb;
+    public Map<String, Object> getTrigger() {
+        return trigger;
+    }
+
+    public Webhook getWebhook() {
+        return webhook;
     }
 
     public Map<String, Map<String, Object>> getGlobal() {

@@ -7,6 +7,8 @@ import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
@@ -26,10 +28,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -49,7 +48,7 @@ public class WorkflowInstanceInternalApplication {
     private final ExpressionLanguage expressionLanguage;
     private final InstanceParameterRepository instanceParameterRepository;
     private final ParameterDomainService parameterDomainService;
-    private final TargetEventRepository targetEventRepository;
+    private final TriggerEventRepository triggerEventRepository;
     private final ParameterRepository parameterRepository;
 
     public WorkflowInstanceInternalApplication(
@@ -60,7 +59,7 @@ public class WorkflowInstanceInternalApplication {
             ExpressionLanguage expressionLanguage,
             InstanceParameterRepository instanceParameterRepository,
             ParameterDomainService parameterDomainService,
-            TargetEventRepository targetEventRepository,
+            TriggerEventRepository triggerEventRepository,
             ParameterRepository parameterRepository
     ) {
         this.workflowRepository = workflowRepository;
@@ -70,15 +69,15 @@ public class WorkflowInstanceInternalApplication {
         this.expressionLanguage = expressionLanguage;
         this.instanceParameterRepository = instanceParameterRepository;
         this.parameterDomainService = parameterDomainService;
-        this.targetEventRepository = targetEventRepository;
+        this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
     }
 
     private EvaluationContext findContext(Workflow workflow, String instanceId, String triggerId) {
         // 查询参数源
-        var eventParameters = this.targetEventRepository.findById(triggerId)
-                .map(TargetEvent::getEventParameters)
-                .orElseGet(Set::of);
+        var eventParameters = this.triggerEventRepository.findById(triggerId)
+                .map(TriggerEvent::getParameters)
+                .orElseGet(List::of);
         var instanceParameters = this.instanceParameterRepository
                 .findOutputParamByBusinessIdAndTriggerId(instanceId, triggerId);
         // 创建表达式上下文
@@ -97,7 +96,7 @@ public class WorkflowInstanceInternalApplication {
         var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
         // 事件参数scope为event
-        eventMap.forEach((key, val) -> context.add("event", key, val));
+        eventMap.forEach((key, val) -> context.add("trigger", key, val));
         // 任务输出参数加入上下文
         Map<String, String> outParams = new HashMap<>();
         instanceParameters.forEach(instanceParameter -> {

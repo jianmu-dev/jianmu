@@ -17,20 +17,34 @@ CREATE TABLE `jianmu_project`
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `cron_trigger`
+CREATE TABLE `jianmu_trigger`
 (
-    `id`         varchar(50) NOT NULL COMMENT '触发器ID',
+    `id`         varchar(45) NOT NULL COMMENT 'ID',
     `project_id` varchar(45) NOT NULL COMMENT '项目ID',
-    `corn`       varchar(45) NOT NULL COMMENT 'Cron表达式',
+    `type`       varchar(45) NOT NULL COMMENT '触发器类型',
+    `schedule`   varchar(45) DEFAULT NULL COMMENT 'Cron表达式',
+    `webhook`    blob COMMENT 'webhook对象',
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `quartz_trigger`
+CREATE TABLE `jianmu_trigger_event`
 (
-    `id`         int         NOT NULL AUTO_INCREMENT COMMENT 'Quartz触发器ID',
-    `trigger_id` varchar(45) NOT NULL COMMENT '触发器ID',
-    `cron`       varchar(45) NOT NULL COMMENT 'Cron表达式',
+    `id`            varchar(45) NOT NULL COMMENT '事件ID',
+    `project_id`    varchar(45) NOT NULL COMMENT '项目ID',
+    `trigger_id`    varchar(45) NOT NULL COMMENT '触发器ID',
+    `trigger_type`  varchar(45) NOT NULL COMMENT '触发器类型',
+    `payload`       text COMMENT '事件载荷',
+    `occurred_time` datetime    NOT NULL COMMENT '触发时间',
     PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `jianmu_trigger_event_parameter`
+(
+    `trigger_event_id` varchar(45) NOT NULL COMMENT '触发器事件ID',
+    `name`             varchar(45) NOT NULL COMMENT '参数名',
+    `type`             varchar(45) NOT NULL COMMENT '参数类型',
+    `value`            varchar(45) NOT NULL COMMENT '参数值',
+    `parameter_id`     varchar(45) NOT NULL COMMENT '参数引用ID'
 );
 
 CREATE TABLE `git_repo`
