@@ -66,6 +66,7 @@ public class WorkflowEventHandler {
         logger.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleTaskTerminatingEvent(TaskTerminatingEvent event) {
         MDC.put("triggerId", event.getTriggerId());
@@ -76,7 +77,7 @@ public class WorkflowEventHandler {
         logger.info(event.getWorkflowInstanceId());
         logger.info(event.getTriggerId());
         logger.info(event.getExternalId());
-        this.taskInstanceInternalApplication.terminate(event.getExternalId());
+        this.workerApplication.terminateTask(event.getExternalId());
         logger.info("-----------------------------------------------------");
     }
 

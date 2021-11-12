@@ -228,12 +228,6 @@ public class WorkflowInstance extends AggregateRoot {
 
     // 中止节点, 非任务类节点无法中止
     public void terminateNode(Node node) {
-        if (this.getStatus().equals(ProcessStatus.FINISHED)) {
-            throw new RuntimeException("该流程实例已结束");
-        }
-        if (this.getStatus().equals(ProcessStatus.TERMINATED)) {
-            throw new RuntimeException("该流程实例已终止");
-        }
         if (node instanceof AsyncTask) {
             // 发布任务中止事件
             AsyncTaskInstance taskInstance = this.findInstanceByRef(node.getRef())

@@ -10,6 +10,7 @@ import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
 import dev.jianmu.worker.event.CreateWorkspaceEvent;
+import dev.jianmu.worker.event.TerminateTaskEvent;
 import dev.jianmu.worker.repository.WorkerRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
@@ -85,6 +86,17 @@ public class WorkerApplication {
                         .workerId(worker.getId())
                         .workerType(worker.getType().name())
                         .workspaceName(triggerId)
+                        .build()
+        );
+    }
+
+    public void terminateTask(String taskInstanceId) {
+        var worker = this.findWorker();
+        this.publisher.publishEvent(
+                TerminateTaskEvent.Builder.aTerminateTaskEvent()
+                        .workerId(worker.getId())
+                        .workerType(worker.getType().name())
+                        .taskInstanceId(taskInstanceId)
                         .build()
         );
     }

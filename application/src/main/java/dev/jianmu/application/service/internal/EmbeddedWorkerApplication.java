@@ -85,6 +85,14 @@ public class EmbeddedWorkerApplication {
         }
     }
 
+    public void terminateTask(String taskInstanceId) {
+        try {
+            this.dockerWorker.terminateTask(taskInstanceId);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("无法终止任务");
+        }
+    }
+
     public void deleteImage(NodeDeletedEvent event) {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);

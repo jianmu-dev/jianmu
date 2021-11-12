@@ -162,12 +162,6 @@ public class TaskInstanceInternalApplication {
     }
 
     @Transactional
-    public void terminate(String instanceId) {
-        var taskInstance = this.taskInstanceRepository.findById(instanceId)
-                .orElseThrow(() -> new DataNotFoundException("未找到要终止的任务"));
-    }
-
-    @Transactional
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
