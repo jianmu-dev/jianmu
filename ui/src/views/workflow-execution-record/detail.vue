@@ -105,7 +105,7 @@
       v-model="webhookLogForm.drawerVisible"
       direction="rtl"
       destroy-on-close>
-      <webhook-log :name-name="webhookLogForm.nodeName"
+      <webhook-log :node-name="webhookLogForm.nodeName"
                    :trigger-id="webhookLogForm.triggerId"
                    :trigger-type="webhookLogForm.triggerType"
                    :tab-type="webhookLogForm.tabType"/>
