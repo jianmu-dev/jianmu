@@ -1,14 +1,12 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.application.service.internal.EventBridgeInternalApplication;
+import dev.jianmu.application.service.TriggerApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * @class: WebHookController
@@ -20,25 +18,21 @@ import java.util.Base64;
 @RequestMapping("webhook")
 @Tag(name = "WebHook API", description = "WebHook API")
 public class WebHookController {
-    private final EventBridgeInternalApplication eventBridgeInternalApplication;
+    private final TriggerApplication triggerApplication;
 
-    public WebHookController(EventBridgeInternalApplication eventBridgeInternalApplication) {
-        this.eventBridgeInternalApplication = eventBridgeInternalApplication;
+    public WebHookController(TriggerApplication triggerApplication) {
+        this.triggerApplication = triggerApplication;
     }
 
 
-    @RequestMapping(value = "/{webhook}", method = RequestMethod.POST, consumes = {"application/json", "application/x-www-form-urlencoded", "text/plain"})
+    @RequestMapping(value = "/{projectName}", method = RequestMethod.POST, consumes = {"application/json", "application/x-www-form-urlencoded", "text/plain"})
     @ResponseBody
     @Operation(summary = "触发项目", description = "触发项目启动")
     public void receivePostJsonEvent(
             HttpServletRequest request,
             @RequestHeader("Content-Type") String contentType,
-            @PathVariable String webhook
+            @PathVariable String projectName
     ) {
-        var bytes = Base64.getDecoder().decode(webhook);
-        var strings = new String(bytes, StandardCharsets.UTF_8).split("_");
-        var token = strings[0];
-        var sourceId = strings[1];
-        this.eventBridgeInternalApplication.receiveHttpEvent(token, sourceId, request, contentType);
+        this.triggerApplication.receiveHttpEvent(projectName, request, contentType);
     }
 }

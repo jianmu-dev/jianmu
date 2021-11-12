@@ -1,10 +1,8 @@
 package dev.jianmu.infrastructure.mapper.trigger;
 
-import dev.jianmu.trigger.entity.TriggerEntity;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import dev.jianmu.infrastructure.typehandler.WebhookTypeHandler;
+import dev.jianmu.trigger.aggregate.Trigger;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,18 +14,28 @@ import java.util.Optional;
  * @create: 2021-05-25 15:29
  **/
 public interface TriggerMapper {
-    @Insert("insert into quartz_trigger(trigger_id, cron) " +
-            "values(#{triggerId}, #{cron})")
-    void add(TriggerEntity triggerEntity);
+    @Insert("insert into jianmu_trigger(id, project_id, type, schedule, webhook) " +
+            "values(#{id}, #{projectId}, #{type}, #{schedule}, #{webhook, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.WebhookTypeHandler})")
+    void add(Trigger trigger);
 
-    @Delete("delete from quartz_trigger where trigger_id = #{triggerId}")
-    void deleteByTriggerId(String triggerId);
+    @Update("update jianmu_trigger set project_id = #{projectId}, type = #{type}, schedule = #{schedule}, webhook = #{webhook, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.WebhookTypeHandler} where id = #{id}")
+    void updateById(Trigger trigger);
 
-    @Select("SELECT * FROM `quartz_trigger` WHERE trigger_id = #{triggerId}")
-    @Result(column = "trigger_id", property = "triggerId")
-    Optional<TriggerEntity> findByTriggerId(String triggerId);
+    @Delete("delete from jianmu_trigger where id = #{id}")
+    void deleteById(String id);
 
-    @Select("SELECT * FROM `quartz_trigger`")
-    @Result(column = "trigger_id", property = "triggerId")
-    List<TriggerEntity> findAll();
+    @Select("SELECT * FROM `jianmu_trigger` WHERE project_id = #{projectId}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "webhook", property = "webhook", typeHandler = WebhookTypeHandler.class)
+    Optional<Trigger> findByProjectId(String projectId);
+
+    @Select("SELECT * FROM `jianmu_trigger` WHERE id = #{triggerId}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "webhook", property = "webhook", typeHandler = WebhookTypeHandler.class)
+    Optional<Trigger> findByTriggerId(String triggerId);
+
+    @Select("SELECT * FROM `jianmu_trigger` WHERE type = #{type}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "webhook", property = "webhook", typeHandler = WebhookTypeHandler.class)
+    List<Trigger> findAllByType(Trigger.Type type);
 }

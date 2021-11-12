@@ -41,6 +41,11 @@ public class TestDockerWorker implements DockerWorker {
     }
 
     @Override
+    public void terminateTask(String taskInstanceId) {
+        logger.info("terminateTask: {}", taskInstanceId);
+    }
+
+    @Override
     public void deleteImage(String imageName) {
         logger.info("deleteImage: {}", imageName);
     }

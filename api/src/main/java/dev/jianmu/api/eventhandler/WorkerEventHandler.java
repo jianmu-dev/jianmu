@@ -7,6 +7,7 @@ import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
 import dev.jianmu.worker.event.CreateWorkspaceEvent;
+import dev.jianmu.worker.event.TerminateTaskEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,12 @@ public class WorkerEventHandler {
     @EventListener
     public void cleanupWorkspaceEventHandle(CleanupWorkspaceEvent cleanupWorkspaceEvent) {
         this.embeddedWorkerApplication.deleteVolume(cleanupWorkspaceEvent.getWorkspaceName());
+    }
+
+    @EventListener
+    public void handleTerminateTaskEvent(TerminateTaskEvent terminateTaskEvent) {
+        log.info("docker worker terminate task id: {}", terminateTaskEvent.getTaskInstanceId());
+        this.embeddedWorkerApplication.terminateTask(terminateTaskEvent.getTaskInstanceId());
     }
 
     @EventListener

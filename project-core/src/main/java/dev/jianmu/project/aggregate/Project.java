@@ -22,6 +22,7 @@ public class Project {
 
     public enum TriggerType {
         EVENT_BRIDGE,
+        WEBHOOK,
         CRON,
         MANUAL
     }

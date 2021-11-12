@@ -16,6 +16,7 @@ import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
@@ -24,10 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -46,6 +44,7 @@ import java.util.stream.Collectors;
 @Tag(name = "查询API", description = "查询API")
 public class ViewController {
     private final ProjectApplication projectApplication;
+    private final TriggerApplication triggerApplication;
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
@@ -57,6 +56,7 @@ public class ViewController {
 
     public ViewController(
             ProjectApplication projectApplication,
+            TriggerApplication triggerApplication,
             WorkflowInstanceApplication workflowInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
@@ -67,6 +67,7 @@ public class ViewController {
             StorageService storageService
     ) {
         this.projectApplication = projectApplication;
+        this.triggerApplication = triggerApplication;
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
@@ -117,6 +118,20 @@ public class ViewController {
     public TargetEventVo findTargetEvent(@PathVariable String triggerId) {
         var targetEvent = this.eventBridgeApplication.findTargetEvent(triggerId);
         return TargetEventMapper.INSTANCE.toTargetEventVo(targetEvent);
+    }
+
+    @GetMapping("/trigger/webhook/{projectId}")
+    @ResponseBody
+    @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
+    public WebhookVo getWebhookUrl(@PathVariable String projectId) {
+        var webhook = this.triggerApplication.getWebhookUrl(projectId);
+        return WebhookVo.builder().webhook(webhook).build();
+    }
+
+    @GetMapping("/trigger_events/{triggerId}")
+    @Operation(summary = "查询触发事件", description = "查询触发事件")
+    public TriggerEvent findTriggerEvent(@PathVariable String triggerId) {
+        return this.triggerApplication.findTriggerEvent(triggerId);
     }
 
     @GetMapping("/event_bridges/templates")
@@ -203,7 +218,7 @@ public class ViewController {
                 .map(workflowInstance -> {
                     var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
                     projectVo.setLatestTime(workflowInstance.getEndTime());
-                    projectVo.setNextTime(this.projectApplication.getNextFireTime(project.getId()));
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
                     if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
                         projectVo.setStatus("FAILED");
                     }

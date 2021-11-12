@@ -1,11 +1,8 @@
-package dev.jianmu.trigger.job;
+package dev.jianmu.infrastructure.quartz;
 
-import dev.jianmu.trigger.event.TriggerEvent;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class PublishJob implements Job {
-    private static final Logger logger = LoggerFactory.getLogger(PublishJob.class);
     private final ApplicationEventPublisher publisher;
 
     public PublishJob(ApplicationEventPublisher publisher) {
@@ -27,7 +23,7 @@ public class PublishJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         var triggerId = context.getTrigger().getJobDataMap().get("triggerId").toString();
-        var evt = TriggerEvent.Builder.aTriggerEvent().triggerId(triggerId).build();
+        var evt = CronTriggerEvent.builder().triggerId(triggerId).build();
         this.publisher.publishEvent(evt);
     }
 }

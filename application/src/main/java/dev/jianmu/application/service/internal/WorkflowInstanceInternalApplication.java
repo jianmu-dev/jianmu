@@ -2,15 +2,16 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
-import dev.jianmu.eventbridge.aggregate.event.TargetEvent;
-import dev.jianmu.eventbridge.repository.TargetEventRepository;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
@@ -28,8 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -49,7 +50,7 @@ public class WorkflowInstanceInternalApplication {
     private final ExpressionLanguage expressionLanguage;
     private final InstanceParameterRepository instanceParameterRepository;
     private final ParameterDomainService parameterDomainService;
-    private final TargetEventRepository targetEventRepository;
+    private final TriggerEventRepository triggerEventRepository;
     private final ParameterRepository parameterRepository;
 
     public WorkflowInstanceInternalApplication(
@@ -60,7 +61,7 @@ public class WorkflowInstanceInternalApplication {
             ExpressionLanguage expressionLanguage,
             InstanceParameterRepository instanceParameterRepository,
             ParameterDomainService parameterDomainService,
-            TargetEventRepository targetEventRepository,
+            TriggerEventRepository triggerEventRepository,
             ParameterRepository parameterRepository
     ) {
         this.workflowRepository = workflowRepository;
@@ -70,15 +71,15 @@ public class WorkflowInstanceInternalApplication {
         this.expressionLanguage = expressionLanguage;
         this.instanceParameterRepository = instanceParameterRepository;
         this.parameterDomainService = parameterDomainService;
-        this.targetEventRepository = targetEventRepository;
+        this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
     }
 
     private EvaluationContext findContext(Workflow workflow, String instanceId, String triggerId) {
         // 查询参数源
-        var eventParameters = this.targetEventRepository.findById(triggerId)
-                .map(TargetEvent::getEventParameters)
-                .orElseGet(Set::of);
+        var eventParameters = this.triggerEventRepository.findById(triggerId)
+                .map(TriggerEvent::getParameters)
+                .orElseGet(List::of);
         var instanceParameters = this.instanceParameterRepository
                 .findOutputParamByBusinessIdAndTriggerId(instanceId, triggerId);
         // 创建表达式上下文
@@ -97,7 +98,7 @@ public class WorkflowInstanceInternalApplication {
         var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
         // 事件参数scope为event
-        eventMap.forEach((key, val) -> context.add("event", key, val));
+        eventMap.forEach((key, val) -> context.add("trigger", key, val));
         // 任务输出参数加入上下文
         Map<String, String> outParams = new HashMap<>();
         instanceParameters.forEach(instanceParameter -> {
@@ -165,6 +166,16 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         // 终止流程
         workflowInstance.terminate();
+        // 同时终止运行中的任务
+        Workflow workflow = this.workflowRepository
+                .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        workflowInstance.getAsyncTaskInstances().stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
+                .forEach(asyncTaskInstance -> {
+                    log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
+                    workflowInstanceDomainService.terminateNode(workflow, workflowInstance, asyncTaskInstance.getAsyncTaskRef());
+                });
         this.workflowInstanceRepository.save(workflowInstance);
     }
 
@@ -212,17 +223,20 @@ public class WorkflowInstanceInternalApplication {
 
     // 任务中止，完成
     @Transactional
-    public WorkflowInstance terminateNode(String instanceId, String nodeRef) {
+    public WorkflowInstance terminateNode(String instanceId) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(instance.getWorkflowRef(), instance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        instance.setExpressionLanguage(this.expressionLanguage);
+        instance.getAsyncTaskInstances().stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
+                .forEach(asyncTaskInstance -> {
+                    log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
+                    workflowInstanceDomainService.terminateNode(workflow, instance, asyncTaskInstance.getAsyncTaskRef());
+                });
         // 中止节点
-        log.info("terminateNode: " + nodeRef);
-        workflowInstanceDomainService.terminateNode(workflow, instance, nodeRef);
         return this.workflowInstanceRepository.save(instance);
     }
 
@@ -236,7 +250,7 @@ public class WorkflowInstanceInternalApplication {
         var workflowInstance = this.workflowInstanceRepository
                 .findById(taskInstance.getBusinessId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        workflowInstance.taskRun(taskInstance.getAsyncTaskRef());
+        workflowInstance.taskRun(taskInstance.getAsyncTaskRef(), taskInstanceId);
         this.workflowInstanceRepository.save(workflowInstance);
     }
 

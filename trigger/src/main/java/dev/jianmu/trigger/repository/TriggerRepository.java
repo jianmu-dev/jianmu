@@ -1,6 +1,6 @@
 package dev.jianmu.trigger.repository;
 
-import dev.jianmu.trigger.entity.TriggerEntity;
+import dev.jianmu.trigger.aggregate.Trigger;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,14 +9,18 @@ import java.util.Optional;
  * @class: TriggerRepository
  * @description: TriggerRepository
  * @author: Ethan Liu
- * @create: 2021-05-24 10:26
- **/
+ * @create: 2021-11-10 11:16
+ */
 public interface TriggerRepository {
-    void add(TriggerEntity triggerEntity);
+    void add(Trigger trigger);
 
-    void deleteByTriggerId(String triggerId);
+    void updateById(Trigger trigger);
 
-    Optional<TriggerEntity> findByTriggerId(String triggerId);
+    void deleteById(String id);
 
-    List<TriggerEntity> findAll();
+    Optional<Trigger> findByProjectId(String projectId);
+
+    Optional<Trigger> findByTriggerId(String triggerId);
+
+    List<Trigger> findCronTriggerAll();
 }
