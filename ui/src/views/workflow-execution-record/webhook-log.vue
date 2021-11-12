@@ -7,8 +7,8 @@
         <div class="param-value">{{ workflowName }}</div>
       </jm-tooltip>
       <div class="param-key">节点名称：</div>
-      <jm-tooltip :content="ebTargetId" placement="bottom" effect="light">
-        <div class="param-value">{{ ebTargetId }}</div>
+      <jm-tooltip :content="nodeName" placement="bottom" effect="light">
+        <div class="param-value">{{ nodeName }}</div>
       </jm-tooltip>
       <div class="param-key">启动时间：</div>
       <jm-tooltip :content="startTime" placement="bottom" effect="light">
@@ -24,7 +24,7 @@
           </template>
           <div class="tab-content">
             <div class="log">
-              <jm-log-viewer id="webhook-log" :filename="`${ebTargetId}.txt`" :value="webhookLog"/>
+              <jm-log-viewer id="webhook-log" :filename="`${nodeName}.txt`" :value="webhookLog"/>
             </div>
           </div>
         </jm-tab-pane>
@@ -66,14 +66,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onMounted, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
-import { fetchTargetEvent } from '@/api/view-no-auth';
+import { fetchTargetEvent, fetchTriggerEvent } from '@/api/view-no-auth';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-import { IEventParameterVo } from '@/api/dto/event-bridge';
+import { IEventParameterVo } from '@/api/dto/project';
+import { TriggerTypeEnum } from '@/api/dto/enumeration';
 
 const autoHeights: {
   [key: string]: IAutoHeight;
@@ -90,13 +91,12 @@ const autoHeights: {
 
 export default defineComponent({
   props: {
-    ebTargetId: {
+    nodeName: {
       type: String,
       required: true,
     },
-    triggerId: {
-      type: String,
-    },
+    triggerId: String,
+    triggerType: String as PropType<TriggerTypeEnum>,
     tabType: {
       type: String,
       required: true,
@@ -119,8 +119,19 @@ export default defineComponent({
       }
 
       try {
+        let payload: string, eventParameters: IEventParameterVo[];
+
         // 初始化Webhook
-        const { payload, eventParameters } = await fetchTargetEvent(props.triggerId);
+        if (props.triggerType === TriggerTypeEnum.EVENT_BRIDGE) {
+          const event = await fetchTargetEvent(props.triggerId);
+          payload = event.payload;
+          eventParameters = event.eventParameters;
+        } else {
+          const event = await fetchTriggerEvent(props.triggerId);
+          payload = event.payload;
+          eventParameters = event.parameters;
+        }
+
         webhookLog.value = 'Webhook:\n' +
           `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`;
         webhookParams.value = eventParameters;

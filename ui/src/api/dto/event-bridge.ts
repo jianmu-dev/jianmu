@@ -1,5 +1,6 @@
 import { BaseVo, IPageDto } from '@/api/dto/common';
 import { EventBridgeSourceTypeEnum } from '@/api/dto/enumeration';
+import { IEventParameterVo } from '@/api/dto/project';
 
 /**
  * 查询事件桥接器dto
@@ -77,16 +78,6 @@ export interface IEventBridgeSavingDto extends Readonly<{
     readonly transformers: IEventBridgeTargetTransformerVo[];
   })[];
 }> {
-}
-
-/**
- * 事件参数vo
- */
-export interface IEventParameterVo {
-  parameterId: string;
-  name: string;
-  type: string;
-  value: string;
 }
 
 /**

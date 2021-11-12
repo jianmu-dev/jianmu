@@ -1,6 +1,13 @@
 import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
+import {
+  IProcessTemplateVo,
+  IProjectDetailVo,
+  IProjectQueryingDto,
+  IProjectVo,
+  ITriggerEventVo,
+  IWorkflowVo,
+} from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
@@ -25,6 +32,7 @@ export const baseUrl = {
   eventBridge: '/view/event_bridges',
   parameter: '/view/parameters',
   targetEvent: '/view/target_events',
+  triggerEvent: '/view/trigger_events',
 };
 const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 const baseHubUrl = {
@@ -264,6 +272,17 @@ export function fetchParameterType(): Promise<string[]> {
 export function fetchTargetEvent(triggerId: string): Promise<ITargetEventVo> {
   return restProxy<ITargetEventVo>({
     url: `${baseUrl.targetEvent}/${triggerId}`,
+    method: 'get',
+  });
+}
+
+/**
+ * 获取触发器事件
+ * @param triggerId
+ */
+export function fetchTriggerEvent(triggerId: string): Promise<ITriggerEventVo> {
+  return restProxy<ITriggerEventVo>({
+    url: `${baseUrl.triggerEvent}/${triggerId}`,
     method: 'get',
   });
 }

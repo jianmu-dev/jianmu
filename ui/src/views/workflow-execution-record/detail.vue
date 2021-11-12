@@ -105,8 +105,9 @@
       v-model="webhookLogForm.drawerVisible"
       direction="rtl"
       destroy-on-close>
-      <webhook-log :eb-target-id="webhookLogForm.id"
+      <webhook-log :name-name="webhookLogForm.nodeName"
                    :trigger-id="webhookLogForm.triggerId"
+                   :trigger-type="webhookLogForm.triggerType"
                    :tab-type="webhookLogForm.tabType"/>
     </jm-drawer>
   </div>
@@ -160,7 +161,7 @@ export default defineComponent({
     });
     const webhookLogForm = ref<IOpenWebhookLogForm>({
       drawerVisible: false,
-      id: '',
+      nodeName: '',
       tabType: '',
     });
     const processLogDrawer = ref<boolean>(false);
@@ -362,9 +363,10 @@ export default defineComponent({
       },
       openWebhookLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         webhookLogForm.value.drawerVisible = true;
-        webhookLogForm.value.id = nodeId;
+        webhookLogForm.value.nodeName = nodeId;
         webhookLogForm.value.tabType = tabType;
         webhookLogForm.value.triggerId = data.value.record?.triggerId;
+        webhookLogForm.value.triggerType = data.value.record?.triggerType;
       },
     };
   },
