@@ -334,6 +334,9 @@ public class DslParser {
     }
 
     private void triggerSyntaxCheck() {
+        if (this.trigger == null) {
+            return;
+        }
         var triggerType = this.trigger.get("type");
         if (!(triggerType instanceof String)) {
             throw new IllegalArgumentException("trigger type配置错误");

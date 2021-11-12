@@ -160,6 +160,7 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .webhook(webhook)
                     .build();
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
             this.publisher.publishEvent(webhookEvent);
         }
         this.projectRepository.add(project);
@@ -208,6 +209,7 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .webhook(webhook)
                     .build();
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
             this.publisher.publishEvent(webhookEvent);
         }
         this.projectRepository.updateByWorkflowRef(project);
@@ -255,6 +257,7 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .webhook(webhook)
                     .build();
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
             this.publisher.publishEvent(webhookEvent);
         }
         this.projectRepository.add(project);
@@ -300,6 +303,7 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .webhook(webhook)
                     .build();
+            project.setTriggerType(Project.TriggerType.WEBHOOK);
             this.publisher.publishEvent(webhookEvent);
         }
         this.projectRepository.updateByWorkflowRef(project);
