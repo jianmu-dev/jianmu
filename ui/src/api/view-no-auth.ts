@@ -1,13 +1,6 @@
 import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import {
-  IProcessTemplateVo,
-  IProjectDetailVo,
-  IProjectQueryingDto,
-  IProjectVo,
-  ITriggerEventVo,
-  IWorkflowVo,
-} from '@/api/dto/project';
+import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
@@ -18,6 +11,7 @@ import {
   IEventBridgeVo,
   ITargetEventVo,
 } from '@/api/dto/event-bridge';
+import { ITriggerEventVo } from '@/api/dto/trigger';
 
 export const baseUrl = {
   project: '/view/projects',

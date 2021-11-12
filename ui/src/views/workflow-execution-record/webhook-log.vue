@@ -73,7 +73,7 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTargetEvent, fetchTriggerEvent } from '@/api/view-no-auth';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-import { IEventParameterVo } from '@/api/dto/project';
+import { IEventParameterVo } from '@/api/dto/trigger';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 
 const autoHeights: {

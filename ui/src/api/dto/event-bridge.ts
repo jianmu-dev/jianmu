@@ -1,6 +1,6 @@
 import { BaseVo, IPageDto } from '@/api/dto/common';
 import { EventBridgeSourceTypeEnum } from '@/api/dto/enumeration';
-import { IEventParameterVo } from '@/api/dto/project';
+import { IEventParameterVo } from '@/api/dto/trigger';
 
 /**
  * 查询事件桥接器dto

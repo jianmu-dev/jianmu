@@ -17,7 +17,6 @@ export interface IProjectSavingDto extends Readonly<{
 }> {
 }
 
-
 /**
  * 克隆Git库dto
  */
@@ -203,27 +202,4 @@ export interface INodeDefVo extends Readonly<{
   type: string;
   workerType: NodeTypeEnum;
 }> {
-}
-
-/**
- * 事件参数vo
- */
-export interface IEventParameterVo {
-  parameterId: string;
-  name: string;
-  type: string;
-  value: string;
-}
-
-/**
- * 触发器事件vo
- */
-export interface ITriggerEventVo {
-  id: string;
-  projectId: string;
-  triggerId: string;
-  triggerType: TriggerTypeEnum;
-  payload: string;
-  occurredTime: string;
-  parameters: IEventParameterVo[];
 }
