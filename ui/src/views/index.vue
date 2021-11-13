@@ -15,11 +15,6 @@
           </router-link>
         </div>
         <div class="right-area">
-          <router-link :to="{name: 'event-bridge'}">
-            <jm-tooltip content="事件桥接器" placement="top">
-              <button class="event-bridge"></button>
-            </jm-tooltip>
-          </router-link>
           <router-link :to="{name: 'node-library'}">
             <jm-tooltip content="本地节点库" placement="top">
               <button class="node-library"></button>
@@ -386,10 +381,6 @@ export default defineComponent({
 
           &.hub {
             background-image: url('@/assets/svgs/index/hub-btn.svg');
-          }
-
-          &.event-bridge {
-            background-image: url('@/assets/svgs/index/event-bridge-btn.svg');
           }
 
           &.node-library {

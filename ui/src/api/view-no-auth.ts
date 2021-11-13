@@ -4,13 +4,6 @@ import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, 
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
-import {
-  IEventBridgeDetailVo,
-  IEventBridgeQueryingDto,
-  IEventBridgeTargetTransformerVo,
-  IEventBridgeVo,
-  ITargetEventVo,
-} from '@/api/dto/event-bridge';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 
 export const baseUrl = {
@@ -23,9 +16,7 @@ export const baseUrl = {
   processLog: '/view/logs/workflow',
   secretKey: '/view/namespaces',
   library: '/view/nodes',
-  eventBridge: '/view/event_bridges',
   parameter: '/view/parameters',
-  targetEvent: '/view/target_events',
   triggerEvent: '/view/trigger_events',
   trigger: '/view/trigger',
 };
@@ -204,52 +195,6 @@ export function fetchNodeLibraryList(dto: IPageDto): Promise<IPageVo<INodeVo>> {
 }
 
 /**
- * 查询事件桥接器
- * @param dto
- */
-export function queryEventBridge(dto: IEventBridgeQueryingDto): Promise<IPageVo<IEventBridgeVo>> {
-  return restProxy<IPageVo<IEventBridgeVo>>({
-    url: `${baseUrl.eventBridge}`,
-    method: 'get',
-    payload: dto,
-  });
-}
-
-/**
- * 获取事件桥接器详情
- * @param bridgeId
- */
-export function fetchEventBridgeDetail(bridgeId: string): Promise<IEventBridgeDetailVo> {
-  return restProxy<IEventBridgeDetailVo>({
-    url: `${baseUrl.eventBridge}/${bridgeId}`,
-    method: 'get',
-  });
-}
-
-/**
- * 获取事件桥接器目标转换器模板名称
- */
-export function fetchEventBridgeTargetTransformerTemplateName(): Promise<string[]> {
-  return restProxy<string[]>({
-    url: `${baseUrl.eventBridge}/templates`,
-    method: 'get',
-    auth: true,
-  });
-}
-
-/**
- * 获取事件桥接器目标转换器模板
- * @param templateName
- */
-export function fetchEventBridgeTargetTransformerTemplate(templateName: string): Promise<IEventBridgeTargetTransformerVo[]> {
-  return restProxy<IEventBridgeTargetTransformerVo[]>({
-    url: `${baseUrl.eventBridge}/templates/${templateName}`,
-    method: 'get',
-    auth: true,
-  });
-}
-
-/**
  * 获取参数类型列表
  */
 export function fetchParameterType(): Promise<string[]> {
@@ -257,17 +202,6 @@ export function fetchParameterType(): Promise<string[]> {
     url: `${baseUrl.parameter}/types`,
     method: 'get',
     auth: true,
-  });
-}
-
-/**
- * 获取目标事件
- * @param triggerId
- */
-export function fetchTargetEvent(triggerId: string): Promise<ITargetEventVo> {
-  return restProxy<ITargetEventVo>({
-    url: `${baseUrl.targetEvent}/${triggerId}`,
-    method: 'get',
   });
 }
 

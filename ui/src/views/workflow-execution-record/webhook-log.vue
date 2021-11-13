@@ -71,7 +71,7 @@ import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
-import { fetchTargetEvent, fetchTriggerEvent } from '@/api/view-no-auth';
+import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { IEventParameterVo } from '@/api/dto/trigger';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
@@ -119,22 +119,11 @@ export default defineComponent({
       }
 
       try {
-        let payload: string, eventParameters: IEventParameterVo[];
-
         // 初始化Webhook
-        if (props.triggerType === TriggerTypeEnum.EVENT_BRIDGE) {
-          const event = await fetchTargetEvent(props.triggerId);
-          payload = event.payload;
-          eventParameters = event.eventParameters;
-        } else {
-          const event = await fetchTriggerEvent(props.triggerId);
-          payload = event.payload;
-          eventParameters = event.parameters;
-        }
-
+        const { payload, parameters } = await fetchTriggerEvent(props.triggerId);
         webhookLog.value = 'Webhook:\n' +
           `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`;
-        webhookParams.value = eventParameters;
+        webhookParams.value = parameters;
       } catch (err) {
         proxy.$throw(err, proxy);
       }

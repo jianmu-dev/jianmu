@@ -65,7 +65,6 @@ export enum TaskParamTypeEnum {
  * 触发类型枚举
  */
 export enum TriggerTypeEnum {
-  EVENT_BRIDGE = 'EVENT_BRIDGE',
   WEBHOOK = 'WEBHOOK',
   CRON = 'CRON',
   MANUAL = 'MANUAL',
@@ -86,14 +85,6 @@ export enum OwnerTypeEnum {
   PERSONAL = 'PERSONAL',
   ORGANIZATION = 'ORGANIZATION',
   LOCAL = 'LOCAL',
-}
-
-/**
- * 事件桥接器来源类型枚举
- */
-export enum EventBridgeSourceTypeEnum {
-  WEBHOOK = 'WEBHOOK',
-  SERVICE = 'SERVICE',
 }
 
 /**

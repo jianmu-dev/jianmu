@@ -18,24 +18,6 @@ export default [
       title: '组件库',
     },
   },
-  // 事件桥接器路由
-  {
-    name: 'event-bridge',
-    path: 'event-bridge',
-    component: () => import('@/views/event-bridge/manager.vue'),
-    meta: {
-      title: '事件桥接器',
-    },
-    children: [{
-      name: 'event-bridge-detail',
-      path: 'detail/:id',
-      component: () => import('@/views/event-bridge/detail.vue'),
-      props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
-      meta: {
-        title: '详情',
-      },
-    }],
-  },
   // 节点库路由
   {
     name: 'node-library',
@@ -81,15 +63,16 @@ export default [
     name: 'process-template',
     path: 'process-template',
     component: () => import('@/views/process-template/manager.vue'),
-    props: ({ query: { 
-      processTemplatesName,
-     
-    } }: RouteLocationNormalizedLoaded) => ({  
+    props: ({
+      query: {
+        processTemplatesName,
+      },
+    }: RouteLocationNormalizedLoaded) => ({
       processTemplatesName,
     }),
     meta: {
       title: '流程模版',
-      keepAlive:true,
+      keepAlive: true,
     },
   }, {
     name: 'update-project',
