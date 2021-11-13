@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>trigger</artifactId>
+    <artifactId>trigger-core</artifactId>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

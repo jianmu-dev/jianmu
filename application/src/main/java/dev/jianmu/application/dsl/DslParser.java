@@ -7,6 +7,7 @@ import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.node.definition.aggregate.ShellNode;
+import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.trigger.aggregate.WebhookAuth;
 import dev.jianmu.trigger.aggregate.WebhookParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DslParser {
     private Map<String, Object> trigger;
+    private Project.TriggerType triggerType = Project.TriggerType.MANUAL;
     private Webhook webhook;
     private String cron;
     private final Map<String, Map<String, Object>> global = new HashMap<>();
@@ -341,12 +343,12 @@ public class DslParser {
         if (!(triggerType instanceof String)) {
             throw new IllegalArgumentException("trigger type配置错误");
         }
-        triggerType = triggerType.toString();
         if (triggerType.equals("cron")) {
             var schedule = this.trigger.get("schedule");
             if (!(schedule instanceof String)) {
                 throw new IllegalArgumentException("schedule未配置");
             }
+            this.triggerType = Project.TriggerType.CRON;
             this.cron = (String) schedule;
         }
         if (triggerType.equals("webhook")) {
@@ -396,6 +398,7 @@ public class DslParser {
                 webhookBuilder.param(ps);
             }
             this.webhook = webhookBuilder.build();
+            this.triggerType = Project.TriggerType.WEBHOOK;
         }
     }
 
@@ -549,6 +552,10 @@ public class DslParser {
                     return type;
                 })
                 .collect(Collectors.toSet());
+    }
+
+    public Project.TriggerType getTriggerType() {
+        return triggerType;
     }
 
     public String getCron() {
