@@ -243,7 +243,6 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
       // 解析cron节点
       parseCron(trigger.schedule, nodes, edges, !!workflow);
       break;
-    case TriggerTypeEnum.EVENT_BRIDGE:
     case TriggerTypeEnum.WEBHOOK:
       // 解析webhook节点
       parseWebhook(nodes, edges, !!workflow);
