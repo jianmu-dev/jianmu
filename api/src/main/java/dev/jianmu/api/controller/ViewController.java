@@ -1,18 +1,13 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.EbDto;
 import dev.jianmu.api.dto.PageDto;
-import dev.jianmu.api.dto.TransformerDto;
 import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
-import dev.jianmu.eventbridge.aggregate.Bridge;
-import dev.jianmu.eventbridge.aggregate.Transformer;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
-import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -48,7 +43,6 @@ public class ViewController {
     private final WorkflowInstanceApplication workflowInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
-    private final EventBridgeApplication eventBridgeApplication;
     private final WorkflowInstanceApplication instanceApplication;
     private final TaskInstanceApplication taskInstanceApplication;
     private final ParameterApplication parameterApplication;
@@ -60,7 +54,6 @@ public class ViewController {
             WorkflowInstanceApplication workflowInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
-            EventBridgeApplication eventBridgeApplication,
             WorkflowInstanceApplication instanceApplication,
             TaskInstanceApplication taskInstanceApplication,
             ParameterApplication parameterApplication,
@@ -71,7 +64,6 @@ public class ViewController {
         this.workflowInstanceApplication = workflowInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
-        this.eventBridgeApplication = eventBridgeApplication;
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;
         this.parameterApplication = parameterApplication;
@@ -82,42 +74,6 @@ public class ViewController {
     @Operation(summary = "参数类型获取接口", description = "参数类型获取接口")
     public Parameter.Type[] getTypes() {
         return Parameter.Type.values();
-    }
-
-    @GetMapping("/event_bridges")
-    @Operation(summary = "分页查询event bridges列表", description = "分页查询event bridges列表")
-    public PageInfo<Bridge> findAllEb(PageDto dto) {
-        return this.eventBridgeApplication.findAll(dto.getPageNum(), dto.getPageSize());
-    }
-
-    @GetMapping("/event_bridges/{bridgeId}")
-    @Operation(summary = "查询event bridge", description = "查询event bridge")
-    public EbDto findEbById(@PathVariable String bridgeId) {
-        var bridge = this.eventBridgeApplication.findBridgeById(bridgeId);
-        var source = this.eventBridgeApplication.findSourceByBridgeId(bridgeId);
-        var sourceDto = SourceMapper.INSTANCE.toSourceDto(source);
-        var targets = this.eventBridgeApplication.findTargetsByBridgeId(bridgeId).stream()
-                .map(target -> {
-                    var projectName = "";
-                    if (target.getDestinationId() != null) {
-                        projectName = this.projectApplication.findById(target.getDestinationId())
-                                .map(Project::getWorkflowName).orElse("");
-                    }
-                    return TargetMapper.INSTANCE.toTargetDto(target, projectName);
-                })
-                .collect(Collectors.toList());
-        return EbDto.builder()
-                .bridge(bridge)
-                .source(sourceDto)
-                .targets(targets)
-                .build();
-    }
-
-    @GetMapping("/target_events/{triggerId}")
-    @Operation(summary = "查询目标event参数", description = "查询目标event参数")
-    public TargetEventVo findTargetEvent(@PathVariable String triggerId) {
-        var targetEvent = this.eventBridgeApplication.findTargetEvent(triggerId);
-        return TargetEventMapper.INSTANCE.toTargetEventVo(targetEvent);
     }
 
     @GetMapping("/trigger/webhook/{projectId}")
@@ -132,25 +88,6 @@ public class ViewController {
     @Operation(summary = "查询触发事件", description = "查询触发事件")
     public TriggerEvent findTriggerEvent(@PathVariable String triggerId) {
         return this.triggerApplication.findTriggerEvent(triggerId);
-    }
-
-    @GetMapping("/event_bridges/templates")
-    @Operation(summary = "转换器模版列表", description = "转换器模版列表")
-    public List<String> findTemplates() {
-        return List.of("Gitee", "Gitlab");
-    }
-
-    @GetMapping("/event_bridges/templates/{name}")
-    @Operation(summary = "转换器模版详情", description = "转换器模版详情")
-    public List<TransformerDto> findTemplate(@PathVariable String name) {
-        List<Transformer> temps = List.of();
-        if (name.equals("Gitee")) {
-            temps = this.eventBridgeApplication.giteeTemplates();
-        }
-        if (name.equals("Gitlab")) {
-            temps = this.eventBridgeApplication.gitlabTemplates();
-        }
-        return TargetMapper.INSTANCE.toTransformerDtos(temps);
     }
 
     @GetMapping("/namespaces")

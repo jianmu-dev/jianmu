@@ -17,7 +17,6 @@
         <module>project-core</module>
         <module>user-core</module>
         <module>trigger-core</module>
-        <module>eventbridge</module>
         <module>node-definition</module>
         <module>embedded-worker</module>
         <module>worker-core</module>
