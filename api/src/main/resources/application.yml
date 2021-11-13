@@ -12,7 +12,7 @@ spring:
     username: root
     password: 12345678
   flyway:
-    enabled: false
+    enabled: true
     clean-disabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
