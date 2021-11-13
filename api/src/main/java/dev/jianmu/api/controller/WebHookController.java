@@ -4,9 +4,16 @@ import dev.jianmu.application.service.TriggerApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @class: WebHookController
@@ -25,14 +32,22 @@ public class WebHookController {
     }
 
 
-    @RequestMapping(value = "/{projectName}", method = RequestMethod.POST, consumes = {"application/json", "application/x-www-form-urlencoded", "text/plain"})
+    @RequestMapping(value = "/**", method = RequestMethod.POST, consumes = {"application/json", "application/x-www-form-urlencoded", "text/plain"})
     @ResponseBody
     @Operation(summary = "触发项目", description = "触发项目启动")
     public void receivePostJsonEvent(
             HttpServletRequest request,
-            @RequestHeader("Content-Type") String contentType,
-            @PathVariable String projectName
+            @RequestHeader("Content-Type") String contentType
     ) {
-        this.triggerApplication.receiveHttpEvent(projectName, request, contentType);
+        var path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        var bestMatchPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        var apm = new AntPathMatcher();
+        var projectName = apm.extractPathWithinPattern(bestMatchPattern, path);
+        var decodeProjectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8);
+        System.out.println(bestMatchPattern);
+        System.out.println(path);
+        System.out.println(projectName);
+        System.out.println(decodeProjectName);
+        this.triggerApplication.receiveHttpEvent(decodeProjectName, request, contentType);
     }
 }

@@ -33,6 +33,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -266,7 +268,7 @@ public class TriggerApplication {
     public String getWebhookUrl(String projectId) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        return "/webhook/" + project.getWorkflowName();
+        return "/webhook/" + URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
     }
 
     public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
