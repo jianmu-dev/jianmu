@@ -8,10 +8,9 @@
     <div class="webhook" v-loading="loading">
       <div class="info">可以通过调用以下地址来触发流程执行</div>
       <div class="link">
-        <jm-tooltip v-if="link" :content="link" placement="top">
+        <jm-tooltip :content="link" placement="top">
           <div class="jm-icon-input-hook ellipsis">{{ link }}</div>
         </jm-tooltip>
-        <router-link v-else class="jm-icon-input-hook" :to="{name: 'login'}">登录后可查看</router-link>
       </div>
       <div class="operation">
         <jm-button type="primary" size="small" @click="copy" :disabled="!webhook">复制链接</jm-button>
