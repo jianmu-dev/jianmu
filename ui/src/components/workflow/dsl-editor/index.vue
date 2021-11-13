@@ -179,6 +179,10 @@ export default defineComponent({
     height: inherit;
     background-color: #19253B;
 
+    * {
+      font-family: Hiragino Sans GB, sans-serif;
+    }
+
     .CodeMirror-gutters {
       z-index: 0;
       background-color: #19253B;
