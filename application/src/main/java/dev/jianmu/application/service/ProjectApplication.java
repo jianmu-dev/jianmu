@@ -136,33 +136,11 @@ public class ProjectApplication {
                 .steps(parser.getSteps())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
-                .triggerType(Project.TriggerType.MANUAL)
+                .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .lastModifiedBy("admin")
                 .build();
-        // 创建Cron触发器
-        if (null != parser.getCron()) {
-            var cronEvent = CronEvent.builder()
-                    .projectId(project.getId())
-                    .schedule(parser.getCron())
-                    .build();
-            this.publisher.publishEvent(cronEvent);
-            project.setTriggerType(Project.TriggerType.CRON);
-        }
-        // 创建Webhook触发器
-        if (null != parser.getWebhook()) {
-            var webhook = Webhook.Builder.aWebhook()
-                    .matcher(parser.getWebhook().getMatcher())
-                    .auth(parser.getWebhook().getAuth())
-                    .param(parser.getWebhook().getParam())
-                    .build();
-            var webhookEvent = WebhookEvent.builder()
-                    .projectId(project.getId())
-                    .webhook(webhook)
-                    .build();
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-            this.publisher.publishEvent(webhookEvent);
-        }
+        this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
         this.gitRepoRepository.add(gitRepo);
         this.jgitService.cleanUp(gitRepo.getId());
@@ -189,29 +167,9 @@ public class ProjectApplication {
         project.setWorkflowName(parser.getName());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
-        // 创建Cron触发器
-        if (null != parser.getCron()) {
-            var cronEvent = CronEvent.builder()
-                    .projectId(project.getId())
-                    .schedule(parser.getCron())
-                    .build();
-            this.publisher.publishEvent(cronEvent);
-            project.setTriggerType(Project.TriggerType.CRON);
-        }
-        // 创建Webhook触发器
-        if (null != parser.getWebhook()) {
-            var webhook = Webhook.Builder.aWebhook()
-                    .matcher(parser.getWebhook().getMatcher())
-                    .auth(parser.getWebhook().getAuth())
-                    .param(parser.getWebhook().getParam())
-                    .build();
-            var webhookEvent = WebhookEvent.builder()
-                    .projectId(project.getId())
-                    .webhook(webhook)
-                    .build();
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-            this.publisher.publishEvent(webhookEvent);
-        }
+        project.setTriggerType(parser.getTriggerType());
+
+        this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.jgitService.cleanUp(gitRepo.getId());
@@ -234,32 +192,11 @@ public class ProjectApplication {
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
-                .triggerType(Project.TriggerType.MANUAL)
+                .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
-        // 创建Cron触发器
-        if (null != parser.getCron()) {
-            var cronEvent = CronEvent.builder()
-                    .projectId(project.getId())
-                    .schedule(parser.getCron())
-                    .build();
-            this.publisher.publishEvent(cronEvent);
-            project.setTriggerType(Project.TriggerType.CRON);
-        }
-        // 创建Webhook触发器
-        if (null != parser.getWebhook()) {
-            var webhook = Webhook.Builder.aWebhook()
-                    .matcher(parser.getWebhook().getMatcher())
-                    .auth(parser.getWebhook().getAuth())
-                    .param(parser.getWebhook().getParam())
-                    .build();
-            var webhookEvent = WebhookEvent.builder()
-                    .projectId(project.getId())
-                    .webhook(webhook)
-                    .build();
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-            this.publisher.publishEvent(webhookEvent);
-        }
+
+        this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
@@ -277,35 +214,14 @@ public class ProjectApplication {
         var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
-        project.setTriggerType(Project.TriggerType.MANUAL);
+        project.setTriggerType(parser.getTriggerType());
         project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
         project.setWorkflowName(parser.getName());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
-        // 创建Cron触发器
-        if (null != parser.getCron()) {
-            var cronEvent = CronEvent.builder()
-                    .projectId(project.getId())
-                    .schedule(parser.getCron())
-                    .build();
-            this.publisher.publishEvent(cronEvent);
-            project.setTriggerType(Project.TriggerType.CRON);
-        }
-        // 创建Webhook触发器
-        if (null != parser.getWebhook()) {
-            var webhook = Webhook.Builder.aWebhook()
-                    .matcher(parser.getWebhook().getMatcher())
-                    .auth(parser.getWebhook().getAuth())
-                    .param(parser.getWebhook().getParam())
-                    .build();
-            var webhookEvent = WebhookEvent.builder()
-                    .projectId(project.getId())
-                    .webhook(webhook)
-                    .build();
-            project.setTriggerType(Project.TriggerType.WEBHOOK);
-            this.publisher.publishEvent(webhookEvent);
-        }
+
+        this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
     }
@@ -326,6 +242,30 @@ public class ProjectApplication {
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.gitRepoRepository.deleteById(project.getGitRepoId());
         this.publisher.publishEvent(new DeletedEvent(project.getId()));
+    }
+
+    private void pubTriggerEvent(DslParser parser, Project project) {
+        // 创建Cron触发器
+        if (project.getTriggerType() == Project.TriggerType.CRON) {
+            var cronEvent = CronEvent.builder()
+                    .projectId(project.getId())
+                    .schedule(parser.getCron())
+                    .build();
+            this.publisher.publishEvent(cronEvent);
+        }
+        // 创建Webhook触发器
+        if (project.getTriggerType() == Project.TriggerType.WEBHOOK) {
+            var webhook = Webhook.Builder.aWebhook()
+                    .matcher(parser.getWebhook().getMatcher())
+                    .auth(parser.getWebhook().getAuth())
+                    .param(parser.getWebhook().getParam())
+                    .build();
+            var webhookEvent = WebhookEvent.builder()
+                    .projectId(project.getId())
+                    .webhook(webhook)
+                    .build();
+            this.publisher.publishEvent(webhookEvent);
+        }
     }
 
     public List<Project> findAll() {
