@@ -132,15 +132,6 @@
                       prop="value"
                       header-align="center"
                     >
-                      <template #default="scope">
-                        <img
-                          src="~@/assets/svgs/task-log/no-content.svg"
-                          alt=""
-                          v-if="scope.row.required"
-                        /><span v-else>
-                          {{ scope.row.value }}
-                        </span>
-                      </template>
                     </jm-table-column>
                   </jm-table>
                   <div class="title separator">输出参数</div>
@@ -195,15 +186,6 @@
                       prop="value"
                       header-align="center"
                     >
-                      <template #default="scope">
-                        <img
-                          src="~@/assets/svgs/task-log/no-content.svg"
-                          alt=""
-                          v-if="scope.row.required"
-                        /><span v-else>
-                          {{ scope.row.value }}
-                        </span>
-                      </template>
                     </jm-table-column>
                   </jm-table>
                 </div>
