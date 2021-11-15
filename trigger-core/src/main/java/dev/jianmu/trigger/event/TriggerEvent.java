@@ -14,6 +14,7 @@ public class TriggerEvent {
     private String id;
     private String projectId;
     private String triggerId;
+    private String webRequestId;
     private String triggerType;
     // Payload
     private String payload;
@@ -35,6 +36,10 @@ public class TriggerEvent {
 
     public String getTriggerId() {
         return triggerId;
+    }
+
+    public String getWebRequestId() {
+        return webRequestId;
     }
 
     public String getTriggerType() {
@@ -59,6 +64,7 @@ public class TriggerEvent {
     public static final class Builder {
         private String projectId;
         private String triggerId;
+        private String webRequestId;
         private String triggerType;
         // Payload
         private String payload;
@@ -78,6 +84,11 @@ public class TriggerEvent {
 
         public Builder triggerId(String triggerId) {
             this.triggerId = triggerId;
+            return this;
+        }
+
+        public Builder webRequestId(String webRequestId) {
+            this.webRequestId = webRequestId;
             return this;
         }
 
@@ -103,6 +114,7 @@ public class TriggerEvent {
             triggerEvent.parameters = this.parameters;
             triggerEvent.projectId = this.projectId;
             triggerEvent.triggerId = this.triggerId;
+            triggerEvent.webRequestId = this.webRequestId;
             triggerEvent.triggerType = this.triggerType;
             triggerEvent.payload = this.payload;
             return triggerEvent;
@@ -115,9 +127,10 @@ public class TriggerEvent {
                 "id='" + id + '\'' +
                 ", projectId='" + projectId + '\'' +
                 ", triggerId='" + triggerId + '\'' +
+                ", webRequestId='" + webRequestId + '\'' +
                 ", triggerType='" + triggerType + '\'' +
+                ", payload='" + payload + '\'' +
                 ", occurredTime=" + occurredTime +
-                ", parameters=" + parameters +
                 '}';
     }
 }

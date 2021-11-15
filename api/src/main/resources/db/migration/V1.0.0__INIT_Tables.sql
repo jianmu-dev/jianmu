@@ -33,14 +33,32 @@ CREATE TABLE `jianmu_trigger`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='建木触发器表';
 
+CREATE TABLE `jianmu_web_request`
+(
+    `id`               varchar(45) NOT NULL COMMENT 'ID',
+    `project_id`       varchar(45) DEFAULT NULL COMMENT '项目ID',
+    `workflow_ref`     varchar(45) DEFAULT NULL COMMENT '流程Ref',
+    `workflow_version` varchar(45) DEFAULT NULL COMMENT '流程版本',
+    `trigger_id`       varchar(45) DEFAULT NULL COMMENT '触发器ID',
+    `user_agent`       text COMMENT 'UserAgent',
+    `payload`          text COMMENT '请求载荷',
+    `status_code`      varchar(45) NOT NULL COMMENT '状态枚举',
+    `error_msg`        text COMMENT '错误信息',
+    `request_time`     datetime    NOT NULL COMMENT '请求时间',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='Web请求表';
+
 CREATE TABLE `jianmu_trigger_event`
 (
-    `id`            varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '事件ID',
-    `project_id`    varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目ID',
-    `trigger_id`    varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器ID',
-    `trigger_type`  varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器类型',
-    `payload`       text COLLATE utf8mb4_unicode_ci COMMENT '事件载荷',
-    `occurred_time` datetime                               NOT NULL COMMENT '触发时间',
+    `id`             varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '事件ID',
+    `project_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目ID',
+    `trigger_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器ID',
+    `web_request_id` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'WebRequest ID',
+    `trigger_type`   varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器类型',
+    `payload`        text COLLATE utf8mb4_unicode_ci COMMENT '事件载荷',
+    `occurred_time`  datetime                               NOT NULL COMMENT '触发时间',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

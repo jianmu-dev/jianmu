@@ -44,10 +44,6 @@ public class WebHookController {
         var apm = new AntPathMatcher();
         var projectName = apm.extractPathWithinPattern(bestMatchPattern, path);
         var decodeProjectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8);
-        System.out.println(bestMatchPattern);
-        System.out.println(path);
-        System.out.println(projectName);
-        System.out.println(decodeProjectName);
         this.triggerApplication.receiveHttpEvent(decodeProjectName, request, contentType);
     }
 }
