@@ -1,16 +1,18 @@
 package dev.jianmu.application.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageInfo;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
 import dev.jianmu.infrastructure.quartz.PublishJob;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
+import dev.jianmu.trigger.aggregate.WebRequest;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.event.TriggerEventParameter;
@@ -31,10 +33,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -58,6 +58,7 @@ public class TriggerApplication {
     private final TriggerEventRepository triggerEventRepository;
     private final ParameterRepository parameterRepository;
     private final ProjectRepository projectRepository;
+    private final WebRequestRepositoryImpl webRequestRepositoryImpl;
     private final CredentialManager credentialManager;
     private final Scheduler quartzScheduler;
     private final ApplicationEventPublisher publisher;
@@ -70,6 +71,7 @@ public class TriggerApplication {
             TriggerEventRepository triggerEventRepository,
             ParameterRepository parameterRepository,
             ProjectRepository projectRepository,
+            WebRequestRepositoryImpl webRequestRepositoryImpl,
             CredentialManager credentialManager,
             Scheduler quartzScheduler,
             ApplicationEventPublisher publisher,
@@ -79,6 +81,7 @@ public class TriggerApplication {
         this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
         this.projectRepository = projectRepository;
+        this.webRequestRepositoryImpl = webRequestRepositoryImpl;
         this.credentialManager = credentialManager;
         this.quartzScheduler = quartzScheduler;
         this.publisher = publisher;
@@ -101,10 +104,9 @@ public class TriggerApplication {
 
     @Transactional
     public void trigger(
-            Trigger trigger,
             List<TriggerEventParameter> eventParameters,
             List<Parameter> parameters,
-            String payload
+            WebRequest webRequest
     ) {
         // 过滤SECRET类型参数不保存
         var eventParametersClean = eventParameters.stream()
@@ -114,11 +116,12 @@ public class TriggerApplication {
                 .filter(parameter -> !(parameter.getType() == Parameter.Type.SECRET))
                 .collect(Collectors.toList());
         var event = TriggerEvent.Builder.aTriggerEvent()
-                .triggerId(trigger.getId())
-                .projectId(trigger.getProjectId())
-                .payload(payload)
+                .triggerId(webRequest.getTriggerId())
+                .projectId(webRequest.getProjectId())
+                .webRequestId(webRequest.getId())
+                .payload(webRequest.getPayload())
                 .parameters(eventParametersClean)
-                .triggerType(trigger.getType().name())
+                .triggerType(Trigger.Type.WEBHOOK.name())
                 .build();
         this.parameterRepository.addAll(parametersClean);
         this.triggerEventRepository.save(event);
@@ -265,6 +268,10 @@ public class TriggerApplication {
         return event;
     }
 
+    public PageInfo<WebRequest> findWebRequestPage(int pageNum, int pageSize) {
+        return this.webRequestRepositoryImpl.findPage(pageNum, pageSize);
+    }
+
     public String getWebhookUrl(String projectId) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
@@ -272,12 +279,29 @@ public class TriggerApplication {
     }
 
     public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
-        var payload = this.createPayload(request, contentType);
+        var webRequest = this.createWebRequest(request, contentType);
         var project = this.projectRepository.findByName(projectName)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目: " + projectName));
+                .orElseThrow(() -> {
+                    webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                    webRequest.setErrorMsg("未找到项目: " + projectName);
+                    this.webRequestRepositoryImpl.add(webRequest);
+                    return new DataNotFoundException("未找到项目: " + projectName);
+                });
+        webRequest.setProjectId(project.getId());
+        webRequest.setWorkflowRef(project.getWorkflowRef());
+        webRequest.setWorkflowVersion(project.getWorkflowVersion());
         var trigger = this.triggerRepository.findByProjectId(project.getId())
-                .orElseThrow(() -> new DataNotFoundException("项目：" + projectName + " 未找到触发器"));
+                .orElseThrow(() -> {
+                    webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                    webRequest.setErrorMsg("项目：" + projectName + " 未找到触发器");
+                    this.webRequestRepositoryImpl.add(webRequest);
+                    return new DataNotFoundException("项目：" + projectName + " 未找到触发器");
+                });
+        webRequest.setTriggerId(trigger.getId());
         if (trigger.getType() != Trigger.Type.WEBHOOK) {
+            webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+            webRequest.setErrorMsg("项目：" + projectName + " 未找到触发器");
+            this.webRequestRepositoryImpl.add(webRequest);
             throw new IllegalArgumentException("项目：" + projectName + "触发器类型错误");
         }
         // 创建表达式上下文
@@ -289,7 +313,7 @@ public class TriggerApplication {
         webhook.getParam().forEach(webhookParameter -> {
             Parameter<?> parameter = Parameter.Type
                     .getTypeByName(webhookParameter.getType())
-                    .newParameter(this.extractParameter(payload, webhookParameter.getExp()));
+                    .newParameter(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp()));
             var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
                     .name(webhookParameter.getName())
                     .type(webhookParameter.getType())
@@ -307,10 +331,16 @@ public class TriggerApplication {
             var authValue = this.findSecret(auth.getValue());
             if (authToken.getType() != Parameter.Type.STRING) {
                 log.warn("Auth Token表达式计算错误");
+                webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
+                webRequest.setErrorMsg("Auth Token表达式计算错误");
+                this.webRequestRepositoryImpl.add(webRequest);
                 return;
             }
             if (!authToken.getValue().equals(authValue)) {
                 log.warn("Webhook密钥不匹配");
+                webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
+                webRequest.setErrorMsg("Webhook密钥不匹配");
+                this.webRequestRepositoryImpl.add(webRequest);
                 return;
             }
         }
@@ -319,10 +349,14 @@ public class TriggerApplication {
             var res = this.calculateExp(webhook.getMatcher(), context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
                 log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
+                webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+                webRequest.setErrorMsg("Match计算不匹配，计算结果为：" + res.getStringValue());
+                this.webRequestRepositoryImpl.add(webRequest);
                 return;
             }
         }
-        this.trigger(trigger, eventParameters, parameters, payload);
+        this.webRequestRepositoryImpl.add(webRequest);
+        this.trigger(eventParameters, parameters, webRequest);
     }
 
     private String findSecret(String secretExp) {
@@ -387,83 +421,86 @@ public class TriggerApplication {
         }
     }
 
-    private String createPayload(HttpServletRequest request, String contentType) {
-        // Get body
-        String body = null;
+    private WebRequest createWebRequest(HttpServletRequest request, String contentType) {
         try {
-            body = request.getReader()
+            // Get body
+            var body = request.getReader()
                     .lines()
                     .collect(Collectors.joining(System.lineSeparator()));
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-        // Create root node
-        var root = this.objectMapper.createObjectNode();
-        // Headers node
-        Map<String, List<String>> headers = Collections.list(request.getHeaderNames())
-                .stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        h -> Collections.list(request.getHeaders(h))
-                ));
-        var headerNode = root.putObject("header");
-        headers.forEach((key, value) -> {
-            if (value.size() > 1) {
-                var item = headerNode.putArray(key);
-                value.forEach(item::add);
-            } else {
-                headerNode.put(key, value.get(0));
-            }
-        });
-        // Query String node
-        var url = request.getRequestURL().toString();
-        var queryString = request.getQueryString();
-        MultiValueMap<String, String> parameters =
-                UriComponentsBuilder.fromUriString(url + "?" + queryString).build().getQueryParams();
-        var queryNode = root.putObject("query");
-        parameters.forEach((key, value) -> {
-            if ("null".equals(key)) {
-                return;
-            }
-            if (value.size() > 1) {
-                var item = queryNode.putArray(key);
-                value.forEach(item::add);
-            } else {
-                queryNode.put(key, value.get(0));
-            }
-        });
-        // Body node
-        var bodyNode = root.putObject("body");
-        // Body Json node
-        if (contentType.startsWith("application/json")) {
-            try {
-                var bodyJson = this.objectMapper.readTree(body);
-                bodyNode.set("json", bodyJson);
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Body格式错误");
-            }
-        }
-        // Body Form node
-        if (contentType.startsWith("application/x-www-form-urlencoded")) {
-            var formNode = bodyNode.putObject("form");
-            var formMap = Pattern.compile("&")
-                    .splitAsStream(body)
-                    .map(s -> Arrays.copyOf(s.split("=", 2), 2))
-                    .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
-            formMap.forEach((key, value) -> {
+            // Create root node
+            var root = this.objectMapper.createObjectNode();
+            // Headers node
+            Map<String, List<String>> headers = Collections.list(request.getHeaderNames())
+                    .stream()
+                    .collect(Collectors.toMap(
+                            Function.identity(),
+                            h -> Collections.list(request.getHeaders(h))
+                    ));
+            var headerNode = root.putObject("header");
+            headers.forEach((key, value) -> {
                 if (value.size() > 1) {
-                    var item = formNode.putArray(key);
+                    var item = headerNode.putArray(key);
                     value.forEach(item::add);
                 } else {
-                    formNode.put(key, value.get(0));
+                    headerNode.put(key, value.get(0));
                 }
             });
+            // Query String node
+            var url = request.getRequestURL().toString();
+            var queryString = request.getQueryString();
+            MultiValueMap<String, String> parameters =
+                    UriComponentsBuilder.fromUriString(url + "?" + queryString).build().getQueryParams();
+            var queryNode = root.putObject("query");
+            parameters.forEach((key, value) -> {
+                if ("null".equals(key)) {
+                    return;
+                }
+                if (value.size() > 1) {
+                    var item = queryNode.putArray(key);
+                    value.forEach(item::add);
+                } else {
+                    queryNode.put(key, value.get(0));
+                }
+            });
+            // Body node
+            var bodyNode = root.putObject("body");
+            // Body Json node
+            if (contentType.startsWith("application/json")) {
+                var bodyJson = this.objectMapper.readTree(body);
+                bodyNode.set("json", bodyJson);
+            }
+            // Body Form node
+            if (contentType.startsWith("application/x-www-form-urlencoded")) {
+                var formNode = bodyNode.putObject("form");
+                var formMap = Pattern.compile("&")
+                        .splitAsStream(body)
+                        .map(s -> Arrays.copyOf(s.split("=", 2), 2))
+                        .collect(groupingBy(s -> decode(s[0]), mapping(s -> decode(s[1]), toList())));
+                formMap.forEach((key, value) -> {
+                    if (value.size() > 1) {
+                        var item = formNode.putArray(key);
+                        value.forEach(item::add);
+                    } else {
+                        formNode.put(key, value.get(0));
+                    }
+                });
+            }
+            // Body Text node
+            if (contentType.startsWith("text/plain")) {
+                bodyNode.put("text", body);
+            }
+            return WebRequest.Builder.aWebRequest()
+                    .userAgent(request.getHeader("User-Agent"))
+                    .payload(root.toString())
+                    .statusCode(WebRequest.StatusCode.OK)
+                    .build();
+        } catch (Exception e) {
+            return WebRequest.Builder.aWebRequest()
+                    .userAgent(request.getHeader("User-Agent"))
+                    .statusCode(WebRequest.StatusCode.UNKNOWN)
+                    .errorMsg(e.getMessage())
+                    .build();
         }
-        // Body Text node
-        if (contentType.startsWith("text/plain")) {
-            bodyNode.put("text", body);
-        }
-        return root.toString();
     }
 
     private static String decode(final String encoded) {
