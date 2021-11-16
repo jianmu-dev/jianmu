@@ -26,8 +26,8 @@ public class VaultCredentialManager implements CredentialManager {
     private final VaultOperations vaultOperations;
     private final CredentialProperties credentialProperties;
 
-    private final String EXAMPLE_KEY = "JIANMU_EXAMPLE_KEY";
-    private final String EXAMPLE_VALUE = "JIANMU_EXAMPLE_VALUE";
+    private final static String EXAMPLE_KEY = "JIANMU_EXAMPLE_KEY";
+    private final static String EXAMPLE_VALUE = "JIANMU_EXAMPLE_VALUE";
 
     public VaultCredentialManager(VaultOperations vaultOperations, CredentialProperties credentialProperties) {
         this.vaultOperations = vaultOperations;
@@ -46,7 +46,7 @@ public class VaultCredentialManager implements CredentialManager {
         if (res != null && res.getData() != null) {
             throw new RuntimeException("该命名空间已存在");
         }
-        var map = Map.of(this.EXAMPLE_KEY, this.EXAMPLE_VALUE);
+        var map = Map.of(EXAMPLE_KEY, EXAMPLE_VALUE);
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .put(namespace.getName(), map);
     }
@@ -59,7 +59,7 @@ public class VaultCredentialManager implements CredentialManager {
 
     @Override
     public void createKVPair(KVPair kvPair) {
-        if (kvPair.getKey().equals(this.EXAMPLE_KEY)) {
+        if (kvPair.getKey().equals(EXAMPLE_KEY)) {
             throw new RuntimeException("该密钥名称为内置密钥名称，不可添加");
         }
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
@@ -77,7 +77,7 @@ public class VaultCredentialManager implements CredentialManager {
 
     @Override
     public void deleteKVPair(String namespaceName, String key) {
-        if (key.equals(this.EXAMPLE_KEY)) {
+        if (key.equals(EXAMPLE_KEY)) {
             throw new RuntimeException("该密钥名称为内置密钥名称，不可删除");
         }
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
