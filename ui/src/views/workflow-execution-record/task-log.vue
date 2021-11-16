@@ -60,7 +60,6 @@
                 id="task-log"
                 :filename="`${task.nodeName}.txt`"
                 :value="taskLog"
-                :auto-scroll="taskLogAutoScroll"
               />
             </div>
           </div>
@@ -263,7 +262,6 @@ export default defineComponent({
     );
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
-    const taskLogAutoScroll = ref<boolean>(false);
     const taskParams = ref<ITaskParamVo[]>([]);
 
     proxy.$nextTick(() => adaptHeight(autoHeights[tabActiveName.value]));
@@ -283,10 +281,8 @@ export default defineComponent({
         if (contentLength > taskLog.value.length) {
           // 存在更多日志
           taskLog.value = await fetchTaskLog(props.id);
-          taskLogAutoScroll.value = true;
         } else {
           console.debug('暂无更多日志');
-          taskLogAutoScroll.value = false;
         }
 
         taskParams.value = await listTaskParam(props.id);
@@ -308,7 +304,6 @@ export default defineComponent({
 
       if (!executing.value) {
         console.debug('任务已完成，终止获取日志');
-        taskLogAutoScroll.value = false;
         return;
       }
 
@@ -332,7 +327,6 @@ export default defineComponent({
       executionTime,
       tabActiveName,
       taskLog,
-      taskLogAutoScroll,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT),

@@ -31,10 +31,6 @@ export default defineComponent({
   props: {
     filename: String,
     value: String,
-    autoScroll: {
-      type: Boolean,
-      default: false,
-    },
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
