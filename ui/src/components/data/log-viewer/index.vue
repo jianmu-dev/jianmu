@@ -9,8 +9,12 @@
         <div class="copy" @click="copy"></div>
       </jm-tooltip>
     </div>
+    <div class="auto-scroll" @click="handleAutoScroll(true)"
+         :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}">
+      Auto scroll
+    </div>
     <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
-    <div class="content" ref="contentRef">
+    <div class="content" ref="contentRef" @click="handleAutoScroll(false)">
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
         <div class="no" :style="{left: `${-1 * noWidth}px`, width: `${noWidth}px`}">
@@ -38,6 +42,7 @@ export default defineComponent({
     const data = ref<string[]>([]);
     const contentRef = ref<HTMLDivElement>();
     const noWidth = ref<number>(0);
+    const autoScroll = ref<boolean>(true);
 
     const textarea = document.createElement('textarea');
     const virtualNoDiv = document.createElement('div');
@@ -62,13 +67,23 @@ export default defineComponent({
         noWidth.value = tempNoWidth;
       }
 
-      nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
+      if (autoScroll.value) {
+        nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
+      }
     });
 
     return {
       data,
       contentRef,
       noWidth,
+      autoScroll,
+      handleAutoScroll: (val: boolean) => {
+        autoScroll.value = val;
+
+        if (val) {
+          nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
+        }
+      },
       download: () => {
         const blob = new Blob([props.value || '']);
 
@@ -153,7 +168,6 @@ export default defineComponent({
     position: absolute;
     right: 10px;
     top: 15px;
-    z-index: 1;
 
     display: flex;
     align-items: center;
@@ -190,6 +204,17 @@ export default defineComponent({
       background-color: #CDD1E3;
       overflow: hidden;
     }
+  }
+
+  .auto-scroll {
+    position: absolute;
+    right: 10px;
+    bottom: 15px;
+
+    visibility: hidden;
+
+    color: #FFF;
+    cursor: pointer;
   }
 }
 </style>
