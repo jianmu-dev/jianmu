@@ -107,7 +107,7 @@ public class VaultCredentialManager implements CredentialManager {
                 .get(namespaceName);
         if (res != null && res.getData() != null) {
             kvPairs = res.getData().entrySet().stream()
-                    .filter(entry -> !entry.getKey().equals(this.EXAMPLE_KEY))
+                    .filter(entry -> !entry.getKey().equals(EXAMPLE_KEY))
                     .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespaceName).key(entry.getKey()).value(entry.getValue().toString()).build())
                     .collect(Collectors.toList());
         }
@@ -132,7 +132,7 @@ public class VaultCredentialManager implements CredentialManager {
                 .get(namespaceName);
         if (res != null && res.getData() != null) {
             return res.getData().entrySet().stream()
-                    .filter(entry -> entry.getKey().equals(key) && !entry.getKey().equals(this.EXAMPLE_KEY))
+                    .filter(entry -> entry.getKey().equals(key) && !entry.getKey().equals(EXAMPLE_KEY))
                     .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespaceName).key(entry.getKey()).value(entry.getValue().toString()).build())
                     .findFirst();
         }
