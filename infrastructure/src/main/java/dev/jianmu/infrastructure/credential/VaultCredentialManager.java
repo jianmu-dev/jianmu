@@ -10,6 +10,7 @@ import org.springframework.vault.core.VaultOperations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,9 @@ public class VaultCredentialManager implements CredentialManager {
     private final VaultOperations vaultOperations;
     private final CredentialProperties credentialProperties;
 
+    private final static String EXAMPLE_KEY = "JIANMU_EXAMPLE_KEY";
+    private final static String EXAMPLE_VALUE = "JIANMU_EXAMPLE_VALUE";
+
     public VaultCredentialManager(VaultOperations vaultOperations, CredentialProperties credentialProperties) {
         this.vaultOperations = vaultOperations;
         this.credentialProperties = credentialProperties;
@@ -37,20 +41,53 @@ public class VaultCredentialManager implements CredentialManager {
 
     @Override
     public void createNamespace(Namespace namespace) {
+        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .get(namespace.getName());
+        if (res != null && res.getData() != null) {
+            throw new RuntimeException("该命名空间已存在");
+        }
+        var map = Map.of(EXAMPLE_KEY, EXAMPLE_VALUE);
+        this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .put(namespace.getName(), map);
     }
 
     @Override
     public void deleteNamespace(String name) {
+        this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .delete(name);
     }
 
     @Override
     public void createKVPair(KVPair kvPair) {
-
+        if (kvPair.getKey().equals(EXAMPLE_KEY)) {
+            throw new RuntimeException("该密钥名称为内置密钥名称，不可添加");
+        }
+        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .get(kvPair.getNamespaceName());
+        if (res == null || res.getData() == null) {
+            throw new RuntimeException("未找到对应的命名空间");
+        }
+        if (res.getData().get(kvPair.getKey()) != null) {
+            throw new RuntimeException("秘钥名称在该命名空间下已存在");
+        }
+        res.getData().put(kvPair.getKey(), kvPair.getValue());
+        this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .put(kvPair.getNamespaceName(), res.getData());
     }
 
     @Override
     public void deleteKVPair(String namespaceName, String key) {
-
+        if (key.equals(EXAMPLE_KEY)) {
+            throw new RuntimeException("该密钥名称为内置密钥名称，不可删除");
+        }
+        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .get(namespaceName);
+        if (res == null || res.getData() == null) {
+            throw new RuntimeException("未找到对应的命名空间");
+        }
+        res.getData().remove(key);
+        this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .put(namespaceName, res.getData());
     }
 
     @Override
@@ -69,13 +106,10 @@ public class VaultCredentialManager implements CredentialManager {
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .get(namespaceName);
         if (res != null && res.getData() != null) {
-            res.getData().forEach((k, v) ->
-                    kvPairs.add(KVPair.Builder.aKVPair()
-                            .namespaceName(namespaceName)
-                            .key(k)
-                            .value(v.toString())
-                            .build())
-            );
+            kvPairs = res.getData().entrySet().stream()
+                    .filter(entry -> !entry.getKey().equals(this.EXAMPLE_KEY))
+                    .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespaceName).key(entry.getKey()).value(entry.getValue().toString()).build())
+                    .collect(Collectors.toList());
         }
         return kvPairs;
     }
@@ -98,7 +132,7 @@ public class VaultCredentialManager implements CredentialManager {
                 .get(namespaceName);
         if (res != null && res.getData() != null) {
             return res.getData().entrySet().stream()
-                    .filter(entry -> entry.getKey().equals(key))
+                    .filter(entry -> entry.getKey().equals(key) && !entry.getKey().equals(this.EXAMPLE_KEY))
                     .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespaceName).key(entry.getKey()).value(entry.getValue().toString()).build())
                     .findFirst();
         }
