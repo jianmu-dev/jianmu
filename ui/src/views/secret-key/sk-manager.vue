@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onBeforeMount, ref } from 'vue';
 import SkEditor from './sk-editor.vue';
 import { deleteSecretKey } from '@/api/secret-key';
 import { fetchNamespaceDetail, listSecretKey } from '@/api/view-no-auth';
@@ -44,7 +44,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/secret-key';
 import { IState } from '@/model/modules/secret-key';
-import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
 
 interface IKeyType {
   id: string;
@@ -64,7 +63,6 @@ export default defineComponent({
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
-    const credentialManagerType = computed<CredentialManagerTypeEnum>(() => state.credentialManagerType);
     const description = ref<string>('无');
     const keys = ref<IKeyType[]>([]);
     const loading = ref<boolean>(false);
@@ -97,18 +95,9 @@ export default defineComponent({
         keys.value.push({ id: uuidv4(), name });
       },
       add: () => {
-        if (credentialManagerType.value !== CredentialManagerTypeEnum.LOCAL) {
-          proxy.$info(`密钥管理类型为${credentialManagerType.value}，请到${credentialManagerType.value}控制台继续操作。`);
-          return;
-        }
         creationActivated.value = true;
       },
       del: (name: string) => {
-        if (credentialManagerType.value !== CredentialManagerTypeEnum.LOCAL) {
-          proxy.$info(`密钥管理类型为${credentialManagerType.value}，请到${credentialManagerType.value}控制台继续操作。`);
-          return;
-        }
-
         if (deletings.value[name]) {
           return;
         }
