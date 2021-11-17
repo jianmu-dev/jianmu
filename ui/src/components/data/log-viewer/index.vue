@@ -10,11 +10,9 @@
       </jm-tooltip>
     </div>
     <div class="auto-scroll" @click="handleAutoScroll(true)"
-         :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}">
-      Auto scroll
-    </div>
+         :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}"></div>
     <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
-    <div class="content" ref="contentRef" @click="handleAutoScroll(false)">
+    <div class="content" ref="contentRef">
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
         <div class="no" :style="{left: `${-1 * noWidth}px`, width: `${noWidth}px`}">
@@ -55,7 +53,18 @@ export default defineComponent({
     virtualNoDiv.style.height = '0px';
     virtualNoDiv.style.visibility = 'hidden';
 
-    onMounted(() => contentRef.value?.appendChild(virtualNoDiv));
+    const handleAutoScroll = (val: boolean) => {
+      autoScroll.value = val;
+
+      if (val) {
+        nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
+      }
+    };
+
+    onMounted(() => {
+      contentRef.value?.appendChild(virtualNoDiv);
+      contentRef.value?.addEventListener('scroll', () => handleAutoScroll(contentRef.value?.scrollHeight - contentRef.value?.scrollTop <= contentRef.value?.clientHeight));
+    });
 
     watch(() => props.value, value => {
       textarea.value = value || '';
@@ -77,13 +86,7 @@ export default defineComponent({
       contentRef,
       noWidth,
       autoScroll,
-      handleAutoScroll: (val: boolean) => {
-        autoScroll.value = val;
-
-        if (val) {
-          nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
-        }
-      },
+      handleAutoScroll,
       download: () => {
         const blob = new Blob([props.value || '']);
 
@@ -215,7 +218,9 @@ export default defineComponent({
 
     visibility: hidden;
 
-    color: #FFF;
+    width: 20px;
+    height: 20px;
+    background-color: #FFF;
     cursor: pointer;
   }
 }
