@@ -46,8 +46,7 @@
             加载中...
           </jm-button>
         </div>
-        <jm-log-viewer id="process-log" :filename="`${process.name}.txt`" :value="processLog"
-                       :auto-scroll="processLogAutoScroll"/>
+        <jm-log-viewer id="process-log" :filename="`${process.name}.txt`" :value="processLog"/>
       </div>
     </div>
   </div>
@@ -82,7 +81,6 @@ export default defineComponent({
     const process = computed<IWorkflowExecutionRecordVo>(() => state.recordDetail.record as IWorkflowExecutionRecordVo);
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
     const executionTime = computed<string>(() => executionTimeFormatter(process.value.startTime, process.value.endTime, executing.value));
-    const processLogAutoScroll = ref<boolean>(false);
     const processLog = ref<string>('');
 
     proxy.$nextTick(() => adaptHeight(autoHeights.log));
@@ -101,10 +99,8 @@ export default defineComponent({
         if (contentLength > processLog.value.length) {
           // 存在更多日志
           processLog.value = await fetchProcessLog(process.value.triggerId);
-          proxy.$nextTick(() => (processLogAutoScroll.value = true));
         } else {
           console.debug('暂无更多日志');
-          processLogAutoScroll.value = false;
         }
       } catch (err) {
         if (err instanceof TimeoutError) {
@@ -124,7 +120,6 @@ export default defineComponent({
 
       if (!executing.value) {
         console.debug('流程已完成，终止获取日志');
-        processLogAutoScroll.value = false;
 
         return;
       }
@@ -147,7 +142,6 @@ export default defineComponent({
       executionTime,
       datetimeFormatter,
       processLog,
-      processLogAutoScroll,
       executing,
     };
   },
