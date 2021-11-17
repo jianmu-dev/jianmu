@@ -31,8 +31,14 @@ import useClipboard from 'vue-clipboard3';
 export default defineComponent({
   name: 'jm-log-viewer',
   props: {
-    filename: String,
-    value: String,
+    filename: {
+      type: String,
+      default: 'log.txt',
+    },
+    value: {
+      type: String,
+      default: '',
+    },
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
@@ -42,7 +48,6 @@ export default defineComponent({
     const noWidth = ref<number>(0);
     const autoScroll = ref<boolean>(true);
 
-    const textarea = document.createElement('textarea');
     const virtualNoDiv = document.createElement('div');
     virtualNoDiv.style.position = 'fixed';
     virtualNoDiv.style.left = '-1000px';
@@ -66,9 +71,8 @@ export default defineComponent({
       contentRef.value?.addEventListener('scroll', () => handleAutoScroll(contentRef.value?.scrollHeight - contentRef.value?.scrollTop <= contentRef.value?.clientHeight));
     });
 
-    watch(() => props.value, value => {
-      textarea.value = value || '';
-      data.value = textarea.value.split(/\r?\n/);
+    watch(() => props.value, (value: string) => {
+      data.value = value.split(/\r?\n/);
 
       virtualNoDiv.innerHTML = data.value.length + '';
       const tempNoWidth = virtualNoDiv.clientWidth + 25;
@@ -88,13 +92,13 @@ export default defineComponent({
       autoScroll,
       handleAutoScroll,
       download: () => {
-        const blob = new Blob([props.value || '']);
+        const blob = new Blob([props.value]);
 
         const url = window.URL.createObjectURL(blob);
 
         const a = document.createElement('a');
         a.href = url;
-        a.download = props.filename || 'log.txt';
+        a.download = props.filename;
         a.click();
 
         // 释放url
@@ -102,7 +106,7 @@ export default defineComponent({
       },
       copy: async () => {
         try {
-          await toClipboard(props.value || '');
+          await toClipboard(props.value);
           proxy.$success('复制成功');
         } catch (err) {
           proxy.$error('复制失败，请手动复制');
