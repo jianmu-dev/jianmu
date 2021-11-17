@@ -47,7 +47,7 @@ CREATE TABLE `jianmu_trigger_event`
     `id`             varchar(45) NOT NULL COMMENT '事件ID',
     `project_id`     varchar(45) NOT NULL COMMENT '项目ID',
     `trigger_id`     varchar(45) NOT NULL COMMENT '触发器ID',
-    `web_request_id` varchar(45) NOT NULL COMMENT 'WebRequest ID',
+    `web_request_id` varchar(45) DEFAULT NULL COMMENT 'WebRequest ID',
     `trigger_type`   varchar(45) NOT NULL COMMENT '触发器类型',
     `payload`        text COMMENT '事件载荷',
     `occurred_time`  datetime    NOT NULL COMMENT '触发时间',
