@@ -59,7 +59,7 @@ CREATE TABLE `jianmu_trigger_event_parameter`
     `trigger_event_id` varchar(45) NOT NULL COMMENT '触发器事件ID',
     `name`             varchar(45) NOT NULL COMMENT '参数名',
     `type`             varchar(45) NOT NULL COMMENT '参数类型',
-    `value`            varchar(45) NOT NULL COMMENT '参数值',
+    `value`            text        NOT NULL COMMENT '参数值',
     `parameter_id`     varchar(45) NOT NULL COMMENT '参数引用ID'
 );
 
