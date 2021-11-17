@@ -149,6 +149,9 @@ export default defineComponent({
         position: absolute;
         right: 0;
         user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
         text-align: right;
         padding-right: 10px;
         box-sizing: border-box;
@@ -216,15 +219,19 @@ export default defineComponent({
 
   .auto-scroll {
     position: absolute;
-    right: 10px;
-    bottom: 15px;
+    right: 25px;
+    bottom: 25px;
     z-index: 1;
 
     visibility: hidden;
 
-    width: 20px;
-    height: 20px;
-    background-color: #FFF;
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    background-color: #19253B;
+    background-image: url('./svgs/auto-scroll.svg');
+    background-repeat: no-repeat;
+    background-size: contain;
     cursor: pointer;
   }
 }
