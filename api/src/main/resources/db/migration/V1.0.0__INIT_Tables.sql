@@ -55,7 +55,7 @@ CREATE TABLE `jianmu_trigger_event`
     `id`             varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '事件ID',
     `project_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目ID',
     `trigger_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器ID',
-    `web_request_id` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'WebRequest ID',
+    `web_request_id` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'WebRequest ID',
     `trigger_type`   varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器类型',
     `payload`        text COLLATE utf8mb4_unicode_ci COMMENT '事件载荷',
     `occurred_time`  datetime                               NOT NULL COMMENT '触发时间',
@@ -69,7 +69,7 @@ CREATE TABLE `jianmu_trigger_event_parameter`
     `trigger_event_id` varchar(45) NOT NULL COMMENT '触发器事件ID',
     `name`             varchar(45) NOT NULL COMMENT '参数名',
     `type`             varchar(45) NOT NULL COMMENT '参数类型',
-    `value`            varchar(45) NOT NULL COMMENT '参数值',
+    `value`            text        NOT NULL COMMENT '参数值',
     `parameter_id`     varchar(45) NOT NULL COMMENT '参数引用ID'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

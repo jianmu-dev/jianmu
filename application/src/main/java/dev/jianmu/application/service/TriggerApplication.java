@@ -310,20 +310,22 @@ public class TriggerApplication {
         var webhook = trigger.getWebhook();
         List<TriggerEventParameter> eventParameters = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
-        webhook.getParam().forEach(webhookParameter -> {
-            Parameter<?> parameter = Parameter.Type
-                    .getTypeByName(webhookParameter.getType())
-                    .newParameter(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp()));
-            var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
-                    .name(webhookParameter.getName())
-                    .type(webhookParameter.getType())
-                    .value(parameter.getStringValue())
-                    .parameterId(parameter.getId())
-                    .build();
-            parameters.add(parameter);
-            eventParameters.add(eventParameter);
-            context.add("trigger", eventParameter.getName(), parameter);
-        });
+        if (webhook.getParam() != null) {
+            webhook.getParam().forEach(webhookParameter -> {
+                Parameter<?> parameter = Parameter.Type
+                        .getTypeByName(webhookParameter.getType())
+                        .newParameter(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp()));
+                var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                        .name(webhookParameter.getName())
+                        .type(webhookParameter.getType())
+                        .value(parameter.getStringValue())
+                        .parameterId(parameter.getId())
+                        .build();
+                parameters.add(parameter);
+                eventParameters.add(eventParameter);
+                context.add("trigger", eventParameter.getName(), parameter);
+            });
+        }
         // 验证Auth
         if (webhook.getAuth() != null) {
             var auth = webhook.getAuth();
