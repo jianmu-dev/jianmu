@@ -23,7 +23,7 @@ export default function (G6: typeof _G6) {
       },
       style: {
         fill: '#FFFFFF',
-        lineWidth: 2,
+        lineWidth: 1,
         stroke: '#35474F',
         radius: 80 * 0.242,
         shadowOffsetX: 0,

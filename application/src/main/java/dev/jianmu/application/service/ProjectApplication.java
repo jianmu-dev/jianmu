@@ -2,6 +2,7 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.event.CronEvent;
+import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
@@ -265,6 +266,13 @@ public class ProjectApplication {
                     .webhook(webhook)
                     .build();
             this.publisher.publishEvent(webhookEvent);
+        }
+        // 当触发类型为手动时
+        if (project.getTriggerType() == Project.TriggerType.MANUAL) {
+            var manualEvent = ManualEvent.builder()
+                    .projectId(project.getId())
+                    .build();
+            this.publisher.publishEvent(manualEvent);
         }
     }
 
