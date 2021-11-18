@@ -9,13 +9,23 @@
         <div class="copy" @click="copy"></div>
       </jm-tooltip>
     </div>
-    <div class="auto-scroll" @click="handleAutoScroll(true)"
-         :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}"></div>
-    <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
+    <div
+      class="auto-scroll"
+      @click="handleAutoScroll(true)"
+      :style="{ visibility: `${autoScroll ? 'hidden' : 'visible'}` }"
+    ></div>
+    <div class="no-bg" :style="{ width: `${noWidth}px` }"></div>
     <div class="content" ref="contentRef">
-      <div class="line" v-for="(txt, idx) in data" :key="idx"
-           :style="{marginLeft: `${noWidth}px`}">
-        <div class="no" :style="{left: `${-1 * noWidth}px`, width: `${noWidth}px`}">
+      <div
+        class="line"
+        v-for="(txt, idx) in data"
+        :key="idx"
+        :style="{ marginLeft: `${noWidth}px` }"
+      >
+        <div
+          class="no"
+          :style="{ left: `${-1 * noWidth}px`, width: `${noWidth}px` }"
+        >
           {{ idx + 1 }}
         </div>
         <pre class="txt">{{ txt }}</pre>
@@ -25,7 +35,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, nextTick, onMounted, ref, watch } from 'vue';
+import {
+  defineComponent,
+  getCurrentInstance,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
@@ -62,28 +79,40 @@ export default defineComponent({
       autoScroll.value = val;
 
       if (val) {
-        nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
+        nextTick(
+          () => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight)
+        );
       }
     };
 
     onMounted(() => {
       contentRef.value?.appendChild(virtualNoDiv);
-      contentRef.value?.addEventListener('scroll', () => handleAutoScroll(contentRef.value?.scrollHeight - contentRef.value?.scrollTop <= contentRef.value?.clientHeight));
+      contentRef.value?.addEventListener('scroll', () =>
+        handleAutoScroll(
+          contentRef.value?.scrollHeight - contentRef.value?.scrollTop <=
+            contentRef.value?.clientHeight
+        )
+      );
     });
 
-    watch(() => props.value, (value: string) => {
-      data.value = value.split(/\r?\n/);
+    watch(
+      () => props.value,
+      (value: string) => {
+        data.value = value.split(/\r?\n/);
 
-      virtualNoDiv.innerHTML = data.value.length + '';
-      const tempNoWidth = virtualNoDiv.clientWidth + 25;
-      if (tempNoWidth > noWidth.value) {
-        noWidth.value = tempNoWidth;
-      }
+        virtualNoDiv.innerHTML = data.value.length + '';
+        const tempNoWidth = virtualNoDiv.clientWidth + 25;
+        if (tempNoWidth > noWidth.value) {
+          noWidth.value = tempNoWidth;
+        }
 
-      if (autoScroll.value) {
-        nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
+        if (autoScroll.value) {
+          nextTick(
+            () => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight)
+          );
+        }
       }
-    });
+    );
 
     return {
       data,
@@ -121,7 +150,7 @@ export default defineComponent({
 <style scoped lang="less">
 .jm-log-viewer {
   position: relative;
-  background-color: #19253B;
+  background-color: #19253b;
   padding: 8px 0;
   box-sizing: border-box;
 
@@ -131,7 +160,7 @@ export default defineComponent({
     top: 0;
     width: 0;
     height: 100%;
-    background-color: #303D56;
+    background-color: #303d56;
   }
 
   .content {
@@ -155,7 +184,7 @@ export default defineComponent({
         text-align: right;
         padding-right: 10px;
         box-sizing: border-box;
-        color: #8193B2;
+        color: #8193b2;
       }
 
       .txt {
@@ -163,7 +192,7 @@ export default defineComponent({
         word-wrap: break-word;
         white-space: pre-wrap;
         word-break: normal;
-        color: #FFFFFF;
+        color: #ffffff;
       }
     }
   }
@@ -186,7 +215,7 @@ export default defineComponent({
     background-color: #818894;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
-    border: 1px solid #767F91;
+    border: 1px solid #767f91;
 
     visibility: hidden;
 
@@ -212,7 +241,7 @@ export default defineComponent({
       margin: 0 10px;
       width: 1px;
       height: 15px;
-      background-color: #CDD1E3;
+      background-color: #cdd1e3;
       overflow: hidden;
     }
   }
@@ -228,7 +257,7 @@ export default defineComponent({
     width: 24px;
     height: 24px;
     border-radius: 3px;
-    background-color: #19253B;
+    background-color: #19253b;
     background-image: url('./svgs/auto-scroll.svg');
     background-repeat: no-repeat;
     background-size: contain;
