@@ -19,6 +19,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -357,6 +359,9 @@ public class DslParser {
             var matcher = this.trigger.get("matcher");
             var webhookBuilder = Webhook.builder();
             if (matcher instanceof String) {
+                if (!this.isEl((String) matcher)) {
+                    throw new IllegalArgumentException("matcher表达式格式错误");
+                }
                 webhookBuilder.matcher((String) matcher);
             }
             if (auth instanceof Map) {
@@ -535,6 +540,12 @@ public class DslParser {
         if (!(targets instanceof List)) {
             throw new DslException("开始节点targets未设置");
         }
+    }
+
+    private boolean isEl(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(.*\\)$");
+        Matcher matcher = pattern.matcher(paramValue);
+        return matcher.lookingAt();
     }
 
     public Set<String> getAsyncTaskTypes() {

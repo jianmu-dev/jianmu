@@ -187,18 +187,21 @@ public class TriggerApplication {
 
     @Transactional
     public void deleteByProjectId(String projectId) {
+        // 删除Cron触发器
         this.triggerRepository.findByProjectId(projectId)
                 .ifPresent(trigger -> {
-                    try {
-                        // 停止触发器
-                        quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
-                        // 卸载任务
-                        quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
-                        // 删除任务
-                        quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
-                    } catch (SchedulerException e) {
-                        log.error("触发器删除失败: {}", e.getMessage());
-                        throw new RuntimeException("触发器删除失败");
+                    if (trigger.getType() == Trigger.Type.CRON) {
+                        try {
+                            // 停止触发器
+                            quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
+                            // 卸载任务
+                            quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
+                            // 删除任务
+                            quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
+                        } catch (SchedulerException e) {
+                            log.error("触发器删除失败: {}", e.getMessage());
+                            throw new RuntimeException("触发器删除失败");
+                        }
                     }
                     this.triggerRepository.deleteById(trigger.getId());
                 });
