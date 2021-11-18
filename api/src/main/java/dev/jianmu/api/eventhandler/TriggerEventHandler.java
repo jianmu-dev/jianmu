@@ -1,6 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.event.CronEvent;
+import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TriggerApplication;
@@ -55,4 +56,10 @@ public class TriggerEventHandler {
         // 创建Webhook触发器
         this.triggerApplication.saveOrUpdate(webhookEvent.getProjectId(), webhookEvent.getWebhook());
     }
-}
+
+    @TransactionalEventListener
+    public void handleManualEvent(ManualEvent manualEvent) {
+        // 删除相关触发器
+        this.triggerApplication.deleteByProjectId(manualEvent.getProjectId());
+    }
+ }
