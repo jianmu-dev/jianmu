@@ -124,6 +124,7 @@ export default defineComponent({
   background-color: #19253B;
   padding: 8px 0;
   box-sizing: border-box;
+  height: 100%;
 
   .no-bg {
     position: absolute;
