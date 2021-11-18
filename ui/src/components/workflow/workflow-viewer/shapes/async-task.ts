@@ -192,7 +192,7 @@ export default function (G6: typeof _G6) {
               y: -height / 2,
               width,
               height,
-              img: `${iconUrl}?imageMogr2/thumbnail/126x/sharpen/1%7CroundPic/radius/!25.5p`,
+              img: `${iconUrl}?roundPic/radius/!25.5p`,
             },
             name: 'async_task_icon',
           });
