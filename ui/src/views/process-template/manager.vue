@@ -185,7 +185,7 @@ export default defineComponent({
     let classifyClickKey = true;
     // 流程模版
     const getTemplatesList = (
-      workflowTemplates: IWorkflowTemplateViewingForm
+      workflowTemplates: IWorkflowTemplateViewingForm,
     ) => {
       templateLoading.value = true;
       isShowMore.value = false;
