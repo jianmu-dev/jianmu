@@ -86,6 +86,9 @@ public class VaultCredentialManager implements CredentialManager {
             throw new RuntimeException("未找到对应的命名空间");
         }
         res.getData().remove(key);
+        if (res.getData().isEmpty()) {
+            res.getData().put(EXAMPLE_KEY, EXAMPLE_VALUE);
+        }
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .put(namespaceName, res.getData());
     }
