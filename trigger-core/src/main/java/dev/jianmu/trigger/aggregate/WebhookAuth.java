@@ -42,15 +42,15 @@ public class WebhookAuth {
         }
 
         public Builder token(String token) {
-            var secret = this.isSecret(token);
-            if (secret == null) {
-                throw new IllegalArgumentException("Token必须使用密钥表达式类型：" + token);
-            }
             this.token = token;
             return this;
         }
 
         public Builder value(String value) {
+            var secret = this.isSecret(token);
+            if (secret == null) {
+                throw new IllegalArgumentException("Token必须使用密钥表达式类型：" + token);
+            }
             this.value = value;
             return this;
         }
