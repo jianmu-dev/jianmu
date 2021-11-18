@@ -99,7 +99,7 @@
         >
           <img
             v-if="i.icon"
-            :src="`${i.icon}?imageView2/2/w/54/h/54/interlace/1/q/100`"
+            :src="`${i.icon}?imageMogr2/thumbnail/81x/sharpen/1`"
           />
         </div>
       </div>
