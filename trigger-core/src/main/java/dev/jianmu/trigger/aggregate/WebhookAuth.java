@@ -47,9 +47,9 @@ public class WebhookAuth {
         }
 
         public Builder value(String value) {
-            var secret = this.isSecret(token);
+            var secret = this.isSecret(value);
             if (secret == null) {
-                throw new IllegalArgumentException("Token必须使用密钥表达式类型：" + token);
+                throw new IllegalArgumentException("Token value必须使用密钥表达式类型：" + value);
             }
             this.value = value;
             return this;
