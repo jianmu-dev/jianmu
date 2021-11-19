@@ -18,7 +18,7 @@ public interface WebRequestMapper {
             "values(#{id}, #{projectId}, #{workflowRef}, #{workflowVersion}, #{triggerId}, #{userAgent}, #{payload}, #{statusCode}, #{errorMsg}, #{requestTime})")
     void add(WebRequest webRequest);
 
-    @Select("SELECT * FROM jianmu_web_request")
+    @Select("SELECT * FROM jianmu_web_request where project_id = #{projectId} order by request_time desc")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -27,5 +27,5 @@ public interface WebRequestMapper {
     @Result(column = "status_code", property = "statusCode")
     @Result(column = "error_msg", property = "errorMsg")
     @Result(column = "request_time", property = "requestTime")
-    List<WebRequest> findPage();
+    List<WebRequest> findPage(String projectId);
 }

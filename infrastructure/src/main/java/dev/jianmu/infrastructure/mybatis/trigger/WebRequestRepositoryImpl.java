@@ -26,8 +26,8 @@ public class WebRequestRepositoryImpl implements WebRequestRepository {
         this.webRequestMapper.add(webRequest);
     }
 
-    public PageInfo<WebRequest> findPage(int pageNum, int pageSize) {
+    public PageInfo<WebRequest> findPage(String projectId, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(this.webRequestMapper::findPage);
+                .doSelectPageInfo(() -> this.webRequestMapper.findPage(projectId));
     }
 }
