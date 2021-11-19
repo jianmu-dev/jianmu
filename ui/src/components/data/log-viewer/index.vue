@@ -66,12 +66,7 @@ export default defineComponent({
       }
     };
 
-    onMounted(() => {
-      contentRef.value?.appendChild(virtualNoDiv);
-      contentRef.value?.addEventListener('scroll', () => handleAutoScroll(contentRef.value?.scrollHeight - contentRef.value?.scrollTop <= contentRef.value?.clientHeight));
-    });
-
-    watch(() => props.value, (value: string) => {
+    const setLog = (value: string) => {
       data.value = value.split(/\r?\n/);
 
       virtualNoDiv.innerHTML = data.value.length + '';
@@ -83,7 +78,17 @@ export default defineComponent({
       if (autoScroll.value) {
         nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
       }
+    };
+
+    onMounted(() => {
+      contentRef.value?.appendChild(virtualNoDiv);
+      contentRef.value?.addEventListener('scroll', () =>
+        handleAutoScroll(contentRef.value!.scrollHeight - contentRef.value!.scrollTop <= contentRef.value!.clientHeight));
+
+      setLog(props.value);
     });
+
+    watch(() => props.value, (value: string) => setLog(value));
 
     return {
       data,
