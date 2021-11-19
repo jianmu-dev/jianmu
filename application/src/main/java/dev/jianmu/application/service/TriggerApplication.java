@@ -271,8 +271,8 @@ public class TriggerApplication {
         return event;
     }
 
-    public PageInfo<WebRequest> findWebRequestPage(int pageNum, int pageSize) {
-        return this.webRequestRepositoryImpl.findPage(pageNum, pageSize);
+    public PageInfo<WebRequest> findWebRequestPage(String projectId, int pageNum, int pageSize) {
+        return this.webRequestRepositoryImpl.findPage(projectId, pageNum, pageSize);
     }
 
     public String getWebhookUrl(String projectId) {
