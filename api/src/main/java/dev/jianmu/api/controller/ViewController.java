@@ -2,7 +2,10 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
-import dev.jianmu.api.mapper.*;
+import dev.jianmu.api.mapper.ProjectMapper;
+import dev.jianmu.api.mapper.TaskInstanceMapper;
+import dev.jianmu.api.mapper.WorkflowInstanceMapper;
+import dev.jianmu.api.mapper.WorkflowMapper;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
@@ -168,7 +171,11 @@ public class ViewController {
                     }
                     return projectVo;
                 })
-                .orElseGet(() -> ProjectMapper.INSTANCE.toProjectVo(project))).collect(Collectors.toList());
+                .orElseGet(() -> {
+                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                    return projectVo;
+                })).collect(Collectors.toList());
     }
 
     @GetMapping("/projects/{projectId}")

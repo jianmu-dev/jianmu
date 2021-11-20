@@ -40,7 +40,7 @@ public class ProjectVo {
     private Source source;
     @Schema(description = "DSL类型")
     private DslType dslType;
-    @Schema(description = "Event Bridge Id")
+    @Schema(description = "Event Bridge Id", deprecated = true)
     private String eventBridgeId;
     @Schema(description = "触发类型")
     private String triggerType;
