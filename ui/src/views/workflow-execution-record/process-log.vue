@@ -14,7 +14,7 @@
         </jm-tooltip>
       </div>
       <div>
-        <div class="param-key">最后执行时间：</div>
+        <div class="param-key">最后完成时间：</div>
         <jm-tooltip :content="datetimeFormatter(process.endTime)" placement="bottom" effect="light">
           <div class="param-value">{{ datetimeFormatter(process.endTime) }}</div>
         </jm-tooltip>
