@@ -5,6 +5,7 @@ import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,7 +28,6 @@ public class ParameterApplication {
     }
 
     public List<Parameter> findParameters(Set<String> ids) {
-        var parameters = this.parameterRepository.findByIds(ids);
-        return parameters.stream().filter(parameter -> (!(parameter instanceof SecretParameter))).collect(Collectors.toList());
+        return this.parameterRepository.findByIds(ids);
     }
 }
