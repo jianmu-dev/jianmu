@@ -140,6 +140,7 @@ export default defineComponent({
 .secret-key-ns-manager {
   padding: 15px;
   background-color: #FFFFFF;
+  margin-bottom: 25px;
 
   .right-top-btn {
     position: fixed;
