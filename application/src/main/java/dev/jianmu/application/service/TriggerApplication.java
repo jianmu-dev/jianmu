@@ -37,6 +37,8 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -207,22 +209,23 @@ public class TriggerApplication {
                 });
     }
 
-    public String getNextFireTime(String projectId) {
+    public LocalDateTime getNextFireTime(String projectId) {
         var triggerId = this.triggerRepository.findByProjectId(projectId)
                 .filter(trigger -> trigger.getType() == Trigger.Type.CRON)
                 .map(Trigger::getId)
                 .orElse("");
         if (triggerId.isBlank()) {
-            return triggerId;
+            return null;
         }
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             var schedulerTrigger = this.quartzScheduler.getTrigger(TriggerKey.triggerKey(triggerId));
             if (schedulerTrigger != null) {
-                var date = schedulerTrigger.getNextFireTime();
-                return sdf.format(date);
+                var dateTime = schedulerTrigger.getNextFireTime()
+                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                return dateTime;
             }
-            return "";
+            return null;
         } catch (SchedulerException e) {
             log.info("未找到触发器： {}", e.getMessage());
             throw new RuntimeException("未找到触发器");

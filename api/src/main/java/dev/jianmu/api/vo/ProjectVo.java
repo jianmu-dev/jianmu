@@ -51,7 +51,7 @@ public class ProjectVo {
     @Schema(description = "最后执行时间")
     private LocalDateTime latestTime;
     @Schema(description = "下次执行时间")
-    private String nextTime;
+    private LocalDateTime nextTime;
     @Schema(description = "最后一次执行状态")
     private String status;
 }

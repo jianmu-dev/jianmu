@@ -257,8 +257,12 @@ public class ViewController {
                             instanceParameterVo.setRef(instanceParameter.getRef());
                             instanceParameterVo.setType(instanceParameter.getType().toString());
                             instanceParameterVo.setValueType(parameter.getType().toString());
-                            instanceParameterVo.setValue(parameter.getStringValue());
                             instanceParameterVo.setRequired(instanceParameter.getRequired());
+                            if (parameter.getType() == Parameter.Type.SECRET) {
+                                instanceParameterVo.setValue("**********");
+                            } else {
+                                instanceParameterVo.setValue(parameter.getStringValue());
+                            }
                         }
                     });
                     return instanceParameterVo;
