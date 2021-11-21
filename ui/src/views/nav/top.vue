@@ -4,11 +4,7 @@
       <router-link to="/">
         <div class="logo"/>
       </router-link>
-      <!--      <div class="separator"/>-->
-      <div class="title">
-        <!--        <span>自动化集成平台</span>-->
-        <span class="version">v{{ version }}</span>
-      </div>
+      <div class="version">v{{ version }}</div>
     </div>
     <div class="right">
       <router-link v-if="!session" :to="{name: 'login'}">
@@ -95,30 +91,16 @@ export default defineComponent({
       cursor: pointer;
     }
 
-    //.separator {
-    //  margin: 0 18px;
-    //  width: 1px;
-    //  height: 20px;
-    //  background-color: #C2DFFF;
-    //  border-radius: 1px;
-    //  overflow: hidden;
-    //}
-    //
-    .title {
-      //font-size: 24px;
+    .version {
+      position: absolute;
+      left: 170px;
+      bottom: 10px;
+      font-size: 12px;
       font-weight: bold;
-      //color: #042749;
-      //letter-spacing: 1px;
-
-      .version {
-        position: absolute;
-        right: -45px;
-        bottom: 10px;
-        font-size: 12px;
-        color: #082340;
-        opacity: 0.5;
-        letter-spacing: normal;
-      }
+      color: #082340;
+      opacity: 0.5;
+      letter-spacing: normal;
+      white-space: nowrap;
     }
   }
 
