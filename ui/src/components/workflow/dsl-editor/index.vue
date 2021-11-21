@@ -141,6 +141,7 @@ export default defineComponent({
   z-index: 0;
   // 必须与codemirror主题背景保持一致
   background-color: #19253B;
+  height: 100%;
 
   &:hover {
     .operation {

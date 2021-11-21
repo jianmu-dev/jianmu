@@ -46,14 +46,14 @@
             加载中...
           </jm-button>
         </div>
-        <jm-log-viewer id="process-log" :filename="`${process.name}.txt`" :value="processLog"/>
+        <jm-log-viewer :filename="`${process.name}.txt`" :value="processLog"/>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -62,28 +62,15 @@ import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkProcessLog, fetchProcessLog } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
-
-const autoHeights: {
-  [key: string]: IAutoHeight;
-} = {
-  log: {
-    elementId: 'process-log',
-    offsetTop: 250,
-  },
-};
 
 export default defineComponent({
   setup() {
-    const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const process = computed<IWorkflowExecutionRecordVo>(() => state.recordDetail.record as IWorkflowExecutionRecordVo);
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
     const executionTime = computed<string>(() => executionTimeFormatter(process.value.startTime, process.value.endTime, executing.value));
     const processLog = ref<string>('');
-
-    proxy.$nextTick(() => adaptHeight(autoHeights.log));
 
     let terminateLogLoad = false;
     const loadLog = async (retry: number) => {
@@ -202,6 +189,7 @@ export default defineComponent({
     .log {
       margin: 16px;
       position: relative;
+      height: calc(100vh - 250px);
 
       .loading {
         position: absolute;

@@ -44,7 +44,7 @@
     </div>
 
     <div class="tab-section">
-      <jm-tabs v-model="tabActiveName" @tab-click="handleTabClick">
+      <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
             <div class="tab">日志</div>
@@ -56,11 +56,7 @@
                   加载中...
                 </jm-button>
               </div>
-              <jm-log-viewer
-                id="task-log"
-                :filename="`${task.nodeName}.txt`"
-                :value="taskLog"
-              />
+              <jm-log-viewer :filename="`${task.nodeName}.txt`" :value="taskLog"/>
             </div>
           </div>
         </jm-tab-pane>
@@ -69,7 +65,7 @@
             <div class="tab">业务参数</div>
           </template>
           <div class="tab-content">
-            <div class="params" id="task-params">
+            <div class="params">
               <jm-scrollbar>
                 <div class="content">
                   <div class="title">输入参数</div>
@@ -198,7 +194,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -206,24 +202,10 @@ import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-executi
 import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import sleep from '@/utils/sleep';
 import { TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
-
-const autoHeights: {
-  [key: string]: IAutoHeight;
-} = {
-  log: {
-    elementId: 'task-log',
-    offsetTop: 286,
-  },
-  params: {
-    elementId: 'task-params',
-    offsetTop: 254,
-  },
-};
 
 export default defineComponent({
   components: { TaskState },
@@ -238,7 +220,6 @@ export default defineComponent({
     },
   },
   setup(props: any) {
-    const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const task = computed<ITaskExecutionRecordVo>(
       () =>
@@ -263,8 +244,6 @@ export default defineComponent({
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
-
-    proxy.$nextTick(() => adaptHeight(autoHeights[tabActiveName.value]));
 
     let terminateTaskLogLoad = false;
 
@@ -335,9 +314,6 @@ export default defineComponent({
         taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT),
       ),
       datetimeFormatter,
-      handleTabClick: ({ props: { name } }: any) => {
-        proxy.$nextTick(() => adaptHeight(autoHeights[name]));
-      },
     };
   },
 });
@@ -474,6 +450,7 @@ export default defineComponent({
       .log {
         margin: 16px;
         position: relative;
+        height: calc(100vh - 286px);
 
         .loading {
           position: absolute;
@@ -492,6 +469,7 @@ export default defineComponent({
         background-color: #ffffff;
         border-radius: 4px;
         color: #082340;
+        height: calc(100vh - 254px);
 
         .content {
           padding: 0 16px 16px 16px;

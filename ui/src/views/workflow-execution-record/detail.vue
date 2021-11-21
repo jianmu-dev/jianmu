@@ -74,8 +74,7 @@
     </div>
 
     <div class="workflow-section">
-      <jm-workflow-viewer id="workflow-execution-record-detail-workflow"
-                          :dsl="dslSourceCode"
+      <jm-workflow-viewer :dsl="dslSourceCode"
                           :trigger-type="data.record?.triggerType"
                           :node-infos="nodeInfos"
                           :tasks="data.taskRecords"
@@ -125,7 +124,6 @@ import ProcessLog from '@/views/workflow-execution-record/process-log.vue';
 import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { executeImmediately } from '@/api/project';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import sleep from '@/utils/sleep';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { terminate } from '@/api/workflow-execution-record';
@@ -134,11 +132,6 @@ import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 
 const { mapActions, mapMutations } = createNamespacedHelpers(namespace);
-
-const autoHeight: IAutoHeight = {
-  elementId: 'workflow-execution-record-detail-workflow',
-  offsetTop: 390,
-};
 
 export default defineComponent({
   components: { TaskLog, ProcessLog, WebhookLog },
@@ -242,8 +235,6 @@ export default defineComponent({
       } else {
         proxy.mutateNavScrollLeft(0);
       }
-
-      adaptHeight(autoHeight);
 
       await loadDetail();
     });
@@ -632,6 +623,7 @@ export default defineComponent({
 
   .workflow-section {
     background-color: #FFFFFF;
+    height: calc(100vh - 390px);
   }
 
   ::v-deep(.el-tabs__nav-scroll) {
