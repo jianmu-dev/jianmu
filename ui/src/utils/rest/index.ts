@@ -105,5 +105,14 @@ export default async function rest({
     store.commit(`${sessionNs}/mutateToken`, newToken);
   }
 
-  return m === 'head' ? res.headers : res.data;
+  if (m === 'head') {
+    return res.headers;
+  }
+
+  if (res.headers['content-type'].includes('text/plain') &&
+    typeof res.data === 'object') {
+    return JSON.stringify(res.data);
+  }
+
+  return res.data;
 }
