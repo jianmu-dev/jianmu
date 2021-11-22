@@ -1,6 +1,11 @@
 <template>
   <div class="notice-popconfirm-box">
     气泡确认框：
+    <jm-popconfirm title="default">
+      <template #reference>
+        <jm-button type="text">点击打开 default</jm-button>
+      </template>
+    </jm-popconfirm>
     <jm-popconfirm icon="jm-icon-success" title="success">
       <template #reference>
         <jm-button type="text">点击打开 success</jm-button>

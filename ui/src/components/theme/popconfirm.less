@@ -4,28 +4,34 @@
     color: #333333;
     padding: 10px 10px 20px;
 
-    [class^=jm-icon-] {
-      width: 20px;
-      height: 20px;
-      background-repeat: no-repeat;
-      background-size: contain;
-      background-position: center center;
-    }
+    .el-popconfirm__icon {
+      &::before {
+        font-size: 20px;
+      }
 
-    .jm-icon-error {
-      background-image: url('./message-box/svgs/error.svg');
-    }
+      &[class^=jm-icon-] {
+        width: 20px;
+        height: 20px;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center center;
+      }
 
-    .jm-icon-info {
-      background-image: url('./message-box/svgs/info.svg');
-    }
+      &.jm-icon-error {
+        background-image: url('./message-box/svgs/error.svg');
+      }
 
-    .jm-icon-success {
-      background-image: url('./message-box/svgs/success.svg');
-    }
+      &.jm-icon-info {
+        background-image: url('./message-box/svgs/info.svg');
+      }
 
-    .jm-icon-warning {
-      background-image: url('./message-box/svgs/warning.svg');
+      &.jm-icon-success {
+        background-image: url('./message-box/svgs/success.svg');
+      }
+
+      &.jm-icon-warning {
+        background-image: url('./message-box/svgs/warning.svg');
+      }
     }
   }
 }
