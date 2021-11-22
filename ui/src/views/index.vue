@@ -101,7 +101,10 @@
                   content="Webhook"
                   placement="bottom"
                 >
-                  <button class="webhook" @click="webhookDrawer"></button>
+                  <button
+                    class="webhook"
+                    @click="webhookDrawer(project.id)"
+                  ></button>
                 </jm-tooltip>
                 <jm-tooltip
                   v-if="project.source === DslSourceEnum.LOCAL"
@@ -150,6 +153,7 @@
     </div>
     <bottom-nav />
     <webhook-drawer
+      :current-project-id="currentProjectId"
       v-model="webhookDrawerFlag"
       @close-webhook-drawer="closeWebhookDrawer"
     ></webhook-drawer>
@@ -207,6 +211,7 @@ export default defineComponent({
     const selectedDslId = ref<string>();
     const selectedDslType = ref<DslTypeEnum>();
     const webhookDrawerFlag = ref<boolean>(false);
+    const currentProjectId = ref<string>('');
 
     console.log('开启自动刷新项目列表');
     const autoRefreshingInterval = setInterval(async () => {
@@ -267,7 +272,8 @@ export default defineComponent({
     });
 
     // 打开webhook-drawer
-    const webhookDrawer = () => {
+    const webhookDrawer = (id: string) => {
+      currentProjectId.value = id;
       webhookDrawerFlag.value = true;
     };
     // 接收webhook的自定义函数
@@ -294,6 +300,7 @@ export default defineComponent({
       webhookDrawerFlag,
       webhookDrawer,
       closeWebhookDrawer,
+      currentProjectId,
       execute: (id: string) => {
         if (executings.value[id]) {
           return;

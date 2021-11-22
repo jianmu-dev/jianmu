@@ -94,3 +94,14 @@ export enum CredentialManagerTypeEnum {
   LOCAL = 'local',
   VAULT = 'vault',
 }
+
+/**
+ * webhook请求状态
+ */
+export enum WebhookRequstStateEnum {
+  OK = 'OK',
+  NOT_ACCEPTABLE = 'NOT_ACCEPTABLE',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  NOT_FOUND = 'NOT_FOUND',
+  UNKNOWN = 'UNKNOWN',
+}

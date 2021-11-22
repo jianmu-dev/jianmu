@@ -9,18 +9,30 @@
       </div>
       <div>
         <div class="param-key">启动时间：</div>
-        <jm-tooltip :content="datetimeFormatter(process.startTime)" placement="bottom" effect="light">
-          <div class="param-value">{{ datetimeFormatter(process.startTime) }}</div>
+        <jm-tooltip
+          :content="datetimeFormatter(process.startTime)"
+          placement="bottom"
+          effect="light"
+        >
+          <div class="param-value">
+            {{ datetimeFormatter(process.startTime) }}
+          </div>
         </jm-tooltip>
       </div>
       <div>
         <div class="param-key">最后执行时间：</div>
-        <jm-tooltip :content="datetimeFormatter(process.endTime)" placement="bottom" effect="light">
-          <div class="param-value">{{ datetimeFormatter(process.endTime) }}</div>
+        <jm-tooltip
+          :content="datetimeFormatter(process.endTime)"
+          placement="bottom"
+          effect="light"
+        >
+          <div class="param-value">
+            {{ datetimeFormatter(process.endTime) }}
+          </div>
         </jm-tooltip>
       </div>
       <div>
-        <div class="param-key ">执行时长：</div>
+        <div class="param-key">执行时长：</div>
         <jm-tooltip :content="executionTime" placement="bottom" effect="light">
           <div class="param-value">{{ executionTime }}</div>
         </jm-tooltip>
@@ -33,7 +45,11 @@
       </div>
       <div>
         <div class="param-key">流程版本号：</div>
-        <jm-tooltip :content="process.workflowVersion" placement="bottom" effect="light">
+        <jm-tooltip
+          :content="process.workflowVersion"
+          placement="bottom"
+          effect="light"
+        >
           <div class="param-value ellipsis">{{ process.workflowVersion }}</div>
         </jm-tooltip>
       </div>
@@ -46,14 +62,25 @@
             加载中...
           </jm-button>
         </div>
-        <jm-log-viewer id="process-log" :filename="`${process.name}.txt`" :value="processLog"/>
+        <jm-log-viewer
+          id="process-log"
+          :filename="`${process.name}.txt`"
+          :value="processLog"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  getCurrentInstance,
+  onBeforeMount,
+  onBeforeUnmount,
+  ref,
+} from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -78,9 +105,21 @@ export default defineComponent({
   setup() {
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
-    const process = computed<IWorkflowExecutionRecordVo>(() => state.recordDetail.record as IWorkflowExecutionRecordVo);
-    const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
-    const executionTime = computed<string>(() => executionTimeFormatter(process.value.startTime, process.value.endTime, executing.value));
+    const process = computed<IWorkflowExecutionRecordVo>(
+      () => state.recordDetail.record as IWorkflowExecutionRecordVo
+    );
+    const executing = computed<boolean>(
+      () =>
+        WorkflowExecutionRecordStatusEnum.RUNNING ===
+        (process.value.status as WorkflowExecutionRecordStatusEnum)
+    );
+    const executionTime = computed<string>(() =>
+      executionTimeFormatter(
+        process.value.startTime,
+        process.value.endTime,
+        executing.value
+      )
+    );
     const processLog = ref<string>('');
 
     proxy.$nextTick(() => adaptHeight(autoHeights.log));
@@ -152,7 +191,7 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   height: 100%;
 
   .basic-section {
@@ -160,7 +199,7 @@ export default defineComponent({
     padding: 16px 20px 0;
     display: flex;
     justify-content: space-between;
-    box-shadow: 0 0 8px 0 #9EB1C5;
+    box-shadow: 0 0 8px 0 #9eb1c5;
 
     .ellipsis {
       display: inline-block;
@@ -180,7 +219,7 @@ export default defineComponent({
       cursor: default;
 
       .param-key {
-        color: #6B7B8D;
+        color: #6b7b8d;
         margin-bottom: 8px;
       }
 
@@ -197,7 +236,7 @@ export default defineComponent({
 
   .process-log {
     margin: 0 20px;
-    border: 1px solid #EEF0F7;
+    border: 1px solid #eef0f7;
 
     .log {
       margin: 16px;
@@ -216,6 +255,5 @@ export default defineComponent({
       }
     }
   }
-
 }
 </style>

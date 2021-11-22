@@ -40,6 +40,8 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
         '/view': { target, changeOrigin },
         // 节点库
         '/library': { target, changeOrigin },
+        // webhook列表
+        '/trigger': { target, changeOrigin },
         // '/xxx': {
         //   target: 'http://xxx.xxx.xxx.xxx',
         //   // 发送请求头中，host会设置成target

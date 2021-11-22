@@ -11,195 +11,201 @@ import {
 /**
  * 保存项目dto
  */
-export interface IProjectSavingDto extends Readonly<{
-  id?: string;
-  dslText: string;
-}> {
-}
+export interface IProjectSavingDto
+  extends Readonly<{
+    id?: string;
+    dslText: string;
+  }> {}
 
 /**
  * 克隆Git库dto
  */
-export interface IGitCloningDto extends Readonly<{
-  uri: string;
-  credential: {
-    type?: ProjectImporterTypeEnum;
-    namespace?: string;
-    userKey?: string;
-    passKey?: string;
-    privateKey?: string
-  };
-  branch: string;
-}> {
-}
+export interface IGitCloningDto
+  extends Readonly<{
+    uri: string;
+    credential: {
+      type?: ProjectImporterTypeEnum;
+      namespace?: string;
+      userKey?: string;
+      passKey?: string;
+      privateKey?: string;
+    };
+    branch: string;
+  }> {}
 
 /**
  * git值对象
  */
-export interface IGitVo extends Readonly<{
-  id: string;
-  uri: string;
-  branch: string;
-}> {
-}
+export interface IGitVo
+  extends Readonly<{
+    id: string;
+    uri: string;
+    branch: string;
+  }> {}
 
 /**
  * 导入项目dto
  */
-export interface IProjectImportingDto extends Readonly<IGitCloningDto & {
-  id: string;
-  dslPath: string;
-}> {
-}
+export interface IProjectImportingDto
+  extends Readonly<
+    IGitCloningDto & {
+      id: string;
+      dslPath: string;
+    }
+  > {}
 
 /**
  * 查询项目dto
  */
-export interface IProjectQueryingDto extends Readonly<{
-  name?: string;
-}> {
-}
+export interface IProjectQueryingDto
+  extends Readonly<{
+    name?: string;
+  }> {}
 
 /**
  * 项目vo
  */
-export interface IProjectVo extends Readonly<BaseVo & {
-  id: string;
-  name: string;
-  source: DslSourceEnum;
-  dslType: DslTypeEnum;
-  gitRepoId?: string;
-  startTime?: string;
-  latestTime?: string;
-  nextTime?: string;
-  status: ProjectStatusEnum;
-  eventBridgeId?: string;
-  triggerType: TriggerTypeEnum;
-}> {
-}
+export interface IProjectVo
+  extends Readonly<
+    BaseVo & {
+      id: string;
+      name: string;
+      source: DslSourceEnum;
+      dslType: DslTypeEnum;
+      gitRepoId?: string;
+      startTime?: string;
+      latestTime?: string;
+      nextTime?: string;
+      status: ProjectStatusEnum;
+      eventBridgeId?: string;
+      triggerType: TriggerTypeEnum;
+    }
+  > {}
 
 /**
  * 项目详情vo
  */
-export interface IProjectDetailVo extends Readonly<BaseVo & {
-  id: string;
-  dslSource: DslSourceEnum;
-  dslType: DslTypeEnum;
-  gitRepoId?: string;
-  workflowName: string;
-  workflowRef: string;
-  workflowVersion: string;
-  steps: number;
-  dslText: string;
-  eventBridgeId?: string;
-  triggerType: TriggerTypeEnum;
-}> {
-}
+export interface IProjectDetailVo
+  extends Readonly<
+    BaseVo & {
+      id: string;
+      dslSource: DslSourceEnum;
+      dslType: DslTypeEnum;
+      gitRepoId?: string;
+      workflowName: string;
+      workflowRef: string;
+      workflowVersion: string;
+      steps: number;
+      dslText: string;
+      eventBridgeId?: string;
+      triggerType: TriggerTypeEnum;
+    }
+  > {}
 
 /**
  * 项目webhook vo
  */
-export interface IProjectWebhookVo extends Readonly<{
-  webhook: string;
-}> {
-}
+export interface IProjectWebhookVo
+  extends Readonly<{
+    webhook: string;
+  }> {}
 
 /**
  * 流程模板vo
  */
-export interface IProcessTemplateVo extends Readonly<{
-  id: number
-  name: string
-  type: string
-  dsl: string
-  nodeDefs: [
-    {
-      name: string
-      description: string
-      type: string
-      icon: string
-      ownerRef: string
-      sourceLink: string
-      documentLink: string
-      workType: string
-    }
-  ]
-}> {
-}
+export interface IProcessTemplateVo
+  extends Readonly<{
+    id: number;
+    name: string;
+    type: string;
+    dsl: string;
+    nodeDefs: [
+      {
+        name: string;
+        description: string;
+        type: string;
+        icon: string;
+        ownerRef: string;
+        sourceLink: string;
+        documentLink: string;
+        workType: string;
+      }
+    ];
+  }> {}
 
 /**
  * 任务参数vo
  */
-export interface ITaskParameterVo extends Readonly<{
-  ref: string;
-  expression: string;
-}> {
-}
+export interface ITaskParameterVo
+  extends Readonly<{
+    ref: string;
+    expression: string;
+  }> {}
 
 /**
  * 流程节点vo
  */
-export interface IWorkflowNodeVo extends Readonly<{
-  /**
-   * 节点定义名称
-   */
-  name: string;
-  /**
-   * 节点定义描述
-   */
-  description?: string;
-  /**
-   * 节点定义
-   */
-  metadata?: string;
-  ref: string;
-  type: string;
-  taskParameters: ITaskParameterVo[];
-  sources: string[];
-  targets: string[];
-}> {
-}
+export interface IWorkflowNodeVo
+  extends Readonly<{
+    /**
+     * 节点定义名称
+     */
+    name: string;
+    /**
+     * 节点定义描述
+     */
+    description?: string;
+    /**
+     * 节点定义
+     */
+    metadata?: string;
+    ref: string;
+    type: string;
+    taskParameters: ITaskParameterVo[];
+    sources: string[];
+    targets: string[];
+  }> {}
 
 /**
  * 全局参数vo
  */
-export interface IGlobalParameterVo extends Readonly<{
-  name: string;
-  type: string;
-  value: string | number | boolean;
-}> {
-}
+export interface IGlobalParameterVo
+  extends Readonly<{
+    name: string;
+    type: string;
+    value: string | number | boolean;
+  }> {}
 
 /**
  * 流程vo
  */
-export interface IWorkflowVo extends Readonly<{
-  name: string;
-  ref: string;
-  type: DslTypeEnum;
-  description?: string;
-  version: string;
-  nodes: IWorkflowNodeVo[];
-  globalParameters: IGlobalParameterVo[];
-  dslText: string;
-}> {
-}
+export interface IWorkflowVo
+  extends Readonly<{
+    name: string;
+    ref: string;
+    type: DslTypeEnum;
+    description?: string;
+    version: string;
+    nodes: IWorkflowNodeVo[];
+    globalParameters: IGlobalParameterVo[];
+    dslText: string;
+  }> {}
 
 /**
  * 节点定义vo
  */
-export interface INodeDefVo extends Readonly<{
-  name: string;
-  description?: string;
-  icon?: string;
-  ownerName: string;
-  ownerType: string;
-  ownerRef: string;
-  creatorName: string;
-  creatorRef: string;
-  sourceLink?: string;
-  documentLink?: string;
-  type: string;
-  workerType: NodeTypeEnum;
-}> {
-}
+export interface INodeDefVo
+  extends Readonly<{
+    name: string;
+    description?: string;
+    icon?: string;
+    ownerName: string;
+    ownerType: string;
+    ownerRef: string;
+    creatorName: string;
+    creatorRef: string;
+    sourceLink?: string;
+    documentLink?: string;
+    type: string;
+    workerType: NodeTypeEnum;
+  }> {}
