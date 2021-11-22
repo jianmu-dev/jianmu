@@ -4,7 +4,19 @@
       <router-link to="/">
         <div class="logo"/>
       </router-link>
-      <div class="version">v{{ version }}</div>
+      <jm-popconfirm title="最新版本为v2.1.0"
+                     icon="jm-icon-info"
+                     confirmButtonText="查看"
+                     cancelButtonText="忽略"
+                     confirmButtonIcon="jm-icon-button-visible"
+                     cancelButtonIcon="jm-icon-button-terminate">
+        <template #reference>
+          <div class="version">
+            <div class="new"></div>
+            <span class="txt">v{{ version }}</span>
+          </div>
+        </template>
+      </jm-popconfirm>
     </div>
     <div class="right">
       <router-link v-if="!session" :to="{name: 'login'}">
@@ -94,13 +106,32 @@ export default defineComponent({
     .version {
       position: absolute;
       left: 170px;
-      bottom: 10px;
-      font-size: 12px;
-      font-weight: bold;
-      color: #082340;
-      opacity: 0.5;
+      bottom: 8px;
       letter-spacing: normal;
       white-space: nowrap;
+      padding: 0 10px 1px;
+      height: 16px;
+      background-color: #F2F2F2;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+
+      .txt {
+        font-size: 12px;
+        font-weight: bold;
+        color: #082340;
+        opacity: 0.5;
+      }
+
+      .new {
+        position: absolute;
+        right: -3px;
+        top: -3px;
+        width: 8px;
+        height: 8px;
+        background-color: #FF0D0D;
+        border-radius: 4px;
+      }
     }
   }
 
