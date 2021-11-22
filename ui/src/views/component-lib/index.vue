@@ -39,6 +39,7 @@
       <notice-loading/>
       <notice-message/>
       <notice-message-box/>
+      <notice-popconfirm/>
     </div>
     <div class="group">
       <div>其他：</div>
@@ -82,6 +83,7 @@ import NavigationSteps from './navigation-steps.vue';
 import NoticeLoading from './notice-loading.vue';
 import NoticeMessage from './notice-message.vue';
 import NoticeMessageBox from './notice-message-box.vue';
+import NoticePopconfirm from './notice-popconfirm.vue';
 import OthersDialog from './others-dialog.vue';
 import OthersDraggable from './others-draggable.vue';
 import OthersDrawer from './others-drawer.vue';
@@ -95,7 +97,7 @@ export default defineComponent({
     DataBadge, DataDatePicker, DataLogViewer, DataPagination, DataState, DataTable, DataTree,
     FormCheckbox, FormForm, FormInput, FormRadio, FormSelect, FormTagsInput, FormCascader,
     NavigationBreadcrumb, NavigationDropdown, NavigationTabs, NavigationSteps,
-    NoticeLoading, NoticeMessage, NoticeMessageBox,
+    NoticeLoading, NoticeMessage, NoticeMessageBox, NoticePopconfirm,
     OthersDialog, OthersDraggable, OthersDrawer, OthersTooltip,
     WorkflowDslEditor, WorkflowWorkflowViewer,
   },
