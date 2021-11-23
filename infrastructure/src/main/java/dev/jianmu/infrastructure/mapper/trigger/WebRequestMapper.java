@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @class WebRequestMapper
@@ -28,4 +29,15 @@ public interface WebRequestMapper {
     @Result(column = "error_msg", property = "errorMsg")
     @Result(column = "request_time", property = "requestTime")
     List<WebRequest> findPage(String projectId);
+
+    @Select("SELECT * FROM jianmu_web_request where id = #{id}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "user_agent", property = "userAgent")
+    @Result(column = "status_code", property = "statusCode")
+    @Result(column = "error_msg", property = "errorMsg")
+    @Result(column = "request_time", property = "requestTime")
+    Optional<WebRequest> findById(String id);
 }

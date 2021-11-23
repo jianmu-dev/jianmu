@@ -8,14 +8,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
+ * @author Ethan Liu
  * @class TriggerController
  * @description TriggerController
- * @author Ethan Liu
  * @create 2021-11-15 13:36
  */
 @RestController
@@ -33,5 +31,11 @@ public class TriggerController {
     @Operation(summary = "分页返回Webhook请求列表", description = "分页返回Webhook请求列表")
     public PageInfo<WebRequest> listWebRequest(@Validated WebRequestDto dto) {
         return this.triggerApplication.findWebRequestPage(dto.getProjectId(), dto.getPageNum(), dto.getPageSize());
+    }
+
+    @PostMapping("/retry/{webRequestId}")
+    @Operation(summary = "Webhook请求重试", description = "Webhook请求重试")
+    public void retry(@PathVariable String webRequestId) {
+        this.triggerApplication.retryHttpEvent(webRequestId);
     }
 }
