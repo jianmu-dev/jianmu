@@ -110,9 +110,9 @@ export default async function rest({
   }
 
   const resContentType = res.headers['content-type'];
-  
+
   if (resContentType && resContentType.includes('text/plain') && typeof res.data === 'object') {
-    return JSON.stringify(res.data);
+    return res.request.responseText;
   }
 
   return res.data;
