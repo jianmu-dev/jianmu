@@ -9,11 +9,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @class: LibraryController
- * @description: LibraryController
- * @author: Ethan Liu
- * @create: 2021-09-15 14:10
- **/
+ * @class LibraryController
+ * @description LibraryController
+ * @author Ethan Liu
+ * @create 2021-09-15 14:10
+*/
 @RestController
 @RequestMapping("library")
 @Tag(name = "Hub", description = "Hub API")

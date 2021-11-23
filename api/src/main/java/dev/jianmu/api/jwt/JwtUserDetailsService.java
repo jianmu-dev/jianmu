@@ -8,11 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * @class: JwtUserDetailsService
- * @description: JwtUserDetailsService
- * @author: Ethan Liu
- * @create: 2021-05-17 21:10
- **/
+ * @class JwtUserDetailsService
+ * @description JwtUserDetailsService
+ * @author Ethan Liu
+ * @create 2021-05-17 21:10
+*/
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;

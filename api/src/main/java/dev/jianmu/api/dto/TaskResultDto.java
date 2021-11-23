@@ -6,11 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: TaskResult
- * @description: 任务执行结果DTO
- * @author: Ethan Liu
- * @create: 2021-04-16 12:50
- **/
+ * @class TaskResult
+ * @description 任务执行结果DTO
+ * @author Ethan Liu
+ * @create 2021-04-16 12:50
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

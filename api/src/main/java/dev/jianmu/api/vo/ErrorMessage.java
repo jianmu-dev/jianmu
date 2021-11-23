@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @class: ErrorMessage
- * @description: Rest API异常信息封装DTO
- * @author: Ethan Liu
- * @create: 2021-04-06 20:47
- **/
+ * @class ErrorMessage
+ * @description Rest API异常信息封装DTO
+ * @author Ethan Liu
+ * @create 2021-04-06 20:47
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

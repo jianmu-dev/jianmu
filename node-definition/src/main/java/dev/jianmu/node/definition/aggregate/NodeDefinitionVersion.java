@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @class: NodeDefinitionVersion
- * @description: 节点定义版本
- * @author: Ethan Liu
- * @create: 2021-09-03 14:58
- **/
+ * @class NodeDefinitionVersion
+ * @description 节点定义版本
+ * @author Ethan Liu
+ * @create 2021-09-03 14:58
+*/
 public class NodeDefinitionVersion {
 
     private String id;

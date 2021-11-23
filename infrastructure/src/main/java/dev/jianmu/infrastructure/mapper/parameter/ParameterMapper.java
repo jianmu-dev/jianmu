@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @class: ParameterMapper
- * @description: 参数Mapper
- * @author: Ethan Liu
- * @create: 2021-04-10 10:02
- **/
+ * @class ParameterMapper
+ * @description 参数Mapper
+ * @author Ethan Liu
+ * @create 2021-04-10 10:02
+*/
 public interface ParameterMapper {
     @Insert("<script>" +
             "insert into parameter(id, type, value) values" +

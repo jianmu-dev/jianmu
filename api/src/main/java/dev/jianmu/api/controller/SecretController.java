@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @class: SecretController
- * @description: 密钥管理接口
- * @author: Ethan Liu
- * @create: 2021-04-19 19:46
- **/
+ * @class SecretController
+ * @description 密钥管理接口
+ * @author Ethan Liu
+ * @create 2021-04-19 19:46
+*/
 @RestController
 @RequestMapping("secrets")
 @Tag(name = "密钥管理接口", description = "提供密钥创建删除等API")

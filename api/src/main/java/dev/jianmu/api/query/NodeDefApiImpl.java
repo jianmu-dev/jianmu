@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @class: NodeDefApiImpl
- * @description: 节点定义查询API实现类
- * @author: Ethan Liu
- * @create: 2021-09-04 18:34
- **/
+ * @class NodeDefApiImpl
+ * @description 节点定义查询API实现类
+ * @author Ethan Liu
+ * @create 2021-09-04 18:34
+*/
 @Component
 public class NodeDefApiImpl implements NodeDefApi {
     private final HubApplication hubApplication;

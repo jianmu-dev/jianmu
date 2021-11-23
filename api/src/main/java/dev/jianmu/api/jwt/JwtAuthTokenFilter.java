@@ -15,11 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * @class: JwtAuthTokenFilter
- * @description: JwtAuthTokenFilter
- * @author: Ethan Liu
- * @create: 2021-05-17 20:48
- **/
+ * @class JwtAuthTokenFilter
+ * @description JwtAuthTokenFilter
+ * @author Ethan Liu
+ * @create 2021-05-17 20:48
+*/
 @Component
 public class JwtAuthTokenFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;

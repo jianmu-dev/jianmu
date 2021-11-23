@@ -12,11 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 
 /**
- * @class: NodeInfoTypeHandler
- * @description: NodeInfoTypeHandler
- * @author: Ethan Liu
- * @create: 2021-09-19 13:27
- **/
+ * @class NodeInfoTypeHandler
+ * @description NodeInfoTypeHandler
+ * @author Ethan Liu
+ * @create 2021-09-19 13:27
+*/
 public class NodeInfoTypeHandler extends BaseTypeHandler<NodeInfo> {
     private final ObjectMapper objectMapper;
 

@@ -3,11 +3,11 @@ package dev.jianmu.secret.aggregate;
 import java.time.LocalDateTime;
 
 /**
- * @class: Namespace
- * @description: 命名空间
- * @author: Ethan Liu
- * @create: 2021-04-20 12:36
- **/
+ * @class Namespace
+ * @description 命名空间
+ * @author Ethan Liu
+ * @create 2021-04-20 12:36
+*/
 public class Namespace {
     private String name;
     private String description;

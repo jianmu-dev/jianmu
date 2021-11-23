@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @class: WorkerTask
- * @description: WorkerTask
- * @author: Ethan Liu
- * @create: 2021-09-10 22:17
- **/
+ * @class WorkerTask
+ * @description WorkerTask
+ * @author Ethan Liu
+ * @create 2021-09-10 22:17
+*/
 public class WorkerTask {
     private String workerId;
     private Worker.Type type;

@@ -1,10 +1,10 @@
 package dev.jianmu.worker.event;
 
 /**
- * @class: TerminateTaskEvent
- * @description: TerminateTaskEvent
- * @author: Ethan Liu
- * @create: 2021-11-12 13:43
+ * @class TerminateTaskEvent
+ * @description TerminateTaskEvent
+ * @author Ethan Liu
+ * @create 2021-11-12 13:43
  */
 public class TerminateTaskEvent {
     private String workerId;

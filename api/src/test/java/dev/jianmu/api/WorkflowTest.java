@@ -14,11 +14,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @class: WorkflowTest
- * @description: TODO
- * @author: Ethan Liu
- * @create: 2021-04-08 21:01
- **/
+ * @class WorkflowTest
+ * @description TODO
+ * @author Ethan Liu
+ * @create 2021-04-08 21:01
+*/
 @SpringBootTest(classes = SpringbootApp.class)
 @ActiveProfiles("test")
 public class WorkflowTest {

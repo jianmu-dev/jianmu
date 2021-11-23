@@ -25,11 +25,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @class: JgitService
- * @description: JgitService
- * @author: Ethan Liu
- * @create: 2021-05-13 15:40
- **/
+ * @class JgitService
+ * @description JgitService
+ * @author Ethan Liu
+ * @create 2021-05-13 15:40
+*/
 @Service
 public class JgitService {
     private static final Logger logger = LoggerFactory.getLogger(JgitService.class);

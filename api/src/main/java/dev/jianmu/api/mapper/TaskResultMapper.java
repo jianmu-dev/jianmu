@@ -7,11 +7,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @class: TaskResultMapper
- * @description: TaskResultMapper
- * @author: Ethan Liu
- * @create: 2021-04-24 15:24
- **/
+ * @class TaskResultMapper
+ * @description TaskResultMapper
+ * @author Ethan Liu
+ * @create 2021-04-24 15:24
+*/
 @Mapper
 public interface TaskResultMapper {
     TaskResultMapper INSTANCE = Mappers.getMapper(TaskResultMapper.class);

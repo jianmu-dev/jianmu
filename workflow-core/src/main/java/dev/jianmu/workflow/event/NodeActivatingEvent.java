@@ -1,11 +1,11 @@
 package dev.jianmu.workflow.event;
 
 /**
- * @class: NodeActivatingEvent
- * @description: 节点激活事件
- * @author: Ethan Liu
- * @create: 2021-03-17 13:53
- **/
+ * @class NodeActivatingEvent
+ * @description 节点激活事件
+ * @author Ethan Liu
+ * @create 2021-03-17 13:53
+*/
 public class NodeActivatingEvent extends BaseEvent {
     private NodeActivatingEvent() {
     }

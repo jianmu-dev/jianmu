@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: InstanceParameterVo
- * @description: InstanceParameterVo
- * @author: Ethan Liu
- * @create: 2021-06-09 20:28
- **/
+ * @class InstanceParameterVo
+ * @description InstanceParameterVo
+ * @author Ethan Liu
+ * @create 2021-06-09 20:28
+*/
 @Data
 @Builder
 @AllArgsConstructor

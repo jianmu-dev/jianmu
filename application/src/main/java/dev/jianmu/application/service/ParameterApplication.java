@@ -11,11 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @class: ParameterApplication
- * @description: 参数门面类
- * @author: Ethan Liu
- * @create: 2021-04-07 16:53
- **/
+ * @class ParameterApplication
+ * @description 参数门面类
+ * @author Ethan Liu
+ * @create 2021-04-07 16:53
+*/
 @Service
 public class ParameterApplication {
 

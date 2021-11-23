@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @class: AggregateRoot
- * @description: 聚合根定义
- * @author: Ethan Liu
- * @create: 2021-03-25 07:43
- **/
+ * @class AggregateRoot
+ * @description 聚合根定义
+ * @author Ethan Liu
+ * @create 2021-03-25 07:43
+*/
 public class AggregateRoot {
     private final List<DomainEvent> events = new ArrayList<>();
 

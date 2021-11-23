@@ -12,11 +12,11 @@ import javax.annotation.Resource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: ElServiceTest
- * @description: 表达式引擎集成测试
- * @author: Ethan Liu
- * @create: 2021-03-22 15:06
- **/
+ * @class ElServiceTest
+ * @description 表达式引擎集成测试
+ * @author Ethan Liu
+ * @create 2021-03-22 15:06
+*/
 @SpringBootTest(classes = SpringbootApp.class)
 @ActiveProfiles("test")
 public class ElServiceTest {

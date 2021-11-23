@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * @class: GitApplication
- * @description: GitApplication
- * @author: Ethan Liu
- * @create: 2021-05-14 11:19
- **/
+ * @class GitApplication
+ * @description GitApplication
+ * @author Ethan Liu
+ * @create 2021-05-14 11:19
+*/
 @Service
 public class GitApplication {
     private static final Logger logger = LoggerFactory.getLogger(GitApplication.class);

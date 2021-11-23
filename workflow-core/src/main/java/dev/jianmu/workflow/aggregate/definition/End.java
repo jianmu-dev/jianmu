@@ -2,10 +2,10 @@ package dev.jianmu.workflow.aggregate.definition;
 
 /**
  * @program: workflow
- * @description: 结束节点
- * @author: Ethan Liu
- * @create: 2021-01-21 13:13
- **/
+ * @description 结束节点
+ * @author Ethan Liu
+ * @create 2021-01-21 13:13
+*/
 public class End extends BaseNode {
 
     private End() {

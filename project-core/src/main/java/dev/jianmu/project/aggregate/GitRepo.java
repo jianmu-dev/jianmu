@@ -3,11 +3,11 @@ package dev.jianmu.project.aggregate;
 import java.util.UUID;
 
 /**
- * @class: GitRepo
- * @description: Git仓库模型
- * @author: Ethan Liu
- * @create: 2021-05-12 16:02
- **/
+ * @class GitRepo
+ * @description Git仓库模型
+ * @author Ethan Liu
+ * @create 2021-05-12 16:02
+*/
 public class GitRepo {
 
     private String id = UUID.randomUUID().toString().replace("-", "");

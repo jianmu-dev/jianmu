@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @class: DslTextDto
- * @description: DslTextDto
- * @author: Ethan Liu
- * @create: 2021-04-26 17:13
- **/
+ * @class DslTextDto
+ * @description DslTextDto
+ * @author Ethan Liu
+ * @create 2021-04-26 17:13
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

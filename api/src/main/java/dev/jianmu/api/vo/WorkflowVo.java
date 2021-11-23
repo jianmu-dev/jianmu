@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 import java.util.Set;
 
 /**
- * @class: WorkflowVo
- * @description: WorkflowVo
- * @author: Ethan Liu
- * @create: 2021-10-31 14:40
- **/
+ * @class WorkflowVo
+ * @description WorkflowVo
+ * @author Ethan Liu
+ * @create 2021-10-31 14:40
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: InstanceRepositoryImpl
- * @description: 任务实例仓储实现类
- * @author: Ethan Liu
- * @create: 2021-03-25 20:54
- **/
+ * @class InstanceRepositoryImpl
+ * @description 任务实例仓储实现类
+ * @author Ethan Liu
+ * @create 2021-03-25 20:54
+*/
 @Repository
 public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceRepositoryImpl.class);

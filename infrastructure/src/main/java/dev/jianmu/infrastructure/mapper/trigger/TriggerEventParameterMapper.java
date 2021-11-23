@@ -9,10 +9,10 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * @class: TriggerEventParameterMapper
- * @description: TriggerEventParameterMapper
- * @author: Ethan Liu
- * @create: 2021-11-11 09:45
+ * @class TriggerEventParameterMapper
+ * @description TriggerEventParameterMapper
+ * @author Ethan Liu
+ * @create 2021-11-11 09:45
  */
 public interface TriggerEventParameterMapper {
     @Select("SELECT * FROM `jianmu_trigger_event_parameter` WHERE trigger_event_id = #{triggerEventId}")

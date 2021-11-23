@@ -14,11 +14,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 /**
- * @class: RestClient
- * @description: RestClient
- * @author: Ethan Liu
- * @create: 2021-06-21 09:05
- **/
+ * @class RestClient
+ * @description RestClient
+ * @author Ethan Liu
+ * @create 2021-06-21 09:05
+*/
 @Slf4j
 @Service
 public class RegistryClient {

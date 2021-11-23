@@ -27,11 +27,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @class: HubApplication
- * @description: HubApplication
- * @author: Ethan Liu
- * @create: 2021-09-04 10:03
- **/
+ * @class HubApplication
+ * @description HubApplication
+ * @author Ethan Liu
+ * @create 2021-09-04 10:03
+*/
 @Service
 public class HubApplication {
     private final NodeDefinitionRepositoryImpl nodeDefinitionRepository;

@@ -1,11 +1,11 @@
 package dev.jianmu.task.event;
 
 /**
- * @class: TaskInstanceFailedEvent
- * @description: 任务实例运行失败事件
- * @author: Ethan Liu
- * @create: 2021-04-06 16:08
- **/
+ * @class TaskInstanceFailedEvent
+ * @description 任务实例运行失败事件
+ * @author Ethan Liu
+ * @create 2021-04-06 16:08
+*/
 public class TaskInstanceFailedEvent extends BaseEvent {
     private TaskInstanceFailedEvent() {
     }

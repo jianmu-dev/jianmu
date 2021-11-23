@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @class: NodeDefinitionVersionDto
- * @description: NodeDefinitionVersionDto
- * @author: Ethan Liu
- * @create: 2021-09-08 19:49
- **/
+ * @class NodeDefinitionVersionDto
+ * @description NodeDefinitionVersionDto
+ * @author Ethan Liu
+ * @create 2021-09-08 19:49
+*/
 @NoArgsConstructor
 @Data
 public class NodeDefinitionVersionDto {

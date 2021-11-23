@@ -1,10 +1,10 @@
 package dev.jianmu.trigger.aggregate;
 
 /**
- * @class: WebhookParameter
- * @description: WebhookParameter
- * @author: Ethan Liu
- * @create: 2021-11-10 11:26
+ * @class WebhookParameter
+ * @description WebhookParameter
+ * @author Ethan Liu
+ * @create 2021-11-10 11:26
  */
 public class WebhookParameter {
     private String name;

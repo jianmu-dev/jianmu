@@ -9,11 +9,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @class: ReflectTool
- * @description: 反射工具类
- * @author: Ethan Liu
- * @create: 2021-02-20 22:05
- **/
+ * @class ReflectTool
+ * @description 反射工具类
+ * @author Ethan Liu
+ * @create 2021-02-20 22:05
+*/
 public class ReflectUntil {
 
     private static final List<Class<?>> convertPriority = new ArrayList<>();

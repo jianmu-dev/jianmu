@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @class: InstanceParameterMapper
- * @description: InstanceParameterMapper
- * @author: Ethan Liu
- * @create: 2021-05-01 21:31
- **/
+ * @class InstanceParameterMapper
+ * @description InstanceParameterMapper
+ * @author Ethan Liu
+ * @create 2021-05-01 21:31
+*/
 public interface InstanceParameterMapper {
     @Insert("<script>" +
             "insert into task_instance_parameter(instance_id, serial_no, def_key, async_task_ref, business_id, trigger_id, ref, `type`, workflow_type, parameter_id, required) values" +

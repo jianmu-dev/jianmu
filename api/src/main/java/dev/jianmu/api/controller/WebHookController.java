@@ -16,11 +16,11 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * @class: WebHookController
- * @description: WebHookController
- * @author: Ethan Liu
- * @create: 2021-06-25 23:04
- **/
+ * @class WebHookController
+ * @description WebHookController
+ * @author Ethan Liu
+ * @create 2021-06-25 23:04
+*/
 @Controller
 @RequestMapping("webhook")
 @Tag(name = "WebHook API", description = "WebHook API")

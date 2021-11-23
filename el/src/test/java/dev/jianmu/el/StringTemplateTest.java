@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: StringTemplateTest
- * @description: 字符串模版测试
- * @author: Ethan Liu
- * @create: 2021-09-02 08:35
- **/
+ * @class StringTemplateTest
+ * @description 字符串模版测试
+ * @author Ethan Liu
+ * @create 2021-09-02 08:35
+*/
 @DisplayName("字符串模版测试")
 public class StringTemplateTest {
     private final ElContext context = new ElContext();

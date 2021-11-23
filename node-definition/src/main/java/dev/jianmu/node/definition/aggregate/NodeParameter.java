@@ -1,11 +1,11 @@
 package dev.jianmu.node.definition.aggregate;
 
 /**
- * @class: TaskParameter
- * @description: 任务参数
- * @author: Ethan Liu
- * @create: 2021-04-11 13:42
- **/
+ * @class TaskParameter
+ * @description 任务参数
+ * @author Ethan Liu
+ * @create 2021-04-11 13:42
+*/
 public class NodeParameter {
     // 显示名称
     private String name;

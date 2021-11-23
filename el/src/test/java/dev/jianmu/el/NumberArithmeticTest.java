@@ -9,11 +9,11 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: NumberArithmeticTest
- * @description: 数字数学运算测试
- * @author: Ethan Liu
- * @create: 2021-09-01 13:54
- **/
+ * @class NumberArithmeticTest
+ * @description 数字数学运算测试
+ * @author Ethan Liu
+ * @create 2021-09-01 13:54
+*/
 @DisplayName("数字数学运算测试")
 public class NumberArithmeticTest {
 

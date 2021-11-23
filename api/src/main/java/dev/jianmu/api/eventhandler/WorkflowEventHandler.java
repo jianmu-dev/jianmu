@@ -16,11 +16,11 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
- * @class: WorkflowEventHandler
- * @description: 流程事件处理器
- * @author: Ethan Liu
- * @create: 2021-03-24 14:18
- **/
+ * @class WorkflowEventHandler
+ * @description 流程事件处理器
+ * @author Ethan Liu
+ * @create 2021-03-24 14:18
+*/
 @Component
 public class WorkflowEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowEventHandler.class);

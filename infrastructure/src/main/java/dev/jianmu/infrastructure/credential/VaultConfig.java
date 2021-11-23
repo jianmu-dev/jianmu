@@ -19,11 +19,11 @@ import java.net.URI;
 import java.time.Duration;
 
 /**
- * @class: VaultConfig
- * @description: VaultConfig
- * @author: Ethan Liu
- * @create: 2021-11-02 11:23
- **/
+ * @class VaultConfig
+ * @description VaultConfig
+ * @author Ethan Liu
+ * @create 2021-11-02 11:23
+*/
 @Configuration
 @ConditionalOnProperty(prefix = "credential", name = "type", havingValue = "vault")
 public class VaultConfig extends AbstractVaultConfiguration {

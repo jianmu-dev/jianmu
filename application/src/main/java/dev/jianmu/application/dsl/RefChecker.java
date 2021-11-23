@@ -3,11 +3,11 @@ package dev.jianmu.application.dsl;
 import java.util.regex.Pattern;
 
 /**
- * @class: RefChecker
- * @description: RefChecker
- * @author: Ethan Liu
- * @create: 2021-10-03 12:46
- **/
+ * @class RefChecker
+ * @description RefChecker
+ * @author Ethan Liu
+ * @create 2021-10-03 12:46
+*/
 public class RefChecker {
     public static final String REF_REG = "^[a-zA-Z][a-zA-Z0-9_]{3,29}$";
 

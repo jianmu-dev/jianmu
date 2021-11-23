@@ -12,11 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 
 /**
- * @class: CredentialTypeHandler
- * @description: CredentialTypeHandler
- * @author: Ethan Liu
- * @create: 2021-05-15 17:49
- **/
+ * @class CredentialTypeHandler
+ * @description CredentialTypeHandler
+ * @author Ethan Liu
+ * @create 2021-05-15 17:49
+*/
 public class CredentialTypeHandler extends BaseTypeHandler<Credential> {
     private final ObjectMapper objectMapper;
 

@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @class: InstanceVo
- * @description: InstanceVo
- * @author: Ethan Liu
- * @create: 2021-06-04 19:25
- **/
+ * @class InstanceVo
+ * @description InstanceVo
+ * @author Ethan Liu
+ * @create 2021-06-04 19:25
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

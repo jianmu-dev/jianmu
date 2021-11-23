@@ -18,11 +18,11 @@ import java.sql.*;
 import java.util.Set;
 
 /**
- * @class: NodeSetTypeHandler
- * @description: 自定义类型(Set<Node>)转换器
- * @author: Ethan Liu
- * @create: 2021-03-21 12:48
- **/
+ * @class NodeSetTypeHandler
+ * @description 自定义类型(Set<Node>)转换器
+ * @author Ethan Liu
+ * @create 2021-03-21 12:48
+*/
 public class NodeSetTypeHandler extends BaseTypeHandler<Set<Node>> {
     private ObjectMapper objectMapper;
 

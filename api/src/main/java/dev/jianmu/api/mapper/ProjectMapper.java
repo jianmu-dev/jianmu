@@ -14,11 +14,11 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * @class: ProjectMapper
- * @description: ProjectMapper
- * @author: Ethan Liu
- * @create: 2021-06-05 18:28
- **/
+ * @class ProjectMapper
+ * @description ProjectMapper
+ * @author Ethan Liu
+ * @create 2021-06-05 18:28
+*/
 @Mapper(imports = {AsyncTaskInstance.class})
 public interface ProjectMapper {
     ProjectMapper INSTANCE = Mappers.getMapper(ProjectMapper.class);

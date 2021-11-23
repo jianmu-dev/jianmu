@@ -13,11 +13,11 @@ import java.util.Optional;
 
 
 /**
- * @class: WorkflowMapper
- * @description: 流程DB映射接口
- * @author: Ethan Liu
- * @create: 2021-03-21 11:24
- **/
+ * @class WorkflowMapper
+ * @description 流程DB映射接口
+ * @author Ethan Liu
+ * @create 2021-03-21 11:24
+*/
 public interface WorkflowMapper {
 
     @Select("select * from workflow where ref_version = #{refVersion}")

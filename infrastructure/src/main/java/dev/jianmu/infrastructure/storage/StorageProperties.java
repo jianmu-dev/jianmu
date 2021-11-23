@@ -5,11 +5,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: StorageProperties
- * @description: 存储配置项
- * @author: Ethan Liu
- * @create: 2021-04-05 20:41
- **/
+ * @class StorageProperties
+ * @description 存储配置项
+ * @author Ethan Liu
+ * @create 2021-04-05 20:41
+*/
 @Data
 @Component
 @ConfigurationProperties(prefix = "storage")

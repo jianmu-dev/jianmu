@@ -2,10 +2,10 @@ package dev.jianmu.workflow.event;
 
 /**
  * @program: workflow
- * @description: 任务中止事件
- * @author: Ethan Liu
- * @create: 2021-01-21 20:48
- **/
+ * @description 任务中止事件
+ * @author Ethan Liu
+ * @create 2021-01-21 20:48
+*/
 public class TaskTerminatingEvent extends BaseEvent {
     private TaskTerminatingEvent() {
     }

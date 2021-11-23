@@ -1,12 +1,12 @@
 package dev.jianmu.workflow.el;
 
 /**
- * @class: ExpressionLanguage
- * @description: A parser and interpreter for the expression language. An expression can be parsed and stored as
+ * @class ExpressionLanguage
+ * @description A parser and interpreter for the expression language. An expression can be parsed and stored as
  * object. The parsed expression needs to be used to evaluate the expression with a given variable context.
- * @author: Ethan Liu
- * @create: 2021-01-30 19:46
- **/
+ * @author Ethan Liu
+ * @create 2021-01-30 19:46
+*/
 public interface ExpressionLanguage {
     /**
      * Parse the given string into an expression.

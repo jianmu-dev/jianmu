@@ -6,11 +6,11 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import java.util.List;
 
 /**
- * @class: InstanceDomainService
- * @description: 任务实例Domain服务
- * @author: Ethan Liu
- * @create: 2021-03-27 09:05
- **/
+ * @class InstanceDomainService
+ * @description 任务实例Domain服务
+ * @author Ethan Liu
+ * @create 2021-03-27 09:05
+*/
 public class InstanceDomainService {
 
     public void runningCheck(List<TaskInstance> taskInstances) {

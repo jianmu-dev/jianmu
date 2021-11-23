@@ -14,11 +14,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @class: UnmodifiableListDeserializer
- * @description: 不可变List反序列化器
- * @author: Ethan Liu
- * @create: 2021-03-21 16:11
- **/
+ * @class UnmodifiableListDeserializer
+ * @description 不可变List反序列化器
+ * @author Ethan Liu
+ * @create 2021-03-21 16:11
+*/
 public class UnmodifiableListDeserializer extends JsonDeserializer<List> {
     @Override
     public List deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {

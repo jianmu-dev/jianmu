@@ -1,11 +1,11 @@
 package dev.jianmu.task.event;
 
 /**
- * @class: TaskInstanceSucceedEvent
- * @description: 任务实例运行成功事件
- * @author: Ethan Liu
- * @create: 2021-04-06 16:09
- **/
+ * @class TaskInstanceSucceedEvent
+ * @description 任务实例运行成功事件
+ * @author Ethan Liu
+ * @create 2021-04-06 16:09
+*/
 public class TaskInstanceSucceedEvent extends BaseEvent {
     private TaskInstanceSucceedEvent() {
     }

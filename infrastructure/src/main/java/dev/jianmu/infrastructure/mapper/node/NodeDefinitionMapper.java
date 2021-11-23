@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: NodeDefinitionMapper
- * @description: NodeDefinitionMapper
- * @author: Ethan Liu
- * @create: 2021-09-09 12:42
- **/
+ * @class NodeDefinitionMapper
+ * @description NodeDefinitionMapper
+ * @author Ethan Liu
+ * @create 2021-09-09 12:42
+*/
 public interface NodeDefinitionMapper {
     @Select("SELECT * FROM hub_node_definition WHERE id = #{id}")
     @Result(column = "owner_name", property = "ownerName")

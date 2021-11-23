@@ -48,10 +48,10 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.*;
 
 /**
- * @class: TriggerApplication
- * @description: TriggerApplication
- * @author: Ethan Liu
- * @create: 2021-11-10 11:15
+ * @class TriggerApplication
+ * @description TriggerApplication
+ * @author Ethan Liu
+ * @create 2021-11-10 11:15
  */
 @Service
 @Slf4j

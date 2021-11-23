@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @class: TriggerController
- * @description: TriggerController
- * @author: Ethan Liu
- * @create: 2021-11-15 13:36
+ * @class TriggerController
+ * @description TriggerController
+ * @author Ethan Liu
+ * @create 2021-11-15 13:36
  */
 @RestController
 @RequestMapping("trigger")

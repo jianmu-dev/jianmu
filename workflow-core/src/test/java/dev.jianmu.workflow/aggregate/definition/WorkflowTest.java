@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @program: workflow
- * @description: Workflow测试类
- * @author: Ethan Liu
- * @create: 2021-01-22 11:53
- **/
+ * @description Workflow测试类
+ * @author Ethan Liu
+ * @create 2021-01-22 11:53
+*/
 @DisplayName("Workflow domain测试类")
 public class WorkflowTest {
     private static Start start1;

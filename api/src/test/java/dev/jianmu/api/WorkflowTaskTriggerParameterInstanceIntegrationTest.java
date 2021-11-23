@@ -24,11 +24,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 /**
- * @class: dev.jianmu.web.WorkflowInstanceIntegrationTest
- * @description: 流程实例集成测试类
- * @author: Ethan Liu
- * @create: 2021-03-21 19:35
- **/
+ * @class dev.jianmu.web.WorkflowInstanceIntegrationTest
+ * @description 流程实例集成测试类
+ * @author Ethan Liu
+ * @create 2021-03-21 19:35
+*/
 @SpringBootTest(classes = SpringbootApp.class)
 @ActiveProfiles("test")
 public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
