@@ -110,7 +110,7 @@ export default defineComponent({
         )
       );
 
-      setLog(props.value);
+      nextTick(() => setLog(props.value));
     });
 
     watch(

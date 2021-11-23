@@ -284,6 +284,95 @@ public class TriggerApplication {
         return "/webhook/" + URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
     }
 
+    public void retryHttpEvent(String webRequestId) {
+        var webRequest = this.webRequestRepositoryImpl.findById(webRequestId)
+                .orElseThrow(() -> new DataNotFoundException("未找到可重试的记录"));
+        var newWebRequest = WebRequest.Builder.aWebRequest()
+                .payload(webRequest.getPayload())
+                .userAgent(webRequest.getUserAgent())
+                .statusCode(WebRequest.StatusCode.OK)
+                .build();
+        var project = this.projectRepository.findById(webRequest.getProjectId())
+                .orElseThrow(() -> {
+                    newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                    newWebRequest.setErrorMsg("未找到项目ID: " + webRequest.getProjectId());
+                    this.webRequestRepositoryImpl.add(newWebRequest);
+                    return new DataNotFoundException("未找到项目ID: " + webRequest.getProjectId());
+                });
+        newWebRequest.setProjectId(project.getId());
+        newWebRequest.setWorkflowRef(project.getWorkflowRef());
+        newWebRequest.setWorkflowVersion(project.getWorkflowVersion());
+        var trigger = this.triggerRepository.findByProjectId(project.getId())
+                .orElseThrow(() -> {
+                    newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                    newWebRequest.setErrorMsg("项目：" + project.getWorkflowName() + " 未找到触发器");
+                    this.webRequestRepositoryImpl.add(newWebRequest);
+                    return new DataNotFoundException("项目：" + project.getWorkflowName() + " 未找到触发器");
+                });
+        newWebRequest.setTriggerId(trigger.getId());
+        if (trigger.getType() != Trigger.Type.WEBHOOK) {
+            newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+            newWebRequest.setErrorMsg("项目：" + project.getWorkflowName() + " 未找到触发器");
+            this.webRequestRepositoryImpl.add(newWebRequest);
+            throw new IllegalArgumentException("项目：" + project.getWorkflowName() + "触发器类型错误");
+        }
+        // 创建表达式上下文
+        var context = new ElContext();
+        // 提取参数
+        var webhook = trigger.getWebhook();
+        List<TriggerEventParameter> eventParameters = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
+        if (webhook.getParam() != null) {
+            webhook.getParam().forEach(webhookParameter -> {
+                Parameter<?> parameter = Parameter.Type
+                        .getTypeByName(webhookParameter.getType())
+                        .newParameter(this.extractParameter(newWebRequest.getPayload(), webhookParameter.getExp()));
+                var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                        .name(webhookParameter.getName())
+                        .type(webhookParameter.getType())
+                        .value(parameter.getStringValue())
+                        .parameterId(parameter.getId())
+                        .build();
+                parameters.add(parameter);
+                eventParameters.add(eventParameter);
+                context.add("trigger", eventParameter.getName(), parameter);
+            });
+        }
+        // 验证Auth
+        if (webhook.getAuth() != null) {
+            var auth = webhook.getAuth();
+            var authToken = this.calculateExp(auth.getToken(), context);
+            var authValue = this.findSecret(auth.getValue());
+            if (authToken.getType() != Parameter.Type.STRING) {
+                log.warn("Auth Token表达式计算错误");
+                newWebRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
+                newWebRequest.setErrorMsg("Auth Token表达式计算错误");
+                this.webRequestRepositoryImpl.add(newWebRequest);
+                return;
+            }
+            if (!authToken.getValue().equals(authValue)) {
+                log.warn("Webhook密钥不匹配");
+                newWebRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
+                newWebRequest.setErrorMsg("Webhook密钥不匹配");
+                this.webRequestRepositoryImpl.add(newWebRequest);
+                return;
+            }
+        }
+        // 验证Matcher
+        if (webhook.getMatcher() != null) {
+            var res = this.calculateExp(webhook.getMatcher(), context);
+            if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
+                log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
+                newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+                newWebRequest.setErrorMsg("Match计算不匹配，计算结果为：" + res.getStringValue());
+                this.webRequestRepositoryImpl.add(newWebRequest);
+                return;
+            }
+        }
+        this.webRequestRepositoryImpl.add(newWebRequest);
+        this.trigger(eventParameters, parameters, newWebRequest);
+    }
+
     public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
         var webRequest = this.createWebRequest(request, contentType);
         var project = this.projectRepository.findByName(projectName)

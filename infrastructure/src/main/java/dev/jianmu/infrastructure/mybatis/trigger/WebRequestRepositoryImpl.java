@@ -7,10 +7,12 @@ import dev.jianmu.trigger.aggregate.WebRequest;
 import dev.jianmu.trigger.repository.WebRequestRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
+ * @author Ethan Liu
  * @class WebRequestRepositoryImpl
  * @description WebRequestRepositoryImpl
- * @author Ethan Liu
  * @create 2021-11-15 13:27
  */
 @Repository
@@ -24,6 +26,11 @@ public class WebRequestRepositoryImpl implements WebRequestRepository {
     @Override
     public void add(WebRequest webRequest) {
         this.webRequestMapper.add(webRequest);
+    }
+
+    @Override
+    public Optional<WebRequest> findById(String id) {
+        return this.webRequestMapper.findById(id);
     }
 
     public PageInfo<WebRequest> findPage(String projectId, int pageNum, int pageSize) {
