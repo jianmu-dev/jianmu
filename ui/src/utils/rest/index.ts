@@ -17,7 +17,7 @@ type PayloadType = 'form-data' | 'json' | 'file';
 export interface IRequest {
   url: string;
   method: Method;
-  headers: {
+  headers?: {
     [key: string]: string;
   };
   payload?: any;
