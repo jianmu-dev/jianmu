@@ -2,10 +2,10 @@ package dev.jianmu.workflow.event;
 
 /**
  * @program: workflow
- * @description: 任务激活事件
- * @author: Ethan Liu
- * @create: 2021-01-21 20:47
- **/
+ * @description 任务激活事件
+ * @author Ethan Liu
+ * @create 2021-01-21 20:47
+*/
 public class TaskActivatingEvent extends BaseEvent {
 
     private TaskActivatingEvent() {

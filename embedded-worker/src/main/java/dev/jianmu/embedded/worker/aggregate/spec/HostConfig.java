@@ -3,11 +3,11 @@ package dev.jianmu.embedded.worker.aggregate.spec;
 import java.util.List;
 
 /**
- * @class: HostConfig
- * @description: HostConfig
- * @author: Ethan Liu
- * @create: 2021-04-14 10:20
- **/
+ * @class HostConfig
+ * @description HostConfig
+ * @author Ethan Liu
+ * @create 2021-04-14 10:20
+*/
 public class HostConfig {
     private List<Mount> mounts;
 

@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: BooleanTest
- * @description: 布尔值测试
- * @author: Ethan Liu
- * @create: 2021-09-01 12:48
- **/
+ * @class BooleanTest
+ * @description 布尔值测试
+ * @author Ethan Liu
+ * @create 2021-09-01 12:48
+*/
 @DisplayName("布尔值运算测试")
 public class BooleanTest {
 

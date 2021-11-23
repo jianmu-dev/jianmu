@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: NullOperationTest
- * @description: 空关键字运算测试
- * @author: Ethan Liu
- * @create: 2021-09-01 12:27
- **/
+ * @class NullOperationTest
+ * @description 空关键字运算测试
+ * @author Ethan Liu
+ * @create 2021-09-01 12:27
+*/
 @DisplayName("null关键字测试")
 public class NullOperationTest {
 

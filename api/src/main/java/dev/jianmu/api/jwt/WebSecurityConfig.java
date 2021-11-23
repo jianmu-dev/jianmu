@@ -14,11 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * @class: WebSecurityConfig
- * @description: WebSecurityConfig
- * @author: Ethan Liu
- * @create: 2021-05-18 08:53
- **/
+ * @class WebSecurityConfig
+ * @description WebSecurityConfig
+ * @author Ethan Liu
+ * @create 2021-05-18 08:53
+*/
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)

@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @class: ContainerSpec
- * @description: 容器规格定义
- * @author: Ethan Liu
- * @create: 2021-04-14 20:30
- **/
+ * @class ContainerSpec
+ * @description 容器规格定义
+ * @author Ethan Liu
+ * @create 2021-04-14 20:30
+*/
 public class ContainerSpec {
     private String name;
     private String hostName;

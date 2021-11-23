@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: KVPairMapper
- * @description: 键值对Mapper
- * @author: Ethan Liu
- * @create: 2021-04-20 13:31
- **/
+ * @class KVPairMapper
+ * @description 键值对Mapper
+ * @author Ethan Liu
+ * @create 2021-04-20 13:31
+*/
 public interface KVPairMapper {
     @Insert("insert into secret_kv_pair(namespace_name, kv_key, kv_value) " +
             "values(#{namespaceName}, #{key}, #{value})")

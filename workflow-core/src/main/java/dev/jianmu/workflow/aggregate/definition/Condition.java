@@ -13,10 +13,10 @@ import java.util.Set;
 
 /**
  * @program: workflow
- * @description: 条件网关
- * @author: Ethan Liu
- * @create: 2021-01-21 13:14
- **/
+ * @description 条件网关
+ * @author Ethan Liu
+ * @create 2021-01-21 13:14
+*/
 public class Condition extends BaseNode implements Gateway {
     private Map<Boolean, String> targetMap = new HashMap<>();
     private String expression;

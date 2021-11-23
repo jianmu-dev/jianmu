@@ -13,11 +13,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: WorkerEventHandler
- * @description: WorkerEventHandler
- * @author: Ethan Liu
- * @create: 2021-09-12 22:18
- **/
+ * @class WorkerEventHandler
+ * @description WorkerEventHandler
+ * @author Ethan Liu
+ * @create 2021-09-12 22:18
+*/
 @Component
 @Slf4j
 public class WorkerEventHandler {

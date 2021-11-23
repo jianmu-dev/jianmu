@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: CronEvent
- * @description: CronEvent
- * @author: Ethan Liu
- * @create: 2021-11-10 19:24
+ * @class CronEvent
+ * @description CronEvent
+ * @author Ethan Liu
+ * @create 2021-11-10 19:24
  */
 @Getter
 @Builder

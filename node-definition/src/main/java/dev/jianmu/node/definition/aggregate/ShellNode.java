@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * @class: ShellNode
- * @description: Shell节点定义
- * @author: Ethan Liu
- * @create: 2021-11-08 13:24
+ * @class ShellNode
+ * @description Shell节点定义
+ * @author Ethan Liu
+ * @create 2021-11-08 13:24
  */
 public class ShellNode {
     // Id

@@ -1,11 +1,11 @@
 package dev.jianmu.user;
 
 /**
- * @class: User
- * @description: User
- * @author: Ethan Liu
- * @create: 2021-05-17 21:58
- **/
+ * @class User
+ * @description User
+ * @author Ethan Liu
+ * @create 2021-05-17 21:58
+*/
 public class User {
     private Long id;
     private String username;

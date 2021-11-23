@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 
 /**
  * @program: workflow
- * @description: 异步任务执行实例
- * @author: Ethan Liu
- * @create: 2021-01-21 20:45
- **/
+ * @description 异步任务执行实例
+ * @author Ethan Liu
+ * @create 2021-01-21 20:45
+*/
 public class AsyncTaskInstance {
     // 显示名称
     private String name;

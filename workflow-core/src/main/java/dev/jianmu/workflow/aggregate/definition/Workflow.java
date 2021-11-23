@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 /**
  * @program: workflow
- * @description: 流程定义实体
- * @author: Ethan Liu
- * @create: 2021-01-21 14:10
- **/
+ * @description 流程定义实体
+ * @author Ethan Liu
+ * @create 2021-01-21 14:10
+*/
 public class Workflow {
     public enum Type {
         WORKFLOW,

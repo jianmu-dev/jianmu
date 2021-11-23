@@ -1,11 +1,11 @@
 package dev.jianmu.node.definition.aggregate;
 
 /**
- * @class: NodeDefinition
- * @description: 节点定义
- * @author: Ethan Liu
- * @create: 2021-09-03 14:56
- **/
+ * @class NodeDefinition
+ * @description 节点定义
+ * @author Ethan Liu
+ * @create 2021-09-03 14:56
+*/
 public class NodeDefinition {
     public enum Type {
         DOCKER,

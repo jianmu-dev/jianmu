@@ -19,11 +19,11 @@ import java.sql.*;
 import java.util.List;
 
 /**
- * @class: TaskInstanceListTypeHandler
- * @description: 自定义类型(List<AsyncTaskInstance>)转换器
- * @author: Ethan Liu
- * @create: 2021-03-21 21:32
- **/
+ * @class TaskInstanceListTypeHandler
+ * @description 自定义类型(List<AsyncTaskInstance>)转换器
+ * @author Ethan Liu
+ * @create 2021-03-21 21:32
+*/
 public class TaskInstanceListTypeHandler extends BaseTypeHandler<List<AsyncTaskInstance>> {
     private ObjectMapper objectMapper;
 

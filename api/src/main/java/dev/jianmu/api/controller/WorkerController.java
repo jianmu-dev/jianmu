@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @class: WorkerController
- * @description: Worker API
- * @author: Ethan Liu
- * @create: 2021-04-21 14:40
- **/
+ * @class WorkerController
+ * @description Worker API
+ * @author Ethan Liu
+ * @create 2021-04-21 14:40
+*/
 @RestController
 @RequestMapping("workers")
 @Tag(name = "Worker API", description = "Worker API")

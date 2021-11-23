@@ -7,10 +7,10 @@ import lombok.*;
 import java.util.List;
 
 /**
- * @class: Webhook
- * @description: Webhook
- * @author: Ethan Liu
- * @create: 2021-11-10 09:02
+ * @class Webhook
+ * @description Webhook
+ * @author Ethan Liu
+ * @create 2021-11-10 09:02
  */
 @Getter
 @Builder

@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 /**
  * @program: workflow
- * @description: 流程实例DomainService
- * @author: Ethan Liu
- * @create: 2021-01-21 21:16
- **/
+ * @description 流程实例DomainService
+ * @author Ethan Liu
+ * @create 2021-01-21 21:16
+*/
 public class WorkflowInstanceDomainService {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceDomainService.class);
 

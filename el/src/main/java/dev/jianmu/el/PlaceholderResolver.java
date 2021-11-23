@@ -5,11 +5,11 @@ import dev.jianmu.workflow.el.EvaluationContext;
 import java.util.function.Function;
 
 /**
- * @class: PlaceholderResolver
- * @description: 占位符解析器
- * @author: Ethan Liu
- * @create: 2021-09-02 08:45
- **/
+ * @class PlaceholderResolver
+ * @description 占位符解析器
+ * @author Ethan Liu
+ * @create 2021-09-02 08:45
+*/
 public class PlaceholderResolver {
     /**
      * 默认前缀占位符

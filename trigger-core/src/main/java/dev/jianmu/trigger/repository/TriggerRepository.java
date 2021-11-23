@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: TriggerRepository
- * @description: TriggerRepository
- * @author: Ethan Liu
- * @create: 2021-11-10 11:16
+ * @class TriggerRepository
+ * @description TriggerRepository
+ * @author Ethan Liu
+ * @create 2021-11-10 11:16
  */
 public interface TriggerRepository {
     void add(Trigger trigger);

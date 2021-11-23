@@ -12,10 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @program: workflow
- * @description: 节点测试类
- * @author: Ethan Liu
- * @create: 2021-01-22 12:50
- **/
+ * @description 节点测试类
+ * @author Ethan Liu
+ * @create 2021-01-22 12:50
+*/
 @DisplayName("节点测试类")
 public class NodeTest {
     private static Node testNode1;

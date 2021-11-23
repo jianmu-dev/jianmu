@@ -9,11 +9,11 @@ import lombok.Setter;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @class: NodeDefinitionDto
- * @description: NodeDefinitionDto
- * @author: Ethan Liu
- * @create: 2021-10-01 11:27
- **/
+ * @class NodeDefinitionDto
+ * @description NodeDefinitionDto
+ * @author Ethan Liu
+ * @create 2021-10-01 11:27
+*/
 @Getter
 @Setter
 @AllArgsConstructor

@@ -23,11 +23,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @class: RestExceptionHandler
- * @description: Rest全局异常处理类
- * @author: Ethan Liu
- * @create: 2021-04-06 20:40
- **/
+ * @class RestExceptionHandler
+ * @description Rest全局异常处理类
+ * @author Ethan Liu
+ * @create 2021-04-06 20:40
+*/
 @RestControllerAdvice
 public class RestExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);

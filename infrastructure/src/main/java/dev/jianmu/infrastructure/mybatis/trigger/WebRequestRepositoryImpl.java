@@ -8,10 +8,10 @@ import dev.jianmu.trigger.repository.WebRequestRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * @class: WebRequestRepositoryImpl
- * @description: WebRequestRepositoryImpl
- * @author: Ethan Liu
- * @create: 2021-11-15 13:27
+ * @class WebRequestRepositoryImpl
+ * @description WebRequestRepositoryImpl
+ * @author Ethan Liu
+ * @create 2021-11-15 13:27
  */
 @Repository
 public class WebRequestRepositoryImpl implements WebRequestRepository {

@@ -3,11 +3,11 @@ package dev.jianmu.workflow.el;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 
 /**
- * @class: EvaluationResult
- * @description: The result of an expression evaluation
- * @author: Ethan Liu
- * @create: 2021-01-30 10:31
- **/
+ * @class EvaluationResult
+ * @description The result of an expression evaluation
+ * @author Ethan Liu
+ * @create 2021-01-30 10:31
+*/
 public interface EvaluationResult {
     /**
      * @return the (raw) expression as string

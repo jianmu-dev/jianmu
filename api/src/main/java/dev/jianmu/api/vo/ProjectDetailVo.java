@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @class: ProjectDetailVo
- * @description: ProjectDetailVo
- * @author: Ethan Liu
- * @create: 2021-06-28 21:25
- **/
+ * @class ProjectDetailVo
+ * @description ProjectDetailVo
+ * @author Ethan Liu
+ * @create 2021-06-28 21:25
+*/
 @Data
 @Builder
 @AllArgsConstructor

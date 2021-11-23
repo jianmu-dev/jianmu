@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 
 /**
  * @program: workflow
- * @description: 异步任务节点
- * @author: Ethan Liu
- * @create: 2021-01-21 20:42
- **/
+ * @description 异步任务节点
+ * @author Ethan Liu
+ * @create 2021-01-21 20:42
+*/
 public class AsyncTask extends BaseNode {
     private AsyncTask() {
     }

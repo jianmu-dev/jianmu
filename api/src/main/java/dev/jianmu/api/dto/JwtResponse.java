@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: JwtResponse
- * @description: JwtResponse
- * @author: Ethan Liu
- * @create: 2021-05-18 09:48
- **/
+ * @class JwtResponse
+ * @description JwtResponse
+ * @author Ethan Liu
+ * @create 2021-05-18 09:48
+*/
 @Getter
 @NoArgsConstructor
 @Builder

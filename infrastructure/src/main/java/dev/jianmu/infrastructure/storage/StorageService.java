@@ -5,11 +5,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 
 /**
- * @class: StorageService
- * @description: 文件存储服务
- * @author: Ethan Liu
- * @create: 2021-04-05 20:37
- **/
+ * @class StorageService
+ * @description 文件存储服务
+ * @author Ethan Liu
+ * @create 2021-04-05 20:37
+*/
 public interface StorageService {
     void init();
 

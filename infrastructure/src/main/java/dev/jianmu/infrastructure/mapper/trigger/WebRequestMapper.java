@@ -8,10 +8,10 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * @class: WebRequestMapper
- * @description: WebRequestMapper
- * @author: Ethan Liu
- * @create: 2021-11-15 13:44
+ * @class WebRequestMapper
+ * @description WebRequestMapper
+ * @author Ethan Liu
+ * @create 2021-11-15 13:44
  */
 public interface WebRequestMapper {
     @Insert("insert into jianmu_web_request(id, project_id, workflow_ref, workflow_version, trigger_id, user_agent, payload, status_code, error_msg, request_time) " +

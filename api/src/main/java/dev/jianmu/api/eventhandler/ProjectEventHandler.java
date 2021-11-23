@@ -12,11 +12,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: DslEventHandler
- * @description: Dsl事件处理器
- * @author: Ethan Liu
- * @create: 2021-04-23 17:21
- **/
+ * @class DslEventHandler
+ * @description Dsl事件处理器
+ * @author Ethan Liu
+ * @create 2021-04-23 17:21
+*/
 @Component
 @Slf4j
 public class ProjectEventHandler {

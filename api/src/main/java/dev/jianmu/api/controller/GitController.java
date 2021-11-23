@@ -13,11 +13,11 @@ import javax.validation.Valid;
 import java.util.Map;
 
 /**
- * @class: GitController
- * @description: Git API
- * @author: Ethan Liu
- * @create: 2021-05-14 11:17
- **/
+ * @class GitController
+ * @description Git API
+ * @author Ethan Liu
+ * @create 2021-05-14 11:17
+*/
 @RestController
 @RequestMapping("git")
 @Tag(name = "Git", description = "Git API")

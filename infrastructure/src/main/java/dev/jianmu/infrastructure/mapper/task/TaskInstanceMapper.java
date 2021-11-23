@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: InstanceMapper
- * @description: 任务实例Mapper
- * @author: Ethan Liu
- * @create: 2021-03-25 21:39
- **/
+ * @class InstanceMapper
+ * @description 任务实例Mapper
+ * @author Ethan Liu
+ * @create 2021-03-25 21:39
+*/
 public interface TaskInstanceMapper {
     @Insert("insert into task_instance(id, serial_no, def_key, node_info, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status) " +
             "values(#{id}, #{serialNo}, #{defKey}, #{nodeInfo, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status})")

@@ -5,10 +5,10 @@ import dev.jianmu.trigger.event.TriggerEvent;
 import java.util.Optional;
 
 /**
- * @class: TriggerEventRepository
- * @description: TriggerEventRepository
- * @author: Ethan Liu
- * @create: 2021-11-11 08:34
+ * @class TriggerEventRepository
+ * @description TriggerEventRepository
+ * @author Ethan Liu
+ * @create 2021-11-11 08:34
  */
 public interface TriggerEventRepository {
     Optional<TriggerEvent> findById(String id);

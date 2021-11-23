@@ -16,11 +16,11 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * @class: dev.jianmu.web.WorkflowIntegrationTest
- * @description: 流程集成测试类
- * @author: Ethan Liu
- * @create: 2021-03-21 12:26
- **/
+ * @class dev.jianmu.web.WorkflowIntegrationTest
+ * @description 流程集成测试类
+ * @author Ethan Liu
+ * @create 2021-03-21 12:26
+*/
 @SpringBootTest(classes = SpringbootApp.class)
 @ActiveProfiles("test")
 public class WorkflowIntegrationTest {

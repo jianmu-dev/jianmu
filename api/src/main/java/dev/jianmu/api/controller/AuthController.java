@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 /**
- * @class: AuthController
- * @description: AuthController
- * @author: Ethan Liu
- * @create: 2021-05-18 09:38
- **/
+ * @class AuthController
+ * @description AuthController
+ * @author Ethan Liu
+ * @create 2021-05-18 09:38
+*/
 @RestController
 @RequestMapping("auth")
 @Tag(name = "Auth", description = "Auth API")

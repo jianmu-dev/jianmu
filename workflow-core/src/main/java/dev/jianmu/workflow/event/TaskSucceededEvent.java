@@ -2,10 +2,10 @@ package dev.jianmu.workflow.event;
 
 /**
  * @program: workflow
- * @description: 任务执行成功事件
- * @author: Ethan Liu
- * @create: 2021-01-23 21:31
- **/
+ * @description 任务执行成功事件
+ * @author Ethan Liu
+ * @create 2021-01-23 21:31
+*/
 public class TaskSucceededEvent extends BaseEvent {
     private TaskSucceededEvent() {
     }

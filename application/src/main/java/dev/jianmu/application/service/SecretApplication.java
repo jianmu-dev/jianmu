@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: SecretApplication
- * @description: 密钥管理应用服务
- * @author: Ethan Liu
- * @create: 2021-04-19 19:55
- **/
+ * @class SecretApplication
+ * @description 密钥管理应用服务
+ * @author Ethan Liu
+ * @create 2021-04-19 19:55
+*/
 @Service
 public class SecretApplication {
     private final CredentialManager credentialManager;

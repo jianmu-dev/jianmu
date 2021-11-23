@@ -12,10 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 
 /**
- * @class: WebhookTypeHandler
- * @description: WebhookTypeHandler
- * @author: Ethan Liu
- * @create: 2021-11-10 22:22
+ * @class WebhookTypeHandler
+ * @description WebhookTypeHandler
+ * @author Ethan Liu
+ * @create 2021-11-10 22:22
  */
 public class WebhookTypeHandler extends BaseTypeHandler<Webhook> {
     private final ObjectMapper objectMapper;

@@ -1,11 +1,11 @@
 package dev.jianmu.workflow.event;
 
 /**
- * @class: WorkflowStartEvent
- * @description: 流程启动事件
- * @author: Ethan Liu
- * @create: 2021-03-19 08:36
- **/
+ * @class WorkflowStartEvent
+ * @description 流程启动事件
+ * @author Ethan Liu
+ * @create 2021-03-19 08:36
+*/
 public class WorkflowStartEvent extends BaseEvent {
     private WorkflowStartEvent() {
     }

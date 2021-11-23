@@ -8,11 +8,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @class: GitRepoMapper
- * @description: GitRepoMapper
- * @author: Ethan Liu
- * @create: 2021-05-13 19:23
- **/
+ * @class GitRepoMapper
+ * @description GitRepoMapper
+ * @author Ethan Liu
+ * @create 2021-05-13 19:23
+*/
 @Mapper
 public interface GitRepoMapper {
     GitRepoMapper INSTANCE = Mappers.getMapper(GitRepoMapper.class);

@@ -5,11 +5,11 @@ import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.ResultType;
 
 /**
- * @class: EvaluationFailure
- * @description: 失败结果
- * @author: Ethan Liu
- * @create: 2021-03-08 22:35
- **/
+ * @class EvaluationFailure
+ * @description 失败结果
+ * @author Ethan Liu
+ * @create 2021-03-08 22:35
+*/
 public class EvaluationFailure implements EvaluationResult {
 
     private final String expression;
