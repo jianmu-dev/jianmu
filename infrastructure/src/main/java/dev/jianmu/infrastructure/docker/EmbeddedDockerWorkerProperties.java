@@ -5,11 +5,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: EmbeddedDockerWorkerProperties
- * @description: 内置DockerWorker配置类
- * @author: Ethan Liu
- * @create: 2021-04-14 19:33
- **/
+ * @class EmbeddedDockerWorkerProperties
+ * @description 内置DockerWorker配置类
+ * @author Ethan Liu
+ * @create 2021-04-14 19:33
+*/
 @Data
 @Component
 @ConfigurationProperties(prefix = "embedded.docker-worker")

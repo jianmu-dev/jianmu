@@ -3,11 +3,11 @@ package dev.jianmu.task.aggregate;
 import java.util.Locale;
 
 /**
- * @class: InstanceParameter
- * @description: 任务实例参数
- * @author: Ethan Liu
- * @create: 2021-04-28 14:13
- **/
+ * @class InstanceParameter
+ * @description 任务实例参数
+ * @author Ethan Liu
+ * @create 2021-04-28 14:13
+*/
 public class InstanceParameter {
     public enum Type {
         INPUT,

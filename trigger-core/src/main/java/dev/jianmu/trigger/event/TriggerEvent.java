@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * @class: TriggerEvent
- * @description: TriggerEvent
- * @author: Ethan Liu
- * @create: 2021-05-25 08:25
- **/
+ * @class TriggerEvent
+ * @description TriggerEvent
+ * @author Ethan Liu
+ * @create 2021-05-25 08:25
+*/
 public class TriggerEvent {
     private String id;
     private String projectId;

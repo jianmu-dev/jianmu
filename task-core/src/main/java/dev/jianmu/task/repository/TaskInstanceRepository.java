@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: InstanceRepository
- * @description: 任务实例仓储接口
- * @author: Ethan Liu
- * @create: 2021-03-25 19:27
- **/
+ * @class InstanceRepository
+ * @description 任务实例仓储接口
+ * @author Ethan Liu
+ * @create 2021-03-25 19:27
+*/
 public interface TaskInstanceRepository {
     void add(TaskInstance taskInstance);
 

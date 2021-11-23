@@ -6,11 +6,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @class: WorkflowMapper
- * @description: WorkflowMapper
- * @author: Ethan Liu
- * @create: 2021-10-31 14:42
- **/
+ * @class WorkflowMapper
+ * @description WorkflowMapper
+ * @author Ethan Liu
+ * @create 2021-10-31 14:42
+*/
 @Mapper
 public interface WorkflowMapper {
     WorkflowMapper INSTANCE = Mappers.getMapper(WorkflowMapper.class);

@@ -9,11 +9,11 @@ import org.apache.ibatis.annotations.Update;
 import java.util.Optional;
 
 /**
- * @class: WorkerMapper
- * @description: WorkerMapper
- * @author: Ethan Liu
- * @create: 2021-04-02 12:39
- **/
+ * @class WorkerMapper
+ * @description WorkerMapper
+ * @author Ethan Liu
+ * @create 2021-04-02 12:39
+*/
 public interface WorkerMapper {
     @Insert("insert into worker(id,name, status, type) " +
             "values(#{id}, #{name}, #{status}, #{type})")

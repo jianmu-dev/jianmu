@@ -8,10 +8,10 @@ import org.apache.ibatis.annotations.Select;
 import java.util.Optional;
 
 /**
- * @class: TriggerEventMapper
- * @description: TriggerEventMapper
- * @author: Ethan Liu
- * @create: 2021-11-11 09:44
+ * @class TriggerEventMapper
+ * @description TriggerEventMapper
+ * @author Ethan Liu
+ * @create 2021-11-11 09:44
  */
 public interface TriggerEventMapper {
     @Select("SELECT * FROM `jianmu_trigger_event` WHERE id = #{id}")

@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
- * @class: JwtProvider
- * @description: JwtProvider
- * @author: Ethan Liu
- * @create: 2021-05-17 21:02
- **/
+ * @class JwtProvider
+ * @description JwtProvider
+ * @author Ethan Liu
+ * @create 2021-05-17 21:02
+*/
 @Component
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);

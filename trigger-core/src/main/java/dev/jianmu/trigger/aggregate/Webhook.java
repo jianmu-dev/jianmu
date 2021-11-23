@@ -3,10 +3,10 @@ package dev.jianmu.trigger.aggregate;
 import java.util.List;
 
 /**
- * @class: Webhook
- * @description: Webhook
- * @author: Ethan Liu
- * @create: 2021-11-10 19:07
+ * @class Webhook
+ * @description Webhook
+ * @author Ethan Liu
+ * @create 2021-11-10 19:07
  */
 public class Webhook {
     private String matcher;

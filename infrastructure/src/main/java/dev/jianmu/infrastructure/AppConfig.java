@@ -20,11 +20,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * @class: AppConfig
- * @description: 自定义Bean配置类
- * @author: Ethan Liu
- * @create: 2021-03-17 16:49
- **/
+ * @class AppConfig
+ * @description 自定义Bean配置类
+ * @author Ethan Liu
+ * @create 2021-03-17 16:49
+*/
 @Configuration
 public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);

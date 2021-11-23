@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: GitRepoVo
- * @description: GitRepoVo
- * @author: Ethan Liu
- * @create: 2021-05-13 19:46
- **/
+ * @class GitRepoVo
+ * @description GitRepoVo
+ * @author Ethan Liu
+ * @create 2021-05-13 19:46
+*/
 @Data
 @Builder
 @AllArgsConstructor

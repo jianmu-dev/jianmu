@@ -10,11 +10,11 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * @class: NodeDefinitionRepositoryImpl
- * @description: NodeDefinitionRepositoryImpl
- * @author: Ethan Liu
- * @create: 2021-09-08 21:51
- **/
+ * @class NodeDefinitionRepositoryImpl
+ * @description NodeDefinitionRepositoryImpl
+ * @author Ethan Liu
+ * @create 2021-09-08 21:51
+*/
 @Repository
 public class NodeDefinitionRepositoryImpl implements NodeDefinitionRepository {
     private final NodeDefinitionMapper nodeDefinitionMapper;

@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: NodeDefinitionVersionRepositoryImpl
- * @description: NodeDefinitionVersionRepositoryImpl
- * @author: Ethan Liu
- * @create: 2021-09-08 21:52
- **/
+ * @class NodeDefinitionVersionRepositoryImpl
+ * @description NodeDefinitionVersionRepositoryImpl
+ * @author Ethan Liu
+ * @create 2021-09-08 21:52
+*/
 @Repository
 public class NodeDefinitionVersionRepositoryImpl implements NodeDefinitionVersionRepository {
     private final NodeDefinitionVersionMapper nodeDefinitionVersionMapper;

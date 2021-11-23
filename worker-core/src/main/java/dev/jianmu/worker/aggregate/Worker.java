@@ -1,11 +1,11 @@
 package dev.jianmu.worker.aggregate;
 
 /**
- * @class: DockerWorkerClient
- * @description: DockerWorkerClient接口
- * @author: Ethan Liu
- * @create: 2021-04-14 18:45
- **/
+ * @class DockerWorkerClient
+ * @description DockerWorkerClient接口
+ * @author Ethan Liu
+ * @create 2021-04-14 18:45
+*/
 public class Worker {
     public enum Status {
         ONLINE,

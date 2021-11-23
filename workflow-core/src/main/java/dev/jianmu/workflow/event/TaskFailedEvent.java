@@ -2,10 +2,10 @@ package dev.jianmu.workflow.event;
 
 /**
  * @program: workflow
- * @description: 任务执行失败事件
- * @author: Ethan Liu
- * @create: 2021-01-23 21:30
- **/
+ * @description 任务执行失败事件
+ * @author Ethan Liu
+ * @create 2021-01-23 21:30
+*/
 public class TaskFailedEvent extends BaseEvent {
 
     private TaskFailedEvent() {

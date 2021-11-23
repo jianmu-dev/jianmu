@@ -17,11 +17,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * @class: SpringbootApp
- * @description: 项目启动类
- * @author: Ethan Liu
- * @create: 2021-02-12 15:35
- **/
+ * @class SpringbootApp
+ * @description 项目启动类
+ * @author Ethan Liu
+ * @create 2021-02-12 15:35
+*/
 @SpringBootApplication(scanBasePackages = "dev.jianmu")
 @MapperScan("dev.jianmu.infrastructure.mapper")
 @EnableRetry

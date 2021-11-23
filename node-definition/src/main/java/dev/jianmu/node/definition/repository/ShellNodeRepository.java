@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: ShellNodeRepository
- * @description: ShellNodeRepository
- * @author: Ethan Liu
- * @create: 2021-11-09 15:09
+ * @class ShellNodeRepository
+ * @description ShellNodeRepository
+ * @author Ethan Liu
+ * @create 2021-11-09 15:09
  */
 public interface ShellNodeRepository {
     void addAll(List<ShellNode> shellNodes);

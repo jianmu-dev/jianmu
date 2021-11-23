@@ -24,11 +24,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * @class: DslParser
- * @description: DSL解析器
- * @author: Ethan Liu
- * @create: 2021-09-03 15:01
- **/
+ * @class DslParser
+ * @description DSL解析器
+ * @author Ethan Liu
+ * @create 2021-09-03 15:01
+*/
 @Slf4j
 public class DslParser {
     private Map<String, Object> trigger;

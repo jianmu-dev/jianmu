@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @class: Client
- * @description: Docker客户端
- * @author: Ethan Liu
- * @create: 2021-04-13 10:59
- **/
+ * @class Client
+ * @description Docker客户端
+ * @author Ethan Liu
+ * @create 2021-04-13 10:59
+*/
 @Service
 @Profile("!test")
 public class EmbeddedDockerWorker implements DockerWorker {

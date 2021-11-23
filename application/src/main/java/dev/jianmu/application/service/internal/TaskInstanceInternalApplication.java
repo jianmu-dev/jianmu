@@ -30,11 +30,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @class: TaskInstanceInternalApplication
- * @description: TaskInstanceInternalApplication
- * @author: Ethan Liu
- * @create: 2021-10-21 15:25
- **/
+ * @class TaskInstanceInternalApplication
+ * @description TaskInstanceInternalApplication
+ * @author Ethan Liu
+ * @create 2021-10-21 15:25
+*/
 @Service
 @Slf4j
 public class TaskInstanceInternalApplication {

@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: StringTest
- * @description: 字符串运算测试
- * @author: Ethan Liu
- * @create: 2021-09-01 12:38
- **/
+ * @class StringTest
+ * @description 字符串运算测试
+ * @author Ethan Liu
+ * @create 2021-09-01 12:38
+*/
 @DisplayName("字符串运算测试")
 public class StringTest {
 

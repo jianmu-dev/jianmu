@@ -1,11 +1,11 @@
 package dev.jianmu.workflow.event;
 
 /**
- * @class: WorkflowEndEvent
- * @description: 流程结束事件
- * @author: Ethan Liu
- * @create: 2021-03-19 08:43
- **/
+ * @class WorkflowEndEvent
+ * @description 流程结束事件
+ * @author Ethan Liu
+ * @create 2021-03-19 08:43
+*/
 public class WorkflowEndEvent extends BaseEvent {
     private WorkflowEndEvent() {
     }

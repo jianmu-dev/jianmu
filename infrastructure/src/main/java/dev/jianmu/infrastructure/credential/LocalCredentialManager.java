@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: LocalCredentialManager
- * @description: LocalCredentialManager
- * @author: Ethan Liu
- * @create: 2021-11-02 06:35
- **/
+ * @class LocalCredentialManager
+ * @description LocalCredentialManager
+ * @author Ethan Liu
+ * @create 2021-11-02 06:35
+*/
 @Component
 @ConditionalOnProperty(prefix = "credential", name = "type", havingValue = "local", matchIfMissing = true)
 public class LocalCredentialManager implements CredentialManager {

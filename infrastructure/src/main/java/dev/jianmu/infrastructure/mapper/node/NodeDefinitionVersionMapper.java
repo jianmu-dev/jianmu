@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: NodeDefinitionVersionMapper
- * @description: NodeDefinitionVersionMapper
- * @author: Ethan Liu
- * @create: 2021-09-09 12:56
- **/
+ * @class NodeDefinitionVersionMapper
+ * @description NodeDefinitionVersionMapper
+ * @author Ethan Liu
+ * @create 2021-09-09 12:56
+*/
 public interface NodeDefinitionVersionMapper {
     @Select("SELECT * FROM hub_node_definition_version WHERE owner_ref = #{ownerRef} and ref = #{ref} and version = #{version}")
     @Result(column = "result_file", property = "resultFile")

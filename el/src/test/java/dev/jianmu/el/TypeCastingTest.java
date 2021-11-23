@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: TypeCastingTest
- * @description: 隐式类型转换测试
- * @author: Ethan Liu
- * @create: 2021-09-01 22:12
- **/
+ * @class TypeCastingTest
+ * @description 隐式类型转换测试
+ * @author Ethan Liu
+ * @create 2021-09-01 22:12
+*/
 @DisplayName("隐式类型转换测试")
 public class TypeCastingTest {
 

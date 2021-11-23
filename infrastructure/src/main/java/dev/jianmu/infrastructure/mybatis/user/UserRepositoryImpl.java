@@ -10,11 +10,11 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * @class: UserRepositoryImpl
- * @description: UserRepositoryImpl
- * @author: Ethan Liu
- * @create: 2021-05-18 08:49
- **/
+ * @class UserRepositoryImpl
+ * @description UserRepositoryImpl
+ * @author Ethan Liu
+ * @create 2021-05-18 08:49
+*/
 @Repository
 public class UserRepositoryImpl implements UserRepository {
     private final JwtProperties jwtProperties;

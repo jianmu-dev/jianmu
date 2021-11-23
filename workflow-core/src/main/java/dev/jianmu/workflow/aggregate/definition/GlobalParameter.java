@@ -1,11 +1,11 @@
 package dev.jianmu.workflow.aggregate.definition;
 
 /**
- * @class: GlobalParameter
- * @description: 全局参数
- * @author: Ethan Liu
- * @create: 2021-09-04 16:43
- **/
+ * @class GlobalParameter
+ * @description 全局参数
+ * @author Ethan Liu
+ * @create 2021-09-04 16:43
+*/
 public class GlobalParameter {
     private String name;
     private String type;

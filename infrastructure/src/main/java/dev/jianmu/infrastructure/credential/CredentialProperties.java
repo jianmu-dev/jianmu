@@ -11,11 +11,11 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
- * @class: VaultProperties
- * @description: VaultProperties
- * @author: Ethan Liu
- * @create: 2021-11-02 09:53
- **/
+ * @class VaultProperties
+ * @description VaultProperties
+ * @author Ethan Liu
+ * @create 2021-11-02 09:53
+*/
 @Data
 @Component
 @Validated

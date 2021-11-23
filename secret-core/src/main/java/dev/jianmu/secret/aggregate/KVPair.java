@@ -1,11 +1,11 @@
 package dev.jianmu.secret.aggregate;
 
 /**
- * @class: KVPair
- * @description: 键值对
- * @author: Ethan Liu
- * @create: 2021-04-20 12:40
- **/
+ * @class KVPair
+ * @description 键值对
+ * @author Ethan Liu
+ * @create 2021-04-20 12:40
+*/
 public class KVPair {
     private String namespaceName;
     private String key;

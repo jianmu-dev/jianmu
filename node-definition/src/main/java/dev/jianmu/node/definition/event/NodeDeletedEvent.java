@@ -1,11 +1,11 @@
 package dev.jianmu.node.definition.event;
 
 /**
- * @class: NodeDeletedEvent
- * @description: NodeDeletedEvent
- * @author: Ethan Liu
- * @create: 2021-10-07 07:54
- **/
+ * @class NodeDeletedEvent
+ * @description NodeDeletedEvent
+ * @author Ethan Liu
+ * @create 2021-10-07 07:54
+*/
 public class NodeDeletedEvent {
     private String ownerRef;
     private String ref;

@@ -10,11 +10,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: TriggerRunner
- * @description: TriggerRunner
- * @author: Ethan Liu
- * @create: 2021-05-24 19:26
- **/
+ * @class TriggerRunner
+ * @description TriggerRunner
+ * @author Ethan Liu
+ * @create 2021-05-24 19:26
+*/
 @Component
 @Slf4j
 public class TriggerRunner implements ApplicationRunner {

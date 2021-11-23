@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * @class: GitRepoRepositoryImpl
- * @description: GitRepoRepositoryImpl
- * @author: Ethan Liu
- * @create: 2021-05-14 15:21
- **/
+ * @class GitRepoRepositoryImpl
+ * @description GitRepoRepositoryImpl
+ * @author Ethan Liu
+ * @create 2021-05-14 15:21
+*/
 @Repository
 public class GitRepoRepositoryImpl implements GitRepoRepository {
     private final GitRepoMapper gitRepoMapper;

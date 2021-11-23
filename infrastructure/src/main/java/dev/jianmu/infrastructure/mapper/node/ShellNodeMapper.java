@@ -8,10 +8,10 @@ import org.apache.ibatis.annotations.Select;
 import java.util.Optional;
 
 /**
- * @class: ShellNodeMapper
- * @description: ShellNodeMapper
- * @author: Ethan Liu
- * @create: 2021-11-09 21:23
+ * @class ShellNodeMapper
+ * @description ShellNodeMapper
+ * @author Ethan Liu
+ * @create 2021-11-09 21:23
  */
 public interface ShellNodeMapper {
 

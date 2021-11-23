@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: WebhookEvent
- * @description: WebhookEvent
- * @author: Ethan Liu
- * @create: 2021-11-10 23:07
+ * @class WebhookEvent
+ * @description WebhookEvent
+ * @author Ethan Liu
+ * @create 2021-11-10 23:07
  */
 @Getter
 @Builder

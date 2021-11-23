@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @class: Node
- * @description: 节点
- * @author: Ethan Liu
- * @create: 2021-04-19 11:17
- **/
+ * @class Node
+ * @description 节点
+ * @author Ethan Liu
+ * @create 2021-04-19 11:17
+*/
 @Getter
 public class DslNode {
     private String name;

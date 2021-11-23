@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: CredentialManager
- * @description: CredentialManager
- * @author: Ethan Liu
- * @create: 2021-11-01 21:15
- **/
+ * @class CredentialManager
+ * @description CredentialManager
+ * @author Ethan Liu
+ * @create 2021-11-01 21:15
+*/
 public interface CredentialManager {
 
     String getType();

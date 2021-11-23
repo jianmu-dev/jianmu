@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * @class: TriggerEventRepositoryImpl
- * @description: TriggerEventRepositoryImpl
- * @author: Ethan Liu
- * @create: 2021-11-11 08:36
+ * @class TriggerEventRepositoryImpl
+ * @description TriggerEventRepositoryImpl
+ * @author Ethan Liu
+ * @create 2021-11-11 08:36
  */
 @Repository
 public class TriggerEventRepositoryImpl implements TriggerEventRepository {

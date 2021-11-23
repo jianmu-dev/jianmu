@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @class: NameSpacesVo
- * @description: NameSpacesVo
- * @author: Ethan Liu
- * @create: 2021-11-02 13:18
- **/
+ * @class NameSpacesVo
+ * @description NameSpacesVo
+ * @author Ethan Liu
+ * @create 2021-11-02 13:18
+*/
 @Data
 @Builder
 @AllArgsConstructor

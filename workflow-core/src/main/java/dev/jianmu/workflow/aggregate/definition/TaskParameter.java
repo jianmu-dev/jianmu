@@ -1,11 +1,11 @@
 package dev.jianmu.workflow.aggregate.definition;
 
 /**
- * @class: TaskParameter
- * @description: 任务参数
- * @author: Ethan Liu
- * @create: 2021-09-04 17:10
- **/
+ * @class TaskParameter
+ * @description 任务参数
+ * @author Ethan Liu
+ * @create 2021-09-04 17:10
+*/
 public class TaskParameter {
     private String ref;
     private String expression;

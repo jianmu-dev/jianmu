@@ -9,11 +9,11 @@ import java.math.RoundingMode;
 import java.util.List;
 
 /**
- * @class: ElVisitorImpl
- * @description: 语法树遍历实现
- * @author: Ethan Liu
- * @create: 2021-02-20 09:55
- **/
+ * @class ElVisitorImpl
+ * @description 语法树遍历实现
+ * @author Ethan Liu
+ * @create 2021-02-20 09:55
+*/
 public class ElVisitorImpl extends JianMuElBaseVisitor {
     private final EvaluationContext context;
 

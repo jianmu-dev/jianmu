@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * @class: WebhookRequest
- * @description: Webhook请求
- * @author: Ethan Liu
- * @create: 2021-11-14 21:26
+ * @class WebhookRequest
+ * @description Webhook请求
+ * @author Ethan Liu
+ * @create 2021-11-14 21:26
  */
 public class WebRequest {
     public enum StatusCode {
