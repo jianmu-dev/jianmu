@@ -1,4 +1,5 @@
 import type { App, DirectiveBinding } from 'vue';
+import { nextTick } from 'vue';
 import { CustomObjectDirective } from './model';
 const findRootElement = (el: HTMLElement | null): HTMLElement | null => {
   // 递归发现没父元素直接结束
@@ -10,15 +11,6 @@ const findRootElement = (el: HTMLElement | null): HTMLElement | null => {
   }
   return findRootElement(el.parentElement);
 };
-function getStyle(element: HTMLElement, attr: string) {
-  // @ts-ignore
-  if (element.currentStyle) {
-    // @ts-ignore
-    return element.currentStyle[attr];
-  }
-  // @ts-ignore
-  return getComputedStyle(element, null)[attr];
-}
 // 指令
 const vScroll = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
@@ -27,19 +19,13 @@ const vScroll = {
     // 默认设置挂载元素高度
     if (binding.modifiers.current) {
       rootElement = el;
-      // rootElement指定为当前节点，设置height直接为浏览器computed自动计算的值
-      const height = getStyle(rootElement, 'height');
-      // 浏览器计算出来的高度为0，提示警告
-      if (!height) {
-        console.warn('无法拿到元素初始高度，请设置元素高度');
-        return;
-      }
-      if (height.includes('%')) {
-        console.warn('请设置具体的元素的高度');
-        return;
-      }
-      rootElement.style.height = height;
-      dir.initHeight = rootElement.clientHeight;
+      nextTick(() => {
+        // 浏览器计算出来的高度为0，提示警告
+        if (rootElement!.clientHeight === 0) {
+          console.warn('无法拿到元素初始高度，请设置元素高度');
+          return;
+        }
+      });
     } else {
       if (!rootElement) {
         return;
@@ -48,9 +34,6 @@ const vScroll = {
     }
     rootElement.style.overflowY = 'auto';
     dir.handler = function () {
-      // console.log('scrollTop', rootElement!.scrollTop);
-      // console.log('clientHeight', rootElement!.clientHeight);
-      // console.log('scrollHeight', rootElement!.scrollHeight);
       if (
         !rootElement ||
         rootElement.scrollTop + rootElement.clientHeight !==
@@ -58,6 +41,12 @@ const vScroll = {
       ) {
         return;
       }
+      console.log(
+        'hhhhhhhh',
+        rootElement!.scrollTop,
+        rootElement!.clientHeight,
+        rootElement!.scrollHeight
+      );
       // 滚动触底
       binding.value();
     };
@@ -72,7 +61,7 @@ const vScroll = {
         clearTimeout(dir.timer);
       }
       dir.timer = setTimeout(() => {
-        if (rootElement!.scrollHeight > (dir.initHeight as number)) {
+        if (rootElement!.scrollHeight > rootElement!.clientHeight) {
           return;
         }
         binding.value();

@@ -23,10 +23,10 @@
             </div>
           </div>
         </div>
-        <div class="table-container" v-loading="bottomLoading">
+        <div class="table-container">
           <div class="table-title">请求列表</div>
           <div class="table-content" ref="scrollRef" v-scroll.current="btnDown">
-            <jm-table :data="webhookRequestList" border>
+            <jm-table :data="webhookRequestList" border :row-key="rowkey">
               <jm-table-column prop="userAgent" label="来源"></jm-table-column>
               <jm-table-column prop="timed" label="请求时间" align="center">
                 <template #default="scope">
@@ -52,7 +52,7 @@
               <jm-table-column label="操作" align="center">
                 <template #default="scope">
                   <div class="table-button">
-                    <div class="retry" @click="retry">重试</div>
+                    <div class="retry" @click="retry(scope.row.id)">重试</div>
                     <div class="see-payload" @click="seePayload(scope.row.id)">
                       查看payload
                     </div>
@@ -91,11 +91,11 @@ import {
   nextTick,
 } from 'vue';
 import useClipboard from 'vue-clipboard3';
-import { getWebhookList, getWebhookUrl } from '@/api/trigger';
+import { getWebhookList, getWebhookUrl, retryWebRequest } from '@/api/trigger';
 import { IWebRequestVo } from '@/api/dto/trigger';
-import { IWebhookRequestTable } from '@/model/modules/trigger';
 import { datetimeFormatter } from '@/utils/formatter';
 import { IPageVo } from '@/api/dto/common';
+import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 export default defineComponent({
   props: {
@@ -133,14 +133,18 @@ export default defineComponent({
       pageSize: number;
       projectId: string;
     }>({
-      pageNum: 1,
-      pageSize: 1,
+      pageNum: START_PAGE_NUM,
+      pageSize: DEFAULT_PAGE_SIZE,
       projectId: '',
     });
     // 请求所有数据
-    const webhookRequestData = ref<IPageVo<IWebRequestVo>>();
+    const webhookRequestData = ref<IPageVo<IWebRequestVo>>({
+      total: 0,
+      pages: 0,
+      list: [],
+    });
     // 请求列表
-    const webhookRequestList = ref<IWebhookRequestTable[]>([]);
+    const webhookRequestList = ref<IWebRequestVo[]>([]);
     // 日志
     const webhookLog = ref<string>('');
     // 监听抽屉切换
@@ -150,6 +154,7 @@ export default defineComponent({
     );
     // 分页返回webhook请求列表
     const getWebhookRequestList = async () => {
+      const currentScorllTop = scrollRef.value?.scrollTop || 0;
       try {
         webhookRequestData.value = await getWebhookList(
           webhookRequestParams.value
@@ -159,15 +164,12 @@ export default defineComponent({
           ? (firstLoading.value = false)
           : (firstLoading.value = true);
         // 数据追加
-        webhookRequestData.value.list?.forEach(item => {
-          webhookRequestList.value.push(item);
-        });
+        webhookRequestList.value.push(...webhookRequestData.value.list);
         nextTick(() => {
-          console.log(
-            scrollRef.value!.scrollHeight,
-            scrollRef.value!.scrollTop,
-            scrollRef.value!.clientHeight
-          );
+          if (!scrollRef.value) {
+            return;
+          }
+          scrollRef.value.scrollTop = currentScorllTop;
         });
         // 还原状态
         bottomLoading.value = false;
@@ -215,15 +217,29 @@ export default defineComponent({
     const closeDrawer = () => {
       emit('close-webhook-drawer', false);
     };
+    // 重试api
+    const retryRequest = async (id: string) => {
+      try {
+        console.log('请求id', id);
+        await await retryWebRequest(id);
+        proxy.$success('重试成功');
+        getWebhookRequestList();
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     // 重试
     let msg = '<div>确定要重试吗?</div>';
-    const retry = () => {
-      proxy.$confirm(msg, '重试', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'info',
-        dangerouslyUseHTMLString: true,
-      });
+    const retry = (id: string) => {
+      console.log('选中的id', id);
+      proxy
+        .$confirm(msg, '重试', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info',
+          dangerouslyUseHTMLString: true,
+        })
+        .then(() => retryRequest(id));
     };
     // 查看payload
     const seePayload = (id: string) => {
@@ -247,7 +263,11 @@ export default defineComponent({
         getWebhookRequestList();
       }
     };
+    const rowkey = (row: any) => {
+      return row.id;
+    };
     return {
+      rowkey,
       scrollRef,
       drawerVisible,
       link,
@@ -301,7 +321,6 @@ export default defineComponent({
     padding: 20px 25px 0 25px;
     // webhook地址
     .webhook-link-container {
-      width: 905px;
       height: 125px;
       background: #fff;
       box-sizing: border-box;
@@ -363,11 +382,15 @@ export default defineComponent({
       }
       .table-content {
         // height: 160px;
-        height: calc(100vh - 375px);
+        max-height: calc(100vh - 375px);
+        // height: calc(100vh - 375px);
+        overflow-y: auto;
         ::v-deep(.el-table) {
           background: #fff;
           font-size: 14px;
           color: #082340;
+          overflow: visible;
+          height: auto;
           th {
             text-align: center;
             border-right: none;
