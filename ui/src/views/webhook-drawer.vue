@@ -25,47 +25,45 @@
         </div>
         <div class="table-container" v-loading="bottomLoading">
           <div class="table-title">请求列表</div>
-          <jm-table
-            :data="webhookRequestList"
-            border
-            v-scroll.current="btnDown"
-          >
-            <jm-table-column prop="userAgent" label="来源"></jm-table-column>
-            <jm-table-column prop="timed" label="请求时间" align="center">
-              <template #default="scope">
-                <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
-              </template></jm-table-column
-            >
-            <jm-table-column prop="statusCode" label="状态" align="center">
-              <template #default="scope">
-                <div
-                  v-if="scope.row.statusCode === 'OK'"
-                  style="color: #10c2c2"
-                >
-                  成功
-                </div>
-                <div v-else style="color: red">失败</div>
-              </template>
-            </jm-table-column>
-            <jm-table-column
-              prop="errorMsg"
-              label="错误信息"
-              align="center"
-            ></jm-table-column>
-            <jm-table-column label="操作" align="center">
-              <template #default="scope">
-                <div class="table-button">
-                  <div class="retry" @click="retry">重试</div>
-                  <div class="see-payload" @click="seePayload(scope.row.id)">
-                    查看payload
+          <div class="table-content" ref="scrollRef" v-scroll.current="btnDown">
+            <jm-table :data="webhookRequestList" border>
+              <jm-table-column prop="userAgent" label="来源"></jm-table-column>
+              <jm-table-column prop="timed" label="请求时间" align="center">
+                <template #default="scope">
+                  <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
+                </template></jm-table-column
+              >
+              <jm-table-column prop="statusCode" label="状态" align="center">
+                <template #default="scope">
+                  <div
+                    v-if="scope.row.statusCode === 'OK'"
+                    style="color: #10c2c2"
+                  >
+                    成功
                   </div>
-                </div>
-              </template>
-            </jm-table-column>
-          </jm-table>
-          <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
-            <span>显示更多</span>
-            <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
+                  <div v-else style="color: red">失败</div>
+                </template>
+              </jm-table-column>
+              <jm-table-column
+                prop="errorMsg"
+                label="错误信息"
+                align="center"
+              ></jm-table-column>
+              <jm-table-column label="操作" align="center">
+                <template #default="scope">
+                  <div class="table-button">
+                    <div class="retry" @click="retry">重试</div>
+                    <div class="see-payload" @click="seePayload(scope.row.id)">
+                      查看payload
+                    </div>
+                  </div>
+                </template>
+              </jm-table-column>
+            </jm-table>
+            <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
+              <span>显示更多</span>
+              <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -76,7 +74,7 @@
         destroy-on-close
       >
         <div class="payload-content">
-          <jm-log-viewer :value="webhookLog" />
+          <jm-log-viewer filename="webhook.txt" :value="webhookLog" />
         </div>
       </jm-dialog>
     </jm-drawer>
@@ -103,15 +101,15 @@ export default defineComponent({
   props: {
     modelValue: {
       type: Boolean,
-      require: true,
     },
     currentProjectId: {
       type: String,
-      required: true,
     },
   },
   emits: ['close-webhook-drawer'],
   setup(props, { emit }) {
+    const scrollRef = ref<HTMLDivElement>();
+
     const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
     // 抽屉控制
@@ -122,7 +120,7 @@ export default defineComponent({
     const noMore = ref<boolean>(true);
     const firstLoading = ref<boolean>(false);
     const bottomLoading = ref<boolean>(false);
-    // 模拟链接
+    // webhookUrl链接
     const webhook = ref<string>();
     const link = computed<string | undefined>(
       () =>
@@ -143,7 +141,7 @@ export default defineComponent({
     const webhookRequestData = ref<IPageVo<IWebRequestVo>>();
     // 请求列表
     const webhookRequestList = ref<IWebhookRequestTable[]>([]);
-    // 模拟日志
+    // 日志
     const webhookLog = ref<string>('');
     // 监听抽屉切换
     watch(
@@ -156,14 +154,20 @@ export default defineComponent({
         webhookRequestData.value = await getWebhookList(
           webhookRequestParams.value
         );
-        console.log('请求下来的数据', webhookRequestData.value);
         // 判断是否有下一页
-        webhookRequestData.value.total > webhookRequestList.value.length
+        webhookRequestData.value.pages > webhookRequestParams.value.pageNum
           ? (firstLoading.value = false)
           : (firstLoading.value = true);
         // 数据追加
         webhookRequestData.value.list?.forEach(item => {
           webhookRequestList.value.push(item);
+        });
+        nextTick(() => {
+          console.log(
+            scrollRef.value!.scrollHeight,
+            scrollRef.value!.scrollTop,
+            scrollRef.value!.clientHeight
+          );
         });
         // 还原状态
         bottomLoading.value = false;
@@ -174,10 +178,10 @@ export default defineComponent({
     // webhookUrl
     const getWebhookUrlRequest = async () => {
       try {
-        const { webhook: webhookUri } = await getWebhookUrl(
+        const { webhook: webhookUrl } = await getWebhookUrl(
           webhookRequestParams.value.projectId
         );
-        webhook.value = webhookUri;
+        webhook.value = webhookUrl;
       } catch (err) {
         proxy.$throw(err, proxy);
       }
@@ -188,7 +192,7 @@ export default defineComponent({
       () => {
         webhookRequestList.value = [];
         // 获取webhook请求列表
-        webhookRequestParams.value.projectId = props.currentProjectId;
+        webhookRequestParams.value.projectId = props.currentProjectId as string;
         getWebhookRequestList();
         // 获取webhookUrl
         getWebhookUrlRequest();
@@ -235,25 +239,26 @@ export default defineComponent({
     // 显示更多
     const btnDown = () => {
       // 如果还有下一页才会触发
-      if (webhookRequestData.value.hasNextPage) {
+      if (
+        webhookRequestData.value!.pages > webhookRequestParams.value.pageNum
+      ) {
         webhookRequestParams.value.pageNum++;
-        console.log(webhookRequestParams.value);
         bottomLoading.value = true;
         getWebhookRequestList();
       }
     };
     return {
+      scrollRef,
       drawerVisible,
       link,
       copy,
-      // 模拟表格数据
       // 表单数据
       webhookRequestList,
       closeDrawer,
       retry,
       seePayload,
       payloadDialogVisible,
-      // 模拟日志
+      // 日志
       webhookLog,
       // 显示更多
       noMore,
@@ -268,6 +273,11 @@ export default defineComponent({
 
 <style scoped lang="less">
 .webhook-drawer-container {
+  .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   ::v-deep(.el-drawer) {
     // 图标
     .el-drawer__header {
@@ -307,7 +317,7 @@ export default defineComponent({
         display: flex;
         align-items: center;
         .link-address {
-          width: 700px;
+          width: 760px;
           height: 40px;
           line-height: 40px;
           background: #f6f8fb;
@@ -315,11 +325,7 @@ export default defineComponent({
           color: #082340;
           margin-right: 10px;
           border-radius: 2px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
           > :first-child:before {
-            display: inline-block;
             margin: 0 10px;
             font-size: 16px;
             color: #6b7b8d;
@@ -332,9 +338,7 @@ export default defineComponent({
             }
           }
           .jm-icon-input-hook {
-            width: 700px;
-            display: flex;
-            align-items: center;
+            width: 760px;
           }
         }
         .copy-link-address {
@@ -351,51 +355,40 @@ export default defineComponent({
       background: #fff;
       box-sizing: border-box;
       padding: 20px;
-      height: 530px;
+      height: 535px;
       .table-title {
         margin-bottom: 20px;
         font-size: 14px;
         color: #082340;
       }
-      .success {
-        color: green;
-      }
-      .fail {
-        color: red;
-      }
-      ::v-deep(.el-table) {
-        background: #fff;
-        font-size: 14px;
-        color: #082340;
-        height: 420px;
-        // height: calc(100vh - 112px);
-        th {
-          text-align: center;
-          border-right: none;
-          font-weight: 500;
-        }
-        tr {
-          height: 56px;
-        }
-        .table-button {
-          display: flex;
-          justify-content: center;
-          .retry,
-          .see-payload {
-            font-size: 14px;
-            color: #096dd9;
-            font-weight: 600;
-            cursor: pointer;
+      .table-content {
+        // height: 160px;
+        height: calc(100vh - 375px);
+        ::v-deep(.el-table) {
+          background: #fff;
+          font-size: 14px;
+          color: #082340;
+          th {
+            text-align: center;
+            border-right: none;
+            font-weight: 500;
           }
-          .retry {
-            margin-right: 20px;
+          tr {
+            height: 56px;
           }
-          // 状态
-          .success {
-            color: red;
-          }
-          .fail {
-            color: green;
+          .table-button {
+            display: flex;
+            justify-content: center;
+            .retry,
+            .see-payload {
+              font-size: 14px;
+              color: #096dd9;
+              font-weight: 600;
+              cursor: pointer;
+            }
+            .retry {
+              margin-right: 20px;
+            }
           }
         }
       }

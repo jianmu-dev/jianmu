@@ -48,6 +48,9 @@ const vScroll = {
     }
     rootElement.style.overflowY = 'auto';
     dir.handler = function () {
+      // console.log('scrollTop', rootElement!.scrollTop);
+      // console.log('clientHeight', rootElement!.clientHeight);
+      // console.log('scrollHeight', rootElement!.scrollHeight);
       if (
         !rootElement ||
         rootElement.scrollTop + rootElement.clientHeight !==
