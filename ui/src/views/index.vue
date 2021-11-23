@@ -78,16 +78,8 @@
                 <span v-if="project.status === ProjectStatusEnum.RUNNING"
                   >执行时长：{{
                     executionTimeFormatter(project.startTime, undefined, true)
-                  }}</span
-                >
-                <span v-else
-                  >最后执行时间：{{
-                    datetimeFormatter(project.latestTime)
-                  }}</span
-                >
-              </div>
-              <div class="time">
-                下次执行时间：{{ datetimeFormatter(project.nextTime) }}
+                  }}</span>
+                <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
               </div>
               <div class="operation">
                 <jm-tooltip content="触发" placement="bottom">

@@ -40,7 +40,7 @@ public class ProjectVo {
     private Source source;
     @Schema(description = "DSL类型")
     private DslType dslType;
-    @Schema(description = "Event Bridge Id")
+    @Schema(description = "Event Bridge Id", deprecated = true)
     private String eventBridgeId;
     @Schema(description = "触发类型")
     private String triggerType;
@@ -51,7 +51,7 @@ public class ProjectVo {
     @Schema(description = "最后执行时间")
     private LocalDateTime latestTime;
     @Schema(description = "下次执行时间")
-    private String nextTime;
+    private LocalDateTime nextTime;
     @Schema(description = "最后一次执行状态")
     private String status;
 }

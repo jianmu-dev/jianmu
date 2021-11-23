@@ -20,7 +20,7 @@
         </jm-tooltip>
       </div>
       <div>
-        <div class="param-key">最后执行时间：</div>
+        <div class="param-key">最后完成时间：</div>
         <jm-tooltip
           :content="datetimeFormatter(process.endTime)"
           placement="bottom"
@@ -62,11 +62,7 @@
             加载中...
           </jm-button>
         </div>
-        <jm-log-viewer
-          id="process-log"
-          :filename="`${process.name}.txt`"
-          :value="processLog"
-        />
+        <jm-log-viewer :filename="`${process.name}.txt`" :value="processLog" />
       </div>
     </div>
   </div>
@@ -76,7 +72,6 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onBeforeMount,
   onBeforeUnmount,
   ref,
@@ -89,21 +84,10 @@ import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkProcessLog, fetchProcessLog } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
-
-const autoHeights: {
-  [key: string]: IAutoHeight;
-} = {
-  log: {
-    elementId: 'process-log',
-    offsetTop: 250,
-  },
-};
 
 export default defineComponent({
   setup() {
-    const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const process = computed<IWorkflowExecutionRecordVo>(
       () => state.recordDetail.record as IWorkflowExecutionRecordVo
@@ -121,8 +105,6 @@ export default defineComponent({
       )
     );
     const processLog = ref<string>('');
-
-    proxy.$nextTick(() => adaptHeight(autoHeights.log));
 
     let terminateLogLoad = false;
     const loadLog = async (retry: number) => {
@@ -241,6 +223,7 @@ export default defineComponent({
     .log {
       margin: 16px;
       position: relative;
+      height: calc(100vh - 250px);
 
       .loading {
         position: absolute;

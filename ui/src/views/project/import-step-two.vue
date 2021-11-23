@@ -11,7 +11,7 @@
                  :loading="loading" @click="save">保存
       </jm-button>
     </div>
-    <div class="content" id="import-step-two-content">
+    <div class="content">
       <jm-scrollbar>
         <jm-radio-group v-model="importForm.dslPath">
           <jm-tree
@@ -33,12 +33,6 @@ import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
 import { _import, listGit } from '@/api/project';
 import { IImportForm } from '@/model/modules/project';
 import { useRouter } from 'vue-router';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-
-const autoHeight: IAutoHeight = {
-  elementId: 'import-step-two-content',
-  offsetTop: 284,
-};
 
 /**
  * 计算节点目录
@@ -93,8 +87,6 @@ export default defineComponent({
             leaf: !data[key],
           });
         });
-
-        proxy.$nextTick(() => adaptHeight(autoHeight));
 
         return resolve(nodes);
       },
@@ -154,6 +146,7 @@ export default defineComponent({
     min-width: 600px;
     margin: 16px 0;
     border: 1px solid #E6EBF2;
+    height: calc(100vh - 284px);
 
     ::v-deep(.el-tree) {
       margin: 15px;

@@ -8,7 +8,7 @@
         </jm-steps>
       </div>
     </div>
-    <div class="step" id="project-importer-step">
+    <div class="step">
       <jm-scrollbar>
         <step-one v-show="step === 0"/>
         <step-two v-if="step === 1" :data="stepTwoData"/>
@@ -18,24 +18,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, provide, ref } from 'vue';
+import { defineComponent, provide, ref } from 'vue';
 import StepOne from './import-step-one.vue';
 import StepTwo from './import-step-two.vue';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { IGitVo } from '@/api/dto/project';
 import { IGitCloneForm } from '@/model/modules/project';
-
-const autoHeight: IAutoHeight = {
-  elementId: 'project-importer-step',
-  offsetTop: 250,
-};
 
 export default defineComponent({
   components: { StepOne, StepTwo },
   setup() {
-    const { proxy } = getCurrentInstance() as any;
-    proxy.$nextTick(() => adaptHeight(autoHeight));
-
     const step = ref<number>(0);
     const stepTwoData = ref<{
       git: IGitVo;
@@ -81,6 +72,7 @@ export default defineComponent({
     margin-top: 16px;
     border-radius: 4px;
     background-color: #FFFFFF;
+    height: calc(100vh - 250px);
   }
 }
 </style>

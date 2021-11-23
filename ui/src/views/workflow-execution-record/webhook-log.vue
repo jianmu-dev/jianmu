@@ -17,14 +17,14 @@
     </div>
 
     <div class="tab-section">
-      <jm-tabs v-model="tabActiveName" @tab-click="handleTabClick">
+      <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
             <div class="tab">日志</div>
           </template>
           <div class="tab-content">
             <div class="log">
-              <jm-log-viewer id="webhook-log" :filename="`${nodeName}.txt`" :value="webhookLog"/>
+              <jm-log-viewer :filename="`${nodeName}.txt`" :value="webhookLog"/>
             </div>
           </div>
         </jm-tab-pane>
@@ -33,7 +33,7 @@
             <div class="tab">业务参数</div>
           </template>
           <div class="tab-content">
-            <div class="params" id="webhook-params">
+            <div class="params">
               <jm-scrollbar>
                 <div class="content">
                   <jm-table
@@ -72,22 +72,8 @@ import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { IEventParameterVo } from '@/api/dto/trigger';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
-
-const autoHeights: {
-  [key: string]: IAutoHeight;
-} = {
-  log: {
-    elementId: 'webhook-log',
-    offsetTop: 258,
-  },
-  params: {
-    elementId: 'webhook-params',
-    offsetTop: 226,
-  },
-};
 
 export default defineComponent({
   props: {
@@ -108,8 +94,6 @@ export default defineComponent({
     const tabActiveName = ref<string>(props.tabType);
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
-
-    proxy.$nextTick(() => adaptHeight(autoHeights[tabActiveName.value]));
 
     onMounted(async () => {
       if (!props.triggerId) {
@@ -135,9 +119,6 @@ export default defineComponent({
       tabActiveName,
       webhookLog,
       webhookParams,
-      handleTabClick: ({ props: { name } }: any) => {
-        proxy.$nextTick(() => adaptHeight(autoHeights[name]));
-      },
     };
   },
 });
@@ -225,12 +206,14 @@ export default defineComponent({
 
     .log {
       margin: 16px;
+      height: calc(100vh - 258px)
     }
 
     .params {
       background-color: #FFFFFF;
       border-radius: 4px;
       color: #082340;
+      height: calc(100vh - 226px);
 
       .content {
         padding: 16px;

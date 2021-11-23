@@ -20,7 +20,9 @@
     <jm-tabs v-model="activatedTab" class="tabs">
       <jm-tab-pane name="dsl" lazy>
         <template #label><i class="jm-icon-tab-dsl"></i> DSL模式</template>
-        <jm-dsl-editor id="project-editor" class="dsl-editor" v-model:value="editorForm.dslText"/>
+        <div class="dsl-editor">
+          <jm-dsl-editor v-model:value="editorForm.dslText"/>
+        </div>
       </jm-tab-pane>
     </jm-tabs>
   </div>
@@ -31,14 +33,8 @@ import { defineComponent, getCurrentInstance, inject, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { save } from '@/api/project';
 import { ISaveForm } from '@/model/modules/project';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { fetchProjectDetail, getProcessTemplate } from '@/api/view-no-auth';
 import { IProcessTemplateVo } from '@/api/dto/project';
-
-const autoHeight: IAutoHeight = {
-  elementId: 'project-editor',
-  offsetTop: 215,
-};
 
 export default defineComponent({
   props: {
@@ -79,17 +75,11 @@ export default defineComponent({
         editorForm.value.dslText = dslText;
 
         loading.value = !loading.value;
-
-        proxy.$nextTick(() => adaptHeight(autoHeight));
       }).catch((err: Error) => {
         loading.value = !loading.value;
 
         proxy.$throw(err, proxy);
-
-        proxy.$nextTick(() => adaptHeight(autoHeight));
       });
-    } else {
-      proxy.$nextTick(() => adaptHeight(autoHeight));
     }
 
     return {
@@ -163,7 +153,11 @@ export default defineComponent({
     border-radius: 4px 4px 0 0;
 
     .dsl-editor {
-      z-index: 1;
+      height: calc(100vh - 215px);
+
+      > div {
+        z-index: 1;
+      }
     }
   }
 }

@@ -240,6 +240,7 @@ export default defineComponent({
 <style lang="less">
 .jm-workflow-viewer {
   position: relative;
+  height: 100%;
 
   .task-states {
     position: absolute;
