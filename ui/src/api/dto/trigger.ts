@@ -35,7 +35,7 @@ export interface ITriggerWebhookVo
 /**
  * 分页返回Webhook请求列表 dto
  */
-export interface ITriggerViewerDto
+export interface ITriggerViewingDto
   extends Readonly<
     IPageDto & {
       projectId: string;
