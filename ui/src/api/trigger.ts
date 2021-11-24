@@ -16,7 +16,7 @@ export const baseUrl = {
  * 分页返回webhook请求列表
  */
 export function getWebhookList(
-  dto: ITriggerViewerDto
+  dto: ITriggerViewerDto,
 ): Promise<IPageVo<IWebRequestVo>> {
   return restProxy({
     url: `${baseUrl.webhook}`,

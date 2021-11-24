@@ -127,7 +127,7 @@ export default defineComponent({
     const link = computed<string | undefined>(
       () =>
         webhook.value &&
-        `${window.location.protocol}//${window.location.host}${webhook.value}`
+        `${window.location.protocol}//${window.location.host}${webhook.value}`,
     );
     // 请求参数
     const webhookRequestParams = ref<{
@@ -152,7 +152,7 @@ export default defineComponent({
     // 监听抽屉切换
     watch(
       () => props.modelValue,
-      () => (drawerVisible.value = props.modelValue)
+      () => (drawerVisible.value = props.modelValue),
     );
     // 分页返回webhook请求列表
     // listState列表的状态，push/cover
@@ -160,7 +160,7 @@ export default defineComponent({
       const currentScorllTop = scrollRef.value?.scrollTop || 0;
       try {
         webhookRequestData.value = await getWebhookList(
-          webhookRequestParams.value
+          webhookRequestParams.value,
         );
         // 判断是否有下一页
         webhookRequestData.value.pages > webhookRequestParams.value.pageNum
@@ -192,7 +192,7 @@ export default defineComponent({
     const getWebhookUrlRequest = async () => {
       try {
         const { webhook: webhookUrl } = await getWebhookUrl(
-          webhookRequestParams.value.projectId
+          webhookRequestParams.value.projectId,
         );
         webhook.value = webhookUrl;
       } catch (err) {
@@ -211,7 +211,7 @@ export default defineComponent({
         getWebhookRequestList('cover');
         // 获取webhookUrl
         getWebhookUrlRequest();
-      }
+      },
     );
     // 一键复制
     const copy = async () => {
@@ -257,7 +257,7 @@ export default defineComponent({
     // 查看payload
     const seePayload = (id: string) => {
       const { payload } = webhookRequestList.value.find(
-        item => item.id === id
+        item => item.id === id,
       ) as IWebRequestVo;
       webhookLog.value = JSON.stringify(JSON.parse(payload), null, 2);
       nextTick(() => {

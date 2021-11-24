@@ -80,7 +80,7 @@ export default defineComponent({
 
       if (val) {
         nextTick(
-          () => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight)
+          () => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight),
         );
       }
     };
@@ -96,7 +96,7 @@ export default defineComponent({
 
       if (autoScroll.value) {
         nextTick(
-          () => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight)
+          () => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight),
         );
       }
     };
@@ -106,8 +106,8 @@ export default defineComponent({
       contentRef.value?.addEventListener('scroll', () =>
         handleAutoScroll(
           contentRef.value!.scrollHeight - contentRef.value!.scrollTop <=
-            contentRef.value!.clientHeight
-        )
+            contentRef.value!.clientHeight,
+        ),
       );
 
       nextTick(() => setLog(props.value));
@@ -115,7 +115,7 @@ export default defineComponent({
 
     watch(
       () => props.value,
-      (value: string) => setLog(value)
+      (value: string) => setLog(value),
     );
 
     return {

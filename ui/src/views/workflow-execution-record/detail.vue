@@ -262,8 +262,8 @@ export default defineComponent({
           status === WorkflowExecutionRecordStatusEnum.RUNNING ||
           state.recordDetail.taskRecords.find(item =>
             [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(
-              item.status
-            )
+              item.status,
+            ),
           )
         ) {
           console.debug('3秒后刷新');
@@ -286,7 +286,7 @@ export default defineComponent({
 
       // 保留滚动偏移量
       proxy.mutateNavScrollLeft(
-        navScrollBar.value.scrollbar.firstElementChild.scrollLeft
+        navScrollBar.value.scrollbar.firstElementChild.scrollLeft,
       );
     });
 
@@ -327,7 +327,7 @@ export default defineComponent({
       data,
       loading,
       dslSourceCode: computed<string | undefined>(
-        () => state.recordDetail.recordDsl
+        () => state.recordDetail.recordDsl,
       ),
       nodeInfos: computed<INodeDefVo[]>(() => state.recordDetail.nodeInfos),
       taskLogForm,

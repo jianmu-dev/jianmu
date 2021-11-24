@@ -80,7 +80,7 @@ const vScroll = {
       clearTimeout(timer);
     }
     rootElement.removeEventListener('scroll', handler);
-    //取消截流
+    // 取消截流
     throttleScroll.cancel();
   },
 };

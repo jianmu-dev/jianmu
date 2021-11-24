@@ -90,19 +90,19 @@ export default defineComponent({
   setup() {
     const state = useStore().state[namespace] as IState;
     const process = computed<IWorkflowExecutionRecordVo>(
-      () => state.recordDetail.record as IWorkflowExecutionRecordVo
+      () => state.recordDetail.record as IWorkflowExecutionRecordVo,
     );
     const executing = computed<boolean>(
       () =>
         WorkflowExecutionRecordStatusEnum.RUNNING ===
-        (process.value.status as WorkflowExecutionRecordStatusEnum)
+        (process.value.status as WorkflowExecutionRecordStatusEnum),
     );
     const executionTime = computed<string>(() =>
       executionTimeFormatter(
         process.value.startTime,
         process.value.endTime,
-        executing.value
-      )
+        executing.value,
+      ),
     );
     const processLog = ref<string>('');
 

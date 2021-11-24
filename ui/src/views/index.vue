@@ -307,7 +307,7 @@ export default defineComponent({
         }
 
         const { triggerType } = projects.value.find(
-          item => item.id === id
+          item => item.id === id,
         ) as IProjectVo;
         const isWarning = triggerType === TriggerTypeEnum.WEBHOOK;
 
@@ -387,7 +387,7 @@ export default defineComponent({
         }
 
         const { name } = projects.value.find(
-          item => item.id === id
+          item => item.id === id,
         ) as IProjectVo;
 
         let msg = '<div>确定要删除项目吗?</div>';
