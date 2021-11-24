@@ -15,7 +15,6 @@
     "codemirror": "^5.61.0",
     "dateformat": "^4.5.1",
     "element-plus": "^1.0.2-beta.41",
-    "lodash": "^4.17.21",
     "mockjs": "^1.1.0",
     "qs": "^6.10.1",
     "smart-tagz": "^0.2.0",

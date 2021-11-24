@@ -1,10 +1,5 @@
 import { restProxy } from '@/api';
-import {
-  IGitCloningDto,
-  IGitVo,
-  IProjectImportingDto,
-  IProjectSavingDto,
-} from '@/api/dto/project';
+import { IGitCloningDto, IGitVo, IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
 
 export const baseUrl = {
   project: '/projects',
@@ -70,10 +65,7 @@ export function cloneGit(dto: IGitCloningDto): Promise<IGitVo> {
  * @param id
  * @param dir
  */
-export function listGit(
-  id: string,
-  dir?: string,
-): Promise<{
+export function listGit(id: string, dir?: string): Promise<{
   [key: string]: boolean;
 }> {
   return restProxy({
