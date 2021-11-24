@@ -395,8 +395,7 @@ export default defineComponent({
       .table-content {
         max-height: calc(100vh - 341px);
         overflow-y: auto;
-        border: none;
-        border-radius: 4px 4px 0px 0px;
+        border-radius:4px;
         border: 1px solid #ecedf4;
         ::v-deep(.el-table) {
           background: #fff;
@@ -415,6 +414,9 @@ export default defineComponent({
             text-align: center;
             border-right: 1px solid #ecedf4;
             font-weight: 500;
+          }
+          th:last-of-type{
+            border-right:none;
           }
           tr {
             height: 56px;
