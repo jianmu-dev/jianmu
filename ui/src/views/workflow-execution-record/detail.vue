@@ -83,27 +83,27 @@
                           @click-webhook-node="openWebhookLog"/>
     </div>
     <jm-drawer
-        title="查看任务执行日志"
-        :size="850"
-        v-model="taskLogForm.drawerVisible"
-        direction="rtl"
-        destroy-on-close>
+      title="查看任务执行日志"
+      :size="850"
+      v-model="taskLogForm.drawerVisible"
+      direction="rtl"
+      destroy-on-close>
       <task-log :id="taskLogForm.id" :tab-type="taskLogForm.tabType"/>
     </jm-drawer>
     <jm-drawer
-        title="查看流程日志"
-        :size="850"
-        v-model="processLogDrawer"
-        direction="rtl"
-        destroy-on-close>
+      title="查看流程日志"
+      :size="850"
+      v-model="processLogDrawer"
+      direction="rtl"
+      destroy-on-close>
       <process-log/>
     </jm-drawer>
     <jm-drawer
-        title="查看Webhook日志"
-        :size="850"
-        v-model="webhookLogForm.drawerVisible"
-        direction="rtl"
-        destroy-on-close>
+      title="查看Webhook日志"
+      :size="850"
+      v-model="webhookLogForm.drawerVisible"
+      direction="rtl"
+      destroy-on-close>
       <webhook-log :node-name="webhookLogForm.nodeName"
                    :trigger-id="webhookLogForm.triggerId"
                    :trigger-type="webhookLogForm.triggerType"
@@ -204,7 +204,7 @@ export default defineComponent({
         const { status } = state.recordDetail.record as IWorkflowExecutionRecordVo;
 
         if (status === WorkflowExecutionRecordStatusEnum.RUNNING ||
-            state.recordDetail.taskRecords.find(item => [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(item.status))) {
+          state.recordDetail.taskRecords.find(item => [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(item.status))) {
           console.debug('3秒后刷新');
           await sleep(3000);
           await loadDetail(true);
