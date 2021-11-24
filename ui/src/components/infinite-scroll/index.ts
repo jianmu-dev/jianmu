@@ -1,5 +1,6 @@
 import type { App, DirectiveBinding } from 'vue';
 import { nextTick } from 'vue';
+import _throttle from 'lodash/throttle';
 import { CustomObjectDirective } from './model';
 const findRootElement = (el: HTMLElement | null): HTMLElement | null => {
   // 递归发现没父元素直接结束
@@ -33,22 +34,19 @@ const vScroll = {
       rootElement.style.height = '100vh';
     }
     rootElement.style.overflowY = 'auto';
+    dir.throttleScroll = _throttle(binding.value, 800, {
+      leading: true,
+      trailing: false,
+    });
     dir.handler = function () {
+      // 滚动触底
       if (
         !rootElement ||
-        rootElement.scrollTop + rootElement.clientHeight !==
+        rootElement.scrollTop + rootElement.clientHeight ===
           rootElement.scrollHeight
       ) {
-        return;
+        dir.throttleScroll();
       }
-      console.log(
-        'hhhhhhhh',
-        rootElement!.scrollTop,
-        rootElement!.clientHeight,
-        rootElement!.scrollHeight
-      );
-      // 滚动触底
-      binding.value();
     };
     rootElement.addEventListener('scroll', dir.handler);
   },
@@ -76,11 +74,14 @@ const vScroll = {
     if (!rootElement) {
       return;
     }
-    const { handler, timer } = binding.dir as CustomObjectDirective;
+    const { handler, timer, throttleScroll } =
+      binding.dir as CustomObjectDirective;
     if (timer) {
       clearTimeout(timer);
     }
     rootElement.removeEventListener('scroll', handler);
+    //取消截流
+    throttleScroll.cancel();
   },
 };
 export default {

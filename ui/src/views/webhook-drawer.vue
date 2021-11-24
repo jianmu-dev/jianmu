@@ -134,7 +134,7 @@ export default defineComponent({
       projectId: string;
     }>({
       pageNum: START_PAGE_NUM,
-      pageSize: DEFAULT_PAGE_SIZE,
+      pageSize: 1,
       projectId: '',
     });
     // 请求所有数据
