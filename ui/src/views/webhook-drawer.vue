@@ -2,7 +2,7 @@
   <div class="webhook-drawer-container">
     <jm-drawer
       v-model="drawerVisible"
-      title="webhook"
+      title="Webhook"
       :size="953"
       direction="rtl"
       @close="closeDrawer"
@@ -26,7 +26,7 @@
         <div class="table-container">
           <div class="table-title">请求列表</div>
           <div class="table-content" ref="scrollRef" v-scroll.current="btnDown">
-            <jm-table :data="webhookRequestList" border :row-key="rowkey">
+            <jm-table :data="webhookRequestList" :row-key="rowkey">
               <jm-table-column prop="userAgent" label="来源"></jm-table-column>
               <jm-table-column prop="timed" label="请求时间" align="center">
                 <template #default="scope">
@@ -63,6 +63,9 @@
             <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
               <span>显示更多</span>
               <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
+            </div>
+            <div v-else>
+              <span class="bottom">没有更多了</span>
             </div>
           </div>
         </div>
@@ -108,8 +111,6 @@ export default defineComponent({
   },
   emits: ['close-webhook-drawer'],
   setup(props, { emit }) {
-    const scrollRef = ref<HTMLDivElement>();
-
     const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
     // 抽屉控制
@@ -120,6 +121,7 @@ export default defineComponent({
     const noMore = ref<boolean>(true);
     const firstLoading = ref<boolean>(false);
     const bottomLoading = ref<boolean>(false);
+    const scrollRef = ref<HTMLDivElement>();
     // webhookUrl链接
     const webhook = ref<string>();
     const link = computed<string | undefined>(
@@ -153,7 +155,8 @@ export default defineComponent({
       () => (drawerVisible.value = props.modelValue)
     );
     // 分页返回webhook请求列表
-    const getWebhookRequestList = async () => {
+    // listState列表的状态，push/cover
+    const getWebhookRequestList = async (listState: string) => {
       const currentScorllTop = scrollRef.value?.scrollTop || 0;
       try {
         webhookRequestData.value = await getWebhookList(
@@ -163,8 +166,16 @@ export default defineComponent({
         webhookRequestData.value.pages > webhookRequestParams.value.pageNum
           ? (firstLoading.value = false)
           : (firstLoading.value = true);
-        // 数据追加
-        webhookRequestList.value.push(...webhookRequestData.value.list);
+        // 追加-加载更多
+        if (listState === 'push') {
+          // 数据追加
+          webhookRequestList.value.push(...webhookRequestData.value.list);
+        }
+        // 重试-覆盖旧数据
+        if (listState === 'cover') {
+          webhookRequestList.value = webhookRequestData.value.list;
+        }
+
         nextTick(() => {
           if (!scrollRef.value) {
             return;
@@ -192,10 +203,12 @@ export default defineComponent({
     watch(
       () => props.currentProjectId,
       () => {
+        // 还原页码
+        webhookRequestParams.value.pageNum = START_PAGE_NUM;
         webhookRequestList.value = [];
         // 获取webhook请求列表
         webhookRequestParams.value.projectId = props.currentProjectId as string;
-        getWebhookRequestList();
+        getWebhookRequestList('cover');
         // 获取webhookUrl
         getWebhookUrlRequest();
       }
@@ -220,10 +233,11 @@ export default defineComponent({
     // 重试api
     const retryRequest = async (id: string) => {
       try {
-        console.log('请求id', id);
-        await await retryWebRequest(id);
+        webhookRequestParams.value.pageNum = START_PAGE_NUM;
         proxy.$success('重试成功');
-        getWebhookRequestList();
+        await retryWebRequest(id);
+        // 旧数据覆盖新数据
+        getWebhookRequestList('cover');
       } catch (err) {
         proxy.$throw(err, proxy);
       }
@@ -231,7 +245,6 @@ export default defineComponent({
     // 重试
     let msg = '<div>确定要重试吗?</div>';
     const retry = (id: string) => {
-      console.log('选中的id', id);
       proxy
         .$confirm(msg, '重试', {
           confirmButtonText: '确定',
@@ -251,7 +264,6 @@ export default defineComponent({
         payloadDialogVisible.value = true;
       });
     };
-
     // 显示更多
     const btnDown = () => {
       // 如果还有下一页才会触发
@@ -260,7 +272,7 @@ export default defineComponent({
       ) {
         webhookRequestParams.value.pageNum++;
         bottomLoading.value = true;
-        getWebhookRequestList();
+        getWebhookRequestList('push');
       }
     };
     const rowkey = (row: any) => {
@@ -381,23 +393,36 @@ export default defineComponent({
         color: #082340;
       }
       .table-content {
-        // height: 160px;
-        max-height: calc(100vh - 375px);
-        // height: calc(100vh - 375px);
+        max-height: calc(100vh - 341px);
         overflow-y: auto;
+        border: none;
+        border-radius: 4px 4px 0px 0px;
+        border: 1px solid #ecedf4;
         ::v-deep(.el-table) {
           background: #fff;
           font-size: 14px;
           color: #082340;
           overflow: visible;
           height: auto;
+          &::before {
+            height: 0;
+          }
+          td {
+            border-bottom: 1px solid #ecedf4;
+            border-right: 1px solid #ecedf4;
+          }
           th {
             text-align: center;
-            border-right: none;
+            border-right: 1px solid #ecedf4;
             font-weight: 500;
           }
           tr {
             height: 56px;
+          }
+          tr {
+            td:last-of-type {
+              border-right: none;
+            }
           }
           .table-button {
             display: flex;
@@ -417,26 +442,23 @@ export default defineComponent({
       }
       // 显示更多
       .bottom {
-        margin-top: 25px;
+        margin: 15px 0;
         color: #7b8c9c;
         font-size: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-
         .btm-down {
           width: 16px;
           height: 16px;
           background-image: url('@/assets/svgs/node-library/drop-down.svg');
           margin-left: 6px;
         }
-
         .btm-down.btn-loading {
           animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43) infinite;
           background-image: url('@/assets/svgs/node-library/loading.svg');
         }
-
         @keyframes rotate {
           0% {
             transform: rotate(0deg);
