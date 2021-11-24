@@ -416,6 +416,9 @@ export default defineComponent({
             border-right: 1px solid #ecedf4;
             font-weight: 500;
           }
+          th:last-of-type{
+            border-right:none;
+          }
           tr {
             height: 56px;
           }
