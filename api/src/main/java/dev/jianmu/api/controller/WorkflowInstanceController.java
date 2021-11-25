@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @class: WorkflowInstanceController
- * @description: 流程实例接口类
- * @author: Ethan Liu
- * @create: 2021-03-24 16:02
- **/
+ * @class WorkflowInstanceController
+ * @description 流程实例接口类
+ * @author Ethan Liu
+ * @create 2021-03-24 16:02
+*/
 @RestController
 @RequestMapping("workflow_instances")
 @Tag(name = "流程实例接口", description = "提供流程实例启动停止等API")

@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: TriggerRepositoryImpl
- * @description: TriggerRepositoryImpl
- * @author: Ethan Liu
- * @create: 2021-11-10 15:28
+ * @class TriggerRepositoryImpl
+ * @description TriggerRepositoryImpl
+ * @author Ethan Liu
+ * @create 2021-11-10 15:28
  */
 @Repository
 public class TriggerRepositoryImpl implements TriggerRepository {

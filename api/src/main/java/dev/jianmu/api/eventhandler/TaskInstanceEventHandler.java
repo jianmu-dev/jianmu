@@ -22,11 +22,11 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
- * @class: TaskInstanceEventHandler
- * @description: 任务实例事件处理器
- * @author: Ethan Liu
- * @create: 2021-04-02 22:18
- **/
+ * @class TaskInstanceEventHandler
+ * @description 任务实例事件处理器
+ * @author Ethan Liu
+ * @create 2021-04-02 22:18
+*/
 @Component
 public class TaskInstanceEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceEventHandler.class);

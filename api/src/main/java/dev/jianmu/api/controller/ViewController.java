@@ -32,11 +32,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @class: ProjectViewController
- * @description: ProjectViewController
- * @author: Ethan Liu
- * @create: 2021-06-04 17:23
- **/
+ * @class ProjectViewController
+ * @description ProjectViewController
+ * @author Ethan Liu
+ * @create 2021-06-04 17:23
+*/
 @RestController
 @RequestMapping("view")
 @Tag(name = "查询API", description = "查询API")

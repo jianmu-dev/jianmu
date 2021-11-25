@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * @class: TaskInstance
- * @description: 任务实例
- * @author: Ethan Liu
- * @create: 2021-03-25 15:44
- **/
+ * @class TaskInstance
+ * @description 任务实例
+ * @author Ethan Liu
+ * @create 2021-03-25 15:44
+*/
 public class TaskInstance extends AggregateRoot {
     // ID
     private String id;

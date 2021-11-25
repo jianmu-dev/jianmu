@@ -1,10 +1,10 @@
 package dev.jianmu.trigger.event;
 
 /**
- * @class: TriggerParameter
- * @description: TriggerParameter
- * @author: Ethan Liu
- * @create: 2021-11-11 08:18
+ * @class TriggerParameter
+ * @description TriggerParameter
+ * @author Ethan Liu
+ * @create 2021-11-11 08:18
  */
 public class TriggerEventParameter {
     private String name;

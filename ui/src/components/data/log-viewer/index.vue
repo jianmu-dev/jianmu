@@ -85,7 +85,7 @@ export default defineComponent({
       contentRef.value?.addEventListener('scroll', () =>
         handleAutoScroll(contentRef.value!.scrollHeight - contentRef.value!.scrollTop <= contentRef.value!.clientHeight));
 
-      setLog(props.value);
+      nextTick(() => setLog(props.value));
     });
 
     watch(() => props.value, (value: string) => setLog(value));

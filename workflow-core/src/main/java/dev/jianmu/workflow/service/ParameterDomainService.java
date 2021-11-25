@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @class: ParameterDomainService
- * @description: 参数领域服务
- * @author: Ethan Liu
- * @create: 2021-04-08 10:00
- **/
+ * @class ParameterDomainService
+ * @description 参数领域服务
+ * @author Ethan Liu
+ * @create 2021-04-08 10:00
+*/
 public class ParameterDomainService {
 
     public Map<String, String> createParameterMap(Map<String, ? extends Parameter> parameterMap) {

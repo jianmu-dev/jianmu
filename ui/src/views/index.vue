@@ -3,24 +3,24 @@
     <div class="main">
       <div class="menu-bar">
         <div class="left-area">
-          <router-link :to="{name: 'process-template'}">
+          <router-link :to="{ name: 'create-project' }">
             <jm-tooltip content="新增项目" placement="top">
               <button class="add"></button>
             </jm-tooltip>
           </router-link>
-          <router-link :to="{name: 'import-project'}">
+          <router-link :to="{ name: 'import-project' }">
             <jm-tooltip content="导入项目" placement="top">
               <button class="git"></button>
             </jm-tooltip>
           </router-link>
         </div>
         <div class="right-area">
-          <router-link :to="{name: 'node-library'}">
+          <router-link :to="{ name: 'node-library' }">
             <jm-tooltip content="本地节点库" placement="top">
               <button class="node-library"></button>
             </jm-tooltip>
           </router-link>
-          <router-link :to="{name: 'secret-key'}">
+          <router-link :to="{ name: 'secret-key' }">
             <jm-tooltip content="密钥管理" placement="top">
               <button class="secret-key"></button>
             </jm-tooltip>
@@ -34,48 +34,116 @@
           <span class="desc">（共有 {{ projects.length }} 个项目）</span>
         </div>
         <div class="projects">
-          <jm-empty v-if="projects.length === 0"/>
-          <div v-else v-for="project of projects" :key="project.id" class="item">
-            <div :class="{'state-bar': true, [project.status.toLowerCase()]: true}"></div>
+          <jm-empty v-if="projects.length === 0" />
+          <div
+            v-else
+            v-for="project of projects"
+            :key="project.id"
+            class="item"
+          >
+            <div
+              :class="{
+                'state-bar': true,
+                [project.status.toLowerCase()]: true,
+              }"
+            ></div>
             <div class="content">
-              <jm-tooltip v-if="project.source === DslSourceEnum.GIT" content="打开git仓库" placement="bottom">
-                <a :class="{'git-label': true, [project.status === ProjectStatusEnum.INIT? 'init': 'normal']: true}"
-                   :href="`/view/repo/${project.gitRepoId}`"
-                   target="_blank"></a>
+              <jm-tooltip
+                v-if="project.source === DslSourceEnum.GIT"
+                content="打开git仓库"
+                placement="bottom"
+              >
+                <a
+                  :class="{
+                    'git-label': true,
+                    [project.status === ProjectStatusEnum.INIT
+                      ? 'init'
+                      : 'normal']: true,
+                  }"
+                  :href="`/view/repo/${project.gitRepoId}`"
+                  target="_blank"
+                ></a>
               </jm-tooltip>
-              <router-link :to="{name: 'workflow-execution-record-detail', query: { projectId: project.id }}">
+              <router-link
+                :to="{
+                  name: 'workflow-execution-record-detail',
+                  query: { projectId: project.id },
+                }"
+              >
                 <jm-tooltip :content="project.name" placement="top">
                   <div class="title ellipsis">{{ project.name }}</div>
                 </jm-tooltip>
               </router-link>
               <div class="time">
-                <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
+                <span v-if="project.status === ProjectStatusEnum.RUNNING"
+                  >执行时长：{{
                     executionTimeFormatter(project.startTime, undefined, true)
-                  }}</span>
-                <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
+                  }}</span
+                >
+                <span v-else
+                  >最后完成时间：{{
+                    datetimeFormatter(project.latestTime)
+                  }}</span
+                >
               </div>
-              <div class="time">下次执行时间：{{ datetimeFormatter(project.nextTime) }}</div>
+              <div class="time">
+                下次执行时间：{{ datetimeFormatter(project.nextTime) }}
+              </div>
               <div class="operation">
                 <jm-tooltip content="触发" placement="bottom">
-                  <button :class="{execute: true, doing: executings[project.id]}" @click="execute(project.id)"></button>
+                  <button
+                    :class="{ execute: true, doing: executings[project.id] }"
+                    @click="execute(project.id)"
+                  ></button>
                 </jm-tooltip>
-                <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
-                  <button class="webhook" @click="selectedWebhookId = project.id"></button>
+                <jm-tooltip
+                  v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
+                  content="Webhook"
+                  placement="bottom"
+                >
+                  <button
+                    class="webhook"
+                    @click="webhookDrawer(project.id)"
+                  ></button>
                 </jm-tooltip>
-                <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" content="编辑" placement="bottom">
+                <jm-tooltip
+                  v-if="project.source === DslSourceEnum.LOCAL"
+                  content="编辑"
+                  placement="bottom"
+                >
                   <button class="edit" @click="edit(project.id)"></button>
                 </jm-tooltip>
                 <jm-tooltip v-else content="同步DSL" placement="bottom">
-                  <button :class="{sync: true, doing: synchronizings[project.id]}" @click="sync(project.id)"></button>
+                  <button
+                    :class="{ sync: true, doing: synchronizings[project.id] }"
+                    @click="sync(project.id)"
+                  ></button>
                 </jm-tooltip>
-                <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="查看流程DSL" placement="bottom">
-                  <button class="workflow-label" @click="viewDsl(project)"></button>
+                <jm-tooltip
+                  v-if="project.dslType === DslTypeEnum.WORKFLOW"
+                  content="查看流程DSL"
+                  placement="bottom"
+                >
+                  <button
+                    class="workflow-label"
+                    @click="viewDsl(project)"
+                  ></button>
                 </jm-tooltip>
-                <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="查看管道DSL" placement="bottom">
-                  <button class="pipeline-label" @click="viewDsl(project)"></button>
+                <jm-tooltip
+                  v-else-if="project.dslType === DslTypeEnum.PIPELINE"
+                  content="查看管道DSL"
+                  placement="bottom"
+                >
+                  <button
+                    class="pipeline-label"
+                    @click="viewDsl(project)"
+                  ></button>
                 </jm-tooltip>
                 <jm-tooltip content="删除" placement="top">
-                  <button :class="{del: true, doing: deletings[project.id]}" @click="del(project.id)"></button>
+                  <button
+                    :class="{ del: true, doing: deletings[project.id] }"
+                    @click="del(project.id)"
+                  ></button>
                 </jm-tooltip>
               </div>
             </div>
@@ -83,34 +151,53 @@
         </div>
       </div>
     </div>
-    <bottom-nav/>
-    <webhook-dialog v-if="selectedWebhookId" :project-id="selectedWebhookId"
-                    @close="selectedWebhookId = undefined"/>
-    <dsl-dialog v-if="selectedDslId && selectedDslType"
-                :project-id="selectedDslId"
-                :dsl-type="selectedDslType"
-                @close="selectedDslId = undefined; selectedDslType = undefined;"/>
+    <bottom-nav />
+    <webhook-drawer
+      :current-project-id="currentProjectId"
+      v-model="webhookDrawerFlag"
+      @close-webhook-drawer="closeWebhookDrawer"
+    ></webhook-drawer>
+    <dsl-dialog
+      v-if="selectedDslId && selectedDslType"
+      :project-id="selectedDslId"
+      :dsl-type="selectedDslType"
+      @close="
+        selectedDslId = undefined;
+        selectedDslType = undefined;
+      "
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import {
+  defineComponent,
+  getCurrentInstance,
+  onBeforeMount,
+  onBeforeUnmount,
+  ref,
+} from 'vue';
 import { IProjectVo } from '@/api/dto/project';
 import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
-import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import {
+  DslSourceEnum,
+  DslTypeEnum,
+  ProjectStatusEnum,
+  TriggerTypeEnum,
+} from '@/api/dto/enumeration';
 import { del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import WebhookDialog from './webhook-dialog.vue';
 import DslDialog from './dsl-dialog.vue';
 import BottomNav from '@/views/nav/bottom2.vue';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
+import WebhookDrawer from './webhook-drawer.vue';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
 export default defineComponent({
-  components: { BottomNav, WebhookDialog, DslDialog },
+  components: { BottomNav, DslDialog, WebhookDrawer },
   setup() {
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
@@ -123,12 +210,19 @@ export default defineComponent({
     const selectedWebhookId = ref<string>();
     const selectedDslId = ref<string>();
     const selectedDslType = ref<DslTypeEnum>();
+    const webhookDrawerFlag = ref<boolean>(false);
+    const currentProjectId = ref<string>('');
 
     console.log('开启自动刷新项目列表');
     const autoRefreshingInterval = setInterval(async () => {
-      if (!projects.value.find(item => item.status === ProjectStatusEnum.RUNNING)) {
+      if (
+        !projects.value.find(item => item.status === ProjectStatusEnum.RUNNING)
+      ) {
         // 不存在running场景
-        if (autoRefreshingOfNoRunningCount.value < MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT) {
+        if (
+          autoRefreshingOfNoRunningCount.value <
+          MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT
+        ) {
           autoRefreshingOfNoRunningCount.value++;
           return;
         } else {
@@ -177,6 +271,16 @@ export default defineComponent({
       clearInterval(autoRefreshingInterval);
     });
 
+    // 打开webhook-drawer
+    const webhookDrawer = (id: string) => {
+      currentProjectId.value = id;
+      webhookDrawerFlag.value = true;
+    };
+    // 接收webhook的自定义函数
+    const closeWebhookDrawer = (data: boolean) => {
+      webhookDrawerFlag.value = data;
+    };
+
     return {
       loading,
       DslSourceEnum,
@@ -193,44 +297,55 @@ export default defineComponent({
       selectedWebhookId,
       selectedDslId,
       selectedDslType,
+      webhookDrawerFlag,
+      webhookDrawer,
+      closeWebhookDrawer,
+      currentProjectId,
       execute: (id: string) => {
         if (executings.value[id]) {
           return;
         }
 
-        const { triggerType } = projects.value.find(item => item.id === id) as IProjectVo;
+        const { triggerType } = projects.value.find(
+          item => item.id === id,
+        ) as IProjectVo;
         const isWarning = triggerType === TriggerTypeEnum.WEBHOOK;
 
         let msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
-          msg += '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
+          msg +=
+            '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
         }
 
-        proxy.$confirm(msg, '触发项目执行', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: isWarning ? 'warning' : 'info',
-          dangerouslyUseHTMLString: true,
-        }).then(() => {
-          executings.value[id] = true;
+        proxy
+          .$confirm(msg, '触发项目执行', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: isWarning ? 'warning' : 'info',
+            dangerouslyUseHTMLString: true,
+          })
+          .then(() => {
+            executings.value[id] = true;
 
-          executeImmediately(id).then(() => {
-            proxy.$success('操作成功');
+            executeImmediately(id)
+              .then(() => {
+                proxy.$success('操作成功');
 
-            delete executings.value[id];
+                delete executings.value[id];
 
-            const index = projects.value.findIndex(item => item.id === id);
-            projects.value[index] = {
-              ...projects.value[index],
-              status: ProjectStatusEnum.RUNNING,
-            };
-          }).catch((err: Error) => {
-            proxy.$throw(err, proxy);
+                const index = projects.value.findIndex(item => item.id === id);
+                projects.value[index] = {
+                  ...projects.value[index],
+                  status: ProjectStatusEnum.RUNNING,
+                };
+              })
+              .catch((err: Error) => {
+                proxy.$throw(err, proxy);
 
-            delete executings.value[id];
-          });
-        }).catch(() => {
-        });
+                delete executings.value[id];
+              });
+          })
+          .catch(() => {});
       },
       edit: (id: string) => {
         router.push({ name: 'update-project', params: { id } });
@@ -240,60 +355,70 @@ export default defineComponent({
           return;
         }
 
-        proxy.$confirm('确定要同步吗?', '同步DSL', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'info',
-        }).then(() => {
-          synchronizings.value[id] = true;
+        proxy
+          .$confirm('确定要同步吗?', '同步DSL', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'info',
+          })
+          .then(() => {
+            synchronizings.value[id] = true;
 
-          synchronize(id).then(() => {
-            proxy.$success('同步成功');
+            synchronize(id)
+              .then(() => {
+                proxy.$success('同步成功');
 
-            delete synchronizings.value[id];
+                delete synchronizings.value[id];
 
-            // 刷新项目列表，保留查询状态
-            loadProject();
-          }).catch((err: Error) => {
-            proxy.$throw(err, proxy);
+                // 刷新项目列表，保留查询状态
+                loadProject();
+              })
+              .catch((err: Error) => {
+                proxy.$throw(err, proxy);
 
-            delete synchronizings.value[id];
-          });
-        }).catch(() => {
-        });
+                delete synchronizings.value[id];
+              });
+          })
+          .catch(() => {});
       },
       del: (id: string) => {
         if (deletings.value[id]) {
           return;
         }
 
-        const { name } = projects.value.find(item => item.id === id) as IProjectVo;
+        const { name } = projects.value.find(
+          item => item.id === id,
+        ) as IProjectVo;
 
         let msg = '<div>确定要删除项目吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
 
-        proxy.$confirm(msg, '删除项目', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          dangerouslyUseHTMLString: true,
-        }).then(() => {
-          deletings.value[id] = true;
+        proxy
+          .$confirm(msg, '删除项目', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+            dangerouslyUseHTMLString: true,
+          })
+          .then(() => {
+            deletings.value[id] = true;
 
-          del(id).then(() => {
-            proxy.$success('删除成功');
+            del(id)
+              .then(() => {
+                proxy.$success('删除成功');
 
-            delete deletings.value[id];
+                delete deletings.value[id];
 
-            const index = projects.value.findIndex(item => item.id === id);
-            projects.value.splice(index, 1);
-          }).catch((err: Error) => {
-            proxy.$throw(err, proxy);
+                const index = projects.value.findIndex(item => item.id === id);
+                projects.value.splice(index, 1);
+              })
+              .catch((err: Error) => {
+                proxy.$throw(err, proxy);
 
-            delete deletings.value[id];
-          });
-        }).catch(() => {
-        });
+                delete deletings.value[id];
+              });
+          })
+          .catch(() => {});
       },
       viewDsl: ({ id, dslType }: IProjectVo) => {
         selectedDslId.value = id;
@@ -339,8 +464,8 @@ export default defineComponent({
         button {
           width: 186px;
           height: 64px;
-          background-color: #FFFFFF;
-          box-shadow: 0 6px 14px 0 #ACC3EE;
+          background-color: #ffffff;
+          box-shadow: 0 6px 14px 0 #acc3ee;
           border-radius: 4px;
           border: 0;
           background-position: center center;
@@ -430,8 +555,8 @@ export default defineComponent({
           margin: 0.5%;
           width: 19%;
           min-width: 260px;
-          background-color: #FFFFFF;
-          box-shadow: 0 0 8px 0 #9EB1C5;
+          background-color: #ffffff;
+          box-shadow: 0 0 8px 0 #9eb1c5;
 
           //&:hover {
           //  .content {
@@ -452,17 +577,25 @@ export default defineComponent({
             }
 
             &.running {
-              background-image: repeating-linear-gradient(115deg, #10C2C2 0px, #58D4D4 1px, #58D4D4 10px, #10C2C2 11px, #10C2C2 16px);
+              background-image: repeating-linear-gradient(
+                115deg,
+                #10c2c2 0px,
+                #58d4d4 1px,
+                #58d4d4 10px,
+                #10c2c2 11px,
+                #10c2c2 16px
+              );
               background-size: 106px 114px;
-              animation: 3s linear 0s infinite normal none running workflow-running;
+              animation: 3s linear 0s infinite normal none running
+                workflow-running;
             }
 
             &.succeeded {
-              background-color: #3EBB03;
+              background-color: #3ebb03;
             }
 
             &.failed {
-              background-color: #CF1524;
+              background-color: #cf1524;
             }
           }
 
@@ -511,7 +644,7 @@ export default defineComponent({
             .time {
               margin-top: 6px;
               font-size: 13px;
-              color: #6B7B8D;
+              color: #6b7b8d;
             }
 
             .operation {
@@ -533,7 +666,7 @@ export default defineComponent({
                 cursor: pointer;
 
                 &:active {
-                  background-color: #EFF7FF;
+                  background-color: #eff7ff;
                   border-radius: 4px;
                 }
 

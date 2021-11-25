@@ -7,10 +7,10 @@ import java.util.UUID;
 
 /**
  * @program: Parameter
- * @description: 参数类
- * @author: Ethan Liu
- * @create: 2021-01-21 13:13
- **/
+ * @description 参数类
+ * @author Ethan Liu
+ * @create 2021-01-21 13:13
+*/
 public abstract class Parameter<T> {
     public enum Type {
         STRING {

@@ -1,11 +1,11 @@
 package dev.jianmu.project.aggregate;
 
 /**
- * @class: Credential
- * @description: Credential
- * @author: Ethan Liu
- * @create: 2021-05-15 11:46
- **/
+ * @class Credential
+ * @description Credential
+ * @author Ethan Liu
+ * @create 2021-05-15 11:46
+*/
 public class Credential {
     public enum Type {
         SSH,

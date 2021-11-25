@@ -4,10 +4,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @class: WebhookAuth
- * @description: WebhookAuth
- * @author: Ethan Liu
- * @create: 2021-11-10 11:25
+ * @class WebhookAuth
+ * @description WebhookAuth
+ * @author Ethan Liu
+ * @create 2021-11-10 11:25
  */
 public class WebhookAuth {
     private String token;

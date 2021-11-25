@@ -3,10 +3,10 @@ package dev.jianmu.trigger.aggregate;
 import java.util.UUID;
 
 /**
- * @class: Trigger
- * @description: Trigger
- * @author: Ethan Liu
- * @create: 2021-11-10 11:06
+ * @class Trigger
+ * @description Trigger
+ * @author Ethan Liu
+ * @create 2021-11-10 11:06
  */
 public class Trigger {
     public enum Type {

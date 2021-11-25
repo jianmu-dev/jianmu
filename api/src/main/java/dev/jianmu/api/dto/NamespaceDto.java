@@ -10,11 +10,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 /**
- * @class: NamespaceDto
- * @description: 命名空间Dto
- * @author: Ethan Liu
- * @create: 2021-04-20 12:51
- **/
+ * @class NamespaceDto
+ * @description 命名空间Dto
+ * @author Ethan Liu
+ * @create 2021-04-20 12:51
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

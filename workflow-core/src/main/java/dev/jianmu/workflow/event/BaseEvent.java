@@ -5,10 +5,10 @@ import java.util.UUID;
 
 /**
  * @program: workflow
- * @description: 领域事件抽象类
- * @author: Ethan Liu
- * @create: 2021-01-21 20:40
- **/
+ * @description 领域事件抽象类
+ * @author Ethan Liu
+ * @create 2021-01-21 20:40
+*/
 public abstract class BaseEvent implements DomainEvent {
     // 触发时间
     private LocalDateTime occurredTime;

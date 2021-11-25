@@ -17,6 +17,9 @@ type PayloadType = 'form-data' | 'json' | 'file';
 export interface IRequest {
   url: string;
   method: Method;
+  headers?: {
+    [key: string]: string;
+  };
   payload?: any;
   payloadType?: PayloadType;
   auth?: boolean;
@@ -27,6 +30,7 @@ export interface IRequest {
 export default async function rest({
   url,
   method,
+  headers = {},
   payload = {},
   payloadType = 'json',
   auth = false,
@@ -58,10 +62,6 @@ export default async function rest({
   } else {
     throw new Error(`Invalid supported method (value: ${method})`);
   }
-
-  const headers: {
-    [key: string]: string;
-  } = {};
 
   if (contentType) {
     headers['Content-Type'] = contentType;
@@ -109,9 +109,10 @@ export default async function rest({
     return res.headers;
   }
 
-  if (res.headers['content-type'].includes('text/plain') &&
-    typeof res.data === 'object') {
-    return JSON.stringify(res.data);
+  const resContentType = res.headers['content-type'];
+
+  if (resContentType && resContentType.includes('text/plain') && typeof res.data === 'object') {
+    return res.request.responseText;
   }
 
   return res.data;

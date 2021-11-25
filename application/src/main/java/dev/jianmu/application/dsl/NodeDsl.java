@@ -17,11 +17,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @class: NodeDslVo
- * @description: 节点定义版本
- * @author: Ethan Liu
- * @create: 2021-10-01 13:12
- **/
+ * @class NodeDslVo
+ * @description 节点定义版本
+ * @author Ethan Liu
+ * @create 2021-10-01 13:12
+*/
 @Getter
 @Builder
 @NoArgsConstructor

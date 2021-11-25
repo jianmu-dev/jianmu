@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: WorkflowInstanceMapper
- * @description: 流程实例DB映射接口
- * @author: Ethan Liu
- * @create: 2021-03-21 19:27
- **/
+ * @class WorkflowInstanceMapper
+ * @description 流程实例DB映射接口
+ * @author Ethan Liu
+ * @create 2021-03-21 19:27
+*/
 public interface WorkflowInstanceMapper {
 
     @Select("select * from workflow_instance where workflow_ref = #{workflowRef} " +

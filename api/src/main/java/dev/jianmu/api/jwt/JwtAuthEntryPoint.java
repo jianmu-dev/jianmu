@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * @class: JwtAuthEntryPoint
- * @description: JwtAuthEntryPoint
- * @author: Ethan Liu
- * @create: 2021-05-17 22:43
- **/
+ * @class JwtAuthEntryPoint
+ * @description JwtAuthEntryPoint
+ * @author Ethan Liu
+ * @create 2021-05-17 22:43
+*/
 @Component
 public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthEntryPoint.class);

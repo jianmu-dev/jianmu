@@ -5,10 +5,10 @@ import java.util.Set;
 
 /**
  * @program: workflow
- * @description: 流程组件父类
- * @author: Ethan Liu
- * @create: 2021-01-21 13:13
- **/
+ * @description 流程组件父类
+ * @author Ethan Liu
+ * @create 2021-01-21 13:13
+*/
 public abstract class BaseNode implements Node {
     // 显示名称
     protected String name;

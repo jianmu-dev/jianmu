@@ -15,11 +15,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @class: NodeDef
- * @description: 节点定义
- * @author: Ethan Liu
- * @create: 2021-09-04 11:59
- **/
+ * @class NodeDef
+ * @description 节点定义
+ * @author Ethan Liu
+ * @create 2021-09-04 11:59
+*/
 @Getter
 @Builder
 @Slf4j

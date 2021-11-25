@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: NumberLogicTest
- * @description: 数字逻辑运算测试
- * @author: Ethan Liu
- * @create: 2021-09-01 15:11
- **/
+ * @class NumberLogicTest
+ * @description 数字逻辑运算测试
+ * @author Ethan Liu
+ * @create 2021-09-01 15:11
+*/
 @DisplayName("数字逻辑运算测试")
 public class NumberLogicTest {
 

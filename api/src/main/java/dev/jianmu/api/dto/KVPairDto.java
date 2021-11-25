@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @class: KVPairDto
- * @description: 键值对Dto
- * @author: Ethan Liu
- * @create: 2021-04-20 13:03
- **/
+ * @class KVPairDto
+ * @description 键值对Dto
+ * @author Ethan Liu
+ * @create 2021-04-20 13:03
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

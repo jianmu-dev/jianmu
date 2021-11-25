@@ -7,11 +7,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: PublishJob
- * @description: PublishJob
- * @author: Ethan Liu
- * @create: 2021-05-24 09:29
- **/
+ * @class PublishJob
+ * @description PublishJob
+ * @author Ethan Liu
+ * @create 2021-05-24 09:29
+*/
 @Component
 public class PublishJob implements Job {
     private final ApplicationEventPublisher publisher;

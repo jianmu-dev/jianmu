@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * @class: BaseEvent
- * @description: 领域事件抽象类
- * @author: Ethan Liu
- * @create: 2021-03-25 15:50
- **/
+ * @class BaseEvent
+ * @description 领域事件抽象类
+ * @author Ethan Liu
+ * @create 2021-03-25 15:50
+*/
 public abstract class BaseEvent implements DomainEvent {
     // 触发时间
     private LocalDateTime occurredTime;

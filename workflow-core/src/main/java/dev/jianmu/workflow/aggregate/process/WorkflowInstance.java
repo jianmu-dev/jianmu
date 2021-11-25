@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 
 /**
  * @program: workflow
- * @description: 流程运行实例
- * @author: Ethan Liu
- * @create: 2021-01-21 19:53
- **/
+ * @description 流程运行实例
+ * @author Ethan Liu
+ * @create 2021-01-21 19:53
+*/
 public class WorkflowInstance extends AggregateRoot {
     // ID
     private String id;

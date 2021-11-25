@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: ManualEvent
- * @description: ManualEvent
- * @author: Ethan Liu
- * @create: 2021-11-18 15:37
+ * @class ManualEvent
+ * @description ManualEvent
+ * @author Ethan Liu
+ * @create 2021-11-18 15:37
  */
 @Getter
 @Builder

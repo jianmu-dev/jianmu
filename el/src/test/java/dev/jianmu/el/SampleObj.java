@@ -4,11 +4,11 @@ package dev.jianmu.el;
 import dev.jianmu.workflow.el.ElVariable;
 
 /**
- * @class: SampleObj
- * @description: TODO
- * @author: Ethan Liu
- * @create: 2021-02-21 11:01
- **/
+ * @class SampleObj
+ * @description TODO
+ * @author Ethan Liu
+ * @create 2021-02-21 11:01
+*/
 public class SampleObj implements ElVariable {
     private String name;
     private int age;

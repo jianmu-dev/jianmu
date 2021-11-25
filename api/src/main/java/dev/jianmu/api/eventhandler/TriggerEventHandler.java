@@ -15,11 +15,11 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.time.LocalDateTime;
 
 /**
- * @class: TriggerEventHandler
- * @description: TriggerEventHandler
- * @author: Ethan Liu
- * @create: 2021-05-25 08:44
- **/
+ * @class TriggerEventHandler
+ * @description TriggerEventHandler
+ * @author Ethan Liu
+ * @create 2021-05-25 08:44
+*/
 @Component
 @Slf4j
 public class TriggerEventHandler {

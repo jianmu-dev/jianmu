@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: NodeDefinitionDto
- * @description: NodeDefinitionDto
- * @author: Ethan Liu
- * @create: 2021-09-08 19:48
- **/
+ * @class NodeDefinitionDto
+ * @description NodeDefinitionDto
+ * @author Ethan Liu
+ * @create 2021-09-08 19:48
+*/
 @NoArgsConstructor
 @Data
 public class NodeDefinitionDto {

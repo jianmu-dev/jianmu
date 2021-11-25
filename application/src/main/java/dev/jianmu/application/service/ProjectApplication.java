@@ -32,11 +32,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * @class: ProjectApplication
- * @description: ProjectApplication
- * @author: Ethan Liu
- * @create: 2021-05-15 22:13
- **/
+ * @class ProjectApplication
+ * @description ProjectApplication
+ * @author Ethan Liu
+ * @create 2021-05-15 22:13
+*/
 @Service
 public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
@@ -257,7 +257,7 @@ public class ProjectApplication {
         // 创建Webhook触发器
         if (project.getTriggerType() == Project.TriggerType.WEBHOOK) {
             var webhook = Webhook.Builder.aWebhook()
-                    .matcher(parser.getWebhook().getMatcher())
+                    .only(parser.getWebhook().getOnly())
                     .auth(parser.getWebhook().getAuth())
                     .param(parser.getWebhook().getParam())
                     .build();

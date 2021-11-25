@@ -6,11 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: TaskFailedEvent
- * @description: TaskFailedEvent
- * @author: Ethan Liu
- * @create: 2021-05-06 09:19
- **/
+ * @class TaskFailedEvent
+ * @description TaskFailedEvent
+ * @author Ethan Liu
+ * @create 2021-05-06 09:19
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

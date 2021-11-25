@@ -9,10 +9,10 @@ import lombok.Setter;
 import javax.validation.constraints.NotEmpty;
 
 /**
- * @class: WebRequestDto
- * @description: WebRequestDto
- * @author: Ethan Liu
- * @create: 2021-11-19 14:55
+ * @class WebRequestDto
+ * @description WebRequestDto
+ * @author Ethan Liu
+ * @create 2021-11-19 14:55
  */
 @Getter
 @Setter

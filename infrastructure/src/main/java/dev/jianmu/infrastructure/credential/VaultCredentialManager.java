@@ -15,11 +15,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @class: VaultCredentialManager
- * @description: VaultCredentialManager
- * @author: Ethan Liu
- * @create: 2021-11-02 06:42
- **/
+ * @class VaultCredentialManager
+ * @description VaultCredentialManager
+ * @author Ethan Liu
+ * @create 2021-11-02 06:42
+*/
 @Component
 @ConditionalOnProperty(prefix = "credential", name = "type", havingValue = "vault")
 public class VaultCredentialManager implements CredentialManager {

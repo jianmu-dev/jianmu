@@ -1,11 +1,11 @@
 package dev.jianmu.worker.event;
 
 /**
- * @class: CleanupWorkspaceEvent
- * @description: CleanupWorkspaceEvent
- * @author: Ethan Liu
- * @create: 2021-09-14 09:07
- **/
+ * @class CleanupWorkspaceEvent
+ * @description CleanupWorkspaceEvent
+ * @author Ethan Liu
+ * @create 2021-09-14 09:07
+*/
 public class CleanupWorkspaceEvent {
     private String workerId;
     private String workerType;

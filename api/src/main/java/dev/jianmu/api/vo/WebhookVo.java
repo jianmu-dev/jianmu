@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: WebhookVo
- * @description: WebhookVo
- * @author: Ethan Liu
- * @create: 2021-06-28 16:39
- **/
+ * @class WebhookVo
+ * @description WebhookVo
+ * @author Ethan Liu
+ * @create 2021-06-28 16:39
+*/
 @Data
 @Builder
 @AllArgsConstructor

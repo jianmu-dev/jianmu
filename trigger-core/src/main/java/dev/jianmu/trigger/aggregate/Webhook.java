@@ -3,18 +3,18 @@ package dev.jianmu.trigger.aggregate;
 import java.util.List;
 
 /**
- * @class: Webhook
- * @description: Webhook
- * @author: Ethan Liu
- * @create: 2021-11-10 19:07
+ * @class Webhook
+ * @description Webhook
+ * @author Ethan Liu
+ * @create 2021-11-10 19:07
  */
 public class Webhook {
-    private String matcher;
+    private String only;
     private WebhookAuth auth;
     private List<WebhookParameter> param;
 
-    public String getMatcher() {
-        return matcher;
+    public String getOnly() {
+        return only;
     }
 
     public WebhookAuth getAuth() {
@@ -26,7 +26,7 @@ public class Webhook {
     }
 
     public static final class Builder {
-        private String matcher;
+        private String only;
         private WebhookAuth auth;
         private List<WebhookParameter> param;
 
@@ -37,8 +37,8 @@ public class Webhook {
             return new Builder();
         }
 
-        public Builder matcher(String matcher) {
-            this.matcher = matcher;
+        public Builder only(String only) {
+            this.only = only;
             return this;
         }
 
@@ -54,7 +54,7 @@ public class Webhook {
 
         public Webhook build() {
             Webhook webhook = new Webhook();
-            webhook.matcher = this.matcher;
+            webhook.only = this.only;
             webhook.auth = this.auth;
             webhook.param = this.param;
             return webhook;

@@ -12,11 +12,11 @@ import org.mapstruct.ValueMappings;
 import org.mapstruct.factory.Mappers;
 
 /**
- * @class: TaskInstanceMapper
- * @description: 任务实例Mapper
- * @author: Ethan Liu
- * @create: 2021-04-22 13:53
- **/
+ * @class TaskInstanceMapper
+ * @description 任务实例Mapper
+ * @author Ethan Liu
+ * @create 2021-04-22 13:53
+*/
 @Mapper
 public interface TaskInstanceMapper {
     TaskInstanceMapper INSTANCE = Mappers.getMapper(TaskInstanceMapper.class);

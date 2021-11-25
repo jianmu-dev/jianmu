@@ -3,11 +3,11 @@ package dev.jianmu.workflow.el;
 import java.util.Optional;
 
 /**
- * @class: Expression
- * @description: A parsed expression.
- * @author: Ethan Liu
- * @create: 2021-01-30 19:40
- **/
+ * @class Expression
+ * @description A parsed expression.
+ * @author Ethan Liu
+ * @create 2021-01-30 19:40
+*/
 public interface Expression {
     /**
      * @return the (raw) expression as string

@@ -9,11 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * @class: ExpressionLanguageWarp
- * @description: 表达式引擎包装类
- * @author: Ethan Liu
- * @create: 2021-02-21 11:08
- **/
+ * @class ExpressionLanguageWarp
+ * @description 表达式引擎包装类
+ * @author Ethan Liu
+ * @create 2021-02-21 11:08
+*/
 @Service
 @Slf4j
 public class ExpressionLanguageWarp implements ExpressionLanguage {

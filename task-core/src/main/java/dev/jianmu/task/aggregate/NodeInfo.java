@@ -1,11 +1,11 @@
 package dev.jianmu.task.aggregate;
 
 /**
- * @class: NodeDef
- * @description: 节点定义
- * @author: Ethan Liu
- * @create: 2021-09-19 13:16
- **/
+ * @class NodeDef
+ * @description 节点定义
+ * @author Ethan Liu
+ * @create 2021-09-19 13:16
+*/
 public class NodeInfo {
     private String name;
     private String description;

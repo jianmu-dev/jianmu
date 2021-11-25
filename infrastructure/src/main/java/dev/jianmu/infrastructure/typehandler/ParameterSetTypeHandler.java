@@ -19,11 +19,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @class: ParameterSetTypeHandler
- * @description: 自定义类型(Set < GlobalParameter >)转换器
- * @author: Ethan Liu
- * @create: 2021-04-25 21:17
- **/
+ * @class ParameterSetTypeHandler
+ * @description 自定义类型(Set < GlobalParameter >)转换器
+ * @author Ethan Liu
+ * @create 2021-04-25 21:17
+*/
 public class ParameterSetTypeHandler extends BaseTypeHandler<Set<GlobalParameter>> {
     private final ObjectMapper objectMapper = new ObjectMapper();
 

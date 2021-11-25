@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: TriggerMapper
- * @description: TriggerMapper
- * @author: Ethan Liu
- * @create: 2021-05-25 15:29
- **/
+ * @class TriggerMapper
+ * @description TriggerMapper
+ * @author Ethan Liu
+ * @create 2021-05-25 15:29
+*/
 public interface TriggerMapper {
     @Insert("insert into jianmu_trigger(id, project_id, type, schedule, webhook) " +
             "values(#{id}, #{projectId}, #{type}, #{schedule}, #{webhook, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.WebhookTypeHandler})")

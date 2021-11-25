@@ -64,8 +64,8 @@ export default defineComponent({
       }).catch((err: Error) => {
         console.warn(err.message);
       });
-    } else {
-      editorForm.value.dslText = `workflow:\n  name: ${route.query.processTemplatesName}\n`;
+    } else if (route.query.source === 'processTemplates') {
+      editorForm.value.dslText = `name: "${route.query.processTemplatesName || ''}"\n\nworkflow:\n`;
     }
 
     if (editMode) {

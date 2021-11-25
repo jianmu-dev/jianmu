@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 /**
- * @class: ProjectController
- * @description: ProjectController
- * @author: Ethan Liu
- * @create: 2021-05-14 14:00
- **/
+ * @class ProjectController
+ * @description ProjectController
+ * @author Ethan Liu
+ * @create 2021-05-14 14:00
+*/
 @RestController
 @RequestMapping("projects")
 @Tag(name = "项目API", description = "项目API")

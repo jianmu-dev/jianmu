@@ -14,11 +14,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * @class: FileSystemStorageService
- * @description: 文件系统实现类
- * @author: Ethan Liu
- * @create: 2021-04-05 21:01
- **/
+ * @class FileSystemStorageService
+ * @description 文件系统实现类
+ * @author Ethan Liu
+ * @create 2021-04-05 21:01
+*/
 @Service
 public class FileSystemStorageService implements StorageService, ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(FileSystemStorageService.class);

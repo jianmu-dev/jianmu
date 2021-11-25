@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @class: EmbeddedWorkerApplication
- * @description: EmbeddedWorkerApplication
- * @author: Ethan Liu
- * @create: 2021-09-12 22:23
- **/
+ * @class EmbeddedWorkerApplication
+ * @description EmbeddedWorkerApplication
+ * @author Ethan Liu
+ * @create 2021-09-12 22:23
+*/
 @Service
 @Slf4j
 public class EmbeddedWorkerApplication {

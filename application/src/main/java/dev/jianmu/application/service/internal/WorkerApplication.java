@@ -27,11 +27,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @class: WorkerApplication
- * @description: 任务执行器门面类
- * @author: Ethan Liu
- * @create: 2021-04-02 12:30
- **/
+ * @class WorkerApplication
+ * @description 任务执行器门面类
+ * @author Ethan Liu
+ * @create 2021-04-02 12:30
+*/
 @Service
 @Transactional
 public class WorkerApplication {

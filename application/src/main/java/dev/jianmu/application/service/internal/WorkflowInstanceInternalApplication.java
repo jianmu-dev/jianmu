@@ -36,11 +36,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * @class: WorkflowInstanceInternalApplication
- * @description: WorkflowInstanceInternalApplication
- * @author: Ethan Liu
- * @create: 2021-10-21 15:35
- **/
+ * @class WorkflowInstanceInternalApplication
+ * @description WorkflowInstanceInternalApplication
+ * @author Ethan Liu
+ * @create 2021-10-21 15:35
+*/
 @Service
 @Slf4j
 public class WorkflowInstanceInternalApplication {
