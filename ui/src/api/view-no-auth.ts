@@ -201,7 +201,6 @@ export function fetchParameterType(): Promise<string[]> {
   return restProxy({
     url: `${baseUrl.parameter}/types`,
     method: 'get',
-    auth: true,
   });
 }
 
@@ -224,6 +223,5 @@ export function fetchTriggerWebhook(projectId: string): Promise<ITriggerWebhookV
   return restProxy({
     url: `${baseUrl.trigger}/webhook/${projectId}`,
     method: 'get',
-    auth: true,
   });
 }
