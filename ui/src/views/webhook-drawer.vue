@@ -65,7 +65,7 @@
               <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
             </div>
             <div v-if="noMoreFlag">
-              <span class="bottom">没有更多了</span>
+              <span class="bottom not-more">没有更多了</span>
             </div>
           </div>
         </div>
@@ -482,6 +482,10 @@ export default defineComponent({
             transform: rotate(360deg);
           }
         }
+      }
+      .not-more {
+        opacity: 0.45;
+        cursor: auto;
       }
     }
   }
