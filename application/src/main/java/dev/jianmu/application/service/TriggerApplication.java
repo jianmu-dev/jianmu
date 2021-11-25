@@ -362,9 +362,9 @@ public class TriggerApplication {
         if (webhook.getOnly() != null) {
             var res = this.calculateExp(webhook.getOnly(), context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
-                log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
+                log.warn("Only计算不匹配，计算结果为：{}", res.getStringValue());
                 newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
-                newWebRequest.setErrorMsg("Match计算不匹配，计算结果为：" + res.getStringValue());
+                newWebRequest.setErrorMsg("Only计算不匹配，计算结果为：" + res.getStringValue());
                 this.webRequestRepositoryImpl.add(newWebRequest);
                 return;
             }
@@ -445,9 +445,9 @@ public class TriggerApplication {
         if (webhook.getOnly() != null) {
             var res = this.calculateExp(webhook.getOnly(), context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
-                log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
+                log.warn("Only计算不匹配，计算结果为：{}", res.getStringValue());
                 webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
-                webRequest.setErrorMsg("Match计算不匹配，计算结果为：" + res.getStringValue());
+                webRequest.setErrorMsg("Only计算不匹配，计算结果为：" + res.getStringValue());
                 this.webRequestRepositoryImpl.add(webRequest);
                 return;
             }
