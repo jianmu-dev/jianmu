@@ -2,7 +2,7 @@ import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
-import { IPageDto, IPageVo } from '@/api/dto/common';
+import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 
@@ -19,6 +19,7 @@ export const baseUrl = {
   parameter: '/view/parameters',
   triggerEvent: '/view/trigger_events',
   trigger: '/view/trigger',
+  version: 'https://jianmu.dev/versions/ci',
 };
 const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 const baseHubUrl = {
@@ -223,5 +224,16 @@ export function fetchTriggerWebhook(projectId: string): Promise<ITriggerWebhookV
   return restProxy({
     url: `${baseUrl.trigger}/webhook/${projectId}`,
     method: 'get',
+  });
+}
+
+/**
+ * 获取版本列表
+ */
+export function fetchVersion(): Promise<IVersionVo[]> {
+  return restProxy({
+    url: `${baseUrl.version}`,
+    method: 'get',
+    timeout: 1000,
   });
 }

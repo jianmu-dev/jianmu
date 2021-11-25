@@ -4,19 +4,24 @@
       <router-link to="/">
         <div class="logo"/>
       </router-link>
-      <jm-popconfirm title="最新版本为v2.1.0"
+      <jm-popconfirm v-if="newVersion"
+                     :title="`最新版本为${newVersion.versionNo}`"
                      icon="jm-icon-info"
                      confirmButtonText="查看"
                      cancelButtonText="忽略"
                      confirmButtonIcon="jm-icon-button-visible"
-                     cancelButtonIcon="jm-icon-button-terminate">
+                     cancelButtonIcon="jm-icon-button-terminate"
+                     @confirm="view()">
         <template #reference>
           <div class="version">
             <div class="new"></div>
-            <span class="txt">v{{ version }}</span>
+            <span class="txt">{{ currentVersion }}</span>
           </div>
         </template>
       </jm-popconfirm>
+      <div v-else class="version">
+        <span class="txt">{{ currentVersion }}</span>
+      </div>
     </div>
     <div class="right">
       <router-link v-if="!session" :to="{name: 'login'}">
@@ -47,7 +52,9 @@ import { namespace } from '@/store/modules/session';
 import { IState } from '@/model/modules/session';
 import { LOGIN_INDEX } from '@/router/path-def';
 import { ISessionVo } from '@/api/dto/session';
-import { version } from '@/../package.json';
+import { version as v } from '@/../package.json';
+import { IRootState } from '@/model';
+import { IVersionVo } from '@/api/dto/common';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 
@@ -55,14 +62,32 @@ export default defineComponent({
   setup() {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
-    const state = useStore().state[namespace] as IState;
+    const store = useStore();
+    const rootState = store.state as IRootState;
+    const state = store.state[namespace] as IState;
+    const currentVersion = `v${v}`;
+    const newVersion = computed<IVersionVo | undefined>(() => {
+      if (rootState.versions.length === 0 || rootState.versions[0].versionNo === currentVersion) {
+        return undefined;
+      }
+
+      return rootState.versions[0];
+    });
 
     return {
-      version,
+      currentVersion,
+      newVersion,
       session: computed<ISessionVo | undefined>(() => state.session),
       ...mapMutations({
         deleteSession: 'mutateDeletion',
       }),
+      view: () => {
+        if (!newVersion.value) {
+          return;
+        }
+
+        window.open(newVersion.value.releaseUrl, '_blank');
+      },
       logout: () => {
         try {
           // 清理token
@@ -116,13 +141,6 @@ export default defineComponent({
       display: flex;
       align-items: center;
 
-      .txt {
-        font-size: 12px;
-        font-weight: bold;
-        color: #082340;
-        opacity: 0.5;
-      }
-
       .new {
         position: absolute;
         right: -3px;
@@ -131,6 +149,15 @@ export default defineComponent({
         height: 8px;
         background-color: #FF0D0D;
         border-radius: 4px;
+
+        & + .txt {
+          cursor: pointer;
+        }
+      }
+
+      .txt {
+        font-size: 12px;
+        color: #082340;
       }
     }
   }
