@@ -383,7 +383,6 @@ export default defineComponent({
     }
     // 表格
     .table-container {
-      height: calc(100vh - 254px);
       background: #fff;
       box-sizing: border-box;
       padding: 20px;
