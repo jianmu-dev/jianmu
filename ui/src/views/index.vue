@@ -3,7 +3,7 @@
     <div class="main">
       <div class="menu-bar">
         <div class="left-area">
-          <router-link :to="{ name: 'process-template' }">
+          <router-link :to="{ name: 'create-project' }">
             <jm-tooltip content="新增项目" placement="top">
               <button class="add"></button>
             </jm-tooltip>
