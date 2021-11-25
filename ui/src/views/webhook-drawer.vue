@@ -64,7 +64,7 @@
               <span>显示更多</span>
               <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
             </div>
-            <div v-else>
+            <div v-if="noMoreFlag">
               <span class="bottom">没有更多了</span>
             </div>
           </div>
@@ -124,6 +124,7 @@ export default defineComponent({
     const scrollRef = ref<HTMLDivElement>();
     // webhookUrl链接
     const webhook = ref<string>();
+    const noMoreFlag = ref<boolean>(false);
     const link = computed<string | undefined>(
       () =>
         webhook.value &&
@@ -163,9 +164,19 @@ export default defineComponent({
           webhookRequestParams.value
         );
         // 判断是否有下一页
-        webhookRequestData.value.pages > webhookRequestParams.value.pageNum
-          ? (firstLoading.value = false)
-          : (firstLoading.value = true);
+        if (
+          webhookRequestData.value.pages > webhookRequestParams.value.pageNum
+        ) {
+          firstLoading.value = false;
+        } else {
+          // 禁用显示更多
+          firstLoading.value = true;
+          // 打开没有更多了
+          noMoreFlag.value = true;
+        }
+        if (webhookRequestData.value.total === 0) {
+          noMoreFlag.value = false;
+        }
         // 追加-加载更多
         if (listState === 'push') {
           // 数据追加
@@ -205,6 +216,8 @@ export default defineComponent({
       () => {
         // 还原页码
         webhookRequestParams.value.pageNum = START_PAGE_NUM;
+        // 还原提示状态
+        noMoreFlag.value = false;
         webhookRequestList.value = [];
         // 获取webhook请求列表
         webhookRequestParams.value.projectId = props.currentProjectId as string;
@@ -298,6 +311,7 @@ export default defineComponent({
       bottomLoading,
       btnDown,
       datetimeFormatter,
+      noMoreFlag,
     };
   },
 });
