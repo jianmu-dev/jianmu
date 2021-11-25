@@ -356,13 +356,13 @@ public class DslParser {
         if (triggerType.equals("webhook")) {
             var param = this.trigger.get("param");
             var auth = this.trigger.get("auth");
-            var matcher = this.trigger.get("matcher");
+            var only = this.trigger.get("only");
             var webhookBuilder = Webhook.builder();
-            if (matcher instanceof String) {
-                if (!this.isEl((String) matcher)) {
-                    throw new IllegalArgumentException("matcher表达式格式错误");
+            if (only instanceof String) {
+                if (!this.isEl((String) only)) {
+                    throw new IllegalArgumentException("only表达式格式错误");
                 }
-                webhookBuilder.matcher((String) matcher);
+                webhookBuilder.only((String) only);
             }
             if (auth instanceof Map) {
                 var token = ((Map<?, ?>) auth).get("token");

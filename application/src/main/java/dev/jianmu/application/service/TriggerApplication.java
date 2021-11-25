@@ -359,8 +359,8 @@ public class TriggerApplication {
             }
         }
         // 验证Matcher
-        if (webhook.getMatcher() != null) {
-            var res = this.calculateExp(webhook.getMatcher(), context);
+        if (webhook.getOnly() != null) {
+            var res = this.calculateExp(webhook.getOnly(), context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
                 log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
                 newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
@@ -442,8 +442,8 @@ public class TriggerApplication {
             }
         }
         // 验证Matcher
-        if (webhook.getMatcher() != null) {
-            var res = this.calculateExp(webhook.getMatcher(), context);
+        if (webhook.getOnly() != null) {
+            var res = this.calculateExp(webhook.getOnly(), context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
                 log.warn("Match计算不匹配，计算结果为：{}", res.getStringValue());
                 webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);

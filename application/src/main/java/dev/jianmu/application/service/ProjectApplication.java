@@ -257,7 +257,7 @@ public class ProjectApplication {
         // 创建Webhook触发器
         if (project.getTriggerType() == Project.TriggerType.WEBHOOK) {
             var webhook = Webhook.Builder.aWebhook()
-                    .matcher(parser.getWebhook().getMatcher())
+                    .only(parser.getWebhook().getOnly())
                     .auth(parser.getWebhook().getAuth())
                     .param(parser.getWebhook().getParam())
                     .build();
