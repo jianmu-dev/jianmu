@@ -213,7 +213,10 @@ export default defineComponent({
       () => {
         drawerVisible.value = props.modelValue;
         if (drawerVisible.value) {
+          // 获取webhook请求列表
           getWebhookRequestList('cover');
+          // 获取webhookUrl
+          getWebhookUrlRequest();
         }
       },
     );
@@ -226,10 +229,8 @@ export default defineComponent({
         // 还原提示状态
         noMoreFlag.value = false;
         webhookRequestList.value = [];
-        // 获取webhook请求列表
+        // 更改projectId
         webhookRequestParams.value.projectId = props.currentProjectId as string;
-        // 获取webhookUrl
-        getWebhookUrlRequest();
       },
     );
     // 一键复制
