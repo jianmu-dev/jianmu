@@ -5,7 +5,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>2.0.0-beta.1</version>
+        <version>2.0.0-beta.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>application</artifactId>
-            <version>2.0.0-beta.1</version>
+            <version>2.0.0-beta.2</version>
         </dependency>
 
         <dependency>
@@ -80,10 +80,10 @@
                         <image>registry://jianmudev/openjdk:11.0.11-jdk-oracle-wait-for-it</image>
                     </from>
                     <to>
-                        <image>${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
+                        <image>jianmudev/jianmu-ci-server:2.0.0</image>
                         <auth>
-                            <username>${env.JIANMU_DOCKER_USERNAME}</username>
-                            <password>${env.JIANMU_DOCKER_PASSWORD}</password>
+                            <username>jianmudev</username>
+                            <password>99cloud@BJ</password>
                         </auth>
                     </to>
                     <container>
@@ -103,7 +103,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>build</goal>
                         </goals>
