@@ -6,6 +6,7 @@
       :size="953"
       direction="rtl"
       @close="closeDrawer"
+      destroy-on-close
     >
       <div class="webhook-drawer">
         <div class="webhook-link-container">
@@ -151,11 +152,6 @@ export default defineComponent({
     const webhookRequestList = ref<IWebRequestVo[]>([]);
     // 日志
     const webhookLog = ref<string>('');
-    // 监听抽屉切换
-    watch(
-      () => props.modelValue,
-      () => (drawerVisible.value = props.modelValue),
-    );
     // 分页返回webhook请求列表
     // listState列表的状态，push/cover
     const getWebhookRequestList = async (listState: string) => {
@@ -211,6 +207,16 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     };
+    // 监听抽屉切换
+    watch(
+      () => props.modelValue,
+      () => {
+        drawerVisible.value = props.modelValue;
+        if (drawerVisible.value) {
+          getWebhookRequestList('cover');
+        }
+      },
+    );
     // 监听项目id+请求
     watch(
       () => props.currentProjectId,
@@ -222,7 +228,6 @@ export default defineComponent({
         webhookRequestList.value = [];
         // 获取webhook请求列表
         webhookRequestParams.value.projectId = props.currentProjectId as string;
-        getWebhookRequestList('cover');
         // 获取webhookUrl
         getWebhookUrlRequest();
       },
