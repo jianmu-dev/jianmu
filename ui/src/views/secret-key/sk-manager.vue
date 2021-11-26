@@ -75,7 +75,7 @@ export default defineComponent({
         loading.value = true;
 
         const { description: desc } = await fetchNamespaceDetail(props.ns);
-        description.value = (desc || '无').replaceAll('\n', '<br/>');
+        description.value = (desc || '无').replace(/\n/g, '<br/>');
 
         keys.value = (await listSecretKey(props.ns)).map(item => ({ id: uuidv4(), name: item }));
       } catch (err) {

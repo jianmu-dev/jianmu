@@ -11,7 +11,7 @@
       </jm-tooltip>
       <div class="info">
         <div class="name">{{ data.record?.name }}</div>
-        <div class="desc" v-html="data.record?.description?.replaceAll('\n', '<br/>')"></div>
+        <div class="desc" v-html="data.record?.description?.replace(/\n/g, '<br/>')"></div>
       </div>
       <div v-if="!data.record?.status" class="instance-tabs">
         <div class="tab init selected">
