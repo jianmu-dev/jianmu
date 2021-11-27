@@ -80,10 +80,10 @@
                         <image>registry://jianmudev/openjdk:11.0.11-jdk-oracle-wait-for-it</image>
                     </from>
                     <to>
-                        <image>jianmudev/jianmu-ci-server:2.0.0</image>
+                        <image>${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
                         <auth>
-                            <username>jianmudev</username>
-                            <password>99cloud@BJ</password>
+                            <username>${env.JIANMU_DOCKER_USERNAME}</username>
+                            <password>${env.JIANMU_DOCKER_PASSWORD}</password>
                         </auth>
                     </to>
                     <container>
@@ -103,7 +103,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <phase>install</phase>
                         <goals>
                             <goal>build</goal>
                         </goals>
