@@ -14,13 +14,13 @@ import java.util.Optional;
  */
 public interface ProjectLinkGroupMapper {
     @Insert("insert into project_link_group(id, project_id, project_group_id, sort, created_time) " +
-            "VALUES(#{id}, #{projectId}, #{projectGroupId}, #{sort}, #{createdTie})")
+            "VALUES(#{id}, #{projectId}, #{projectGroupId}, #{sort}, #{createdTime})")
     void add(ProjectLinkGroup projectLinkGroup);
 
     @Insert("<script>" +
             "INSERT INTO `project_link_group`(`id`, `project_id`, `project_group_id`, `sort`, `created_time`) VALUES" +
             " <foreach collection='projectProjectGroups' item='i' separator=','>" +
-            "   (#{i.id}, #{i.projectId}, #{i.projectGroupId}, #{i.sort}, #{i.createdTie})" +
+            "   (#{i.id}, #{i.projectId}, #{i.projectGroupId}, #{i.sort}, #{i.createdTime})" +
             " </foreach>" +
             "</script>")
     void addAll(List<ProjectLinkGroup> projectLinkGroups);
@@ -31,7 +31,7 @@ public interface ProjectLinkGroupMapper {
     @Select("select * from project_link_group where project_group_id = #{projectGroupId} order by sort desc limit 1")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "project_group_id", property = "projectGroupId")
-    @Result(column = "created_time", property = "createdTie")
+    @Result(column = "created_time", property = "createdTime")
     Optional<ProjectLinkGroup> findByProjectGroupIdAndSortMax(String projectGroupId);
 
     @Delete("delete from project_link_group where project_group_id = #{projectGroupId}")
@@ -40,7 +40,7 @@ public interface ProjectLinkGroupMapper {
     @Select("select * from project_link_group where id = #{projectLinkGroupId}")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "project_group_id", property = "projectGroupId")
-    @Result(column = "created_time", property = "createdTie")
+    @Result(column = "created_time", property = "createdTime")
     Optional<ProjectLinkGroup> findById(String projectLinkGroupId);
 
     @Delete("delete from project_link_group where id = #{projectLinkGroupId}")
@@ -56,7 +56,7 @@ public interface ProjectLinkGroupMapper {
     @Select("select * from project_link_group where project_group_id = #{projectGroupId} and sort between #{originSort} and #{targetSort}")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "project_group_id", property = "projectGroupId")
-    @Result(column = "created_time", property = "createdTie")
+    @Result(column = "created_time", property = "createdTime")
     List<ProjectLinkGroup> findAllByGroupIdAndSortBetween(String projectGroupId, Integer originSort, Integer targetSort);
 
     @Update("update project_link_group set sort = #{sort} where id = #{projectLinkGroupId}")

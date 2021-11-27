@@ -260,7 +260,7 @@ CREATE TABLE `project_group`
     `created_time`       datetime    NOT NULL COMMENT '创建时间',
     `last_modified_time` datetime    NOT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name_UNIQUE` (`name`),
+    UNIQUE KEY `name_UNIQUE` (`name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='项目组表';
@@ -276,7 +276,7 @@ CREATE TABLE `project_link_group`
     `sort`             int         NOT NULL COMMENT '排序',
     `created_time`     datetime    NOT NULL COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `project_group_UNIQUE` (`project_id`,`project_group_id`),
+    UNIQUE KEY `project_group_UNIQUE` (`project_id`,`project_group_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='项目-项目组中间表';
