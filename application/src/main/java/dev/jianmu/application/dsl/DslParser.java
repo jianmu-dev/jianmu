@@ -292,6 +292,9 @@ public class DslParser {
 
     // DSL语法校验
     private void syntaxCheck() {
+        if (null == this.name) {
+            throw new DslException("project name未设置");
+        }
         this.triggerSyntaxCheck();
         this.globalParamSyntaxCheck();
         if (null != this.workflow) {
@@ -356,13 +359,13 @@ public class DslParser {
         if (triggerType.equals("webhook")) {
             var param = this.trigger.get("param");
             var auth = this.trigger.get("auth");
-            var matcher = this.trigger.get("matcher");
+            var only = this.trigger.get("only");
             var webhookBuilder = Webhook.builder();
-            if (matcher instanceof String) {
-                if (!this.isEl((String) matcher)) {
-                    throw new IllegalArgumentException("matcher表达式格式错误");
+            if (only instanceof String) {
+                if (!this.isEl((String) only)) {
+                    throw new IllegalArgumentException("only表达式格式错误");
                 }
-                webhookBuilder.matcher((String) matcher);
+                webhookBuilder.only((String) only);
             }
             if (auth instanceof Map) {
                 var token = ((Map<?, ?>) auth).get("token");
@@ -426,11 +429,6 @@ public class DslParser {
 
     private void pipelineSyntaxCheck() {
         var pipe = this.pipeline;
-        if (null == pipe.get("name")) {
-            throw new DslException("pipeline name未设置");
-        }
-        this.name = (String) pipe.get("name");
-        this.description = (String) pipe.get("description");
         pipe.forEach((key, val) -> {
             if (val instanceof Map) {
                 this.checkPipeNode(key, (Map<?, ?>) val);
@@ -459,11 +457,6 @@ public class DslParser {
 
     private void workflowSyntaxCheck() {
         var flow = this.workflow;
-        if (null == flow.get("name")) {
-            throw new DslException("workflow name未设置");
-        }
-        this.name = (String) flow.get("name");
-        this.description = (String) flow.get("description");
         flow.forEach((key, val) -> {
             if (val instanceof Map) {
                 this.checkNode(key, (Map<?, ?>) val);

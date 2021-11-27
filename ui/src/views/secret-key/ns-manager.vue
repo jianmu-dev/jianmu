@@ -24,7 +24,7 @@
           </router-link>
           <div class="description">
             <jm-scrollbar max-height="80px">
-              <span v-html="(ns.description || '无').replaceAll('\n', '<br/>')"/>
+              <span v-html="(ns.description || '无').replace(/\n/g, '<br/>')"/>
             </jm-scrollbar>
           </div>
           <div class="time">最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}</div>

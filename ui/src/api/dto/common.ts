@@ -66,3 +66,12 @@ export interface IPageVo<T> extends Readonly<{
   list: T[];
 }> {
 }
+
+/**
+ * 版本
+ */
+export interface IVersionVo extends Readonly<{
+  versionNo: string;
+  releaseUrl: string;
+}> {
+}

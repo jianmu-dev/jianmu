@@ -35,11 +35,11 @@ import java.util.stream.Collectors;
 import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
 
 /**
+ * @author Ethan Liu
  * @class ProjectViewController
  * @description ProjectViewController
- * @author Ethan Liu
  * @create 2021-06-04 17:23
-*/
+ */
 @RestController
 @RequestMapping("view")
 @Tag(name = "查询API", description = "查询API")
@@ -259,6 +259,9 @@ public class ViewController {
                     var instanceParameterVo = new InstanceParameterVo();
                     instanceParameters.forEach(instanceParameter -> {
                         if (instanceParameter.getParameterId().equals(parameter.getId())) {
+                            if (parameter.getType() == Parameter.Type.SECRET && ((String) parameter.getValue()).isBlank()) {
+                                return;
+                            }
                             instanceParameterVo.setRef(instanceParameter.getRef());
                             instanceParameterVo.setType(instanceParameter.getType().toString());
                             instanceParameterVo.setValueType(parameter.getType().toString());

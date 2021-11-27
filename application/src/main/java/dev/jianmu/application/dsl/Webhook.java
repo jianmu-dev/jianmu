@@ -20,5 +20,5 @@ import java.util.List;
 public class Webhook {
     private List<WebhookParameter> param;
     private WebhookAuth auth;
-    private String matcher;
+    private String only;
 }
