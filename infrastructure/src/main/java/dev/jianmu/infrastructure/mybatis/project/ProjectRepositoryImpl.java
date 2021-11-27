@@ -57,4 +57,9 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     public List<Project> findAll() {
         return this.projectMapper.findAll();
     }
+
+    public PageInfo<Project> findAllPageByProjectIdIn(int pageNum, int pageSize, List<String> projectIds, String projectName) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> this.projectMapper.findAllByProjectIdIn(projectIds,projectName));
+    }
 }

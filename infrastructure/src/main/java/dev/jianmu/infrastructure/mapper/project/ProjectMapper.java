@@ -87,4 +87,26 @@ public interface ProjectMapper {
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Project> findAll();
+
+    @Select("<script>" +
+            "SELECT * FROM `jianmu_project` " +
+            " WHERE `id` IN " +
+            "<foreach collection='projectIds' item='i'  open='(' separator=',' close=')'>#{i}" +
+            "</foreach>" +
+            "<if test='name != null'> AND `workflow_name` like concat('%', #{workflowName}, '%')</if>" +
+            " order by sort" +
+            "</script>")
+    @Result(column = "workflow_name", property = "workflowName")
+    @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
+    @Result(column = "event_bridge_id", property = "eventBridgeId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "git_repo_id", property = "gitRepoId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    List<Project> findAllByProjectIdIn(List<String> projectIds, String projectName);
 }
