@@ -1,11 +1,13 @@
 package dev.jianmu.task.aggregate;
 
+import java.util.Locale;
+
 /**
- * @class: InstanceParameter
- * @description: 任务实例参数
- * @author: Ethan Liu
- * @create: 2021-04-28 14:13
- **/
+ * @class InstanceParameter
+ * @description 任务实例参数
+ * @author Ethan Liu
+ * @create 2021-04-28 14:13
+*/
 public class InstanceParameter {
     public enum Type {
         INPUT,
@@ -28,8 +30,12 @@ public class InstanceParameter {
     private String ref;
     // 输入输出类型
     private Type type;
+    // 流程类型
+    private String workflowType;
     // 参数引用Id
     private String parameterId;
+    // 参数是否必填
+    private Boolean required;
 
     public String getInstanceId() {
         return instanceId;
@@ -63,8 +69,16 @@ public class InstanceParameter {
         return type;
     }
 
+    public String getWorkflowType() {
+        return workflowType;
+    }
+
     public String getParameterId() {
         return parameterId;
+    }
+
+    public Boolean getRequired() {
+        return required;
     }
 
     public static final class Builder {
@@ -84,8 +98,12 @@ public class InstanceParameter {
         private String ref;
         // 输入输出类型
         private Type type;
+        // 流程类型
+        private String workflowType;
         // 参数引用Id
         private String parameterId;
+        // 参数是否必填
+        private Boolean required;
 
         private Builder() {
         }
@@ -134,8 +152,18 @@ public class InstanceParameter {
             return this;
         }
 
+        public Builder workflowType(String workflowType) {
+            this.workflowType = workflowType.toLowerCase(Locale.ROOT);
+            return this;
+        }
+
         public Builder parameterId(String parameterId) {
             this.parameterId = parameterId;
+            return this;
+        }
+
+        public Builder required(Boolean required) {
+            this.required = required;
             return this;
         }
 
@@ -143,6 +171,7 @@ public class InstanceParameter {
             InstanceParameter instanceParameter = new InstanceParameter();
             instanceParameter.triggerId = this.triggerId;
             instanceParameter.type = this.type;
+            instanceParameter.workflowType = this.workflowType;
             instanceParameter.asyncTaskRef = this.asyncTaskRef;
             instanceParameter.parameterId = this.parameterId;
             instanceParameter.defKey = this.defKey;
@@ -150,6 +179,7 @@ public class InstanceParameter {
             instanceParameter.serialNo = this.serialNo;
             instanceParameter.ref = this.ref;
             instanceParameter.businessId = this.businessId;
+            instanceParameter.required = this.required;
             return instanceParameter;
         }
     }

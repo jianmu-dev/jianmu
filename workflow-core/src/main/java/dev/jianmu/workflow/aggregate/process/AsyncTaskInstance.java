@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 
 /**
  * @program: workflow
- * @description: 异步任务执行实例
- * @author: Ethan Liu
- * @create: 2021-01-21 20:45
- **/
+ * @description 异步任务执行实例
+ * @author Ethan Liu
+ * @create 2021-01-21 20:45
+*/
 public class AsyncTaskInstance {
     // 显示名称
     private String name;
@@ -19,12 +19,15 @@ public class AsyncTaskInstance {
     private String asyncTaskRef;
     // 任务定义类型
     private String asyncTaskType;
+    // 任务外部ID
+    private String externalId;
     // 开始时间
     private LocalDateTime startTime;
     // 结束时间
     private LocalDateTime endTime;
 
-    void run() {
+    void run(String externalId) {
+        this.externalId = externalId;
         this.status = TaskStatus.RUNNING;
         this.startTime = LocalDateTime.now();
     }
@@ -63,6 +66,10 @@ public class AsyncTaskInstance {
 
     public String getAsyncTaskType() {
         return asyncTaskType;
+    }
+
+    public String getExternalId() {
+        return externalId;
     }
 
     public LocalDateTime getStartTime() {

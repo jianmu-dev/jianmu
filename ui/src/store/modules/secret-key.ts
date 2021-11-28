@@ -1,9 +1,9 @@
 import { ActionContext, Module } from 'vuex';
 import { IRootState } from '@/model';
-import { IQueryNamespaceForm, IState } from '@/model/modules/secret-key';
-import { queryNamespace } from '@/api/view-no-auth';
-import { IPageVo } from '@/api/dto/common';
-import { INamespaceVo } from '@/api/dto/secret-key';
+import { IState } from '@/model/modules/secret-key';
+import { listNamespace } from '@/api/view-no-auth';
+import { INamespacesVo } from '@/api/dto/secret-key';
+import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 命名空间
@@ -14,15 +14,13 @@ export default {
   namespaced: true,
   state: () => {
     return {
-      totalPages: 0,
-      totalElements: 0,
+      credentialManagerType: CredentialManagerTypeEnum.LOCAL,
       namespaces: [],
     };
   },
   mutations: {
-    mutateNamespaces(state: IState, { total, pages, list }: IPageVo<INamespaceVo>) {
-      state.totalElements = total;
-      state.totalPages = pages;
+    mutateNamespaces(state: IState, { credentialManagerType, list }: INamespacesVo) {
+      state.credentialManagerType = credentialManagerType;
       state.namespaces = list;
     },
     mutateNamespaceDeletion(state: IState, name: string) {
@@ -31,9 +29,8 @@ export default {
     },
   },
   actions: {
-    async queryNamespace({ commit }: ActionContext<IState, IRootState>, payload: IQueryNamespaceForm): Promise<void> {
-      const page = await queryNamespace(payload);
-      commit('mutateNamespaces', page);
+    async listNamespace({ commit }: ActionContext<IState, IRootState>): Promise<void> {
+      commit('mutateNamespaces', await listNamespace());
     },
   },
 } as Module<IState, IRootState>;

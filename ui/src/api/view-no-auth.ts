@@ -1,10 +1,10 @@
 import { restProxy } from '@/api/index';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProjectDetailVo, IProjectQueryingDto, IProjectVo } from '@/api/dto/project';
-import { INamespaceDetailVo, INamespaceQueryingDto, INamespaceVo } from '@/api/dto/secret-key';
-import { IPageDto, IPageVo } from '@/api/dto/common';
+import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
+import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
+import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
-import { IEventBridgeDetailVo, IEventBridgeQueryingDto, IEventBridgeTargetTransformerVo, IEventBridgeVo, ITargetEventVo } from '@/api/dto/event-bridge';
+import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 
 export const baseUrl = {
   project: '/view/projects',
@@ -16,9 +16,14 @@ export const baseUrl = {
   processLog: '/view/logs/workflow',
   secretKey: '/view/namespaces',
   library: '/view/nodes',
-  eventBridge: '/view/event_bridges',
   parameter: '/view/parameters',
-  targetEvent: '/view/target_events',
+  triggerEvent: '/view/trigger_events',
+  trigger: '/view/trigger',
+  version: 'https://jianmu.dev/versions/ci',
+};
+const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
+const baseHubUrl = {
+  processTemplate: '/hub/view/workflow_templates',
 };
 
 /**
@@ -30,6 +35,17 @@ export function queryProject(dto: IProjectQueryingDto): Promise<IProjectVo[]> {
     url: baseUrl.project,
     method: 'get',
     payload: dto,
+  });
+}
+
+/**
+ * 获取流程模版
+ * @param dto
+ */
+export function getProcessTemplate(dto: number): Promise<IProcessTemplateVo> {
+  return restProxy({
+    url: `${hubUrl}${baseHubUrl.processTemplate}/${dto}`,
+    method: 'get',
   });
 }
 
@@ -128,22 +144,20 @@ export function fetchProcessLog(processExecutionRecordId: string): Promise<strin
  * @param workflowRef
  * @param workflowVersion
  */
-export function fetchDsl(workflowRef: string, workflowVersion: string): Promise<string> {
-  return restProxy<string>({
+export function fetchWorkflow(workflowRef: string, workflowVersion: string): Promise<IWorkflowVo> {
+  return restProxy<IWorkflowVo>({
     url: `${baseUrl.dsl}/${workflowRef}/${workflowVersion}`,
     method: 'get',
   });
 }
 
 /**
- * 查询命名空间
- * @param dto
+ * 获取命名空间列表
  */
-export function queryNamespace(dto: INamespaceQueryingDto): Promise<IPageVo<INamespaceVo>> {
-  return restProxy<IPageVo<INamespaceVo>>({
+export function listNamespace(): Promise<INamespacesVo> {
+  return restProxy<INamespacesVo>({
     url: baseUrl.secretKey,
     method: 'get',
-    payload: dto,
   });
 }
 
@@ -182,69 +196,44 @@ export function fetchNodeLibraryList(dto: IPageDto): Promise<IPageVo<INodeVo>> {
 }
 
 /**
- * 查询事件桥接器
- * @param dto
- */
-export function queryEventBridge(dto: IEventBridgeQueryingDto): Promise<IPageVo<IEventBridgeVo>> {
-  return restProxy<IPageVo<IEventBridgeVo>>({
-    url: `${baseUrl.eventBridge}`,
-    method: 'get',
-    payload: dto,
-  });
-}
-
-/**
- * 获取事件桥接器详情
- * @param bridgeId
- */
-export function fetchEventBridgeDetail(bridgeId: string): Promise<IEventBridgeDetailVo> {
-  return restProxy<IEventBridgeDetailVo>({
-    url: `${baseUrl.eventBridge}/${bridgeId}`,
-    method: 'get',
-  });
-}
-
-/**
- * 获取事件桥接器目标转换器模板名称
- */
-export function fetchEventBridgeTargetTransformerTemplateName(): Promise<string[]> {
-  return restProxy<string[]>({
-    url: `${baseUrl.eventBridge}/templates`,
-    method: 'get',
-    auth: true,
-  });
-}
-
-/**
- * 获取事件桥接器目标转换器模板
- * @param templateName
- */
-export function fetchEventBridgeTargetTransformerTemplate(templateName: string): Promise<IEventBridgeTargetTransformerVo[]> {
-  return restProxy<IEventBridgeTargetTransformerVo[]>({
-    url: `${baseUrl.eventBridge}/templates/${templateName}`,
-    method: 'get',
-    auth: true,
-  });
-}
-
-/**
  * 获取参数类型列表
  */
 export function fetchParameterType(): Promise<string[]> {
   return restProxy({
     url: `${baseUrl.parameter}/types`,
     method: 'get',
-    auth: true,
   });
 }
 
 /**
- * 获取目标事件
+ * 获取触发器事件
  * @param triggerId
  */
-export function fetchTargetEvent(triggerId: string): Promise<ITargetEventVo> {
-  return restProxy<ITargetEventVo>({
-    url: `${baseUrl.targetEvent}/${triggerId}`,
+export function fetchTriggerEvent(triggerId: string): Promise<ITriggerEventVo> {
+  return restProxy<ITriggerEventVo>({
+    url: `${baseUrl.triggerEvent}/${triggerId}`,
     method: 'get',
+  });
+}
+
+/**
+ * 获取触发器webhook
+ * @param projectId
+ */
+export function fetchTriggerWebhook(projectId: string): Promise<ITriggerWebhookVo> {
+  return restProxy({
+    url: `${baseUrl.trigger}/webhook/${projectId}`,
+    method: 'get',
+  });
+}
+
+/**
+ * 获取版本列表
+ */
+export function fetchVersion(): Promise<IVersionVo[]> {
+  return restProxy({
+    url: `${baseUrl.version}`,
+    method: 'get',
+    timeout: 1000,
   });
 }

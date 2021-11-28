@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 /**
  * @program: workflow
- * @description: 流程实例DomainService
- * @author: Ethan Liu
- * @create: 2021-01-21 21:16
- **/
+ * @description 流程实例DomainService
+ * @author Ethan Liu
+ * @create 2021-01-21 21:16
+*/
 public class WorkflowInstanceDomainService {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceDomainService.class);
 
@@ -62,16 +62,7 @@ public class WorkflowInstanceDomainService {
 
     // 中止节点
     public void terminateNode(Workflow workflow, WorkflowInstance workflowInstance, String nodeRef) {
-        if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
-            throw new RuntimeException("该流程实例已结束，不能中止节点");
-        }
-        if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
-            throw new RuntimeException("该流程实例已终止，不能中止节点");
-        }
-        Node node = workflow.getNodes().stream()
-                .filter(n -> n.getRef().equals(nodeRef))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("未找到要中止的节点: " + nodeRef));
+        Node node = workflow.findNode(nodeRef);
         workflowInstance.terminateNode(node);
     }
 

@@ -7,8 +7,8 @@
         <div class="param-value">{{ workflowName }}</div>
       </jm-tooltip>
       <div class="param-key">节点名称：</div>
-      <jm-tooltip :content="ebTargetId" placement="bottom" effect="light">
-        <div class="param-value">{{ ebTargetId }}</div>
+      <jm-tooltip :content="nodeName" placement="bottom" effect="light">
+        <div class="param-value">{{ nodeName }}</div>
       </jm-tooltip>
       <div class="param-key">启动时间：</div>
       <jm-tooltip :content="startTime" placement="bottom" effect="light">
@@ -17,14 +17,14 @@
     </div>
 
     <div class="tab-section">
-      <jm-tabs v-model="tabActiveName" @tab-click="handleTabClick">
+      <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
             <div class="tab">日志</div>
           </template>
           <div class="tab-content">
             <div class="log">
-              <jm-log-viewer id="webhook-log" :filename="`${ebTargetId}.txt`" :value="webhookLog"/>
+              <jm-log-viewer :filename="`${nodeName}.txt`" :value="webhookLog"/>
             </div>
           </div>
         </jm-tab-pane>
@@ -33,7 +33,7 @@
             <div class="tab">业务参数</div>
           </template>
           <div class="tab-content">
-            <div class="params" id="webhook-params">
+            <div class="params">
               <jm-scrollbar>
                 <div class="content">
                   <jm-table
@@ -66,37 +66,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
-import { fetchTargetEvent } from '@/api/view-no-auth';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
-import { IEventParameterVo } from '@/api/dto/event-bridge';
-
-const autoHeights: {
-  [key: string]: IAutoHeight;
-} = {
-  log: {
-    elementId: 'webhook-log',
-    offsetTop: 258,
-  },
-  params: {
-    elementId: 'webhook-params',
-    offsetTop: 226,
-  },
-};
+import { fetchTriggerEvent } from '@/api/view-no-auth';
+import { IEventParameterVo } from '@/api/dto/trigger';
+import { TriggerTypeEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   props: {
-    ebTargetId: {
+    nodeName: {
       type: String,
       required: true,
     },
-    triggerId: {
-      type: String,
-    },
+    triggerId: String,
+    triggerType: String as PropType<TriggerTypeEnum>,
     tabType: {
       type: String,
       required: true,
@@ -109,22 +95,19 @@ export default defineComponent({
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
 
-    proxy.$nextTick(() => adaptHeight(autoHeights[tabActiveName.value]));
-
-    onBeforeMount(async () => {
+    onMounted(async () => {
       if (!props.triggerId) {
         // 尚未触发
+        webhookLog.value = '尚未触发\n';
         return;
       }
 
       try {
         // 初始化Webhook
-        const { payload: { query, header, body }, eventParameters } = await fetchTargetEvent(props.triggerId);
+        const { payload, parameters } = await fetchTriggerEvent(props.triggerId);
         webhookLog.value = 'Webhook:\n' +
-          `query: ${JSON.stringify(query)}\n` +
-          `header：${JSON.stringify(header)}\n` +
-          `body：${body}\n`;
-        webhookParams.value = eventParameters;
+          `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`;
+        webhookParams.value = parameters;
       } catch (err) {
         proxy.$throw(err, proxy);
       }
@@ -136,9 +119,6 @@ export default defineComponent({
       tabActiveName,
       webhookLog,
       webhookParams,
-      handleTabClick: ({ props: { name } }: any) => {
-        proxy.$nextTick(() => adaptHeight(autoHeights[name]));
-      },
     };
   },
 });
@@ -226,12 +206,14 @@ export default defineComponent({
 
     .log {
       margin: 16px;
+      height: calc(100vh - 258px)
     }
 
     .params {
       background-color: #FFFFFF;
       border-radius: 4px;
       color: #082340;
+      height: calc(100vh - 226px);
 
       .content {
         padding: 16px;

@@ -3,8 +3,9 @@ package dev.jianmu.application.dsl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import dev.jianmu.application.exception.DslException;
 import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
-import dev.jianmu.hub.intergration.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,11 +17,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @class: NodeDslVo
- * @description: 节点定义版本
- * @author: Ethan Liu
- * @create: 2021-10-01 13:12
- **/
+ * @class NodeDslVo
+ * @description 节点定义版本
+ * @author Ethan Liu
+ * @create 2021-10-01 13:12
+*/
 @Getter
 @Builder
 @NoArgsConstructor
@@ -80,10 +81,11 @@ public class NodeDsl {
                 dslVo.ownerRef = "local";
             }
             dslVo.checkRef();
+            dslVo.checkParameter();
             return dslVo;
         } catch (JsonProcessingException e) {
             log.error("e:", e);
-            throw new RuntimeException("节点定义DSL格式不正确");
+            throw new DslException("节点定义DSL格式不正确");
         }
     }
 
@@ -92,7 +94,7 @@ public class NodeDsl {
      */
     private void checkRef() {
         if (ObjectUtils.isEmpty(this.ref)) {
-            throw new RuntimeException("节点定义DSL格式不正确");
+            throw new DslException("节点定义DSL格式不正确");
         }
         RefChecker.check(this.ref);
     }
@@ -102,7 +104,29 @@ public class NodeDsl {
         try {
             return mapper.writeValueAsString(this.spec);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("无法序列化Spec");
+            throw new DslException("无法序列化Spec");
         }
+    }
+
+    /**
+     * 校验参数
+     */
+    public void checkParameter() {
+        this.checkParameterRequired(this.inputParameters);
+        this.checkParameterRequired(this.outputParameters);
+    }
+
+    /**
+     * 校验参数是否必填
+     */
+    private void checkParameterRequired(Set<NodeParameter> set) {
+        set.forEach(nodeParameter -> {
+            if (nodeParameter.getRequired() && nodeParameter.getValue() != null) {
+                throw new DslException("必填参数不能定义默认值");
+            }
+            if (!nodeParameter.getRequired() && nodeParameter.getValue() == null) {
+                throw new DslException("非必填参数的默认值未定义");
+            }
+        });
     }
 }

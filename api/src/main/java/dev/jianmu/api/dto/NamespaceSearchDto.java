@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @class: NamespaceSearchDto
- * @description: NamespaceSearchDto
- * @author: Ethan Liu
- * @create: 2021-04-27 08:45
- **/
+ * @class NamespaceSearchDto
+ * @description NamespaceSearchDto
+ * @author Ethan Liu
+ * @create 2021-04-27 08:45
+*/
 @Getter
 @Setter
 @AllArgsConstructor

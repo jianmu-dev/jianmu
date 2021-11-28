@@ -6,10 +6,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @program: workflow
- * @description: 领域事件发布者
- * @author: Ethan Liu
- * @create: 2021-01-21 20:40
- **/
+ * @description 领域事件发布者
+ * @author Ethan Liu
+ * @create 2021-01-21 20:40
+*/
 public class DomainEventPublisher {
     private static ConcurrentHashMap<Class<? extends DomainEvent>, List<DomainEventSubscriber<? extends DomainEvent>>> subscriberMap
             = new ConcurrentHashMap<>();

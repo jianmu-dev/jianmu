@@ -13,10 +13,10 @@ import java.util.Set;
 
 /**
  * @program: workflow
- * @description: Switch网关
- * @author: Ethan Liu
- * @create: 2021-01-21 13:14
- **/
+ * @description Switch网关
+ * @author Ethan Liu
+ * @create 2021-01-21 13:14
+*/
 public class SwitchGateway extends BaseNode implements Gateway {
     private String expression;
     // Switch网关条件Case暂时只支持String类型比较，区分大小写

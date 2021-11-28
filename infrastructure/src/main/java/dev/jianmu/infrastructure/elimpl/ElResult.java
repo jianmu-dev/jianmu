@@ -5,11 +5,11 @@ import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.EvaluationResult;
 
 /**
- * @class: ElResult
- * @description: 表达式计算结果
- * @author: Ethan Liu
- * @create: 2021-03-08 22:02
- **/
+ * @class ElResult
+ * @description 表达式计算结果
+ * @author Ethan Liu
+ * @create 2021-03-08 22:02
+*/
 public class ElResult implements EvaluationResult {
 
     private String expr;

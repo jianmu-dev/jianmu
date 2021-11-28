@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @program: workflow
- * @description: AsyncTask测试类
- * @author: Ethan Liu
- * @create: 2021-01-22 16:43
- **/
+ * @description AsyncTask测试类
+ * @author Ethan Liu
+ * @create 2021-01-22 16:43
+*/
 @DisplayName("AsyncTask测试类")
 public class AsyncTaskTest {
     private static AsyncTask asyncTask;

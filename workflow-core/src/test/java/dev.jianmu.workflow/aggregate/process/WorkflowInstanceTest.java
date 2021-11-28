@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @program: workflow
- * @description: WorkflowInstance测试类
- * @author: Ethan Liu
- * @create: 2021-01-22 16:53
- **/
+ * @description WorkflowInstance测试类
+ * @author Ethan Liu
+ * @create 2021-01-22 16:53
+*/
 @DisplayName("流程实例测试类")
 public class WorkflowInstanceTest {
     private static Workflow workflow;

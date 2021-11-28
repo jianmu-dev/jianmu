@@ -4,10 +4,10 @@ import java.util.Set;
 
 /**
  * @program: workflow
- * @description: 流程节点接口定义
- * @author: Ethan Liu
- * @create: 2021-01-21 14:13
- **/
+ * @description 流程节点接口定义
+ * @author Ethan Liu
+ * @create 2021-01-21 14:13
+*/
 public interface Node {
     // 返回节点显示名称
     String getName();
@@ -20,6 +20,9 @@ public interface Node {
 
     // 返回节点类型
     String getType();
+
+    // 返回节点元数据快照
+    String getMetadata();
 
     // 返回上游节点列表
     Set<String> getSources();

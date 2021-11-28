@@ -7,15 +7,18 @@ import java.util.UUID;
 
 /**
  * @program: Parameter
- * @description: 参数类
- * @author: Ethan Liu
- * @create: 2021-01-21 13:13
- **/
+ * @description 参数类
+ * @author Ethan Liu
+ * @create 2021-01-21 13:13
+*/
 public abstract class Parameter<T> {
     public enum Type {
         STRING {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof String) {
                     return new StringParameter((String) value);
                 }
@@ -30,6 +33,9 @@ public abstract class Parameter<T> {
         BOOL {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof Boolean) {
                     return new BoolParameter((Boolean) value);
                 }
@@ -44,6 +50,9 @@ public abstract class Parameter<T> {
         SECRET {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof String) {
                     return new SecretParameter((String) value);
                 }
@@ -58,6 +67,9 @@ public abstract class Parameter<T> {
         NUMBER {
             @Override
             public Parameter<?> newParameter(Object value) {
+                if (value == null) {
+                    return defaultParameter();
+                }
                 if (value instanceof Number) {
                     return new NumberParameter(new BigDecimal(value.toString()));
                 }

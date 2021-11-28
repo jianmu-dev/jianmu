@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @class: WorkflowInstanceVo
- * @description: 流程实例VO
- * @author: Ethan Liu
- * @create: 2021-04-22 10:49
- **/
+ * @class WorkflowInstanceVo
+ * @description 流程实例VO
+ * @author Ethan Liu
+ * @create 2021-04-22 10:49
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,5 +31,4 @@ public class WorkflowInstanceVo {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ProcessStatus status;
-    private String latestTaskStatus;
 }

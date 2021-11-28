@@ -1,8 +1,10 @@
 import { EdgeConfig, NodeConfig } from '@antv/g6';
 import yaml from 'yaml';
 import { NodeTypeEnum } from '../utils/enumeration';
-import { INodeInfoVo } from '@/api/dto/workflow-execution-record';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { INodeDefVo } from '@/api/dto/project';
+import shellIcon from '../svgs/shape/shell.svg';
+import { SHELL_NODE_TYPE } from './model';
 
 /**
  * 节点标签最长长度
@@ -11,26 +13,19 @@ export const MAX_LABEL_LENGTH = 10;
 
 /**
  * 解析webhook节点
- * @param eb
  * @param nodes
  * @param edges
  * @param isWorkflow
  */
-function parseWebhook(eb: string | undefined, nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
-  if (!eb) {
-    // 不存在时，忽略
-    return;
-  }
-
-  const key = eb;
-  const label = key.length > MAX_LABEL_LENGTH ? `${key.substr(0, MAX_LABEL_LENGTH)}...` : key;
-  const description = eb;
+function parseWebhook(nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
+  const key = 'webhook';
+  const label = key;
   const type = NodeTypeEnum.WEBHOOK;
 
   nodes.push({
     id: key,
     label,
-    description,
+    description: key,
     type,
   });
 
@@ -64,7 +59,7 @@ function parseCron(cron: string | undefined, nodes: NodeConfig[], edges: EdgeCon
 
   const key = NodeTypeEnum.CRON;
   // const label = cron.length > MAX_LABEL_LENGTH ? `${cron.substr(0, MAX_LABEL_LENGTH)}...` : cron;
-  const label = 'Cron';
+  const label = 'cron';
   const description = cron;
   const type = NodeTypeEnum.CRON;
 
@@ -120,10 +115,12 @@ function parseWorkflow(workflow: any): {
       case NodeTypeEnum.CONDITION:
         description += `<br/>${workflow[key].expression}`;
         break;
-      default:
+      default: {
         type = NodeTypeEnum.ASYNC_TASK;
-        uniqueKey = workflow[key].type;
+        const { image } = workflow[key];
+        uniqueKey = image ? SHELL_NODE_TYPE : workflow[key].type;
         break;
+      }
     }
 
     nodes.push({
@@ -208,13 +205,14 @@ function parsePipeline(pipeline: any): {
     }
 
     const label = key.length > MAX_LABEL_LENGTH ? `${key.substr(0, MAX_LABEL_LENGTH)}...` : key;
+    const { image, type } = pipeline[key];
 
     nodes.push({
       id: key,
       label,
       description: key,
       type: NodeTypeEnum.ASYNC_TASK,
-      uniqueKey: pipeline[key].type,
+      uniqueKey: image ? SHELL_NODE_TYPE : type,
     });
   });
 
@@ -227,7 +225,7 @@ function parsePipeline(pipeline: any): {
  * @param triggerType
  * @param nodeInfos
  */
-export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined, nodeInfos?: INodeInfoVo[]): {
+export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined, nodeInfos?: INodeDefVo[]): {
   nodes: NodeConfig[];
   edges: EdgeConfig[];
 } {
@@ -235,7 +233,7 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
     return { nodes: [], edges: [] };
   }
 
-  const { eb, cron, workflow, pipeline } = yaml.parse(dsl);
+  const { trigger, workflow, pipeline } = yaml.parse(dsl);
 
   // 解析workflow节点
   const { nodes, edges } = workflow ? parseWorkflow(workflow) : parsePipeline(pipeline);
@@ -243,17 +241,21 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
   switch (triggerType) {
     case TriggerTypeEnum.CRON:
       // 解析cron节点
-      parseCron(cron, nodes, edges, !!workflow);
+      parseCron(trigger.schedule, nodes, edges, !!workflow);
       break;
-    case TriggerTypeEnum.EVENT_BRIDGE:
+    case TriggerTypeEnum.WEBHOOK:
       // 解析webhook节点
-      parseWebhook(eb, nodes, edges, !!workflow);
+      parseWebhook(nodes, edges, !!workflow);
       break;
   }
 
   if (nodeInfos) {
     // 匹配icon
     nodes.forEach((node: NodeConfig) => {
+      if (node.uniqueKey === SHELL_NODE_TYPE) {
+        node.iconUrl = shellIcon;
+        return;
+      }
       node.iconUrl = nodeInfos.find(nodeInfo => nodeInfo.type === node.uniqueKey)?.icon;
     });
   }

@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @class: ProjectSearchDto
- * @description: ProjectSearchDto
- * @author: Ethan Liu
- * @create: 2021-04-27 09:07
- **/
+ * @class ProjectSearchDto
+ * @description ProjectSearchDto
+ * @author Ethan Liu
+ * @create 2021-04-27 09:07
+*/
 @Getter
 @Setter
 @AllArgsConstructor

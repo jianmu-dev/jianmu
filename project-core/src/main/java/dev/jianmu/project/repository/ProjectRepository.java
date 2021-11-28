@@ -6,11 +6,11 @@ import dev.jianmu.project.aggregate.Project;
 import java.util.Optional;
 
 /**
- * @class: DslReferenceRepository
- * @description: DSL流程定义关联仓储
- * @author: Ethan Liu
- * @create: 2021-04-23 11:18
- **/
+ * @class DslReferenceRepository
+ * @description DSL流程定义关联仓储
+ * @author Ethan Liu
+ * @create 2021-04-23 11:18
+*/
 public interface ProjectRepository {
     void add(Project project);
 
@@ -19,4 +19,6 @@ public interface ProjectRepository {
     void updateByWorkflowRef(Project project);
 
     Optional<Project> findById(String id);
+
+    Optional<Project> findByName(String name);
 }

@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * @class: Project
- * @description: 建木项目
- * @author: Ethan Liu
- * @create: 2021-04-23 10:55
- **/
+ * @class Project
+ * @description 建木项目
+ * @author Ethan Liu
+ * @create 2021-04-23 10:55
+*/
 public class Project {
     public enum DslSource {
         GIT,
@@ -22,6 +22,7 @@ public class Project {
 
     public enum TriggerType {
         EVENT_BRIDGE,
+        WEBHOOK,
         CRON,
         MANUAL
     }

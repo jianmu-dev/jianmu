@@ -1,10 +1,11 @@
 <template>
   <div v-if="true"></div>
   <div v-else class="bottom-nav">
-    <span class="copyright">&copy;2020-{{ currentYear }} 版权所有</span>
-    <span class="company">九州云信息科技有限公司</span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" class="icp">浙ICP备12032350号-5</a>
-    <span class="email">邮箱：<a href=mailto:support@jianmu.dev>support@jianmu.dev</a></span>
+    <a href="https://portal.mulanos.cn" target="_blank" class="mulan">木兰社区孵化项目</a>
+    <a href="https://jianmu.dev" target="_blank">关于建木</a>
+    <a href="https://docs.jianmu.dev" target="_blank">使用手册</a>
+    <a href="mailto:support@jianmu.dev">联系我们</a>
+    <a v-if="icpVisible" href="https://beian.miit.gov.cn" target="_blank">浙ICP备12032350号-5</a>
   </div>
 </template>
 
@@ -15,6 +16,7 @@ export default defineComponent({
   setup() {
     return {
       currentYear: new Date().getFullYear(),
+      icpVisible: import.meta.env.mode === 'cdn',
     };
   },
 });
@@ -34,12 +36,15 @@ export default defineComponent({
   color: #FFFFFF;
   text-align: center;
 
-  .copyright {
-    margin-right: 5px;
+  > :nth-child(n+2) {
+    margin-left: 30px;
   }
 
-  .icp, .email {
-    margin-left: 30px;
+  .mulan {
+    padding-left: 20px;
+    background-image: url("@/assets/svgs/logo/mulan.svg");
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
   }
 
   a {

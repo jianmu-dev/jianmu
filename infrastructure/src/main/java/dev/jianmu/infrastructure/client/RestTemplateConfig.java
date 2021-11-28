@@ -9,11 +9,11 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * @class: RestTemplateConfig
- * @description: RestTemplateConfig
- * @author: Ethan Liu
- * @create: 2021-06-21 09:09
- **/
+ * @class RestTemplateConfig
+ * @description RestTemplateConfig
+ * @author Ethan Liu
+ * @create 2021-06-21 09:09
+*/
 @Configuration
 public class RestTemplateConfig {
     @Bean

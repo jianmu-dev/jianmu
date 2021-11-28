@@ -6,17 +6,24 @@
  * @param radius
  * @param callback
  */
-export function clipImageBorder(url: string,
-  width: number, height: number, radius: number,
-  callback: (base64: string) => void) {
+export function clipImageBorder(
+  url: string,
+  width: number,
+  height: number,
+  radius: number,
+  callback: (base64: string) => void,
+) {
   const image = new Image();
   image.src = url;
   // 解决：Tainted canvases may not be exported.
   image.setAttribute('crossOrigin', 'Anonymous');
 
   image.onload = function () {
-    const x = 0, y = 0;
-    const w = width, h = height, r = radius;
+    const x = 0,
+      y = 0;
+    const w = width,
+      h = height,
+      r = radius;
 
     const canvas = document.createElement('canvas');
     canvas.width = w;

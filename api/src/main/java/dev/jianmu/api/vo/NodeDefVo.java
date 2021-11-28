@@ -1,6 +1,6 @@
 package dev.jianmu.api.vo;
 
-import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
+import dev.jianmu.node.definition.aggregate.NodeDefinition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @class: NodeDefVo
- * @description: NodeDefVo
- * @author: Ethan Liu
- * @create: 2021-09-15 20:58
- **/
+ * @class NodeDefVo
+ * @description NodeDefVo
+ * @author Ethan Liu
+ * @create 2021-09-15 20:58
+*/
 @Data
 @Builder
 @AllArgsConstructor

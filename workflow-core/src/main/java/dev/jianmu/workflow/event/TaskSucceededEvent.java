@@ -2,10 +2,10 @@ package dev.jianmu.workflow.event;
 
 /**
  * @program: workflow
- * @description: 任务执行成功事件
- * @author: Ethan Liu
- * @create: 2021-01-23 21:31
- **/
+ * @description 任务执行成功事件
+ * @author Ethan Liu
+ * @create 2021-01-23 21:31
+*/
 public class TaskSucceededEvent extends BaseEvent {
     private TaskSucceededEvent() {
     }
@@ -23,6 +23,8 @@ public class TaskSucceededEvent extends BaseEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
+        // 任务外部ID
+        protected String externalId;
 
         private Builder() {
         }
@@ -61,14 +63,20 @@ public class TaskSucceededEvent extends BaseEvent {
             return this;
         }
 
+        public Builder externalId(String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
         public TaskSucceededEvent build() {
             TaskSucceededEvent taskSucceededEvent = new TaskSucceededEvent();
-            taskSucceededEvent.triggerId = this.triggerId;
-            taskSucceededEvent.workflowRef = this.workflowRef;
             taskSucceededEvent.workflowVersion = this.workflowVersion;
             taskSucceededEvent.workflowInstanceId = this.workflowInstanceId;
-            taskSucceededEvent.nodeRef = this.nodeRef;
             taskSucceededEvent.nodeType = this.nodeType;
+            taskSucceededEvent.triggerId = this.triggerId;
+            taskSucceededEvent.workflowRef = this.workflowRef;
+            taskSucceededEvent.nodeRef = this.nodeRef;
+            taskSucceededEvent.externalId = this.externalId;
             return taskSucceededEvent;
         }
     }

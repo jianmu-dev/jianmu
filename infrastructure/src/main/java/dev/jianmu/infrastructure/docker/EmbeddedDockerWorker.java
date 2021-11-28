@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @class: Client
- * @description: Docker客户端
- * @author: Ethan Liu
- * @create: 2021-04-13 10:59
- **/
+ * @class Client
+ * @description Docker客户端
+ * @author Ethan Liu
+ * @create 2021-04-13 10:59
+*/
 @Service
 @Profile("!test")
 public class EmbeddedDockerWorker implements DockerWorker {
@@ -133,7 +133,6 @@ public class EmbeddedDockerWorker implements DockerWorker {
             } else {
                 envArray = spec.getEnv();
             }
-            Arrays.stream(envArray).forEach(System.out::println);
             createContainerCmd.withEnv(envArray);
         }
         if (null != spec.getEntrypoint() && spec.getEntrypoint().length > 0) {
@@ -278,7 +277,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
                 resultFile = IOUtils.toString(reader);
                 logger.info("结果文件内容: {}", resultFile);
             } catch (Exception e) {
-                logger.error("无法获取容器执行结果文件:", e);
+                logger.warn("无法获取容器执行结果文件: {}", e.getMessage());
                 this.publisher.publishEvent(TaskFailedEvent.builder()
                         .triggerId(dockerTask.getTriggerId())
                         .taskId(dockerTask.getTaskInstanceId())
@@ -410,6 +409,12 @@ public class EmbeddedDockerWorker implements DockerWorker {
                         .resultFile(resultFile)
                         .build()
         );
+    }
+
+    @Override
+    public void terminateTask(String taskInstanceId) {
+        logger.info("stop task id: {}", taskInstanceId);
+        this.dockerClient.stopContainerCmd(taskInstanceId).exec();
     }
 
     @Override

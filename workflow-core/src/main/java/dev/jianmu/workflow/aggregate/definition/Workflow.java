@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 /**
  * @program: workflow
- * @description: 流程定义实体
- * @author: Ethan Liu
- * @create: 2021-01-21 14:10
- **/
+ * @description 流程定义实体
+ * @author Ethan Liu
+ * @create 2021-01-21 14:10
+*/
 public class Workflow {
     public enum Type {
         WORKFLOW,
@@ -56,15 +56,6 @@ public class Workflow {
 
     public void setContext(EvaluationContext context) {
         this.context = context;
-    }
-
-    public static Set<GlobalParameter> createGlobalParameters(Map<String, String> param) {
-        return param.entrySet().stream().map(entry ->
-                GlobalParameter.Builder.aGlobalParameter()
-                        .name(entry.getKey())
-                        .value(entry.getValue())
-                        .build()
-        ).collect(Collectors.toSet());
     }
 
     public Map<String, Parameter<?>> calculateTaskParams(String taskRef) {

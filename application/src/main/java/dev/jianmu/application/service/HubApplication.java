@@ -4,17 +4,18 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.dsl.NodeDsl;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
-import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
-import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
-import dev.jianmu.hub.intergration.aggregate.NodeParameter;
-import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
-import dev.jianmu.hub.intergration.event.NodeUpdatedEvent;
-import dev.jianmu.hub.intergration.repository.NodeDefinitionVersionRepository;
 import dev.jianmu.infrastructure.client.RegistryClient;
-import dev.jianmu.infrastructure.mybatis.hub.NodeDefinitionRepositoryImpl;
+import dev.jianmu.infrastructure.mybatis.node.NodeDefinitionRepositoryImpl;
+import dev.jianmu.node.definition.aggregate.NodeDefinition;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.ShellNode;
+import dev.jianmu.node.definition.event.NodeDeletedEvent;
+import dev.jianmu.node.definition.event.NodeUpdatedEvent;
+import dev.jianmu.node.definition.repository.NodeDefinitionVersionRepository;
+import dev.jianmu.node.definition.repository.ShellNodeRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.repository.ParameterRepository;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -26,15 +27,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @class: HubApplication
- * @description: HubApplication
- * @author: Ethan Liu
- * @create: 2021-09-04 10:03
- **/
+ * @class HubApplication
+ * @description HubApplication
+ * @author Ethan Liu
+ * @create 2021-09-04 10:03
+*/
 @Service
 public class HubApplication {
     private final NodeDefinitionRepositoryImpl nodeDefinitionRepository;
     private final NodeDefinitionVersionRepository nodeDefinitionVersionRepository;
+    private final ShellNodeRepository shellNodeRepository;
     private final ParameterRepository parameterRepository;
     private final RegistryClient registryClient;
     private final ApplicationEventPublisher publisher;
@@ -42,15 +44,22 @@ public class HubApplication {
     public HubApplication(
             NodeDefinitionRepositoryImpl nodeDefinitionRepository,
             NodeDefinitionVersionRepository nodeDefinitionVersionRepository,
+            ShellNodeRepository shellNodeRepository,
             ParameterRepository parameterRepository,
             RegistryClient registryClient,
             ApplicationEventPublisher publisher
     ) {
         this.nodeDefinitionRepository = nodeDefinitionRepository;
         this.nodeDefinitionVersionRepository = nodeDefinitionVersionRepository;
+        this.shellNodeRepository = shellNodeRepository;
         this.parameterRepository = parameterRepository;
         this.registryClient = registryClient;
         this.publisher = publisher;
+    }
+
+    @Transactional
+    public void addShellNodes(List<ShellNode> shellNodes) {
+        this.shellNodeRepository.addAll(shellNodes);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -80,6 +89,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
@@ -93,6 +103,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
@@ -216,6 +227,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
@@ -229,6 +241,7 @@ public class HubApplication {
                     .type(parameter.getType())
                     .parameterId(p.getId())
                     .value(parameter.getValue())
+                    .required(parameter.getRequired())
                     .build();
         }).collect(Collectors.toSet());
 
@@ -248,8 +261,34 @@ public class HubApplication {
                 .build();
     }
 
+    private NodeDef findShellNodeDef(String type) {
+        var shellNode = this.shellNodeRepository.findById(getVersion(type))
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义: shell:" + getVersion(type)));
+        var inputParameters = shellNode.getEnvironment().keySet().stream()
+                .map(s -> NodeParameter.Builder.aNodeParameter()
+                        .ref(s)
+                        .name(s)
+                        .type("STRING")
+                        .value("")
+                        .build()
+                )
+                .collect(Collectors.toSet());
+        return NodeDef.builder()
+                .name("Shell Node")
+                .description("Shell Node")
+                .workerType("DOCKER")
+                .type(type)
+                .image(shellNode.getImage())
+                .script(shellNode.getScript())
+                .inputParameters(inputParameters)
+                .build();
+    }
+
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public NodeDef getByType(String type) {
+        if (type.startsWith("shell:")) {
+            return this.findShellNodeDef(type);
+        }
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
                 .orElseGet(() -> this.downloadNodeDef(type));
         var version =
@@ -286,11 +325,14 @@ public class HubApplication {
     }
 
     public NodeDef findByType(String type) {
+        if (type.startsWith("shell:")) {
+            return this.findShellNodeDef(type);
+        }
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
-                .orElseThrow(() -> new DataNotFoundException("未找到节点定义"));
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义: " + type));
         var version =
                 this.nodeDefinitionVersionRepository.findByOwnerRefAndRefAndVersion(getOwnerRef(type), getRef(type), getVersion(type))
-                        .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本"));
+                        .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + type));
 
         return NodeDef.builder()
                 .name(node.getName())

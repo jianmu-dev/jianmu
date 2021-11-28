@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import dev.jianmu.hub.intergration.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.infrastructure.jackson2.UnmodifiableSetDeserializer;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -19,11 +19,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @class: NodeParameterSetTypeHandler
- * @description: 自定义类型(Set < NodeParameter >)转换器
- * @author: Ethan Liu
- * @create: 2021-09-09 14:17
- **/
+ * @class NodeParameterSetTypeHandler
+ * @description 自定义类型(Set < NodeParameter >)转换器
+ * @author Ethan Liu
+ * @create 2021-09-09 14:17
+*/
 public class NodeParameterSetTypeHandler extends BaseTypeHandler<Set<NodeParameter>> {
     private final ObjectMapper objectMapper = new ObjectMapper();
 

@@ -30,9 +30,9 @@ export enum TaskStatusEnum {
 }
 
 /**
- * 流程定义导入类型
+ * 项目导入类型
  */
-export enum WorkflowDefinitionImporterTypeEnum {
+export enum ProjectImporterTypeEnum {
   SSH = 'SSH',
   HTTPS = 'HTTPS',
 }
@@ -65,7 +65,7 @@ export enum TaskParamTypeEnum {
  * 触发类型枚举
  */
 export enum TriggerTypeEnum {
-  EVENT_BRIDGE = 'EVENT_BRIDGE',
+  WEBHOOK = 'WEBHOOK',
   CRON = 'CRON',
   MANUAL = 'MANUAL',
 }
@@ -88,18 +88,20 @@ export enum OwnerTypeEnum {
 }
 
 /**
- * 事件桥接器来源类型枚举
+ * 密钥管理器类型
  */
-export enum EventBridgeSourceTypeEnum {
-  WEBHOOK = 'WEBHOOK',
-  SERVICE = 'SERVICE',
+export enum CredentialManagerTypeEnum {
+  LOCAL = 'local',
+  VAULT = 'vault',
 }
 
 /**
- * 事件桥接器目标转换器类型枚举
+ * webhook请求状态
  */
-export enum EventBridgeTargetTransformerTypeEnum {
-  QUERY = 'QUERY',
-  HEADER = 'HEADER',
-  BODY = 'BODY',
+export enum WebhookRequstStateEnum {
+  OK = 'OK',
+  NOT_ACCEPTABLE = 'NOT_ACCEPTABLE',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  NOT_FOUND = 'NOT_FOUND',
+  UNKNOWN = 'UNKNOWN',
 }

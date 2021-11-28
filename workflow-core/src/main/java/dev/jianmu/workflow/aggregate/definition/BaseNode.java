@@ -5,10 +5,10 @@ import java.util.Set;
 
 /**
  * @program: workflow
- * @description: 流程组件父类
- * @author: Ethan Liu
- * @create: 2021-01-21 13:13
- **/
+ * @description 流程组件父类
+ * @author Ethan Liu
+ * @create 2021-01-21 13:13
+*/
 public abstract class BaseNode implements Node {
     // 显示名称
     protected String name;
@@ -22,6 +22,8 @@ public abstract class BaseNode implements Node {
     protected Set<String> targets = new HashSet<>();
     // 类型
     protected String type;
+    // 节点元数据快照
+    protected String metadata;
     // 参数列表
     protected Set<TaskParameter> taskParameters;
 
@@ -66,6 +68,11 @@ public abstract class BaseNode implements Node {
     @Override
     public String getType() {
         return this.type;
+    }
+
+    @Override
+    public String getMetadata() {
+        return this.metadata;
     }
 
     @Override

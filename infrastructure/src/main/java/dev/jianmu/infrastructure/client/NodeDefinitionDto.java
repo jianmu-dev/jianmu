@@ -2,16 +2,16 @@ package dev.jianmu.infrastructure.client;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
-import dev.jianmu.hub.intergration.aggregate.NodeDefinition;
+import dev.jianmu.node.definition.aggregate.NodeDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: NodeDefinitionDto
- * @description: NodeDefinitionDto
- * @author: Ethan Liu
- * @create: 2021-09-08 19:48
- **/
+ * @class NodeDefinitionDto
+ * @description NodeDefinitionDto
+ * @author Ethan Liu
+ * @create 2021-09-08 19:48
+*/
 @NoArgsConstructor
 @Data
 public class NodeDefinitionDto {

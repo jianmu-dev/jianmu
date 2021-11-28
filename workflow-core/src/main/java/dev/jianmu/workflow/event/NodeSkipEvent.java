@@ -1,11 +1,11 @@
 package dev.jianmu.workflow.event;
 
 /**
- * @class: NodeSkipEvent
- * @description: 节点跳过事件
- * @author: Ethan Liu
- * @create: 2021-10-18 11:28
- **/
+ * @class NodeSkipEvent
+ * @description 节点跳过事件
+ * @author Ethan Liu
+ * @create 2021-10-18 11:28
+*/
 public class NodeSkipEvent extends BaseEvent {
     private NodeSkipEvent() {
     }

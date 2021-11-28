@@ -8,11 +8,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * @class: HmacSha1
- * @description: HmacSha1
- * @author: Ethan Liu
- * @create: 2021-09-29 11:37
- **/
+ * @class HmacSha1
+ * @description HmacSha1
+ * @author Ethan Liu
+ * @create 2021-09-29 11:37
+*/
 public class HmacSha1 {
     /**
      * 定义加密方式

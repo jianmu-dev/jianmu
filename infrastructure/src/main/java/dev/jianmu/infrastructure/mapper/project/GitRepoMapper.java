@@ -10,11 +10,11 @@ import org.apache.ibatis.annotations.Select;
 import java.util.Optional;
 
 /**
- * @class: GitRepoMapper
- * @description: GitRepoMapper
- * @author: Ethan Liu
- * @create: 2021-05-14 19:05
- **/
+ * @class GitRepoMapper
+ * @description GitRepoMapper
+ * @author Ethan Liu
+ * @create 2021-05-14 19:05
+*/
 public interface GitRepoMapper {
     @Insert("insert into git_repo(id, uri, credential, branch, is_clone_all_branches, dsl_path) " +
             "values(#{id}, #{uri}, #{credential, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.CredentialTypeHandler}, #{branch}, #{isCloneAllBranches}, #{dslPath})")

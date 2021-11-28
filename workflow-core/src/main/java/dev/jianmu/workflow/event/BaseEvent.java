@@ -5,10 +5,10 @@ import java.util.UUID;
 
 /**
  * @program: workflow
- * @description: 领域事件抽象类
- * @author: Ethan Liu
- * @create: 2021-01-21 20:40
- **/
+ * @description 领域事件抽象类
+ * @author Ethan Liu
+ * @create 2021-01-21 20:40
+*/
 public abstract class BaseEvent implements DomainEvent {
     // 触发时间
     private LocalDateTime occurredTime;
@@ -29,6 +29,8 @@ public abstract class BaseEvent implements DomainEvent {
     protected String nodeRef;
     // 节点类型
     protected String nodeType;
+    // 任务外部ID
+    protected String externalId;
 
     protected BaseEvent() {
         this.occurredTime = LocalDateTime.now();
@@ -74,6 +76,10 @@ public abstract class BaseEvent implements DomainEvent {
         return triggerId;
     }
 
+    public String getExternalId() {
+        return externalId;
+    }
+
     @Override
     public String toString() {
         return "BaseEvent{" +
@@ -85,6 +91,8 @@ public abstract class BaseEvent implements DomainEvent {
                 ", workflowInstanceId='" + workflowInstanceId + '\'' +
                 ", triggerId='" + triggerId + '\'' +
                 ", nodeRef='" + nodeRef + '\'' +
+                ", nodeType='" + nodeType + '\'' +
+                ", externalId='" + externalId + '\'' +
                 '}';
     }
 }

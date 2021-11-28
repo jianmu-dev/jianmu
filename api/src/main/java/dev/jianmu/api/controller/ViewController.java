@@ -1,34 +1,29 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.EbDto;
-import dev.jianmu.api.dto.NamespaceSearchDto;
 import dev.jianmu.api.dto.PageDto;
-import dev.jianmu.api.dto.TransformerDto;
-import dev.jianmu.api.mapper.*;
+import dev.jianmu.api.mapper.ProjectMapper;
+import dev.jianmu.api.mapper.TaskInstanceMapper;
+import dev.jianmu.api.mapper.WorkflowInstanceMapper;
+import dev.jianmu.api.mapper.WorkflowMapper;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
-import dev.jianmu.eventbridge.aggregate.Bridge;
-import dev.jianmu.eventbridge.aggregate.Transformer;
-import dev.jianmu.hub.intergration.aggregate.NodeDefinitionVersion;
 import dev.jianmu.infrastructure.storage.StorageService;
-import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
-import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -37,19 +32,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @class: ProjectViewController
- * @description: ProjectViewController
- * @author: Ethan Liu
- * @create: 2021-06-04 17:23
- **/
+ * @author Ethan Liu
+ * @class ProjectViewController
+ * @description ProjectViewController
+ * @create 2021-06-04 17:23
+ */
 @RestController
 @RequestMapping("view")
 @Tag(name = "查询API", description = "查询API")
 public class ViewController {
     private final ProjectApplication projectApplication;
+    private final TriggerApplication triggerApplication;
+    private final WorkflowInstanceApplication workflowInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
-    private final EventBridgeApplication eventBridgeApplication;
     private final WorkflowInstanceApplication instanceApplication;
     private final TaskInstanceApplication taskInstanceApplication;
     private final ParameterApplication parameterApplication;
@@ -57,18 +53,20 @@ public class ViewController {
 
     public ViewController(
             ProjectApplication projectApplication,
+            TriggerApplication triggerApplication,
+            WorkflowInstanceApplication workflowInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
-            EventBridgeApplication eventBridgeApplication,
             WorkflowInstanceApplication instanceApplication,
             TaskInstanceApplication taskInstanceApplication,
             ParameterApplication parameterApplication,
             StorageService storageService
     ) {
         this.projectApplication = projectApplication;
+        this.triggerApplication = triggerApplication;
+        this.workflowInstanceApplication = workflowInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
-        this.eventBridgeApplication = eventBridgeApplication;
         this.instanceApplication = instanceApplication;
         this.taskInstanceApplication = taskInstanceApplication;
         this.parameterApplication = parameterApplication;
@@ -81,77 +79,41 @@ public class ViewController {
         return Parameter.Type.values();
     }
 
-    @GetMapping("/event_bridges")
-    @Operation(summary = "分页查询event bridges列表", description = "分页查询event bridges列表")
-    public PageInfo<Bridge> findAllEb(PageDto dto) {
-        return this.eventBridgeApplication.findAll(dto.getPageNum(), dto.getPageSize());
+    @GetMapping("/trigger/webhook/{projectId}")
+    @ResponseBody
+    @Operation(summary = "获取WebHook Url", description = "获取WebHook Url")
+    public WebhookVo getWebhookUrl(@PathVariable String projectId) {
+        var webhook = this.triggerApplication.getWebhookUrl(projectId);
+        return WebhookVo.builder().webhook(webhook).build();
     }
 
-    @GetMapping("/event_bridges/{bridgeId}")
-    @Operation(summary = "查询event bridge", description = "查询event bridge")
-    public EbDto findEbById(@PathVariable String bridgeId) {
-        var bridge = this.eventBridgeApplication.findBridgeById(bridgeId);
-        var source = this.eventBridgeApplication.findSourceByBridgeId(bridgeId);
-        var sourceDto = SourceMapper.INSTANCE.toSourceDto(source);
-        var targets = this.eventBridgeApplication.findTargetsByBridgeId(bridgeId).stream()
-                .map(target -> {
-                    var projectName = "";
-                    if (target.getDestinationId() != null) {
-                        projectName = this.projectApplication.findById(target.getDestinationId())
-                                .map(Project::getWorkflowName).orElse("");
-                    }
-                    return TargetMapper.INSTANCE.toTargetDto(target, projectName);
-                })
-                .collect(Collectors.toList());
-        return EbDto.builder()
-                .bridge(bridge)
-                .source(sourceDto)
-                .targets(targets)
-                .build();
-    }
-
-    @GetMapping("/target_events/{triggerId}")
-    @Operation(summary = "查询目标event参数", description = "查询目标event参数")
-    public TargetEventVo findTargetEvent(@PathVariable String triggerId) {
-        var targetEvent = this.eventBridgeApplication.findTargetEvent(triggerId);
-        return TargetEventMapper.INSTANCE.toTargetEventVo(targetEvent);
-    }
-
-    @GetMapping("/event_bridges/templates")
-    @Operation(summary = "转换器模版列表", description = "转换器模版列表")
-    public List<String> findTemplates() {
-        return List.of("Gitee", "Gitlab");
-    }
-
-    @GetMapping("/event_bridges/templates/{name}")
-    @Operation(summary = "转换器模版详情", description = "转换器模版详情")
-    public List<TransformerDto> findTemplate(@PathVariable String name) {
-        List<Transformer> temps = List.of();
-        if (name.equals("Gitee")) {
-            temps = this.eventBridgeApplication.giteeTemplates();
-        }
-        if (name.equals("Gitlab")) {
-            temps = this.eventBridgeApplication.gitlabTemplates();
-        }
-        return TargetMapper.INSTANCE.toTransformerDtos(temps);
+    @GetMapping("/trigger_events/{triggerId}")
+    @Operation(summary = "查询触发事件", description = "查询触发事件")
+    public TriggerEvent findTriggerEvent(@PathVariable String triggerId) {
+        return this.triggerApplication.findTriggerEvent(triggerId);
     }
 
     @GetMapping("/namespaces")
-    @Operation(summary = "分页查询命名空间列表", description = "分页查询命名空间列表")
-    public PageInfo<Namespace> findAll(NamespaceSearchDto namespaceSearchDto) {
-        return this.secretApplication.findAll(namespaceSearchDto.getName(), namespaceSearchDto.getPageNum(), namespaceSearchDto.getPageSize());
+    @Operation(summary = "查询命名空间列表", description = "查询命名空间列表")
+    public NameSpacesVo findAllNamespace() {
+        var type = this.secretApplication.getCredentialManagerType();
+        var list = this.secretApplication.findAll();
+        return NameSpacesVo.builder()
+                .credentialManagerType(type)
+                .list(list)
+                .build();
     }
 
     @GetMapping("/namespaces/{name}")
     @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
     public Namespace findByName(@PathVariable String name) {
-        return this.secretApplication.findById(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
+        return this.secretApplication.findByName(name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
     }
 
     @GetMapping("/namespaces/{name}/keys")
     @Operation(summary = "查询键值对列表", description = "查询键值对列表")
     public List<String> findAll(@PathVariable String name) {
-        var kvs = this.secretApplication.findAll(name);
+        var kvs = this.secretApplication.findAllByNamespaceName(name);
         return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
     }
 
@@ -196,26 +158,39 @@ public class ViewController {
                 .map(workflowInstance -> {
                     var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
                     projectVo.setLatestTime(workflowInstance.getEndTime());
-                    projectVo.setNextTime(this.projectApplication.getNextFireTime(project.getId()));
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
                     if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
                         projectVo.setStatus("FAILED");
-                    } else {
-                        projectVo.setStatus(workflowInstance.findLatestAsyncTaskInstance()
-                                .orElse(AsyncTaskInstance.Builder.anAsyncTaskInstance().build())
-                                .getStatus().name()
-                        );
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
+                        projectVo.setStatus("SUCCEEDED");
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
+                        projectVo.setStartTime(workflowInstance.getStartTime());
+                        projectVo.setStatus("RUNNING");
                     }
                     return projectVo;
                 })
-                .orElseGet(() -> ProjectMapper.INSTANCE.toProjectVo(project))).collect(Collectors.toList());
+                .orElseGet(() -> {
+                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                    return projectVo;
+                })).collect(Collectors.toList());
     }
 
     @GetMapping("/projects/{projectId}")
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
         var project = this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        var nodeDefs = this.projectApplication.findNodes(project.getWorkflowRef(), project.getWorkflowVersion());
-        return ProjectMapper.INSTANCE.toProjectDetailVo(project, nodeDefs);
+        return ProjectMapper.INSTANCE.toProjectDetailVo(project);
+    }
+
+    @GetMapping("/projects/{projectId}/dsl")
+    @Operation(summary = "获取项目DSL", description = "获取项目DSL", deprecated = true)
+    public String getProjectDsl(@PathVariable String projectId) {
+        return this.projectApplication.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"))
+                .getDslText();
     }
 
     @GetMapping("/repo/{gitRepoId}")
@@ -232,9 +207,10 @@ public class ViewController {
     }
 
     @GetMapping("/workflow/{ref}/{version}")
-    @Operation(summary = "获取DSL源码", description = "获取DSL源码")
-    public String findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
-        return this.projectApplication.findByRefAndVersion(ref, version).getDslText();
+    @Operation(summary = "获取流程定义", description = "获取流程定义")
+    public WorkflowVo findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
+        var workflow = this.projectApplication.findByRefAndVersion(ref, version);
+        return WorkflowMapper.INSTANCE.toWorkflowVo(workflow);
     }
 
     @GetMapping("/task_instances/{workflowInstanceId}")
@@ -242,6 +218,16 @@ public class ViewController {
     public List<TaskInstanceVo> findByBusinessId(@PathVariable String workflowInstanceId) {
         List<TaskInstanceVo> list = new ArrayList<>();
         var taskInstances = this.taskInstanceApplication.findByBusinessId(workflowInstanceId);
+        this.workflowInstanceApplication.findById(workflowInstanceId)
+                .ifPresent(workflowInstance -> {
+                    workflowInstance.getAsyncTaskInstances()
+                            .stream()
+                            .filter(asyncTaskInstance -> asyncTaskInstance.getStatus().equals(TaskStatus.SKIPPED))
+                            .forEach(asyncTaskInstance -> {
+                                var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
+                                list.add(vo);
+                            });
+                });
         taskInstances.forEach(taskInstance -> {
             var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
             list.add(vo);
@@ -268,10 +254,18 @@ public class ViewController {
                     var instanceParameterVo = new InstanceParameterVo();
                     instanceParameters.forEach(instanceParameter -> {
                         if (instanceParameter.getParameterId().equals(parameter.getId())) {
+                            if (parameter.getType() == Parameter.Type.SECRET && ((String) parameter.getValue()).isBlank()) {
+                                return;
+                            }
                             instanceParameterVo.setRef(instanceParameter.getRef());
                             instanceParameterVo.setType(instanceParameter.getType().toString());
                             instanceParameterVo.setValueType(parameter.getType().toString());
-                            instanceParameterVo.setValue(parameter.getStringValue());
+                            instanceParameterVo.setRequired(instanceParameter.getRequired());
+                            if (parameter.getType() == Parameter.Type.SECRET) {
+                                instanceParameterVo.setValue("**********");
+                            } else {
+                                instanceParameterVo.setValue(parameter.getStringValue());
+                            }
                         }
                     });
                     return instanceParameterVo;
@@ -281,10 +275,18 @@ public class ViewController {
     @GetMapping("/logs/{logId}")
     @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取")
     public ResponseEntity<FileSystemResource> getLog(@PathVariable String logId) {
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.TEXT_PLAIN)
-                .body(new FileSystemResource(this.storageService.logFile(logId)));
+        var fileSystemResource = new FileSystemResource(this.storageService.logFile(logId));
+        if (fileSystemResource.exists()) {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(fileSystemResource);
+        } else {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .build();
+        }
     }
 
     @GetMapping("/logs/workflow/{logId}")

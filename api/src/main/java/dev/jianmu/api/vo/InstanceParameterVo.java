@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class: InstanceParameterVo
- * @description: InstanceParameterVo
- * @author: Ethan Liu
- * @create: 2021-06-09 20:28
- **/
+ * @class InstanceParameterVo
+ * @description InstanceParameterVo
+ * @author Ethan Liu
+ * @create 2021-06-09 20:28
+*/
 @Data
 @Builder
 @AllArgsConstructor
@@ -24,6 +24,8 @@ public class InstanceParameterVo {
     private String type;
     // 参数类型
     private String valueType;
+    // 参数是否必填
+    private Boolean required;
     // 参数值
     private String value;
 }

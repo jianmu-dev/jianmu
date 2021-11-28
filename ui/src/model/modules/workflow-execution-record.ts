@@ -1,19 +1,12 @@
-import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordQueryingDto, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { Mutable } from '@/utils/lib';
-import { IPageVo } from '@/api/dto/common';
-import { IProjectDetailVo } from '@/api/dto/project';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
+import { TriggerTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * vuex状态
  */
 export interface IState {
-  totalElements: {
-    executing: number;
-    completed: number;
-  };
-  executing: IPageVo<IWorkflowExecutionRecordVo>;
-  completed: IPageVo<IWorkflowExecutionRecordVo>;
   recordDetail: {
     project?: IProjectDetailVo;
     navScrollLeft: number;
@@ -21,14 +14,8 @@ export interface IState {
     record?: IWorkflowExecutionRecordVo;
     recordDsl?: string;
     taskRecords: ITaskExecutionRecordVo[];
-    nodeInfos: INodeInfoVo[];
+    nodeInfos: INodeDefVo[];
   };
-}
-
-/**
- * 查询表单
- */
-export interface IQueryForm extends Mutable<IWorkflowExecutionRecordQueryingDto> {
 }
 
 /**
@@ -45,7 +32,8 @@ export interface IOpenTaskLogForm {
  */
 export interface IOpenWebhookLogForm {
   drawerVisible: boolean;
-  id: string;
+  nodeName: string;
   tabType: NodeToolbarTabTypeEnum | '';
   triggerId?: string;
+  triggerType?: TriggerTypeEnum;
 }

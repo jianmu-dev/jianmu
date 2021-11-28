@@ -1,11 +1,11 @@
 package dev.jianmu.project.event;
 
 /**
- * @class: TriggerEvent
- * @description: TriggerEvent
- * @author: Ethan Liu
- * @create: 2021-08-17 22:14
- **/
+ * @class TriggerEvent
+ * @description TriggerEvent
+ * @author Ethan Liu
+ * @create 2021-08-17 22:14
+*/
 public class TriggerEvent {
     private String projectId;
     private String triggerId;

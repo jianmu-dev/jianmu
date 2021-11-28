@@ -8,11 +8,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 /**
- * @class: JwtUserDetails
- * @description: JwtUserDetails
- * @author: Ethan Liu
- * @create: 2021-05-17 22:06
- **/
+ * @class JwtUserDetails
+ * @description JwtUserDetails
+ * @author Ethan Liu
+ * @create 2021-05-17 22:06
+*/
 public class JwtUserDetails implements UserDetails {
     private static final long serialVersionUID = 1L;
 

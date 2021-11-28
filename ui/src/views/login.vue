@@ -4,11 +4,11 @@
       <router-link :to="{name: 'index'}">
         <div class="icon"></div>
       </router-link>
-      <div class="separator"></div>
-      <div>
-        <div class="title">自动化集成平台</div>
-        <div class="subtitle">Automation Integration Platform</div>
-      </div>
+      <!--      <div class="separator"></div>-->
+      <!--      <div>-->
+      <!--        <div class="title">自动化集成平台</div>-->
+      <!--        <div class="subtitle">Automation Integration Platform</div>-->
+      <!--      </div>-->
     </div>
     <div class="main">
       <div class="desc">欢迎登录</div>
@@ -128,41 +128,41 @@ export default defineComponent({
   padding-top: 15vh;
 
   .logo {
-    margin: 0 auto 30px auto;
+    margin: 0 auto 15px auto;
     width: 350px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 
     .icon {
-      width: 130px;
-      height: 35px;
-      background-image: url('@/assets/svgs/logo/secondary.svg');
+      width: 160px;
+      height: 50px;
+      background-image: url('@/assets/svgs/logo/main.svg');
       background-repeat: no-repeat;
       background-size: contain;
       background-position: center center;
     }
 
-    .separator {
-      width: 1px;
-      height: 28px;
-      background-color: #B9CFE6;
-      border-radius: 1px;
-      overflow: hidden;
-    }
-
-    .title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #082340;
-      letter-spacing: 3.5px;
-    }
-
-    .subtitle {
-      font-size: 12px;
-      color: #082340;
-      letter-spacing: 0.3px;
-    }
+    //.separator {
+    //  width: 1px;
+    //  height: 28px;
+    //  background-color: #B9CFE6;
+    //  border-radius: 1px;
+    //  overflow: hidden;
+    //}
+    //
+    //.title {
+    //  font-size: 24px;
+    //  font-weight: bold;
+    //  color: #082340;
+    //  letter-spacing: 3.5px;
+    //}
+    //
+    //.subtitle {
+    //  font-size: 12px;
+    //  color: #082340;
+    //  letter-spacing: 0.3px;
+    //}
   }
 
   .main {

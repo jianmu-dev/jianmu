@@ -15,7 +15,7 @@
         <span class="desc">（共有 {{ keys.length }} 个密钥）</span>
       </div>
       <div class="menu-bar">
-        <button class="add" @click="creationActivated = true">
+        <button class="add" @click="add">
           <div class="label">新增密钥</div>
         </button>
       </div>
@@ -41,6 +41,9 @@ import SkEditor from './sk-editor.vue';
 import { deleteSecretKey } from '@/api/secret-key';
 import { fetchNamespaceDetail, listSecretKey } from '@/api/view-no-auth';
 import { v4 as uuidv4 } from 'uuid';
+import { useStore } from 'vuex';
+import { namespace } from '@/store/modules/secret-key';
+import { IState } from '@/model/modules/secret-key';
 
 interface IKeyType {
   id: string;
@@ -59,6 +62,7 @@ export default defineComponent({
   },
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
+    const state = useStore().state[namespace] as IState;
     const description = ref<string>('无');
     const keys = ref<IKeyType[]>([]);
     const loading = ref<boolean>(false);
@@ -71,7 +75,7 @@ export default defineComponent({
         loading.value = true;
 
         const { description: desc } = await fetchNamespaceDetail(props.ns);
-        description.value = (desc || '无').replaceAll('\n', '<br/>');
+        description.value = (desc || '无').replace(/\n/g, '<br/>');
 
         keys.value = (await listSecretKey(props.ns)).map(item => ({ id: uuidv4(), name: item }));
       } catch (err) {
@@ -87,9 +91,11 @@ export default defineComponent({
       loading,
       creationActivated,
       deletings,
-
       handleKeyAdd: (namespace: string, name: string) => {
         keys.value.push({ id: uuidv4(), name });
+      },
+      add: () => {
+        creationActivated.value = true;
       },
       del: (name: string) => {
         if (deletings.value[name]) {

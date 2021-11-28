@@ -14,11 +14,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 /**
- * @class: RestClient
- * @description: RestClient
- * @author: Ethan Liu
- * @create: 2021-06-21 09:05
- **/
+ * @class RestClient
+ * @description RestClient
+ * @author Ethan Liu
+ * @create 2021-06-21 09:05
+*/
 @Slf4j
 @Service
 public class RegistryClient {
@@ -32,6 +32,8 @@ public class RegistryClient {
 
     private HttpHeaders createHeaders(String path) {
         var headers = new HttpHeaders();
+        headers.add("X-Client-Type", registryProperties.getType());
+        headers.add("X-Client-Version", registryProperties.getVersion());
         if (registryProperties.getAk() == null ||
                 registryProperties.getSk() == null ||
                 registryProperties.getAk().isBlank() ||

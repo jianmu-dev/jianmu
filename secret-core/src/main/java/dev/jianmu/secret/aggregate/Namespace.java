@@ -3,11 +3,11 @@ package dev.jianmu.secret.aggregate;
 import java.time.LocalDateTime;
 
 /**
- * @class: Namespace
- * @description: 命名空间
- * @author: Ethan Liu
- * @create: 2021-04-20 12:36
- **/
+ * @class Namespace
+ * @description 命名空间
+ * @author Ethan Liu
+ * @create 2021-04-20 12:36
+*/
 public class Namespace {
     private String name;
     private String description;
@@ -40,5 +40,35 @@ public class Namespace {
 
     public LocalDateTime getLastModifiedTime() {
         return lastModifiedTime;
+    }
+
+
+    public static final class Builder {
+        private String name;
+        private String description;
+
+        private Builder() {
+        }
+
+        public static Builder aNamespace() {
+            return new Builder();
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Namespace build() {
+            Namespace namespace = new Namespace();
+            namespace.setName(name);
+            namespace.setDescription(description);
+            return namespace;
+        }
     }
 }

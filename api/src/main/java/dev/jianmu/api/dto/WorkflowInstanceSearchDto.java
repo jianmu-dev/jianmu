@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @class: WorkflowInstanceSearchDto
- * @description: WorkflowInstanceSearchDto
- * @author: Ethan Liu
- * @create: 2021-04-27 11:44
- **/
+ * @class WorkflowInstanceSearchDto
+ * @description WorkflowInstanceSearchDto
+ * @author Ethan Liu
+ * @create 2021-04-27 11:44
+*/
 @Getter
 @Setter
 @AllArgsConstructor

@@ -1,22 +1,23 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.EmbeddedWorkerApplication;
-import dev.jianmu.hub.intergration.event.NodeDeletedEvent;
-import dev.jianmu.hub.intergration.event.NodeUpdatedEvent;
+import dev.jianmu.application.service.internal.EmbeddedWorkerApplication;
+import dev.jianmu.node.definition.event.NodeDeletedEvent;
+import dev.jianmu.node.definition.event.NodeUpdatedEvent;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
 import dev.jianmu.worker.event.CreateWorkspaceEvent;
+import dev.jianmu.worker.event.TerminateTaskEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: WorkerEventHandler
- * @description: WorkerEventHandler
- * @author: Ethan Liu
- * @create: 2021-09-12 22:18
- **/
+ * @class WorkerEventHandler
+ * @description WorkerEventHandler
+ * @author Ethan Liu
+ * @create 2021-09-12 22:18
+*/
 @Component
 @Slf4j
 public class WorkerEventHandler {
@@ -37,8 +38,16 @@ public class WorkerEventHandler {
     }
 
     @EventListener
+    public void handleTerminateTaskEvent(TerminateTaskEvent terminateTaskEvent) {
+        log.info("docker worker terminate task id: {}", terminateTaskEvent.getTaskInstanceId());
+        this.embeddedWorkerApplication.terminateTask(terminateTaskEvent.getTaskInstanceId());
+    }
+
+    @EventListener
     public void embeddedWorkerTask(WorkerTask workerTask) {
         if (workerTask.getType() == Worker.Type.EMBEDDED) {
+            log.info("embedded docker worker running task id: {}", workerTask.getTaskInstanceId());
+            log.info("embedded docker worker running task type: {}", workerTask.getDefKey());
             this.embeddedWorkerApplication.runTask(workerTask);
         }
     }

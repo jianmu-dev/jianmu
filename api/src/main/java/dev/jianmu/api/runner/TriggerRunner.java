@@ -1,26 +1,55 @@
 package dev.jianmu.api.runner;
 
-import dev.jianmu.trigger.service.ScheduleJobService;
+import dev.jianmu.application.service.TriggerApplication;
+import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
+import dev.jianmu.application.service.internal.WorkerApplication;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: TriggerRunner
- * @description: TriggerRunner
- * @author: Ethan Liu
- * @create: 2021-05-24 19:26
- **/
+ * @class TriggerRunner
+ * @description TriggerRunner
+ * @author Ethan Liu
+ * @create 2021-05-24 19:26
+*/
 @Component
+@Slf4j
 public class TriggerRunner implements ApplicationRunner {
-    private final ScheduleJobService jobService;
+    private final TriggerApplication triggerApplication;
+    private final TaskInstanceInternalApplication taskInstanceInternalApplication;
+    private final WorkerApplication workerApplication;
 
-    public TriggerRunner(ScheduleJobService jobService) {
-        this.jobService = jobService;
+    public TriggerRunner(
+            TriggerApplication triggerApplication,
+            TaskInstanceInternalApplication taskInstanceInternalApplication,
+            WorkerApplication workerApplication
+    ) {
+        this.triggerApplication = triggerApplication;
+        this.taskInstanceInternalApplication = taskInstanceInternalApplication;
+        this.workerApplication = workerApplication;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        this.jobService.startTriggers();
+        this.triggerApplication.startTriggers();
+        this.resumeTasks();
+    }
+
+    @Async
+    void resumeTasks() {
+        var taskInstances = this.taskInstanceInternalApplication.findRunningTask();
+        log.info("恢复仍在运行中的任务数量：{}", taskInstances.size());
+        taskInstances.forEach(taskInstance -> {
+            try {
+                this.workerApplication.dispatchTask(taskInstance, true);
+                log.info("Task instance id: {}  ref: {} is resumed", taskInstance.getId(), taskInstance.getAsyncTaskRef());
+            } catch (Exception e) {
+                log.warn("Task instance id: {}  ref: {} is resume failed, due to: {}", taskInstance.getId(), taskInstance.getAsyncTaskRef(), e.getMessage());
+                this.taskInstanceInternalApplication.executeFailed(taskInstance.getId());
+            }
+        });
     }
 }

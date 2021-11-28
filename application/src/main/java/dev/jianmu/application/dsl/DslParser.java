@@ -2,8 +2,16 @@ package dev.jianmu.application.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
+import dev.jianmu.node.definition.aggregate.NodeParameter;
+import dev.jianmu.node.definition.aggregate.ShellNode;
+import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.trigger.aggregate.WebhookAuth;
+import dev.jianmu.trigger.aggregate.WebhookParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -11,26 +19,31 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * @class: DslParser
- * @description: DSL解析器
- * @author: Ethan Liu
- * @create: 2021-09-03 15:01
- **/
+ * @class DslParser
+ * @description DSL解析器
+ * @author Ethan Liu
+ * @create 2021-09-03 15:01
+*/
 @Slf4j
 public class DslParser {
+    private Map<String, Object> trigger;
+    private Project.TriggerType triggerType = Project.TriggerType.MANUAL;
+    private Webhook webhook;
     private String cron;
-    private String eb;
-    private Map<String, String> param;
+    private final Map<String, Map<String, Object>> global = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
     private String name;
-    private String ref;
     private String description;
     private Workflow.Type type;
     private final List<DslNode> dslNodes = new ArrayList<>();
+    private final List<ShellNode> shellNodes = new ArrayList<>();
+    private Set<GlobalParameter> globalParameters = new HashSet<>();
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -39,9 +52,10 @@ public class DslParser {
         try {
             parser = parser.mapper.readValue(dslText, DslParser.class);
             parser.syntaxCheck();
+            parser.createGlobalParameters();
         } catch (IOException e) {
             log.error("DSL解析异常:", e);
-            throw new RuntimeException("DSL解析异常");
+            throw new DslException("DSL解析异常");
         }
         return parser;
     }
@@ -92,12 +106,18 @@ public class DslParser {
                 symbolTable.put(dslNode.getName(), condition);
                 return;
             }
-            // 创建任务节点
-            var n = nodeDefs.stream()
-                    .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("未找到任务定义"));
-            var task = this.createAsyncTask(dslNode, n);
+            AsyncTask task;
+            if (dslNode.getImage() != null) {
+                // 创建Shell Node类型的任务节点
+                task = this.createAsyncTask(dslNode);
+            } else {
+                // 创建任务节点
+                var d = nodeDefs.stream()
+                        .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
+                        .findFirst()
+                        .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
+                task = this.createAsyncTask(dslNode, d);
+            }
             symbolTable.put(dslNode.getName(), task);
         });
         // 添加节点引用关系
@@ -108,17 +128,62 @@ public class DslParser {
                     var target = symbolTable.get(nodeName);
                     if (null != target) {
                         n.addTarget(target.getRef());
+                    } else {
+                        throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
                     }
                 });
                 dslNode.getSources().forEach(nodeName -> {
                     var source = symbolTable.get(nodeName);
                     if (null != source) {
                         n.addSource(source.getRef());
+                    } else {
+                        throw new DslException("节点" + dslNode.getName() + "指定的source: " + nodeName + "不存在");
                     }
                 });
             }
         });
+        // 校验并发网关上游下游语法
+        symbolTable.values().forEach(node -> {
+            node.getTargets().forEach(nodeName -> {
+                var target = symbolTable.get(nodeName);
+                if (!target.getSources().contains(node.getRef())) {
+                    throw new DslException("节点" + nodeName + "未指定source: " + node.getRef());
+                }
+            });
+            node.getSources().forEach(nodeName -> {
+                var source = symbolTable.get(nodeName);
+                if (!source.getTargets().contains(node.getRef())) {
+                    throw new DslException("节点" + nodeName + "未指定target: " + node.getRef());
+                }
+            });
+        });
         return new HashSet<>(symbolTable.values());
+    }
+
+    private void createGlobalParameters() {
+        var globalParam = this.global.get("param");
+        if (globalParam == null) {
+            return;
+        }
+        this.globalParameters = globalParam.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .map(entry -> {
+                    String type = null;
+                    Object value = null;
+                    if (entry.getValue() instanceof String) {
+                        value = entry.getValue().toString();
+                        type = "STRING";
+                    }
+                    if (entry.getValue() instanceof Map) {
+                        value = ((Map<?, ?>) entry.getValue()).get("value");
+                        type = ((Map<String, String>) entry.getValue()).get("type");
+                    }
+                    return GlobalParameter.Builder.aGlobalParameter()
+                            .name(entry.getKey())
+                            .type(type)
+                            .value(value)
+                            .build();
+                }).collect(Collectors.toSet());
     }
 
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
@@ -131,12 +196,18 @@ public class DslParser {
         var end = End.Builder.anEnd().name("End").ref("End").build();
         symbolTable.put("End", end);
         dslNodes.forEach(dslNode -> {
-            // 创建任务节点
-            var d = nodeDefs.stream()
-                    .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("未找到任务定义"));
-            var task = this.createAsyncTask(dslNode, d);
+            AsyncTask task;
+            if (dslNode.getImage() != null) {
+                // 创建Shell Node类型的任务节点
+                task = this.createAsyncTask(dslNode);
+            } else {
+                // 创建任务节点
+                var d = nodeDefs.stream()
+                        .filter(nodeDef -> dslNode.getType().equals(nodeDef.getType()))
+                        .findFirst()
+                        .orElseThrow(() -> new DataNotFoundException("未找到任务定义"));
+                task = this.createAsyncTask(dslNode, d);
+            }
             symbolTable.put(dslNode.getName(), task);
         });
         // 添加节点引用关系
@@ -166,7 +237,23 @@ public class DslParser {
         return new HashSet<>(symbolTable.values());
     }
 
+    private AsyncTask createAsyncTask(DslNode dslNode) {
+        Set<TaskParameter> taskParameters = Set.of();
+        if (dslNode.getEnvironment() != null) {
+            taskParameters = AsyncTask.createTaskParameters(dslNode.getEnvironment());
+        }
+        return AsyncTask.Builder.anAsyncTask()
+                .name("Shell Node")
+                .ref(dslNode.getName())
+                .type(dslNode.getType())
+                .taskParameters(taskParameters)
+                .description("Shell Node")
+                .metadata("{}")
+                .build();
+    }
+
     private AsyncTask createAsyncTask(DslNode dslNode, NodeDef nodeDef) {
+        this.checkNodeParamRequired(dslNode, nodeDef);
         Set<TaskParameter> taskParameters = Set.of();
         if (dslNode.getParam() != null) {
             taskParameters = AsyncTask.createTaskParameters(dslNode.getParam());
@@ -177,6 +264,7 @@ public class DslParser {
                 .type(dslNode.getType())
                 .taskParameters(taskParameters)
                 .description(nodeDef.getDescription())
+                .metadata(nodeDef.toJsonString())
                 .build();
     }
 
@@ -185,17 +273,46 @@ public class DslParser {
         return item -> consumer.accept(counter.getAndIncrement(), item);
     }
 
+    /**
+     * 校验节点必填参数
+     */
+    private void checkNodeParamRequired(DslNode dslNode, NodeDef nodeDef) {
+        nodeDef.getInputParameters().stream()
+                .filter(NodeParameter::getRequired)
+                .forEach(param -> {
+                    var value = dslNode.getParam().keySet().stream()
+                            .filter(k -> param.getRef().equals(k))
+                            .findFirst()
+                            .orElseThrow(() -> new DslException(dslNode.getName() + "节点的必填参数不能为空"));
+                    if (value == null) {
+                        throw new DslException(dslNode.getName() + "节点的必填参数不能为空");
+                    }
+                });
+    }
+
     // DSL语法校验
     private void syntaxCheck() {
-        if (this.cron != null && this.eb != null) {
-            throw new RuntimeException("不能同时使用Cron与EventBridge");
+        if (null == this.name) {
+            throw new DslException("project name未设置");
         }
+        this.triggerSyntaxCheck();
+        this.globalParamSyntaxCheck();
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
             this.workflow.forEach((key, val) -> {
                 if (val instanceof Map) {
-                    dslNodes.add(new DslNode(key, (Map<?, ?>) val));
+                    var dslNode = DslNode.of(key, (Map<?, ?>) val);
+                    if (dslNode.getImage() != null) {
+                        var shellNode = ShellNode.Builder.aShellNode()
+                                .image(dslNode.getImage())
+                                .environment(dslNode.getEnvironment())
+                                .script(dslNode.getScript())
+                                .build();
+                        dslNode.setType("shell:" + shellNode.getId());
+                        shellNodes.add(shellNode);
+                    }
+                    dslNodes.add(dslNode);
                 }
             });
             return;
@@ -205,26 +322,113 @@ public class DslParser {
             this.type = Workflow.Type.PIPELINE;
             this.pipeline.forEach((key, val) -> {
                 if (val instanceof Map) {
-                    dslNodes.add(new DslNode(key, (Map<?, ?>) val));
+                    var dslNode = DslNode.of(key, (Map<?, ?>) val);
+                    if (dslNode.getImage() != null) {
+                        var shellNode = ShellNode.Builder.aShellNode()
+                                .image(dslNode.getImage())
+                                .environment(dslNode.getEnvironment())
+                                .script(dslNode.getScript())
+                                .build();
+                        dslNode.setType("shell:" + shellNode.getId());
+                        shellNodes.add(shellNode);
+                    }
+                    dslNodes.add(dslNode);
                 }
             });
             return;
         }
-        throw new RuntimeException("workflow或pipeline未设置");
+        throw new DslException("workflow或pipeline未设置");
+    }
+
+    private void triggerSyntaxCheck() {
+        if (this.trigger == null) {
+            return;
+        }
+        var triggerType = this.trigger.get("type");
+        if (!(triggerType instanceof String)) {
+            throw new IllegalArgumentException("trigger type配置错误");
+        }
+        if (triggerType.equals("cron")) {
+            var schedule = this.trigger.get("schedule");
+            if (!(schedule instanceof String)) {
+                throw new IllegalArgumentException("schedule未配置");
+            }
+            this.triggerType = Project.TriggerType.CRON;
+            this.cron = (String) schedule;
+        }
+        if (triggerType.equals("webhook")) {
+            var param = this.trigger.get("param");
+            var auth = this.trigger.get("auth");
+            var only = this.trigger.get("only");
+            var webhookBuilder = Webhook.builder();
+            if (only instanceof String) {
+                if (!this.isEl((String) only)) {
+                    throw new IllegalArgumentException("only表达式格式错误");
+                }
+                webhookBuilder.only((String) only);
+            }
+            if (auth instanceof Map) {
+                var token = ((Map<?, ?>) auth).get("token");
+                var value = ((Map<?, ?>) auth).get("value");
+                if (token instanceof String && value instanceof String) {
+                    webhookBuilder.auth(
+                            WebhookAuth.Builder.aWebhookAuth()
+                                    .token((String) token)
+                                    .value((String) value)
+                                    .build()
+                    );
+                }
+            }
+            if (param instanceof List) {
+                var ps = ((List<?>) param).stream()
+                        .filter(p -> p instanceof Map)
+                        .map(p -> (Map<String, Object>) p)
+                        .map(p -> {
+                            var name = p.get("name");
+                            var type = p.get("type");
+                            var exp = p.get("exp");
+                            if (!(name instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数名配置错误");
+                            }
+                            if (!(type instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数类型配置错误");
+                            }
+                            if (!(exp instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数表达式配置错误");
+                            }
+                            Parameter.Type.getTypeByName((String) type);
+                            return WebhookParameter.Builder.aWebhookParameter()
+                                    .name((String) name)
+                                    .type((String) type)
+                                    .exp((String) exp)
+                                    .build();
+                        }).collect(Collectors.toList());
+                webhookBuilder.param(ps);
+            }
+            this.webhook = webhookBuilder.build();
+            this.triggerType = Project.TriggerType.WEBHOOK;
+        }
+    }
+
+    private void globalParamSyntaxCheck() {
+        var globalParam = this.global.get("param");
+        if (globalParam == null) {
+            return;
+        }
+        globalParam.forEach((k, v) -> {
+            if (v instanceof Map) {
+                var type = ((Map<String, String>) v).get("type");
+                var value = ((Map<?, ?>) v).get("value");
+                var p = Parameter.Type.getTypeByName(type).newParameter(value);
+                if (Parameter.Type.SECRET == p.getType()) {
+                    throw new DslException("全局参数不支持使用SECRET类型");
+                }
+            }
+        });
     }
 
     private void pipelineSyntaxCheck() {
         var pipe = this.pipeline;
-        if (null == pipe.get("name")) {
-            throw new RuntimeException("pipeline name未设置");
-        }
-        if (null == pipe.get("ref")) {
-            throw new RuntimeException("pipeline ref未设置");
-        }
-        this.name = (String) pipe.get("name");
-        this.ref = (String) pipe.get("ref");
-        RefChecker.check(this.ref);
-        this.description = (String) pipe.get("description");
         pipe.forEach((key, val) -> {
             if (val instanceof Map) {
                 this.checkPipeNode(key, (Map<?, ?>) val);
@@ -233,31 +437,26 @@ public class DslParser {
     }
 
     private void checkPipeNode(String nodeName, Map<?, ?> node) {
-        var type = node.get("type");
-        if (null == type) {
-            throw new RuntimeException("Node type未设置");
-        }
         // 验证保留关键字
         if (nodeName.equals("event")) {
-            throw new RuntimeException("节点名称不能使用event");
+            throw new DslException("节点名称不能使用event");
         }
         if (nodeName.equals("global")) {
-            throw new RuntimeException("节点名称不能使用global");
+            throw new DslException("节点名称不能使用global");
+        }
+        // 如果为Shell Node，不校验type
+        var image = node.get("image");
+        if (image != null) {
+            return;
+        }
+        var type = node.get("type");
+        if (null == type) {
+            throw new DslException("Node type未设置");
         }
     }
 
     private void workflowSyntaxCheck() {
         var flow = this.workflow;
-        if (null == flow.get("name")) {
-            throw new RuntimeException("workflow name未设置");
-        }
-        if (null == flow.get("ref")) {
-            throw new RuntimeException("workflow ref未设置");
-        }
-        this.name = (String) flow.get("name");
-        this.ref = (String) flow.get("ref");
-        RefChecker.check(this.ref);
-        this.description = (String) flow.get("description");
         flow.forEach((key, val) -> {
             if (val instanceof Map) {
                 this.checkNode(key, (Map<?, ?>) val);
@@ -266,9 +465,14 @@ public class DslParser {
     }
 
     private void checkNode(String nodeName, Map<?, ?> node) {
+        // 如果为Shell Node，不校验type
+        var image = node.get("image");
+        if (image != null) {
+            return;
+        }
         var type = node.get("type");
         if (null == type) {
-            throw new RuntimeException("Node type未设置");
+            throw new DslException("Node type未设置");
         }
         if (type.equals("start")) {
             this.checkStart(node);
@@ -284,10 +488,10 @@ public class DslParser {
         }
         // 验证保留关键字
         if (nodeName.equals("event")) {
-            throw new RuntimeException("节点名称不能使用event");
+            throw new DslException("节点名称不能使用event");
         }
         if (nodeName.equals("global")) {
-            throw new RuntimeException("节点名称不能使用global");
+            throw new DslException("节点名称不能使用global");
         }
         this.checkTask(nodeName, node);
     }
@@ -296,10 +500,10 @@ public class DslParser {
         var sources = node.get("sources");
         var targets = node.get("targets");
         if (!(sources instanceof List) || ((List<?>) sources).isEmpty()) {
-            throw new RuntimeException("任务节点" + nodeName + "sources未设置");
+            throw new DslException("任务节点" + nodeName + "sources未设置");
         }
         if (!(targets instanceof List) || ((List<?>) targets).isEmpty()) {
-            throw new RuntimeException("任务节点" + nodeName + "targets未设置");
+            throw new DslException("任务节点" + nodeName + "targets未设置");
         }
     }
 
@@ -307,28 +511,34 @@ public class DslParser {
         var expression = node.get("expression");
         var cases = node.get("cases");
         if (null == expression) {
-            throw new RuntimeException("条件网关expression未设置");
+            throw new DslException("条件网关expression未设置");
         }
         if (!(cases instanceof Map<?, ?>)) {
-            throw new RuntimeException("条件网关cases未设置");
+            throw new DslException("条件网关cases未设置");
         }
         if (((Map<?, ?>) cases).size() != 2) {
-            throw new RuntimeException("cases数量错误");
+            throw new DslException("cases数量错误");
         }
     }
 
     private void checkEnd(Map<?, ?> node) {
         var sources = node.get("sources");
         if (!(sources instanceof List)) {
-            throw new RuntimeException("结束节点sources未设置");
+            throw new DslException("结束节点sources未设置");
         }
     }
 
     private void checkStart(Map<?, ?> node) {
         var targets = node.get("targets");
         if (!(targets instanceof List)) {
-            throw new RuntimeException("开始节点targets未设置");
+            throw new DslException("开始节点targets未设置");
         }
+    }
+
+    private boolean isEl(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(.*\\)$");
+        Matcher matcher = pattern.matcher(paramValue);
+        return matcher.lookingAt();
     }
 
     public Set<String> getAsyncTaskTypes() {
@@ -337,9 +547,10 @@ public class DslParser {
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
                 .filter(type -> !type.equals("condition"))
+                .filter(type -> !type.startsWith("shell:"))
                 .map(type -> {
                     String[] strings = type.split(":");
-                    if (strings.length == 0) {
+                    if (strings.length == 1) {
                         return type + ":latest";
                     }
                     return type;
@@ -347,16 +558,24 @@ public class DslParser {
                 .collect(Collectors.toSet());
     }
 
+    public Project.TriggerType getTriggerType() {
+        return triggerType;
+    }
+
     public String getCron() {
         return cron;
     }
 
-    public String getEb() {
-        return eb;
+    public Map<String, Object> getTrigger() {
+        return trigger;
     }
 
-    public Map<String, String> getParam() {
-        return param;
+    public Webhook getWebhook() {
+        return webhook;
+    }
+
+    public Map<String, Map<String, Object>> getGlobal() {
+        return global;
     }
 
     public Map<String, Object> getWorkflow() {
@@ -371,10 +590,6 @@ public class DslParser {
         return name;
     }
 
-    public String getRef() {
-        return ref;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -385,5 +600,13 @@ public class DslParser {
 
     public List<DslNode> getDslNodes() {
         return dslNodes;
+    }
+
+    public List<ShellNode> getShellNodes() {
+        return shellNodes;
+    }
+
+    public Set<GlobalParameter> getGlobalParameters() {
+        return globalParameters;
     }
 }

@@ -14,7 +14,7 @@
         </jm-tooltip>
       </div>
       <div>
-        <div class="param-key">最后执行时间：</div>
+        <div class="param-key">最后完成时间：</div>
         <jm-tooltip :content="datetimeFormatter(process.endTime)" placement="bottom" effect="light">
           <div class="param-value">{{ datetimeFormatter(process.endTime) }}</div>
         </jm-tooltip>
@@ -46,15 +46,14 @@
             加载中...
           </jm-button>
         </div>
-        <jm-log-viewer id="process-log" :filename="`${process.name}.txt`" :value="processLog"
-                       :auto-scroll="processLogAutoScroll"/>
+        <jm-log-viewer :filename="`${process.name}.txt`" :value="processLog"/>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -63,29 +62,15 @@ import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkProcessLog, fetchProcessLog } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
-
-const autoHeights: {
-  [key: string]: IAutoHeight;
-} = {
-  log: {
-    elementId: 'process-log',
-    offsetTop: 250,
-  },
-};
 
 export default defineComponent({
   setup() {
-    const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const process = computed<IWorkflowExecutionRecordVo>(() => state.recordDetail.record as IWorkflowExecutionRecordVo);
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
     const executionTime = computed<string>(() => executionTimeFormatter(process.value.startTime, process.value.endTime, executing.value));
-    const processLogAutoScroll = ref<boolean>(false);
     const processLog = ref<string>('');
-
-    proxy.$nextTick(() => adaptHeight(autoHeights.log));
 
     let terminateLogLoad = false;
     const loadLog = async (retry: number) => {
@@ -101,10 +86,8 @@ export default defineComponent({
         if (contentLength > processLog.value.length) {
           // 存在更多日志
           processLog.value = await fetchProcessLog(process.value.triggerId);
-          proxy.$nextTick(() => (processLogAutoScroll.value = true));
         } else {
           console.debug('暂无更多日志');
-          processLogAutoScroll.value = false;
         }
       } catch (err) {
         if (err instanceof TimeoutError) {
@@ -124,7 +107,6 @@ export default defineComponent({
 
       if (!executing.value) {
         console.debug('流程已完成，终止获取日志');
-        processLogAutoScroll.value = false;
 
         return;
       }
@@ -147,7 +129,6 @@ export default defineComponent({
       executionTime,
       datetimeFormatter,
       processLog,
-      processLogAutoScroll,
       executing,
     };
   },
@@ -208,6 +189,7 @@ export default defineComponent({
     .log {
       margin: 16px;
       position: relative;
+      height: calc(100vh - 250px);
 
       .loading {
         position: absolute;

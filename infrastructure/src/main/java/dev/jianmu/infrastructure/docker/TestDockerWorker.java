@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedWriter;
 
 /**
- * @class: TestDockerWorker
- * @description: 测试TestDockerWorker
- * @author: Ethan Liu
- * @create: 2021-04-16 14:12
- **/
+ * @class TestDockerWorker
+ * @description 测试TestDockerWorker
+ * @author Ethan Liu
+ * @create 2021-04-16 14:12
+*/
 @Service
 @Profile("test")
 public class TestDockerWorker implements DockerWorker {
@@ -38,6 +38,11 @@ public class TestDockerWorker implements DockerWorker {
     @Override
     public void resumeTask(DockerTask dockerTask, BufferedWriter logWriter) {
         logger.info("resumeTask: {}", dockerTask);
+    }
+
+    @Override
+    public void terminateTask(String taskInstanceId) {
+        logger.info("terminateTask: {}", taskInstanceId);
     }
 
     @Override

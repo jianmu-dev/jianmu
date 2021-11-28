@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * @class: WorkerRepositoryImpl
- * @description: Worker仓储接口实现
- * @author: Ethan Liu
- * @create: 2021-04-02 12:37
- **/
+ * @class WorkerRepositoryImpl
+ * @description Worker仓储接口实现
+ * @author Ethan Liu
+ * @create 2021-04-02 12:37
+*/
 @Repository
 public class WorkerRepositoryImpl implements WorkerRepository {
     private final WorkerMapper workerMapper;

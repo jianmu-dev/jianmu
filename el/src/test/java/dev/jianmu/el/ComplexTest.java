@@ -10,11 +10,11 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @class: ComplexTest
- * @description: 复合运算测试
- * @author: Ethan Liu
- * @create: 2021-09-02 09:11
- **/
+ * @class ComplexTest
+ * @description 复合运算测试
+ * @author Ethan Liu
+ * @create 2021-09-02 09:11
+*/
 @DisplayName("复合运算测试")
 public class ComplexTest {
     private final ElContext context = new ElContext();

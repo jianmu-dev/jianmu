@@ -1,11 +1,11 @@
 package dev.jianmu.embedded.worker.aggregate.spec;
 
 /**
- * @class: Mount
- * @description: Mount
- * @author: Ethan Liu
- * @create: 2021-04-14 10:21
- **/
+ * @class Mount
+ * @description Mount
+ * @author Ethan Liu
+ * @create 2021-04-14 10:21
+*/
 public class Mount {
     private MountType type;
 

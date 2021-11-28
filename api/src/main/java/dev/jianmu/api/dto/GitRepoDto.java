@@ -11,11 +11,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
- * @class: GitRepoDto
- * @description: GitRepoDto
- * @author: Ethan Liu
- * @create: 2021-05-13 19:18
- **/
+ * @class GitRepoDto
+ * @description GitRepoDto
+ * @author Ethan Liu
+ * @create 2021-05-13 19:18
+*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

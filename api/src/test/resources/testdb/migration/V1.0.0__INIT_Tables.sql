@@ -17,20 +17,50 @@ CREATE TABLE `jianmu_project`
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `cron_trigger`
+CREATE TABLE `jianmu_trigger`
 (
-    `id`         varchar(50) NOT NULL COMMENT '触发器ID',
+    `id`         varchar(45) NOT NULL COMMENT 'ID',
     `project_id` varchar(45) NOT NULL COMMENT '项目ID',
-    `corn`       varchar(45) NOT NULL COMMENT 'Cron表达式',
+    `type`       varchar(45) NOT NULL COMMENT '触发器类型',
+    `schedule`   varchar(45) DEFAULT NULL COMMENT 'Cron表达式',
+    `webhook`    blob COMMENT 'webhook对象',
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `quartz_trigger`
+CREATE TABLE `jianmu_web_request`
 (
-    `id`         int         NOT NULL AUTO_INCREMENT COMMENT 'Quartz触发器ID',
-    `trigger_id` varchar(45) NOT NULL COMMENT '触发器ID',
-    `cron`       varchar(45) NOT NULL COMMENT 'Cron表达式',
+    `id`               varchar(45) NOT NULL COMMENT 'ID',
+    `project_id`       varchar(45) DEFAULT NULL COMMENT '项目ID',
+    `workflow_ref`     varchar(45) DEFAULT NULL COMMENT '流程Ref',
+    `workflow_version` varchar(45) DEFAULT NULL COMMENT '流程版本',
+    `trigger_id`       varchar(45) DEFAULT NULL COMMENT '触发器ID',
+    `user_agent`       text COMMENT 'UserAgent',
+    `payload`          text COMMENT '请求载荷',
+    `status_code`      varchar(45) NOT NULL COMMENT '状态枚举',
+    `error_msg`        text COMMENT '错误信息',
+    `request_time`     datetime    NOT NULL COMMENT '请求时间',
     PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `jianmu_trigger_event`
+(
+    `id`             varchar(45) NOT NULL COMMENT '事件ID',
+    `project_id`     varchar(45) NOT NULL COMMENT '项目ID',
+    `trigger_id`     varchar(45) NOT NULL COMMENT '触发器ID',
+    `web_request_id` varchar(45) DEFAULT NULL COMMENT 'WebRequest ID',
+    `trigger_type`   varchar(45) NOT NULL COMMENT '触发器类型',
+    `payload`        text COMMENT '事件载荷',
+    `occurred_time`  datetime    NOT NULL COMMENT '触发时间',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `jianmu_trigger_event_parameter`
+(
+    `trigger_event_id` varchar(45) NOT NULL COMMENT '触发器事件ID',
+    `name`             varchar(45) NOT NULL COMMENT '参数名',
+    `type`             varchar(45) NOT NULL COMMENT '参数类型',
+    `value`            text        NOT NULL COMMENT '参数值',
+    `parameter_id`     varchar(45) NOT NULL COMMENT '参数引用ID'
 );
 
 CREATE TABLE `git_repo`
@@ -106,6 +136,7 @@ CREATE TABLE `task_instance_parameter`
     `project_id`     varchar(255) NOT NULL COMMENT '项目ID',
     `ref`            varchar(45)  NOT NULL COMMENT '参数ref',
     `type`           varchar(45)  NOT NULL COMMENT '参数类型',
+    `workflow_type`  varchar(45)  NOT NULL COMMENT '流程类型',
     `parameter_id`   varchar(45)  NOT NULL COMMENT '参数引用ID'
 );
 
@@ -142,79 +173,6 @@ CREATE TABLE `secret_kv_pair`
     `kv_value`       text         NOT NULL COMMENT '参数值'
 );
 
-CREATE TABLE `eb_bridge`
-(
-    `id`                 varchar(45) NOT NULL COMMENT 'ID',
-    `name`               varchar(45) DEFAULT NULL COMMENT '名称',
-    `created_time`       datetime    DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
-    `last_modified_time` datetime    DEFAULT NULL COMMENT '最后修改时间',
-    PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `eb_source`
-(
-    `id`        varchar(45) NOT NULL COMMENT 'ID',
-    `bridge_id` varchar(45) DEFAULT NULL COMMENT 'Bridge ID',
-    `name`      varchar(45) DEFAULT NULL COMMENT '名称',
-    `type`      varchar(45) DEFAULT NULL COMMENT '类型',
-    `token`     varchar(45) DEFAULT NULL COMMENT '外部token',
-    PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `eb_target`
-(
-    `id`             varchar(45) NOT NULL COMMENT 'ID',
-    `ref`            varchar(45) DEFAULT NULL COMMENT 'Ref',
-    `bridge_id`      varchar(45) DEFAULT NULL COMMENT 'Bridge ID',
-    `name`           varchar(45) DEFAULT NULL COMMENT '名称',
-    `type`           varchar(45) DEFAULT NULL COMMENT '类型',
-    `destination_id` varchar(45) DEFAULT NULL COMMENT '目标ID',
-    PRIMARY KEY (`id`),
-    CONSTRAINT `ref_UNIQUE` UNIQUE (`ref`)
-);
-
-CREATE TABLE `eb_connection`
-(
-    `id`        varchar(255) NOT NULL COMMENT 'ID',
-    `bridge_id` varchar(45) DEFAULT NULL COMMENT 'bridge ID',
-    `source_id` varchar(45) DEFAULT NULL COMMENT 'Source ID',
-    `target_id` varchar(45) DEFAULT NULL COMMENT 'Target ID',
-    PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `eb_target_event`
-(
-    `id`                  varchar(45) NOT NULL COMMENT 'ID',
-    `source_id`           varchar(45) DEFAULT NULL COMMENT 'Source ID',
-    `source_event_id`     varchar(45) DEFAULT NULL COMMENT 'Source Event Id',
-    `connection_event_id` varchar(45) DEFAULT NULL COMMENT 'Connection Event Id',
-    `target_id`           varchar(45) DEFAULT NULL COMMENT 'Target ID',
-    `target_ref`          varchar(45) DEFAULT NULL COMMENT 'Target Ref',
-    `destination_id`      varchar(45) DEFAULT NULL COMMENT 'Destination ID',
-    `payload`             blob COMMENT 'Http payload',
-    PRIMARY KEY (`id`)
-);
-
-CREATE TABLE `eb_target_event_parameter`
-(
-    `target_event_id` varchar(45) NOT NULL COMMENT '关联Target Event ID',
-    `name`            varchar(45) NOT NULL COMMENT '名称',
-    `type`            varchar(45) NOT NULL COMMENT '类型',
-    `value`           tinytext    NOT NULL COMMENT '参数值',
-    `parameter_id`    varchar(45) NOT NULL COMMENT '关联parameter id'
-);
-
-CREATE TABLE `eb_target_transformer`
-(
-    `bridge_id`     varchar(45) NOT NULL COMMENT 'Bridge ID',
-    `target_id`     varchar(45) NOT NULL COMMENT '关联的Target ID',
-    `variable_name` varchar(45) NOT NULL COMMENT '变量名',
-    `variable_type` varchar(45) NOT NULL COMMENT '变量类型',
-    `expression`    varchar(45) NOT NULL COMMENT '表达式',
-    `class_type`    varchar(45) NOT NULL COMMENT 'Transformer类型'
-);
-
 CREATE TABLE `hub_node_definition`
 (
     `id`            varchar(45) NOT NULL COMMENT 'ID',
@@ -246,5 +204,12 @@ CREATE TABLE `hub_node_definition_version`
     `input_parameters`  blob COMMENT '输入参数列表',
     `output_parameters` blob COMMENT '输出参数列表',
     `spec`              longtext COMMENT '规格',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `shell_node_def`
+(
+    `id`         varchar(100) NOT NULL COMMENT 'ID',
+    `shell_node` text         NOT NULL COMMENT '序列化对象',
     PRIMARY KEY (`id`)
 );

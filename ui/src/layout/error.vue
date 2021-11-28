@@ -41,9 +41,9 @@ export default defineComponent({});
       position: absolute;
       left: 110px;
       top: 55px;
-      width: 130px;
-      height: 35px;
-      background-image: url('@/assets/svgs/logo/secondary.svg');
+      width: 160px;
+      height: 50px;
+      background-image: url('@/assets/svgs/logo/main.svg');
       background-repeat: no-repeat;
       background-size: contain;
     }

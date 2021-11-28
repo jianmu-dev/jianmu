@@ -18,24 +18,6 @@ export default [
       title: '组件库',
     },
   },
-  // 事件桥接器路由
-  {
-    name: 'event-bridge',
-    path: 'event-bridge',
-    component: () => import('@/views/event-bridge/manager.vue'),
-    meta: {
-      title: '事件桥接器',
-    },
-    children: [{
-      name: 'event-bridge-detail',
-      path: 'detail/:id',
-      component: () => import('@/views/event-bridge/detail.vue'),
-      props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
-      meta: {
-        title: '详情',
-      },
-    }],
-  },
   // 节点库路由
   {
     name: 'node-library',
@@ -64,90 +46,44 @@ export default [
     }],
   },
   {
-    // 任务定义路由
-    name: 'task-definition',
-    path: 'task-definition',
-    component: () => import('@/views/task-definition/manager.vue'),
-    meta: {
-      title: '任务定义',
-      auth: true,
-    },
-    children: [{
-      name: 'task-definition-version-detail',
-      path: 'detail/version',
-      component: () => import('@/views/task-definition/detail.vue'),
-      props: ({ query: { taskDefRef, taskDefVersion } }: RouteLocationNormalizedLoaded) => ({ taskDefRef, taskDefVersion }),
-      meta: {
-        title: '详情',
-      },
-    }, {
-      name: 'create-task-definition',
-      path: 'editor',
-      component: () => import('@/views/task-definition/editor.vue'),
-      meta: {
-        title: '新增',
-      },
-    }, {
-      name: 'upgrade-task-definition-version',
-      path: 'editor/upgrade',
-      component: () => import('@/views/task-definition/editor.vue'),
-      props: ({ query: { taskDefRef, taskDefVersion } }: RouteLocationNormalizedLoaded) => ({ taskDefRef, taskDefVersion }),
-      meta: {
-        title: '升级版本',
-      },
-    }],
-  },
-  {
-    // 流程定义路由
-    // name: 'workflow-definition',
-    // path: 'workflow-definition',
-    // component: () => import('@/views/workflow-definition/manager.vue'),
-    // meta: {
-    //   title: '流程定义',
-    // },
-    // children: [{
-    //   name: 'workflow-definition-detail',
-    //   path: 'detail',
-    //   component: () => import('@/views/workflow-definition/detail.vue'),
-    //   props: ({ query: { workflowRef, workflowVersion } }: RouteLocationNormalizedLoaded) => ({
-    //     workflowRef,
-    //     workflowVersion,
-    //   }),
-    //   meta: {
-    //     title: '详情',
-    //   },
-    // }, {
-    name: 'import-workflow-definition',
-    path: 'workflow-definition/importer',
-    component: () => import('@/views/workflow-definition/importer.vue'),
+    name: 'import-project',
+    path: 'project/importer',
+    component: () => import('@/views/project/importer.vue'),
     meta: {
       title: '导入项目',
     },
   }, {
-    name: 'create-workflow-definition',
-    path: 'workflow-definition/editor',
-    component: () => import('@/views/workflow-definition/editor.vue'),
+    name: 'create-project',
+    path: 'project/editor',
+    component: () => import('@/views/project/editor.vue'),
     meta: {
       title: '新增项目',
     },
   }, {
-    name: 'update-workflow-definition',
-    path: 'workflow-definition/editor/:id',
-    component: () => import('@/views/workflow-definition/editor.vue'),
+    name: 'process-template',
+    path: 'process-template',
+    component: () => import('@/views/process-template/manager.vue'),
+    props: ({
+      query: {
+        processTemplatesName,
+      },
+    }: RouteLocationNormalizedLoaded) => ({
+      processTemplatesName,
+    }),
+    meta: {
+      title: '流程模版',
+      keepAlive: true,
+    },
+  }, {
+    name: 'update-project',
+    path: 'project/editor/:id',
+    component: () => import('@/views/project/editor.vue'),
     props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
     meta: {
       title: '编辑项目',
     },
-    // }],
   },
   {
-    // 流程执行记录
-    // path: 'workflow-execution-record',
-    // component: () => import('@/views/workflow-execution-record/manager.vue'),
-    // meta: {
-    //   title: '流程执行中心',
-    // },
-    // children: [{
     name: 'workflow-execution-record-detail',
     path: 'workflow-execution-record/detail',
     component: () => import('@/views/workflow-execution-record/detail.vue'),
@@ -158,6 +94,5 @@ export default [
     meta: {
       title: '执行记录',
     },
-    // }],
   },
 ] as RouteRecordRaw[];

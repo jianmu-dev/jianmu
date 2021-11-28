@@ -40,7 +40,7 @@ export const attrs = {
   keyShape: {
     default: {
       fill: '#E5FFFF',
-      lineWidth: 2,
+      lineWidth: 1,
       stroke: '#11C2C2',
       radius: 80 * 0.242,
       shadowOffsetX: 0,

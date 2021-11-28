@@ -25,11 +25,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @class: JgitService
- * @description: JgitService
- * @author: Ethan Liu
- * @create: 2021-05-13 15:40
- **/
+ * @class JgitService
+ * @description JgitService
+ * @author Ethan Liu
+ * @create 2021-05-13 15:40
+*/
 @Service
 public class JgitService {
     private static final Logger logger = LoggerFactory.getLogger(JgitService.class);
@@ -85,6 +85,7 @@ public class JgitService {
     }
 
     public void cloneRepoWithUserAndPass(GitRepo gitRepo, String user, String pass) {
+        this.cleanUp(gitRepo.getId());
         File directory = new File(TMPDIR + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
@@ -100,12 +101,14 @@ public class JgitService {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {
             logger.error("Clone Failed:", e);
+            this.cleanUp(gitRepo.getId());
             throw new RuntimeException("克隆失败");
         }
     }
 
 
     public void cloneRepoWithSshKey(GitRepo gitRepo, String sshKey) {
+        this.cleanUp(gitRepo.getId());
         File directory = new File(TMPDIR + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
@@ -134,11 +137,13 @@ public class JgitService {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {
             logger.error("Clone Failed:", e);
+            this.cleanUp(gitRepo.getId());
             throw new RuntimeException("克隆失败");
         }
     }
 
     public void cloneRepo(GitRepo gitRepo) {
+        this.cleanUp(gitRepo.getId());
         File directory = new File(TMPDIR + gitRepo.getId());
         try (
                 Git newlyCloned = Git.cloneRepository()
@@ -159,6 +164,7 @@ public class JgitService {
             logger.info("Clone Git Repo: {} 成功", gitRepo.getUri());
         } catch (GitAPIException e) {
             logger.error("Clone Failed:", e);
+            this.cleanUp(gitRepo.getId());
             throw new RuntimeException("克隆失败");
         }
     }

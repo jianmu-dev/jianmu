@@ -4,10 +4,10 @@ import dev.jianmu.workflow.event.*;
 
 /**
  * @program: workflow
- * @description: 一个简单打印事件的领域事件订阅者
- * @author: Ethan Liu
- * @create: 2021-01-24 12:57
- **/
+ * @description 一个简单打印事件的领域事件订阅者
+ * @author Ethan Liu
+ * @create 2021-01-24 12:57
+*/
 public class PrintEventSubscriber {
     public static void sub() {
         DomainEventSubscriber<NodeActivatingEvent> nodeActivatingEventDomainEventSubscriber = event -> System.out.println(event.getName() + ": " + event.toString());

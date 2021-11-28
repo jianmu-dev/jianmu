@@ -1,13 +1,14 @@
 package dev.jianmu.worker.aggregate;
 
+import java.util.List;
 import java.util.Map;
 
 /**
- * @class: WorkerTask
- * @description: WorkerTask
- * @author: Ethan Liu
- * @create: 2021-09-10 22:17
- **/
+ * @class WorkerTask
+ * @description WorkerTask
+ * @author Ethan Liu
+ * @create 2021-09-10 22:17
+*/
 public class WorkerTask {
     private String workerId;
     private Worker.Type type;
@@ -23,6 +24,12 @@ public class WorkerTask {
     private Map<String, String> parameterMap;
     // 是否为恢复执行
     private boolean resumed;
+    // 是否为Shell类型任务
+    private boolean shellTask;
+    // 镜像名称
+    private String image;
+    // 命令列表
+    private List<String> script;
 
     public String getWorkerId() {
         return workerId;
@@ -64,6 +71,18 @@ public class WorkerTask {
         return resumed;
     }
 
+    public boolean isShellTask() {
+        return shellTask;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public List<String> getScript() {
+        return script;
+    }
+
     public static final class Builder {
         private String workerId;
         private Worker.Type type;
@@ -79,6 +98,12 @@ public class WorkerTask {
         private Map<String, String> parameterMap;
         // 是否为恢复执行
         private boolean resumed;
+        // 是否为Shell类型任务
+        private boolean shellTask;
+        // 镜像名称
+        private String image;
+        // 命令列表
+        private List<String> script;
 
         private Builder() {
         }
@@ -137,6 +162,21 @@ public class WorkerTask {
             return this;
         }
 
+        public Builder shellTask(boolean shellTask) {
+            this.shellTask = shellTask;
+            return this;
+        }
+
+        public Builder image(String image) {
+            this.image = image;
+            return this;
+        }
+
+        public Builder script(List<String> script) {
+            this.script = script;
+            return this;
+        }
+
         public WorkerTask build() {
             WorkerTask workerTask = new WorkerTask();
             workerTask.triggerId = this.triggerId;
@@ -149,6 +189,9 @@ public class WorkerTask {
             workerTask.resultFile = this.resultFile;
             workerTask.workerId = this.workerId;
             workerTask.resumed = this.resumed;
+            workerTask.shellTask = this.shellTask;
+            workerTask.image = this.image;
+            workerTask.script = this.script;
             return workerTask;
         }
     }

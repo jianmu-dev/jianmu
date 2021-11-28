@@ -4,11 +4,11 @@ package dev.jianmu.embedded.worker.aggregate;
 import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 
 /**
- * @class: DockerTask
- * @description: Docker任务封装
- * @author: Ethan Liu
- * @create: 2021-04-14 20:14
- **/
+ * @class DockerTask
+ * @description Docker任务封装
+ * @author Ethan Liu
+ * @create 2021-04-14 20:14
+*/
 public class DockerTask {
     private String taskInstanceId;
     private String businessId;

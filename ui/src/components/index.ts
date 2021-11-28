@@ -19,6 +19,7 @@ import './theme/icon/input/css/jm-icon-input.css';
 import JmLoading from './notice/loading';
 import JmMessage from './notice/message';
 import JmMessageBox from './notice/message-box';
+import JmInfiniteScroll from './infinite-scroll';
 
 export default {
   // app.use()触发install的调用
@@ -27,11 +28,16 @@ export default {
     Object.values(import.meta.globEager('./**/index.vue'))
       .concat(Object.values(import.meta.globEager('./**/index.ts')))
       // 全局注册组件
-      .forEach(({ default: component }) => app.component(component.name, component));
+      .forEach(({ default: component }) => {
+        if (!component.name) {
+          return;
+        }
+        app.component(component.name, component);
+      });
 
     // 全局注册指令
     app.directive('loading', JmLoading.directive);
-
+    app.directive('scroll', JmInfiniteScroll.directive);
     // 全局注册变量
     app.config.globalProperties.$loading = JmLoading.service;
     app.config.globalProperties.$success = JmMessage.success;

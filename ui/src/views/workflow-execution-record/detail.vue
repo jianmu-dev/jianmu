@@ -11,7 +11,7 @@
       </jm-tooltip>
       <div class="info">
         <div class="name">{{ data.record?.name }}</div>
-        <div class="desc" v-html="data.record?.description?.replaceAll('\n', '<br/>')"></div>
+        <div class="desc" v-html="data.record?.description?.replace(/\n/g, '<br/>')"></div>
       </div>
       <div v-if="!data.record?.status" class="instance-tabs">
         <div class="tab init selected">
@@ -74,8 +74,7 @@
     </div>
 
     <div class="workflow-section">
-      <jm-workflow-viewer id="workflow-execution-record-detail-workflow"
-                          :dsl="dslSourceCode"
+      <jm-workflow-viewer :dsl="dslSourceCode"
                           :trigger-type="data.record?.triggerType"
                           :node-infos="nodeInfos"
                           :tasks="data.taskRecords"
@@ -105,8 +104,9 @@
       v-model="webhookLogForm.drawerVisible"
       direction="rtl"
       destroy-on-close>
-      <webhook-log :eb-target-id="webhookLogForm.id"
+      <webhook-log :node-name="webhookLogForm.nodeName"
                    :trigger-id="webhookLogForm.triggerId"
+                   :trigger-type="webhookLogForm.triggerType"
                    :tab-type="webhookLogForm.tabType"/>
     </jm-drawer>
   </div>
@@ -118,26 +118,20 @@ import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IOpenTaskLogForm, IOpenWebhookLogForm, IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import { TaskStatusEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
+import { TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import TaskLog from '@/views/workflow-execution-record/task-log.vue';
 import ProcessLog from '@/views/workflow-execution-record/process-log.vue';
 import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
-import { INodeInfoVo, ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { executeImmediately } from '@/api/workflow-definition';
-import { adaptHeight, IAutoHeight } from '@/utils/auto-height';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { executeImmediately } from '@/api/project';
 import sleep from '@/utils/sleep';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { terminate } from '@/api/workflow-execution-record';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
-import { IProjectDetailVo } from '@/api/dto/project';
+import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 
 const { mapActions, mapMutations } = createNamespacedHelpers(namespace);
-
-const autoHeight: IAutoHeight = {
-  elementId: 'workflow-execution-record-detail-workflow',
-  offsetTop: 390,
-};
 
 export default defineComponent({
   components: { TaskLog, ProcessLog, WebhookLog },
@@ -160,7 +154,7 @@ export default defineComponent({
     });
     const webhookLogForm = ref<IOpenWebhookLogForm>({
       drawerVisible: false,
-      id: '',
+      nodeName: '',
       tabType: '',
     });
     const processLogDrawer = ref<boolean>(false);
@@ -242,8 +236,6 @@ export default defineComponent({
         proxy.mutateNavScrollLeft(0);
       }
 
-      adaptHeight(autoHeight);
-
       await loadDetail();
     });
 
@@ -268,7 +260,7 @@ export default defineComponent({
       data,
       loading,
       dslSourceCode: computed<string | undefined>(() => state.recordDetail.recordDsl),
-      nodeInfos: computed<INodeInfoVo[]>(() => state.recordDetail.nodeInfos),
+      nodeInfos: computed<INodeDefVo[]>(() => state.recordDetail.nodeInfos),
       taskLogForm,
       webhookLogForm,
       ...mapMutations({
@@ -301,10 +293,10 @@ export default defineComponent({
       datetimeFormatter,
       executionTimeFormatter,
       execute: () => {
-        const isWarning = !!data.value.project?.eventBridgeId;
+        const isWarning = data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
         let msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
-          msg += '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已关联事件桥接器，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
+          msg += '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
         }
 
         proxy.$confirm(msg, '触发项目执行', {
@@ -362,9 +354,10 @@ export default defineComponent({
       },
       openWebhookLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         webhookLogForm.value.drawerVisible = true;
-        webhookLogForm.value.id = nodeId;
+        webhookLogForm.value.nodeName = nodeId;
         webhookLogForm.value.tabType = tabType;
         webhookLogForm.value.triggerId = data.value.record?.triggerId;
+        webhookLogForm.value.triggerType = data.value.record?.triggerType;
       },
     };
   },
@@ -630,6 +623,7 @@ export default defineComponent({
 
   .workflow-section {
     background-color: #FFFFFF;
+    height: calc(100vh - 390px);
   }
 
   ::v-deep(.el-tabs__nav-scroll) {

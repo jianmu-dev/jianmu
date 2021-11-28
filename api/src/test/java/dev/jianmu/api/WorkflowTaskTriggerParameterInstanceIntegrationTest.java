@@ -2,6 +2,7 @@ package dev.jianmu.api;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.el.ExpressionLanguage;
@@ -23,11 +24,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 /**
- * @class: dev.jianmu.web.WorkflowInstanceIntegrationTest
- * @description: 流程实例集成测试类
- * @author: Ethan Liu
- * @create: 2021-03-21 19:35
- **/
+ * @class dev.jianmu.web.WorkflowInstanceIntegrationTest
+ * @description 流程实例集成测试类
+ * @author Ethan Liu
+ * @create 2021-03-21 19:35
+*/
 @SpringBootTest(classes = SpringbootApp.class)
 @ActiveProfiles("test")
 public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
@@ -36,7 +37,7 @@ public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
     @Resource
     private ExpressionLanguage expressionLanguage;
     @Resource
-    private WorkflowInstanceApplication workflowInstanceApplication;
+    private WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
 
     private static final Logger logger = LoggerFactory.getLogger(WorkflowTaskTriggerParameterInstanceIntegrationTest.class);
 
@@ -118,7 +119,7 @@ public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
 
     @Test
     void test11() {
-        this.workflowInstanceApplication.start("6e8840f303c949b09f3b50cb7ce88bad", "start_1");
+        this.workflowInstanceInternalApplication.start("6e8840f303c949b09f3b50cb7ce88bad", "start_1");
     }
 
     @Test

@@ -1,7 +1,8 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.service.ProjectApplication;
-import dev.jianmu.application.service.WorkflowInstanceApplication;
+import dev.jianmu.application.service.TriggerApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
@@ -11,30 +12,33 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * @class: DslEventHandler
- * @description: Dsl事件处理器
- * @author: Ethan Liu
- * @create: 2021-04-23 17:21
- **/
+ * @class DslEventHandler
+ * @description Dsl事件处理器
+ * @author Ethan Liu
+ * @create 2021-04-23 17:21
+*/
 @Component
 @Slf4j
 public class ProjectEventHandler {
-    private final WorkflowInstanceApplication workflowInstanceApplication;
+    private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final ProjectApplication projectApplication;
+    private final TriggerApplication triggerApplication;
 
     public ProjectEventHandler(
-            WorkflowInstanceApplication workflowInstanceApplication,
-            ProjectApplication projectApplication
+            WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
+            ProjectApplication projectApplication,
+            TriggerApplication triggerApplication
     ) {
-        this.workflowInstanceApplication = workflowInstanceApplication;
+        this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.projectApplication = projectApplication;
+        this.triggerApplication = triggerApplication;
     }
 
     @Async
     @EventListener
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
-        this.workflowInstanceApplication.createAndStart(
+        this.workflowInstanceInternalApplication.createAndStart(
                 triggerEvent.getTriggerId(),
                 triggerEvent.getTriggerType(),
                 triggerEvent.getWorkflowRef() + triggerEvent.getWorkflowVersion()
@@ -53,7 +57,8 @@ public class ProjectEventHandler {
     }
 
     @EventListener
-    // 项目删除事件
     public void handleProjectDelete(DeletedEvent deletedEvent) {
+        // 项目删除事件, 删除相关的Trigger
+        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId());
     }
 }

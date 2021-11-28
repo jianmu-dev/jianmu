@@ -2,9 +2,10 @@ import { G6Event, Graph, IBBox, IG6GraphEvent, Item } from '@antv/g6';
 import { parse } from './dsl';
 import { NodeTypeEnum } from './enumeration';
 import { TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import { INodeInfoVo, ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { size } from '@/components/workflow/workflow-viewer/shapes/async-task';
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/utils/model';
+import { INodeDefVo } from '@/api/dto/project';
 
 /**
  * 检查内容是否溢出
@@ -96,7 +97,7 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
  * @param container
  */
 export function init(dsl: string | undefined, readonly: boolean, triggerType: TriggerTypeEnum | undefined,
-  nodeInfos: INodeInfoVo[], container: HTMLElement): Graph | undefined {
+  nodeInfos: INodeDefVo[], container: HTMLElement): Graph | undefined {
   if (!dsl || !triggerType) {
     return undefined;
   }
@@ -162,7 +163,11 @@ export function init(dsl: string | undefined, readonly: boolean, triggerType: Tr
  * @param tasks
  * @param graph
  */
-export function updateNodeStates(tasks: ITaskExecutionRecordVo[], graph: Graph) {
+export function updateNodeStates(tasks: ITaskExecutionRecordVo[], graph?: Graph) {
+  if (!graph) {
+    return;
+  }
+
   graph
     .getNodes()
     .filter(node => node.getModel().type === NodeTypeEnum.ASYNC_TASK)

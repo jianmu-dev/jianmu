@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @class: PageDto
- * @description: 分页DTO
- * @author: Ethan Liu
- * @create: 2021-04-19 16:42
- **/
+ * @class PageDto
+ * @description 分页DTO
+ * @author Ethan Liu
+ * @create 2021-04-19 16:42
+*/
 @Getter
 @Setter
 @AllArgsConstructor

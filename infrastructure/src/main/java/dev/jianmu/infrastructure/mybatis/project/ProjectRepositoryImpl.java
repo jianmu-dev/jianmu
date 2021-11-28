@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @class: DslReferenceRepositoryImpl
- * @description: DSL流程定义关联仓储实现
- * @author: Ethan Liu
- * @create: 2021-04-23 11:39
- **/
+ * @class DslReferenceRepositoryImpl
+ * @description DSL流程定义关联仓储实现
+ * @author Ethan Liu
+ * @create 2021-04-23 11:39
+*/
 @Repository
 public class ProjectRepositoryImpl implements ProjectRepository {
     private final ProjectMapper projectMapper;
@@ -42,6 +42,11 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     @Override
     public Optional<Project> findById(String id) {
         return this.projectMapper.findById(id);
+    }
+
+    @Override
+    public Optional<Project> findByName(String name) {
+        return this.projectMapper.findByName(name);
     }
 
     public PageInfo<Project> findAllPage(String workflowName, int pageNum, int pageSize) {

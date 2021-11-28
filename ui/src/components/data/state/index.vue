@@ -35,7 +35,7 @@ export default defineComponent({
             sColor = '#51C41B';
             break;
           case 'warning':
-            sColor = '#FFAC00';
+            sColor = '#979797';
             break;
           case 'info':
             sColor = DEFAULT_SIGNAL_COLOR;

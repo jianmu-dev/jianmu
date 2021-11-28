@@ -141,6 +141,7 @@ export default defineComponent({
   z-index: 0;
   // 必须与codemirror主题背景保持一致
   background-color: #19253B;
+  height: 100%;
 
   &:hover {
     .operation {
@@ -178,6 +179,10 @@ export default defineComponent({
     z-index: 0;
     height: inherit;
     background-color: #19253B;
+
+    * {
+      font-family: Hiragino Sans GB, sans-serif;
+    }
 
     .CodeMirror-gutters {
       z-index: 0;

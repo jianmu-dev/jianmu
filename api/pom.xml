@@ -5,13 +5,13 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>api</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.1</version>
+    <version>2.0.0</version>
 
     <properties>
         <grpc.version>1.36.0</grpc.version>
@@ -24,16 +24,12 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>application</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <!--For Test-->
         <dependency>
@@ -66,6 +62,7 @@
     </dependencies>
 
     <build>
+        <finalName>jianmu-ci-server-${project.version}</finalName>
         <extensions>
             <extension>
                 <groupId>kr.motd.maven</groupId>
@@ -77,7 +74,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.4</version>
                 <configuration>
                     <from>
                         <image>registry://jianmudev/openjdk:11.0.11-jdk-oracle-wait-for-it</image>
@@ -178,6 +175,16 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>*.jks</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>*.jks</include>
+                </includes>
             </resource>
         </resources>
     </build>
