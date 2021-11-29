@@ -550,7 +550,7 @@ public class DslParser {
                 .filter(type -> !type.startsWith("shell:"))
                 .map(type -> {
                     String[] strings = type.split(":");
-                    if (strings.length == 0) {
+                    if (strings.length == 1) {
                         return type + ":latest";
                     }
                     return type;

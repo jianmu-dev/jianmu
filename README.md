@@ -46,3 +46,9 @@ embedded:
 这部分配置是用来开启服务内置Worker的，docker-host指向的是Docker Engine的地址和端口。
 
 默认Docker Engine是不对外开放的，因此需要自行修改配置。具体可以参考 [Docker Engine API的官方文档](https://docs.docker.com/engine/api/)
+
+[详见官方示例](https://ci.jianmu.dev)
+
+[快速开始](https://docs.jianmu.dev/guide/quick-start.html)
+
+[官网首页](https://jianmu.dev)

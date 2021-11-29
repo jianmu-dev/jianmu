@@ -24,7 +24,7 @@
             </div>
           </div>
         </div>
-        <div class="table-container">
+        <div class="table-container" v-loading="tableLoading">
           <div class="table-title">请求列表</div>
           <div class="table-content" ref="scrollRef" v-scroll.current="btnDown">
             <jm-table :data="webhookRequestList" :row-key="rowkey">
@@ -127,6 +127,8 @@ export default defineComponent({
     // webhookUrl链接
     const webhook = ref<string>();
     const noMoreFlag = ref<boolean>(false);
+    // 表格loading
+    const tableLoading = ref<boolean>(false);
     const link = computed<string | undefined>(
       () =>
         webhook.value &&
@@ -160,17 +162,20 @@ export default defineComponent({
         webhookRequestData.value = await getWebhookList(
           webhookRequestParams.value,
         );
+        // 数据请求成功取消loading
+        tableLoading.value = false;
         // 判断是否有下一页
         if (
           webhookRequestData.value.pages > webhookRequestParams.value.pageNum
         ) {
-          firstLoading.value = false;
+          noMore.value = true;
         } else {
           // 禁用显示更多
-          firstLoading.value = true;
+          noMore.value = false;
           // 打开没有更多了
           noMoreFlag.value = true;
         }
+        // 如果总数为0就不现实没有更多
         if (webhookRequestData.value.total === 0) {
           noMoreFlag.value = false;
         }
@@ -213,6 +218,10 @@ export default defineComponent({
       () => {
         drawerVisible.value = props.modelValue;
         if (drawerVisible.value) {
+          // 还原页码
+          webhookRequestParams.value.pageNum = START_PAGE_NUM;
+          // 第一次隐藏显示更多
+          noMore.value = false;
           // 获取webhook请求列表
           getWebhookRequestList('cover');
           // 获取webhookUrl
@@ -224,13 +233,13 @@ export default defineComponent({
     watch(
       () => props.currentProjectId,
       () => {
-        // 还原页码
-        webhookRequestParams.value.pageNum = START_PAGE_NUM;
         // 还原提示状态
         noMoreFlag.value = false;
         webhookRequestList.value = [];
         // 更改projectId
         webhookRequestParams.value.projectId = props.currentProjectId as string;
+        // 进入抽屉显示loading
+        tableLoading.value = true;
       },
     );
     // 一键复制
@@ -319,6 +328,7 @@ export default defineComponent({
       btnDown,
       datetimeFormatter,
       noMoreFlag,
+      tableLoading,
     };
   },
 });
