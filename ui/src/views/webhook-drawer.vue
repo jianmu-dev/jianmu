@@ -168,13 +168,14 @@ export default defineComponent({
         if (
           webhookRequestData.value.pages > webhookRequestParams.value.pageNum
         ) {
-          firstLoading.value = false;
+          noMore.value = true;
         } else {
           // 禁用显示更多
-          firstLoading.value = true;
+          noMore.value = false;
           // 打开没有更多了
           noMoreFlag.value = true;
         }
+        // 如果总数为0就不现实没有更多
         if (webhookRequestData.value.total === 0) {
           noMoreFlag.value = false;
         }
@@ -219,6 +220,8 @@ export default defineComponent({
         if (drawerVisible.value) {
           // 还原页码
           webhookRequestParams.value.pageNum = START_PAGE_NUM;
+          // 第一次隐藏显示更多
+          noMore.value = false;
           // 获取webhook请求列表
           getWebhookRequestList('cover');
           // 获取webhookUrl
