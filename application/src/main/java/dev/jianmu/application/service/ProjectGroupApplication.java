@@ -87,15 +87,17 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void updateSort(Integer originSort, Integer targetSort) {
+        var groups = this.projectGroupRepository.findAllBySortBetween(Math.min(originSort,targetSort), Math.max(originSort,targetSort));
+        if (groups.isEmpty()) {
+            return;
+        }
         if (originSort > targetSort) {
-            var groups = this.projectGroupRepository.findAllBySortBetween(targetSort, originSort);
             for (int i = 0; i < groups.size() - 1; i++) {
                 this.projectGroupRepository.updateSortById(groups.get(i).getId(), groups.get(i + 1).getSort());
             }
             this.projectGroupRepository.updateSortById(groups.get(groups.size() - 1).getId(), targetSort);
         }
         if (targetSort > originSort){
-            var groups = this.projectGroupRepository.findAllBySortBetween(originSort, targetSort);
             for (int i = 1; i < groups.size(); i++) {
                 this.projectGroupRepository.updateSortById(groups.get(i).getId(), groups.get(i - 1).getSort());
             }
@@ -148,15 +150,17 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void updateProjectSort(String projectGroupId, Integer originSort, Integer targetSort) {
+        var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId, Math.min(originSort,targetSort), Math.max(originSort,targetSort));
+        if (linkGroups.isEmpty()) {
+            return;
+        }
         if (originSort > targetSort) {
-            var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId, targetSort, originSort);
             for (int i = 0; i < linkGroups.size() - 1; i++) {
                 this.projectLinkGroupRepository.updateSortById(linkGroups.get(i).getId(), linkGroups.get(i + 1).getSort());
             }
             this.projectLinkGroupRepository.updateSortById(linkGroups.get(linkGroups.size() - 1).getId(), targetSort);
         }
         if (targetSort > originSort){
-            var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId, originSort, targetSort);
             for (int i = 1; i < linkGroups.size(); i++) {
                 this.projectLinkGroupRepository.updateSortById(linkGroups.get(i).getId(), linkGroups.get(i - 1).getSort());
             }

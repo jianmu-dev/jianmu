@@ -94,7 +94,6 @@ public interface ProjectMapper {
             "<foreach collection='projectIds' item='i'  separator=','>#{i}" +
             "</foreach>)" +
             "<if test='workflowName != null'> AND `workflow_name` like concat('%', #{workflowName}, '%')</if>" +
-            " order by sort" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
