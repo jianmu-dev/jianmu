@@ -36,13 +36,13 @@ public interface ProjectGroupMapper {
     void update(ProjectGroup projectGroup);
 
     @Update("update project_group set sort=#{sort} where id =#{id}")
-    void updateSortById(String id, Integer sort);
+    void updateSortById(@Param("id") String id, @Param("sort") Integer sort);
 
     @Select("select * from project_group where sort between #{originSort} and #{targetSort}")
     @Result(column = "project_count", property = "projectCount")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
-    List<ProjectGroup> findAllBySortBetween(Integer originSort, Integer targetSort);
+    List<ProjectGroup> findAllBySortBetween(@Param("originSort") Integer originSort, @Param("targetSort") Integer targetSort);
 
     @Select("select * from project_group order by sort desc limit 1")
     @Result(column = "project_count", property = "projectCount")
@@ -50,9 +50,9 @@ public interface ProjectGroupMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<ProjectGroup> findBySortMax();
 
-    @Update("update project_group set project_count = project_count + #{count}")
-    void addProjectCountById(String projectGroupId, int count);
+    @Update("update project_group set project_count = project_count + ${count} where id = #{projectGroupId}")
+    void addProjectCountById(@Param("projectGroupId") String projectGroupId, @Param("count") int count);
 
-    @Update("update project_group set project_count = project_count - #{count}")
-    void subProjectCountById(String projectGroupId, int count);
+    @Update("update project_group set project_count = project_count - ${count} where id = #{projectGroupId}")
+    void subProjectCountById(@Param("projectGroupId") String projectGroupId, @Param("count") int count);
 }

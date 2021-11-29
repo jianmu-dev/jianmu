@@ -19,11 +19,11 @@ public interface ProjectLinkGroupMapper {
 
     @Insert("<script>" +
             "INSERT INTO `project_link_group`(`id`, `project_id`, `project_group_id`, `sort`, `created_time`) VALUES" +
-            " <foreach collection='projectProjectGroups' item='i' separator=','>" +
+            " <foreach collection='projectLinkGroups' item='i' separator=','>" +
             "   (#{i.id}, #{i.projectId}, #{i.projectGroupId}, #{i.sort}, #{i.createdTime})" +
             " </foreach>" +
             "</script>")
-    void addAll(List<ProjectLinkGroup> projectLinkGroups);
+    void addAll(@Param("projectLinkGroups") List<ProjectLinkGroup> projectLinkGroups);
 
     @Select("select project_id from project_link_group where project_group_id = #{groupId}")
     List<String> findAllProjectIdByGroupId(String groupId);
@@ -51,17 +51,28 @@ public interface ProjectLinkGroupMapper {
             "<foreach collection='projectIds' item='i'  open='(' separator=',' close=')'>#{i}" +
             "</foreach>" +
             "</script>")
-    void deleteByGroupIdAndProjectIdIn(String projectGroupId, List<String> projectIds);
+    void deleteByGroupIdAndProjectIdIn(@Param("projectGroupId") String projectGroupId, @Param("projectIds") List<String> projectIds);
 
-    @Select("select * from project_link_group where project_group_id = #{projectGroupId} and sort between #{originSort} and #{targetSort}")
+    @Select("select * from project_link_group where project_group_id = #{projectGroupId} and sort between #{originSort} and #{targetSort} order by sort")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "project_group_id", property = "projectGroupId")
     @Result(column = "created_time", property = "createdTime")
-    List<ProjectLinkGroup> findAllByGroupIdAndSortBetween(String projectGroupId, Integer originSort, Integer targetSort);
+    List<ProjectLinkGroup> findAllByGroupIdAndSortBetween(@Param("projectGroupId") String projectGroupId,
+                                                          @Param("originSort") Integer originSort,
+                                                          @Param("targetSort") Integer targetSort);
 
     @Update("update project_link_group set sort = #{sort} where id = #{projectLinkGroupId}")
-    void updateSortById(String projectLinkGroupId, Integer sort);
+    void updateSortById(@Param("projectLinkGroupId") String projectLinkGroupId, @Param("sort") Integer sort);
 
-    @Delete("delete from project_link_group where project_id =#{projectId}")
-    void deleteByProjectId(String projectId);
+    @Select("select * from project_link_group where project_id = #{projectId}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "project_group_id", property = "projectGroupId")
+    @Result(column = "created_time", property = "createdTime")
+    Optional<ProjectLinkGroup> findByProjectId(String projectId);
+
+    @Select("select * from project_link_group where project_group_id = #{groupId} order by sort")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "project_group_id", property = "projectGroupId")
+    @Result(column = "created_time", property = "createdTime")
+    List<ProjectLinkGroup> findAllByGroupId(String groupId);
 }

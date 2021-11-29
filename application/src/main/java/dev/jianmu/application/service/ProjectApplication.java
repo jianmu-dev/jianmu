@@ -16,6 +16,7 @@ import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.GitRepoRepository;
+import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Webhook;
@@ -55,6 +56,7 @@ public class ProjectApplication {
     private final ApplicationEventPublisher publisher;
     private final JgitService jgitService;
     private final ProjectLinkGroupRepository projectLinkGroupRepository;
+    private final ProjectGroupRepository projectGroupRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -65,7 +67,7 @@ public class ProjectApplication {
             NodeDefApi nodeDefApi,
             ApplicationEventPublisher publisher,
             JgitService jgitService,
-            ProjectLinkGroupRepository projectLinkGroupRepository) {
+            ProjectLinkGroupRepository projectLinkGroupRepository, ProjectGroupRepository projectGroupRepository) {
         this.projectRepository = projectRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
@@ -75,6 +77,7 @@ public class ProjectApplication {
         this.publisher = publisher;
         this.jgitService = jgitService;
         this.projectLinkGroupRepository = projectLinkGroupRepository;
+        this.projectGroupRepository = projectGroupRepository;
     }
 
     public void trigger(String projectId, String triggerId, String triggerType) {
@@ -149,13 +152,18 @@ public class ProjectApplication {
                 .lastModifiedBy("admin")
                 .build();
         // 添加到默认分组
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
+                .map(ProjectLinkGroup::getSort)
+                .orElse(0);
         var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
                 .projectId(project.getId())
+                .sort(++sort)
                 .build();
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
         this.projectLinkGroupRepository.add(projectLinkGroup);
+        this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, 1);
         this.gitRepoRepository.add(gitRepo);
         this.jgitService.cleanUp(gitRepo.getId());
         this.workflowRepository.add(workflow);
@@ -210,13 +218,19 @@ public class ProjectApplication {
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
         // 添加到默认分组
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
+                .map(ProjectLinkGroup::getSort)
+                .orElse(0);
         var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
                 .projectId(project.getId())
+                .sort(++sort)
                 .build();
+
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
         this.projectLinkGroupRepository.add(projectLinkGroup);
+        this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }
@@ -255,7 +269,10 @@ public class ProjectApplication {
         if (running > 0) {
             throw new RuntimeException("仍有流程执行中，不能删除");
         }
-        this.projectLinkGroupRepository.deleteByProjectId(id);
+        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(id)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目分组"));
+        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
+        this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
@@ -312,8 +329,7 @@ public class ProjectApplication {
         return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
     }
 
-    public PageInfo<Project> findAllPageByProjectIdIn(int pageNum, int pageSize, String projectId, String projectName) {
-        var projectIds = this.projectLinkGroupRepository.findAllProjectIdByGroupId(projectId);
-        return this.projectRepository.findAllPageByProjectIdIn(pageNum, pageSize, projectIds, projectName);
+    public List<Project> findAllPageByProjectIdIn(List<String> projectIds, String workflowName) {
+        return this.projectRepository.findAllPageByProjectIdIn(projectIds, workflowName);
     }
 }

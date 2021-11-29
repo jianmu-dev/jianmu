@@ -18,6 +18,8 @@ public interface ProjectLinkGroupRepository {
 
     List<String> findAllProjectIdByGroupId(String groupId);
 
+    List<ProjectLinkGroup> findAllByGroupId(String groupId);
+
     Optional<ProjectLinkGroup> findByProjectGroupIdAndSortMax(String projectGroupId);
 
     void deleteByProjectGroupId(String projectGroupId);
@@ -32,5 +34,5 @@ public interface ProjectLinkGroupRepository {
 
     void updateSortById(String projectLinkGroupId, Integer sort);
 
-    void deleteByProjectId(String projectId);
+    Optional<ProjectLinkGroup> findByProjectId(String projectId);
 }

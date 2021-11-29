@@ -12,6 +12,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
+import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -27,8 +28,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -305,33 +308,45 @@ public class ViewController {
 
     @GetMapping("/v2/projects")
     @Operation(summary = "查询项目列表", description = "查询项目列表")
-    public PageInfo<ProjectVo> findProjectPage(ProjectViewingDto dto) {
-        var page = this.projectApplication.findAllPageByProjectIdIn(dto.getPageNum(), dto.getPageSize(), dto.getProjectId(), dto.getProjectName());
-        var projects = page.getList().stream().map(project -> this.instanceApplication
-                .findByRefAndSerialNoMax(project.getWorkflowRef())
-                .map(workflowInstance -> {
-                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                    projectVo.setLatestTime(workflowInstance.getEndTime());
-                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                    if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
-                        projectVo.setStatus("FAILED");
-                    }
-                    if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
-                        projectVo.setStatus("SUCCEEDED");
-                    }
-                    if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
-                        projectVo.setStartTime(workflowInstance.getStartTime());
-                        projectVo.setStatus("RUNNING");
-                    }
-                    return projectVo;
-                })
-                .orElseGet(() -> {
-                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                    return projectVo;
-                })).collect(Collectors.toList());
+    public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
+        var page = this.projectGroupApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId());
+        var projectIds = page.getList().stream().map(ProjectLinkGroup::getProjectId).collect(Collectors.toList());
+        var projects = this.projectApplication.findAllPageByProjectIdIn(projectIds, dto.getWorkflowName());
+        var projectVos = projects.stream().map(project -> {
+            var projectLinkGroup = page.getList().stream()
+                    .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
+                    .findFirst().orElse(null);
+            return this.instanceApplication
+                    .findByRefAndSerialNoMax(project.getWorkflowRef())
+                    .map(workflowInstance -> {
+                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                        projectVo.setLatestTime(workflowInstance.getEndTime());
+                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                        if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
+                            projectVo.setStatus("FAILED");
+                        }
+                        if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
+                            projectVo.setStatus("SUCCEEDED");
+                        }
+                        if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
+                            projectVo.setStartTime(workflowInstance.getStartTime());
+                            projectVo.setStatus("RUNNING");
+                        }
+                        projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
+                        projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
+                        return projectVo;
+                    })
+                    .orElseGet(() -> {
+                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                        projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
+                        projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
+                        return projectVo;
+                    });
+        }).sorted(Comparator.comparing(ProjectVo::getSort))
+                .collect(Collectors.toList());
         PageInfo<ProjectVo> pageInfo = PageUtils.pageInfo2PageInfoVo(page);
-        pageInfo.setList(projects);
+        pageInfo.setList(projectVos);
         return pageInfo;
     }
 

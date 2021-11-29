@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @class ProjectSortUpdatingDto
@@ -20,11 +20,11 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @Schema(description = "项目排序修改Dto")
 public class ProjectSortUpdatingDto {
-    @NotBlank(message = "原序号不能为空")
+    @NotNull(message = "原序号不能为空")
     @Schema(required = true, description = "原序号")
     private Integer originSort;
 
-    @NotBlank(message = "目标序号不能为空")
+    @NotNull(message = "目标序号不能为空")
     @Schema(required = true, description = "目标序号")
     private Integer targetSort;
 }

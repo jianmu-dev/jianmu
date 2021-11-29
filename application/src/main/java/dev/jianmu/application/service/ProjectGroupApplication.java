@@ -1,5 +1,6 @@
 package dev.jianmu.application.service;
 
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.mybatis.project.ProjectGroupRepositoryImpl;
@@ -67,7 +68,7 @@ public class ProjectGroupApplication {
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
-                .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
+                .orElse(0);
         List<ProjectLinkGroup> projectLinkGroups = new ArrayList<>();
         for (String projectId : projectIds) {
             projectLinkGroups.add(ProjectLinkGroup.Builder.aReference()
@@ -76,7 +77,9 @@ public class ProjectGroupApplication {
                     .sort(++sort)
                     .build());
         }
-        this.projectLinkGroupRepository.addAll(projectLinkGroups);
+        if (!projectLinkGroups.isEmpty()) {
+            this.projectLinkGroupRepository.addAll(projectLinkGroups);
+        }
         // 删除
         this.projectLinkGroupRepository.deleteByProjectGroupId(projectGroupId);
         this.projectGroupRepository.deleteById(projectGroupId);
@@ -84,12 +87,20 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void updateSort(Integer originSort, Integer targetSort) {
-        var groups = this.projectGroupRepository.findAllBySortBetween(originSort, targetSort);
-        for (int i = 1; i < groups.size() - 1; i++) {
-            this.projectGroupRepository.updateSortById(groups.get(i).getId(), groups.get(i + 1).getSort());
+        if (originSort > targetSort) {
+            var groups = this.projectGroupRepository.findAllBySortBetween(targetSort, originSort);
+            for (int i = 0; i < groups.size() - 1; i++) {
+                this.projectGroupRepository.updateSortById(groups.get(i).getId(), groups.get(i + 1).getSort());
+            }
+            this.projectGroupRepository.updateSortById(groups.get(groups.size() - 1).getId(), targetSort);
         }
-        this.projectGroupRepository.updateSortById(groups.get(0).getId(), targetSort);
-        this.projectGroupRepository.updateSortById(groups.get(groups.size() - 1).getId(), originSort);
+        if (targetSort > originSort){
+            var groups = this.projectGroupRepository.findAllBySortBetween(originSort, targetSort);
+            for (int i = 1; i < groups.size(); i++) {
+                this.projectGroupRepository.updateSortById(groups.get(i).getId(), groups.get(i - 1).getSort());
+            }
+            this.projectGroupRepository.updateSortById(groups.get(0).getId(), targetSort);
+        }
     }
 
     @Transactional
@@ -110,6 +121,7 @@ public class ProjectGroupApplication {
         // 删除默认分组中间表
         this.projectLinkGroupRepository.deleteByGroupIdAndProjectIdIn(DEFAULT_PROJECT_GROUP_ID, projectIds);
         // 修改项目组个数
+        this.projectGroupRepository.subProjectCountById(DEFAULT_PROJECT_GROUP_ID, projectIds.size());
         this.projectGroupRepository.addProjectCountById(projectGroupId, projectIds.size());
     }
 
@@ -120,7 +132,7 @@ public class ProjectGroupApplication {
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
-                .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
+                .orElse(0);
         var newProjectLinkGroup = ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
                 .projectId(projectLinkGroup.getProjectId())
@@ -136,11 +148,24 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void updateProjectSort(String projectGroupId, Integer originSort, Integer targetSort) {
-        var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId, originSort, targetSort);
-        for (int i = 1; i < linkGroups.size() - 1; i++) {
-            this.projectLinkGroupRepository.updateSortById(linkGroups.get(i).getId(), linkGroups.get(i + 1).getSort());
+        if (originSort > targetSort) {
+            var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId, targetSort, originSort);
+            for (int i = 0; i < linkGroups.size() - 1; i++) {
+                this.projectLinkGroupRepository.updateSortById(linkGroups.get(i).getId(), linkGroups.get(i + 1).getSort());
+            }
+            this.projectLinkGroupRepository.updateSortById(linkGroups.get(linkGroups.size() - 1).getId(), targetSort);
         }
-        this.projectLinkGroupRepository.updateSortById(linkGroups.get(0).getId(), targetSort);
-        this.projectLinkGroupRepository.updateSortById(linkGroups.get(linkGroups.size() - 1).getId(), originSort);
+        if (targetSort > originSort){
+            var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId, originSort, targetSort);
+            for (int i = 1; i < linkGroups.size(); i++) {
+                this.projectLinkGroupRepository.updateSortById(linkGroups.get(i).getId(), linkGroups.get(i - 1).getSort());
+            }
+            this.projectLinkGroupRepository.updateSortById(linkGroups.get(0).getId(), targetSort);
+        }
+    }
+
+    public PageInfo<ProjectLinkGroup> findPageByGroupId(int pageNum, int pageSize, String projectGroupId) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> this.projectLinkGroupRepository.findAllByGroupId(projectGroupId));
     }
 }

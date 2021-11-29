@@ -21,6 +21,6 @@ import javax.validation.constraints.NotBlank;
 @Schema(description = "项目查看Dto")
 public class ProjectViewingDto extends PageDto {
     @NotBlank(message = "项目组ID不能为空")
-    private String projectId;
-    private String projectName;
+    private String projectGroupId;
+    private String workflowName;
 }
