@@ -32,13 +32,13 @@ public interface ProjectGroupMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<ProjectGroup> findAllOrderBySort();
 
-    @Update("update project_group set name=#{name}, description=#{description}, last_modified_time=#{lastModifiedTime} where id=#{id} order by sort")
+    @Update("update project_group set name=#{name}, description=#{description}, last_modified_time=#{lastModifiedTime} where id=#{id}")
     void update(ProjectGroup projectGroup);
 
     @Update("update project_group set sort=#{sort} where id =#{id}")
     void updateSortById(@Param("id") String id, @Param("sort") Integer sort);
 
-    @Select("select * from project_group where sort between #{originSort} and #{targetSort}")
+    @Select("select * from project_group where sort between #{originSort} and #{targetSort} order by sort")
     @Result(column = "project_count", property = "projectCount")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
