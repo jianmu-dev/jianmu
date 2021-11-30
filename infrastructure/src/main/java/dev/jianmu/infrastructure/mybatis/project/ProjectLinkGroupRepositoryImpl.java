@@ -64,6 +64,9 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
 
     @Override
     public void deleteByIdIn(List<String> projectLinkGroupIds) {
+        if (projectLinkGroupIds.isEmpty()) {
+            return;
+        }
         this.projectLinkGroupMapper.deleteByIdIn(projectLinkGroupIds);
     }
 
@@ -79,6 +82,9 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
 
     @Override
     public List<ProjectLinkGroup> findAllByProjectIdIn(List<String> projectIds) {
+        if (projectIds.isEmpty()) {
+            return List.of();
+        }
         return this.projectLinkGroupMapper.findAllByProjectIdIn(projectIds);
     }
 }
