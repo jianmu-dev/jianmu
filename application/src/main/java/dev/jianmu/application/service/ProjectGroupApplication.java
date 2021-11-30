@@ -109,6 +109,11 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void addProject(String projectGroupId, List<String> projectIds) {
+        // 删除分组中间表
+        var projectLinkGroups = this.projectLinkGroupRepository.findAllByProjectIdIn(projectIds);
+        this.projectLinkGroupRepository.deleteByIdIn(projectLinkGroups.stream()
+                .map(ProjectLinkGroup::getId)
+                .collect(Collectors.toList()));
         // 添加分组中间表
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(projectGroupId)
                 .map(ProjectLinkGroup::getSort)
@@ -122,11 +127,6 @@ public class ProjectGroupApplication {
                     .build());
         }
         this.projectLinkGroupRepository.addAll(newProjectLinkGroups);
-        // 删除分组中间表
-        var projectLinkGroups = this.projectLinkGroupRepository.findAllByProjectIdIn(projectIds);
-        this.projectLinkGroupRepository.deleteByIdIn(projectLinkGroups.stream()
-                .map(ProjectLinkGroup::getId)
-                .collect(Collectors.toList()));
         // 修改项目组个数
         var groupCountMap = projectLinkGroups.stream()
                 .collect(Collectors.groupingBy(ProjectLinkGroup::getProjectGroupId, Collectors.counting()));
@@ -141,6 +141,8 @@ public class ProjectGroupApplication {
         if (projectLinkGroup.getProjectGroupId().equals(DEFAULT_PROJECT_GROUP_ID)) {
             throw new ProjectGroupException("不能删除默认分组的项目");
         }
+        // 删除分组中间表
+        this.projectLinkGroupRepository.deleteById(projectLinkGroupId);
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
@@ -151,8 +153,6 @@ public class ProjectGroupApplication {
                 .sort(++sort)
                 .build();
         this.projectLinkGroupRepository.add(newProjectLinkGroup);
-        // 删除项目组项目
-        this.projectLinkGroupRepository.deleteById(projectLinkGroupId);
         // 修改项目组个数
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, 1);

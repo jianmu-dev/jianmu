@@ -31,45 +31,45 @@ public class ProjectGroupController {
         this.projectGroupApplication = projectGroupApplication;
     }
 
-    @PostMapping("/groups")
+    @PostMapping
     @Operation(summary = "创建项目组", description = "创建项目组")
     public void createProjectGroup(@RequestBody @Valid ProjectGroupDto projectGroupDto) {
         var projectGroup = ProjectGroupDtoMapper.INSTANCE.toProjectGroup(projectGroupDto);
         this.projectGroupApplication.createProjectGroup(projectGroup);
     }
 
-    @PutMapping("/groups/{projectGroupId}")
+    @PutMapping("/{projectGroupId}")
     @Operation(summary = "编辑项目组", description = "编辑项目组")
     public void updateProjectGroup(@PathVariable String projectGroupId, @RequestBody @Valid ProjectGroupDto projectGroupDto) {
         var projectGroup = ProjectGroupDtoMapper.INSTANCE.toProjectGroup(projectGroupDto);
         this.projectGroupApplication.updateProjectGroup(projectGroupId, projectGroup);
     }
 
-    @DeleteMapping("/groups/{projectGroupId}")
+    @DeleteMapping("/{projectGroupId}")
     @Operation(summary = "删除项目组", description = "删除项目组")
     public void deleteProjectGroup(@PathVariable String projectGroupId) {
         this.projectGroupApplication.deleteById(projectGroupId);
     }
 
-    @PatchMapping("/groups/sort")
+    @PatchMapping("/sort")
     @Operation(summary = "修改项目组排序", description = "修改项目组排序")
     public void updateProjectGroupSort(@RequestBody @Valid ProjectGroupSortUpdatingDto projectGroupSortUpdatingDto) {
         this.projectGroupApplication.updateSort(projectGroupSortUpdatingDto.getOriginSort(), projectGroupSortUpdatingDto.getTargetSort());
     }
 
-    @PostMapping("/groups/projects")
+    @PostMapping("/projects")
     @Operation(summary = "项目组添加项目", description = "项目组添加项目")
     public void addProjectByGroupId(@RequestBody @Valid ProjectGroupAddingDto projectGroupAddingDto) {
         this.projectGroupApplication.addProject(projectGroupAddingDto.getProjectGroupId(), projectGroupAddingDto.getProjectIds());
     }
 
-    @DeleteMapping("/groups/projects/{projectLinkGroupId}")
+    @DeleteMapping("/projects/{projectLinkGroupId}")
     @Operation(summary = "项目组删除项目", description = "项目组删除项目")
     public void deleteProjectByGroup(@PathVariable String projectLinkGroupId) {
         this.projectGroupApplication.deleteProject(projectLinkGroupId);
     }
 
-    @PatchMapping("/groups/{projectGroupId}/projects/sort")
+    @PatchMapping("/{projectGroupId}/projects/sort")
     @Operation(summary = "修改项目组中的项目排序", description = "修改项目组中的项目排序")
     public void updateProjectSort(@PathVariable String projectGroupId, @RequestBody @Valid ProjectSortUpdatingDto projectSortUpdatingDto) {
         this.projectGroupApplication.updateProjectSort(projectGroupId, projectSortUpdatingDto.getOriginSort(), projectSortUpdatingDto.getTargetSort());
