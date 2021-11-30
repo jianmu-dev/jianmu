@@ -132,7 +132,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void importProject(GitRepo gitRepo) {
+    public void importProject(GitRepo gitRepo, String projectGroupId) {
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
@@ -152,18 +152,25 @@ public class ProjectApplication {
                 .lastModifiedBy("admin")
                 .build();
         // 添加到默认分组
-        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
+        String groupId;
+        if (projectGroupId != null) {
+            this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
+            groupId = projectGroupId;
+        }else {
+            groupId = DEFAULT_PROJECT_GROUP_ID;
+        }
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(groupId)
                 .map(ProjectLinkGroup::getSort)
                 .orElse(-1);
         var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
-                .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
+                .projectGroupId(groupId)
                 .projectId(project.getId())
                 .sort(++sort)
                 .build();
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
         this.projectLinkGroupRepository.add(projectLinkGroup);
-        this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, 1);
+        this.projectGroupRepository.addProjectCountById(groupId, 1);
         this.gitRepoRepository.add(gitRepo);
         this.jgitService.cleanUp(gitRepo.getId());
         this.workflowRepository.add(workflow);
@@ -198,7 +205,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void createProject(String dslText) {
+    public void createProject(String dslText, String projectGroupId) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -217,12 +224,19 @@ public class ProjectApplication {
                 .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
-        // 添加到默认分组
-        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
+        // 添加分组
+        String groupId;
+        if (projectGroupId != null) {
+            this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
+            groupId = projectGroupId;
+        }else {
+            groupId = DEFAULT_PROJECT_GROUP_ID;
+        }
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(groupId)
                 .map(ProjectLinkGroup::getSort)
                 .orElse(-1);
         var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
-                .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
+                .projectGroupId(groupId)
                 .projectId(project.getId())
                 .sort(++sort)
                 .build();
@@ -230,7 +244,7 @@ public class ProjectApplication {
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
         this.projectLinkGroupRepository.add(projectLinkGroup);
-        this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, 1);
+        this.projectGroupRepository.addProjectCountById(groupId, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }

@@ -43,14 +43,14 @@ public class ProjectController {
     @PostMapping
     @Operation(summary = "创建项目", description = "上传DSL并创建项目")
     public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
-        this.projectApplication.createProject(dslTextDto.getDslText());
+        this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId());
     }
 
     @PostMapping("/import")
     @Operation(summary = "导入DSL", description = "导入Git库中的DSL文件创建项目")
     public void importDsl(@RequestBody @Validated(AddGroup.class) GitRepoDto gitRepoDto) {
         var gitRepo = GitRepoMapper.INSTANCE.toGitRepo(gitRepoDto);
-        this.projectApplication.importProject(gitRepo);
+        this.projectApplication.importProject(gitRepo, gitRepoDto.getProjectGroupId());
     }
 
     @PutMapping("/{projectId}")
