@@ -2,6 +2,7 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.dto.ProjectViewingDto;
 import dev.jianmu.api.mapper.ProjectMapper;
 import dev.jianmu.api.mapper.TaskInstanceMapper;
 import dev.jianmu.api.mapper.WorkflowInstanceMapper;
@@ -11,6 +12,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
+import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -26,10 +28,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
 
 /**
  * @author Ethan Liu
@@ -50,6 +56,7 @@ public class ViewController {
     private final TaskInstanceApplication taskInstanceApplication;
     private final ParameterApplication parameterApplication;
     private final StorageService storageService;
+    private final ProjectGroupApplication projectGroupApplication;
 
     public ViewController(
             ProjectApplication projectApplication,
@@ -60,8 +67,8 @@ public class ViewController {
             WorkflowInstanceApplication instanceApplication,
             TaskInstanceApplication taskInstanceApplication,
             ParameterApplication parameterApplication,
-            StorageService storageService
-    ) {
+            StorageService storageService,
+            ProjectGroupApplication projectGroupApplication) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.workflowInstanceApplication = workflowInstanceApplication;
@@ -71,6 +78,7 @@ public class ViewController {
         this.taskInstanceApplication = taskInstanceApplication;
         this.parameterApplication = parameterApplication;
         this.storageService = storageService;
+        this.projectGroupApplication = projectGroupApplication;
     }
 
     @GetMapping("/parameters/types")
@@ -296,5 +304,86 @@ public class ViewController {
                 .ok()
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(new FileSystemResource(this.storageService.workflowLogFile(logId)));
+    }
+
+    @GetMapping("/v2/projects")
+    @Operation(summary = "查询项目列表", description = "查询项目列表")
+    public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
+        var page = this.projectGroupApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId());
+        var projectIds = page.getList().stream().map(ProjectLinkGroup::getProjectId).collect(Collectors.toList());
+        var projects = this.projectApplication.findAllPageByProjectIdIn(projectIds, dto.getWorkflowName());
+        var projectVos = projects.stream().map(project -> {
+            var projectLinkGroup = page.getList().stream()
+                    .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
+                    .findFirst().orElse(null);
+            return this.instanceApplication
+                    .findByRefAndSerialNoMax(project.getWorkflowRef())
+                    .map(workflowInstance -> {
+                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                        projectVo.setLatestTime(workflowInstance.getEndTime());
+                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                        if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
+                            projectVo.setStatus("FAILED");
+                        }
+                        if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
+                            projectVo.setStatus("SUCCEEDED");
+                        }
+                        if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
+                            projectVo.setStartTime(workflowInstance.getStartTime());
+                            projectVo.setStatus("RUNNING");
+                        }
+                        projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
+                        projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
+                        return projectVo;
+                    })
+                    .orElseGet(() -> {
+                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                        projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
+                        projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
+                        return projectVo;
+                    });
+        }).sorted(Comparator.comparing(ProjectVo::getSort))
+                .collect(Collectors.toList());
+        PageInfo<ProjectVo> pageInfo = PageUtils.pageInfo2PageInfoVo(page);
+        pageInfo.setList(projectVos);
+        return pageInfo;
+    }
+
+    @GetMapping("/projects/groups")
+    @Operation(summary = "查询项目组列表", description = "查询项目组列表")
+    public PageInfo<ProjectGroupVo> findProjectGroupPage(PageDto dto) {
+        var pageInfo = this.projectGroupApplication.findPage(dto.getPageNum(), dto.getPageSize());
+        var projectGroupVos = pageInfo.getList().stream()
+                .map(projectGroup -> ProjectGroupVo.builder()
+                        .id(projectGroup.getId())
+                        .name(projectGroup.getName())
+                        .description(projectGroup.getDescription())
+                        .sort(projectGroup.getSort())
+                        .projectCount(projectGroup.getProjectCount())
+                        .createdTime(projectGroup.getCreatedTime())
+                        .lastModifiedTime(projectGroup.getLastModifiedTime())
+                        .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
+                        .build())
+                .collect(Collectors.toList());
+        PageInfo<ProjectGroupVo> pageInfoVo = PageUtils.pageInfo2PageInfoVo(pageInfo);
+        pageInfoVo.setList(projectGroupVos);
+        return pageInfoVo;
+    }
+
+    @GetMapping("/projects/groups/{projectGroupId}")
+    @Operation(summary = "查询项目组详情", description = "查询项目组详情")
+    public ProjectGroupVo findProjectDetail(@PathVariable String projectGroupId) {
+        var projectGroup = this.projectGroupApplication.findById(projectGroupId);
+        return ProjectGroupVo.builder()
+                .id(projectGroup.getId())
+                .name(projectGroup.getName())
+                .description(projectGroup.getDescription())
+                .sort(projectGroup.getSort())
+                .projectCount(projectGroup.getProjectCount())
+                .createdTime(projectGroup.getCreatedTime())
+                .lastModifiedTime(projectGroup.getLastModifiedTime())
+                .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
+                .build();
     }
 }

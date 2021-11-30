@@ -1,5 +1,6 @@
 package dev.jianmu.application.service;
 
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.event.CronEvent;
 import dev.jianmu.application.event.ManualEvent;
@@ -10,10 +11,13 @@ import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.GitRepoRepository;
+import dev.jianmu.project.repository.ProjectGroupRepository;
+import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
@@ -31,12 +35,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_ID;
+
 /**
+ * @author Ethan Liu
  * @class ProjectApplication
  * @description ProjectApplication
- * @author Ethan Liu
  * @create 2021-05-15 22:13
-*/
+ */
 @Service
 public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
@@ -49,6 +55,8 @@ public class ProjectApplication {
     private final NodeDefApi nodeDefApi;
     private final ApplicationEventPublisher publisher;
     private final JgitService jgitService;
+    private final ProjectLinkGroupRepository projectLinkGroupRepository;
+    private final ProjectGroupRepository projectGroupRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -58,8 +66,8 @@ public class ProjectApplication {
             TaskInstanceRepository taskInstanceRepository,
             NodeDefApi nodeDefApi,
             ApplicationEventPublisher publisher,
-            JgitService jgitService
-    ) {
+            JgitService jgitService,
+            ProjectLinkGroupRepository projectLinkGroupRepository, ProjectGroupRepository projectGroupRepository) {
         this.projectRepository = projectRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
@@ -68,6 +76,8 @@ public class ProjectApplication {
         this.nodeDefApi = nodeDefApi;
         this.publisher = publisher;
         this.jgitService = jgitService;
+        this.projectLinkGroupRepository = projectLinkGroupRepository;
+        this.projectGroupRepository = projectGroupRepository;
     }
 
     public void trigger(String projectId, String triggerId, String triggerType) {
@@ -141,8 +151,19 @@ public class ProjectApplication {
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .lastModifiedBy("admin")
                 .build();
+        // 添加到默认分组
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
+                .map(ProjectLinkGroup::getSort)
+                .orElse(-1);
+        var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
+                .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
+                .projectId(project.getId())
+                .sort(++sort)
+                .build();
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
+        this.projectLinkGroupRepository.add(projectLinkGroup);
+        this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, 1);
         this.gitRepoRepository.add(gitRepo);
         this.jgitService.cleanUp(gitRepo.getId());
         this.workflowRepository.add(workflow);
@@ -196,9 +217,20 @@ public class ProjectApplication {
                 .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
+        // 添加到默认分组
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
+                .map(ProjectLinkGroup::getSort)
+                .orElse(-1);
+        var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
+                .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
+                .projectId(project.getId())
+                .sort(++sort)
+                .build();
 
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
+        this.projectLinkGroupRepository.add(projectLinkGroup);
+        this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }
@@ -237,6 +269,10 @@ public class ProjectApplication {
         if (running > 0) {
             throw new RuntimeException("仍有流程执行中，不能删除");
         }
+        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(id)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目分组"));
+        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
+        this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
@@ -291,5 +327,9 @@ public class ProjectApplication {
 
     public GitRepo findGitRepoById(String gitRepoId) {
         return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
+    }
+
+    public List<Project> findAllPageByProjectIdIn(List<String> projectIds, String workflowName) {
+        return this.projectRepository.findAllPageByProjectIdIn(projectIds, workflowName);
     }
 }
