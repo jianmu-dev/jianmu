@@ -71,6 +71,9 @@ public class ProjectGroupRepositoryImpl implements ProjectGroupRepository {
 
     @Override
     public void deleteByIdIn(List<String> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
         this.projectGroupMapper.deleteByIdIn(ids);
     }
 

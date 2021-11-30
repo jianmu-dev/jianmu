@@ -59,6 +59,9 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     public List<Project> findAllPageByProjectIdIn(List<String> projectIds, String projectName) {
+        if (projectIds.isEmpty()) {
+            return List.of();
+        }
         return this.projectMapper.findAllByProjectIdIn(projectIds,projectName);
     }
 }
