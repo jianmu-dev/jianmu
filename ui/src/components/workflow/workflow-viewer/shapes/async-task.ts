@@ -11,6 +11,7 @@ import AsyncTaskRunningAnimation, {
 } from '../animations/async-task-running-animation';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
+import { SHELL_NODE_TYPE } from '../utils/model';
 
 export const size = {
   width: 80,
@@ -169,7 +170,7 @@ export default function (G6: typeof _G6) {
       afterDraw(cfg, group) {
         const width = 82;
         const height = 82;
-        const { iconUrl } = group?.cfg.item.getModel();
+        const { iconUrl, uniqueKey } = group?.cfg.item.getModel();
 
         if (!iconUrl) {
           const width = 44;
@@ -192,7 +193,7 @@ export default function (G6: typeof _G6) {
               y: -height / 2,
               width,
               height,
-              img: `${iconUrl}?roundPic/radius/!25.5p`,
+              img: `${iconUrl}${uniqueKey === SHELL_NODE_TYPE ? '' : '?roundPic/radius/!25.5p'}`,
             },
             name: 'async_task_icon',
           });
