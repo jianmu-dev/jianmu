@@ -73,11 +73,6 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
     }
 
     @Override
-    public void updateSortById(String projectLinkGroupId, Integer sort) {
-        this.projectLinkGroupMapper.updateSortById(projectLinkGroupId, sort);
-    }
-
-    @Override
     public Optional<ProjectLinkGroup> findByProjectId(String projectId) {
         return this.projectLinkGroupMapper.findByProjectId(projectId);
     }

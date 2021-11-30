@@ -61,9 +61,6 @@ public interface ProjectLinkGroupMapper {
                                                           @Param("originSort") Integer originSort,
                                                           @Param("targetSort") Integer targetSort);
 
-    @Update("update project_link_group set sort = #{sort} where id = #{projectLinkGroupId}")
-    void updateSortById(@Param("projectLinkGroupId") String projectLinkGroupId, @Param("sort") Integer sort);
-
     @Select("select * from project_link_group where project_id = #{projectId}")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "project_group_id", property = "projectGroupId")
