@@ -28,11 +28,13 @@ public interface ProjectLinkGroupRepository {
 
     void deleteById(String projectLinkGroupId);
 
-    void deleteByGroupIdAndProjectIdIn(String projectGroupId, List<String> projectIds);
+    void deleteByIdIn(List<String> projectLinkGroupIds);
 
     List<ProjectLinkGroup> findAllByGroupIdAndSortBetween(String projectGroupId, Integer originSort, Integer targetSort);
 
     void updateSortById(String projectLinkGroupId, Integer sort);
 
     Optional<ProjectLinkGroup> findByProjectId(String projectId);
+
+    List<ProjectLinkGroup> findAllByProjectIdIn(List<String> projectIds);
 }

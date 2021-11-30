@@ -3,6 +3,7 @@ package dev.jianmu.application.service;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.ProjectGroupException;
 import dev.jianmu.infrastructure.mybatis.project.ProjectGroupRepositoryImpl;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Daihw
@@ -45,7 +47,7 @@ public class ProjectGroupApplication {
     public void createProjectGroup(ProjectGroup projectGroup) {
         var sort = this.projectGroupRepository.findBySortMax()
                 .map(ProjectGroup::getSort)
-                .orElse(0);
+                .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
         projectGroup.setProjectNumber(0);
         projectGroup.setSort(++sort);
         projectGroup.setLastModifiedTime();
@@ -68,7 +70,7 @@ public class ProjectGroupApplication {
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
-                .orElse(0);
+                .orElse(-1);
         List<ProjectLinkGroup> projectLinkGroups = new ArrayList<>();
         for (String projectId : projectIds) {
             projectLinkGroups.add(ProjectLinkGroup.Builder.aReference()
@@ -110,20 +112,25 @@ public class ProjectGroupApplication {
         // 添加分组中间表
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(projectGroupId)
                 .map(ProjectLinkGroup::getSort)
-                .orElse(0);
-        var projectLinkGroups = new ArrayList<ProjectLinkGroup>();
+                .orElse(-1);
+        var newProjectLinkGroups = new ArrayList<ProjectLinkGroup>();
         for (String projectId : projectIds) {
-            projectLinkGroups.add(ProjectLinkGroup.Builder.aReference()
+            newProjectLinkGroups.add(ProjectLinkGroup.Builder.aReference()
                     .projectGroupId(projectGroupId)
                     .projectId(projectId)
                     .sort(++sort)
                     .build());
         }
-        this.projectLinkGroupRepository.addAll(projectLinkGroups);
-        // 删除默认分组中间表
-        this.projectLinkGroupRepository.deleteByGroupIdAndProjectIdIn(DEFAULT_PROJECT_GROUP_ID, projectIds);
+        this.projectLinkGroupRepository.addAll(newProjectLinkGroups);
+        // 删除分组中间表
+        var projectLinkGroups = this.projectLinkGroupRepository.findAllByProjectIdIn(projectIds);
+        this.projectLinkGroupRepository.deleteByIdIn(projectLinkGroups.stream()
+                .map(ProjectLinkGroup::getId)
+                .collect(Collectors.toList()));
         // 修改项目组个数
-        this.projectGroupRepository.subProjectCountById(DEFAULT_PROJECT_GROUP_ID, projectIds.size());
+        var groupCountMap = projectLinkGroups.stream()
+                .collect(Collectors.groupingBy(ProjectLinkGroup::getProjectGroupId, Collectors.counting()));
+        groupCountMap.forEach((key, value) -> this.projectGroupRepository.subProjectCountById(key, Math.toIntExact(value)));
         this.projectGroupRepository.addProjectCountById(projectGroupId, projectIds.size());
     }
 
@@ -131,10 +138,13 @@ public class ProjectGroupApplication {
     public void deleteProject(String projectLinkGroupId) {
         var projectLinkGroup = this.projectLinkGroupRepository.findById(projectLinkGroupId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目组中的项目"));
+        if (projectLinkGroup.getProjectGroupId().equals(DEFAULT_PROJECT_GROUP_ID)) {
+            throw new ProjectGroupException("不能删除默认分组的项目");
+        }
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
-                .orElse(0);
+                .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
         var newProjectLinkGroup = ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
                 .projectId(projectLinkGroup.getProjectId())

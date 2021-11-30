@@ -260,13 +260,14 @@ CREATE TABLE `project_group`
     `created_time`       datetime    NOT NULL COMMENT '创建时间',
     `last_modified_time` datetime    NOT NULL COMMENT '最后修改时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `name_UNIQUE` (`name`)
+    UNIQUE KEY `name_UNIQUE` (`name`),
+    UNIQUE KEY `sort_UNIQUE` (`sort`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目组表';
 
 INSERT INTO `project_group`(`id`, `name`, `description`, `sort`, `project_count`, `created_time`, `last_modified_time`)
-VALUES ("1", "默认分组", "默认分组", 1, 0, now(), now());
+VALUES ("1", "默认分组", "默认分组", 0, 0, now(), now());
 
 CREATE TABLE `project_link_group`
 (
@@ -276,7 +277,8 @@ CREATE TABLE `project_link_group`
     `sort`             int         NOT NULL COMMENT '排序',
     `created_time`     datetime    NOT NULL COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `project_group_UNIQUE` (`project_id`,`project_group_id`)
+    UNIQUE KEY `project_UNIQUE` (`project_id`),
+    UNIQUE KEY `project_sort_UNIQUE` (`project_id`,`sort`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目-项目组中间表';

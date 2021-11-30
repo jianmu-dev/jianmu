@@ -154,7 +154,7 @@ public class ProjectApplication {
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
-                .orElse(0);
+                .orElse(-1);
         var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
                 .projectId(project.getId())
@@ -220,7 +220,7 @@ public class ProjectApplication {
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
-                .orElse(0);
+                .orElse(-1);
         var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(DEFAULT_PROJECT_GROUP_ID)
                 .projectId(project.getId())

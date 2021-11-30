@@ -63,8 +63,8 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
     }
 
     @Override
-    public void deleteByGroupIdAndProjectIdIn(String projectGroupId, List<String> projectIds) {
-        this.projectLinkGroupMapper.deleteByGroupIdAndProjectIdIn(projectGroupId, projectIds);
+    public void deleteByIdIn(List<String> projectLinkGroupIds) {
+        this.projectLinkGroupMapper.deleteByIdIn(projectLinkGroupIds);
     }
 
     @Override
@@ -80,5 +80,10 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
     @Override
     public Optional<ProjectLinkGroup> findByProjectId(String projectId) {
         return this.projectLinkGroupMapper.findByProjectId(projectId);
+    }
+
+    @Override
+    public List<ProjectLinkGroup> findAllByProjectIdIn(List<String> projectIds) {
+        return this.projectLinkGroupMapper.findAllByProjectIdIn(projectIds);
     }
 }

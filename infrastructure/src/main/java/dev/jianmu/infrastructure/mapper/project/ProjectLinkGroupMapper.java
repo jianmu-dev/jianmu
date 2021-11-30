@@ -47,11 +47,11 @@ public interface ProjectLinkGroupMapper {
     void deleteById(String projectLinkGroupId);
 
     @Delete("<script>" +
-            "DELETE FROM `project_link_group` WHERE `project_group_id` = #{projectGroupId} AND `project_id` IN " +
-            "<foreach collection='projectIds' item='i'  open='(' separator=',' close=')'>#{i}" +
+            "DELETE FROM `project_link_group` WHERE `id` IN " +
+            "<foreach collection='projectLinkGroupIds' item='i'  open='(' separator=',' close=')'>#{i}" +
             "</foreach>" +
             "</script>")
-    void deleteByGroupIdAndProjectIdIn(@Param("projectGroupId") String projectGroupId, @Param("projectIds") List<String> projectIds);
+    void deleteByIdIn(@Param("projectLinkGroupIds") List<String> projectLinkGroupIds);
 
     @Select("select * from project_link_group where project_group_id = #{projectGroupId} and sort between #{originSort} and #{targetSort} order by sort")
     @Result(column = "project_id", property = "projectId")
@@ -75,4 +75,14 @@ public interface ProjectLinkGroupMapper {
     @Result(column = "project_group_id", property = "projectGroupId")
     @Result(column = "created_time", property = "createdTime")
     List<ProjectLinkGroup> findAllByGroupId(String groupId);
+
+    @Select("<script>" +
+            "SELECT * FROM `project_link_group` where `project_id` IN " +
+            "<foreach collection='projectIds' item='i'  open='(' separator=',' close=')'>#{i}" +
+            "</foreach>" +
+            "</script>")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "project_group_id", property = "projectGroupId")
+    @Result(column = "created_time", property = "createdTime")
+    List<ProjectLinkGroup> findAllByProjectIdIn(@Param("projectIds") List<String> projectIds);
 }

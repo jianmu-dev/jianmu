@@ -1,11 +1,11 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.api.dto.*;
+import dev.jianmu.api.dto.AddGroup;
+import dev.jianmu.api.dto.DslTextDto;
+import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
-import dev.jianmu.api.mapper.ProjectGroupDtoMapper;
 import dev.jianmu.application.service.GitApplication;
 import dev.jianmu.application.service.ProjectApplication;
-import dev.jianmu.application.service.ProjectGroupApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,14 +28,10 @@ import javax.validation.Valid;
 public class ProjectController {
     private final ProjectApplication projectApplication;
     private final GitApplication gitApplication;
-    private final ProjectGroupApplication projectGroupApplication;
 
-    public ProjectController(ProjectApplication projectApplication,
-                             GitApplication gitApplication,
-                             ProjectGroupApplication projectGroupApplication) {
+    public ProjectController(ProjectApplication projectApplication, GitApplication gitApplication) {
         this.projectApplication = projectApplication;
         this.gitApplication = gitApplication;
-        this.projectGroupApplication = projectGroupApplication;
     }
 
     @PostMapping("/trigger/{projectId}")
@@ -73,49 +69,5 @@ public class ProjectController {
     @Operation(summary = "删除项目", description = "删除项目")
     public void deleteById(@PathVariable String projectId) {
         this.projectApplication.deleteById(projectId);
-    }
-
-    @PostMapping("/groups")
-    @Operation(summary = "创建项目组", description = "创建项目组")
-    public void createProjectGroup(@RequestBody @Valid ProjectGroupDto projectGroupDto) {
-        var projectGroup = ProjectGroupDtoMapper.INSTANCE.toProjectGroup(projectGroupDto);
-        this.projectGroupApplication.createProjectGroup(projectGroup);
-    }
-
-    @PutMapping("/groups/{projectGroupId}")
-    @Operation(summary = "编辑项目组", description = "编辑项目组")
-    public void updateProjectGroup(@PathVariable String projectGroupId, @RequestBody @Valid ProjectGroupDto projectGroupDto) {
-        var projectGroup = ProjectGroupDtoMapper.INSTANCE.toProjectGroup(projectGroupDto);
-        this.projectGroupApplication.updateProjectGroup(projectGroupId, projectGroup);
-    }
-
-    @DeleteMapping("/groups/{projectGroupId}")
-    @Operation(summary = "删除项目组", description = "删除项目组")
-    public void deleteProjectGroup(@PathVariable String projectGroupId) {
-        this.projectGroupApplication.deleteById(projectGroupId);
-    }
-
-    @PutMapping("/groups/sort")
-    @Operation(summary = "修改项目组排序", description = "修改项目组排序")
-    public void updateProjectGroupSort(@RequestBody @Valid ProjectGroupSortUpdatingDto projectGroupSortUpdatingDto) {
-        this.projectGroupApplication.updateSort(projectGroupSortUpdatingDto.getOriginSort(), projectGroupSortUpdatingDto.getTargetSort());
-    }
-
-    @PostMapping("/groups/projects")
-    @Operation(summary = "项目组添加项目", description = "项目组添加项目")
-    public void addProjectByGroupId(@RequestBody @Valid ProjectGroupAddingDto projectGroupAddingDto) {
-        this.projectGroupApplication.addProject(projectGroupAddingDto.getProjectGroupId(), projectGroupAddingDto.getProjectIds());
-    }
-
-    @DeleteMapping("/groups/projects/{projectLinkGroupId}")
-    @Operation(summary = "项目组删除项目", description = "项目组删除项目")
-    public void deleteProjectByGroup(@PathVariable String projectLinkGroupId) {
-        this.projectGroupApplication.deleteProject(projectLinkGroupId);
-    }
-
-    @PostMapping("/groups/{projectGroupId}/projects/sort")
-    @Operation(summary = "修改项目组中的项目排序", description = "修改项目组中的项目排序")
-    public void updateProjectSort(@PathVariable String projectGroupId, @RequestBody @Valid ProjectSortUpdatingDto projectSortUpdatingDto) {
-        this.projectGroupApplication.updateProjectSort(projectGroupId, projectSortUpdatingDto.getOriginSort(), projectSortUpdatingDto.getTargetSort());
     }
 }
