@@ -17,6 +17,14 @@ public interface ProjectGroupMapper {
             "values(#{id}, #{name}, #{description}, #{sort}, #{projectCount}, #{createdTime}, #{lastModifiedTime})")
     void add(ProjectGroup projectGroup);
 
+    @Insert("<script>" +
+            "INSERT INTO `project_group`(`id`, `name`, `description`, `sort`, `project_count`, `created_time`, `last_modified_time`) VALUES" +
+            " <foreach collection='projectGroups' item='i' separator=','>" +
+            "   (#{i.id}, #{i.name}, #{i.description}, #{i.sort}, #{i.projectCount}, #{i.createdTime}, #{i.lastModifiedTime})" +
+            " </foreach>" +
+            "</script>")
+    void addAll(@Param("projectGroups") List<ProjectGroup> projectGroups);
+
     @Delete("delete from project_group where id = #{id}")
     void deleteById(String id);
 
@@ -35,9 +43,6 @@ public interface ProjectGroupMapper {
     @Update("update project_group set name=#{name}, description=#{description}, last_modified_time=#{lastModifiedTime} where id=#{id}")
     void update(ProjectGroup projectGroup);
 
-    @Update("update project_group set sort=#{sort} where id =#{id}")
-    void updateSortById(@Param("id") String id, @Param("sort") Integer sort);
-
     @Select("select * from project_group where sort between #{originSort} and #{targetSort} order by sort")
     @Result(column = "project_count", property = "projectCount")
     @Result(column = "created_time", property = "createdTime")
@@ -55,4 +60,11 @@ public interface ProjectGroupMapper {
 
     @Update("update project_group set project_count = project_count - ${count} where id = #{projectGroupId}")
     void subProjectCountById(@Param("projectGroupId") String projectGroupId, @Param("count") int count);
+
+    @Delete("<script>" +
+            "DELETE FROM `project_group` WHERE `id` IN " +
+            "<foreach collection='ids' item='i'  open='(' separator=',' close=')'>#{i}" +
+            "</foreach>" +
+            "</script>")
+    void deleteByIdIn(@Param("ids") List<String> ids);
 }

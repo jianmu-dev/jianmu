@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface ProjectGroupRepository {
     void add(ProjectGroup projectGroup);
 
+    void addAll(List<ProjectGroup> projectGroups);
+
     void deleteById(String id);
 
     Optional<ProjectGroup> findById(String id);
@@ -23,11 +25,11 @@ public interface ProjectGroupRepository {
 
     List<ProjectGroup> findAllBySortBetween(Integer originSort, Integer targetSort);
 
-    void updateSortById(String id, Integer sort);
-
     Optional<ProjectGroup> findBySortMax();
 
     void addProjectCountById(String projectGroupId, int count);
 
     void subProjectCountById(String projectGroupId, int count);
+
+    void deleteByIdIn(List<String> ids);
 }

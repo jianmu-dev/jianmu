@@ -21,7 +21,7 @@ public class ProjectGroup {
     // 项目数
     private Integer projectCount = 0;
     // 创建时间
-    private final LocalDateTime createdTime = LocalDateTime.now();
+    private LocalDateTime createdTime = LocalDateTime.now();
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
 
@@ -37,7 +37,7 @@ public class ProjectGroup {
         this.sort = sort;
     }
 
-    public void setProjectNumber(Integer projectCount) {
+    public void setProjectCount(Integer projectCount) {
         this.projectCount = projectCount;
     }
 
@@ -61,7 +61,7 @@ public class ProjectGroup {
         return sort;
     }
 
-    public Integer getProjectNumber() {
+    public Integer getProjectCount() {
         return projectCount;
     }
 
@@ -71,5 +71,63 @@ public class ProjectGroup {
 
     public LocalDateTime getLastModifiedTime() {
         return lastModifiedTime;
+    }
+
+    public static class Builder{
+        private String id;
+        private String name;
+        private String description;
+        private Integer sort;
+        private Integer projectCount;
+        private LocalDateTime createdTime;
+
+        public Builder() {
+        }
+
+        public static Builder aReference() {
+            return new Builder();
+        }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder sort(Integer sort) {
+            this.sort = sort;
+            return this;
+        }
+
+        public Builder projectCount(Integer projectCount) {
+            this.projectCount = projectCount;
+            return this;
+        }
+
+        public Builder createdTime(LocalDateTime createdTime) {
+            this.createdTime = createdTime;
+            return this;
+        }
+
+        public ProjectGroup build() {
+            var projectGroup = new ProjectGroup();
+            projectGroup.id = this.id;
+            projectGroup.name = this.name;
+            projectGroup.description = this.description;
+            projectGroup.sort = this.sort;
+            projectGroup.projectCount = this.projectCount;
+            projectGroup.createdTime = this.createdTime;
+            projectGroup.lastModifiedTime = LocalDateTime.now();
+            return projectGroup;
+        }
     }
 }

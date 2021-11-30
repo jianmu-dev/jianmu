@@ -278,7 +278,7 @@ CREATE TABLE `project_link_group`
     `created_time`     datetime    NOT NULL COMMENT '创建时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `project_UNIQUE` (`project_id`),
-    UNIQUE KEY `project_sort_UNIQUE` (`project_id`,`sort`)
+    UNIQUE KEY `project_group_sort_UNIQUE` (`project_group_id`,`sort`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目-项目组中间表';

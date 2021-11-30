@@ -30,6 +30,11 @@ public class ProjectGroupRepositoryImpl implements ProjectGroupRepository {
     }
 
     @Override
+    public void addAll(List<ProjectGroup> projectGroups) {
+        this.projectGroupMapper.addAll(projectGroups);
+    }
+
+    @Override
     public void deleteById(String id) {
         this.projectGroupMapper.deleteById(id);
     }
@@ -50,11 +55,6 @@ public class ProjectGroupRepositoryImpl implements ProjectGroupRepository {
     }
 
     @Override
-    public void updateSortById(String id, Integer sort) {
-        this.projectGroupMapper.updateSortById(id, sort);
-    }
-
-    @Override
     public Optional<ProjectGroup> findBySortMax() {
         return this.projectGroupMapper.findBySortMax();
     }
@@ -67,6 +67,11 @@ public class ProjectGroupRepositoryImpl implements ProjectGroupRepository {
     @Override
     public void subProjectCountById(String projectGroupId, int count) {
         this.projectGroupMapper.subProjectCountById(projectGroupId, count);
+    }
+
+    @Override
+    public void deleteByIdIn(List<String> ids) {
+        this.projectGroupMapper.deleteByIdIn(ids);
     }
 
     public PageInfo<ProjectGroup> findPage(int pageNum, int pageSize) {

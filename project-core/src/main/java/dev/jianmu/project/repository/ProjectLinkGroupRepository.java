@@ -32,8 +32,6 @@ public interface ProjectLinkGroupRepository {
 
     List<ProjectLinkGroup> findAllByGroupIdAndSortBetween(String projectGroupId, Integer originSort, Integer targetSort);
 
-    void updateSortById(String projectLinkGroupId, Integer sort);
-
     Optional<ProjectLinkGroup> findByProjectId(String projectId);
 
     List<ProjectLinkGroup> findAllByProjectIdIn(List<String> projectIds);

@@ -48,7 +48,7 @@ public class ProjectGroupApplication {
         var sort = this.projectGroupRepository.findBySortMax()
                 .map(ProjectGroup::getSort)
                 .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
-        projectGroup.setProjectNumber(0);
+        projectGroup.setProjectCount(0);
         projectGroup.setSort(++sort);
         projectGroup.setLastModifiedTime();
         this.projectGroupRepository.add(projectGroup);
@@ -66,8 +66,13 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void deleteById(String projectGroupId) {
-        var projectIds = this.projectLinkGroupRepository.findAllProjectIdByGroupId(projectGroupId);
+        if (projectGroupId.equals(DEFAULT_PROJECT_GROUP_ID)) {
+            throw new ProjectGroupException("不能删除默认分组");
+        }
+        // 删除分组中间表
+        this.projectLinkGroupRepository.deleteByProjectGroupId(projectGroupId);
         // 添加到默认分组
+        var projectIds = this.projectLinkGroupRepository.findAllProjectIdByGroupId(projectGroupId);
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
                 .orElse(-1);
@@ -82,29 +87,57 @@ public class ProjectGroupApplication {
         if (!projectLinkGroups.isEmpty()) {
             this.projectLinkGroupRepository.addAll(projectLinkGroups);
         }
-        // 删除
-        this.projectLinkGroupRepository.deleteByProjectGroupId(projectGroupId);
+        // 删除项目组
         this.projectGroupRepository.deleteById(projectGroupId);
     }
 
     @Transactional
     public void updateSort(Integer originSort, Integer targetSort) {
-        var groups = this.projectGroupRepository.findAllBySortBetween(Math.min(originSort,targetSort), Math.max(originSort,targetSort));
+        var groups = this.projectGroupRepository.findAllBySortBetween(Math.min(originSort, targetSort), Math.max(originSort, targetSort));
         if (groups.isEmpty()) {
             return;
         }
+        // 删除项目组
+        this.projectGroupRepository.deleteByIdIn(groups.stream().map(ProjectGroup::getId).collect(Collectors.toList()));
+        // 添加项目组
+        var projectGroups = new ArrayList<ProjectGroup>();
+        ProjectGroup targetProjectGroup;
         if (originSort > targetSort) {
             for (int i = 0; i < groups.size() - 1; i++) {
-                this.projectGroupRepository.updateSortById(groups.get(i).getId(), groups.get(i + 1).getSort());
+                ProjectGroup projectGroup = groups.get(i);
+                projectGroups.add(ProjectGroup.Builder.aReference()
+                        .id(projectGroup.getId())
+                        .name(projectGroup.getName())
+                        .description(projectGroup.getDescription())
+                        .sort(groups.get(i + 1).getSort())
+                        .projectCount(projectGroup.getProjectCount())
+                        .createdTime(projectGroup.getCreatedTime())
+                        .build());
             }
-            this.projectGroupRepository.updateSortById(groups.get(groups.size() - 1).getId(), targetSort);
-        }
-        if (targetSort > originSort){
+            targetProjectGroup = groups.get(groups.size()-1);
+        }else {
             for (int i = 1; i < groups.size(); i++) {
-                this.projectGroupRepository.updateSortById(groups.get(i).getId(), groups.get(i - 1).getSort());
+                ProjectGroup projectGroup = groups.get(i);
+                projectGroups.add(ProjectGroup.Builder.aReference()
+                        .id(projectGroup.getId())
+                        .name(projectGroup.getName())
+                        .description(projectGroup.getDescription())
+                        .sort(groups.get(i - 1).getSort())
+                        .projectCount(projectGroup.getProjectCount())
+                        .createdTime(projectGroup.getCreatedTime())
+                        .build());
             }
-            this.projectGroupRepository.updateSortById(groups.get(0).getId(), targetSort);
+            targetProjectGroup = groups.get(0);
         }
+        projectGroups.add(ProjectGroup.Builder.aReference()
+                .id(targetProjectGroup.getId())
+                .name(targetProjectGroup.getName())
+                .description(targetProjectGroup.getDescription())
+                .sort(targetSort)
+                .projectCount(targetProjectGroup.getProjectCount())
+                .createdTime(targetProjectGroup.getCreatedTime())
+                .build());
+        this.projectGroupRepository.addAll(projectGroups);
     }
 
     @Transactional
@@ -160,22 +193,40 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void updateProjectSort(String projectGroupId, Integer originSort, Integer targetSort) {
-        var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId, Math.min(originSort,targetSort), Math.max(originSort,targetSort));
+        var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId,
+                Math.min(originSort, targetSort),
+                Math.max(originSort, targetSort));
         if (linkGroups.isEmpty()) {
             return;
         }
+        // 删除分组中间表
+        this.projectLinkGroupRepository.deleteByIdIn(linkGroups.stream().map(ProjectLinkGroup::getId).collect(Collectors.toList()));
+        // 添加分组中间表
+        var newLinkGroups = new ArrayList<ProjectLinkGroup>();
         if (originSort > targetSort) {
             for (int i = 0; i < linkGroups.size() - 1; i++) {
-                this.projectLinkGroupRepository.updateSortById(linkGroups.get(i).getId(), linkGroups.get(i + 1).getSort());
+                linkGroups.add(ProjectLinkGroup.Builder.aReference()
+                        .projectGroupId(projectGroupId)
+                        .projectId(linkGroups.get(i).getProjectId())
+                        .sort(linkGroups.get(i + 1).getSort())
+                        .build());
             }
-            this.projectLinkGroupRepository.updateSortById(linkGroups.get(linkGroups.size() - 1).getId(), targetSort);
-        }
-        if (targetSort > originSort){
+        }else {
             for (int i = 1; i < linkGroups.size(); i++) {
-                this.projectLinkGroupRepository.updateSortById(linkGroups.get(i).getId(), linkGroups.get(i - 1).getSort());
+                linkGroups.add(ProjectLinkGroup.Builder.aReference()
+                        .projectGroupId(projectGroupId)
+                        .projectId(linkGroups.get(i).getProjectId())
+                        .sort(linkGroups.get(i - 1).getSort())
+                        .build());
             }
-            this.projectLinkGroupRepository.updateSortById(linkGroups.get(0).getId(), targetSort);
+
         }
+        linkGroups.add(ProjectLinkGroup.Builder.aReference()
+                .projectGroupId(projectGroupId)
+                .projectId(originSort > targetSort ? linkGroups.get(linkGroups.size() - 1).getProjectId() : linkGroups.get(0).getProjectId())
+                .sort(targetSort)
+                .build());
+        this.projectLinkGroupRepository.addAll(newLinkGroups);
     }
 
     public PageInfo<ProjectLinkGroup> findPageByGroupId(int pageNum, int pageSize, String projectGroupId) {
