@@ -205,7 +205,7 @@ public class ProjectGroupApplication {
         var newLinkGroups = new ArrayList<ProjectLinkGroup>();
         if (originSort > targetSort) {
             for (int i = 0; i < linkGroups.size() - 1; i++) {
-                linkGroups.add(ProjectLinkGroup.Builder.aReference()
+                newLinkGroups.add(ProjectLinkGroup.Builder.aReference()
                         .projectGroupId(projectGroupId)
                         .projectId(linkGroups.get(i).getProjectId())
                         .sort(linkGroups.get(i + 1).getSort())
@@ -213,7 +213,7 @@ public class ProjectGroupApplication {
             }
         }else {
             for (int i = 1; i < linkGroups.size(); i++) {
-                linkGroups.add(ProjectLinkGroup.Builder.aReference()
+                newLinkGroups.add(ProjectLinkGroup.Builder.aReference()
                         .projectGroupId(projectGroupId)
                         .projectId(linkGroups.get(i).getProjectId())
                         .sort(linkGroups.get(i - 1).getSort())
@@ -221,7 +221,7 @@ public class ProjectGroupApplication {
             }
 
         }
-        linkGroups.add(ProjectLinkGroup.Builder.aReference()
+        newLinkGroups.add(ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(projectGroupId)
                 .projectId(originSort > targetSort ? linkGroups.get(linkGroups.size() - 1).getProjectId() : linkGroups.get(0).getProjectId())
                 .sort(targetSort)
