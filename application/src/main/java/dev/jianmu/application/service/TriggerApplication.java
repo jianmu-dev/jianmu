@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
@@ -48,9 +49,9 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.*;
 
 /**
+ * @author Ethan Liu
  * @class TriggerApplication
  * @description TriggerApplication
- * @author Ethan Liu
  * @create 2021-11-10 11:15
  */
 @Service
@@ -510,9 +511,16 @@ public class TriggerApplication {
         if (exp.startsWith("$.header.")) {
             exp = exp.toLowerCase(Locale.ROOT);
         }
-        Object document = Configuration.defaultConfiguration().jsonProvider().parse(payload);
+        Object document = Configuration.defaultConfiguration()
+                .jsonProvider().parse(payload);
         try {
-            return JsonPath.read(document, exp);
+            var conf = Configuration.defaultConfiguration()
+                    .addOptions(Option.ALWAYS_RETURN_LIST, Option.DEFAULT_PATH_LEAF_TO_NULL);
+            List<?> vars = JsonPath.using(conf).parse(document).read(exp);
+            if (vars.isEmpty()) {
+                return null;
+            }
+            return vars.get(0);
         } catch (PathNotFoundException e) {
             return null;
         }

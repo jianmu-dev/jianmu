@@ -3,6 +3,7 @@ package dev.jianmu.infrastructure.credential;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport;
@@ -15,11 +16,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @class VaultCredentialManager
  * @description VaultCredentialManager
- * @author Ethan Liu
  * @create 2021-11-02 06:42
-*/
+ */
+@Slf4j
 @Component
 @ConditionalOnProperty(prefix = "credential", name = "type", havingValue = "vault")
 public class VaultCredentialManager implements CredentialManager {
@@ -131,13 +133,17 @@ public class VaultCredentialManager implements CredentialManager {
     @Override
     public Optional<KVPair> findByNamespaceNameAndKey(String namespaceName, String key) {
         List<KVPair> kvPairs = new ArrayList<>();
-        var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .get(namespaceName);
-        if (res != null && res.getData() != null) {
-            return res.getData().entrySet().stream()
-                    .filter(entry -> entry.getKey().equals(key) && !entry.getKey().equals(EXAMPLE_KEY))
-                    .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespaceName).key(entry.getKey()).value(entry.getValue().toString()).build())
-                    .findFirst();
+        try {
+            var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                    .get(namespaceName);
+            if (res != null && res.getData() != null) {
+                return res.getData().entrySet().stream()
+                        .filter(entry -> entry.getKey().equals(key) && !entry.getKey().equals(EXAMPLE_KEY))
+                        .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespaceName).key(entry.getKey()).value(entry.getValue().toString()).build())
+                        .findFirst();
+            }
+        } catch (Exception e) {
+            log.warn("vault exception: {}", e.getMessage());
         }
         return Optional.empty();
     }
