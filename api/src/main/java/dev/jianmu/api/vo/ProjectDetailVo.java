@@ -50,4 +50,11 @@ public class ProjectDetailVo {
     private String lastModifiedBy;
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
+    // 项目组ID
+    private String projectGroupId;
+    // 关联项目组ID
+    private String projectLinkGroupId;
+    // 序号
+    private Integer sort;
+
 }

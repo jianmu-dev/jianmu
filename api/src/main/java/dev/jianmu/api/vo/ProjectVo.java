@@ -54,6 +54,8 @@ public class ProjectVo {
     private LocalDateTime nextTime;
     @Schema(description = "最后一次执行状态")
     private String status;
+    @Schema(description = "项目组ID")
+    private String projectGroupId;
     @Schema(description = "关联项目组ID")
     private String projectLinkGroupId;
     @Schema(description = "序号")
