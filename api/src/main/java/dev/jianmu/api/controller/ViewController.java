@@ -334,6 +334,7 @@ public class ViewController {
                         }
                         projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
                         projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
+                        projectVo.setProjectGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getProjectGroupId());
                         return projectVo;
                     })
                     .orElseGet(() -> {
@@ -341,6 +342,7 @@ public class ViewController {
                         projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
                         projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
                         projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
+                        projectVo.setProjectGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getProjectGroupId());
                         return projectVo;
                     });
         }).sorted(Comparator.comparing(ProjectVo::getSort))
