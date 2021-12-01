@@ -190,7 +190,13 @@ public class ViewController {
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
         var project = this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        return ProjectMapper.INSTANCE.toProjectDetailVo(project);
+        var projectDetailVo = ProjectMapper.INSTANCE.toProjectDetailVo(project);
+        var projectLinkGroup = this.projectGroupApplication.findLinkByProjectId(project.getId()).orElse(null);
+        assert projectLinkGroup != null;
+        projectDetailVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
+        projectDetailVo.setProjectLinkGroupId(projectLinkGroup.getId());
+        projectDetailVo.setSort(projectLinkGroup.getSort());
+        return projectDetailVo;
     }
 
     @GetMapping("/projects/{projectId}/dsl")
@@ -316,6 +322,7 @@ public class ViewController {
             var projectLinkGroup = page.getList().stream()
                     .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
                     .findFirst().orElse(null);
+            assert projectLinkGroup != null;
             return this.instanceApplication
                     .findByRefAndSerialNoMax(project.getWorkflowRef())
                     .map(workflowInstance -> {
@@ -332,17 +339,17 @@ public class ViewController {
                             projectVo.setStartTime(workflowInstance.getStartTime());
                             projectVo.setStatus("RUNNING");
                         }
-                        projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
-                        projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
-                        projectVo.setProjectGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getProjectGroupId());
+                        projectVo.setProjectLinkGroupId(projectLinkGroup.getId());
+                        projectVo.setSort(projectLinkGroup.getSort());
+                        projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
                         return projectVo;
                     })
                     .orElseGet(() -> {
                         var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
                         projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                        projectVo.setProjectLinkGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getId());
-                        projectVo.setSort(projectLinkGroup == null ? 0 : projectLinkGroup.getSort());
-                        projectVo.setProjectGroupId(projectLinkGroup == null ? "" : projectLinkGroup.getProjectGroupId());
+                        projectVo.setProjectLinkGroupId(projectLinkGroup.getId());
+                        projectVo.setSort(projectLinkGroup.getSort());
+                        projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
                         return projectVo;
                     });
         }).sorted(Comparator.comparing(ProjectVo::getSort))

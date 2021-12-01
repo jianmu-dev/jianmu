@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -232,5 +233,9 @@ public class ProjectGroupApplication {
     public PageInfo<ProjectLinkGroup> findPageByGroupId(int pageNum, int pageSize, String projectGroupId) {
         return PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> this.projectLinkGroupRepository.findAllByGroupId(projectGroupId));
+    }
+
+    public Optional<ProjectLinkGroup> findLinkByProjectId(String id) {
+        return this.projectLinkGroupRepository.findByProjectId(id);
     }
 }
