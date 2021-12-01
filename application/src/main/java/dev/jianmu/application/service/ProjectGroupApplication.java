@@ -87,6 +87,7 @@ public class ProjectGroupApplication {
         }
         if (!projectLinkGroups.isEmpty()) {
             this.projectLinkGroupRepository.addAll(projectLinkGroups);
+            this.projectGroupRepository.addProjectCountById(DEFAULT_PROJECT_GROUP_ID, projectLinkGroups.size());
         }
         // 删除项目组
         this.projectGroupRepository.deleteById(projectGroupId);
