@@ -238,4 +238,8 @@ public class ProjectGroupApplication {
     public Optional<ProjectLinkGroup> findLinkByProjectId(String id) {
         return this.projectLinkGroupRepository.findByProjectId(id);
     }
+
+    public List<ProjectLinkGroup> findLinkByProjectIdIn(List<String> projectIds) {
+        return this.projectLinkGroupRepository.findAllByProjectIdIn(projectIds);
+    }
 }
