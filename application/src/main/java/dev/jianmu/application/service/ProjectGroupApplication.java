@@ -70,10 +70,10 @@ public class ProjectGroupApplication {
         if (projectGroupId.equals(DEFAULT_PROJECT_GROUP_ID)) {
             throw new ProjectGroupException("不能删除默认分组");
         }
+        var projectIds = this.projectLinkGroupRepository.findAllProjectIdByGroupId(projectGroupId);
         // 删除分组中间表
         this.projectLinkGroupRepository.deleteByProjectGroupId(projectGroupId);
         // 添加到默认分组
-        var projectIds = this.projectLinkGroupRepository.findAllProjectIdByGroupId(projectGroupId);
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(DEFAULT_PROJECT_GROUP_ID)
                 .map(ProjectLinkGroup::getSort)
                 .orElse(-1);
