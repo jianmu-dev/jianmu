@@ -148,12 +148,13 @@ export default defineComponent({
 
     .line {
       position: relative;
+      min-height: 22px;
 
       .no {
         // 解决数字字体等宽问题
         font-family: 'Helvetica Neue';
         position: absolute;
-        right: 0;
+        top: 0;
         user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
