@@ -11,6 +11,7 @@ import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
@@ -35,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_ID;
+import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
 
 /**
  * @author Ethan Liu
@@ -157,7 +158,8 @@ public class ProjectApplication {
             this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
             groupId = projectGroupId;
         }else {
-            groupId = DEFAULT_PROJECT_GROUP_ID;
+            groupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
+                    .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
         }
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(groupId)
                 .map(ProjectLinkGroup::getSort)
@@ -230,7 +232,8 @@ public class ProjectApplication {
             this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
             groupId = projectGroupId;
         }else {
-            groupId = DEFAULT_PROJECT_GROUP_ID;
+            groupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
+                    .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));;
         }
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(groupId)
                 .map(ProjectLinkGroup::getSort)
@@ -343,7 +346,7 @@ public class ProjectApplication {
         return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
     }
 
-    public List<Project> findAllPageByProjectIdIn(List<String> projectIds, String workflowName) {
+    public List<Project> findPageByProjectIdIn(List<String> projectIds, String workflowName) {
         return this.projectRepository.findAllPageByProjectIdIn(projectIds, workflowName);
     }
 }
