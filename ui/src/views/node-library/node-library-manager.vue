@@ -1,124 +1,142 @@
 <template>
-  <div class="node-library-manager" v-scroll.current="btnDown">
-    <div class="right-top-btn">
-      <router-link :to="{ name: 'index' }">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-          >关闭</jm-button
-        >
-      </router-link>
-    </div>
-    <div class="menu-bar">
-      <button class="add" @click="creationActivated = true">
-        <div class="label">新增本地节点</div>
-      </button>
-    </div>
-    <div class="title">
-      <span>建木节点库</span>
-      <span class="desc">（共有 {{ total }} 个节点定义）</span>
-    </div>
+  <jm-scrollbar ref="nfManagerRef">
+    <div
+      class="node-library-manager"
+      v-scroll="{
+        loadMore: btnDown,
+        scrollableEl,
+      }"
+    >
+      <div class="right-top-btn">
+        <router-link :to="{ name: 'index' }">
+          <jm-button type="primary" class="jm-icon-button-cancel" size="small"
+            >关闭</jm-button
+          >
+        </router-link>
+      </div>
+      <div class="menu-bar">
+        <button class="add" @click="creationActivated = true">
+          <div class="label">新增本地节点</div>
+        </button>
+      </div>
+      <div class="title">
+        <span>建木节点库</span>
+        <span class="desc">（共有 {{ total }} 个节点定义）</span>
+      </div>
 
-    <div v-loading="firstLoading" class="content">
-      <jm-empty v-if="nodeLibraryListData.length === 0" />
-      <div
-        v-else
-        v-for="(i, idx) in nodeLibraryListData"
-        :key="idx"
-        class="item"
-      >
-        <div class="item-t">
-          <span
-            class="item-t-t ellipsis"
-            v-if="i.ownerType === OwnerTypeEnum.LOCAL"
-            >{{ i.name }}</span
-          >
-          <a
-            v-else
-            target="_blank"
-            class="item-t-t ellipsis"
-            :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}`"
-            >{{ i.name }}</a
-          >
-          <p class="item-t-mid ellipsis">{{ i.ownerName }} / {{ i.ref }}</p>
-          <p class="item-t-btm ellipsis">{{ i.description || '无' }}</p>
-        </div>
-        <div class="item-mid" :class="{ 'is-background': !i.isDirectionDown }">
-          <i
-            @click="clickVersion(i)"
-            class="down"
-            :class="{ 'direction-down': i.isDirectionDown }"
-          ></i>
-          <jm-scrollbar max-height="75px">
-            <div
-              class="item-mid-items"
-              :class="{ 'is-scroll': i.isDirectionDown }"
-            >
-              <div
-                v-for="(version, versionIdx) in i.versions"
-                :key="versionIdx"
-                class="item-mid-item ellipsis"
-              >
-                <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">{{
-                  version
-                }}</span>
-                <a
-                  v-else
-                  target="_blank"
-                  :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}/${version}`"
-                  >{{ version }}</a
-                >
-              </div>
-            </div>
-          </jm-scrollbar>
-        </div>
-        <div v-show="!i.isDirectionDown" class="item-btm">
-          <div>
-            <jm-tooltip
-              v-if="i.ownerType !== OwnerTypeEnum.LOCAL"
-              content="同步"
-              placement="top"
-            >
-              <button
-                @click="syncNode(i)"
-                class="sync"
-                :class="{ doing: i.isSync }"
-              ></button>
-            </jm-tooltip>
-            <jm-tooltip content="删除" placement="top">
-              <button
-                @click="deleteNode(i)"
-                class="del"
-                :class="{ doing: i.isDel }"
-              ></button>
-            </jm-tooltip>
-          </div>
-          <div class="item-btm-r ellipsis">by {{ i.creatorName }}</div>
-        </div>
+      <div v-loading="firstLoading" class="content">
+        <jm-empty v-if="nodeLibraryListData.length === 0" />
         <div
-          class="item-pos"
-          :class="{ 'node-definition-default-icon': !i.icon }"
+          v-else
+          v-for="(i, idx) in nodeLibraryListData"
+          :key="idx"
+          class="item"
         >
-          <img
-            v-if="i.icon"
-            :src="`${i.icon}?imageMogr2/thumbnail/81x/sharpen/1`"
-          />
+          <div class="item-t">
+            <span
+              class="item-t-t ellipsis"
+              v-if="i.ownerType === OwnerTypeEnum.LOCAL"
+              >{{ i.name }}</span
+            >
+            <a
+              v-else
+              target="_blank"
+              class="item-t-t ellipsis"
+              :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}`"
+              >{{ i.name }}</a
+            >
+            <p class="item-t-mid ellipsis">{{ i.ownerName }} / {{ i.ref }}</p>
+            <p class="item-t-btm ellipsis">{{ i.description || '无' }}</p>
+          </div>
+          <div
+            class="item-mid"
+            :class="{ 'is-background': !i.isDirectionDown }"
+          >
+            <i
+              @click="clickVersion(i)"
+              class="down"
+              :class="{ 'direction-down': i.isDirectionDown }"
+            ></i>
+            <jm-scrollbar max-height="75px">
+              <div
+                class="item-mid-items"
+                :class="{ 'is-scroll': i.isDirectionDown }"
+              >
+                <div
+                  v-for="(version, versionIdx) in i.versions"
+                  :key="versionIdx"
+                  class="item-mid-item ellipsis"
+                >
+                  <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">{{
+                    version
+                  }}</span>
+                  <a
+                    v-else
+                    target="_blank"
+                    :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}/${version}`"
+                    >{{ version }}</a
+                  >
+                </div>
+              </div>
+            </jm-scrollbar>
+          </div>
+          <div v-show="!i.isDirectionDown" class="item-btm">
+            <div>
+              <jm-tooltip
+                v-if="i.ownerType !== OwnerTypeEnum.LOCAL"
+                content="同步"
+                placement="top"
+              >
+                <button
+                  @click="syncNode(i)"
+                  class="sync"
+                  :class="{ doing: i.isSync }"
+                ></button>
+              </jm-tooltip>
+              <jm-tooltip content="删除" placement="top">
+                <button
+                  @click="deleteNode(i)"
+                  class="del"
+                  :class="{ doing: i.isDel }"
+                ></button>
+              </jm-tooltip>
+            </div>
+            <div class="item-btm-r ellipsis">by {{ i.creatorName }}</div>
+          </div>
+          <div
+            class="item-pos"
+            :class="{ 'node-definition-default-icon': !i.icon }"
+          >
+            <img
+              v-if="i.icon"
+              :src="`${i.icon}?imageMogr2/thumbnail/81x/sharpen/1`"
+            />
+          </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
-      <span>显示更多</span>
-      <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
+      <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
+        <span>显示更多</span>
+        <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
+      </div>
+      <node-editor
+        v-if="creationActivated"
+        @closed="creationActivated = false"
+        @completed="handleCreation"
+      />
     </div>
-    <node-editor
-      v-if="creationActivated"
-      @closed="creationActivated = false"
-      @completed="handleCreation"
-    />
-  </div>
+  </jm-scrollbar>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, reactive, ref, Ref } from 'vue';
+import {
+  defineComponent,
+  getCurrentInstance,
+  reactive,
+  ref,
+  Ref,
+  inject,
+} from 'vue';
 import { fetchNodeLibraryList } from '@/api/view-no-auth';
 import { deleteNodeLibrary, syncNodeLibrary } from '@/api/node-library';
 import { INode } from '@/model/modules/node-library';
@@ -130,8 +148,6 @@ export default defineComponent({
     NodeEditor,
   },
   setup() {
-    const librayManager =
-      document.getElementsByClassName('el-scrollbar__wrap')[0];
     const { proxy } = getCurrentInstance() as any;
     const nodeLibraryListParameter = reactive<{
       pageNum: number;
@@ -145,14 +161,14 @@ export default defineComponent({
     const noMore = ref<boolean>(true);
     const total = ref<number>(0);
     const creationActivated = ref<boolean>(false);
-
+    const scrollableEl = inject('scrollableEl');
     // 获取数据
     const nodeListData = (
       nodeLibraryListData: INode[],
       nodeLibraryListParameter: { pageNum: number; pageSize: number },
       loading: Ref<boolean>,
       noMore: Ref<boolean>,
-      total: Ref<number>,
+      total: Ref<number>
     ) => {
       if (!noMore.value) return;
       fetchNodeLibraryList(nodeLibraryListParameter)
@@ -178,7 +194,7 @@ export default defineComponent({
       nodeLibraryListParameter,
       firstLoading,
       noMore,
-      total,
+      total
     );
 
     // 加载更多
@@ -194,7 +210,7 @@ export default defineComponent({
           nodeLibraryListParameter,
           bottomLoading,
           noMore,
-          total,
+          total
         );
       };
       return {
@@ -270,7 +286,7 @@ export default defineComponent({
         });
     };
     return {
-      librayManager,
+      scrollableEl,
       clickVersion,
       ...loadMore(),
       deleteNode,
@@ -292,7 +308,7 @@ export default defineComponent({
           nodeLibraryListParameter,
           firstLoading,
           noMore,
-          total,
+          total
         );
       },
       OwnerTypeEnum,
@@ -305,7 +321,7 @@ export default defineComponent({
 .node-library-manager {
   padding: 16px 20px 25px 16px;
   background-color: #ffffff;
-  height: calc(100vh - 185px);
+  // height: calc(100vh - 185px);
   .right-top-btn {
     position: fixed;
     right: 20px;

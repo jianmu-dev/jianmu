@@ -1,18 +1,23 @@
 <template>
-  <div class="platform">
+  <div class="platform" ref="platFormRef">
     <div class="header"></div>
     <jm-container class="container">
       <jm-header height="64px">
-        <top-nav/>
+        <top-nav />
       </jm-header>
       <jm-container>
         <jm-header v-if="pathNavsDisplay" class="path-nav">
           <jm-breadcrumb>
-            <jm-breadcrumb-item v-for="{name, path} in pathNavs" :key="path" :to="path">{{ name }}</jm-breadcrumb-item>
+            <jm-breadcrumb-item
+              v-for="{ name, path } in pathNavs"
+              :key="path"
+              :to="path"
+              >{{ name }}</jm-breadcrumb-item
+            >
           </jm-breadcrumb>
         </jm-header>
         <jm-main :class="mainClass" id="platform-main">
-          <jm-scrollbar>
+          <jm-scrollbar ref="mainScrollbarRef">
             <template v-if="loadMain">
               <router-view v-slot="{ Component }">
                 <keep-alive :include="bufferList">
@@ -28,17 +33,34 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, provide, reactive, Ref, ref } from 'vue';
-import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLoaded, useRoute } from 'vue-router';
+import {
+  computed,
+  defineComponent,
+  getCurrentInstance,
+  provide,
+  reactive,
+  Ref,
+  ref,
+} from 'vue';
+import {
+  onBeforeRouteUpdate,
+  RouteLocationNormalized,
+  RouteLocationNormalizedLoaded,
+  useRoute,
+} from 'vue-router';
 import TopNav from '@/views/nav/top.vue';
 import { PLATFORM_INDEX } from '@/router/path-def';
+import { ElScrollbar } from 'element-plus';
 
 interface IPathNav {
   name: string;
   path: string;
 }
 
-function buildPathNav(pathNavs: Ref<IPathNav[]>, route: RouteLocationNormalizedLoaded | RouteLocationNormalized) {
+function buildPathNav(
+  pathNavs: Ref<IPathNav[]>,
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+) {
   pathNavs.value.length = 0;
 
   route.matched.forEach(item => {
@@ -60,14 +82,19 @@ export default defineComponent({
   setup() {
     const { proxy } = getCurrentInstance() as any;
     const route = useRoute();
+    const platFormRef = ref<HTMLElement>();
+    const height = computed(
+      () => platFormRef.value && platFormRef.value!.offsetHeight - 64
+    );
     const bufferList = reactive<string[]>([]);
     const pathNavs = ref<IPathNav[]>([]);
     const loadMain = ref<boolean>(true);
-    const pathNavsDisplay = computed<boolean>(() => route.path !== PLATFORM_INDEX);
+    const pathNavsDisplay = computed<boolean>(
+      () => route.path !== PLATFORM_INDEX
+    );
     const mainClass = ref<string>(pathNavsDisplay.value ? 'main' : 'main2');
-
+    const mainScrollbarRef = ref<InstanceType<typeof ElScrollbar>>();
     buildPathNav(pathNavs, useRoute());
-
     // 直接访问要被缓冲的路由地址时，添加缓冲
     if (route.meta.keepAlive && !bufferList.includes(route.name as string)) {
       bufferList.push(route.name as string);
@@ -89,8 +116,12 @@ export default defineComponent({
     };
 
     provide('reloadMain', reloadMain);
-
+    provide('scrollableEl', () => {
+      return mainScrollbarRef.value?.scrollbar.firstElementChild;
+    });
     return {
+      platFormRef,
+      mainScrollbarRef,
       bufferList,
       pathNavs,
       pathNavsDisplay,
@@ -114,8 +145,8 @@ export default defineComponent({
     top: 0;
     width: 100vw;
     height: 64px;
-    background-color: #FFFFFF;
-    box-shadow: 0 0 8px 0 #CFD7E5;
+    background-color: #ffffff;
+    box-shadow: 0 0 8px 0 #cfd7e5;
   }
 
   .container {
@@ -132,7 +163,8 @@ export default defineComponent({
       height: calc(100vh - 65px);
     }
 
-    .main, .main2 {
+    .main,
+    .main2 {
       padding: 0;
 
       > div {

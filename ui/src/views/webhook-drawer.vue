@@ -26,48 +26,70 @@
         </div>
         <div class="table-container" v-loading="tableLoading">
           <div class="table-title">请求列表</div>
-          <div class="table-content" ref="scrollRef" v-scroll.current="btnDown">
-            <jm-table :data="webhookRequestList" :row-key="rowkey">
-              <jm-table-column prop="userAgent" label="来源"></jm-table-column>
-              <jm-table-column prop="timed" label="请求时间" align="center">
-                <template #default="scope">
-                  <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
-                </template></jm-table-column
-              >
-              <jm-table-column prop="statusCode" label="状态" align="center">
-                <template #default="scope">
-                  <div
-                    v-if="scope.row.statusCode === 'OK'"
-                    style="color: #10c2c2"
-                  >
-                    成功
-                  </div>
-                  <div v-else style="color: red">失败</div>
-                </template>
-              </jm-table-column>
-              <jm-table-column
-                prop="errorMsg"
-                label="错误信息"
-                align="center"
-              ></jm-table-column>
-              <jm-table-column label="操作" align="center">
-                <template #default="scope">
-                  <div class="table-button">
-                    <div class="retry" @click="retry(scope.row.id)">重试</div>
-                    <div class="see-payload" @click="seePayload(scope.row.id)">
-                      查看payload
+          <div
+            class="table-content"
+            ref="scrollRef"
+            v-scroll="{
+              loadMore: btnDown,
+              scrollableEl,
+            }"
+          >
+            <jm-scrollbar ref="webhookDrawerRef" :height="height">
+              <jm-table :data="webhookRequestList" :row-key="rowkey">
+                <jm-table-column
+                  prop="userAgent"
+                  label="来源"
+                ></jm-table-column>
+                <jm-table-column prop="timed" label="请求时间" align="center">
+                  <template #default="scope">
+                    <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
+                  </template></jm-table-column
+                >
+                <jm-table-column prop="statusCode" label="状态" align="center">
+                  <template #default="scope">
+                    <div
+                      v-if="scope.row.statusCode === 'OK'"
+                      style="color: #10c2c2"
+                    >
+                      成功
                     </div>
-                  </div>
-                </template>
-              </jm-table-column>
-            </jm-table>
-            <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
-              <span>显示更多</span>
-              <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
-            </div>
-            <div v-if="noMoreFlag">
-              <span class="bottom not-more">没有更多了</span>
-            </div>
+                    <div v-else style="color: red">失败</div>
+                  </template>
+                </jm-table-column>
+                <jm-table-column
+                  prop="errorMsg"
+                  label="错误信息"
+                  align="center"
+                ></jm-table-column>
+                <jm-table-column label="操作" align="center">
+                  <template #default="scope">
+                    <div class="table-button">
+                      <div class="retry" @click="retry(scope.row.id)">重试</div>
+                      <div
+                        class="see-payload"
+                        @click="seePayload(scope.row.id)"
+                      >
+                        查看payload
+                      </div>
+                    </div>
+                  </template>
+                </jm-table-column>
+              </jm-table>
+              <div
+                v-if="noMore && !firstLoading"
+                @click="btnDown"
+                class="bottom"
+              >
+                <span>显示更多</span>
+                <i
+                  class="btm-down"
+                  :class="{ 'btn-loading': bottomLoading }"
+                ></i>
+              </div>
+              <div v-if="noMoreFlag">
+                <span class="bottom not-more">没有更多了</span>
+              </div>
+            </jm-scrollbar>
           </div>
         </div>
       </div>
@@ -101,6 +123,7 @@ import { datetimeFormatter } from '@/utils/formatter';
 import { IPageVo } from '@/api/dto/common';
 import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { fetchTriggerWebhook } from '@/api/view-no-auth';
+import { ElScrollbar } from 'element-plus';
 
 export default defineComponent({
   props: {
@@ -124,6 +147,17 @@ export default defineComponent({
     const firstLoading = ref<boolean>(false);
     const bottomLoading = ref<boolean>(false);
     const scrollRef = ref<HTMLDivElement>();
+    const webhookDrawerRef = ref<InstanceType<typeof ElScrollbar>>();
+    const scrollableEl = () => {
+      return webhookDrawerRef.value?.scrollbar.firstElementChild;
+    };
+    const height = computed<number>(() => {
+      const h =
+        window.innerHeight ||
+        document.documentElement.clientHeight ||
+        document.body.clientHeight;
+      return h - 335;
+    });
     // webhookUrl链接
     const webhook = ref<string>();
     const noMoreFlag = ref<boolean>(false);
@@ -132,7 +166,7 @@ export default defineComponent({
     const link = computed<string | undefined>(
       () =>
         webhook.value &&
-        `${window.location.protocol}//${window.location.host}${webhook.value}`,
+        `${window.location.protocol}//${window.location.host}${webhook.value}`
     );
     // 请求参数
     const webhookRequestParams = ref<{
@@ -160,7 +194,7 @@ export default defineComponent({
       const currentScorllTop = scrollRef.value?.scrollTop || 0;
       try {
         webhookRequestData.value = await getWebhookList(
-          webhookRequestParams.value,
+          webhookRequestParams.value
         );
         // 数据请求成功取消loading
         tableLoading.value = false;
@@ -205,7 +239,7 @@ export default defineComponent({
     const getWebhookUrlRequest = async () => {
       try {
         const { webhook: webhookUrl } = await fetchTriggerWebhook(
-          webhookRequestParams.value.projectId,
+          webhookRequestParams.value.projectId
         );
         webhook.value = webhookUrl;
       } catch (err) {
@@ -227,7 +261,7 @@ export default defineComponent({
           // 获取webhookUrl
           getWebhookUrlRequest();
         }
-      },
+      }
     );
     // 监听项目id+请求
     watch(
@@ -240,7 +274,7 @@ export default defineComponent({
         webhookRequestParams.value.projectId = props.currentProjectId as string;
         // 进入抽屉显示loading
         tableLoading.value = true;
-      },
+      }
     );
     // 一键复制
     const copy = async () => {
@@ -286,7 +320,7 @@ export default defineComponent({
     // 查看payload
     const seePayload = (id: string) => {
       const { payload } = webhookRequestList.value.find(
-        item => item.id === id,
+        item => item.id === id
       ) as IWebRequestVo;
       webhookLog.value = JSON.stringify(JSON.parse(payload), null, 2);
       nextTick(() => {
@@ -308,6 +342,9 @@ export default defineComponent({
       return row.id;
     };
     return {
+      height,
+      scrollableEl,
+      webhookDrawerRef,
       rowkey,
       scrollRef,
       drawerVisible,
@@ -417,13 +454,14 @@ export default defineComponent({
       background: #fff;
       box-sizing: border-box;
       padding: 20px;
+      margin-bottom: 20px;
       .table-title {
         margin-bottom: 20px;
         font-size: 14px;
         color: #082340;
       }
       .table-content {
-        max-height: calc(100vh - 341px);
+        // max-height: calc(100vh - 341px);
         overflow-y: auto;
         border-radius: 4px;
         border: 1px solid #ecedf4;
