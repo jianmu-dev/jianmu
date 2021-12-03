@@ -330,9 +330,9 @@ public class ViewController {
     @GetMapping("/v2/projects")
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
-        var page = this.projectGroupApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId());
+        var page = this.projectGroupApplication.findLinkPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId());
         var projectIds = page.getList().stream().map(ProjectLinkGroup::getProjectId).collect(Collectors.toList());
-        var projects = this.projectApplication.findAllPageByProjectIdIn(projectIds, dto.getWorkflowName());
+        var projects = this.projectApplication.findPageByProjectIdIn(projectIds, dto.getWorkflowName());
         var projectVos = projects.stream().map(project -> {
             var projectLinkGroup = page.getList().stream()
                     .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
