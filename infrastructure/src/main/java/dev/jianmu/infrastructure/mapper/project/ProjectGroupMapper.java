@@ -67,4 +67,10 @@ public interface ProjectGroupMapper {
             "</foreach>" +
             "</script>")
     void deleteByIdIn(@Param("ids") List<String> ids);
+
+    @Select("select * from project_group where name = #{name}")
+    @Result(column = "project_count", property = "projectCount")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    Optional<ProjectGroup> findByName(String name);
 }

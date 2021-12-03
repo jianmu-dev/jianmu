@@ -45,6 +45,11 @@ public class ProjectGroupRepositoryImpl implements ProjectGroupRepository {
     }
 
     @Override
+    public Optional<ProjectGroup> findByName(String name) {
+        return this.projectGroupMapper.findByName(name);
+    }
+
+    @Override
     public void update(ProjectGroup projectGroup) {
         this.projectGroupMapper.update(projectGroup);
     }
