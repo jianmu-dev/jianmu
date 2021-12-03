@@ -26,15 +26,20 @@
         </div>
         <div class="table-container" v-loading="tableLoading">
           <div class="table-title">请求列表</div>
-          <div
-            class="table-content"
-            ref="scrollRef"
-            v-scroll="{
-              loadMore: btnDown,
-              scrollableEl,
-            }"
+          <jm-scrollbar
+            ref="webhookDrawerRef"
+            :height="height"
+            class="webhook-drawer-ref"
           >
-            <jm-scrollbar ref="webhookDrawerRef" :height="height">
+            <div
+              class="table-content"
+              ref="scrollRef"
+              v-scroll="{
+                throtlle: 800,
+                loadMore: btnDown,
+                scrollableEl,
+              }"
+            >
               <jm-table :data="webhookRequestList" :row-key="rowkey">
                 <jm-table-column
                   prop="userAgent"
@@ -75,22 +80,15 @@
                   </template>
                 </jm-table-column>
               </jm-table>
-              <div
-                v-if="noMore && !firstLoading"
-                @click="btnDown"
-                class="bottom"
-              >
-                <span>显示更多</span>
-                <i
-                  class="btm-down"
-                  :class="{ 'btn-loading': bottomLoading }"
-                ></i>
+              <!-- 显示更多 -->
+              <div class="load-more">
+                <jm-load-more
+                  :state="loadState"
+                  :load-more="btnDown"
+                ></jm-load-more>
               </div>
-              <div v-if="noMoreFlag">
-                <span class="bottom not-more">没有更多了</span>
-              </div>
-            </jm-scrollbar>
-          </div>
+            </div>
+          </jm-scrollbar>
         </div>
       </div>
       <!-- 查看payload -->
@@ -124,6 +122,7 @@ import { IPageVo } from '@/api/dto/common';
 import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { fetchTriggerWebhook } from '@/api/view-no-auth';
 import { ElScrollbar } from 'element-plus';
+import { StateEnum } from '@/components/load-more/enumeration';
 
 export default defineComponent({
   props: {
@@ -143,11 +142,9 @@ export default defineComponent({
     // 弹窗控制
     const payloadDialogVisible = ref<boolean>(false);
     // 显示更多
-    const noMore = ref<boolean>(true);
-    const firstLoading = ref<boolean>(false);
-    const bottomLoading = ref<boolean>(false);
     const scrollRef = ref<HTMLDivElement>();
     const webhookDrawerRef = ref<InstanceType<typeof ElScrollbar>>();
+    const loadState = ref<StateEnum>(StateEnum.NONE);
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
     };
@@ -166,7 +163,7 @@ export default defineComponent({
     const link = computed<string | undefined>(
       () =>
         webhook.value &&
-        `${window.location.protocol}//${window.location.host}${webhook.value}`
+        `${window.location.protocol}//${window.location.host}${webhook.value}`,
     );
     // 请求参数
     const webhookRequestParams = ref<{
@@ -194,7 +191,7 @@ export default defineComponent({
       const currentScorllTop = scrollRef.value?.scrollTop || 0;
       try {
         webhookRequestData.value = await getWebhookList(
-          webhookRequestParams.value
+          webhookRequestParams.value,
         );
         // 数据请求成功取消loading
         tableLoading.value = false;
@@ -202,16 +199,14 @@ export default defineComponent({
         if (
           webhookRequestData.value.pages > webhookRequestParams.value.pageNum
         ) {
-          noMore.value = true;
+          loadState.value = StateEnum.MORE;
         } else {
-          // 禁用显示更多
-          noMore.value = false;
-          // 打开没有更多了
-          noMoreFlag.value = true;
+          loadState.value = StateEnum.NO_MORE;
         }
-        // 如果总数为0就不现实没有更多
+        // 如果总数为0就不展示没有更多
         if (webhookRequestData.value.total === 0) {
-          noMoreFlag.value = false;
+          // 什么都不显示
+          loadState.value = StateEnum.NONE;
         }
         // 追加-加载更多
         if (listState === 'push') {
@@ -229,8 +224,6 @@ export default defineComponent({
           }
           scrollRef.value.scrollTop = currentScorllTop;
         });
-        // 还原状态
-        bottomLoading.value = false;
       } catch (err) {
         proxy.$throw(err, proxy);
       }
@@ -239,7 +232,7 @@ export default defineComponent({
     const getWebhookUrlRequest = async () => {
       try {
         const { webhook: webhookUrl } = await fetchTriggerWebhook(
-          webhookRequestParams.value.projectId
+          webhookRequestParams.value.projectId,
         );
         webhook.value = webhookUrl;
       } catch (err) {
@@ -252,29 +245,27 @@ export default defineComponent({
       () => {
         drawerVisible.value = props.modelValue;
         if (drawerVisible.value) {
+          webhookRequestList.value = [];
+          // 进入抽屉显示loading
+          tableLoading.value = true;
           // 还原页码
           webhookRequestParams.value.pageNum = START_PAGE_NUM;
-          // 第一次隐藏显示更多
-          noMore.value = false;
-          // 获取webhook请求列表
-          getWebhookRequestList('cover');
+          // 打开抽屉时什么状态都没有
+          loadState.value = StateEnum.NONE;
           // 获取webhookUrl
           getWebhookUrlRequest();
+          // 获取webhook请求列表
+          getWebhookRequestList('cover');
         }
-      }
+      },
     );
     // 监听项目id+请求
     watch(
       () => props.currentProjectId,
       () => {
-        // 还原提示状态
-        noMoreFlag.value = false;
-        webhookRequestList.value = [];
         // 更改projectId
         webhookRequestParams.value.projectId = props.currentProjectId as string;
-        // 进入抽屉显示loading
-        tableLoading.value = true;
-      }
+      },
     );
     // 一键复制
     const copy = async () => {
@@ -320,7 +311,7 @@ export default defineComponent({
     // 查看payload
     const seePayload = (id: string) => {
       const { payload } = webhookRequestList.value.find(
-        item => item.id === id
+        item => item.id === id,
       ) as IWebRequestVo;
       webhookLog.value = JSON.stringify(JSON.parse(payload), null, 2);
       nextTick(() => {
@@ -333,8 +324,8 @@ export default defineComponent({
       if (
         webhookRequestData.value!.pages > webhookRequestParams.value.pageNum
       ) {
+        loadState.value = StateEnum.LOADING;
         webhookRequestParams.value.pageNum++;
-        bottomLoading.value = true;
         getWebhookRequestList('push');
       }
     };
@@ -342,6 +333,7 @@ export default defineComponent({
       return row.id;
     };
     return {
+      loadState,
       height,
       scrollableEl,
       webhookDrawerRef,
@@ -358,10 +350,6 @@ export default defineComponent({
       payloadDialogVisible,
       // 日志
       webhookLog,
-      // 显示更多
-      noMore,
-      firstLoading,
-      bottomLoading,
       btnDown,
       datetimeFormatter,
       noMoreFlag,
@@ -449,8 +437,13 @@ export default defineComponent({
         }
       }
     }
+    .webhook-drawer-ref {
+      // max-height: calc(100vh - 254px);
+      // height: 100px;
+    }
     // 表格
     .table-container {
+      max-height: calc(100vh - 254px);
       background: #fff;
       box-sizing: border-box;
       padding: 20px;
@@ -460,8 +453,10 @@ export default defineComponent({
         font-size: 14px;
         color: #082340;
       }
+      ::v-deep(.el-scrollbar__wrap) {
+        max-height: calc(100vh - 254px);
+      }
       .table-content {
-        // max-height: calc(100vh - 341px);
         overflow-y: auto;
         border-radius: 4px;
         border: 1px solid #ecedf4;
@@ -511,36 +506,8 @@ export default defineComponent({
         }
       }
       // 显示更多
-      .bottom {
-        margin: 15px 0;
-        color: #7b8c9c;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        .btm-down {
-          width: 16px;
-          height: 16px;
-          background-image: url('@/assets/svgs/node-library/drop-down.svg');
-          margin-left: 6px;
-        }
-        .btm-down.btn-loading {
-          animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43) infinite;
-          background-image: url('@/assets/svgs/node-library/loading.svg');
-        }
-        @keyframes rotate {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      }
-      .not-more {
-        opacity: 0.45;
-        cursor: auto;
+      .load-more {
+        text-align: center;
       }
     }
   }

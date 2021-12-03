@@ -115,9 +115,9 @@
         </div>
       </div>
 
-      <div v-if="noMore && !firstLoading" @click="btnDown" class="bottom">
-        <span>显示更多</span>
-        <i class="btm-down" :class="{ 'btn-loading': bottomLoading }"></i>
+      <!-- 显示更多 -->
+      <div class="load-more">
+        <jm-load-more :state="loadState" :load-more="btnDown"></jm-load-more>
       </div>
       <node-editor
         v-if="creationActivated"
@@ -142,7 +142,7 @@ import { deleteNodeLibrary, syncNodeLibrary } from '@/api/node-library';
 import { INode } from '@/model/modules/node-library';
 import NodeEditor from './node-editor.vue';
 import { OwnerTypeEnum } from '@/api/dto/enumeration';
-
+import { StateEnum } from '@/components/load-more/enumeration';
 export default defineComponent({
   components: {
     NodeEditor,
@@ -158,63 +158,64 @@ export default defineComponent({
     });
     const nodeLibraryListData = reactive<INode[]>([]);
     const firstLoading = ref<boolean>(true);
-    const noMore = ref<boolean>(true);
     const total = ref<number>(0);
     const creationActivated = ref<boolean>(false);
     const scrollableEl = inject('scrollableEl');
+    // 显示更多
+    const loadState = ref<StateEnum>(StateEnum.NONE);
+    // 总页数
+    const pages = ref<number>(0);
     // 获取数据
     const nodeListData = (
       nodeLibraryListData: INode[],
       nodeLibraryListParameter: { pageNum: number; pageSize: number },
       loading: Ref<boolean>,
-      noMore: Ref<boolean>,
-      total: Ref<number>
+      total: Ref<number>,
     ) => {
-      if (!noMore.value) return;
       fetchNodeLibraryList(nodeLibraryListParameter)
         .then(res => {
+          pages.value = res.pages;
           total.value = res.total;
           loading.value = false;
-          if (res.list.length === 0) {
-            noMore.value = false;
-            return;
-          }
-          if (res.list.length === res.total) {
-            noMore.value = false;
-          }
           nodeLibraryListData.push(...res.list);
+          if (pages.value > nodeLibraryListParameter.pageNum) {
+            loadState.value = StateEnum.MORE;
+          }
+          if (pages.value === nodeLibraryListParameter.pageNum) {
+            loadState.value = StateEnum.NO_MORE;
+          }
+          if (total.value === 0) {
+            loadState.value = StateEnum.NONE;
+          }
         })
         .catch((err: Error) => {
           proxy.$throw(err, proxy);
         });
     };
-
     nodeListData(
       nodeLibraryListData,
       nodeLibraryListParameter,
       firstLoading,
-      noMore,
-      total
+      total,
     );
 
     // 加载更多
     const loadMore = () => {
       const bottomLoading = ref<boolean>(false);
       const btnDown = () => {
-        if (bottomLoading.value) return;
-        if (!noMore.value) return;
-        nodeLibraryListParameter.pageNum++;
-        bottomLoading.value = true;
-        nodeListData(
-          nodeLibraryListData,
-          nodeLibraryListParameter,
-          bottomLoading,
-          noMore,
-          total
-        );
+        if (nodeLibraryListParameter.pageNum < pages.value) {
+          loadState.value = StateEnum.LOADING;
+          nodeLibraryListParameter.pageNum++;
+          bottomLoading.value = true;
+          nodeListData(
+            nodeLibraryListData,
+            nodeLibraryListParameter,
+            bottomLoading,
+            total,
+          );
+        }
       };
       return {
-        bottomLoading,
         btnDown,
       };
     };
@@ -286,13 +287,13 @@ export default defineComponent({
         });
     };
     return {
+      loadState,
       scrollableEl,
       clickVersion,
       ...loadMore(),
       deleteNode,
       firstLoading,
       nodeLibraryListData,
-      noMore,
       syncNode,
       total,
       creationActivated,
@@ -301,14 +302,12 @@ export default defineComponent({
         nodeLibraryListParameter.pageNum = 1;
         nodeLibraryListParameter.pageSize = 12;
         firstLoading.value = true;
-        noMore.value = true;
         total.value = 0;
         nodeListData(
           nodeLibraryListData,
           nodeLibraryListParameter,
           firstLoading,
-          noMore,
-          total
+          total,
         );
       },
       OwnerTypeEnum,
@@ -568,35 +567,8 @@ export default defineComponent({
     }
   }
 
-  .bottom {
-    margin-top: 25px;
-    color: #7b8c9c;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-
-    .btm-down {
-      width: 16px;
-      height: 16px;
-      background-image: url('@/assets/svgs/node-library/drop-down.svg');
-      margin-left: 6px;
-    }
-
-    .btm-down.btn-loading {
-      animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43) infinite;
-      background-image: url('@/assets/svgs/node-library/loading.svg');
-    }
-
-    @keyframes rotate {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
+  .load-more {
+    text-align: center;
   }
 }
 </style>
