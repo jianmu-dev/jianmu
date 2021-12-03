@@ -27,7 +27,7 @@
       <router-link v-if="!session" :to="{name: 'login'}">
         <div class="no-login"></div>
       </router-link>
-      <jm-dropdown v-else>
+      <jm-dropdown v-else trigger="click">
         <span class="el-dropdown-link">
           <jm-tooltip :content="session.username" placement="left">
             <span class="username">{{ session.username.charAt(0).toUpperCase() }}</span>
@@ -176,7 +176,7 @@ export default defineComponent({
       align-items: center;
       margin-left: 10px;
       color: #333333;
-      cursor: default;
+      cursor: pointer;
 
       .username {
         display: inline-block;
