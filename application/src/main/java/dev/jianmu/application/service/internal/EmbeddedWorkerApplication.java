@@ -48,11 +48,15 @@ public class EmbeddedWorkerApplication {
     }
 
     public void createVolume(String volumeName) {
+        log.info("start create volume: {}", volumeName);
         this.dockerWorker.createVolume(volumeName);
+        log.info("create volume: {} completed", volumeName);
     }
 
     public void deleteVolume(String volumeName) {
+        log.info("start delete volume: {}", volumeName);
         this.dockerWorker.deleteVolume(volumeName);
+        log.info("delete volume: {} completed", volumeName);
     }
 
     public void runTask(WorkerTask workerTask) {
