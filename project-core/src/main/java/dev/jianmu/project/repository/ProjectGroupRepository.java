@@ -21,6 +21,8 @@ public interface ProjectGroupRepository {
 
     Optional<ProjectGroup> findById(String id);
 
+    Optional<ProjectGroup> findByName(String name);
+
     void update(ProjectGroup originProjectGroup);
 
     List<ProjectGroup> findAllBySortBetween(Integer originSort, Integer targetSort);
