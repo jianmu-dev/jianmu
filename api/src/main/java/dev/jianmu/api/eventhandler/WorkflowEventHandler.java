@@ -16,11 +16,11 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
+ * @author Ethan Liu
  * @class WorkflowEventHandler
  * @description 流程事件处理器
- * @author Ethan Liu
  * @create 2021-03-24 14:18
-*/
+ */
 @Component
 public class WorkflowEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowEventHandler.class);
@@ -46,7 +46,7 @@ public class WorkflowEventHandler {
     public void handleAggregateRootEvents(AggregateRoot aggregateRoot) {
         logger.info("Get AggregateRoot here -------------------------");
         aggregateRoot.getUncommittedDomainEvents().forEach(event -> {
-            logger.info("publishEvent here");
+            logger.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
         logger.info("-----------------------------------------------------");
@@ -57,11 +57,7 @@ public class WorkflowEventHandler {
     public void handleTaskActivatingEvent(TaskActivatingEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskActivatingEvent here -------------------------");
-        logger.info(event.getName());
-        logger.info(event.getNodeRef());
-        logger.info(event.getNodeType());
-        logger.info(event.getWorkflowInstanceId());
-        logger.info(event.getTriggerId());
+        logger.info(event.toString());
         this.taskInstanceInternalApplication.create(event);
         logger.info("-----------------------------------------------------");
     }
@@ -71,12 +67,7 @@ public class WorkflowEventHandler {
     public void handleTaskTerminatingEvent(TaskTerminatingEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskTerminatingEvent here -------------------------");
-        logger.info(event.getName());
-        logger.info(event.getNodeRef());
-        logger.info(event.getNodeType());
-        logger.info(event.getWorkflowInstanceId());
-        logger.info(event.getTriggerId());
-        logger.info(event.getExternalId());
+        logger.info(event.toString());
         this.workerApplication.terminateTask(event.getExternalId());
         logger.info("-----------------------------------------------------");
     }
@@ -85,12 +76,7 @@ public class WorkflowEventHandler {
     public void handleTaskRunningEvent(TaskRunningEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskRunningEvent here -------------------------");
-        logger.info(event.getName());
-        logger.info(event.getNodeRef());
-        logger.info(event.getNodeType());
-        logger.info(event.getWorkflowInstanceId());
-        logger.info(event.getTriggerId());
-        logger.info(event.getExternalId());
+        logger.info(event.toString());
         logger.info("-----------------------------------------------------");
     }
 
@@ -98,12 +84,7 @@ public class WorkflowEventHandler {
     public void handleTaskSucceededEvent(TaskSucceededEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskSucceededEvent here -------------------------");
-        logger.info(event.getName());
-        logger.info(event.getNodeRef());
-        logger.info(event.getNodeType());
-        logger.info(event.getWorkflowInstanceId());
-        logger.info(event.getTriggerId());
-        logger.info(event.getExternalId());
+        logger.info(event.toString());
         logger.info("-----------------------------------------------------");
     }
 
@@ -111,15 +92,10 @@ public class WorkflowEventHandler {
     public void handleTaskFailedEvent(TaskFailedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get TaskFailedEvent here -------------------------");
-        logger.info(event.getName());
-        logger.info(event.getNodeRef());
-        logger.info(event.getNodeType());
-        logger.info(event.getWorkflowInstanceId());
-        logger.info(event.getTriggerId());
-        logger.info(event.getExternalId());
-        logger.info("-----------------------------------------------------");
+        logger.info(event.toString());
         this.workflowInstanceInternalApplication.stop(event.getWorkflowInstanceId());
         this.workerApplication.cleanupWorkspace(event.getTriggerId());
+        logger.info("-----------------------------------------------------");
     }
 
     @Async
@@ -127,7 +103,7 @@ public class WorkflowEventHandler {
     public void handleNodeActivatingEvent(NodeActivatingEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get NodeActivatingEvent here -------------------------");
-        logger.info(event.getNodeRef());
+        logger.info(event.toString());
         this.workflowInstanceInternalApplication.activateNode(event.getWorkflowInstanceId(), event.getNodeRef());
         logger.info("handle NodeActivatingEvent end-----------------------------------------------------");
     }
@@ -137,7 +113,7 @@ public class WorkflowEventHandler {
     public void handleNodeSkipEvent(NodeSkipEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get NodeSkipEvent here -------------------------");
-        logger.info(event.getNodeRef());
+        logger.info(event.toString());
         this.workflowInstanceInternalApplication.skipNode(event.getWorkflowInstanceId(), event.getNodeRef());
         logger.info("handle NodeSkipEvent end-----------------------------------------------------");
     }
@@ -146,9 +122,7 @@ public class WorkflowEventHandler {
     public void handleWorkflowStartEvent(WorkflowStartEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get WorkflowStartEvent here -------------------------");
-        logger.info(event.getName());
-        logger.info(event.getWorkflowInstanceId());
-        logger.info(event.getTriggerId());
+        logger.info(event.toString());
         this.workerApplication.createWorkspace(event.getTriggerId());
         logger.info("-----------------------------------------------------");
     }
@@ -158,10 +132,7 @@ public class WorkflowEventHandler {
     public void handleWorkflowEndEvent(WorkflowEndEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         logger.info("Get WorkflowEndEvent here -------------------------");
-        logger.info(event.getName());
-        logger.info(event.getWorkflowInstanceId());
-        logger.info(event.getTriggerId());
-        logger.info("Delete Volume here -------------------------");
+        logger.info(event.toString());
         this.workerApplication.cleanupWorkspace(event.getTriggerId());
         logger.info("-----------------------------------------------------");
     }
