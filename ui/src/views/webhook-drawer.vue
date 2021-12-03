@@ -35,7 +35,7 @@
               class="table-content"
               ref="scrollRef"
               v-scroll="{
-                throtlle: 800,
+                throttle: 800,
                 loadMore: btnDown,
                 scrollableEl,
               }"
