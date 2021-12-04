@@ -173,7 +173,7 @@ export default defineComponent({
     }>({
       pageNum: START_PAGE_NUM,
       pageSize: DEFAULT_PAGE_SIZE,
-      projectId: '',
+      projectId: props.currentProjectId || '',
     });
     // 请求所有数据
     const webhookRequestData = ref<IPageVo<IWebRequestVo>>({
