@@ -1,6 +1,6 @@
 <template>
   <div class="project-group" v-loading="loading">
-    <div class="name">
+    <div v-if="!pageable" class="name">
       <span>{{ projectGroup.name }}</span>
       <span class="desc">（共有 {{ projectGroup.projectCount }} 个项目）</span>
     </div>
