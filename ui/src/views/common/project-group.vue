@@ -1,8 +1,8 @@
 <template>
   <div class="project-group" v-loading="loading">
     <div class="name">
-      <span>默认分组</span>
-      <span class="desc">（共有 {{ projects.length }} 个项目）</span>
+      <span>{{ projectGroup.name }}</span>
+      <span class="desc">（共有 {{ projectGroup.projectCount }} 个项目）</span>
     </div>
     <div class="projects">
       <jm-empty v-if="projects.length === 0"/>
@@ -19,23 +19,47 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, PropType, ref } from 'vue';
 import { IProjectVo } from '@/api/dto/project';
+import { IProjectGroupVo } from '@/api/dto/project-group';
 import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
 import { ProjectStatusEnum } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
+import { IPageVo } from '@/api/dto/common';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
 export default defineComponent({
   components: { ProjectItem },
-  setup() {
+  props: {
+    // 项目组
+    projectGroup: {
+      type: Object as PropType<IProjectGroupVo>,
+      required: true,
+    },
+    // 是否分页
+    pageable: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
-    const projects = ref<IProjectVo[]>([]);
-    const queryForm = ref<IQueryForm>({});
+    const projectPage = ref<IPageVo<IProjectVo>>({
+      total: 0,
+      pages: 0,
+      list: [],
+    });
+    const projects = computed<IProjectVo[]>(() => projectPage.value.list);
+    const queryForm = ref<IQueryForm>({
+      pageNum: 1,
+      // TODO 待完善分页
+      pageSize: props.pageable ? 10 : 10 * 1000,
+      projectGroupId: props.projectGroup.id,
+    });
     const autoRefreshingOfNoRunningCount = ref<number>(0);
 
     console.log('开启自动刷新项目列表');
@@ -59,7 +83,7 @@ export default defineComponent({
       autoRefreshingOfNoRunningCount.value = 0;
 
       try {
-        projects.value = await queryProject({ ...queryForm.value });
+        projectPage.value = await queryProject({ ...queryForm.value });
       } catch (err) {
         if (err instanceof TimeoutError) {
           // 忽略超时错误
@@ -80,7 +104,7 @@ export default defineComponent({
     const loadProject = async () => {
       try {
         loading.value = true;
-        projects.value = await queryProject({ ...queryForm.value });
+        projectPage.value = await queryProject({ ...queryForm.value });
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {

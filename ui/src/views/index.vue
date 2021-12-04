@@ -28,19 +28,35 @@
         </div>
       </div>
       <div class="separator">全部项目</div>
-      <project-group/>
+      <project-group v-for="projectGroup in projectGroups"
+                     :key="projectGroup.id"
+                     :project-group="projectGroup"
+                     :pageable="false"/>
     </div>
     <bottom-nav/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onBeforeMount, ref } from 'vue';
 import BottomNav from '@/views/nav/bottom2.vue';
 import ProjectGroup from '@/views/common/project-group.vue';
+import { IProjectGroupVo } from '@/api/dto/project-group';
+import { listProjectGroup } from '@/api/view-no-auth';
 
 export default defineComponent({
   components: { ProjectGroup, BottomNav },
+  setup() {
+    const projectGroups = ref<IProjectGroupVo[]>([]);
+
+    onBeforeMount(async () => {
+      projectGroups.value = await listProjectGroup();
+    });
+
+    return {
+      projectGroups,
+    };
+  },
 });
 </script>
 
