@@ -129,8 +129,8 @@ import { IProjectVo } from '@/api/dto/project';
 import { del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import DslDialog from '../dsl-dialog.vue';
-import WebhookDrawer from '../webhook-drawer.vue';
+import DslDialog from './dsl-dialog.vue';
+import WebhookDrawer from './webhook-drawer.vue';
 
 export default defineComponent({
   components: { DslDialog, WebhookDrawer },
