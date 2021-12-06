@@ -1,12 +1,12 @@
 package dev.jianmu.application.service;
 
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.ProjectGroupException;
-import dev.jianmu.infrastructure.mybatis.project.ProjectGroupRepositoryImpl;
+import dev.jianmu.infrastructure.mybatis.project.ProjectLinkGroupRepositoryImpl;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.repository.ProjectGroupRepository;
-import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +26,9 @@ public class ProjectGroupApplication {
     public static final String DEFAULT_PROJECT_GROUP_NAME = "默认分组";
 
     private final ProjectGroupRepository projectGroupRepository;
-    private final ProjectLinkGroupRepository projectLinkGroupRepository;
+    private final ProjectLinkGroupRepositoryImpl projectLinkGroupRepository;
 
-    public ProjectGroupApplication(ProjectGroupRepository projectGroupRepository, ProjectLinkGroupRepository projectLinkGroupRepository) {
+    public ProjectGroupApplication(ProjectGroupRepository projectGroupRepository, ProjectLinkGroupRepositoryImpl projectLinkGroupRepository) {
         this.projectGroupRepository = projectGroupRepository;
         this.projectLinkGroupRepository = projectLinkGroupRepository;
     }
@@ -233,8 +233,8 @@ public class ProjectGroupApplication {
         this.projectLinkGroupRepository.addAll(newLinkGroups);
     }
 
-    public List<ProjectLinkGroup> findLinkByGroupId(String projectGroupId) {
-        return this.projectLinkGroupRepository.findAllByGroupId(projectGroupId);
+    public PageInfo<ProjectLinkGroup> findLinkPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId) {
+        return this.projectLinkGroupRepository.findPageByGroupId(pageNum, pageSize, projectGroupId);
     }
 
     public Optional<ProjectLinkGroup> findLinkByProjectId(String id) {
