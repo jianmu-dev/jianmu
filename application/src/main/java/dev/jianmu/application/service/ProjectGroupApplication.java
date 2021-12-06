@@ -1,12 +1,11 @@
 package dev.jianmu.application.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.ProjectGroupException;
 import dev.jianmu.infrastructure.mybatis.project.ProjectGroupRepositoryImpl;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
+import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,16 +25,16 @@ import java.util.stream.Collectors;
 public class ProjectGroupApplication {
     public static final String DEFAULT_PROJECT_GROUP_NAME = "默认分组";
 
-    private final ProjectGroupRepositoryImpl projectGroupRepository;
+    private final ProjectGroupRepository projectGroupRepository;
     private final ProjectLinkGroupRepository projectLinkGroupRepository;
 
-    public ProjectGroupApplication(ProjectGroupRepositoryImpl projectGroupRepository, ProjectLinkGroupRepository projectLinkGroupRepository) {
+    public ProjectGroupApplication(ProjectGroupRepository projectGroupRepository, ProjectLinkGroupRepository projectLinkGroupRepository) {
         this.projectGroupRepository = projectGroupRepository;
         this.projectLinkGroupRepository = projectLinkGroupRepository;
     }
 
-    public PageInfo<ProjectGroup> findPage(int pageNum, int pageSize) {
-        return this.projectGroupRepository.findPage(pageNum, pageSize);
+    public List<ProjectGroup> findAll() {
+        return this.projectGroupRepository.findAll();
     }
 
     public ProjectGroup findById(String projectGroupId) {
@@ -117,8 +116,8 @@ public class ProjectGroupApplication {
                         .createdTime(projectGroup.getCreatedTime())
                         .build());
             }
-            targetProjectGroup = groups.get(groups.size()-1);
-        }else {
+            targetProjectGroup = groups.get(groups.size() - 1);
+        } else {
             for (int i = 1; i < groups.size(); i++) {
                 ProjectGroup projectGroup = groups.get(i);
                 projectGroups.add(ProjectGroup.Builder.aReference()
@@ -216,7 +215,7 @@ public class ProjectGroupApplication {
                         .sort(linkGroups.get(i + 1).getSort())
                         .build());
             }
-        }else {
+        } else {
             for (int i = 1; i < linkGroups.size(); i++) {
                 newLinkGroups.add(ProjectLinkGroup.Builder.aReference()
                         .projectGroupId(projectGroupId)
