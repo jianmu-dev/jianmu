@@ -1,7 +1,5 @@
 package dev.jianmu.infrastructure.mybatis.project;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.mapper.project.ProjectGroupMapper;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.repository.ProjectGroupRepository;
@@ -82,8 +80,7 @@ public class ProjectGroupRepositoryImpl implements ProjectGroupRepository {
         this.projectGroupMapper.deleteByIdIn(ids);
     }
 
-    public PageInfo<ProjectGroup> findPage(int pageNum, int pageSize) {
-        return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.projectGroupMapper.findAllOrderBySort());
+    public List<ProjectGroup> findAll() {
+        return this.projectGroupMapper.findAllOrderBySort();
     }
 }
