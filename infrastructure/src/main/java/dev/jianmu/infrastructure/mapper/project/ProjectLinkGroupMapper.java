@@ -67,7 +67,10 @@ public interface ProjectLinkGroupMapper {
     @Result(column = "created_time", property = "createdTime")
     Optional<ProjectLinkGroup> findByProjectId(String projectId);
 
-    @Select("select * from project_link_group where project_group_id = #{groupId} order by sort")
+    @Select("<script>" +
+            "SELECT * FROM `project_link_group` " +
+            "<if test='groupId != null'> WHERE `project_group_id` = #{groupId}</if>" +
+            "</script>")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "project_group_id", property = "projectGroupId")
     @Result(column = "created_time", property = "createdTime")

@@ -234,9 +234,8 @@ public class ProjectGroupApplication {
         this.projectLinkGroupRepository.addAll(newLinkGroups);
     }
 
-    public PageInfo<ProjectLinkGroup> findLinkPageByGroupId(int pageNum, int pageSize, String projectGroupId) {
-        return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.projectLinkGroupRepository.findAllByGroupId(projectGroupId));
+    public List<ProjectLinkGroup> findLinkByGroupId(String projectGroupId) {
+        return this.projectLinkGroupRepository.findAllByGroupId(projectGroupId);
     }
 
     public Optional<ProjectLinkGroup> findLinkByProjectId(String id) {
