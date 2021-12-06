@@ -1,5 +1,7 @@
 package dev.jianmu.infrastructure.mybatis.project;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.mapper.project.ProjectLinkGroupMapper;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
@@ -37,9 +39,9 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
         return this.projectLinkGroupMapper.findAllProjectIdByGroupId(groupId);
     }
 
-    @Override
-    public List<ProjectLinkGroup> findAllByGroupId(String groupId) {
-        return this.projectLinkGroupMapper.findAllByGroupId(groupId);
+    public PageInfo<ProjectLinkGroup> findPageByGroupId(Integer pageNum, Integer pageSize, String groupId) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> this.projectLinkGroupMapper.findAllByGroupId(groupId));
     }
 
     @Override

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Schema(description = "项目查看Dto")
-public class ProjectViewingDto {
+public class ProjectViewingDto extends PageDto {
     private String projectGroupId;
     private String name;
 }
