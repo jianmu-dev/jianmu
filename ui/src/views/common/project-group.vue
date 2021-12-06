@@ -2,7 +2,7 @@
   <div class="project-group" v-loading="loading">
     <div v-if="!pageable" class="name">
       <span>{{ projectGroup.name }}</span>
-      <span class="desc">（共有 {{ projectGroup.projectCount }} 个项目）</span>
+      <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
     </div>
     <div class="projects">
       <jm-empty v-if="projects.length === 0"/>
@@ -123,6 +123,7 @@ export default defineComponent({
     return {
       loading,
       ProjectStatusEnum,
+      projectPage,
       projects,
       queryForm,
       handleProjectRunning: (id: string) => {
