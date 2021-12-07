@@ -470,7 +470,7 @@ public class TriggerApplication {
     }
 
     private String isSecret(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\(\\(([a-zA-Z0-9_-]+\\.*[a-zA-Z0-9_-]+)\\)\\)$");
+        Pattern pattern = Pattern.compile("^\\(\\(([a-zA-Z0-9_-]+\\.+[a-zA-Z0-9_-]+)\\)\\)$");
         Matcher matcher = pattern.matcher(paramValue);
         if (matcher.find()) {
             return matcher.group(1);
