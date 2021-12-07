@@ -245,14 +245,9 @@ export function fetchVersion(): Promise<IVersionVo[]> {
 /**
  * 获取项目组列表
  */
-export async function listProjectGroup(): Promise<IProjectGroupVo[]> {
-  // TODO 待改善
-  return (await restProxy<IPageVo<IProjectGroupVo>>({
+export function listProjectGroup(): Promise<IProjectGroupVo[]> {
+  return restProxy<IProjectGroupVo[]>({
     url: `${baseUrl.projectGroup}`,
     method: 'get',
-    payload: {
-      pageNum: 1,
-      pageSize: 1000,
-    },
-  })).list;
+  });
 }
