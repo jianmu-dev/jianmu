@@ -9,14 +9,14 @@ import { IPageVo } from './dto/common';
 export const baseUrl = {
   webhook: '/trigger/web_requests',
   retry: '/trigger/retry',
-  trigger: '/trigger/web_requests/',
+  trigger: '/trigger/web_requests',
 };
 
 /**
  * 分页返回webhook请求列表
  */
 export function getWebhookList(
-  dto: ITriggerViewingDto,
+  dto: ITriggerViewingDto
 ): Promise<IPageVo<IWebRequestVo>> {
   return restProxy({
     url: `${baseUrl.webhook}`,
