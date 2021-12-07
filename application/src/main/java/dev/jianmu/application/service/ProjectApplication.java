@@ -346,7 +346,7 @@ public class ProjectApplication {
         return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
     }
 
-    public List<Project> findAllByProjectIdInAndWorkflowName(String projectGroupId, List<String> projectIds, String workflowName) {
-        return this.projectRepository.findAllByProjectIdInAndWorkflowName(projectGroupId, projectIds, workflowName);
+    public List<Project> findAllByProjectIdInAndWorkflowName(List<String> projectIds, String workflowName) {
+        return this.projectRepository.findAllByProjectIdInAndWorkflowName(projectIds, workflowName);
     }
 }

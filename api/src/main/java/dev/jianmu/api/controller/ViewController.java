@@ -332,7 +332,7 @@ public class ViewController {
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
         var page = this.projectGroupApplication.findLinkPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId());
         var projectIds = page.getList().stream().map(ProjectLinkGroup::getProjectId).collect(Collectors.toList());
-        var projects = this.projectApplication.findAllByProjectIdInAndWorkflowName(dto.getProjectGroupId(), projectIds, dto.getName());
+        var projects = this.projectApplication.findAllByProjectIdInAndWorkflowName(projectIds, dto.getName());
         var projectVos = projects.stream().map(project -> {
             var projectLinkGroup = page.getList().stream()
                     .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
