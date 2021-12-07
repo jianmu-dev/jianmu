@@ -59,7 +59,7 @@ interface IPathNav {
 
 function buildPathNav(
   pathNavs: Ref<IPathNav[]>,
-  route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
 ) {
   pathNavs.value.length = 0;
 
@@ -84,13 +84,13 @@ export default defineComponent({
     const route = useRoute();
     const platFormRef = ref<HTMLElement>();
     const height = computed(
-      () => platFormRef.value && platFormRef.value!.offsetHeight - 64
+      () => platFormRef.value && platFormRef.value!.offsetHeight - 64,
     );
     const bufferList = reactive<string[]>([]);
     const pathNavs = ref<IPathNav[]>([]);
     const loadMain = ref<boolean>(true);
     const pathNavsDisplay = computed<boolean>(
-      () => route.path !== PLATFORM_INDEX
+      () => route.path !== PLATFORM_INDEX,
     );
     const mainClass = ref<string>(pathNavsDisplay.value ? 'main' : 'main2');
     const mainScrollbarRef = ref<InstanceType<typeof ElScrollbar>>();
