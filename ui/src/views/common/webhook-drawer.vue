@@ -74,7 +74,7 @@
                         class="see-payload"
                         @click="seePayload(scope.row.id)"
                       >
-                        查看payload
+                        详情
                       </div>
                     </div>
                   </template>
@@ -94,11 +94,42 @@
       <!-- 查看payload -->
       <jm-dialog
         v-model="payloadDialogVisible"
-        title="查看payload"
+        title="查看详情"
+        @closed="dialogClose"
         destroy-on-close
+        width="1000px"
+        top="5vh"
       >
-        <div class="payload-content">
+        <div class="tab-container">
+          <div :class="{ active: payloadTab }" @click="toTrigger">Payload</div>
+          <div :class="{ active: !payloadTab }" @click="toPayload">触发器</div>
+        </div>
+        <!-- 查看payload -->
+        <div class="payload-content" v-if="payloadTab">
           <jm-log-viewer filename="webhook.txt" :value="webhookLog" />
+        </div>
+        <!-- 触发器 -->
+        <div v-else class="trigger-content">
+          <!-- 参数列表 -->
+          <div class="trigger-title">参数列表</div>
+          <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
+            <jm-table-column label="参数唯一标识" prop="name"></jm-table-column>
+            <jm-table-column
+              label="参数类型"
+              prop="type"
+              width="200px"
+            ></jm-table-column>
+            <jm-table-column label="参数值" prop="value"></jm-table-column>
+          </jm-table>
+          <!-- 认证 -->
+          <div class="verify-title">认证</div>
+          <jm-table class="verify-table" :data="webhookAuth">
+            <jm-table-column label="token" prop="token"></jm-table-column>
+            <jm-table-column label="value" prop="value"></jm-table-column>
+          </jm-table>
+          <!-- 匹配认证 -->
+          <div class="matching-title">匹配认证</div>
+          <div class="matching-container">{{ webhookParamsDetail?.only }}</div>
         </div>
       </jm-dialog>
     </jm-drawer>
@@ -113,10 +144,19 @@ import {
   watch,
   computed,
   nextTick,
+  onUpdated,
 } from 'vue';
 import useClipboard from 'vue-clipboard3';
-import { getWebhookList, retryWebRequest } from '@/api/trigger';
-import { IWebRequestVo } from '@/api/dto/trigger';
+import {
+  getWebhookList,
+  retryWebRequest,
+  getWebhookParams,
+} from '@/api/trigger';
+import {
+  IWebRequestVo,
+  IWebhookParamVo,
+  IWebhookAuthVo,
+} from '@/api/dto/trigger';
 import { datetimeFormatter } from '@/utils/formatter';
 import { IPageVo } from '@/api/dto/common';
 import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
@@ -126,25 +166,32 @@ import { StateEnum } from '@/components/load-more/enumeration';
 
 export default defineComponent({
   props: {
-    modelValue: {
+    webhookVisible: {
       type: Boolean,
     },
     currentProjectId: {
       type: String,
     },
   },
-  emits: ['close-webhook-drawer'],
+  emits: ['update:webhookVisible'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
+
     // 抽屉控制
-    const drawerVisible = ref<boolean>(false);
+    const drawerVisible = ref<boolean>(props.webhookVisible);
     // 弹窗控制
     const payloadDialogVisible = ref<boolean>(false);
     // 显示更多
     const scrollRef = ref<HTMLDivElement>();
     const webhookDrawerRef = ref<InstanceType<typeof ElScrollbar>>();
     const loadState = ref<StateEnum>(StateEnum.NONE);
+    const payloadTab = ref<boolean>(true);
+    // 列表id
+    const webhookListId = ref<string>('');
+    // webhook参数详情
+    const webhookParamsDetail = ref<IWebhookParamVo>();
+    const webhookAuth = ref<IWebhookAuthVo[]>([]);
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
     };
@@ -241,32 +288,29 @@ export default defineComponent({
     };
     // 监听抽屉切换
     watch(
-      () => props.modelValue,
+      () => props.webhookVisible,
       () => {
-        drawerVisible.value = props.modelValue;
-        if (drawerVisible.value) {
-          webhookRequestList.value = [];
-          // 进入抽屉显示loading
-          tableLoading.value = true;
-          // 还原页码
-          webhookRequestParams.value.pageNum = START_PAGE_NUM;
-          // 打开抽屉时什么状态都没有
-          loadState.value = StateEnum.NONE;
-          // 获取webhookUrl
-          getWebhookUrlRequest();
-          // 获取webhook请求列表
-          getWebhookRequestList('cover');
-        }
+        drawerVisible.value = props.webhookVisible;
       },
     );
-    // 监听项目id+请求
-    watch(
-      () => props.currentProjectId,
-      () => {
+    onUpdated(() => {
+      if (drawerVisible.value) {
         // 更改projectId
         webhookRequestParams.value.projectId = props.currentProjectId as string;
-      },
-    );
+        // 清空数组
+        webhookRequestList.value = [];
+        // 进入抽屉显示loading
+        tableLoading.value = true;
+        // 还原页码
+        webhookRequestParams.value.pageNum = START_PAGE_NUM;
+        // 打开抽屉时什么状态都没有
+        loadState.value = StateEnum.NONE;
+        // 获取webhookUrl
+        getWebhookUrlRequest();
+        // 获取webhook请求列表
+        getWebhookRequestList('cover');
+      }
+    });
     // 一键复制
     const copy = async () => {
       if (!link.value) {
@@ -282,7 +326,8 @@ export default defineComponent({
     };
     // 关闭drawer
     const closeDrawer = () => {
-      emit('close-webhook-drawer', false);
+      emit('update:webhookVisible', false);
+      // drawerVisible.value = false;
     };
     // 重试api
     const retryRequest = async (id: string) => {
@@ -308,14 +353,28 @@ export default defineComponent({
         })
         .then(() => retryRequest(id));
     };
+    // 获取触发器参数
+    const getTriggerParam = async () => {
+      try {
+        webhookParamsDetail.value = await getWebhookParams(webhookListId.value);
+        // 清空数组
+        webhookAuth.value = [];
+        // 重新赋值
+        webhookAuth.value!.push(webhookParamsDetail.value.auth);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     // 查看payload
     const seePayload = (id: string) => {
+      webhookListId.value = id;
       const { payload } = webhookRequestList.value.find(
-        item => item.id === id,
+        item => item.id === webhookListId.value,
       ) as IWebRequestVo;
       webhookLog.value = JSON.stringify(JSON.parse(payload), null, 2);
       nextTick(() => {
         payloadDialogVisible.value = true;
+        getTriggerParam();
       });
     };
     // 显示更多
@@ -331,6 +390,18 @@ export default defineComponent({
     };
     const rowkey = (row: any) => {
       return row.id;
+    };
+    // payload
+    const toTrigger = () => {
+      payloadTab.value = !payloadTab.value;
+    };
+    // 触发器
+    const toPayload = () => {
+      payloadTab.value = !payloadTab.value;
+    };
+    // 弹窗关闭
+    const dialogClose = () => {
+      payloadTab.value = true;
     };
     return {
       loadState,
@@ -354,6 +425,15 @@ export default defineComponent({
       datetimeFormatter,
       noMoreFlag,
       tableLoading,
+      // 切换tab
+      payloadTab,
+      toTrigger,
+      toPayload,
+      // 请求详情
+      webhookParamsDetail,
+      webhookAuth,
+      // 弹窗关闭
+      dialogClose,
     };
   },
 });
@@ -437,10 +517,6 @@ export default defineComponent({
         }
       }
     }
-    .webhook-drawer-ref {
-      // max-height: calc(100vh - 254px);
-      // height: 100px;
-    }
     // 表格
     .table-container {
       max-height: calc(100vh - 254px);
@@ -513,6 +589,23 @@ export default defineComponent({
   }
   // 查看paload
   ::v-deep(.el-dialog) {
+    .el-dialog__header {
+      border-bottom: 1px solid #e6ebf2;
+      margin-bottom: 25px;
+      padding: 20px 25px;
+    }
+    .el-dialog__header {
+      > span::before {
+        font-family: 'jm-icon-input';
+        content: '\e803';
+        margin-right: 10px;
+        color: #6b7b8d;
+        font-size: 20px;
+        vertical-align: bottom;
+        position: relative;
+        top: 1px;
+      }
+    }
     .el-dialog__title {
       font-size: 16px;
       color: #082340;
@@ -522,8 +615,83 @@ export default defineComponent({
       border: none;
       padding: 0px 20px 25px 20px;
     }
+    // payload/trigger
     .payload-content {
       height: 500px;
+      padding: 20px;
+      border: 1px solid #e6ebf2;
+    }
+    // tab切换
+    .tab-container {
+      display: flex;
+      div {
+        width: 120px;
+        height: 40px;
+        text-align: center;
+        line-height: 40px;
+        background: #e6ebf2;
+        margin-right: 5px;
+        font-size: 14px;
+        color: #082340;
+        cursor: pointer;
+        border-radius: 4px 4px 0 0;
+      }
+      .active {
+        color: #fff;
+        background: #042749;
+      }
+    }
+    // 触发器
+    .trigger-content {
+      padding: 20px;
+      border: 1px solid #e6ebf2;
+      .trigger-title {
+        margin-bottom: 10px;
+      }
+      .trigger-table,
+      .verify-table {
+        border: 1px solid #eceef6;
+        border-bottom: 0;
+        th {
+          text-align: center;
+        }
+        td {
+          border-right: 1px solid #eceef6;
+        }
+        td:last-of-type {
+          border-right: 0;
+        }
+        td:nth-of-type(2) {
+          text-align: center;
+        }
+      }
+      .trigger-table {
+        td:last-of-type,
+        td:first-of-type {
+          padding-left: 50px;
+        }
+      }
+      // 认证
+      .verify-title {
+        margin: 25px 0 10px 0;
+      }
+      .verify-table {
+        td {
+          text-align: center;
+        }
+      }
+      // 匹配认证
+      .matching-title {
+        margin: 25px 0 10px 0;
+      }
+      .matching-container {
+        height: 40px;
+        border-radius: 4px;
+        background: #f5f8fb;
+        font-size: 16px;
+        line-height: 40px;
+        padding-left: 20px;
+      }
     }
   }
 }

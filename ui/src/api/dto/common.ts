@@ -74,4 +74,4 @@ export interface IVersionVo extends Readonly<{
   versionNo: string;
   releaseUrl: string;
 }> {
-}
+} 
