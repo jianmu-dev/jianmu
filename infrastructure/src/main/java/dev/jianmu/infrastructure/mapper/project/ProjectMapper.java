@@ -90,13 +90,10 @@ public interface ProjectMapper {
 
     @Select("<script>" +
             "SELECT * FROM `jianmu_project` " +
-            "<where>" +
-            "<if test='projectGroupId != null'> AND `id` IN " +
+            "WHERE `id` IN " +
             "<foreach collection='projectIds' item='i'  open='(' separator=',' close=')'>#{i}" +
             "</foreach>" +
-            "</if>" +
             "<if test='workflowName != null'> AND `workflow_name` like concat('%', #{workflowName}, '%')</if>" +
-            "</where>" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "dsl_source", property = "dslSource")
@@ -110,5 +107,5 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
-    List<Project> findAllByProjectIdInAndWorkflowName(@Param("projectGroupId")String projectGroupId, @Param("projectIds") List<String> projectIds, @Param("workflowName") String workflowName);
+    List<Project> findAllByProjectIdInAndWorkflowName(@Param("projectIds") List<String> projectIds, @Param("workflowName") String workflowName);
 }

@@ -58,10 +58,10 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findAll();
     }
 
-    public List<Project> findAllByProjectIdInAndWorkflowName(String projectGroupId, List<String> projectIds, String projectName) {
+    public List<Project> findAllByProjectIdInAndWorkflowName(List<String> projectIds, String projectName) {
         if (projectIds.isEmpty()) {
             return List.of();
         }
-        return this.projectMapper.findAllByProjectIdInAndWorkflowName(projectGroupId, projectIds, projectName);
+        return this.projectMapper.findAllByProjectIdInAndWorkflowName(projectIds, projectName);
     }
 }
