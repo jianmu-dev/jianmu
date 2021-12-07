@@ -57,7 +57,9 @@ public class ProjectGroupApplication {
     public void updateProjectGroup(String projectGroupId, ProjectGroup projectGroup) {
         var originProjectGroup = this.projectGroupRepository.findById(projectGroupId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目组"));
-        originProjectGroup.setName(projectGroup.getName());
+        if (!DEFAULT_PROJECT_GROUP_NAME.equals(originProjectGroup.getName())) {
+            originProjectGroup.setName(projectGroup.getName());
+        }
         originProjectGroup.setDescription(projectGroup.getDescription());
         originProjectGroup.setLastModifiedTime();
         this.projectGroupRepository.update(originProjectGroup);
