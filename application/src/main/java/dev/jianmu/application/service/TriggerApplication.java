@@ -7,6 +7,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
 import dev.jianmu.infrastructure.quartz.PublishJob;
@@ -25,6 +26,7 @@ import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.ParameterRepository;
+import dev.jianmu.workflow.repository.WorkflowRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.ApplicationEventPublisher;
@@ -62,6 +64,7 @@ public class TriggerApplication {
     private final ParameterRepository parameterRepository;
     private final ProjectRepository projectRepository;
     private final WebRequestRepositoryImpl webRequestRepositoryImpl;
+    private final WorkflowRepository workflowRepository;
     private final CredentialManager credentialManager;
     private final Scheduler quartzScheduler;
     private final ApplicationEventPublisher publisher;
@@ -75,6 +78,7 @@ public class TriggerApplication {
             ParameterRepository parameterRepository,
             ProjectRepository projectRepository,
             WebRequestRepositoryImpl webRequestRepositoryImpl,
+            WorkflowRepository workflowRepository,
             CredentialManager credentialManager,
             Scheduler quartzScheduler,
             ApplicationEventPublisher publisher,
@@ -85,6 +89,7 @@ public class TriggerApplication {
         this.parameterRepository = parameterRepository;
         this.projectRepository = projectRepository;
         this.webRequestRepositoryImpl = webRequestRepositoryImpl;
+        this.workflowRepository = workflowRepository;
         this.credentialManager = credentialManager;
         this.quartzScheduler = quartzScheduler;
         this.publisher = publisher;
@@ -612,5 +617,16 @@ public class TriggerApplication {
         return Optional.ofNullable(encoded)
                 .map(e -> URLDecoder.decode(e, StandardCharsets.UTF_8))
                 .orElse(null);
+    }
+
+    public dev.jianmu.application.dsl.webhook.Webhook getWebhookParam(String id) {
+        var webRequest = webRequestRepositoryImpl.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
+        var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(),webRequest.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        WebhookDslParser parse = WebhookDslParser.parse(workflow.getDslText());
+        parse.getTrigger().getParam().forEach(webhookParameter ->
+                webhookParameter.setValue(this.extractParameter(webRequest.getPayload(),webhookParameter.getExp())));
+        return parse.getTrigger();
     }
 }
