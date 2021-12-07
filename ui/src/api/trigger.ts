@@ -1,10 +1,15 @@
 import { restProxy } from '@/api';
-import { ITriggerViewingDto, IWebRequestVo } from '@/api/dto/trigger';
+import {
+  ITriggerViewingDto,
+  IWebRequestVo,
+  IWebhookParamVo,
+} from '@/api/dto/trigger';
 import { IPageVo } from './dto/common';
 
 export const baseUrl = {
   webhook: '/trigger/web_requests',
   retry: '/trigger/retry',
+  trigger: '/trigger/web_requests/',
 };
 
 /**
@@ -28,6 +33,17 @@ export function retryWebRequest(WebRequestId: string): Promise<void> {
   return restProxy({
     url: `${baseUrl.retry}/${WebRequestId}`,
     method: 'post',
+    auth: true,
+  });
+}
+
+/**
+ * 获取webhook参数
+ */
+export function getWebhookParams(id: string): Promise<IWebhookParamVo> {
+  return restProxy({
+    url: `${baseUrl.trigger}/${id}/trigger`,
+    method: 'get',
     auth: true,
   });
 }

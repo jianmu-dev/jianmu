@@ -1,12 +1,10 @@
 <template>
-  <div
-    class="project-item"
-  >
+  <div class="project-item">
     <div
       :class="{
-                'state-bar': true,
-                [project.status.toLowerCase()]: true,
-              }"
+        'state-bar': true,
+        [project.status.toLowerCase()]: true,
+      }"
     ></div>
     <div class="content">
       <jm-tooltip
@@ -16,35 +14,33 @@
       >
         <a
           :class="{
-                    'git-label': true,
-                    [project.status === ProjectStatusEnum.INIT
-                      ? 'init'
-                      : 'normal']: true,
-                  }"
+            'git-label': true,
+            [project.status === ProjectStatusEnum.INIT
+              ? 'init'
+              : 'normal']: true,
+          }"
           :href="`/view/repo/${project.gitRepoId}`"
           target="_blank"
         ></a>
       </jm-tooltip>
       <router-link
         :to="{
-                  name: 'workflow-execution-record-detail',
-                  query: { projectId: project.id },
-                }"
+          name: 'workflow-execution-record-detail',
+          query: { projectId: project.id },
+        }"
       >
         <jm-tooltip :content="project.name" placement="top">
           <div class="title ellipsis">{{ project.name }}</div>
         </jm-tooltip>
       </router-link>
       <div class="time">
-                <span v-if="project.status === ProjectStatusEnum.RUNNING"
-                >执行时长：{{
-                    executionTimeFormatter(project.startTime, undefined, true)
-                  }}</span
-                >
-        <span v-else
-        >最后完成时间：{{
-            datetimeFormatter(project.latestTime)
+        <span v-if="project.status === ProjectStatusEnum.RUNNING"
+          >执行时长：{{
+            executionTimeFormatter(project.startTime, undefined, true)
           }}</span
+        >
+        <span v-else
+          >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
         >
       </div>
       <div class="time">
@@ -62,10 +58,7 @@
           content="Webhook"
           placement="bottom"
         >
-          <button
-            class="webhook"
-            @click="webhookDrawerFlag = true"
-          ></button>
+          <button class="webhook" @click="webhookDrawerFlag = true"></button>
         </jm-tooltip>
         <jm-tooltip
           v-if="project.source === DslSourceEnum.LOCAL"
@@ -85,20 +78,14 @@
           content="查看流程DSL"
           placement="bottom"
         >
-          <button
-            class="workflow-label"
-            @click="dslDialogFlag = true"
-          ></button>
+          <button class="workflow-label" @click="dslDialogFlag = true"></button>
         </jm-tooltip>
         <jm-tooltip
           v-else-if="project.dslType === DslTypeEnum.PIPELINE"
           content="查看管道DSL"
           placement="bottom"
         >
-          <button
-            class="pipeline-label"
-            @click="dslDialogFlag = true"
-          ></button>
+          <button class="pipeline-label" @click="dslDialogFlag = true"></button>
         </jm-tooltip>
         <jm-tooltip content="删除" placement="top">
           <button
@@ -110,8 +97,7 @@
     </div>
     <webhook-drawer
       :current-project-id="project.id"
-      v-model="webhookDrawerFlag"
-      @close-webhook-drawer="webhookDrawerFlag = false"
+      v-model:webhookVisible="webhookDrawerFlag"
     ></webhook-drawer>
     <dsl-dialog
       v-if="dslDialogFlag"
@@ -123,8 +109,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, PropType, ref, SetupContext } from 'vue';
-import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import {
+  defineComponent,
+  getCurrentInstance,
+  PropType,
+  ref,
+  SetupContext,
+} from 'vue';
+import {
+  DslSourceEnum,
+  DslTypeEnum,
+  ProjectStatusEnum,
+  TriggerTypeEnum,
+} from '@/api/dto/enumeration';
 import { IProjectVo } from '@/api/dto/project';
 import { del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
@@ -197,8 +194,7 @@ export default defineComponent({
                 executing.value = false;
               });
           })
-          .catch(() => {
-          });
+          .catch(() => {});
       },
       edit: (id: string) => {
         router.push({ name: 'update-project', params: { id } });
@@ -229,8 +225,7 @@ export default defineComponent({
                 synchronizing.value = false;
               });
           })
-          .catch(() => {
-          });
+          .catch(() => {});
       },
       del: (id: string) => {
         if (deleting.value) {
@@ -264,8 +259,7 @@ export default defineComponent({
                 deleting.value = false;
               });
           })
-          .catch(() => {
-          });
+          .catch(() => {});
       },
     };
   },
@@ -317,12 +311,14 @@ export default defineComponent({
     }
 
     &.running {
-      background-image: repeating-linear-gradient(115deg,
-      #10c2c2 0px,
-      #58d4d4 1px,
-      #58d4d4 10px,
-      #10c2c2 11px,
-      #10c2c2 16px);
+      background-image: repeating-linear-gradient(
+        115deg,
+        #10c2c2 0px,
+        #58d4d4 1px,
+        #58d4d4 10px,
+        #10c2c2 11px,
+        #10c2c2 16px
+      );
       background-size: 106px 114px;
       animation: 3s linear 0s infinite normal none running workflow-running;
     }
