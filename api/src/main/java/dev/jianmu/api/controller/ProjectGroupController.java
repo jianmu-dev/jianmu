@@ -57,6 +57,12 @@ public class ProjectGroupController {
         this.projectGroupApplication.updateSort(projectGroupSortUpdatingDto.getOriginSort(), projectGroupSortUpdatingDto.getTargetSort());
     }
 
+    @PutMapping("/{projectGroupId}/is_show")
+    @Operation(summary = "修改项目组是否展示", description = "修改项目组是否展示")
+    public void updateProjectGroupIsShow(@PathVariable String projectGroupId) {
+        this.projectGroupApplication.updateProjectGroupIsShow(projectGroupId);
+    }
+
     @PostMapping("/projects")
     @Operation(summary = "项目组添加项目", description = "项目组添加项目")
     public void addProjectByGroupId(@RequestBody @Valid ProjectGroupAddingDto projectGroupAddingDto) {

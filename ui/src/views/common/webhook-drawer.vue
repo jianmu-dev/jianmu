@@ -114,12 +114,29 @@
           <div class="trigger-title">参数列表</div>
           <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
             <jm-table-column label="参数唯一标识" prop="name"></jm-table-column>
-            <jm-table-column
-              label="参数类型"
-              prop="type"
-              width="200px"
-            ></jm-table-column>
-            <jm-table-column label="参数值" prop="value"></jm-table-column>
+            <jm-table-column label="参数类型" width="200px" prop="type">
+            </jm-table-column>
+            <jm-table-column label="参数值" prop="value">
+              <template #default="scope">
+                <div v-if="scope.row.type === 'SECRET'">
+                  <div class="hide-container" v-if="secretVisible">
+                    <span>********************</span>
+                    <i
+                      class="hide-secret jm-icon-input-visible"
+                      @click="hideSecret"
+                    ></i>
+                  </div>
+                  <div class="display-container" v-else>
+                    <span class="ellipsis">{{ scope.row.value }}</span>
+                    <i
+                      class="display-secret jm-icon-input-invisible"
+                      @click="displaySecret"
+                    ></i>
+                  </div>
+                </div>
+                <div class="ellipsis" v-else>{{ scope.row.value }}</div>
+              </template>
+            </jm-table-column>
           </jm-table>
           <!-- 认证 -->
           <div class="verify-title">认证</div>
@@ -194,6 +211,8 @@ export default defineComponent({
     // webhook参数详情
     const webhookParamsDetail = ref<IWebhookParamVo>();
     const webhookAuth = ref<IWebhookAuthVo[]>([]);
+    // 密钥类型显隐
+    const secretVisible = ref<boolean>(true);
     // webhook请求列表滚动
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
@@ -408,10 +427,15 @@ export default defineComponent({
     // 触发器
     const toPayload = () => {
       payloadTab.value = false;
+      // 还原密钥显示
+      secretVisible.value = true;
     };
     // 弹窗关闭
     const dialogClose = () => {
+      // 还原tab
       payloadTab.value = true;
+      // 还原密钥显示
+      secretVisible.value = true;
     };
     return {
       loadState,
@@ -444,6 +468,10 @@ export default defineComponent({
       webhookAuth,
       // 弹窗关闭
       dialogClose,
+      // 密钥类型显隐
+      secretVisible,
+      hideSecret: () => (secretVisible.value = false),
+      displaySecret: () => (secretVisible.value = true),
     };
   },
 });
@@ -655,7 +683,7 @@ export default defineComponent({
     }
     // 触发器
     .trigger-content {
-      overflow: auto;
+      overflow-y: auto;
       padding: 20px;
       border: 1px solid #e6ebf2;
       .trigger-title {
@@ -677,12 +705,56 @@ export default defineComponent({
         td:nth-of-type(2) {
           text-align: center;
         }
+        .el-table__row:hover > td {
+          background-color: #ffffff !important;
+        }
+
+        .el-table__row--striped:hover > td {
+          background-color: #fafafa !important;
+        }
       }
       .trigger-table {
         td:first-of-type,
         td:last-of-type {
           .cell {
             padding-left: 40px;
+          }
+        }
+        .hide-secret,
+        .display-secret {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 20px;
+          height: 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          margin-left: 10px;
+        }
+        .hide-container {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          .hide-secret {
+            .jm-icon-input-visible::before {
+              content: '\e803';
+            }
+            &:hover {
+              background: #eff7ff;
+            }
+          }
+        }
+        .display-container {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          .display-secret {
+            .jm-icon-input-invisible::before {
+              content: '\e800';
+            }
+            &:hover {
+              background: #eff7ff;
+            }
           }
         }
       }

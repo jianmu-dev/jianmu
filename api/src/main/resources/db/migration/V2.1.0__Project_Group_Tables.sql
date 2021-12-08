@@ -4,6 +4,7 @@ CREATE TABLE `project_group`
     `name`               varchar(45) NOT NULL COMMENT '名称',
     `description`        varchar(255) DEFAULT NULL COMMENT '描述',
     `sort`               int         NOT NULL COMMENT '排序',
+    `is_show`            bit         NOT NULL COMMENT '是否展示',
     `project_count`      int         NOT NULL COMMENT '项目数量',
     `created_time`       datetime    NOT NULL COMMENT '创建时间',
     `last_modified_time` datetime    NOT NULL COMMENT '最后修改时间',
@@ -14,8 +15,8 @@ CREATE TABLE `project_group`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目组表';
 
-INSERT INTO `project_group`(`id`, `name`, `description`, `sort`, `project_count`, `created_time`, `last_modified_time`)
-VALUES ('1', '默认分组', '默认分组', 0, 0, now(), now());
+INSERT INTO `project_group`(`id`, `name`, `description`, `sort`, `is_show`, `project_count`, `created_time`, `last_modified_time`)
+VALUES ('1', '默认分组', '默认分组', 0, 1, 0, now(), now());
 
 CREATE TABLE `project_link_group`
 (
