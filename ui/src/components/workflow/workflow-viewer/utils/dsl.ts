@@ -102,10 +102,11 @@ function parseWorkflow(workflow: any): {
       return;
     }
 
-    const { type: nodeType } = workflow[key];
+    const { type: nodeType, alias } = workflow[key];
 
-    const label = key.length > MAX_LABEL_LENGTH ? `${key.substr(0, MAX_LABEL_LENGTH)}...` : key;
-    let description = key;
+    let label = alias || key;
+    label = label.length > MAX_LABEL_LENGTH ? `${label.substr(0, MAX_LABEL_LENGTH)}...` : label;
+    let description = alias || key;
     let type = nodeType;
     let uniqueKey;
     switch (nodeType) {
@@ -204,13 +205,15 @@ function parsePipeline(pipeline: any): {
       });
     }
 
-    const label = key.length > MAX_LABEL_LENGTH ? `${key.substr(0, MAX_LABEL_LENGTH)}...` : key;
-    const { image, type } = pipeline[key];
+    const { image, type, alias } = pipeline[key];
+
+    let label = alias || key;
+    label = label.length > MAX_LABEL_LENGTH ? `${label.substr(0, MAX_LABEL_LENGTH)}...` : label;
 
     nodes.push({
       id: key,
       label,
-      description: key,
+      description: alias || key,
       type: NodeTypeEnum.ASYNC_TASK,
       uniqueKey: image ? SHELL_NODE_TYPE : type,
     });
