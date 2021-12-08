@@ -55,7 +55,7 @@
                   <div class="name">{{ i.name }}</div>
                 </div>
                 <div class="description">
-                  {{ i.description || '暂无内容' }}
+                  {{ i.description || '无' }}
                 </div>
                 <div class="update-time">
                   <span>最后修改时间：</span
@@ -98,7 +98,7 @@
               </div>
             </div>
             <div class="description">
-              {{ i.description || '暂无内容' }}
+              {{ i.description || '无' }}
             </div>
             <div class="update-time">
               <span>最后修改时间：</span
