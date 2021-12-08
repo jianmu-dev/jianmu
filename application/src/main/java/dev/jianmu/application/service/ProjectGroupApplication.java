@@ -49,6 +49,7 @@ public class ProjectGroupApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
         projectGroup.setProjectCount(0);
         projectGroup.setSort(++sort);
+        projectGroup.setIsShow(projectGroup.getIsShow());
         projectGroup.setLastModifiedTime();
         this.projectGroupRepository.add(projectGroup);
     }
@@ -60,6 +61,7 @@ public class ProjectGroupApplication {
         if (!DEFAULT_PROJECT_GROUP_NAME.equals(originProjectGroup.getName())) {
             originProjectGroup.setName(projectGroup.getName());
         }
+        originProjectGroup.setIsShow(projectGroup.getIsShow());
         originProjectGroup.setDescription(projectGroup.getDescription());
         originProjectGroup.setLastModifiedTime();
         this.projectGroupRepository.update(originProjectGroup);
@@ -114,6 +116,7 @@ public class ProjectGroupApplication {
                         .name(projectGroup.getName())
                         .description(projectGroup.getDescription())
                         .sort(groups.get(i + 1).getSort())
+                        .isShow(projectGroup.getIsShow())
                         .projectCount(projectGroup.getProjectCount())
                         .createdTime(projectGroup.getCreatedTime())
                         .build());
@@ -127,6 +130,7 @@ public class ProjectGroupApplication {
                         .name(projectGroup.getName())
                         .description(projectGroup.getDescription())
                         .sort(groups.get(i - 1).getSort())
+                        .isShow(projectGroup.getIsShow())
                         .projectCount(projectGroup.getProjectCount())
                         .createdTime(projectGroup.getCreatedTime())
                         .build());
@@ -138,6 +142,7 @@ public class ProjectGroupApplication {
                 .name(targetProjectGroup.getName())
                 .description(targetProjectGroup.getDescription())
                 .sort(targetSort)
+                .isShow(targetProjectGroup.getIsShow())
                 .projectCount(targetProjectGroup.getProjectCount())
                 .createdTime(targetProjectGroup.getCreatedTime())
                 .build());
@@ -245,5 +250,12 @@ public class ProjectGroupApplication {
 
     public List<ProjectLinkGroup> findLinkByProjectIdIn(List<String> projectIds) {
         return this.projectLinkGroupRepository.findAllByProjectIdIn(projectIds);
+    }
+
+    public void updateProjectGroupIsShow(String projectGroupId) {
+        var projectGroup = this.projectGroupRepository.findById(projectGroupId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
+        projectGroup.setIsShow(!projectGroup.getIsShow());
+        this.projectGroupRepository.update(projectGroup);
     }
 }

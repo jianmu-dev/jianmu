@@ -44,4 +44,7 @@ public class ProjectGroupVo {
     // 是否是默认分组
     @Schema(description = "是否是默认分组")
     private Boolean isDefaultGroup;
+    // 是否展示
+    @Schema(description = "是否首页展示")
+    private Boolean isShow;
 }
