@@ -618,12 +618,6 @@ export default defineComponent({
       border: none;
       padding: 0px 20px 25px 20px;
     }
-    // payload/trigger
-    .payload-content {
-      height: 500px;
-      padding: 20px;
-      border: 1px solid #e6ebf2;
-    }
     // tab切换
     .tab-container {
       display: flex;
@@ -644,8 +638,18 @@ export default defineComponent({
         background: #042749;
       }
     }
+    // payload/trigger
+    .payload-content,
+    .trigger-content {
+      height: 500px;
+    }
+    .payload-content {
+      padding: 20px;
+      border: 1px solid #e6ebf2;
+    }
     // 触发器
     .trigger-content {
+      overflow: auto;
       padding: 20px;
       border: 1px solid #e6ebf2;
       .trigger-title {
