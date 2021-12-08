@@ -1,9 +1,11 @@
 <template>
-  <router-view v-if="childRoute"/>
+  <router-view v-if="childRoute" />
   <div v-else class="secret-key-ns-manager">
     <div class="right-top-btn">
-      <router-link :to="{name: 'index'}">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
+      <router-link :to="{ name: 'index' }">
+        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
+          >关闭</jm-button
+        >
       </router-link>
     </div>
     <div class="menu-bar">
@@ -16,41 +18,67 @@
       <span class="desc">（共有 {{ namespaces.length }} 个命名空间）</span>
     </div>
     <div class="content" v-loading="loading">
-      <jm-empty v-if="namespaces.length === 0"/>
+      <jm-empty v-if="namespaces.length === 0" />
       <div v-else class="item" v-for="ns of namespaces" :key="ns.name">
         <div class="wrapper">
-          <router-link :to="{name: 'manage-secret-key', params: { namespace: ns.name }}">
+          <router-link
+            :to="{ name: 'manage-secret-key', params: { namespace: ns.name } }"
+          >
             <div class="name ellipsis">{{ ns.name }}</div>
           </router-link>
           <div class="description">
             <jm-scrollbar max-height="80px">
-              <span v-html="(ns.description || '无').replace(/\n/g, '<br/>')"/>
+              <span v-html="(ns.description || '无').replace(/\n/g, '<br/>')" />
             </jm-scrollbar>
           </div>
-          <div class="time">最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}</div>
+          <div class="time">
+            最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}
+          </div>
         </div>
         <div class="operation">
-          <button :class="{del: true, doing: deletings[ns.name]}" @click="del(ns.name)"></button>
+          <button
+            :class="{ del: true, doing: deletings[ns.name] }"
+            @click="del(ns.name)"
+          ></button>
         </div>
       </div>
     </div>
-    <ns-editor v-if="creationActivated" @closed="creationActivated = false" @completed="loadNamespace()"/>
+    <ns-editor
+      v-if="creationActivated"
+      @closed="creationActivated = false"
+      @completed="loadNamespace()"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, Ref, ref, toRefs } from 'vue';
+import {
+  defineComponent,
+  getCurrentInstance,
+  onBeforeMount,
+  Ref,
+  ref,
+  toRefs,
+} from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/secret-key';
 import { IState } from '@/model/modules/secret-key';
-import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLoaded, useRoute } from 'vue-router';
+import {
+  onBeforeRouteUpdate,
+  RouteLocationNormalized,
+  RouteLocationNormalizedLoaded,
+  useRoute,
+} from 'vue-router';
 import { deleteNamespace } from '@/api/secret-key';
 import NsEditor from './ns-editor.vue';
 import { datetimeFormatter } from '@/utils/formatter';
 
 const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
-function changeView(childRoute: Ref<boolean>, route: RouteLocationNormalizedLoaded | RouteLocationNormalized) {
+function changeView(
+  childRoute: Ref<boolean>,
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+) {
   childRoute.value = route.matched.length > 2;
 }
 
@@ -108,28 +136,32 @@ export default defineComponent({
         let msg = '<div>确定要删除命名空间吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
 
-        proxy.$confirm(msg, '删除命名空间', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          dangerouslyUseHTMLString: true,
-        }).then(() => {
-          deletings.value[name] = true;
+        proxy
+          .$confirm(msg, '删除命名空间', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+            dangerouslyUseHTMLString: true,
+          })
+          .then(() => {
+            deletings.value[name] = true;
 
-          deleteNamespace(name).then(() => {
-            proxy.$success('删除成功');
+            deleteNamespace(name)
+              .then(() => {
+                proxy.$success('删除成功');
 
-            delete deletings.value[name];
+                delete deletings.value[name];
 
-            // 同步命名空间列表（vuex状态）
-            proxy.mutateNamespaceDeletion(name);
-          }).catch((err: Error) => {
-            proxy.$throw(err, proxy);
+                // 同步命名空间列表（vuex状态）
+                proxy.mutateNamespaceDeletion(name);
+              })
+              .catch((err: Error) => {
+                proxy.$throw(err, proxy);
 
-            delete deletings.value[name];
-          });
-        }).catch(() => {
-        });
+                delete deletings.value[name];
+              });
+          })
+          .catch(() => {});
       },
     };
   },
@@ -139,7 +171,7 @@ export default defineComponent({
 <style scoped lang="less">
 .secret-key-ns-manager {
   padding: 15px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   margin-bottom: 25px;
 
   .right-top-btn {
@@ -163,7 +195,7 @@ export default defineComponent({
         width: 100%;
         text-align: center;
         font-size: 18px;
-        color: #B5BDC6;
+        color: #b5bdc6;
       }
 
       &.add {
@@ -171,8 +203,8 @@ export default defineComponent({
         width: 19%;
         min-width: 260px;
         height: 170px;
-        background-color: #FFFFFF;
-        border: 1px dashed #B5BDC6;
+        background-color: #ffffff;
+        border: 1px dashed #b5bdc6;
         background-image: url('@/assets/svgs/btn/add.svg');
         background-position: center 45px;
         background-repeat: no-repeat;
@@ -201,18 +233,17 @@ export default defineComponent({
   .content {
     display: flex;
     flex-wrap: wrap;
-
     .item {
       position: relative;
       margin: 0.5%;
       width: 19%;
       min-width: 260px;
       height: 170px;
-      background-color: #FFFFFF;
-      box-shadow: 0 0 8px 0 #9EB1C5;
+      background-color: #ffffff;
+      box-shadow: 0 0 8px 0 #9eb1c5;
 
       &:hover {
-        box-shadow: 0 0 12px 0 #9EB1C5;
+        box-shadow: 0 0 12px 0 #9eb1c5;
 
         .operation {
           display: block;
@@ -225,7 +256,7 @@ export default defineComponent({
         height: 138px;
 
         &:hover {
-          border-color: #096DD9;
+          border-color: #096dd9;
         }
 
         a {
@@ -245,7 +276,7 @@ export default defineComponent({
         .description {
           margin-top: 6px;
           font-size: 13px;
-          color: #6B7B8D;
+          color: #6b7b8d;
         }
 
         .ellipsis {
@@ -260,7 +291,7 @@ export default defineComponent({
         left: 15px;
         bottom: 15px;
         font-size: 13px;
-        color: #6B7B8D;
+        color: #6b7b8d;
       }
 
       .operation {
@@ -272,7 +303,7 @@ export default defineComponent({
         button {
           width: 22px;
           height: 22px;
-          background-color: #FFFFFF;
+          background-color: #ffffff;
           border: 0;
           background-position: center center;
           background-repeat: no-repeat;
@@ -280,7 +311,7 @@ export default defineComponent({
           cursor: pointer;
 
           &:active {
-            background-color: #EFF7FF;
+            background-color: #eff7ff;
             border-radius: 4px;
           }
 

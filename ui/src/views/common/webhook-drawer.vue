@@ -198,12 +198,18 @@ export default defineComponent({
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
     };
-    const height = computed<number>(() => {
-      const h =
-        window.innerHeight ||
+    const h =
+      (window.innerHeight ||
         document.documentElement.clientHeight ||
-        document.body.clientHeight;
-      return h - 335;
+        document.body.clientHeight) - 335;
+    const scrollHeight = ref<number>(h);
+    const height = computed<number>({
+      get() {
+        return scrollHeight.value;
+      },
+      set(value) {
+        scrollHeight.value = value;
+      },
     });
     // webhookUrl链接
     const webhook = ref<string>();
