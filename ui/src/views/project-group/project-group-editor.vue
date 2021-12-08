@@ -17,7 +17,12 @@
           placeholder="请输入分组名称"
         />
       </jm-form-item>
-      <jm-form-item label="首页展示" label-position="top" prop="isShow">
+      <jm-form-item
+        label="首页展示"
+        label-position="top"
+        prop="isShow"
+        class="is-show"
+      >
         <jm-switch v-model="editorForm.isShow" active-color="#096DD9" />
       </jm-form-item>
       <jm-form-item label="描述" label-position="top" prop="description">
@@ -137,6 +142,12 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+.el-form-item {
+  &.is-show {
+    margin-bottom: 0px;
+    margin-top: -10px;
+  }
+}
 .editor-title {
   padding-left: 36px;
   background-image: url('@/assets/svgs/btn/edit.svg');
