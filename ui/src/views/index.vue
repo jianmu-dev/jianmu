@@ -20,6 +20,11 @@
               <button class="node-library"></button>
             </jm-tooltip>
           </router-link>
+          <router-link :to="{ name: 'project-group' }">
+            <jm-tooltip content="分组管理" placement="top">
+              <button class="group"></button>
+            </jm-tooltip>
+          </router-link>
           <router-link :to="{ name: 'secret-key' }">
             <jm-tooltip content="密钥管理" placement="top">
               <button class="secret-key"></button>
@@ -28,12 +33,14 @@
         </div>
       </div>
       <div class="separator">全部项目</div>
-      <project-group v-for="projectGroup in projectGroups"
-                     :key="projectGroup.id"
-                     :project-group="projectGroup"
-                     :pageable="false"/>
+      <project-group
+        v-for="projectGroup in projectGroups"
+        :key="projectGroup.id"
+        :project-group="projectGroup"
+        :pageable="false"
+      />
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
 </template>
 
@@ -124,6 +131,10 @@ export default defineComponent({
           &.node-library {
             margin-left: 40px;
             background-image: url('@/assets/svgs/index/node-library-btn.svg');
+          }
+          &.group {
+            margin-left: 40px;
+            background-image: url('@/assets/svgs/index/group-icon.svg');
           }
 
           &.secret-key {

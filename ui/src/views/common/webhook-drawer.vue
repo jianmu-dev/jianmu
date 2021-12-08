@@ -5,7 +5,7 @@
       title="Webhook"
       :size="953"
       direction="rtl"
-      @close="closeDrawer"
+      @closed="closeDrawer"
       destroy-on-close
     >
       <div class="webhook-drawer">
@@ -129,7 +129,10 @@
           </jm-table>
           <!-- 匹配认证 -->
           <div class="matching-title">匹配认证</div>
-          <div class="matching-container">{{ webhookParamsDetail?.only }}</div>
+          <div class="matching-container" v-if="webhookParamsDetail?.only">
+            {{ webhookParamsDetail?.only }}
+          </div>
+          <div class="matching-container matching-null" v-else>暂无数据</div>
         </div>
       </jm-dialog>
     </jm-drawer>
@@ -141,7 +144,6 @@ import {
   defineComponent,
   ref,
   getCurrentInstance,
-  watch,
   computed,
   nextTick,
   onUpdated,
@@ -192,15 +194,22 @@ export default defineComponent({
     // webhook参数详情
     const webhookParamsDetail = ref<IWebhookParamVo>();
     const webhookAuth = ref<IWebhookAuthVo[]>([]);
+    // webhook请求列表滚动
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
     };
-    const height = computed<number>(() => {
-      const h =
-        window.innerHeight ||
+    const h =
+      (window.innerHeight ||
         document.documentElement.clientHeight ||
-        document.body.clientHeight;
-      return h - 335;
+        document.body.clientHeight) - 335;
+    const scrollHeight = ref<number>(h);
+    const height = computed<number>({
+      get() {
+        return scrollHeight.value;
+      },
+      set(value) {
+        scrollHeight.value = value;
+      },
     });
     // webhookUrl链接
     const webhook = ref<string>();
@@ -210,7 +219,7 @@ export default defineComponent({
     const link = computed<string | undefined>(
       () =>
         webhook.value &&
-        `${window.location.protocol}//${window.location.host}${webhook.value}`,
+        `${window.location.protocol}//${window.location.host}${webhook.value}`
     );
     // 请求参数
     const webhookRequestParams = ref<{
@@ -232,13 +241,25 @@ export default defineComponent({
     const webhookRequestList = ref<IWebRequestVo[]>([]);
     // 日志
     const webhookLog = ref<string>('');
+    // webhookUrl
+    const getWebhookUrlRequest = async () => {
+      try {
+        const { webhook: webhookUrl } = await fetchTriggerWebhook(
+          webhookRequestParams.value.projectId
+        );
+        webhook.value = webhookUrl;
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     // 分页返回webhook请求列表
     // listState列表的状态，push/cover
     const getWebhookRequestList = async (listState: string) => {
       const currentScorllTop = scrollRef.value?.scrollTop || 0;
       try {
+        // 请求表格数据
         webhookRequestData.value = await getWebhookList(
-          webhookRequestParams.value,
+          webhookRequestParams.value
         );
         // 数据请求成功取消loading
         tableLoading.value = false;
@@ -272,45 +293,29 @@ export default defineComponent({
           scrollRef.value.scrollTop = currentScorllTop;
         });
       } catch (err) {
+        tableLoading.value = false;
         proxy.$throw(err, proxy);
       }
     };
-    // webhookUrl
-    const getWebhookUrlRequest = async () => {
-      try {
-        const { webhook: webhookUrl } = await fetchTriggerWebhook(
-          webhookRequestParams.value.projectId,
-        );
-        webhook.value = webhookUrl;
-      } catch (err) {
-        proxy.$throw(err, proxy);
+    // 获取webhook的url和表格数据
+    const getWebhookInfo = () => {
+      if (drawerVisible.value === props.webhookVisible) {
+        return;
       }
+      // 打开抽屉
+      drawerVisible.value = props.webhookVisible;
+      // 更改projectId
+      webhookRequestParams.value.projectId = props.currentProjectId as string;
+      // 进入抽屉显示loading
+      tableLoading.value = true;
+      // 打开抽屉时什么状态都没有
+      loadState.value = StateEnum.NONE;
+      // 获取webhookUrl
+      getWebhookUrlRequest();
+      // 获取webhook请求列表
+      getWebhookRequestList('cover');
     };
-    // 监听抽屉切换
-    watch(
-      () => props.webhookVisible,
-      () => {
-        drawerVisible.value = props.webhookVisible;
-      },
-    );
-    onUpdated(() => {
-      if (drawerVisible.value) {
-        // 更改projectId
-        webhookRequestParams.value.projectId = props.currentProjectId as string;
-        // 清空数组
-        webhookRequestList.value = [];
-        // 进入抽屉显示loading
-        tableLoading.value = true;
-        // 还原页码
-        webhookRequestParams.value.pageNum = START_PAGE_NUM;
-        // 打开抽屉时什么状态都没有
-        loadState.value = StateEnum.NONE;
-        // 获取webhookUrl
-        getWebhookUrlRequest();
-        // 获取webhook请求列表
-        getWebhookRequestList('cover');
-      }
-    });
+    onUpdated(() => getWebhookInfo());
     // 一键复制
     const copy = async () => {
       if (!link.value) {
@@ -327,7 +332,10 @@ export default defineComponent({
     // 关闭drawer
     const closeDrawer = () => {
       emit('update:webhookVisible', false);
-      // drawerVisible.value = false;
+      // 清空数组
+      webhookRequestList.value = [];
+      // 还原页码
+      webhookRequestParams.value.pageNum = START_PAGE_NUM;
     };
     // 重试api
     const retryRequest = async (id: string) => {
@@ -360,7 +368,9 @@ export default defineComponent({
         // 清空数组
         webhookAuth.value = [];
         // 重新赋值
-        webhookAuth.value!.push(webhookParamsDetail.value.auth);
+        webhookParamsDetail.value.auth
+          ? webhookAuth.value.push(webhookParamsDetail.value.auth)
+          : webhookAuth.value;
       } catch (err) {
         proxy.$throw(err, proxy);
       }
@@ -369,7 +379,7 @@ export default defineComponent({
     const seePayload = (id: string) => {
       webhookListId.value = id;
       const { payload } = webhookRequestList.value.find(
-        item => item.id === webhookListId.value,
+        item => item.id === webhookListId.value
       ) as IWebRequestVo;
       webhookLog.value = JSON.stringify(JSON.parse(payload), null, 2);
       nextTick(() => {
@@ -393,11 +403,11 @@ export default defineComponent({
     };
     // payload
     const toTrigger = () => {
-      payloadTab.value = !payloadTab.value;
+      payloadTab.value = true;
     };
     // 触发器
     const toPayload = () => {
-      payloadTab.value = !payloadTab.value;
+      payloadTab.value = false;
     };
     // 弹窗关闭
     const dialogClose = () => {
@@ -551,7 +561,6 @@ export default defineComponent({
           }
           th {
             text-align: center;
-            border-right: 1px solid #ecedf4;
             font-weight: 500;
           }
           th:last-of-type {
@@ -615,12 +624,6 @@ export default defineComponent({
       border: none;
       padding: 0px 20px 25px 20px;
     }
-    // payload/trigger
-    .payload-content {
-      height: 500px;
-      padding: 20px;
-      border: 1px solid #e6ebf2;
-    }
     // tab切换
     .tab-container {
       display: flex;
@@ -641,8 +644,18 @@ export default defineComponent({
         background: #042749;
       }
     }
+    // payload/trigger
+    .payload-content,
+    .trigger-content {
+      height: 500px;
+    }
+    .payload-content {
+      padding: 20px;
+      border: 1px solid #e6ebf2;
+    }
     // 触发器
     .trigger-content {
+      overflow: auto;
       padding: 20px;
       border: 1px solid #e6ebf2;
       .trigger-title {
@@ -666,9 +679,11 @@ export default defineComponent({
         }
       }
       .trigger-table {
-        td:last-of-type,
-        td:first-of-type {
-          padding-left: 50px;
+        td:first-of-type,
+        td:last-of-type {
+          .cell {
+            padding-left: 40px;
+          }
         }
       }
       // 认证
@@ -685,12 +700,19 @@ export default defineComponent({
         margin: 25px 0 10px 0;
       }
       .matching-container {
-        height: 40px;
+        min-height: 40px;
         border-radius: 4px;
         background: #f5f8fb;
         font-size: 16px;
-        line-height: 40px;
-        padding-left: 20px;
+        line-height: 20px;
+        padding: 17px 20px;
+        word-wrap: break-word;
+        box-sizing: border-box;
+      }
+      // 为空时
+      .matching-null {
+        font-size: 14px;
+        color: #909399;
       }
     }
   }

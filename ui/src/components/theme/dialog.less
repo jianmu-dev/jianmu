@@ -1,8 +1,10 @@
 .el-dialog {
   .el-dialog__header {
-    .el-dialog__title {
-      color: #082340;
-    }
+    color: #082340;
+    height: 64px;
+    box-sizing: border-box;
+    padding: 20px 30px;
+    border-bottom: 1px solid #cad6ee;
 
     .el-dialog__headerbtn {
       .el-dialog__close::before {
@@ -14,15 +16,20 @@
   }
 
   .el-dialog__body {
-    padding: 10px 20px;
-    margin: 5px 0;
-    border-top: 1px solid #CAD6EE;
-    border-bottom: 1px solid #CAD6EE;
+    padding: 15px 30px;
   }
 
   .el-dialog__footer {
-    .el-button + .el-button {
-      margin-left: 32px;
+    height: 64px;
+    box-sizing: border-box;
+    background-color: #eff4f9;
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+    .el-button {
+      &:nth-child(2) {
+        margin: 0px 5px 0px 30px;
+      }
     }
   }
 }
