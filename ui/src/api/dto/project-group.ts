@@ -11,6 +11,7 @@ export interface IProjectGroupVo
       sort: number;
       projectCount: number;
       isDefaultGroup: boolean;
+      isShow: boolean;
     }
   > {}
 
@@ -21,6 +22,7 @@ export interface IProjectGroupVo
 export interface IProjectGroupCreatingDto
   extends Readonly<{
     name: string;
+    isShow: boolean;
     description?: string;
   }> {}
 /**
@@ -30,6 +32,7 @@ export interface IProjectGroupCreatingDto
 export interface IProjectGroupEditingDto
   extends Readonly<{
     name: string;
+    isShow: boolean;
     description?: string;
   }> {}
 /**

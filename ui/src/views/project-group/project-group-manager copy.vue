@@ -35,7 +35,7 @@
           v-model="projectGroupList"
           @change="sortList"
           @start="start"
-          @end="() => (currentSelected = false)"
+          @drag="drag"
           v-else-if="isActive"
         >
           <transition-group type="transition" name="flip-list">
@@ -144,7 +144,6 @@ import {
   getCurrentInstance,
   onMounted,
   computed,
-  nextTick,
 } from 'vue';
 import GroupCreator from './project-group-creator.vue';
 import GroupEditor from './project-group-editor.vue';
@@ -268,10 +267,8 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         }
       }
-      nextTick(() => {
-        currentItem.value = e.moved.element.id;
-        currentSelected.value = false;
-      });
+      currentItem.value = e.moved.element.id;
+      currentSelected.value = false;
     };
 
     return {
@@ -288,6 +285,9 @@ export default defineComponent({
       start(e: any) {
         currentSelected.value = true;
         currentItem.value = e.item.getAttribute('_id');
+      },
+      drag(e: any) {
+        currentItem.value = '-1';
       },
       isShow,
       currentSelected,
@@ -370,10 +370,10 @@ export default defineComponent({
       cursor: pointer;
       width: 24px;
       height: 24px;
-      background-image: url('@/assets/svgs/sort/move.svg');
+      background-image: url('@/assets/svgs/group/move.svg');
       background-size: contain;
       &.active {
-        background-image: url('@/assets/svgs/sort/move-active.svg');
+        background-image: url('@/assets/svgs/group/move-active.svg');
       }
     }
 
@@ -411,7 +411,7 @@ export default defineComponent({
                 bottom: 0;
                 width: 30px;
                 height: 30px;
-                background-image: url('@/assets/svgs/sort/drag.svg');
+                background-image: url('@/assets/svgs/group/drag.svg');
                 background-size: contain;
               }
             }
