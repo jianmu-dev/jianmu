@@ -110,7 +110,7 @@
                 @change="showChange($event, i.id)"
                 active-color="#096DD9"
               ></jm-switch>
-              <span>展示首页</span>
+              <span>首页展示</span>
             </div>
             <div class="total">
               共<span class="count"> {{ i.projectCount }} </span>条项目
@@ -431,7 +431,7 @@ export default defineComponent({
         padding: 15px;
         border: 1px solid transparent;
         height: 138px;
-        color: #80878f;
+        color: #6b7b8d;
         font-size: 13px;
         position: relative;
 
@@ -490,8 +490,9 @@ export default defineComponent({
         }
         .update-time {
           position: absolute;
-          bottom: 35px;
-          margin-top: 10px;
+          bottom: 38px;
+          // margin-top: 10px;
+          // margin-top: 20px;
         }
         .switch {
           position: absolute;

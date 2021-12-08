@@ -17,7 +17,7 @@
           placeholder="请输入分组名称"
         />
       </jm-form-item>
-      <jm-form-item label="展示首页" label-position="top" prop="isShow">
+      <jm-form-item label="首页展示" label-position="top" prop="isShow">
         <jm-switch v-model="editorForm.isShow" active-color="#096DD9" />
       </jm-form-item>
       <jm-form-item label="描述" label-position="top" prop="description">
