@@ -28,6 +28,14 @@ export default [
     },
   },
   {
+    name: 'project-group',
+    path: 'project-group',
+    component: () => import('@/views/project-group/project-group-manager.vue'),
+    meta: {
+      title: '分组管理',
+    },
+  },
+  {
     // 密钥管理路由
     name: 'secret-key',
     path: 'secret-key',
@@ -35,15 +43,19 @@ export default [
     meta: {
       title: '密钥管理',
     },
-    children: [{
-      name: 'manage-secret-key',
-      path: 'manager/:namespace',
-      component: () => import('@/views/secret-key/sk-manager.vue'),
-      props: ({ params: { namespace } }: RouteLocationNormalizedLoaded) => ({ ns: namespace }),
-      meta: {
-        title: '详情',
+    children: [
+      {
+        name: 'manage-secret-key',
+        path: 'manager/:namespace',
+        component: () => import('@/views/secret-key/sk-manager.vue'),
+        props: ({ params: { namespace } }: RouteLocationNormalizedLoaded) => ({
+          ns: namespace,
+        }),
+        meta: {
+          title: '详情',
+        },
       },
-    }],
+    ],
   },
   {
     name: 'import-project',
@@ -52,21 +64,21 @@ export default [
     meta: {
       title: '导入项目',
     },
-  }, {
+  },
+  {
     name: 'create-project',
     path: 'project/editor',
     component: () => import('@/views/project/editor.vue'),
     meta: {
       title: '新增项目',
     },
-  }, {
+  },
+  {
     name: 'process-template',
     path: 'process-template',
     component: () => import('@/views/process-template/manager.vue'),
     props: ({
-      query: {
-        processTemplatesName,
-      },
+      query: { processTemplatesName },
     }: RouteLocationNormalizedLoaded) => ({
       processTemplatesName,
     }),
@@ -74,7 +86,8 @@ export default [
       title: '流程模版',
       keepAlive: true,
     },
-  }, {
+  },
+  {
     name: 'update-project',
     path: 'project/editor/:id',
     component: () => import('@/views/project/editor.vue'),
@@ -87,7 +100,9 @@ export default [
     name: 'workflow-execution-record-detail',
     path: 'workflow-execution-record/detail',
     component: () => import('@/views/workflow-execution-record/detail.vue'),
-    props: ({ query: { projectId, workflowExecutionRecordId } }: RouteLocationNormalizedLoaded) => ({
+    props: ({
+      query: { projectId, workflowExecutionRecordId },
+    }: RouteLocationNormalizedLoaded) => ({
       projectId,
       workflowExecutionRecordId,
     }),

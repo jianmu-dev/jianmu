@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>移动 (1)</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="建木自动化-分组管理移动样式" transform="translate(-1393.000000, -544.000000)">
+            <g id="编组-4" transform="translate(1128.000000, 405.000000)">
+                <g id="移动-(1)" transform="translate(265.000000, 139.000000)">
+                    <path d="M30,0 L30,0 L30,0 L30,30 L0,30 C-2.02906125e-15,13.4314575 13.4314575,3.04359188e-15 30,0 Z" id="蒙版备份-70" fill-opacity="0.7" fill="#6B7B8D"></path>
+                    <rect id="矩形" fill="#000000" fill-rule="nonzero" opacity="0" x="12" y="11" width="16" height="16"></rect>
+                    <polygon id="路径" fill="#FFFFFF" fill-rule="nonzero" points="24 16 24 18 21 18 21 15 23 15 20 12 17 15 19 15 19 18 16 18 16 16 13 19 14 20 16 22 16 20 19 20 19 23 17 23 20 26 21 25 23 23 21 23 21 20 24 20 24 22 27 19"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

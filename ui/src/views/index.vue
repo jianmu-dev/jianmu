@@ -20,6 +20,11 @@
               <button class="node-library"></button>
             </jm-tooltip>
           </router-link>
+          <router-link :to="{ name: 'project-group' }">
+            <jm-tooltip content="分组管理" placement="top">
+              <button class="group"></button>
+            </jm-tooltip>
+          </router-link>
           <router-link :to="{ name: 'secret-key' }">
             <jm-tooltip content="密钥管理" placement="top">
               <button class="secret-key"></button>
@@ -307,7 +312,7 @@ export default defineComponent({
         }
 
         const { triggerType } = projects.value.find(
-          item => item.id === id,
+          item => item.id === id
         ) as IProjectVo;
         const isWarning = triggerType === TriggerTypeEnum.WEBHOOK;
 
@@ -387,7 +392,7 @@ export default defineComponent({
         }
 
         const { name } = projects.value.find(
-          item => item.id === id,
+          item => item.id === id
         ) as IProjectVo;
 
         let msg = '<div>确定要删除项目吗?</div>';
@@ -511,6 +516,10 @@ export default defineComponent({
           &.node-library {
             margin-left: 40px;
             background-image: url('@/assets/svgs/index/node-library-btn.svg');
+          }
+          &.group {
+            margin-left: 40px;
+            background-image: url('@/assets/svgs/index/group-icon.svg');
           }
 
           &.secret-key {

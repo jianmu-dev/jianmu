@@ -1,12 +1,24 @@
 import { restProxy } from '@/api/index';
-import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
+import {
+  ITaskExecutionRecordVo,
+  ITaskParamVo,
+  IWorkflowExecutionRecordVo,
+} from '@/api/dto/workflow-execution-record';
+import {
+  IProcessTemplateVo,
+  IProjectDetailVo,
+  IProjectQueryingDto,
+  IProjectVo,
+  IWorkflowVo,
+} from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
+import { IProjectGroupVo } from '@/api//dto/project-group';
 import { INodeVo } from '@/api/dto/node-library';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 
 export const baseUrl = {
+  projectGroup: '/view/projects/groups',
   project: '/view/projects',
   workflow: '/view/workflow_instances',
   tasks: '/view/task_instances',
@@ -25,7 +37,15 @@ const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 const baseHubUrl = {
   processTemplate: '/hub/view/workflow_templates',
 };
-
+/**
+ * 查询项目组列表
+ */
+export function queryProjectGroup(): Promise<IProjectGroupVo[]> {
+  return restProxy({
+    url: baseUrl.projectGroup,
+    method: 'get',
+  });
+}
 /**
  * 查询项目
  * @param dto
@@ -53,7 +73,9 @@ export function getProcessTemplate(dto: number): Promise<IProcessTemplateVo> {
  * 获取项目详情
  * @param projectId
  */
-export function fetchProjectDetail(projectId: string): Promise<IProjectDetailVo> {
+export function fetchProjectDetail(
+  projectId: string
+): Promise<IProjectDetailVo> {
   return restProxy({
     url: `${baseUrl.project}/${projectId}`,
     method: 'get',
@@ -64,7 +86,9 @@ export function fetchProjectDetail(projectId: string): Promise<IProjectDetailVo>
  * 获取流程执行记录列表
  * @param workflowRef
  */
-export function listWorkflowExecutionRecord(workflowRef: string): Promise<IWorkflowExecutionRecordVo[]> {
+export function listWorkflowExecutionRecord(
+  workflowRef: string
+): Promise<IWorkflowExecutionRecordVo[]> {
   return restProxy<IWorkflowExecutionRecordVo[]>({
     url: `${baseUrl.workflow}/${workflowRef}`,
     method: 'get',
@@ -75,7 +99,9 @@ export function listWorkflowExecutionRecord(workflowRef: string): Promise<IWorkf
  * 获取任务执行记录列表
  * @param workflowExecutionRecordId
  */
-export function listTask(workflowExecutionRecordId: string): Promise<ITaskExecutionRecordVo[]> {
+export function listTask(
+  workflowExecutionRecordId: string
+): Promise<ITaskExecutionRecordVo[]> {
   return restProxy<ITaskExecutionRecordVo[]>({
     url: `${baseUrl.tasks}/${workflowExecutionRecordId}`,
     method: 'get',
@@ -120,7 +146,9 @@ export function fetchTaskLog(taskExecutionRecordId: string): Promise<string> {
  * 检查流程日志
  * @param processExecutionRecordId
  */
-export function checkProcessLog(processExecutionRecordId: string): Promise<object> {
+export function checkProcessLog(
+  processExecutionRecordId: string
+): Promise<object> {
   return restProxy<object>({
     url: `${baseUrl.processLog}/${processExecutionRecordId}`,
     method: 'head',
@@ -131,7 +159,9 @@ export function checkProcessLog(processExecutionRecordId: string): Promise<objec
  * 获取流程日志
  * @param processExecutionRecordId
  */
-export function fetchProcessLog(processExecutionRecordId: string): Promise<string> {
+export function fetchProcessLog(
+  processExecutionRecordId: string
+): Promise<string> {
   return restProxy<string>({
     url: `${baseUrl.processLog}/${processExecutionRecordId}`,
     method: 'get',
@@ -144,7 +174,10 @@ export function fetchProcessLog(processExecutionRecordId: string): Promise<strin
  * @param workflowRef
  * @param workflowVersion
  */
-export function fetchWorkflow(workflowRef: string, workflowVersion: string): Promise<IWorkflowVo> {
+export function fetchWorkflow(
+  workflowRef: string,
+  workflowVersion: string
+): Promise<IWorkflowVo> {
   return restProxy<IWorkflowVo>({
     url: `${baseUrl.dsl}/${workflowRef}/${workflowVersion}`,
     method: 'get',
@@ -165,7 +198,9 @@ export function listNamespace(): Promise<INamespacesVo> {
  * 获取命名空间详情
  * @param name
  */
-export function fetchNamespaceDetail(name: string): Promise<INamespaceDetailVo> {
+export function fetchNamespaceDetail(
+  name: string
+): Promise<INamespaceDetailVo> {
   return restProxy<INamespaceDetailVo>({
     url: `${baseUrl.secretKey}/${name}`,
     method: 'get',
@@ -220,7 +255,9 @@ export function fetchTriggerEvent(triggerId: string): Promise<ITriggerEventVo> {
  * 获取触发器webhook
  * @param projectId
  */
-export function fetchTriggerWebhook(projectId: string): Promise<ITriggerWebhookVo> {
+export function fetchTriggerWebhook(
+  projectId: string
+): Promise<ITriggerWebhookVo> {
   return restProxy({
     url: `${baseUrl.trigger}/webhook/${projectId}`,
     method: 'get',

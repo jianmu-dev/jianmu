@@ -1,5 +1,5 @@
 <template>
-  <jm-scrollbar ref="nfManagerRef">
+  <jm-scrollbar>
     <div
       class="node-library-manager"
       v-scroll="{
@@ -170,7 +170,7 @@ export default defineComponent({
       nodeLibraryListData: INode[],
       nodeLibraryListParameter: { pageNum: number; pageSize: number },
       loading: Ref<boolean>,
-      total: Ref<number>,
+      total: Ref<number>
     ) => {
       fetchNodeLibraryList(nodeLibraryListParameter)
         .then(res => {
@@ -196,7 +196,7 @@ export default defineComponent({
       nodeLibraryListData,
       nodeLibraryListParameter,
       firstLoading,
-      total,
+      total
     );
 
     // 加载更多
@@ -211,7 +211,7 @@ export default defineComponent({
             nodeLibraryListData,
             nodeLibraryListParameter,
             bottomLoading,
-            total,
+            total
           );
         }
       };
@@ -307,7 +307,7 @@ export default defineComponent({
           nodeLibraryListData,
           nodeLibraryListParameter,
           firstLoading,
-          total,
+          total
         );
       },
       OwnerTypeEnum,
