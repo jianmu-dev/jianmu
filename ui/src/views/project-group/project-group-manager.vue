@@ -462,7 +462,7 @@ export default defineComponent({
         .total {
           position: absolute;
           bottom: 12px;
-          right: 20px;
+          right: 25px;
           font-weight: 400;
           text-align: end;
           margin-top: 10px;
