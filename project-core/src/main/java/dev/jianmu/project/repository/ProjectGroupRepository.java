@@ -34,4 +34,6 @@ public interface ProjectGroupRepository {
     void subProjectCountById(String projectGroupId, int count);
 
     void deleteByIdIn(List<String> ids);
+
+    List<ProjectGroup> findAll();
 }

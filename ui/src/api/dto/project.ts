@@ -1,4 +1,4 @@
-import { BaseVo } from '@/api/dto/common';
+import { BaseVo, IPageDto } from '@/api/dto/common';
 import {
   DslSourceEnum,
   DslTypeEnum,
@@ -58,9 +58,12 @@ export interface IProjectImportingDto
  * 查询项目dto
  */
 export interface IProjectQueryingDto
-  extends Readonly<{
-    name?: string;
-  }> {}
+  extends Readonly<
+    IPageDto & {
+      projectGroupId: string;
+      name?: string;
+    }
+  > {}
 
 /**
  * 项目vo

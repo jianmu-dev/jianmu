@@ -1,17 +1,18 @@
+import { BaseVo } from '@/api/dto/common';
 /**
- * 查询项目组列表vo
+ * 项目组vo
  */
 export interface IProjectGroupVo
-  extends Readonly<{
-    id: string;
-    name: string;
-    description?: string;
-    sort: number;
-    projectCount: number;
-    createdTime: string;
-    lastModifiedTime: string;
-    isDefaultGroup: boolean;
-  }> {}
+  extends Readonly<
+    BaseVo & {
+      id: string;
+      name: string;
+      description?: string;
+      sort: number;
+      projectCount: number;
+      isDefaultGroup: boolean;
+    }
+  > {}
 
 /**
  * 创建项目组dto

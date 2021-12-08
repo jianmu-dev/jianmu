@@ -16,10 +16,14 @@ import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
 import { IProjectGroupVo } from '@/api//dto/project-group';
 import { INodeVo } from '@/api/dto/node-library';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
+import { IProjectGroupVo } from '@/api/dto/project-group';
 
 export const baseUrl = {
   projectGroup: '/view/projects/groups',
   project: '/view/projects',
+  // TODO 待改善，与/view/projects合并
+  projectV2: '/view/v2/projects',
+  projectGroup: '/view/projects/groups',
   workflow: '/view/workflow_instances',
   tasks: '/view/task_instances',
   task: '/view/task_instance',
@@ -50,9 +54,9 @@ export function queryProjectGroup(): Promise<IProjectGroupVo[]> {
  * 查询项目
  * @param dto
  */
-export function queryProject(dto: IProjectQueryingDto): Promise<IProjectVo[]> {
+export function queryProject(dto: IProjectQueryingDto): Promise<IPageVo<IProjectVo>> {
   return restProxy({
-    url: baseUrl.project,
+    url: baseUrl.projectV2,
     method: 'get',
     payload: dto,
   });
@@ -272,5 +276,15 @@ export function fetchVersion(): Promise<IVersionVo[]> {
     url: `${baseUrl.version}`,
     method: 'get',
     timeout: 1000,
+  });
+}
+
+/**
+ * 获取项目组列表
+ */
+export function listProjectGroup(): Promise<IProjectGroupVo[]> {
+  return restProxy<IProjectGroupVo[]>({
+    url: `${baseUrl.projectGroup}`,
+    method: 'get',
   });
 }

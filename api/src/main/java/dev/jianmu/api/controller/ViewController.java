@@ -332,7 +332,7 @@ public class ViewController {
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
         var page = this.projectGroupApplication.findLinkPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId());
         var projectIds = page.getList().stream().map(ProjectLinkGroup::getProjectId).collect(Collectors.toList());
-        var projects = this.projectApplication.findPageByProjectIdIn(projectIds, dto.getWorkflowName());
+        var projects = this.projectApplication.findAllByProjectIdInAndWorkflowName(projectIds, dto.getName());
         var projectVos = projects.stream().map(project -> {
             var projectLinkGroup = page.getList().stream()
                     .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
@@ -376,9 +376,9 @@ public class ViewController {
 
     @GetMapping("/projects/groups")
     @Operation(summary = "查询项目组列表", description = "查询项目组列表")
-    public PageInfo<ProjectGroupVo> findProjectGroupPage(PageDto dto) {
-        var pageInfo = this.projectGroupApplication.findPage(dto.getPageNum(), dto.getPageSize());
-        var projectGroupVos = pageInfo.getList().stream()
+    public List<ProjectGroupVo> findProjectGroupPage() {
+        var projectGroups = this.projectGroupApplication.findAll();
+        return projectGroups.stream()
                 .map(projectGroup -> ProjectGroupVo.builder()
                         .id(projectGroup.getId())
                         .name(projectGroup.getName())
@@ -390,9 +390,6 @@ public class ViewController {
                         .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
                         .build())
                 .collect(Collectors.toList());
-        PageInfo<ProjectGroupVo> pageInfoVo = PageUtils.pageInfo2PageInfoVo(pageInfo);
-        pageInfoVo.setList(projectGroupVos);
-        return pageInfoVo;
     }
 
     @GetMapping("/projects/groups/{projectGroupId}")

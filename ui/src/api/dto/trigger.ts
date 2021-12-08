@@ -58,3 +58,25 @@ export interface IWebRequestVo
     errorMsg?: string;
     requestTime: string;
   }> {}
+
+/**
+ * 获取webhook参数
+ */
+export interface IWebhookParameterVo
+  extends Readonly<{
+    name: string;
+    type: string;
+    exp: string;
+    value: object;
+  }> {}
+export interface IWebhookAuthVo
+  extends Readonly<{
+    token: string;
+    value: string;
+  }> {}
+export interface IWebhookParamVo
+  extends Readonly<{
+    param: IWebhookParameterVo[];
+    auth: IWebhookAuthVo;
+    only: string;
+  }> {}

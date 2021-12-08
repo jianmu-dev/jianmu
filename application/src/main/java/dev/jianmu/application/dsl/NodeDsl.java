@@ -1,6 +1,7 @@
 package dev.jianmu.application.dsl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.exception.DslException;
@@ -72,7 +73,10 @@ public class NodeDsl {
     public static NodeDsl parseDsl(String dsl) {
         try {
             var mapper = new ObjectMapper(new YAMLFactory());
+            // 忽略description
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             var dslVo = mapper.readValue(dsl, NodeDsl.class);
+            dslVo.checkRef();
             if (dslVo.ref.contains("/")) {
                 var arr = dslVo.ref.split("/");
                 dslVo.ownerRef = arr[0];
@@ -80,7 +84,6 @@ public class NodeDsl {
             } else {
                 dslVo.ownerRef = "local";
             }
-            dslVo.checkRef();
             dslVo.checkParameter();
             return dslVo;
         } catch (JsonProcessingException e) {

@@ -1,13 +1,12 @@
 package dev.jianmu.application.service;
 
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.ProjectGroupException;
-import dev.jianmu.infrastructure.mybatis.project.ProjectGroupRepositoryImpl;
+import dev.jianmu.infrastructure.mybatis.project.ProjectLinkGroupRepositoryImpl;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
-import dev.jianmu.project.repository.ProjectLinkGroupRepository;
+import dev.jianmu.project.repository.ProjectGroupRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,16 +25,16 @@ import java.util.stream.Collectors;
 public class ProjectGroupApplication {
     public static final String DEFAULT_PROJECT_GROUP_NAME = "默认分组";
 
-    private final ProjectGroupRepositoryImpl projectGroupRepository;
-    private final ProjectLinkGroupRepository projectLinkGroupRepository;
+    private final ProjectGroupRepository projectGroupRepository;
+    private final ProjectLinkGroupRepositoryImpl projectLinkGroupRepository;
 
-    public ProjectGroupApplication(ProjectGroupRepositoryImpl projectGroupRepository, ProjectLinkGroupRepository projectLinkGroupRepository) {
+    public ProjectGroupApplication(ProjectGroupRepository projectGroupRepository, ProjectLinkGroupRepositoryImpl projectLinkGroupRepository) {
         this.projectGroupRepository = projectGroupRepository;
         this.projectLinkGroupRepository = projectLinkGroupRepository;
     }
 
-    public PageInfo<ProjectGroup> findPage(int pageNum, int pageSize) {
-        return this.projectGroupRepository.findPage(pageNum, pageSize);
+    public List<ProjectGroup> findAll() {
+        return this.projectGroupRepository.findAll();
     }
 
     public ProjectGroup findById(String projectGroupId) {
@@ -58,7 +57,9 @@ public class ProjectGroupApplication {
     public void updateProjectGroup(String projectGroupId, ProjectGroup projectGroup) {
         var originProjectGroup = this.projectGroupRepository.findById(projectGroupId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目组"));
-        originProjectGroup.setName(projectGroup.getName());
+        if (!DEFAULT_PROJECT_GROUP_NAME.equals(originProjectGroup.getName())) {
+            originProjectGroup.setName(projectGroup.getName());
+        }
         originProjectGroup.setDescription(projectGroup.getDescription());
         originProjectGroup.setLastModifiedTime();
         this.projectGroupRepository.update(originProjectGroup);
@@ -117,8 +118,8 @@ public class ProjectGroupApplication {
                         .createdTime(projectGroup.getCreatedTime())
                         .build());
             }
-            targetProjectGroup = groups.get(groups.size()-1);
-        }else {
+            targetProjectGroup = groups.get(groups.size() - 1);
+        } else {
             for (int i = 1; i < groups.size(); i++) {
                 ProjectGroup projectGroup = groups.get(i);
                 projectGroups.add(ProjectGroup.Builder.aReference()
@@ -216,7 +217,7 @@ public class ProjectGroupApplication {
                         .sort(linkGroups.get(i + 1).getSort())
                         .build());
             }
-        }else {
+        } else {
             for (int i = 1; i < linkGroups.size(); i++) {
                 newLinkGroups.add(ProjectLinkGroup.Builder.aReference()
                         .projectGroupId(projectGroupId)
@@ -234,9 +235,8 @@ public class ProjectGroupApplication {
         this.projectLinkGroupRepository.addAll(newLinkGroups);
     }
 
-    public PageInfo<ProjectLinkGroup> findLinkPageByGroupId(int pageNum, int pageSize, String projectGroupId) {
-        return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.projectLinkGroupRepository.findAllByGroupId(projectGroupId));
+    public PageInfo<ProjectLinkGroup> findLinkPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId) {
+        return this.projectLinkGroupRepository.findPageByGroupId(pageNum, pageSize, projectGroupId);
     }
 
     public Optional<ProjectLinkGroup> findLinkByProjectId(String id) {

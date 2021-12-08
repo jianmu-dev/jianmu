@@ -2,6 +2,7 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.WebRequestDto;
+import dev.jianmu.api.vo.WebhookParamVo;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.trigger.aggregate.WebRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,5 +38,16 @@ public class TriggerController {
     @Operation(summary = "Webhook请求重试", description = "Webhook请求重试")
     public void retry(@PathVariable String webRequestId) {
         this.triggerApplication.retryHttpEvent(webRequestId);
+    }
+
+    @GetMapping("/web_requests/{id}/trigger")
+    @Operation(summary = "获取webhook参数", description = "获取webhook参数")
+    public WebhookParamVo getWebhookParam(@PathVariable String id) {
+        var webhook =  this.triggerApplication.getWebhookParam(id);
+        return WebhookParamVo.builder()
+                .param(webhook.getParam())
+                .auth(webhook.getAuth())
+                .only(webhook.getOnly())
+                .build();
     }
 }

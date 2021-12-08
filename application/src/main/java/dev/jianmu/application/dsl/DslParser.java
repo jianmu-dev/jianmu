@@ -371,12 +371,17 @@ public class DslParser {
                 var token = ((Map<?, ?>) auth).get("token");
                 var value = ((Map<?, ?>) auth).get("value");
                 if (token instanceof String && value instanceof String) {
+                    if (this.isSecret((String) value) == null) {
+                        throw new IllegalArgumentException("token值应为密钥参数类型");
+                    }
                     webhookBuilder.auth(
                             WebhookAuth.Builder.aWebhookAuth()
                                     .token((String) token)
                                     .value((String) value)
                                     .build()
                     );
+                } else {
+                    throw new IllegalArgumentException("token格式不正确");
                 }
             }
             if (param instanceof List) {
@@ -539,6 +544,15 @@ public class DslParser {
         Pattern pattern = Pattern.compile("^\\(.*\\)$");
         Matcher matcher = pattern.matcher(paramValue);
         return matcher.lookingAt();
+    }
+
+    private String isSecret(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(\\(([a-zA-Z0-9_-]+\\.+[a-zA-Z0-9_-]+)\\)\\)$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     public Set<String> getAsyncTaskTypes() {
