@@ -18,10 +18,15 @@
           <span>项目分组</span>
           <span class="desc">（共有 {{ projectGroupList?.length }} 个组）</span>
         </div>
-        <div
-          :class="['move', isActive ? 'active' : '']"
-          @click="() => (isActive = !isActive)"
-        ></div>
+        <jm-tooltip content="关闭排序" placement="top" v-if="isActive">
+          <div
+            :class="['move', isActive ? 'active' : '']"
+            @click="() => (isActive = !isActive)"
+          ></div>
+        </jm-tooltip>
+        <jm-tooltip content="排序" placement="top" v-else>
+          <div class="move" @click="() => (isActive = !isActive)"></div>
+        </jm-tooltip>
       </div>
       <div class="content" v-loading="loading">
         <jm-empty v-if="projectGroupList?.length === 0" />
@@ -30,7 +35,7 @@
           v-model="projectGroupList"
           @change="sortList"
           @start="start"
-          @end="currentSelected = false"
+          @end="() => (currentSelected = false)"
           v-else-if="isActive"
         >
           <transition-group type="transition" name="flip-list">
@@ -40,6 +45,7 @@
               :key="i.id"
               :_id="i.id"
               @mouseover="over(i.id)"
+              @mouseleave="leave"
             >
               <div class="wrapper">
                 <div class="top">
@@ -47,18 +53,6 @@
                     <div class="name">{{ i.name }}</div>
                   </router-link> -->
                   <div class="name">{{ i.name }}</div>
-                  <div class="operation">
-                    <div
-                      class="edit op-item"
-                      @click="
-                        toEdit(i.id, i.name, i.isDefaultGroup, i.description)
-                      "
-                    ></div>
-                    <div
-                      class="delete op-item"
-                      @click="toDelete(i.name, i.id)"
-                    ></div>
-                  </div>
                 </div>
                 <div class="description">
                   {{ i.description }}
@@ -87,7 +81,15 @@
               <div class="operation">
                 <div
                   class="edit op-item"
-                  @click="toEdit(i.id, i.name, i.isDefaultGroup, i.description)"
+                  @click="
+                    toEdit(
+                      i.id,
+                      i.name,
+                      i.isDefaultGroup,
+                      i.isShow,
+                      i.description
+                    )
+                  "
                 ></div>
                 <div
                   class="delete op-item"
@@ -101,6 +103,14 @@
             <div class="update-time">
               <span>最后修改时间：</span
               ><span>{{ datetimeFormatter(i.lastModifiedTime) }}</span>
+            </div>
+            <div class="switch">
+              <jm-switch
+                v-model="i.isShow"
+                @change="showChange($event, i.id)"
+                active-color="#096DD9"
+              ></jm-switch>
+              <span>展示首页</span>
             </div>
             <div class="total">
               共<span class="count"> {{ i.projectCount }} </span>条项目
@@ -117,6 +127,7 @@
         :default-group="defaultProjectGroup"
         :name="groupName || ''"
         :description="groupDescription"
+        :is-show="showInHomePage"
         :id="projectGroupId || ''"
         v-if="editionActivated"
         @closed="editionActivated = false"
@@ -142,8 +153,10 @@ import { IProjectGroupVo } from '@/api/dto/project-group';
 import { datetimeFormatter } from '@/utils/formatter';
 import {
   deleteProjectGroup,
+  updateProjectGroupShow,
   updateProjectGroupSort,
 } from '@/api/project-group';
+import { Mutable } from '@/utils/lib';
 export default defineComponent({
   components: {
     GroupCreator,
@@ -151,17 +164,29 @@ export default defineComponent({
   },
   setup() {
     const { proxy } = getCurrentInstance() as any;
+    const isShow = ref<boolean>(false);
     const loading = ref<boolean>();
     const isActive = ref<boolean>(false);
     const creationActivated = ref<boolean>(false);
     const editionActivated = ref<boolean>(false);
-    const projectGroupList = ref<IProjectGroupVo[]>([]);
+    const projectGroupList = ref<Mutable<IProjectGroupVo[]>>([]);
     const groupName = ref<string>();
     const groupDescription = ref<string>();
     const projectGroupId = ref<string>();
     const defaultProjectGroup = ref<boolean>(false);
     const currentItem = ref<string>('-1');
     const currentSelected = ref<boolean>(false);
+    const showInHomePage = ref<boolean>(false);
+    const showChange = async (e: boolean, id: string) => {
+      try {
+        await updateProjectGroupShow(id);
+        e
+          ? proxy.$success('项目分组首页显示')
+          : proxy.$success('项目分组首页隐藏');
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     const moveClassList = computed<string[]>(() =>
       projectGroupList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
@@ -183,6 +208,7 @@ export default defineComponent({
       id: string,
       name: string,
       isDefault: boolean,
+      isShow: boolean,
       description?: string
     ) => {
       defaultProjectGroup.value = isDefault;
@@ -190,6 +216,7 @@ export default defineComponent({
       groupDescription.value = description;
       projectGroupId.value = id;
       editionActivated.value = true;
+      showInHomePage.value = isShow;
     };
     const toDelete = async (name: string, projectGroupId: string) => {
       let msg = '<div>确定要删除分组吗?</div>';
@@ -243,20 +270,28 @@ export default defineComponent({
       }
       nextTick(() => {
         currentItem.value = e.moved.element.id;
+        currentSelected.value = false;
       });
     };
-    const over = (id: string) => {
-      if (currentSelected.value) {
-        return;
-      }
-      currentItem.value = id;
-    };
+
     return {
+      leave() {
+        currentItem.value = '';
+      },
+      over(id: string) {
+        if (currentSelected.value) {
+          return;
+        }
+        currentItem.value = id;
+      },
+      showChange,
       start(e: any) {
         currentSelected.value = true;
         currentItem.value = e.item.getAttribute('_id');
       },
+      isShow,
       currentSelected,
+      showInHomePage,
       moveClassList,
       defaultProjectGroup,
       groupName,
@@ -274,7 +309,6 @@ export default defineComponent({
       add,
       toEdit,
       toDelete,
-      over,
     };
   },
 });
@@ -336,10 +370,10 @@ export default defineComponent({
       cursor: pointer;
       width: 24px;
       height: 24px;
-      background-image: url('@/assets/svgs/group/move.svg');
+      background-image: url('@/assets/svgs/sort/move.svg');
       background-size: contain;
       &.active {
-        background-image: url('@/assets/svgs/group/move-active.svg');
+        background-image: url('@/assets/svgs/sort/move-active.svg');
       }
     }
 
@@ -360,10 +394,10 @@ export default defineComponent({
       width: 100%;
       .item {
         cursor: move;
-        pointer-events: stroke;
         &.move {
           .wrapper {
             position: relative;
+            border-color: #096dd9;
             .cover {
               position: absolute;
               top: 0;
@@ -377,7 +411,7 @@ export default defineComponent({
                 bottom: 0;
                 width: 30px;
                 height: 30px;
-                background-image: url('@/assets/svgs/group/drag.svg');
+                background-image: url('@/assets/svgs/sort/drag.svg');
                 background-size: contain;
               }
             }
@@ -458,6 +492,16 @@ export default defineComponent({
           position: absolute;
           bottom: 35px;
           margin-top: 10px;
+        }
+        .switch {
+          position: absolute;
+          bottom: 10px;
+          left: 15px;
+          display: flex;
+          align-items: center;
+          span {
+            margin-left: 5px;
+          }
         }
         .total {
           position: absolute;

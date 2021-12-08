@@ -13,7 +13,6 @@ import {
 } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
-import { IProjectGroupVo } from '@/api//dto/project-group';
 import { INodeVo } from '@/api/dto/node-library';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 import { IProjectGroupVo } from '@/api/dto/project-group';
@@ -23,7 +22,6 @@ export const baseUrl = {
   project: '/view/projects',
   // TODO 待改善，与/view/projects合并
   projectV2: '/view/v2/projects',
-  projectGroup: '/view/projects/groups',
   workflow: '/view/workflow_instances',
   tasks: '/view/task_instances',
   task: '/view/task_instance',
@@ -54,7 +52,9 @@ export function queryProjectGroup(): Promise<IProjectGroupVo[]> {
  * 查询项目
  * @param dto
  */
-export function queryProject(dto: IProjectQueryingDto): Promise<IPageVo<IProjectVo>> {
+export function queryProject(
+  dto: IProjectQueryingDto
+): Promise<IPageVo<IProjectVo>> {
   return restProxy({
     url: baseUrl.projectV2,
     method: 'get',

@@ -105,3 +105,14 @@ export function deleteProjectGroupProject(
     auth: true,
   });
 }
+
+/**
+ * 修改项目组是否展示
+ */
+export function updateProjectGroupShow(projectGroupId: string): Promise<void> {
+  return restProxy({
+    url: `${baseUrl}/${projectGroupId}/is_show`,
+    method: 'put',
+    auth: true,
+  });
+}
