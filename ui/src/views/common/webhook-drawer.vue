@@ -127,14 +127,14 @@
                     ></i>
                   </div>
                   <div class="display-container" v-else>
-                    <span>{{ scope.row.value }}</span>
+                    <span class="ellipsis">{{ scope.row.value }}</span>
                     <i
                       class="display-secret jm-icon-input-invisible"
                       @click="displaySecret"
                     ></i>
                   </div>
                 </div>
-                <div v-else>{{ scope.row.value }}</div>
+                <div class="ellipsis" v-else>{{ scope.row.value }}</div>
               </template>
             </jm-table-column>
           </jm-table>
@@ -683,7 +683,7 @@ export default defineComponent({
     }
     // 触发器
     .trigger-content {
-      overflow: auto;
+      overflow-y: auto;
       padding: 20px;
       border: 1px solid #e6ebf2;
       .trigger-title {
@@ -733,6 +733,8 @@ export default defineComponent({
         }
         .hide-container {
           display: flex;
+          align-items: center;
+          justify-content: space-between;
           .hide-secret {
             .jm-icon-input-visible::before {
               content: '\e803';
@@ -745,6 +747,7 @@ export default defineComponent({
         .display-container {
           display: flex;
           align-items: center;
+          justify-content: space-between;
           .display-secret {
             .jm-icon-input-invisible::before {
               content: '\e800';
