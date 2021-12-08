@@ -18,6 +18,8 @@ public class ProjectGroup {
     private String description;
     // 排序
     private Integer sort;
+    // 是否展示
+    private Boolean isShow;
     // 项目数
     private Integer projectCount = 0;
     // 创建时间
@@ -35,6 +37,10 @@ public class ProjectGroup {
 
     public void setSort(Integer sort) {
         this.sort = sort;
+    }
+
+    public void setIsShow(Boolean isShow) {
+        this.isShow = isShow;
     }
 
     public void setProjectCount(Integer projectCount) {
@@ -61,6 +67,10 @@ public class ProjectGroup {
         return sort;
     }
 
+    public Boolean getIsShow() {
+        return isShow;
+    }
+
     public Integer getProjectCount() {
         return projectCount;
     }
@@ -78,6 +88,7 @@ public class ProjectGroup {
         private String name;
         private String description;
         private Integer sort;
+        private Boolean isShow;
         private Integer projectCount;
         private LocalDateTime createdTime;
 
@@ -108,6 +119,11 @@ public class ProjectGroup {
             return this;
         }
 
+        public Builder isShow(Boolean isShow) {
+            this.isShow = isShow;
+            return this;
+        }
+
         public Builder projectCount(Integer projectCount) {
             this.projectCount = projectCount;
             return this;
@@ -124,6 +140,7 @@ public class ProjectGroup {
             projectGroup.name = this.name;
             projectGroup.description = this.description;
             projectGroup.sort = this.sort;
+            projectGroup.isShow = this.isShow;
             projectGroup.projectCount = this.projectCount;
             projectGroup.createdTime = this.createdTime;
             projectGroup.lastModifiedTime = LocalDateTime.now();

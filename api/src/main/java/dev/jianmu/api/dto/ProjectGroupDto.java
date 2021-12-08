@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @class ProjectGroupDto
@@ -24,4 +25,6 @@ public class ProjectGroupDto {
     @NotBlank(message = "名称不能为空")
     private String name;
     private String description;
+    @NotNull(message = "是否展示不能为空")
+    private Boolean isShow;
 }
