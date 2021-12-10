@@ -67,6 +67,12 @@ public interface ProjectLinkGroupMapper {
     @Result(column = "created_time", property = "createdTime")
     Optional<ProjectLinkGroup> findByProjectId(String projectId);
 
+    @Select("select * from project_link_group where project_group_id = #{groupId} and project_id = #{projectId}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "project_group_id", property = "projectGroupId")
+    @Result(column = "created_time", property = "createdTime")
+    Optional<ProjectLinkGroup> findByGroupIdAndProjectId(@Param("groupId") String groupId, @Param("projectId") String projectId);
+
     @Select("<script>" +
             "SELECT * FROM `project_link_group` " +
             "<if test='groupId != null'> WHERE `project_group_id` = #{groupId}</if>" +

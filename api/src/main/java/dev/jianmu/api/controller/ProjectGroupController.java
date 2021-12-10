@@ -54,7 +54,7 @@ public class ProjectGroupController {
     @PatchMapping("/sort")
     @Operation(summary = "修改项目组排序", description = "修改项目组排序")
     public void updateProjectGroupSort(@RequestBody @Valid ProjectGroupSortUpdatingDto projectGroupSortUpdatingDto) {
-        this.projectGroupApplication.updateSort(projectGroupSortUpdatingDto.getOriginSort(), projectGroupSortUpdatingDto.getTargetSort());
+        this.projectGroupApplication.updateSort(projectGroupSortUpdatingDto.getOriginGroupId(), projectGroupSortUpdatingDto.getTargetGroupId());
     }
 
     @PutMapping("/{projectGroupId}/is_show")
@@ -69,15 +69,15 @@ public class ProjectGroupController {
         this.projectGroupApplication.addProject(projectGroupAddingDto.getProjectGroupId(), projectGroupAddingDto.getProjectIds());
     }
 
-    @DeleteMapping("/projects/{projectLinkGroupId}")
+    @DeleteMapping("/projects/{projectId}")
     @Operation(summary = "项目组删除项目", description = "项目组删除项目")
-    public void deleteProjectByGroup(@PathVariable String projectLinkGroupId) {
-        this.projectGroupApplication.deleteProject(projectLinkGroupId);
+    public void deleteProjectByGroup(@PathVariable String projectId) {
+        this.projectGroupApplication.deleteProject(projectId);
     }
 
     @PatchMapping("/{projectGroupId}/projects/sort")
     @Operation(summary = "修改项目组中的项目排序", description = "修改项目组中的项目排序")
     public void updateProjectSort(@PathVariable String projectGroupId, @RequestBody @Valid ProjectSortUpdatingDto projectSortUpdatingDto) {
-        this.projectGroupApplication.updateProjectSort(projectGroupId, projectSortUpdatingDto.getOriginSort(), projectSortUpdatingDto.getTargetSort());
+        this.projectGroupApplication.updateProjectSort(projectGroupId, projectSortUpdatingDto.getOriginProjectId(), projectSortUpdatingDto.getTargetProjectId());
     }
 }

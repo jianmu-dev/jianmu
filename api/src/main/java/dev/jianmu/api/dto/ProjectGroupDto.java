@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -24,6 +25,7 @@ public class ProjectGroupDto {
     @Schema(required = true)
     @NotBlank(message = "名称不能为空")
     private String name;
+    @Max(value = 255, message = "描述不能超过255个字符")
     private String description;
     @NotNull(message = "是否展示不能为空")
     private Boolean isShow;

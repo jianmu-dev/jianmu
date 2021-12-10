@@ -1,6 +1,5 @@
 package dev.jianmu.application.service;
 
-import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.ProjectGroupException;
 import dev.jianmu.infrastructure.mybatis.project.ProjectLinkGroupRepositoryImpl;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -98,11 +96,12 @@ public class ProjectGroupApplication {
     }
 
     @Transactional
-    public void updateSort(Integer originSort, Integer targetSort) {
+    public void updateSort(String originGroupId, String targetGroupId) {
+        var originSort = this.projectGroupRepository.findById(originGroupId).map(ProjectGroup::getSort)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
+        var targetSort = this.projectGroupRepository.findById(targetGroupId).map(ProjectGroup::getSort)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
         var groups = this.projectGroupRepository.findAllBySortBetween(Math.min(originSort, targetSort), Math.max(originSort, targetSort));
-        if (groups.isEmpty()) {
-            return;
-        }
         // 删除项目组
         this.projectGroupRepository.deleteByIdIn(groups.stream().map(ProjectGroup::getId).collect(Collectors.toList()));
         // 添加项目组
@@ -177,16 +176,16 @@ public class ProjectGroupApplication {
     }
 
     @Transactional
-    public void deleteProject(String projectLinkGroupId) {
+    public void deleteProject(String projectId) {
+        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var defaultGroupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
                 .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
-        var projectLinkGroup = this.projectLinkGroupRepository.findById(projectLinkGroupId)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目组中的项目"));
         if (projectLinkGroup.getProjectGroupId().equals(defaultGroupId)) {
             throw new ProjectGroupException("不能删除默认分组的项目");
         }
         // 删除分组中间表
-        this.projectLinkGroupRepository.deleteById(projectLinkGroupId);
+        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         // 添加到默认分组
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(defaultGroupId)
                 .map(ProjectLinkGroup::getSort)
@@ -203,13 +202,16 @@ public class ProjectGroupApplication {
     }
 
     @Transactional
-    public void updateProjectSort(String projectGroupId, Integer originSort, Integer targetSort) {
+    public void updateProjectSort(String projectGroupId, String originProjectId, String targetProjectId) {
+        var originSort = this.projectLinkGroupRepository.findByGroupIdAndProjectId(projectGroupId, originProjectId)
+                .map(ProjectLinkGroup::getSort)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目组中的项目"));
+        var targetSort = this.projectLinkGroupRepository.findByGroupIdAndProjectId(projectGroupId, targetProjectId)
+                .map(ProjectLinkGroup::getSort)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目组中的项目"));
         var linkGroups = this.projectLinkGroupRepository.findAllByGroupIdAndSortBetween(projectGroupId,
                 Math.min(originSort, targetSort),
                 Math.max(originSort, targetSort));
-        if (linkGroups.isEmpty()) {
-            return;
-        }
         // 删除分组中间表
         this.projectLinkGroupRepository.deleteByIdIn(linkGroups.stream().map(ProjectLinkGroup::getId).collect(Collectors.toList()));
         // 添加分组中间表
@@ -238,18 +240,6 @@ public class ProjectGroupApplication {
                 .sort(targetSort)
                 .build());
         this.projectLinkGroupRepository.addAll(newLinkGroups);
-    }
-
-    public PageInfo<ProjectLinkGroup> findLinkPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId) {
-        return this.projectLinkGroupRepository.findPageByGroupId(pageNum, pageSize, projectGroupId);
-    }
-
-    public Optional<ProjectLinkGroup> findLinkByProjectId(String id) {
-        return this.projectLinkGroupRepository.findByProjectId(id);
-    }
-
-    public List<ProjectLinkGroup> findLinkByProjectIdIn(List<String> projectIds) {
-        return this.projectLinkGroupRepository.findAllByProjectIdIn(projectIds);
     }
 
     public void updateProjectGroupIsShow(String projectGroupId) {
