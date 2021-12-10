@@ -1,13 +1,13 @@
 <template>
-  <!-- 所有项目 -->
+  <!-- 搜索结果 -->
   <div class="search-project">
     <div class="search">
       <jm-select v-model="selectValue" @change="selectOption">
         <jm-option
           v-for="item in groupOptions"
           :key="item.value"
-          :label="item.label"
           :value="item.value"
+          :label="item.label"
         >
         </jm-option>
       </jm-select>
@@ -15,17 +15,21 @@
         <jm-input v-model="projectName" @change="searchProject" />
         <i class="jm-icon-button-search"></i>
       </div>
-      <i class="jm-icon-button-refresh"></i>
     </div>
-    <project-group :name="projectName" :pageable="true" />
+    <project-group
+      :project-group="currentGroup"
+      :name="projectName"
+      :pageable="true"
+    />
   </div>
 </template>
 
 <script lang="ts">
+import { IProjectGroupVo } from '@/api/dto/project-group';
+import { listProjectGroup } from '@/api/view-no-auth';
 import ProjectGroup from '@/views/common/project-group.vue';
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onBeforeMount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// import { IQueryListForm } from '@/model/modules/project';
 
 export default defineComponent({
   components: { ProjectGroup },
@@ -41,32 +45,59 @@ export default defineComponent({
     const selectValue = ref<string>('');
     // 项目名称
     const projectName = ref<string>('');
-    // 请求内容
-    // const requestContent = ref<IQueryListForm>({ pageNum: 1, pageSize: 20 });
+    // 当前组id
+    const currentGroupId = ref<string>('');
+    // 当前组
+    const currentGroup = ref<IProjectGroupVo>();
+    // 项目组
+    const projectGroups = ref<IProjectGroupVo[]>([]);
+
+    // 选择框内容
+    const groupOptions = ref<{ value: string; label: string }[]>([]);
+    onBeforeMount(async () => {
+      projectGroups.value = await listProjectGroup();
+      projectGroups.value.forEach(item => {
+        groupOptions.value.push({ value: item.id, label: item.name });
+      });
+      groupOptions.value.forEach(item => {
+        if (item.value === currentGroupId.value) {
+          selectValue.value = item.label;
+        }
+      });
+    });
 
     onMounted(() => {
+      // 获取查询关键字
       projectName.value = route.query.searchName as string;
-      // requestContent.value.name = route.query.searchName as string;
-      // console.log(requestContent.value);
-      // console.log(projectName.value);
+      // 获取项目组id
+      currentGroupId.value = route.query.projectGroupId as string;
     });
+    // 下拉框-change请求
+    const selectOption = () => {
+      router.push({
+        name: 'index',
+        query: {
+          projectGroupId: selectValue.value,
+          searchName: projectName.value,
+        },
+      });
+      // 改变赋值id
+      currentGroupId.value = selectValue.value;
+      projectGroups.value.forEach(item => {
+        if (selectValue.value === item.id) {
+          // 传递当前组
+          currentGroup.value = item;
+        }
+      });
+    };
     return {
       projectName,
       selectValue,
-      // 下拉选择框
-      selectOption: () => {
-        // console.log(selectValue.value);
-        router.push({
-          name: 'index',
-          query: {
-            projectGroupId: selectValue.value,
-            searchName: projectName.value,
-          },
-        });
-      },
+      selectOption,
+      groupOptions,
+      currentGroup,
       // 查询输入框
       searchProject: () => {
-        // console.log(projectName.value);
         router.push({
           name: 'index',
           query: {
@@ -75,28 +106,6 @@ export default defineComponent({
           },
         });
       },
-      groupOptions: ref([
-        {
-          value: 'Option1',
-          label: 'Option1',
-        },
-        {
-          value: 'Option2',
-          label: 'Option2',
-        },
-        {
-          value: 'Option3',
-          label: 'Option3',
-        },
-        {
-          value: 'Option4',
-          label: 'Option4',
-        },
-        {
-          value: 'Option5',
-          label: 'Option5',
-        },
-      ]),
     };
   },
 });
@@ -120,7 +129,6 @@ export default defineComponent({
     }
     .search-container {
       width: 100%;
-      margin-right: 20px;
       position: relative;
       ::v-deep(.el-input) {
         height: 36px;
@@ -138,18 +146,6 @@ export default defineComponent({
         cursor: pointer;
       }
     }
-    // 刷新
-    .jm-icon-button-refresh::before {
-      content: '\e80d';
-      cursor: pointer;
-    }
-    // position: relative;
-    // ::v-deep(.el-input) {
-    //   border-radius: 4px;
-    //   .el-input__inner {
-    //     text-indent: 35px;
-    //   }
-    // }
   }
 }
 </style>
