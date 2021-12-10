@@ -4,7 +4,6 @@ import { resolve } from 'path';
 import { name, version } from './package.json';
 const target = 'http://localhost:8081';
 const changeOrigin = true;
-
 // https://vitejs.dev/config/
 export default ({ command, mode }: ConfigEnv): UserConfigExport => {
   return {

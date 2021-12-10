@@ -16,6 +16,14 @@
           placeholder="请输入分组名称"
         />
       </jm-form-item>
+      <jm-form-item
+        label="首页展示"
+        label-position="top"
+        prop="isShow"
+        class="is-show"
+      >
+        <jm-switch v-model="createForm.isShow" active-color="#096DD9" />
+      </jm-form-item>
       <jm-form-item label="描述" label-position="top" prop="description">
         <jm-input
           type="textarea"
@@ -63,6 +71,7 @@ export default defineComponent({
     const createFormRef = ref<any>(null);
     const createForm = ref<IProjectGroupCreateFrom>({
       name: '',
+      isShow: true,
     });
     const editorRule = ref<object>({
       name: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
@@ -73,12 +82,13 @@ export default defineComponent({
         if (!valid) {
           return;
         }
-        const { name, description } = createForm.value;
+        const { name, description, isShow } = createForm.value;
         loading.value = true;
         try {
           await createProjectGroup({
             name,
             description,
+            isShow,
           });
           proxy.$success('项目分组创建成功');
           emit('completed');
@@ -103,6 +113,12 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+.el-form-item {
+  &.is-show {
+    margin-bottom: 0px;
+    margin-top: -10px;
+  }
+}
 .creator-title {
   padding-left: 36px;
   background-image: url('@/assets/svgs/btn/edit.svg');

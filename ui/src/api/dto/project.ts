@@ -60,7 +60,7 @@ export interface IProjectImportingDto
 export interface IProjectQueryingDto
   extends Readonly<
     IPageDto & {
-      projectGroupId: string;
+      projectGroupId?: string;
       name?: string;
     }
   > {}
@@ -82,6 +82,9 @@ export interface IProjectVo
       status: ProjectStatusEnum;
       eventBridgeId?: string;
       triggerType: TriggerTypeEnum;
+      projectGroupId: string;
+      projectLinkGroupId: string;
+      sort: number;
     }
   > {}
 

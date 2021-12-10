@@ -17,6 +17,14 @@
           placeholder="请输入分组名称"
         />
       </jm-form-item>
+      <jm-form-item
+        label="首页展示"
+        label-position="top"
+        prop="isShow"
+        class="is-show"
+      >
+        <jm-switch v-model="editorForm.isShow" active-color="#096DD9" />
+      </jm-form-item>
       <jm-form-item label="描述" label-position="top" prop="description">
         <jm-input
           type="textarea"
@@ -76,6 +84,10 @@ export default defineComponent({
       type: Boolean,
       required: true,
     },
+    isShow: {
+      type: Boolean,
+      required: true,
+    },
   },
   setup(props, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
@@ -83,6 +95,7 @@ export default defineComponent({
     const editorFormRef = ref<any>(null);
     const editorForm = ref<IProjectGroupEditFrom>({
       name: '',
+      isShow: true,
     });
     const editorRule = ref<object>({
       name: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
@@ -91,18 +104,20 @@ export default defineComponent({
     onMounted(() => {
       editorForm.value.name = props.name;
       editorForm.value.description = props.description;
+      editorForm.value.isShow = props.isShow;
     });
     const save = async () => {
       editorFormRef.value.validate(async (valid: boolean) => {
         if (!valid) {
           return;
         }
-        const { name, description } = editorForm.value;
+        const { name, description, isShow } = editorForm.value;
         try {
           loading.value = true;
           await editProjectGroup(props.id, {
             name,
             description,
+            isShow,
           });
           proxy.$success('项目分组修改成功');
           emit('completed');
@@ -127,6 +142,12 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+.el-form-item {
+  &.is-show {
+    margin-bottom: 0px;
+    margin-top: -10px;
+  }
+}
 .editor-title {
   padding-left: 36px;
   background-image: url('@/assets/svgs/btn/edit.svg');
