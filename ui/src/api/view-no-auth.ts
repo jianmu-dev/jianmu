@@ -288,3 +288,15 @@ export function listProjectGroup(): Promise<IProjectGroupVo[]> {
     method: 'get',
   });
 }
+
+/**
+ * 查询项目组详情
+ */
+export function getProjectGroupDetail(
+  projectGroupId: string
+): Promise<IProjectGroupVo> {
+  return restProxy({
+    url: `${baseUrl.projectGroup}/${projectGroupId}`,
+    method: 'get',
+  });
+}

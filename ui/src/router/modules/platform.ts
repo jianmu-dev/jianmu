@@ -36,6 +36,15 @@ export default [
     },
   },
   {
+    name: 'project-list',
+    path: 'project-list',
+    component: () => import('@/views/project-list/project-list-manager.vue'),
+    props: ({ query: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
+    meta: {
+      title: '列表',
+    },
+  },
+  {
     // 密钥管理路由
     name: 'secret-key',
     path: 'secret-key',

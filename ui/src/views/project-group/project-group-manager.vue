@@ -49,10 +49,11 @@
             >
               <div class="wrapper">
                 <div class="top">
-                  <!-- <router-link to="/">
+                  <router-link
+                    :to="{ name: 'project-list', query: { id: i.id } }"
+                  >
                     <div class="name">{{ i.name }}</div>
-                  </router-link> -->
-                  <div class="name">{{ i.name }}</div>
+                  </router-link>
                 </div>
                 <div class="description">
                   {{ i.description || '无' }}
@@ -74,10 +75,9 @@
         <div class="item" v-for="i in projectGroupList" :key="i.id" v-else>
           <div class="wrapper">
             <div class="top">
-              <!-- <router-link to="/">
+              <router-link :to="{ name: 'project-list', query: { id: i.id } }">
                 <div class="name">{{ i.name }}</div>
-              </router-link> -->
-              <div class="name">{{ i.name }}</div>
+              </router-link>
               <div class="operation">
                 <div
                   class="edit op-item"
@@ -192,14 +192,24 @@ export default defineComponent({
         return id === currentItem.value ? 'move' : '';
       })
     );
+    const fetchProjectGroup = async () => {
+      loading.value = true;
+      try {
+        projectGroupList.value = await queryProjectGroup();
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      } finally {
+        loading.value = false;
+      }
+    };
     onMounted(async () => {
-      projectGroupList.value = await queryProjectGroup();
+      await fetchProjectGroup();
     });
     const addCompleted = async () => {
-      projectGroupList.value = await queryProjectGroup();
+      await fetchProjectGroup();
     };
     const editCompleted = async () => {
-      projectGroupList.value = await queryProjectGroup();
+      await fetchProjectGroup();
     };
     const add = () => {
       creationActivated.value = true;
@@ -233,7 +243,7 @@ export default defineComponent({
           try {
             await deleteProjectGroup(projectGroupId);
             proxy.$success('项目分组删除成功');
-            projectGroupList.value = await queryProjectGroup();
+            await fetchProjectGroup();
           } catch (err) {
             proxy.$throw(err, proxy);
           }
@@ -251,7 +261,7 @@ export default defineComponent({
             targetSort: projectGroupList.value![targetSort + 1].sort,
             originSort: element.sort,
           });
-          projectGroupList.value = await queryProjectGroup();
+          await fetchProjectGroup();
           proxy.$success('项目分组排序成功');
         } catch (err) {
           proxy.$throw(err, proxy);
@@ -262,7 +272,7 @@ export default defineComponent({
             targetSort: projectGroupList.value![targetSort - 1].sort,
             originSort: element.sort,
           });
-          projectGroupList.value = await queryProjectGroup();
+          await fetchProjectGroup();
           proxy.$success('项目分组排序成功');
         } catch (err) {
           proxy.$throw(err, proxy);
