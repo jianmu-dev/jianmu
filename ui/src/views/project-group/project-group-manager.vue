@@ -261,7 +261,7 @@ export default defineComponent({
             targetSort: projectGroupList.value![targetSort + 1].sort,
             originSort: element.sort,
           });
-          await fetchProjectGroup();
+          projectGroupList.value = await queryProjectGroup();
           proxy.$success('项目分组排序成功');
         } catch (err) {
           proxy.$throw(err, proxy);
@@ -272,7 +272,7 @@ export default defineComponent({
             targetSort: projectGroupList.value![targetSort - 1].sort,
             originSort: element.sort,
           });
-          await fetchProjectGroup();
+          projectGroupList.value = await queryProjectGroup();
           proxy.$success('项目分组排序成功');
         } catch (err) {
           proxy.$throw(err, proxy);
