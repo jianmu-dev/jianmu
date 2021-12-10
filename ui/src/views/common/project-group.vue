@@ -34,9 +34,9 @@ import {
   getCurrentInstance,
   onBeforeMount,
   onBeforeUnmount,
-  onMounted,
   onUpdated,
   PropType,
+  nextTick,
   ref,
 } from 'vue';
 import { IProjectVo } from '@/api/dto/project';
@@ -135,9 +135,11 @@ export default defineComponent({
         loading.value = false;
       }
     };
-
     // 初始化项目列表
     onBeforeMount(async () => {
+      await nextTick(() => {
+        queryForm.value.name = props.name;
+      });
       await loadProject();
     });
     onUpdated(async () => {
@@ -149,7 +151,9 @@ export default defineComponent({
       }
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
-      await loadProject();
+      nextTick(async () => {
+        await loadProject();
+      });
     });
 
     onBeforeUnmount(() => {
