@@ -6,6 +6,9 @@ export default [
     name: 'index',
     path: '',
     component: () => import('@/views/index.vue'),
+    props: ({ query: { searchName } }: RouteLocationNormalizedLoaded) => ({
+      searchName,
+    }),
     meta: {
       title: '首页',
     },
