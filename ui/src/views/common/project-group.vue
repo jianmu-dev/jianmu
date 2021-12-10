@@ -1,11 +1,14 @@
 <template>
   <div class="project-group" v-loading="loading">
     <div v-if="!pageable" class="name">
-      <span>{{ projectGroup.name }}</span>
-      <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
+      <div class="group-name">
+        <span>{{ projectGroup?.name }}</span>
+        <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
+      </div>
+      <div class="more" v-if="projectPage.total > 9">查看更多</div>
     </div>
     <div class="projects">
-      <jm-empty v-if="projects.length === 0"/>
+      <jm-empty v-if="projects.length === 0" />
       <project-item
         v-for="project of projects"
         :key="project.id"
@@ -19,7 +22,16 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, PropType, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  getCurrentInstance,
+  onBeforeMount,
+  onBeforeUnmount,
+  onUpdated,
+  PropType,
+  ref,
+} from 'vue';
 import { IProjectVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { queryProject } from '@/api/view-no-auth';
@@ -37,12 +49,15 @@ export default defineComponent({
     // 项目组
     projectGroup: {
       type: Object as PropType<IProjectGroupVo>,
-      required: true,
     },
     // 是否分页
     pageable: {
       type: Boolean,
       required: true,
+    },
+    // 查询关键字
+    name: {
+      type: String,
     },
   },
   setup(props: any) {
@@ -54,12 +69,15 @@ export default defineComponent({
       list: [],
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
+    // 搜索项目名
+    const projectName = ref<string>(props.name);
     const queryForm = ref<IQueryForm>({
       pageNum: 1,
       // TODO 待完善分页
-      pageSize: props.pageable ? 10 : 10 * 1000,
-      projectGroupId: props.projectGroup.id,
+      pageSize: props.pageable ? 10 * 1000 : 10,
+      projectGroupId: props.projectGroup?.id,
     });
+
     const autoRefreshingOfNoRunningCount = ref<number>(0);
 
     console.log('开启自动刷新项目列表');
@@ -111,10 +129,20 @@ export default defineComponent({
         loading.value = false;
       }
     };
-
     // 初始化项目列表
-    onBeforeMount(() => loadProject());
-
+    onBeforeMount(() => {
+      if (!props.pageable) {
+        loadProject();
+      }
+    });
+    onUpdated(() => {
+      if (projectName.value === props.name) {
+        return;
+      }
+      projectName.value = props.name;
+      queryForm.value.name = projectName.value;
+      loadProject();
+    });
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
       clearInterval(autoRefreshingInterval);
@@ -151,17 +179,44 @@ export default defineComponent({
   margin-top: 30px;
 
   .name {
-    margin-left: 0.5%;
+    margin: 0 0.5%;
     margin-bottom: 20px;
     font-size: 18px;
     font-weight: bold;
     color: #082340;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-right: 16px;
 
-    .desc {
-      margin-left: 12px;
+    .group-name {
+      .desc {
+        margin-left: 12px;
+        font-size: 14px;
+        color: #082340;
+        opacity: 0.46;
+      }
+    }
+    .more {
       font-size: 14px;
-      color: #082340;
-      opacity: 0.46;
+      color: #6b7b8d;
+      cursor: pointer;
+      &::after {
+        display: inline-block;
+        content: '';
+        width: 16px;
+        height: 16px;
+        background: url('@/assets/svgs/group/more.svg');
+        position: relative;
+        top: 3px;
+        right: -4px;
+      }
+      &:hover {
+        color: #096dd9;
+        &::after {
+          background: url('@/assets/svgs/group/more-active.svg');
+        }
+      }
     }
   }
 

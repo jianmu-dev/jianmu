@@ -609,7 +609,6 @@ export default defineComponent({
             .see-payload {
               font-size: 14px;
               color: #096dd9;
-              font-weight: 600;
               cursor: pointer;
             }
             .retry {

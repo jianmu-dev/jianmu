@@ -32,36 +32,32 @@
           </router-link>
         </div>
       </div>
-      <div class="separator">全部项目</div>
-      <project-group
-        v-for="projectGroup in projectGroups"
-        :key="projectGroup.id"
-        :project-group="projectGroup"
-        :pageable="false"
-      />
+      <!-- 全部项目 -->
+      <all-project v-if="searchResultFlag" />
+      <!-- 搜索结果 -->
+      <search-project v-else />
     </div>
     <bottom-nav />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeMount, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 import BottomNav from '@/views/nav/bottom2.vue';
-import ProjectGroup from '@/views/common/project-group.vue';
-import { IProjectGroupVo } from '@/api/dto/project-group';
-import { listProjectGroup } from '@/api/view-no-auth';
+import AllProject from '@/views/index-content/all-project.vue';
+import SearchProject from '@/views/index-content/search-project.vue';
 
 export default defineComponent({
-  components: { ProjectGroup, BottomNav },
-  setup() {
-    const projectGroups = ref<IProjectGroupVo[]>([]);
-
-    onBeforeMount(async () => {
-      projectGroups.value = await listProjectGroup();
-    });
-
+  components: { AllProject, SearchProject, BottomNav },
+  props: {
+    searchName: {
+      type: String,
+    },
+  },
+  setup(props) {
+    // 切换到搜索结果页
     return {
-      projectGroups,
+      searchResultFlag: computed<boolean>(() => props.searchName === undefined),
     };
   },
 });
@@ -143,14 +139,6 @@ export default defineComponent({
           }
         }
       }
-    }
-
-    .separator {
-      margin-left: 0.5%;
-      font-size: 24px;
-      font-weight: bold;
-      color: #082340;
-      opacity: 0.5;
     }
   }
 }
