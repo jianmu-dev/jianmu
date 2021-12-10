@@ -151,8 +151,8 @@ export default defineComponent({
       }
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
-      nextTick(async () => {
-        await loadProject();
+      await nextTick(() => {
+        loadProject();
       });
     });
 
