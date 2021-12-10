@@ -39,11 +39,6 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
         return this.projectLinkGroupMapper.findAllProjectIdByGroupId(groupId);
     }
 
-    public PageInfo<ProjectLinkGroup> findPageByGroupId(Integer pageNum, Integer pageSize, String groupId) {
-        return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.projectLinkGroupMapper.findAllByGroupId(groupId));
-    }
-
     @Override
     public Optional<ProjectLinkGroup> findByProjectGroupIdAndSortMax(String projectGroupId) {
         return this.projectLinkGroupMapper.findByProjectGroupIdAndSortMax(projectGroupId);
@@ -80,6 +75,10 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
     @Override
     public Optional<ProjectLinkGroup> findByProjectId(String projectId) {
         return this.projectLinkGroupMapper.findByProjectId(projectId);
+    }
+
+    public Optional<ProjectLinkGroup> findByGroupIdAndProjectId(String groupId, String projectId) {
+        return this.projectLinkGroupMapper.findByGroupIdAndProjectId(groupId, projectId);
     }
 
     @Override

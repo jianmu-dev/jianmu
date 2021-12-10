@@ -142,6 +142,7 @@ public class ProjectApplication {
         var workflow = this.createWorkflow(parser, dslText, ref);
         var project = Project.Builder.aReference()
                 .workflowName(parser.getName())
+                .workflowDescription(parser.getDescription())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
@@ -196,6 +197,7 @@ public class ProjectApplication {
         project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
         project.setWorkflowName(parser.getName());
+        project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
         project.setTriggerType(parser.getTriggerType());
@@ -216,6 +218,7 @@ public class ProjectApplication {
         // 创建项目
         var project = Project.Builder.aReference()
                 .workflowName(workflow.getName())
+                .workflowDescription(workflow.getDescription())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
@@ -268,6 +271,7 @@ public class ProjectApplication {
         project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
         project.setWorkflowName(parser.getName());
+        project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
 
@@ -346,7 +350,7 @@ public class ProjectApplication {
         return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
     }
 
-    public List<Project> findAllByProjectIdInAndWorkflowName(List<String> projectIds, String workflowName) {
-        return this.projectRepository.findAllByProjectIdInAndWorkflowName(projectIds, workflowName);
+    public PageInfo<Project> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName) {
+        return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName);
     }
 }

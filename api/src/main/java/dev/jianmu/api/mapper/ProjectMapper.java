@@ -25,6 +25,7 @@ public interface ProjectMapper {
 
     @Mapping(target = "source", source = "dslSource")
     @Mapping(target = "name", source = "workflowName")
+    @Mapping(target = "description", source = "workflowDescription")
     @Mapping(target = "status", expression = "java(\"INIT\")")
     ProjectVo toProjectVo(Project project);
 

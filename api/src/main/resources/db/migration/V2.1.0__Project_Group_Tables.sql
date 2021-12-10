@@ -55,3 +55,6 @@ DELIMITER ;
 
 CALL `add_project_link_group`;
 DROP PROCEDURE `add_project_link_group`;
+
+ALTER TABLE `jianmu_project`
+    add `workflow_description` varchar(255) DEFAULT NULL COMMENT '描述';

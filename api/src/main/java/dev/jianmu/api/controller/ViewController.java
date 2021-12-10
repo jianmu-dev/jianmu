@@ -162,56 +162,36 @@ public class ViewController {
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public List<ProjectVo> findAll() {
         var projects = this.projectApplication.findAll();
-        var projectLinkGroups = this.projectGroupApplication.findLinkByProjectIdIn(projects.stream().map(Project::getId).collect(Collectors.toList()));
-        var projectVos = projects.stream().map(project -> {
-            var projectLinkGroup = projectLinkGroups.stream()
-                    .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
-                    .findFirst().orElse(null);
-            assert projectLinkGroup != null;
-            return this.instanceApplication
-                    .findByRefAndSerialNoMax(project.getWorkflowRef())
-                    .map(workflowInstance -> {
-                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                        projectVo.setLatestTime(workflowInstance.getEndTime());
-                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                        if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
-                            projectVo.setStatus("FAILED");
-                        }
-                        if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
-                            projectVo.setStatus("SUCCEEDED");
-                        }
-                        if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
-                            projectVo.setStartTime(workflowInstance.getStartTime());
-                            projectVo.setStatus("RUNNING");
-                        }
-                        projectVo.setProjectLinkGroupId(projectLinkGroup.getId());
-                        projectVo.setSort(projectLinkGroup.getSort());
-                        projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
-                        return projectVo;
-                    })
-                    .orElseGet(() -> {
-                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                        projectVo.setProjectLinkGroupId(projectLinkGroup.getId());
-                        projectVo.setSort(projectLinkGroup.getSort());
-                        projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
-                        return projectVo;
-                    });
-        }).collect(Collectors.toList());
-        return projectVos;
+        return projects.stream().map(project -> this.instanceApplication
+                .findByRefAndSerialNoMax(project.getWorkflowRef())
+                .map(workflowInstance -> {
+                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                    projectVo.setLatestTime(workflowInstance.getEndTime());
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                    if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
+                        projectVo.setStatus("FAILED");
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
+                        projectVo.setStatus("SUCCEEDED");
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
+                        projectVo.setStartTime(workflowInstance.getStartTime());
+                        projectVo.setStatus("RUNNING");
+                    }
+                    return projectVo;
+                })
+                .orElseGet(() -> {
+                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                    return projectVo;
+                })).collect(Collectors.toList());
     }
 
     @GetMapping("/projects/{projectId}")
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
         var project = this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        var projectDetailVo = ProjectMapper.INSTANCE.toProjectDetailVo(project);
-        var projectLinkGroup = this.projectGroupApplication.findLinkByProjectId(project.getId()).orElse(null);
-        assert projectLinkGroup != null;
-        projectDetailVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
-        projectDetailVo.setProjectLinkGroupId(projectLinkGroup.getId());
-        projectDetailVo.setSort(projectLinkGroup.getSort());
-        return projectDetailVo;
+        return ProjectMapper.INSTANCE.toProjectDetailVo(project);
     }
 
     @GetMapping("/projects/{projectId}/dsl")
@@ -330,46 +310,31 @@ public class ViewController {
     @GetMapping("/v2/projects")
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
-        var page = this.projectGroupApplication.findLinkPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId());
-        var projectIds = page.getList().stream().map(ProjectLinkGroup::getProjectId).collect(Collectors.toList());
-        var projects = this.projectApplication.findAllByProjectIdInAndWorkflowName(projectIds, dto.getName());
-        var projectVos = projects.stream().map(project -> {
-            var projectLinkGroup = page.getList().stream()
-                    .filter(linkGroup -> project.getId().equals(linkGroup.getProjectId()))
-                    .findFirst().orElse(null);
-            assert projectLinkGroup != null;
-            return this.instanceApplication
-                    .findByRefAndSerialNoMax(project.getWorkflowRef())
-                    .map(workflowInstance -> {
-                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                        projectVo.setLatestTime(workflowInstance.getEndTime());
-                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                        if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
-                            projectVo.setStatus("FAILED");
-                        }
-                        if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
-                            projectVo.setStatus("SUCCEEDED");
-                        }
-                        if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
-                            projectVo.setStartTime(workflowInstance.getStartTime());
-                            projectVo.setStatus("RUNNING");
-                        }
-                        projectVo.setProjectLinkGroupId(projectLinkGroup.getId());
-                        projectVo.setSort(projectLinkGroup.getSort());
-                        projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
-                        return projectVo;
-                    })
-                    .orElseGet(() -> {
-                        var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                        projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                        projectVo.setProjectLinkGroupId(projectLinkGroup.getId());
-                        projectVo.setSort(projectLinkGroup.getSort());
-                        projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
-                        return projectVo;
-                    });
-        }).sorted(Comparator.comparing(ProjectVo::getSort))
-                .collect(Collectors.toList());
-        PageInfo<ProjectVo> pageInfo = PageUtils.pageInfo2PageInfoVo(page);
+        var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName());
+        var projectVos = projects.getList().stream().map(project -> this.instanceApplication
+                .findByRefAndSerialNoMax(project.getWorkflowRef())
+                .map(workflowInstance -> {
+                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                    projectVo.setLatestTime(workflowInstance.getEndTime());
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                    if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
+                        projectVo.setStatus("FAILED");
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
+                        projectVo.setStatus("SUCCEEDED");
+                    }
+                    if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
+                        projectVo.setStartTime(workflowInstance.getStartTime());
+                        projectVo.setStatus("RUNNING");
+                    }
+                    return projectVo;
+                })
+                .orElseGet(() -> {
+                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
+                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+                    return projectVo;
+                })).collect(Collectors.toList());
+        PageInfo<ProjectVo> pageInfo = PageUtils.pageInfo2PageInfoVo(projects);
         pageInfo.setList(projectVos);
         return pageInfo;
     }

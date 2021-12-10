@@ -36,6 +36,8 @@ public class ProjectDetailVo {
     private String gitRepoId;
     // 关联流程定义名称
     private String workflowName;
+    // 关联流程定义描述
+    private String workflowDescription;
     // 关联流程定义Ref
     private String workflowRef;
     // 关联流程定义版本
@@ -50,11 +52,4 @@ public class ProjectDetailVo {
     private String lastModifiedBy;
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
-    // 项目组ID
-    private String projectGroupId;
-    // 关联项目组ID
-    private String projectLinkGroupId;
-    // 序号
-    private Integer sort;
-
 }

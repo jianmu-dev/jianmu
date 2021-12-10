@@ -32,5 +32,7 @@ public interface ProjectLinkGroupRepository {
 
     Optional<ProjectLinkGroup> findByProjectId(String projectId);
 
+    Optional<ProjectLinkGroup> findByGroupIdAndProjectId(String groupId, String projectId);
+
     List<ProjectLinkGroup> findAllByProjectIdIn(List<String> projectIds);
 }
