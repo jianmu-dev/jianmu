@@ -37,14 +37,11 @@
         </jm-tooltip>
       </div>
       <div class="group-list-wrapper">
-        <!-- <project-item
-          v-for="project of projects"
-          :key="project.id"
-          :project="project"
-          @running="handleProjectRunning"
-          @synchronized="handleProjectSynchronized"
-          @deleted="handleProjectDeleted"
-        /> -->
+        <project-group
+          :project-group="projectGroupDetail"
+          :pageable="true"
+          :move="isActive"
+        />
       </div>
     </div>
     <list-creator
@@ -61,7 +58,7 @@ import { IProjectGroupVo } from '@/api/dto/project-group';
 import { getProjectGroupDetail } from '@/api/view-no-auth';
 import { defineComponent, ref, onMounted, getCurrentInstance } from 'vue';
 import ListCreator from './project-list-creator.vue';
-import ProjectItem from '@/views/common/project-item.vue';
+import ProjectGroup from '@/views/common/project-group.vue';
 export default defineComponent({
   props: {
     id: {
@@ -71,7 +68,7 @@ export default defineComponent({
   },
   components: {
     ListCreator,
-    ProjectItem,
+    ProjectGroup,
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
@@ -147,7 +144,7 @@ export default defineComponent({
   }
   .content {
     margin-top: 20px;
-    padding: 20px;
+    padding: 15px;
     background-color: #ffffff;
     .menu-bar {
       button {

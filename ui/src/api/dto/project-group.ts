@@ -51,8 +51,8 @@ export interface IProjectGroupDto
 
 export interface IProjectGroupSortUpdatingDto
   extends Readonly<{
-    originSort: number;
-    targetSort: number;
+    originGroupId: string;
+    targetGroupId: string;
   }> {}
 
 /**
@@ -69,6 +69,6 @@ export interface IProjectGroupAddingDto
  */
 export interface IProjectSortUpdatingDto
   extends Readonly<{
-    originSort: 0;
-    targetSort: 0;
+    originProjectId: string;
+    targetProjectId: string;
   }> {}

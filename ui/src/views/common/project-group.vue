@@ -9,7 +9,32 @@
     </div>
     <div class="projects">
       <jm-empty v-if="projects.length === 0" />
+      <jm-draggable
+        v-else-if="move"
+        class="list"
+        v-model="projectList"
+        @change="sortList"
+        @start="start"
+        @end="() => (currentSelected = false)"
+      >
+        <transition-group type="transition" name="flip-list">
+          <project-item
+            v-for="(project, index) in projectList"
+            :key="project.id"
+            :_id="project.id"
+            :project="project"
+            @mouseenter="over($event, project.id)"
+            @mouseleave="leave"
+            :move-active="move"
+            :move="moveClassList[index] === 'move'"
+            @running="handleProjectRunning"
+            @synchronized="handleProjectSynchronized"
+            @deleted="handleProjectDeleted"
+          />
+        </transition-group>
+      </jm-draggable>
       <project-item
+        v-else
         v-for="project of projects"
         :key="project.id"
         :project="project"
@@ -40,6 +65,8 @@ import { ProjectStatusEnum } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IPageVo } from '@/api/dto/common';
+import { Mutable } from '@/utils/lib';
+import { updateProjectGroupProjectSort } from '@/api/project-group';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
@@ -59,6 +86,11 @@ export default defineComponent({
     name: {
       type: String,
     },
+    // 是否开启移动模式
+    move: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
@@ -69,60 +101,68 @@ export default defineComponent({
       list: [],
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
-    // 搜索项目名
-    const projectName = ref<string>(props.name);
+    const projectList = ref<Mutable<IProjectVo[]>>([]);
     const queryForm = ref<IQueryForm>({
       pageNum: 1,
       // TODO 待完善分页
       pageSize: props.pageable ? 10 * 1000 : 10,
       projectGroupId: props.projectGroup?.id,
+      name: props.name,
     });
-
     const autoRefreshingOfNoRunningCount = ref<number>(0);
-
     console.log('开启自动刷新项目列表');
-    const autoRefreshingInterval = setInterval(async () => {
-      if (
-        !projects.value.find(item => item.status === ProjectStatusEnum.RUNNING)
-      ) {
-        // 不存在running场景
+    let autoRefreshingInterval: any;
+    const refreshHandler = () => {
+      autoRefreshingInterval = setInterval(async () => {
         if (
-          autoRefreshingOfNoRunningCount.value <
-          MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT
+          !projects.value.find(
+            item => item.status === ProjectStatusEnum.RUNNING
+          )
         ) {
-          autoRefreshingOfNoRunningCount.value++;
-          return;
-        } else {
-          console.debug('刷新项目列表，检查是否存在running中的项目');
-        }
-      } else {
-        console.debug('存在running中的项目，刷新项目列表');
-      }
-      autoRefreshingOfNoRunningCount.value = 0;
-
-      try {
-        projectPage.value = await queryProject({ ...queryForm.value });
-      } catch (err) {
-        if (err instanceof TimeoutError) {
-          // 忽略超时错误
-          console.warn(err.message);
-        } else if (err instanceof HttpError) {
-          const { response } = err as HttpError;
-
-          if (response && response.status !== 502) {
-            throw err;
+          // 不存在running场景
+          if (
+            autoRefreshingOfNoRunningCount.value <
+            MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT
+          ) {
+            autoRefreshingOfNoRunningCount.value++;
+            return;
+          } else {
+            console.debug('刷新项目列表，检查是否存在running中的项目');
           }
-
-          // 忽略错误
-          console.warn(err.message);
+        } else {
+          console.debug('存在running中的项目，刷新项目列表');
         }
-      }
-    }, 3000);
+        autoRefreshingOfNoRunningCount.value = 0;
 
+        try {
+          projectPage.value = await queryProject({ ...queryForm.value });
+          projectList.value = projectPage.value.list;
+        } catch (err) {
+          if (err instanceof TimeoutError) {
+            // 忽略超时错误
+            console.warn(err.message);
+          } else if (err instanceof HttpError) {
+            const { response } = err as HttpError;
+
+            if (response && response.status !== 502) {
+              throw err;
+            }
+
+            // 忽略错误
+            console.warn(err.message);
+          }
+        }
+      }, 500);
+    };
+    const move = computed(() => {
+      props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
+      return props.move;
+    });
     const loadProject = async () => {
       try {
         loading.value = true;
         projectPage.value = await queryProject({ ...queryForm.value });
+        projectList.value = projectPage.value.list;
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
@@ -131,24 +171,91 @@ export default defineComponent({
     };
     // 初始化项目列表
     onBeforeMount(() => {
-      if (!props.pageable) {
-        loadProject();
-      }
-    });
-    onUpdated(() => {
-      if (projectName.value === props.name) {
-        return;
-      }
-      projectName.value = props.name;
-      queryForm.value.name = projectName.value;
+      // if (!props.pageable) {
+      //   loadProject();
+      // }
       loadProject();
     });
+    onUpdated(async () => {
+      if (
+        queryForm.value.name === props.name &&
+        queryForm.value.projectGroupId === props.projectGroup?.id
+      ) {
+        return;
+      }
+      queryForm.value.name = props.name;
+      queryForm.value.projectGroupId = props.projectGroup?.id;
+      await loadProject();
+    });
+    // new
+    const currentSelected = ref<boolean>(false);
+    const currentItem = ref<string>('-1');
+    let setCurrentItemTimer: any;
+    const sortList = async (e: any) => {
+      console.log('eee', e);
+      const {
+        moved: { newIndex: targetSort, oldIndex: originSort, element },
+      } = e;
+      // 向移动
+      if (targetSort < originSort) {
+        try {
+          await updateProjectGroupProjectSort(props.projectGroup.id, {
+            originProjectId: element.id,
+            targetProjectId: projectList.value![targetSort + 1].id,
+          });
+        } catch (err) {
+          proxy.$throw(err, proxy);
+          const spliceProjectList = projectList.value.splice(targetSort, 1);
+          projectList.value.splice(originSort, 0, ...spliceProjectList);
+        }
+      } else {
+        try {
+          await updateProjectGroupProjectSort(props.projectGroup.id, {
+            originProjectId: element.id,
+            targetProjectId: projectList.value![targetSort - 1].id,
+          });
+        } catch (err) {
+          proxy.$throw(err, proxy);
+          const spliceProjectList = projectList.value.splice(targetSort, 1);
+          projectList.value.splice(originSort, 0, ...spliceProjectList);
+        }
+      }
+      //设置定时延迟，不让mouseenter事件因为页面渲染的问题被自动触发，导致选中样式出现问题
+      currentSelected.value = true;
+      setCurrentItemTimer = setTimeout(() => {
+        currentItem.value = e.moved.element.id;
+        currentSelected.value = false;
+      }, 400);
+    };
+    const moveClassList = computed<string[]>(() =>
+      projectList.value.map(({ id }) => {
+        return id === currentItem.value ? 'move' : '';
+      })
+    );
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
       clearInterval(autoRefreshingInterval);
+      clearTimeout(setCurrentItemTimer);
     });
-
     return {
+      moveClassList,
+      leave() {
+        currentItem.value = '';
+      },
+      over(e: any, id: string) {
+        if (currentSelected.value) {
+          return;
+        }
+        currentItem.value = id;
+      },
+      projectList,
+      sortList,
+      start(e: any) {
+        currentSelected.value = true;
+        currentItem.value = e.item.getAttribute('_id');
+      },
+      currentSelected,
+      move,
       loading,
       ProjectStatusEnum,
       projectPage,
@@ -223,6 +330,10 @@ export default defineComponent({
   .projects {
     display: flex;
     flex-wrap: wrap;
+    .list {
+      display: flex;
+      flex-wrap: wrap;
+    }
   }
 }
 </style>
