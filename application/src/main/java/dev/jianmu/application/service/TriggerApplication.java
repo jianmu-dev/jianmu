@@ -622,11 +622,14 @@ public class TriggerApplication {
     public dev.jianmu.application.dsl.webhook.Webhook getWebhookParam(String id) {
         var webRequest = webRequestRepositoryImpl.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
-        var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(),webRequest.getWorkflowVersion())
+        var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(), webRequest.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        WebhookDslParser parse = WebhookDslParser.parse(workflow.getDslText());
-        parse.getTrigger().getParam().forEach(webhookParameter ->
-                webhookParameter.setValue(this.extractParameter(webRequest.getPayload(),webhookParameter.getExp())));
-        return parse.getTrigger();
+        dev.jianmu.application.dsl.webhook.Webhook trigger = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
+        if (trigger.getParam() == null) {
+            return trigger;
+        }
+        trigger.getParam().forEach(webhookParameter ->
+                webhookParameter.setValue(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp())));
+        return trigger;
     }
 }
