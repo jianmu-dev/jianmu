@@ -25,7 +25,7 @@ public class ProjectGroupDto {
     @Schema(required = true)
     @NotBlank(message = "名称不能为空")
     private String name;
-    @Size(max = 255, message = "描述不能超过255个字符")
+    @Size(max = 256, message = "描述不能超过256个字符")
     private String description;
     @NotNull(message = "是否展示不能为空")
     private Boolean isShow;
