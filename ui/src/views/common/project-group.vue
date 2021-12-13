@@ -23,7 +23,7 @@
             :key="project.id"
             :_id="project.id"
             :project="project"
-            @mouseenter="over($event, project.id)"
+            @mouseenter="over(project.id)"
             @mouseleave="leave"
             :move-active="move"
             :move="moveClassList[index] === 'move'"
@@ -192,7 +192,6 @@ export default defineComponent({
     const currentItem = ref<string>('-1');
     let setCurrentItemTimer: any;
     const sortList = async (e: any) => {
-      console.log('eee', e);
       const {
         moved: { newIndex: targetSort, oldIndex: originSort, element },
       } = e;
@@ -242,7 +241,7 @@ export default defineComponent({
       leave() {
         currentItem.value = '';
       },
-      over(e: any, id: string) {
+      over(id: string) {
         if (currentSelected.value) {
           return;
         }
@@ -331,6 +330,7 @@ export default defineComponent({
     display: flex;
     flex-wrap: wrap;
     .list {
+      width: 100%;
       display: flex;
       flex-wrap: wrap;
     }
