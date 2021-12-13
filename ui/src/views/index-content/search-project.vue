@@ -18,8 +18,10 @@
     </div>
     <project-group
       :project-group="currentGroup"
-      :name="projectName"
+      :name="projectName || ''"
       :pageable="true"
+      :event-flag="eventFlag"
+      @init-event-flag="initEventFlag"
     />
   </div>
 </template>
@@ -28,8 +30,8 @@
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
 import ProjectGroup from '@/views/common/project-group.vue';
-import { defineComponent, onBeforeMount, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { computed, defineComponent, onBeforeMount, onUpdated, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   components: { ProjectGroup },
@@ -37,21 +39,27 @@ export default defineComponent({
     searchName: {
       type: String,
     },
+    projectGroupId: {
+      type: String,
+    },
   },
-  setup() {
-    const route = useRoute();
+  setup(props) {
     const router = useRouter();
     // 选择框内容
     const selectValue = ref<string>('');
     // 项目名称
-    const projectName = ref<string>('');
+    const projectName = ref<string | undefined>(props.searchName);
+    // 控制事件触发时机
+    const eventFlag = ref<boolean>(false);
+
     // 当前组id
-    const currentGroupId = ref<string>('');
-    // 当前组
-    const currentGroup = ref<IProjectGroupVo>();
+    const currentGroupId = ref<string | undefined>(props.projectGroupId);
     // 项目组
     const projectGroups = ref<IProjectGroupVo[]>([]);
-
+    // 当前组
+    const currentGroup = computed<IProjectGroupVo | undefined>(() =>
+      projectGroups.value.find(item => item.id === currentGroupId.value)
+    );
     // 选择框内容
     const groupOptions = ref<{ value: string; label: string }[]>([]);
     onBeforeMount(async () => {
@@ -66,12 +74,6 @@ export default defineComponent({
       });
     });
 
-    onMounted(() => {
-      // 获取查询关键字
-      projectName.value = route.query.searchName as string;
-      // 获取项目组id
-      currentGroupId.value = route.query.projectGroupId as string;
-    });
     // 下拉框-change请求
     const selectOption = () => {
       router.push({
@@ -83,19 +85,20 @@ export default defineComponent({
       });
       // 改变赋值id
       currentGroupId.value = selectValue.value;
-      projectGroups.value.forEach(item => {
-        if (selectValue.value === item.id) {
-          // 传递当前组
-          currentGroup.value = item;
-        }
-      });
+      eventFlag.value = true;
     };
+    const initEventFlag = () => {
+      eventFlag.value = false;
+    };
+    // const reloadMain = inject('reloadMain') as () => void;
     return {
       projectName,
       selectValue,
       selectOption,
       groupOptions,
       currentGroup,
+      eventFlag,
+      initEventFlag,
       // 查询输入框
       searchProject: () => {
         router.push({
@@ -105,6 +108,8 @@ export default defineComponent({
             searchName: projectName.value,
           },
         });
+        eventFlag.value = true;
+        // reloadMain();
       },
     };
   },
