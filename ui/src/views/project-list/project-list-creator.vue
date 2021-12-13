@@ -3,7 +3,7 @@
     <template #title>
       <div class="creator-title">
         <div class="edit-icon">
-          <img src="~@/assets/svgs/sort/edit.svg" alt="" />
+          <img src="~@/assets/svgs/btn/edit.svg" alt="" />
         </div>
         <span>添加项目</span>
       </div>
@@ -115,7 +115,6 @@ import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup, queryProject } from '@/api/view-no-auth';
 import { IProjectGroupAddingForm } from '@/model/modules/project-group';
 import { Mutable } from '@/utils/lib';
-import dropDown from '@/assets/svgs/sort/drop-down.svg';
 import {
   defineComponent,
   ref,
@@ -220,7 +219,6 @@ export default defineComponent({
       });
     };
     return {
-      dropDown,
       createFormRef,
       compSelectedList,
       projectList,
@@ -331,7 +329,7 @@ export default defineComponent({
                   display: inline-block;
                   width: 14px;
                   height: 14px;
-                  background-image: url('@/assets/svgs/sort/drop-down.svg');
+                  background-image: url('@/assets/svgs/node-library/drop-down.svg');
                   background-repeat: repeat;
                   background-size: contain;
                   transform: rotate(180deg);
