@@ -254,41 +254,28 @@ export default defineComponent({
       const {
         moved: { newIndex: targetSort, oldIndex: originSort, element },
       } = e;
-      // 向移动
-      if (targetSort < originSort) {
-        try {
-          await updateProjectGroupSort({
-            targetGroupId: projectGroupList.value[targetSort + 1].id,
-            originGroupId: element.id,
-          });
-        } catch (err) {
-          proxy.$throw(err, proxy);
-          const spliceProjectList = projectGroupList.value.splice(
-            targetSort,
-            1
-          );
-          console.log('eeee', spliceProjectList);
-          projectGroupList.value.splice(originSort, 0, ...spliceProjectList);
-        }
-      } else {
-        try {
-          await updateProjectGroupSort({
-            targetGroupId: projectGroupList.value[targetSort - 1].id,
-            originGroupId: element.id,
-          });
-        } catch (err) {
-          proxy.$throw(err, proxy);
-          const spliceProjectList = projectGroupList.value.splice(
-            targetSort,
-            1
-          );
-          projectGroupList.value.splice(originSort, 0, ...spliceProjectList);
-        }
+
+      try {
+        // 向移动
+        targetSort < originSort
+          ? await updateProjectGroupSort({
+              targetGroupId: projectGroupList.value[targetSort + 1].id,
+              originGroupId: element.id,
+            })
+          : await updateProjectGroupSort({
+              targetGroupId: projectGroupList.value[targetSort - 1].id,
+              originGroupId: element.id,
+            });
+        nextTick(() => {
+          currentItem.value = e.moved.element.id;
+          currentSelected.value = false;
+        });
+      } catch (err) {
+        proxy.$throw(err, proxy);
+        // 未调换成功，将数据位置对调状态还原
+        const spliceProjectList = projectGroupList.value.splice(targetSort, 1);
+        projectGroupList.value.splice(originSort, 0, ...spliceProjectList);
       }
-      nextTick(() => {
-        currentItem.value = e.moved.element.id;
-        currentSelected.value = false;
-      });
     };
 
     return {

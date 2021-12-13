@@ -1,5 +1,5 @@
 <template>
-  <div :class="['project-item', isMove ? 'move' : '']" v-if="isMoveActive">
+  <div :class="['project-item', isMove ? 'move' : '']" v-if="isMoveMode">
     <div
       :class="{
         'state-bar': true,
@@ -46,7 +46,7 @@
       <div class="time">
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
       </div>
-      <div class="operation" v-if="!isMoveActive">
+      <div class="operation" v-if="!isMoveMode">
         <jm-tooltip content="触发" placement="bottom">
           <button
             :class="{ execute: true, doing: executing }"
@@ -246,11 +246,13 @@ export default defineComponent({
       type: Object as PropType<IProjectVo>,
       required: true,
     },
+    //控制item是否加上hover样式，根据对比id值判断
     move: {
       type: Boolean,
       default: false,
     },
-    moveActive: {
+    // 控制是否处于拖拽模式
+    moveMode: {
       type: Boolean,
       default: false,
     },
@@ -259,14 +261,14 @@ export default defineComponent({
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const isMove = computed<boolean>(() => props.move);
-    const isMoveActive = computed<boolean>(() => props.moveActive);
+    const isMoveMode = computed<boolean>(() => props.moveMode);
     const executing = ref<boolean>(false);
     const synchronizing = ref<boolean>(false);
     const deleting = ref<boolean>(false);
     const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
     return {
-      isMoveActive,
+      isMoveMode,
       isMove,
       DslSourceEnum,
       DslTypeEnum,

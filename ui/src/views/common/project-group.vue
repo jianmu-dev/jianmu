@@ -25,7 +25,7 @@
             :project="project"
             @mouseenter="over(project.id)"
             @mouseleave="leave"
-            :move-active="move"
+            :move-mode="move"
             :move="moveClassList[index] === 'move'"
             @running="handleProjectRunning"
             @synchronized="handleProjectSynchronized"
@@ -101,7 +101,7 @@ export default defineComponent({
       list: [],
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
-    const projectList = ref<Mutable<IProjectVo[]>>([]);
+    const projectList = ref<Mutable<IProjectVo>[]>([]);
     const queryForm = ref<IQueryForm>({
       pageNum: 1,
       // TODO 待完善分页
@@ -143,7 +143,6 @@ export default defineComponent({
             console.warn(err.message);
           } else if (err instanceof HttpError) {
             const { response } = err as HttpError;
-
             if (response && response.status !== 502) {
               throw err;
             }
@@ -195,29 +194,22 @@ export default defineComponent({
       const {
         moved: { newIndex: targetSort, oldIndex: originSort, element },
       } = e;
-      // 向移动
-      if (targetSort < originSort) {
-        try {
-          await updateProjectGroupProjectSort(props.projectGroup.id, {
-            originProjectId: element.id,
-            targetProjectId: projectList.value![targetSort + 1].id,
-          });
-        } catch (err) {
-          proxy.$throw(err, proxy);
-          const spliceProjectList = projectList.value.splice(targetSort, 1);
-          projectList.value.splice(originSort, 0, ...spliceProjectList);
-        }
-      } else {
-        try {
-          await updateProjectGroupProjectSort(props.projectGroup.id, {
-            originProjectId: element.id,
-            targetProjectId: projectList.value![targetSort - 1].id,
-          });
-        } catch (err) {
-          proxy.$throw(err, proxy);
-          const spliceProjectList = projectList.value.splice(targetSort, 1);
-          projectList.value.splice(originSort, 0, ...spliceProjectList);
-        }
+      try {
+        // 向移动
+        targetSort < originSort
+          ? await updateProjectGroupProjectSort(props.projectGroup.id, {
+              originProjectId: element.id,
+              targetProjectId: projectList.value[targetSort + 1].id,
+            })
+          : await updateProjectGroupProjectSort(props.projectGroup.id, {
+              originProjectId: element.id,
+              targetProjectId: projectList.value[targetSort - 1].id,
+            });
+      } catch (err) {
+        proxy.$throw(err, proxy);
+        // 未调换成功，将数据位置对调状态还原
+        const spliceProjectList = projectList.value.splice(targetSort, 1);
+        projectList.value.splice(originSort, 0, ...spliceProjectList);
       }
       //设置定时延迟，不让mouseenter事件因为页面渲染的问题被自动触发，导致选中样式出现问题
       currentSelected.value = true;
