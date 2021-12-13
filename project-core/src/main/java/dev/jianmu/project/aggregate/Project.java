@@ -41,6 +41,8 @@ public class Project {
     private String gitRepoId;
     // 关联流程定义名称
     private String workflowName;
+    // 关联流程定义描述
+    private String workflowDescription;
     // 关联流程定义Ref
     private String workflowRef;
     // 关联流程定义版本
@@ -58,6 +60,10 @@ public class Project {
 
     public void setWorkflowName(String workflowName) {
         this.workflowName = workflowName;
+    }
+
+    public void setWorkflowDescription(String workflowDescription) {
+        this.workflowDescription = workflowDescription;
     }
 
     public void setWorkflowVersion(String workflowVersion) {
@@ -120,6 +126,10 @@ public class Project {
         return workflowName;
     }
 
+    public String getWorkflowDescription() {
+        return workflowDescription;
+    }
+
     public String getWorkflowRef() {
         return workflowRef;
     }
@@ -161,6 +171,8 @@ public class Project {
         private String gitRepoId;
         // 关联流程定义名称
         private String workflowName;
+        // 关联流程定义描述
+        private String workflowDescription;
         // 关联流程定义Ref
         private String workflowRef;
         // 关联流程定义版本
@@ -209,6 +221,11 @@ public class Project {
             return this;
         }
 
+        public Builder workflowDescription(String workflowDescription) {
+            this.workflowDescription = workflowDescription;
+            return this;
+        }
+
         public Builder workflowRef(String workflowRef) {
             this.workflowRef = workflowRef;
             return this;
@@ -239,6 +256,7 @@ public class Project {
             project.id = UUID.randomUUID().toString().replace("-", "");
             project.workflowVersion = this.workflowVersion;
             project.workflowName = this.workflowName;
+            project.workflowDescription = this.workflowDescription;
             project.dslSource = this.dslSource;
             project.dslType = this.dslType;
             project.triggerType = this.triggerType;

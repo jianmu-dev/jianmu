@@ -2,7 +2,7 @@ CREATE TABLE `project_group`
 (
     `id`                 varchar(45) NOT NULL COMMENT 'ID',
     `name`               varchar(45) NOT NULL COMMENT '名称',
-    `description`        varchar(255) DEFAULT NULL COMMENT '描述',
+    `description`        varchar(256) DEFAULT NULL COMMENT '描述',
     `sort`               int         NOT NULL COMMENT '排序',
     `is_show`            bit         NOT NULL COMMENT '是否展示',
     `project_count`      int         NOT NULL COMMENT '项目数量',
@@ -55,3 +55,6 @@ DELIMITER ;
 
 CALL `add_project_link_group`;
 DROP PROCEDURE `add_project_link_group`;
+
+ALTER TABLE `jianmu_project`
+    add `workflow_description` varchar(255) DEFAULT NULL COMMENT '描述';

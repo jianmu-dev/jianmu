@@ -5,7 +5,13 @@
         <span>{{ projectGroup?.name }}</span>
         <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
       </div>
-      <div class="more" v-if="projectPage.total > 9">查看更多</div>
+      <div
+        class="more"
+        v-if="projectPage.total > 9"
+        @click="more(projectGroup)"
+      >
+        查看更多
+      </div>
     </div>
     <div class="projects">
       <jm-empty v-if="projects.length === 0" />
@@ -55,7 +61,9 @@ import {
   onBeforeUnmount,
   onUpdated,
   PropType,
+  nextTick,
   ref,
+  watch,
 } from 'vue';
 import { IProjectVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
@@ -67,6 +75,7 @@ import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IPageVo } from '@/api/dto/common';
 import { Mutable } from '@/utils/lib';
 import { updateProjectGroupProjectSort } from '@/api/project-group';
+import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
@@ -91,8 +100,13 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    eventFlag: {
+      type: Boolean,
+      default: false,
+    },
   },
-  setup(props: any) {
+  emits: ['init-event-flag'],
+  setup(props: any, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
     const projectPage = ref<IPageVo<IProjectVo>>({
@@ -103,9 +117,8 @@ export default defineComponent({
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
     const projectList = ref<Mutable<IProjectVo>[]>([]);
     const queryForm = ref<IQueryForm>({
-      pageNum: 1,
-      // TODO 待完善分页
-      pageSize: props.pageable ? 10 * 1000 : 10,
+      pageNum: START_PAGE_NUM,
+      pageSize: 10000,
       projectGroupId: props.projectGroup?.id,
       name: props.name,
     });
@@ -135,17 +148,18 @@ export default defineComponent({
         autoRefreshingOfNoRunningCount.value = 0;
 
         try {
-          projectPage.value = await queryProject({ ...queryForm.value });
-          projectList.value = projectPage.value.list;
+          projectPage.value = await queryProject({
+            pageNum: START_PAGE_NUM,
+            pageSize: projects.value.length || DEFAULT_PAGE_SIZE,
+            projectGroupId: props.projectGroup?.id,
+            name: props.name,
+          });
         } catch (err) {
           if (err instanceof TimeoutError) {
             // 忽略超时错误
             console.warn(err.message);
           } else if (err instanceof HttpError) {
             const { response } = err as HttpError;
-            if (response && response.status !== 502) {
-              throw err;
-            }
 
             // 忽略错误
             console.warn(err.message);
@@ -169,11 +183,11 @@ export default defineComponent({
       }
     };
     // 初始化项目列表
-    onBeforeMount(() => {
-      // if (!props.pageable) {
-      //   loadProject();
-      // }
-      loadProject();
+    onBeforeMount(async () => {
+      await nextTick(() => {
+        queryForm.value.name = props.name;
+      });
+      await loadProject();
     });
     onUpdated(async () => {
       if (
@@ -184,7 +198,9 @@ export default defineComponent({
       }
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
-      await loadProject();
+      // await nextTick(() => {
+      //   loadProject();
+      // });
     });
     // new
     const currentSelected = ref<boolean>(false);
@@ -222,6 +238,16 @@ export default defineComponent({
       projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
       })
+    );
+    // TODO watch待优化
+    watch(
+      () => props.eventFlag,
+      newVal => {
+        if (newVal) {
+          loadProject();
+          emit('init-event-flag');
+        }
+      }
     );
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
@@ -266,6 +292,15 @@ export default defineComponent({
       handleProjectDeleted: (id: string) => {
         const index = projects.value.findIndex(item => item.id === id);
         projects.value.splice(index, 1);
+      },
+      // 显示更多
+      more: (group: any) => {
+        // console.log('显示更多组id', group.id);
+        // 获取当前组id
+        // queryForm.value.projectGroupId = group.id;
+        // 重新请求
+        // loadProject();
+        // 将当前组名或组id传递给search-project.vue渲染到下拉框
       },
     };
   },

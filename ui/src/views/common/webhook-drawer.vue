@@ -101,11 +101,11 @@
         top="5vh"
       >
         <div class="tab-container">
-          <div :class="{ active: payloadTab }" @click="toTrigger">Payload</div>
-          <div :class="{ active: !payloadTab }" @click="toPayload">触发器</div>
+          <div :class="{ active: payloadTab }" @click="toPayload">触发器</div>
+          <div :class="{ active: !payloadTab }" @click="toTrigger">Payload</div>
         </div>
         <!-- 查看payload -->
-        <div class="payload-content" v-if="payloadTab">
+        <div class="payload-content" v-if="!payloadTab">
           <jm-log-viewer filename="webhook.txt" :value="webhookLog" />
         </div>
         <!-- 触发器 -->
@@ -422,11 +422,11 @@ export default defineComponent({
     };
     // payload
     const toTrigger = () => {
-      payloadTab.value = true;
+      payloadTab.value = false;
     };
     // 触发器
     const toPayload = () => {
-      payloadTab.value = false;
+      payloadTab.value = true;
       // 还原密钥显示
       secretVisible.value = true;
     };
