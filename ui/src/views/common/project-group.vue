@@ -5,7 +5,13 @@
         <span>{{ projectGroup?.name }}</span>
         <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
       </div>
-      <div class="more" v-if="projectPage.total > 9">查看更多</div>
+      <div
+        class="more"
+        v-if="projectPage.total > 9"
+        @click="more(projectGroup)"
+      >
+        查看更多
+      </div>
     </div>
     <div class="projects">
       <jm-empty v-if="projects.length === 0" />
@@ -30,6 +36,7 @@ import {
   onBeforeUnmount,
   onUpdated,
   PropType,
+  nextTick,
   ref,
 } from 'vue';
 import { IProjectVo } from '@/api/dto/project';
@@ -69,13 +76,12 @@ export default defineComponent({
       list: [],
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
-    // 搜索项目名
-    const projectName = ref<string>(props.name);
     const queryForm = ref<IQueryForm>({
       pageNum: 1,
       // TODO 待完善分页
       pageSize: props.pageable ? 10 * 1000 : 10,
       projectGroupId: props.projectGroup?.id,
+      name: props.name,
     });
 
     const autoRefreshingOfNoRunningCount = ref<number>(0);
@@ -130,19 +136,26 @@ export default defineComponent({
       }
     };
     // 初始化项目列表
-    onBeforeMount(() => {
-      if (!props.pageable) {
-        loadProject();
-      }
+    onBeforeMount(async () => {
+      await nextTick(() => {
+        queryForm.value.name = props.name;
+      });
+      await loadProject();
     });
-    onUpdated(() => {
-      if (projectName.value === props.name) {
+    onUpdated(async () => {
+      if (
+        queryForm.value.name === props.name &&
+        queryForm.value.projectGroupId === props.projectGroup?.id
+      ) {
         return;
       }
-      projectName.value = props.name;
-      queryForm.value.name = projectName.value;
-      loadProject();
+      queryForm.value.name = props.name;
+      queryForm.value.projectGroupId = props.projectGroup?.id;
+      await nextTick(() => {
+        loadProject();
+      });
     });
+
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
       clearInterval(autoRefreshingInterval);
@@ -168,6 +181,15 @@ export default defineComponent({
       handleProjectDeleted: (id: string) => {
         const index = projects.value.findIndex(item => item.id === id);
         projects.value.splice(index, 1);
+      },
+      // 显示更多
+      more: (group: any) => {
+        // console.log('显示更多组id', group.id);
+        // 获取当前组id
+        // queryForm.value.projectGroupId = group.id;
+        // 重新请求
+        // loadProject();
+        // 将当前组名或组id传递给search-project.vue渲染到下拉框
       },
     };
   },

@@ -82,9 +82,6 @@ export interface IProjectVo
       status: ProjectStatusEnum;
       eventBridgeId?: string;
       triggerType: TriggerTypeEnum;
-      projectGroupId: string;
-      projectLinkGroupId: string;
-      sort: number;
     }
   > {}
 

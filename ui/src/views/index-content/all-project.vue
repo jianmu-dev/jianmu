@@ -33,7 +33,6 @@ export default defineComponent({
     const projectName = ref<string>('');
     onBeforeMount(async () => {
       const projectGroupList = await listProjectGroup();
-      // console.log(projectGroupList);
       projectGroupList.forEach(item => {
         // 通过isShow筛选
         if (item.isShow) {
