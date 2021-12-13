@@ -187,6 +187,9 @@ export default defineComponent({
       await nextTick(() => {
         queryForm.value.name = props.name;
       });
+      if (!props.projectGroup) {
+        return;
+      }
       await loadProject();
     });
     onUpdated(async () => {
@@ -198,9 +201,9 @@ export default defineComponent({
       }
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
-      // await nextTick(() => {
-      //   loadProject();
-      // });
+      await nextTick(() => {
+        loadProject();
+      });
     });
     // new
     const currentSelected = ref<boolean>(false);
