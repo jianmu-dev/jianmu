@@ -2,7 +2,7 @@ CREATE TABLE `project_group`
 (
     `id`                 varchar(45) NOT NULL COMMENT 'ID',
     `name`               varchar(45) NOT NULL COMMENT '名称',
-    `description`        varchar(255) DEFAULT NULL COMMENT '描述',
+    `description`        varchar(256) DEFAULT NULL COMMENT '描述',
     `sort`               int         NOT NULL COMMENT '排序',
     `is_show`            bit         NOT NULL COMMENT '是否展示',
     `project_count`      int         NOT NULL COMMENT '项目数量',
