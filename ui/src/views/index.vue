@@ -35,7 +35,11 @@
       <!-- 全部项目 -->
       <all-project v-if="searchResultFlag" />
       <!-- 搜索结果 -->
-      <search-project v-else />
+      <search-project
+        :searchName="searchName"
+        :projectGroupId="projectGroupId"
+        v-else
+      />
     </div>
     <bottom-nav />
   </div>
@@ -51,6 +55,9 @@ export default defineComponent({
   components: { AllProject, SearchProject, BottomNav },
   props: {
     searchName: {
+      type: String,
+    },
+    projectGroupId: {
       type: String,
     },
   },

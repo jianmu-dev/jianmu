@@ -38,6 +38,7 @@ import {
   PropType,
   nextTick,
   ref,
+  watch,
 } from 'vue';
 import { IProjectVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
@@ -47,6 +48,7 @@ import { ProjectStatusEnum } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IPageVo } from '@/api/dto/common';
+import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
@@ -66,8 +68,13 @@ export default defineComponent({
     name: {
       type: String,
     },
+    eventFlag: {
+      type: Boolean,
+      default: false,
+    },
   },
-  setup(props: any) {
+  emits: ['init-event-flag'],
+  setup(props: any, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
     const projectPage = ref<IPageVo<IProjectVo>>({
@@ -77,9 +84,8 @@ export default defineComponent({
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
     const queryForm = ref<IQueryForm>({
-      pageNum: 1,
-      // TODO 待完善分页
-      pageSize: props.pageable ? 10 * 1000 : 10,
+      pageNum: START_PAGE_NUM,
+      pageSize: DEFAULT_PAGE_SIZE,
       projectGroupId: props.projectGroup?.id,
       name: props.name,
     });
@@ -107,7 +113,12 @@ export default defineComponent({
       autoRefreshingOfNoRunningCount.value = 0;
 
       try {
-        projectPage.value = await queryProject({ ...queryForm.value });
+        projectPage.value = await queryProject({
+          pageNum: START_PAGE_NUM,
+          pageSize: projects.value.length || DEFAULT_PAGE_SIZE,
+          projectGroupId: props.projectGroup?.id,
+          name: props.name,
+        });
       } catch (err) {
         if (err instanceof TimeoutError) {
           // 忽略超时错误
@@ -151,10 +162,20 @@ export default defineComponent({
       }
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
-      await nextTick(() => {
-        loadProject();
-      });
+      // await nextTick(() => {
+      //   loadProject();
+      // });
     });
+    // TODO watch待优化
+    watch(
+      () => props.eventFlag,
+      newVal => {
+        if (newVal) {
+          loadProject();
+          emit('init-event-flag');
+        }
+      }
+    );
 
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
