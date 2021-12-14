@@ -16,7 +16,7 @@
     <div class="projects">
       <jm-empty v-if="projects.length === 0" />
       <jm-draggable
-        v-else-if="move"
+        v-else-if="moveListener"
         class="list"
         v-model="projectList"
         @change="sortList"
@@ -31,7 +31,7 @@
             :project="project"
             @mouseenter="over(project.id)"
             @mouseleave="leave"
-            :move-mode="move"
+            :move-mode="moveListener"
             :move="moveClassList[index] === 'move'"
             @running="handleProjectRunning"
             @synchronized="handleProjectSynchronized"
@@ -201,15 +201,19 @@ export default defineComponent({
       await loadProject();
       refreshHandler();
     };
-    const move = computed(() => {
+    const moveListener = computed(() => {
       props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
       return props.move;
     });
     const loadProject = async () => {
       try {
-        // projectPage.value = await queryProject({ ...queryForm.value });
+        // 不分页加载项目列表数据
+        if (!props.pageable) {
+          projectPage.value = await queryProject({ ...queryForm.value });
+          return;
+        }
         loadState.value = StateEnum.LOADING;
-        // 在加载时，控制不自动加载
+        // 在加载时，控制不自动刷新
         loadingMore.value = true;
         const { list, pages } = await queryProject({
           ...queryForm.value,
@@ -286,6 +290,7 @@ export default defineComponent({
         currentSelected.value = false;
       }, 400);
     };
+    //TODO watch待优化
     watch(
       () => props.move,
       async flag => {
@@ -345,7 +350,7 @@ export default defineComponent({
         currentItem.value = e.item.getAttribute('_id');
       },
       currentSelected,
-      move,
+      moveListener,
       loading,
       ProjectStatusEnum,
       projectPage,
