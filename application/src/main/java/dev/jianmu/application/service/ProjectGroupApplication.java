@@ -2,6 +2,7 @@ package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.ProjectGroupException;
+import dev.jianmu.application.exception.RepeatFoundException;
 import dev.jianmu.infrastructure.mybatis.project.ProjectLinkGroupRepositoryImpl;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
@@ -42,6 +43,10 @@ public class ProjectGroupApplication {
 
     @Transactional
     public void createProjectGroup(ProjectGroup projectGroup) {
+        this.projectGroupRepository.findByName(projectGroup.getName())
+                .ifPresent(t -> {
+                    throw new RepeatFoundException(t.getName() + "项目组已存在");
+                });
         var sort = this.projectGroupRepository.findBySortMax()
                 .map(ProjectGroup::getSort)
                 .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
@@ -56,6 +61,12 @@ public class ProjectGroupApplication {
     public void updateProjectGroup(String projectGroupId, ProjectGroup projectGroup) {
         var originProjectGroup = this.projectGroupRepository.findById(projectGroupId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目组"));
+        this.projectGroupRepository.findByName(projectGroup.getName())
+                .ifPresent(t -> {
+                    if (!t.getId().equals(projectGroupId)) {
+                        throw new RepeatFoundException(t.getName() + "项目组已存在");
+                    }
+                });
         if (!DEFAULT_PROJECT_GROUP_NAME.equals(originProjectGroup.getName())) {
             originProjectGroup.setName(projectGroup.getName());
         }
