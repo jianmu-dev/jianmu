@@ -9,7 +9,8 @@
       <jm-form-item label="命名空间" label-position="top" prop="name">
         <jm-input v-model="editorForm.name" clearable placeholder="请输入命名空间"/>
       </jm-form-item>
-      <jm-form-item label="描述" label-position="top" prop="description">
+      <jm-form-item v-if="credentialManagerType === CredentialManagerTypeEnum.LOCAL" label="描述" label-position="top"
+                    prop="description">
         <jm-input
           type="textarea"
           v-model="editorForm.description"
@@ -34,8 +35,15 @@
 import { defineComponent, getCurrentInstance, ref, SetupContext } from 'vue';
 import { ISaveNamespaceForm } from '@/model/modules/secret-key';
 import { saveNamespace } from '@/api/secret-key';
+import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
+  props: {
+    credentialManagerType: {
+      type: String,
+      required: true,
+    },
+  },
   emits: ['completed'],
   setup(_, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
@@ -53,6 +61,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
 
     return {
+      CredentialManagerTypeEnum,
       dialogVisible,
       editorFormRef,
       editorForm,
