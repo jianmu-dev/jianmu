@@ -17,8 +17,9 @@
       </div>
     </div>
     <project-group
+      v-if="initialized"
       :project-group="currentGroup"
-      :name="projectName"
+      :name="currentSearchName"
       :pageable="true"
     />
   </div>
@@ -28,8 +29,8 @@
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
 import ProjectGroup from '@/views/common/project-group.vue';
-import { defineComponent, onBeforeMount, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { computed, defineComponent, inject, onBeforeMount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   components: { ProjectGroup },
@@ -37,58 +38,58 @@ export default defineComponent({
     searchName: {
       type: String,
     },
+    projectGroupId: {
+      type: String,
+    },
   },
-  setup() {
-    const route = useRoute();
+  setup(props) {
+    console.log('search', { ...props });
     const router = useRouter();
     // 选择框内容
     const selectValue = ref<string>('');
-    // 项目名称
-    const projectName = ref<string>('');
+    // 搜索关键字
+    const projectName = ref<string | undefined>(props.searchName);
     // 当前组id
-    const currentGroupId = ref<string>('');
-    // 当前组
-    const currentGroup = ref<IProjectGroupVo>();
+    const currentGroupId = ref<string | undefined>(props.projectGroupId);
+    // 当前搜索关键字-保证第一次搜索正常，传递值赋给当前搜索关键字
+    const currentSearchName = ref<string>(props.searchName as string);
     // 项目组
     const projectGroups = ref<IProjectGroupVo[]>([]);
-
+    // 已初始化
+    const initialized = ref<boolean>(false);
+    // 当前组
+    const currentGroup = computed<IProjectGroupVo | undefined>(() =>
+      projectGroups.value.find(item => item.id === currentGroupId.value)
+    );
     // 选择框内容
     const groupOptions = ref<{ value: string; label: string }[]>([]);
     onBeforeMount(async () => {
       projectGroups.value = await listProjectGroup();
+      initialized.value = true;
       projectGroups.value.forEach(item => {
         groupOptions.value.push({ value: item.id, label: item.name });
       });
       groupOptions.value.forEach(item => {
         if (item.value === currentGroupId.value) {
-          selectValue.value = item.label;
+          selectValue.value = item.value;
         }
       });
+      // nextTick(() => (initialized.value = true));
     });
-
-    onMounted(() => {
-      // 获取查询关键字
-      projectName.value = route.query.searchName as string;
-      // 获取项目组id
-      currentGroupId.value = route.query.projectGroupId as string;
-    });
+    const reloadMain = inject('reloadMain') as () => void;
     // 下拉框-change请求
-    const selectOption = () => {
-      router.push({
+    const selectOption = async () => {
+      currentSearchName.value = projectName.value as string;
+      await router.push({
         name: 'index',
         query: {
           projectGroupId: selectValue.value,
-          searchName: projectName.value,
+          searchName: currentSearchName.value,
         },
       });
+      await reloadMain();
       // 改变赋值id
       currentGroupId.value = selectValue.value;
-      projectGroups.value.forEach(item => {
-        if (selectValue.value === item.id) {
-          // 传递当前组
-          currentGroup.value = item;
-        }
-      });
     };
     return {
       projectName,
@@ -96,15 +97,19 @@ export default defineComponent({
       selectOption,
       groupOptions,
       currentGroup,
+      currentSearchName,
+      initialized,
       // 查询输入框
-      searchProject: () => {
-        router.push({
+      searchProject: async () => {
+        currentSearchName.value = projectName.value as string;
+        await router.push({
           name: 'index',
           query: {
             projectGroupId: selectValue.value,
-            searchName: projectName.value,
+            searchName: currentSearchName.value,
           },
         });
+        await reloadMain();
       },
     };
   },
@@ -144,6 +149,7 @@ export default defineComponent({
         left: 20px;
         top: 11px;
         cursor: pointer;
+        color: #7f8c9b;
       }
     }
   }

@@ -9,12 +9,14 @@
         @change="searchProject"
       />
     </div>
-    <project-group
-      v-for="projectGroup in projectGroups"
-      :key="projectGroup.id"
-      :project-group="projectGroup"
-      :pageable="false"
-    />
+    <template v-if="initialized">
+      <project-group
+        v-for="projectGroup in projectGroups"
+        :key="projectGroup.id"
+        :project-group="projectGroup"
+        :pageable="false"
+      />
+    </template>
   </div>
 </template>
 
@@ -29,10 +31,13 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const projectGroups = ref<IProjectGroupVo[]>([]);
+    // 已初始化
+    const initialized = ref<boolean>(false);
     // 项目名称
     const projectName = ref<string>('');
     onBeforeMount(async () => {
       const projectGroupList = await listProjectGroup();
+      initialized.value = true;
       projectGroupList.forEach(item => {
         // 通过isShow筛选
         if (item.isShow) {
@@ -48,6 +53,7 @@ export default defineComponent({
       projectGroups,
       projectName,
       searchProject,
+      initialized,
     };
   },
 });
@@ -77,6 +83,7 @@ export default defineComponent({
       position: absolute;
       left: 50px;
       top: 24px;
+      color: #7f8c9b;
     }
   }
 }

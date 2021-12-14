@@ -6,8 +6,11 @@ export default [
     name: 'index',
     path: '',
     component: () => import('@/views/index.vue'),
-    props: ({ query: { searchName } }: RouteLocationNormalizedLoaded) => ({
+    props: ({
+      query: { searchName, projectGroupId },
+    }: RouteLocationNormalizedLoaded) => ({
       searchName,
+      projectGroupId,
     }),
     meta: {
       title: '首页',
@@ -36,6 +39,15 @@ export default [
     component: () => import('@/views/project-group/project-group-manager.vue'),
     meta: {
       title: '分组管理',
+    },
+  },
+  {
+    name: 'project-detail',
+    path: 'project-group/detail/:id',
+    component: () => import('@/views/project-group/project-detail.vue'),
+    props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
+    meta: {
+      title: '列表',
     },
   },
   {
