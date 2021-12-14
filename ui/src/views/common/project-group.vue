@@ -5,12 +5,8 @@
         <span>{{ projectGroup?.name }}</span>
         <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
       </div>
-      <div
-        class="more"
-        v-if="projectPage.total > 9"
-        @click="more(projectGroup)"
-      >
-        查看更多
+      <div class="more" v-if="projectPage.total > 10">
+        <router-link :to="{ name: 'project-group' }">查看更多</router-link>
       </div>
     </div>
     <div class="projects">
@@ -117,13 +113,8 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    eventFlag: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: ['init-event-flag'],
-  setup(props: any, { emit }) {
+  setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
     const scrollableEl = inject('scrollableEl');
@@ -191,20 +182,6 @@ export default defineComponent({
         }
       }, 3000);
     };
-    const btnDown = async () => {
-      // 如果状态为没有更多控制加载
-      if (loadState.value === StateEnum.NO_MORE) {
-        return;
-      }
-      clearInterval(autoRefreshingInterval);
-      queryForm.value.pageNum += 1;
-      await loadProject();
-      refreshHandler();
-    };
-    const moveListener = computed(() => {
-      props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
-      return props.move;
-    });
     const loadProject = async () => {
       try {
         // 不分页加载项目列表数据
@@ -219,6 +196,7 @@ export default defineComponent({
           ...queryForm.value,
         });
         projectPage.value.list.push(...list);
+        console.log(projectPage.value);
         projectPage.value.pages = pages;
         projectList.value = projectPage.value.list;
       } catch (err) {
@@ -233,6 +211,20 @@ export default defineComponent({
         loadingMore.value = false;
       }
     };
+    const btnDown = async () => {
+      // 如果状态为没有更多控制加载
+      if (loadState.value === StateEnum.NO_MORE) {
+        return;
+      }
+      clearInterval(autoRefreshingInterval);
+      queryForm.value.pageNum += 1;
+      await loadProject();
+      refreshHandler();
+    };
+    const moveListener = computed(() => {
+      props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
+      return props.move;
+    });
     // 初始化项目列表
     onBeforeMount(async () => {
       await nextTick(() => {
@@ -280,14 +272,14 @@ export default defineComponent({
         const spliceProjectList = projectList.value.splice(targetSort, 1);
         projectList.value.splice(originSort, 0, ...spliceProjectList);
       }
-      //设置定时延迟，不让mouseenter事件因为页面渲染的问题被自动触发，导致选中样式出现问题
+      // 设置定时延迟，不让mouseenter事件因为页面渲染的问题被自动触发，导致选中样式出现问题
       currentSelected.value = true;
       setCurrentItemTimer = setTimeout(() => {
         currentItem.value = e.moved.element.id;
         currentSelected.value = false;
       }, 400);
     };
-    //TODO watch待优化
+    // TODO watch待优化
     watch(
       () => props.move,
       async flag => {
@@ -310,16 +302,6 @@ export default defineComponent({
       projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
       })
-    );
-    // TODO watch待优化
-    watch(
-      () => props.eventFlag,
-      newVal => {
-        if (newVal) {
-          loadProject();
-          emit('init-event-flag');
-        }
-      }
     );
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
@@ -368,15 +350,6 @@ export default defineComponent({
         const index = projects.value.findIndex(item => item.id === id);
         projects.value.splice(index, 1);
       },
-      // 显示更多
-      more: (group: any) => {
-        // console.log('显示更多组id', group.id);
-        // 获取当前组id
-        // queryForm.value.projectGroupId = group.id;
-        // 重新请求
-        // loadProject();
-        // 将当前组名或组id传递给search-project.vue渲染到下拉框
-      },
     };
   },
 });
@@ -419,10 +392,14 @@ export default defineComponent({
         top: 3px;
         right: -4px;
       }
-      &:hover {
-        color: #096dd9;
-        &::after {
-          background: url('@/assets/svgs/group/more-active.svg');
+      a {
+        color: #6b7b8d;
+        text-decoration: none;
+        &:hover {
+          color: #096dd9;
+          &::after {
+            background: url('@/assets/svgs/group/more-active.svg');
+          }
         }
       }
     }

@@ -17,11 +17,10 @@
       </div>
     </div>
     <project-group
+      v-if="initialized"
       :project-group="currentGroup"
-      :name="projectName || ''"
+      :name="currentSearchName"
       :pageable="true"
-      :event-flag="eventFlag"
-      @init-event-flag="initEventFlag"
     />
   </div>
 </template>
@@ -30,7 +29,7 @@
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
 import ProjectGroup from '@/views/common/project-group.vue';
-import { computed, defineComponent, onBeforeMount, onUpdated, ref } from 'vue';
+import { computed, defineComponent, inject, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -44,18 +43,20 @@ export default defineComponent({
     },
   },
   setup(props) {
+    console.log('search', { ...props });
     const router = useRouter();
     // 选择框内容
     const selectValue = ref<string>('');
-    // 项目名称
+    // 搜索关键字
     const projectName = ref<string | undefined>(props.searchName);
-    // 控制事件触发时机
-    const eventFlag = ref<boolean>(false);
-
     // 当前组id
     const currentGroupId = ref<string | undefined>(props.projectGroupId);
+    // 当前搜索关键字-保证第一次搜索正常，传递值赋给当前搜索关键字
+    const currentSearchName = ref<string>(props.searchName as string);
     // 项目组
     const projectGroups = ref<IProjectGroupVo[]>([]);
+    // 已初始化
+    const initialized = ref<boolean>(false);
     // 当前组
     const currentGroup = computed<IProjectGroupVo | undefined>(() =>
       projectGroups.value.find(item => item.id === currentGroupId.value)
@@ -64,52 +65,51 @@ export default defineComponent({
     const groupOptions = ref<{ value: string; label: string }[]>([]);
     onBeforeMount(async () => {
       projectGroups.value = await listProjectGroup();
+      initialized.value = true;
       projectGroups.value.forEach(item => {
         groupOptions.value.push({ value: item.id, label: item.name });
       });
       groupOptions.value.forEach(item => {
         if (item.value === currentGroupId.value) {
-          selectValue.value = item.label;
+          selectValue.value = item.value;
         }
       });
+      // nextTick(() => (initialized.value = true));
     });
-
+    const reloadMain = inject('reloadMain') as () => void;
     // 下拉框-change请求
-    const selectOption = () => {
-      router.push({
+    const selectOption = async () => {
+      currentSearchName.value = projectName.value as string;
+      await router.push({
         name: 'index',
         query: {
           projectGroupId: selectValue.value,
-          searchName: projectName.value,
+          searchName: currentSearchName.value,
         },
       });
+      await reloadMain();
       // 改变赋值id
       currentGroupId.value = selectValue.value;
-      eventFlag.value = true;
     };
-    const initEventFlag = () => {
-      eventFlag.value = false;
-    };
-    // const reloadMain = inject('reloadMain') as () => void;
     return {
       projectName,
       selectValue,
       selectOption,
       groupOptions,
       currentGroup,
-      eventFlag,
-      initEventFlag,
+      currentSearchName,
+      initialized,
       // 查询输入框
-      searchProject: () => {
-        router.push({
+      searchProject: async () => {
+        currentSearchName.value = projectName.value as string;
+        await router.push({
           name: 'index',
           query: {
             projectGroupId: selectValue.value,
-            searchName: projectName.value,
+            searchName: currentSearchName.value,
           },
         });
-        eventFlag.value = true;
-        // reloadMain();
+        await reloadMain();
       },
     };
   },
@@ -149,6 +149,7 @@ export default defineComponent({
         left: 20px;
         top: 11px;
         cursor: pointer;
+        color: #7f8c9b;
       }
     }
   }
