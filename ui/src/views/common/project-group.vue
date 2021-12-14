@@ -238,9 +238,6 @@ export default defineComponent({
       await nextTick(() => {
         queryForm.value.name = props.name;
       });
-      if (!props.projectGroup) {
-        return;
-      }
       loading.value = true;
       await loadProject();
     });
