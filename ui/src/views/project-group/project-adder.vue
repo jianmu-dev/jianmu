@@ -55,7 +55,9 @@
         v-model.trim="keyword"
         @keyup.enter="search"
       >
-        <template #prefix></template>
+        <template #prefix>
+          <i class="jm-icon-button-search"></i>
+        </template>
       </jm-input>
       <div class="card-wrapper">
         <jm-empty v-if="projectList?.list.length === 0" />
@@ -303,13 +305,12 @@ export default defineComponent({
           padding-left: 55px;
         }
         .el-input__prefix {
-          margin-left: 24px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 16px;
-          height: 16px;
-          background-image: url('@/assets/svgs/sort/search.svg');
-          background-size: contain;
+          display: flex;
+          align-items: center;
+          margin-left: 18px;
+          .jm-icon-button-search {
+            font-size: 20px;
+          }
         }
       }
       ::v-deep(.project-group) {
