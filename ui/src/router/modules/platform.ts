@@ -42,6 +42,15 @@ export default [
     },
   },
   {
+    name: 'project-detail',
+    path: 'project-group/detail/:id',
+    component: () => import('@/views/project-group/project-detail.vue'),
+    props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
+    meta: {
+      title: '列表',
+    },
+  },
+  {
     // 密钥管理路由
     name: 'secret-key',
     path: 'secret-key',

@@ -16,7 +16,7 @@
       <div class="title">
         <div>
           <span>项目分组</span>
-          <span class="desc">（共有 {{ projectGroupList?.length }} 个组）</span>
+          <span class="desc">（共有 {{ projectGroupList.length }} 个组）</span>
         </div>
         <jm-tooltip content="关闭排序" placement="top" v-if="isActive">
           <div
@@ -29,7 +29,7 @@
         </jm-tooltip>
       </div>
       <div class="content" v-loading="loading">
-        <jm-empty v-if="projectGroupList?.length === 0" />
+        <jm-empty v-if="projectGroupList.length === 0" />
         <jm-draggable
           class="list"
           v-model="projectGroupList"
@@ -41,18 +41,17 @@
           <transition-group type="transition" name="flip-list">
             <div
               v-for="(i, index) in projectGroupList"
-              :class="['item', moveClassList[index], `${i}`]"
+              :class="['item', moveClassList[index]]"
               :key="i.id"
               :_id="i.id"
-              @mouseover="over(i.id)"
+              @mouseenter="over(i.id)"
               @mouseleave="leave"
             >
               <div class="wrapper">
                 <div class="top">
-                  <!-- <router-link to="/">
+                  <router-link :to="{ path: `/project-group/detail/${i.id}` }">
                     <div class="name">{{ i.name }}</div>
-                  </router-link> -->
-                  <div class="name">{{ i.name }}</div>
+                  </router-link>
                 </div>
                 <div class="description">
                   {{ i.description || '无' }}
@@ -74,10 +73,9 @@
         <div class="item" v-for="i in projectGroupList" :key="i.id" v-else>
           <div class="wrapper">
             <div class="top">
-              <!-- <router-link to="/">
+              <router-link :to="{ path: `/project-group/detail/${i.id}` }">
                 <div class="name">{{ i.name }}</div>
-              </router-link> -->
-              <div class="name">{{ i.name }}</div>
+              </router-link>
               <div class="operation">
                 <div
                   class="edit op-item"
@@ -145,6 +143,8 @@ import {
   onMounted,
   computed,
   nextTick,
+  provide,
+  inject,
 } from 'vue';
 import GroupCreator from './project-group-creator.vue';
 import GroupEditor from './project-group-editor.vue';
@@ -164,12 +164,16 @@ export default defineComponent({
   },
   setup() {
     const { proxy } = getCurrentInstance() as any;
+    const scrollableEl = inject('scrollableEl');
+    provide('scrollableEl', () => {
+      return scrollableEl;
+    });
     const isShow = ref<boolean>(false);
     const loading = ref<boolean>();
     const isActive = ref<boolean>(false);
     const creationActivated = ref<boolean>(false);
     const editionActivated = ref<boolean>(false);
-    const projectGroupList = ref<Mutable<IProjectGroupVo[]>>([]);
+    const projectGroupList = ref<Mutable<IProjectGroupVo>[]>([]);
     const groupName = ref<string>();
     const groupDescription = ref<string>();
     const projectGroupId = ref<string>();
@@ -180,9 +184,9 @@ export default defineComponent({
     const showChange = async (e: boolean, id: string) => {
       try {
         await updateProjectGroupShow(id);
-        e
-          ? proxy.$success('项目分组首页显示')
-          : proxy.$success('项目分组首页隐藏');
+        // e
+        //   ? proxy.$success('首页显示项目分组')
+        //   : proxy.$success('首页隐藏项目分组');
       } catch (err) {
         proxy.$throw(err, proxy);
       }
@@ -192,14 +196,24 @@ export default defineComponent({
         return id === currentItem.value ? 'move' : '';
       })
     );
+    const fetchProjectGroup = async () => {
+      loading.value = true;
+      try {
+        projectGroupList.value = await queryProjectGroup();
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      } finally {
+        loading.value = false;
+      }
+    };
     onMounted(async () => {
-      projectGroupList.value = await queryProjectGroup();
+      await fetchProjectGroup();
     });
     const addCompleted = async () => {
-      projectGroupList.value = await queryProjectGroup();
+      await fetchProjectGroup();
     };
     const editCompleted = async () => {
-      projectGroupList.value = await queryProjectGroup();
+      await fetchProjectGroup();
     };
     const add = () => {
       creationActivated.value = true;
@@ -233,7 +247,7 @@ export default defineComponent({
           try {
             await deleteProjectGroup(projectGroupId);
             proxy.$success('项目分组删除成功');
-            projectGroupList.value = await queryProjectGroup();
+            await fetchProjectGroup();
           } catch (err) {
             proxy.$throw(err, proxy);
           }
@@ -244,34 +258,28 @@ export default defineComponent({
       const {
         moved: { newIndex: targetSort, oldIndex: originSort, element },
       } = e;
-      // 向移动
-      if (targetSort < originSort) {
-        try {
-          await updateProjectGroupSort({
-            targetSort: projectGroupList.value![targetSort + 1].sort,
-            originSort: element.sort,
-          });
-          projectGroupList.value = await queryProjectGroup();
-          proxy.$success('项目分组排序成功');
-        } catch (err) {
-          proxy.$throw(err, proxy);
-        }
-      } else {
-        try {
-          await updateProjectGroupSort({
-            targetSort: projectGroupList.value![targetSort - 1].sort,
-            originSort: element.sort,
-          });
-          projectGroupList.value = await queryProjectGroup();
-          proxy.$success('项目分组排序成功');
-        } catch (err) {
-          proxy.$throw(err, proxy);
-        }
+
+      try {
+        // 向移动
+        targetSort < originSort
+          ? await updateProjectGroupSort({
+              targetGroupId: projectGroupList.value[targetSort + 1].id,
+              originGroupId: element.id,
+            })
+          : await updateProjectGroupSort({
+              targetGroupId: projectGroupList.value[targetSort - 1].id,
+              originGroupId: element.id,
+            });
+        nextTick(() => {
+          currentItem.value = e.moved.element.id;
+          currentSelected.value = false;
+        });
+      } catch (err) {
+        proxy.$throw(err, proxy);
+        // 未调换成功，将数据位置对调状态还原
+        const spliceProjectList = projectGroupList.value.splice(targetSort, 1);
+        projectGroupList.value.splice(originSort, 0, ...spliceProjectList);
       }
-      nextTick(() => {
-        currentItem.value = e.moved.element.id;
-        currentSelected.value = false;
-      });
     };
 
     return {
