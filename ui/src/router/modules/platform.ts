@@ -42,10 +42,10 @@ export default [
     },
   },
   {
-    name: 'project-list',
-    path: 'project-list',
-    component: () => import('@/views/project-list/project-list-manager.vue'),
-    props: ({ query: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
+    name: 'project-detail',
+    path: 'project-group/detail/:id',
+    component: () => import('@/views/project-group/project-detail.vue'),
+    props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
     meta: {
       title: '列表',
     },

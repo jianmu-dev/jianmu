@@ -156,7 +156,6 @@ export default defineComponent({
             i => i.id !== item.id
           ))
         : selectedList.value.push(item);
-      console.log('select', compSelectedList.value);
     };
     const projectList = ref<IPageVo<IProjectVo>>();
     const selectChange = async (projectGroupId: string) => {

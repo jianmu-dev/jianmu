@@ -49,6 +49,21 @@
         @deleted="handleProjectDeleted"
       />
     </div>
+    <!-- 显示更多 -->
+    <div
+      class="load-more"
+      v-if="pageable"
+      v-scroll="{
+        loadMore: btnDown,
+        scrollableEl,
+      }"
+    >
+      <jm-load-more
+        :state="loadState"
+        :load-more="btnDown"
+        v-if="projects.length !== 0"
+      ></jm-load-more>
+    </div>
   </div>
 </template>
 
@@ -64,6 +79,7 @@ import {
   nextTick,
   ref,
   watch,
+  inject,
 } from 'vue';
 import { IProjectVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
@@ -76,6 +92,7 @@ import { IPageVo } from '@/api/dto/common';
 import { Mutable } from '@/utils/lib';
 import { updateProjectGroupProjectSort } from '@/api/project-group';
 import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { StateEnum } from '@/components/load-more/enumeration';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
@@ -109,24 +126,31 @@ export default defineComponent({
   setup(props: any, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
-    const projectPage = ref<IPageVo<IProjectVo>>({
+    const scrollableEl = inject('scrollableEl');
+    const projectPage = ref<Mutable<IPageVo<IProjectVo>>>({
       total: 0,
       pages: 0,
       list: [],
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
+    // 显示更多
+    const loadState = ref<StateEnum>(StateEnum.MORE);
     const projectList = ref<Mutable<IProjectVo>[]>([]);
     const queryForm = ref<IQueryForm>({
       pageNum: START_PAGE_NUM,
-      pageSize: 10000,
+      pageSize: DEFAULT_PAGE_SIZE,
       projectGroupId: props.projectGroup?.id,
       name: props.name,
     });
     const autoRefreshingOfNoRunningCount = ref<number>(0);
+    const loadingMore = ref<boolean>(false);
     console.log('开启自动刷新项目列表');
     let autoRefreshingInterval: any;
     const refreshHandler = () => {
       autoRefreshingInterval = setInterval(async () => {
+        if (loadingMore.value === true) {
+          return;
+        }
         if (
           !projects.value.find(
             item => item.status === ProjectStatusEnum.RUNNING
@@ -165,7 +189,17 @@ export default defineComponent({
             console.warn(err.message);
           }
         }
-      }, 500);
+      }, 3000);
+    };
+    const btnDown = async () => {
+      // 如果状态为没有更多控制加载
+      if (loadState.value === StateEnum.NO_MORE) {
+        return;
+      }
+      clearInterval(autoRefreshingInterval);
+      queryForm.value.pageNum += 1;
+      await loadProject();
+      refreshHandler();
     };
     const move = computed(() => {
       props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
@@ -173,13 +207,26 @@ export default defineComponent({
     });
     const loadProject = async () => {
       try {
-        loading.value = true;
-        projectPage.value = await queryProject({ ...queryForm.value });
+        // projectPage.value = await queryProject({ ...queryForm.value });
+        loadState.value = StateEnum.LOADING;
+        // 在加载时，控制不自动加载
+        loadingMore.value = true;
+        const { list, pages } = await queryProject({
+          ...queryForm.value,
+        });
+        projectPage.value.list.push(...list);
+        projectPage.value.pages = pages;
         projectList.value = projectPage.value.list;
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
         loading.value = false;
+        loadState.value = StateEnum.MORE;
+        if (queryForm.value.pageNum >= projectPage.value.pages) {
+          // 加载完成
+          loadState.value = StateEnum.NO_MORE;
+        }
+        loadingMore.value = false;
       }
     };
     // 初始化项目列表
@@ -190,6 +237,7 @@ export default defineComponent({
       if (!props.projectGroup) {
         return;
       }
+      loading.value = true;
       await loadProject();
     });
     onUpdated(async () => {
@@ -202,10 +250,11 @@ export default defineComponent({
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
       await nextTick(() => {
+        loading.value = true;
         loadProject();
       });
     });
-    // new
+    // 拖拽排序
     const currentSelected = ref<boolean>(false);
     const currentItem = ref<string>('-1');
     let setCurrentItemTimer: any;
@@ -237,6 +286,24 @@ export default defineComponent({
         currentSelected.value = false;
       }, 400);
     };
+    watch(
+      () => props.move,
+      async flag => {
+        if (flag) {
+          return;
+        }
+        try {
+          projectPage.value = await queryProject({
+            pageNum: START_PAGE_NUM,
+            pageSize: projects.value.length || DEFAULT_PAGE_SIZE,
+            projectGroupId: props.projectGroup?.id,
+            name: props.name,
+          });
+        } catch (err) {
+          proxy.$throw(err, proxy);
+        }
+      }
+    );
     const moveClassList = computed<string[]>(() =>
       projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
@@ -258,6 +325,9 @@ export default defineComponent({
       clearTimeout(setCurrentItemTimer);
     });
     return {
+      scrollableEl,
+      loadState,
+      btnDown,
       moveClassList,
       leave() {
         currentItem.value = '';
@@ -364,6 +434,11 @@ export default defineComponent({
       display: flex;
       flex-wrap: wrap;
     }
+  }
+  .load-more {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
   }
 }
 </style>

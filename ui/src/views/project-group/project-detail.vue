@@ -1,5 +1,5 @@
 <template>
-  <div class="project-list-manager">
+  <div class="project-detail">
     <div class="right-top-btn">
       <router-link :to="{ name: 'index' }">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small"
@@ -19,7 +19,7 @@
     <div class="content">
       <div class="menu-bar">
         <button class="add" @click="add">
-          <div class="label">新建项目</div>
+          <div class="label">添加项目</div>
         </button>
       </div>
       <div class="title">
@@ -44,7 +44,7 @@
         />
       </div>
     </div>
-    <list-creator
+    <project-adder
       :id="id"
       v-if="creationActivated"
       @closed="creationActivated = false"
@@ -56,8 +56,14 @@
 <script lang="ts">
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { getProjectGroupDetail } from '@/api/view-no-auth';
-import { defineComponent, ref, onMounted, getCurrentInstance } from 'vue';
-import ListCreator from './project-list-creator.vue';
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  getCurrentInstance,
+  inject,
+} from 'vue';
+import ProjectAdder from '@/views/project-group/project-adder.vue';
 import ProjectGroup from '@/views/common/project-group.vue';
 export default defineComponent({
   props: {
@@ -67,16 +73,18 @@ export default defineComponent({
     },
   },
   components: {
-    ListCreator,
+    ProjectAdder,
     ProjectGroup,
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
     const isActive = ref<boolean>(false);
     const loadingTop = ref<boolean>(false);
-    const loading = ref<boolean>(false);
+    const isShow = ref<boolean>(true);
     const creationActivated = ref<boolean>(false);
     const projectGroupDetail = ref<IProjectGroupVo>();
+    const scrollableEl = inject('scrollableEl');
+    const reloadMain = inject('reloadMain') as () => void;
     const add = () => {
       creationActivated.value = true;
     };
@@ -94,9 +102,11 @@ export default defineComponent({
       await fetchProjectGroupDetail();
     });
     const addCompleted = async () => {
-      await fetchProjectGroupDetail();
+      reloadMain();
     };
     return {
+      isShow,
+      scrollableEl,
       loadingTop,
       isActive,
       creationActivated,
@@ -109,7 +119,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.project-list-manager {
+.project-detail {
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -200,6 +210,13 @@ export default defineComponent({
         font-size: 14px;
         color: #082340;
         opacity: 0.46;
+      }
+    }
+    .group-list-wrapper {
+      display: flex;
+      flex-direction: column;
+      .load-more {
+        align-self: center;
       }
     }
   }

@@ -49,9 +49,7 @@
             >
               <div class="wrapper">
                 <div class="top">
-                  <router-link
-                    :to="{ name: 'project-list', query: { id: i.id } }"
-                  >
+                  <router-link :to="{ path: `/project-group/detail/${i.id}` }">
                     <div class="name">{{ i.name }}</div>
                   </router-link>
                 </div>
@@ -75,7 +73,7 @@
         <div class="item" v-for="i in projectGroupList" :key="i.id" v-else>
           <div class="wrapper">
             <div class="top">
-              <router-link :to="{ name: 'project-list', query: { id: i.id } }">
+              <router-link :to="{ path: `/project-group/detail/${i.id}` }">
                 <div class="name">{{ i.name }}</div>
               </router-link>
               <div class="operation">
@@ -145,6 +143,8 @@ import {
   onMounted,
   computed,
   nextTick,
+  provide,
+  inject,
 } from 'vue';
 import GroupCreator from './project-group-creator.vue';
 import GroupEditor from './project-group-editor.vue';
@@ -164,6 +164,10 @@ export default defineComponent({
   },
   setup() {
     const { proxy } = getCurrentInstance() as any;
+    const scrollableEl = inject('scrollableEl');
+    provide('scrollableEl', () => {
+      return scrollableEl;
+    });
     const isShow = ref<boolean>(false);
     const loading = ref<boolean>();
     const isActive = ref<boolean>(false);
