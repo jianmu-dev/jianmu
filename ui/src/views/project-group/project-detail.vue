@@ -38,6 +38,7 @@
       </div>
       <div class="group-list-wrapper">
         <project-group
+          v-if="initialized"
           :project-group="projectGroupDetail"
           :pageable="true"
           :move="isActive"
@@ -79,6 +80,7 @@ export default defineComponent({
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
     const isActive = ref<boolean>(false);
+    const initialized = ref<boolean>(false);
     const loadingTop = ref<boolean>(false);
     const isShow = ref<boolean>(true);
     const creationActivated = ref<boolean>(false);
@@ -92,6 +94,7 @@ export default defineComponent({
       try {
         loadingTop.value = true;
         projectGroupDetail.value = await getProjectGroupDetail(props.id);
+        initialized.value = true;
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
@@ -105,6 +108,7 @@ export default defineComponent({
       reloadMain();
     };
     return {
+      initialized,
       isShow,
       scrollableEl,
       loadingTop,
