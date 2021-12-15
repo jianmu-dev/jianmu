@@ -550,7 +550,9 @@ export default defineComponent({
         width: 30px;
         height: 30px;
         padding: 3px;
+        background-color: transparent;
         border: 0;
+        background-position: center center;
         background-repeat: no-repeat;
         cursor: pointer;
         outline: none;
@@ -561,36 +563,15 @@ export default defineComponent({
         }
 
         &.execute {
-          background: url('@/assets/svgs/btn/execute.svg') no-repeat;
-          background-position: center center;
-          border-radius: 2px;
-          &:hover {
-            background: url('@/assets/svgs/btn/execute.svg') no-repeat #eff7ff;
-            background-position: center center;
-            border-radius: 2px;
-          }
+          background-image: url('@/assets/svgs/btn/execute.svg');
         }
 
         &.edit {
-          background: url('@/assets/svgs/btn/edit.svg') no-repeat;
-          background-position: center center;
-          border-radius: 2px;
-          &:hover {
-            background: url('@/assets/svgs/btn/edit.svg') no-repeat #eff7ff;
-            background-position: center center;
-            border-radius: 2px;
-          }
+          background-image: url('@/assets/svgs/btn/edit.svg');
         }
 
         &.sync {
-          background: url('@/assets/svgs/btn/sync.svg') no-repeat;
-          background-position: center center;
-          border-radius: 2px;
-          &:hover {
-            background: url('@/assets/svgs/btn/sync.svg') no-repeat #eff7ff;
-            background-position: center center;
-            border-radius: 2px;
-          }
+          background-image: url('@/assets/svgs/btn/sync.svg');
 
           &.doing {
             animation: rotating 2s linear infinite;
@@ -598,56 +579,31 @@ export default defineComponent({
         }
 
         &.webhook {
-          width: 24px;
-          height: 24px;
-          background: url('@/assets/svgs/btn/hook.svg') no-repeat;
-          background-position: center center;
-          border-radius: 2px;
-          &:hover {
-            background: url('@/assets/svgs/btn/hook.svg') no-repeat #eff7ff;
-            background-position: center center;
-            border-radius: 2px;
-          }
+          background-image: url('@/assets/svgs/btn/hook.svg');
         }
 
         &.del {
           position: absolute;
           right: 7px;
           top: 7px;
-          background: url('@/assets/svgs/btn/del.svg') no-repeat;
-          background-position: center center;
-          border-radius: 2px;
-          opacity: 0.56;
+          width: 22px;
+          height: 22px;
+          //display: none;
+          background-image: url('@/assets/svgs/btn/del.svg');
+          background-size: contain;
+          opacity: 0.65;
+          padding: 2px;
           &:hover {
-            background: url('@/assets/svgs/btn/del.svg') no-repeat #eff7ff;
-            background-position: center center;
-            border-radius: 2px;
             opacity: 1;
           }
         }
 
         &.workflow-label {
-          background: url('@/assets/svgs/index/workflow-label.svg') no-repeat;
-          background-position: center center;
-          border-radius: 2px;
-          &:hover {
-            background: url('@/assets/svgs/index/workflow-label.svg') no-repeat
-              #eff7ff;
-            background-position: center center;
-            border-radius: 2px;
-          }
+          background-image: url('@/assets/svgs/index/workflow-label.svg');
         }
 
         &.pipeline-label {
-          background: url('@/assets/svgs/index/pipeline-label.svg') no-repeat;
-          background-position: center center;
-          border-radius: 2px;
-          &:hover {
-            background: url('@/assets/svgs/index/pipeline-label.svg') no-repeat
-              #eff7ff;
-            background-position: center center;
-            border-radius: 2px;
-          }
+          background-image: url('@/assets/svgs/index/pipeline-label.svg');
         }
 
         &.doing {
@@ -660,14 +616,15 @@ export default defineComponent({
         }
       }
     }
+  }
 
-    .ellipsis {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+  .ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
+
 .project-item {
   margin-left: 0px;
 }

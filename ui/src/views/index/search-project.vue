@@ -45,7 +45,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    console.log('search', { ...props });
     const router = useRouter();
     // 选择框内容
     const selectValue = ref<string>('');
@@ -122,6 +121,7 @@ export default defineComponent({
 // 搜索结果
 .search-project {
   background-color: #fff;
+  min-height: 510px;
   .search {
     height: 66px;
     background: #f6fafe;

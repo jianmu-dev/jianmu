@@ -48,8 +48,8 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import BottomNav from '@/views/nav/bottom2.vue';
-import AllProject from '@/views/index-content/all-project.vue';
-import SearchProject from '@/views/index-content/search-project.vue';
+import AllProject from '@/views/index/all-project.vue';
+import SearchProject from '@/views/index/search-project.vue';
 
 export default defineComponent({
   components: { AllProject, SearchProject, BottomNav },
