@@ -13,7 +13,7 @@
       </div>
       <div v-if="!data.record?.status" class="instance-tabs">
         <div class="tab init selected">
-          <div class="left-horn"/>
+<!--          <div class="left-horn"/>-->
           <div class="right-horn"/>
           <div class="label">-</div>
         </div>
