@@ -1,9 +1,15 @@
 <template>
   <div class="project-editor" v-loading="loading">
     <div class="right-top-btn">
-      <router-link :to="{ name: 'index' }">
+      <!-- <router-link :to="{ name: 'index' }">
         <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
-      </router-link>
+      </router-link> -->
+      <jm-button
+        class="jm-icon-button-cancel"
+        size="small"
+        @click="$router.go(-1)"
+        >取消</jm-button
+      >
       <jm-button
         v-if="source === 'processTemplates'"
         type="primary"
@@ -105,7 +111,7 @@ export default defineComponent({
             let name = `name: ${res.name}`;
             editorForm.value.dslText = dsl.replace(
               name,
-              `name: ${route.query.processTemplatesName}`,
+              `name: ${route.query.processTemplatesName}`
             );
           } else {
             editorForm.value.dslText = dsl;
