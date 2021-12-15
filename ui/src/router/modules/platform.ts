@@ -42,9 +42,10 @@ export default [
     },
     children: [
       {
-        name: 'project-detail',
+        name: 'project-group-detail',
         path: 'detail/:id',
-        component: () => import('@/views/project-group/project-detail.vue'),
+        component: () =>
+          import('@/views/project-group/project-group-detail.vue'),
         props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
         meta: {
           title: '详情',

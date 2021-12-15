@@ -1,5 +1,5 @@
 <template>
-  <div class="project-detail">
+  <div class="project-group-detail">
     <div class="right-top-btn">
       <router-link :to="{ name: 'index' }">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small"
@@ -85,7 +85,6 @@ export default defineComponent({
     const isShow = ref<boolean>(true);
     const creationActivated = ref<boolean>(false);
     const projectGroupDetail = ref<IProjectGroupVo>();
-    const scrollableEl = inject('scrollableEl');
     const reloadMain = inject('reloadMain') as () => void;
     const add = () => {
       creationActivated.value = true;
@@ -110,7 +109,6 @@ export default defineComponent({
     return {
       initialized,
       isShow,
-      scrollableEl,
       loadingTop,
       isActive,
       creationActivated,
@@ -123,7 +121,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.project-detail {
+.project-group-detail {
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -223,7 +221,7 @@ export default defineComponent({
         align-self: center;
       }
       .project-group {
-        margin-top: 0px;
+        margin-top: -10px;
       }
     }
   }

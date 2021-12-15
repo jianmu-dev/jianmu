@@ -172,10 +172,6 @@ export default defineComponent({
   },
   setup() {
     const { proxy } = getCurrentInstance() as any;
-    const scrollableEl = inject('scrollableEl');
-    provide('scrollableEl', () => {
-      return scrollableEl;
-    });
     const isShow = ref<boolean>(false);
     const loading = ref<boolean>();
     const isActive = ref<boolean>(false);
