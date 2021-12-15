@@ -256,7 +256,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void updateProject(String dslId, String dslText) {
+    public void updateProject(String dslId, String dslText, String projectGroupId) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         if (project.getDslSource() == Project.DslSource.GIT) {
@@ -274,10 +274,31 @@ public class ProjectApplication {
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
+        // 修改项目组
+        this.updateProjectGroup(dslId, projectGroupId);
 
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
+    }
+
+    private void updateProjectGroup(String dslId, String projectGroupId) {
+        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(dslId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
+        var targetGroupId = this.projectGroupRepository.findById(projectGroupId).map(ProjectGroup::getId)
+                .orElseThrow(() -> new DataNotFoundException("未找到目标项目组"));
+        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(targetGroupId)
+                .map(ProjectLinkGroup::getSort)
+                .orElseThrow(() -> new DataNotFoundException("未找到目标项目组"));
+        var newProjectLinkGroup = ProjectLinkGroup.Builder.aReference()
+                .projectGroupId(targetGroupId)
+                .projectId(projectLinkGroup.getProjectId())
+                .sort(++sort)
+                .build();
+        this.projectLinkGroupRepository.add(newProjectLinkGroup);
+        this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
+        this.projectGroupRepository.addProjectCountById(targetGroupId, 1);
     }
 
     @Transactional

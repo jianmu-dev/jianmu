@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -258,5 +259,9 @@ public class ProjectGroupApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
         projectGroup.setIsShow(!projectGroup.getIsShow());
         this.projectGroupRepository.update(projectGroup);
+    }
+
+    public Optional<ProjectLinkGroup> findLinkByProjectId(String projectId) {
+        return this.projectLinkGroupRepository.findByProjectId(projectId);
     }
 }
