@@ -2,14 +2,11 @@
   <div class="project-group" v-loading="loading">
     <div v-if="!pageable" class="name">
       <div class="group-name">
-        <span>{{ projectGroup?.name }}</span>
-        <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
-      </div>
-      <div class="more">
-        <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
-          >查看更多</router-link
+        <router-link
+          :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
+          >{{ projectGroup?.name }}</router-link
         >
-        <i class="more-icon"></i>
+        <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
       </div>
     </div>
     <div class="projects">
@@ -199,7 +196,6 @@ export default defineComponent({
           ...queryForm.value,
         });
         projectPage.value.list.push(...list);
-        console.log(projectPage.value);
         projectPage.value.pages = pages;
         projectList.value = projectPage.value.list;
       } catch (err) {
@@ -372,40 +368,19 @@ export default defineComponent({
     padding-right: 5px;
 
     .group-name {
+      a {
+        color: #082340;
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
       .desc {
         margin-left: 12px;
         font-size: 14px;
         font-weight: normal;
         color: #082340;
         opacity: 0.46;
-      }
-    }
-    .more {
-      font-size: 14px;
-      color: #6b7b8d;
-      cursor: pointer;
-      .more-icon {
-        display: inline-block;
-        content: '';
-        width: 16px;
-        height: 16px;
-        background: url('@/assets/svgs/group/more.svg');
-        position: relative;
-        top: 3px;
-        right: -4px;
-      }
-      a {
-        color: #6b7b8d;
-        text-decoration: none;
-        font-weight: normal;
-      }
-      &:hover {
-        a {
-          color: #096dd9;
-        }
-        .more-icon {
-          background: url('@/assets/svgs/group/more-active.svg');
-        }
       }
     }
   }
