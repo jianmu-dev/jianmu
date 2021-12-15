@@ -535,13 +535,6 @@ export default defineComponent({
             font-size: 16px;
             color: #6b7b8d;
           }
-          a {
-            color: inherit;
-            text-decoration: none;
-            &:hover {
-              text-decoration: underline;
-            }
-          }
           .jm-icon-input-hook {
             width: 760px;
           }

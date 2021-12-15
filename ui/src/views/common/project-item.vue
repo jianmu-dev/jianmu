@@ -517,17 +517,13 @@ export default defineComponent({
       }
     }
 
-    a {
-      text-decoration: none;
-    }
-
     .title {
       width: 90%;
       font-size: 16px;
       color: #082340;
 
       &:hover {
-        text-decoration: underline;
+        color: #096dd9;
       }
     }
 

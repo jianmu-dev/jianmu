@@ -1,24 +1,33 @@
 <template>
   <div class="import-step-two">
     <div class="right-top-btn">
-      <router-link :to="{name: 'index'}">
-        <jm-button class="jm-icon-button-cancel" size="small" :loading="loading">取消</jm-button>
+      <router-link :to="{ name: 'index' }">
+        <jm-button class="jm-icon-button-cancel" size="small" :loading="loading"
+          >取消</jm-button
+        >
       </router-link>
-      <jm-button type="primary" class="jm-icon-button-previous" size="small"
-                 :loading="loading" @click="previous">上一步
+      <jm-button
+        type="primary"
+        class="jm-icon-button-previous"
+        size="small"
+        :loading="loading"
+        @click="previous"
+        >上一步
       </jm-button>
-      <jm-button type="primary" class="jm-icon-button-preserve" size="small"
-                 :loading="loading" @click="save">保存
+      <jm-button
+        type="primary"
+        class="jm-icon-button-preserve"
+        size="small"
+        :loading="loading"
+        @click="save"
+        >保存
       </jm-button>
     </div>
     <div class="content">
       <jm-scrollbar>
         <jm-radio-group v-model="importForm.dslPath">
-          <jm-tree
-            :props="treeProps"
-            :load="loadNode"
-            lazy>
-            <template #default="{ data: {id, label, leaf} }">
+          <jm-tree :props="treeProps" :load="loadNode" lazy>
+            <template #default="{ data: { id, label, leaf } }">
               <jm-radio :disabled="!leaf" :label="id">{{ label }}</jm-radio>
             </template>
           </jm-tree>
@@ -80,13 +89,15 @@ export default defineComponent({
         const data = await listGit(importForm.value.id, dir);
         const nodes: object[] = [];
 
-        Object.keys(data).sort().forEach(key => {
-          nodes.push({
-            id: `${dir || ''}/${key}`,
-            label: key,
-            leaf: !data[key],
+        Object.keys(data)
+          .sort()
+          .forEach(key => {
+            nodes.push({
+              id: `${dir || ''}/${key}`,
+              label: key,
+              leaf: !data[key],
+            });
           });
-        });
 
         return resolve(nodes);
       },
@@ -102,19 +113,21 @@ export default defineComponent({
 
         loading.value = true;
 
-        _import({ ...importForm.value }).then(() => {
-          // 刷新流程定义列表
-          reloadMain();
+        _import({ ...importForm.value })
+          .then(() => {
+            // 刷新流程定义列表
+            reloadMain();
 
-          proxy.$success('导入成功');
+            proxy.$success('导入成功');
 
-          router.push({ name: 'index' });
-        }).catch((err: Error) => {
-          // 关闭loading
-          loading.value = false;
+            router.push({ name: 'index' });
+          })
+          .catch((err: Error) => {
+            // 关闭loading
+            loading.value = false;
 
-          proxy.$throw(err, proxy);
-        });
+            proxy.$throw(err, proxy);
+          });
       },
     };
   },
@@ -145,7 +158,7 @@ export default defineComponent({
   .content {
     min-width: 600px;
     margin: 16px 0;
-    border: 1px solid #E6EBF2;
+    border: 1px solid #e6ebf2;
     height: calc(100vh - 284px);
 
     ::v-deep(.el-tree) {
