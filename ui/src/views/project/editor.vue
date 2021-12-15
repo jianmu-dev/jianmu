@@ -1,13 +1,7 @@
 <template>
   <div class="project-editor" v-loading="loading">
     <div class="right-top-btn">
-      <!-- <router-link :to="{ name: 'index' }">
-        <jm-button class="jm-icon-button-cancel" size="small">取消</jm-button>
-      </router-link> -->
-      <jm-button
-        class="jm-icon-button-cancel"
-        size="small"
-        @click="$router.go(-1)"
+      <jm-button class="jm-icon-button-cancel" size="small" @click="close"
         >取消</jm-button
       >
       <jm-button
@@ -75,6 +69,8 @@ import {
 } from '@/api/view-no-auth';
 import { IProcessTemplateVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
+import { useStore } from 'vuex';
+import { IRootState } from '@/model';
 
 export default defineComponent({
   props: {
@@ -94,6 +90,8 @@ export default defineComponent({
     const projectGroupList = ref<IProjectGroupVo[]>([]);
     const form = ref<any>();
     const loading = ref<boolean>(false);
+    const store = useStore();
+    const rootState = store.state as IRootState;
     onMounted(async () => {
       // 请求项目组列表
       projectGroupList.value = await listProjectGroup();
@@ -187,6 +185,13 @@ export default defineComponent({
               proxy.$throw(err, proxy);
             });
         });
+      },
+      close: () => {
+        if (rootState.fromRouteFullPath) {
+          router.push(rootState.fromRouteFullPath);
+          return;
+        }
+        router.push({ name: 'index' });
       },
     };
   },
