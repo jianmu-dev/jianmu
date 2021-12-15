@@ -290,7 +290,7 @@ public class ProjectApplication {
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(targetGroupId)
                 .map(ProjectLinkGroup::getSort)
-                .orElseThrow(() -> new DataNotFoundException("未找到目标项目组"));
+                .orElse(-1);
         var newProjectLinkGroup = ProjectLinkGroup.Builder.aReference()
                 .projectGroupId(targetGroupId)
                 .projectId(projectLinkGroup.getProjectId())
