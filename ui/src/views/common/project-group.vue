@@ -46,14 +46,7 @@
       />
     </div>
     <!-- 显示更多 -->
-    <div
-      class="load-more"
-      v-if="pageable"
-      v-scroll="{
-        loadMore: btnDown,
-        scrollableEl,
-      }"
-    >
+    <div class="load-more" v-if="pageable" v-scroll="scrollObj">
       <jm-load-more
         :state="loadState"
         :load-more="btnDown"
@@ -246,6 +239,25 @@ export default defineComponent({
         loadProject();
       });
     });
+    // onUpdated(() => {
+    //   if (props.move) {
+    //     return;
+    //   }
+    //   // 关闭拖拽模式将拖拽后的新数组数据同步
+    //   projectPage.value.list = projectList.value;
+    // });
+
+    // TODO watch待优化
+    watch(
+      () => props.move,
+      flag => {
+        if (flag) {
+          return;
+        }
+        // 关闭拖拽模式将拖拽后的新数组数据同步
+        projectPage.value.list = projectList.value;
+      }
+    );
     // 拖拽排序
     const currentSelected = ref<boolean>(false);
     const currentItem = ref<string>('-1');
@@ -278,25 +290,6 @@ export default defineComponent({
         currentSelected.value = false;
       }, 400);
     };
-    // TODO watch待优化
-    watch(
-      () => props.move,
-      async flag => {
-        if (flag) {
-          return;
-        }
-        try {
-          projectPage.value = await queryProject({
-            pageNum: START_PAGE_NUM,
-            pageSize: projects.value.length || DEFAULT_PAGE_SIZE,
-            projectGroupId: props.projectGroup?.id,
-            name: props.name,
-          });
-        } catch (err) {
-          proxy.$throw(err, proxy);
-        }
-      }
-    );
     const moveClassList = computed<string[]>(() =>
       projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
@@ -307,7 +300,12 @@ export default defineComponent({
       clearInterval(autoRefreshingInterval);
       clearTimeout(setCurrentItemTimer);
     });
+    const scrollObj = {
+      loadMore: btnDown,
+      scrollableEl,
+    };
     return {
+      scrollObj,
       scrollableEl,
       loadState,
       btnDown,

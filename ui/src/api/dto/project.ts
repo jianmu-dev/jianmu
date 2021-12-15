@@ -15,6 +15,7 @@ export interface IProjectSavingDto
   extends Readonly<{
     id?: string;
     dslText: string;
+    projectGroupId: string;
   }> {}
 
 /**
@@ -23,6 +24,7 @@ export interface IProjectSavingDto
 export interface IGitCloningDto
   extends Readonly<{
     uri: string;
+    projectGroupId: string;
     credential: {
       type?: ProjectImporterTypeEnum;
       namespace?: string;
@@ -103,6 +105,7 @@ export interface IProjectDetailVo
       dslText: string;
       eventBridgeId?: string;
       triggerType: TriggerTypeEnum;
+      projectGroupId: string;
     }
   > {}
 
