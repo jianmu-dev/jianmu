@@ -35,6 +35,7 @@ public class GitRepoDto {
     private String branch;
     @NotBlank(message = "参数dslPath不能为空", groups = AddGroup.class)
     private String dslPath;
+    @NotBlank(message = "项目组ID不能为空")
     @Schema(description = "项目组ID")
     private String projectGroupId;
 }

@@ -230,19 +230,12 @@ public class ProjectApplication {
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
         // 添加分组
-        String groupId;
-        if (projectGroupId != null) {
-            this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
-            groupId = projectGroupId;
-        }else {
-            groupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
-                    .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));;
-        }
-        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(groupId)
+        this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(projectGroupId)
                 .map(ProjectLinkGroup::getSort)
                 .orElse(-1);
         var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
-                .projectGroupId(groupId)
+                .projectGroupId(projectGroupId)
                 .projectId(project.getId())
                 .sort(++sort)
                 .build();
@@ -250,7 +243,7 @@ public class ProjectApplication {
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
         this.projectLinkGroupRepository.add(projectLinkGroup);
-        this.projectGroupRepository.addProjectCountById(groupId, 1);
+        this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
     }
