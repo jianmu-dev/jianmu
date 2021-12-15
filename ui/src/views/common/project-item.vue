@@ -617,14 +617,11 @@ export default defineComponent({
           background: url('@/assets/svgs/btn/del.svg') no-repeat;
           background-position: center center;
           border-radius: 2px;
+          opacity: 0.56;
           &:hover {
-            background: url('@/assets/svgs/btn/del-active.svg') no-repeat
-              #eff7ff;
+            background: url('@/assets/svgs/btn/del.svg') no-repeat #eff7ff;
             background-position: center center;
             border-radius: 2px;
-          }
-
-          &:hover {
             opacity: 1;
           }
         }
