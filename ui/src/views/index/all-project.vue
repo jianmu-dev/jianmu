@@ -78,6 +78,11 @@ export default defineComponent({
       .el-input__inner {
         height: 36px;
         text-indent: 25px;
+        border: transparent;
+      }
+      .el-input__inner:focus {
+        text-indent: 24px;
+        border: 1px solid #096dd9;
       }
     }
     .jm-icon-button-search::before {

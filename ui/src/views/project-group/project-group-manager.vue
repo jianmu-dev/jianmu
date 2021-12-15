@@ -464,14 +464,6 @@ export default defineComponent({
             }
           }
         }
-
-        a {
-          text-decoration: none;
-          &:hover {
-            color: #000000;
-            text-decoration: underline;
-          }
-        }
         .top {
           display: flex;
           justify-content: space-between;
@@ -484,6 +476,9 @@ export default defineComponent({
             color: #082340;
             font-size: 20px;
             font-weight: 500;
+            &:hover {
+              color: #096dd9;
+            }
           }
           .operation {
             display: none;
