@@ -366,13 +366,6 @@ export default defineComponent({
     padding-right: 5px;
 
     .group-name {
-      a {
-        color: #082340;
-        text-decoration: none;
-        &:hover {
-          text-decoration: underline;
-        }
-      }
       .desc {
         margin-left: 12px;
         font-size: 14px;

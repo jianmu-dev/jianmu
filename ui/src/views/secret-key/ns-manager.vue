@@ -78,7 +78,7 @@ const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
 function changeView(
   childRoute: Ref<boolean>,
-  route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized
 ) {
   childRoute.value = route.matched.length > 2;
 }
@@ -260,17 +260,12 @@ export default defineComponent({
           border-color: #096dd9;
         }
 
-        a {
-          text-decoration: none;
-        }
-
         .name {
           font-size: 20px;
           font-weight: bold;
           color: #082340;
-
           &:hover {
-            text-decoration: underline;
+            color: #096dd9;
           }
         }
 

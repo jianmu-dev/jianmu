@@ -12,7 +12,11 @@
         </jm-option>
       </jm-select>
       <div class="search-container">
-        <jm-input v-model="projectName" @change="searchProject" />
+        <jm-input
+          v-model="projectName"
+          @change="searchProject"
+          placeholder="请输入项目名称"
+        />
         <i class="jm-icon-button-search"></i>
       </div>
     </div>
@@ -75,7 +79,6 @@ export default defineComponent({
           selectValue.value = item.value;
         }
       });
-      // nextTick(() => (initialized.value = true));
     });
     const reloadMain = inject('reloadMain') as () => void;
     // 下拉框-change请求
@@ -135,16 +138,20 @@ export default defineComponent({
       border-radius: 2px;
       margin-right: 30px;
     }
+    ::v-deep(.el-input) {
+      height: 36px;
+      .el-input__inner {
+        text-indent: 32px;
+        border: 1px solid #fff;
+      }
+      .el-input__inner:focus {
+        text-indent: 32px;
+        border: 1px solid #096dd9;
+      }
+    }
     .search-container {
       width: 100%;
       position: relative;
-      ::v-deep(.el-input) {
-        height: 36px;
-        border-radius: 2px;
-        .el-input__inner {
-          text-indent: 32px;
-        }
-      }
       .jm-icon-button-search::before {
         z-index: 100;
         content: '\e80b';

@@ -415,9 +415,8 @@ export default defineComponent({
           margin-bottom: 10px;
           font-size: 16px;
         }
-
         a.item-t-t:hover {
-          text-decoration: underline;
+          color: #096dd9;
         }
 
         .item-t-mid {
@@ -470,15 +469,6 @@ export default defineComponent({
             overflow-y: auto;
             margin-bottom: 10px;
             max-width: 350px;
-
-            & > a {
-              text-decoration: none;
-              color: #385775;
-            }
-
-            & > a:hover {
-              text-decoration: underline;
-            }
           }
         }
 
