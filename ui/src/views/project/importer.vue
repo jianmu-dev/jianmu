@@ -3,15 +3,15 @@
     <div class="steps">
       <div>
         <jm-steps :active="step" finish-status="success">
-          <jm-step title="克隆Git仓库"/>
-          <jm-step title="选择DSL文件"/>
+          <jm-step title="克隆Git仓库" />
+          <jm-step title="选择DSL文件" />
         </jm-steps>
       </div>
     </div>
     <div class="step">
       <jm-scrollbar>
-        <step-one v-show="step === 0"/>
-        <step-two v-if="step === 1" :data="stepTwoData"/>
+        <step-one v-show="step === 0" />
+        <step-two v-if="step === 1" :data="stepTwoData" />
       </jm-scrollbar>
     </div>
   </div>
@@ -58,8 +58,8 @@ export default defineComponent({
 
   .steps {
     border-radius: 4px;
-    background-color: #FFFFFF;
-    border: 1px solid #E6EBF2;
+    background-color: #ffffff;
+    border: 1px solid #e6ebf2;
 
     > div {
       width: 30%;
@@ -71,7 +71,7 @@ export default defineComponent({
   .step {
     margin-top: 16px;
     border-radius: 4px;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     height: calc(100vh - 250px);
   }
 }

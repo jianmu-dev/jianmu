@@ -153,7 +153,7 @@ export default defineComponent({
         }
         if (
           !projects.value.find(
-            item => item.status === ProjectStatusEnum.RUNNING
+            item => item.status === ProjectStatusEnum.RUNNING,
           )
         ) {
           // 不存在running场景
@@ -191,16 +191,7 @@ export default defineComponent({
         }
       }, 3000);
     };
-    const btnDown = async () => {
-      // 如果状态为没有更多控制加载
-      if (loadState.value === StateEnum.NO_MORE) {
-        return;
-      }
-      clearInterval(autoRefreshingInterval);
-      queryForm.value.pageNum += 1;
-      await loadProject();
-      refreshHandler();
-    };
+
     const moveListener = computed(() => {
       props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
       return props.move;
@@ -233,6 +224,16 @@ export default defineComponent({
         loadingMore.value = false;
       }
     };
+    const btnDown = async () => {
+      // 如果状态为没有更多控制加载
+      if (loadState.value === StateEnum.NO_MORE) {
+        return;
+      }
+      clearInterval(autoRefreshingInterval);
+      queryForm.value.pageNum += 1;
+      await loadProject();
+      refreshHandler();
+    };
     // 初始化项目列表
     onBeforeMount(async () => {
       await nextTick(() => {
@@ -255,6 +256,25 @@ export default defineComponent({
         loadProject();
       });
     });
+    // onUpdated(() => {
+    //   if (props.move) {
+    //     return;
+    //   }
+    //   // 关闭拖拽模式将拖拽后的新数组数据同步
+    //   projectPage.value.list = projectList.value;
+    // });
+
+    // TODO watch待优化
+    watch(
+      () => props.move,
+      flag => {
+        if (flag) {
+          return;
+        }
+        // 关闭拖拽模式将拖拽后的新数组数据同步
+        projectPage.value.list = projectList.value;
+      },
+    );
     // 拖拽排序
     const currentSelected = ref<boolean>(false);
     const currentItem = ref<string>('-1');
@@ -267,49 +287,30 @@ export default defineComponent({
         // 向移动
         targetSort < originSort
           ? await updateProjectGroupProjectSort(props.projectGroup.id, {
-              originProjectId: element.id,
-              targetProjectId: projectList.value[targetSort + 1].id,
-            })
+            originProjectId: element.id,
+            targetProjectId: projectList.value[targetSort + 1].id,
+          })
           : await updateProjectGroupProjectSort(props.projectGroup.id, {
-              originProjectId: element.id,
-              targetProjectId: projectList.value[targetSort - 1].id,
-            });
+            originProjectId: element.id,
+            targetProjectId: projectList.value[targetSort - 1].id,
+          });
       } catch (err) {
         proxy.$throw(err, proxy);
         // 未调换成功，将数据位置对调状态还原
         const spliceProjectList = projectList.value.splice(targetSort, 1);
         projectList.value.splice(originSort, 0, ...spliceProjectList);
       }
-      //设置定时延迟，不让mouseenter事件因为页面渲染的问题被自动触发，导致选中样式出现问题
+      // 设置定时延迟，不让mouseenter事件因为页面渲染的问题被自动触发，导致选中样式出现问题
       currentSelected.value = true;
       setCurrentItemTimer = setTimeout(() => {
         currentItem.value = e.moved.element.id;
         currentSelected.value = false;
       }, 400);
     };
-    //TODO watch待优化
-    watch(
-      () => props.move,
-      async flag => {
-        if (flag) {
-          return;
-        }
-        try {
-          projectPage.value = await queryProject({
-            pageNum: START_PAGE_NUM,
-            pageSize: projects.value.length || DEFAULT_PAGE_SIZE,
-            projectGroupId: props.projectGroup?.id,
-            name: props.name,
-          });
-        } catch (err) {
-          proxy.$throw(err, proxy);
-        }
-      }
-    );
     const moveClassList = computed<string[]>(() =>
       projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
-      })
+      }),
     );
     // TODO watch待优化
     watch(
@@ -319,7 +320,7 @@ export default defineComponent({
           loadProject();
           emit('init-event-flag');
         }
-      }
+      },
     );
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
