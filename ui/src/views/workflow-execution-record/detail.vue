@@ -1,9 +1,7 @@
 <template>
   <div class="workflow-execution-record-detail" v-loading="loading">
     <div class="right-top-btn">
-      <router-link :to="{name: 'index'}">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
-      </router-link>
+      <jm-button type="primary" class="jm-icon-button-cancel" size="small" @click="close">关闭</jm-button>
     </div>
     <div class="basic-section">
       <jm-tooltip content="触发" placement="left">
@@ -130,6 +128,7 @@ import { terminate } from '@/api/workflow-execution-record';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
+import { IRootState } from '@/model';
 
 const { mapActions, mapMutations } = createNamespacedHelpers(namespace);
 
@@ -145,7 +144,9 @@ export default defineComponent({
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
-    const state = useStore().state[namespace] as IState;
+    const store = useStore();
+    const rootState = store.state as IRootState;
+    const state = store.state[namespace] as IState;
     const loading = ref<boolean>(false);
     const taskLogForm = ref<IOpenTaskLogForm>({
       drawerVisible: false,
@@ -270,6 +271,13 @@ export default defineComponent({
       ...mapActions({
         fetchDetail: 'fetchDetail',
       }),
+      close: () => {
+        if (rootState.fromRouteFullPath) {
+          router.push(rootState.fromRouteFullPath);
+          return;
+        }
+        router.push({ name: 'index' });
+      },
       loadDetail,
       changeRecord: async (record: IWorkflowExecutionRecordVo) => {
         const { id } = record;

@@ -73,6 +73,7 @@ router.beforeEach((to, from, next) => {
   }
 
   const store = _store as any;
+  store.commit('mutateFromRouteFullPath', from.fullPath);
   const { session } = store.state[sessionNs] as ISessionState;
 
   for (const m of to.matched) {
