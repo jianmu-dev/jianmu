@@ -25,6 +25,10 @@ const store = createStore<IRootState>({
     mutateParameterTypes(state: IRootState, payload: string[]): void {
       state.parameterTypes = payload;
     },
+
+    mutateFromRouteFullPath(state: IRootState, payload: string): void {
+      state.fromRouteFullPath = payload;
+    },
   },
   // 根action
   actions: {
