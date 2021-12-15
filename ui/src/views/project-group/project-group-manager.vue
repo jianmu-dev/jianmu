@@ -479,6 +479,10 @@ export default defineComponent({
               height: 22px;
               background-size: contain;
               cursor: pointer;
+              &:active {
+                background-color: #eff7ff;
+                border-radius: 4px;
+              }
               &.edit {
                 background-image: url('@/assets/svgs/btn/edit.svg');
               }
