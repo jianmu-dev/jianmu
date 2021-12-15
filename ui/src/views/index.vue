@@ -48,8 +48,8 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import BottomNav from '@/views/nav/bottom2.vue';
-import AllProject from '@/views/index-content/all-project.vue';
-import SearchProject from '@/views/index-content/search-project.vue';
+import AllProject from '@/views/index/all-project.vue';
+import SearchProject from '@/views/index/search-project.vue';
 
 export default defineComponent({
   components: { AllProject, SearchProject, BottomNav },
@@ -76,7 +76,7 @@ export default defineComponent({
     min-height: calc(100vh - 125px);
 
     .menu-bar {
-      padding: 45px 0;
+      padding: 40px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -88,7 +88,7 @@ export default defineComponent({
           width: 186px;
           height: 64px;
           background-color: #ffffff;
-          box-shadow: 0 6px 14px 0 #acc3ee;
+          box-shadow: 0px 6px 16px 4px #e6eef6;
           border-radius: 4px;
           border: 0;
           background-position: center center;
@@ -100,7 +100,6 @@ export default defineComponent({
           }
 
           &.add {
-            margin-left: 14px;
             background-image: url('@/assets/svgs/index/add-btn.svg');
           }
 

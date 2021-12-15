@@ -2,16 +2,18 @@
   <div class="top-nav">
     <div class="left">
       <router-link to="/">
-        <div class="logo"/>
+        <div class="logo" />
       </router-link>
-      <jm-popconfirm v-if="newVersion"
-                     :title="`最新版本为${newVersion.versionNo}`"
-                     icon="jm-icon-info"
-                     confirmButtonText="查看"
-                     cancelButtonText="忽略"
-                     confirmButtonIcon="jm-icon-button-visible"
-                     cancelButtonIcon="jm-icon-button-terminate"
-                     @confirm="view()">
+      <jm-popconfirm
+        v-if="newVersion"
+        :title="`最新版本为${newVersion.versionNo}`"
+        icon="jm-icon-info"
+        confirmButtonText="查看"
+        cancelButtonText="忽略"
+        confirmButtonIcon="jm-icon-button-visible"
+        cancelButtonIcon="jm-icon-button-terminate"
+        @confirm="view()"
+      >
         <template #reference>
           <div class="version">
             <div class="new"></div>
@@ -24,13 +26,15 @@
       </div>
     </div>
     <div class="right">
-      <router-link v-if="!session" :to="{name: 'login'}">
+      <router-link v-if="!session" :to="{ name: 'login' }">
         <div class="no-login"></div>
       </router-link>
       <jm-dropdown v-else trigger="click">
         <span class="el-dropdown-link">
           <jm-tooltip :content="session.username" placement="left">
-            <span class="username">{{ session.username.charAt(0).toUpperCase() }}</span>
+            <span class="username">{{
+              session.username.charAt(0).toUpperCase()
+            }}</span>
           </jm-tooltip>
           <i class="el-icon-arrow-down el-icon--right"></i>
         </span>
@@ -67,7 +71,10 @@ export default defineComponent({
     const state = store.state[namespace] as IState;
     const currentVersion = `v${v}`;
     const newVersion = computed<IVersionVo | undefined>(() => {
-      if (rootState.versions.length === 0 || rootState.versions[0].versionNo === currentVersion) {
+      if (
+        rootState.versions.length === 0 ||
+        rootState.versions[0].versionNo === currentVersion
+      ) {
         return undefined;
       }
 
@@ -106,7 +113,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .top-nav {
-  margin: 0 0.5%;
+  margin-right: 0.5%;
   position: relative;
   height: 100%;
   display: flex;
@@ -136,7 +143,7 @@ export default defineComponent({
       white-space: nowrap;
       padding: 0 10px 1px;
       height: 16px;
-      background-color: #F2F2F2;
+      background-color: #f2f2f2;
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -147,7 +154,7 @@ export default defineComponent({
         top: -3px;
         width: 8px;
         height: 8px;
-        background-color: #FF0D0D;
+        background-color: #ff0d0d;
         border-radius: 4px;
 
         & + .txt {
@@ -185,11 +192,11 @@ export default defineComponent({
         line-height: 36px;
         text-align: center;
         overflow: hidden;
-        background-color: #7B8C9C;
+        background-color: #7b8c9c;
         border-radius: 18px;
         font-size: 26px;
         font-weight: bold;
-        color: #FFFFFF;
+        color: #ffffff;
       }
 
       .el-icon-arrow-down::before {

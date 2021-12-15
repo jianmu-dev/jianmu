@@ -5,8 +5,11 @@
         <span>{{ projectGroup?.name }}</span>
         <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
       </div>
-      <div class="more" v-if="projectPage.total > 10">
-        <router-link :to="{ name: 'project-group' }">查看更多</router-link>
+      <div class="more">
+        <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
+          >查看更多</router-link
+        >
+        <i class="more-icon"></i>
       </div>
     </div>
     <div class="projects">
@@ -360,20 +363,19 @@ export default defineComponent({
   margin-top: 30px;
 
   .name {
-    margin: 0 0.5%;
-    margin-bottom: 20px;
     font-size: 18px;
     font-weight: bold;
     color: #082340;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-right: 16px;
+    padding-right: 5px;
 
     .group-name {
       .desc {
         margin-left: 12px;
         font-size: 14px;
+        font-weight: normal;
         color: #082340;
         opacity: 0.46;
       }
@@ -382,7 +384,7 @@ export default defineComponent({
       font-size: 14px;
       color: #6b7b8d;
       cursor: pointer;
-      &::after {
+      .more-icon {
         display: inline-block;
         content: '';
         width: 16px;
@@ -395,11 +397,14 @@ export default defineComponent({
       a {
         color: #6b7b8d;
         text-decoration: none;
-        &:hover {
+        font-weight: normal;
+      }
+      &:hover {
+        a {
           color: #096dd9;
-          &::after {
-            background: url('@/assets/svgs/group/more-active.svg');
-          }
+        }
+        .more-icon {
+          background: url('@/assets/svgs/group/more-active.svg');
         }
       }
     }
