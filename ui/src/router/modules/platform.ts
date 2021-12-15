@@ -40,16 +40,19 @@ export default [
     meta: {
       title: '分组管理',
     },
+    children: [
+      {
+        name: 'project-detail',
+        path: 'detail/:id',
+        component: () => import('@/views/project-group/project-detail.vue'),
+        props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
+        meta: {
+          title: '详情',
+        },
+      },
+    ],
   },
-  {
-    name: 'project-detail',
-    path: 'project-group/detail/:id',
-    component: () => import('@/views/project-group/project-detail.vue'),
-    props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
-    meta: {
-      title: '列表',
-    },
-  },
+
   {
     // 密钥管理路由
     name: 'secret-key',

@@ -222,6 +222,9 @@ export default defineComponent({
       .load-more {
         align-self: center;
       }
+      .project-group {
+        margin-top: 0px;
+      }
     }
   }
 }
