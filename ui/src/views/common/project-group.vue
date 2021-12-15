@@ -2,11 +2,11 @@
   <div class="project-group" v-loading="loading">
     <div v-if="!pageable" class="name">
       <div class="group-name">
-        <span>{{ projectGroup?.name }}</span>
+        <router-link
+          :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
+          >{{ projectGroup?.name }}</router-link
+        >
         <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
-      </div>
-      <div class="more" v-if="projectPage.total > 10">
-        <router-link :to="{ name: 'project-group' }">查看更多</router-link>
       </div>
     </div>
     <div class="projects">
@@ -46,14 +46,7 @@
       />
     </div>
     <!-- 显示更多 -->
-    <div
-      class="load-more"
-      v-if="pageable"
-      v-scroll="{
-        loadMore: btnDown,
-        scrollableEl,
-      }"
-    >
+    <div class="load-more" v-if="pageable" v-scroll="scrollObj">
       <jm-load-more
         :state="loadState"
         :load-more="btnDown"
@@ -196,7 +189,6 @@ export default defineComponent({
           ...queryForm.value,
         });
         projectPage.value.list.push(...list);
-        console.log(projectPage.value);
         projectPage.value.pages = pages;
         projectList.value = projectPage.value.list;
       } catch (err) {
@@ -247,6 +239,25 @@ export default defineComponent({
         loadProject();
       });
     });
+    // onUpdated(() => {
+    //   if (props.move) {
+    //     return;
+    //   }
+    //   // 关闭拖拽模式将拖拽后的新数组数据同步
+    //   projectPage.value.list = projectList.value;
+    // });
+
+    // TODO watch待优化
+    watch(
+      () => props.move,
+      flag => {
+        if (flag) {
+          return;
+        }
+        // 关闭拖拽模式将拖拽后的新数组数据同步
+        projectPage.value.list = projectList.value;
+      }
+    );
     // 拖拽排序
     const currentSelected = ref<boolean>(false);
     const currentItem = ref<string>('-1');
@@ -279,25 +290,6 @@ export default defineComponent({
         currentSelected.value = false;
       }, 400);
     };
-    // TODO watch待优化
-    watch(
-      () => props.move,
-      async flag => {
-        if (flag) {
-          return;
-        }
-        try {
-          projectPage.value = await queryProject({
-            pageNum: START_PAGE_NUM,
-            pageSize: projects.value.length || DEFAULT_PAGE_SIZE,
-            projectGroupId: props.projectGroup?.id,
-            name: props.name,
-          });
-        } catch (err) {
-          proxy.$throw(err, proxy);
-        }
-      }
-    );
     const moveClassList = computed<string[]>(() =>
       projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
@@ -308,7 +300,12 @@ export default defineComponent({
       clearInterval(autoRefreshingInterval);
       clearTimeout(setCurrentItemTimer);
     });
+    const scrollObj = {
+      loadMore: btnDown,
+      scrollableEl,
+    };
     return {
+      scrollObj,
       scrollableEl,
       loadState,
       btnDown,
@@ -360,47 +357,28 @@ export default defineComponent({
   margin-top: 30px;
 
   .name {
-    margin: 0 0.5%;
-    margin-bottom: 20px;
     font-size: 18px;
     font-weight: bold;
     color: #082340;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-right: 16px;
+    padding-right: 5px;
 
     .group-name {
+      a {
+        color: #082340;
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
       .desc {
         margin-left: 12px;
         font-size: 14px;
+        font-weight: normal;
         color: #082340;
         opacity: 0.46;
-      }
-    }
-    .more {
-      font-size: 14px;
-      color: #6b7b8d;
-      cursor: pointer;
-      &::after {
-        display: inline-block;
-        content: '';
-        width: 16px;
-        height: 16px;
-        background: url('@/assets/svgs/group/more.svg');
-        position: relative;
-        top: 3px;
-        right: -4px;
-      }
-      a {
-        color: #6b7b8d;
-        text-decoration: none;
-        &:hover {
-          color: #096dd9;
-          &::after {
-            background: url('@/assets/svgs/group/more-active.svg');
-          }
-        }
       }
     }
   }

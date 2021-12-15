@@ -1,6 +1,7 @@
 <template>
   <jm-scrollbar>
-    <div class="group-manager">
+    <router-view v-if="childRoute"></router-view>
+    <div class="group-manager" v-else>
       <div class="right-top-btn">
         <router-link :to="{ name: 'index' }">
           <jm-button type="primary" class="jm-icon-button-cancel" size="small"
@@ -145,6 +146,7 @@ import {
   nextTick,
   provide,
   inject,
+  Ref,
 } from 'vue';
 import GroupCreator from './project-group-creator.vue';
 import GroupEditor from './project-group-editor.vue';
@@ -157,6 +159,12 @@ import {
   updateProjectGroupSort,
 } from '@/api/project-group';
 import { Mutable } from '@/utils/lib';
+import {
+  onBeforeRouteUpdate,
+  RouteLocationNormalized,
+  RouteLocationNormalizedLoaded,
+  useRoute,
+} from 'vue-router';
 export default defineComponent({
   components: {
     GroupCreator,
@@ -164,10 +172,6 @@ export default defineComponent({
   },
   setup() {
     const { proxy } = getCurrentInstance() as any;
-    const scrollableEl = inject('scrollableEl');
-    provide('scrollableEl', () => {
-      return scrollableEl;
-    });
     const isShow = ref<boolean>(false);
     const loading = ref<boolean>();
     const isActive = ref<boolean>(false);
@@ -191,6 +195,12 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     };
+    function changeView(
+      childRoute: Ref<boolean>,
+      route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+    ) {
+      childRoute.value = route.matched.length > 2;
+    }
     const moveClassList = computed<string[]>(() =>
       projectGroupList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
@@ -281,8 +291,11 @@ export default defineComponent({
         projectGroupList.value.splice(originSort, 0, ...spliceProjectList);
       }
     };
-
+    const childRoute = ref<boolean>(false);
+    changeView(childRoute, useRoute());
+    onBeforeRouteUpdate(to => changeView(childRoute, to));
     return {
+      childRoute,
       leave() {
         currentItem.value = '';
       },
@@ -479,6 +492,10 @@ export default defineComponent({
               height: 22px;
               background-size: contain;
               cursor: pointer;
+              &:active {
+                background-color: #eff7ff;
+                border-radius: 4px;
+              }
               &.edit {
                 background-image: url('@/assets/svgs/btn/edit.svg');
               }

@@ -142,7 +142,7 @@ export default defineComponent({
       projectIds: [],
     });
     const keyword = ref<string>();
-    //被选中的项目
+    // 被选中的项目
     const selectedList = ref<Mutable<IProjectVo[]>>([]);
     const compSelectedList = computed(() => selectedList.value);
     const editorRule = ref<object>({
@@ -155,8 +155,8 @@ export default defineComponent({
     const selectProject = (item: IProjectVo) => {
       selectedList.value.some(i => i.id === item.id)
         ? (selectedList.value = selectedList.value.filter(
-            i => i.id !== item.id
-          ))
+          i => i.id !== item.id,
+        ))
         : selectedList.value.push(item);
     };
     const projectList = ref<IPageVo<IProjectVo>>();
@@ -201,9 +201,13 @@ export default defineComponent({
           return;
         }
         const projectIds: string[] = [];
-        //获取选中数组中的id
+        // 获取选中数组中的id
         compSelectedList.value.forEach(item => projectIds.push(item.id));
         try {
+          if (projectIds.length === 0) {
+            proxy.$error('请添加项目');
+            return;
+          }
           loading.value = true;
           await addProject({
             projectGroupId: props.id,

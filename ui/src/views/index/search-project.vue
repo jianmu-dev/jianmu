@@ -16,12 +16,14 @@
         <i class="jm-icon-button-search"></i>
       </div>
     </div>
-    <project-group
-      v-if="initialized"
-      :project-group="currentGroup"
-      :name="currentSearchName"
-      :pageable="true"
-    />
+    <div class="project">
+      <project-group
+        v-if="initialized"
+        :project-group="currentGroup"
+        :name="currentSearchName"
+        :pageable="true"
+      />
+    </div>
   </div>
 </template>
 
@@ -43,7 +45,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    console.log('search', { ...props });
     const router = useRouter();
     // 选择框内容
     const selectValue = ref<string>('');
@@ -119,13 +120,15 @@ export default defineComponent({
 <style scoped lang="less">
 // 搜索结果
 .search-project {
+  background-color: #fff;
+  min-height: 500px;
   .search {
     height: 66px;
     background: #f6fafe;
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    padding: 15px 30px;
+    padding: 15px 20px;
     ::v-deep(.el-select) {
       width: 390px;
       height: 36px;
@@ -139,7 +142,7 @@ export default defineComponent({
         height: 36px;
         border-radius: 2px;
         .el-input__inner {
-          text-indent: 35px;
+          text-indent: 32px;
         }
       }
       .jm-icon-button-search::before {
@@ -151,6 +154,12 @@ export default defineComponent({
         cursor: pointer;
         color: #7f8c9b;
       }
+    }
+  }
+  .project {
+    padding: 0 20px;
+    .project-group {
+      margin-top: 10px;
     }
   }
 }

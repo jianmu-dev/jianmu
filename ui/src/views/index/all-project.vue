@@ -9,14 +9,16 @@
         @change="searchProject"
       />
     </div>
-    <template v-if="initialized">
-      <project-group
-        v-for="projectGroup in projectGroups"
-        :key="projectGroup.id"
-        :project-group="projectGroup"
-        :pageable="false"
-      />
-    </template>
+    <div class="project">
+      <template v-if="initialized">
+        <project-group
+          v-for="projectGroup in projectGroups"
+          :key="projectGroup.id"
+          :project-group="projectGroup"
+          :pageable="false"
+        />
+      </template>
+    </div>
   </div>
 </template>
 
@@ -62,29 +64,33 @@ export default defineComponent({
 <style scoped lang="less">
 // 所有项目
 .all-project {
+  background: #fff;
   .search {
     height: 66px;
     background: #f6fafe;
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    padding: 15px 30px;
+    padding: 15px 20px;
     position: relative;
     ::v-deep(.el-input) {
       border-radius: 4px;
       .el-input__inner {
         height: 36px;
-        text-indent: 35px;
+        text-indent: 25px;
       }
     }
     .jm-icon-button-search::before {
       z-index: 100;
       content: '\e80b';
       position: absolute;
-      left: 50px;
+      left: 33px;
       top: 24px;
       color: #7f8c9b;
     }
+  }
+  .project {
+    padding: 0 20px 20px;
   }
 }
 </style>
