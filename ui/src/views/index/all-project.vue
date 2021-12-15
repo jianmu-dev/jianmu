@@ -77,7 +77,7 @@ export default defineComponent({
       border-radius: 4px;
       .el-input__inner {
         height: 36px;
-        text-indent: 22px;
+        text-indent: 25px;
       }
     }
     .jm-icon-button-search::before {

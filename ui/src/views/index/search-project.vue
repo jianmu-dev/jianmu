@@ -121,7 +121,7 @@ export default defineComponent({
 // 搜索结果
 .search-project {
   background-color: #fff;
-  min-height: 510px;
+  min-height: 500px;
   .search {
     height: 66px;
     background: #f6fafe;
