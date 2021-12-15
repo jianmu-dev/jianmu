@@ -156,7 +156,7 @@ export default defineComponent({
   }
   .content {
     margin-top: 20px;
-    padding: 15px;
+    padding: 15px 15px 0px;
     background-color: #ffffff;
     .menu-bar {
       button {
