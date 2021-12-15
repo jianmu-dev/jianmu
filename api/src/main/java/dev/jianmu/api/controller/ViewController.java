@@ -191,7 +191,11 @@ public class ViewController {
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
         var project = this.projectApplication.findById(projectId).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        return ProjectMapper.INSTANCE.toProjectDetailVo(project);
+        var projectVo = ProjectMapper.INSTANCE.toProjectDetailVo(project);
+        var projectLinkGroup = this.projectGroupApplication.findLinkByProjectId(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
+        projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
+        return projectVo;
     }
 
     @GetMapping("/projects/{projectId}/dsl")

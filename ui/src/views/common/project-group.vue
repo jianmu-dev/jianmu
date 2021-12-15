@@ -2,15 +2,11 @@
   <div class="project-group" v-loading="loading">
     <div v-if="!pageable" class="name">
       <div class="group-name">
-        <span>{{ projectGroup?.name }}</span>
+        <router-link
+          :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
+          >{{ projectGroup?.name }}</router-link
+        >
         <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
-      </div>
-      <div
-        class="more"
-        v-if="projectPage.total > 9"
-        @click="more(projectGroup)"
-      >
-        查看更多
       </div>
     </div>
     <div class="projects">
@@ -110,13 +106,8 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    eventFlag: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: ['init-event-flag'],
-  setup(props: any, { emit }) {
+  setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
     const scrollableEl = inject('scrollableEl');
@@ -184,11 +175,6 @@ export default defineComponent({
         }
       }, 3000);
     };
-
-    const moveListener = computed(() => {
-      props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
-      return props.move;
-    });
     const loadProject = async () => {
       try {
         // 不分页加载项目列表数据
@@ -227,6 +213,10 @@ export default defineComponent({
       await loadProject();
       refreshHandler();
     };
+    const moveListener = computed(() => {
+      props.move ? clearInterval(autoRefreshingInterval) : refreshHandler();
+      return props.move;
+    });
     // 初始化项目列表
     onBeforeMount(async () => {
       await nextTick(() => {
@@ -305,16 +295,6 @@ export default defineComponent({
         return id === currentItem.value ? 'move' : '';
       })
     );
-    // TODO watch待优化
-    watch(
-      () => props.eventFlag,
-      newVal => {
-        if (newVal) {
-          loadProject();
-          emit('init-event-flag');
-        }
-      }
-    );
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
       clearInterval(autoRefreshingInterval);
@@ -367,15 +347,6 @@ export default defineComponent({
         const index = projects.value.findIndex(item => item.id === id);
         projects.value.splice(index, 1);
       },
-      // 显示更多
-      more: (group: any) => {
-        // console.log('显示更多组id', group.id);
-        // 获取当前组id
-        // queryForm.value.projectGroupId = group.id;
-        // 重新请求
-        // loadProject();
-        // 将当前组名或组id传递给search-project.vue渲染到下拉框
-      },
     };
   },
 });
@@ -386,43 +357,28 @@ export default defineComponent({
   margin-top: 30px;
 
   .name {
-    margin: 0 0.5%;
-    margin-bottom: 20px;
     font-size: 18px;
     font-weight: bold;
     color: #082340;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-right: 16px;
+    padding-right: 5px;
 
     .group-name {
+      a {
+        color: #082340;
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
       .desc {
         margin-left: 12px;
         font-size: 14px;
+        font-weight: normal;
         color: #082340;
         opacity: 0.46;
-      }
-    }
-    .more {
-      font-size: 14px;
-      color: #6b7b8d;
-      cursor: pointer;
-      &::after {
-        display: inline-block;
-        content: '';
-        width: 16px;
-        height: 16px;
-        background: url('@/assets/svgs/group/more.svg');
-        position: relative;
-        top: 3px;
-        right: -4px;
-      }
-      &:hover {
-        color: #096dd9;
-        &::after {
-          background: url('@/assets/svgs/group/more-active.svg');
-        }
       }
     }
   }

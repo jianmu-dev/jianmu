@@ -45,6 +45,7 @@
     </div>
     <ns-editor
       v-if="creationActivated"
+      :credential-manager-type="credentialManagerType"
       @closed="creationActivated = false"
       @completed="loadNamespace()"
     />
@@ -77,7 +78,7 @@ const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
 function changeView(
   childRoute: Ref<boolean>,
-  route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
 ) {
   childRoute.value = route.matched.length > 2;
 }

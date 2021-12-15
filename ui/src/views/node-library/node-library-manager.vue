@@ -515,6 +515,10 @@ export default defineComponent({
           background-repeat: no-repeat;
           margin-right: 16px;
           cursor: pointer;
+          &:active {
+            background-color: #eff7ff;
+            border-radius: 4px;
+          }
         }
 
         .sync {

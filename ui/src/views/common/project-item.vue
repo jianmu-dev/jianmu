@@ -409,11 +409,12 @@ export default defineComponent({
 }
 
 .project-item {
-  margin: 0.5%;
+  margin: 1.1%;
+  margin-bottom: 0px;
   width: 19%;
   min-width: 260px;
   background-color: #ffffff;
-  box-shadow: 0 0 8px 0 #9eb1c5;
+  box-shadow: 0px 0px 12px 4px #edf1f8;
 
   &.move {
     position: relative;
@@ -453,6 +454,9 @@ export default defineComponent({
   //    }
   //  }
   //}
+  &:hover {
+    box-shadow: 0px 6px 16px 4px #e6eef6;
+  }
 
   .state-bar {
     height: 8px;
@@ -518,8 +522,8 @@ export default defineComponent({
     }
 
     .title {
-      font-size: 20px;
-      font-weight: bold;
+      width: 90%;
+      font-size: 16px;
       color: #082340;
 
       &:hover {
@@ -534,17 +538,18 @@ export default defineComponent({
     }
 
     .operation {
-      margin-top: 10px;
+      margin-top: 20px;
       display: flex;
       align-items: center;
 
       button + button {
-        margin-left: 10px;
+        margin-left: 20px;
       }
 
       button {
         width: 30px;
         height: 30px;
+        padding: 3px;
         background-color: transparent;
         border: 0;
         background-position: center center;
@@ -579,15 +584,15 @@ export default defineComponent({
 
         &.del {
           position: absolute;
-          right: 3px;
-          top: 5px;
+          right: 7px;
+          top: 7px;
           width: 22px;
           height: 22px;
           //display: none;
           background-image: url('@/assets/svgs/btn/del.svg');
           background-size: contain;
           opacity: 0.65;
-
+          padding: 2px;
           &:hover {
             opacity: 1;
           }
@@ -611,12 +616,19 @@ export default defineComponent({
         }
       }
     }
-
-    .ellipsis {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
   }
+
+  .ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.project-item {
+  margin-left: 0px;
+}
+.project-item:nth-child(5n) {
+  margin-right: 0px;
 }
 </style>
