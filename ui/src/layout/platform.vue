@@ -16,15 +16,15 @@
             >
           </jm-breadcrumb>
         </jm-header>
-        <jm-main :class="mainClass" id="platform-main">
+        <jm-main :class="mainClass">
           <jm-scrollbar ref="mainScrollbarRef">
-            <template v-if="loadMain">
+            <div class="main-content" v-if="loadMain" id="platform-main">
               <router-view v-slot="{ Component }">
                 <keep-alive :include="bufferList">
                   <component :is="Component"></component>
                 </keep-alive>
               </router-view>
-            </template>
+            </div>
           </jm-scrollbar>
         </jm-main>
       </jm-container>
@@ -59,7 +59,7 @@ interface IPathNav {
 
 function buildPathNav(
   pathNavs: Ref<IPathNav[]>,
-  route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
 ) {
   pathNavs.value.length = 0;
 
@@ -83,15 +83,10 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const route = useRoute();
     const platFormRef = ref<HTMLElement>();
-    const height = computed(
-      () => platFormRef.value && platFormRef.value!.offsetHeight - 64
-    );
     const bufferList = reactive<string[]>([]);
     const pathNavs = ref<IPathNav[]>([]);
     const loadMain = ref<boolean>(true);
-    const pathNavsDisplay = computed<boolean>(
-      () => route.path !== PLATFORM_INDEX
-    );
+    const pathNavsDisplay = computed<boolean>(() => route.path !== PLATFORM_INDEX);
     const mainClass = ref<string>(pathNavsDisplay.value ? 'main' : 'main2');
     const mainScrollbarRef = ref<InstanceType<typeof ElScrollbar>>();
     buildPathNav(pathNavs, useRoute());
@@ -134,9 +129,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+@main-width: 1600px;
+
 .platform {
   margin: 0 auto;
-  max-width: 1600px;
   height: 100vh;
 
   .header {
@@ -150,6 +146,12 @@ export default defineComponent({
   }
 
   .container {
+    .el-header {
+      width: 100%;
+      max-width: @main-width;
+      margin: 0 auto;
+    }
+
     .path-nav {
       display: flex;
       align-items: center;
@@ -167,8 +169,14 @@ export default defineComponent({
     .main2 {
       padding: 0;
 
-      > div {
-        padding: 0 20px;
+      > .el-scrollbar {
+        .main-content {
+          width: 100%;
+          max-width: @main-width;
+          margin: 0 auto;
+          padding: 0 20px;
+          box-sizing: border-box;
+        }
       }
     }
   }
