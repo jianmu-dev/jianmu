@@ -88,7 +88,7 @@ export default defineComponent({
   color: #7b8c9c;
   .have-more {
     position: relative;
-    color: #7b8c9c;
+    color:#7b8c9c;
     ::v-deep(.el-icon-loading) {
       position: absolute;
       right: -17px;
