@@ -1,6 +1,6 @@
 <template>
   <!-- 所有项目 -->
-  <div class="all-project">
+  <div class="all-project" v-loading="allProjectLoading">
     <div class="search">
       <i class="jm-icon-button-search" @click="searchProject"></i>
       <jm-input
@@ -26,26 +26,38 @@
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
 import ProjectGroup from '@/views/common/project-group.vue';
-import { defineComponent, onBeforeMount, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onBeforeMount, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 export default defineComponent({
   components: { ProjectGroup },
   setup() {
+    const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const projectGroups = ref<IProjectGroupVo[]>([]);
     // 已初始化
     const initialized = ref<boolean>(false);
     // 项目名称
     const projectName = ref<string>('');
-    onBeforeMount(async () => {
-      const projectGroupList = await listProjectGroup();
-      initialized.value = true;
-      projectGroupList.forEach(item => {
-        // 通过isShow筛选
-        if (item.isShow) {
-          projectGroups.value.push(item);
-        }
-      });
+    // 首页loading
+    const allProjectLoading = ref<boolean>(false);
+    onBeforeMount(async()=>{
+      try{
+        allProjectLoading.value = true;
+        const projectGroupList = await listProjectGroup();
+        initialized.value = true;
+        projectGroupList.forEach(item => {
+          // 通过isShow筛选
+          if (item.isShow) {
+            projectGroups.value.push(item);
+          }
+        });
+      }catch(err){
+        proxy.$throw(err, proxy);
+      }finally {
+        await nextTick(()=>{
+          allProjectLoading.value = false;
+        });
+      }
     });
     // 回车搜索
     const searchProject = () => {
@@ -56,6 +68,7 @@ export default defineComponent({
       projectName,
       searchProject,
       initialized,
+      allProjectLoading,
     };
   },
 });

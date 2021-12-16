@@ -216,7 +216,9 @@ export default defineComponent({
       await nextTick(() => {
         queryForm.value.name = props.name;
       });
-      loading.value = true;
+      if(props.pageable){
+        loading.value = true;
+      }
       await loadProject();
     });
     onUpdated(async () => {
