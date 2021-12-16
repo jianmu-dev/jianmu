@@ -96,7 +96,7 @@ public interface ProjectMapper {
             "SELECT jp.* FROM `jianmu_project` `jp` INNER JOIN `project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
             "<where>" +
             "   <if test='projectGroupId != null'> AND `plp`.`project_group_id` = #{projectGroupId} </if>" +
-            "   <if test='workflowName != null'> AND `jp`.`workflow_name` like concat('%', #{workflowName}, '%')</if>" +
+            "   <if test='workflowName != null'> AND (`jp`.`workflow_name` like concat('%', #{workflowName}, '%') OR `jp`.`workflow_description` like concat('%', #{workflowName}, '%'))</if>" +
             "</where>" +
             "ORDER BY `plp`.`sort` asc" +
             "</script>")
