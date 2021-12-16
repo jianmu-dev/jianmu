@@ -78,7 +78,7 @@ const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
 function changeView(
   childRoute: Ref<boolean>,
-  route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+  route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
 ) {
   childRoute.value = route.matched.length > 2;
 }

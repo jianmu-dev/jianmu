@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="projects">
-      <jm-empty v-if="projects.length === 0" />
+      <jm-empty v-if="projects.length === 0 && pageable" />
       <jm-draggable
         v-else-if="moveListener"
         class="list"
@@ -181,9 +181,10 @@ export default defineComponent({
         const { list, pages } = await queryProject({
           ...queryForm.value,
         });
-        projectPage.value.list.push(...list);
+        // 点击加载更多按钮请求的数据加入到排序后的数组里
+        projectList.value.push(...list);
         projectPage.value.pages = pages;
-        projectList.value = projectPage.value.list;
+        projectPage.value.list = projectList.value;
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
@@ -215,7 +216,9 @@ export default defineComponent({
       await nextTick(() => {
         queryForm.value.name = props.name;
       });
-      loading.value = true;
+      if(props.pageable){
+        loading.value = true;
+      }
       await loadProject();
     });
     onUpdated(async () => {
