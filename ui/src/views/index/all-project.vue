@@ -65,6 +65,7 @@ export default defineComponent({
 // 所有项目
 .all-project {
   background: #fff;
+  margin-bottom: 20px;
   .search {
     height: 66px;
     background: #f6fafe;

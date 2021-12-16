@@ -12,7 +12,7 @@
               v-for="{ name, path } in pathNavs"
               :key="path"
               :to="path"
-              >{{ name }}</jm-breadcrumb-item
+            >{{ name }}</jm-breadcrumb-item
             >
           </jm-breadcrumb>
         </jm-header>
