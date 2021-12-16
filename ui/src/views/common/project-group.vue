@@ -137,7 +137,7 @@ export default defineComponent({
         }
         if (
           !projects.value.find(
-            item => item.status === ProjectStatusEnum.RUNNING
+            item => item.status === ProjectStatusEnum.RUNNING,
           )
         ) {
           // 不存在running场景
@@ -163,15 +163,8 @@ export default defineComponent({
             name: props.name,
           });
         } catch (err) {
-          if (err instanceof TimeoutError) {
-            // 忽略超时错误
-            console.warn(err.message);
-          } else if (err instanceof HttpError) {
-            const { response } = err as HttpError;
-
-            // 忽略错误
-            console.warn(err.message);
-          }
+          // 忽略错误
+          console.warn(err.message);
         }
       }, 3000);
     };
@@ -256,7 +249,7 @@ export default defineComponent({
         }
         // 关闭拖拽模式将拖拽后的新数组数据同步
         projectPage.value.list = projectList.value;
-      }
+      },
     );
     // 拖拽排序
     const currentSelected = ref<boolean>(false);
@@ -270,13 +263,13 @@ export default defineComponent({
         // 向移动
         targetSort < originSort
           ? await updateProjectGroupProjectSort(props.projectGroup.id, {
-              originProjectId: element.id,
-              targetProjectId: projectList.value[targetSort + 1].id,
-            })
+            originProjectId: element.id,
+            targetProjectId: projectList.value[targetSort + 1].id,
+          })
           : await updateProjectGroupProjectSort(props.projectGroup.id, {
-              originProjectId: element.id,
-              targetProjectId: projectList.value[targetSort - 1].id,
-            });
+            originProjectId: element.id,
+            targetProjectId: projectList.value[targetSort - 1].id,
+          });
       } catch (err) {
         proxy.$throw(err, proxy);
         // 未调换成功，将数据位置对调状态还原
@@ -293,7 +286,7 @@ export default defineComponent({
     const moveClassList = computed<string[]>(() =>
       projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
-      })
+      }),
     );
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
