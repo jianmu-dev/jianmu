@@ -195,6 +195,7 @@ public class ViewController {
         var projectLinkGroup = this.projectGroupApplication.findLinkByProjectId(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
         projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
+        projectVo.setProjectGroupName(this.projectGroupApplication.findById(projectLinkGroup.getProjectGroupId()).getName());
         return projectVo;
     }
 

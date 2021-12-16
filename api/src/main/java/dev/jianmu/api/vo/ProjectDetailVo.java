@@ -54,4 +54,6 @@ public class ProjectDetailVo {
     private LocalDateTime lastModifiedTime;
     // 项目组ID
     private String projectGroupId;
+    // 项目组名称
+    private String projectGroupName;
 }
