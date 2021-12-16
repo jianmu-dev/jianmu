@@ -124,7 +124,7 @@ export default defineComponent({
 // 搜索结果
 .search-project {
   background-color: #fff;
-  // min-height: 500px;
+  min-height: calc(100vh - 290px);
   margin-bottom: 20px;
   .search {
     height: 66px;
@@ -148,6 +148,19 @@ export default defineComponent({
       .el-input__inner:focus {
         text-indent: 32px;
         border: 1px solid #096dd9;
+      }
+    }
+    // 搜索框缩进
+    ::v-deep(.el-select) {
+      .select-trigger {
+        .el-input {
+          .el-input__inner {
+            text-indent: 1px;
+          }
+          .el-input__inner:focus {
+            text-indent: 1px;
+          }
+        }
       }
     }
     .search-container {

@@ -415,6 +415,7 @@ export default defineComponent({
   min-width: 260px;
   background-color: #ffffff;
   box-shadow: 0px 0px 8px 4px #eff4f9;
+  min-height: 170px;
 
   &.move {
     position: relative;
@@ -491,7 +492,7 @@ export default defineComponent({
   .content {
     min-height: 116px;
     position: relative;
-    padding: 16px 20px;
+    padding: 20px 20px 16px 20px;
 
     .git-label {
       position: absolute;
@@ -528,13 +529,13 @@ export default defineComponent({
     }
 
     .time {
-      margin-top: 6px;
+      margin-top: 10px;
       font-size: 13px;
       color: #6b7b8d;
     }
 
     .operation {
-      margin-top: 20px;
+      margin-top: 18px;
       display: flex;
       align-items: center;
 
