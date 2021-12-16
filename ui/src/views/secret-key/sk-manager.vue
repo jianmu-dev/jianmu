@@ -1,8 +1,10 @@
 <template>
   <div class="secret-key-sk-manager">
     <div class="right-top-btn">
-      <router-link :to="{name: 'secret-key'}">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
+      <router-link :to="{ name: 'secret-key' }">
+        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
+          >关闭</jm-button
+        >
       </router-link>
     </div>
     <div class="namespace">
@@ -20,18 +22,26 @@
         </button>
       </div>
       <div class="content" v-loading="loading">
-        <jm-empty v-if="keys.length === 0"/>
-        <div v-else class="item" v-for="{id, name} of keys" :key="id">
+        <jm-empty v-if="keys.length === 0" />
+        <div v-else class="item" v-for="{ id, name } of keys" :key="id">
           <div class="wrapper">
             <div class="name ellipsis">{{ name }}</div>
           </div>
           <div class="operation">
-            <button :class="{del: true, doing: deletings[name]}" @click="del(name)"></button>
+            <button
+              :class="{ del: true, doing: deletings[name] }"
+              @click="del(name)"
+            ></button>
           </div>
         </div>
       </div>
     </div>
-    <sk-editor v-if="creationActivated" @closed="creationActivated = false" :ns="ns" @completed="handleKeyAdd"/>
+    <sk-editor
+      v-if="creationActivated"
+      @closed="creationActivated = false"
+      :ns="ns"
+      @completed="handleKeyAdd"
+    />
   </div>
 </template>
 
@@ -77,7 +87,10 @@ export default defineComponent({
         const { description: desc } = await fetchNamespaceDetail(props.ns);
         description.value = (desc || '无').replace(/\n/g, '<br/>');
 
-        keys.value = (await listSecretKey(props.ns)).map(item => ({ id: uuidv4(), name: item }));
+        keys.value = (await listSecretKey(props.ns)).map(item => ({
+          id: uuidv4(),
+          name: item,
+        }));
       } catch (err) {
         proxy.$throw(err, proxy);
       } finally {
@@ -105,28 +118,32 @@ export default defineComponent({
         let msg = '<div>确定要删除密钥吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
 
-        proxy.$confirm(msg, '删除密钥', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          dangerouslyUseHTMLString: true,
-        }).then(() => {
-          deletings.value[name] = true;
+        proxy
+          .$confirm(msg, '删除密钥', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+            dangerouslyUseHTMLString: true,
+          })
+          .then(() => {
+            deletings.value[name] = true;
 
-          deleteSecretKey(props.ns, name).then(() => {
-            proxy.$success('删除成功');
+            deleteSecretKey(props.ns, name)
+              .then(() => {
+                proxy.$success('删除成功');
 
-            delete deletings.value[name];
+                delete deletings.value[name];
 
-            const index = keys.value.findIndex(item => item.name === name);
-            keys.value.splice(index, 1);
-          }).catch((err: Error) => {
-            proxy.$throw(err, proxy);
+                const index = keys.value.findIndex(item => item.name === name);
+                keys.value.splice(index, 1);
+              })
+              .catch((err: Error) => {
+                proxy.$throw(err, proxy);
 
-            delete deletings.value[name];
-          });
-        }).catch(() => {
-        });
+                delete deletings.value[name];
+              });
+          })
+          .catch(() => {});
       },
     };
   },
@@ -153,8 +170,8 @@ export default defineComponent({
     margin-bottom: 20px;
     padding: 25px 0 25px 115px;
     min-height: 64px;
-    background-color: #FFFFFF;
-    box-shadow: 0 0 8px 0 #9EB1C5;
+    background-color: #ffffff;
+    box-shadow: 0 0 8px 0 #9eb1c5;
     background-image: url('@/assets/svgs/secret-key/key-icon.svg');
     background-repeat: no-repeat;
     background-position: 25px 25px;
@@ -168,13 +185,13 @@ export default defineComponent({
 
     .desc {
       font-size: 14px;
-      color: #6B7B8D;
+      color: #6b7b8d;
     }
   }
 
   .keys {
     padding: 15px;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
 
     .title {
       font-size: 18px;
@@ -205,7 +222,7 @@ export default defineComponent({
           width: 100%;
           text-align: center;
           font-size: 18px;
-          color: #B5BDC6;
+          color: #b5bdc6;
         }
 
         &.add {
@@ -213,8 +230,8 @@ export default defineComponent({
           width: 19%;
           min-width: 260px;
           height: 170px;
-          background-color: #FFFFFF;
-          border: 1px dashed #B5BDC6;
+          background-color: #ffffff;
+          border: 1px dashed #b5bdc6;
           background-image: url('@/assets/svgs/btn/add.svg');
           background-position: center 45px;
           background-repeat: no-repeat;
@@ -236,11 +253,11 @@ export default defineComponent({
         background-image: url('@/assets/svgs/secret-key/key-icon.svg');
         background-repeat: no-repeat;
         background-position: center 40px;
-        background-color: #FFFFFF;
-        box-shadow: 0 0 8px 0 #9EB1C5;
+        background-color: #ffffff;
+        box-shadow: 0 0 8px 0 #9eb1c5;
 
         &:hover {
-          box-shadow: 0 0 12px 0 #9EB1C5;
+          box-shadow: 0 0 12px 0 #9eb1c5;
 
           .operation {
             display: block;
@@ -253,7 +270,7 @@ export default defineComponent({
           height: 138px;
 
           &:hover {
-            border-color: #096DD9;
+            border-color: #096dd9;
           }
 
           .name {
@@ -280,7 +297,7 @@ export default defineComponent({
           button {
             width: 22px;
             height: 22px;
-            background-color: #FFFFFF;
+            background-color: #ffffff;
             border: 0;
             background-position: center center;
             background-repeat: no-repeat;
@@ -288,7 +305,7 @@ export default defineComponent({
             cursor: pointer;
 
             &:active {
-              background-color: #EFF7FF;
+              background-color: #eff7ff;
               border-radius: 4px;
             }
 

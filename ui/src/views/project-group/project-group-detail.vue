@@ -14,7 +14,14 @@
           （共有 {{ projectGroupDetail?.projectCount }} 个项目）
         </div>
       </div>
-      <div class="description">{{ projectGroupDetail?.description }}</div>
+      <jm-scrollbar max-height="40px">
+        <span
+          class="description"
+          v-html="
+            (projectGroupDetail?.description || '无').replace(/\n/g, '<br/>')
+          "
+        />
+      </jm-scrollbar>
     </div>
     <div class="content">
       <div class="menu-bar">
@@ -122,6 +129,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .project-group-detail {
+  margin-bottom: 20px;
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -150,13 +158,14 @@ export default defineComponent({
       }
     }
     .description {
+      max-height: 40px;
       margin-top: 10px;
       color: #6b7b8d;
     }
   }
   .content {
     margin-top: 20px;
-    padding: 15px;
+    padding: 15px 15px 0px;
     background-color: #ffffff;
     .menu-bar {
       button {
@@ -222,6 +231,9 @@ export default defineComponent({
       }
       .project-group {
         margin-top: -10px;
+        ::v-deep(.project-item) {
+          min-height: 170px;
+        }
       }
     }
   }

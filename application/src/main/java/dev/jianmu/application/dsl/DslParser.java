@@ -1,7 +1,9 @@
 package dev.jianmu.application.dsl;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
@@ -45,7 +47,7 @@ public class DslParser {
     private final List<ShellNode> shellNodes = new ArrayList<>();
     private Set<GlobalParameter> globalParameters = new HashSet<>();
 
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION));
 
     public static DslParser parse(String dslText) {
         var parser = new DslParser();
@@ -54,8 +56,7 @@ public class DslParser {
             parser.syntaxCheck();
             parser.createGlobalParameters();
         } catch (IOException e) {
-            log.error("DSL解析异常:", e);
-            throw new DslException("DSL解析异常");
+            throw new DslException("DSL解析异常: " + e.getMessage());
         }
         return parser;
     }
