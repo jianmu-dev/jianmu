@@ -14,11 +14,8 @@
       </div>
       <jm-scrollbar max-height="40px">
         <span
-            class="description"
-            v-html="
-            (projectGroupDetail?.description || '无').replace(/\n/g, '<br/>')
-          "
-        />
+          class="description"
+          v-html="(projectGroupDetail?.description || '无').replace(/\n/g, '<br/>')"/>
       </jm-scrollbar>
     </div>
     <div class="content">
@@ -33,8 +30,8 @@
         </div>
         <jm-tooltip content="关闭排序" placement="top" v-if="isActive">
           <div
-              :class="['move', isActive ? 'active' : '']"
-              @click="() => (isActive = !isActive)"
+            :class="['move', isActive ? 'active' : '']"
+            @click="() => (isActive = !isActive)"
           ></div>
         </jm-tooltip>
         <jm-tooltip content="排序" placement="top" v-else>
@@ -43,24 +40,23 @@
       </div>
       <div class="group-list-wrapper">
         <project-group
-            v-if="initialized"
-            :project-group="projectGroupDetail"
-            :pageable="true"
-            :move="isActive"
+          v-if="initialized"
+          :project-group="projectGroupDetail"
+          :pageable="true"
+          :move="isActive"
         />
       </div>
     </div>
     <project-adder
-        :id="id"
-        v-if="creationActivated"
-        @closed="creationActivated = false"
-        @completed="addCompleted"
+      :id="id"
+      v-if="creationActivated"
+      @closed="creationActivated = false"
+      @completed="addCompleted"
     />
   </div>
 </template>
 
-<script lang="ts">var isActive;
-
+<script lang="ts">
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { getProjectGroupDetail } from '@/api/view-no-auth';
 import {
