@@ -53,7 +53,7 @@ export function queryProjectGroup(): Promise<IProjectGroupVo[]> {
  * @param dto
  */
 export function queryProject(
-  dto: IProjectQueryingDto
+  dto: IProjectQueryingDto,
 ): Promise<IPageVo<IProjectVo>> {
   return restProxy({
     url: baseUrl.projectV2,
@@ -78,7 +78,7 @@ export function getProcessTemplate(dto: number): Promise<IProcessTemplateVo> {
  * @param projectId
  */
 export function fetchProjectDetail(
-  projectId: string
+  projectId: string,
 ): Promise<IProjectDetailVo> {
   return restProxy({
     url: `${baseUrl.project}/${projectId}`,
@@ -91,7 +91,7 @@ export function fetchProjectDetail(
  * @param workflowRef
  */
 export function listWorkflowExecutionRecord(
-  workflowRef: string
+  workflowRef: string,
 ): Promise<IWorkflowExecutionRecordVo[]> {
   return restProxy<IWorkflowExecutionRecordVo[]>({
     url: `${baseUrl.workflow}/${workflowRef}`,
@@ -104,7 +104,7 @@ export function listWorkflowExecutionRecord(
  * @param workflowExecutionRecordId
  */
 export function listTask(
-  workflowExecutionRecordId: string
+  workflowExecutionRecordId: string,
 ): Promise<ITaskExecutionRecordVo[]> {
   return restProxy<ITaskExecutionRecordVo[]>({
     url: `${baseUrl.tasks}/${workflowExecutionRecordId}`,
@@ -151,7 +151,7 @@ export function fetchTaskLog(taskExecutionRecordId: string): Promise<string> {
  * @param processExecutionRecordId
  */
 export function checkProcessLog(
-  processExecutionRecordId: string
+  processExecutionRecordId: string,
 ): Promise<object> {
   return restProxy<object>({
     url: `${baseUrl.processLog}/${processExecutionRecordId}`,
@@ -164,7 +164,7 @@ export function checkProcessLog(
  * @param processExecutionRecordId
  */
 export function fetchProcessLog(
-  processExecutionRecordId: string
+  processExecutionRecordId: string,
 ): Promise<string> {
   return restProxy<string>({
     url: `${baseUrl.processLog}/${processExecutionRecordId}`,
@@ -180,7 +180,7 @@ export function fetchProcessLog(
  */
 export function fetchWorkflow(
   workflowRef: string,
-  workflowVersion: string
+  workflowVersion: string,
 ): Promise<IWorkflowVo> {
   return restProxy<IWorkflowVo>({
     url: `${baseUrl.dsl}/${workflowRef}/${workflowVersion}`,
@@ -203,7 +203,7 @@ export function listNamespace(): Promise<INamespacesVo> {
  * @param name
  */
 export function fetchNamespaceDetail(
-  name: string
+  name: string,
 ): Promise<INamespaceDetailVo> {
   return restProxy<INamespaceDetailVo>({
     url: `${baseUrl.secretKey}/${name}`,
@@ -260,7 +260,7 @@ export function fetchTriggerEvent(triggerId: string): Promise<ITriggerEventVo> {
  * @param projectId
  */
 export function fetchTriggerWebhook(
-  projectId: string
+  projectId: string,
 ): Promise<ITriggerWebhookVo> {
   return restProxy({
     url: `${baseUrl.trigger}/webhook/${projectId}`,
@@ -293,7 +293,7 @@ export function listProjectGroup(): Promise<IProjectGroupVo[]> {
  * 查询项目组详情
  */
 export function getProjectGroupDetail(
-  projectGroupId: string
+  projectGroupId: string,
 ): Promise<IProjectGroupVo> {
   return restProxy({
     url: `${baseUrl.projectGroup}/${projectGroupId}`,

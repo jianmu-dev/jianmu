@@ -109,7 +109,7 @@ export default defineComponent({
             let name = `name: ${res.name}`;
             editorForm.value.dslText = dsl.replace(
               name,
-              `name: ${route.query.processTemplatesName}`
+              `name: ${route.query.processTemplatesName}`,
             );
           } else {
             editorForm.value.dslText = dsl;

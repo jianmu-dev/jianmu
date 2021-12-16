@@ -11,7 +11,7 @@ const baseUrl = '/projects/groups';
  * 创建项目组
  */
 export function createProjectGroup(
-  dto: IProjectGroupCreatingDto
+  dto: IProjectGroupCreatingDto,
 ): Promise<void> {
   return restProxy({
     url: `${baseUrl}`,
@@ -26,7 +26,7 @@ export function createProjectGroup(
  */
 export function editProjectGroup(
   projectGroupId: string,
-  dto: IProjectGroupEditingDto
+  dto: IProjectGroupEditingDto,
 ): Promise<void> {
   return restProxy({
     url: `${baseUrl}/${projectGroupId}`,
@@ -53,7 +53,7 @@ export function deleteProjectGroup(projectGroupId: string): Promise<void> {
  * @param dto
  */
 export function updateProjectGroupSort(
-  dto: IProjectGroupSortUpdatingDto
+  dto: IProjectGroupSortUpdatingDto,
 ): Promise<void> {
   return restProxy({
     url: `${baseUrl}/sort`,
@@ -68,7 +68,7 @@ export function updateProjectGroupSort(
  * @param dto
  */
 export function projectGroupAddProject(
-  dto: IProjectGroupAddingDto
+  dto: IProjectGroupAddingDto,
 ): Promise<void> {
   return restProxy({
     url: `${baseUrl}/projects`,
@@ -83,7 +83,7 @@ export function projectGroupAddProject(
  */
 export function updateProjectGroupProjectSort(
   projectGroupId: string,
-  dto: IProjectSortUpdatingDto
+  dto: IProjectSortUpdatingDto,
 ): Promise<void> {
   return restProxy({
     url: `${baseUrl}/${projectGroupId}/projects/sort`,
@@ -97,7 +97,7 @@ export function updateProjectGroupProjectSort(
  * 项目组删除项目
  */
 export function deleteProjectGroupProject(
-  projectLinkGroupId: string
+  projectLinkGroupId: string,
 ): Promise<void> {
   return restProxy({
     url: `${baseUrl}/projects/${projectLinkGroupId}`,
