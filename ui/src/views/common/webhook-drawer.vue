@@ -238,7 +238,7 @@ export default defineComponent({
     const link = computed<string | undefined>(
       () =>
         webhook.value &&
-        `${window.location.protocol}//${window.location.host}${webhook.value}`
+        `${window.location.protocol}//${window.location.host}${webhook.value}`,
     );
     // 请求参数
     const webhookRequestParams = ref<{
@@ -264,7 +264,7 @@ export default defineComponent({
     const getWebhookUrlRequest = async () => {
       try {
         const { webhook: webhookUrl } = await fetchTriggerWebhook(
-          webhookRequestParams.value.projectId
+          webhookRequestParams.value.projectId,
         );
         webhook.value = webhookUrl;
       } catch (err) {
@@ -278,7 +278,7 @@ export default defineComponent({
       try {
         // 请求表格数据
         webhookRequestData.value = await getWebhookList(
-          webhookRequestParams.value
+          webhookRequestParams.value,
         );
         // 数据请求成功取消loading
         tableLoading.value = false;
@@ -398,7 +398,7 @@ export default defineComponent({
     const seePayload = (id: string) => {
       webhookListId.value = id;
       const { payload } = webhookRequestList.value.find(
-        item => item.id === webhookListId.value
+        item => item.id === webhookListId.value,
       ) as IWebRequestVo;
       webhookLog.value = JSON.stringify(JSON.parse(payload), null, 2);
       nextTick(() => {

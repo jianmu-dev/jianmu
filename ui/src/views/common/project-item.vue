@@ -246,7 +246,7 @@ export default defineComponent({
       type: Object as PropType<IProjectVo>,
       required: true,
     },
-    //控制item是否加上hover样式，根据对比id值判断
+    // 控制item是否加上hover样式，根据对比id值判断
     move: {
       type: Boolean,
       default: false,

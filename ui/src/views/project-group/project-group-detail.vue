@@ -2,9 +2,7 @@
   <div class="project-group-detail">
     <div class="right-top-btn">
       <router-link :to="{ name: 'index' }">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-          >关闭</jm-button
-        >
+        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
       </router-link>
     </div>
     <div class="top-card" v-loading="loadingTop">
@@ -16,8 +14,8 @@
       </div>
       <jm-scrollbar max-height="40px">
         <span
-          class="description"
-          v-html="
+            class="description"
+            v-html="
             (projectGroupDetail?.description || '无').replace(/\n/g, '<br/>')
           "
         />
@@ -35,8 +33,8 @@
         </div>
         <jm-tooltip content="关闭排序" placement="top" v-if="isActive">
           <div
-            :class="['move', isActive ? 'active' : '']"
-            @click="() => (isActive = !isActive)"
+              :class="['move', isActive ? 'active' : '']"
+              @click="() => (isActive = !isActive)"
           ></div>
         </jm-tooltip>
         <jm-tooltip content="排序" placement="top" v-else>
@@ -45,23 +43,24 @@
       </div>
       <div class="group-list-wrapper">
         <project-group
-          v-if="initialized"
-          :project-group="projectGroupDetail"
-          :pageable="true"
-          :move="isActive"
+            v-if="initialized"
+            :project-group="projectGroupDetail"
+            :pageable="true"
+            :move="isActive"
         />
       </div>
     </div>
     <project-adder
-      :id="id"
-      v-if="creationActivated"
-      @closed="creationActivated = false"
-      @completed="addCompleted"
+        :id="id"
+        v-if="creationActivated"
+        @closed="creationActivated = false"
+        @completed="addCompleted"
     />
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts">var isActive;
+
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { getProjectGroupDetail } from '@/api/view-no-auth';
 import {
@@ -73,6 +72,7 @@ import {
 } from 'vue';
 import ProjectAdder from '@/views/project-group/project-adder.vue';
 import ProjectGroup from '@/views/common/project-group.vue';
+
 export default defineComponent({
   props: {
     id: {
@@ -130,6 +130,7 @@ export default defineComponent({
 <style scoped lang="less">
 .project-group-detail {
   margin-bottom: 20px;
+
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -139,34 +140,41 @@ export default defineComponent({
       font-weight: bold;
     }
   }
+
   .top-card {
     min-height: 58px;
     font-size: 14px;
     padding: 24px;
     background-color: #ffffff;
+
     .top-title {
       display: flex;
       align-items: center;
       color: #082340;
+
       .name {
         font-size: 20px;
         font-weight: 500;
       }
+
       .count {
         font-weight: 400;
         opacity: 0.45;
       }
     }
+
     .description {
       max-height: 40px;
       margin-top: 10px;
       color: #6b7b8d;
     }
   }
+
   .content {
     margin-top: 20px;
     padding: 15px 15px 0px;
     background-color: #ffffff;
+
     .menu-bar {
       button {
         position: relative;
@@ -195,6 +203,7 @@ export default defineComponent({
         }
       }
     }
+
     .title {
       font-size: 18px;
       font-weight: bold;
@@ -204,12 +213,14 @@ export default defineComponent({
       display: flex;
       justify-content: space-between;
       align-items: center;
+
       .move {
         cursor: pointer;
         width: 24px;
         height: 24px;
         background-image: url('@/assets/svgs/sort/move.svg');
         background-size: contain;
+
         &.active {
           background-image: url('@/assets/svgs/sort/move-active.svg');
         }
@@ -223,17 +234,17 @@ export default defineComponent({
         opacity: 0.46;
       }
     }
+
     .group-list-wrapper {
       display: flex;
       flex-direction: column;
+
       .load-more {
         align-self: center;
       }
+
       .project-group {
         margin-top: -10px;
-        ::v-deep(.project-item) {
-          min-height: 170px;
-        }
       }
     }
   }
