@@ -246,8 +246,8 @@ export default defineComponent({
     border-radius: 4px 4px 0 0;
 
     .dsl-editor {
-      height: calc(100vh - 215px);
-
+      // height: calc(100vh - 215px);
+      height: calc(100vh - 350px);
       > div {
         z-index: 1;
       }

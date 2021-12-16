@@ -173,7 +173,7 @@ export default defineComponent({
 .secret-key-ns-manager {
   padding: 15px;
   background-color: #ffffff;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 
   .right-top-btn {
     position: fixed;
@@ -241,11 +241,10 @@ export default defineComponent({
       min-width: 260px;
       height: 170px;
       background-color: #ffffff;
-      box-shadow: 0 0 8px 0 #9eb1c5;
+      box-shadow: 0px 0px 8px 4px #eff4f9;
 
       &:hover {
-        box-shadow: 0 0 12px 0 #9eb1c5;
-
+        box-shadow: 0px 6px 16px 4px #e6eef6;
         .operation {
           display: block;
         }
