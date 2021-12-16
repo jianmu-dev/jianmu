@@ -79,6 +79,7 @@ export default defineComponent({
 .all-project {
   background: #fff;
   margin-bottom: 20px;
+  min-height:calc(100vh - 290px);
   .search {
     height: 66px;
     background: #f6fafe;
