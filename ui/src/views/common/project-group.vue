@@ -379,7 +379,7 @@ export default defineComponent({
     }
   }
   .load-more {
-    margin: 30px auto 0px;
+    margin: 10px auto 0px;
     display: flex;
     justify-content: center;
   }
