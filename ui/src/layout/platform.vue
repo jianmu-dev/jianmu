@@ -86,7 +86,9 @@ export default defineComponent({
     const bufferList = reactive<string[]>([]);
     const pathNavs = ref<IPathNav[]>([]);
     const loadMain = ref<boolean>(true);
-    const pathNavsDisplay = computed<boolean>(() => route.path !== PLATFORM_INDEX);
+    const pathNavsDisplay = computed<boolean>(
+      () => route.path !== PLATFORM_INDEX,
+    );
     const mainClass = ref<string>(pathNavsDisplay.value ? 'main' : 'main2');
     const mainScrollbarRef = ref<InstanceType<typeof ElScrollbar>>();
     buildPathNav(pathNavs, useRoute());
@@ -182,4 +184,3 @@ export default defineComponent({
   }
 }
 </style>
-

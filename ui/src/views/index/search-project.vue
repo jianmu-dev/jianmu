@@ -64,7 +64,7 @@ export default defineComponent({
     const initialized = ref<boolean>(false);
     // 当前组
     const currentGroup = computed<IProjectGroupVo | undefined>(() =>
-      projectGroups.value.find(item => item.id === currentGroupId.value)
+      projectGroups.value.find(item => item.id === currentGroupId.value),
     );
     // 选择框内容
     const groupOptions = ref<{ value: string; label: string }[]>([]);
@@ -125,6 +125,7 @@ export default defineComponent({
 .search-project {
   background-color: #fff;
   // min-height: 500px;
+  margin-bottom: 20px;
   .search {
     height: 66px;
     background: #f6fafe;

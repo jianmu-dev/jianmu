@@ -246,7 +246,7 @@ export default defineComponent({
       type: Object as PropType<IProjectVo>,
       required: true,
     },
-    //控制item是否加上hover样式，根据对比id值判断
+    // 控制item是否加上hover样式，根据对比id值判断
     move: {
       type: Boolean,
       default: false,
@@ -409,12 +409,12 @@ export default defineComponent({
 }
 
 .project-item {
-  margin: 1.1%;
+  margin: 1%;
   margin-bottom: 0px;
-  width: 19%;
+  width: 19.2%;
   min-width: 260px;
   background-color: #ffffff;
-  box-shadow: 0px 0px 12px 4px #edf1f8;
+  box-shadow: 0px 0px 8px 4px #eff4f9;
 
   &.move {
     position: relative;

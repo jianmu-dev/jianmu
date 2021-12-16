@@ -205,14 +205,14 @@ export default defineComponent({
     };
     function changeView(
       childRoute: Ref<boolean>,
-      route: RouteLocationNormalizedLoaded | RouteLocationNormalized
+      route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
     ) {
       childRoute.value = route.matched.length > 2;
     }
     const moveClassList = computed<string[]>(() =>
       projectGroupList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
-      })
+      }),
     );
     const fetchProjectGroup = async () => {
       loading.value = true;
@@ -241,7 +241,7 @@ export default defineComponent({
       name: string,
       isDefault: boolean,
       isShow: boolean,
-      description?: string
+      description?: string,
     ) => {
       defaultProjectGroup.value = isDefault;
       groupName.value = name;
@@ -281,13 +281,13 @@ export default defineComponent({
         // 向移动
         targetSort < originSort
           ? await updateProjectGroupSort({
-              targetGroupId: projectGroupList.value[targetSort + 1].id,
-              originGroupId: element.id,
-            })
+            targetGroupId: projectGroupList.value[targetSort + 1].id,
+            originGroupId: element.id,
+          })
           : await updateProjectGroupSort({
-              targetGroupId: projectGroupList.value[targetSort - 1].id,
-              originGroupId: element.id,
-            });
+            targetGroupId: projectGroupList.value[targetSort - 1].id,
+            originGroupId: element.id,
+          });
         nextTick(() => {
           currentItem.value = e.moved.element.id;
           currentSelected.value = false;

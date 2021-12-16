@@ -35,6 +35,7 @@ export default defineComponent({
   font-weight: 400;
   color: #595959;
   text-align: center;
+  border-top: 1px solid rgba(185, 207, 230, 0.59);
 
   > :nth-child(n + 2) {
     margin-left: 10px;

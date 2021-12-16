@@ -75,7 +75,7 @@ export function cloneGit(dto: IGitCloningDto): Promise<IGitVo> {
  */
 export function listGit(
   id: string,
-  dir?: string
+  dir?: string,
 ): Promise<{
   [key: string]: boolean;
 }> {
