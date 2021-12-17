@@ -73,7 +73,7 @@ export default defineComponent({
 <style scoped lang="less">
 .index {
   .main {
-    min-height: calc(100vh - 115px);
+    min-height: calc(100vh - 130px);
 
     .menu-bar {
       padding: 40px 0;
