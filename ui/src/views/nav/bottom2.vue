@@ -3,8 +3,11 @@
     <a href="https://portal.mulanos.cn" target="_blank" class="mulan"
       >木兰社区孵化项目</a
     >
+    <i class="line"></i>
     <a href="https://jianmu.dev" target="_blank">关于建木</a>
+    <i class="line"></i>
     <a href="https://docs.jianmu.dev" target="_blank">使用手册</a>
+    <i class="line"></i>
     <a href="mailto:support@jianmu.dev">联系我们</a>
     <a v-if="icpVisible" href="https://beian.miit.gov.cn" target="_blank"
       >浙ICP备12032350号-5</a
@@ -30,14 +33,23 @@ export default defineComponent({
   padding-top: 10px;
   width: 100%;
   height: 50px;
-  line-height: 50px;
   font-size: 12px;
   font-weight: 400;
   color: #595959;
   text-align: center;
+  border-top: 1px solid rgba(185, 207, 230, 0.59);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   > :nth-child(n + 2) {
-    margin-left: 10px;
+    margin-left: 20px;
+  }
+  .line{
+    width:1px;
+    height:14px;
+    background:#B9CFE6;
   }
 
   .mulan {

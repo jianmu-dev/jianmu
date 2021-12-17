@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <div class="logo">
-      <router-link :to="{name: 'index'}">
+      <router-link :to="{ name: 'index' }">
         <div class="icon"></div>
       </router-link>
       <!--      <div class="separator"></div>-->
@@ -15,14 +15,26 @@
       <jm-form :model="loginForm" :rules="loginRule" ref="loginFormRef">
         <div class="item">
           <jm-form-item prop="username">
-            <jm-input v-model="loginForm.username" prefix-icon="jm-icon-input-user" clearable placeholder="请输入用户名"
-                      @keyup.enter="login"/>
+            <jm-input
+              v-model="loginForm.username"
+              prefix-icon="jm-icon-input-user"
+              clearable
+              placeholder="请输入用户名"
+              @keyup.enter="login"
+            />
           </jm-form-item>
         </div>
         <div class="item">
           <jm-form-item prop="password">
-            <jm-input v-model="loginForm.password" prefix-icon="jm-icon-input-lock" type="password" clearable
-                      show-password placeholder="请输入密码" @keyup.enter="login"/>
+            <jm-input
+              v-model="loginForm.password"
+              prefix-icon="jm-icon-input-lock"
+              type="password"
+              clearable
+              show-password
+              placeholder="请输入密码"
+              @keyup.enter="login"
+            />
           </jm-form-item>
         </div>
         <div class="item">
@@ -31,11 +43,13 @@
           </jm-checkbox>
         </div>
         <div class="btn">
-          <jm-button type="primary" @click="login" :loading="loading">登录</jm-button>
+          <jm-button type="primary" @click="login" :loading="loading"
+            >登录</jm-button
+          >
         </div>
       </jm-form>
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
 </template>
 
@@ -92,10 +106,12 @@ export default defineComponent({
             return false;
           }
 
-          proxy.createSession({ ...loginForm.value })
+          proxy
+            .createSession({ ...loginForm.value })
             .then(() => {
               // 初始化vuex根状态
-              proxy.initialize()
+              proxy
+                .initialize()
                 .then(() => router.push(props.redirectUrl || PLATFORM_INDEX))
                 .catch((err: Error) => {
                   // 关闭loading
@@ -169,7 +185,7 @@ export default defineComponent({
     margin: 0 auto 0;
     padding: 30px 30px 40px 30px;
     width: 290px;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     border-radius: 4px;
 
     .desc {
@@ -185,7 +201,7 @@ export default defineComponent({
       .label {
         font-size: 13px;
         font-weight: 400;
-        color: #6B7B8D;
+        color: #6b7b8d;
       }
     }
 

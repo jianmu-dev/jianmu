@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="projects">
-      <jm-empty v-if="projects.length === 0" />
+      <jm-empty v-if="projects.length === 0 && pageable" />
       <jm-draggable
         v-else-if="moveListener"
         class="list"
@@ -216,7 +216,9 @@ export default defineComponent({
       await nextTick(() => {
         queryForm.value.name = props.name;
       });
-      loading.value = true;
+      if(props.pageable){
+        loading.value = true;
+      }
       await loadProject();
     });
     onUpdated(async () => {
