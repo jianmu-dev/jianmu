@@ -49,7 +49,7 @@
         </div>
       </div>
       <jm-input
-        placeholder="请输入项目名称"
+        placeholder="请输入项目名称或描述"
         type="text"
         class="search-input"
         v-model.trim="keyword"

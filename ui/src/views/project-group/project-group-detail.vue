@@ -12,11 +12,9 @@
           （共有 {{ projectGroupDetail?.projectCount }} 个项目）
         </div>
       </div>
-      <jm-scrollbar max-height="40px">
-        <span
-          class="description"
-          v-html="(projectGroupDetail?.description || '无').replace(/\n/g, '<br/>')"/>
-      </jm-scrollbar>
+      <div class="description">
+        <span v-html="(projectGroupDetail?.description || '无').replace(/\n/g, '<br/>')"/>
+      </div>
     </div>
     <div class="content">
       <div class="menu-bar">
@@ -160,7 +158,6 @@ export default defineComponent({
     }
 
     .description {
-      max-height: 40px;
       margin-top: 10px;
       color: #6b7b8d;
     }
