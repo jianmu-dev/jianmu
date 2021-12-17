@@ -474,7 +474,7 @@ export default defineComponent({
 .workflow-execution-record-detail {
   font-size: 14px;
   color: #333333;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 
   .param-value {
     color: #606266;
@@ -526,15 +526,14 @@ export default defineComponent({
 
     .info {
       padding: 0 24px;
-      margin-bottom: 16px;
-
+      margin-bottom: 14px;
       .name {
         font-size: 20px;
         font-weight: bold;
         color: #082340;
         display: flex;
         align-items: center;
-        margin-bottom: 7px;
+        margin-bottom: 8px;
         .project-group-name {
           padding: 2px 20px;
           margin-right: 10px;
@@ -744,7 +743,7 @@ export default defineComponent({
 
   .workflow-section {
     background-color: #ffffff;
-    height: calc(100vh - 390px);
+    height: calc(100vh - 384px);
   }
 
   ::v-deep(.el-tabs__nav-scroll) {
