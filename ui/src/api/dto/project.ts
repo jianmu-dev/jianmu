@@ -106,6 +106,7 @@ export interface IProjectDetailVo
       eventBridgeId?: string;
       triggerType: TriggerTypeEnum;
       projectGroupId: string;
+      projectGroupName:string;
     }
   > {}
 
