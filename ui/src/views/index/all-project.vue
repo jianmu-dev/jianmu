@@ -4,7 +4,7 @@
     <div class="search">
       <i class="jm-icon-button-search" @click="searchProject"></i>
       <jm-input
-        placeholder="请输入项目名称"
+        placeholder="请输入项目名称或描述"
         v-model="projectName"
         @change="searchProject"
       />

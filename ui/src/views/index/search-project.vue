@@ -15,7 +15,7 @@
         <jm-input
           v-model="projectName"
           @change="searchProject"
-          placeholder="请输入项目名称"
+          placeholder="请输入项目名称或描述"
         />
         <i class="jm-icon-button-search"></i>
       </div>
