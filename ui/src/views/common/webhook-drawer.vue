@@ -134,7 +134,12 @@
                     ></i>
                   </div>
                 </div>
-                <div class="ellipsis" v-else>{{ scope.row.value }}</div>
+                <div class="ellipsis params-container" v-else>
+                  <div class="params">
+                    {{ scope.row.value }}
+                  </div>
+                  <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
+                </div>
               </template>
             </jm-table-column>
           </jm-table>
@@ -437,6 +442,19 @@ export default defineComponent({
       // 还原密钥显示
       secretVisible.value = true;
     };
+    // 一键复制
+    const copyParam = async (value:string) => {
+      if (!value) {
+        return;
+      }
+      try {
+        await toClipboard(value);
+        proxy.$success('复制成功');
+      } catch (err) {
+        proxy.$error('复制失败，请手动复制');
+        console.error(err);
+      }
+    };
     return {
       loadState,
       height,
@@ -447,6 +465,7 @@ export default defineComponent({
       drawerVisible,
       link,
       copy,
+      copyParam,
       // 表单数据
       webhookRequestList,
       closeDrawer,
@@ -706,6 +725,27 @@ export default defineComponent({
         }
       }
       .trigger-table {
+        .params-container{
+          display: flex;
+          position:relative;
+          &:hover{
+            .copy-btn{
+              width:16px;
+              height:16px;
+              background:url('@/assets/svgs/btn/copy.svg') no-repeat;
+              background-size:100%;
+              cursor: pointer;
+              position:absolute;
+              top:2px;
+              right:2px;
+              opacity: 0.5;
+              &:hover{
+                opacity:1;
+              }
+            }
+          }
+
+        }
         td:first-of-type,
         td:last-of-type {
           .cell {
