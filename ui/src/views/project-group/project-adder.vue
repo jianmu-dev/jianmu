@@ -36,7 +36,7 @@
         </jm-select>
       </jm-form-item>
       <div class="selected-list">
-        <div class="title">已选择项目组</div>
+        <div class="title">已选项目</div>
         <div class="selected-list-wrapper">
           <div
             class="selected-item"

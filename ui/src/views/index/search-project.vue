@@ -2,7 +2,7 @@
   <!-- 搜索结果 -->
   <div class="search-project">
     <div class="search">
-      <jm-select v-model="selectValue" @change="selectOption">
+      <jm-select v-model="selectValue" placeholder="请选择项目组" @change="selectOption">
         <jm-option
           v-for="item in groupOptions"
           :key="item.value"
