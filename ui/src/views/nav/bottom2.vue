@@ -30,9 +30,8 @@ export default defineComponent({
 
 <style scoped lang="less">
 .bottom-nav {
-  padding-top: 10px;
   width: 100%;
-  height: 50px;
+  height: 64px;
   font-size: 12px;
   font-weight: 400;
   color: #595959;

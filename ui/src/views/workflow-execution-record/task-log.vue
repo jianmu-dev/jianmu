@@ -122,11 +122,13 @@
                         </span>
                       </template>
                     </jm-table-column>
-                    <jm-table-column
-                      label="参数值"
-                      prop="value"
-                      header-align="center"
-                    >
+                    <jm-table-column label="参数值" header-align="center">
+                      <template #default="scope">
+                        <div class="copy-container">
+                          <div class="param-value">{{scope.row.value}}</div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
+                        </div>
+                      </template>
                     </jm-table-column>
                   </jm-table>
                   <div class="title separator">输出参数</div>
@@ -176,11 +178,13 @@
                         </span>
                       </template>
                     </jm-table-column>
-                    <jm-table-column
-                      label="参数值"
-                      prop="value"
-                      header-align="center"
-                    >
+                    <jm-table-column label="参数值" header-align="center">
+                      <template #default="scope">
+                        <div class="copy-container">
+                          <div class="param-value">{{scope.row.value}}</div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
+                        </div>
+                      </template>
                     </jm-table-column>
                   </jm-table>
                 </div>
@@ -194,7 +198,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -206,6 +210,7 @@ import sleep from '@/utils/sleep';
 import { TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
+import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
   components: { TaskState },
@@ -221,6 +226,8 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
+    const { proxy } = getCurrentInstance() as any;
+    const { toClipboard } = useClipboard();
     const task = computed<ITaskExecutionRecordVo>(
       () =>
         state.recordDetail.taskRecords.find(
@@ -299,6 +306,20 @@ export default defineComponent({
 
     onBeforeUnmount(() => (terminateTaskLogLoad = true));
 
+    // 一键复制
+    const copy = async (value:string) => {
+      if (!value) {
+        return;
+      }
+      try {
+        await toClipboard(value);
+        proxy.$success('复制成功');
+      } catch (err) {
+        proxy.$error('复制失败，请手动复制');
+        console.error(err);
+      }
+    };
+
     return {
       workflowName: state.recordDetail.record?.name,
       task,
@@ -306,6 +327,7 @@ export default defineComponent({
       executionTime,
       tabActiveName,
       taskLog,
+      copy,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT),
@@ -488,6 +510,33 @@ export default defineComponent({
             th,
             td {
               color: #082340;
+            }
+            .copy-container{
+              display: flex;
+              align-items: center;
+              .param-value {
+                width: 93%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                position: relative;
+              }
+              &:hover{
+                .copy-btn{
+                  width:16px;
+                  height:16px;
+                  background:url('@/assets/svgs/btn/copy.svg') no-repeat;
+                  background-size:100%;
+                  cursor: pointer;
+                  position:absolute;
+                  top:2px;
+                  right:0px;
+                  opacity: 0.5;
+                  &:hover{
+                    opacity: 1;
+                  }
+                }
+              }
             }
           }
         }
