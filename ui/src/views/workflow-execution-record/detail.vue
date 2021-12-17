@@ -534,8 +534,9 @@ export default defineComponent({
         color: #082340;
         display: flex;
         align-items: center;
+        margin-bottom: 7px;
         .project-group-name {
-          padding: 4px 20px;
+          padding: 2px 20px;
           margin-right: 10px;
           background: #f0f7ff;
           border-radius: 2px;
