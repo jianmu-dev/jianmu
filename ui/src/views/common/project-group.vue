@@ -352,7 +352,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .project-group {
-  margin-top: 30px;
+  margin-top: 23px;
 
   .name {
     font-size: 18px;
