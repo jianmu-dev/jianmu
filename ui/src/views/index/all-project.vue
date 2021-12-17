@@ -110,7 +110,7 @@ export default defineComponent({
     }
   }
   .project {
-    padding: 0 20px 20px;
+    padding: 0 20px 30px;
   }
 }
 </style>
