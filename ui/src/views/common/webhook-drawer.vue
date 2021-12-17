@@ -749,7 +749,7 @@ export default defineComponent({
         td:first-of-type,
         td:last-of-type {
           .cell {
-            padding-left: 40px;
+            padding-left: 20px;
           }
         }
         .hide-secret,

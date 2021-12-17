@@ -51,8 +51,13 @@
                     </jm-table-column>
                     <jm-table-column
                       label="参数值"
-                      align="center"
-                      prop="value">
+                      align="center">
+                      <template #default="scope">
+                        <div class="copy-container">
+                          <div class="param-value ellipsis">{{scope.row.value}}</div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
+                        </div>
+                      </template>
                     </jm-table-column>
                   </jm-table>
                 </div>
@@ -74,6 +79,7 @@ import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
   props: {
@@ -94,6 +100,7 @@ export default defineComponent({
     const tabActiveName = ref<string>(props.tabType);
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
+    const { toClipboard } = useClipboard();
 
     onMounted(async () => {
       if (!props.triggerId) {
@@ -112,13 +119,26 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     });
-
+    // 一键复制
+    const copy = async (value:string) => {
+      if (!value) {
+        return;
+      }
+      try {
+        await toClipboard(value);
+        proxy.$success('复制成功');
+      } catch (err) {
+        proxy.$error('复制失败，请手动复制');
+        console.error(err);
+      }
+    };
     return {
       workflowName: state.recordDetail.record?.name,
       startTime: datetimeFormatter(state.recordDetail.record?.startTime),
       tabActiveName,
       webhookLog,
       webhookParams,
+      copy,
     };
   },
 });
@@ -221,6 +241,50 @@ export default defineComponent({
         ::v-deep(.el-table) {
           th, td {
             color: #082340;
+          }
+          tr{
+            td:first-child,
+            td:last-child{
+              text-align:left;
+              padding-left:20px;
+            }
+            td:first-child{
+              .cell{
+                width:100%!important;
+              }
+            }
+          }
+          .copy-container{
+            display: flex;
+            align-items: center;
+            .param-value {
+              width: 75%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              position: relative;
+            }
+            .ellipsis {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+            &:hover{
+              .copy-btn{
+                width:16px;
+                height:16px;
+                background:url('@/assets/svgs/btn/copy.svg') no-repeat;
+                background-size:100%;
+                cursor: pointer;
+                position:absolute;
+                top:14px;
+                right:10px;
+                opacity: 0.5;
+                &:hover{
+                  opacity: 1;
+                }
+              }
+            }
           }
         }
       }
