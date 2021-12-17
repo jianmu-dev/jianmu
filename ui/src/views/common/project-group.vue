@@ -122,7 +122,7 @@ export default defineComponent({
     const projectList = ref<Mutable<IProjectVo>[]>([]);
     const queryForm = ref<IQueryForm>({
       pageNum: START_PAGE_NUM,
-      pageSize: DEFAULT_PAGE_SIZE,
+      pageSize: props.pageable?40:DEFAULT_PAGE_SIZE,
       projectGroupId: props.projectGroup?.id,
       name: props.name,
     });
@@ -158,7 +158,7 @@ export default defineComponent({
         try {
           projectPage.value = await queryProject({
             pageNum: START_PAGE_NUM,
-            pageSize: projects.value.length || DEFAULT_PAGE_SIZE,
+            pageSize: props.pageable?projects.value.length:DEFAULT_PAGE_SIZE,
             projectGroupId: props.projectGroup?.id,
             name: props.name,
           });
@@ -230,10 +230,6 @@ export default defineComponent({
       }
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
-      await nextTick(() => {
-        loading.value = true;
-        loadProject();
-      });
     });
     // onUpdated(() => {
     //   if (props.move) {
