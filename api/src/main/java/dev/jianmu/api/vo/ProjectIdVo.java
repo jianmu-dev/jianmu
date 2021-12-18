@@ -12,7 +12,8 @@ import lombok.Getter;
  */
 @Getter
 @Builder
+@Schema(description = "项目ID值对象")
 public class ProjectIdVo {
-    @Schema(description = "项目ID")
+    @Schema(description = "项目ID", required = true)
     private final String id;
 }
