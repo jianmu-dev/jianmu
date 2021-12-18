@@ -67,7 +67,7 @@ import {
   getProcessTemplate,
   listProjectGroup,
 } from '@/api/view-no-auth';
-import { IProcessTemplateVo } from '@/api/dto/project';
+import { IProcessTemplateVo, IProjectIdVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { useStore } from 'vuex';
 import { IRootState } from '@/model';
@@ -145,7 +145,6 @@ export default defineComponent({
       projectGroupList,
       form,
       rules,
-      editMode,
       editorForm,
       loading,
       activatedTab: ref<string>('dsl'),
@@ -168,15 +167,16 @@ export default defineComponent({
           loading.value = true;
 
           save({ ...editorForm.value })
-            .then(() => {
-              if (!editMode) {
-                // 刷新流程定义列表
-                reloadMain();
-              }
+            .then(async ({ id }: IProjectIdVo) => {
+              // 关闭loading
+              loading.value = false;
 
               proxy.$success(editMode ? '编辑成功' : '新增成功');
 
-              router.push({ name: 'index' });
+              if (!editMode) {
+                await router.push({ name: 'update-project', params: { id } });
+                reloadMain();
+              }
             })
             .catch((err: Error) => {
               // 关闭loading
@@ -187,7 +187,8 @@ export default defineComponent({
         });
       },
       close: () => {
-        if (rootState.fromRouteFullPath) {
+        if (rootState.fromRouteFullPath &&
+          !rootState.fromRouteFullPath.startsWith('/project/editor')) {
           router.push(rootState.fromRouteFullPath);
           return;
         }

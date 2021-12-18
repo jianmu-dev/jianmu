@@ -1,13 +1,5 @@
 import { restProxy } from '@/api';
-import {
-  IGitCloningDto,
-  IGitVo,
-  IProjectImportingDto,
-  IProjectSavingDto,
-  queryProjectList,
-  IProjectVo,
-} from '@/api/dto/project';
-import { IPageVo } from '@/api/dto/common';
+import { IGitCloningDto, IGitVo, IProjectIdVo, IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
 
 export const baseUrl = {
   project: '/projects',
@@ -18,16 +10,20 @@ export const baseUrl = {
  * 保存项目
  * @param dto
  */
-export function save(dto: IProjectSavingDto): Promise<void> {
+export async function save(dto: IProjectSavingDto): Promise<IProjectIdVo> {
   const url = `${baseUrl.project}${dto.id ? `/${dto.id}` : ''}`;
   const method = dto.id ? 'put' : 'post';
 
-  return restProxy({
+  const res = await restProxy({
     url,
     method,
     payload: dto,
     auth: true,
   });
+  
+  return dto.id ? {
+    id: dto.id,
+  } : res;
 }
 
 /**
