@@ -4,6 +4,7 @@ import dev.jianmu.api.dto.AddGroup;
 import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
+import dev.jianmu.api.vo.ProjectIdVo;
 import dev.jianmu.application.service.GitApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,11 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 /**
+ * @author Ethan Liu
  * @class ProjectController
  * @description ProjectController
- * @author Ethan Liu
  * @create 2021-05-14 14:00
-*/
+ */
 @RestController
 @RequestMapping("projects")
 @Tag(name = "项目API", description = "项目API")
@@ -42,8 +43,9 @@ public class ProjectController {
 
     @PostMapping
     @Operation(summary = "创建项目", description = "上传DSL并创建项目")
-    public void createProject(@RequestBody @Valid DslTextDto dslTextDto) {
-        this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId());
+    public ProjectIdVo createProject(@RequestBody @Valid DslTextDto dslTextDto) {
+        var project = this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId());
+        return ProjectIdVo.builder().id(project.getId()).build();
     }
 
     @PostMapping("/import")

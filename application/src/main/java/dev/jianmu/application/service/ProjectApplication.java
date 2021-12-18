@@ -209,7 +209,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void createProject(String dslText, String projectGroupId) {
+    public Project createProject(String dslText, String projectGroupId) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -246,6 +246,7 @@ public class ProjectApplication {
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
+        return project;
     }
 
     @Transactional
