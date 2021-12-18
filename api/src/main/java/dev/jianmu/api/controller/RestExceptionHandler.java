@@ -23,11 +23,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
+ * @author Ethan Liu
  * @class RestExceptionHandler
  * @description Rest全局异常处理类
- * @author Ethan Liu
  * @create 2021-04-06 20:40
-*/
+ */
 @RestControllerAdvice
 public class RestExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
@@ -73,7 +73,7 @@ public class RestExceptionHandler {
         return ErrorMessage.builder()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
-                .message("主键重复")
+                .message(ex.getCause().getMessage().contains("workflow_name_UNIQUE") ? "项目名称不能重复" : "主键重复")
                 .description(request.getDescription(false))
                 .build();
     }
