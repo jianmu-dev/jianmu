@@ -16,7 +16,8 @@ export interface IProjectSavingDto
     id?: string;
     dslText: string;
     projectGroupId: string;
-  }> {}
+  }> {
+}
 
 /**
  * 克隆Git库dto
@@ -33,7 +34,8 @@ export interface IGitCloningDto
       privateKey?: string;
     };
     branch: string;
-  }> {}
+  }> {
+}
 
 /**
  * git值对象
@@ -43,72 +45,77 @@ export interface IGitVo
     id: string;
     uri: string;
     branch: string;
-  }> {}
+  }> {
+}
 
 /**
  * 导入项目dto
  */
 export interface IProjectImportingDto
-  extends Readonly<
-    IGitCloningDto & {
-      id: string;
-      dslPath: string;
-    }
-  > {}
+  extends Readonly<IGitCloningDto & {
+    id: string;
+    dslPath: string;
+  }> {
+}
 
 /**
  * 查询项目dto
  */
 export interface IProjectQueryingDto
-  extends Readonly<
-    IPageDto & {
-      projectGroupId?: string;
-      name?: string;
-    }
-  > {}
+  extends Readonly<IPageDto & {
+    projectGroupId?: string;
+    name?: string;
+  }> {
+}
+
+/**
+ * 项目id vo
+ */
+export interface IProjectIdVo extends Readonly<{
+  id: string;
+}> {
+}
 
 /**
  * 项目vo
  */
 export interface IProjectVo
-  extends Readonly<
-    BaseVo & {
-      id: string;
-      name: string;
-      source: DslSourceEnum;
-      dslType: DslTypeEnum;
-      gitRepoId?: string;
-      startTime?: string;
-      latestTime?: string;
-      nextTime?: string;
-      status: ProjectStatusEnum;
-      eventBridgeId?: string;
-      triggerType: TriggerTypeEnum;
-      description?: string;
-    }
-  > {}
+  extends Readonly<BaseVo & {
+    id: string;
+    name: string;
+    source: DslSourceEnum;
+    dslType: DslTypeEnum;
+    gitRepoId?: string;
+    startTime?: string;
+    latestTime?: string;
+    nextTime?: string;
+    status: ProjectStatusEnum;
+    eventBridgeId?: string;
+    triggerType: TriggerTypeEnum;
+    description?: string;
+  }> {
+}
 
 /**
  * 项目详情vo
  */
 export interface IProjectDetailVo
-  extends Readonly<
-    BaseVo & {
-      id: string;
-      dslSource: DslSourceEnum;
-      dslType: DslTypeEnum;
-      gitRepoId?: string;
-      workflowName: string;
-      workflowRef: string;
-      workflowVersion: string;
-      steps: number;
-      dslText: string;
-      eventBridgeId?: string;
-      triggerType: TriggerTypeEnum;
-      projectGroupId: string;
-      projectGroupName:string;
-    }
-  > {}
+  extends Readonly<BaseVo & {
+    id: string;
+    dslSource: DslSourceEnum;
+    dslType: DslTypeEnum;
+    gitRepoId?: string;
+    workflowName: string;
+    workflowRef: string;
+    workflowVersion: string;
+    steps: number;
+    dslText: string;
+    eventBridgeId?: string;
+    triggerType: TriggerTypeEnum;
+    projectGroupId: string;
+    projectGroupName: string;
+  }> {
+}
 
 /**
  * 项目webhook vo
@@ -116,7 +123,8 @@ export interface IProjectDetailVo
 export interface IProjectWebhookVo
   extends Readonly<{
     webhook: string;
-  }> {}
+  }> {
+}
 
 /**
  * 流程模板vo
@@ -139,7 +147,8 @@ export interface IProcessTemplateVo
         workType: string;
       }
     ];
-  }> {}
+  }> {
+}
 
 /**
  * 任务参数vo
@@ -148,7 +157,8 @@ export interface ITaskParameterVo
   extends Readonly<{
     ref: string;
     expression: string;
-  }> {}
+  }> {
+}
 
 /**
  * 流程节点vo
@@ -172,7 +182,8 @@ export interface IWorkflowNodeVo
     taskParameters: ITaskParameterVo[];
     sources: string[];
     targets: string[];
-  }> {}
+  }> {
+}
 
 /**
  * 全局参数vo
@@ -182,7 +193,8 @@ export interface IGlobalParameterVo
     name: string;
     type: string;
     value: string | number | boolean;
-  }> {}
+  }> {
+}
 
 /**
  * 流程vo
@@ -197,7 +209,8 @@ export interface IWorkflowVo
     nodes: IWorkflowNodeVo[];
     globalParameters: IGlobalParameterVo[];
     dslText: string;
-  }> {}
+  }> {
+}
 
 /**
  * 节点定义vo
@@ -216,7 +229,8 @@ export interface INodeDefVo
     documentLink?: string;
     type: string;
     workerType: NodeTypeEnum;
-  }> {}
+  }> {
+}
 
 /**
  * 查询项目列表(v2)dto
@@ -227,4 +241,5 @@ export interface queryProjectList
     pageSize: number;
     projectGroupId?: string;
     name?: string;
-  }> {}
+  }> {
+}
