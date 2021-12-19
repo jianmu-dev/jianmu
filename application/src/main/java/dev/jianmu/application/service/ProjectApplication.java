@@ -279,6 +279,9 @@ public class ProjectApplication {
     private void updateProjectGroup(String dslId, String projectGroupId) {
         var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
+        if (projectLinkGroup.getProjectGroupId().equals(projectGroupId)) {
+            return;
+        }
         var targetGroupId = this.projectGroupRepository.findById(projectGroupId).map(ProjectGroup::getId)
                 .orElseThrow(() -> new DataNotFoundException("未找到目标项目组"));
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
