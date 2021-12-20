@@ -1,13 +1,7 @@
 <template>
   <div class="workflow-execution-record-detail" v-loading="loading">
     <div class="right-top-btn">
-      <jm-button
-        type="primary"
-        class="jm-icon-button-cancel"
-        size="small"
-        @click="close"
-        >关闭</jm-button
-      >
+      <jm-button type="primary" class="jm-icon-button-cancel" size="small" @click="close">关闭</jm-button>
     </div>
     <div class="basic-section">
       <jm-tooltip content="触发" placement="left">
@@ -21,8 +15,8 @@
             }"
           >
             <span class="project-group-name">{{
-              data.project?.projectGroupName
-            }}</span>
+                data.project?.projectGroupName
+              }}</span>
           </router-link>
           <span>{{ data.record?.name }}</span>
         </div>
@@ -34,7 +28,7 @@
       <div v-if="!data.record?.status" class="instance-tabs">
         <div class="tab init selected">
           <!--          <div class="left-horn"/>-->
-          <div class="right-horn" />
+          <div class="right-horn"/>
           <div class="label">-</div>
         </div>
       </div>
@@ -50,8 +44,8 @@
             }"
             @click="changeRecord(record)"
           >
-            <div v-if="record.id === data.record.id" class="left-horn" />
-            <div v-if="record.id === data.record.id" class="right-horn" />
+            <div v-if="record.id === data.record.id" class="left-horn"/>
+            <div v-if="record.id === data.record.id" class="right-horn"/>
             <div class="label">{{ record.serialNo }}</div>
           </div>
         </div>
@@ -132,7 +126,7 @@
       direction="rtl"
       destroy-on-close
     >
-      <task-log :id="taskLogForm.id" :tab-type="taskLogForm.tabType" />
+      <task-log :id="taskLogForm.id" :tab-type="taskLogForm.tabType"/>
     </jm-drawer>
     <jm-drawer
       title="查看流程日志"
@@ -141,7 +135,7 @@
       direction="rtl"
       destroy-on-close
     >
-      <process-log />
+      <process-log/>
     </jm-drawer>
     <jm-drawer
       title="查看Webhook日志"
@@ -161,35 +155,16 @@
 </template>
 s
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  getCurrentInstance,
-  inject,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-} from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
-import {
-  IOpenTaskLogForm,
-  IOpenWebhookLogForm,
-  IState,
-} from '@/model/modules/workflow-execution-record';
+import { IOpenTaskLogForm, IOpenWebhookLogForm, IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import {
-  TaskStatusEnum,
-  TriggerTypeEnum,
-  WorkflowExecutionRecordStatusEnum,
-} from '@/api/dto/enumeration';
+import { TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import TaskLog from '@/views/workflow-execution-record/task-log.vue';
 import ProcessLog from '@/views/workflow-execution-record/process-log.vue';
 import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
-import {
-  ITaskExecutionRecordVo,
-  IWorkflowExecutionRecordVo,
-} from '@/api/dto/workflow-execution-record';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { executeImmediately } from '@/api/project';
 import sleep from '@/utils/sleep';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
@@ -344,7 +319,6 @@ export default defineComponent({
       loading,
       dslSourceCode: computed<string | undefined>(
         () => state.recordDetail.recordDsl,
-
       ),
       nodeInfos: computed<INodeDefVo[]>(() => state.recordDetail.nodeInfos),
       taskLogForm,
@@ -357,11 +331,7 @@ export default defineComponent({
         fetchDetail: 'fetchDetail',
       }),
       close: () => {
-        if (rootState.fromRouteFullPath) {
-          router.push(rootState.fromRouteFullPath);
-          return;
-        }
-        router.push({ name: 'index' });
+        router.push(rootState.fromRoute.fullPath);
       },
       loadDetail,
       changeRecord: async (record: IWorkflowExecutionRecordVo) => {
@@ -421,7 +391,8 @@ export default defineComponent({
               })
               .catch((err: Error) => proxy.$throw(err, proxy));
           })
-          .catch(() => {});
+          .catch(() => {
+          });
       },
       terminate: () => {
         proxy
@@ -444,7 +415,8 @@ export default defineComponent({
               })
               .catch((err: Error) => proxy.$throw(err, proxy));
           })
-          .catch(() => {});
+          .catch(() => {
+          });
       },
       openTaskLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         taskLogForm.value.drawerVisible = true;
@@ -527,6 +499,7 @@ export default defineComponent({
     .info {
       padding: 0 24px;
       margin-bottom: 14px;
+
       .name {
         font-size: 20px;
         font-weight: bold;
@@ -534,6 +507,7 @@ export default defineComponent({
         display: flex;
         align-items: center;
         margin-bottom: 8px;
+
         .project-group-name {
           padding: 2px 20px;
           margin-right: 10px;

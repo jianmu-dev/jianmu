@@ -1,16 +1,14 @@
 <template>
   <div class="project-editor" v-loading="loading">
     <div class="right-top-btn">
-      <jm-button class="jm-icon-button-cancel" size="small" @click="close"
-        >取消</jm-button
-      >
+      <jm-button class="jm-icon-button-cancel" size="small" @click="close">取消</jm-button>
       <jm-button
         v-if="source === 'processTemplates'"
         type="primary"
         class="jm-icon-button-previous"
         size="small"
         @click="previousStep"
-        >上一步
+      >上一步
       </jm-button>
 
       <jm-button
@@ -19,7 +17,7 @@
         size="small"
         @click="save"
         :loading="loading"
-        >保存
+      >保存
       </jm-button>
     </div>
     <div class="form">
@@ -44,7 +42,7 @@
       <jm-tab-pane name="dsl" lazy>
         <template #label><i class="jm-icon-tab-dsl"></i> DSL模式</template>
         <div class="dsl-editor">
-          <jm-dsl-editor v-model:value="editorForm.dslText" />
+          <jm-dsl-editor v-model:value="editorForm.dslText"/>
         </div>
       </jm-tab-pane>
     </jm-tabs>
@@ -52,21 +50,11 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  getCurrentInstance,
-  inject,
-  onMounted,
-  ref,
-} from 'vue';
+import { defineComponent, getCurrentInstance, inject, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { save } from '@/api/project';
 import { ISaveForm } from '@/model/modules/project';
-import {
-  fetchProjectDetail,
-  getProcessTemplate,
-  listProjectGroup,
-} from '@/api/view-no-auth';
+import { fetchProjectDetail, getProcessTemplate, listProjectGroup } from '@/api/view-no-auth';
 import { IProcessTemplateVo, IProjectIdVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { useStore } from 'vuex';
@@ -187,12 +175,11 @@ export default defineComponent({
         });
       },
       close: () => {
-        if (rootState.fromRouteFullPath &&
-          !rootState.fromRouteFullPath.startsWith('/project/editor')) {
-          router.push(rootState.fromRouteFullPath);
+        if (rootState.fromRoute.fullPath.startsWith('/project/editor')) {
+          router.push({ name: 'index' });
           return;
         }
-        router.push({ name: 'index' });
+        router.push(rootState.fromRoute.fullPath);
       },
     };
   },
@@ -204,20 +191,25 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
+
   .form {
     padding: 24px;
     padding-top: 10px;
     background-color: #fff;
     margin-bottom: 20px;
+
     .el-form-item {
       &.is-required {
         display: flex;
         flex-direction: column;
+
         ::v-deep(.el-form-item__label) {
           text-align: left;
         }
       }
+
       margin-bottom: 0px;
+
       .el-form-item__content {
         .el-select {
           width: 50%;
@@ -249,6 +241,7 @@ export default defineComponent({
     .dsl-editor {
       // height: calc(100vh - 215px);
       height: calc(100vh - 350px);
+
       > div {
         z-index: 1;
       }
