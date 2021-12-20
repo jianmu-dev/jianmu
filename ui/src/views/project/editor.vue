@@ -187,12 +187,11 @@ export default defineComponent({
         });
       },
       close: () => {
-        if (rootState.fromRouteFullPath &&
-          !rootState.fromRouteFullPath.startsWith('/project/editor')) {
-          router.push(rootState.fromRouteFullPath);
+        if (rootState.fromRoute.fullPath.startsWith('/project/editor')) {
+          router.push({ name: 'index' });
           return;
         }
-        router.push({ name: 'index' });
+        router.push(rootState.fromRoute.fullPath);
       },
     };
   },

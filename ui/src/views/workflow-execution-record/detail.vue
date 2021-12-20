@@ -357,11 +357,7 @@ export default defineComponent({
         fetchDetail: 'fetchDetail',
       }),
       close: () => {
-        if (rootState.fromRouteFullPath) {
-          router.push(rootState.fromRouteFullPath);
-          return;
-        }
-        router.push({ name: 'index' });
+        router.push(rootState.fromRoute.fullPath);
       },
       loadDetail,
       changeRecord: async (record: IWorkflowExecutionRecordVo) => {
