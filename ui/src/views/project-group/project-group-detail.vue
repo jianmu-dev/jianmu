@@ -112,6 +112,10 @@ export default defineComponent({
       isActive,
       creationActivated,
       close: () => {
+        if (!['/', '/project-group'].includes(rootState.fromRoute.path)) {
+          router.push({ name: 'index' });
+          return;
+        }
         router.push(rootState.fromRoute.fullPath);
       },
       add,
