@@ -35,7 +35,7 @@
       <jm-scrollbar v-else ref="navScrollBar">
         <div class="instance-tabs">
           <div
-            v-for="record of data.allRecords"
+            v-for="(record, idx) of data.allRecords"
             :key="record.id"
             :class="{
               tab: true,
@@ -45,7 +45,7 @@
             @click="changeRecord(record)"
           >
             <div v-if="record.id === data.record.id" class="left-horn"/>
-            <div v-if="record.id === data.record.id" class="right-horn"/>
+            <div v-if="record.id === data.record.id && idx !== data.allRecords.length - 1" class="right-horn"/>
             <div class="label">{{ record.serialNo }}</div>
           </div>
         </div>
@@ -153,7 +153,7 @@
     </jm-drawer>
   </div>
 </template>
-s
+
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
@@ -276,25 +276,32 @@ export default defineComponent({
       }
 
       // 保留滚动偏移量
-      proxy.mutateNavScrollLeft(
-        navScrollBar.value.scrollbar.firstElementChild.scrollLeft,
-      );
+      proxy.mutateNavScrollLeft(navScrollBar.value.scrollbar.firstElementChild.scrollLeft);
     });
 
     // 初始化流程执行记录详情
     onMounted(async () => {
+      await loadDetail();
+
       // 初始化滚动偏移量
       if (
         state.recordDetail.project?.id === props.projectId &&
-        props.workflowExecutionRecordId
+        props.workflowExecutionRecordId && navScrollBar.value
       ) {
-        navScrollBar.value.scrollbar.firstElementChild.scrollLeft =
-          state.recordDetail.navScrollLeft;
+        if (state.recordDetail.navScrollLeft === 0) {
+          const index = state.recordDetail.allRecords.findIndex(({ id }) => id === props.workflowExecutionRecordId);
+          const contentWidth = navScrollBar.value.scrollbar.firstElementChild.clientWidth;
+          const navScrollLeft = (70 + 8) * index;
+          if (navScrollLeft > contentWidth) {
+            const maxNavScrollBarLeft = navScrollBar.value.scrollbar.firstElementChild.scrollWidth -
+              navScrollBar.value.scrollbar.firstElementChild.clientWidth;
+            proxy.mutateNavScrollLeft(navScrollLeft > maxNavScrollBarLeft ? maxNavScrollBarLeft : navScrollLeft);
+          }
+        }
+        navScrollBar.value.scrollbar.firstElementChild.scrollLeft = state.recordDetail.navScrollLeft;
       } else {
         proxy.mutateNavScrollLeft(0);
       }
-
-      await loadDetail();
     });
 
     onBeforeUnmount(() => {
