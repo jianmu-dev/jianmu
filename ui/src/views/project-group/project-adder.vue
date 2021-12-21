@@ -3,7 +3,7 @@
     <template #title>
       <div class="creator-title">
         <div class="edit-icon">
-          <img src="~@/assets/svgs/btn/edit.svg" alt=""/>
+          <img src="~@/assets/svgs/btn/edit.svg" alt="" />
         </div>
         <span>添加项目</span>
       </div>
@@ -60,7 +60,7 @@
         </template>
       </jm-input>
       <div class="card-wrapper">
-        <jm-empty v-if="projectList?.list.length === 0"/>
+        <jm-empty v-if="projectList?.list.length === 0" />
         <div
           v-else
           :class="[
@@ -95,7 +95,7 @@
           size="small"
           @click="dialogVisible = false"
           icon="jm-icon-button-cancel"
-        >取消</jm-button
+          >取消</jm-button
         >
         <jm-button
           size="small"
@@ -103,7 +103,7 @@
           @click="create"
           :loading="loading"
           icon="jm-icon-button-preserve"
-        >确定</jm-button
+          >确定</jm-button
         >
       </span>
     </template>
@@ -125,7 +125,6 @@ import {
   computed,
 } from 'vue';
 import { addProject } from '@/api/project-group';
-
 export default defineComponent({
   emits: ['completed'],
   props: {
@@ -192,17 +191,8 @@ export default defineComponent({
     const removeItem = (index: number) => {
       selectedList.value.splice(index, 1);
     };
-    const initProjectList = async (id: string): Promise<void> => {
-      createForm.value.projectGroupId = id;
-      projectList.value = await queryProject({
-        projectGroupId: createForm.value.projectGroupId,
-        pageNum: 1,
-        pageSize: 8,
-      });
-    };
     onMounted(async () => {
       projectGroupList.value = await listProjectGroup();
-      props.id === '1' ? await initProjectList(projectGroupList.value[1].id) : await initProjectList('1');
     });
     const loading = ref<boolean>(false);
     const create = () => {
@@ -259,14 +249,12 @@ export default defineComponent({
   .creator-title {
     display: flex;
     align-items: center;
-
     .edit-icon {
       width: 26px;
       height: 26px;
       margin-right: 10px;
     }
   }
-
   .el-dialog__body {
     .el-form {
       .selected-list {
@@ -278,7 +266,6 @@ export default defineComponent({
           width: 100%;
           border: 1px solid #b9cfe6;
           padding-top: 10px;
-
           .selected-item {
             margin: 0px 0px 10px 15px;
             width: 169px;
@@ -291,14 +278,12 @@ export default defineComponent({
             padding: 0 5px;
             align-items: center;
             justify-content: space-between;
-
             .item-name {
               width: 90%;
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
             }
-
             .close {
               width: 10px;
               height: 10px;
@@ -310,12 +295,10 @@ export default defineComponent({
           }
         }
       }
-
       ::v-deep(.search-input) {
         margin: 24px 0px 20px;
         display: flex;
         align-items: center;
-
         .el-input__inner {
           border-top: 1px solid #cad6ee;
           border-bottom: none;
@@ -325,30 +308,24 @@ export default defineComponent({
           background-color: #f6fafe;
           padding-left: 55px;
         }
-
         .el-input__prefix {
           display: flex;
           align-items: center;
           margin-left: 18px;
-
           .jm-icon-button-search {
             font-size: 20px;
           }
         }
       }
-
       ::v-deep(.project-group) {
         display: flex;
         flex-direction: column;
-
         .el-form-item__label {
           text-align: left;
         }
-
         .el-form-item__content {
           .el-select {
             width: 50%;
-
             .el-input__suffix {
               .el-icon-arrow-up {
                 &::before {
@@ -366,18 +343,14 @@ export default defineComponent({
           }
         }
       }
-
       .card-wrapper {
         display: flex;
         flex-wrap: wrap;
-
         .card-item {
           position: relative;
           cursor: pointer;
-
           &.active {
             border-color: #096dd9;
-
             .selected {
               display: block;
               width: 20px;
@@ -390,7 +363,6 @@ export default defineComponent({
               top: 0;
             }
           }
-
           box-shadow: 0px 0px 12px 4px #edf1f8;
           box-sizing: border-box;
           border: 1px solid transparent;
@@ -399,11 +371,9 @@ export default defineComponent({
           margin: 0.5% 0.5% 20px;
           min-width: 270px;
           height: 170px;
-
           &:hover {
             border-color: #096dd9;
           }
-
           .project-name {
             max-width: 230px;
             overflow: hidden;
@@ -413,7 +383,6 @@ export default defineComponent({
             font-weight: 500;
             color: #082340;
           }
-
           .project-desc {
             max-width: 230px;
             font-size: 14px;
@@ -421,20 +390,17 @@ export default defineComponent({
             color: #6b7b8d;
             margin-top: 10px;
           }
-
           .selected {
             display: none;
           }
         }
       }
-
       .page {
         display: flex;
         justify-content: flex-end;
         // margin-bottom: 40px;
         ::v-deep(.el-pagination) {
           margin-right: -13px;
-
           .btn-prev,
           .btn-next {
             height: 24px;
@@ -443,18 +409,15 @@ export default defineComponent({
             box-sizing: border-box;
             border: none;
           }
-
           .el-pager {
             height: 24px;
-
             .number {
               border: none;
               min-width: 24px;
               line-height: 24px;
               height: 24px;
-
               &.active {
-                border: 1px solid #096DD9;
+                border: 1px solid#096DD9;
               }
             }
           }
