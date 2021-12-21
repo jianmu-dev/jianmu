@@ -86,7 +86,8 @@ export default defineComponent({
       if(editMode){
         return;
       }
-      editorForm.value.projectGroupId='1';
+      const defaultGroup=projectGroupList.value.find(item=>item.isDefaultGroup);
+      editorForm.value.projectGroupId=defaultGroup!.id;
     });
     const rules = {
       projectGroupId: [
