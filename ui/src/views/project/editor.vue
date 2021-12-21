@@ -83,6 +83,7 @@ export default defineComponent({
     onMounted(async () => {
       // 请求项目组列表
       projectGroupList.value = await listProjectGroup();
+      editorForm.value.projectGroupId='1';
     });
     const rules = {
       projectGroupId: [
