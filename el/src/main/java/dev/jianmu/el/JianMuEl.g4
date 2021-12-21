@@ -41,7 +41,7 @@ BOOL_LITERAL:       'true'
             ;
 STRING_LITERAL:     '"' (~["\\\r\n] | EscapeSequence)* '"';
 NULL_LITERAL:       'null';
-TEMPLATE:           '`' (~[\\\r\n] | EscapeSequence)* '`';
+TEMPLATE:           '`' (~[\\\r] | EscapeSequence)* '`';
 
 // Operators
 

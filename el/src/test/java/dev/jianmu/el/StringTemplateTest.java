@@ -77,4 +77,13 @@ public class StringTemplateTest {
         Object result = El.eval(this.context, eq);
         assertEquals(result, "aaa != 32.3 == ${c}");
     }
+
+    @Test
+    @DisplayName("多行文本测试")
+    void tempTest7() {
+        String eq = "`aaa\nbbb\nbbb\nccc`";
+        Object result = El.eval(this.context, eq);
+        System.out.println(result);
+//        assertEquals(result, "aaa != 32.3 == ${c}");
+    }
 }
