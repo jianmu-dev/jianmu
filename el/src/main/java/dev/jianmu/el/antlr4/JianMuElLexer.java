@@ -2,12 +2,14 @@
 
 package dev.jianmu.el.antlr4;
 
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
-import org.antlr.v4.runtime.atn.LexerATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class JianMuElLexer extends Lexer {
@@ -136,9 +138,9 @@ public class JianMuElLexer extends Lexer {
 		"\n!\3\"\3\"\3#\3#\3$\3$\3$\5$\u00e5\n$\3%\3%\3%\3%\5%\u00eb\n%\2\2&\3"+
 		"\3\5\4\7\5\t\6\13\7\r\b\17\t\21\n\23\13\25\f\27\r\31\16\33\17\35\20\37"+
 		"\21!\22#\23%\24\'\25)\26+\27-\30/\31\61\32\63\33\65\34\67\359\36;\37="+
-		" ?!A\2C\2E\2G\2I\2\3\2\16\6\2\f\f\17\17$$^^\5\2\f\f\17\17^^\5\2\13\f\17"+
-		"\17\"\"\n\2$$))^^ddhhppttvv\3\2\62\65\3\2\629\5\2\62;CHch\3\2\62;\6\2"+
-		"&&C\\aac|\4\2\2\u0081\ud802\udc01\3\2\ud802\udc01\3\2\udc02\ue001\2\u00f9"+
+		" ?!A\2C\2E\2G\2I\2\3\2\16\6\2\f\f\17\17$$^^\4\2\17\17^^\5\2\13\f\17\17"+
+		"\"\"\n\2$$))^^ddhhppttvv\3\2\62\65\3\2\629\5\2\62;CHch\3\2\62;\6\2&&C"+
+		"\\aac|\4\2\2\u0081\ud802\udc01\3\2\ud802\udc01\3\2\udc02\ue001\2\u00f9"+
 		"\2\3\3\2\2\2\2\5\3\2\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13\3\2\2\2\2\r\3\2"+
 		"\2\2\2\17\3\2\2\2\2\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2\2\2\27\3\2\2\2"+
 		"\2\31\3\2\2\2\2\33\3\2\2\2\2\35\3\2\2\2\2\37\3\2\2\2\2!\3\2\2\2\2#\3\2"+
