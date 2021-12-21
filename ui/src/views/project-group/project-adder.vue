@@ -36,7 +36,7 @@
         </jm-select>
       </jm-form-item>
       <div class="selected-list">
-        <div class="title">已选择项目组</div>
+        <div class="title">已选项目</div>
         <div class="selected-list-wrapper">
           <div
             class="selected-item"
@@ -49,7 +49,7 @@
         </div>
       </div>
       <jm-input
-        placeholder="请输入项目名称"
+        placeholder="请输入项目名称或描述"
         type="text"
         class="search-input"
         v-model.trim="keyword"

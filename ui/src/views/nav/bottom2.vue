@@ -22,7 +22,7 @@ export default defineComponent({
   setup() {
     return {
       currentYear: new Date().getFullYear(),
-      icpVisible: import.meta.env.mode === 'cdn',
+      icpVisible: import.meta.env.MODE === 'cdn',
     };
   },
 });
@@ -30,10 +30,9 @@ export default defineComponent({
 
 <style scoped lang="less">
 .bottom-nav {
-  padding-top: 10px;
   width: 100%;
-  height: 50px;
-  font-size: 12px;
+  height: 64px;
+  font-size: 14px;
   font-weight: 400;
   color: #595959;
   text-align: center;
@@ -53,10 +52,11 @@ export default defineComponent({
   }
 
   .mulan {
-    padding-left: 20px;
+    line-height: 24px;
+    padding-left: 30px;
     background-image: url('@/assets/svgs/logo/mulan.svg');
     background-repeat: no-repeat;
-    background-size: 16px 16px;
+    background-size: 24px 24px;
   }
 }
 </style>

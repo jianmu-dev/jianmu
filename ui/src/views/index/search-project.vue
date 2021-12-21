@@ -2,7 +2,7 @@
   <!-- 搜索结果 -->
   <div class="search-project">
     <div class="search">
-      <jm-select v-model="selectValue" @change="selectOption">
+      <jm-select v-model="selectValue" placeholder="请选择项目组" @change="selectOption">
         <jm-option
           v-for="item in groupOptions"
           :key="item.value"
@@ -15,7 +15,7 @@
         <jm-input
           v-model="projectName"
           @change="searchProject"
-          placeholder="请输入项目名称"
+          placeholder="请输入项目名称或描述"
         />
         <i class="jm-icon-button-search"></i>
       </div>
@@ -124,7 +124,7 @@ export default defineComponent({
 // 搜索结果
 .search-project {
   background-color: #fff;
-  min-height: calc(100vh - 290px);
+  min-height: calc(100vh - 300px);
   margin-bottom: 20px;
   .search {
     height: 66px;

@@ -7,5 +7,8 @@ export interface IRootState {
   versions: IVersionVo[];
   workerTypes: string[];
   parameterTypes: string[];
-  fromRouteFullPath?: string;
+  fromRoute: {
+    path: string;
+    fullPath: string;
+  };
 }
