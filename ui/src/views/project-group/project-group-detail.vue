@@ -1,9 +1,7 @@
 <template>
   <div class="project-group-detail">
     <div class="right-top-btn">
-      <router-link :to="{ name: 'index' }">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small">关闭</jm-button>
-      </router-link>
+      <jm-button type="primary" class="jm-icon-button-cancel" size="small" @click="close">关闭</jm-button>
     </div>
     <div class="top-card" v-loading="loadingTop">
       <div class="top-title">
@@ -57,15 +55,12 @@
 <script lang="ts">
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { getProjectGroupDetail } from '@/api/view-no-auth';
-import {
-  defineComponent,
-  ref,
-  onMounted,
-  getCurrentInstance,
-  inject,
-} from 'vue';
+import { defineComponent, getCurrentInstance, inject, onMounted, ref } from 'vue';
 import ProjectAdder from '@/views/project-group/project-adder.vue';
 import ProjectGroup from '@/views/common/project-group.vue';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { IRootState } from '@/model';
 
 export default defineComponent({
   props: {
@@ -80,6 +75,9 @@ export default defineComponent({
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
+    const router = useRouter();
+    const store = useStore();
+    const rootState = store.state as IRootState;
     const isActive = ref<boolean>(false);
     const initialized = ref<boolean>(false);
     const loadingTop = ref<boolean>(false);
@@ -113,6 +111,13 @@ export default defineComponent({
       loadingTop,
       isActive,
       creationActivated,
+      close: () => {
+        if (!['/', '/project-group'].includes(rootState.fromRoute.path)) {
+          router.push({ name: 'index' });
+          return;
+        }
+        router.push(rootState.fromRoute.fullPath);
+      },
       add,
       addCompleted,
       projectGroupDetail,

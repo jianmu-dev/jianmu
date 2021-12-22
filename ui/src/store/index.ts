@@ -2,6 +2,7 @@ import { ActionContext, createStore } from 'vuex';
 import { IRootState } from '@/model';
 import { IVersionVo } from '@/api/dto/common';
 import { fetchVersion } from '@/api/view-no-auth';
+import { RouteLocationNormalized } from 'vue-router';
 
 const store = createStore<IRootState>({
   // 开发环境开启严格模式，在严格模式下，无论何时发生了状态变更且不是由 mutation 函数引起的，将会抛出错误
@@ -11,6 +12,10 @@ const store = createStore<IRootState>({
     versions: [],
     workerTypes: [],
     parameterTypes: [],
+    fromRoute: {
+      path: '/',
+      fullPath: '/',
+    },
   },
   // 根mutation
   mutations: {
@@ -26,8 +31,23 @@ const store = createStore<IRootState>({
       state.parameterTypes = payload;
     },
 
-    mutateFromRouteFullPath(state: IRootState, payload: string): void {
-      state.fromRouteFullPath = payload;
+    mutateFromRoute(state: IRootState, { to, from }: {
+      to: RouteLocationNormalized;
+      from: RouteLocationNormalized;
+    }): void {
+      if (to.path === from.path) {
+        // 忽略重复
+        return;
+      }
+
+      if (from.path === '/login') {
+        // 过滤来源
+        state.fromRoute = { path: '/', fullPath: '/' };
+        return;
+      }
+
+      const { path, fullPath } = from;
+      state.fromRoute = { path, fullPath };
     },
   },
   // 根action
