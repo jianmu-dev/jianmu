@@ -256,6 +256,9 @@ public class ProjectApplication {
         if (project.getDslSource() == Project.DslSource.GIT) {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
         }
+        if (project.getDslText().equals(dslText)) {
+            return;
+        }
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
