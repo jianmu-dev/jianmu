@@ -10,12 +10,18 @@
         @click="previousStep"
       >上一步
       </jm-button>
-
+      <jm-button
+        class="jm-icon-button-preserve"
+        size="small"
+        @click="save(true)"
+        :loading="loading"
+      >保存并返回
+      </jm-button>
       <jm-button
         type="primary"
         class="jm-icon-button-preserve"
         size="small"
-        @click="save"
+        @click="save(false)"
         :loading="loading"
       >保存
       </jm-button>
@@ -83,11 +89,11 @@ export default defineComponent({
     onMounted(async () => {
       // 请求项目组列表
       projectGroupList.value = await listProjectGroup();
-      if(editMode){
+      if (editMode) {
         return;
       }
-      const defaultGroup=projectGroupList.value.find(item=>item.isDefaultGroup);
-      editorForm.value.projectGroupId=defaultGroup!.id;
+      const defaultGroup = projectGroupList.value.find(item => item.isDefaultGroup);
+      editorForm.value.projectGroupId = defaultGroup!.id;
     });
     const rules = {
       projectGroupId: [
@@ -134,6 +140,14 @@ export default defineComponent({
         });
     }
 
+    const close = () => {
+      if (rootState.fromRoute.fullPath.startsWith('/project/editor')) {
+        router.push({ name: 'index' });
+        return;
+      }
+      router.push(rootState.fromRoute.fullPath);
+    };
+
     return {
       projectGroupList,
       form,
@@ -147,7 +161,7 @@ export default defineComponent({
           name: 'process-template',
         });
       },
-      save: () => {
+      save: (returnFlag: boolean) => {
         form.value.validate((valid: boolean) => {
           if (!valid) {
             return false;
@@ -166,9 +180,17 @@ export default defineComponent({
 
               proxy.$success(editMode ? '编辑成功' : '新增成功');
 
+              if (returnFlag) {
+                close();
+
+                return;
+              }
+
               if (!editMode) {
                 await router.push({ name: 'update-project', params: { id } });
                 reloadMain();
+
+                return;
               }
             })
             .catch((err: Error) => {
@@ -179,13 +201,7 @@ export default defineComponent({
             });
         });
       },
-      close: () => {
-        if (rootState.fromRoute.fullPath.startsWith('/project/editor')) {
-          router.push({ name: 'index' });
-          return;
-        }
-        router.push(rootState.fromRoute.fullPath);
-      },
+      close,
     };
   },
 });
