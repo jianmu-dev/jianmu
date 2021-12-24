@@ -256,6 +256,8 @@ public class ProjectApplication {
         if (project.getDslSource() == Project.DslSource.GIT) {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
         }
+        // 修改项目组
+        this.updateProjectGroup(dslId, projectGroupId);
         if (project.getDslText().equals(dslText)) {
             return;
         }
@@ -271,8 +273,6 @@ public class ProjectApplication {
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
-        // 修改项目组
-        this.updateProjectGroup(dslId, projectGroupId);
 
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
