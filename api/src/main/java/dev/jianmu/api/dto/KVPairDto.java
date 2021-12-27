@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 /**
  * @class KVPairDto
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotBlank;
 public class KVPairDto {
     @Schema(required = true)
     @NotBlank(message = "参数Key不能为空")
+    @Pattern(regexp = "^\\w+$", message = "参数Key只能输入由数字、26个英文字母或者下划线组成的字符串")
     private String key;
     @Schema(required = true)
     @NotBlank(message = "参数Value不能为空")
