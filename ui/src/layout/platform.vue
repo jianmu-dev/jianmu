@@ -129,7 +129,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-@main-width: 1600px;
+@main-min-width: 1200px;
+@main-max-width: 1600px;
 
 .platform {
   margin: 0 auto;
@@ -148,7 +149,7 @@ export default defineComponent({
   .container {
     .el-header {
       width: 100%;
-      max-width: @main-width;
+      max-width: @main-max-width;
       margin: 0 auto;
     }
 
@@ -172,7 +173,8 @@ export default defineComponent({
       > .el-scrollbar {
         .main-content {
           width: 100%;
-          max-width: @main-width;
+          min-width: @main-min-width;
+          max-width: @main-max-width;
           margin: 0 auto;
           padding: 0 20px;
           box-sizing: border-box;

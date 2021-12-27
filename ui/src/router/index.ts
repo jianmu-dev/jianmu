@@ -67,9 +67,9 @@ router.beforeEach((to, from, next) => {
   const lastMatched = to.matched[to.matched.length - 1];
 
   if (lastMatched.meta.title) {
-    document.title = `建木 - ${lastMatched.meta.title}`;
+    document.title = `建木CI - ${lastMatched.meta.title}`;
   } else {
-    document.title = '建木';
+    document.title = '建木CI';
   }
 
   const store = _store as any;
