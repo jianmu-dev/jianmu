@@ -22,8 +22,8 @@ import javax.validation.constraints.Pattern;
 @Schema(description = "命名空间Dto")
 public class NamespaceDto {
     @Schema(required = true)
-    @NotBlank(message = "name不能为空")
-    @Pattern(regexp = "^\\w+$", message = "只能输入由数字、26个英文字母或者下划线组成的字符串")
+    @NotBlank(message = "命名空间名称不能为空")
+    @Pattern(regexp = "^\\w+$", message = "命名空间名称只能输入由数字、26个英文字母或者下划线组成的字符串")
     private String name;
     private String description;
 }

@@ -22,10 +22,10 @@ import javax.validation.constraints.Pattern;
 @Schema(description = "键值对Dto")
 public class KVPairDto {
     @Schema(required = true)
-    @NotBlank(message = "参数Key不能为空")
-    @Pattern(regexp = "^\\w+$", message = "参数Key只能输入由数字、26个英文字母或者下划线组成的字符串")
+    @NotBlank(message = "密钥名称不能为空")
+    @Pattern(regexp = "^\\w+$", message = "密钥名称只能输入由数字、26个英文字母或者下划线组成的字符串")
     private String key;
     @Schema(required = true)
-    @NotBlank(message = "参数Value不能为空")
+    @NotBlank(message = "密钥值不能为空")
     private String value;
 }
