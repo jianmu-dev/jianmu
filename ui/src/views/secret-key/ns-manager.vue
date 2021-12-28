@@ -1,10 +1,11 @@
 <template>
-  <router-view v-if="childRoute" />
+  <router-view v-if="childRoute"/>
   <div v-else class="secret-key-ns-manager">
     <div class="right-top-btn">
       <router-link :to="{ name: 'index' }">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-          >关闭</jm-button
+        >关闭
+        </jm-button
         >
       </router-link>
     </div>
@@ -18,29 +19,51 @@
       <span class="desc">（共有 {{ namespaces.length }} 个命名空间）</span>
     </div>
     <div class="content" v-loading="loading">
-      <jm-empty v-if="namespaces.length === 0" />
-      <div v-else class="item" v-for="ns of namespaces" :key="ns.name">
-        <div class="wrapper">
-          <router-link
-            :to="{ name: 'manage-secret-key', params: { namespace: ns.name } }"
-          >
-            <div class="name ellipsis">{{ ns.name }}</div>
-          </router-link>
-          <div class="description">
-            <jm-scrollbar max-height="80px">
-              <span v-html="(ns.description || '无').replace(/\n/g, '<br/>')" />
-            </jm-scrollbar>
+      <jm-empty v-if="namespaces.length === 0"/>
+      <div v-else class="item">
+        <!-- local-item -->
+        <template v-if="credentialManagerType === CredentialManagerTypeEnum.LOCAL">
+          <div class="local-item" v-for="ns of namespaces" :key="ns.name">
+            <div class="wrapper">
+              <router-link
+                :to="{ name: 'manage-secret-key', params: { namespace: ns.name } }"
+              >
+                <div class="name ellipsis">{{ ns.name }}</div>
+              </router-link>
+              <div class="description">
+                <jm-scrollbar max-height="80px">
+                  <span v-html="(ns.description || '无').replace(/\n/g, '<br/>')"/>
+                </jm-scrollbar>
+              </div>
+              <div class="time">
+                最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}
+              </div>
+            </div>
+            <div class="operation">
+              <button
+                :class="{ del: true, doing: deletings[ns.name] }"
+                @click="del(ns.name)"
+              ></button>
+            </div>
           </div>
-          <div class="time">
-            最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}
+        </template>
+        <!-- vault-item-->
+        <template v-else>
+          <div class="vault-item" v-for="ns of namespaces" :key="ns.name">
+            <div class="wrapper">
+              <div class="vault-icon"></div>
+              <router-link :to="{name:'manage-secret-key',params:{namespace:ns.name}}">
+                <div class="vault-name">{{ ns.name }}</div>
+              </router-link>
+            </div>
+            <div class="operation">
+              <button
+                :class="{ del: true, doing: deletings[ns.name] }"
+                @click="del(ns.name)"
+              ></button>
+            </div>
           </div>
-        </div>
-        <div class="operation">
-          <button
-            :class="{ del: true, doing: deletings[ns.name] }"
-            @click="del(ns.name)"
-          ></button>
-        </div>
+        </template>
       </div>
     </div>
     <ns-editor
@@ -73,6 +96,7 @@ import {
 import { deleteNamespace } from '@/api/secret-key';
 import NsEditor from './ns-editor.vue';
 import { datetimeFormatter } from '@/utils/formatter';
+import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
 
 const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 
@@ -113,6 +137,7 @@ export default defineComponent({
     onBeforeRouteUpdate(to => changeView(childRoute, to));
 
     return {
+      CredentialManagerTypeEnum,
       ...toRefs(state),
       childRoute,
       loading,
@@ -162,7 +187,8 @@ export default defineComponent({
                 delete deletings.value[name];
               });
           })
-          .catch(() => {});
+          .catch(() => {
+          });
       },
     };
   },
@@ -234,97 +260,134 @@ export default defineComponent({
   .content {
     display: flex;
     flex-wrap: wrap;
+
     .item {
-      position: relative;
-      margin: 0.5%;
-      width: 19%;
-      min-width: 260px;
-      height: 170px;
-      background-color: #ffffff;
-      box-shadow: 0px 0px 8px 4px #eff4f9;
+      display: flex;
+      flex-wrap: wrap;
 
-      &:hover {
-        box-shadow: 0px 6px 16px 4px #e6eef6;
-        .operation {
-          display: block;
-        }
-      }
-
-      .wrapper {
-        padding: 15px;
-        border: 1px solid transparent;
-        height: 138px;
+      .local-item,
+      .vault-item {
+        position: relative;
+        margin: 0.5%;
+        width: 19%;
+        min-width: 260px;
+        height: 170px;
+        background-color: #ffffff;
+        box-shadow: 0px 0px 8px 4px #eff4f9;
 
         &:hover {
-          border-color: #096dd9;
-        }
+          box-shadow: 0px 6px 16px 4px #e6eef6;
 
-        .name {
-          font-size: 20px;
-          font-weight: bold;
-          color: #082340;
-          &:hover {
-            color: #096dd9;
+          .operation {
+            display: block;
           }
         }
 
-        .description {
-          margin-top: 6px;
+        .wrapper {
+          padding: 15px;
+          border: 1px solid transparent;
+          height: 138px;
+
+          &:hover {
+            border-color: #096dd9;
+          }
+
+          .name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #082340;
+
+            &:hover {
+              color: #096dd9;
+            }
+          }
+
+          .description {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #6b7b8d;
+          }
+
+          .ellipsis {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+
+        .time {
+          position: absolute;
+          left: 15px;
+          bottom: 15px;
           font-size: 13px;
           color: #6b7b8d;
         }
 
-        .ellipsis {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      }
+        .operation {
+          display: none;
+          position: absolute;
+          right: 6px;
+          top: 8px;
 
-      .time {
-        position: absolute;
-        left: 15px;
-        bottom: 15px;
-        font-size: 13px;
-        color: #6b7b8d;
-      }
-
-      .operation {
-        display: none;
-        position: absolute;
-        right: 6px;
-        top: 8px;
-
-        button {
-          width: 22px;
-          height: 22px;
-          background-color: #ffffff;
-          border: 0;
-          background-position: center center;
-          background-repeat: no-repeat;
-          background-size: contain;
-          cursor: pointer;
-
-          &:active {
-            background-color: #eff7ff;
-            border-radius: 4px;
-          }
-
-          &.del {
-            background-image: url('@/assets/svgs/btn/del.svg');
-          }
-
-          &.doing {
-            opacity: 0.5;
-            cursor: not-allowed;
+          button {
+            width: 22px;
+            height: 22px;
+            background-color: #ffffff;
+            border: 0;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            cursor: pointer;
 
             &:active {
-              background-color: transparent;
+              background-color: #eff7ff;
+              border-radius: 4px;
+            }
+
+            &.del {
+              background-image: url('@/assets/svgs/btn/del.svg');
+            }
+
+            &.doing {
+              opacity: 0.5;
+              cursor: not-allowed;
+
+              &:active {
+                background-color: transparent;
+              }
             }
           }
         }
       }
+
+      .vault-item {
+        .wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          .vault-icon {
+            width: 64px;
+            height: 64px;
+            margin: 20px 0px;
+            background: url('@/assets/svgs/secret-key/key-title-icon.svg');
+          }
+
+          .vault-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #082340;
+            cursor: pointer;
+
+            &:hover {
+              color: #096dd9;
+            }
+          }
+        }
+
+      }
     }
+
   }
 }
 </style>
