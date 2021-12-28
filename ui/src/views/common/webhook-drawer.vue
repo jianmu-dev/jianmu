@@ -9,6 +9,8 @@
       destroy-on-close
     >
       <div class="webhook-drawer">
+        <!-- 项目名称 -->
+        <div class="project-name">{{currentProject}}</div>
         <div class="webhook-link-container">
           <div class="link-tips">可以通过调用以下Webhook地址来触发流程执行</div>
           <div class="link-container">
@@ -196,6 +198,9 @@ export default defineComponent({
     currentProjectId: {
       type: String,
     },
+    currentProjectName:{
+      type:String,
+    },
   },
   emits: ['update:webhookVisible'],
   setup(props, { emit }) {
@@ -245,6 +250,8 @@ export default defineComponent({
         webhook.value &&
         `${window.location.protocol}//${window.location.host}${webhook.value}`,
     );
+    // 当前webhook的项目名
+    const currentProject = ref<string>(props.currentProjectName);
     // 请求参数
     const webhookRequestParams = ref<{
       pageNum: number;
@@ -330,6 +337,8 @@ export default defineComponent({
       drawerVisible.value = props.webhookVisible;
       // 更改projectId
       webhookRequestParams.value.projectId = props.currentProjectId as string;
+      // 打开抽屉时重新赋值项目名
+      currentProject.value = props.currentProjectName;
       // 进入抽屉显示loading
       tableLoading.value = true;
       // 打开抽屉时什么状态都没有
@@ -491,6 +500,8 @@ export default defineComponent({
       secretVisible,
       hideSecret: () => (secretVisible.value = false),
       displaySecret: () => (secretVisible.value = true),
+      // 当前项目名
+      currentProject,
     };
   },
 });
@@ -524,6 +535,12 @@ export default defineComponent({
     background: #eff4f9;
     box-sizing: border-box;
     padding: 20px 25px 0 25px;
+    // 项目名称
+    .project-name{
+      margin-bottom:20px;
+      font-size:16px;
+      color:#082340;
+    }
     // webhook地址
     .webhook-link-container {
       height: 125px;
@@ -580,11 +597,11 @@ export default defineComponent({
         color: #082340;
       }
       ::v-deep(.el-scrollbar__wrap) {
-        max-height: calc(100vh - 254px);
+        max-height: calc(100vh - 380px);
       }
       .table-content {
         overflow-y: auto;
-        border-radius: 4px;
+        border-radius: 4px 4px 0 0;
         border: 1px solid #ecedf4;
         ::v-deep(.el-table) {
           background: #fff;
