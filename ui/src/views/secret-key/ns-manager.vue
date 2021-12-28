@@ -51,7 +51,9 @@
         <template v-else>
           <div class="vault-item" v-for="ns of namespaces" :key="ns.name">
             <div class="wrapper">
-              <div class="vault-icon"></div>
+              <router-link :to="{name:'manage-secret-key',params:{namespace:ns.name}}">
+                <div class="vault-icon"></div>
+              </router-link>
               <router-link :to="{name:'manage-secret-key',params:{namespace:ns.name}}">
                 <div class="vault-name">{{ ns.name }}</div>
               </router-link>

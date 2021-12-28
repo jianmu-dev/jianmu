@@ -30,7 +30,7 @@
         }"
       >
         <jm-tooltip :content="project.name" placement="top">
-          <div class="title ellipsis">{{ project.name }}</div>
+          <div class="title ellipsis">{{ project.name}}</div>
         </jm-tooltip>
       </router-link>
       <div class="time">
@@ -205,6 +205,7 @@
     </div>
     <webhook-drawer
       :current-project-id="project.id"
+      :current-project-name="project.name"
       v-model:webhookVisible="webhookDrawerFlag"
     ></webhook-drawer>
     <dsl-dialog
