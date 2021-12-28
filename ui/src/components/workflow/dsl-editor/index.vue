@@ -14,6 +14,7 @@ import { defineComponent, getCurrentInstance, onBeforeUpdate, onMounted, ref } f
 import useClipboard from 'vue-clipboard3';
 // 引入全局实例
 import CodeMirror from 'codemirror';
+import { Comment } from './model/shortcut';
 
 // 核心样式
 import 'codemirror/lib/codemirror.css';
@@ -27,6 +28,12 @@ import 'codemirror/mode/yaml/yaml.js';
 
 // 尝试获取全局实例
 const codemirror = window.CodeMirror || CodeMirror;
+
+/**
+ * 注释快捷键
+ * @param cm
+ */
+codemirror.commands[Comment.name] = Comment.command;
 
 /**
  * 初始化
@@ -49,6 +56,11 @@ function initialize(textarea, readonly, onChange) {
     lineNumbers: true,
     // 是否只读
     readOnly: readonly,
+    // 快捷键
+    extraKeys: {
+      // 注释
+      [Comment.shortcut]: Comment.name,
+    },
   });
 
   if (!readonly) {
