@@ -3,13 +3,17 @@
     <div class="right-top-btn">
       <router-link :to="{ name: 'secret-key' }">
         <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-          >关闭</jm-button
+        >关闭
+        </jm-button
         >
       </router-link>
     </div>
     <div class="namespace">
-      <div class="name">{{ ns }}</div>
-      <div class="desc" v-html="description"></div>
+      <div class="key-title-icon"></div>
+      <div class="info">
+        <div class="name">{{ ns }}</div>
+        <div class="desc" v-html="description"></div>
+      </div>
     </div>
     <div class="keys">
       <div class="title">
@@ -22,7 +26,7 @@
         </button>
       </div>
       <div class="content" v-loading="loading">
-        <jm-empty v-if="keys.length === 0" />
+        <jm-empty v-if="keys.length === 0"/>
         <div v-else class="item" v-for="{ id, name } of keys" :key="id">
           <div class="wrapper">
             <div class="name ellipsis">{{ name }}</div>
@@ -143,7 +147,8 @@ export default defineComponent({
                 delete deletings.value[name];
               });
           })
-          .catch(() => {});
+          .catch(() => {
+          });
       },
     };
   },
@@ -168,24 +173,32 @@ export default defineComponent({
 
   .namespace {
     margin-bottom: 20px;
-    padding: 25px 0 25px 115px;
+    padding: 30px 0 30px 30px;
     min-height: 64px;
     background-color: #ffffff;
     box-shadow: 0 0 8px 0 #9eb1c5;
-    background-image: url('@/assets/svgs/secret-key/key-icon.svg');
-    background-repeat: no-repeat;
-    background-position: 25px 25px;
+    display: flex;
+    align-items: center;
 
-    .name {
-      font-size: 24px;
-      font-weight: bold;
-      color: #082340;
-      margin-bottom: 5px;
+    .key-title-icon {
+      width: 64px;
+      height: 64px;
+      background: url('@/assets/svgs/secret-key/key-title-icon.svg');
+      margin-right: 15px;
     }
 
-    .desc {
-      font-size: 14px;
-      color: #6b7b8d;
+    .info {
+      .name {
+        font-size: 24px;
+        font-weight: bold;
+        color: #082340;
+        margin-bottom: 5px;
+      }
+
+      .desc {
+        font-size: 14px;
+        color: #6b7b8d;
+      }
     }
   }
 
