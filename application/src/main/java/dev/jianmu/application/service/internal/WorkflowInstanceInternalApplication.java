@@ -183,7 +183,7 @@ public class WorkflowInstanceInternalApplication {
 
     // 节点启动，重做
     @Transactional
-    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 999, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public WorkflowInstance activateNode(String instanceId, String nodeRef) {
         WorkflowInstance instance = this.workflowInstanceRepository
                 .findById(instanceId)
@@ -244,7 +244,7 @@ public class WorkflowInstanceInternalApplication {
 
     // 任务已启动命令
     @Transactional
-    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 999, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskRun(String taskInstanceId) {
         // TODO 这里可以通过优化传入参数减少查询
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
@@ -264,7 +264,7 @@ public class WorkflowInstanceInternalApplication {
 
     // 任务已中止命令
     @Transactional
-    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 999, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskFail(String taskInstanceId) {
         // TODO 这里可以通过优化传入参数减少查询
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
@@ -278,7 +278,7 @@ public class WorkflowInstanceInternalApplication {
 
     // 任务已成功命令
     @Transactional
-    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 5, backoff = @Backoff(delay = 3000L, multiplier = 2))
+    @Retryable(value = DBException.OptimisticLocking.class, maxAttempts = 999, backoff = @Backoff(delay = 3000L, multiplier = 2))
     public void taskSucceed(String taskInstanceId) {
         // TODO 这里可以通过优化传入参数减少查询
         var taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
