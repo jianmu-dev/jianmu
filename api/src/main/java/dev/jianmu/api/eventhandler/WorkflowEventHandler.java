@@ -1,12 +1,14 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
-import dev.jianmu.application.service.internal.WorkerApplication;
+import dev.jianmu.application.command.ActivateNodeCmd;
+import dev.jianmu.application.command.AsyncTaskActivatingCmd;
+import dev.jianmu.application.command.SkipNodeCmd;
+import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
-import dev.jianmu.workflow.aggregate.AggregateRoot;
-import dev.jianmu.workflow.event.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.jianmu.application.service.internal.WorkflowInternalApplication;
+import dev.jianmu.workflow.aggregate.definition.Workflow;
+import dev.jianmu.workflow.event.definition.*;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -17,123 +19,95 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @author Ethan Liu
- * @class WorkflowEventHandler
- * @description 流程事件处理器
- * @create 2021-03-24 14:18
+ * @class AsyncTaskInstanceEventHandler
+ * @description AsyncTaskInstanceEventHandler
+ * @create 2022-01-01 10:45
  */
 @Component
+@Slf4j
 public class WorkflowEventHandler {
-    private static final Logger logger = LoggerFactory.getLogger(WorkflowEventHandler.class);
-
+    private final WorkflowInternalApplication workflowInternalApplication;
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
-    private final TaskInstanceInternalApplication taskInstanceInternalApplication;
-    private final WorkerApplication workerApplication;
+    private final AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication;
     private final ApplicationEventPublisher publisher;
 
     public WorkflowEventHandler(
+            WorkflowInternalApplication workflowInternalApplication,
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
-            TaskInstanceInternalApplication taskInstanceInternalApplication,
-            WorkerApplication workerApplication,
+            AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
             ApplicationEventPublisher publisher
     ) {
+        this.workflowInternalApplication = workflowInternalApplication;
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
-        this.taskInstanceInternalApplication = taskInstanceInternalApplication;
-        this.workerApplication = workerApplication;
+        this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
         this.publisher = publisher;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleAggregateRootEvents(AggregateRoot aggregateRoot) {
-        logger.info("Get AggregateRoot here -------------------------");
-        aggregateRoot.getUncommittedDomainEvents().forEach(event -> {
-            logger.info("publish {} here", event.getClass().getSimpleName());
+    public void handleProcessEvents(Workflow workflow) {
+        log.info("Get Workflow Events here -------------------------");
+        workflow.getUncommittedDomainEvents().forEach(event -> {
+            log.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
-        logger.info("-----------------------------------------------------");
-    }
-
-    @Async
-    @EventListener
-    public void handleTaskActivatingEvent(TaskActivatingEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get TaskActivatingEvent here -------------------------");
-        logger.info(event.toString());
-        this.taskInstanceInternalApplication.create(event);
-        logger.info("-----------------------------------------------------");
-    }
-
-    @Async
-    @EventListener
-    public void handleTaskTerminatingEvent(TaskTerminatingEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get TaskTerminatingEvent here -------------------------");
-        logger.info(event.toString());
-        this.workerApplication.terminateTask(event.getExternalId());
-        logger.info("-----------------------------------------------------");
-    }
-
-    @EventListener
-    public void handleTaskRunningEvent(TaskRunningEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get TaskRunningEvent here -------------------------");
-        logger.info(event.toString());
-        logger.info("-----------------------------------------------------");
-    }
-
-    @EventListener
-    public void handleTaskSucceededEvent(TaskSucceededEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get TaskSucceededEvent here -------------------------");
-        logger.info(event.toString());
-        logger.info("-----------------------------------------------------");
-    }
-
-    @EventListener
-    public void handleTaskFailedEvent(TaskFailedEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get TaskFailedEvent here -------------------------");
-        logger.info(event.toString());
-        this.workflowInstanceInternalApplication.stop(event.getWorkflowInstanceId());
-        this.workerApplication.cleanupWorkspace(event.getTriggerId());
-        logger.info("-----------------------------------------------------");
-    }
-
-    @Async
-    @EventListener
-    public void handleNodeActivatingEvent(NodeActivatingEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get NodeActivatingEvent here -------------------------");
-        logger.info(event.toString());
-        this.workflowInstanceInternalApplication.activateNode(event.getWorkflowInstanceId(), event.getNodeRef());
-        logger.info("handle NodeActivatingEvent end-----------------------------------------------------");
-    }
-
-    @Async
-    @EventListener
-    public void handleNodeSkipEvent(NodeSkipEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get NodeSkipEvent here -------------------------");
-        logger.info(event.toString());
-        this.workflowInstanceInternalApplication.skipNode(event.getWorkflowInstanceId(), event.getNodeRef());
-        logger.info("handle NodeSkipEvent end-----------------------------------------------------");
+        log.info("-----------------------------------------------------");
     }
 
     @EventListener
     public void handleWorkflowStartEvent(WorkflowStartEvent event) {
         MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get WorkflowStartEvent here -------------------------");
-        logger.info(event.toString());
-        this.workerApplication.createWorkspace(event.getTriggerId());
-        logger.info("-----------------------------------------------------");
+        log.info("Get WorkflowStartEvent here -------------------------");
+        log.info(event.toString());
+        log.info("-----------------------------------------------------");
     }
 
-    @Async
+    @EventListener
+    public void handleNodeActivatingEvent(NodeActivatingEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get NodeActivatingEvent here -------------------------");
+        log.info(event.toString());
+        var cmd = ActivateNodeCmd.builder()
+                .triggerId(event.getTriggerId())
+                .workflowRef(event.getWorkflowRef())
+                .workflowVersion(event.getWorkflowVersion())
+                .nodeRef(event.getNodeRef())
+                .build();
+        this.workflowInternalApplication.activateNode(cmd);
+        log.info("handle NodeActivatingEvent end-----------------------------------------------------");
+    }
+
+    @EventListener
+    public void handleAsyncTaskActivatingEvent(AsyncTaskActivatingEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get AsyncTaskActivatingEvent here -------------------------");
+        log.info(event.toString());
+        var cmd = AsyncTaskActivatingCmd.builder()
+                .build();
+        this.asyncTaskInstanceInternalApplication.create(cmd);
+        log.info("handle AsyncTaskActivatingEvent end-----------------------------------------------------");
+    }
+
+    @EventListener
+    public void handleNodeSkipEvent(NodeSkipEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get NodeSkipEvent here -------------------------");
+        log.info(event.toString());
+        var cmd = SkipNodeCmd.builder()
+                .triggerId(event.getTriggerId())
+                .workflowRef(event.getWorkflowRef())
+                .workflowVersion(event.getWorkflowVersion())
+                .nodeRef(event.getNodeRef())
+                .build();
+        this.workflowInternalApplication.skipNode(cmd);
+        log.info("handle NodeSkipEvent end-----------------------------------------------------");
+    }
+
     @EventListener
     public void handleWorkflowEndEvent(WorkflowEndEvent event) {
         MDC.put("triggerId", event.getTriggerId());
-        logger.info("Get WorkflowEndEvent here -------------------------");
-        logger.info(event.toString());
-        this.workerApplication.cleanupWorkspace(event.getTriggerId());
-        logger.info("-----------------------------------------------------");
+        log.info("Get WorkflowEndEvent here -------------------------");
+        log.info(event.toString());
+        this.workflowInstanceInternalApplication.end(event.getTriggerId());
+        log.info("-----------------------------------------------------");
     }
 }

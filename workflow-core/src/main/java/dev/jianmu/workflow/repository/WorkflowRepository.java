@@ -17,4 +17,6 @@ public interface WorkflowRepository {
     void deleteByRefAndVersion(String ref, String version);
 
     void deleteByRef(String ref);
+
+    void commitEvents(Workflow workflow);
 }

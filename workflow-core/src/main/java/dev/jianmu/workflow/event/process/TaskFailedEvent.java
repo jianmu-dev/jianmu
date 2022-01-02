@@ -1,15 +1,15 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.process;
 
 /**
- * @class NodeActivatingEvent
- * @description 节点激活事件
  * @author Ethan Liu
- * @create 2021-03-17 13:53
-*/
-public class NodeActivatingEvent extends BaseEvent {
-    private NodeActivatingEvent() {
-    }
+ * @program: workflow
+ * @description 任务执行失败事件
+ * @create 2021-01-23 21:30
+ */
+public class TaskFailedEvent extends AsyncTaskInstanceEvent {
 
+    private TaskFailedEvent() {
+    }
 
     public static final class Builder {
         // 流程定义唯一引用名称
@@ -20,6 +20,8 @@ public class NodeActivatingEvent extends BaseEvent {
         protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
+        // 异步任务实例ID
+        protected String asyncTaskInstanceId;
         // 节点唯一引用名称
         protected String nodeRef;
         // 节点类型
@@ -28,7 +30,7 @@ public class NodeActivatingEvent extends BaseEvent {
         private Builder() {
         }
 
-        public static Builder aNodeActivatingEvent() {
+        public static Builder aTaskFailedEvent() {
             return new Builder();
         }
 
@@ -52,6 +54,11 @@ public class NodeActivatingEvent extends BaseEvent {
             return this;
         }
 
+        public Builder asyncTaskInstanceId(String asyncTaskInstanceId) {
+            this.asyncTaskInstanceId = asyncTaskInstanceId;
+            return this;
+        }
+
         public Builder nodeRef(String nodeRef) {
             this.nodeRef = nodeRef;
             return this;
@@ -62,15 +69,16 @@ public class NodeActivatingEvent extends BaseEvent {
             return this;
         }
 
-        public NodeActivatingEvent build() {
-            NodeActivatingEvent nodeActivatingEvent = new NodeActivatingEvent();
-            nodeActivatingEvent.triggerId = this.triggerId;
-            nodeActivatingEvent.workflowRef = this.workflowRef;
-            nodeActivatingEvent.workflowVersion = this.workflowVersion;
-            nodeActivatingEvent.workflowInstanceId = this.workflowInstanceId;
-            nodeActivatingEvent.nodeRef = this.nodeRef;
-            nodeActivatingEvent.nodeType = this.nodeType;
-            return nodeActivatingEvent;
+        public TaskFailedEvent build() {
+            TaskFailedEvent taskFailedEvent = new TaskFailedEvent();
+            taskFailedEvent.triggerId = this.triggerId;
+            taskFailedEvent.workflowInstanceId = this.workflowInstanceId;
+            taskFailedEvent.asyncTaskInstanceId = this.asyncTaskInstanceId;
+            taskFailedEvent.workflowRef = this.workflowRef;
+            taskFailedEvent.workflowVersion = this.workflowVersion;
+            taskFailedEvent.nodeRef = this.nodeRef;
+            taskFailedEvent.nodeType = this.nodeType;
+            return taskFailedEvent;
         }
     }
 }

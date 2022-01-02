@@ -19,8 +19,6 @@ import java.util.Optional;
 */
 @Service
 public class TaskInstanceApplication {
-    private static final Logger logger = LoggerFactory.getLogger(TaskInstanceApplication.class);
-
     private final TaskInstanceRepository taskInstanceRepository;
     private final InstanceParameterRepository instanceParameterRepository;
 
@@ -36,9 +34,9 @@ public class TaskInstanceApplication {
         return this.instanceParameterRepository.findByInstanceId(instanceId);
     }
 
-    public List<TaskInstance> findByBusinessId(String businessId) {
-        return this.taskInstanceRepository.findByBusinessId(businessId);
-    }
+//    public List<TaskInstance> findByBusinessId(String businessId) {
+//        return this.taskInstanceRepository.findByBusinessId(businessId);
+//    }
 
     public Optional<TaskInstance> findById(String instanceId) {
         return this.taskInstanceRepository.findById(instanceId);

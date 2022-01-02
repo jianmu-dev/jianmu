@@ -1,12 +1,12 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.process;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description 任务中止事件
- * @author Ethan Liu
  * @create 2021-01-21 20:48
-*/
-public class TaskTerminatingEvent extends BaseEvent {
+ */
+public class TaskTerminatingEvent extends AsyncTaskInstanceEvent {
     private TaskTerminatingEvent() {
     }
 
@@ -19,12 +19,12 @@ public class TaskTerminatingEvent extends BaseEvent {
         protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
+        // 异步任务实例ID
+        protected String asyncTaskInstanceId;
         // 节点唯一引用名称
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
-        // 任务外部ID
-        protected String externalId;
 
         private Builder() {
         }
@@ -53,6 +53,11 @@ public class TaskTerminatingEvent extends BaseEvent {
             return this;
         }
 
+        public Builder asyncTaskInstanceId(String asyncTaskInstanceId) {
+            this.asyncTaskInstanceId = asyncTaskInstanceId;
+            return this;
+        }
+
         public Builder nodeRef(String nodeRef) {
             this.nodeRef = nodeRef;
             return this;
@@ -63,20 +68,15 @@ public class TaskTerminatingEvent extends BaseEvent {
             return this;
         }
 
-        public Builder externalId(String externalId) {
-            this.externalId = externalId;
-            return this;
-        }
-
         public TaskTerminatingEvent build() {
             TaskTerminatingEvent taskTerminatingEvent = new TaskTerminatingEvent();
-            taskTerminatingEvent.workflowVersion = this.workflowVersion;
             taskTerminatingEvent.workflowInstanceId = this.workflowInstanceId;
-            taskTerminatingEvent.nodeType = this.nodeType;
             taskTerminatingEvent.triggerId = this.triggerId;
+            taskTerminatingEvent.asyncTaskInstanceId = this.asyncTaskInstanceId;
             taskTerminatingEvent.workflowRef = this.workflowRef;
+            taskTerminatingEvent.workflowVersion = this.workflowVersion;
+            taskTerminatingEvent.nodeType = this.nodeType;
             taskTerminatingEvent.nodeRef = this.nodeRef;
-            taskTerminatingEvent.externalId = this.externalId;
             return taskTerminatingEvent;
         }
     }

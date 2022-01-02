@@ -1,12 +1,12 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.definition;
 
 /**
+ * @author Ethan Liu
  * @class WorkflowEndEvent
  * @description 流程结束事件
- * @author Ethan Liu
  * @create 2021-03-19 08:43
-*/
-public class WorkflowEndEvent extends BaseEvent {
+ */
+public class WorkflowEndEvent extends DefinitionEvent {
     private WorkflowEndEvent() {
     }
 
@@ -15,8 +15,6 @@ public class WorkflowEndEvent extends BaseEvent {
         protected String workflowRef;
         // 流程定义版本
         protected String workflowVersion;
-        // 流程实例ID
-        protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
         // 节点唯一引用名称
@@ -39,11 +37,6 @@ public class WorkflowEndEvent extends BaseEvent {
             return this;
         }
 
-        public Builder workflowInstanceId(String workflowInstanceId) {
-            this.workflowInstanceId = workflowInstanceId;
-            return this;
-        }
-
         public Builder triggerId(String triggerId) {
             this.triggerId = triggerId;
             return this;
@@ -58,7 +51,6 @@ public class WorkflowEndEvent extends BaseEvent {
             WorkflowEndEvent workflowEndEvent = new WorkflowEndEvent();
             workflowEndEvent.workflowRef = this.workflowRef;
             workflowEndEvent.nodeRef = this.nodeRef;
-            workflowEndEvent.workflowInstanceId = this.workflowInstanceId;
             workflowEndEvent.triggerId = this.triggerId;
             workflowEndEvent.workflowVersion = this.workflowVersion;
             return workflowEndEvent;

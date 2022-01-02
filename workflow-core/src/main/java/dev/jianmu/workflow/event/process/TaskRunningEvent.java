@@ -1,12 +1,12 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.process;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description 任务开始执行事件
- * @author Ethan Liu
  * @create 2021-01-23 20:09
-*/
-public class TaskRunningEvent extends BaseEvent {
+ */
+public class TaskRunningEvent extends AsyncTaskInstanceEvent {
 
     private TaskRunningEvent() {
     }
@@ -20,12 +20,12 @@ public class TaskRunningEvent extends BaseEvent {
         protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
+        // 异步任务实例ID
+        protected String asyncTaskInstanceId;
         // 节点唯一引用名称
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
-        // 任务外部ID
-        protected String externalId;
 
         private Builder() {
         }
@@ -54,6 +54,11 @@ public class TaskRunningEvent extends BaseEvent {
             return this;
         }
 
+        public Builder asyncTaskInstanceId(String asyncTaskInstanceId) {
+            this.asyncTaskInstanceId = asyncTaskInstanceId;
+            return this;
+        }
+
         public Builder nodeRef(String nodeRef) {
             this.nodeRef = nodeRef;
             return this;
@@ -64,20 +69,15 @@ public class TaskRunningEvent extends BaseEvent {
             return this;
         }
 
-        public Builder externalId(String externalId) {
-            this.externalId = externalId;
-            return this;
-        }
-
         public TaskRunningEvent build() {
             TaskRunningEvent taskRunningEvent = new TaskRunningEvent();
-            taskRunningEvent.workflowVersion = this.workflowVersion;
             taskRunningEvent.workflowInstanceId = this.workflowInstanceId;
-            taskRunningEvent.nodeType = this.nodeType;
+            taskRunningEvent.asyncTaskInstanceId = this.asyncTaskInstanceId;
             taskRunningEvent.triggerId = this.triggerId;
             taskRunningEvent.workflowRef = this.workflowRef;
+            taskRunningEvent.workflowVersion = this.workflowVersion;
             taskRunningEvent.nodeRef = this.nodeRef;
-            taskRunningEvent.externalId = this.externalId;
+            taskRunningEvent.nodeType = this.nodeType;
             return taskRunningEvent;
         }
     }
