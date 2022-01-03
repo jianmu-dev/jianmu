@@ -45,6 +45,18 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findById(String instanceId);
 
+    @Select("select * from workflow_instance where trigger_id = #{triggerId}")
+    @Result(column = "task_instances", property = "asyncTaskInstances", typeHandler = TaskInstanceListTypeHandler.class)
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    Optional<WorkflowInstance> findByTriggerId(String triggerId);
+
     @Insert("insert into workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, task_instances, start_time, end_time, _version) " +
             "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
             "#{wk.asyncTaskInstances, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.TaskInstanceListTypeHandler}," +

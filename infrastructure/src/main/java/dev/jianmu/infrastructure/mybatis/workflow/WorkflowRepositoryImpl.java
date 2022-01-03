@@ -4,6 +4,7 @@ import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowMapper;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.repository.WorkflowRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -21,6 +22,8 @@ public class WorkflowRepositoryImpl implements WorkflowRepository {
 
     @Resource
     private WorkflowMapper workflowMapper;
+    @Resource
+    private ApplicationEventPublisher publisher;
 
     @Override
     public Optional<Workflow> findByRefAndVersion(String ref, String version) {
@@ -53,5 +56,10 @@ public class WorkflowRepositoryImpl implements WorkflowRepository {
     @Override
     public void deleteByRef(String ref) {
         this.workflowMapper.deleteByRef(ref);
+    }
+
+    @Override
+    public void commitEvents(Workflow workflow) {
+        this.publisher.publishEvent(workflow);
     }
 }

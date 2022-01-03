@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class WorkflowInstanceRepositoryImpl
  * @description 流程实例仓储实现类
- * @author Ethan Liu
  * @create 2021-03-18 08:38
-*/
+ */
 @Repository
 public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepository {
 
@@ -40,6 +40,11 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     @Override
     public Optional<WorkflowInstance> findById(String instanceId) {
         return this.workflowInstanceMapper.findById(instanceId);
+    }
+
+    @Override
+    public Optional<WorkflowInstance> findByTriggerId(String triggerId) {
+        return this.workflowInstanceMapper.findByTriggerId(triggerId);
     }
 
     @Override
