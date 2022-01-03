@@ -52,7 +52,7 @@ public class AsyncTaskInstanceInternalApplication {
                 .asyncTaskType(cmd.getAsyncTaskType())
                 .build();
         asyncTaskInstance.activating();
-        this.asyncTaskInstanceRepository.save(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.add(asyncTaskInstance);
     }
 
     // 发布全部任务终止事件
@@ -66,7 +66,7 @@ public class AsyncTaskInstanceInternalApplication {
                     asyncTaskInstance.terminate();
                     log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
                 });
-        this.asyncTaskInstanceRepository.save(asyncTaskInstances);
+        this.asyncTaskInstanceRepository.updateAll(asyncTaskInstances);
     }
 
     // 任务已启动命令
@@ -75,7 +75,7 @@ public class AsyncTaskInstanceInternalApplication {
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到要启动的任务"));
         asyncTaskInstance.run();
-        this.asyncTaskInstanceRepository.save(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
     }
 
     // 任务已失败命令
@@ -84,7 +84,7 @@ public class AsyncTaskInstanceInternalApplication {
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到要失败的任务"));
         asyncTaskInstance.fail();
-        this.asyncTaskInstanceRepository.save(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
     }
 
     // 任务已成功命令
@@ -93,6 +93,6 @@ public class AsyncTaskInstanceInternalApplication {
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到要成功的任务"));
         asyncTaskInstance.succeed();
-        this.asyncTaskInstanceRepository.save(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
     }
 }

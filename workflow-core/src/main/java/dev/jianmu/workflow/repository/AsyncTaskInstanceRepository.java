@@ -18,9 +18,9 @@ public interface AsyncTaskInstanceRepository {
 
     List<AsyncTaskInstance> findByTriggerId(String triggerId);
 
-    List<AsyncTaskInstance> findAll();
+    void add(AsyncTaskInstance asyncTaskInstance);
 
-    void save(AsyncTaskInstance asyncTaskInstance);
+    void updateById(AsyncTaskInstance asyncTaskInstance);
 
-    void save(List<AsyncTaskInstance> asyncTaskInstances);
+    void updateAll(List<AsyncTaskInstance> asyncTaskInstances);
 }
