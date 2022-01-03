@@ -47,6 +47,9 @@ public class WorkflowInstance extends AggregateRoot {
 
     // 启动流程实例
     public void start() {
+        if (this.status == ProcessStatus.FINISHED || this.status == ProcessStatus.TERMINATED) {
+            throw new RuntimeException("流程实例已终止或结束，无法启动");
+        }
         this.status = ProcessStatus.RUNNING;
         this.startTime = LocalDateTime.now();
         // 发布流程实例开始运行事件
@@ -60,6 +63,9 @@ public class WorkflowInstance extends AggregateRoot {
 
     // 终止流程实例
     public void terminate() {
+        if (this.status == ProcessStatus.FINISHED) {
+            throw new RuntimeException("流程实例已结束，无法终止");
+        }
         this.status = ProcessStatus.TERMINATED;
         this.endTime = LocalDateTime.now();
         var processTerminatedEvent = ProcessTerminatedEvent.Builder.aProcessTerminatedEvent()
@@ -73,6 +79,9 @@ public class WorkflowInstance extends AggregateRoot {
 
     // 结束流程实例
     public void end() {
+        if (this.status == ProcessStatus.TERMINATED) {
+            throw new RuntimeException("流程实例已终止，无法结束");
+        }
         this.status = ProcessStatus.FINISHED;
         this.endTime = LocalDateTime.now();
         // 发布流程实例结束事件
