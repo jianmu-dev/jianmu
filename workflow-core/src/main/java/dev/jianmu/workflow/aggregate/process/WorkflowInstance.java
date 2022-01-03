@@ -62,10 +62,11 @@ public class WorkflowInstance extends AggregateRoot {
     public void terminate() {
         this.status = ProcessStatus.TERMINATED;
         this.endTime = LocalDateTime.now();
-        var processTerminatedEvent= ProcessTerminatedEvent.Builder.aProcessTerminatedEvent()
+        var processTerminatedEvent = ProcessTerminatedEvent.Builder.aProcessTerminatedEvent()
                 .triggerId(triggerId)
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processTerminatedEvent);
     }

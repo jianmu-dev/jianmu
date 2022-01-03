@@ -70,6 +70,7 @@ public class WorkflowInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleProcessTerminatedEvent(ProcessTerminatedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
