@@ -21,7 +21,6 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -127,6 +126,19 @@ public class WorkflowInternalApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        workflow.next(cmd.getTriggerId(), cmd.getNodeRef());
+        this.workflowRepository.commitEvents(workflow);
+    }
+
+    // 节点启动
+    public void activateNode(ActivateNodeCmd cmd) {
+        Workflow workflow = this.workflowRepository
+                .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        EvaluationContext context = this.findContext(workflow, cmd.getTriggerId());
+        workflow.setExpressionLanguage(this.expressionLanguage);
+        workflow.setContext(context);
+        // 激活节点
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
         // 返回当前节点上游Task的ref List
         List<String> refList = workflow.findTasks(cmd.getNodeRef());
@@ -143,19 +155,6 @@ public class WorkflowInternalApplication {
             log.info("当前节点{}上游任务执行完成数量{}小于上游任务总数{}", cmd.getNodeRef(), completed, refList.size());
             return;
         }
-        workflow.next(cmd.getTriggerId(), cmd.getNodeRef());
-        this.workflowRepository.commitEvents(workflow);
-    }
-
-    // 节点启动
-    public void activateNode(ActivateNodeCmd cmd) {
-        Workflow workflow = this.workflowRepository
-                .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        EvaluationContext context = this.findContext(workflow, cmd.getTriggerId());
-        workflow.setExpressionLanguage(this.expressionLanguage);
-        workflow.setContext(context);
-        // 激活节点
         log.info("activateNode: " + cmd.getNodeRef());
         workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
         this.workflowRepository.commitEvents(workflow);
