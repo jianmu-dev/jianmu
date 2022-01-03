@@ -14,8 +14,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @author Ethan Liu
@@ -43,7 +41,7 @@ public class WorkflowEventHandler {
         this.publisher = publisher;
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleProcessEvents(Workflow workflow) {
         log.info("Get Workflow Events here -------------------------");
         workflow.getUncommittedDomainEvents().forEach(event -> {
@@ -76,12 +74,18 @@ public class WorkflowEventHandler {
         log.info("handle NodeActivatingEvent end-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleAsyncTaskActivatingEvent(AsyncTaskActivatingEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get AsyncTaskActivatingEvent here -------------------------");
         log.info(event.toString());
         var cmd = AsyncTaskActivatingCmd.builder()
+                .triggerId(event.getTriggerId())
+                .workflowRef(event.getWorkflowRef())
+                .workflowVersion(event.getWorkflowVersion())
+                .asyncTaskRef(event.getNodeRef())
+                .asyncTaskType(event.getNodeType())
                 .build();
         this.asyncTaskInstanceInternalApplication.create(cmd);
         log.info("handle AsyncTaskActivatingEvent end-----------------------------------------------------");

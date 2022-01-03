@@ -21,6 +21,7 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.HashSet;

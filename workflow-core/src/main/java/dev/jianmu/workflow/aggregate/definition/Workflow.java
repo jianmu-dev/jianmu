@@ -78,6 +78,7 @@ public class Workflow extends AggregateRoot {
         if (node instanceof AsyncTask) {
             AsyncTaskActivatingEvent asyncTaskActivatingEvent = AsyncTaskActivatingEvent.Builder.anAsyncTaskActivatingEvent()
                     .nodeRef(node.getRef())
+                    .nodeType(node.getType())
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)

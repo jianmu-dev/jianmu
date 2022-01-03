@@ -53,7 +53,6 @@ public class WorkflowInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
-    @Async
     @EventListener
     public void handleProcessStartedEvent(ProcessStartedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
@@ -71,7 +70,6 @@ public class WorkflowInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
-    @Async
     @EventListener
     public void handleProcessTerminatedEvent(ProcessTerminatedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
@@ -81,7 +79,6 @@ public class WorkflowInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
-    @Async
     @EventListener
     public void handleProcessEndedEvent(ProcessEndedEvent event) {
         MDC.put("triggerId", event.getTriggerId());

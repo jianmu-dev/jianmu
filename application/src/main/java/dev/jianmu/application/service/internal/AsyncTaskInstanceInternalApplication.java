@@ -34,6 +34,7 @@ public class AsyncTaskInstanceInternalApplication {
         this.workflowRepository = workflowRepository;
     }
 
+    @Transactional
     public void create(AsyncTaskActivatingCmd cmd) {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(cmd.getTriggerId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));

@@ -56,6 +56,6 @@ public interface AsyncTaskInstanceMapper {
             "values(#{id}, #{triggerId}, #{workflowRef}, #{workflowVersion}, #{workflowInstanceId}, #{name}, #{description}, #{status}, #{asyncTaskRef}, #{asyncTaskType}, #{activatingTime}, #{startTime}, #{endTime})")
     void add(AsyncTaskInstance asyncTaskInstance);
 
-    @Update("update async_task_instance set status=#{status}, start_time=#{start_time}, end_time=#{end_time} where id=#{id}")
+    @Update("update async_task_instance set status=#{status}, start_time=#{startTime}, end_time=#{endTime} where id=#{id}")
     void updateById(AsyncTaskInstance asyncTaskInstance);
 }
