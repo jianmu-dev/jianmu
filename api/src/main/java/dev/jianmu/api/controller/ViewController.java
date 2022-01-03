@@ -12,8 +12,6 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
-import dev.jianmu.project.aggregate.Project;
-import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -32,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +48,7 @@ public class ViewController {
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
     private final WorkflowInstanceApplication workflowInstanceApplication;
+    private final AsyncTaskInstanceApplication asyncTaskInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
     private final WorkflowInstanceApplication instanceApplication;
@@ -63,6 +61,7 @@ public class ViewController {
             ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
             WorkflowInstanceApplication workflowInstanceApplication,
+            AsyncTaskInstanceApplication asyncTaskInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
             WorkflowInstanceApplication instanceApplication,
@@ -73,6 +72,7 @@ public class ViewController {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.workflowInstanceApplication = workflowInstanceApplication;
+        this.asyncTaskInstanceApplication = asyncTaskInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
         this.instanceApplication = instanceApplication;
@@ -227,20 +227,16 @@ public class ViewController {
         return WorkflowMapper.INSTANCE.toWorkflowVo(workflow);
     }
 
-    @GetMapping("/task_instances/{workflowInstanceId}")
+    @GetMapping("/task_instances/{triggerId}")
     @Operation(summary = "任务实例列表接口", description = "任务实例列表接口")
-    public List<TaskInstanceVo> findByBusinessId(@PathVariable String workflowInstanceId) {
+    public List<TaskInstanceVo> findByTriggerId(@PathVariable String triggerId) {
         List<TaskInstanceVo> list = new ArrayList<>();
-        var taskInstances = this.taskInstanceApplication.findByBusinessId(workflowInstanceId);
-        this.workflowInstanceApplication.findById(workflowInstanceId)
-                .ifPresent(workflowInstance -> {
-                    workflowInstance.getAsyncTaskInstances()
-                            .stream()
-                            .filter(asyncTaskInstance -> asyncTaskInstance.getStatus().equals(TaskStatus.SKIPPED))
-                            .forEach(asyncTaskInstance -> {
-                                var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
-                                list.add(vo);
-                            });
+        var taskInstances = this.taskInstanceApplication.findByTriggerId(triggerId);
+        this.asyncTaskInstanceApplication.findByTriggerId(triggerId).stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus().equals(TaskStatus.SKIPPED))
+                .forEach(asyncTaskInstance -> {
+                    var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
+                    list.add(vo);
                 });
         taskInstances.forEach(taskInstance -> {
             var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);

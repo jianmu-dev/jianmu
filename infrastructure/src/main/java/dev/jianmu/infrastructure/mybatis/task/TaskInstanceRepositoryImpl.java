@@ -85,8 +85,13 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
-    public List<TaskInstance> findByBusinessId(String businessId) {
+    public Optional<TaskInstance> findByBusinessId(String businessId) {
         return this.taskInstanceMapper.findByBusinessId(businessId);
+    }
+
+    @Override
+    public List<TaskInstance> findByTriggerId(String triggerId) {
+        return this.taskInstanceMapper.findByTriggerId(triggerId);
     }
 
     @Override
