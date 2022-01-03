@@ -15,11 +15,9 @@ import java.util.Set;
 public interface InstanceParameterRepository {
     void addAll(Set<InstanceParameter> instanceParameters);
 
-    List<InstanceParameter> findByBusinessId(String businessId);
-
     List<InstanceParameter> findByInstanceId(String instanceId);
 
     List<InstanceParameter> findByInstanceIdAndType(String instanceId, InstanceParameter.Type type);
 
-    List<InstanceParameter> findOutputParamByBusinessIdAndTriggerId(String businessId, String triggerId);
+    List<InstanceParameter> findOutputParamByTriggerId(String triggerId);
 }
