@@ -26,7 +26,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     // 显示名称
     private String name;
     // 描述
-    private String description;
+    private String description = "";
     // 运行状态
     private TaskStatus status = TaskStatus.INIT;
     // 任务定义唯一引用名称
