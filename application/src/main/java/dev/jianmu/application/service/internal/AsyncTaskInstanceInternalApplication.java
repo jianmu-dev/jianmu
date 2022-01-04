@@ -73,27 +73,30 @@ public class AsyncTaskInstanceInternalApplication {
     // 任务已启动命令
     @Transactional
     public void run(String asyncTaskInstanceId) {
-        var asyncTaskInstance = this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
-                .orElseThrow(() -> new DataNotFoundException("未找到要启动的任务"));
-        asyncTaskInstance.run();
-        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
+                .ifPresent(asyncTaskInstance -> {
+                    asyncTaskInstance.run();
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                });
     }
 
     // 任务已失败命令
     @Transactional
     public void fail(String asyncTaskInstanceId) {
-        var asyncTaskInstance = this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
-                .orElseThrow(() -> new DataNotFoundException("未找到要失败的任务"));
-        asyncTaskInstance.fail();
-        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
+                .ifPresent(asyncTaskInstance -> {
+                    asyncTaskInstance.fail();
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                });
     }
 
     // 任务已成功命令
     @Transactional
     public void succeed(String asyncTaskInstanceId) {
-        var asyncTaskInstance = this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
-                .orElseThrow(() -> new DataNotFoundException("未找到要成功的任务"));
-        asyncTaskInstance.succeed();
-        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
+                .ifPresent(asyncTaskInstance -> {
+                    asyncTaskInstance.succeed();
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                });
     }
 }
