@@ -1,13 +1,13 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.definition;
 
 /**
- * @class WorkflowEndEvent
- * @description 流程结束事件
  * @author Ethan Liu
- * @create 2021-03-19 08:43
-*/
-public class WorkflowEndEvent extends BaseEvent {
-    private WorkflowEndEvent() {
+ * @class NodeSkipEvent
+ * @description 节点跳过事件
+ * @create 2021-10-18 11:28
+ */
+public class NodeSkipEvent extends DefinitionEvent {
+    private NodeSkipEvent() {
     }
 
     public static final class Builder {
@@ -15,17 +15,17 @@ public class WorkflowEndEvent extends BaseEvent {
         protected String workflowRef;
         // 流程定义版本
         protected String workflowVersion;
-        // 流程实例ID
-        protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
         // 节点唯一引用名称
         protected String nodeRef;
+        // 节点类型
+        protected String nodeType;
 
         private Builder() {
         }
 
-        public static Builder aWorkflowEndEvent() {
+        public static Builder aNodeSkipEvent() {
             return new Builder();
         }
 
@@ -39,11 +39,6 @@ public class WorkflowEndEvent extends BaseEvent {
             return this;
         }
 
-        public Builder workflowInstanceId(String workflowInstanceId) {
-            this.workflowInstanceId = workflowInstanceId;
-            return this;
-        }
-
         public Builder triggerId(String triggerId) {
             this.triggerId = triggerId;
             return this;
@@ -54,14 +49,19 @@ public class WorkflowEndEvent extends BaseEvent {
             return this;
         }
 
-        public WorkflowEndEvent build() {
-            WorkflowEndEvent workflowEndEvent = new WorkflowEndEvent();
-            workflowEndEvent.workflowRef = this.workflowRef;
-            workflowEndEvent.nodeRef = this.nodeRef;
-            workflowEndEvent.workflowInstanceId = this.workflowInstanceId;
-            workflowEndEvent.triggerId = this.triggerId;
-            workflowEndEvent.workflowVersion = this.workflowVersion;
-            return workflowEndEvent;
+        public Builder nodeType(String nodeType) {
+            this.nodeType = nodeType;
+            return this;
+        }
+
+        public NodeSkipEvent build() {
+            NodeSkipEvent nodeSkipEvent = new NodeSkipEvent();
+            nodeSkipEvent.triggerId = this.triggerId;
+            nodeSkipEvent.nodeType = this.nodeType;
+            nodeSkipEvent.workflowVersion = this.workflowVersion;
+            nodeSkipEvent.nodeRef = this.nodeRef;
+            nodeSkipEvent.workflowRef = this.workflowRef;
+            return nodeSkipEvent;
         }
     }
 }

@@ -104,10 +104,10 @@ export function listWorkflowExecutionRecord(
  * @param workflowExecutionRecordId
  */
 export function listTask(
-  workflowExecutionRecordId: string,
+    triggerId: string,
 ): Promise<ITaskExecutionRecordVo[]> {
   return restProxy<ITaskExecutionRecordVo[]>({
-    url: `${baseUrl.tasks}/${workflowExecutionRecordId}`,
+    url: `${baseUrl.tasks}/${triggerId}`,
     method: 'get',
   });
 }

@@ -1,13 +1,13 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.process;
 
 /**
- * @class WorkflowStartEvent
- * @description 流程启动事件
  * @author Ethan Liu
- * @create 2021-03-19 08:36
-*/
-public class WorkflowStartEvent extends BaseEvent {
-    private WorkflowStartEvent() {
+ * @class ProcessTerminatedEvent
+ * @description 流程实例终止事件
+ * @create 2022-01-02 12:07
+ */
+public class ProcessTerminatedEvent extends ProcessEvent {
+    private ProcessTerminatedEvent() {
     }
 
     public static final class Builder {
@@ -19,13 +19,11 @@ public class WorkflowStartEvent extends BaseEvent {
         protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
-        // 节点唯一引用名称
-        protected String nodeRef;
 
         private Builder() {
         }
 
-        public static Builder aWorkflowStartEvent() {
+        public static Builder aProcessTerminatedEvent() {
             return new Builder();
         }
 
@@ -49,19 +47,13 @@ public class WorkflowStartEvent extends BaseEvent {
             return this;
         }
 
-        public Builder nodeRef(String nodeRef) {
-            this.nodeRef = nodeRef;
-            return this;
-        }
-
-        public WorkflowStartEvent build() {
-            WorkflowStartEvent workflowStartEvent = new WorkflowStartEvent();
-            workflowStartEvent.workflowRef = this.workflowRef;
-            workflowStartEvent.nodeRef = this.nodeRef;
-            workflowStartEvent.workflowInstanceId = this.workflowInstanceId;
-            workflowStartEvent.triggerId = this.triggerId;
-            workflowStartEvent.workflowVersion = this.workflowVersion;
-            return workflowStartEvent;
+        public ProcessTerminatedEvent build() {
+            ProcessTerminatedEvent processTerminatedEvent = new ProcessTerminatedEvent();
+            processTerminatedEvent.workflowInstanceId = this.workflowInstanceId;
+            processTerminatedEvent.triggerId = this.triggerId;
+            processTerminatedEvent.workflowRef = this.workflowRef;
+            processTerminatedEvent.workflowVersion = this.workflowVersion;
+            return processTerminatedEvent;
         }
     }
 }

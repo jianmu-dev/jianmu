@@ -1,10 +1,13 @@
 package dev.jianmu.workflow.aggregate.definition;
 
+import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.event.definition.*;
+import dev.jianmu.workflow.event.process.TaskTerminatingEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -15,12 +18,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description 流程定义实体
- * @author Ethan Liu
  * @create 2021-01-21 14:10
-*/
-public class Workflow {
+ */
+public class Workflow extends AggregateRoot {
     public enum Type {
         WORKFLOW,
         PIPELINE
@@ -56,6 +59,114 @@ public class Workflow {
 
     public void setContext(EvaluationContext context) {
         this.context = context;
+    }
+
+    // 激活节点
+    public void activateNode(String triggerId, String nodeRef) {
+        Node node = this.findNode(nodeRef);
+        if (node instanceof End) {
+            // 发布流程结束事件并返回
+            WorkflowEndEvent workflowEndEvent = WorkflowEndEvent.Builder.aWorkflowEndEvent()
+                    .nodeRef(node.getRef())
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(workflowEndEvent);
+            return;
+        }
+        if (node instanceof AsyncTask) {
+            AsyncTaskActivatingEvent asyncTaskActivatingEvent = AsyncTaskActivatingEvent.Builder.anAsyncTaskActivatingEvent()
+                    .nodeRef(node.getRef())
+                    .nodeType(node.getType())
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(asyncTaskActivatingEvent);
+            return;
+        }
+        if (node instanceof Gateway) {
+            String nextNodeRef = ((Gateway) node).calculateTarget(expressionLanguage, context);
+            // 发布其他节点跳过事件
+            var targets = node.getTargets().stream()
+                    .filter(targetRef -> !targetRef.equals(nextNodeRef))
+                    .collect(Collectors.toList());
+            targets.forEach(targetRef -> {
+                var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                        .nodeRef(targetRef)
+                        .triggerId(triggerId)
+                        .workflowRef(this.ref)
+                        .workflowVersion(this.version)
+                        .build();
+                this.raiseEvent(nodeSkipEvent);
+            });
+            // 发布下一个节点激活事件并返回
+            NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
+                    .nodeRef(nextNodeRef)
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(activatingEvent);
+            return;
+        }
+        if (node instanceof Start) {
+            // 发布流程启动事件
+            WorkflowStartEvent workflowStartEvent = WorkflowStartEvent.Builder.aWorkflowStartEvent()
+                    .nodeRef(node.getRef())
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(workflowStartEvent);
+        }
+    }
+
+    public void next(String triggerId, String nodeRef) {
+        Node node = this.findNode(nodeRef);
+        // 发布所有下游节点激活事件
+        Set<String> nodes = node.getTargets();
+        nodes.forEach(n -> {
+            NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
+                    .nodeRef(n)
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(activatingEvent);
+        });
+    }
+
+    public void start(String triggerId) {
+        Node node = this.findStart();
+        // 发布所有下游节点激活事件
+        Set<String> nodes = node.getTargets();
+        nodes.forEach(n -> {
+            NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
+                    .nodeRef(n)
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(activatingEvent);
+        });
+    }
+
+    // 跳过节点
+    public void skipNode(String triggerId, String nodeRef) {
+        Node node = this.findNode(nodeRef);
+        // 发布下游节点跳过事件
+        var targets = node.getTargets();
+        targets.forEach(targetRef -> {
+            var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                    .nodeRef(targetRef)
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(nodeSkipEvent);
+        });
     }
 
     public Map<String, Parameter<?>> calculateTaskParams(String taskRef) {

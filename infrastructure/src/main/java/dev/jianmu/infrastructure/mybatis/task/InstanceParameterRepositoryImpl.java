@@ -6,15 +6,14 @@ import dev.jianmu.task.repository.InstanceParameterRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
+ * @author Ethan Liu
  * @class InstanceParameterRepositoryImpl
  * @description 任务实例参数仓储实现
- * @author Ethan Liu
  * @create 2021-04-28 18:48
-*/
+ */
 @Repository
 public class InstanceParameterRepositoryImpl implements InstanceParameterRepository {
     private final InstanceParameterMapper instanceParameterMapper;
@@ -31,11 +30,6 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     }
 
     @Override
-    public List<InstanceParameter> findByBusinessId(String businessId) {
-        return this.instanceParameterMapper.findByBusinessId(businessId);
-    }
-
-    @Override
     public List<InstanceParameter> findByInstanceId(String instanceId) {
         return this.instanceParameterMapper.findByInstanceId(instanceId);
     }
@@ -46,7 +40,7 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     }
 
     @Override
-    public List<InstanceParameter> findOutputParamByBusinessIdAndTriggerId(String businessId, String triggerId) {
-        return this.instanceParameterMapper.findOutputParamByBusinessIdAndTriggerId(businessId, triggerId);
+    public List<InstanceParameter> findOutputParamByTriggerId(String triggerId) {
+        return this.instanceParameterMapper.findOutputParamByTriggerId(triggerId);
     }
 }

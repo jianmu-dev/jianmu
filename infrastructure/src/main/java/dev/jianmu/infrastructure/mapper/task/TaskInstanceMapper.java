@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class InstanceMapper
  * @description 任务实例Mapper
- * @author Ethan Liu
  * @create 2021-03-25 21:39
-*/
+ */
 public interface TaskInstanceMapper {
     @Insert("insert into task_instance(id, serial_no, def_key, node_info, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status) " +
             "values(#{id}, #{serialNo}, #{defKey}, #{nodeInfo, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status})")
@@ -40,7 +40,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findById(String instanceId);
 
-    @Select("select * from task_instance where business_id = #{businessId} order by start_time asc")
+    @Select("select * from task_instance where business_id = #{businessId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -51,7 +51,20 @@ public interface TaskInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
-    List<TaskInstance> findByBusinessId(String businessId);
+    Optional<TaskInstance> findByBusinessId(String businessId);
+
+    @Select("select * from task_instance where trigger_id = #{triggerId} order by start_time asc")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
+    @Result(column = "async_task_ref", property = "asyncTaskRef")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "business_id", property = "businessId")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    List<TaskInstance> findByTriggerId(String triggerId);
 
     @Select("select * from task_instance where status = 'RUNNING'")
     @Result(column = "serial_no", property = "serialNo")

@@ -1,5 +1,6 @@
 package dev.jianmu.api.eventhandler;
 
+import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
@@ -12,11 +13,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
+ * @author Ethan Liu
  * @class DslEventHandler
  * @description Dsl事件处理器
- * @author Ethan Liu
  * @create 2021-04-23 17:21
-*/
+ */
 @Component
 @Slf4j
 public class ProjectEventHandler {
@@ -38,11 +39,13 @@ public class ProjectEventHandler {
     @EventListener
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
-        this.workflowInstanceInternalApplication.createAndStart(
-                triggerEvent.getTriggerId(),
-                triggerEvent.getTriggerType(),
-                triggerEvent.getWorkflowRef() + triggerEvent.getWorkflowVersion()
-        );
+        var cmd = WorkflowStartCmd.builder()
+                .triggerId(triggerEvent.getTriggerId())
+                .triggerType(triggerEvent.getTriggerType())
+                .workflowRef(triggerEvent.getWorkflowRef())
+                .workflowVersion(triggerEvent.getWorkflowVersion())
+                .build();
+        this.workflowInstanceInternalApplication.createAndStart(cmd);
     }
 
     @EventListener

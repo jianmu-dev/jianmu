@@ -18,7 +18,7 @@ import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
-import dev.jianmu.workflow.event.TaskActivatingEvent;
+import dev.jianmu.workflow.event.process.TaskActivatingEvent;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
@@ -30,11 +30,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @class TaskInstanceInternalApplication
  * @description TaskInstanceInternalApplication
- * @author Ethan Liu
  * @create 2021-10-21 15:25
-*/
+ */
 @Service
 @Slf4j
 public class TaskInstanceInternalApplication {
@@ -45,6 +45,7 @@ public class TaskInstanceInternalApplication {
     private final ParameterDomainService parameterDomainService;
     private final TriggerEventRepository triggerEventRepository;
     private final InstanceParameterRepository instanceParameterRepository;
+    private final WorkerApplication workerApplication;
     private final NodeDefApi nodeDefApi;
     private final ExpressionLanguage expressionLanguage;
 
@@ -56,6 +57,7 @@ public class TaskInstanceInternalApplication {
             ParameterDomainService parameterDomainService,
             TriggerEventRepository triggerEventRepository,
             InstanceParameterRepository instanceParameterRepository,
+            WorkerApplication workerApplication,
             NodeDefApi nodeDefApi,
             ExpressionLanguage expressionLanguage
     ) {
@@ -66,6 +68,7 @@ public class TaskInstanceInternalApplication {
         this.parameterDomainService = parameterDomainService;
         this.triggerEventRepository = triggerEventRepository;
         this.instanceParameterRepository = instanceParameterRepository;
+        this.workerApplication = workerApplication;
         this.nodeDefApi = nodeDefApi;
         this.expressionLanguage = expressionLanguage;
     }
@@ -105,7 +108,7 @@ public class TaskInstanceInternalApplication {
                 .asyncTaskRef(asyncTask.getRef())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
-                .businessId(event.getWorkflowInstanceId())
+                .businessId(event.getAsyncTaskInstanceId())
                 .triggerId(event.getTriggerId())
                 .build();
         // 查询参数源
@@ -113,7 +116,7 @@ public class TaskInstanceInternalApplication {
                 .map(TriggerEvent::getParameters)
                 .orElseGet(List::of);
         var instanceParameters = this.instanceParameterRepository
-                .findOutputParamByBusinessIdAndTriggerId(event.getWorkflowInstanceId(), event.getTriggerId());
+                .findOutputParamByTriggerId(event.getTriggerId());
         // 创建表达式上下文
         var context = new ElContext();
         // 全局参数加入上下文
@@ -156,6 +159,12 @@ public class TaskInstanceInternalApplication {
         this.instanceParameterRepository.addAll(instanceInputParameters);
         // 保存任务实例
         this.taskInstanceRepository.add(taskInstance);
+    }
+
+    public void terminate(String asyncTaskInstanceId) {
+        var taskInstance = this.taskInstanceRepository.findByBusinessId(asyncTaskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        this.workerApplication.terminateTask(taskInstance.getId());
     }
 
     @Transactional

@@ -1,13 +1,14 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.process;
 
 /**
- * @program: workflow
- * @description 任务执行成功事件
  * @author Ethan Liu
- * @create 2021-01-23 21:31
-*/
-public class TaskSucceededEvent extends BaseEvent {
-    private TaskSucceededEvent() {
+ * @program: workflow
+ * @description 任务激活事件
+ * @create 2021-01-21 20:47
+ */
+public class TaskActivatingEvent extends AsyncTaskInstanceEvent {
+
+    private TaskActivatingEvent() {
     }
 
     public static final class Builder {
@@ -19,17 +20,17 @@ public class TaskSucceededEvent extends BaseEvent {
         protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
+        // 异步任务实例ID
+        protected String asyncTaskInstanceId;
         // 节点唯一引用名称
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
-        // 任务外部ID
-        protected String externalId;
 
         private Builder() {
         }
 
-        public static Builder aTaskSucceededEvent() {
+        public static Builder aTaskActivatingEvent() {
             return new Builder();
         }
 
@@ -53,6 +54,11 @@ public class TaskSucceededEvent extends BaseEvent {
             return this;
         }
 
+        public Builder asyncTaskInstanceId(String asyncTaskInstanceId) {
+            this.asyncTaskInstanceId = asyncTaskInstanceId;
+            return this;
+        }
+
         public Builder nodeRef(String nodeRef) {
             this.nodeRef = nodeRef;
             return this;
@@ -63,21 +69,16 @@ public class TaskSucceededEvent extends BaseEvent {
             return this;
         }
 
-        public Builder externalId(String externalId) {
-            this.externalId = externalId;
-            return this;
-        }
-
-        public TaskSucceededEvent build() {
-            TaskSucceededEvent taskSucceededEvent = new TaskSucceededEvent();
-            taskSucceededEvent.workflowVersion = this.workflowVersion;
-            taskSucceededEvent.workflowInstanceId = this.workflowInstanceId;
-            taskSucceededEvent.nodeType = this.nodeType;
-            taskSucceededEvent.triggerId = this.triggerId;
-            taskSucceededEvent.workflowRef = this.workflowRef;
-            taskSucceededEvent.nodeRef = this.nodeRef;
-            taskSucceededEvent.externalId = this.externalId;
-            return taskSucceededEvent;
+        public TaskActivatingEvent build() {
+            TaskActivatingEvent taskActivatingEvent = new TaskActivatingEvent();
+            taskActivatingEvent.workflowInstanceId = this.workflowInstanceId;
+            taskActivatingEvent.triggerId = this.triggerId;
+            taskActivatingEvent.asyncTaskInstanceId = this.asyncTaskInstanceId;
+            taskActivatingEvent.workflowRef = this.workflowRef;
+            taskActivatingEvent.workflowVersion = this.workflowVersion;
+            taskActivatingEvent.nodeRef = this.nodeRef;
+            taskActivatingEvent.nodeType = this.nodeType;
+            return taskActivatingEvent;
         }
     }
 }
