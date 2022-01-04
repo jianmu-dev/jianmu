@@ -15,3 +15,5 @@ CREATE TABLE IF NOT EXISTS `async_task_instance`
     `end_time`             datetime DEFAULT NULL COMMENT '结束时间',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='异步任务实例表';
+
+ALTER TABLE `jianmu_web_request` ADD INDEX request_time (`request_time` desc);
