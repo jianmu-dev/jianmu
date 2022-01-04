@@ -27,6 +27,9 @@ public interface TaskInstanceMapper {
     @Delete("delete from task_instance where workflow_ref = #{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
+    @Delete("delete from task_instance where trigger_id = #{triggerId}")
+    void deleteByTriggerId(String triggerId);
+
     @Select("select * from task_instance where id = #{instanceId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")

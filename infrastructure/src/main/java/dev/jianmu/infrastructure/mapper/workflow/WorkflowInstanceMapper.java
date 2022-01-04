@@ -70,6 +70,20 @@ public interface WorkflowInstanceMapper {
     @Delete("delete from workflow_instance where workflow_ref=#{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
+    @Delete("delete from workflow_instance where id=#{id}")
+    void deleteById(String id);
+
+    @Select("SELECT * FROM jianmu.workflow_instance where workflow_ref=#{workflowRef} and serial_no < ((select max(serial_no) from workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    List<WorkflowInstance> findByRefOffset(@Param("workflowRef") String workflowRef, @Param("offset") long offset);
+
     @Select("select * from workflow_instance")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
@@ -109,7 +123,7 @@ public interface WorkflowInstanceMapper {
             @Param("status") ProcessStatus status
     );
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc")
+    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit #{offset}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -118,7 +132,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findByWorkflowRef(@Param("workflowRef") String workflowRef);
+    List<WorkflowInstance> findByWorkflowRef(@Param("workflowRef") String workflowRef, @Param("offset") long offset);
 
     @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit 1")
     @Result(column = "serial_no", property = "serialNo")

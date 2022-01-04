@@ -7,6 +7,7 @@ import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.GitRepo;
@@ -23,6 +24,7 @@ import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import org.slf4j.Logger;
@@ -52,33 +54,41 @@ public class ProjectApplication {
     private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final TaskInstanceRepository taskInstanceRepository;
     private final NodeDefApi nodeDefApi;
     private final ApplicationEventPublisher publisher;
     private final JgitService jgitService;
     private final ProjectLinkGroupRepository projectLinkGroupRepository;
     private final ProjectGroupRepository projectGroupRepository;
+    private final GlobalProperties globalProperties;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
             GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             TaskInstanceRepository taskInstanceRepository,
             NodeDefApi nodeDefApi,
             ApplicationEventPublisher publisher,
             JgitService jgitService,
-            ProjectLinkGroupRepository projectLinkGroupRepository, ProjectGroupRepository projectGroupRepository) {
+            ProjectLinkGroupRepository projectLinkGroupRepository,
+            ProjectGroupRepository projectGroupRepository,
+            GlobalProperties globalProperties
+    ) {
         this.projectRepository = projectRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
+        this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.taskInstanceRepository = taskInstanceRepository;
         this.nodeDefApi = nodeDefApi;
         this.publisher = publisher;
         this.jgitService = jgitService;
         this.projectLinkGroupRepository = projectLinkGroupRepository;
         this.projectGroupRepository = projectGroupRepository;
+        this.globalProperties = globalProperties;
     }
 
     public void trigger(String projectId, String triggerId, String triggerType) {
@@ -158,7 +168,7 @@ public class ProjectApplication {
         if (projectGroupId != null) {
             this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
             groupId = projectGroupId;
-        }else {
+        } else {
             groupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
                     .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
         }
@@ -318,9 +328,27 @@ public class ProjectApplication {
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.gitRepoRepository.deleteById(project.getGitRepoId());
         this.publisher.publishEvent(new DeletedEvent(project.getId()));
+    }
+
+    @Transactional
+    public void autoClean() {
+        // 是否需要自动清理
+        if (!this.globalProperties.getGlobal().getRecord().getAutoClean()) {
+            return;
+        }
+        logger.info("执行记录自动清理已开启，将自动删除最新{}条之前的记录", this.globalProperties.getGlobal().getRecord().getMax());
+        this.projectRepository.findAll().forEach(project -> {
+            this.workflowInstanceRepository.findByRefOffset(project.getWorkflowRef(), this.globalProperties.getGlobal().getRecord().getMax()).forEach(workflowInstance -> {
+                this.workflowInstanceRepository.deleteById(workflowInstance.getId());
+                this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
+                this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+            });
+        });
+
     }
 
     private void pubTriggerEvent(DslParser parser, Project project) {

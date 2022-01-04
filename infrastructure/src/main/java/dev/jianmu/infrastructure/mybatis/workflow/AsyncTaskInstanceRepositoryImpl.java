@@ -56,4 +56,14 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     public void updateAll(List<AsyncTaskInstance> asyncTaskInstances) {
         asyncTaskInstances.forEach(this.publisher::publishEvent);
     }
+
+    @Override
+    public void deleteByWorkflowInstanceId(String workflowInstanceId) {
+        this.asyncTaskInstanceMapper.deleteByWorkflowInstanceId(workflowInstanceId);
+    }
+
+    @Override
+    public void deleteByWorkflowRef(String workflowRef) {
+        this.asyncTaskInstanceMapper.deleteByWorkflowRef(workflowRef);
+    }
 }

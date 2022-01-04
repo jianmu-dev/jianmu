@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class InstanceRepositoryImpl
  * @description 任务实例仓储实现类
- * @author Ethan Liu
  * @create 2021-03-25 20:54
-*/
+ */
 @Repository
 public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceRepositoryImpl.class);
@@ -112,5 +112,10 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void deleteByWorkflowRef(String workflowRef) {
         this.taskInstanceMapper.deleteByWorkflowRef(workflowRef);
+    }
+
+    @Override
+    public void deleteByTriggerId(String triggerId) {
+        this.taskInstanceMapper.deleteByTriggerId(triggerId);
     }
 }

@@ -10,6 +10,8 @@ public interface WorkflowInstanceRepository {
 
     List<WorkflowInstance> findByRefAndVersionAndStatus(String workflowRef, String workflowVersion, ProcessStatus status);
 
+    List<WorkflowInstance> findByWorkflowRefLimit(String workflowRef, long offset);
+
     Optional<WorkflowInstance> findById(String instanceId);
 
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
@@ -22,5 +24,9 @@ public interface WorkflowInstanceRepository {
 
     Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef);
 
+    List<WorkflowInstance> findByRefOffset(String workflowRef, long offset);
+
     void deleteByWorkflowRef(String workflowRef);
+
+    void deleteById(String id);
 }
