@@ -250,7 +250,7 @@ public class AsyncTaskInstance extends AggregateRoot {
         public AsyncTaskInstance build() {
             AsyncTaskInstance asyncTaskInstance = new AsyncTaskInstance();
             asyncTaskInstance.id = this.id;
-            asyncTaskInstance.description = this.description;
+            asyncTaskInstance.description = this.description == null ? "" : this.description;
             asyncTaskInstance.triggerId = this.triggerId;
             asyncTaskInstance.workflowRef = this.workflowRef;
             asyncTaskInstance.workflowVersion = this.workflowVersion;
