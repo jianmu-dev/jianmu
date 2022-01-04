@@ -26,7 +26,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     // 显示名称
     private String name;
     // 描述
-    private String description = "";
+    private String description;
     // 运行状态
     private TaskStatus status = TaskStatus.INIT;
     // 任务定义唯一引用名称
@@ -250,7 +250,7 @@ public class AsyncTaskInstance extends AggregateRoot {
         public AsyncTaskInstance build() {
             AsyncTaskInstance asyncTaskInstance = new AsyncTaskInstance();
             asyncTaskInstance.id = this.id;
-            asyncTaskInstance.description = this.description;
+            asyncTaskInstance.description = this.description == null ? "" : this.description;
             asyncTaskInstance.triggerId = this.triggerId;
             asyncTaskInstance.workflowRef = this.workflowRef;
             asyncTaskInstance.workflowVersion = this.workflowVersion;
