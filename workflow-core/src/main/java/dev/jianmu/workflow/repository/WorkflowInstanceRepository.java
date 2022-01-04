@@ -10,6 +10,8 @@ public interface WorkflowInstanceRepository {
 
     List<WorkflowInstance> findByRefAndVersionAndStatus(String workflowRef, String workflowVersion, ProcessStatus status);
 
+    List<WorkflowInstance> findByWorkflowRefLimit(String workflowRef, long offset);
+
     Optional<WorkflowInstance> findById(String instanceId);
 
     Optional<WorkflowInstance> findByTriggerId(String triggerId);

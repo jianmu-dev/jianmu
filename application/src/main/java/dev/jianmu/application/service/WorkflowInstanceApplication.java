@@ -1,24 +1,31 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
+import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description 流程实例门面类
- * @author Ethan Liu
  * @create 2021-01-22 14:50
-*/
+ */
 @Service
 public class WorkflowInstanceApplication {
-    private final WorkflowInstanceRepositoryImpl workflowInstanceRepository;
+    private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final GlobalProperties globalProperties;
 
-    public WorkflowInstanceApplication(WorkflowInstanceRepositoryImpl workflowInstanceRepository) {
+    public WorkflowInstanceApplication(
+            WorkflowInstanceRepositoryImpl workflowInstanceRepository,
+            GlobalProperties globalProperties
+    ) {
         this.workflowInstanceRepository = workflowInstanceRepository;
+        this.globalProperties = globalProperties;
     }
 
     public Optional<WorkflowInstance> findById(String id) {
@@ -26,7 +33,7 @@ public class WorkflowInstanceApplication {
     }
 
     public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
-        return this.workflowInstanceRepository.findByWorkflowRef(workflowRef);
+        return this.workflowInstanceRepository.findByWorkflowRefLimit(workflowRef, globalProperties.getLatestRecords() + 1);
     }
 
     public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {

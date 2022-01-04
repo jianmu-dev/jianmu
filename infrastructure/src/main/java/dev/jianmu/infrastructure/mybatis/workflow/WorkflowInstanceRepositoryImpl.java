@@ -1,7 +1,5 @@
 package dev.jianmu.infrastructure.mybatis.workflow;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowInstanceMapper;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -60,6 +58,7 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
 
     @Override
     public WorkflowInstance save(WorkflowInstance workflowInstance) {
+        // TODO 乐观锁已不需要，可以去掉
         int version = this.workflowInstanceMapper.getVersion(workflowInstance.getId());
         logger.info("-------------------------the version is: {}", version);
         boolean succeed = this.workflowInstanceMapper.save(workflowInstance, version);
@@ -86,12 +85,8 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
         this.workflowInstanceMapper.deleteByWorkflowRef(workflowRef);
     }
 
-    public PageInfo<WorkflowInstance> findAllPage(String id, String name, String workflowVersion, ProcessStatus status, int pageNum, int pageSize) {
-        return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.workflowInstanceMapper.findAllPage(id, name, workflowVersion, status));
-    }
-
-    public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
-        return this.workflowInstanceMapper.findByWorkflowRef(workflowRef);
+    @Override
+    public List<WorkflowInstance> findByWorkflowRefLimit(String workflowRef, long offset) {
+        return this.workflowInstanceMapper.findByWorkflowRef(workflowRef, offset);
     }
 }

@@ -109,7 +109,7 @@ public interface WorkflowInstanceMapper {
             @Param("status") ProcessStatus status
     );
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc")
+    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit #{offset}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -118,7 +118,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findByWorkflowRef(@Param("workflowRef") String workflowRef);
+    List<WorkflowInstance> findByWorkflowRef(@Param("workflowRef") String workflowRef, @Param("offset") long offset);
 
     @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit 1")
     @Result(column = "serial_no", property = "serialNo")
