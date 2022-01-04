@@ -24,17 +24,6 @@ public interface InstanceParameterMapper {
             " </script>")
     void addAll(@Param("instanceParameters") Set<InstanceParameter> instanceParameters);
 
-    @Select("select * from task_instance_parameter where business_id = #{businessId}")
-    @Result(column = "instance_id", property = "instanceId")
-    @Result(column = "serial_no", property = "serialNo")
-    @Result(column = "def_key", property = "defKey")
-    @Result(column = "async_task_ref", property = "asyncTaskRef")
-    @Result(column = "business_id", property = "businessId")
-    @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "parameter_id", property = "parameterId")
-    @Result(column = "workflow_type", property = "workflowType")
-    List<InstanceParameter> findByBusinessId(String businessId);
-
     @Select("select * from task_instance_parameter where instance_id = #{instanceId}")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")
@@ -57,7 +46,7 @@ public interface InstanceParameterMapper {
     @Result(column = "workflow_type", property = "workflowType")
     List<InstanceParameter> findByInstanceIdAndType(@Param("instanceId") String instanceId, @Param("type") InstanceParameter.Type type);
 
-    @Select("select * from task_instance_parameter where business_id = #{businessId} and trigger_id = #{triggerId} and type = 'OUTPUT'")
+    @Select("select * from task_instance_parameter where trigger_id = #{triggerId} and type = 'OUTPUT'")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
@@ -66,5 +55,5 @@ public interface InstanceParameterMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
     @Result(column = "workflow_type", property = "workflowType")
-    List<InstanceParameter> findOutputParamByBusinessIdAndTriggerId(@Param("businessId") String businessId, @Param("triggerId") String triggerId);
+    List<InstanceParameter> findOutputParamByTriggerId(String triggerId);
 }

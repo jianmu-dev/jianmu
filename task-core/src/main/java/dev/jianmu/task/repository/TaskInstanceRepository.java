@@ -20,7 +20,9 @@ public interface TaskInstanceRepository {
 
     Optional<TaskInstance> findById(String instanceId);
 
-    List<TaskInstance> findByBusinessId(String businessId);
+    Optional<TaskInstance> findByBusinessId(String businessId);
+
+    List<TaskInstance> findByTriggerId(String triggerId);
 
     List<TaskInstance> findRunningTask();
 

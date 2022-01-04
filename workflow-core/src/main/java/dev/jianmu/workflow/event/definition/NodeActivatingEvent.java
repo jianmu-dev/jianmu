@@ -1,22 +1,21 @@
-package dev.jianmu.workflow.event;
+package dev.jianmu.workflow.event.definition;
 
 /**
- * @class NodeSkipEvent
- * @description 节点跳过事件
  * @author Ethan Liu
- * @create 2021-10-18 11:28
-*/
-public class NodeSkipEvent extends BaseEvent {
-    private NodeSkipEvent() {
+ * @class NodeActivatingEvent
+ * @description 节点激活事件
+ * @create 2021-03-17 13:53
+ */
+public class NodeActivatingEvent extends DefinitionEvent {
+    private NodeActivatingEvent() {
     }
+
 
     public static final class Builder {
         // 流程定义唯一引用名称
         protected String workflowRef;
         // 流程定义版本
         protected String workflowVersion;
-        // 流程实例ID
-        protected String workflowInstanceId;
         // 触发器ID
         protected String triggerId;
         // 节点唯一引用名称
@@ -27,7 +26,7 @@ public class NodeSkipEvent extends BaseEvent {
         private Builder() {
         }
 
-        public static Builder aNodeSkipEvent() {
+        public static Builder aNodeActivatingEvent() {
             return new Builder();
         }
 
@@ -38,11 +37,6 @@ public class NodeSkipEvent extends BaseEvent {
 
         public Builder workflowVersion(String workflowVersion) {
             this.workflowVersion = workflowVersion;
-            return this;
-        }
-
-        public Builder workflowInstanceId(String workflowInstanceId) {
-            this.workflowInstanceId = workflowInstanceId;
             return this;
         }
 
@@ -61,15 +55,14 @@ public class NodeSkipEvent extends BaseEvent {
             return this;
         }
 
-        public NodeSkipEvent build() {
-            NodeSkipEvent nodeSkipEvent = new NodeSkipEvent();
-            nodeSkipEvent.triggerId = this.triggerId;
-            nodeSkipEvent.nodeType = this.nodeType;
-            nodeSkipEvent.workflowVersion = this.workflowVersion;
-            nodeSkipEvent.nodeRef = this.nodeRef;
-            nodeSkipEvent.workflowRef = this.workflowRef;
-            nodeSkipEvent.workflowInstanceId = this.workflowInstanceId;
-            return nodeSkipEvent;
+        public NodeActivatingEvent build() {
+            NodeActivatingEvent nodeActivatingEvent = new NodeActivatingEvent();
+            nodeActivatingEvent.triggerId = this.triggerId;
+            nodeActivatingEvent.workflowRef = this.workflowRef;
+            nodeActivatingEvent.workflowVersion = this.workflowVersion;
+            nodeActivatingEvent.nodeRef = this.nodeRef;
+            nodeActivatingEvent.nodeType = this.nodeType;
+            return nodeActivatingEvent;
         }
     }
 }

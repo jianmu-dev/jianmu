@@ -109,70 +109,70 @@ public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
         instance = workflowInstanceDomainService.create("trigger567", "CRON", 1, workflow);
     }
 
-    @Test
-    @Transactional
-    void test1() {
-        Node node = workflow.findNode("asyncTask_1");
-        instance.activateNode(node);
-        this.workflowInstanceRepository.add(instance);
-    }
-
-    @Test
-    void test11() {
-        this.workflowInstanceInternalApplication.start("6e8840f303c949b09f3b50cb7ce88bad", "start_1");
-    }
-
-    @Test
-    @Transactional
-    void test12() {
-        Node node = workflow.findNode("condition_1");
-        instance.setExpressionLanguage(this.expressionLanguage);
-        instance.activateNode(node);
-        this.workflowInstanceRepository.add(instance);
-    }
-
-    @Test
-    void test2() {
-        Optional<WorkflowInstance> instanceOptional = this.workflowInstanceRepository.findById("6e8840f303c949b09f3b50cb7ce88bad");
-        instanceOptional.ifPresent(instance1 -> {
-            logger.info(instance1.getId());
-            logger.info(instance1.getName());
-            logger.info(instance1.getDescription());
-            instance1.getAsyncTaskInstances().forEach(task -> {
-                logger.info(task.getName());
-                logger.info(task.getDescription());
-            });
-        });
-    }
-
-    @Test
-    void test3() {
-        List<WorkflowInstance> instances = this.workflowInstanceRepository
-                .findByRefAndVersionAndStatus(instance.getWorkflowRef(), instance.getWorkflowVersion(), instance.getStatus());
-        instances.forEach(i -> {
-            System.out.println(i.getId());
-            System.out.println(i.getName());
-            System.out.println(i.getDescription());
-            i.getAsyncTaskInstances().forEach(task -> {
-                System.out.println(task.getName());
-                System.out.println(task.getDescription());
-            });
-        });
-    }
-
-    @Test
-    void test4() {
-        List<WorkflowInstance> instances = this.workflowInstanceRepository.findAll(1, 1);
-        instances.forEach(i -> {
-            System.out.println(i.getId());
-            System.out.println(i.getName());
-            System.out.println(i.getDescription());
-            i.getAsyncTaskInstances().forEach(task -> {
-                System.out.println(task.getName());
-                System.out.println(task.getDescription());
-            });
-        });
-    }
+//    @Test
+//    @Transactional
+//    void test1() {
+//        Node node = workflow.findNode("asyncTask_1");
+//        instance.activateNode(node);
+//        this.workflowInstanceRepository.add(instance);
+//    }
+//
+//    @Test
+//    void test11() {
+//        this.workflowInstanceInternalApplication.start("6e8840f303c949b09f3b50cb7ce88bad", "start_1");
+//    }
+//
+//    @Test
+//    @Transactional
+//    void test12() {
+//        Node node = workflow.findNode("condition_1");
+//        instance.setExpressionLanguage(this.expressionLanguage);
+//        instance.activateNode(node);
+//        this.workflowInstanceRepository.add(instance);
+//    }
+//
+//    @Test
+//    void test2() {
+//        Optional<WorkflowInstance> instanceOptional = this.workflowInstanceRepository.findById("6e8840f303c949b09f3b50cb7ce88bad");
+//        instanceOptional.ifPresent(instance1 -> {
+//            logger.info(instance1.getId());
+//            logger.info(instance1.getName());
+//            logger.info(instance1.getDescription());
+//            instance1.getAsyncTaskInstances().forEach(task -> {
+//                logger.info(task.getName());
+//                logger.info(task.getDescription());
+//            });
+//        });
+//    }
+//
+//    @Test
+//    void test3() {
+//        List<WorkflowInstance> instances = this.workflowInstanceRepository
+//                .findByRefAndVersionAndStatus(instance.getWorkflowRef(), instance.getWorkflowVersion(), instance.getStatus());
+//        instances.forEach(i -> {
+//            System.out.println(i.getId());
+//            System.out.println(i.getName());
+//            System.out.println(i.getDescription());
+//            i.getAsyncTaskInstances().forEach(task -> {
+//                System.out.println(task.getName());
+//                System.out.println(task.getDescription());
+//            });
+//        });
+//    }
+//
+//    @Test
+//    void test4() {
+//        List<WorkflowInstance> instances = this.workflowInstanceRepository.findAll(1, 1);
+//        instances.forEach(i -> {
+//            System.out.println(i.getId());
+//            System.out.println(i.getName());
+//            System.out.println(i.getDescription());
+//            i.getAsyncTaskInstances().forEach(task -> {
+//                System.out.println(task.getName());
+//                System.out.println(task.getDescription());
+//            });
+//        });
+//    }
 
     @Test
     @Transactional

@@ -27,15 +27,6 @@ public class WorkflowInstanceController {
         this.instanceApplication = instanceApplication;
     }
 
-    @PutMapping("/{instanceId}/{nodeRef}")
-    @Operation(summary = "流程启动", description = "流程启动")
-    public void start(
-            @Parameter(description = "流程实例ID") @PathVariable String instanceId,
-            @Parameter(description = "启动节点定义名") @PathVariable String nodeRef
-    ) {
-        this.instanceApplication.start(instanceId, nodeRef);
-    }
-
     @PutMapping("/stop/{instanceId}")
     @Operation(summary = "流程结束接口", description = "流程结束接口")
     public void stop(

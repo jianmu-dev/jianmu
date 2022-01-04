@@ -1,6 +1,8 @@
 package dev.jianmu.workflow;
 
 import dev.jianmu.workflow.event.*;
+import dev.jianmu.workflow.event.definition.*;
+import dev.jianmu.workflow.event.process.*;
 
 /**
  * @program: workflow
