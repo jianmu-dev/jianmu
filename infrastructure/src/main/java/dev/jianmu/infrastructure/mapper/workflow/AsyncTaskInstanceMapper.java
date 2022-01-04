@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure.mapper.workflow;
 
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,4 +55,10 @@ public interface AsyncTaskInstanceMapper {
 
     @Update("update async_task_instance set status=#{status}, start_time=#{startTime}, end_time=#{endTime} where id=#{id}")
     void updateById(AsyncTaskInstance asyncTaskInstance);
+
+    @Delete("delete from async_task_instance where workflow_instance_id = #{workflowInstanceId}")
+    void deleteByWorkflowInstanceId(String workflowInstanceId);
+
+    @Delete("delete from async_task_instance where workflow_ref = #{workflowRef}")
+    void deleteByWorkflowRef(String workflowRef);
 }

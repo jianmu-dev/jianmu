@@ -31,4 +31,6 @@ public interface TaskInstanceRepository {
     List<TaskInstance> findAll(int pageNum, int pageSize);
 
     void deleteByWorkflowRef(String workflowRef);
+
+    void deleteByTriggerId(String triggerId);
 }

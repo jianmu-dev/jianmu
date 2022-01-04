@@ -86,6 +86,16 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
+    public void deleteById(String id) {
+        this.workflowInstanceMapper.deleteById(id);
+    }
+
+    @Override
+    public List<WorkflowInstance> findByRefOffset(String workflowRef, long offset) {
+        return this.workflowInstanceMapper.findByRefOffset(workflowRef, offset);
+    }
+
+    @Override
     public List<WorkflowInstance> findByWorkflowRefLimit(String workflowRef, long offset) {
         return this.workflowInstanceMapper.findByWorkflowRef(workflowRef, offset);
     }

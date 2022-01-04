@@ -24,5 +24,9 @@ public interface WorkflowInstanceRepository {
 
     Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef);
 
+    List<WorkflowInstance> findByRefOffset(String workflowRef, long offset);
+
     void deleteByWorkflowRef(String workflowRef);
+
+    void deleteById(String id);
 }
