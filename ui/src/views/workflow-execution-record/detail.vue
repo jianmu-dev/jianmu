@@ -624,9 +624,8 @@ export default defineComponent({
           opacity: 0.55;
 
           .label {
-            position: absolute;
-            top: 7px;
-            right: 10px;
+            padding: 7px 10px 0;
+            text-align: right;
             font-size: 20px;
           }
         }
@@ -637,7 +636,7 @@ export default defineComponent({
           .label {
             padding-left: 4px;
             line-height: 60px;
-            font-size: 30px;
+            font-size: 26px;
             text-align: center;
 
             &::before {
