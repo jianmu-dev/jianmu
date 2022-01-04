@@ -291,7 +291,9 @@ export default defineComponent({
         if (state.recordDetail.navScrollLeft === 0) {
           const index = state.recordDetail.allRecords.findIndex(({ id }) => id === props.workflowExecutionRecordId);
           const contentWidth = navScrollBar.value.scrollbar.firstElementChild.clientWidth;
-          const navScrollLeft = (70 + 8) * index;
+          const navScrollLeft = navScrollBar.value.scrollbar
+            .firstElementChild.firstElementChild.firstElementChild.children
+            .item(index).offsetLeft;
           if (navScrollLeft > contentWidth) {
             const maxNavScrollBarLeft = navScrollBar.value.scrollbar.firstElementChild.scrollWidth -
               navScrollBar.value.scrollbar.firstElementChild.clientWidth;
@@ -542,8 +544,8 @@ export default defineComponent({
 
       .tab {
         position: relative;
-        //width: 70px;
-        flex-basis: 70px;
+        min-width: 70px;
+        //flex-basis: 70px;
         flex-shrink: 0;
         height: 60px;
         border-radius: 4px 4px 0 0;
@@ -624,9 +626,8 @@ export default defineComponent({
           opacity: 0.55;
 
           .label {
-            position: absolute;
-            top: 7px;
-            right: 10px;
+            padding: 7px 10px 0;
+            text-align: right;
             font-size: 20px;
           }
         }
@@ -637,7 +638,7 @@ export default defineComponent({
           .label {
             padding-left: 4px;
             line-height: 60px;
-            font-size: 30px;
+            font-size: 26px;
             text-align: center;
 
             &::before {
