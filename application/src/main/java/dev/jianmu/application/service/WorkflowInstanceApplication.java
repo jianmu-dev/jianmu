@@ -33,7 +33,7 @@ public class WorkflowInstanceApplication {
     }
 
     public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
-        return this.workflowInstanceRepository.findByWorkflowRefLimit(workflowRef, globalProperties.getLatestRecords() + 1);
+        return this.workflowInstanceRepository.findByWorkflowRefLimit(workflowRef, globalProperties.getGlobal().getRecord().getMax() + 1);
     }
 
     public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {

@@ -337,11 +337,12 @@ public class ProjectApplication {
     @Transactional
     public void autoClean() {
         // 是否需要自动清理
-        if (!this.globalProperties.getAutoClean()) {
+        if (!this.globalProperties.getGlobal().getRecord().getAutoClean()) {
             return;
         }
+        logger.info("执行记录自动清理已开启，将自动删除最新{}条之前的记录", this.globalProperties.getGlobal().getRecord().getMax());
         this.projectRepository.findAll().forEach(project -> {
-            this.workflowInstanceRepository.findByRefOffset(project.getWorkflowRef(), this.globalProperties.getLatestRecords()).forEach(workflowInstance -> {
+            this.workflowInstanceRepository.findByRefOffset(project.getWorkflowRef(), this.globalProperties.getGlobal().getRecord().getMax()).forEach(workflowInstance -> {
                 this.workflowInstanceRepository.deleteById(workflowInstance.getId());
                 this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
                 this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
