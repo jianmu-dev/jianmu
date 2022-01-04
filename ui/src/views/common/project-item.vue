@@ -533,6 +533,7 @@ export default defineComponent({
       margin-top: 10px;
       font-size: 13px;
       color: #6b7b8d;
+      white-space:nowrap;
     }
 
     .operation {
