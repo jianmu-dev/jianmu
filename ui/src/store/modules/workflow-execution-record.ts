@@ -87,7 +87,7 @@ export default {
           triggerType: project.triggerType,
         };
       }
-      const taskRecords = !record.id ? [] : await listTask(record.triggerId);
+      const taskRecords = !record.triggerId ? [] : await listTask(record.triggerId);
       commit('mutateRecordDetail', { project, allRecords, record, recordDsl, taskRecords, nodeInfos });
     },
   },
