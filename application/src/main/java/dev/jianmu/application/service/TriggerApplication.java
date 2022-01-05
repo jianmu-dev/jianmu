@@ -101,6 +101,12 @@ public class TriggerApplication {
     public void trigger(String triggerId) {
         var trigger = this.triggerRepository.findByTriggerId(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
+        var project = this.projectRepository.findById(trigger.getProjectId())
+                .orElseThrow(() -> new DataNotFoundException("未找到要触发的项目"));
+        if (!project.isEnabled()) {
+            log.info("当前项目不可触发，请先修改状态");
+            return;
+        }
         var evt = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(trigger.getProjectId())
                 .triggerId(trigger.getId())
@@ -388,6 +394,9 @@ public class TriggerApplication {
                     this.webRequestRepositoryImpl.add(webRequest);
                     return new DataNotFoundException("未找到项目: " + projectName);
                 });
+        if (!project.isEnabled()) {
+            throw new RuntimeException("当前项目不可触发，请先修改状态");
+        }
         webRequest.setProjectId(project.getId());
         webRequest.setWorkflowRef(project.getWorkflowRef());
         webRequest.setWorkflowVersion(project.getWorkflowVersion());

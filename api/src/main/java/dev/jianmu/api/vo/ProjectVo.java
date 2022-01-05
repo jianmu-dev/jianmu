@@ -44,6 +44,10 @@ public class ProjectVo {
     private DslType dslType;
     @Schema(description = "触发类型")
     private String triggerType;
+    @Schema(description = "项目状态")
+    private boolean enabled;
+    @Schema(description = "状态是否可变")
+    private boolean mutable;
     @Schema(description = "Git库ID")
     private String gitRepoId;
     @Schema(description = "开始执行时间")

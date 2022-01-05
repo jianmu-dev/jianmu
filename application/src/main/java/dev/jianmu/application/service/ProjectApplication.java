@@ -108,6 +108,9 @@ public class ProjectApplication {
     public void triggerByManual(String projectId) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        if (!project.isEnabled()) {
+            throw new RuntimeException("当前项目不可触发，请先修改状态");
+        }
         var triggerId = UUID.randomUUID().toString().replace("-", "");
         MDC.put("triggerId", triggerId);
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
@@ -157,6 +160,8 @@ public class ProjectApplication {
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
                 .steps(parser.getSteps())
+                .enabled(parser.isEnabled())
+                .mutable(parser.isMutable())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
                 .triggerType(parser.getTriggerType())
@@ -206,6 +211,8 @@ public class ProjectApplication {
         project.setTriggerType(Project.TriggerType.MANUAL);
         project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
+        project.setEnabled(parser.isEnabled());
+        project.setMutable(parser.isMutable());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -233,6 +240,8 @@ public class ProjectApplication {
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
                 .steps(parser.getSteps())
+                .enabled(parser.isEnabled())
+                .mutable(parser.isMutable())
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
@@ -279,6 +288,8 @@ public class ProjectApplication {
         project.setTriggerType(parser.getTriggerType());
         project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
+        project.setEnabled(parser.isEnabled());
+        project.setMutable(parser.isMutable());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();

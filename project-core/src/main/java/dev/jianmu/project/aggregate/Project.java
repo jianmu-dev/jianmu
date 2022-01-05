@@ -47,6 +47,10 @@ public class Project {
     private String workflowVersion;
     // 流程节点数量
     private int steps;
+    // 项目状态
+    private boolean enabled = true;
+    // 状态是否可变
+    private boolean mutable = false;
     // 原始DSL文本
     private String dslText;
     // 创建时间
@@ -55,6 +59,21 @@ public class Project {
     private String lastModifiedBy;
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
+
+    public void switchEnabled(boolean enabled) {
+        if (!this.mutable) {
+            throw new RuntimeException("mutable为false时项目状态不可更改");
+        }
+        this.enabled = enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setMutable(boolean mutable) {
+        this.mutable = mutable;
+    }
 
     public void setWorkflowName(String workflowName) {
         this.workflowName = workflowName;
@@ -132,6 +151,14 @@ public class Project {
         return steps;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isMutable() {
+        return mutable;
+    }
+
     public String getDslText() {
         return dslText;
     }
@@ -167,6 +194,10 @@ public class Project {
         private String workflowVersion;
         // 流程节点数量
         private int steps;
+        // 项目状态
+        private boolean enabled;
+        // 状态是否可变
+        private boolean mutable;
         // 原始DSL文本
         private String dslText;
         // 最后修改者
@@ -224,6 +255,16 @@ public class Project {
             return this;
         }
 
+        public Builder enabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+
+        public Builder mutable(boolean mutable) {
+            this.mutable = mutable;
+            return this;
+        }
+
         public Builder dslText(String dslText) {
             this.dslText = dslText;
             return this;
@@ -235,6 +276,9 @@ public class Project {
         }
 
         public Project build() {
+            if (!this.mutable && !this.enabled) {
+                throw new RuntimeException("mutable与enabled同时为false时，项目将永不可用");
+            }
             Project project = new Project();
             project.id = UUID.randomUUID().toString().replace("-", "");
             project.workflowVersion = this.workflowVersion;
@@ -245,6 +289,8 @@ public class Project {
             project.triggerType = this.triggerType;
             project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
+            project.enabled = this.enabled;
+            project.mutable = this.mutable;
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;
             project.lastModifiedBy = this.lastModifiedBy;
