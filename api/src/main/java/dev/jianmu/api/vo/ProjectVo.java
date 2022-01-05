@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
+ * @author Ethan Liu
  * @class ProjectVo
  * @description 项目VO
- * @author Ethan Liu
  * @create 2021-06-04 17:04
-*/
+ */
 @Data
 @Builder
 @AllArgsConstructor
@@ -42,8 +42,6 @@ public class ProjectVo {
     private Source source;
     @Schema(description = "DSL类型")
     private DslType dslType;
-    @Schema(description = "Event Bridge Id", deprecated = true)
-    private String eventBridgeId;
     @Schema(description = "触发类型")
     private String triggerType;
     @Schema(description = "Git库ID")

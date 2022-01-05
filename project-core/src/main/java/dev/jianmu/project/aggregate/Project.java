@@ -33,8 +33,6 @@ public class Project {
     private DslSource dslSource;
     // DSL类型
     private DslType dslType;
-    // Event Bridge Id
-    private String eventBridgeId;
     // 触发类型
     private TriggerType triggerType;
     // Git库Id
@@ -86,10 +84,6 @@ public class Project {
         this.triggerType = triggerType;
     }
 
-    public void setEventBridgeId(String eventBridgeId) {
-        this.eventBridgeId = eventBridgeId;
-    }
-
     public void setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
     }
@@ -112,10 +106,6 @@ public class Project {
 
     public TriggerType getTriggerType() {
         return triggerType;
-    }
-
-    public String getEventBridgeId() {
-        return eventBridgeId;
     }
 
     public String getGitRepoId() {
@@ -163,8 +153,6 @@ public class Project {
         private DslSource dslSource;
         // DSL类型
         private DslType dslType;
-        // Event Bridge Id
-        private String eventBridgeId;
         // 触发类型
         private TriggerType triggerType;
         // Git库Id
@@ -198,11 +186,6 @@ public class Project {
 
         public Builder dslType(DslType dslType) {
             this.dslType = dslType;
-            return this;
-        }
-
-        public Builder eventBridgeId(String eventBridgeId) {
-            this.eventBridgeId = eventBridgeId;
             return this;
         }
 
@@ -260,7 +243,6 @@ public class Project {
             project.dslSource = this.dslSource;
             project.dslType = this.dslType;
             project.triggerType = this.triggerType;
-            project.eventBridgeId = this.eventBridgeId;
             project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
             project.workflowRef = this.workflowRef;
