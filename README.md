@@ -4,7 +4,9 @@
 
 > 建木持续集成平台基于建木自动化平台作为核心实现的持续集成平台，为开发者构建便捷的编译、测试、打包、发布、部署和通知等持续集成生命周期中的相关服务。
 
-#### TL;DR;
+[ci.jianmu.dev](https://ci.jianmu.dev)
+
+#### TL;DR
 
 ```shell
 wget https://gitee.com/jianmu-dev/jianmu-deploy/raw/master/docker-compose.yml
@@ -55,7 +57,7 @@ embedded:
 
 默认Docker Engine是不对外开放的，因此需要自行修改配置。具体可以参考 [Docker Engine API的官方文档](https://docs.docker.com/engine/api/)
 
-[详见官方示例](https://ci.jianmu.dev)
+[官方示例](https://ci.jianmu.dev)
 
 [快速开始](https://docs.jianmu.dev/guide/quick-start.html)
 
