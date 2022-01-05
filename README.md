@@ -7,8 +7,9 @@
 #### TL;DR;
 
 ```shell
-$ wget https://gitee.com/jianmu-dev/jianmu-deploy/raw/master/docker-compose.yml
-$ docker-compose up -d
+wget https://gitee.com/jianmu-dev/jianmu-deploy/raw/master/docker-compose.yml
+
+docker-compose up -d
 ```
 
 #### 运行环境
