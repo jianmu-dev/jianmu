@@ -174,26 +174,34 @@ public class TaskInstanceInternalApplication {
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
+        Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
         if (nodeVersion.getResultFile() != null) {
-            try {
-                // 解析Json为Map
-                var parameterMap = this.parseJson(resultFile);
-                // 创建任务实例输出参数与参数存储参数
-                var outputParameters = this.handleOutputParameter(
-                        parameterMap, nodeVersion, workflow.getType().name(), taskInstance
-                );
-                // 保存任务实例输出参数
-                this.instanceParameterRepository.addAll(outputParameters.keySet());
-                // 保存参数
-                this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
-            } catch (RuntimeException e) {
-                log.warn("e: ", e);
+            outputParameters = this.handleOutputParameter(
+                    resultFile, nodeVersion, workflow.getType().name(), taskInstance
+            );
+            if (outputParameters.isEmpty()) {
                 taskInstance.executeFailed();
-                this.taskInstanceRepository.updateStatus(taskInstance);
-                return;
             }
         }
         taskInstance.executeSucceeded();
+        var parameter = Parameter.Type.STRING.newParameter(taskInstance.getStatus().name());
+        var executionStatus = InstanceParameter.Builder.anInstanceParameter()
+                .instanceId(taskInstance.getId())
+                .triggerId(taskInstance.getTriggerId())
+                .defKey(taskInstance.getDefKey())
+                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                .businessId(taskInstance.getBusinessId())
+                .ref("inner.execution_status")
+                .parameterId(parameter.getId())
+                .required(true)
+                .type(InstanceParameter.Type.OUTPUT)
+                .workflowType(workflow.getType().name())
+                .build();
+        outputParameters.put(executionStatus, parameter);
+        // 保存任务实例输出参数
+        this.instanceParameterRepository.addAll(outputParameters.keySet());
+        // 保存参数
+        this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         this.taskInstanceRepository.saveSucceeded(taskInstance);
     }
 
@@ -201,7 +209,24 @@ public class TaskInstanceInternalApplication {
     public void executeFailed(String taskInstanceId) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         taskInstance.executeFailed();
+        var parameter = Parameter.Type.STRING.newParameter(taskInstance.getStatus().name());
+        var executionStatus = InstanceParameter.Builder.anInstanceParameter()
+                .instanceId(taskInstance.getId())
+                .triggerId(taskInstance.getTriggerId())
+                .defKey(taskInstance.getDefKey())
+                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                .businessId(taskInstance.getBusinessId())
+                .ref("inner.execution_status")
+                .parameterId(parameter.getId())
+                .required(true)
+                .type(InstanceParameter.Type.OUTPUT)
+                .workflowType(workflow.getType().name())
+                .build();
+        this.parameterRepository.addAll(List.of(parameter));
+        this.instanceParameterRepository.addAll(Set.of(executionStatus));
         this.taskInstanceRepository.updateStatus(taskInstance);
     }
 
@@ -280,35 +305,43 @@ public class TaskInstanceInternalApplication {
     }
 
     private Map<InstanceParameter, Parameter<?>> handleOutputParameter(
-            Map<String, Object> parameterMap,
+            String resultFile,
             NodeDef nodeDef,
             String workflowType,
             TaskInstance taskInstance
     ) {
-        // 查找需赋值的输出参数
-        var outputParameters = nodeDef.matchedOutputParameters(parameterMap);
-        return outputParameters.stream()
-                .map(nodeParameter -> {
-                    var value = parameterMap.get(nodeParameter.getRef());
-                    // 创建参数
-                    var parameter = Parameter.Type.getTypeByName(nodeParameter.getType()).newParameter(value);
-                    // 创建任务实例输出参数
-                    var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
-                            .instanceId(taskInstance.getId())
-                            .serialNo(taskInstance.getSerialNo())
-                            .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                            .defKey(taskInstance.getDefKey())
-                            .businessId(taskInstance.getBusinessId())
-                            .triggerId(taskInstance.getTriggerId())
-                            .ref(nodeParameter.getRef())
-                            .type(InstanceParameter.Type.OUTPUT)
-                            .required(nodeParameter.getRequired())
-                            .workflowType(workflowType)
-                            .parameterId(parameter.getId())
-                            .build();
-                    return Map.entry(instanceParameter, parameter);
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        try {
+            // 解析Json为Map
+            var parameterMap = this.parseJson(resultFile);
+            // 创建任务实例输出参数与参数存储参数
+            // 查找需赋值的输出参数
+            var outputParameters = nodeDef.matchedOutputParameters(parameterMap);
+            return outputParameters.stream()
+                    .map(nodeParameter -> {
+                        var value = parameterMap.get(nodeParameter.getRef());
+                        // 创建参数
+                        var parameter = Parameter.Type.getTypeByName(nodeParameter.getType()).newParameter(value);
+                        // 创建任务实例输出参数
+                        var instanceParameter = InstanceParameter.Builder.anInstanceParameter()
+                                .instanceId(taskInstance.getId())
+                                .serialNo(taskInstance.getSerialNo())
+                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                                .defKey(taskInstance.getDefKey())
+                                .businessId(taskInstance.getBusinessId())
+                                .triggerId(taskInstance.getTriggerId())
+                                .ref(nodeParameter.getRef())
+                                .type(InstanceParameter.Type.OUTPUT)
+                                .required(nodeParameter.getRequired())
+                                .workflowType(workflowType)
+                                .parameterId(parameter.getId())
+                                .build();
+                        return Map.entry(instanceParameter, parameter);
+                    })
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } catch (RuntimeException e) {
+            log.warn("e: ", e);
+        }
+        return Map.of();
     }
 
 }
