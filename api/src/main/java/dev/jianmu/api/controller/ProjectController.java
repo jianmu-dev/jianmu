@@ -35,6 +35,18 @@ public class ProjectController {
         this.gitApplication = gitApplication;
     }
 
+    @PutMapping("/enable/{projectId}")
+    @Operation(summary = "激活项目", description = "激活项目")
+    public void enable(@PathVariable String projectId) {
+        this.projectApplication.switchEnabled(projectId, true);
+    }
+
+    @PutMapping("/disable/{projectId}")
+    @Operation(summary = "禁用项目", description = "禁用项目")
+    public void disable(@PathVariable String projectId) {
+        this.projectApplication.switchEnabled(projectId, false);
+    }
+
     @PostMapping("/trigger/{projectId}")
     @Operation(summary = "触发项目", description = "触发项目启动")
     public void trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {

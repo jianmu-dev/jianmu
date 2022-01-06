@@ -33,8 +33,6 @@ public class Project {
     private DslSource dslSource;
     // DSL类型
     private DslType dslType;
-    // Event Bridge Id
-    private String eventBridgeId;
     // 触发类型
     private TriggerType triggerType;
     // Git库Id
@@ -49,6 +47,10 @@ public class Project {
     private String workflowVersion;
     // 流程节点数量
     private int steps;
+    // 项目状态
+    private boolean enabled = true;
+    // 状态是否可变
+    private boolean mutable = false;
     // 原始DSL文本
     private String dslText;
     // 创建时间
@@ -57,6 +59,21 @@ public class Project {
     private String lastModifiedBy;
     // 最后修改时间
     private LocalDateTime lastModifiedTime;
+
+    public void switchEnabled(boolean enabled) {
+        if (!this.mutable) {
+            throw new RuntimeException("mutable为false时项目状态不可更改");
+        }
+        this.enabled = enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setMutable(boolean mutable) {
+        this.mutable = mutable;
+    }
 
     public void setWorkflowName(String workflowName) {
         this.workflowName = workflowName;
@@ -86,10 +103,6 @@ public class Project {
         this.triggerType = triggerType;
     }
 
-    public void setEventBridgeId(String eventBridgeId) {
-        this.eventBridgeId = eventBridgeId;
-    }
-
     public void setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
     }
@@ -112,10 +125,6 @@ public class Project {
 
     public TriggerType getTriggerType() {
         return triggerType;
-    }
-
-    public String getEventBridgeId() {
-        return eventBridgeId;
     }
 
     public String getGitRepoId() {
@@ -142,6 +151,14 @@ public class Project {
         return steps;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isMutable() {
+        return mutable;
+    }
+
     public String getDslText() {
         return dslText;
     }
@@ -163,8 +180,6 @@ public class Project {
         private DslSource dslSource;
         // DSL类型
         private DslType dslType;
-        // Event Bridge Id
-        private String eventBridgeId;
         // 触发类型
         private TriggerType triggerType;
         // Git库Id
@@ -179,6 +194,10 @@ public class Project {
         private String workflowVersion;
         // 流程节点数量
         private int steps;
+        // 项目状态
+        private boolean enabled;
+        // 状态是否可变
+        private boolean mutable;
         // 原始DSL文本
         private String dslText;
         // 最后修改者
@@ -198,11 +217,6 @@ public class Project {
 
         public Builder dslType(DslType dslType) {
             this.dslType = dslType;
-            return this;
-        }
-
-        public Builder eventBridgeId(String eventBridgeId) {
-            this.eventBridgeId = eventBridgeId;
             return this;
         }
 
@@ -241,6 +255,16 @@ public class Project {
             return this;
         }
 
+        public Builder enabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+
+        public Builder mutable(boolean mutable) {
+            this.mutable = mutable;
+            return this;
+        }
+
         public Builder dslText(String dslText) {
             this.dslText = dslText;
             return this;
@@ -252,6 +276,9 @@ public class Project {
         }
 
         public Project build() {
+            if (!this.mutable && !this.enabled) {
+                throw new RuntimeException("mutable与enabled同时为false时，项目将永不可用");
+            }
             Project project = new Project();
             project.id = UUID.randomUUID().toString().replace("-", "");
             project.workflowVersion = this.workflowVersion;
@@ -260,9 +287,10 @@ public class Project {
             project.dslSource = this.dslSource;
             project.dslType = this.dslType;
             project.triggerType = this.triggerType;
-            project.eventBridgeId = this.eventBridgeId;
             project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
+            project.enabled = this.enabled;
+            project.mutable = this.mutable;
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;
             project.lastModifiedBy = this.lastModifiedBy;

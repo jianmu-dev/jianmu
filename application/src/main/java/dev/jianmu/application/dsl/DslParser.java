@@ -3,7 +3,6 @@ package dev.jianmu.application.dsl;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
@@ -26,20 +25,22 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @class DslParser
  * @description DSL解析器
- * @author Ethan Liu
  * @create 2021-09-03 15:01
-*/
+ */
 @Slf4j
 public class DslParser {
     private Map<String, Object> trigger;
     private Project.TriggerType triggerType = Project.TriggerType.MANUAL;
     private Webhook webhook;
     private String cron;
-    private final Map<String, Map<String, Object>> global = new HashMap<>();
+    private final Map<String, Object> global = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
+    private boolean enabled = true;
+    private boolean mutable = false;
     private String name;
     private String description;
     private Workflow.Type type;
@@ -54,7 +55,7 @@ public class DslParser {
         try {
             parser = parser.mapper.readValue(dslText, DslParser.class);
             parser.syntaxCheck();
-            parser.createGlobalParameters();
+            parser.createGlobal();
         } catch (IOException e) {
             throw new DslException("DSL解析异常: " + e.getMessage());
         }
@@ -161,30 +162,47 @@ public class DslParser {
         return new HashSet<>(symbolTable.values());
     }
 
-    private void createGlobalParameters() {
-        var globalParam = this.global.get("param");
-        if (globalParam == null) {
-            return;
+    private void createGlobalParameters(Object globalParam) {
+        if (globalParam instanceof Map) {
+            this.globalParameters = ((Map<String, Object>) globalParam).entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .map(entry -> {
+                        String type = null;
+                        Object value = null;
+                        if (entry.getValue() instanceof String) {
+                            value = entry.getValue().toString();
+                            type = "STRING";
+                        }
+                        if (entry.getValue() instanceof Map) {
+                            value = ((Map<?, ?>) entry.getValue()).get("value");
+                            type = ((Map<String, String>) entry.getValue()).get("type");
+                        }
+                        return GlobalParameter.Builder.aGlobalParameter()
+                                .name(entry.getKey())
+                                .type(type)
+                                .value(value)
+                                .build();
+                    }).collect(Collectors.toSet());
         }
-        this.globalParameters = globalParam.entrySet().stream()
-                .filter(entry -> entry.getValue() != null)
-                .map(entry -> {
-                    String type = null;
-                    Object value = null;
-                    if (entry.getValue() instanceof String) {
-                        value = entry.getValue().toString();
-                        type = "STRING";
-                    }
-                    if (entry.getValue() instanceof Map) {
-                        value = ((Map<?, ?>) entry.getValue()).get("value");
-                        type = ((Map<String, String>) entry.getValue()).get("type");
-                    }
-                    return GlobalParameter.Builder.aGlobalParameter()
-                            .name(entry.getKey())
-                            .type(type)
-                            .value(value)
-                            .build();
-                }).collect(Collectors.toSet());
+    }
+
+    private void createGlobal() {
+        var globalParam = this.global.get("param");
+        this.createGlobalParameters(globalParam);
+        var enabled = this.global.get("enabled");
+        if (enabled instanceof Boolean) {
+            this.enabled = (Boolean) enabled;
+        }
+        if (enabled instanceof Map) {
+            var value = ((Map<String, Object>) enabled).get("value");
+            if (value instanceof Boolean) {
+                this.enabled = (Boolean) value;
+            }
+            var mutable = ((Map<String, Object>) enabled).get("mutable");
+            if (mutable instanceof Boolean) {
+                this.mutable = (Boolean) mutable;
+            }
+        }
     }
 
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
@@ -418,19 +436,18 @@ public class DslParser {
 
     private void globalParamSyntaxCheck() {
         var globalParam = this.global.get("param");
-        if (globalParam == null) {
-            return;
-        }
-        globalParam.forEach((k, v) -> {
-            if (v instanceof Map) {
-                var type = ((Map<String, String>) v).get("type");
-                var value = ((Map<?, ?>) v).get("value");
-                var p = Parameter.Type.getTypeByName(type).newParameter(value);
-                if (Parameter.Type.SECRET == p.getType()) {
-                    throw new DslException("全局参数不支持使用SECRET类型");
+        if (globalParam instanceof Map) {
+            ((Map<String, Object>) globalParam).forEach((k, v) -> {
+                if (v instanceof Map) {
+                    var type = ((Map<String, String>) v).get("type");
+                    var value = ((Map<?, ?>) v).get("value");
+                    var p = Parameter.Type.getTypeByName(type).newParameter(value);
+                    if (Parameter.Type.SECRET == p.getType()) {
+                        throw new DslException("全局参数不支持使用SECRET类型");
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void pipelineSyntaxCheck() {
@@ -589,7 +606,7 @@ public class DslParser {
         return webhook;
     }
 
-    public Map<String, Map<String, Object>> getGlobal() {
+    public Map<String, Object> getGlobal() {
         return global;
     }
 
@@ -599,6 +616,14 @@ public class DslParser {
 
     public Map<String, Object> getPipeline() {
         return pipeline;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isMutable() {
+        return mutable;
     }
 
     public String getName() {
