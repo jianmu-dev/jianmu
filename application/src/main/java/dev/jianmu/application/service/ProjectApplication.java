@@ -91,6 +91,13 @@ public class ProjectApplication {
         this.globalProperties = globalProperties;
     }
 
+    public void switchEnabled(String projectId, boolean enabled) {
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        project.switchEnabled(enabled);
+        this.projectRepository.updateByWorkflowRef(project);
+    }
+
     public void trigger(String projectId, String triggerId, String triggerType) {
         MDC.put("triggerId", triggerId);
         var project = this.projectRepository.findById(projectId)
