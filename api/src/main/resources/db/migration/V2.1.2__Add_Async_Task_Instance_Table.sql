@@ -17,3 +17,7 @@ CREATE TABLE IF NOT EXISTS `async_task_instance`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='异步任务实例表';
 
 ALTER TABLE `jianmu_web_request` ADD INDEX request_time (`request_time` desc);
+
+ALTER TABLE `jianmu_project` ADD `enabled` tinyint(1) DEFAULT NULL COMMENT '项目是否可触发';
+ALTER TABLE `jianmu_project` ADD `mutable` tinyint(1) DEFAULT NULL COMMENT '项目状态是否可变';
+ALTER TABLE `jianmu_project` DROP `event_bridge_id`;
