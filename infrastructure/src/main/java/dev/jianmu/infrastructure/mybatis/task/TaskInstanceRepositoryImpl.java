@@ -1,8 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
 import dev.jianmu.task.event.TaskInstanceRunningEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
@@ -35,75 +35,48 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    private void publishEvent(TaskInstance taskInstance) {
-        switch (taskInstance.getStatus()) {
-            case WAITING:
-                this.applicationEventPublisher.publishEvent(
-                        TaskInstanceCreatedEvent.Builder.aTaskInstanceCreatedEvent()
-                                .defKey(taskInstance.getDefKey())
-                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                                .triggerId(taskInstance.getTriggerId())
-                                .businessId(taskInstance.getBusinessId())
-                                .taskInstanceId(taskInstance.getId())
-                                .build()
-                );
-                break;
-            case RUNNING:
-                this.applicationEventPublisher.publishEvent(
-                        TaskInstanceRunningEvent.Builder.aTaskInstanceRunningEvent()
-                                .defKey(taskInstance.getDefKey())
-                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                                .triggerId(taskInstance.getTriggerId())
-                                .businessId(taskInstance.getBusinessId())
-                                .taskInstanceId(taskInstance.getId())
-                                .build()
-                );
-                break;
-            case EXECUTION_FAILED:
-                this.applicationEventPublisher.publishEvent(
-                        TaskInstanceFailedEvent.Builder.aTaskInstanceFailedEvent()
-                                .defKey(taskInstance.getDefKey())
-                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                                .triggerId(taskInstance.getTriggerId())
-                                .businessId(taskInstance.getBusinessId())
-                                .taskInstanceId(taskInstance.getId())
-                                .build()
-                );
-                break;
-            case EXECUTION_SUCCEEDED:
-                this.applicationEventPublisher.publishEvent(
-                        TaskInstanceSucceedEvent.Builder.aTaskInstanceSucceedEvent()
-                                .defKey(taskInstance.getDefKey())
-                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                                .triggerId(taskInstance.getTriggerId())
-                                .businessId(taskInstance.getBusinessId())
-                                .taskInstanceId(taskInstance.getId())
-                                .build()
-                );
-                break;
-            case DISPATCH_FAILED:
-                break;
-            default:
-                logger.warn("任务实例未知状态");
-        }
-    }
-
     @Override
     public void add(TaskInstance taskInstance) {
         this.taskInstanceMapper.add(taskInstance);
-        this.publishEvent(taskInstance);
+        this.applicationEventPublisher.publishEvent(taskInstance);
     }
 
     @Override
     public void updateStatus(TaskInstance taskInstance) {
         this.taskInstanceMapper.updateStatus(taskInstance);
-        this.publishEvent(taskInstance);
+        if (taskInstance.getStatus().equals(InstanceStatus.RUNNING)) {
+            this.applicationEventPublisher.publishEvent(
+                    TaskInstanceRunningEvent.Builder.aTaskInstanceRunningEvent()
+                            .defKey(taskInstance.getDefKey())
+                            .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                            .businessId(taskInstance.getBusinessId())
+                            .taskInstanceId(taskInstance.getId())
+                            .build()
+            );
+        }
+        if (taskInstance.getStatus().equals(InstanceStatus.EXECUTION_FAILED)) {
+            this.applicationEventPublisher.publishEvent(
+                    TaskInstanceFailedEvent.Builder.aTaskInstanceFailedEvent()
+                            .defKey(taskInstance.getDefKey())
+                            .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                            .businessId(taskInstance.getBusinessId())
+                            .taskInstanceId(taskInstance.getId())
+                            .build()
+            );
+        }
     }
 
     @Override
     public void saveSucceeded(TaskInstance taskInstance) {
         this.taskInstanceMapper.saveSucceeded(taskInstance);
-        this.publishEvent(taskInstance);
+        this.applicationEventPublisher.publishEvent(
+                TaskInstanceSucceedEvent.Builder.aTaskInstanceSucceedEvent()
+                        .defKey(taskInstance.getDefKey())
+                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                        .businessId(taskInstance.getBusinessId())
+                        .taskInstanceId(taskInstance.getId())
+                        .build()
+        );
     }
 
     @Override

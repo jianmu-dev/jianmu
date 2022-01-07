@@ -1,39 +1,23 @@
 package dev.jianmu.workflow.aggregate.definition;
 
-import dev.jianmu.workflow.aggregate.parameter.Parameter;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @author Ethan Liu
  * @program: workflow
  * @description 异步任务节点
+ * @author Ethan Liu
  * @create 2021-01-21 20:42
- */
+*/
 public class AsyncTask extends BaseNode {
     private AsyncTask() {
-    }
-
-    public static Set<TaskParameter> createTaskParameters(Map<String, String> param, Map<String, String> inputParameters) {
-        return param.entrySet().stream().map(entry -> {
-                    var typeString = inputParameters.get(entry.getKey());
-                    var type = Parameter.Type.getTypeByName(typeString);
-                    return TaskParameter.Builder.aTaskParameter()
-                            .ref(entry.getKey())
-                            .type(type)
-                            .expression(entry.getValue())
-                            .build();
-                }
-        ).collect(Collectors.toSet());
     }
 
     public static Set<TaskParameter> createTaskParameters(Map<String, String> param) {
         return param.entrySet().stream().map(entry ->
                 TaskParameter.Builder.aTaskParameter()
                         .ref(entry.getKey())
-                        .type(Parameter.Type.STRING)
                         .expression(entry.getValue())
                         .build()
         ).collect(Collectors.toSet());
