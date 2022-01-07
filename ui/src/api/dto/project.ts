@@ -92,6 +92,8 @@ export interface IProjectVo
     status: ProjectStatusEnum;
     eventBridgeId?: string;
     triggerType: TriggerTypeEnum;
+    enabled: boolean;
+    mutable: boolean;
     description?: string;
   }> {
 }
@@ -229,17 +231,5 @@ export interface INodeDefVo
     documentLink?: string;
     type: string;
     workerType: NodeTypeEnum;
-  }> {
-}
-
-/**
- * 查询项目列表(v2)dto
- */
-export interface queryProjectList
-  extends Readonly<{
-    pageNum: number;
-    pageSize: number;
-    projectGroupId?: string;
-    name?: string;
   }> {
 }

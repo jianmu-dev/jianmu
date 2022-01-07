@@ -30,69 +30,21 @@
         }"
       >
         <jm-tooltip :content="project.name" placement="top">
-          <div class="title ellipsis">{{ project.name}}</div>
+          <div class="title ellipsis">{{ project.name }}</div>
         </jm-tooltip>
       </router-link>
       <div class="time">
         <span v-if="project.status === ProjectStatusEnum.RUNNING"
-          >执行时长：{{
+        >执行时长：{{
             executionTimeFormatter(project.startTime, undefined, true)
           }}</span
         >
         <span v-else
-          >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
+        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
         >
       </div>
       <div class="time">
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
-      </div>
-      <div class="operation" v-if="!isMoveMode">
-        <jm-tooltip content="触发" placement="bottom">
-          <button
-            :class="{ execute: true, doing: executing }"
-            @click="execute(project.id)"
-          ></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
-          content="Webhook"
-          placement="bottom"
-        >
-          <button class="webhook" @click="webhookDrawerFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.source === DslSourceEnum.LOCAL"
-          content="编辑"
-          placement="bottom"
-        >
-          <button class="edit" @click="edit(project.id)"></button>
-        </jm-tooltip>
-        <jm-tooltip v-else content="同步DSL" placement="bottom">
-          <button
-            :class="{ sync: true, doing: synchronizing }"
-            @click="sync(project.id)"
-          ></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.dslType === DslTypeEnum.WORKFLOW"
-          content="查看流程DSL"
-          placement="bottom"
-        >
-          <button class="workflow-label" @click="dslDialogFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-else-if="project.dslType === DslTypeEnum.PIPELINE"
-          content="查看管道DSL"
-          placement="bottom"
-        >
-          <button class="pipeline-label" @click="dslDialogFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip content="删除" placement="top">
-          <button
-            :class="{ del: true, doing: deleting }"
-            @click="del(project.id)"
-          ></button>
-        </jm-tooltip>
       </div>
     </div>
     <webhook-drawer
@@ -143,12 +95,12 @@
       </router-link>
       <div class="time">
         <span v-if="project.status === ProjectStatusEnum.RUNNING"
-          >执行时长：{{
+        >执行时长：{{
             executionTimeFormatter(project.startTime, undefined, true)
           }}</span
         >
         <span v-else
-          >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
+        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
         >
       </div>
       <div class="time">
@@ -195,6 +147,14 @@
         >
           <button class="pipeline-label" @click="dslDialogFlag = true"></button>
         </jm-tooltip>
+        <jm-tooltip :content="enabled? '已启用' : '已禁用'" placement="top" v-if="project.mutable">
+          <jm-switch
+            v-model="enabled"
+            :loading="enabling"
+            :class="{ enabled: true, doing: enabling }"
+            @change="val => enable(project.id, val)"
+          ></jm-switch>
+        </jm-tooltip>
         <jm-tooltip content="删除" placement="top">
           <button
             :class="{ del: true, doing: deleting }"
@@ -219,22 +179,10 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  getCurrentInstance,
-  PropType,
-  ref,
-  SetupContext,
-  computed,
-} from 'vue';
-import {
-  DslSourceEnum,
-  DslTypeEnum,
-  ProjectStatusEnum,
-  TriggerTypeEnum,
-} from '@/api/dto/enumeration';
+import { computed, defineComponent, getCurrentInstance, PropType, ref, SetupContext } from 'vue';
+import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { IProjectVo } from '@/api/dto/project';
-import { del, executeImmediately, synchronize } from '@/api/project';
+import { active, del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import DslDialog from './dsl-dialog.vue';
@@ -266,6 +214,8 @@ export default defineComponent({
     const executing = ref<boolean>(false);
     const synchronizing = ref<boolean>(false);
     const deleting = ref<boolean>(false);
+    const enabling = ref<boolean>(false);
+    const enabled = ref<boolean>(props.project.enabled);
     const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
     return {
@@ -280,6 +230,8 @@ export default defineComponent({
       executing,
       synchronizing,
       deleting,
+      enabling,
+      enabled,
       dslDialogFlag,
       webhookDrawerFlag,
       execute: (id: string) => {
@@ -318,7 +270,8 @@ export default defineComponent({
                 executing.value = false;
               });
           })
-          .catch(() => {});
+          .catch(() => {
+          });
       },
       edit: (id: string) => {
         router.push({ name: 'update-project', params: { id } });
@@ -349,7 +302,8 @@ export default defineComponent({
                 synchronizing.value = false;
               });
           })
-          .catch(() => {});
+          .catch(() => {
+          });
       },
       del: (id: string) => {
         if (deleting.value) {
@@ -383,7 +337,21 @@ export default defineComponent({
                 deleting.value = false;
               });
           })
-          .catch(() => {});
+          .catch(() => {
+          });
+      },
+      enable: async (id: string, val: boolean) => {
+        enabling.value = true;
+
+        try {
+          await active(id, val);
+
+          proxy.$success(val ? '已启用' : '已禁用');
+        } catch (err) {
+          proxy.$throw(err, proxy);
+        } finally {
+          enabling.value = false;
+        }
       },
     };
   },
@@ -421,6 +389,7 @@ export default defineComponent({
   &.move {
     position: relative;
     cursor: move;
+
     .cover {
       display: block;
       position: absolute;
@@ -431,6 +400,7 @@ export default defineComponent({
       background-color: rgba(140, 140, 140, 0.3);
       top: 0;
       left: 0;
+
       &::after {
         content: '';
         position: absolute;
@@ -444,9 +414,11 @@ export default defineComponent({
       }
     }
   }
+
   .cover {
     display: none;
   }
+
   //&:hover {
   //  .content {
   //    .operation {
@@ -469,14 +441,12 @@ export default defineComponent({
     }
 
     &.running {
-      background-image: repeating-linear-gradient(
-        115deg,
-        #10c2c2 0px,
-        #58d4d4 1px,
-        #58d4d4 10px,
-        #10c2c2 11px,
-        #10c2c2 16px
-      );
+      background-image: repeating-linear-gradient(115deg,
+      #10c2c2 0px,
+      #58d4d4 1px,
+      #58d4d4 10px,
+      #10c2c2 11px,
+      #10c2c2 16px);
       background-size: 106px 114px;
       animation: 3s linear 0s infinite normal none running workflow-running;
     }
@@ -533,7 +503,7 @@ export default defineComponent({
       margin-top: 10px;
       font-size: 13px;
       color: #6b7b8d;
-      white-space:nowrap;
+      white-space: nowrap;
     }
 
     .operation {
@@ -542,7 +512,7 @@ export default defineComponent({
       align-items: center;
 
       button + button {
-        margin-left: 20px;
+        margin-left: 12px;
       }
 
       button {
@@ -592,6 +562,7 @@ export default defineComponent({
           background-size: contain;
           opacity: 0.65;
           padding: 2px;
+
           &:hover {
             opacity: 1;
           }
@@ -614,6 +585,10 @@ export default defineComponent({
           }
         }
       }
+
+      .enabled {
+        margin-left: 12px;
+      }
     }
   }
 
@@ -627,6 +602,7 @@ export default defineComponent({
 .project-item {
   margin-left: 0px;
 }
+
 .project-item:nth-child(5n) {
   margin-right: 0px;
 }

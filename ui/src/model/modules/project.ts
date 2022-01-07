@@ -4,7 +4,6 @@ import {
   IProjectImportingDto,
   IProjectQueryingDto,
   IProjectSavingDto,
-  queryProjectList,
 } from '@/api/dto/project';
 
 /**
@@ -31,8 +30,3 @@ export interface IGitCloneForm extends Mutable<IGitCloningDto> {}
  * 导入表单
  */
 export interface IImportForm extends Mutable<IProjectImportingDto> {}
-
-/**
- * 查询项目列表
- */
-export interface IQueryListForm extends Mutable<queryProjectList> {}
