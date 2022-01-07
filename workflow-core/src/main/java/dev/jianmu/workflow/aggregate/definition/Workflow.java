@@ -7,7 +7,6 @@ import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.event.definition.*;
-import dev.jianmu.workflow.event.process.TaskTerminatingEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -179,9 +178,11 @@ public class Workflow extends AggregateRoot {
 
     private Parameter<?> calculateTaskParameter(TaskParameter taskParameter) {
         // 密钥类型单独处理
-        var secret = this.findSecret(taskParameter.getExpression());
-        if (secret != null) {
-            return Parameter.Type.SECRET.newParameter(secret);
+        if (taskParameter.getType() == Parameter.Type.SECRET) {
+            var secret = this.findSecret(taskParameter.getExpression());
+            if (secret != null) {
+                return Parameter.Type.SECRET.newParameter(secret);
+            }
         }
         String el;
         if (isEl(taskParameter.getExpression())) {
@@ -197,6 +198,12 @@ public class Workflow extends AggregateRoot {
                     " 表达式: " + taskParameter.getExpression() +
                     " 计算错误: " + evaluationResult.getFailureMessage();
             throw new RuntimeException(errorMsg);
+        }
+        if (taskParameter.getType() == Parameter.Type.SECRET) {
+            return Parameter.Type.SECRET.newParameter(evaluationResult.getValue().getStringValue());
+        }
+        if (taskParameter.getType() != evaluationResult.getValue().getType()) {
+            throw new IllegalArgumentException("表达式计算结果类型与节点定义参数类型不匹配");
         }
         return evaluationResult.getValue();
     }

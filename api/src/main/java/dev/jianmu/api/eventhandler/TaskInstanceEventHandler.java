@@ -7,7 +7,7 @@ import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
-import dev.jianmu.task.aggregate.TaskInstance;
+import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
 import dev.jianmu.task.event.TaskInstanceRunningEvent;
 import dev.jianmu.task.event.TaskInstanceSucceedEvent;
@@ -74,11 +74,10 @@ public class TaskInstanceEventHandler {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleTaskInstanceEvent(TaskInstance taskInstance) {
-//        this.taskInstanceQueue.put(taskInstance);
+    public void handleTaskInstanceEvent(TaskInstanceCreatedEvent event) {
         // 任务上下文抛出事件通知Worker
-        this.workerApplication.dispatchTask(taskInstance, false);
-        logger.info("Task instance id: {}  ref: {} is running", taskInstance.getId(), taskInstance.getAsyncTaskRef());
+        this.workerApplication.dispatchTask(event, false);
+        logger.info("Task instance id: {}  ref: {} is running", event.getTaskInstanceId(), event.getAsyncTaskRef());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
