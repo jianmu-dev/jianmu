@@ -311,6 +311,9 @@ public class TriggerApplication {
                     this.webRequestRepositoryImpl.add(newWebRequest);
                     return new DataNotFoundException("未找到项目ID: " + webRequest.getProjectId());
                 });
+        if (!project.isEnabled()) {
+            throw new RuntimeException("当前项目不可触发，请先修改状态");
+        }
         newWebRequest.setProjectId(project.getId());
         newWebRequest.setWorkflowRef(project.getWorkflowRef());
         newWebRequest.setWorkflowVersion(project.getWorkflowVersion());
