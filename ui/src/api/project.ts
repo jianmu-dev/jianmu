@@ -20,7 +20,7 @@ export async function save(dto: IProjectSavingDto): Promise<IProjectIdVo> {
     payload: dto,
     auth: true,
   });
-  
+
   return dto.id ? {
     id: dto.id,
   } : res;
@@ -108,5 +108,18 @@ export function synchronize(id: string): Promise<void> {
     method: 'put',
     auth: true,
     timeout: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * 激活项目
+ * @param id
+ * @param enable
+ */
+export function active(id: string, enable: boolean): Promise<void> {
+  return restProxy({
+    url: `${baseUrl.project}/${enable ? 'enable' : 'disable'}/${id}`,
+    method: 'put',
+    auth: true,
   });
 }

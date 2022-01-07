@@ -92,6 +92,8 @@ export interface IProjectVo
     status: ProjectStatusEnum;
     eventBridgeId?: string;
     triggerType: TriggerTypeEnum;
+    enabled: boolean;
+    mutable: boolean;
     description?: string;
   }> {
 }
