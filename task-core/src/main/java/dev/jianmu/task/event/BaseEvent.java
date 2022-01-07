@@ -11,25 +11,24 @@ import java.util.UUID;
 */
 public abstract class BaseEvent implements DomainEvent {
     // 触发时间
-    private final LocalDateTime occurredTime;
+    private LocalDateTime occurredTime;
     // 事件唯一ID
-    private final String identify;
+    private String identify;
 
     // 事件名称
-    private final String name = this.getClass().getSimpleName();
+    private String name = this.getClass().getSimpleName();
     // 任务实例ID
     protected String taskInstanceId;
     // 任务定义唯一Key
     protected String defKey;
     // 流程定义上下文中的AsyncTask唯一标识
     protected String asyncTaskRef;
-    // 外部触发ID，流程实例唯一
-    protected String triggerId;
     // 外部业务ID, 必须唯一
     protected String businessId;
 
     protected BaseEvent() {
         this.occurredTime = LocalDateTime.now();
+        // TODO 暂时使用UUID的值
         this.identify = UUID.randomUUID().toString().replace("-", "");
     }
 
@@ -47,10 +46,6 @@ public abstract class BaseEvent implements DomainEvent {
 
     public String getAsyncTaskRef() {
         return asyncTaskRef;
-    }
-
-    public String getTriggerId() {
-        return triggerId;
     }
 
     public String getBusinessId() {
@@ -76,7 +71,6 @@ public abstract class BaseEvent implements DomainEvent {
                 ", taskInstanceId='" + taskInstanceId + '\'' +
                 ", defKey='" + defKey + '\'' +
                 ", asyncTaskRef='" + asyncTaskRef + '\'' +
-                ", triggerId='" + triggerId + '\'' +
                 ", businessId='" + businessId + '\'' +
                 '}';
     }

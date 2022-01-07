@@ -4,9 +4,8 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.task.event.TaskInstanceCreatedEvent;
+import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
-import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
@@ -40,7 +39,6 @@ public class WorkerApplication {
     private final ParameterDomainService parameterDomainService;
     private final CredentialManager credentialManager;
     private final NodeDefApi nodeDefApi;
-    private final TaskInstanceRepository taskInstanceRepository;
     private final WorkerRepository workerRepository;
     private final ApplicationEventPublisher publisher;
     private final InstanceParameterRepository instanceParameterRepository;
@@ -50,7 +48,6 @@ public class WorkerApplication {
             ParameterDomainService parameterDomainService,
             CredentialManager credentialManager,
             NodeDefApi nodeDefApi,
-            TaskInstanceRepository taskInstanceRepository,
             WorkerRepository workerRepository,
             ApplicationEventPublisher publisher,
             InstanceParameterRepository instanceParameterRepository
@@ -59,7 +56,6 @@ public class WorkerApplication {
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
         this.nodeDefApi = nodeDefApi;
-        this.taskInstanceRepository = taskInstanceRepository;
         this.workerRepository = workerRepository;
         this.publisher = publisher;
         this.instanceParameterRepository = instanceParameterRepository;
@@ -105,26 +101,26 @@ public class WorkerApplication {
         );
     }
 
-    public void dispatchTask(TaskInstanceCreatedEvent event, boolean resumed) {
+    public void dispatchTask(TaskInstance taskInstance, boolean resumed) {
         // 查找节点定义
-        var nodeDef = this.nodeDefApi.findByType(event.getDefKey());
+        var nodeDef = this.nodeDefApi.findByType(taskInstance.getDefKey());
         if (!nodeDef.getWorkerType().equals("DOCKER")) {
             throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
         }
         var worker = this.findWorker();
         // 创建WorkerTask
         var instanceParameters = this.instanceParameterRepository
-                .findByInstanceIdAndType(event.getTaskInstanceId(), InstanceParameter.Type.INPUT);
+                .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
         var parameterMap = this.getParameterMap(instanceParameters);
         WorkerTask workerTask;
         if (nodeDef.getImage() != null) {
             workerTask = WorkerTask.Builder.aWorkerTask()
                     .workerId(worker.getId())
                     .type(worker.getType())
-                    .taskInstanceId(event.getTaskInstanceId())
-                    .businessId(event.getBusinessId())
-                    .triggerId(event.getTriggerId())
-                    .defKey(event.getDefKey())
+                    .taskInstanceId(taskInstance.getId())
+                    .businessId(taskInstance.getBusinessId())
+                    .triggerId(taskInstance.getTriggerId())
+                    .defKey(taskInstance.getDefKey())
                     .parameterMap(parameterMap)
                     .resumed(resumed)
                     .shellTask(true)
@@ -136,10 +132,10 @@ public class WorkerApplication {
             workerTask = WorkerTask.Builder.aWorkerTask()
                     .workerId(worker.getId())
                     .type(worker.getType())
-                    .taskInstanceId(event.getTaskInstanceId())
-                    .businessId(event.getBusinessId())
-                    .triggerId(event.getTriggerId())
-                    .defKey(event.getDefKey())
+                    .taskInstanceId(taskInstance.getId())
+                    .businessId(taskInstance.getBusinessId())
+                    .triggerId(taskInstance.getTriggerId())
+                    .defKey(taskInstance.getDefKey())
                     .resultFile(nodeDef.getResultFile())
                     .spec(nodeDef.getSpec())
                     .parameterMap(parameterMap)

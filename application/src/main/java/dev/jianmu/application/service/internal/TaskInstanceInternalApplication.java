@@ -148,13 +148,7 @@ public class TaskInstanceInternalApplication {
 
         workflow.setExpressionLanguage(this.expressionLanguage);
         workflow.setContext(context);
-        Map<String, Parameter<?>> params = Map.of();
-        try {
-            params = workflow.calculateTaskParams(asyncTask.getRef());
-        } catch (RuntimeException e) {
-            log.warn("任务参数计算错误：{}", e.getMessage());
-            taskInstance.executeFailed();
-        }
+        var params = workflow.calculateTaskParams(asyncTask.getRef());
 
         // 创建任务实例输入参数
         var instanceInputParameters = this.createInstanceParameters(params, taskInstance, workflow.getType().name(), nodeDef.getInputParameters());
