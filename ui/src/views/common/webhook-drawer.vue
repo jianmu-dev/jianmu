@@ -374,8 +374,8 @@ export default defineComponent({
     const retryRequest = async (id: string) => {
       try {
         webhookRequestParams.value.pageNum = START_PAGE_NUM;
-        proxy.$success('重试成功');
         await retryWebRequest(id);
+        proxy.$success('重试成功');
         // 旧数据覆盖新数据
         getWebhookRequestList('cover');
       } catch (err) {
