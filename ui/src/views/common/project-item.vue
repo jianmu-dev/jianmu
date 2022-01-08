@@ -7,82 +7,6 @@
       }"
     ></div>
     <div class="content">
-      <jm-tooltip
-        v-if="project.source === DslSourceEnum.GIT"
-        content="打开git仓库"
-        placement="bottom"
-      >
-        <a
-          :class="{
-            'git-label': true,
-            [project.status === ProjectStatusEnum.INIT
-              ? 'init'
-              : 'normal']: true,
-          }"
-          :href="`/view/repo/${project.gitRepoId}`"
-          target="_blank"
-        ></a>
-      </jm-tooltip>
-      <router-link
-        :to="{
-          name: 'workflow-execution-record-detail',
-          query: { projectId: project.id },
-        }"
-      >
-        <jm-tooltip :content="project.name" placement="top">
-          <div class="title ellipsis">{{ project.name }}</div>
-        </jm-tooltip>
-      </router-link>
-      <div class="time">
-        <span v-if="project.status === ProjectStatusEnum.RUNNING"
-        >执行时长：{{
-            executionTimeFormatter(project.startTime, undefined, true)
-          }}</span
-        >
-        <span v-else
-        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
-        >
-      </div>
-      <div class="time">
-        下次执行时间：{{ datetimeFormatter(project.nextTime) }}
-      </div>
-    </div>
-    <webhook-drawer
-      :current-project-id="project.id"
-      v-model:webhookVisible="webhookDrawerFlag"
-    ></webhook-drawer>
-    <dsl-dialog
-      v-if="dslDialogFlag"
-      :project-id="project.id"
-      :dsl-type="project.dslType"
-      @close="dslDialogFlag = false"
-    />
-    <div class="cover"></div>
-  </div>
-  <div class="project-item" v-else>
-    <div
-      :class="{
-        'state-bar': true,
-        [project.status.toLowerCase()]: true,
-      }"
-    ></div>
-    <div class="content">
-      <jm-tooltip
-        v-if="project.source === DslSourceEnum.GIT"
-        content="打开git仓库"
-        placement="bottom"
-      >
-        <a
-          :class="{
-            'git-label': true,
-            [project.status === ProjectStatusEnum.INIT
-              ? 'init'
-              : 'normal']: true,
-          }"
-          :href="`/view/repo/${project.gitRepoId}`"
-          target="_blank"
-        ></a>
-      </jm-tooltip>
       <router-link
         :to="{
           name: 'workflow-execution-record-detail',
@@ -107,60 +31,121 @@
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
       </div>
       <div class="operation">
-        <jm-tooltip content="触发" placement="bottom">
-          <button
-            :class="{ execute: true, doing: executing }"
-            @click="execute(project.id)"
-          ></button>
+        <div class="top"></div>
+        <div class="bottom"></div>
+      </div>
+    </div>
+    <div class="cover"></div>
+  </div>
+  <div class="project-item" v-else>
+    <div
+      :class="{
+        'state-bar': true,
+        [project.status.toLowerCase()]: true,
+      }"
+    ></div>
+    <div class="content">
+      <router-link
+        :to="{
+          name: 'workflow-execution-record-detail',
+          query: { projectId: project.id },
+        }"
+      >
+        <jm-tooltip :content="project.name" placement="top">
+          <div :class="{
+            title: true,
+            ellipsis: true,
+            disabled: !enabled,
+          }">{{ project.name }}
+          </div>
         </jm-tooltip>
-        <jm-tooltip
-          v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
-          content="Webhook"
-          placement="bottom"
+      </router-link>
+      <div :class="{
+        time: true,
+        disabled: !enabled,
+      }">
+        <span v-if="project.status === ProjectStatusEnum.RUNNING"
+        >执行时长：{{
+            executionTimeFormatter(project.startTime, undefined, true)
+          }}</span
         >
-          <button class="webhook" @click="webhookDrawerFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.source === DslSourceEnum.LOCAL"
-          content="编辑"
-          placement="bottom"
+        <span v-else
+        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
         >
-          <button class="edit" @click="edit(project.id)"></button>
-        </jm-tooltip>
-        <jm-tooltip v-else content="同步DSL" placement="bottom">
-          <button
-            :class="{ sync: true, doing: synchronizing }"
-            @click="sync(project.id)"
-          ></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.dslType === DslTypeEnum.WORKFLOW"
-          content="查看流程DSL"
-          placement="bottom"
-        >
-          <button class="workflow-label" @click="dslDialogFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-else-if="project.dslType === DslTypeEnum.PIPELINE"
-          content="查看管道DSL"
-          placement="bottom"
-        >
-          <button class="pipeline-label" @click="dslDialogFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip :content="enabled? '已启用' : '已禁用'" placement="top" v-if="project.mutable">
-          <jm-switch
-            v-model="enabled"
-            :loading="enabling"
-            :class="{ enabled: true, doing: enabling }"
-            @change="val => enable(project.id, val)"
-          ></jm-switch>
-        </jm-tooltip>
-        <jm-tooltip content="删除" placement="top">
-          <button
-            :class="{ del: true, doing: deleting }"
-            @click="del(project.id)"
-          ></button>
-        </jm-tooltip>
+      </div>
+      <div :class="{
+        time: true,
+        disabled: !enabled,
+      }">
+        下次执行时间：{{ datetimeFormatter(project.nextTime) }}
+      </div>
+      <div class="operation">
+        <div class="top">
+          <jm-tooltip content="触发" placement="bottom">
+            <button
+              :class="{ execute: true, doing: !enabled || executing }"
+              @click="execute(project.id)"
+            ></button>
+          </jm-tooltip>
+          <jm-tooltip
+            v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
+            content="Webhook"
+            placement="bottom"
+          >
+            <button class="webhook" @click="webhookDrawerFlag = true"></button>
+          </jm-tooltip>
+          <jm-tooltip
+            v-if="project.source === DslSourceEnum.LOCAL"
+            content="编辑"
+            placement="bottom"
+          >
+            <button class="edit" @click="edit(project.id)"></button>
+          </jm-tooltip>
+          <jm-tooltip v-else content="同步DSL" placement="bottom">
+            <button
+              :class="{ sync: true, doing: synchronizing }"
+              @click="sync(project.id)"
+            ></button>
+          </jm-tooltip>
+          <jm-tooltip
+            v-if="project.source === DslSourceEnum.GIT"
+            content="打开git仓库"
+            placement="bottom"
+          >
+            <button class="git-label" @click="openGit(project.gitRepoId)"></button>
+          </jm-tooltip>
+          <jm-tooltip
+            v-if="project.dslType === DslTypeEnum.WORKFLOW"
+            content="查看流程DSL"
+            placement="bottom"
+          >
+            <button class="workflow-label" @click="dslDialogFlag = true"></button>
+          </jm-tooltip>
+          <jm-tooltip
+            v-else-if="project.dslType === DslTypeEnum.PIPELINE"
+            content="查看管道DSL"
+            placement="bottom"
+          >
+            <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+          </jm-tooltip>
+        </div>
+        <div class="bottom">
+          <jm-tooltip :content="enabled? '已启用' : '已禁用'" placement="bottom">
+            <jm-switch
+              v-model="enabled"
+              :disabled="!project.mutable"
+              :loading="enabling"
+              :class="{ doing: enabling }"
+              @change="val => enable(project.id, val)"
+            ></jm-switch>
+          </jm-tooltip>
+          <jm-tooltip content="删除" placement="bottom">
+            <button
+              :class="{ del: true, doing: deleting }"
+              @click="del(project.id)"
+            ></button>
+          </jm-tooltip>
+        </div>
       </div>
     </div>
     <webhook-drawer
@@ -187,6 +172,7 @@ import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import DslDialog from './dsl-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
+import sleep from '@/utils/sleep';
 
 export default defineComponent({
   components: { DslDialog, WebhookDrawer },
@@ -235,7 +221,7 @@ export default defineComponent({
       dslDialogFlag,
       webhookDrawerFlag,
       execute: (id: string) => {
-        if (executing.value) {
+        if (!enabled.value || executing.value) {
           return;
         }
 
@@ -340,6 +326,9 @@ export default defineComponent({
           .catch(() => {
           });
       },
+      openGit: (gitRepoId: string) => {
+        window.open(`/view/repo/${gitRepoId}`);
+      },
       enable: async (id: string, val: boolean) => {
         enabling.value = true;
 
@@ -349,6 +338,9 @@ export default defineComponent({
           proxy.$success(val ? '已启用' : '已禁用');
         } catch (err) {
           proxy.$throw(err, proxy);
+
+          await sleep(300);
+          enabled.value = !val;
         } finally {
           enabling.value = false;
         }
@@ -384,7 +376,7 @@ export default defineComponent({
   min-width: 260px;
   background-color: #ffffff;
   box-shadow: 0px 0px 8px 4px #eff4f9;
-  min-height: 170px;
+  min-height: 209px;
 
   &.move {
     position: relative;
@@ -465,34 +457,14 @@ export default defineComponent({
     position: relative;
     padding: 20px 20px 16px 20px;
 
-    .git-label {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 40px;
-      height: 40px;
-      overflow: hidden;
-      background-position: center center;
-      background-repeat: no-repeat;
-      cursor: pointer;
-
-      &:active {
-        opacity: 0.8;
-      }
-
-      &.normal {
-        background-image: url('@/assets/svgs/index/git-label.svg');
-      }
-
-      &.init {
-        background-image: url('@/assets/svgs/index/git-label2.svg');
-      }
-    }
-
     .title {
       width: 90%;
       font-size: 16px;
       color: #082340;
+
+      &.disabled {
+        color: #979797;
+      }
 
       &:hover {
         color: #096dd9;
@@ -504,21 +476,20 @@ export default defineComponent({
       font-size: 13px;
       color: #6b7b8d;
       white-space: nowrap;
+
+      &.disabled {
+        color: #979797;
+      }
     }
 
     .operation {
-      margin-top: 18px;
-      display: flex;
-      align-items: center;
-
       button + button {
-        margin-left: 12px;
+        margin-left: 16px;
       }
 
       button {
-        width: 30px;
-        height: 30px;
-        padding: 3px;
+        width: 26px;
+        height: 26px;
         background-color: transparent;
         border: 0;
         background-position: center center;
@@ -552,20 +523,14 @@ export default defineComponent({
         }
 
         &.del {
-          position: absolute;
-          right: 7px;
-          top: 7px;
-          width: 22px;
-          height: 22px;
-          //display: none;
+          width: 24px;
+          height: 24px;
           background-image: url('@/assets/svgs/btn/del.svg');
           background-size: contain;
-          opacity: 0.65;
-          padding: 2px;
+        }
 
-          &:hover {
-            opacity: 1;
-          }
+        &.git-label {
+          background-image: url('@/assets/svgs/index/git-label.svg');
         }
 
         &.workflow-label {
@@ -586,8 +551,20 @@ export default defineComponent({
         }
       }
 
-      .enabled {
-        margin-left: 12px;
+      .top {
+        padding: 12px 0;
+        min-height: 26px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #E8E8E8;
+      }
+
+      .bottom {
+        padding-top: 12px;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
     }
   }
