@@ -4,8 +4,9 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.task.aggregate.TaskInstance;
+import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
+import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
@@ -27,11 +28,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @class WorkerApplication
  * @description 任务执行器门面类
- * @author Ethan Liu
  * @create 2021-04-02 12:30
-*/
+ */
 @Service
 @Transactional
 public class WorkerApplication {
@@ -101,26 +102,26 @@ public class WorkerApplication {
         );
     }
 
-    public void dispatchTask(TaskInstance taskInstance, boolean resumed) {
+    public void dispatchTask(TaskInstanceCreatedEvent event, boolean resumed) {
         // 查找节点定义
-        var nodeDef = this.nodeDefApi.findByType(taskInstance.getDefKey());
+        var nodeDef = this.nodeDefApi.findByType(event.getDefKey());
         if (!nodeDef.getWorkerType().equals("DOCKER")) {
             throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
         }
         var worker = this.findWorker();
         // 创建WorkerTask
         var instanceParameters = this.instanceParameterRepository
-                .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
+                .findByInstanceIdAndType(event.getTaskInstanceId(), InstanceParameter.Type.INPUT);
         var parameterMap = this.getParameterMap(instanceParameters);
         WorkerTask workerTask;
         if (nodeDef.getImage() != null) {
             workerTask = WorkerTask.Builder.aWorkerTask()
                     .workerId(worker.getId())
                     .type(worker.getType())
-                    .taskInstanceId(taskInstance.getId())
-                    .businessId(taskInstance.getBusinessId())
-                    .triggerId(taskInstance.getTriggerId())
-                    .defKey(taskInstance.getDefKey())
+                    .taskInstanceId(event.getTaskInstanceId())
+                    .businessId(event.getBusinessId())
+                    .triggerId(event.getTriggerId())
+                    .defKey(event.getDefKey())
                     .parameterMap(parameterMap)
                     .resumed(resumed)
                     .shellTask(true)
@@ -132,10 +133,10 @@ public class WorkerApplication {
             workerTask = WorkerTask.Builder.aWorkerTask()
                     .workerId(worker.getId())
                     .type(worker.getType())
-                    .taskInstanceId(taskInstance.getId())
-                    .businessId(taskInstance.getBusinessId())
-                    .triggerId(taskInstance.getTriggerId())
-                    .defKey(taskInstance.getDefKey())
+                    .taskInstanceId(event.getTaskInstanceId())
+                    .businessId(event.getBusinessId())
+                    .triggerId(event.getTriggerId())
+                    .defKey(event.getDefKey())
                     .resultFile(nodeDef.getResultFile())
                     .spec(nodeDef.getSpec())
                     .parameterMap(parameterMap)

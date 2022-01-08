@@ -275,7 +275,10 @@ public class DslParser {
         this.checkNodeParamRequired(dslNode, nodeDef);
         Set<TaskParameter> taskParameters = Set.of();
         if (dslNode.getParam() != null) {
-            taskParameters = AsyncTask.createTaskParameters(dslNode.getParam());
+            var inputParameters = nodeDef.getInputParameters().stream()
+                    .map(nodeParameter -> Map.entry(nodeParameter.getRef(), nodeParameter.getType()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            taskParameters = AsyncTask.createTaskParameters(dslNode.getParam(), inputParameters);
         }
         return AsyncTask.Builder.anAsyncTask()
                 .name(nodeDef.getName())
