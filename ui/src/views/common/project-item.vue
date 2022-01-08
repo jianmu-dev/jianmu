@@ -130,7 +130,20 @@
           </jm-tooltip>
         </div>
         <div class="bottom">
-          <jm-tooltip :content="enabled? '已启用' : '已禁用'" placement="bottom">
+          <jm-tooltip placement="bottom">
+            <template #content>
+              <div>
+                <span>{{ enabled ? '已启用' : '已禁用' }}</span>
+                <a href="https://docs.jianmu.dev/guide/global.html"
+                   target="_blank"
+                   class="jm-icon-button-help"
+                   style="color: #ffffff; font-size: 1.1em;"
+                ></a>
+              </div>
+              <template v-if="!project.mutable">
+                <div style="margin-top: 10px;">若要修改，请通过DSL更新</div>
+              </template>
+            </template>
             <jm-switch
               v-model="enabled"
               :disabled="!project.mutable"
