@@ -30,17 +30,11 @@
       <div class="time">
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
       </div>
+      <div class="operation">
+        <div class="top"></div>
+        <div class="bottom"></div>
+      </div>
     </div>
-    <webhook-drawer
-      :current-project-id="project.id"
-      v-model:webhookVisible="webhookDrawerFlag"
-    ></webhook-drawer>
-    <dsl-dialog
-      v-if="dslDialogFlag"
-      :project-id="project.id"
-      :dsl-type="project.dslType"
-      @close="dslDialogFlag = false"
-    />
     <div class="cover"></div>
   </div>
   <div class="project-item" v-else>
@@ -382,7 +376,7 @@ export default defineComponent({
   min-width: 260px;
   background-color: #ffffff;
   box-shadow: 0px 0px 8px 4px #eff4f9;
-  min-height: 170px;
+  min-height: 209px;
 
   &.move {
     position: relative;
@@ -559,6 +553,7 @@ export default defineComponent({
 
       .top {
         padding: 12px 0;
+        min-height: 26px;
         display: flex;
         align-items: center;
         border-bottom: 1px solid #E8E8E8;
@@ -566,6 +561,7 @@ export default defineComponent({
 
       .bottom {
         padding-top: 12px;
+        min-height: 24px;
         display: flex;
         align-items: center;
         justify-content: space-between;
