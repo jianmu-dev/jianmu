@@ -2,12 +2,12 @@ package dev.jianmu.task.event;
 
 /**
  * @author Ethan Liu
- * @class TaskInstanceSucceedEvent
- * @description 任务实例运行成功事件
- * @create 2021-04-06 16:09
+ * @class TaskInstanceCreatedEvent
+ * @description 任务实例创建事件
+ * @create 2022-01-06 18:37
  */
-public class TaskInstanceSucceedEvent extends BaseEvent {
-    private TaskInstanceSucceedEvent() {
+public class TaskInstanceCreatedEvent extends BaseEvent {
+    private TaskInstanceCreatedEvent() {
     }
 
     public static final class Builder {
@@ -25,7 +25,7 @@ public class TaskInstanceSucceedEvent extends BaseEvent {
         private Builder() {
         }
 
-        public static Builder aTaskInstanceSucceedEvent() {
+        public static Builder aTaskInstanceCreatedEvent() {
             return new Builder();
         }
 
@@ -54,14 +54,14 @@ public class TaskInstanceSucceedEvent extends BaseEvent {
             return this;
         }
 
-        public TaskInstanceSucceedEvent build() {
-            TaskInstanceSucceedEvent taskInstanceSucceedEvent = new TaskInstanceSucceedEvent();
-            taskInstanceSucceedEvent.defKey = this.defKey;
-            taskInstanceSucceedEvent.triggerId = this.triggerId;
-            taskInstanceSucceedEvent.businessId = this.businessId;
-            taskInstanceSucceedEvent.taskInstanceId = this.taskInstanceId;
-            taskInstanceSucceedEvent.asyncTaskRef = this.asyncTaskRef;
-            return taskInstanceSucceedEvent;
+        public TaskInstanceCreatedEvent build() {
+            TaskInstanceCreatedEvent taskInstanceCreatedEvent = new TaskInstanceCreatedEvent();
+            taskInstanceCreatedEvent.defKey = this.defKey;
+            taskInstanceCreatedEvent.triggerId = this.triggerId;
+            taskInstanceCreatedEvent.businessId = this.businessId;
+            taskInstanceCreatedEvent.taskInstanceId = this.taskInstanceId;
+            taskInstanceCreatedEvent.asyncTaskRef = this.asyncTaskRef;
+            return taskInstanceCreatedEvent;
         }
     }
 }

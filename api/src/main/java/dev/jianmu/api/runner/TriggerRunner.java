@@ -3,6 +3,7 @@ package dev.jianmu.api.runner;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkerApplication;
+import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -44,7 +45,14 @@ public class TriggerRunner implements ApplicationRunner {
         log.info("恢复仍在运行中的任务数量：{}", taskInstances.size());
         taskInstances.forEach(taskInstance -> {
             try {
-                this.workerApplication.dispatchTask(taskInstance, true);
+                var event = TaskInstanceCreatedEvent.Builder.aTaskInstanceCreatedEvent()
+                        .defKey(taskInstance.getDefKey())
+                        .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                        .triggerId(taskInstance.getTriggerId())
+                        .businessId(taskInstance.getBusinessId())
+                        .taskInstanceId(taskInstance.getId())
+                        .build();
+                this.workerApplication.dispatchTask(event, true);
                 log.info("Task instance id: {}  ref: {} is resumed", taskInstance.getId(), taskInstance.getAsyncTaskRef());
             } catch (Exception e) {
                 log.warn("Task instance id: {}  ref: {} is resume failed, due to: {}", taskInstance.getId(), taskInstance.getAsyncTaskRef(), e.getMessage());
