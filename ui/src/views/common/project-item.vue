@@ -80,85 +80,78 @@
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
       </div>
       <div class="operation">
-        <div class="top">
-          <jm-tooltip content="触发" placement="bottom">
-            <button
-              :class="{ execute: true, doing: !enabled || executing }"
-              @click="execute(project.id)"
-            ></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
-            content="Webhook"
-            placement="bottom"
-          >
-            <button class="webhook" @click="webhookDrawerFlag = true"></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.source === DslSourceEnum.LOCAL"
-            content="编辑"
-            placement="bottom"
-          >
-            <button class="edit" @click="edit(project.id)"></button>
-          </jm-tooltip>
-          <jm-tooltip v-else content="同步DSL" placement="bottom">
-            <button
-              :class="{ sync: true, doing: synchronizing }"
-              @click="sync(project.id)"
-            ></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.source === DslSourceEnum.GIT"
-            content="打开git仓库"
-            placement="bottom"
-          >
-            <button class="git-label" @click="openGit(project.gitRepoId)"></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.dslType === DslTypeEnum.WORKFLOW"
-            content="查看流程DSL"
-            placement="bottom"
-          >
-            <button class="workflow-label" @click="dslDialogFlag = true"></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-else-if="project.dslType === DslTypeEnum.PIPELINE"
-            content="查看管道DSL"
-            placement="bottom"
-          >
-            <button class="pipeline-label" @click="dslDialogFlag = true"></button>
-          </jm-tooltip>
-        </div>
-        <div class="bottom">
-          <jm-tooltip placement="bottom">
-            <template #content>
-              <div>
-                <span>{{ enabled ? '已启用' : '已禁用' }}</span>
-                <a href="https://docs.jianmu.dev/guide/global.html"
-                   target="_blank"
-                   class="jm-icon-button-help"
-                   style="color: #ffffff; font-size: 1.1em;"
-                ></a>
-              </div>
-              <template v-if="!project.mutable">
-                <div style="margin-top: 10px;">若要修改，请通过DSL更新</div>
-              </template>
+        <jm-tooltip :content="`${enabled ? '' : '已禁用，不可'}触发`" placement="bottom">
+          <button
+            :class="{ execute: true, doing: !enabled || executing }"
+            @click="execute(project.id)"
+          ></button>
+        </jm-tooltip>
+        <jm-tooltip placement="bottom">
+          <template #content>
+            <div>
+              <span>{{ enabled ? '已启用' : '已禁用' }}</span>
+              <a href="https://docs.jianmu.dev/guide/global.html"
+                 target="_blank"
+                 class="jm-icon-button-help"
+                 style="color: #ffffff; font-size: 1.1em;"
+              ></a>
+            </div>
+            <template v-if="!project.mutable">
+              <div style="margin-top: 10px;">若要修改，请通过DSL更新</div>
             </template>
-            <jm-switch
-              v-model="enabled"
-              :disabled="!project.mutable"
-              :loading="enabling"
-              :class="{ doing: enabling }"
-              @change="val => enable(project.id, val)"
-            ></jm-switch>
-          </jm-tooltip>
-          <jm-tooltip content="删除" placement="bottom">
-            <button
-              :class="{ del: true, doing: deleting }"
-              @click="del(project.id)"
-            ></button>
-          </jm-tooltip>
-        </div>
+          </template>
+          <button
+            :class="{ able: true, disabled: project.mutable && !enabled, doing: !project.mutable || abling }"
+            @click="able(project.id)"
+          ></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
+          content="Webhook"
+          placement="bottom"
+        >
+          <button class="webhook" @click="webhookDrawerFlag = true"></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.source === DslSourceEnum.LOCAL"
+          content="编辑"
+          placement="bottom"
+        >
+          <button class="edit" @click="edit(project.id)"></button>
+        </jm-tooltip>
+        <jm-tooltip v-else content="同步DSL" placement="bottom">
+          <button
+            :class="{ sync: true, doing: synchronizing }"
+            @click="sync(project.id)"
+          ></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.source === DslSourceEnum.GIT"
+          content="打开git仓库"
+          placement="bottom"
+        >
+          <button class="git-label" @click="openGit(project.gitRepoId)"></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.dslType === DslTypeEnum.WORKFLOW"
+          content="查看流程DSL"
+          placement="bottom"
+        >
+          <button class="workflow-label" @click="dslDialogFlag = true"></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-else-if="project.dslType === DslTypeEnum.PIPELINE"
+          content="查看管道DSL"
+          placement="bottom"
+        >
+          <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+        </jm-tooltip>
+        <jm-tooltip content="删除" placement="bottom">
+          <button
+            :class="{ del: true, doing: deleting }"
+            @click="del(project.id)"
+          ></button>
+        </jm-tooltip>
       </div>
     </div>
     <webhook-drawer
@@ -185,7 +178,6 @@ import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import DslDialog from './dsl-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
-import sleep from '@/utils/sleep';
 
 export default defineComponent({
   components: { DslDialog, WebhookDrawer },
@@ -211,9 +203,9 @@ export default defineComponent({
     const isMove = computed<boolean>(() => props.move);
     const isMoveMode = computed<boolean>(() => props.moveMode);
     const executing = ref<boolean>(false);
+    const abling = ref<boolean>(false);
     const synchronizing = ref<boolean>(false);
     const deleting = ref<boolean>(false);
-    const enabling = ref<boolean>(false);
     const enabled = ref<boolean>(props.project.enabled);
     const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
@@ -227,9 +219,9 @@ export default defineComponent({
       datetimeFormatter,
       executionTimeFormatter,
       executing,
+      abling,
       synchronizing,
       deleting,
-      enabling,
       enabled,
       dslDialogFlag,
       webhookDrawerFlag,
@@ -271,6 +263,31 @@ export default defineComponent({
           })
           .catch(() => {
           });
+      },
+      able: (id: string) => {
+        if (!props.project.mutable || abling.value) {
+          return;
+        }
+
+        const str = enabled.value ? '禁用' : '启用';
+        proxy.$confirm(`确定要${str}吗?`, `${str}项目`, {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info',
+        }).then(async () => {
+          abling.value = true;
+          try {
+            await active(id, !enabled.value);
+            enabled.value = !enabled.value;
+
+            proxy.$success(enabled.value ? '已启用' : '已禁用');
+          } catch (err) {
+            proxy.$throw(err, proxy);
+          } finally {
+            abling.value = false;
+          }
+        }).catch(() => {
+        });
       },
       edit: (id: string) => {
         router.push({ name: 'update-project', params: { id } });
@@ -342,22 +359,6 @@ export default defineComponent({
       openGit: (gitRepoId: string) => {
         window.open(`/view/repo/${gitRepoId}`);
       },
-      enable: async (id: string, val: boolean) => {
-        enabling.value = true;
-
-        try {
-          await active(id, val);
-
-          proxy.$success(val ? '已启用' : '已禁用');
-        } catch (err) {
-          proxy.$throw(err, proxy);
-
-          await sleep(300);
-          enabled.value = !val;
-        } finally {
-          enabling.value = false;
-        }
-      },
     };
   },
 });
@@ -389,7 +390,7 @@ export default defineComponent({
   min-width: 260px;
   background-color: #ffffff;
   box-shadow: 0px 0px 8px 4px #eff4f9;
-  min-height: 209px;
+  min-height: 166px;
 
   &.move {
     position: relative;
@@ -496,8 +497,13 @@ export default defineComponent({
     }
 
     .operation {
+      margin-top: 18px;
+      min-height: 26px;
+      display: flex;
+      align-items: center;
+
       button + button {
-        margin-left: 16px;
+        margin-left: 12px;
       }
 
       button {
@@ -519,6 +525,17 @@ export default defineComponent({
           background-image: url('@/assets/svgs/btn/execute.svg');
         }
 
+        &.able {
+          background-image: url('@/assets/svgs/btn/disable.svg');
+          background-size: contain;
+          transform: rotateY(180deg);
+
+          &.disabled {
+            background-color: #eff7ff;
+            border-radius: 4px;
+          }
+        }
+
         &.edit {
           background-image: url('@/assets/svgs/btn/edit.svg');
         }
@@ -536,10 +553,20 @@ export default defineComponent({
         }
 
         &.del {
-          width: 24px;
-          height: 24px;
+          position: absolute;
+          right: 7px;
+          top: 7px;
+          width: 22px;
+          height: 22px;
+          //display: none;
           background-image: url('@/assets/svgs/btn/del.svg');
           background-size: contain;
+          opacity: 0.65;
+          padding: 2px;
+
+          &:hover {
+            opacity: 1;
+          }
         }
 
         &.git-label {
@@ -562,22 +589,6 @@ export default defineComponent({
             background-color: transparent;
           }
         }
-      }
-
-      .top {
-        padding: 12px 0;
-        min-height: 26px;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid #E8E8E8;
-      }
-
-      .bottom {
-        padding-top: 12px;
-        min-height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
       }
     }
   }
