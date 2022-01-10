@@ -4,7 +4,8 @@
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"/>
     </div>
-    <toolbar v-if="!readonly && graph" :zoom-value="zoom" @click-process-log="clickProcessLog" @on-zoom="handleZoom"/>
+    <toolbar v-if="graph" :readonly="readonly" :zoom-value="zoom" @click-process-log="clickProcessLog"
+             @on-zoom="handleZoom"/>
     <node-toolbar v-if="!readonly && nodeEvent"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
                   @node-click="clickNode"
