@@ -20,7 +20,7 @@
              @click="changeZoom(true)"></div>
       </jm-tooltip>
     </div>
-    <div class="group">
+    <div class="group" v-if="!readonly">
       <jm-tooltip content="流程日志" placement="top">
         <div class="process-log-icon" @click="processLog"></div>
       </jm-tooltip>
@@ -38,7 +38,11 @@ const MAX_ZOOM = 500;
 
 export default defineComponent({
   props: {
-    'zoomValue': {
+    readonly: {
+      type: Boolean,
+      default: false,
+    },
+    zoomValue: {
       type: Number,
       default: MAX_ZOOM,
     },
@@ -91,7 +95,7 @@ export default defineComponent({
   justify-content: flex-end;
   align-items: center;
 
-  .group + .group{
+  .group + .group {
     margin-left: 44px;
   }
 
@@ -115,7 +119,7 @@ export default defineComponent({
       }
     }
 
-    .process-log-icon{
+    .process-log-icon {
       background-image: url('./svgs/tool/process-log.svg');
     }
 

@@ -134,14 +134,14 @@
         </jm-tooltip>
         <jm-tooltip
           v-if="project.dslType === DslTypeEnum.WORKFLOW"
-          content="查看流程DSL"
+          content="预览流程"
           placement="bottom"
         >
           <button class="workflow-label" @click="dslDialogFlag = true"></button>
         </jm-tooltip>
         <jm-tooltip
           v-else-if="project.dslType === DslTypeEnum.PIPELINE"
-          content="查看管道DSL"
+          content="预览管道"
           placement="bottom"
         >
           <button class="pipeline-label" @click="dslDialogFlag = true"></button>
@@ -159,7 +159,7 @@
       :current-project-name="project.name"
       v-model:webhookVisible="webhookDrawerFlag"
     ></webhook-drawer>
-    <dsl-dialog
+    <project-preview-dialog
       v-if="dslDialogFlag"
       :project-id="project.id"
       :dsl-type="project.dslType"
@@ -176,11 +176,11 @@ import { IProjectVo } from '@/api/dto/project';
 import { active, del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import DslDialog from './dsl-dialog.vue';
+import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
 
 export default defineComponent({
-  components: { DslDialog, WebhookDrawer },
+  components: { ProjectPreviewDialog, WebhookDrawer },
   props: {
     project: {
       type: Object as PropType<IProjectVo>,
