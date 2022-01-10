@@ -527,8 +527,6 @@ export default defineComponent({
 
         &.able {
           background-image: url('@/assets/svgs/btn/disable.svg');
-          background-size: contain;
-          transform: rotateY(180deg);
 
           &.disabled {
             background-color: #eff7ff;
