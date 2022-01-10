@@ -93,7 +93,7 @@
               <a href="https://docs.jianmu.dev/guide/global.html"
                  target="_blank"
                  class="jm-icon-button-help"
-                 style="color: #ffffff; font-size: 1.1em;"
+                 style="color: #ffffff;"
               ></a>
             </div>
             <template v-if="!project.mutable">
