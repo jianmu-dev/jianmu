@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'jm-icon-button';
-  src: url('../font/jm-icon-button.eot?20239262');
-  src: url('../font/jm-icon-button.eot?20239262#iefix') format('embedded-opentype'),
-       url('../font/jm-icon-button.woff2?20239262') format('woff2'),
-       url('../font/jm-icon-button.woff?20239262') format('woff'),
-       url('../font/jm-icon-button.ttf?20239262') format('truetype'),
-       url('../font/jm-icon-button.svg?20239262#jm-icon-button') format('svg');
+  src: url('../font/jm-icon-button.eot?38328132');
+  src: url('../font/jm-icon-button.eot?38328132#iefix') format('embedded-opentype'),
+       url('../font/jm-icon-button.woff2?38328132') format('woff2'),
+       url('../font/jm-icon-button.woff?38328132') format('woff'),
+       url('../font/jm-icon-button.ttf?38328132') format('truetype'),
+       url('../font/jm-icon-button.svg?38328132#jm-icon-button') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -15,7 +15,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'jm-icon-button';
-    src: url('../font/jm-icon-button.svg?20239262#jm-icon-button') format('svg');
+    src: url('../font/jm-icon-button.svg?38328132#jm-icon-button') format('svg');
   }
 }
 */
