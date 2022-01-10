@@ -1,20 +1,27 @@
 <template>
-  <jm-dialog
-    :title="title"
-    v-model="dialogVisible"
-    width="800px"
-    @close="close"
-  >
-    <div class="dsl" v-loading="loading">
-      <jm-dsl-editor :value="dsl" readonly/>
-    </div>
-  </jm-dialog>
+  <div class="project-preview-dialog">
+    <jm-dialog
+      :title="title"
+      v-model="dialogVisible"
+      width="1000px"
+      @close="close"
+    >
+      <div class="dsl" v-loading="loading">
+        <jm-workflow-viewer
+          :dsl="dsl"
+          readonly
+          :node-infos="nodeDefs"
+          :trigger-type="TriggerTypeEnum.MANUAL"/>
+      </div>
+    </jm-dialog>
+  </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
-import { DslTypeEnum } from '@/api/dto/enumeration';
-import { fetchProjectDetail } from '@/api/view-no-auth';
+import { DslTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import { fetchProjectDetail, fetchWorkflow } from '@/api/view-no-auth';
+import { INodeDefVo } from '@/api/dto/project';
 
 export default defineComponent({
   props: {
@@ -34,6 +41,7 @@ export default defineComponent({
     const dialogVisible = ref<boolean>(true);
     const loading = ref<boolean>(false);
     const dsl = ref<string>();
+    const nodeDefs = ref<INodeDefVo[]>([]);
     const close = () => emit('close');
 
     const loadDsl = async () => {
@@ -44,8 +52,12 @@ export default defineComponent({
       try {
         loading.value = true;
 
-        const { dslText } = await fetchProjectDetail(props.projectId);
+        const { workflowRef, workflowVersion } = await fetchProjectDetail(props.projectId);
+        const { nodes, dslText } = await fetchWorkflow(workflowRef, workflowVersion);
         dsl.value = dslText;
+        nodeDefs.value = nodes
+          .filter(({ metadata }) => metadata)
+          .map(({ metadata }) => JSON.parse(metadata as string));
       } catch (err) {
         close();
 
@@ -58,23 +70,24 @@ export default defineComponent({
     onBeforeMount(() => loadDsl());
 
     return {
+      TriggerTypeEnum,
       title: computed(() => {
-        let t = '';
+        let t = '预览';
         switch (props.dslType) {
           case DslTypeEnum.WORKFLOW:
-            t = '流程';
+            t += '流程';
             break;
           case DslTypeEnum.PIPELINE:
-            t = '管道';
+            t += '管道';
             break;
         }
-        t += 'DSL';
 
         return t;
       }),
       dialogVisible,
       loading,
       dsl,
+      nodeDefs,
       close,
     };
   },
@@ -82,7 +95,15 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.dsl {
-  height: 60vh;
+.project-preview-dialog {
+  ::v-deep(.el-dialog) {
+    .el-dialog__body {
+      padding: 0;
+    }
+  }
+
+  .dsl {
+    height: 60vh;
+  }
 }
 </style>
