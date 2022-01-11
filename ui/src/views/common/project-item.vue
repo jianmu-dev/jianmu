@@ -77,25 +77,6 @@
             @click="execute(project.id)"
           ></button>
         </jm-tooltip>
-        <jm-tooltip placement="bottom">
-          <template #content>
-            <div>
-              <span>{{ enabled ? '已启用' : '已禁用' }}</span>
-              <a href="https://docs.jianmu.dev/guide/global.html"
-                 target="_blank"
-                 class="jm-icon-button-help"
-                 style="color: #ffffff;"
-              ></a>
-            </div>
-            <template v-if="!project.mutable">
-              <div style="margin-top: 10px;">若要修改，请通过DSL更新</div>
-            </template>
-          </template>
-          <button
-            :class="{ able: true, disabled: project.mutable && !enabled, doing: !project.mutable || abling }"
-            @click="able(project.id)"
-          ></button>
-        </jm-tooltip>
         <jm-tooltip
           v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
           content="Webhook"
@@ -137,12 +118,31 @@
         >
           <button class="pipeline-label" @click="dslDialogFlag = true"></button>
         </jm-tooltip>
-        <jm-tooltip content="删除" placement="bottom">
-          <button
-            :class="{ del: true, doing: deleting }"
-            @click="del(project.id)"
-          ></button>
-        </jm-tooltip>
+        <div class="more">
+          <jm-dropdown trigger="click" placement="bottom-start">
+            <span class="el-dropdown-link">
+              <button class="btn-group"></button>
+            </span>
+            <template #dropdown>
+              <jm-dropdown-menu>
+                <jm-dropdown-item :disabled="abling" @click="able(project.id)">
+                  <a
+                    href="javascript: void(0)"
+                    :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
+                    style="width: 90px; display: inline-block;"
+                  >{{ enabled ? '禁用' : '启用' }}</a>
+                </jm-dropdown-item>
+                <jm-dropdown-item :disabled="deleting" @click="del(project.id)">
+                  <a
+                    href="javascript: void(0)"
+                    class="jm-icon-button-delete"
+                    style="width: 90px; display: inline-block;"
+                  >删除</a>
+                </jm-dropdown-item>
+              </jm-dropdown-menu>
+            </template>
+          </jm-dropdown>
+        </div>
       </div>
     </div>
     <webhook-drawer
@@ -256,15 +256,30 @@ export default defineComponent({
           });
       },
       able: (id: string) => {
-        if (!props.project.mutable || abling.value) {
+        if (abling.value) {
           return;
         }
 
         const str = enabled.value ? '禁用' : '启用';
-        proxy.$confirm(`确定要${str}吗?`, `${str}项目`, {
+        const msg = props.project.mutable ? `
+          <div>
+            <span>确定要${str}吗?</span>
+            <a href="https://docs.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
+          </div>
+        ` : `
+          <div>
+            <span>${enabled.value ? '已启用' : '已禁用'}，不可修改</span>
+            <a href="https://docs.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
+          </div>
+          <div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">若要修改，请通过DSL更新</div>
+        `;
+
+        proxy.$confirm(msg, `${str}项目`, {
+          showConfirmButton: props.project.mutable,
           confirmButtonText: '确定',
-          cancelButtonText: '取消',
+          cancelButtonText: props.project.mutable ? '取消' : '关闭',
           type: 'info',
+          dangerouslyUseHTMLString: true,
         }).then(async () => {
           abling.value = true;
           try {
@@ -416,15 +431,6 @@ export default defineComponent({
     display: none;
   }
 
-  //&:hover {
-  //  .content {
-  //    .operation {
-  //      button.del {
-  //        display: block;
-  //      }
-  //    }
-  //  }
-  //}
   &:hover {
     box-shadow: 0px 6px 16px 4px #e6eef6;
   }
@@ -463,6 +469,7 @@ export default defineComponent({
     padding: 20px 20px 16px 20px;
 
     .title {
+      margin-right: 20px;
       font-size: 16px;
       color: #082340;
 
@@ -493,7 +500,7 @@ export default defineComponent({
       align-items: center;
 
       button + button {
-        margin-left: 12px;
+        margin-left: 18px;
       }
 
       button {
@@ -515,15 +522,6 @@ export default defineComponent({
           background-image: url('@/assets/svgs/btn/execute.svg');
         }
 
-        &.able {
-          background-image: url('@/assets/svgs/btn/disable.svg');
-
-          &.disabled {
-            background-color: #eff7ff;
-            border-radius: 4px;
-          }
-        }
-
         &.edit {
           background-image: url('@/assets/svgs/btn/edit.svg');
         }
@@ -540,23 +538,6 @@ export default defineComponent({
           background-image: url('@/assets/svgs/btn/hook.svg');
         }
 
-        &.del {
-          position: absolute;
-          right: 7px;
-          top: 7px;
-          width: 22px;
-          height: 22px;
-          //display: none;
-          background-image: url('@/assets/svgs/btn/del.svg');
-          background-size: contain;
-          opacity: 0.65;
-          padding: 2px;
-
-          &:hover {
-            opacity: 1;
-          }
-        }
-
         &.git-label {
           background-image: url('@/assets/svgs/index/git-label.svg');
         }
@@ -569,6 +550,13 @@ export default defineComponent({
           background-image: url('@/assets/svgs/index/pipeline-label.svg');
         }
 
+        &.btn-group {
+          background-image: url('@/assets/svgs/btn/more2.svg');
+          position: absolute;
+          right: 0px;
+          top: 0px;
+        }
+
         &.doing {
           opacity: 0.5;
           cursor: not-allowed;
@@ -576,6 +564,18 @@ export default defineComponent({
           &:active {
             background-color: transparent;
           }
+        }
+      }
+
+      .more {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+
+        .el-dropdown-link {
+          display: inline-block;
+          width: 26px;
+          height: 10px;
         }
       }
     }
