@@ -33,10 +33,10 @@
                   <jm-table
                     :data="webhookParams"
                     border>
-                    <jm-table-column
-                      label="参数唯一标识"
-                      align="center"
-                      prop="name">
+                    <jm-table-column label="参数唯一标识">
+                      <template #default="scope">
+                        <jm-text-viewer :value="scope.row.name"  class="params-name"/>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="参数类型"
@@ -231,7 +231,9 @@ export default defineComponent({
 
       .content {
         padding: 16px;
-
+        .params-name{
+          width:80%;
+        }
         ::v-deep(.el-table) {
           th, td {
             color: #082340;
