@@ -3,11 +3,11 @@
     <div class="basic-section">
       <div class="param-key">流程名称：
       </div>
-      <jm-text-viewer :value="workflowName" class="param-value" tipPlacement="top" />
+      <jm-text-viewer :value="workflowName" class="param-value" />
       <div class="param-key">节点名称：</div>
-      <jm-text-viewer :value="nodeName" class="param-value node-name" tipPlacement="top" />
+      <jm-text-viewer :value="nodeName" class="param-value node-name" />
       <div class="param-key">启动时间：</div>
-      <jm-text-viewer :value="startTime" class="param-value" tipPlacement="top" />
+      <jm-text-viewer :value="startTime" class="param-value" />
     </div>
 
     <div class="tab-section">

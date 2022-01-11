@@ -82,11 +82,11 @@
         </div>
         <div class="item">
           <div v-if="!data.record?.id" class="value">无</div>
-          <jm-text-viewer v-else :value="data.record?.id" class="value" tipPlacement="top" />
+          <jm-text-viewer v-else :value="data.record?.id" class="value" />
           <div>流程实例ID</div>
         </div>
         <div class="item">
-          <jm-text-viewer :value="data.record?.workflowVersion" class="value" tipPlacement="top" />
+          <jm-text-viewer :value="data.record?.workflowVersion" class="value" />
           <div>流程版本号</div>
         </div>
         <jm-tooltip
