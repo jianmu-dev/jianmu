@@ -3,37 +3,33 @@
     <div class="basic-section">
       <div>
         <div class="param-key">流程名称：</div>
-        <jm-tooltip :content="workflowName" placement="bottom" effect="light">
-          <div class="param-value">{{ workflowName }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="workflowName "/>
+        </div>
       </div>
       <div>
         <div class="param-key">节点名称：</div>
-        <jm-tooltip :content="task.nodeName" placement="bottom" effect="light">
-          <div class="param-value">{{ task.nodeName }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="task.nodeName "/>
+        </div>
       </div>
       <div>
         <div class="param-key">节点定义：</div>
-        <jm-tooltip :content="nodeDef" placement="bottom" effect="light">
-          <div class="param-value">{{ nodeDef }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="nodeDef"/>
+        </div>
       </div>
       <div>
         <div class="param-key">启动时间：</div>
-        <jm-tooltip
-          :content="datetimeFormatter(task.startTime)"
-          placement="bottom"
-          effect="light"
-        >
-          <div class="param-value">{{ datetimeFormatter(task.startTime) }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="task.startTime"/>
+        </div>
       </div>
       <div>
         <div class="param-key">执行时长：</div>
-        <jm-tooltip :content="executionTime" placement="bottom" effect="light">
-          <div class="param-value">{{ executionTime }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="executionTime"/>
+        </div>
       </div>
       <div>
         <div class="param-key">执行状态：</div>
@@ -84,18 +80,18 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div>
-                          <span>{{ scope.row.ref }}</span>
-                          <jm-tooltip
+                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                          <div class="text-viewer">
+                            <jm-text-viewer :value="scope.row.ref" class="value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
+                          </div>
+                          <el-tooltip
                             content="必填项"
                             placement="top"
                             v-if="scope.row.required"
                           >
-                            <img
-                              src="~@/assets/svgs/task-log/required.svg"
-                              alt=""
-                            />
-                          </jm-tooltip>
+                            <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
+                          </el-tooltip>
                         </div>
                       </template>
                     </jm-table-column>
@@ -106,6 +102,11 @@
                       align="center"
                       prop="valueType"
                     >
+                      <template #default="scope">
+                        <div class="text-viewer">
+                          <jm-text-viewer :value="scope.row.valueType" class="value"/>
+                        </div>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="是/否必填"
@@ -125,7 +126,9 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div class="param-value">{{scope.row.value}}</div>
+                          <div class="param-value text-viewer">
+                            <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
+                          </div>
                           <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
                         </div>
                       </template>
@@ -140,18 +143,18 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div>
-                          <span>{{ scope.row.ref }}</span>
-                          <jm-tooltip
+                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                          <div class="text-viewer">
+                            <jm-text-viewer :value="scope.row.ref" class="value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
+                          </div>
+                          <el-tooltip
                             content="必填项"
                             placement="top"
                             v-if="scope.row.required"
                           >
-                            <img
-                              src="~@/assets/svgs/task-log/required.svg"
-                              alt=""
-                            />
-                          </jm-tooltip>
+                            <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
+                          </el-tooltip>
                         </div>
                       </template>
                     </jm-table-column>
@@ -162,6 +165,11 @@
                       width="110px"
                       prop="valueType"
                     >
+                      <template #default="scope">
+                        <div class="text-viewer">
+                          <jm-text-viewer :value="scope.row.valueType" class="value"/>
+                        </div>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       header-align="center"
@@ -181,7 +189,9 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div class="param-value">{{scope.row.value}}</div>
+                          <div class="param-value text-viewer">
+                            <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
+                          </div>
                           <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
                         </div>
                       </template>
@@ -319,8 +329,9 @@ export default defineComponent({
         console.error(err);
       }
     };
-
+    const maxWidthRecord = ref<Record<string, number>>({});
     return {
+      maxWidthRecord,
       workflowName: state.recordDetail.record?.name,
       task,
       executing,
@@ -336,6 +347,9 @@ export default defineComponent({
         taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT),
       ),
       datetimeFormatter,
+      getTotalWidth(width: number, ref: string) {
+        maxWidthRecord.value[ref] = width;
+      },
     };
   },
 });
@@ -434,23 +448,53 @@ export default defineComponent({
           .cell {
             padding: 0 20px;
 
+            .text-viewer {
+              display: flex;
+              align-items: center;
+              &.param-value{
+                .value {
+                  width: 100%;
+                  &.jm-text-viewer{
+                    .content{
+                      .text-line{
+                        &:last-child{
+                          text-align: left;
+                          &::after{
+                            display: none;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              .value {
+                width: 100%;
+                &.jm-text-viewer{
+                  .content{
+                    .text-line{
+                      &:last-child{
+                        text-align: center;
+                        &::after{
+                          display: none;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
             div {
               display: inline-block;
-              max-width: 100%;
+              width: 100%;
               position: relative;
-
-              span {
-                display: inline-block;
-                max-width: 100%;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-              }
 
               img {
                 position: absolute;
-                right: -20px;
-                bottom: 10px;
+                left: 100%;
+                margin-left: 5px;
+                bottom: 4px;
               }
             }
           }

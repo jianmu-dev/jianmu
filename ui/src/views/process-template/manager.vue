@@ -33,7 +33,7 @@
               >
                 <img v-if="i.icon" :src="i.icon" />
                 <i v-else>{{ i.name[0].toUpperCase() }}</i>
-                <span class="ellipsis"> {{ i.name }} </span>
+                <jm-text-viewer :value="i.name"/>
               </li>
             </ul>
           </jm-scrollbar>
@@ -316,11 +316,6 @@ export default defineComponent({
   height: calc(100vh - 170px);
   li {
     list-style: none;
-  }
-  .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .right-top-btn {
     position: fixed;

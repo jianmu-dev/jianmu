@@ -51,7 +51,10 @@
               <div class="wrapper">
                 <div class="top">
                   <router-link :to="{ path: `/project-group/detail/${i.id}` }">
-                    <div class="name">{{ i.name }}</div>
+<!--                    <div class="name">{{ i.name }}</div>-->
+                    <div class="name">
+                      <jm-text-viewer :value="i.name"/>
+                    </div>
                   </router-link>
                 </div>
                 <div class="description">
@@ -79,7 +82,10 @@
           <div class="wrapper">
             <div class="top">
               <router-link :to="{ path: `/project-group/detail/${i.id}` }">
-                <div class="name">{{ i.name }}</div>
+<!--                <div class="name">{{ i.name }}</div>-->
+                <div class="name">
+                  <jm-text-viewer :value="i.name"/>
+                </div>
               </router-link>
               <div class="operation">
                 <div
@@ -479,10 +485,11 @@ export default defineComponent({
           justify-content: space-between;
           align-items: center;
           .name {
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            //max-width: 150px;
+            width: 150px;
+            //overflow: hidden;
+            //text-overflow: ellipsis;
+            //white-space: nowrap;
             color: #082340;
             font-size: 20px;
             font-weight: 500;
