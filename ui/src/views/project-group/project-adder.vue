@@ -43,7 +43,8 @@
             v-for="(i, index) in compSelectedList"
             :key="i.id"
           >
-            <span class="item-name">{{ i.name }}</span>
+<!--            <span class="item-name">{{ i.name }}</span>-->
+            <jm-text-viewer :value="i.name" class="item-name" />
             <span class="close" @click="removeItem(index)"></span>
           </div>
         </div>
@@ -71,7 +72,8 @@
           :key="i.id"
           @click="selectProject(i)"
         >
-          <div class="project-name">{{ i.name }}</div>
+<!--          <div class="project-name">{{ i.name }}</div>-->
+          <jm-text-viewer :value="i.name" class="project-name"/>
           <div class="project-desc">
             {{ i.description || '无' }}
           </div>
@@ -279,10 +281,7 @@ export default defineComponent({
             align-items: center;
             justify-content: space-between;
             .item-name {
-              width: 90%;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
+              width: 100%;
             }
             .close {
               width: 10px;
@@ -376,9 +375,6 @@ export default defineComponent({
           }
           .project-name {
             max-width: 230px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
             font-size: 20px;
             font-weight: 500;
             color: #082340;

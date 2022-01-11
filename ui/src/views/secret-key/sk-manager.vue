@@ -29,7 +29,9 @@
         <jm-empty v-if="keys.length === 0"/>
         <div v-else class="item" v-for="{ id, name } of keys" :key="id">
           <div class="wrapper">
-            <div class="name ellipsis">{{ name }}</div>
+            <div class="name">
+              <jm-text-viewer :value="name"/>
+            </div>
           </div>
           <div class="operation">
             <button
@@ -293,11 +295,17 @@ export default defineComponent({
             color: #082340;
             text-align: center;
           }
-
-          .ellipsis {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+          ::v-deep(.jm-text-viewer){
+            .content{
+              .text-line{
+                &:last-child{
+                  text-align: center;
+                  &::after{
+                    display: none;
+                  }
+                }
+              }
+            }
           }
         }
 

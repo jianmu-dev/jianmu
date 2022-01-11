@@ -28,7 +28,9 @@
               <router-link
                 :to="{ name: 'manage-secret-key', params: { namespace: ns.name } }"
               >
-                <div class="name ellipsis">{{ ns.name }}</div>
+                <div class="name">
+                  <jm-text-viewer :value="ns.name"/>
+                </div>
               </router-link>
               <div class="description">
                 <jm-scrollbar max-height="80px">
@@ -55,7 +57,7 @@
                 <div class="vault-icon"></div>
               </router-link>
               <router-link :to="{name:'manage-secret-key',params:{namespace:ns.name}}">
-                <div class="vault-name">{{ ns.name }}</div>
+                <div class="vault-name"><jm-text-viewer :value="ns.name"/></div>
               </router-link>
             </div>
             <div class="operation">
@@ -309,12 +311,6 @@ export default defineComponent({
             font-size: 13px;
             color: #6b7b8d;
           }
-
-          .ellipsis {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
         }
 
         .time {
@@ -367,19 +363,35 @@ export default defineComponent({
           display: flex;
           flex-direction: column;
           align-items: center;
-
           .vault-icon {
             width: 64px;
             height: 64px;
             margin: 20px 0px;
             background: url('@/assets/svgs/secret-key/key-title-icon.svg');
           }
-
+          a{
+            &:nth-child(2){
+              align-self: stretch;
+            }
+          }
           .vault-name {
             font-size: 20px;
             font-weight: bold;
             color: #082340;
             cursor: pointer;
+            ::v-deep(.jm-text-viewer){
+              width: 100%;
+              .content{
+                .text-line{
+                  &:last-child{
+                    text-align: center;
+                    &::after{
+                      display: none;
+                    }
+                  }
+                }
+              }
+            }
 
             &:hover {
               color: #096dd9;

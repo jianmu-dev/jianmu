@@ -3,39 +3,39 @@
     <div class="basic-section">
       <div>
         <div class="param-key">流程名称：</div>
-        <jm-tooltip :content="workflowName" placement="bottom" effect="light">
-          <div class="param-value">{{ workflowName }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="workflowName "/>
+        </div>
       </div>
       <div>
         <div class="param-key">启动时间：</div>
-        <jm-tooltip :content="datetimeFormatter(process.startTime)" placement="bottom" effect="light">
-          <div class="param-value">{{ datetimeFormatter(process.startTime) }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="datetimeFormatter(process.startTime) "/>
+        </div>
       </div>
       <div>
         <div class="param-key">最后完成时间：</div>
-        <jm-tooltip :content="datetimeFormatter(process.endTime)" placement="bottom" effect="light">
-          <div class="param-value">{{ datetimeFormatter(process.endTime) }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="datetimeFormatter(process.endTime) "/>
+        </div>
       </div>
       <div>
         <div class="param-key ">执行时长：</div>
-        <jm-tooltip :content="executionTime" placement="bottom" effect="light">
-          <div class="param-value">{{ executionTime }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="executionTime "/>
+        </div>
       </div>
       <div>
         <div class="param-key">流程实例ID：</div>
-        <jm-tooltip :content="process.id" placement="bottom" effect="light">
-          <div class="param-value ellipsis">{{ process.id }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="process.id"/>
+        </div>
       </div>
       <div>
         <div class="param-key">流程版本号：</div>
-        <jm-tooltip :content="process.workflowVersion" placement="bottom" effect="light">
-          <div class="param-value ellipsis">{{ process.workflowVersion }}</div>
-        </jm-tooltip>
+        <div class="param-value">
+          <jm-text-viewer :value="process.workflowVersion"/>
+        </div>
       </div>
     </div>
 
@@ -148,23 +148,8 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     box-shadow: 0 0 8px 0 #9EB1C5;
-
-    .ellipsis {
-      display: inline-block;
-      width: 80px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      vertical-align: bottom;
-      cursor: default;
-    }
-
     > div {
       margin-bottom: 16px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: default;
 
       .param-key {
         color: #6B7B8D;
