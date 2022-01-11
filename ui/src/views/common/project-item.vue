@@ -13,9 +13,7 @@
           query: { projectId: project.id },
         }"
       >
-        <jm-tooltip :content="project.name" placement="top">
-          <div class="title ellipsis">{{ project.name }}</div>
-        </jm-tooltip>
+        <jm-text-viewer :value="project.name" class="title" tipPlacement="top"/>
       </router-link>
       <div class="time">
         <span v-if="project.status === ProjectStatusEnum.RUNNING"
@@ -51,14 +49,7 @@
           query: { projectId: project.id },
         }"
       >
-        <jm-tooltip :content="project.name" placement="top">
-          <div :class="{
-            title: true,
-            ellipsis: true,
-            disabled: !enabled,
-          }">{{ project.name }}
-          </div>
-        </jm-tooltip>
+        <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}" tipPlacement="top" />
       </router-link>
       <div :class="{
         time: true,
@@ -472,7 +463,6 @@ export default defineComponent({
     padding: 20px 20px 16px 20px;
 
     .title {
-      width: 90%;
       font-size: 16px;
       color: #082340;
 
@@ -589,12 +579,6 @@ export default defineComponent({
         }
       }
     }
-  }
-
-  .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
