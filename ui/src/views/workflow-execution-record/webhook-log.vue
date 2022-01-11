@@ -3,17 +3,11 @@
     <div class="basic-section">
       <div class="param-key">流程名称：
       </div>
-      <jm-tooltip :content="workflowName" placement="bottom" effect="light">
-        <div class="param-value">{{ workflowName }}</div>
-      </jm-tooltip>
+      <jm-text-viewer :value="workflowName" class="param-value" tipPlacement="top" />
       <div class="param-key">节点名称：</div>
-      <jm-tooltip :content="nodeName" placement="bottom" effect="light">
-        <div class="param-value">{{ nodeName }}</div>
-      </jm-tooltip>
+      <jm-text-viewer :value="nodeName" class="param-value node-name" tipPlacement="top" />
       <div class="param-key">启动时间：</div>
-      <jm-tooltip :content="startTime" placement="bottom" effect="light">
-        <div class="param-value">{{ startTime }}</div>
-      </jm-tooltip>
+      <jm-text-viewer :value="startTime" class="param-value" tipPlacement="top" />
     </div>
 
     <div class="tab-section">
@@ -54,7 +48,7 @@
                       align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div class="param-value ellipsis">{{scope.row.value}}</div>
+                          <jm-text-viewer :value="scope.row.value" class="webhook-param-value"/>
                           <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
                         </div>
                       </template>
@@ -171,11 +165,11 @@ export default defineComponent({
 
     .param-value {
       display: inline-block;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      max-width: 20%;
+      width: 20%;
       color: #082340;
+    }
+    .node-name{
+      max-width:10%;
     }
   }
 }
@@ -257,17 +251,10 @@ export default defineComponent({
           .copy-container{
             display: flex;
             align-items: center;
-            .param-value {
-              width: 75%;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
+            // 表格参数
+            .webhook-param-value {
+              width: 88%;
               position: relative;
-            }
-            .ellipsis {
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
             }
             &:hover{
               .copy-btn{

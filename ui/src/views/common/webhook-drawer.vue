@@ -15,11 +15,10 @@
           <div class="link-tips">可以通过调用以下Webhook地址来触发流程执行</div>
           <div class="link-container">
             <div class="link-address">
-              <jm-tooltip :content="link" placement="top">
-                <div class="jm-icon-input-hook ellipsis">
-                  {{ link }}
-                </div>
-              </jm-tooltip>
+              <!-- 左侧图标 -->
+              <i class="jm-icon-input-hook"></i>
+              <!-- 右侧链接 -->
+              <jm-text-viewer :value="link" class="webhook-link" tipPlacement="top"/>
             </div>
             <div class="copy-link-address">
               <jm-button type="primary" @click="copy">复制链接</jm-button>
@@ -63,11 +62,11 @@
                     <div v-else style="color: red">失败</div>
                   </template>
                 </jm-table-column>
-                <jm-table-column
-                  prop="errorMsg"
-                  label="错误信息"
-                  align="center"
-                ></jm-table-column>
+                <jm-table-column label="错误信息">
+                  <template #default="scope">
+                    <jm-text-viewer :value="scope.row.errorMsg||''" tipPlacement="top"/>
+                  </template>
+                </jm-table-column>
                 <jm-table-column label="操作" align="center">
                   <template #default="scope">
                     <div class="table-button">
@@ -121,6 +120,7 @@
             <jm-table-column label="参数值" prop="value">
               <template #default="scope">
                 <div v-if="scope.row.type === 'SECRET'">
+                  <!-- 密钥类型切换 -->
                   <div class="hide-container" v-if="secretVisible">
                     <span>********************</span>
                     <i
@@ -129,17 +129,15 @@
                     ></i>
                   </div>
                   <div class="display-container" v-else>
-                    <span class="ellipsis">{{ scope.row.value }}</span>
+                    <jm-text-viewer :value="scope.row.value" class="trigger-params-value" tipPlacement="top" />
                     <i
                       class="display-secret jm-icon-input-invisible"
                       @click="displaySecret"
                     ></i>
                   </div>
                 </div>
-                <div class="ellipsis params-container" v-else>
-                  <div class="params">
-                    {{ scope.row.value }}
-                  </div>
+                <div class="params-container" v-else>
+                  <jm-text-viewer :value="scope.row.value" class="trigger-value" tipPlacement="top" />
                   <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
                 </div>
               </template>
@@ -509,11 +507,6 @@ export default defineComponent({
 
 <style scoped lang="less">
 .webhook-drawer-container {
-  .ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
   ::v-deep(.el-drawer) {
     // 图标
     .el-drawer__header {
@@ -566,13 +559,15 @@ export default defineComponent({
           color: #082340;
           margin-right: 10px;
           border-radius: 2px;
-          > :first-child:before {
-            margin: 0 10px;
-            font-size: 16px;
-            color: #6b7b8d;
-          }
+          display: flex;
+          // 图标
           .jm-icon-input-hook {
-            width: 760px;
+            content: '\e818';
+            margin:0 14px;
+          }
+          // 链接
+          .webhook-link{
+            width:700px;
           }
         }
         .copy-link-address {
@@ -761,7 +756,10 @@ export default defineComponent({
               }
             }
           }
-
+          // 普通参数
+          .trigger-value{
+            width:280px;
+          }
         }
         td:first-of-type,
         td:last-of-type {
@@ -797,6 +795,9 @@ export default defineComponent({
           display: flex;
           align-items: center;
           justify-content: space-between;
+          .trigger-params-value {
+            width: 280px;
+          }
           .display-secret {
             .jm-icon-input-invisible::before {
               content: '\e800';
