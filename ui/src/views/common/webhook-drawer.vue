@@ -18,7 +18,7 @@
               <!-- 左侧图标 -->
               <i class="jm-icon-input-hook"></i>
               <!-- 右侧链接 -->
-              <jm-text-viewer :value="link" class="webhook-link" tipPlacement="top"/>
+              <jm-text-viewer :value="link" class="webhook-link"/>
             </div>
             <div class="copy-link-address">
               <jm-button type="primary" @click="copy">复制链接</jm-button>
@@ -64,7 +64,7 @@
                 </jm-table-column>
                 <jm-table-column label="错误信息">
                   <template #default="scope">
-                    <jm-text-viewer :value="scope.row.errorMsg||''" tipPlacement="top"/>
+                    <jm-text-viewer :value="scope.row.errorMsg||''"/>
                   </template>
                 </jm-table-column>
                 <jm-table-column label="操作" align="center">
@@ -129,7 +129,7 @@
                     ></i>
                   </div>
                   <div class="display-container" v-else>
-                    <jm-text-viewer :value="scope.row.value" class="trigger-params-value" tipPlacement="top" />
+                    <jm-text-viewer :value="scope.row.value" class="trigger-params-value" />
                     <i
                       class="display-secret jm-icon-input-invisible"
                       @click="displaySecret"
@@ -137,7 +137,7 @@
                   </div>
                 </div>
                 <div class="params-container" v-else>
-                  <jm-text-viewer :value="scope.row.value" class="trigger-value" tipPlacement="top" />
+                  <jm-text-viewer :value="scope.row.value" class="trigger-value" />
                   <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
                 </div>
               </template>

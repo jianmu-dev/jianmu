@@ -3,11 +3,11 @@
     <div class="basic-section">
       <div class="param-key">流程名称：
       </div>
-      <jm-text-viewer :value="workflowName" class="param-value" tipPlacement="top" />
+      <jm-text-viewer :value="workflowName" class="param-value" />
       <div class="param-key">节点名称：</div>
-      <jm-text-viewer :value="nodeName" class="param-value node-name" tipPlacement="top" />
+      <jm-text-viewer :value="nodeName" class="param-value node-name" />
       <div class="param-key">启动时间：</div>
-      <jm-text-viewer :value="startTime" class="param-value" tipPlacement="top" />
+      <jm-text-viewer :value="startTime" class="param-value" />
     </div>
 
     <div class="tab-section">
@@ -33,10 +33,10 @@
                   <jm-table
                     :data="webhookParams"
                     border>
-                    <jm-table-column
-                      label="参数唯一标识"
-                      align="center"
-                      prop="name">
+                    <jm-table-column label="参数唯一标识">
+                      <template #default="scope">
+                        <jm-text-viewer :value="scope.row.name"  class="params-name"/>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="参数类型"
@@ -231,7 +231,9 @@ export default defineComponent({
 
       .content {
         padding: 16px;
-
+        .params-name{
+          width:80%;
+        }
         ::v-deep(.el-table) {
           th, td {
             color: #082340;

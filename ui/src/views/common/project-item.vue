@@ -13,7 +13,7 @@
           query: { projectId: project.id },
         }"
       >
-        <jm-text-viewer :value="project.name" class="title" tipPlacement="top"/>
+        <jm-text-viewer :value="project.name" class="title"/>
       </router-link>
       <div class="time">
         <span v-if="project.status === ProjectStatusEnum.RUNNING"
@@ -49,7 +49,7 @@
           query: { projectId: project.id },
         }"
       >
-        <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}" tipPlacement="top" />
+        <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}"/>
       </router-link>
       <div :class="{
         time: true,
