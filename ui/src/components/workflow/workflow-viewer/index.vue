@@ -130,7 +130,7 @@ export default defineComponent({
 
     proxy.$nextTick(() => {
       // 保证整个视图都渲染完毕，才能确定图的宽高
-      graph.value = init(props.dsl, props.readonly, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+      graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
 
       updateZoom();
 
@@ -143,7 +143,7 @@ export default defineComponent({
 
     onBeforeUpdate(() => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.readonly, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
 
         updateZoom();
       }
