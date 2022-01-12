@@ -20,6 +20,7 @@ import {
   defineComponent,
   getCurrentInstance,
   onBeforeUpdate,
+  onMounted,
   onUnmounted,
   PropType,
   ref,
@@ -128,19 +129,6 @@ export default defineComponent({
       return nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK);
     });
 
-    proxy.$nextTick(() => {
-      // 保证整个视图都渲染完毕，才能确定图的宽高
-      graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
-
-      updateZoom();
-
-      // 配置节点行为
-      nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
-
-      // 更新状态
-      updateNodeStates(props.tasks, graph.value);
-    });
-
     onBeforeUpdate(() => {
       if (!graph.value) {
         graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
@@ -158,19 +146,37 @@ export default defineComponent({
       updateNodeStates(props.tasks, graph.value);
     });
 
-    // 监控容器大小变化
-    const interval = ref<any>(setInterval(() => {
-      if (!container.value || !graph.value) {
-        return;
-      }
 
-      const parentElement = container.value.parentElement as HTMLElement;
-      graph.value.changeSize(parentElement.clientWidth, parentElement.clientHeight);
-    }, 500));
+    let resizeObserver: ResizeObserver;
+
+    onMounted(() => {
+      const parentElement = container.value!.parentElement as HTMLElement;
+      resizeObserver = new ResizeObserver(() => {
+        if (!graph.value) {
+          return;
+        }
+        graph.value.changeSize(parentElement.clientWidth, parentElement.clientHeight);
+      });
+      // 监控容器大小变化
+      resizeObserver.observe(parentElement);
+
+      proxy.$nextTick(() => {
+        // 保证整个视图都渲染完毕，才能确定图的宽高
+        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+
+        updateZoom();
+
+        // 配置节点行为
+        nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
+
+        // 更新状态
+        updateNodeStates(props.tasks, graph.value);
+      });
+    });
 
     onUnmounted(() => {
       // 销毁监控容器大小变化
-      clearInterval(interval.value);
+      resizeObserver.disconnect();
 
       // 销毁画布
       graph.value?.destroy();
