@@ -569,8 +569,13 @@ export default defineComponent({
 
       .more {
         position: absolute;
-        right: 5px;
+        right: 3px;
         top: 5px;
+        opacity: 0.65;
+
+        &:hover {
+          opacity: 1;
+        }
 
         .el-dropdown-link {
           display: inline-block;
