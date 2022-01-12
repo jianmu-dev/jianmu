@@ -28,7 +28,7 @@ export default defineComponent({
     const transitCalculator = ref<HTMLElement>();
     // 临时字符串内容
     const temporaryContent = ref<string>('');
-    const text = ref<string>(props.value.toString());
+    const text = ref<string>(props.value ? props.value.toString() : '');
     const { appContext } = getCurrentInstance() as any;
     onMounted(async () => {
       const textViewer = new TextViewer(
