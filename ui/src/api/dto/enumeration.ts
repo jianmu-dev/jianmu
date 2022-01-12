@@ -105,3 +105,10 @@ export enum WebhookRequstStateEnum {
   NOT_FOUND = 'NOT_FOUND',
   UNKNOWN = 'UNKNOWN',
 }
+
+/**
+ * 参数类型
+ */
+export enum ParamTypeEnum {
+  SECRET = 'SECRET'
+}
