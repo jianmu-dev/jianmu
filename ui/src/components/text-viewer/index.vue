@@ -28,7 +28,7 @@ export default defineComponent({
     const transitCalculator = ref<HTMLElement>();
     // 临时字符串内容
     const temporaryContent = ref<string>('');
-    const text = ref<string>(props.value);
+    const text = ref<string>(props.value.toString());
     const { appContext } = getCurrentInstance() as any;
     onMounted(async () => {
       const textViewer = new TextViewer(
@@ -44,10 +44,10 @@ export default defineComponent({
       await textViewer.reload();
     });
     onUpdated(async () => {
-      if (!props.value || text.value === props.value) {
+      if (!props.value || text.value === props.value.toString()) {
         return;
       }
-      text.value = props.value;
+      text.value = props.value.toString();
       const textViewer = new TextViewer(
         text,
         props.tipPlacement,

@@ -1,31 +1,31 @@
 <template>
   <div class="workflow-execution-record-process-log">
     <div class="basic-section">
-      <div>
+      <div class="item">
         <div class="param-key">流程名称：</div>
         <div class="param-value">
           <jm-text-viewer :value="workflowName "/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">启动时间：</div>
         <div class="param-value">
           <jm-text-viewer :value="datetimeFormatter(process.startTime) "/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">最后完成时间：</div>
         <div class="param-value">
           <jm-text-viewer :value="datetimeFormatter(process.endTime) "/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key ">执行时长：</div>
         <div class="param-value">
           <jm-text-viewer :value="executionTime "/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">流程实例ID：</div>
         <div class="param-value">
           <jm-text-viewer :value="process.id"/>
@@ -150,7 +150,9 @@ export default defineComponent({
     box-shadow: 0 0 8px 0 #9EB1C5;
     > div {
       margin-bottom: 16px;
-
+      &.item{
+        flex: 1;
+      }
       .param-key {
         color: #6B7B8D;
         margin-bottom: 8px;
@@ -163,6 +165,7 @@ export default defineComponent({
 
       .param-value {
         line-height: 25px;
+        margin-right: 10px;
       }
     }
   }

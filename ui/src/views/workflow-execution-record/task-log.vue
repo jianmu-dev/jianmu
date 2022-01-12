@@ -1,31 +1,31 @@
 <template>
   <div class="workflow-execution-record-task-log">
     <div class="basic-section">
-      <div>
+      <div class="item">
         <div class="param-key">流程名称：</div>
         <div class="param-value">
-          <jm-text-viewer :value="workflowName "/>
+          <jm-text-viewer :value="workflowName"/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">节点名称：</div>
         <div class="param-value">
           <jm-text-viewer :value="task.nodeName "/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">节点定义：</div>
         <div class="param-value">
           <jm-text-viewer :value="nodeDef"/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">启动时间：</div>
         <div class="param-value">
-          <jm-text-viewer :value="task.startTime"/>
+          <jm-text-viewer :value="datetimeFormatter(task.startTime)"/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">执行时长：</div>
         <div class="param-value">
           <jm-text-viewer :value="executionTime"/>
@@ -80,8 +80,7 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div
-                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -127,11 +126,18 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div class="param-value text-viewer">
-                            <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
+<!--                          // class="param-value text-viewer"-->
+<!--                          -->
+                          <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                            :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
+                            >
+                            </jm-text-viewer>
+                            <template v-else>
+                              {{scope.row.value}}
+                            </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)"
-                               v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -145,8 +151,7 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div
-                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -192,11 +197,17 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div class="param-value text-viewer">
-                            <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
+<!--                          // class="param-value text-viewer"-->
+                          <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                            :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
+                            >
+                            </jm-text-viewer>
+                            <template v-else>
+                              {{scope.row.value}}
+                            </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)"
-                               v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -376,6 +387,9 @@ export default defineComponent({
     box-shadow: 0 0 8px 0 #9eb1c5;
 
     > div {
+      &.item{
+        flex: 1;
+      }
       margin-bottom: 16px;
       white-space: nowrap;
       overflow: hidden;
@@ -394,6 +408,7 @@ export default defineComponent({
 
       .param-value {
         line-height: 25px;
+        margin-right: 10px;
       }
     }
   }
@@ -456,18 +471,15 @@ export default defineComponent({
             .text-viewer {
               display: flex;
               align-items: center;
-
-              &.param-value {
+              &.param-value{
                 .value {
                   width: 100%;
-
-                  &.jm-text-viewer {
-                    .content {
-                      .text-line {
-                        &:last-child {
+                  &.jm-text-viewer{
+                    .content{
+                      .text-line{
+                        &:last-child{
                           text-align: left;
-
-                          &::after {
+                          &::after{
                             display: none;
                           }
                         }
@@ -476,17 +488,14 @@ export default defineComponent({
                   }
                 }
               }
-
               .value {
                 width: 100%;
-
-                &.jm-text-viewer {
-                  .content {
-                    .text-line {
-                      &:last-child {
+                &.jm-text-viewer{
+                  .content{
+                    .text-line{
+                      &:last-child{
                         text-align: center;
-
-                        &::after {
+                        &::after{
                           display: none;
                         }
                       }
@@ -496,7 +505,7 @@ export default defineComponent({
               }
             }
 
-            div {
+            &>div {
               display: inline-block;
               width: 100%;
               position: relative;
@@ -505,7 +514,7 @@ export default defineComponent({
                 position: absolute;
                 left: 100%;
                 margin-left: 5px;
-                bottom: 4px;
+                bottom:0
               }
             }
           }
@@ -566,36 +575,56 @@ export default defineComponent({
             td {
               color: #082340;
             }
-
-            .copy-container {
+            .copy-container{
+              &>div{
+                width: 100%;
+              }
               display: flex;
               align-items: center;
-
-              .param-value {
-                width: 93%;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                position: relative;
-              }
-
-              &:hover {
-                .copy-btn {
-                  width: 16px;
-                  height: 16px;
-                  background: url('@/assets/svgs/btn/copy.svg') no-repeat;
-                  background-size: 100%;
-                  cursor: pointer;
-                  position: absolute;
-                  top: 2px;
-                  right: 0px;
-                  opacity: 0.5;
-
-                  &:hover {
-                    opacity: 1;
-                  }
+              position: relative;
+              &:hover{
+                .copy-btn{
+                  display: block;
                 }
               }
+              .param-value {
+                //max-width: 93%;
+                //overflow: hidden;
+                //text-overflow: ellipsis;
+                //white-space: nowrap;
+                //position: relative;
+              }
+              .copy-btn{
+                width:16px;
+                height:16px;
+                background:url('@/assets/svgs/btn/copy.svg') no-repeat;
+                background-size:100%;
+                cursor: pointer;
+                display: none;
+                //position:absolute;
+                //top:2px;
+                //right:0px;
+                opacity: 0.5;
+                &:hover{
+                  opacity: 1;
+                }
+              }
+              //&:hover{
+              //  .copy-btn{
+              //    width:16px;
+              //    height:16px;
+              //    background:url('@/assets/svgs/btn/copy.svg') no-repeat;
+              //    background-size:100%;
+              //    cursor: pointer;
+              //    //position:absolute;
+              //    //top:2px;
+              //    //right:0px;
+              //    opacity: 0.5;
+              //    &:hover{
+              //      opacity: 1;
+              //    }
+              //  }
+              //}
             }
           }
         }
