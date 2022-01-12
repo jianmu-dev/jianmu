@@ -49,7 +49,7 @@
                       <template #default="scope">
                         <div class="copy-container">
                           <jm-text-viewer :value="scope.row.value" class="webhook-param-value"/>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -72,7 +72,7 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
-import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { TriggerTypeEnum,ParamTypeEnum } from '@/api/dto/enumeration';
 import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
@@ -133,6 +133,7 @@ export default defineComponent({
       webhookLog,
       webhookParams,
       copy,
+      ParamTypeEnum
     };
   },
 });

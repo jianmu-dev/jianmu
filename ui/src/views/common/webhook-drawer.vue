@@ -119,7 +119,7 @@
             </jm-table-column>
             <jm-table-column label="参数值" prop="value">
               <template #default="scope">
-                <div v-if="scope.row.type === 'SECRET'">
+                <div v-if="scope.row.type === ParamTypeEnum.SECRET">
                   <!-- 密钥类型切换 -->
                   <div class="hide-container" v-if="secretVisible">
                     <span>********************</span>
@@ -187,6 +187,7 @@ import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { fetchTriggerWebhook } from '@/api/view-no-auth';
 import { ElScrollbar } from 'element-plus';
 import { StateEnum } from '@/components/load-more/enumeration';
+import {ParamTypeEnum} from '@/api/dto/enumeration';
 
 export default defineComponent({
   props: {
@@ -500,6 +501,7 @@ export default defineComponent({
       displaySecret: () => (secretVisible.value = true),
       // 当前项目名
       currentProject,
+      ParamTypeEnum
     };
   },
 });

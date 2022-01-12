@@ -129,7 +129,7 @@
                           <div class="param-value text-viewer">
                             <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -192,7 +192,7 @@
                           <div class="param-value text-viewer">
                             <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -217,7 +217,7 @@ import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
-import { TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
+import { TaskParamTypeEnum, TaskStatusEnum,ParamTypeEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
 import useClipboard from 'vue-clipboard3';
@@ -331,6 +331,7 @@ export default defineComponent({
     };
     const maxWidthRecord = ref<Record<string, number>>({});
     return {
+      ParamTypeEnum,
       maxWidthRecord,
       workflowName: state.recordDetail.record?.name,
       task,
