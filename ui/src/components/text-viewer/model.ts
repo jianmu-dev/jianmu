@@ -59,18 +59,16 @@ export class TextViewer {
     return await this.calculateMaxCharWidth(value, i + 1, maxWidth);
   }
 
-  private async calculateContentMaxWidth(value: string = this.value.value, i: number = 0, w: number = 0): Promise<number> {
-    this.temporaryContent.value = value[i];
+  private async calculateContentMaxWidth(value: string = this.value.value): Promise<number> {
+    this.temporaryContent.value=value;
     await nextTick();
-    if (!this.transitCalculator.value) {
+    if(!this.transitCalculator.value||!this.transitCalculator.value.getClientRects()[0]){
       return 0;
     }
-    const totalWidth = w + this.transitCalculator.value!.offsetWidth;
-    if (i >= value.length - 1) {
-      this.temporaryContent.value = '';
-      return totalWidth;
-    }
-    return await this.calculateContentMaxWidth(value, i + 1, totalWidth);
+    // 需要用getClientRects去获取元素的宽度精确到小数点后三位
+    const maxWidth=this.transitCalculator.value?.getClientRects()[0].width;
+    this.temporaryContent.value = '';
+    return Math.ceil( maxWidth);
   }
 
   private async calculateEllipsisWidth(): Promise<number> {

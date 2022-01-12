@@ -10,7 +10,7 @@
       <div class="item">
         <div class="param-key">节点名称：</div>
         <div class="param-value">
-          <jm-text-viewer :value="task.nodeName "/>
+          <jm-text-viewer :value="task.nodeName"/>
         </div>
       </div>
       <div class="item">
@@ -126,8 +126,6 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-<!--                          // class="param-value text-viewer"-->
-<!--                          -->
                           <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
                                             :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
@@ -143,7 +141,13 @@
                     </jm-table-column>
                   </jm-table>
                   <div class="title separator">输出参数</div>
-                  <jm-table :data="taskOutputParams" border>
+                  <jm-table :data="taskOutputParams"
+                            :border="true"
+                            :cell-class-name="
+                      ({ row, columnIndex }) =>
+                        row.required && columnIndex === 0 ? 'required-cell' : ''
+                    "
+                  >
                     <jm-table-column
                       header-align="center"
                       label="参数唯一标识"
@@ -197,7 +201,6 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-<!--                          // class="param-value text-viewer"-->
                           <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
                                             :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
@@ -587,44 +590,20 @@ export default defineComponent({
                   display: block;
                 }
               }
-              .param-value {
-                //max-width: 93%;
-                //overflow: hidden;
-                //text-overflow: ellipsis;
-                //white-space: nowrap;
-                //position: relative;
-              }
               .copy-btn{
+                margin-left: 5px;
+                flex-shrink: 0;
                 width:16px;
                 height:16px;
                 background:url('@/assets/svgs/btn/copy.svg') no-repeat;
                 background-size:100%;
                 cursor: pointer;
                 display: none;
-                //position:absolute;
-                //top:2px;
-                //right:0px;
                 opacity: 0.5;
                 &:hover{
                   opacity: 1;
                 }
               }
-              //&:hover{
-              //  .copy-btn{
-              //    width:16px;
-              //    height:16px;
-              //    background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-              //    background-size:100%;
-              //    cursor: pointer;
-              //    //position:absolute;
-              //    //top:2px;
-              //    //right:0px;
-              //    opacity: 0.5;
-              //    &:hover{
-              //      opacity: 1;
-              //    }
-              //  }
-              //}
             }
           }
         }
