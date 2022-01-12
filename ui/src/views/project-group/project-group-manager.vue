@@ -51,18 +51,13 @@
               <div class="wrapper">
                 <div class="top">
                   <router-link :to="{ path: `/project-group/detail/${i.id}` }">
-<!--                    <div class="name">{{ i.name }}</div>-->
                     <div class="name">
                       <jm-text-viewer :value="i.name"/>
                     </div>
                   </router-link>
                 </div>
                 <div class="description">
-                  <jm-scrollbar max-height="60px">
-                    <span
-                      v-html="(i.description || '无').replace(/\n/g, '<br/>')"
-                    />
-                  </jm-scrollbar>
+                  <jm-text-viewer class="text-viewer" :value="(i.description || '无')"/>
                 </div>
                 <div class="update-time">
                   <span>最后修改时间：</span
@@ -82,7 +77,6 @@
           <div class="wrapper">
             <div class="top">
               <router-link :to="{ path: `/project-group/detail/${i.id}` }">
-<!--                <div class="name">{{ i.name }}</div>-->
                 <div class="name">
                   <jm-text-viewer :value="i.name"/>
                 </div>
@@ -107,11 +101,7 @@
               </div>
             </div>
             <div class="description">
-              <jm-scrollbar max-height="60px">
-                <span
-                  v-html="(i.description || '无').replace(/\n/g, '<br/>')"
-                />
-              </jm-scrollbar>
+              <jm-text-viewer class="text-viewer" :value="(i.description || '无')"/>
             </div>
             <div class="update-time">
               <span>最后修改时间：</span
@@ -484,12 +474,11 @@ export default defineComponent({
           display: flex;
           justify-content: space-between;
           align-items: center;
+          white-space: nowrap;
+          a{
+            flex: 1;
+          }
           .name {
-            //max-width: 150px;
-            width: 150px;
-            //overflow: hidden;
-            //text-overflow: ellipsis;
-            //white-space: nowrap;
             color: #082340;
             font-size: 20px;
             font-weight: 500;
@@ -498,6 +487,7 @@ export default defineComponent({
             }
           }
           .operation {
+            margin-left: 5px;
             display: none;
             .op-item {
               width: 22px;
@@ -520,16 +510,14 @@ export default defineComponent({
         }
         .description {
           margin-top: 5px;
+          .text-viewer{
+            height: 54px;
+          }
           line-height: 20px;
-          max-height: 60px;
-          text-overflow: ellipsis;
-          overflow: hidden;
         }
         .update-time {
           position: absolute;
           bottom: 38px;
-          // margin-top: 10px;
-          // margin-top: 20px;
         }
         .switch {
           position: absolute;

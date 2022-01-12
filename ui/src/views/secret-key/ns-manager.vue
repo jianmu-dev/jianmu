@@ -33,9 +33,7 @@
                 </div>
               </router-link>
               <div class="description">
-                <jm-scrollbar max-height="80px">
-                  <span v-html="(ns.description || '无').replace(/\n/g, '<br/>')"/>
-                </jm-scrollbar>
+                <jm-text-viewer :value="(ns.description || '无')" class="text-viewer"/>
               </div>
               <div class="time">
                 最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}
@@ -307,9 +305,11 @@ export default defineComponent({
           }
 
           .description {
-            margin-top: 6px;
             font-size: 13px;
             color: #6b7b8d;
+            .text-viewer{
+              height: 90px;
+            }
           }
         }
 
