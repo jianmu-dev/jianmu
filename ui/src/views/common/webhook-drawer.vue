@@ -10,7 +10,7 @@
     >
       <div class="webhook-drawer">
         <!-- 项目名称 -->
-        <div class="project-name">{{currentProject}}</div>
+        <div class="project-name">{{ currentProject }}</div>
         <div class="webhook-link-container">
           <div class="link-tips">可以通过调用以下Webhook地址来触发流程执行</div>
           <div class="link-container">
@@ -49,7 +49,8 @@
                 <jm-table-column prop="timed" label="请求时间" align="center">
                   <template #default="scope">
                     <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
-                  </template></jm-table-column
+                  </template>
+                </jm-table-column
                 >
                 <jm-table-column prop="statusCode" label="状态" align="center">
                   <template #default="scope">
@@ -107,7 +108,7 @@
         </div>
         <!-- 查看payload -->
         <div class="payload-content" v-if="!payloadTab">
-          <jm-log-viewer filename="webhook.txt" :value="webhookLog" />
+          <jm-log-viewer filename="webhook.txt" :value="webhookLog"/>
         </div>
         <!-- 触发器 -->
         <div v-else class="trigger-content">
@@ -129,7 +130,7 @@
                     ></i>
                   </div>
                   <div class="display-container" v-else>
-                    <jm-text-viewer :value="scope.row.value" class="trigger-params-value" />
+                    <jm-text-viewer :value="scope.row.value" class="trigger-params-value"/>
                     <i
                       class="display-secret jm-icon-input-invisible"
                       @click="displaySecret"
@@ -137,7 +138,7 @@
                   </div>
                 </div>
                 <div class="params-container" v-else>
-                  <jm-text-viewer :value="scope.row.value" class="trigger-value" />
+                  <jm-text-viewer :value="scope.row.value" class="trigger-value"/>
                   <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
                 </div>
               </template>
@@ -187,7 +188,7 @@ import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { fetchTriggerWebhook } from '@/api/view-no-auth';
 import { ElScrollbar } from 'element-plus';
 import { StateEnum } from '@/components/load-more/enumeration';
-import {ParamTypeEnum} from '@/api/dto/enumeration';
+import { ParamTypeEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   props: {
@@ -197,8 +198,8 @@ export default defineComponent({
     currentProjectId: {
       type: String,
     },
-    currentProjectName:{
-      type:String,
+    currentProjectName: {
+      type: String,
     },
   },
   emits: ['update:webhookVisible'],
@@ -451,7 +452,7 @@ export default defineComponent({
       secretVisible.value = true;
     };
     // 一键复制
-    const copyParam = async (value:string) => {
+    const copyParam = async (value: string) => {
       if (!value) {
         return;
       }
@@ -501,7 +502,7 @@ export default defineComponent({
       displaySecret: () => (secretVisible.value = true),
       // 当前项目名
       currentProject,
-      ParamTypeEnum
+      ParamTypeEnum,
     };
   },
 });
@@ -524,6 +525,7 @@ export default defineComponent({
       }
     }
   }
+
   // webhook抽屉
   .webhook-drawer {
     height: 100%;
@@ -531,11 +533,12 @@ export default defineComponent({
     box-sizing: border-box;
     padding: 20px 25px 0 25px;
     // 项目名称
-    .project-name{
-      margin-bottom:20px;
-      font-size:16px;
-      color:#082340;
+    .project-name {
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: #082340;
     }
+
     // webhook地址
     .webhook-link-container {
       height: 125px;
@@ -543,15 +546,18 @@ export default defineComponent({
       box-sizing: border-box;
       padding: 30px 20px;
       margin-bottom: 20px;
+
       .link-tips {
         font-size: 14px;
         color: #082340;
         margin-bottom: 10px;
       }
+
       .link-container {
         height: 36px;
         display: flex;
         align-items: center;
+
         .link-address {
           width: 760px;
           height: 40px;
@@ -565,13 +571,15 @@ export default defineComponent({
           // 图标
           .jm-icon-input-hook {
             content: '\e818';
-            margin:0 14px;
+            margin: 0 14px;
           }
+
           // 链接
-          .webhook-link{
-            width:700px;
+          .webhook-link {
+            width: 700px;
           }
         }
+
         .copy-link-address {
           button {
             height: 36px;
@@ -581,6 +589,7 @@ export default defineComponent({
         }
       }
     }
+
     // 表格
     .table-container {
       max-height: calc(100vh - 254px);
@@ -588,67 +597,82 @@ export default defineComponent({
       box-sizing: border-box;
       padding: 20px;
       margin-bottom: 20px;
+
       .table-title {
         margin-bottom: 20px;
         font-size: 14px;
         color: #082340;
       }
+
       ::v-deep(.el-scrollbar__wrap) {
         max-height: calc(100vh - 380px);
       }
+
       .table-content {
         overflow-y: auto;
         border-radius: 4px 4px 0 0;
         border: 1px solid #ecedf4;
+
         ::v-deep(.el-table) {
           background: #fff;
           font-size: 14px;
           color: #082340;
           overflow: visible;
           height: auto;
+
           &::before {
             height: 0;
           }
+
           td {
             border-bottom: 1px solid #ecedf4;
             border-right: 1px solid #ecedf4;
           }
+
           th {
             text-align: center;
             font-weight: 500;
           }
+
           th:last-of-type {
             border-right: none;
           }
+
           tr {
             height: 56px;
           }
+
           tr {
             td:last-of-type {
               border-right: none;
             }
           }
+
           .table-button {
             display: flex;
             justify-content: center;
+
             .retry,
             .see-payload {
               font-size: 14px;
               color: #096dd9;
               cursor: pointer;
             }
+
             .retry {
               margin-right: 20px;
             }
           }
         }
       }
+
       // 显示更多
       .load-more {
         text-align: center;
       }
     }
   }
+
   // 查看paload
   ::v-deep(.el-dialog) {
     .el-dialog__header {
@@ -656,6 +680,7 @@ export default defineComponent({
       margin-bottom: 25px;
       padding: 20px 25px;
     }
+
     .el-dialog__header {
       > span::before {
         font-family: 'jm-icon-input';
@@ -668,18 +693,22 @@ export default defineComponent({
         top: 1px;
       }
     }
+
     .el-dialog__title {
       font-size: 16px;
       color: #082340;
       font-weight: 500;
     }
+
     .el-dialog__body {
       border: none;
       padding: 0px 20px 25px 20px;
     }
+
     // tab切换
     .tab-container {
       display: flex;
+
       div {
         width: 120px;
         height: 40px;
@@ -692,44 +721,55 @@ export default defineComponent({
         cursor: pointer;
         border-radius: 4px 4px 0 0;
       }
+
       .active {
         color: #fff;
         background: #042749;
       }
     }
+
     // payload/trigger
     .payload-content,
     .trigger-content {
       height: 500px;
     }
+
     .payload-content {
       padding: 20px;
       border: 1px solid #e6ebf2;
     }
+
     // 触发器
     .trigger-content {
       overflow-y: auto;
       padding: 20px;
       border: 1px solid #e6ebf2;
+
       .trigger-title {
         margin-bottom: 10px;
       }
+
       .trigger-table,
       .verify-table {
         border: 1px solid #eceef6;
         border-bottom: 0;
+
         th {
           text-align: center;
         }
+
         td {
           border-right: 1px solid #eceef6;
         }
+
         td:last-of-type {
           border-right: 0;
         }
+
         td:nth-of-type(2) {
           text-align: center;
         }
+
         .el-table__row:hover > td {
           background-color: #ffffff !important;
         }
@@ -738,37 +778,43 @@ export default defineComponent({
           background-color: #fafafa !important;
         }
       }
+
       .trigger-table {
-        .params-container{
+        .params-container {
           display: flex;
-          position:relative;
-          &:hover{
-            .copy-btn{
-              width:16px;
-              height:16px;
-              background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-              background-size:100%;
+          position: relative;
+
+          &:hover {
+            .copy-btn {
+              width: 16px;
+              height: 16px;
+              background: url('@/assets/svgs/btn/copy.svg') no-repeat;
+              background-size: 100%;
               cursor: pointer;
-              position:absolute;
-              top:2px;
-              right:2px;
+              position: absolute;
+              top: 2px;
+              right: 2px;
               opacity: 0.5;
-              &:hover{
-                opacity:1;
+
+              &:hover {
+                opacity: 1;
               }
             }
           }
+
           // 普通参数
-          .trigger-value{
-            width:280px;
+          .trigger-value {
+            width: 280px;
           }
         }
+
         td:first-of-type,
         td:last-of-type {
           .cell {
             padding-left: 20px;
           }
         }
+
         .hide-secret,
         .display-secret {
           display: flex;
@@ -780,49 +826,60 @@ export default defineComponent({
           cursor: pointer;
           margin-left: 10px;
         }
+
         .hide-container {
           display: flex;
           align-items: center;
           justify-content: space-between;
+
           .hide-secret {
             .jm-icon-input-visible::before {
               content: '\e803';
             }
+
             &:hover {
               background: #eff7ff;
             }
           }
         }
+
         .display-container {
           display: flex;
           align-items: center;
           justify-content: space-between;
+
           .trigger-params-value {
             width: 280px;
           }
+
           .display-secret {
             .jm-icon-input-invisible::before {
               content: '\e800';
             }
+
             &:hover {
               background: #eff7ff;
             }
           }
         }
       }
+
       // 认证
       .verify-title {
         margin: 25px 0 10px 0;
       }
+
       .verify-table {
         td {
           text-align: center;
         }
       }
+
       // 匹配认证
       .matching-title {
         margin: 25px 0 10px 0;
       }
+
       .matching-container {
         min-height: 40px;
         border-radius: 4px;
@@ -833,6 +890,7 @@ export default defineComponent({
         word-wrap: break-word;
         box-sizing: border-box;
       }
+
       // 为空时
       .matching-null {
         font-size: 14px;

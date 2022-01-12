@@ -3,11 +3,11 @@
     <div class="basic-section">
       <div class="param-key">流程名称：
       </div>
-      <jm-text-viewer :value="workflowName" class="param-value" />
+      <jm-text-viewer :value="workflowName" class="param-value"/>
       <div class="param-key">节点名称：</div>
-      <jm-text-viewer :value="nodeName" class="param-value node-name" />
+      <jm-text-viewer :value="nodeName" class="param-value node-name"/>
       <div class="param-key">启动时间：</div>
-      <jm-text-viewer :value="startTime" class="param-value" />
+      <jm-text-viewer :value="startTime" class="param-value"/>
     </div>
 
     <div class="tab-section">
@@ -35,7 +35,7 @@
                     border>
                     <jm-table-column label="参数唯一标识">
                       <template #default="scope">
-                        <jm-text-viewer :value="scope.row.name"  class="params-name"/>
+                        <jm-text-viewer :value="scope.row.name" class="params-name"/>
                       </template>
                     </jm-table-column>
                     <jm-table-column
@@ -49,7 +49,8 @@
                       <template #default="scope">
                         <div class="copy-container">
                           <jm-text-viewer :value="scope.row.value" class="webhook-param-value"/>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -72,7 +73,7 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
-import { TriggerTypeEnum,ParamTypeEnum } from '@/api/dto/enumeration';
+import { TriggerTypeEnum, ParamTypeEnum } from '@/api/dto/enumeration';
 import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
@@ -114,7 +115,7 @@ export default defineComponent({
       }
     });
     // 一键复制
-    const copy = async (value:string) => {
+    const copy = async (value: string) => {
       if (!value) {
         return;
       }
@@ -133,7 +134,7 @@ export default defineComponent({
       webhookLog,
       webhookParams,
       copy,
-      ParamTypeEnum
+      ParamTypeEnum,
     };
   },
 });
@@ -169,8 +170,9 @@ export default defineComponent({
       width: 20%;
       color: #082340;
     }
-    .node-name{
-      max-width:10%;
+
+    .node-name {
+      max-width: 10%;
     }
   }
 }
@@ -232,26 +234,31 @@ export default defineComponent({
 
       .content {
         padding: 16px;
-        .params-name{
-          width:80%;
+
+        .params-name {
+          width: 80%;
         }
+
         ::v-deep(.el-table) {
           th, td {
             color: #082340;
           }
-          tr{
+
+          tr {
             td:first-child,
-            td:last-child{
-              text-align:left;
-              padding-left:20px;
+            td:last-child {
+              text-align: left;
+              padding-left: 20px;
             }
-            td:first-child{
-              .cell{
-                width:100%!important;
+
+            td:first-child {
+              .cell {
+                width: 100% !important;
               }
             }
           }
-          .copy-container{
+
+          .copy-container {
             display: flex;
             align-items: center;
             // 表格参数
@@ -259,18 +266,20 @@ export default defineComponent({
               width: 88%;
               position: relative;
             }
-            &:hover{
-              .copy-btn{
-                width:16px;
-                height:16px;
-                background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-                background-size:100%;
+
+            &:hover {
+              .copy-btn {
+                width: 16px;
+                height: 16px;
+                background: url('@/assets/svgs/btn/copy.svg') no-repeat;
+                background-size: 100%;
                 cursor: pointer;
-                position:absolute;
-                top:14px;
-                right:10px;
+                position: absolute;
+                top: 14px;
+                right: 10px;
                 opacity: 0.5;
-                &:hover{
+
+                &:hover {
                   opacity: 1;
                 }
               }

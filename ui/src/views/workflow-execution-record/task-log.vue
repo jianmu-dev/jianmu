@@ -80,7 +80,8 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div
+                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -129,7 +130,8 @@
                           <div class="param-value text-viewer">
                             <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -143,7 +145,8 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div
+                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -192,7 +195,8 @@
                           <div class="param-value text-viewer">
                             <jm-text-viewer :value="scope.row.value" class="value"></jm-text-viewer>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -217,7 +221,7 @@ import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
-import { TaskParamTypeEnum, TaskStatusEnum,ParamTypeEnum } from '@/api/dto/enumeration';
+import { TaskParamTypeEnum, TaskStatusEnum, ParamTypeEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
 import useClipboard from 'vue-clipboard3';
@@ -317,7 +321,7 @@ export default defineComponent({
     onBeforeUnmount(() => (terminateTaskLogLoad = true));
 
     // 一键复制
-    const copy = async (value:string) => {
+    const copy = async (value: string) => {
       if (!value) {
         return;
       }
@@ -452,15 +456,18 @@ export default defineComponent({
             .text-viewer {
               display: flex;
               align-items: center;
-              &.param-value{
+
+              &.param-value {
                 .value {
                   width: 100%;
-                  &.jm-text-viewer{
-                    .content{
-                      .text-line{
-                        &:last-child{
+
+                  &.jm-text-viewer {
+                    .content {
+                      .text-line {
+                        &:last-child {
                           text-align: left;
-                          &::after{
+
+                          &::after {
                             display: none;
                           }
                         }
@@ -469,14 +476,17 @@ export default defineComponent({
                   }
                 }
               }
+
               .value {
                 width: 100%;
-                &.jm-text-viewer{
-                  .content{
-                    .text-line{
-                      &:last-child{
+
+                &.jm-text-viewer {
+                  .content {
+                    .text-line {
+                      &:last-child {
                         text-align: center;
-                        &::after{
+
+                        &::after {
                           display: none;
                         }
                       }
@@ -556,9 +566,11 @@ export default defineComponent({
             td {
               color: #082340;
             }
-            .copy-container{
+
+            .copy-container {
               display: flex;
               align-items: center;
+
               .param-value {
                 width: 93%;
                 overflow: hidden;
@@ -566,18 +578,20 @@ export default defineComponent({
                 white-space: nowrap;
                 position: relative;
               }
-              &:hover{
-                .copy-btn{
-                  width:16px;
-                  height:16px;
-                  background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-                  background-size:100%;
+
+              &:hover {
+                .copy-btn {
+                  width: 16px;
+                  height: 16px;
+                  background: url('@/assets/svgs/btn/copy.svg') no-repeat;
+                  background-size: 100%;
                   cursor: pointer;
-                  position:absolute;
-                  top:2px;
-                  right:0px;
+                  position: absolute;
+                  top: 2px;
+                  right: 0px;
                   opacity: 0.5;
-                  &:hover{
+
+                  &:hover {
                     opacity: 1;
                   }
                 }
