@@ -1,6 +1,5 @@
-import { createVNode, nextTick, render, Ref, AppContext, VNode } from 'vue';
+import { createVNode, nextTick, render, Ref, AppContext, VNode, VNodeProps } from 'vue';
 import Tip from './tip.vue';
-import { VNodeProps } from '@vue/runtime-core';
 
 export interface ICallbackEvent {
   contentMaxWidth: number
