@@ -274,6 +274,10 @@ export class TextViewer {
     await nextTick();
     if (this.transitCalculator.value!.offsetWidth + ellipsisWidth > wrapperSize.width) {
       const temp = wrapperNode.children[wrapperNode.children.length - 1].children[0];
+      // 如果vNode中的children不是数组（数组证明此时vNode中有toolTipVNode），说明没有达到出...的条件，直接将文字展示不做处理
+      if(!Array.isArray(wrapperNode.children[wrapperNode.children.length - 1].children)){
+        return;
+      }
       wrapperNode.children[wrapperNode.children.length - 1].children[0] = '';
       wrapperNode.children[wrapperNode.children.length - 1].children[0] += temp.substring(0, temp.length - 1);
     } else {
