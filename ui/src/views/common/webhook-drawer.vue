@@ -115,7 +115,11 @@
           <!-- 参数列表 -->
           <div class="trigger-title">参数列表</div>
           <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
-            <jm-table-column label="参数唯一标识" prop="name"></jm-table-column>
+            <jm-table-column label="参数唯一标识">
+              <template #default="scope">
+                <jm-text-viewer :value="scope.row.name"/>
+              </template>
+            </jm-table-column>
             <jm-table-column label="参数类型" width="200px" prop="type">
             </jm-table-column>
             <jm-table-column label="参数值" prop="value">
@@ -130,7 +134,20 @@
                     ></i>
                   </div>
                   <div class="display-container" v-else>
-                    <jm-text-viewer :value="scope.row.value" class="trigger-params-value"/>
+                    <template v-if="scope.row.value">
+                      <div class="param-value"
+                           :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                        <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                        :value="scope.row.value"
+                                        @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                        class="value"
+                        >
+                        </jm-text-viewer>
+                        <template v-else>
+                          {{ scope.row.value }}
+                        </template>
+                      </div>
+                    </template>
                     <i
                       class="display-secret jm-icon-input-invisible"
                       @click="displaySecret"
@@ -138,8 +155,24 @@
                   </div>
                 </div>
                 <div class="params-container" v-else>
-                  <jm-text-viewer :value="scope.row.value" class="trigger-value"/>
-                  <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
+                  <template v-if="scope.row.value">
+                    <div class="param-value"
+                         :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                      <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                      :value="scope.row.value"
+                                      @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                      class="value"
+                      >
+                      </jm-text-viewer>
+                      <template v-else>
+                        {{ scope.row.value }}
+                      </template>
+                    </div>
+                    <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
+                  </template>
+                  <template v-else>
+                    {{ scope.row.value }}
+                  </template>
                 </div>
               </template>
             </jm-table-column>
@@ -189,8 +222,10 @@ import { fetchTriggerWebhook } from '@/api/view-no-auth';
 import { ElScrollbar } from 'element-plus';
 import { StateEnum } from '@/components/load-more/enumeration';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
+import JmTextViewer from '@/components/text-viewer/index.vue';
 
 export default defineComponent({
+  components: { JmTextViewer },
   props: {
     webhookVisible: {
       type: Boolean,
@@ -223,6 +258,7 @@ export default defineComponent({
     const webhookAuth = ref<IWebhookAuthVo[]>([]);
     // 密钥类型显隐
     const secretVisible = ref<boolean>(true);
+    const maxWidthRecord = ref<Record<string, number>>({});
     // webhook请求列表滚动
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
@@ -503,6 +539,10 @@ export default defineComponent({
       // 当前项目名
       currentProject,
       ParamTypeEnum,
+      maxWidthRecord,
+      getTotalWidth(width: number, ref: string) {
+        maxWidthRecord.value[ref] = width;
+      },
     };
   },
 });
@@ -782,7 +822,12 @@ export default defineComponent({
       .trigger-table {
         .params-container {
           display: flex;
-          position: relative;
+          align-items: center;
+
+          .param-value {
+            flex: 1;
+            margin-right: 5px;
+          }
 
           &:hover {
             .copy-btn {
@@ -791,9 +836,6 @@ export default defineComponent({
               background: url('@/assets/svgs/btn/copy.svg') no-repeat;
               background-size: 100%;
               cursor: pointer;
-              position: absolute;
-              top: 2px;
-              right: 2px;
               opacity: 0.5;
 
               &:hover {
@@ -804,7 +846,8 @@ export default defineComponent({
 
           // 普通参数
           .trigger-value {
-            width: 280px;
+            max-width: 280px;
+            //margin-right:20px;
           }
         }
 
@@ -824,15 +867,21 @@ export default defineComponent({
           height: 20px;
           border-radius: 4px;
           cursor: pointer;
-          margin-left: 10px;
+          //margin-left: 10px;
         }
 
         .hide-container {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+
+          span {
+            margin-right: 5px;
+          }
 
           .hide-secret {
+            position: relative;
+            top: -2px;
+
             .jm-icon-input-visible::before {
               content: '\e803';
             }
@@ -846,7 +895,11 @@ export default defineComponent({
         .display-container {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          //justify-content: space-between;
+          .param-value {
+            flex: 1;
+            margin-right: 5px;
+          }
 
           .trigger-params-value {
             width: 280px;

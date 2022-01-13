@@ -33,7 +33,7 @@
                   <jm-table
                     :data="webhookParams"
                     border>
-                    <jm-table-column label="参数唯一标识">
+                    <jm-table-column label="参数唯一标识" align="center">
                       <template #default="scope">
                         <jm-text-viewer :value="scope.row.name" class="params-name"/>
                       </template>
@@ -48,7 +48,18 @@
                       align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <jm-text-viewer :value="scope.row.value" class="webhook-param-value"/>
+                          <div class="param-value"
+                               :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
+                            >
+                            </jm-text-viewer>
+                            <template v-else>
+                              {{ scope.row.value }}
+                            </template>
+                          </div>
                           <div class="copy-btn" @click="copy(scope.row.value)"
                                v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
@@ -75,8 +86,10 @@ import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
 import { TriggerTypeEnum, ParamTypeEnum } from '@/api/dto/enumeration';
 import useClipboard from 'vue-clipboard3';
+import JmTextViewer from '@/components/text-viewer/index.vue';
 
 export default defineComponent({
+  components: { JmTextViewer },
   props: {
     nodeName: {
       type: String,
@@ -96,6 +109,7 @@ export default defineComponent({
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
     const { toClipboard } = useClipboard();
+    const maxWidthRecord = ref<Record<string, number>>({});
 
     onMounted(async () => {
       if (!props.triggerId) {
@@ -135,6 +149,10 @@ export default defineComponent({
       webhookParams,
       copy,
       ParamTypeEnum,
+      maxWidthRecord,
+      getTotalWidth(width: number, ref: string) {
+        maxWidthRecord.value[ref] = width;
+      },
     };
   },
 });
@@ -261,10 +279,15 @@ export default defineComponent({
           .copy-container {
             display: flex;
             align-items: center;
+
+            .param-value {
+              flex: 1;
+              margin-right: 5px;
+            }
+
             // 表格参数
             .webhook-param-value {
               width: 88%;
-              position: relative;
             }
 
             &:hover {
@@ -274,9 +297,6 @@ export default defineComponent({
                 background: url('@/assets/svgs/btn/copy.svg') no-repeat;
                 background-size: 100%;
                 cursor: pointer;
-                position: absolute;
-                top: 14px;
-                right: 10px;
                 opacity: 0.5;
 
                 &:hover {
