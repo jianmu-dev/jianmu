@@ -112,83 +112,87 @@
         </div>
         <!-- 触发器 -->
         <div v-else class="trigger-content">
-          <!-- 参数列表 -->
-          <div class="trigger-title">参数列表</div>
-          <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
-            <jm-table-column label="参数唯一标识">
-              <template #default="scope">
-                <jm-text-viewer :value="scope.row.name"/>
-              </template>
-            </jm-table-column>
-            <jm-table-column label="参数类型" width="200px" prop="type">
-            </jm-table-column>
-            <jm-table-column label="参数值" prop="value">
-              <template #default="scope">
-                <div v-if="scope.row.type === ParamTypeEnum.SECRET">
-                  <!-- 密钥类型切换 -->
-                  <div class="hide-container" v-if="secretVisible">
-                    <span>********************</span>
-                    <i
-                      class="hide-secret jm-icon-input-visible"
-                      @click="hideSecret"
-                    ></i>
-                  </div>
-                  <div class="display-container" v-else>
-                    <template v-if="scope.row.value">
-                      <div class="param-value"
-                           :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
-                        <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                        :value="scope.row.value"
-                                        @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
-                                        class="value"
-                        >
-                        </jm-text-viewer>
-                        <template v-else>
-                          {{ scope.row.value }}
-                        </template>
+          <jm-scrollbar>
+            <div style="padding:20px;">
+              <!-- 参数列表 -->
+              <div class="trigger-title">参数列表</div>
+              <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
+                <jm-table-column label="参数唯一标识">
+                  <template #default="scope">
+                    <jm-text-viewer :value="scope.row.name"/>
+                  </template>
+                </jm-table-column>
+                <jm-table-column label="参数类型" width="200px" prop="type">
+                </jm-table-column>
+                <jm-table-column label="参数值" prop="value">
+                  <template #default="scope">
+                    <div v-if="scope.row.type === ParamTypeEnum.SECRET">
+                      <!-- 密钥类型切换 -->
+                      <div class="hide-container" v-if="secretVisible">
+                        <span>********************</span>
+                        <i
+                          class="hide-secret jm-icon-input-visible"
+                          @click="hideSecret"
+                        ></i>
                       </div>
-                    </template>
-                    <i
-                      class="display-secret jm-icon-input-invisible"
-                      @click="displaySecret"
-                    ></i>
-                  </div>
-                </div>
-                <div class="params-container" v-else>
-                  <template v-if="scope.row.value">
-                    <div class="param-value"
-                         :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
-                      <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                      :value="scope.row.value"
-                                      @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
-                                      class="value"
-                      >
-                      </jm-text-viewer>
+                      <div class="display-container" v-else>
+                        <template v-if="scope.row.value">
+                          <div class="param-value"
+                               :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
+                            >
+                            </jm-text-viewer>
+                            <template v-else>
+                              {{ scope.row.value }}
+                            </template>
+                          </div>
+                        </template>
+                        <i
+                          class="display-secret jm-icon-input-invisible"
+                          @click="displaySecret"
+                        ></i>
+                      </div>
+                    </div>
+                    <div class="params-container" v-else>
+                      <template v-if="scope.row.value">
+                        <div class="param-value"
+                             :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                          <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                          :value="scope.row.value"
+                                          @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                          class="value"
+                          >
+                          </jm-text-viewer>
+                          <template v-else>
+                            {{ scope.row.value }}
+                          </template>
+                        </div>
+                        <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
+                      </template>
                       <template v-else>
                         {{ scope.row.value }}
                       </template>
                     </div>
-                    <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
                   </template>
-                  <template v-else>
-                    {{ scope.row.value }}
-                  </template>
-                </div>
-              </template>
-            </jm-table-column>
-          </jm-table>
-          <!-- 认证 -->
-          <div class="verify-title">认证</div>
-          <jm-table class="verify-table" :data="webhookAuth">
-            <jm-table-column label="token" prop="token"></jm-table-column>
-            <jm-table-column label="value" prop="value"></jm-table-column>
-          </jm-table>
-          <!-- 匹配认证 -->
-          <div class="matching-title">匹配认证</div>
-          <div class="matching-container" v-if="webhookParamsDetail?.only">
-            {{ webhookParamsDetail?.only }}
-          </div>
-          <div class="matching-container matching-null" v-else>暂无数据</div>
+                </jm-table-column>
+              </jm-table>
+              <!-- 认证 -->
+              <div class="verify-title">认证</div>
+              <jm-table class="verify-table" :data="webhookAuth">
+                <jm-table-column label="token" prop="token"></jm-table-column>
+                <jm-table-column label="value" prop="value"></jm-table-column>
+              </jm-table>
+              <!-- 匹配认证 -->
+              <div class="matching-title">匹配认证</div>
+              <div class="matching-container" v-if="webhookParamsDetail?.only">
+                {{ webhookParamsDetail?.only }}
+              </div>
+              <div class="matching-container matching-null" v-else>暂无数据</div>
+            </div>
+          </jm-scrollbar>
         </div>
       </jm-dialog>
     </jm-drawer>
@@ -782,7 +786,7 @@ export default defineComponent({
     // 触发器
     .trigger-content {
       overflow-y: auto;
-      padding: 20px;
+      //padding: 20px;
       border: 1px solid #e6ebf2;
 
       .trigger-title {
