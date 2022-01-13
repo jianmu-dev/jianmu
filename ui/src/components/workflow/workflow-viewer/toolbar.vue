@@ -66,7 +66,7 @@ export default defineComponent({
       default: MAX_ZOOM,
     },
   },
-  emits: ['on-zoom', 'click-process-log'],
+  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode'],
   setup(props, { emit }: SetupContext) {
     const zoom = ref<number>(props.zoomValue);
 
