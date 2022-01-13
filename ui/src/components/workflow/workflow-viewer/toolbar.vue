@@ -1,6 +1,6 @@
 <template>
   <div class="jm-workflow-viewer-toolbar">
-    <div class="group">
+    <div class="group" v-if="!dslMode">
       <jm-tooltip content="原始大小" placement="top">
         <div class="full-icon" @click="normalize"></div>
       </jm-tooltip>
@@ -9,7 +9,7 @@
         <div class="normal-icon" @click="fitViewer"></div>
       </jm-tooltip>
     </div>
-    <div class="group">
+    <div class="group" v-if="!dslMode">
       <jm-tooltip content="缩小" placement="top">
         <div :class="{'narrow-icon': true, disabled: zoom === MIN_ZOOM}"
              @click="changeZoom(false)"></div>
@@ -20,16 +20,27 @@
              @click="changeZoom(true)"></div>
       </jm-tooltip>
     </div>
-    <div class="group" v-if="!readonly">
-      <jm-tooltip content="流程日志" placement="top">
-        <div class="process-log-icon" @click="processLog"></div>
+    <div class="group">
+      <template v-if="!readonly && !dslMode">
+        <jm-tooltip content="流程日志" placement="top">
+          <div class="process-log-icon" @click="processLog"></div>
+        </jm-tooltip>
+        <div class="separator"></div>
+      </template>
+      <jm-tooltip content="查看DSL" placement="top" v-if="!dslMode">
+        <div class="dsl-icon" @click="viewDsl(true)"></div>
+      </jm-tooltip>
+      <jm-tooltip :content="`返回${isWorkflow ? '流程' : '管道'}图`" placement="top" v-else>
+        <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'"
+             @click="viewDsl(false)"></div>
       </jm-tooltip>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUpdate, ref, SetupContext } from 'vue';
+import { computed, defineComponent, onBeforeUpdate, PropType, ref, SetupContext } from 'vue';
+import { DslTypeEnum } from '@/api/dto/enumeration';
 
 const ZOOM_INTERVAL = 10;
 const ORIGINAL_ZOOM = 100;
@@ -41,6 +52,14 @@ export default defineComponent({
     readonly: {
       type: Boolean,
       default: false,
+    },
+    dslType: {
+      type: String as PropType<DslTypeEnum>,
+      required: true,
+    },
+    dslMode: {
+      type: Boolean,
+      required: true,
     },
     zoomValue: {
       type: Number,
@@ -59,8 +78,12 @@ export default defineComponent({
       zoom,
       MIN_ZOOM,
       MAX_ZOOM,
+      isWorkflow: computed<boolean>(() => props.dslType === DslTypeEnum.WORKFLOW),
       processLog: () => {
         emit('click-process-log');
+      },
+      viewDsl: (mode: boolean) => {
+        emit('update:dsl-mode', mode);
       },
       normalize: () => {
         emit('on-zoom', ORIGINAL_ZOOM);
@@ -121,6 +144,19 @@ export default defineComponent({
 
     .process-log-icon {
       background-image: url('./svgs/tool/process-log.svg');
+    }
+
+    .dsl-icon {
+      background-image: url('./svgs/tool/dsl.svg');
+      background-size: 24px;
+    }
+
+    .workflow-icon {
+      background-image: url('./svgs/tool/workflow.svg');
+    }
+
+    .pipeline-icon {
+      background-image: url('./svgs/tool/pipeline.svg');
     }
 
     .full-icon {

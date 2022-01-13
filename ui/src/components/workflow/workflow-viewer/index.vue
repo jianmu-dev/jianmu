@@ -1,16 +1,18 @@
 <template>
   <div class="jm-workflow-viewer">
-    <div v-if="!readonly && graph && tasks.length > 0" class="task-states">
+    <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"/>
     </div>
-    <toolbar v-if="graph" :readonly="readonly" :zoom-value="zoom" @click-process-log="clickProcessLog"
+    <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
+             @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"/>
-    <node-toolbar v-if="!readonly && nodeEvent"
+    <node-toolbar v-if="!readonly && !dslMode && nodeEvent"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
                   @node-click="clickNode"
                   @mouseout="handleNodeBarMouseout"/>
-    <div class="canvas" ref="container"/>
+    <div v-show="!dslMode" class="canvas" ref="container"/>
+    <jm-dsl-editor v-if="dslMode" :value="dsl" readonly/>
   </div>
 </template>
 
@@ -26,13 +28,13 @@ import {
   ref,
   SetupContext,
 } from 'vue';
-import G6, { Graph } from '@antv/g6';
+import G6, { Graph, NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
 import { configNodeAction, init, updateNodeStates } from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
 import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/utils/model';
@@ -66,6 +68,7 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeActionConfigured = ref<boolean>(false);
     const taskInstanceId = ref<string>();
+    const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
       taskInstanceId.value = undefined;
@@ -123,10 +126,16 @@ export default defineComponent({
       });
     };
 
-    const allTaskNodes = computed(() => {
-      const { nodes } = parse(props.dsl, props.triggerType);
+    const allTaskNodes = computed<{
+      nodes: NodeConfig[];
+      dslType: DslTypeEnum;
+    }>(() => {
+      const { nodes, dslType } = parse(props.dsl, props.triggerType);
 
-      return nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK);
+      return {
+        nodes: nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK),
+        dslType,
+      };
     });
 
     onBeforeUpdate(() => {
@@ -186,6 +195,8 @@ export default defineComponent({
       container,
       graph,
       taskInstanceId,
+      dslType: computed<DslTypeEnum>(() => allTaskNodes.value.dslType),
+      dslMode,
       nodeEvent,
       clickProcessLog: () => {
         emit('click-process-log');
@@ -227,7 +238,7 @@ export default defineComponent({
 
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,
-          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.length - props.tasks.length) : 0,
+          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.nodes.length - props.tasks.length) : 0,
         }));
 
         props.tasks.forEach(({ status }: ITaskExecutionRecordVo) => {
