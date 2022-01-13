@@ -94,6 +94,8 @@ export default defineComponent({
 
       &.last {
         text-align: justify;
+        // 解决最后一行会被换行显示
+        word-break: normal;
       }
     }
   }
