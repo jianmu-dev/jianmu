@@ -283,7 +283,6 @@ export default defineComponent({
           padding: 15px;
           border: 1px solid transparent;
           height: 138px;
-          white-space: nowrap;
 
           &:hover {
             border-color: #096dd9;
