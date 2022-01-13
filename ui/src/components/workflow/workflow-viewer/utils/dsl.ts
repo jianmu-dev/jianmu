@@ -1,7 +1,7 @@
 import { EdgeConfig, NodeConfig } from '@antv/g6';
 import yaml from 'yaml';
 import { NodeTypeEnum } from '../utils/enumeration';
-import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { DslTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
 import shellIcon from '../svgs/shape/shell.svg';
 import { SHELL_NODE_TYPE } from './model';
@@ -229,11 +229,12 @@ function parsePipeline(pipeline: any): {
  * @param nodeInfos
  */
 export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined, nodeInfos?: INodeDefVo[]): {
+  dslType: DslTypeEnum,
   nodes: NodeConfig[];
   edges: EdgeConfig[];
 } {
   if (!dsl || !triggerType) {
-    return { nodes: [], edges: [] };
+    return { nodes: [], edges: [], dslType: DslTypeEnum.WORKFLOW };
   }
 
   const { trigger, workflow, pipeline } = yaml.parse(dsl);
@@ -263,5 +264,5 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
     });
   }
 
-  return { nodes, edges };
+  return { nodes, edges, dslType: workflow ? DslTypeEnum.WORKFLOW : DslTypeEnum.PIPELINE };
 }
