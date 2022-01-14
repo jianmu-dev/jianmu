@@ -3,7 +3,7 @@
     <div class="header"></div>
     <jm-container class="container">
       <jm-header height="64px">
-        <top-nav />
+        <top-nav/>
       </jm-header>
       <jm-container>
         <jm-header v-if="pathNavsDisplay" class="path-nav">
@@ -12,7 +12,8 @@
               v-for="{ name, path } in pathNavs"
               :key="path"
               :to="path"
-            >{{ name }}</jm-breadcrumb-item
+            >{{ name }}
+            </jm-breadcrumb-item
             >
           </jm-breadcrumb>
         </jm-header>
