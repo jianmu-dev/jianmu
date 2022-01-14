@@ -85,13 +85,13 @@
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
-                          <el-tooltip
+                          <jm-tooltip
                             content="必填项"
                             placement="top"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
-                          </el-tooltip>
+                          </jm-tooltip>
                         </div>
                       </template>
                     </jm-table-column>
@@ -160,13 +160,13 @@
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
-                          <el-tooltip
+                          <jm-tooltip
                             content="必填项"
                             placement="top"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
-                          </el-tooltip>
+                          </jm-tooltip>
                         </div>
                       </template>
                     </jm-table-column>
