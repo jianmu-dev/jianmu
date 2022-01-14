@@ -26,8 +26,8 @@
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
 import ProjectGroup from '@/views/common/project-group.vue';
-import { defineComponent, getCurrentInstance, onBeforeMount, ref, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { defineComponent, getCurrentInstance, onBeforeMount, ref, nextTick, inject, onMounted } from 'vue';
+import { onBeforeRouteLeave, useRouter } from 'vue-router';
 export default defineComponent({
   components: { ProjectGroup },
   setup() {
@@ -63,6 +63,15 @@ export default defineComponent({
     const searchProject = () => {
       router.push({ name: 'index', query: { searchName: projectName.value } });
     };
+
+    const setScrollbarOffset = inject('setScrollbarOffset') as () => void;
+    const updateScrollbarOffset = inject('updateScrollbarOffset') as () => void;
+    onMounted(() => setScrollbarOffset());
+    onBeforeRouteLeave((to, from, next) => {
+      updateScrollbarOffset();
+      next();
+    });
+
     return {
       projectGroups,
       projectName,
