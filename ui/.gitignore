@@ -5,5 +5,3 @@ dist-ssr
 *.local
 .idea
 .eslintcache
-教程
-build_local.sh
