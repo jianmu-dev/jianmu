@@ -67,7 +67,7 @@ public class DslNode {
                     .entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> {
-                        if (!(entry.getValue() instanceof String)) {
+                        if (entry.getValue() instanceof String) {
                             return Map.entry((String) entry.getKey(), (String) entry.getValue());
                         }
                         var value = "(" + entry.getValue().toString() + ")";
