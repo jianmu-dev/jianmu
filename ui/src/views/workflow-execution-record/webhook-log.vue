@@ -42,6 +42,11 @@
                       label="参数类型"
                       align="center"
                       prop="type">
+                      <template #default="scope">
+                        <div class="text-viewer">
+                          <jm-text-viewer :value="scope.row.type" class="params-name"/>
+                        </div>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="参数值"
@@ -252,6 +257,19 @@ export default defineComponent({
 
       .content {
         padding: 16px;
+        ::v-deep(.text-viewer){
+          .params-name{
+            width: 100%;
+            .content{
+              .text-line{
+                text-align: center;
+                &::after{
+                  display: none;
+                }
+              }
+            }
+          }
+        }
 
         .params-name {
           width: 80%;
