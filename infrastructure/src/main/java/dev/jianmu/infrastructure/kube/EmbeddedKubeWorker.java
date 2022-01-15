@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.kube;
 
+import com.google.gson.reflect.TypeToken;
 import io.kubernetes.client.custom.V1Patch;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
@@ -8,6 +9,7 @@ import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
+import io.kubernetes.client.util.Watch;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 import lombok.extern.slf4j.Slf4j;
 
@@ -219,6 +221,51 @@ public class EmbeddedKubeWorker {
         }
     }
 
+    private void watcher() throws ApiException, IOException {
+        // set the global default api-client to the in-cluster one from above
+        Configuration.setDefaultApiClient(client);
+
+        // the CoreV1Api loads default api-client from global configuration.
+        CoreV1Api api = new CoreV1Api();
+
+        try (Watch<V1Pod> watch = Watch.createWatch(
+                this.client,
+                api.listNamespacedPodCall(
+                        defaultNamespace,
+                        "true",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        Boolean.TRUE,
+                        null),
+                new TypeToken<Watch.Response<V1Pod>>() {
+                }.getType()
+        )) {
+            for (Watch.Response<V1Pod> item : watch) {
+                if (item.object.getMetadata().getName().equals("jianmu-pod-1")) {
+                    item.object.getStatus().getContainerStatuses().stream()
+                            .filter(v1ContainerStatus -> v1ContainerStatus.getName().equals("jianmu-task-id-1"))
+                            .forEach(v1ContainerStatus -> {
+                                System.out.printf("%s : %s%n isReady: %s\n", item.type, item.object.getMetadata().getName(), v1ContainerStatus.getReady());
+                                if (v1ContainerStatus.getState().getRunning() != null) {
+                                    try {
+                                        this.watchPod();
+                                    } catch (IOException | ApiException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                }
+//                System.out.printf("%s : %s%n status: %s", item.type, item.object.getMetadata().getName(), item.object.getStatus().getContainerStatuses());
+            }
+        }
+    }
+
     private void watchPod() throws IOException, ApiException {
         // set the global default api-client to the in-cluster one from above
         Configuration.setDefaultApiClient(client);
@@ -256,8 +303,8 @@ public class EmbeddedKubeWorker {
     public static void main(String[] args) {
         try {
             var worker = new EmbeddedKubeWorker();
-//            worker.createPod2();
-            worker.watchPod();
+            worker.createPod2();
+            worker.watcher();
 //            worker.listPods();
 //            worker.deletePod();
         } catch (ApiException e) {
