@@ -45,9 +45,13 @@ public class WorkflowInstance extends AggregateRoot {
     private WorkflowInstance() {
     }
 
+    public boolean isRunning() {
+        return this.status == ProcessStatus.RUNNING;
+    }
+
     // 启动流程实例
     public void start() {
-        if (this.status == ProcessStatus.FINISHED || this.status == ProcessStatus.TERMINATED) {
+        if (!this.isRunning()) {
             throw new RuntimeException("流程实例已终止或结束，无法启动");
         }
         this.status = ProcessStatus.RUNNING;

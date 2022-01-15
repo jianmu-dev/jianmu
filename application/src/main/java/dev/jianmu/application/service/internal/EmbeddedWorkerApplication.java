@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @class EmbeddedWorkerApplication
  * @description EmbeddedWorkerApplication
- * @author Ethan Liu
  * @create 2021-09-12 22:23
-*/
+ */
 @Service
 @Slf4j
 public class EmbeddedWorkerApplication {
@@ -93,7 +93,7 @@ public class EmbeddedWorkerApplication {
         try {
             this.dockerWorker.terminateTask(taskInstanceId);
         } catch (RuntimeException e) {
-            throw new RuntimeException("无法终止任务");
+            log.warn("无法终止任务, 任务终止失败");
         }
     }
 
