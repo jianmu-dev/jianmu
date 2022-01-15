@@ -1,15 +1,18 @@
 <template>
   <div class="jm-workflow-viewer">
-    <div v-if="!readonly && graph && tasks.length > 0" class="task-states">
+    <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"/>
     </div>
-    <toolbar v-if="!readonly && graph" :zoom-value="zoom" @click-process-log="clickProcessLog" @on-zoom="handleZoom"/>
-    <node-toolbar v-if="!readonly && nodeEvent"
+    <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
+             @click-process-log="clickProcessLog"
+             @on-zoom="handleZoom"/>
+    <node-toolbar v-if="!readonly && !dslMode && nodeEvent"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
                   @node-click="clickNode"
                   @mouseout="handleNodeBarMouseout"/>
-    <div class="canvas" ref="container"/>
+    <div v-show="!dslMode" class="canvas" ref="container"/>
+    <jm-dsl-editor v-if="dslMode" :value="dsl" readonly/>
   </div>
 </template>
 
@@ -19,18 +22,19 @@ import {
   defineComponent,
   getCurrentInstance,
   onBeforeUpdate,
+  onMounted,
   onUnmounted,
   PropType,
   ref,
   SetupContext,
 } from 'vue';
-import G6, { Graph } from '@antv/g6';
+import G6, { Graph, NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
 import { configNodeAction, init, updateNodeStates } from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
 import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/utils/model';
@@ -64,6 +68,7 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeActionConfigured = ref<boolean>(false);
     const taskInstanceId = ref<string>();
+    const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
       taskInstanceId.value = undefined;
@@ -121,28 +126,21 @@ export default defineComponent({
       });
     };
 
-    const allTaskNodes = computed(() => {
-      const { nodes } = parse(props.dsl, props.triggerType);
+    const allTaskNodes = computed<{
+      nodes: NodeConfig[];
+      dslType: DslTypeEnum;
+    }>(() => {
+      const { nodes, dslType } = parse(props.dsl, props.triggerType);
 
-      return nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK);
-    });
-
-    proxy.$nextTick(() => {
-      // 保证整个视图都渲染完毕，才能确定图的宽高
-      graph.value = init(props.dsl, props.readonly, props.triggerType, props.nodeInfos, container.value as HTMLElement);
-
-      updateZoom();
-
-      // 配置节点行为
-      nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
-
-      // 更新状态
-      updateNodeStates(props.tasks, graph.value);
+      return {
+        nodes: nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK),
+        dslType,
+      };
     });
 
     onBeforeUpdate(() => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.readonly, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
 
         updateZoom();
       }
@@ -157,19 +155,37 @@ export default defineComponent({
       updateNodeStates(props.tasks, graph.value);
     });
 
-    // 监控容器大小变化
-    const interval = ref<any>(setInterval(() => {
-      if (!container.value || !graph.value) {
-        return;
-      }
 
-      const parentElement = container.value.parentElement as HTMLElement;
-      graph.value.changeSize(parentElement.clientWidth, parentElement.clientHeight);
-    }, 500));
+    let resizeObserver: ResizeObserver;
+
+    onMounted(() => {
+      const parentElement = container.value!.parentElement as HTMLElement;
+      resizeObserver = new ResizeObserver(() => {
+        if (!graph.value) {
+          return;
+        }
+        graph.value.changeSize(parentElement.clientWidth, parentElement.clientHeight);
+      });
+      // 监控容器大小变化
+      resizeObserver.observe(parentElement);
+
+      proxy.$nextTick(() => {
+        // 保证整个视图都渲染完毕，才能确定图的宽高
+        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+
+        updateZoom();
+
+        // 配置节点行为
+        nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
+
+        // 更新状态
+        updateNodeStates(props.tasks, graph.value);
+      });
+    });
 
     onUnmounted(() => {
       // 销毁监控容器大小变化
-      clearInterval(interval.value);
+      resizeObserver.disconnect();
 
       // 销毁画布
       graph.value?.destroy();
@@ -179,6 +195,8 @@ export default defineComponent({
       container,
       graph,
       taskInstanceId,
+      dslType: computed<DslTypeEnum>(() => allTaskNodes.value.dslType),
+      dslMode,
       nodeEvent,
       clickProcessLog: () => {
         emit('click-process-log');
@@ -220,7 +238,7 @@ export default defineComponent({
 
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,
-          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.length - props.tasks.length) : 0,
+          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.nodes.length - props.tasks.length) : 0,
         }));
 
         props.tasks.forEach(({ status }: ITaskExecutionRecordVo) => {

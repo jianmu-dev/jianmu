@@ -13,9 +13,7 @@
           query: { projectId: project.id },
         }"
       >
-        <jm-tooltip :content="project.name" placement="top">
-          <div class="title ellipsis">{{ project.name }}</div>
-        </jm-tooltip>
+        <jm-text-viewer :value="project.name" class="title"/>
       </router-link>
       <div class="time">
         <span v-if="project.status === ProjectStatusEnum.RUNNING"
@@ -51,14 +49,7 @@
           query: { projectId: project.id },
         }"
       >
-        <jm-tooltip :content="project.name" placement="top">
-          <div :class="{
-            title: true,
-            ellipsis: true,
-            disabled: !enabled,
-          }">{{ project.name }}
-          </div>
-        </jm-tooltip>
+        <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}"/>
       </router-link>
       <div :class="{
         time: true,
@@ -80,84 +71,77 @@
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
       </div>
       <div class="operation">
-        <div class="top">
-          <jm-tooltip content="触发" placement="bottom">
-            <button
-              :class="{ execute: true, doing: !enabled || executing }"
-              @click="execute(project.id)"
-            ></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
-            content="Webhook"
-            placement="bottom"
-          >
-            <button class="webhook" @click="webhookDrawerFlag = true"></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.source === DslSourceEnum.LOCAL"
-            content="编辑"
-            placement="bottom"
-          >
-            <button class="edit" @click="edit(project.id)"></button>
-          </jm-tooltip>
-          <jm-tooltip v-else content="同步DSL" placement="bottom">
-            <button
-              :class="{ sync: true, doing: synchronizing }"
-              @click="sync(project.id)"
-            ></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.source === DslSourceEnum.GIT"
-            content="打开git仓库"
-            placement="bottom"
-          >
-            <button class="git-label" @click="openGit(project.gitRepoId)"></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-if="project.dslType === DslTypeEnum.WORKFLOW"
-            content="查看流程DSL"
-            placement="bottom"
-          >
-            <button class="workflow-label" @click="dslDialogFlag = true"></button>
-          </jm-tooltip>
-          <jm-tooltip
-            v-else-if="project.dslType === DslTypeEnum.PIPELINE"
-            content="查看管道DSL"
-            placement="bottom"
-          >
-            <button class="pipeline-label" @click="dslDialogFlag = true"></button>
-          </jm-tooltip>
-        </div>
-        <div class="bottom">
-          <jm-tooltip placement="bottom">
-            <template #content>
-              <div>
-                <span>{{ enabled ? '已启用' : '已禁用' }}</span>
-                <a href="https://docs.jianmu.dev/guide/global.html"
-                   target="_blank"
-                   class="jm-icon-button-help"
-                   style="color: #ffffff; font-size: 1.1em;"
-                ></a>
-              </div>
-              <template v-if="!project.mutable">
-                <div style="margin-top: 10px;">若要修改，请通过DSL更新</div>
-              </template>
+        <jm-tooltip :content="`${enabled ? '' : '已禁用，不可'}触发`" placement="bottom">
+          <button
+            :class="{ execute: true, doing: !enabled || executing }"
+            @click="execute(project.id)"
+          ></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
+          content="Webhook"
+          placement="bottom"
+        >
+          <button class="webhook" @click="webhookDrawerFlag = true"></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.source === DslSourceEnum.LOCAL"
+          content="编辑"
+          placement="bottom"
+        >
+          <button class="edit" @click="edit(project.id)"></button>
+        </jm-tooltip>
+        <jm-tooltip v-else content="同步DSL" placement="bottom">
+          <button
+            :class="{ sync: true, doing: synchronizing }"
+            @click="sync(project.id)"
+          ></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.source === DslSourceEnum.GIT"
+          content="打开git仓库"
+          placement="bottom"
+        >
+          <button class="git-label" @click="openGit(project.gitRepoId)"></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-if="project.dslType === DslTypeEnum.WORKFLOW"
+          content="预览流程"
+          placement="bottom"
+        >
+          <button class="workflow-label" @click="dslDialogFlag = true"></button>
+        </jm-tooltip>
+        <jm-tooltip
+          v-else-if="project.dslType === DslTypeEnum.PIPELINE"
+          content="预览管道"
+          placement="bottom"
+        >
+          <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+        </jm-tooltip>
+        <div class="more">
+          <jm-dropdown trigger="click" placement="bottom-start">
+            <span class="el-dropdown-link">
+              <button class="btn-group"></button>
+            </span>
+            <template #dropdown>
+              <jm-dropdown-menu>
+                <jm-dropdown-item :disabled="abling" @click="able(project.id)">
+                  <a
+                    href="javascript: void(0)"
+                    :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
+                    style="width: 90px; display: inline-block;"
+                  >{{ enabled ? '禁用' : '启用' }}</a>
+                </jm-dropdown-item>
+                <jm-dropdown-item :disabled="deleting" @click="del(project.id)">
+                  <a
+                    href="javascript: void(0)"
+                    class="jm-icon-button-delete"
+                    style="width: 90px; display: inline-block;"
+                  >删除</a>
+                </jm-dropdown-item>
+              </jm-dropdown-menu>
             </template>
-            <jm-switch
-              v-model="enabled"
-              :disabled="!project.mutable"
-              :loading="enabling"
-              :class="{ doing: enabling }"
-              @change="val => enable(project.id, val)"
-            ></jm-switch>
-          </jm-tooltip>
-          <jm-tooltip content="删除" placement="bottom">
-            <button
-              :class="{ del: true, doing: deleting }"
-              @click="del(project.id)"
-            ></button>
-          </jm-tooltip>
+          </jm-dropdown>
         </div>
       </div>
     </div>
@@ -166,7 +150,7 @@
       :current-project-name="project.name"
       v-model:webhookVisible="webhookDrawerFlag"
     ></webhook-drawer>
-    <dsl-dialog
+    <project-preview-dialog
       v-if="dslDialogFlag"
       :project-id="project.id"
       :dsl-type="project.dslType"
@@ -183,12 +167,11 @@ import { IProjectVo } from '@/api/dto/project';
 import { active, del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import DslDialog from './dsl-dialog.vue';
+import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
-import sleep from '@/utils/sleep';
 
 export default defineComponent({
-  components: { DslDialog, WebhookDrawer },
+  components: { ProjectPreviewDialog, WebhookDrawer },
   props: {
     project: {
       type: Object as PropType<IProjectVo>,
@@ -211,9 +194,9 @@ export default defineComponent({
     const isMove = computed<boolean>(() => props.move);
     const isMoveMode = computed<boolean>(() => props.moveMode);
     const executing = ref<boolean>(false);
+    const abling = ref<boolean>(false);
     const synchronizing = ref<boolean>(false);
     const deleting = ref<boolean>(false);
-    const enabling = ref<boolean>(false);
     const enabled = ref<boolean>(props.project.enabled);
     const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
@@ -227,9 +210,9 @@ export default defineComponent({
       datetimeFormatter,
       executionTimeFormatter,
       executing,
+      abling,
       synchronizing,
       deleting,
-      enabling,
       enabled,
       dslDialogFlag,
       webhookDrawerFlag,
@@ -271,6 +254,46 @@ export default defineComponent({
           })
           .catch(() => {
           });
+      },
+      able: (id: string) => {
+        if (abling.value) {
+          return;
+        }
+
+        const str = enabled.value ? '禁用' : '启用';
+        const msg = props.project.mutable ? `
+          <div>
+            <span>确定要${str}吗?</span>
+            <a href="https://docs.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
+          </div>
+        ` : `
+          <div>
+            <span>${enabled.value ? '已启用' : '已禁用'}，不可修改</span>
+            <a href="https://docs.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
+          </div>
+          <div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">若要修改，请通过DSL更新</div>
+        `;
+
+        proxy.$confirm(msg, `${str}项目`, {
+          showConfirmButton: props.project.mutable,
+          confirmButtonText: '确定',
+          cancelButtonText: props.project.mutable ? '取消' : '关闭',
+          type: 'info',
+          dangerouslyUseHTMLString: true,
+        }).then(async () => {
+          abling.value = true;
+          try {
+            await active(id, !enabled.value);
+            enabled.value = !enabled.value;
+
+            proxy.$success(enabled.value ? '已启用' : '已禁用');
+          } catch (err) {
+            proxy.$throw(err, proxy);
+          } finally {
+            abling.value = false;
+          }
+        }).catch(() => {
+        });
       },
       edit: (id: string) => {
         router.push({ name: 'update-project', params: { id } });
@@ -342,22 +365,6 @@ export default defineComponent({
       openGit: (gitRepoId: string) => {
         window.open(`/view/repo/${gitRepoId}`);
       },
-      enable: async (id: string, val: boolean) => {
-        enabling.value = true;
-
-        try {
-          await active(id, val);
-
-          proxy.$success(val ? '已启用' : '已禁用');
-        } catch (err) {
-          proxy.$throw(err, proxy);
-
-          await sleep(300);
-          enabled.value = !val;
-        } finally {
-          enabling.value = false;
-        }
-      },
     };
   },
 });
@@ -389,7 +396,7 @@ export default defineComponent({
   min-width: 260px;
   background-color: #ffffff;
   box-shadow: 0px 0px 8px 4px #eff4f9;
-  min-height: 209px;
+  min-height: 166px;
 
   &.move {
     position: relative;
@@ -424,15 +431,6 @@ export default defineComponent({
     display: none;
   }
 
-  //&:hover {
-  //  .content {
-  //    .operation {
-  //      button.del {
-  //        display: block;
-  //      }
-  //    }
-  //  }
-  //}
   &:hover {
     box-shadow: 0px 6px 16px 4px #e6eef6;
   }
@@ -471,7 +469,7 @@ export default defineComponent({
     padding: 20px 20px 16px 20px;
 
     .title {
-      width: 90%;
+      margin-right: 20px;
       font-size: 16px;
       color: #082340;
 
@@ -496,8 +494,13 @@ export default defineComponent({
     }
 
     .operation {
+      margin-top: 18px;
+      min-height: 26px;
+      display: flex;
+      align-items: center;
+
       button + button {
-        margin-left: 16px;
+        margin-left: 18px;
       }
 
       button {
@@ -535,13 +538,6 @@ export default defineComponent({
           background-image: url('@/assets/svgs/btn/hook.svg');
         }
 
-        &.del {
-          width: 24px;
-          height: 24px;
-          background-image: url('@/assets/svgs/btn/del.svg');
-          background-size: contain;
-        }
-
         &.git-label {
           background-image: url('@/assets/svgs/index/git-label.svg');
         }
@@ -554,6 +550,13 @@ export default defineComponent({
           background-image: url('@/assets/svgs/index/pipeline-label.svg');
         }
 
+        &.btn-group {
+          background-image: url('@/assets/svgs/btn/more2.svg');
+          position: absolute;
+          right: 0px;
+          top: 0px;
+        }
+
         &.doing {
           opacity: 0.5;
           cursor: not-allowed;
@@ -564,28 +567,23 @@ export default defineComponent({
         }
       }
 
-      .top {
-        padding: 12px 0;
-        min-height: 26px;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid #E8E8E8;
-      }
+      .more {
+        position: absolute;
+        right: 3px;
+        top: 5px;
+        opacity: 0.65;
 
-      .bottom {
-        padding-top: 12px;
-        min-height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        &:hover {
+          opacity: 1;
+        }
+
+        .el-dropdown-link {
+          display: inline-block;
+          width: 26px;
+          height: 10px;
+        }
       }
     }
-  }
-
-  .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 

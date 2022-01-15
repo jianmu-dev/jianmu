@@ -10,16 +10,15 @@
     >
       <div class="webhook-drawer">
         <!-- 项目名称 -->
-        <div class="project-name">{{currentProject}}</div>
+        <div class="project-name">{{ currentProject }}</div>
         <div class="webhook-link-container">
           <div class="link-tips">可以通过调用以下Webhook地址来触发流程执行</div>
           <div class="link-container">
             <div class="link-address">
-              <jm-tooltip :content="link" placement="top">
-                <div class="jm-icon-input-hook ellipsis">
-                  {{ link }}
-                </div>
-              </jm-tooltip>
+              <!-- 左侧图标 -->
+              <i class="jm-icon-input-hook"></i>
+              <!-- 右侧链接 -->
+              <jm-text-viewer :value="link" class="webhook-link"/>
             </div>
             <div class="copy-link-address">
               <jm-button type="primary" @click="copy">复制链接</jm-button>
@@ -50,7 +49,8 @@
                 <jm-table-column prop="timed" label="请求时间" align="center">
                   <template #default="scope">
                     <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
-                  </template></jm-table-column
+                  </template>
+                </jm-table-column
                 >
                 <jm-table-column prop="statusCode" label="状态" align="center">
                   <template #default="scope">
@@ -63,11 +63,11 @@
                     <div v-else style="color: red">失败</div>
                   </template>
                 </jm-table-column>
-                <jm-table-column
-                  prop="errorMsg"
-                  label="错误信息"
-                  align="center"
-                ></jm-table-column>
+                <jm-table-column label="错误信息">
+                  <template #default="scope">
+                    <jm-text-viewer :value="scope.row.errorMsg||''"/>
+                  </template>
+                </jm-table-column>
                 <jm-table-column label="操作" align="center">
                   <template #default="scope">
                     <div class="table-button">
@@ -108,55 +108,91 @@
         </div>
         <!-- 查看payload -->
         <div class="payload-content" v-if="!payloadTab">
-          <jm-log-viewer filename="webhook.txt" :value="webhookLog" />
+          <jm-log-viewer filename="webhook.txt" :value="webhookLog"/>
         </div>
         <!-- 触发器 -->
         <div v-else class="trigger-content">
-          <!-- 参数列表 -->
-          <div class="trigger-title">参数列表</div>
-          <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
-            <jm-table-column label="参数唯一标识" prop="name"></jm-table-column>
-            <jm-table-column label="参数类型" width="200px" prop="type">
-            </jm-table-column>
-            <jm-table-column label="参数值" prop="value">
-              <template #default="scope">
-                <div v-if="scope.row.type === 'SECRET'">
-                  <div class="hide-container" v-if="secretVisible">
-                    <span>********************</span>
-                    <i
-                      class="hide-secret jm-icon-input-visible"
-                      @click="hideSecret"
-                    ></i>
-                  </div>
-                  <div class="display-container" v-else>
-                    <span class="ellipsis">{{ scope.row.value }}</span>
-                    <i
-                      class="display-secret jm-icon-input-invisible"
-                      @click="displaySecret"
-                    ></i>
-                  </div>
-                </div>
-                <div class="ellipsis params-container" v-else>
-                  <div class="params">
-                    {{ scope.row.value }}
-                  </div>
-                  <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
-                </div>
-              </template>
-            </jm-table-column>
-          </jm-table>
-          <!-- 认证 -->
-          <div class="verify-title">认证</div>
-          <jm-table class="verify-table" :data="webhookAuth">
-            <jm-table-column label="token" prop="token"></jm-table-column>
-            <jm-table-column label="value" prop="value"></jm-table-column>
-          </jm-table>
-          <!-- 匹配认证 -->
-          <div class="matching-title">匹配认证</div>
-          <div class="matching-container" v-if="webhookParamsDetail?.only">
-            {{ webhookParamsDetail?.only }}
-          </div>
-          <div class="matching-container matching-null" v-else>暂无数据</div>
+          <jm-scrollbar>
+            <div style="padding:20px;">
+              <!-- 参数列表 -->
+              <div class="trigger-title">参数列表</div>
+              <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
+                <jm-table-column label="参数唯一标识">
+                  <template #default="scope">
+                    <jm-text-viewer :value="scope.row.name"/>
+                  </template>
+                </jm-table-column>
+                <jm-table-column label="参数类型" width="200px" prop="type">
+                </jm-table-column>
+                <jm-table-column label="参数值" prop="value">
+                  <template #default="scope">
+                    <div v-if="scope.row.type === ParamTypeEnum.SECRET">
+                      <!-- 密钥类型切换 -->
+                      <div class="hide-container" v-if="secretVisible">
+                        <span>********************</span>
+                        <i
+                          class="hide-secret jm-icon-input-visible"
+                          @click="hideSecret"
+                        ></i>
+                      </div>
+                      <div class="display-container" v-else>
+                        <template v-if="scope.row.value">
+                          <div class="param-value"
+                               :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
+                            >
+                            </jm-text-viewer>
+                            <template v-else>
+                              {{ scope.row.value }}
+                            </template>
+                          </div>
+                        </template>
+                        <i
+                          class="display-secret jm-icon-input-invisible"
+                          @click="displaySecret"
+                        ></i>
+                      </div>
+                    </div>
+                    <div class="params-container" v-else>
+                      <template v-if="scope.row.value">
+                        <div class="param-value"
+                             :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                          <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                          :value="scope.row.value"
+                                          @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                          class="value"
+                          >
+                          </jm-text-viewer>
+                          <template v-else>
+                            {{ scope.row.value }}
+                          </template>
+                        </div>
+                        <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
+                      </template>
+                      <template v-else>
+                        {{ scope.row.value }}
+                      </template>
+                    </div>
+                  </template>
+                </jm-table-column>
+              </jm-table>
+              <!-- 认证 -->
+              <div class="verify-title">认证</div>
+              <jm-table class="verify-table" :data="webhookAuth">
+                <jm-table-column label="token" prop="token"></jm-table-column>
+                <jm-table-column label="value" prop="value"></jm-table-column>
+              </jm-table>
+              <!-- 匹配认证 -->
+              <div class="matching-title">匹配认证</div>
+              <div class="matching-container" v-if="webhookParamsDetail?.only">
+                {{ webhookParamsDetail?.only }}
+              </div>
+              <div class="matching-container matching-null" v-else>暂无数据</div>
+            </div>
+          </jm-scrollbar>
         </div>
       </jm-dialog>
     </jm-drawer>
@@ -189,8 +225,11 @@ import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { fetchTriggerWebhook } from '@/api/view-no-auth';
 import { ElScrollbar } from 'element-plus';
 import { StateEnum } from '@/components/load-more/enumeration';
+import { ParamTypeEnum } from '@/api/dto/enumeration';
+import JmTextViewer from '@/components/text-viewer/index.vue';
 
 export default defineComponent({
+  components: { JmTextViewer },
   props: {
     webhookVisible: {
       type: Boolean,
@@ -198,8 +237,8 @@ export default defineComponent({
     currentProjectId: {
       type: String,
     },
-    currentProjectName:{
-      type:String,
+    currentProjectName: {
+      type: String,
     },
   },
   emits: ['update:webhookVisible'],
@@ -223,6 +262,7 @@ export default defineComponent({
     const webhookAuth = ref<IWebhookAuthVo[]>([]);
     // 密钥类型显隐
     const secretVisible = ref<boolean>(true);
+    const maxWidthRecord = ref<Record<string, number>>({});
     // webhook请求列表滚动
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
@@ -452,7 +492,7 @@ export default defineComponent({
       secretVisible.value = true;
     };
     // 一键复制
-    const copyParam = async (value:string) => {
+    const copyParam = async (value: string) => {
       if (!value) {
         return;
       }
@@ -502,6 +542,11 @@ export default defineComponent({
       displaySecret: () => (secretVisible.value = true),
       // 当前项目名
       currentProject,
+      ParamTypeEnum,
+      maxWidthRecord,
+      getTotalWidth(width: number, ref: string) {
+        maxWidthRecord.value[ref] = width;
+      },
     };
   },
 });
@@ -509,11 +554,6 @@ export default defineComponent({
 
 <style scoped lang="less">
 .webhook-drawer-container {
-  .ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
   ::v-deep(.el-drawer) {
     // 图标
     .el-drawer__header {
@@ -529,6 +569,7 @@ export default defineComponent({
       }
     }
   }
+
   // webhook抽屉
   .webhook-drawer {
     height: 100%;
@@ -536,11 +577,12 @@ export default defineComponent({
     box-sizing: border-box;
     padding: 20px 25px 0 25px;
     // 项目名称
-    .project-name{
-      margin-bottom:20px;
-      font-size:16px;
-      color:#082340;
+    .project-name {
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: #082340;
     }
+
     // webhook地址
     .webhook-link-container {
       height: 125px;
@@ -548,15 +590,18 @@ export default defineComponent({
       box-sizing: border-box;
       padding: 30px 20px;
       margin-bottom: 20px;
+
       .link-tips {
         font-size: 14px;
         color: #082340;
         margin-bottom: 10px;
       }
+
       .link-container {
         height: 36px;
         display: flex;
         align-items: center;
+
         .link-address {
           width: 760px;
           height: 40px;
@@ -566,15 +611,19 @@ export default defineComponent({
           color: #082340;
           margin-right: 10px;
           border-radius: 2px;
-          > :first-child:before {
-            margin: 0 10px;
-            font-size: 16px;
-            color: #6b7b8d;
-          }
+          display: flex;
+          // 图标
           .jm-icon-input-hook {
-            width: 760px;
+            content: '\e818';
+            margin: 0 14px;
+          }
+
+          // 链接
+          .webhook-link {
+            width: 700px;
           }
         }
+
         .copy-link-address {
           button {
             height: 36px;
@@ -584,6 +633,7 @@ export default defineComponent({
         }
       }
     }
+
     // 表格
     .table-container {
       max-height: calc(100vh - 254px);
@@ -591,67 +641,82 @@ export default defineComponent({
       box-sizing: border-box;
       padding: 20px;
       margin-bottom: 20px;
+
       .table-title {
         margin-bottom: 20px;
         font-size: 14px;
         color: #082340;
       }
+
       ::v-deep(.el-scrollbar__wrap) {
         max-height: calc(100vh - 380px);
       }
+
       .table-content {
         overflow-y: auto;
         border-radius: 4px 4px 0 0;
         border: 1px solid #ecedf4;
+
         ::v-deep(.el-table) {
           background: #fff;
           font-size: 14px;
           color: #082340;
           overflow: visible;
           height: auto;
+
           &::before {
             height: 0;
           }
+
           td {
             border-bottom: 1px solid #ecedf4;
             border-right: 1px solid #ecedf4;
           }
+
           th {
             text-align: center;
             font-weight: 500;
           }
+
           th:last-of-type {
             border-right: none;
           }
+
           tr {
             height: 56px;
           }
+
           tr {
             td:last-of-type {
               border-right: none;
             }
           }
+
           .table-button {
             display: flex;
             justify-content: center;
+
             .retry,
             .see-payload {
               font-size: 14px;
               color: #096dd9;
               cursor: pointer;
             }
+
             .retry {
               margin-right: 20px;
             }
           }
         }
       }
+
       // 显示更多
       .load-more {
         text-align: center;
       }
     }
   }
+
   // 查看paload
   ::v-deep(.el-dialog) {
     .el-dialog__header {
@@ -659,6 +724,7 @@ export default defineComponent({
       margin-bottom: 25px;
       padding: 20px 25px;
     }
+
     .el-dialog__header {
       > span::before {
         font-family: 'jm-icon-input';
@@ -671,18 +737,22 @@ export default defineComponent({
         top: 1px;
       }
     }
+
     .el-dialog__title {
       font-size: 16px;
       color: #082340;
       font-weight: 500;
     }
+
     .el-dialog__body {
       border: none;
       padding: 0px 20px 25px 20px;
     }
+
     // tab切换
     .tab-container {
       display: flex;
+
       div {
         width: 120px;
         height: 40px;
@@ -695,44 +765,55 @@ export default defineComponent({
         cursor: pointer;
         border-radius: 4px 4px 0 0;
       }
+
       .active {
         color: #fff;
         background: #042749;
       }
     }
+
     // payload/trigger
     .payload-content,
     .trigger-content {
       height: 500px;
     }
+
     .payload-content {
       padding: 20px;
       border: 1px solid #e6ebf2;
     }
+
     // 触发器
     .trigger-content {
       overflow-y: auto;
-      padding: 20px;
+      //padding: 20px;
       border: 1px solid #e6ebf2;
+
       .trigger-title {
         margin-bottom: 10px;
       }
+
       .trigger-table,
       .verify-table {
         border: 1px solid #eceef6;
         border-bottom: 0;
+
         th {
           text-align: center;
         }
+
         td {
           border-right: 1px solid #eceef6;
         }
+
         td:last-of-type {
           border-right: 0;
         }
+
         td:nth-of-type(2) {
           text-align: center;
         }
+
         .el-table__row:hover > td {
           background-color: #ffffff !important;
         }
@@ -741,34 +822,46 @@ export default defineComponent({
           background-color: #fafafa !important;
         }
       }
+
       .trigger-table {
-        .params-container{
+        .params-container {
           display: flex;
-          position:relative;
-          &:hover{
-            .copy-btn{
-              width:16px;
-              height:16px;
-              background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-              background-size:100%;
+          align-items: center;
+
+          .param-value {
+            flex: 1;
+            margin-right: 5px;
+          }
+
+          &:hover {
+            .copy-btn {
+              width: 16px;
+              height: 16px;
+              background: url('@/assets/svgs/btn/copy.svg') no-repeat;
+              background-size: 100%;
               cursor: pointer;
-              position:absolute;
-              top:2px;
-              right:2px;
               opacity: 0.5;
-              &:hover{
-                opacity:1;
+
+              &:hover {
+                opacity: 1;
               }
             }
           }
 
+          // 普通参数
+          .trigger-value {
+            max-width: 280px;
+            //margin-right:20px;
+          }
         }
+
         td:first-of-type,
         td:last-of-type {
           .cell {
             padding-left: 20px;
           }
         }
+
         .hide-secret,
         .display-secret {
           display: flex;
@@ -778,48 +871,72 @@ export default defineComponent({
           height: 20px;
           border-radius: 4px;
           cursor: pointer;
-          margin-left: 10px;
+          //margin-left: 10px;
         }
+
         .hide-container {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+
+          span {
+            margin-right: 5px;
+          }
+
           .hide-secret {
+            position: relative;
+            top: -2px;
+
             .jm-icon-input-visible::before {
               content: '\e803';
             }
+
             &:hover {
               background: #eff7ff;
             }
           }
         }
+
         .display-container {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          //justify-content: space-between;
+          .param-value {
+            flex: 1;
+            margin-right: 5px;
+          }
+
+          .trigger-params-value {
+            width: 280px;
+          }
+
           .display-secret {
             .jm-icon-input-invisible::before {
               content: '\e800';
             }
+
             &:hover {
               background: #eff7ff;
             }
           }
         }
       }
+
       // 认证
       .verify-title {
         margin: 25px 0 10px 0;
       }
+
       .verify-table {
         td {
           text-align: center;
         }
       }
+
       // 匹配认证
       .matching-title {
         margin: 25px 0 10px 0;
       }
+
       .matching-container {
         min-height: 40px;
         border-radius: 4px;
@@ -830,6 +947,7 @@ export default defineComponent({
         word-wrap: break-word;
         box-sizing: border-box;
       }
+
       // 为空时
       .matching-null {
         font-size: 14px;

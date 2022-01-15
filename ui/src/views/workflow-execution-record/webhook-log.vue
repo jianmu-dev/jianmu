@@ -3,17 +3,11 @@
     <div class="basic-section">
       <div class="param-key">流程名称：
       </div>
-      <jm-tooltip :content="workflowName" placement="bottom" effect="light">
-        <div class="param-value">{{ workflowName }}</div>
-      </jm-tooltip>
+      <jm-text-viewer :value="workflowName" class="param-value"/>
       <div class="param-key">节点名称：</div>
-      <jm-tooltip :content="nodeName" placement="bottom" effect="light">
-        <div class="param-value">{{ nodeName }}</div>
-      </jm-tooltip>
+      <jm-text-viewer :value="nodeName" class="param-value node-name"/>
       <div class="param-key">启动时间：</div>
-      <jm-tooltip :content="startTime" placement="bottom" effect="light">
-        <div class="param-value">{{ startTime }}</div>
-      </jm-tooltip>
+      <jm-text-viewer :value="startTime" class="param-value"/>
     </div>
 
     <div class="tab-section">
@@ -39,23 +33,40 @@
                   <jm-table
                     :data="webhookParams"
                     border>
-                    <jm-table-column
-                      label="参数唯一标识"
-                      align="center"
-                      prop="name">
+                    <jm-table-column label="参数唯一标识" align="center">
+                      <template #default="scope">
+                        <jm-text-viewer :value="scope.row.name" class="params-name"/>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="参数类型"
                       align="center"
                       prop="type">
+                      <template #default="scope">
+                        <div class="text-viewer">
+                          <jm-text-viewer :value="scope.row.type" class="params-name"/>
+                        </div>
+                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="参数值"
                       align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div class="param-value ellipsis">{{scope.row.value}}</div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="scope.row.valueType !== 'SECRET'"></div>
+                          <div class="param-value"
+                               :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
+                            >
+                            </jm-text-viewer>
+                            <template v-else>
+                              {{ scope.row.value }}
+                            </template>
+                          </div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -78,10 +89,12 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
-import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { TriggerTypeEnum, ParamTypeEnum } from '@/api/dto/enumeration';
 import useClipboard from 'vue-clipboard3';
+import JmTextViewer from '@/components/text-viewer/index.vue';
 
 export default defineComponent({
+  components: { JmTextViewer },
   props: {
     nodeName: {
       type: String,
@@ -101,6 +114,7 @@ export default defineComponent({
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
     const { toClipboard } = useClipboard();
+    const maxWidthRecord = ref<Record<string, number>>({});
 
     onMounted(async () => {
       if (!props.triggerId) {
@@ -120,7 +134,7 @@ export default defineComponent({
       }
     });
     // 一键复制
-    const copy = async (value:string) => {
+    const copy = async (value: string) => {
       if (!value) {
         return;
       }
@@ -139,6 +153,11 @@ export default defineComponent({
       webhookLog,
       webhookParams,
       copy,
+      ParamTypeEnum,
+      maxWidthRecord,
+      getTotalWidth(width: number, ref: string) {
+        maxWidthRecord.value[ref] = width;
+      },
     };
   },
 });
@@ -171,11 +190,12 @@ export default defineComponent({
 
     .param-value {
       display: inline-block;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      max-width: 20%;
+      width: 20%;
       color: #082340;
+    }
+
+    .node-name {
+      max-width: 10%;
     }
   }
 }
@@ -237,50 +257,67 @@ export default defineComponent({
 
       .content {
         padding: 16px;
+        ::v-deep(.text-viewer){
+          .params-name{
+            width: 100%;
+            .content{
+              .text-line{
+                text-align: center;
+                &::after{
+                  display: none;
+                }
+              }
+            }
+          }
+        }
+
+        .params-name {
+          width: 80%;
+        }
 
         ::v-deep(.el-table) {
           th, td {
             color: #082340;
           }
-          tr{
+
+          tr {
             td:first-child,
-            td:last-child{
-              text-align:left;
-              padding-left:20px;
+            td:last-child {
+              text-align: left;
+              padding-left: 20px;
             }
-            td:first-child{
-              .cell{
-                width:100%!important;
+
+            td:first-child {
+              .cell {
+                width: 100% !important;
               }
             }
           }
-          .copy-container{
+
+          .copy-container {
             display: flex;
             align-items: center;
+
             .param-value {
-              width: 75%;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              position: relative;
+              flex: 1;
+              margin-right: 5px;
             }
-            .ellipsis {
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
+
+            // 表格参数
+            .webhook-param-value {
+              width: 88%;
             }
-            &:hover{
-              .copy-btn{
-                width:16px;
-                height:16px;
-                background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-                background-size:100%;
+
+            &:hover {
+              .copy-btn {
+                width: 16px;
+                height: 16px;
+                background: url('@/assets/svgs/btn/copy.svg') no-repeat;
+                background-size: 100%;
                 cursor: pointer;
-                position:absolute;
-                top:14px;
-                right:10px;
                 opacity: 0.5;
-                &:hover{
+
+                &:hover {
                   opacity: 1;
                 }
               }

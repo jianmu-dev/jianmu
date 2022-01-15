@@ -82,15 +82,11 @@
         </div>
         <div class="item">
           <div v-if="!data.record?.id" class="value">无</div>
-          <jm-tooltip v-else :content="data.record?.id" placement="top">
-            <div class="value ellipsis">{{ data.record?.id }}</div>
-          </jm-tooltip>
+          <jm-text-viewer v-else :value="data.record?.id" class="value" />
           <div>流程实例ID</div>
         </div>
         <div class="item">
-          <jm-tooltip :content="data.record?.workflowVersion" placement="top">
-            <div class="value ellipsis">{{ data.record?.workflowVersion }}</div>
-          </jm-tooltip>
+          <jm-text-viewer :value="data.record?.workflowVersion" class="value" />
           <div>流程版本号</div>
         </div>
         <jm-tooltip
@@ -457,20 +453,6 @@ export default defineComponent({
   color: #333333;
   margin-bottom: 20px;
 
-  .param-value {
-    color: #606266;
-
-    &.ellipsis {
-      display: inline-block;
-      width: 80px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      vertical-align: bottom;
-      cursor: default;
-    }
-  }
-
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -690,16 +672,6 @@ export default defineComponent({
           font-size: 16px;
           font-weight: bold;
           margin-bottom: 5px;
-
-          &.ellipsis {
-            display: inline-block;
-            width: 80px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: bottom;
-            cursor: default;
-          }
         }
       }
 

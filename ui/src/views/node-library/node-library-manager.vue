@@ -10,7 +10,8 @@
       <div class="right-top-btn">
         <router-link :to="{ name: 'index' }">
           <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-            >关闭</jm-button
+          >关闭
+          </jm-button
           >
         </router-link>
       </div>
@@ -25,7 +26,7 @@
       </div>
 
       <div v-loading="firstLoading" class="content">
-        <jm-empty v-if="nodeLibraryListData.length === 0" />
+        <jm-empty v-if="nodeLibraryListData.length === 0"/>
         <div
           v-else
           v-for="(i, idx) in nodeLibraryListData"
@@ -34,19 +35,27 @@
         >
           <div class="item-t">
             <span
-              class="item-t-t ellipsis"
+              class="item-t-t"
               v-if="i.ownerType === OwnerTypeEnum.LOCAL"
-              >{{ i.name }}</span
+            >
+              <jm-text-viewer :value="i.name"/>
+            </span
             >
             <a
               v-else
               target="_blank"
-              class="item-t-t ellipsis"
+              class="item-t-t"
               :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}`"
-              >{{ i.name }}</a
             >
-            <p class="item-t-mid ellipsis">{{ i.ownerName }} / {{ i.ref }}</p>
-            <p class="item-t-btm ellipsis">{{ i.description || '无' }}</p>
+              <jm-text-viewer :value="i.name"/>
+            </a
+            >
+            <p class="item-t-mid">
+              <jm-text-viewer :value="`${i.ownerName} / ${i.ref}`"/>
+            </p>
+            <p class="item-t-btm">
+              <jm-text-viewer :value="`${i.description || '无'}`"/>
+            </p>
           </div>
           <div
             class="item-mid"
@@ -65,16 +74,18 @@
                 <div
                   v-for="(version, versionIdx) in i.versions"
                   :key="versionIdx"
-                  class="item-mid-item ellipsis"
+                  class="item-mid-item"
                 >
-                  <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">{{
-                    version
-                  }}</span>
+                  <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">
+                   {{version}}
+                  </span>
                   <a
                     v-else
                     target="_blank"
                     :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}/${version}`"
-                    >{{ version }}</a
+                  >
+                    {{version}}
+                  </a
                   >
                 </div>
               </div>
@@ -101,7 +112,7 @@
                 ></button>
               </jm-tooltip>
             </div>
-            <div class="item-btm-r ellipsis">by {{ i.creatorName }}</div>
+            <div class="item-btm-r"><jm-text-viewer :value="`by ${i.creatorName}`"/></div>
           </div>
           <div
             class="item-pos"
@@ -143,6 +154,7 @@ import { INode } from '@/model/modules/node-library';
 import NodeEditor from './node-editor.vue';
 import { OwnerTypeEnum } from '@/api/dto/enumeration';
 import { StateEnum } from '@/components/load-more/enumeration';
+
 export default defineComponent({
   components: {
     NodeEditor,
@@ -330,13 +342,6 @@ export default defineComponent({
       font-weight: bold;
     }
   }
-
-  .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   .menu-bar {
     button {
       position: relative;
@@ -415,6 +420,7 @@ export default defineComponent({
           margin-bottom: 10px;
           font-size: 16px;
         }
+
         a.item-t-t:hover {
           color: #096dd9;
         }
@@ -505,6 +511,7 @@ export default defineComponent({
           background-repeat: no-repeat;
           margin-right: 16px;
           cursor: pointer;
+
           &:active {
             background-color: #eff7ff;
             border-radius: 4px;
@@ -536,6 +543,19 @@ export default defineComponent({
           justify-content: end;
           color: #7c91a5;
           font-size: 14px;
+          ::v-deep(.jm-text-viewer){
+            width: 100%;
+            .content{
+              .text-line{
+                &:last-child{
+                  text-align: right;
+                  &::after{
+                    display: none;
+                  }
+                }
+              }
+            }
+          }
         }
       }
 
