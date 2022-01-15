@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -190,20 +191,7 @@ public class TaskInstanceInternalApplication {
             }
         }
         taskInstance.executeSucceeded();
-        var parameter = Parameter.Type.STRING.newParameter(taskInstance.getStatus().name());
-        var executionStatus = InstanceParameter.Builder.anInstanceParameter()
-                .instanceId(taskInstance.getId())
-                .triggerId(taskInstance.getTriggerId())
-                .defKey(taskInstance.getDefKey())
-                .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                .businessId(taskInstance.getBusinessId())
-                .ref("inner.execution_status")
-                .parameterId(parameter.getId())
-                .required(true)
-                .type(InstanceParameter.Type.OUTPUT)
-                .workflowType(workflow.getType().name())
-                .build();
-        outputParameters.put(executionStatus, parameter);
+        outputParameters.putAll(this.createInnerOutputParameters(taskInstance, workflow.getType().name()));
         // 保存任务实例输出参数
         this.instanceParameterRepository.addAll(outputParameters.keySet());
         // 保存参数
@@ -218,21 +206,10 @@ public class TaskInstanceInternalApplication {
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         taskInstance.executeFailed();
-        var parameter = Parameter.Type.STRING.newParameter(taskInstance.getStatus().name());
-        var executionStatus = InstanceParameter.Builder.anInstanceParameter()
-                .instanceId(taskInstance.getId())
-                .triggerId(taskInstance.getTriggerId())
-                .defKey(taskInstance.getDefKey())
-                .asyncTaskRef(taskInstance.getAsyncTaskRef())
-                .businessId(taskInstance.getBusinessId())
-                .ref("inner.execution_status")
-                .parameterId(parameter.getId())
-                .required(true)
-                .type(InstanceParameter.Type.OUTPUT)
-                .workflowType(workflow.getType().name())
-                .build();
-        this.parameterRepository.addAll(List.of(parameter));
-        this.instanceParameterRepository.addAll(Set.of(executionStatus));
+        var outputParameters =
+                this.createInnerOutputParameters(taskInstance, workflow.getType().name());
+        this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
+        this.instanceParameterRepository.addAll(outputParameters.keySet());
         this.taskInstanceRepository.updateStatus(taskInstance);
     }
 
@@ -308,6 +285,59 @@ public class TaskInstanceInternalApplication {
             }
         });
         return instanceParameters;
+    }
+
+    private Map<InstanceParameter, Parameter<?>> createInnerOutputParameters(TaskInstance taskInstance, String workflowType) {
+        Map<InstanceParameter, Parameter<?>> innerOutputParameters = new HashMap<>();
+        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // inner.execution_status
+        var executionStatusValue = Parameter.Type.STRING.newParameter(taskInstance.getStatus().name());
+        var executionStatusKey = InstanceParameter.Builder.anInstanceParameter()
+                .instanceId(taskInstance.getId())
+                .triggerId(taskInstance.getTriggerId())
+                .defKey(taskInstance.getDefKey())
+                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                .businessId(taskInstance.getBusinessId())
+                .ref("inner.execution_status")
+                .parameterId(executionStatusValue.getId())
+                .required(true)
+                .type(InstanceParameter.Type.OUTPUT)
+                .workflowType(workflowType)
+                .build();
+        innerOutputParameters.put(executionStatusKey, executionStatusValue);
+        // inner.start_time
+        var startTimeValue = Parameter.Type.STRING
+                .newParameter(formatter.format(taskInstance.getStartTime()));
+        var startTimeKey = InstanceParameter.Builder.anInstanceParameter()
+                .instanceId(taskInstance.getId())
+                .triggerId(taskInstance.getTriggerId())
+                .defKey(taskInstance.getDefKey())
+                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                .businessId(taskInstance.getBusinessId())
+                .ref("inner.start_time")
+                .parameterId(startTimeValue.getId())
+                .required(true)
+                .type(InstanceParameter.Type.OUTPUT)
+                .workflowType(workflowType)
+                .build();
+        innerOutputParameters.put(startTimeKey, startTimeValue);
+        // inner.end_time
+        var endTimeValue = Parameter.Type.STRING
+                .newParameter(formatter.format(taskInstance.getEndTime()));
+        var endTimeKey = InstanceParameter.Builder.anInstanceParameter()
+                .instanceId(taskInstance.getId())
+                .triggerId(taskInstance.getTriggerId())
+                .defKey(taskInstance.getDefKey())
+                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                .businessId(taskInstance.getBusinessId())
+                .ref("inner.end_time")
+                .parameterId(endTimeValue.getId())
+                .required(true)
+                .type(InstanceParameter.Type.OUTPUT)
+                .workflowType(workflowType)
+                .build();
+        innerOutputParameters.put(endTimeKey, endTimeValue);
+        return innerOutputParameters;
     }
 
     private Map<InstanceParameter, Parameter<?>> handleOutputParameter(
