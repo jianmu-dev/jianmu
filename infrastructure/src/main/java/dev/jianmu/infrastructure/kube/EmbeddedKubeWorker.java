@@ -165,7 +165,7 @@ public class EmbeddedKubeWorker {
                         "v1",
                         "pods",
                         this.client);
-        V1Pod deletedPod = podClient.delete(defaultNamespace, "foo").throwsApiException().getObject();
+        V1Pod deletedPod = podClient.delete(defaultNamespace, "jianmu-pod-1").throwsApiException().getObject();
         if (deletedPod != null) {
             System.out.println(
                     "Received after-deletion status of the requested object, will be deleting in background!");
@@ -255,6 +255,7 @@ public class EmbeddedKubeWorker {
                                 if (v1ContainerStatus.getState().getRunning() != null) {
                                     try {
                                         this.watchPod();
+                                        this.deletePod();
                                     } catch (IOException | ApiException e) {
                                         e.printStackTrace();
                                     }
@@ -305,8 +306,6 @@ public class EmbeddedKubeWorker {
             var worker = new EmbeddedKubeWorker();
             worker.createPod2();
             worker.watcher();
-//            worker.listPods();
-//            worker.deletePod();
         } catch (ApiException e) {
             log.warn("ApiException: {}", e.getResponseBody());
         } catch (IOException e) {
