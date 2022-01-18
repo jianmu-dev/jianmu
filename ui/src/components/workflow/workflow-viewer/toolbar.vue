@@ -20,17 +20,16 @@
              @click="changeZoom(true)"></div>
       </jm-tooltip>
     </div>
-    <div class="group">
-      <template v-if="!readonly && !dslMode">
-        <jm-tooltip content="流程日志" placement="top">
-          <div class="process-log-icon" @click="processLog"></div>
-        </jm-tooltip>
-        <div class="separator"></div>
-      </template>
+    <div class="group" v-if="!readonly && !dslMode">
+      <jm-tooltip content="流程日志" placement="top">
+        <div class="process-log-icon" @click="processLog"></div>
+      </jm-tooltip>
+    </div>
+    <div :class="{group: true, dsl: dslMode}">
       <jm-tooltip content="查看DSL" placement="top" v-if="!dslMode">
         <div class="dsl-icon" @click="viewDsl(true)"></div>
       </jm-tooltip>
-      <jm-tooltip :content="`返回${isWorkflow ? '流程' : '管道'}图`" placement="top" v-else>
+      <jm-tooltip :content="`返回${isWorkflow ? '流程' : '管道'}`" placement="top" v-else>
         <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'"
              @click="viewDsl(false)"></div>
       </jm-tooltip>
@@ -112,24 +111,30 @@ export default defineComponent({
 .jm-workflow-viewer-toolbar {
   position: absolute;
   z-index: 1;
-  top: 22px;
-  right: 44px;
+  top: 20px;
+  right: 20px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 
   .group + .group {
-    margin-left: 44px;
+    margin-left: 20px;
   }
 
   .group {
-    padding: 8px 16px;
+    padding: 10px 15px;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
     border: 1px solid #CAD6EE;
     background-color: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
+
+    &.dsl {
+      background-color: #818894;
+      border: 1px solid #767F91;
+      box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
+    }
 
     > [class*='-icon'] {
       width: 24px;

@@ -163,13 +163,13 @@ export default defineComponent({
 
   .operation {
     position: absolute;
-    right: 10px;
-    top: 15px;
+    right: 20px;
+    bottom: 20px;
     z-index: 1;
 
     display: flex;
     align-items: center;
-    padding: 5px 10px;
+    padding: 10px 15px;
     background-color: #818894;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
@@ -178,8 +178,8 @@ export default defineComponent({
     visibility: hidden;
 
     .copy {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       background-image: url('./svgs/copy.svg');
       background-repeat: no-repeat;
       background-size: contain;

@@ -3,7 +3,7 @@
     <div class="header"></div>
     <jm-container class="container">
       <jm-header height="64px">
-        <top-nav />
+        <top-nav/>
       </jm-header>
       <jm-container>
         <jm-header v-if="pathNavsDisplay" class="path-nav">
@@ -12,7 +12,8 @@
               v-for="{ name, path } in pathNavs"
               :key="path"
               :to="path"
-            >{{ name }}</jm-breadcrumb-item
+            >{{ name }}
+            </jm-breadcrumb-item
             >
           </jm-breadcrumb>
         </jm-header>
@@ -33,24 +34,13 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  getCurrentInstance,
-  provide,
-  reactive,
-  Ref,
-  ref,
-} from 'vue';
-import {
-  onBeforeRouteUpdate,
-  RouteLocationNormalized,
-  RouteLocationNormalizedLoaded,
-  useRoute,
-} from 'vue-router';
+import { computed, defineComponent, getCurrentInstance, provide, reactive, Ref, ref } from 'vue';
+import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLoaded, useRoute } from 'vue-router';
 import TopNav from '@/views/nav/top.vue';
 import { PLATFORM_INDEX } from '@/router/path-def';
 import { ElScrollbar } from 'element-plus';
+import { mapMutations, useStore } from 'vuex';
+import { IRootState } from '@/model';
 
 interface IPathNav {
   name: string;
@@ -81,6 +71,8 @@ export default defineComponent({
   components: { TopNav },
   setup() {
     const { proxy } = getCurrentInstance() as any;
+    const store = useStore();
+    const rootState = store.state as IRootState;
     const route = useRoute();
     const platFormRef = ref<HTMLElement>();
     const bufferList = reactive<string[]>([]);
@@ -109,11 +101,46 @@ export default defineComponent({
       loadMain.value = false;
       proxy.$nextTick(() => (loadMain.value = true));
     };
+    const setScrollbarOffset = async () => {
+      const scrollableEl = mainScrollbarRef.value?.scrollbar.firstElementChild;
+
+      if (!scrollableEl) {
+        setTimeout(() => setScrollbarOffset(), 300);
+        return;
+      }
+
+      const { left, top } = rootState.scrollbarOffset[route.fullPath] || { left: 0, top: 0 };
+
+      if (scrollableEl.scrollHeight <= top) {
+        setTimeout(() => setScrollbarOffset(), 300);
+        return;
+      }
+
+      setTimeout(() => {
+        console.debug('before', scrollableEl.scrollTop, route.fullPath, top, scrollableEl.scrollHeight);
+        scrollableEl.scrollLeft = left;
+        scrollableEl.scrollTop = top;
+        console.debug('after', scrollableEl.scrollTop, route.fullPath, top, scrollableEl.scrollHeight);
+      }, 400);
+    };
 
     provide('reloadMain', reloadMain);
     provide('scrollableEl', () => {
       return mainScrollbarRef.value?.scrollbar.firstElementChild;
     });
+    provide('setScrollbarOffset', setScrollbarOffset);
+    provide('updateScrollbarOffset', () => {
+      const scrollableEl = mainScrollbarRef.value?.scrollbar.firstElementChild;
+      if (!scrollableEl) {
+        return;
+      }
+      proxy.mutateScrollbarOffset({
+        fullPath: route.fullPath,
+        left: scrollableEl.scrollLeft,
+        top: scrollableEl.scrollTop,
+      });
+    });
+
     return {
       platFormRef,
       mainScrollbarRef,
@@ -123,6 +150,9 @@ export default defineComponent({
       mainClass,
       loadMain,
       reloadMain,
+      ...mapMutations({
+        mutateScrollbarOffset: 'mutateScrollbarOffset',
+      }),
     };
   },
 });

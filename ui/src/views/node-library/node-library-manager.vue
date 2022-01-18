@@ -112,7 +112,6 @@
                 ></button>
               </jm-tooltip>
             </div>
-<!--            <div class="item-btm-r ellipsis">by {{ i.creatorName }}</div>-->
             <div class="item-btm-r"><jm-text-viewer :value="`by ${i.creatorName}`"/></div>
           </div>
           <div

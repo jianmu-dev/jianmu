@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @class Node
  * @description 节点
- * @author Ethan Liu
  * @create 2021-04-19 11:17
-*/
+ */
 @Getter
 public class DslNode {
     private String name;
@@ -66,7 +66,13 @@ public class DslNode {
             dslNode.param = ((Map<?, ?>) p)
                     .entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
-                    .map(entry -> Map.entry((String) entry.getKey(), entry.getValue().toString()))
+                    .map(entry -> {
+                        if (entry.getValue() instanceof String) {
+                            return Map.entry((String) entry.getKey(), (String) entry.getValue());
+                        }
+                        var value = "(" + entry.getValue().toString() + ")";
+                        return Map.entry((String) entry.getKey(), value);
+                    })
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } else {
             dslNode.param = Map.of();
