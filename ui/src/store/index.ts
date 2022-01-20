@@ -1,5 +1,5 @@
 import { ActionContext, createStore } from 'vuex';
-import { IRootState } from '@/model';
+import { IRootState, IScrollOffset } from '@/model';
 import { IVersionVo } from '@/api/dto/common';
 import { fetchVersion } from '@/api/view-no-auth';
 import { RouteLocationNormalized } from 'vue-router';
@@ -16,6 +16,7 @@ const store = createStore<IRootState>({
       path: '/',
       fullPath: '/',
     },
+    scrollbarOffset: {},
   },
   // 根mutation
   mutations: {
@@ -48,6 +49,12 @@ const store = createStore<IRootState>({
 
       const { path, fullPath } = from;
       state.fromRoute = { path, fullPath };
+    },
+    mutateScrollbarOffset(state: IRootState, { fullPath, left, top }: {
+      fullPath: string;
+    } & IScrollOffset) {
+      const { scrollbarOffset } = state;
+      scrollbarOffset[fullPath] = { left, top };
     },
   },
   // 根action

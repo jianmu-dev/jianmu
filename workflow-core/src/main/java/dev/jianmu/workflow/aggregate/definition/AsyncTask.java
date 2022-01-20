@@ -19,6 +19,9 @@ public class AsyncTask extends BaseNode {
     public static Set<TaskParameter> createTaskParameters(Map<String, String> param, Map<String, String> inputParameters) {
         return param.entrySet().stream().map(entry -> {
                     var typeString = inputParameters.get(entry.getKey());
+                    if (typeString == null) {
+                        throw new IllegalArgumentException("节点定义中未找到输入参数名为:" + entry.getKey() + "的参数定义");
+                    }
                     var type = Parameter.Type.getTypeByName(typeString);
                     return TaskParameter.Builder.aTaskParameter()
                             .ref(entry.getKey())

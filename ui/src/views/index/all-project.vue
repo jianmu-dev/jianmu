@@ -26,8 +26,9 @@
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
 import ProjectGroup from '@/views/common/project-group.vue';
-import { defineComponent, getCurrentInstance, onBeforeMount, ref, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { defineComponent, getCurrentInstance, inject, nextTick, onBeforeMount, onMounted, ref } from 'vue';
+import { onBeforeRouteLeave, useRouter } from 'vue-router';
+
 export default defineComponent({
   components: { ProjectGroup },
   setup() {
@@ -40,8 +41,8 @@ export default defineComponent({
     const projectName = ref<string>('');
     // 首页loading
     const allProjectLoading = ref<boolean>(false);
-    onBeforeMount(async()=>{
-      try{
+    onBeforeMount(async () => {
+      try {
         allProjectLoading.value = true;
         const projectGroupList = await listProjectGroup();
         initialized.value = true;
@@ -51,10 +52,10 @@ export default defineComponent({
             projectGroups.value.push(item);
           }
         });
-      }catch(err){
+      } catch (err) {
         proxy.$throw(err, proxy);
-      }finally {
-        await nextTick(()=>{
+      } finally {
+        await nextTick(() => {
           allProjectLoading.value = false;
         });
       }
@@ -63,6 +64,15 @@ export default defineComponent({
     const searchProject = () => {
       router.push({ name: 'index', query: { searchName: projectName.value } });
     };
+
+    const setScrollbarOffset = inject('setScrollbarOffset') as () => void;
+    const updateScrollbarOffset = inject('updateScrollbarOffset') as () => void;
+    onMounted(() => setScrollbarOffset());
+    onBeforeRouteLeave((to, from, next) => {
+      updateScrollbarOffset();
+      next();
+    });
+
     return {
       projectGroups,
       projectName,
@@ -79,7 +89,8 @@ export default defineComponent({
 .all-project {
   background: #fff;
   margin-bottom: 20px;
-  min-height:calc(100vh - 290px);
+  min-height: calc(100vh - 290px);
+
   .search {
     height: 66px;
     background: #f6fafe;
@@ -88,18 +99,22 @@ export default defineComponent({
     box-sizing: border-box;
     padding: 15px 20px;
     position: relative;
+
     ::v-deep(.el-input) {
       border-radius: 4px;
+
       .el-input__inner {
         height: 36px;
         text-indent: 25px;
         border: transparent;
       }
+
       .el-input__inner:focus {
         text-indent: 24px;
         border: 1px solid #096dd9;
       }
     }
+
     .jm-icon-button-search::before {
       z-index: 100;
       content: '\e80b';
@@ -109,6 +124,7 @@ export default defineComponent({
       color: #7f8c9b;
     }
   }
+
   .project {
     padding: 0 20px 30px;
   }
