@@ -50,7 +50,7 @@ export class TextViewer {
     if (!this.transitCalculator.value) {
       return 0;
     }
-    const maxWidth = Math.max(w, this.transitCalculator.value!.offsetWidth);
+    const maxWidth = Math.max(w, this.transitCalculator.value.getBoundingClientRect().width);
     if (i === value.length - 1) {
       this.temporaryContent.value = '';
       return maxWidth;
@@ -61,11 +61,11 @@ export class TextViewer {
   private async calculateContentMaxWidth(value: string = this.value.value): Promise<number> {
     this.temporaryContent.value=value;
     await nextTick();
-    if(!this.transitCalculator.value||!this.transitCalculator.value.getClientRects()[0]){
+    if(!this.transitCalculator.value||!this.transitCalculator.value.getBoundingClientRect()){
       return 0;
     }
     // 需要用getClientRects去获取元素的宽度精确到小数点后三位
-    const maxWidth=this.transitCalculator.value?.getClientRects()[0].width;
+    const maxWidth=this.transitCalculator.value.getBoundingClientRect().width;
     this.temporaryContent.value = '';
     return Math.ceil( maxWidth);
   }
@@ -73,7 +73,7 @@ export class TextViewer {
   private async calculateEllipsisWidth(): Promise<number> {
     this.temporaryContent.value = '...';
     await nextTick();
-    const ellipsisWidth = this.transitCalculator.value!.offsetWidth;
+    const ellipsisWidth = this.transitCalculator.value!.getBoundingClientRect().width;
     this.temporaryContent.value = '';
     return ellipsisWidth;
   }
@@ -87,10 +87,10 @@ export class TextViewer {
     await nextTick();
     this.temporaryContent.value = '';
     // 火狐浏览器计算的offsetHeight精确到小数两位，会大1px
-    if (!this.transitCalculator.value || !this.transitCalculator.value?.getClientRects()[0]) {
+    if (!this.transitCalculator.value || !this.transitCalculator.value.getBoundingClientRect()) {
       return 0;
     }
-    return Math.floor(this.transitCalculator.value!.getClientRects()[0].height);
+    return Math.floor(this.transitCalculator.value!.getBoundingClientRect().height);
   }
 
   /**
@@ -108,7 +108,7 @@ export class TextViewer {
         height: 0,
       };
     }
-    const { clientWidth, clientHeight } = this.transitCalculator.value!.parentElement as HTMLElement;
+    const { clientWidth, clientHeight } = this.transitCalculator.value.parentElement as HTMLElement;
     return {
       width: clientWidth,
       height: clientHeight || lineHeight,
@@ -156,7 +156,7 @@ export class TextViewer {
       return [];
     }
     // 截取到字符串的offsetWidth大于外层元素设置的宽度终止递归
-    if (this.transitCalculator.value!.offsetWidth > wrapperSize.width) {
+    if (this.transitCalculator.value.getBoundingClientRect().width > wrapperSize.width) {
       contentArr.push(this.temporaryContent.value?.substring(0, i));
       // 文本内容截取后将响应式占位宽度的span内容清空
       this.temporaryContent.value = '';
@@ -263,7 +263,7 @@ export class TextViewer {
       return;
     }
     // 将中转计算元素的盒模型改成inline用来计算文字宽度
-    this.transitCalculator.value!.style.display = 'inline';
+    this.transitCalculator.value.style.display = 'inline';
     // 获取...占据的宽度
     const ellipsisWidth = await this.calculateEllipsisWidth();
     // 递归出加上...占据的宽度后应该展示的vNode中的文本内容
@@ -272,7 +272,7 @@ export class TextViewer {
     }
     this.temporaryContent.value += wrapperNode.children[wrapperNode.children.length - 1].children[0];
     await nextTick();
-    if (this.transitCalculator.value!.offsetWidth + ellipsisWidth > wrapperSize.width) {
+    if (this.transitCalculator.value.getBoundingClientRect().width + ellipsisWidth > wrapperSize.width) {
       const temp = wrapperNode.children[wrapperNode.children.length - 1].children[0];
       // 如果vNode中的children不是数组（数组证明此时vNode中有toolTipVNode），说明没有达到出...的条件，直接将文字展示不做处理
       if(!Array.isArray(wrapperNode.children[wrapperNode.children.length - 1].children)){
