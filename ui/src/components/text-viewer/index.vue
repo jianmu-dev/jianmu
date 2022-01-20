@@ -79,6 +79,9 @@ export default defineComponent({
     .text-line {
       &:last-child {
         text-align: left;
+        &::after{
+          width: 0;
+        }
       }
 
       text-align: justify;
@@ -89,6 +92,7 @@ export default defineComponent({
       &::after {
         content: "";
         display: inline-block;
+        height: 0;
         width: 100%;
       }
 
