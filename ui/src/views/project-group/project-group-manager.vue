@@ -1,5 +1,5 @@
 <template>
-  <jm-scrollbar>
+  <jm-scrollbar class="project-group-manager-scrollbar">
     <router-view v-if="childRoute"></router-view>
     <div class="group-manager" v-else>
       <div class="right-top-btn">
@@ -340,6 +340,15 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+.project-group-manager-scrollbar{
+ ::v-deep(.el-scrollbar__view){
+   //overflow-x: hidden;
+ }
+  //::v-deep(.el-scrollbar__wrap){
+  //  display: flex;
+  //  justify-content: center;
+  //}
+}
 .group-manager {
   padding: 15px;
   background-color: #ffffff;
