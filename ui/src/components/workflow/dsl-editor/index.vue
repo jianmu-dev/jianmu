@@ -30,12 +30,6 @@ import 'codemirror/mode/yaml/yaml.js';
 const codemirror = window.CodeMirror || CodeMirror;
 
 /**
- * 注释快捷键
- * @param cm
- */
-codemirror.commands[Comment.name] = Comment.command;
-
-/**
  * 初始化
  * @param textarea
  * @param readonly
@@ -59,7 +53,7 @@ function initialize(textarea, readonly, onChange) {
     // 快捷键
     extraKeys: {
       // 注释
-      [Comment.shortcut]: Comment.name,
+      [Comment.shortcut]: Comment.command,
     },
   });
 

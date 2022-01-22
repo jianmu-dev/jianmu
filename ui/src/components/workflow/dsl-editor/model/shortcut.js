@@ -27,9 +27,6 @@ function calcStartSpaceAmount(str) {
  * 注释
  */
 export class Comment {
-  static get name() {
-    return 'comment';
-  }
 
   static get shortcut() {
     const codemirror = window.CodeMirror || CodeMirror;
