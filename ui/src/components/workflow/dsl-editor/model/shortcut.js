@@ -63,3 +63,22 @@ export class Comment {
     doc.setSelection(anchor, head);
   }
 }
+
+/**
+ * 制表符
+ */
+export class Tab {
+
+  static get shortcut() {
+    return 'Tab';
+  }
+
+  static command(cm) {
+    if (cm.somethingSelected()) {
+      cm.indentSelection('add');
+      return;
+    }
+
+    cm.replaceSelection(Array(cm.getOption('indentUnit') + 1).join(' '));
+  }
+}

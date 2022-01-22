@@ -14,7 +14,7 @@ import { defineComponent, getCurrentInstance, onBeforeUpdate, onMounted, ref } f
 import useClipboard from 'vue-clipboard3';
 // 引入全局实例
 import CodeMirror from 'codemirror';
-import { Comment } from './model/shortcut';
+import { Comment, Tab } from './model/shortcut';
 
 // 核心样式
 import 'codemirror/lib/codemirror.css';
@@ -54,6 +54,8 @@ function initialize(textarea, readonly, onChange) {
     extraKeys: {
       // 注释
       [Comment.shortcut]: Comment.command,
+      // 制表符
+      [Tab.shortcut]: Tab.command,
     },
   });
 
