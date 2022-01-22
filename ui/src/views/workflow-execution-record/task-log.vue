@@ -80,7 +80,8 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div
+                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -126,16 +127,20 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                          <div
+                            :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
                             >
                             </jm-text-viewer>
                             <template v-else>
-                              {{scope.row.value}}
+                              {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -155,7 +160,8 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div
+                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -201,16 +207,20 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                          <div
+                            :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
                             >
                             </jm-text-viewer>
                             <template v-else>
-                              {{scope.row.value}}
+                              {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -235,7 +245,7 @@ import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
-import { TaskParamTypeEnum, TaskStatusEnum, ParamTypeEnum } from '@/api/dto/enumeration';
+import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
 import useClipboard from 'vue-clipboard3';
@@ -390,9 +400,10 @@ export default defineComponent({
     box-shadow: 0 0 8px 0 #9eb1c5;
 
     > div {
-      &.item{
+      &.item {
         flex: 1;
       }
+
       margin-bottom: 16px;
       white-space: nowrap;
       overflow: hidden;
@@ -474,15 +485,18 @@ export default defineComponent({
             .text-viewer {
               display: flex;
               align-items: center;
-              &.param-value{
+
+              &.param-value {
                 .value {
                   width: 100%;
-                  &.jm-text-viewer{
-                    .content{
-                      .text-line{
-                        &:last-child{
+
+                  &.jm-text-viewer {
+                    .content {
+                      .text-line {
+                        &:last-child {
                           text-align: left;
-                          &::after{
+
+                          &::after {
                             display: none;
                           }
                         }
@@ -491,14 +505,17 @@ export default defineComponent({
                   }
                 }
               }
+
               .value {
                 width: 100%;
-                &.jm-text-viewer{
-                  .content{
-                    .text-line{
-                      &:last-child{
+
+                &.jm-text-viewer {
+                  .content {
+                    .text-line {
+                      &:last-child {
                         text-align: center;
-                        &::after{
+
+                        &::after {
                           display: none;
                         }
                       }
@@ -508,7 +525,7 @@ export default defineComponent({
               }
             }
 
-            &>div {
+            & > div {
               display: inline-block;
               width: 100%;
               position: relative;
@@ -517,7 +534,7 @@ export default defineComponent({
                 position: absolute;
                 left: 100%;
                 margin-left: 5px;
-                bottom:0
+                bottom: 0
               }
             }
           }
@@ -578,29 +595,34 @@ export default defineComponent({
             td {
               color: #082340;
             }
-            .copy-container{
-              &>div{
+
+            .copy-container {
+              & > div {
                 width: 100%;
               }
+
               display: flex;
               align-items: center;
               position: relative;
-              &:hover{
-                .copy-btn{
+
+              &:hover {
+                .copy-btn {
                   display: block;
                 }
               }
-              .copy-btn{
+
+              .copy-btn {
                 margin-left: 5px;
                 flex-shrink: 0;
-                width:16px;
-                height:16px;
-                background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-                background-size:100%;
+                width: 16px;
+                height: 16px;
+                background: url('@/assets/svgs/btn/copy.svg') no-repeat;
+                background-size: 100%;
                 cursor: pointer;
                 display: none;
                 opacity: 0.5;
-                &:hover{
+
+                &:hover {
                   opacity: 1;
                 }
               }
