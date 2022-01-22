@@ -128,7 +128,7 @@ export default defineComponent({
         const { payload, parameters } = await fetchTriggerEvent(props.triggerId);
         webhookLog.value = 'Webhook:\n' +
           `payload: ${JSON.stringify(JSON.parse(payload), null, 2)}\n`;
-        webhookParams.value = parameters;
+        webhookParams.value = parameters.sort((p1, p2) => p1.name.localeCompare(p2.name));
       } catch (err) {
         proxy.$throw(err, proxy);
       }

@@ -370,11 +370,21 @@ export default defineComponent({
       copy,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
-        taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT),
+        taskParams.value
+          .filter(item => item.type === TaskParamTypeEnum.INPUT)
+          .sort((p1, p2) => p1.ref.localeCompare(p2.ref)),
       ),
-      taskOutputParams: computed<ITaskParamVo[]>(() =>
-        taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT),
-      ),
+      taskOutputParams: computed<ITaskParamVo[]>(() => {
+        const params = taskParams.value
+          .filter(({ ref, type }) => ref && !(ref.startsWith('inner.')) && type === TaskParamTypeEnum.OUTPUT)
+          .sort((p1, p2) => p1.ref.localeCompare(p2.ref));
+
+        params.push(...taskParams.value
+          .filter(({ ref, type }) => ref && ref.startsWith('inner.') && type === TaskParamTypeEnum.OUTPUT)
+          .sort((p1, p2) => p1.ref.localeCompare(p2.ref)));
+
+        return params;
+      }),
       datetimeFormatter,
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
