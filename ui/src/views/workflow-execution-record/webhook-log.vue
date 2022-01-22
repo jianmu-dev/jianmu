@@ -89,7 +89,7 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
-import { TriggerTypeEnum, ParamTypeEnum } from '@/api/dto/enumeration';
+import { ParamTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import useClipboard from 'vue-clipboard3';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 
@@ -257,13 +257,16 @@ export default defineComponent({
 
       .content {
         padding: 16px;
-        ::v-deep(.text-viewer){
-          .params-name{
+
+        ::v-deep(.text-viewer) {
+          .params-name {
             width: 100%;
-            .content{
-              .text-line{
+
+            .content {
+              .text-line {
                 text-align: center;
-                &::after{
+
+                &::after {
                   display: none;
                 }
               }
