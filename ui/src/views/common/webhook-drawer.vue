@@ -28,7 +28,11 @@
         <div class="table-title">
           <div class="title">请求列表</div>
           <jm-tooltip content="刷新" placement="bottom">
-            <i class="jm-icon-button-refresh"  @click="refresh"></i>
+            <jm-button
+              :class="{ 'jm-icon-button-refresh': true, 'doing': refreshFlag}"
+              :disabled="refreshFlag"
+              @click="refresh"
+            ></jm-button>
           </jm-tooltip>
         </div>
         <div class="table-container" v-loading="tableLoading">
@@ -271,6 +275,7 @@ export default defineComponent({
     const maxWidthRecord = ref<Record<string, number>>({});
     // 刷新表格
     const refreshVisible = ref<boolean>(true);
+    const refreshFlag = ref<boolean>(false);
     // webhook请求列表滚动
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
@@ -514,12 +519,14 @@ export default defineComponent({
     };
     // 刷新
     const refresh = async() =>{
+      refreshFlag.value = true;
       refreshVisible.value = false;
       tableLoading.value = true;
       webhookRequestParams.value.pageNum = START_PAGE_NUM;
       await getWebhookRequestList('cover');
       refreshVisible.value = true;
       tableLoading.value = false;
+      refreshFlag.value = false;
     };
     return {
       loadState,
@@ -566,6 +573,7 @@ export default defineComponent({
       },
       refresh,
       refreshVisible,
+      refreshFlag
     };
   },
 });
@@ -654,21 +662,31 @@ export default defineComponent({
     }
 
     .table-title {
+      height:16px;
       margin-bottom: 14px;
       font-size: 16px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       .title{
         color: #082340;
       }
       .jm-icon-button-refresh{
+        padding:0px;
+        min-height:16px;
+        background:#f0f4f8;
+        box-shadow: none;
+        border:#f0f4f8;
         display: inline-block;
         content: '\e80d';
         color:#818c9b;
-        cursor: pointer;
         &:active{
           color:#096DD9;
         }
+      }
+
+      .doing {
+        animation: rotating 2s linear infinite;
       }
     }
 
