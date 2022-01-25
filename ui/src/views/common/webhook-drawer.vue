@@ -27,7 +27,9 @@
         </div>
         <div class="table-title">
           <div class="title">请求列表</div>
-          <i class="jm-icon-button-refresh"  @click="refresh"></i>
+          <jm-tooltip content="刷新" placement="bottom">
+            <i class="jm-icon-button-refresh"  @click="refresh"></i>
+          </jm-tooltip>
         </div>
         <div class="table-container" v-loading="tableLoading">
           <jm-scrollbar
