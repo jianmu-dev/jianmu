@@ -25,8 +25,13 @@
             </div>
           </div>
         </div>
+        <div class="table-title">
+          <div class="title">请求列表</div>
+          <jm-tooltip content="刷新" placement="bottom">
+            <i class="jm-icon-button-refresh"  @click="refresh"></i>
+          </jm-tooltip>
+        </div>
         <div class="table-container" v-loading="tableLoading">
-          <div class="table-title">请求列表</div>
           <jm-scrollbar
             ref="webhookDrawerRef"
             :height="height"
@@ -35,6 +40,7 @@
             <div
               class="table-content"
               ref="scrollRef"
+              v-if="refreshVisible"
               v-scroll="{
                 throttle: 800,
                 loadMore: btnDown,
@@ -263,6 +269,8 @@ export default defineComponent({
     // 密钥类型显隐
     const secretVisible = ref<boolean>(true);
     const maxWidthRecord = ref<Record<string, number>>({});
+    // 刷新表格
+    const refreshVisible = ref<boolean>(true);
     // webhook请求列表滚动
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
@@ -291,7 +299,7 @@ export default defineComponent({
         `${window.location.protocol}//${window.location.host}${webhook.value}`,
     );
     // 当前webhook的项目名
-    const currentProject = ref<string>(props.currentProjectName);
+    const currentProject = ref<string>(props.currentProjectName as string);
     // 请求参数
     const webhookRequestParams = ref<{
       pageNum: number;
@@ -357,7 +365,7 @@ export default defineComponent({
           webhookRequestList.value = webhookRequestData.value.list;
         }
 
-        nextTick(() => {
+        await nextTick(() => {
           if (!scrollRef.value) {
             return;
           }
@@ -378,7 +386,7 @@ export default defineComponent({
       // 更改projectId
       webhookRequestParams.value.projectId = props.currentProjectId as string;
       // 打开抽屉时重新赋值项目名
-      currentProject.value = props.currentProjectName;
+      currentProject.value = props.currentProjectName as string;
       // 进入抽屉显示loading
       tableLoading.value = true;
       // 打开抽屉时什么状态都没有
@@ -417,7 +425,7 @@ export default defineComponent({
         await retryWebRequest(id);
         proxy.$success('重试成功');
         // 旧数据覆盖新数据
-        getWebhookRequestList('cover');
+        await getWebhookRequestList('cover');
       } catch (err) {
         proxy.$throw(err, proxy);
       }
@@ -504,6 +512,15 @@ export default defineComponent({
         console.error(err);
       }
     };
+    // 刷新
+    const refresh = async() =>{
+      refreshVisible.value = false;
+      tableLoading.value = true;
+      webhookRequestParams.value.pageNum = START_PAGE_NUM;
+      await getWebhookRequestList('cover');
+      refreshVisible.value = true;
+      tableLoading.value = false;
+    };
     return {
       loadState,
       height,
@@ -547,6 +564,8 @@ export default defineComponent({
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
       },
+      refresh,
+      refreshVisible,
     };
   },
 });
@@ -578,7 +597,7 @@ export default defineComponent({
     padding: 20px 25px 0 25px;
     // 项目名称
     .project-name {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
       font-size: 16px;
       color: #082340;
     }
@@ -634,6 +653,25 @@ export default defineComponent({
       }
     }
 
+    .table-title {
+      margin-bottom: 14px;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      .title{
+        color: #082340;
+      }
+      .jm-icon-button-refresh{
+        display: inline-block;
+        content: '\e80d';
+        color:#818c9b;
+        cursor: pointer;
+        &:active{
+          color:#096DD9;
+        }
+      }
+    }
+
     // 表格
     .table-container {
       max-height: calc(100vh - 254px);
@@ -641,12 +679,6 @@ export default defineComponent({
       box-sizing: border-box;
       padding: 20px;
       margin-bottom: 20px;
-
-      .table-title {
-        margin-bottom: 20px;
-        font-size: 14px;
-        color: #082340;
-      }
 
       ::v-deep(.el-scrollbar__wrap) {
         max-height: calc(100vh - 380px);
