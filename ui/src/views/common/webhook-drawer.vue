@@ -27,7 +27,7 @@
         </div>
         <div class="table-title">
           <div class="title">请求列表</div>
-          <div class="refresh" @click="refresh"></div>
+          <i class="jm-icon-button-refresh"  @click="refresh"></i>
         </div>
         <div class="table-container" v-loading="tableLoading">
           <jm-scrollbar
@@ -659,15 +659,13 @@ export default defineComponent({
       .title{
         color: #082340;
       }
-      .refresh{
-        width:16px;
-        height:16px;
-        background:url("@/assets/svgs/btn/refresh.svg") no-repeat;
-        background-size: cover;
+      .jm-icon-button-refresh{
+        display: inline-block;
+        content: '\e80d';
+        color:#818c9b;
         cursor: pointer;
         &:active{
-          background: url("@/assets/svgs/btn/refresh-active.svg") no-repeat;
-          background-size: cover;
+          color:#096DD9;
         }
       }
     }
