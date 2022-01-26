@@ -1,8 +1,9 @@
 import { createVNode, nextTick, render, Ref, AppContext, VNode, VNodeProps } from 'vue';
 import Tip from './tip.vue';
+import TextLine from './text-line.vue';
 
 export interface ICallbackEvent {
-  contentMaxWidth: number
+  contentMaxWidth: number;
 }
 
 type Callback = (event: ICallbackEvent) => void
@@ -18,6 +19,8 @@ export class TextViewer {
   // 事件监听器
   private readonly resizeObserver: ResizeObserver;
   private readonly callback: Callback;
+  // 身略号占据的宽度
+  private ellipsisWidth: number = 0;
 
   constructor(
     value: Ref<string>,
@@ -33,7 +36,9 @@ export class TextViewer {
     this.appContext = appContext;
     this.tipPlacement = tipPlacement;
     this.callback = callback;
-    this.resizeObserver = new ResizeObserver(() => this.reload());
+    this.resizeObserver = new ResizeObserver(async () => {
+      await this.reload();
+    });
     this.resizeObserver.observe(this.transitCalculator.value!.parentElement!.parentElement as Element);
   }
 
@@ -58,16 +63,21 @@ export class TextViewer {
     return await this.calculateMaxCharWidth(value, i + 1, maxWidth);
   }
 
+  /**
+   * 计算出入内容会占据的最大宽度
+   * @param value
+   * @return 传入文本在页面会占据的最大宽度
+   */
   private async calculateContentMaxWidth(value: string = this.value.value): Promise<number> {
-    this.temporaryContent.value=value;
+    this.temporaryContent.value = value;
     await nextTick();
-    if(!this.transitCalculator.value||!this.transitCalculator.value.getBoundingClientRect()){
+    if (!this.transitCalculator.value || !this.transitCalculator.value.getBoundingClientRect()) {
       return 0;
     }
     // 需要用getClientRects去获取元素的宽度精确到小数点后三位
-    const maxWidth=this.transitCalculator.value.getBoundingClientRect().width;
+    const maxWidth = this.transitCalculator.value.getBoundingClientRect().width;
     this.temporaryContent.value = '';
-    return Math.ceil( maxWidth);
+    return Math.ceil(maxWidth);
   }
 
   private async calculateEllipsisWidth(): Promise<number> {
@@ -116,27 +126,10 @@ export class TextViewer {
   }
 
   /**
-   * 生成元素对象
-   * @param rows 行数
-   * @param lineHeight 行高
-   * @return 对象数组
-   */
-  private generateElements(rows: number, lineHeight: number): (Record<string, unknown> & VNodeProps)[] {
-    if (!rows) {
-      return [];
-    }
-    return new Array(rows).fill('').map(() => ({
-      style: {
-        height: `${lineHeight}px`,
-      },
-      class: 'text-line',
-    }));
-  }
-
-  /**
    * 生成vNode中的文本
    * @param wrapperSize 容器大小
    * @param value 文本内容
+   * @param rows 行数
    * @param i
    * @param contentArr
    * @return 保存的所有vNode文本数组
@@ -147,6 +140,7 @@ export class TextViewer {
       readonly height: number;
     },
     value: string,
+    rows: number,
     i: number = 0,
     contentArr: string[] = [],
   ): Promise<string[]> {
@@ -155,25 +149,34 @@ export class TextViewer {
     if (!this.transitCalculator.value) {
       return [];
     }
+    let contentWidth = this.transitCalculator.value?.getBoundingClientRect().width;
+    if (rows === 1 || rows === contentArr.length + 1) {
+      contentWidth += this.ellipsisWidth;
+    }
     // 截取到字符串的offsetWidth大于外层元素设置的宽度终止递归
-    if (this.transitCalculator.value.getBoundingClientRect().width > wrapperSize.width) {
-      contentArr.push(this.temporaryContent.value?.substring(0, i));
+    if (contentWidth > wrapperSize.width) {
+      contentArr.push(this.temporaryContent.value.substring(0, this.temporaryContent.value.length - 1));
       // 文本内容截取后将响应式占位宽度的span内容清空
       this.temporaryContent.value = '';
-      return await this.generateVNodesInnerText(wrapperSize, value, i, contentArr);
+      // 生成多行的VNode中的文本
+      if (rows === 1 || rows === contentArr.length) {
+        return contentArr;
+      }
+      return await this.generateVNodesInnerText(wrapperSize, value, rows, i, contentArr);
     }
     // 截取到字符串最后一位递归结束
     if (i === value.length - 1) {
+      contentArr.push(this.temporaryContent.value);
       // 文本内容截取后将响应式占位宽度的span内容清空
       this.temporaryContent.value = '';
       return contentArr;
     }
-    return await this.generateVNodesInnerText(wrapperSize, value, i + 1, contentArr);
+    // 当行追加内容
+    return await this.generateVNodesInnerText(wrapperSize, value, rows, i + 1, contentArr);
   }
 
   /**
    * 生成最终需要渲染到页面的VNode
-   * @param elements vNode元素描述的数组
    * @param contentArr vNode中的文本内容数组
    * @param rows 行数
    * @param lineHeight 行高
@@ -182,7 +185,6 @@ export class TextViewer {
    * @return vNode
    */
   private async generateVNode(
-    elements: (Record<string, unknown> & VNodeProps)[],
     contentArr: string[],
     rows: number,
     lineHeight: number,
@@ -192,108 +194,53 @@ export class TextViewer {
     },
     value: string,
   ): Promise<VNode> {
+    // 如果数组中没有内容证明没有达到指定宽度，不做操作
+    if (contentArr.length === 0) {
+      return createVNode('div', { class: 'content' });
+    }
     const vNodes: VNode[] = [];
     // 当前str截取到的索引位置
     for (let i = 0; i < rows; i++) {
-      // 如果数组中没有内容证明没有达到指定宽度，不做操作
-      if (contentArr.length === 0) {
+      // 内容生成的数组长度小于指定的rows行数
+      if (!contentArr[i]) {
         break;
       }
-      if (!contentArr[i]) {
+      const textLineVNode = createVNode(TextLine, { value: contentArr[i], style: { height: `${lineHeight}px` } });
+      if (i < Math.min(contentArr.length, rows) - 1) {
+        // 循环向vNode中追加文本，只有vNode中存在内容时才添加，减少没有意义的vNode
+        vNodes.push(textLineVNode);
         continue;
       }
-      let vNode: VNode;
-      if (i === 0) {
-        vNode = createVNode('div', elements[i], contentArr[i]);
-      } else {
-        vNode = createVNode('div', elements[i], contentArr[i].substring(0, contentArr[i].length - 1));
+      const contentLength = contentArr.reduce((pre, current) => {
+        return pre + current.length;
+      }, 0);
+      if (contentLength === this.value.value.length) {
+        vNodes.push(textLineVNode);
+        continue;
       }
-      // 循环向vNode中追加文本，只有vNode中存在内容时才添加，减少没有意义的vNode
-      vNodes.push(vNode);
-    }
-    // 传入字符串的长度小于等于外层元素限制的宽度
-    if (contentArr.length === 0 && value !== '') {
-      const vNode = createVNode('div', { style: { height: `${lineHeight}px` }, class: 'text-line' }, value);
-      vNodes.push(vNode);
-      return createVNode('div', { class: 'content' }, vNodes);
-    }
-    // 如果行号大于数组的长度说明设置高度大于整体文字内容占据的高度，将内容整体显示
-    if ((rows > contentArr.length) && contentArr.length !== 0) {
-      elements.push({
-        style: {
-          height: `${lineHeight}px`,
-        },
-        class: 'text-line',
-      });
-      // 目前剩余字符开始索引
-      const remainingCharacterIndex = contentArr.reduce((a, _, i, arr) => {
-        return a + arr[i].length;
-      }, 0) - (contentArr.length - 1);
-      const vNode = createVNode('div', elements[elements.length - 1], value.substring(remainingCharacterIndex, value.length));
-      vNodes.push(vNode);
-      return createVNode('div', { class: 'content' }, vNodes);
-    }
-    if (rows > 0) {
       // 创建tooltip的VNode
       const toolTipVNode = createVNode(Tip, {
         effect: 'dark', content: value, placement: this.tipPlacement, style: { cursor: 'default' },
-      }
-      , null);
+      }, null);
       toolTipVNode.appContext = this.appContext;
-      // 更改最后一行的样式
-      Object.assign(elements[rows - 1].style, { width: wrapperSize.width });
-      elements[rows - 1].class = 'text-line last';
-      vNodes[vNodes.length - 1] = createVNode('div', {
-        class: 'text-line last',
-        style: {
-          height: `${lineHeight}px`,
-        },
-      }, [(vNodes[vNodes.length - 1] as VNode).children, toolTipVNode]);
+      // 创建出...的vNode
+      vNodes.push(createVNode('span', {
+        class: 'text-line-last',
+        style: { height: `${lineHeight}px` },
+      }, [textLineVNode, toolTipVNode]));
     }
     return createVNode('div', { class: 'content' }, vNodes);
-  }
-
-  /**
-   * 对最后一个VNode中的溢出文本的处理
-   * @param wrapperNode 最终会被渲染到页面的vNode节点
-   * @param wrapperSize 容器大小
-   */
-  private async handleOverFlowText(wrapperNode: any, wrapperSize: any) {
-    if (!this.transitCalculator.value) {
-      return;
-    }
-    // 将中转计算元素的盒模型改成inline用来计算文字宽度
-    this.transitCalculator.value.style.display = 'inline';
-    // 获取...占据的宽度
-    const ellipsisWidth = await this.calculateEllipsisWidth();
-    // 递归出加上...占据的宽度后应该展示的vNode中的文本内容
-    if (wrapperNode.children[wrapperNode.children.length - 1].children.length <= 1) {
-      return;
-    }
-    this.temporaryContent.value += wrapperNode.children[wrapperNode.children.length - 1].children[0];
-    await nextTick();
-    if (this.transitCalculator.value.getBoundingClientRect().width + ellipsisWidth > wrapperSize.width) {
-      const temp = wrapperNode.children[wrapperNode.children.length - 1].children[0];
-      // 如果vNode中的children不是数组（数组证明此时vNode中有toolTipVNode），说明没有达到出...的条件，直接将文字展示不做处理
-      if(!Array.isArray(wrapperNode.children[wrapperNode.children.length - 1].children)){
-        return;
-      }
-      wrapperNode.children[wrapperNode.children.length - 1].children[0] = '';
-      wrapperNode.children[wrapperNode.children.length - 1].children[0] += temp.substring(0, temp.length - 1);
-    } else {
-      return;
-    }
-    await this.handleOverFlowText(wrapperNode, wrapperSize);
   }
 
   private async init(value: string = '') {
     if (!this.transitCalculator.value) {
       return;
     }
+    this.ellipsisWidth = await this.calculateEllipsisWidth();
     const lineHeight = await this.calculateLineHeight();
     const wrapperSize = this.calculateContainerSize(lineHeight);
     if (value.length === 0) {
-      const wrapperNode = await this.generateVNode([], [], 0, lineHeight, wrapperSize, value);
+      const wrapperNode = await this.generateVNode([], 0, lineHeight, wrapperSize, value);
       render(wrapperNode, this.transitCalculator.value!.parentElement as HTMLElement);
       return;
     }
@@ -309,10 +256,8 @@ export class TextViewer {
       console.warn('指定的高度太低无法显示');
       return;
     }
-    const elements = this.generateElements(rows, lineHeight);
-    const contentArr = await this.generateVNodesInnerText(wrapperSize, value);
-    const wrapperNode = await this.generateVNode(elements, contentArr, rows, lineHeight, wrapperSize, value);
-    await this.handleOverFlowText(wrapperNode, wrapperSize);
+    const contentArr = await this.generateVNodesInnerText(wrapperSize, value, rows);
+    const wrapperNode = await this.generateVNode(contentArr, rows, lineHeight, wrapperSize, value);
     this.temporaryContent.value = '';
     render(wrapperNode, this.transitCalculator.value!.parentElement as HTMLElement);
   }
@@ -326,7 +271,7 @@ export class TextViewer {
     await this.clear();
     await nextTick();
     await this.init(this.value.value);
-    const contentMaxWidth = await this.calculateContentMaxWidth();
+    const contentMaxWidth = await this.calculateContentMaxWidth() + this.ellipsisWidth;
     this.callback({ contentMaxWidth });
   }
 }
