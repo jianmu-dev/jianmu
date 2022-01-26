@@ -31,7 +31,7 @@
           <jm-text-viewer :value="process.id"/>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div class="param-key">流程版本号：</div>
         <div class="param-value">
           <jm-text-viewer :value="process.workflowVersion"/>
@@ -144,7 +144,8 @@ export default defineComponent({
 
   .basic-section {
     margin: 20px;
-    padding: 16px 20px 0;
+    //padding: 16px 20px 0;
+    padding: 16px 0 0 20px;
     display: flex;
     justify-content: space-between;
     box-shadow: 0 0 8px 0 #9EB1C5;
