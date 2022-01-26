@@ -27,9 +27,6 @@ function calcStartSpaceAmount(str) {
  * 注释
  */
 export class Comment {
-  static get name() {
-    return 'comment';
-  }
 
   static get shortcut() {
     const codemirror = window.CodeMirror || CodeMirror;
@@ -64,5 +61,24 @@ export class Comment {
 
     cm.setValue(lineVals.join(cm.lineSeparator()));
     doc.setSelection(anchor, head);
+  }
+}
+
+/**
+ * 制表符
+ */
+export class Tab {
+
+  static get shortcut() {
+    return 'Tab';
+  }
+
+  static command(cm) {
+    if (cm.somethingSelected()) {
+      cm.indentSelection('add');
+      return;
+    }
+
+    cm.replaceSelection(Array(cm.getOption('indentUnit') + 1).join(' '));
   }
 }
