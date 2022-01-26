@@ -103,11 +103,6 @@
                       align="center"
                       prop="valueType"
                     >
-                      <template #default="scope">
-                        <div class="text-viewer">
-                          <jm-text-viewer :value="scope.row.valueType" class="value"/>
-                        </div>
-                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="是/否必填"
@@ -183,11 +178,6 @@
                       width="110px"
                       prop="valueType"
                     >
-                      <template #default="scope">
-                        <div class="text-viewer">
-                          <jm-text-viewer :value="scope.row.valueType" class="value"/>
-                        </div>
-                      </template>
                     </jm-table-column>
                     <jm-table-column
                       header-align="center"
@@ -500,38 +490,38 @@ export default defineComponent({
                 .value {
                   width: 100%;
 
-                  &.jm-text-viewer {
-                    .content {
-                      .text-line {
-                        &:last-child {
-                          text-align: left;
-
-                          &::after {
-                            display: none;
-                          }
-                        }
-                      }
-                    }
-                  }
+                  //&.jm-text-viewer {
+                  //  .content {
+                  //    .text-line {
+                  //      &:last-child {
+                  //        text-align: left;
+                  //
+                  //        &::after {
+                  //          display: none;
+                  //        }
+                  //      }
+                  //    }
+                  //  }
+                  //}
                 }
               }
 
               .value {
                 width: 100%;
 
-                &.jm-text-viewer {
-                  .content {
-                    .text-line {
-                      &:last-child {
-                        text-align: center;
-
-                        &::after {
-                          display: none;
-                        }
-                      }
-                    }
-                  }
-                }
+                //&.jm-text-viewer {
+                //  .content {
+                //    .text-line {
+                //      &:last-child {
+                //        text-align: center;
+                //
+                //        &::after {
+                //          display: none;
+                //        }
+                //      }
+                //    }
+                //  }
+                //}
               }
             }
 

@@ -33,7 +33,6 @@ export default defineComponent({
 
   text-align: justify;
   // 兼容IE & 火狐
-  word-break: break-all;
   text-justify: distribute;
   // 解决文本内容两端对齐
   &::after {

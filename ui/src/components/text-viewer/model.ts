@@ -150,7 +150,7 @@ export class TextViewer {
       return [];
     }
     let contentWidth = this.transitCalculator.value?.getBoundingClientRect().width;
-    if (rows === 1 || rows === contentArr.length + 1) {
+    if (rows === contentArr.length + 1 && await this.calculateLastLineMaxWidth(contentArr) > wrapperSize.width) {
       contentWidth += this.ellipsisWidth;
     }
     // 截取到字符串的offsetWidth大于外层元素设置的宽度终止递归
@@ -159,7 +159,7 @@ export class TextViewer {
       // 文本内容截取后将响应式占位宽度的span内容清空
       this.temporaryContent.value = '';
       // 生成多行的VNode中的文本
-      if (rows === 1 || rows === contentArr.length) {
+      if (rows === contentArr.length) {
         return contentArr;
       }
       return await this.generateVNodesInnerText(wrapperSize, value, rows, i, contentArr);
@@ -173,6 +173,23 @@ export class TextViewer {
     }
     // 当行追加内容
     return await this.generateVNodesInnerText(wrapperSize, value, rows, i + 1, contentArr);
+  }
+
+  /**
+   * 计算最后一行文本内容占据的最大宽度
+   * @param contentArr
+   * @param value
+   * @return 最后一行文本内容占据的最大宽度
+   */
+  private async calculateLastLineMaxWidth(contentArr: string[], value: string = this.value.value): Promise<number> {
+    const temp = this.temporaryContent.value;
+    const contentLength = contentArr.reduce((pre, current) => {
+      return pre + current.length;
+    }, 0);
+    const lastLineValue = value.substring(contentLength);
+    const lastLineMaxWidth = await this.calculateContentMaxWidth(lastLineValue);
+    this.temporaryContent.value = temp;
+    return lastLineMaxWidth;
   }
 
   /**
@@ -271,7 +288,7 @@ export class TextViewer {
     await this.clear();
     await nextTick();
     await this.init(this.value.value);
-    const contentMaxWidth = await this.calculateContentMaxWidth() + this.ellipsisWidth;
+    const contentMaxWidth = await this.calculateContentMaxWidth();
     this.callback({ contentMaxWidth });
   }
 }
