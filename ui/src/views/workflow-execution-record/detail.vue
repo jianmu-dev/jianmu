@@ -424,32 +424,20 @@ export default defineComponent({
           });
       },
       openTaskLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
-        taskLogForm.value = {
-          drawerVisible: true,
-          id: nodeId,
-          tabType,
-        };
-        // taskLogForm.value.drawerVisible = true;
-        // taskLogForm.value.id = nodeId;
-        // taskLogForm.value.tabType = tabType;
+        taskLogForm.value.drawerVisible = true;
+        taskLogForm.value.id = nodeId;
+        taskLogForm.value.tabType = tabType;
       },
       processLogDrawer,
       openProcessLog: () => {
         processLogDrawer.value = true;
       },
       openWebhookLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
-        webhookLogForm.value = {
-          drawerVisible: true,
-          nodeName: nodeId,
-          tabType,
-          triggerId: data.value.record?.triggerId,
-          triggerType: data.value.record?.triggerType,
-        };
-        // webhookLogForm.value.drawerVisible = true;
-        // webhookLogForm.value.nodeName = nodeId;
-        // webhookLogForm.value.tabType = tabType;
-        // webhookLogForm.value.triggerId = data.value.record?.triggerId;
-        // webhookLogForm.value.triggerType = data.value.record?.triggerType;
+        webhookLogForm.value.drawerVisible = true;
+        webhookLogForm.value.nodeName = nodeId;
+        webhookLogForm.value.tabType = tabType;
+        webhookLogForm.value.triggerId = data.value.record?.triggerId;
+        webhookLogForm.value.triggerType = data.value.record?.triggerType;
       },
     };
   },
