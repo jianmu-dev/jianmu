@@ -7,7 +7,8 @@
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"/>
-    <node-toolbar v-if="!readonly && !dslMode && nodeEvent"
+    <node-toolbar v-if="!dslMode && nodeEvent"
+                  :readonly="readonly"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
                   @node-click="clickNode"
                   @mouseout="handleNodeBarMouseout"/>
