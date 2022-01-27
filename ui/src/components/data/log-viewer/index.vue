@@ -139,7 +139,7 @@ export default defineComponent({
           window.URL.revokeObjectURL(url);
         } catch (err) {
           proxy.$error('下载失败');
-          console.error(err);
+          console.warn(err.message);
         } finally {
           downloading.value = false;
         }
@@ -154,7 +154,7 @@ export default defineComponent({
           log = await getLog(true);
         } catch (err) {
           proxy.$error(err.message);
-          console.error(err);
+          console.warn(err.message);
           return;
         } finally {
           copying.value = false;
