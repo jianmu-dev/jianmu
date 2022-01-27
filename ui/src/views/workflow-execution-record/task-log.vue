@@ -52,7 +52,12 @@
                   加载中...
                 </jm-button>
               </div>
-              <jm-log-viewer :filename="`${task.nodeName}.txt`" :value="taskLog"/>
+              <jm-log-viewer
+                :filename="`${task.nodeName}.txt`"
+                :value="taskLog"
+                :more="moreLog"
+                :fetch-log="fetchLog"
+              />
             </div>
           </div>
         </jm-tab-pane>
@@ -226,7 +231,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -238,7 +243,6 @@ import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
-import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
   components: { TaskState },
@@ -254,8 +258,6 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
-    const { proxy } = getCurrentInstance() as any;
-    const { toClipboard } = useClipboard();
     const task = computed<ITaskExecutionRecordVo>(() => {
       return state.recordDetail.taskRecords.find(
         item => item.instanceId === props.id,
@@ -284,6 +286,9 @@ export default defineComponent({
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
+    // 最大日志大小为1MB
+    const maxLogLength = 1024 * 1024;
+    const moreLog = ref<boolean>(false);
 
     let terminateTaskLogLoad = false;
 
@@ -327,16 +332,21 @@ export default defineComponent({
     // 初始化任务
     onBeforeMount(() => {
       // 加载日志
+      let lastContentLength = 0;
       loadData(async (id: string) => {
         const headers: any = await checkTaskLog(id);
         const contentLength = +headers['content-length'] as number;
 
-        if (contentLength > taskLog.value.length) {
-          // 存在更多日志
-          taskLog.value = await fetchTaskLog(id);
-        } else {
+        if (contentLength === lastContentLength) {
           console.debug('暂无更多日志');
+          return;
         }
+
+        // 存在更多日志
+        lastContentLength = contentLength;
+
+        moreLog.value = contentLength > maxLogLength;
+        taskLog.value = await fetchTaskLog(id, contentLength - maxLogLength);
       });
 
       // 加载参数
@@ -347,19 +357,6 @@ export default defineComponent({
 
     onBeforeUnmount(() => (terminateTaskLogLoad = true));
 
-    // 一键复制
-    const copy = async (value: string) => {
-      if (!value) {
-        return;
-      }
-      try {
-        await toClipboard(value);
-        proxy.$success('复制成功');
-      } catch (err) {
-        proxy.$error('复制失败，请手动复制');
-        console.error(err);
-      }
-    };
     const maxWidthRecord = ref<Record<string, number>>({});
     return {
       ParamTypeEnum,
@@ -370,7 +367,7 @@ export default defineComponent({
       executionTime,
       tabActiveName,
       taskLog,
-      copy,
+      moreLog,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value
@@ -391,6 +388,18 @@ export default defineComponent({
       datetimeFormatter,
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
+      },
+      fetchLog: async (isCopy: boolean) => {
+        if (isCopy) {
+          const headers: any = await checkTaskLog(props.id);
+          const contentLength = +headers['content-length'] as number;
+
+          if (contentLength > maxLogLength) {
+            throw Error('日志过大，请下载');
+          }
+        }
+
+        return await fetchTaskLog(props.id);
       },
     };
   },
