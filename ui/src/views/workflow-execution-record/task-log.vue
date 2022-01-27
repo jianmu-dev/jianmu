@@ -256,12 +256,17 @@ export default defineComponent({
     const state = useStore().state[namespace] as IState;
     const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
-    const task = computed<ITaskExecutionRecordVo>(
-      () =>
-        state.recordDetail.taskRecords.find(
-          item => item.instanceId === props.id,
-        ) as ITaskExecutionRecordVo,
-    );
+    const task = computed<ITaskExecutionRecordVo>(() => {
+      return state.recordDetail.taskRecords.find(
+        item => item.instanceId === props.id,
+      ) || {
+        instanceId: '',
+        nodeName: '',
+        defKey: '',
+        startTime: '',
+        status: TaskStatusEnum.INIT,
+      };
+    });
     const executing = computed<boolean>(() =>
       [
         TaskStatusEnum.INIT,
