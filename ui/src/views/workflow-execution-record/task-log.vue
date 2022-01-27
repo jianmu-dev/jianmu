@@ -287,24 +287,14 @@ export default defineComponent({
 
     let terminateTaskLogLoad = false;
 
-    const loadTask = async (retry: number) => {
+    const loadData = async (func: (id: string) => Promise<void>, retry: number = 0) => {
       if (terminateTaskLogLoad) {
         console.debug('组件已卸载，终止加载任务');
         return;
       }
 
       try {
-        const headers: any = await checkTaskLog(props.id);
-        const contentLength = +headers['content-length'] as number;
-
-        if (contentLength > taskLog.value.length) {
-          // 存在更多日志
-          taskLog.value = await fetchTaskLog(props.id);
-        } else {
-          console.debug('暂无更多日志');
-        }
-
-        taskParams.value = await listTaskParam(props.id);
+        await func(props.id);
       } catch (err) {
         if (err instanceof TimeoutError) {
           // 忽略超时错误
@@ -331,11 +321,29 @@ export default defineComponent({
       console.debug(`3秒后重试第${retry}次`);
       await sleep(3000);
 
-      await loadTask(retry);
+      await loadData(func, retry);
     };
 
     // 初始化任务
-    onBeforeMount(() => loadTask(0));
+    onBeforeMount(() => {
+      // 加载日志
+      loadData(async (id: string) => {
+        const headers: any = await checkTaskLog(id);
+        const contentLength = +headers['content-length'] as number;
+
+        if (contentLength > taskLog.value.length) {
+          // 存在更多日志
+          taskLog.value = await fetchTaskLog(id);
+        } else {
+          console.debug('暂无更多日志');
+        }
+      });
+
+      // 加载参数
+      loadData(async (id: string) => {
+        taskParams.value = await listTaskParam(id);
+      });
+    });
 
     onBeforeUnmount(() => (terminateTaskLogLoad = true));
 
