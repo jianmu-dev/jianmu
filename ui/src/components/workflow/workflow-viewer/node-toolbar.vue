@@ -26,6 +26,10 @@ import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
 
 export default defineComponent({
   props: {
+    readonly: {
+      type: Boolean,
+      required: true,
+    },
     taskInstanceId: String,
     nodeEvent: {
       type: Object as PropType<INodeMouseoverEvent>,
@@ -71,6 +75,10 @@ export default defineComponent({
         return str;
       }),
       operationVisible: computed<boolean>(() => {
+        if (props.readonly) {
+          return false;
+        }
+
         if (props.nodeEvent.type === NodeTypeEnum.WEBHOOK) {
           return true;
         }
