@@ -138,7 +138,7 @@ export function fetchTaskLog(taskExecutionRecordId: string, startRange?: number)
     headers: startRange === undefined ? undefined : {
       Range: `bytes=${startRange < 0 ? 0 : startRange}-`,
     },
-    timeout: 60 * 1000,
+    timeout: startRange === undefined ? 2 * 60 * 1000 : undefined,
   });
 }
 
