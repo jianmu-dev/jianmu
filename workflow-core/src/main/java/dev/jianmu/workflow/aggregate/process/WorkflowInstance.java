@@ -2,6 +2,7 @@ package dev.jianmu.workflow.aggregate.process;
 
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.process.ProcessEndedEvent;
+import dev.jianmu.workflow.event.process.ProcessNotRunningEvent;
 import dev.jianmu.workflow.event.process.ProcessStartedEvent;
 import dev.jianmu.workflow.event.process.ProcessTerminatedEvent;
 
@@ -47,6 +48,18 @@ public class WorkflowInstance extends AggregateRoot {
 
     public boolean isRunning() {
         return this.status == ProcessStatus.RUNNING;
+    }
+
+    public void statusCheck() {
+        if (this.isRunning()) {
+            return;
+        }
+        var processNotRunningEvent = ProcessNotRunningEvent.Builder.aProcessNotRunningEvent()
+                .triggerId(triggerId)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .build();
+        this.raiseEvent(processNotRunningEvent);
     }
 
     // 启动流程实例

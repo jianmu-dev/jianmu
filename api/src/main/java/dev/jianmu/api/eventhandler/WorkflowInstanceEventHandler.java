@@ -6,6 +6,7 @@ import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.event.process.ProcessEndedEvent;
+import dev.jianmu.workflow.event.process.ProcessNotRunningEvent;
 import dev.jianmu.workflow.event.process.ProcessStartedEvent;
 import dev.jianmu.workflow.event.process.ProcessTerminatedEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +85,15 @@ public class WorkflowInstanceEventHandler {
     public void handleProcessEndedEvent(ProcessEndedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessEndedEvent here -------------------------");
+        log.info(event.toString());
+        this.workerApplication.cleanupWorkspace(event.getTriggerId());
+        log.info("-----------------------------------------------------");
+    }
+
+    @EventListener
+    public void handleProcessNotRunningEvent(ProcessNotRunningEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get ProcessNotRunningEvent here -------------------------");
         log.info(event.toString());
         this.workerApplication.cleanupWorkspace(event.getTriggerId());
         log.info("-----------------------------------------------------");
