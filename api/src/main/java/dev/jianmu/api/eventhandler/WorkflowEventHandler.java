@@ -106,6 +106,7 @@ public class WorkflowEventHandler {
         log.info("handle NodeSkipEvent end-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleWorkflowEndEvent(WorkflowEndEvent event) {
         MDC.put("triggerId", event.getTriggerId());
