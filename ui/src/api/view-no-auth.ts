@@ -1,16 +1,6 @@
 import { restProxy } from '@/api/index';
-import {
-  ITaskExecutionRecordVo,
-  ITaskParamVo,
-  IWorkflowExecutionRecordVo,
-} from '@/api/dto/workflow-execution-record';
-import {
-  IProcessTemplateVo,
-  IProjectDetailVo,
-  IProjectQueryingDto,
-  IProjectVo,
-  IWorkflowVo,
-} from '@/api/dto/project';
+import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
@@ -39,6 +29,7 @@ const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
 const baseHubUrl = {
   processTemplate: '/hub/view/workflow_templates',
 };
+
 /**
  * 查询项目组列表
  */
@@ -48,6 +39,7 @@ export function queryProjectGroup(): Promise<IProjectGroupVo[]> {
     method: 'get',
   });
 }
+
 /**
  * 查询项目
  * @param dto
@@ -137,12 +129,16 @@ export function checkTaskLog(taskExecutionRecordId: string): Promise<object> {
 /**
  * 获取日志
  * @param taskExecutionRecordId
+ * @param startRange
  */
-export function fetchTaskLog(taskExecutionRecordId: string): Promise<string> {
+export function fetchTaskLog(taskExecutionRecordId: string, startRange?: number): Promise<string> {
   return restProxy<string>({
     url: `${baseUrl.log}/${taskExecutionRecordId}`,
     method: 'get',
-    timeout: 20 * 1000,
+    headers: startRange === undefined ? undefined : {
+      Range: `bytes=${startRange < 0 ? 0 : startRange}-`,
+    },
+    timeout: startRange === undefined ? 2 * 60 * 1000 : undefined,
   });
 }
 

@@ -1,12 +1,10 @@
 <template>
   <div class="jm-text-viewer">
-     <span ref="transitCalculator" class="transit-calculator">
-        {{ temporaryContent }}
-     </span>
+    <span ref="transitCalculator" class="transit-calculator" v-html="temporaryContentComputed"/>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, getCurrentInstance, onUpdated } from 'vue';
+import { defineComponent, onMounted, ref, getCurrentInstance, onUpdated, computed } from 'vue';
 import { ICallbackEvent, TextViewer } from './model';
 
 export default defineComponent({
@@ -30,6 +28,9 @@ export default defineComponent({
     const temporaryContent = ref<string>('');
     const text = ref<string>(props.value ? props.value.toString() : '');
     const { appContext } = getCurrentInstance() as any;
+    const temporaryContentComputed = computed<string>(() => {
+      return temporaryContent.value.replace(/ /g, '&nbsp;');
+    });
     onMounted(async () => {
       const textViewer = new TextViewer(
         text,
@@ -63,6 +64,7 @@ export default defineComponent({
     return {
       transitCalculator,
       temporaryContent,
+      temporaryContentComputed,
     };
   },
 });
@@ -72,33 +74,15 @@ export default defineComponent({
   .transit-calculator {
     opacity: 0;
     white-space: nowrap;
-    display: inline-block;
+    display: inline;
   }
 
   .content {
-    .text-line {
-      &:last-child {
-        text-align: left;
-      }
-
-      text-align: justify;
-      // 兼容IE & 火狐
-      word-break: break-all;
-      text-justify: distribute;
-      // 解决文本内容两端对齐
-      &::after {
-        content: "";
-        display: inline-block;
-        width: 100%;
-      }
-
-      &.last {
-        text-align: justify;
-        // 解决最后一行会被换行显示
-        word-break: normal;
-      }
+    .text-line-last {
+      // 解决最后一行会被换行显示
+      word-break: normal;
+      display: flex;
     }
   }
 }
 </style>
-

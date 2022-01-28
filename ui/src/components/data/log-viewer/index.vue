@@ -1,18 +1,24 @@
 <template>
   <div class="jm-log-viewer">
     <div class="operation">
-      <jm-tooltip content="下载" placement="top">
-        <div class="download" @click="download"></div>
+      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'" placement="top">
+        <div :class="{download: true, doing: downloading}" @click="download"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-tooltip content="复制" placement="top">
-        <div class="copy" @click="copy"></div>
+      <jm-tooltip :content="copying ? '复制中，请稍后...' : '复制'" placement="top">
+        <div :class="{copy: true, doing: copying}" @click="copy"></div>
       </jm-tooltip>
     </div>
     <div class="auto-scroll" @click="handleAutoScroll(true)"
          :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}"></div>
     <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
     <div class="content" ref="contentRef">
+      <div v-if="value && more" class="more-line">
+        查看更多日志，请<span :class="{
+          'download-txt': true,
+          doing: downloading,
+        }" @click="download">{{ downloading ? '下载中，请稍后...' : '下载' }}</span>
+      </div>
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
         <div class="no" :style="{left: `${-1 * noWidth}px`, width: `${noWidth}px`}">
@@ -25,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, nextTick, onMounted, ref, watch } from 'vue';
+import { defineComponent, getCurrentInstance, nextTick, onMounted, PropType, ref, watch } from 'vue';
 import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
@@ -39,6 +45,11 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    more: {
+      type: Boolean,
+      default: false,
+    },
+    fetchLog: Function as PropType<(isCopy: boolean) => Promise<string>>,
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
@@ -47,6 +58,8 @@ export default defineComponent({
     const contentRef = ref<HTMLDivElement>();
     const noWidth = ref<number>(0);
     const autoScroll = ref<boolean>(true);
+    const downloading = ref<boolean>(false);
+    const copying = ref<boolean>(false);
 
     const virtualNoDiv = document.createElement('div');
     virtualNoDiv.style.position = 'fixed';
@@ -90,32 +103,71 @@ export default defineComponent({
 
     watch(() => props.value, (value: string) => setLog(value));
 
+    const getLog = async (isCopy: boolean) => {
+      if (props.more && props.fetchLog) {
+        return await props.fetchLog(isCopy);
+      }
+
+      return props.value;
+    };
+
     return {
       data,
       contentRef,
       noWidth,
       autoScroll,
+      downloading,
+      copying,
       handleAutoScroll,
-      download: () => {
-        const blob = new Blob([props.value]);
+      download: async () => {
+        if (downloading.value) {
+          return;
+        }
+        downloading.value = true;
+        try {
+          const log = await getLog(false);
+          const blob = new Blob([log]);
 
-        const url = window.URL.createObjectURL(blob);
+          const url = window.URL.createObjectURL(blob);
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = props.filename;
-        a.click();
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = props.filename;
+          a.click();
 
-        // 释放url
-        window.URL.revokeObjectURL(url);
+          // 释放url
+          window.URL.revokeObjectURL(url);
+        } catch (err) {
+          proxy.$error('下载失败');
+          console.warn(err.message);
+        } finally {
+          downloading.value = false;
+        }
       },
       copy: async () => {
+        if (copying.value) {
+          return;
+        }
+        copying.value = true;
+        let log = '';
         try {
-          await toClipboard(props.value);
+          log = await getLog(true);
+        } catch (err) {
+          proxy.$error(err.message);
+          console.warn(err.message);
+          return;
+        } finally {
+          copying.value = false;
+        }
+
+        try {
+          await toClipboard(log);
           proxy.$success('复制成功');
         } catch (err) {
           proxy.$error('复制失败，请手动复制');
           console.error(err);
+        } finally {
+          copying.value = false;
         }
       },
     };
@@ -145,6 +197,22 @@ export default defineComponent({
     height: 100%;
     overflow: auto;
     line-height: 22px;
+
+    .more-line {
+      text-align: center;
+      color: #FFFFFF;
+      padding-bottom: 10px;
+
+      .download-txt {
+        color: #8193B2;
+        cursor: pointer;
+
+        &.doing {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
 
     .line {
       position: relative;
@@ -204,6 +272,11 @@ export default defineComponent({
       background-repeat: no-repeat;
       background-size: contain;
       cursor: pointer;
+
+      &.doing {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
 
     .copy {
@@ -213,6 +286,11 @@ export default defineComponent({
       background-repeat: no-repeat;
       background-size: contain;
       cursor: pointer;
+
+      &.doing {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
 
     .separator {

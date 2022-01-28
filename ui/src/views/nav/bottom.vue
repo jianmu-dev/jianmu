@@ -7,9 +7,6 @@
     <a href="https://jianmu.dev" target="_blank">关于建木</a>
     <a href="https://docs.jianmu.dev" target="_blank">使用手册</a>
     <a href="mailto:support@jianmu.dev">联系我们</a>
-    <a v-if="icpVisible" href="https://beian.miit.gov.cn" target="_blank"
-      >浙ICP备12032350号-5</a
-    >
   </div>
 </template>
 
@@ -20,7 +17,6 @@ export default defineComponent({
   setup() {
     return {
       currentYear: new Date().getFullYear(),
-      icpVisible: import.meta.env.MODE === 'cdn',
     };
   },
 });

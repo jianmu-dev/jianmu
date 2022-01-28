@@ -52,7 +52,12 @@
                   加载中...
                 </jm-button>
               </div>
-              <jm-log-viewer :filename="`${task.nodeName}.txt`" :value="taskLog"/>
+              <jm-log-viewer
+                :filename="`${task.nodeName}.txt`"
+                :value="taskLog"
+                :more="moreLog"
+                :fetch-log="fetchLog"
+              />
             </div>
           </div>
         </jm-tab-pane>
@@ -80,7 +85,8 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div
+                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -102,11 +108,6 @@
                       align="center"
                       prop="valueType"
                     >
-                      <template #default="scope">
-                        <div class="text-viewer">
-                          <jm-text-viewer :value="scope.row.valueType" class="value"/>
-                        </div>
-                      </template>
                     </jm-table-column>
                     <jm-table-column
                       label="是/否必填"
@@ -126,16 +127,20 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                          <div
+                            :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
                             >
                             </jm-text-viewer>
                             <template v-else>
-                              {{scope.row.value}}
+                              {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -155,7 +160,8 @@
                       prop="ref"
                     >
                       <template #default="scope">
-                        <div :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                        <div
+                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
@@ -177,11 +183,6 @@
                       width="110px"
                       prop="valueType"
                     >
-                      <template #default="scope">
-                        <div class="text-viewer">
-                          <jm-text-viewer :value="scope.row.valueType" class="value"/>
-                        </div>
-                      </template>
                     </jm-table-column>
                     <jm-table-column
                       header-align="center"
@@ -201,16 +202,20 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <div class="copy-container">
-                          <div :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
+                          <div
+                            :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value" @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)" class="value"
+                                            :value="scope.row.value"
+                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
+                                            class="value"
                             >
                             </jm-text-viewer>
                             <template v-else>
-                              {{scope.row.value}}
+                              {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)" v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn" @click="copy(scope.row.value)"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -226,7 +231,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -235,10 +240,9 @@ import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
-import { TaskParamTypeEnum, TaskStatusEnum, ParamTypeEnum } from '@/api/dto/enumeration';
+import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
-import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
   components: { TaskState },
@@ -254,14 +258,17 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
-    const { proxy } = getCurrentInstance() as any;
-    const { toClipboard } = useClipboard();
-    const task = computed<ITaskExecutionRecordVo>(
-      () =>
-        state.recordDetail.taskRecords.find(
-          item => item.instanceId === props.id,
-        ) as ITaskExecutionRecordVo,
-    );
+    const task = computed<ITaskExecutionRecordVo>(() => {
+      return state.recordDetail.taskRecords.find(
+        item => item.instanceId === props.id,
+      ) || {
+        instanceId: '',
+        nodeName: '',
+        defKey: '',
+        startTime: '',
+        status: TaskStatusEnum.INIT,
+      };
+    });
     const executing = computed<boolean>(() =>
       [
         TaskStatusEnum.INIT,
@@ -279,27 +286,20 @@ export default defineComponent({
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
+    // 最大日志大小为1MB
+    const maxLogLength = 1024 * 1024;
+    const moreLog = ref<boolean>(false);
 
     let terminateTaskLogLoad = false;
 
-    const loadTask = async (retry: number) => {
+    const loadData = async (func: (id: string) => Promise<void>, retry: number = 0) => {
       if (terminateTaskLogLoad) {
         console.debug('组件已卸载，终止加载任务');
         return;
       }
 
       try {
-        const headers: any = await checkTaskLog(props.id);
-        const contentLength = +headers['content-length'] as number;
-
-        if (contentLength > taskLog.value.length) {
-          // 存在更多日志
-          taskLog.value = await fetchTaskLog(props.id);
-        } else {
-          console.debug('暂无更多日志');
-        }
-
-        taskParams.value = await listTaskParam(props.id);
+        await func(props.id);
       } catch (err) {
         if (err instanceof TimeoutError) {
           // 忽略超时错误
@@ -326,27 +326,37 @@ export default defineComponent({
       console.debug(`3秒后重试第${retry}次`);
       await sleep(3000);
 
-      await loadTask(retry);
+      await loadData(func, retry);
     };
 
     // 初始化任务
-    onBeforeMount(() => loadTask(0));
+    onBeforeMount(() => {
+      // 加载日志
+      let lastContentLength = 0;
+      loadData(async (id: string) => {
+        const headers: any = await checkTaskLog(id);
+        const contentLength = +headers['content-length'] as number;
+
+        if (contentLength === lastContentLength) {
+          console.debug('暂无更多日志');
+          return;
+        }
+
+        // 存在更多日志
+        lastContentLength = contentLength;
+
+        moreLog.value = contentLength > maxLogLength;
+        taskLog.value = await fetchTaskLog(id, contentLength - maxLogLength);
+      });
+
+      // 加载参数
+      loadData(async (id: string) => {
+        taskParams.value = await listTaskParam(id);
+      });
+    });
 
     onBeforeUnmount(() => (terminateTaskLogLoad = true));
 
-    // 一键复制
-    const copy = async (value: string) => {
-      if (!value) {
-        return;
-      }
-      try {
-        await toClipboard(value);
-        proxy.$success('复制成功');
-      } catch (err) {
-        proxy.$error('复制失败，请手动复制');
-        console.error(err);
-      }
-    };
     const maxWidthRecord = ref<Record<string, number>>({});
     return {
       ParamTypeEnum,
@@ -357,17 +367,39 @@ export default defineComponent({
       executionTime,
       tabActiveName,
       taskLog,
-      copy,
+      moreLog,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
-        taskParams.value.filter(item => item.type === TaskParamTypeEnum.INPUT),
+        taskParams.value
+          .filter(item => item.type === TaskParamTypeEnum.INPUT)
+          .sort((p1, p2) => p1.ref.localeCompare(p2.ref)),
       ),
-      taskOutputParams: computed<ITaskParamVo[]>(() =>
-        taskParams.value.filter(item => item.type === TaskParamTypeEnum.OUTPUT),
-      ),
+      taskOutputParams: computed<ITaskParamVo[]>(() => {
+        const params = taskParams.value
+          .filter(({ ref, type }) => ref && !(ref.startsWith('inner.')) && type === TaskParamTypeEnum.OUTPUT)
+          .sort((p1, p2) => p1.ref.localeCompare(p2.ref));
+
+        params.push(...taskParams.value
+          .filter(({ ref, type }) => ref && ref.startsWith('inner.') && type === TaskParamTypeEnum.OUTPUT)
+          .sort((p1, p2) => p1.ref.localeCompare(p2.ref)));
+
+        return params;
+      }),
       datetimeFormatter,
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
+      },
+      fetchLog: async (isCopy: boolean) => {
+        if (isCopy) {
+          const headers: any = await checkTaskLog(props.id);
+          const contentLength = +headers['content-length'] as number;
+
+          if (contentLength > maxLogLength) {
+            throw Error('日志过大，请下载');
+          }
+        }
+
+        return await fetchTaskLog(props.id);
       },
     };
   },
@@ -390,9 +422,10 @@ export default defineComponent({
     box-shadow: 0 0 8px 0 #9eb1c5;
 
     > div {
-      &.item{
+      &.item {
         flex: 1;
       }
+
       margin-bottom: 16px;
       white-space: nowrap;
       overflow: hidden;
@@ -474,41 +507,47 @@ export default defineComponent({
             .text-viewer {
               display: flex;
               align-items: center;
-              &.param-value{
+
+              &.param-value {
                 .value {
                   width: 100%;
-                  &.jm-text-viewer{
-                    .content{
-                      .text-line{
-                        &:last-child{
-                          text-align: left;
-                          &::after{
-                            display: none;
-                          }
-                        }
-                      }
-                    }
-                  }
+
+                  //&.jm-text-viewer {
+                  //  .content {
+                  //    .text-line {
+                  //      &:last-child {
+                  //        text-align: left;
+                  //
+                  //        &::after {
+                  //          display: none;
+                  //        }
+                  //      }
+                  //    }
+                  //  }
+                  //}
                 }
               }
+
               .value {
                 width: 100%;
-                &.jm-text-viewer{
-                  .content{
-                    .text-line{
-                      &:last-child{
-                        text-align: center;
-                        &::after{
-                          display: none;
-                        }
-                      }
-                    }
-                  }
-                }
+
+                //&.jm-text-viewer {
+                //  .content {
+                //    .text-line {
+                //      &:last-child {
+                //        text-align: center;
+                //
+                //        &::after {
+                //          display: none;
+                //        }
+                //      }
+                //    }
+                //  }
+                //}
               }
             }
 
-            &>div {
+            & > div {
               display: inline-block;
               width: 100%;
               position: relative;
@@ -517,7 +556,7 @@ export default defineComponent({
                 position: absolute;
                 left: 100%;
                 margin-left: 5px;
-                bottom:0
+                bottom: 0
               }
             }
           }
@@ -578,29 +617,34 @@ export default defineComponent({
             td {
               color: #082340;
             }
-            .copy-container{
-              &>div{
+
+            .copy-container {
+              & > div {
                 width: 100%;
               }
+
               display: flex;
               align-items: center;
               position: relative;
-              &:hover{
-                .copy-btn{
+
+              &:hover {
+                .copy-btn {
                   display: block;
                 }
               }
-              .copy-btn{
+
+              .copy-btn {
                 margin-left: 5px;
                 flex-shrink: 0;
-                width:16px;
-                height:16px;
-                background:url('@/assets/svgs/btn/copy.svg') no-repeat;
-                background-size:100%;
+                width: 16px;
+                height: 16px;
+                background: url('@/assets/svgs/btn/copy.svg') no-repeat;
+                background-size: 100%;
                 cursor: pointer;
                 display: none;
                 opacity: 0.5;
-                &:hover{
+
+                &:hover {
                   opacity: 1;
                 }
               }

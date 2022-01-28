@@ -87,6 +87,7 @@ public class WorkflowEventHandler {
                 .asyncTaskRef(event.getNodeRef())
                 .asyncTaskType(event.getNodeType())
                 .build();
+        this.workflowInstanceInternalApplication.statusCheck(event.getTriggerId());
         this.asyncTaskInstanceInternalApplication.create(cmd);
         log.info("handle AsyncTaskActivatingEvent end-----------------------------------------------------");
     }
@@ -106,6 +107,7 @@ public class WorkflowEventHandler {
         log.info("handle NodeSkipEvent end-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleWorkflowEndEvent(WorkflowEndEvent event) {
         MDC.put("triggerId", event.getTriggerId());
