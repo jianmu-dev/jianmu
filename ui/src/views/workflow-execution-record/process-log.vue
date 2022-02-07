@@ -61,13 +61,23 @@ import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record'
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkProcessLog, fetchProcessLog } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
-import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
+import { TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 
 export default defineComponent({
   setup() {
     const state = useStore().state[namespace] as IState;
-    const process = computed<IWorkflowExecutionRecordVo>(() => state.recordDetail.record as IWorkflowExecutionRecordVo);
+    const process = computed<IWorkflowExecutionRecordVo>(() => (state.recordDetail.record || {
+      id: '',
+      serialNo: '',
+      name: '',
+      workflowRef: '',
+      workflowVersion: '',
+      startTime: '',
+      status: '',
+      triggerId: '',
+      triggerType: TriggerTypeEnum.MANUAL,
+    }) as IWorkflowExecutionRecordVo);
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
     const executionTime = computed<string>(() => executionTimeFormatter(process.value.startTime, process.value.endTime, executing.value));
     const processLog = ref<string>('');
@@ -149,11 +159,14 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     box-shadow: 0 0 8px 0 #9EB1C5;
+
     > div {
       margin-bottom: 16px;
-      &.item{
+
+      &.item {
         flex: 1;
       }
+
       .param-key {
         color: #6B7B8D;
         margin-bottom: 8px;
