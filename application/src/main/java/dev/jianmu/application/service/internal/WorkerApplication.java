@@ -6,7 +6,6 @@ import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
-import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import dev.jianmu.worker.event.CleanupWorkspaceEvent;
@@ -15,6 +14,7 @@ import dev.jianmu.worker.event.TerminateTaskEvent;
 import dev.jianmu.worker.repository.WorkerRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
+import dev.jianmu.workflow.event.process.ProcessStartedEvent;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -69,13 +69,17 @@ public class WorkerApplication {
         return worker;
     }
 
-    public void createWorkspace(String triggerId) {
+    public void createWorkspace(ProcessStartedEvent event) {
         var worker = this.findWorker();
         this.publisher.publishEvent(
                 CreateWorkspaceEvent.Builder.aCreateWorkspaceEvent()
                         .workerId(worker.getId())
                         .workerType(worker.getType().name())
-                        .workspaceName(triggerId)
+                        .workspaceName(event.getTriggerId())
+                        .workflowVersion(event.getWorkflowVersion())
+                        .workflowRef(event.getWorkflowRef())
+                        .workflowInstanceId(event.getWorkflowInstanceId())
+                        .triggerId(event.getTriggerId())
                         .build()
         );
     }
@@ -91,13 +95,14 @@ public class WorkerApplication {
         );
     }
 
-    public void terminateTask(String taskInstanceId) {
+    public void terminateTask(String triggerId, String taskInstanceId) {
         var worker = this.findWorker();
         this.publisher.publishEvent(
                 TerminateTaskEvent.Builder.aTerminateTaskEvent()
                         .workerId(worker.getId())
                         .workerType(worker.getType().name())
                         .taskInstanceId(taskInstanceId)
+                        .triggerId(triggerId)
                         .build()
         );
     }
@@ -119,6 +124,7 @@ public class WorkerApplication {
                     .workerId(worker.getId())
                     .type(worker.getType())
                     .taskInstanceId(event.getTaskInstanceId())
+                    .taskName(event.getAsyncTaskRef())
                     .businessId(event.getBusinessId())
                     .triggerId(event.getTriggerId())
                     .defKey(event.getDefKey())
@@ -134,6 +140,7 @@ public class WorkerApplication {
                     .workerId(worker.getId())
                     .type(worker.getType())
                     .taskInstanceId(event.getTaskInstanceId())
+                    .taskName(event.getAsyncTaskRef())
                     .businessId(event.getBusinessId())
                     .triggerId(event.getTriggerId())
                     .defKey(event.getDefKey())

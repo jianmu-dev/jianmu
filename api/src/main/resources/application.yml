@@ -41,15 +41,13 @@ mybatis:
 
 storage:
   logfile-path: task_log
-embedded:
-  docker-worker:
-    docker-host: tcp://127.0.0.1:2375
-    api-version: v1.39
 jianmu:
   api:
     jwtSecret: Hahhahhhaahh
     jwtExpirationMs: 86400000
     adminPasswd: 123456
+  worker:
+    type: dumb
 registry:
   version: @project.version@
   type: @project.build.finalName@

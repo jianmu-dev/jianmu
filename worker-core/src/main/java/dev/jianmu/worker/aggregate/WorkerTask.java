@@ -13,6 +13,7 @@ public class WorkerTask {
     private String workerId;
     private Worker.Type type;
     private String taskInstanceId;
+    private String taskName;
     private String businessId;
     // 外部触发ID，流程实例唯一
     private String triggerId;
@@ -41,6 +42,10 @@ public class WorkerTask {
 
     public String getTaskInstanceId() {
         return taskInstanceId;
+    }
+
+    public String getTaskName() {
+        return taskName;
     }
 
     public String getBusinessId() {
@@ -87,6 +92,7 @@ public class WorkerTask {
         private String workerId;
         private Worker.Type type;
         private String taskInstanceId;
+        private String taskName;
         private String businessId;
         // 外部触发ID，流程实例唯一
         private String triggerId;
@@ -124,6 +130,11 @@ public class WorkerTask {
 
         public Builder taskInstanceId(String taskInstanceId) {
             this.taskInstanceId = taskInstanceId;
+            return this;
+        }
+
+        public Builder taskName(String taskName) {
+            this.taskName = taskName;
             return this;
         }
 
@@ -186,6 +197,7 @@ public class WorkerTask {
             workerTask.parameterMap = this.parameterMap;
             workerTask.spec = this.spec;
             workerTask.taskInstanceId = this.taskInstanceId;
+            workerTask.taskName = this.taskName;
             workerTask.resultFile = this.resultFile;
             workerTask.workerId = this.workerId;
             workerTask.resumed = this.resumed;

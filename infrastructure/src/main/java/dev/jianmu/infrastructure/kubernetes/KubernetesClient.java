@@ -11,10 +11,11 @@ import io.kubernetes.client.util.KubeConfig;
 import io.kubernetes.client.util.Streams;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -27,26 +28,21 @@ import java.util.Map;
 public class KubernetesClient {
     private ApiClient client;
     public final String defaultNamespace;
+    private Resource kubeConfigPath;
 
     private void connect() throws IOException {
-        // loading the in-cluster config, including:
-        //   1. service-account CA
-        //   2. service-account bearer-token
-        //   3. service-account namespace
-        //   4. master endpoints(ip, port) from pre-set environment variables
-//        ApiClient client = ClientBuilder.cluster().build();
+        this.client = ClientBuilder.defaultClient();
+        Configuration.setDefaultApiClient(client);
+    }
 
-        // file path to your KubeConfig
-        String kubeConfigPath = "/Users/ethan-liu/Documents/Java/jianmu-main/config";
-
-        // loading the out-of-cluster config, a kubeconfig from file-system
+    private void connectWithConfig() throws IOException {
+        Assert.notNull(this.kubeConfigPath, "kubeConfigPath must not be null");
+        Assert.isTrue(this.kubeConfigPath.exists(),
+                () -> String.format("Resource %s does not exist", this.kubeConfigPath));
+        var c = new FileReader(this.kubeConfigPath.getFile());
         this.client = ClientBuilder
-                .kubeconfig(KubeConfig.loadKubeConfig(new FileReader(kubeConfigPath)))
-                // 设置超时时间为10分钟，如果watch的时间大于此时间会报socket timeout异常
-                .setReadTimeout(Duration.ZERO)
+                .kubeconfig(KubeConfig.loadKubeConfig(c))
                 .build();
-
-        // set the global default api-client to the in-cluster one from above
         Configuration.setDefaultApiClient(client);
     }
 
@@ -82,16 +78,39 @@ public class KubernetesClient {
         }
     }
 
-    public KubernetesClient() throws IOException, ApiException {
+    public KubernetesClient() {
         this.defaultNamespace = "jianmu";
-        this.connect();
-        this.createNamespace();
+        try {
+            this.connect();
+            this.createNamespace();
+        } catch (IOException | ApiException e) {
+            log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        }
     }
 
-    public KubernetesClient(String namespace) throws IOException, ApiException {
+    public KubernetesClient(Resource kubeConfigPath) {
+        this.defaultNamespace = "jianmu";
+        this.kubeConfigPath = kubeConfigPath;
+        try {
+            this.connectWithConfig();
+            this.createNamespace();
+        } catch (IOException | ApiException e) {
+            log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        }
+    }
+
+    public KubernetesClient(Resource kubeConfigPath, String namespace) {
         this.defaultNamespace = namespace;
-        this.connect();
-        this.createNamespace();
+        this.kubeConfigPath = kubeConfigPath;
+        try {
+            this.connectWithConfig();
+            this.createNamespace();
+        } catch (IOException | ApiException e) {
+            log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        }
     }
 
     public void createConfigMap(V1ConfigMap configMap) throws ApiException {
@@ -109,7 +128,7 @@ public class KubernetesClient {
     public void deleteConfigMap(String configMapName) throws ApiException {
         CoreV1Api api = new CoreV1Api();
         var status = api.deleteNamespacedConfigMap(configMapName, defaultNamespace, "true", null, null, null, null, null);
-        log.info("ConfigMap {} deleted {}", configMapName , status.getStatus());
+        log.info("ConfigMap {} deleted {}", configMapName, status.getStatus());
     }
 
     public V1ConfigMap getConfigMap(String configMapName) throws ApiException {
@@ -201,12 +220,5 @@ public class KubernetesClient {
         Copy copy = new Copy();
         InputStream dataStream = copy.copyFileFromPod(defaultNamespace, podName, containerName, filePath);
         Streams.copy(dataStream, System.out);
-    }
-
-    public static void main(String[] args) throws IOException, ApiException {
-        var client = new KubernetesClient();
-        log.info("copy file from container....");
-        client.copyArchivedFromContainer("jianmu-pod-1", "jianmu-keepalive", "/result/hosts");
-        log.info("copy file from container");
     }
 }

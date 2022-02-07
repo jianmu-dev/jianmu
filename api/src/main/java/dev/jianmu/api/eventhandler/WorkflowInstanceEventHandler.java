@@ -60,7 +60,7 @@ public class WorkflowInstanceEventHandler {
         log.info("Get ProcessStartedEvent here -------------------------");
         log.info(event.toString());
         // 创建Workspace
-        this.workerApplication.createWorkspace(event.getTriggerId());
+        this.workerApplication.createWorkspace(event);
         // 触发流程启动
         var workflowStartCmd = WorkflowStartCmd.builder()
                 .triggerId(event.getTriggerId())

@@ -1,6 +1,6 @@
 package dev.jianmu.api.jwt;
 
-import dev.jianmu.infrastructure.jwt.JwtProperties;
+import dev.jianmu.infrastructure.GlobalProperties;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,18 +10,18 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
+ * @author Ethan Liu
  * @class JwtProvider
  * @description JwtProvider
- * @author Ethan Liu
  * @create 2021-05-17 21:02
-*/
+ */
 @Component
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
-    private final JwtProperties jwtProperties;
+    private final GlobalProperties globalProperties;
 
-    public JwtProvider(JwtProperties jwtProperties) {
-        this.jwtProperties = jwtProperties;
+    public JwtProvider(GlobalProperties globalProperties) {
+        this.globalProperties = globalProperties;
     }
 
     public String generateJwtToken(Authentication authentication) {
@@ -29,14 +29,14 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtProperties.getJwtExpirationMs()))
-                .signWith(SignatureAlgorithm.HS512, jwtProperties.getJwtSecret())
+                .setExpiration(new Date((new Date()).getTime() + globalProperties.getApi().getJwtExpirationMs()))
+                .signWith(SignatureAlgorithm.HS512, globalProperties.getApi().getJwtSecret())
                 .compact();
     }
 
     public boolean validateJwtToken(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtProperties.getJwtSecret()).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(globalProperties.getApi().getJwtSecret()).parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
@@ -54,6 +54,6 @@ public class JwtProvider {
     }
 
     public String getUsernameFromToken(String token) {
-        return Jwts.parser().setSigningKey(jwtProperties.getJwtSecret()).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(globalProperties.getApi().getJwtSecret()).parseClaimsJws(token).getBody().getSubject();
     }
 }

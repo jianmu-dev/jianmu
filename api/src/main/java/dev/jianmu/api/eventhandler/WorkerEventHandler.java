@@ -13,11 +13,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
+ * @author Ethan Liu
  * @class WorkerEventHandler
  * @description WorkerEventHandler
- * @author Ethan Liu
  * @create 2021-09-12 22:18
-*/
+ */
 @Component
 @Slf4j
 public class WorkerEventHandler {
@@ -28,8 +28,8 @@ public class WorkerEventHandler {
     }
 
     @EventListener
-    public void createWorkspaceEventHandle(CreateWorkspaceEvent createWorkspaceEvent) {
-        this.embeddedWorkerApplication.createVolume(createWorkspaceEvent.getWorkspaceName());
+    public void createWorkspaceEventHandle(CreateWorkspaceEvent event) {
+        this.embeddedWorkerApplication.createVolume(event);
     }
 
     @EventListener
@@ -40,7 +40,7 @@ public class WorkerEventHandler {
     @EventListener
     public void handleTerminateTaskEvent(TerminateTaskEvent terminateTaskEvent) {
         log.info("docker worker terminate task id: {}", terminateTaskEvent.getTaskInstanceId());
-        this.embeddedWorkerApplication.terminateTask(terminateTaskEvent.getTaskInstanceId());
+        this.embeddedWorkerApplication.terminateTask(terminateTaskEvent.getTriggerId(), terminateTaskEvent.getTaskInstanceId());
     }
 
     @EventListener

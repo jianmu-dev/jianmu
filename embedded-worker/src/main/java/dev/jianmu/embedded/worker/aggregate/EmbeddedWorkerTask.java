@@ -4,13 +4,14 @@ package dev.jianmu.embedded.worker.aggregate;
 import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 
 /**
+ * @author Ethan Liu
  * @class DockerTask
  * @description Docker任务封装
- * @author Ethan Liu
  * @create 2021-04-14 20:14
-*/
-public class DockerTask {
+ */
+public class EmbeddedWorkerTask {
     private String taskInstanceId;
+    private String taskName;
     private String businessId;
     // 外部触发ID，流程实例唯一
     private String triggerId;
@@ -20,11 +21,15 @@ public class DockerTask {
     // 容器规格定义
     private ContainerSpec spec;
 
-    private DockerTask() {
+    private EmbeddedWorkerTask() {
     }
 
     public String getTaskInstanceId() {
         return taskInstanceId;
+    }
+
+    public String getTaskName() {
+        return taskName;
     }
 
     public String getBusinessId() {
@@ -49,6 +54,7 @@ public class DockerTask {
 
     public static final class Builder {
         private String taskInstanceId;
+        private String taskName;
         private String businessId;
         private String triggerId;
         // 任务定义唯一Key
@@ -60,12 +66,17 @@ public class DockerTask {
         private Builder() {
         }
 
-        public static Builder aDockerTask() {
+        public static Builder aEmbeddedWorkerTask() {
             return new Builder();
         }
 
         public Builder taskInstanceId(String taskInstanceId) {
             this.taskInstanceId = taskInstanceId;
+            return this;
+        }
+
+        public Builder taskName(String taskName) {
+            this.taskName = taskName;
             return this;
         }
 
@@ -94,15 +105,16 @@ public class DockerTask {
             return this;
         }
 
-        public DockerTask build() {
-            DockerTask dockerTask = new DockerTask();
-            dockerTask.spec = this.spec;
-            dockerTask.triggerId = this.triggerId;
-            dockerTask.businessId = this.businessId;
-            dockerTask.taskInstanceId = this.taskInstanceId;
-            dockerTask.defKey = this.defKey;
-            dockerTask.resultFile = this.resultFile;
-            return dockerTask;
+        public EmbeddedWorkerTask build() {
+            EmbeddedWorkerTask embeddedWorkerTask = new EmbeddedWorkerTask();
+            embeddedWorkerTask.spec = this.spec;
+            embeddedWorkerTask.triggerId = this.triggerId;
+            embeddedWorkerTask.businessId = this.businessId;
+            embeddedWorkerTask.taskInstanceId = this.taskInstanceId;
+            embeddedWorkerTask.taskName = this.taskName;
+            embeddedWorkerTask.defKey = this.defKey;
+            embeddedWorkerTask.resultFile = this.resultFile;
+            return embeddedWorkerTask;
         }
     }
 }

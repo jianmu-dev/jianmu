@@ -11,10 +11,18 @@ import io.kubernetes.client.util.CallGeneratorParams;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author Ethan Liu
@@ -24,86 +32,177 @@ import java.time.Duration;
  */
 @Slf4j
 public class KubernetesWatcher {
-    private ApiClient client;
     public final String defaultNamespace;
     private final SharedInformerFactory factory = new SharedInformerFactory();
+    private final Map<String, PodWatcher> podWatcherMap = new ConcurrentHashMap<>();
+    private Resource kubeConfigPath;
 
-    public KubernetesWatcher() throws IOException {
+    public KubernetesWatcher() {
         this.defaultNamespace = "jianmu";
-        this.connect();
+        try {
+            this.connect();
+        } catch (IOException e) {
+            log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        }
     }
 
-    public KubernetesWatcher(String namespace) throws IOException {
+    public KubernetesWatcher(Resource kubeConfigPath) {
+        this.defaultNamespace = "jianmu";
+        this.kubeConfigPath = kubeConfigPath;
+        try {
+            this.connectWithConfig();
+        } catch (IOException e) {
+            log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        }
+    }
+
+    public KubernetesWatcher(Resource kubeConfigPath, String namespace) {
         this.defaultNamespace = namespace;
-        this.connect();
+        this.kubeConfigPath = kubeConfigPath;
+        try {
+            this.connectWithConfig();
+        } catch (IOException e) {
+            log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        }
     }
 
     private void connect() throws IOException {
-        // loading the in-cluster config, including:
-        //   1. service-account CA
-        //   2. service-account bearer-token
-        //   3. service-account namespace
-        //   4. master endpoints(ip, port) from pre-set environment variables
-//        ApiClient client = ClientBuilder.cluster().build();
-
-        // file path to your KubeConfig
-        String kubeConfigPath = "/Users/ethan-liu/Documents/Java/jianmu-main/config";
-
-        // loading the out-of-cluster config, a kubeconfig from file-system
-        this.client = ClientBuilder
-                .kubeconfig(KubeConfig.loadKubeConfig(new FileReader(kubeConfigPath)))
-                // 设置超时时间为10分钟，如果watch的时间大于此时间会报socket timeout异常
-                .setReadTimeout(Duration.ZERO)
-                .build();
-
-        // set the global default api-client to the in-cluster one from above
+        ApiClient client = ClientBuilder.defaultClient();
+        // 设置超时时间为0,即无限，如果watch的时间大于此时间会报socket timeout异常
+        // infinite timeout
+        OkHttpClient httpClient =
+                client.getHttpClient().newBuilder().readTimeout(0, TimeUnit.SECONDS).build();
+        client.setHttpClient(httpClient);
         Configuration.setDefaultApiClient(client);
     }
 
-    public void watch(PodEventHandler eventHandler) {
+    private void connectWithConfig() throws IOException {
+        Assert.notNull(this.kubeConfigPath, "kubeConfigPath must not be null");
+        Assert.isTrue(this.kubeConfigPath.exists(),
+                () -> String.format("Resource %s does not exist", this.kubeConfigPath));
+        var c = new FileReader(this.kubeConfigPath.getFile());
+        ApiClient client = ClientBuilder
+                .kubeconfig(KubeConfig.loadKubeConfig(c))
+                .setReadTimeout(Duration.ZERO)
+                .build();
+        Configuration.setDefaultApiClient(client);
+    }
+
+    public void watch() {
         CoreV1Api api = new CoreV1Api();
         var podInformer = this.factory.sharedIndexInformerFor(
-                (CallGeneratorParams params) -> {
-                    return api.listNamespacedPodCall(
-                            defaultNamespace,
-                            "true",
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            params.resourceVersion,
-                            null,
-                            params.timeoutSeconds,
-                            params.watch,
-                            null);
-                },
+                (CallGeneratorParams params) -> api.listNamespacedPodCall(
+                        defaultNamespace,
+                        "true",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        params.resourceVersion,
+                        null,
+                        params.timeoutSeconds,
+                        params.watch,
+                        null),
                 V1Pod.class,
                 V1PodList.class
         );
         podInformer.addEventHandler(
-                new ResourceEventHandler<V1Pod>() {
+                new ResourceEventHandler<>() {
                     @Override
                     public void onAdd(V1Pod v1Pod) {
-                        log.info("Pod: {} Created", v1Pod.getMetadata().getName());
+                        var podName = v1Pod.getMetadata().getName();
+                        log.info("Pod: {} Created", podName);
                     }
 
                     @Override
                     public void onUpdate(V1Pod oldPod, V1Pod newPod) {
-                        log.info("Pod: {} Update", newPod.getMetadata().getName());
-                        eventHandler.handleEvt(newPod);
+                        var podName = newPod.getMetadata().getName();
+                        log.info("Pod: {} Update", podName);
+                        var podWatcher = podWatcherMap.get(podName);
+                        if (podWatcher != null) {
+                            podWatcher.updateContainers(extractContainers(newPod));
+                        } else {
+                            log.info("unknown pod");
+                        }
                     }
 
                     @Override
                     public void onDelete(V1Pod v1Pod, boolean b) {
-                        log.info("Pod: {} Deleted", v1Pod.getMetadata().getName());
+                        var podName = v1Pod.getMetadata().getName();
+                        log.info("Pod: {} Deleted", podName);
                     }
                 }
         );
         this.factory.startAllRegisteredInformers();
     }
 
+    private List<ContainerInfo> extractContainers(V1Pod v1Pod) {
+        log.info("Pod Phase is: {}", v1Pod.getStatus().getPhase());
+        if (v1Pod.getStatus().getContainerStatuses() == null) {
+            return List.of();
+        }
+        return v1Pod.getStatus().getContainerStatuses().stream()
+                .map(v1ContainerStatus -> {
+                    if (v1ContainerStatus.getState().getTerminated() != null) {
+                        return ContainerInfo.builder()
+                                .id(v1ContainerStatus.getName())
+                                .state(ContainerInfo.State.TERMINATED)
+                                .image(v1ContainerStatus.getImage())
+                                .exitCode(v1ContainerStatus.getState().getTerminated().getExitCode())
+                                .reason(v1ContainerStatus.getState().getTerminated().getReason())
+                                .restartCount(v1ContainerStatus.getRestartCount())
+                                .ready(v1ContainerStatus.getReady())
+                                .build();
+                    }
+                    if (v1ContainerStatus.getState().getRunning() != null) {
+                        return ContainerInfo.builder()
+                                .id(v1ContainerStatus.getName())
+                                .state(ContainerInfo.State.RUNNING)
+                                .image(v1ContainerStatus.getImage())
+                                .reason("")
+                                .restartCount(v1ContainerStatus.getRestartCount())
+                                .ready(v1ContainerStatus.getReady())
+                                .build();
+                    }
+                    if (v1ContainerStatus.getState().getWaiting() != null) {
+                        return ContainerInfo.builder()
+                                .id(v1ContainerStatus.getName())
+                                .state(ContainerInfo.State.WAITING)
+                                .image(v1ContainerStatus.getImage())
+                                .reason(v1ContainerStatus.getState().getWaiting().getReason())
+                                .restartCount(v1ContainerStatus.getRestartCount())
+                                .ready(v1ContainerStatus.getReady())
+                                .build();
+                    }
+                    // kubernetes doc explains that this situation should be treated as Waiting state
+                    return ContainerInfo.builder()
+                            .id(v1ContainerStatus.getName())
+                            .state(ContainerInfo.State.WAITING)
+                            .image(v1ContainerStatus.getImage())
+                            .reason("")
+                            .restartCount(v1ContainerStatus.getRestartCount())
+                            .ready(v1ContainerStatus.getReady())
+                            .build();
+                }).collect(Collectors.toList());
+    }
+
     public void stop() {
         this.factory.stopAllRegisteredInformers();
+    }
+
+    public void addPodWatcher(PodWatcher podWatcher) {
+        this.podWatcherMap.put(podWatcher.getPodName(), podWatcher);
+    }
+
+    public PodWatcher getPodWatcher(String podName) {
+        return this.podWatcherMap.get(podName);
+    }
+
+    public void deletePodWatcher(String podName) {
+        this.podWatcherMap.remove(podName);
     }
 }
