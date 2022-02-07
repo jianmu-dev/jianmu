@@ -1,11 +1,15 @@
 package dev.jianmu.infrastructure.kubernetes;
 
+import dev.jianmu.infrastructure.docker.TaskFailedEvent;
+import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
+import dev.jianmu.infrastructure.docker.TaskRunningEvent;
 import io.kubernetes.client.openapi.ApiException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -46,7 +50,10 @@ public class TaskWatcher {
     private String taskName;
     private BufferedWriter logWriter;
 
-    private final KubernetesClient client = new KubernetesClient();
+    private String resultFile;
+
+    private final KubernetesClient client;
+    private final ApplicationEventPublisher publisher;
 
     public void containerStateChange() {
         switch (this.state) {
@@ -68,24 +75,43 @@ public class TaskWatcher {
     }
 
     public void taskStart() {
+        this.publisher.publishEvent(TaskRunningEvent.builder().taskId(taskInstanceId).build());
         log.info("Task start id: {} trigger id: {}", taskInstanceId, triggerId);
         this.fetchLog();
         this.copyResult();
     }
 
     public void taskSucceed() {
+        this.publisher.publishEvent(
+                TaskFinishedEvent.builder()
+                        .triggerId(triggerId)
+                        .taskId(taskInstanceId)
+                        .cmdStatusCode(exitCode)
+                        .resultFile(resultFile)
+                        .build()
+        );
         log.info("Task succeed id: {} trigger id: {} exitCode: {} reason: {}", taskInstanceId, triggerId, exitCode, reason);
     }
 
     public void taskFailed() {
+        this.publisher.publishEvent(TaskFailedEvent.builder()
+                .triggerId(triggerId)
+                .taskId(taskInstanceId)
+                .errorMsg(reason)
+                .build());
         log.info("Task failed id: {} trigger id: {} exitCode: {} reason: {}", taskInstanceId, triggerId, exitCode, reason);
     }
 
     private void fetchLog() {
         try {
-            this.client.fetchLog(triggerId, taskInstanceId, logWriter);
+            this.client.fetchLog(triggerId, taskName, logWriter);
         } catch (IOException | ApiException e) {
-            e.printStackTrace();
+            log.warn("获取日志失败: {}", e.getMessage());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(triggerId)
+                    .taskId(taskInstanceId)
+                    .errorMsg(reason)
+                    .build());
         }
     }
 
@@ -93,9 +119,14 @@ public class TaskWatcher {
         var resultPath = "/" + this.triggerId + "/" + this.taskName;
         log.info("copy file: " + resultPath + " from container....");
         try {
-            this.client.copyArchivedFromContainer(triggerId, "jianmu-keepalive", resultPath);
+            this.resultFile = this.client.copyArchivedFromContainer(triggerId, "jianmu-keepalive", resultPath);
         } catch (IOException | ApiException e) {
-            e.printStackTrace();
+            log.warn("获取结果文件失败: {}", e.getMessage());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(triggerId)
+                    .taskId(taskInstanceId)
+                    .errorMsg("获取结果文件失败")
+                    .build());
         }
         log.info("copy file:" + resultPath + " from container done");
     }

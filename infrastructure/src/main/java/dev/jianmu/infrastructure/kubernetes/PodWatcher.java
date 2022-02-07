@@ -31,7 +31,7 @@ public class PodWatcher {
     }
 
     public void addTaskWatcher(TaskWatcher taskWatcher) {
-        this.watcherMap.put(taskWatcher.getTaskInstanceId(), taskWatcher);
+        this.watcherMap.put(taskWatcher.getTaskName(), taskWatcher);
     }
 
     public void updateContainers(List<ContainerInfo> containerInfos) {

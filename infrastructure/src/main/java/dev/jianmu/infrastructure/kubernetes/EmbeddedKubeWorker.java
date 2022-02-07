@@ -8,11 +8,14 @@ import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import java.io.BufferedWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -28,14 +31,14 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private final KubernetesClient client;
     private final KubernetesWatcher watcher;
 
-    private final String optionScript = "set -e";
-    private final String traceScript = "\necho + %s\n%s";
     private final String placeholder = "drone/placeholder:latest";
     private final String imagePullPolicy = "Always"; // IfNotPresent, Always and Never
 
+    private final ApplicationEventPublisher publisher;
     private final GlobalProperties properties;
 
-    public EmbeddedKubeWorker(GlobalProperties properties) {
+    public EmbeddedKubeWorker(ApplicationEventPublisher publisher, GlobalProperties properties) {
+        this.publisher = publisher;
         this.properties = properties;
         var kubeConfigPath = properties.getWorker().getK8s().getKubeConfigPath();
         if (kubeConfigPath == null) {
@@ -55,40 +58,19 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
         log.info("watcher stopped");
     }
 
-    private String createScript(List<String> commands) {
-        var sb = new StringBuilder();
-        sb.append(optionScript);
-        var formatter = new Formatter(sb, Locale.ROOT);
-        commands.forEach(cmd -> {
-            var escaped = String.format("%s", cmd);
-            escaped = escaped.replace("$", "\\$");
-            formatter.format(traceScript, escaped, cmd);
-        });
-        return sb.toString();
-    }
-
-    private V1Container buildPlaceholder(String podName, String taskName) {
-        var resultFile = "/home/result.txt";
-        var script = this.createScript(List.of("pwd", "ls -a", "sleep 20", "echo $aaa", "echo $bbb", "echo 1234567890 > " + resultFile));
-        script = "ln -s /result/" + taskName + " " + resultFile + "\n" + script;
-        var container = new V1Container()
-                .name(taskName)
-                .imagePullPolicy("IfNotPresent")
-                .volumeMounts(List.of(new V1VolumeMount().name(podName).mountPath(podName)))
-                .image("drone/placeholder");
-        container.addEnvItem(new V1EnvVar().name("JIANMU_SCRIPT").value(script));
-        container.addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(podName)));
-        container.addCommandItem("/bin/sh");
-        container.addCommandItem("-c");
-        container.addArgsItem("echo \"$JIANMU_SCRIPT\" | /bin/sh");
-        return container;
-    }
-
     private V1Container initPlaceholder(
             String containerName,
             String sharedName,
             ContainerSpec spec
     ) {
+        if (spec == null) {
+            return new V1Container()
+                    .name(containerName)
+                    .imagePullPolicy(imagePullPolicy)
+                    .volumeMounts(List.of(new V1VolumeMount().name(sharedName).mountPath(sharedName)))
+                    .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName)))
+                    .image(placeholder);
+        }
         var container = new V1Container()
                 .name(containerName)
                 .imagePullPolicy(imagePullPolicy)
@@ -115,12 +97,12 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private V1Container buildKeepalive(String podName) {
         var container = new V1Container()
                 .name("jianmu-keepalive")
-                .imagePullPolicy("IfNotPresent")
+                .imagePullPolicy(imagePullPolicy)
                 .volumeMounts(List.of(new V1VolumeMount().name(podName).mountPath(podName)))
                 .image("alpine:3.13.6");
         container.addCommandItem("/bin/sh");
         container.addCommandItem("-c");
-        container.addArgsItem("&& tail -f /dev/null");
+        container.addArgsItem("tail -f /dev/null");
         return container;
     }
 
@@ -174,40 +156,17 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                 .data(map);
     }
 
-//    public static void main(String[] args) {
-//        try {
-//            var task = EmbeddedWorkerTask.Builder.aEmbeddedWorkerTask()
-//                    .taskInstanceId("jianmutaskinstanceid1")
-//                    .triggerId("jianmutriggerid1")
-//                    .businessId("jianmuworkflowinstanceid1")
-//                    .defKey("shellnode123")
-//                    .resultFile("/etc/hosts")
-//                    .spec(ContainerSpec.builder().image("alpine:3.13.6").build())
-//                    .build();
-//            var worker = new EmbeddedKubeWorker(properties);
-//            worker.createPod(task.getTriggerId());
-//            Thread.sleep(10000);
-//            var writer = new BufferedWriter(new OutputStreamWriter(System.out));
-//            worker.runTask(task, writer);
-//            Thread.sleep(150000);
-//            worker.deletePod(task.getTriggerId());
-//            worker.destroy();
-//        } catch (ApiException e) {
-//            e.printStackTrace();
-//            log.warn("ApiException: {}", e.getResponseBody());
-//        } catch (IOException | InterruptedException e) {
-//            log.warn("e: {}", e.getMessage());
-//        }
-//    }
-
     public void createPod(String podName, Map<String, ContainerSpec> specMap) {
         try {
+            log.info("try to create Pod: {}", podName);
+            var pod = initPod(podName, specMap);
             this.client.createConfigMap(initConfigMap(podName));
-            this.client.createPod(initPod(podName, specMap));
+            this.client.createPod(pod);
             var podWatcher = new PodWatcher(podName);
             this.watcher.addPodWatcher(podWatcher);
         } catch (ApiException e) {
-            e.printStackTrace();
+            log.warn("e: {}", e.getResponseBody());
+            throw new RuntimeException("Pod创建失败");
         }
     }
 
@@ -217,7 +176,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
             this.client.deleteConfigMap(podName);
             this.watcher.deletePodWatcher(podName);
         } catch (ApiException e) {
-            e.printStackTrace();
+            log.warn("e: {}", e.getResponseBody());
         }
     }
 
@@ -239,11 +198,11 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
             var pod = this.client.getPod(embeddedWorkerTask.getTriggerId());
             var containers = pod.getSpec().getContainers();
             for (V1Container c : containers) {
-                if (c.getName().equals(embeddedWorkerTask.getTaskInstanceId())) {
+                if (c.getName().equals(embeddedWorkerTask.getTaskName())) {
                     c.setImage(embeddedWorkerTask.getSpec().getImage());
+                    log.info("pod {} container {} to image: {}", pod.getMetadata().getName(), c.getName(), c.getImage());
                 }
             }
-            log.info("try to update pod-1 to image: {}", pod.getSpec().getContainers().get(0).getImage());
             // Add Task Watcher
             var podWatcher = this.watcher.getPodWatcher(embeddedWorkerTask.getTriggerId());
             var taskWatcher = TaskWatcher.builder()
@@ -253,6 +212,8 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                     .placeholder(placeholder)
                     .logWriter(logWriter)
                     .state(TaskWatcher.State.WAITING)
+                    .client(this.client)
+                    .publisher(this.publisher)
                     .build();
             podWatcher.addTaskWatcher(taskWatcher);
 

@@ -3,6 +3,7 @@ package dev.jianmu.application.service.internal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.embedded.worker.aggregate.EmbeddedWorker;
 import dev.jianmu.embedded.worker.aggregate.EmbeddedWorkerTask;
@@ -19,10 +20,7 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Formatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -58,10 +56,42 @@ public class EmbeddedWorkerApplication {
         this.nodeDefApi = nodeDefApi;
     }
 
-    private ContainerSpec toSpec(String spec) {
+    private ContainerSpec toSpec(String triggerId, String taskName, NodeDef nodeDef) {
+        if (nodeDef.getImage() != null) {
+            String[] entrypoint = {"/bin/sh", "-c"};
+            String[] cmd = {"echo \"$JIANMU_SCRIPT\" | /bin/sh"};
+            return ContainerSpec.builder()
+                    .image(nodeDef.getImage())
+                    .workingDir("")
+                    .cmd(cmd)
+                    .entrypoint(entrypoint)
+                    .build();
+        }
         try {
-            return objectMapper.readValue(spec, ContainerSpec.class);
+            var spec = objectMapper.readValue(nodeDef.getSpec(), ContainerSpec.class);
+            if (nodeDef.getResultFile() != null) {
+                var old = List.of(spec.getEntrypoint());
+                var resultPath = "/" + triggerId + "/" + taskName;
+                List<String> entrypoint = new ArrayList<>();
+                entrypoint.add("/bin/sh");
+                entrypoint.add("-c");
+                entrypoint.add("ln -s " + resultPath + " " + nodeDef.getResultFile() + "\n");
+                entrypoint.addAll(old);
+                String[] e = entrypoint.toArray(new String[0]);
+                return ContainerSpec.builder()
+                        .image(spec.getImage())
+                        .domainName(spec.getDomainName())
+                        .hostConfig(spec.getHostConfig())
+                        .workingDir(spec.getWorkingDir())
+                        .cmd(spec.getCmd())
+                        .entrypoint(e)
+                        .env(spec.getEnv())
+                        .build();
+            } else {
+                return spec;
+            }
         } catch (JsonProcessingException e) {
+            log.error("e:", e);
             throw new IllegalArgumentException("spec无法解析");
         }
     }
@@ -70,10 +100,11 @@ public class EmbeddedWorkerApplication {
         log.info("start create volume: {}", event.getWorkspaceName());
         var workflow = this.workflowRepository.findByRefAndVersion(event.getWorkflowRef(), event.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        var specMap = workflow.findTasks().stream().map(node -> {
-            var specString = this.nodeDefApi.findByType(node.getType()).getSpec();
-            return Map.entry(node.getRef(), toSpec(specString));
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, ContainerSpec> specMap = new HashMap<>();
+        workflow.findTasks().forEach(node -> {
+            var nodeDef = this.nodeDefApi.findByType(node.getType());
+            specMap.put(node.getRef(), toSpec(event.getTriggerId(), node.getRef(), nodeDef));
+        });
         this.embeddedWorker.createVolume(event.getWorkspaceName(), specMap);
         log.info("create volume: {} completed", event.getWorkspaceName());
     }

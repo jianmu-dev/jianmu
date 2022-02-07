@@ -8,9 +8,9 @@ import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
-import io.kubernetes.client.util.Streams;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -216,9 +216,9 @@ public class KubernetesClient {
         log.info("Pod {} container {} fetch log done.", podName, containerName);
     }
 
-    public void copyArchivedFromContainer(String podName, String containerName, String filePath) throws IOException, ApiException {
+    public String copyArchivedFromContainer(String podName, String containerName, String filePath) throws IOException, ApiException {
         Copy copy = new Copy();
         InputStream dataStream = copy.copyFileFromPod(defaultNamespace, podName, containerName, filePath);
-        Streams.copy(dataStream, System.out);
+        return IOUtils.toString(dataStream, StandardCharsets.UTF_8);
     }
 }
