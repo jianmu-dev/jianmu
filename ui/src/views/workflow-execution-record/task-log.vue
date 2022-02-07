@@ -231,7 +231,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -243,7 +243,7 @@ import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
-
+import useClipboard from 'vue-clipboard3';
 export default defineComponent({
   components: { TaskState },
   props: {
@@ -258,6 +258,8 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
+    const { proxy }=getCurrentInstance() as any;
+    const { toClipboard } = useClipboard();
     const task = computed<ITaskExecutionRecordVo>(() => {
       return state.recordDetail.taskRecords.find(
         item => item.instanceId === props.id,
@@ -356,9 +358,22 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => (terminateTaskLogLoad = true));
-
+    // 一键复制
+    const copy = async (value: string) => {
+      if (!value) {
+        return;
+      }
+      try {
+        await toClipboard(value);
+        proxy.$success('复制成功');
+      } catch (err) {
+        proxy.$error('复制失败，请手动复制');
+        console.error(err);
+      }
+    };
     const maxWidthRecord = ref<Record<string, number>>({});
     return {
+      copy,
       ParamTypeEnum,
       maxWidthRecord,
       workflowName: state.recordDetail.record?.name,
