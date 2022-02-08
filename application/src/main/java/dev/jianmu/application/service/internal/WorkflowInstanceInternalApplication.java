@@ -86,6 +86,6 @@ public class WorkflowInstanceInternalApplication {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         workflowInstance.statusCheck();
-        this.workflowInstanceRepository.save(workflowInstance);
+        this.workflowInstanceRepository.commitEvents(workflowInstance);
     }
 }
