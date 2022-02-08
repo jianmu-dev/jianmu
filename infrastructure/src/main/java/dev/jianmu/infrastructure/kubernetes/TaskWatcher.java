@@ -50,6 +50,7 @@ public class TaskWatcher {
     private String taskName;
     private BufferedWriter logWriter;
 
+    private boolean hasResult;
     private String resultFile;
 
     private final KubernetesClient client;
@@ -116,6 +117,10 @@ public class TaskWatcher {
     }
 
     private void copyResult() {
+        if (!hasResult) {
+            log.info("Task id: {} 无需获取结果文件", taskInstanceId);
+            return;
+        }
         var resultPath = "/" + this.triggerId + "/" + this.taskName;
         log.info("copy file: " + resultPath + " from container....");
         try {

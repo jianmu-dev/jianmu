@@ -4,6 +4,7 @@ import dev.jianmu.embedded.worker.aggregate.EmbeddedWorker;
 import dev.jianmu.embedded.worker.aggregate.EmbeddedWorkerTask;
 import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 import dev.jianmu.infrastructure.GlobalProperties;
+import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.models.*;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private final KubernetesWatcher watcher;
 
     private final String placeholder = "drone/placeholder:latest";
-    private final String imagePullPolicy = "Always"; // IfNotPresent, Always and Never
+    private final String imagePullPolicy = "IfNotPresent"; // IfNotPresent, Always and Never
 
     private final ApplicationEventPublisher publisher;
     private final GlobalProperties properties;
@@ -211,6 +212,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                     .taskName(embeddedWorkerTask.getTaskName())
                     .placeholder(placeholder)
                     .logWriter(logWriter)
+                    .hasResult(embeddedWorkerTask.getResultFile() != null)
                     .state(TaskWatcher.State.WAITING)
                     .client(this.client)
                     .publisher(this.publisher)
@@ -220,7 +222,12 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
             this.client.updatePod(pod);
             log.info("update pod success");
         } catch (ApiException e) {
-            e.printStackTrace();
+            log.warn("e: {}", e.getResponseBody());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
+                    .errorMsg(e.getResponseBody())
+                    .build());
         }
     }
 
