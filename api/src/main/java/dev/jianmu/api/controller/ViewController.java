@@ -260,13 +260,11 @@ public class ViewController {
         var ids = instanceParameters.stream().map(InstanceParameter::getParameterId).collect(Collectors.toSet());
         var parameters = this.parameterApplication.findParameters(ids);
         return parameters.stream()
+                .filter(parameter -> !(parameter.getType() == Parameter.Type.SECRET && ((String) parameter.getValue()).isBlank()))
                 .map(parameter -> {
                     var instanceParameterVo = new InstanceParameterVo();
                     instanceParameters.forEach(instanceParameter -> {
                         if (instanceParameter.getParameterId().equals(parameter.getId())) {
-                            if (parameter.getType() == Parameter.Type.SECRET && ((String) parameter.getValue()).isBlank()) {
-                                return;
-                            }
                             instanceParameterVo.setRef(instanceParameter.getRef());
                             instanceParameterVo.setType(instanceParameter.getType().toString());
                             instanceParameterVo.setValueType(parameter.getType().toString());
