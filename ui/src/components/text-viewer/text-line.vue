@@ -22,6 +22,16 @@ export default defineComponent({
 </script>
 
 <style scoped lang='less'>
+.text-line-last {
+  .text-line {
+    text-align: left;
+
+    &::after {
+      width: 0;
+    }
+  }
+}
+
 .text-line {
   &:last-child {
     text-align: left;
