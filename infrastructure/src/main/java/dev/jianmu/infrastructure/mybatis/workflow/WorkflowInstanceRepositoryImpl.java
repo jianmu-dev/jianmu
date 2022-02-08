@@ -71,6 +71,11 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
+    public void commitEvents(WorkflowInstance workflowInstance) {
+        this.publisher.publishEvent(workflowInstance);
+    }
+
+    @Override
     public List<WorkflowInstance> findAll(int pageNum, int pageSize) {
         return this.workflowInstanceMapper.findAll(pageNum, pageSize);
     }

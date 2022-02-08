@@ -20,6 +20,8 @@ public interface WorkflowInstanceRepository {
 
     WorkflowInstance save(WorkflowInstance workflowInstance);
 
+    void commitEvents(WorkflowInstance workflowInstance);
+
     List<WorkflowInstance> findAll(int pageNum, int pageSize);
 
     Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef);
