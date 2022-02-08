@@ -284,12 +284,12 @@ public class ProjectApplication {
         }
         // 修改项目组
         this.updateProjectGroup(dslId, projectGroupId);
-        if (project.getDslText().equals(dslText)) {
-            return;
-        }
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
+        if (project.getDslText().equals(dslText)) {
+            return;
+        }
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(parser.getTriggerType());
