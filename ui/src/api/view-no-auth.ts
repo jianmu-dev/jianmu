@@ -25,7 +25,7 @@ export const baseUrl = {
   trigger: '/view/trigger',
   version: 'https://jianmu.dev/versions/ci',
 };
-const hubUrl = import.meta.env.VITE_JIANMU_API_BASE_URL;
+const hubUrl = import.meta.env.VITE_JIANMU_HUB_API_BASE_URL;
 const baseHubUrl = {
   processTemplate: '/hub/view/workflow_templates',
 };
