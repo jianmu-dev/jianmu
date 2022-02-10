@@ -68,28 +68,7 @@ public class EmbeddedWorkerApplication {
                     .build();
         }
         try {
-            var spec = objectMapper.readValue(nodeDef.getSpec(), ContainerSpec.class);
-            if (nodeDef.getResultFile() != null) {
-                var old = List.of(spec.getEntrypoint());
-                var resultPath = "/" + triggerId + "/" + taskName;
-                List<String> entrypoint = new ArrayList<>();
-                entrypoint.add("/bin/sh");
-                entrypoint.add("-c");
-                entrypoint.add("ln -s " + resultPath + " " + nodeDef.getResultFile() + "\n");
-                entrypoint.addAll(old);
-                String[] e = entrypoint.toArray(new String[0]);
-                return ContainerSpec.builder()
-                        .image(spec.getImage())
-                        .domainName(spec.getDomainName())
-                        .hostConfig(spec.getHostConfig())
-                        .workingDir(spec.getWorkingDir())
-                        .cmd(spec.getCmd())
-                        .entrypoint(e)
-                        .env(spec.getEnv())
-                        .build();
-            } else {
-                return spec;
-            }
+            return objectMapper.readValue(nodeDef.getSpec(), ContainerSpec.class);
         } catch (JsonProcessingException e) {
             log.error("e:", e);
             throw new IllegalArgumentException("spec无法解析");
@@ -129,6 +108,7 @@ public class EmbeddedWorkerApplication {
             }
             parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
             parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
+            parameterMap.put("JM_RESULT_FILE", "/" + workerTask.getTriggerId() + "/" + workerTask.getTaskName());
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
             var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId());

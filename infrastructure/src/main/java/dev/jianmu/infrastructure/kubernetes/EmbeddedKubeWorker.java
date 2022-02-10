@@ -32,7 +32,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private final KubernetesClient client;
     private final KubernetesWatcher watcher;
 
-    private final String placeholder = "drone/placeholder:latest";
+    private final String placeholder = "jianmudev/placeholder:0.3";
     private final String imagePullPolicy = "IfNotPresent"; // IfNotPresent, Always and Never
 
     private final ApplicationEventPublisher publisher;
@@ -81,7 +81,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                 .image(placeholder);
         if (null != spec.getEnv()) {
             Arrays.stream(spec.getEnv()).map(s -> {
-                var ss = s.split("=");
+                var ss = s.split("=", 2);
                 return new V1EnvVar().name(ss[0]).value(ss[1]);
             }).forEach(container::addEnvItem);
         }
@@ -145,7 +145,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private V1ConfigMap buildConfigMap(EmbeddedWorkerTask task) {
         var mapName = task.getTriggerId();
         var map = Arrays.stream(task.getSpec().getEnv()).map(s -> {
-            var ss = s.split("=");
+            var ss = s.split("=", 2);
             return Map.entry(ss[0], ss[1]);
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new V1ConfigMap()

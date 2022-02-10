@@ -83,6 +83,7 @@ public class TaskWatcher {
     }
 
     public void taskSucceed() {
+        this.copyResult();
         this.publisher.publishEvent(
                 TaskFinishedEvent.builder()
                         .triggerId(triggerId)
@@ -125,6 +126,7 @@ public class TaskWatcher {
         log.info("copy file: " + resultPath + " from container....");
         try {
             this.resultFile = this.client.copyArchivedFromContainer(triggerId, "jianmu-keepalive", resultPath);
+            log.info("result: {}", this.resultFile);
         } catch (IOException | ApiException e) {
             log.warn("获取结果文件失败: {}", e.getMessage());
             this.publisher.publishEvent(TaskFailedEvent.builder()
