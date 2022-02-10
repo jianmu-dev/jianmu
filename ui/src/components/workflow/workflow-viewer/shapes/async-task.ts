@@ -216,7 +216,7 @@ export default function (G6: typeof _G6) {
 
         // const width = 82;
         // const height = 82;
-        // clipImageBorder(`https://img.jianmu.run/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3?imageView2/2/w/${width}/h/${height}/interlace/1/q/100`,
+        // clipImageBorder(`https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3?imageView2/2/w/${width}/h/${height}/interlace/1/q/100`,
         //   width, height, 21.42, (base64: string) => {
         //     group?.addShape('image', {
         //       attrs: {
