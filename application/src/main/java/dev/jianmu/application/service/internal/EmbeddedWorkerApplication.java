@@ -2,6 +2,7 @@ package dev.jianmu.application.service.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.hash.Hashing;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
@@ -20,6 +21,7 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,7 +84,8 @@ public class EmbeddedWorkerApplication {
         Map<String, ContainerSpec> specMap = new HashMap<>();
         workflow.findTasks().forEach(node -> {
             var nodeDef = this.nodeDefApi.findByType(node.getType());
-            specMap.put(node.getRef(), toSpec(event.getTriggerId(), node.getRef(), nodeDef));
+            var taskName = Hashing.murmur3_128().hashString(node.getRef(), StandardCharsets.UTF_8).toString();
+            specMap.put(taskName, toSpec(event.getTriggerId(), node.getRef(), nodeDef));
         });
         this.embeddedWorker.createVolume(event.getWorkspaceName(), specMap);
         log.info("create volume: {} completed", event.getWorkspaceName());

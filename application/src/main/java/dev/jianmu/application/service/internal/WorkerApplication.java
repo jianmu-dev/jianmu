@@ -1,5 +1,6 @@
 package dev.jianmu.application.service.internal;
 
+import com.google.common.hash.Hashing;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
@@ -21,6 +22,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -119,12 +121,13 @@ public class WorkerApplication {
                 .findByInstanceIdAndType(event.getTaskInstanceId(), InstanceParameter.Type.INPUT);
         var parameterMap = this.getParameterMap(instanceParameters);
         WorkerTask workerTask;
+        var taskName = Hashing.murmur3_128().hashString(event.getAsyncTaskRef(), StandardCharsets.UTF_8).toString();
         if (nodeDef.getImage() != null) {
             workerTask = WorkerTask.Builder.aWorkerTask()
                     .workerId(worker.getId())
                     .type(worker.getType())
                     .taskInstanceId(event.getTaskInstanceId())
-                    .taskName(event.getAsyncTaskRef())
+                    .taskName(taskName)
                     .businessId(event.getBusinessId())
                     .triggerId(event.getTriggerId())
                     .defKey(event.getDefKey())
@@ -140,7 +143,7 @@ public class WorkerApplication {
                     .workerId(worker.getId())
                     .type(worker.getType())
                     .taskInstanceId(event.getTaskInstanceId())
-                    .taskName(event.getAsyncTaskRef())
+                    .taskName(taskName)
                     .businessId(event.getBusinessId())
                     .triggerId(event.getTriggerId())
                     .defKey(event.getDefKey())
