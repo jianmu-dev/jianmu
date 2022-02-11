@@ -69,7 +69,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                     .name(containerName)
                     .imagePullPolicy(imagePullPolicy)
                     .volumeMounts(List.of(new V1VolumeMount().name(sharedName).mountPath(sharedName)))
-                    .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName)))
+                    .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName + containerName)))
                     .image(placeholder);
         }
         var container = new V1Container()
@@ -77,7 +77,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                 .imagePullPolicy(imagePullPolicy)
                 .workingDir(spec.getWorkingDir())
                 .volumeMounts(List.of(new V1VolumeMount().name(sharedName).mountPath(sharedName)))
-                .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName)))
+                .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName + containerName)))
                 .image(placeholder);
         if (null != spec.getEnv()) {
             Arrays.stream(spec.getEnv()).map(s -> {
@@ -113,6 +113,13 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                 .data(Map.of("foo", "boo"));
     }
 
+    private List<V1ConfigMap> initConfigMaps(String podName, Map<String, ContainerSpec> specMap) {
+        return specMap.keySet().stream()
+                .map(spec -> new V1ConfigMap().metadata(new V1ObjectMeta().namespace("jianmu").name(podName + spec))
+                        .data(Map.of("foo", "boo"))
+                ).collect(Collectors.toList());
+    }
+
     private V1Pod initPod(String podName, Map<String, ContainerSpec> specMap) {
         List<V1Container> containers = specMap.entrySet().stream().map(entry ->
                 initPlaceholder(entry.getKey(), podName, entry.getValue())
@@ -143,7 +150,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     }
 
     private V1ConfigMap buildConfigMap(EmbeddedWorkerTask task) {
-        var mapName = task.getTriggerId();
+        var mapName = task.getTriggerId() + task.getTaskName();
         var map = Arrays.stream(task.getSpec().getEnv()).map(s -> {
             var ss = s.split("=", 2);
             return Map.entry(ss[0], ss[1]);
@@ -152,6 +159,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                 .metadata(
                         new V1ObjectMeta()
                                 .namespace(properties.getWorker().getK8s().getNamespace())
+                                .labels(Map.of("podName", task.getTriggerId()))
                                 .name(mapName)
                 )
                 .data(map);
@@ -161,7 +169,10 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
         try {
             log.info("try to create Pod: {}", podName);
             var pod = initPod(podName, specMap);
-            this.client.createConfigMap(initConfigMap(podName));
+            var configMaps = initConfigMaps(podName, specMap);
+            for (var configMap : configMaps) {
+                this.client.createConfigMap(configMap);
+            }
             this.client.createPod(pod);
             var podWatcher = new PodWatcher(podName);
             this.watcher.addPodWatcher(podWatcher);
@@ -195,7 +206,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     public void runTask(EmbeddedWorkerTask embeddedWorkerTask, BufferedWriter logWriter) {
         try {
             log.info("update configMap");
-            this.client.replaceConfigMap(embeddedWorkerTask.getTriggerId(), this.buildConfigMap(embeddedWorkerTask));
+            this.client.replaceConfigMap(embeddedWorkerTask.getTriggerId() + embeddedWorkerTask.getTaskName(), this.buildConfigMap(embeddedWorkerTask));
             var pod = this.client.getPod(embeddedWorkerTask.getTriggerId());
             var containers = pod.getSpec().getContainers();
             for (V1Container c : containers) {

@@ -127,8 +127,23 @@ public class KubernetesClient {
 
     public void deleteConfigMap(String configMapName) throws ApiException {
         CoreV1Api api = new CoreV1Api();
-        var status = api.deleteNamespacedConfigMap(configMapName, defaultNamespace, "true", null, null, null, null, null);
-        log.info("ConfigMap {} deleted {}", configMapName, status.getStatus());
+        api.deleteCollectionNamespacedConfigMap(
+                defaultNamespace,
+                "true",
+                null,
+                null,
+                null,
+                null,
+                "podName=" + configMapName,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        log.info("ConfigMap {} deleted", configMapName);
     }
 
     public V1ConfigMap getConfigMap(String configMapName) throws ApiException {
