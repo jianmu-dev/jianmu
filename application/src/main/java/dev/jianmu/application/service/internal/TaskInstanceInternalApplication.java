@@ -171,7 +171,7 @@ public class TaskInstanceInternalApplication {
     public void terminate(String asyncTaskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findByBusinessId(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        this.workerApplication.terminateTask(taskInstance.getId());
+        this.workerApplication.terminateTask(taskInstance.getTriggerId(), taskInstance.getId());
     }
 
     @Transactional

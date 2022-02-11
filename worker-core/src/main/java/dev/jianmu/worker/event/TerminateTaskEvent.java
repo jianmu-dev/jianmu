@@ -10,6 +10,7 @@ public class TerminateTaskEvent {
     private String workerId;
     private String workerType;
     private String taskInstanceId;
+    private String triggerId;
 
     public String getWorkerId() {
         return workerId;
@@ -23,10 +24,15 @@ public class TerminateTaskEvent {
         return taskInstanceId;
     }
 
+    public String getTriggerId() {
+        return triggerId;
+    }
+
     public static final class Builder {
         private String workerId;
         private String workerType;
         private String taskInstanceId;
+        private String triggerId;
 
         private Builder() {
         }
@@ -50,10 +56,16 @@ public class TerminateTaskEvent {
             return this;
         }
 
+        public Builder triggerId(String triggerId) {
+            this.triggerId = triggerId;
+            return this;
+        }
+
         public TerminateTaskEvent build() {
             TerminateTaskEvent terminateTaskEvent = new TerminateTaskEvent();
             terminateTaskEvent.workerId = this.workerId;
             terminateTaskEvent.taskInstanceId = this.taskInstanceId;
+            terminateTaskEvent.triggerId = this.triggerId;
             terminateTaskEvent.workerType = this.workerType;
             return terminateTaskEvent;
         }

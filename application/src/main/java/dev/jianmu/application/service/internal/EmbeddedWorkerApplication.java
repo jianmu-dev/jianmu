@@ -2,8 +2,12 @@ package dev.jianmu.application.service.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.embedded.worker.aggregate.DockerTask;
-import dev.jianmu.embedded.worker.aggregate.DockerWorker;
+import com.google.common.hash.Hashing;
+import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.query.NodeDef;
+import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.embedded.worker.aggregate.EmbeddedWorker;
+import dev.jianmu.embedded.worker.aggregate.EmbeddedWorkerTask;
 import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 import dev.jianmu.embedded.worker.aggregate.spec.HostConfig;
 import dev.jianmu.embedded.worker.aggregate.spec.Mount;
@@ -12,13 +16,13 @@ import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.event.NodeDeletedEvent;
 import dev.jianmu.node.definition.event.NodeUpdatedEvent;
 import dev.jianmu.worker.aggregate.WorkerTask;
+import dev.jianmu.worker.event.CreateWorkspaceEvent;
+import dev.jianmu.workflow.repository.WorkflowRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Formatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,31 +35,65 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EmbeddedWorkerApplication {
     private final StorageService storageService;
-    private final DockerWorker dockerWorker;
+    private final EmbeddedWorker embeddedWorker;
     private final ObjectMapper objectMapper;
+
+    private final WorkflowRepository workflowRepository;
+    private final NodeDefApi nodeDefApi;
 
     private final String optionScript = "set -e";
     private final String traceScript = "\necho + %s\n%s";
 
     public EmbeddedWorkerApplication(
             StorageService storageService,
-            DockerWorker dockerWorker,
-            ObjectMapper objectMapper
+            EmbeddedWorker embeddedWorker,
+            ObjectMapper objectMapper,
+            WorkflowRepository workflowRepository,
+            NodeDefApi nodeDefApi
     ) {
         this.storageService = storageService;
-        this.dockerWorker = dockerWorker;
+        this.embeddedWorker = embeddedWorker;
         this.objectMapper = objectMapper;
+        this.workflowRepository = workflowRepository;
+        this.nodeDefApi = nodeDefApi;
     }
 
-    public void createVolume(String volumeName) {
-        log.info("start create volume: {}", volumeName);
-        this.dockerWorker.createVolume(volumeName);
-        log.info("create volume: {} completed", volumeName);
+    private ContainerSpec toSpec(String triggerId, String taskName, NodeDef nodeDef) {
+        if (nodeDef.getImage() != null) {
+            String[] entrypoint = {"/bin/sh", "-c"};
+            String[] cmd = {"echo \"$JIANMU_SCRIPT\" | /bin/sh"};
+            return ContainerSpec.builder()
+                    .image(nodeDef.getImage())
+                    .workingDir("")
+                    .cmd(cmd)
+                    .entrypoint(entrypoint)
+                    .build();
+        }
+        try {
+            return objectMapper.readValue(nodeDef.getSpec(), ContainerSpec.class);
+        } catch (JsonProcessingException e) {
+            log.error("e:", e);
+            throw new IllegalArgumentException("spec无法解析");
+        }
+    }
+
+    public void createVolume(CreateWorkspaceEvent event) {
+        log.info("start create volume: {}", event.getWorkspaceName());
+        var workflow = this.workflowRepository.findByRefAndVersion(event.getWorkflowRef(), event.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        Map<String, ContainerSpec> specMap = new HashMap<>();
+        workflow.findTasks().forEach(node -> {
+            var nodeDef = this.nodeDefApi.findByType(node.getType());
+            var taskName = Hashing.murmur3_128().hashString(node.getRef(), StandardCharsets.UTF_8).toString();
+            specMap.put(taskName, toSpec(event.getTriggerId(), node.getRef(), nodeDef));
+        });
+        this.embeddedWorker.createVolume(event.getWorkspaceName(), specMap);
+        log.info("create volume: {} completed", event.getWorkspaceName());
     }
 
     public void deleteVolume(String volumeName) {
         log.info("start delete volume: {}", volumeName);
-        this.dockerWorker.deleteVolume(volumeName);
+        this.embeddedWorker.deleteVolume(volumeName);
         log.info("delete volume: {} completed", volumeName);
     }
 
@@ -73,15 +111,16 @@ public class EmbeddedWorkerApplication {
             }
             parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
             parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
+            parameterMap.put("JM_RESULT_FILE", "/" + workerTask.getTriggerId() + "/" + workerTask.getTaskName());
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
             var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId());
             if (workerTask.isResumed()) {
                 // 恢复任务执行
-                this.dockerWorker.resumeTask(dockerTask, logWriter);
+                this.embeddedWorker.resumeTask(dockerTask, logWriter);
             } else {
                 // 执行任务
-                this.dockerWorker.runTask(dockerTask, logWriter);
+                this.embeddedWorker.runTask(dockerTask, logWriter);
             }
         } catch (RuntimeException | JsonProcessingException e) {
             log.error("任务执行失败：", e);
@@ -89,9 +128,9 @@ public class EmbeddedWorkerApplication {
         }
     }
 
-    public void terminateTask(String taskInstanceId) {
+    public void terminateTask(String triggerId, String taskInstanceId) {
         try {
-            this.dockerWorker.terminateTask(taskInstanceId);
+            this.embeddedWorker.terminateTask(triggerId, taskInstanceId);
         } catch (RuntimeException e) {
             log.warn("无法终止任务, 任务终止失败");
         }
@@ -101,7 +140,7 @@ public class EmbeddedWorkerApplication {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
             log.info("删除镜像: {}", spec.getImage());
-            this.dockerWorker.deleteImage(spec.getImage());
+            this.embeddedWorker.deleteImage(spec.getImage());
         } catch (Exception e) {
             log.error("节点镜像删除失败：", e);
         }
@@ -111,7 +150,7 @@ public class EmbeddedWorkerApplication {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
             log.info("更新镜像: {}", spec.getImage());
-            this.dockerWorker.updateImage(spec.getImage());
+            this.embeddedWorker.updateImage(spec.getImage());
         } catch (JsonProcessingException e) {
             log.error("节点镜像更新失败：", e);
         }
@@ -129,7 +168,7 @@ public class EmbeddedWorkerApplication {
         return sb.toString();
     }
 
-    private DockerTask createDockerTask(WorkerTask workerTask, Map<String, String> environmentMap) throws JsonProcessingException {
+    private EmbeddedWorkerTask createDockerTask(WorkerTask workerTask, Map<String, String> environmentMap) throws JsonProcessingException {
         // 使用TriggerId作为工作目录名称与volume名称
         var workingDir = "/" + workerTask.getTriggerId();
         var volumeName = workerTask.getTriggerId();
@@ -169,8 +208,9 @@ public class EmbeddedWorkerApplication {
                     .env(env)
                     .build();
         }
-        return DockerTask.Builder.aDockerTask()
+        return EmbeddedWorkerTask.Builder.aEmbeddedWorkerTask()
                 .taskInstanceId(workerTask.getTaskInstanceId())
+                .taskName(workerTask.getTaskName())
                 .businessId(workerTask.getBusinessId())
                 .triggerId(workerTask.getTriggerId())
                 .defKey(workerTask.getDefKey())

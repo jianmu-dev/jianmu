@@ -10,14 +10,15 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
-import dev.jianmu.embedded.worker.aggregate.DockerTask;
-import dev.jianmu.embedded.worker.aggregate.DockerWorker;
+import dev.jianmu.embedded.worker.aggregate.EmbeddedWorker;
+import dev.jianmu.embedded.worker.aggregate.EmbeddedWorkerTask;
+import dev.jianmu.infrastructure.GlobalProperties;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +34,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * @author Ethan Liu
  * @class Client
  * @description Docker客户端
- * @author Ethan Liu
  * @create 2021-04-13 10:59
-*/
+ */
 @Service
-@Profile("!test")
-public class EmbeddedDockerWorker implements DockerWorker {
+@ConditionalOnProperty(prefix = "jianmu.worker", name = "type", havingValue = "EMBEDDED_DOCKER")
+public class EmbeddedDockerWorker implements EmbeddedWorker {
     private String dockerHost;
     private String apiVersion;
     private String registryUsername;
@@ -60,17 +61,17 @@ public class EmbeddedDockerWorker implements DockerWorker {
 
     private final ApplicationEventPublisher publisher;
 
-    public EmbeddedDockerWorker(EmbeddedDockerWorkerProperties properties, ApplicationEventPublisher publisher) {
-        this.dockerHost = properties.getDockerHost();
-        this.apiVersion = properties.getApiVersion();
-        this.registryUsername = properties.getRegistryUsername();
-        this.registryPassword = properties.getRegistryPassword();
-        this.registryEmail = properties.getRegistryEmail();
-        this.registryUrl = properties.getRegistryUrl();
-        this.dockerConfig = properties.getDockerConfig();
-        this.dockerCertPath = properties.getDockerCertPath();
-        this.dockerTlsVerify = properties.getDockerTlsVerify();
-        this.sockFile = properties.getSockFile();
+    public EmbeddedDockerWorker(GlobalProperties properties, ApplicationEventPublisher publisher) {
+        this.dockerHost = properties.getWorker().getDocker().getDockerHost();
+        this.apiVersion = properties.getWorker().getDocker().getApiVersion();
+        this.registryUsername = properties.getWorker().getDocker().getRegistryUsername();
+        this.registryPassword = properties.getWorker().getDocker().getRegistryPassword();
+        this.registryEmail = properties.getWorker().getDocker().getRegistryEmail();
+        this.registryUrl = properties.getWorker().getDocker().getRegistryUrl();
+        this.dockerConfig = properties.getWorker().getDocker().getDockerConfig();
+        this.dockerCertPath = properties.getWorker().getDocker().getDockerCertPath();
+        this.dockerTlsVerify = properties.getWorker().getDocker().getDockerTlsVerify();
+        this.sockFile = properties.getWorker().getDocker().getSockFile();
         this.publisher = publisher;
         this.connect();
     }
@@ -94,11 +95,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
 
     @Override
     @Async
-    public void runTask(DockerTask dockerTask, BufferedWriter logWriter) {
-        var spec = dockerTask.getSpec();
+    public void runTask(EmbeddedWorkerTask embeddedWorkerTask, BufferedWriter logWriter) {
+        var spec = embeddedWorkerTask.getSpec();
         // 创建容器参数
         var createContainerCmd = dockerClient.createContainerCmd(spec.getImage())
-                .withName(dockerTask.getTaskInstanceId());
+                .withName(embeddedWorkerTask.getTaskInstanceId());
         if (!spec.getWorkingDir().isBlank()) {
             createContainerCmd.withWorkingDir(spec.getWorkingDir());
         }
@@ -162,8 +163,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
             } catch (InterruptedException | RuntimeException e) {
                 logger.error("镜像下载失败:", e);
                 this.publisher.publishEvent(TaskFailedEvent.builder()
-                        .triggerId(dockerTask.getTriggerId())
-                        .taskId(dockerTask.getTaskInstanceId())
+                        .triggerId(embeddedWorkerTask.getTriggerId())
+                        .taskId(embeddedWorkerTask.getTaskInstanceId())
                         .errorMsg(e.getMessage())
                         .build());
                 Thread.currentThread().interrupt();
@@ -177,8 +178,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
         } catch (RuntimeException e) {
             logger.error("无法创建容器", e);
             this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
                     .errorMsg(e.getMessage())
                     .build());
             return;
@@ -189,14 +190,14 @@ public class EmbeddedDockerWorker implements DockerWorker {
         } catch (RuntimeException e) {
             logger.error("容器启动失败:", e);
             this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
                     .errorMsg(e.getMessage())
                     .build());
             return;
         }
         // 发送任务运行中事件
-        this.publisher.publishEvent(TaskRunningEvent.builder().taskId(dockerTask.getTaskInstanceId()).build());
+        this.publisher.publishEvent(TaskRunningEvent.builder().taskId(embeddedWorkerTask.getTaskInstanceId()).build());
         // 获取日志
         try {
             this.dockerClient.logContainerCmd(containerResponse.getId())
@@ -226,8 +227,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
         } catch (RuntimeException e) {
             logger.error("获取容器日志失败", e);
             this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
                     .errorMsg(e.getMessage())
                     .build());
             try {
@@ -242,8 +243,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
             this.dockerClient.waitContainerCmd(containerResponse.getId()).exec(new ResultCallback.Adapter<>() {
                 @Override
                 public void onNext(WaitResponse object) {
-                    logger.info("dockerTask {} status code is: {}", dockerTask.getTaskInstanceId(), object.getStatusCode());
-                    runStatusMap.put(dockerTask.getTaskInstanceId(), object.getStatusCode());
+                    logger.info("dockerTask {} status code is: {}", embeddedWorkerTask.getTaskInstanceId(), object.getStatusCode());
+                    runStatusMap.put(embeddedWorkerTask.getTaskInstanceId(), object.getStatusCode());
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
@@ -252,17 +253,17 @@ public class EmbeddedDockerWorker implements DockerWorker {
         } catch (RuntimeException e) {
             logger.error("获取容器执行结果失败", e);
             this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
                     .errorMsg(e.getMessage())
                     .build());
             Thread.currentThread().interrupt();
         }
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
         String resultFile = null;
-        if (null != dockerTask.getResultFile()) {
+        if (null != embeddedWorkerTask.getResultFile()) {
             try (
-                    var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), dockerTask.getResultFile()).exec();
+                    var stream = this.dockerClient.copyArchiveFromContainerCmd(containerResponse.getId(), embeddedWorkerTask.getResultFile()).exec();
                     var tarStream = new TarArchiveInputStream(stream);
                     var reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))
             ) {
@@ -279,8 +280,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
             } catch (Exception e) {
                 logger.warn("无法获取容器执行结果文件: {}", e.getMessage());
                 this.publisher.publishEvent(TaskFailedEvent.builder()
-                        .triggerId(dockerTask.getTriggerId())
-                        .taskId(dockerTask.getTaskInstanceId())
+                        .triggerId(embeddedWorkerTask.getTriggerId())
+                        .taskId(embeddedWorkerTask.getTaskInstanceId())
                         .errorMsg(e.getMessage())
                         .build());
             }
@@ -293,19 +294,19 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 发送结果通知
         this.publisher.publishEvent(
                 TaskFinishedEvent.builder()
-                        .triggerId(dockerTask.getTriggerId())
-                        .taskId(dockerTask.getTaskInstanceId())
-                        .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
+                        .triggerId(embeddedWorkerTask.getTriggerId())
+                        .taskId(embeddedWorkerTask.getTaskInstanceId())
+                        .cmdStatusCode(runStatusMap.get(embeddedWorkerTask.getTaskInstanceId()))
                         .resultFile(resultFile)
                         .build()
         );
     }
 
     @Override
-    public void resumeTask(DockerTask dockerTask, BufferedWriter logWriter) {
+    public void resumeTask(EmbeddedWorkerTask embeddedWorkerTask, BufferedWriter logWriter) {
         // 获取日志
         try {
-            this.dockerClient.logContainerCmd(dockerTask.getTaskInstanceId())
+            this.dockerClient.logContainerCmd(embeddedWorkerTask.getTaskInstanceId())
                     .withStdOut(true)
                     .withStdErr(true)
                     .withTailAll()
@@ -332,8 +333,8 @@ public class EmbeddedDockerWorker implements DockerWorker {
         } catch (RuntimeException e) {
             logger.error("获取容器日志失败", e);
             this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
                     .errorMsg(e.getMessage())
                     .build());
             try {
@@ -349,11 +350,11 @@ public class EmbeddedDockerWorker implements DockerWorker {
         }
         // 等待容器执行结果
         try {
-            this.dockerClient.waitContainerCmd(dockerTask.getTaskInstanceId()).exec(new ResultCallback.Adapter<>() {
+            this.dockerClient.waitContainerCmd(embeddedWorkerTask.getTaskInstanceId()).exec(new ResultCallback.Adapter<>() {
                 @Override
                 public void onNext(WaitResponse object) {
-                    logger.info("dockerTask {} status code is: {}", dockerTask.getTaskInstanceId(), object.getStatusCode());
-                    runStatusMap.put(dockerTask.getTaskInstanceId(), object.getStatusCode());
+                    logger.info("dockerTask {} status code is: {}", embeddedWorkerTask.getTaskInstanceId(), object.getStatusCode());
+                    runStatusMap.put(embeddedWorkerTask.getTaskInstanceId(), object.getStatusCode());
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
@@ -362,17 +363,17 @@ public class EmbeddedDockerWorker implements DockerWorker {
         } catch (RuntimeException e) {
             logger.error("获取容器执行结果失败", e);
             this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(dockerTask.getTriggerId())
-                    .taskId(dockerTask.getTaskInstanceId())
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
                     .errorMsg(e.getMessage())
                     .build());
             Thread.currentThread().interrupt();
         }
         // 获取容器执行结果文件(JSON,非数组)，转换为任务输出参数
         String resultFile = null;
-        if (null != dockerTask.getResultFile()) {
+        if (null != embeddedWorkerTask.getResultFile()) {
             try (
-                    var stream = this.dockerClient.copyArchiveFromContainerCmd(dockerTask.getTaskInstanceId(), dockerTask.getResultFile()).exec();
+                    var stream = this.dockerClient.copyArchiveFromContainerCmd(embeddedWorkerTask.getTaskInstanceId(), embeddedWorkerTask.getResultFile()).exec();
                     var tarStream = new TarArchiveInputStream(stream);
                     var reader = new BufferedReader(new InputStreamReader(tarStream, StandardCharsets.UTF_8))
             ) {
@@ -389,36 +390,36 @@ public class EmbeddedDockerWorker implements DockerWorker {
             } catch (Exception e) {
                 logger.error("无法获取容器执行结果文件:", e);
                 this.publisher.publishEvent(TaskFailedEvent.builder()
-                        .triggerId(dockerTask.getTriggerId())
-                        .taskId(dockerTask.getTaskInstanceId())
+                        .triggerId(embeddedWorkerTask.getTriggerId())
+                        .taskId(embeddedWorkerTask.getTaskInstanceId())
                         .errorMsg(e.getMessage())
                         .build());
             }
         }
         // 清除容器
-        this.dockerClient.removeContainerCmd(dockerTask.getTaskInstanceId())
+        this.dockerClient.removeContainerCmd(embeddedWorkerTask.getTaskInstanceId())
                 .withRemoveVolumes(true)
                 .withForce(true)
                 .exec();
         // 发送结果通知
         this.publisher.publishEvent(
                 TaskFinishedEvent.builder()
-                        .triggerId(dockerTask.getTriggerId())
-                        .taskId(dockerTask.getTaskInstanceId())
-                        .cmdStatusCode(runStatusMap.get(dockerTask.getTaskInstanceId()))
+                        .triggerId(embeddedWorkerTask.getTriggerId())
+                        .taskId(embeddedWorkerTask.getTaskInstanceId())
+                        .cmdStatusCode(runStatusMap.get(embeddedWorkerTask.getTaskInstanceId()))
                         .resultFile(resultFile)
                         .build()
         );
     }
 
     @Override
-    public void terminateTask(String taskInstanceId) {
+    public void terminateTask(String triggerId, String taskInstanceId) {
         logger.info("stop task id: {}", taskInstanceId);
         this.dockerClient.stopContainerCmd(taskInstanceId).exec();
     }
 
     @Override
-    public void createVolume(String volumeName) {
+    public void createVolume(String volumeName, Map<String, dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec> specMap) {
         // 创建Volume
         this.dockerClient.createVolumeCmd()
                 .withName(volumeName)
