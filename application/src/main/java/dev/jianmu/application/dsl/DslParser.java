@@ -456,6 +456,9 @@ public class DslParser {
     private void pipelineSyntaxCheck() {
         var pipe = this.pipeline;
         pipe.forEach((key, val) -> {
+            if (val == null) {
+                throw new DslException(key + "节点不能为空");
+            }
             if (val instanceof Map) {
                 this.checkPipeNode(key, (Map<?, ?>) val);
             }
