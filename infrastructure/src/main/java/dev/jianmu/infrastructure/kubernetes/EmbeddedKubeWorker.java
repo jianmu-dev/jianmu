@@ -107,12 +107,6 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
         return container;
     }
 
-    private V1ConfigMap initConfigMap(String mapName) {
-        return new V1ConfigMap()
-                .metadata(new V1ObjectMeta().namespace("jianmu").name(mapName))
-                .data(Map.of("foo", "boo"));
-    }
-
     private List<V1ConfigMap> initConfigMaps(String podName, Map<String, ContainerSpec> specMap) {
         return specMap.keySet().stream()
                 .map(spec -> new V1ConfigMap().metadata(new V1ObjectMeta().namespace("jianmu").name(podName + spec))
