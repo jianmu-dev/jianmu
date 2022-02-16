@@ -76,6 +76,7 @@ public class HubApplication {
                 .creatorName("local")
                 .creatorRef("local")
                 .type(NodeDefinition.Type.DOCKER)
+                .deprecated(false)
                 .build();
 
         List<Parameter> parameters = new ArrayList<>();
@@ -210,6 +211,7 @@ public class HubApplication {
                 .ref(defDto.getRef())
                 .sourceLink(defDto.getSourceLink())
                 .documentLink(defDto.getDocumentLink())
+                .deprecated(defDto.getDeprecated())
                 .build();
     }
 

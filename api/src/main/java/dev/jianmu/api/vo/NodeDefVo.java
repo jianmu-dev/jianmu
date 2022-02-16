@@ -34,4 +34,5 @@ public class NodeDefVo {
     private String sourceLink;
     private String documentLink;
     private List<String> versions;
+    private Boolean deprecated;
 }
