@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="45px" height="45px" viewBox="0 0 45 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 2</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="建木节点库列表备份" transform="translate(-904.000000, -445.000000)">
+            <g id="编组-2" transform="translate(904.000000, 444.000000)">
+                <polygon id="矩形备份-17" fill="#F7F9FB" fill-rule="nonzero" points="0 1 45 1 45 46"></polygon>
+                <text id="已弃用备份-4" transform="translate(29.878680, 15.878680) rotate(-315.000000) translate(-29.878680, -15.878680) " font-family="PingFangSC-Medium, PingFang SC" font-size="10" font-weight="400" line-spacing="14" fill="#B8C7D6">
+                    <tspan x="14.8786797" y="19.8786797">已弃用</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>
