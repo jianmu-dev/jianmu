@@ -21,5 +21,6 @@ export interface INodeVo extends Readonly<{
   sourceLink: string;
   documentLink: string;
   versions: string[];
+  deprecated: boolean;
 }> {
 }

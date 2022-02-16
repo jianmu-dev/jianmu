@@ -33,6 +33,16 @@
           :key="idx"
           class="item"
         >
+          <div class="deprecated" v-if="i.deprecated">
+            <jm-tooltip placement="top-start">
+              <template #content>
+                <div style="line-height: 20px">
+                  由于某些原因，该节点不被推荐使用（如该节点可<br/>能会导致一些已知问题或有更好的节点可替代它）
+                </div>
+              </template>
+              <img src="~@/assets/svgs/node-library/deprecated.svg" alt="">
+            </jm-tooltip>
+          </div>
           <div class="item-t">
             <span
               class="item-t-t"
@@ -77,14 +87,14 @@
                   class="item-mid-item"
                 >
                   <span v-if="i.ownerType === OwnerTypeEnum.LOCAL">
-                   {{version}}
+                   {{ version }}
                   </span>
                   <a
                     v-else
                     target="_blank"
                     :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}/${version}`"
                   >
-                    {{version}}
+                    {{ version }}
                   </a
                   >
                 </div>
@@ -112,11 +122,13 @@
                 ></button>
               </jm-tooltip>
             </div>
-            <div class="item-btm-r"><jm-text-viewer :value="`by ${i.creatorName}`"/></div>
+            <div class="item-btm-r">
+              <jm-text-viewer :value="`by ${i.creatorName}`"/>
+            </div>
           </div>
           <div
             class="item-pos"
-            :class="{ 'node-definition-default-icon': !i.icon }"
+            :class="{ 'node-definition-default-icon': !i.icon, 'deprecated-icon':i.deprecated}"
           >
             <img
               v-if="i.icon"
@@ -342,6 +354,7 @@ export default defineComponent({
       font-weight: bold;
     }
   }
+
   .menu-bar {
     button {
       position: relative;
@@ -403,6 +416,17 @@ export default defineComponent({
       padding: 15px;
       position: relative;
       box-sizing: border-box;
+
+      .deprecated {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        img {
+          width: 45px;
+          height: 45px;
+        }
+      }
 
       .item-t {
         display: flex;
@@ -543,13 +567,16 @@ export default defineComponent({
           justify-content: end;
           color: #7c91a5;
           font-size: 14px;
-          ::v-deep(.jm-text-viewer){
+
+          ::v-deep(.jm-text-viewer) {
             width: 100%;
-            .content{
-              .text-line{
-                &:last-child{
+
+            .content {
+              .text-line {
+                &:last-child {
                   text-align: right;
-                  &::after{
+
+                  &::after {
                     display: none;
                   }
                 }
@@ -567,6 +594,10 @@ export default defineComponent({
         height: 54px;
         border-radius: 25.5%;
         overflow: hidden;
+
+        &.deprecated-icon {
+          opacity: .4;
+        }
 
         img {
           width: 100%;
