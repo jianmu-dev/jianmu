@@ -25,6 +25,7 @@ public class NodeDefinition {
     private String ref;
     private String sourceLink;
     private String documentLink;
+    private Boolean deprecated;
 
     public String getId() {
         return id;
@@ -78,6 +79,10 @@ public class NodeDefinition {
         return documentLink;
     }
 
+    public Boolean getDeprecated() {
+        return this.deprecated;
+    }
+
     public static final class Builder {
         private String id;
         private String icon;
@@ -92,6 +97,7 @@ public class NodeDefinition {
         private String ref;
         private String sourceLink;
         private String documentLink;
+        private Boolean deprecated;
 
         private Builder() {
         }
@@ -165,6 +171,11 @@ public class NodeDefinition {
             return this;
         }
 
+        public Builder deprecated(Boolean deprecated) {
+            this.deprecated = deprecated;
+            return this;
+        }
+
         public NodeDefinition build() {
             NodeDefinition nodeDefinition = new NodeDefinition();
             nodeDefinition.id = this.id;
@@ -180,6 +191,7 @@ public class NodeDefinition {
             nodeDefinition.ownerRef = this.ownerRef;
             nodeDefinition.sourceLink = this.sourceLink;
             nodeDefinition.creatorName = this.creatorName;
+            nodeDefinition.deprecated = this.deprecated;
             return nodeDefinition;
         }
     }

@@ -151,6 +151,7 @@ public class ViewController {
                     .sourceLink(nodeDefinition.getSourceLink())
                     .documentLink(nodeDefinition.getDocumentLink())
                     .versions(versions)
+                    .deprecated(nodeDefinition.getDeprecated())
                     .build();
         }).collect(Collectors.toList());
         PageInfo<NodeDefVo> newPage = PageUtils.pageInfo2PageInfoVo(page);

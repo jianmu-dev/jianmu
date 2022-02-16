@@ -29,4 +29,5 @@ public class NodeDefinitionDto {
     private String ref;
     private String sourceLink;
     private String documentLink;
+    private Boolean deprecated;
 }
