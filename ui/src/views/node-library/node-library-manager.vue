@@ -160,12 +160,13 @@ import {
   Ref,
   inject,
 } from 'vue';
-import { fetchNodeLibraryList } from '@/api/view-no-auth';
+import { fetchNodeLibrary, fetchNodeLibraryList } from '@/api/view-no-auth';
 import { deleteNodeLibrary, syncNodeLibrary } from '@/api/node-library';
 import { INode } from '@/model/modules/node-library';
 import NodeEditor from './node-editor.vue';
 import { OwnerTypeEnum } from '@/api/dto/enumeration';
 import { StateEnum } from '@/components/load-more/enumeration';
+import { Mutable } from '@/utils/lib';
 
 export default defineComponent({
   components: {
@@ -180,7 +181,7 @@ export default defineComponent({
       pageNum: 1,
       pageSize: 12,
     });
-    const nodeLibraryListData = reactive<INode[]>([]);
+    const nodeLibraryListData = reactive<Mutable<INode>[]>([]);
     const firstLoading = ref<boolean>(true);
     const total = ref<number>(0);
     const creationActivated = ref<boolean>(false);
@@ -305,8 +306,19 @@ export default defineComponent({
             .catch((err: Error) => {
               proxy.$throw(err, proxy);
             })
-            .finally(() => {
+            .finally(async () => {
               i.isSync = false;
+              // 点击同步按钮后，重新获取该节点的信息。
+              try {
+                const { deprecated } = await fetchNodeLibrary(i.ownerRef, i.ref);
+                nodeLibraryListData.forEach(item => {
+                  if (item.ref === i.ref) {
+                    item.deprecated = deprecated;
+                  }
+                });
+              } catch (err) {
+                proxy.$throw(err, proxy);
+              }
             });
         });
     };
