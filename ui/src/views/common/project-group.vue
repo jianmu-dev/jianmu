@@ -1,64 +1,77 @@
 <template>
   <div class="project-group" v-loading="loading">
-    <div v-if="!pageable" class="name">
-      <div class="group-name">
-        <router-link
-          :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
-          >{{ projectGroup?.name }}</router-link
-        >
-        <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
-      </div>
-      <div class="more-container" v-if="!pageable && projectPage.total>10">
-        <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }">
-          查看更多
-          <i class="more-icon"></i>
-        </router-link>
-      </div>
-    </div>
-    <div class="projects">
-      <jm-empty v-if="projects.length === 0 && pageable" />
-      <jm-draggable
-        v-else-if="moveListener"
-        class="list"
-        v-model="projectList"
-        @change="sortList"
-        @start="start"
-        @end="() => (currentSelected = false)"
-      >
-        <transition-group type="transition" name="flip-list">
-          <project-item
-            v-for="(project, index) in projectList"
-            :key="project.id"
-            :_id="project.id"
-            :project="project"
-            @mouseenter="over(project.id)"
-            @mouseleave="leave"
-            :move-mode="moveListener"
-            :move="moveClassList[index] === 'move'"
-            @running="handleProjectRunning"
-            @synchronized="handleProjectSynchronized"
-            @deleted="handleProjectDeleted"
-          />
-        </transition-group>
-      </jm-draggable>
-      <project-item
-        v-else
-        v-for="project of projects"
-        :key="project.id"
-        :project="project"
-        @running="handleProjectRunning"
-        @synchronized="handleProjectSynchronized"
-        @deleted="handleProjectDeleted"
-      />
-    </div>
-    <!-- 显示更多 -->
-    <div class="load-more" v-if="pageable" v-scroll="scrollObj">
-      <jm-load-more
-        :state="loadState"
-        :load-more="btnDown"
-        v-if="projects.length !== 0"
-      ></jm-load-more>
-    </div>
+    <folding :status="toggle" :page-able="pageable">
+      <template #prefix v-if="!pageable">
+        <i :class="['jm-icon-button-right','prefix',toggle?'rotate':'']"
+           @click="saveFoldStatus(toggle,projectGroup.id)"/>
+      </template>
+      <template #title>
+        <div v-if="!pageable" class="name">
+          <div class="group-name">
+            <router-link
+              :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
+            >{{ projectGroup?.name }}
+            </router-link
+            >
+            <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
+          </div>
+          <div class="more-container" v-if="!pageable && projectPage.total>10">
+            <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }">
+              查看更多
+              <i class="more-icon"></i>
+            </router-link>
+          </div>
+        </div>
+      </template>
+      <template #default>
+        <div>
+          <div class="projects">
+            <jm-empty v-if="projects.length === 0 && pageable"/>
+            <jm-draggable
+              v-else-if="moveListener"
+              class="list"
+              v-model="projectList"
+              @change="sortList"
+              @start="start"
+              @end="() => (currentSelected = false)"
+            >
+              <transition-group type="transition" name="flip-list">
+                <project-item
+                  v-for="(project, index) in projectList"
+                  :key="project.id"
+                  :_id="project.id"
+                  :project="project"
+                  @mouseenter="over(project.id)"
+                  @mouseleave="leave"
+                  :move-mode="moveListener"
+                  :move="moveClassList[index] === 'move'"
+                  @running="handleProjectRunning"
+                  @synchronized="handleProjectSynchronized"
+                  @deleted="handleProjectDeleted"
+                />
+              </transition-group>
+            </jm-draggable>
+            <project-item
+              v-else
+              v-for="project of projects"
+              :key="project.id"
+              :project="project"
+              @running="handleProjectRunning"
+              @synchronized="handleProjectSynchronized"
+              @deleted="handleProjectDeleted"
+            />
+          </div>
+          <!-- 显示更多 -->
+          <div class="load-more" v-if="pageable" v-scroll="scrollObj">
+            <jm-load-more
+              :state="loadState"
+              :load-more="btnDown"
+              v-if="projects.length !== 0"
+            ></jm-load-more>
+          </div>
+        </div>
+      </template>
+    </folding>
   </div>
 </template>
 
@@ -76,23 +89,26 @@ import {
   watch,
   inject,
 } from 'vue';
-import { IProjectVo } from '@/api/dto/project';
-import { IProjectGroupVo } from '@/api/dto/project-group';
-import { queryProject } from '@/api/view-no-auth';
-import { IQueryForm } from '@/model/modules/project';
-import { ProjectStatusEnum } from '@/api/dto/enumeration';
+import {IProjectVo} from '@/api/dto/project';
+import {IProjectGroupVo} from '@/api/dto/project-group';
+import {queryProject} from '@/api/view-no-auth';
+import {IQueryForm} from '@/model/modules/project';
+import {ProjectStatusEnum} from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
-import { HttpError, TimeoutError } from '@/utils/rest/error';
-import { IPageVo } from '@/api/dto/common';
-import { Mutable } from '@/utils/lib';
-import { updateProjectGroupProjectSort } from '@/api/project-group';
-import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { StateEnum } from '@/components/load-more/enumeration';
+import {HttpError, TimeoutError} from '@/utils/rest/error';
+import {IPageVo} from '@/api/dto/common';
+import {Mutable} from '@/utils/lib';
+import {updateProjectGroupProjectSort} from '@/api/project-group';
+import {START_PAGE_NUM, DEFAULT_PAGE_SIZE} from '@/utils/constants';
+import {StateEnum} from '@/components/load-more/enumeration';
+import Folding from '@/views/common/folding.vue';
+import {createNamespacedHelpers, useStore} from 'vuex';
+import {namespace} from '@/store/modules/project-group';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
 export default defineComponent({
-  components: { ProjectItem },
+  components: {ProjectItem, Folding},
   props: {
     // 项目组
     projectGroup: {
@@ -114,7 +130,17 @@ export default defineComponent({
     },
   },
   setup(props: any) {
-    const { proxy } = getCurrentInstance() as any;
+    const store = useStore();
+    const {mapMutations} = createNamespacedHelpers(namespace);
+    const projectGroupFoldingMapping = store.state[namespace].projectGroupFoldStatusMapping;
+    const toggle = computed<boolean>(() => {
+      // 只有全等于为undefined说明该项目组一开始根本没有做折叠操作
+      if (projectGroupFoldingMapping[props.projectGroup.id] === undefined) {
+        return true;
+      }
+      return projectGroupFoldingMapping[props.projectGroup.id];
+    });
+    const {proxy} = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
     const scrollableEl = inject('scrollableEl');
     const projectPage = ref<Mutable<IPageVo<IProjectVo>>>({
@@ -128,7 +154,7 @@ export default defineComponent({
     const projectList = ref<Mutable<IProjectVo>[]>([]);
     const queryForm = ref<IQueryForm>({
       pageNum: START_PAGE_NUM,
-      pageSize: props.pageable?40:DEFAULT_PAGE_SIZE,
+      pageSize: props.pageable ? 40 : DEFAULT_PAGE_SIZE,
       projectGroupId: props.projectGroup?.id,
       name: props.name,
     });
@@ -164,7 +190,7 @@ export default defineComponent({
         try {
           projectPage.value = await queryProject({
             pageNum: START_PAGE_NUM,
-            pageSize: props.pageable?projects.value.length:DEFAULT_PAGE_SIZE,
+            pageSize: props.pageable ? projects.value.length : DEFAULT_PAGE_SIZE,
             projectGroupId: props.projectGroup?.id,
             name: props.name,
           });
@@ -178,13 +204,13 @@ export default defineComponent({
       try {
         // 不分页加载项目列表数据
         if (!props.pageable) {
-          projectPage.value = await queryProject({ ...queryForm.value });
+          projectPage.value = await queryProject({...queryForm.value});
           return;
         }
         loadState.value = StateEnum.LOADING;
         // 在加载时，控制不自动刷新
         loadingMore.value = true;
-        const { list, pages } = await queryProject({
+        const {list, pages} = await queryProject({
           ...queryForm.value,
         });
         // 点击加载更多按钮请求的数据加入到排序后的数组里
@@ -222,7 +248,7 @@ export default defineComponent({
       await nextTick(() => {
         queryForm.value.name = props.name;
       });
-      if(props.pageable){
+      if (props.pageable) {
         loading.value = true;
       }
       await loadProject();
@@ -260,9 +286,18 @@ export default defineComponent({
     const currentSelected = ref<boolean>(false);
     const currentItem = ref<string>('-1');
     let setCurrentItemTimer: any;
+    const saveFoldStatus = (status: boolean, id: string) => {
+      // 改变状态
+      const toggle = !status;
+      // 调用vuex的mutations更改对应项目组的状态
+      proxy.mutate({
+        id,
+        status: toggle,
+      });
+    };
     const sortList = async (e: any) => {
       const {
-        moved: { newIndex: targetSort, oldIndex: originSort, element },
+        moved: {newIndex: targetSort, oldIndex: originSort, element},
       } = e;
       try {
         // 向移动
@@ -289,7 +324,7 @@ export default defineComponent({
       }, 400);
     };
     const moveClassList = computed<string[]>(() =>
-      projectList.value.map(({ id }) => {
+      projectList.value.map(({id}) => {
         return id === currentItem.value ? 'move' : '';
       }),
     );
@@ -303,6 +338,10 @@ export default defineComponent({
       scrollableEl,
     };
     return {
+      ...mapMutations({
+        mutate: 'mutate',
+      }),
+      toggle,
       scrollObj,
       scrollableEl,
       loadState,
@@ -345,6 +384,8 @@ export default defineComponent({
         const index = projects.value.findIndex(item => item.id === id);
         projects.value.splice(index, 1);
       },
+      saveFoldStatus,
+      projectGroupFoldingMapping,
     };
   },
 });
@@ -354,7 +395,19 @@ export default defineComponent({
 .project-group {
   margin-top: 23px;
 
+  .prefix {
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .1s linear;
+
+    &.rotate {
+      transform: rotate(90deg);
+      transition: all .1s linear;
+    }
+  }
+
   .name {
+    margin-left: 10px;
     font-size: 18px;
     font-weight: bold;
     color: #082340;
@@ -371,39 +424,45 @@ export default defineComponent({
         opacity: 0.46;
       }
     }
-    .more-container{
-      width:86px;
-      height:24px;
-      background:#EFF7FF;
-      border-radius:15px;
-      font-size:12px;
-      font-weight:400;
+
+    .more-container {
+      width: 86px;
+      height: 24px;
+      background: #EFF7FF;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 400;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
-      a{
-        color:#6B7B8D;
-        line-height:24px;
+
+      a {
+        color: #6B7B8D;
+        line-height: 24px;
       }
-      .more-icon{
+
+      .more-icon {
         display: inline-block;
-        width:12px;
-        height:12px;
+        width: 12px;
+        height: 12px;
         text-align: center;
-        line-height:12px;
-        background:url('@/assets/svgs/btn/more.svg') no-repeat;
-        position:relative;
-        top:1.4px;
-        right:0px;
+        line-height: 12px;
+        background: url('@/assets/svgs/btn/more.svg') no-repeat;
+        position: relative;
+        top: 1.4px;
+        right: 0px;
       }
-      &:hover{
-        color:#096DD9;
-        a{
-          color:#096DD9;
+
+      &:hover {
+        color: #096DD9;
+
+        a {
+          color: #096DD9;
         }
-        .more-icon{
-          background:url('@/assets/svgs/btn/more-active.svg') no-repeat;
+
+        .more-icon {
+          background: url('@/assets/svgs/btn/more-active.svg') no-repeat;
         }
       }
     }
@@ -412,12 +471,14 @@ export default defineComponent({
   .projects {
     display: flex;
     flex-wrap: wrap;
+
     .list {
       width: 100%;
       display: flex;
       flex-wrap: wrap;
     }
   }
+
   .load-more {
     margin: 10px auto 0px;
     display: flex;
