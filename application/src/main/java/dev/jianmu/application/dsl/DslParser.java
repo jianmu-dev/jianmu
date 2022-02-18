@@ -129,9 +129,12 @@ public class DslParser {
                 dslNode.getTargets().forEach(nodeName -> {
                     var target = symbolTable.get(nodeName);
                     if (null != target) {
-                        n.addTarget(target.getRef());
+                        if (!n.getType().equals("Condition")) {
+                            n.addTarget(target.getRef());
+                        }
                     } else {
-                        throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
+                        var node_target = n.getType().equals("Condition") ? "case" : "target";
+                        throw new DslException("节点" + dslNode.getName() + "指定的" + node_target + ": " + nodeName + "不存在");
                     }
                 });
                 dslNode.getSources().forEach(nodeName -> {
@@ -539,6 +542,7 @@ public class DslParser {
     private void checkCondition(Map<?, ?> node) {
         var expression = node.get("expression");
         var cases = node.get("cases");
+        var targets = node.get("targets");
         if (null == expression) {
             throw new DslException("条件网关expression未设置");
         }
@@ -547,6 +551,9 @@ public class DslParser {
         }
         if (((Map<?, ?>) cases).size() != 2) {
             throw new DslException("cases数量错误");
+        }
+        if (null != targets) {
+            throw new DslException("条件网关节点不能设置targets");
         }
     }
 
