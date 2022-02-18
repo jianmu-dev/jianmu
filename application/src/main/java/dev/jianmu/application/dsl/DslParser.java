@@ -541,7 +541,6 @@ public class DslParser {
     private void checkCondition(Map<?, ?> node) {
         var expression = node.get("expression");
         var cases = node.get("cases");
-        var targets = node.get("targets");
         if (null == expression) {
             throw new DslException("条件网关expression未设置");
         }
