@@ -89,26 +89,26 @@ import {
   watch,
   inject,
 } from 'vue';
-import {IProjectVo} from '@/api/dto/project';
-import {IProjectGroupVo} from '@/api/dto/project-group';
-import {queryProject} from '@/api/view-no-auth';
-import {IQueryForm} from '@/model/modules/project';
-import {ProjectStatusEnum} from '@/api/dto/enumeration';
+import { IProjectVo } from '@/api/dto/project';
+import { IProjectGroupVo } from '@/api/dto/project-group';
+import { queryProject } from '@/api/view-no-auth';
+import { IQueryForm } from '@/model/modules/project';
+import { ProjectStatusEnum } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
-import {HttpError, TimeoutError} from '@/utils/rest/error';
-import {IPageVo} from '@/api/dto/common';
-import {Mutable} from '@/utils/lib';
-import {updateProjectGroupProjectSort} from '@/api/project-group';
-import {START_PAGE_NUM, DEFAULT_PAGE_SIZE} from '@/utils/constants';
-import {StateEnum} from '@/components/load-more/enumeration';
+import { HttpError, TimeoutError } from '@/utils/rest/error';
+import { IPageVo } from '@/api/dto/common';
+import { Mutable } from '@/utils/lib';
+import { updateProjectGroupProjectSort } from '@/api/project-group';
+import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { StateEnum } from '@/components/load-more/enumeration';
 import Folding from '@/views/common/folding.vue';
-import {createNamespacedHelpers, useStore} from 'vuex';
-import {namespace} from '@/store/modules/project-group';
+import { createNamespacedHelpers, useStore } from 'vuex';
+import { namespace } from '@/store/modules/project-group';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
 export default defineComponent({
-  components: {ProjectItem, Folding},
+  components: { ProjectItem, Folding },
   props: {
     // 项目组
     projectGroup: {
@@ -131,16 +131,16 @@ export default defineComponent({
   },
   setup(props: any) {
     const store = useStore();
-    const {mapMutations} = createNamespacedHelpers(namespace);
+    const { mapMutations } = createNamespacedHelpers(namespace);
     const projectGroupFoldingMapping = store.state[namespace].projectGroupFoldStatusMapping;
     const toggle = computed<boolean>(() => {
       // 只有全等于为undefined说明该项目组一开始根本没有做折叠操作
-      if (projectGroupFoldingMapping[props.projectGroup.id] === undefined) {
+      if (projectGroupFoldingMapping[props.projectGroup?.id] === undefined) {
         return true;
       }
       return projectGroupFoldingMapping[props.projectGroup.id];
     });
-    const {proxy} = getCurrentInstance() as any;
+    const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
     const scrollableEl = inject('scrollableEl');
     const projectPage = ref<Mutable<IPageVo<IProjectVo>>>({
@@ -204,13 +204,13 @@ export default defineComponent({
       try {
         // 不分页加载项目列表数据
         if (!props.pageable) {
-          projectPage.value = await queryProject({...queryForm.value});
+          projectPage.value = await queryProject({ ...queryForm.value });
           return;
         }
         loadState.value = StateEnum.LOADING;
         // 在加载时，控制不自动刷新
         loadingMore.value = true;
-        const {list, pages} = await queryProject({
+        const { list, pages } = await queryProject({
           ...queryForm.value,
         });
         // 点击加载更多按钮请求的数据加入到排序后的数组里
@@ -297,7 +297,7 @@ export default defineComponent({
     };
     const sortList = async (e: any) => {
       const {
-        moved: {newIndex: targetSort, oldIndex: originSort, element},
+        moved: { newIndex: targetSort, oldIndex: originSort, element },
       } = e;
       try {
         // 向移动
@@ -324,7 +324,7 @@ export default defineComponent({
       }, 400);
     };
     const moveClassList = computed<string[]>(() =>
-      projectList.value.map(({id}) => {
+      projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
       }),
     );
