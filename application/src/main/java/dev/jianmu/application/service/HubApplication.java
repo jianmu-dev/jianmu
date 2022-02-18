@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -162,6 +163,10 @@ public class HubApplication {
                 )
                 .collect(Collectors.toList());
         events.forEach(this.publisher::publishEvent);
+    }
+
+    public Optional<NodeDefinition> findById(String id) {
+        return this.nodeDefinitionRepository.findById(id);
     }
 
     public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {

@@ -109,6 +109,10 @@ public class DslNode {
         } else {
             dslNode.targets = List.of();
         }
+        if ("condition".equals(dslNode.getType())) {
+            var c = node.get("cases");
+            dslNode.targets = ((Map<?, ?>) c).values().stream().map(i -> (String) i).collect(Collectors.toList());
+        }
     }
 
     public static DslNode of(String nodeName, Map<?, ?> nodeMap) {

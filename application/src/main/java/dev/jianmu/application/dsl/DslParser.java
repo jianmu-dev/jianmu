@@ -129,7 +129,9 @@ public class DslParser {
                 dslNode.getTargets().forEach(nodeName -> {
                     var target = symbolTable.get(nodeName);
                     if (null != target) {
-                        n.addTarget(target.getRef());
+                        if (!n.getType().equals("Condition")) {
+                            n.addTarget(target.getRef());
+                        }
                     } else {
                         throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
                     }
