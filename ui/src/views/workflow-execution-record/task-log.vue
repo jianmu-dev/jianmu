@@ -40,6 +40,16 @@
     </div>
 
     <div class="tab-section">
+      <div class="task-list" v-if="tasks.length > 1">
+        <jm-select v-model="taskInstanceId" @change="changeTask">
+          <jm-option
+            v-for="item in tasks"
+            :key="item.instanceId"
+            :label="datetimeFormatter(item.startTime)"
+            :value="item.instanceId">
+          </jm-option>
+        </jm-select>
+      </div>
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
@@ -231,7 +241,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, nextTick, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -244,6 +254,7 @@ import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enum
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
 import useClipboard from 'vue-clipboard3';
+
 export default defineComponent({
   components: { TaskState },
   props: {
@@ -258,11 +269,12 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
-    const { proxy }=getCurrentInstance() as any;
+    const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
+    const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
       return state.recordDetail.taskRecords.find(
-        item => item.instanceId === props.id,
+        item => item.instanceId === taskInstanceId.value,
       ) || {
         instanceId: '',
         nodeName: '',
@@ -270,6 +282,29 @@ export default defineComponent({
         startTime: '',
         status: TaskStatusEnum.INIT,
       };
+    });
+    const tasks = computed<ITaskExecutionRecordVo[]>(() => {
+      if (!task.value.nodeName) {
+        return [];
+      }
+
+      const tempArr = state.recordDetail.taskRecords.filter(item => item.nodeName === task.value.nodeName);
+      if (tempArr.length > 0) {
+        // 按开始时间降序排序
+        tempArr.sort((t1, t2) => {
+          const st1 = Date.parse(t1.startTime);
+          const st2 = Date.parse(t2.startTime);
+          if (st1 === st2) {
+            return 0;
+          }
+          if (st1 > st2) {
+            return -1;
+          }
+          return 1;
+        });
+      }
+
+      return tempArr;
     });
     const executing = computed<boolean>(() =>
       [
@@ -279,12 +314,7 @@ export default defineComponent({
       ].includes(task.value.status),
     );
     const executionTime = computed<string>(() =>
-      executionTimeFormatter(
-        task.value.startTime,
-        task.value.endTime,
-        executing.value,
-      ),
-    );
+      executionTimeFormatter(task.value.startTime, task.value.endTime, executing.value));
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
@@ -292,16 +322,14 @@ export default defineComponent({
     const maxLogLength = 1024 * 1024;
     const moreLog = ref<boolean>(false);
 
-    let terminateTaskLogLoad = false;
-
-    const loadData = async (func: (id: string) => Promise<void>, retry: number = 0) => {
-      if (terminateTaskLogLoad) {
+    const loadData = async (func: (id: string) => Promise<void>, id: string, retry: number = 0) => {
+      if (!taskInstanceId.value || taskInstanceId.value !== id) {
         console.debug('组件已卸载，终止加载任务');
         return;
       }
 
       try {
-        await func(props.id);
+        await func(id);
       } catch (err) {
         if (err instanceof TimeoutError) {
           // 忽略超时错误
@@ -328,11 +356,12 @@ export default defineComponent({
       console.debug(`3秒后重试第${retry}次`);
       await sleep(3000);
 
-      await loadData(func, retry);
+      await loadData(func, id, retry);
     };
 
-    // 初始化任务
-    onBeforeMount(() => {
+    const initialize = (id: string) => {
+      taskInstanceId.value = id;
+
       // 加载日志
       let lastContentLength = 0;
       loadData(async (id: string) => {
@@ -349,15 +378,24 @@ export default defineComponent({
 
         moreLog.value = contentLength > maxLogLength;
         taskLog.value = await fetchTaskLog(id, contentLength - maxLogLength);
-      });
+      }, id);
 
       // 加载参数
       loadData(async (id: string) => {
         taskParams.value = await listTaskParam(id);
-      });
-    });
+      }, id);
+    };
 
-    onBeforeUnmount(() => (terminateTaskLogLoad = true));
+    const destroy = () => {
+      taskInstanceId.value = '';
+    };
+
+    // 初始化任务
+    onBeforeMount(() => initialize(props.id));
+
+    // 销毁任务
+    onBeforeUnmount(destroy);
+
     // 一键复制
     const copy = async (value: string) => {
       if (!value) {
@@ -377,7 +415,9 @@ export default defineComponent({
       ParamTypeEnum,
       maxWidthRecord,
       workflowName: state.recordDetail.record?.name,
+      taskInstanceId,
       task,
+      tasks,
       executing,
       executionTime,
       tabActiveName,
@@ -400,13 +440,23 @@ export default defineComponent({
 
         return params;
       }),
+      changeTask: (instanceId: string) => {
+        // 销毁旧任务
+        destroy();
+
+        // 清空日志
+        taskLog.value = '';
+
+        // 初始化新任务
+        nextTick(() => initialize(instanceId));
+      },
       datetimeFormatter,
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
       },
       fetchLog: async (isCopy: boolean) => {
         if (isCopy) {
-          const headers: any = await checkTaskLog(props.id);
+          const headers: any = await checkTaskLog(taskInstanceId.value);
           const contentLength = +headers['content-length'] as number;
 
           if (contentLength > maxLogLength) {
@@ -414,7 +464,7 @@ export default defineComponent({
           }
         }
 
-        return await fetchTaskLog(props.id);
+        return await fetchTaskLog(taskInstanceId.value);
       },
     };
   },
@@ -466,6 +516,14 @@ export default defineComponent({
 
   .tab-section {
     margin: 0 20px;
+    position: relative;
+
+    .task-list {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 2;
+    }
 
     ::v-deep(.el-tabs) {
       .el-tabs__active-bar {

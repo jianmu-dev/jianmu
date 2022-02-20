@@ -85,9 +85,22 @@ export default defineComponent({
 
       switch (evt.type) {
         case NodeTypeEnum.ASYNC_TASK: {
-          const task = (props.tasks as ITaskExecutionRecordVo[]).find(item => item.nodeName === evt.id);
-          if (task) {
-            taskInstanceId.value = task.instanceId;
+          const tasks = (props.tasks as ITaskExecutionRecordVo[]).filter(item => item.nodeName === evt.id);
+          if (tasks.length > 0) {
+            // 按开始时间降序排序
+            tasks.sort((t1, t2) => {
+              const st1 = Date.parse(t1.startTime);
+              const st2 = Date.parse(t2.startTime);
+              if (st1 === st2) {
+                return 0;
+              }
+              if (st1 > st2) {
+                return -1;
+              }
+              return 1;
+            });
+
+            taskInstanceId.value = tasks[0].instanceId;
           }
           break;
         }
