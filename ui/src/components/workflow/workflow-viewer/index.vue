@@ -250,12 +250,15 @@ export default defineComponent({
           count: number;
         }[] = [];
 
+        const taskMap = new Map();
+        props.tasks.forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
+
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,
-          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.nodes.length - props.tasks.length) : 0,
+          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.nodes.length - taskMap.size) : 0,
         }));
 
-        props.tasks.forEach(({ status }: ITaskExecutionRecordVo) => {
+        taskMap.forEach(({ status }: ITaskExecutionRecordVo) => {
           const s = sArr.find(item => item.status === status);
           if (s) {
             s.count += 1;
