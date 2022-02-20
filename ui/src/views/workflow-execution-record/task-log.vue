@@ -347,7 +347,7 @@ export default defineComponent({
       }
 
       if (!executing.value) {
-        console.debug('任务已完成，终止获取日志');
+        console.debug('任务已完成，终止获取日志或参数');
         return;
       }
 
@@ -381,9 +381,7 @@ export default defineComponent({
       }, id);
 
       // 加载参数
-      loadData(async (id: string) => {
-        taskParams.value = await listTaskParam(id);
-      }, id);
+      loadData(async (id: string) => (taskParams.value = await listTaskParam(id)), id);
     };
 
     const destroy = () => {
