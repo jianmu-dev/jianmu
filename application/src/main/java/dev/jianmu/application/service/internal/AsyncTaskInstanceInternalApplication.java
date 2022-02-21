@@ -61,28 +61,6 @@ public class AsyncTaskInstanceInternalApplication {
         this.asyncTaskInstanceRepository.add(asyncTaskInstance);
     }
 
-    @Transactional
-    public void skip(SkipNodeCmd cmd) {
-        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(cmd.getTriggerId())
-                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-        var workflow = this.workflowRepository.findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到该流程定义"));
-        var node = workflow.findNode(cmd.getNodeRef());
-        var asyncTaskInstance = AsyncTaskInstance.Builder
-                .anAsyncTaskInstance()
-                .workflowInstanceId(workflowInstance.getId())
-                .triggerId(cmd.getTriggerId())
-                .workflowRef(cmd.getWorkflowRef())
-                .workflowVersion(cmd.getWorkflowVersion())
-                .name(node.getName())
-                .description(node.getDescription())
-                .asyncTaskRef(node.getRef())
-                .asyncTaskType(node.getType())
-                .build();
-        asyncTaskInstance.skip();
-        this.asyncTaskInstanceRepository.add(asyncTaskInstance);
-    }
-
     // 发布全部任务终止事件
     @Transactional
     public void terminateAll(String instanceId) {

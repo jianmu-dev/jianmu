@@ -49,6 +49,18 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<AsyncTaskInstance> findByTriggerId(String triggerId);
 
+    @Select("select * from async_task_instance where trigger_id = #{triggerId} and async_task_ref = #{taskRef}")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "async_task_ref", property = "asyncTaskRef")
+    @Result(column = "async_task_type", property = "asyncTaskType")
+    @Result(column = "activating_time", property = "activatingTime")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    List<AsyncTaskInstance> findByTriggerIdAndTaskRef(@Param("triggerId") String triggerId, @Param("taskRef") String taskRef);
+
     @Insert("insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, activating_time, start_time, end_time) " +
             "values(#{id}, #{triggerId}, #{workflowRef}, #{workflowVersion}, #{workflowInstanceId}, #{name}, #{description}, #{status}, #{asyncTaskRef}, #{asyncTaskType}, #{activatingTime}, #{startTime}, #{endTime})")
     void add(AsyncTaskInstance asyncTaskInstance);
