@@ -110,6 +110,7 @@
               >
                 <button
                   @click="syncNode(i)"
+                  @keypress.enter.prevent
                   class="sync"
                   :class="{ doing: i.isSync }"
                 ></button>
@@ -117,6 +118,7 @@
               <jm-tooltip content="删除" placement="top">
                 <button
                   @click="deleteNode(i)"
+                  @keypress.enter.prevent
                   class="del"
                   :class="{ doing: i.isDel }"
                 ></button>

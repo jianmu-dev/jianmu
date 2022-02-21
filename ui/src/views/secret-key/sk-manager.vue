@@ -37,6 +37,7 @@
             <button
               :class="{ del: true, doing: deletings[name] }"
               @click="del(name)"
+              @keypress.enter.prevent
             ></button>
           </div>
         </div>
@@ -295,12 +296,14 @@ export default defineComponent({
             color: #082340;
             text-align: center;
           }
-          ::v-deep(.jm-text-viewer){
-            .content{
-              .text-line{
-                &:last-child{
+
+          ::v-deep(.jm-text-viewer) {
+            .content {
+              .text-line {
+                &:last-child {
                   text-align: center;
-                  &::after{
+
+                  &::after {
                     display: none;
                   }
                 }
