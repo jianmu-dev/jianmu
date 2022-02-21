@@ -109,22 +109,6 @@ public class WorkflowEventHandler {
 
     @Async
     @EventListener
-    public void handleAsyncTaskSkipEvent(AsyncTaskSkipEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        log.info("Get AsyncTaskSkipEvent here -------------------------");
-        log.info(event.toString());
-        var cmd = SkipNodeCmd.builder()
-                .triggerId(event.getTriggerId())
-                .workflowRef(event.getWorkflowRef())
-                .workflowVersion(event.getWorkflowVersion())
-                .nodeRef(event.getNodeRef())
-                .build();
-        this.asyncTaskInstanceInternalApplication.skip(cmd);
-        log.info("handle AsyncTaskSkipEvent end-----------------------------------------------------");
-    }
-
-    @Async
-    @EventListener
     public void handleWorkflowEndEvent(WorkflowEndEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get WorkflowEndEvent here -------------------------");
