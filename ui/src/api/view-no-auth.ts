@@ -296,3 +296,15 @@ export function getProjectGroupDetail(
     method: 'get',
   });
 }
+
+/**
+ * 获取节点详情
+ * @param ownerRef
+ * @param ref
+ */
+export function fetchNodeLibrary(ownerRef: string, ref: string): Promise<INodeVo> {
+  return restProxy<INodeVo>({
+    url: `${baseUrl.library}/${ownerRef}/${ref}`,
+    method: 'get',
+  });
+}

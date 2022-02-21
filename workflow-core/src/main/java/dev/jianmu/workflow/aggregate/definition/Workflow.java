@@ -155,6 +155,16 @@ public class Workflow extends AggregateRoot {
     // 跳过节点
     public void skipNode(String triggerId, String nodeRef) {
         Node node = this.findNode(nodeRef);
+        // 如果节点为异步任务类型，发布任务跳过事件
+        if (node instanceof AsyncTask) {
+            var taskSkipEvent = AsyncTaskSkipEvent.Builder.anAsyncTaskSkipEvent()
+                    .nodeRef(nodeRef)
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(taskSkipEvent);
+        }
         // 发布下游节点跳过事件
         var targets = node.getTargets();
         targets.forEach(targetRef -> {

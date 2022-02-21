@@ -151,11 +151,37 @@ public class ViewController {
                     .sourceLink(nodeDefinition.getSourceLink())
                     .documentLink(nodeDefinition.getDocumentLink())
                     .versions(versions)
+                    .deprecated(nodeDefinition.getDeprecated())
                     .build();
         }).collect(Collectors.toList());
         PageInfo<NodeDefVo> newPage = PageUtils.pageInfo2PageInfoVo(page);
         newPage.setList(nodeDefVos);
         return newPage;
+    }
+
+    @GetMapping("nodes/{ownerRef}/{ref}")
+    @Operation(summary = "获取节点定义", description = "获取节点定义")
+    public NodeDefVo findNode(@PathVariable String ownerRef, @PathVariable String ref) {
+        return this.hubApplication.findById(ownerRef + "/" + ref).map(nodeDefinition -> {
+            var versions = this.hubApplication.findByOwnerRefAndRef(nodeDefinition.getOwnerRef(), nodeDefinition.getRef()).stream()
+                    .map(NodeDefinitionVersion::getVersion).collect(Collectors.toList());
+            return NodeDefVo.builder()
+                    .icon(nodeDefinition.getIcon())
+                    .name(nodeDefinition.getName())
+                    .ownerName(nodeDefinition.getOwnerName())
+                    .ownerType(nodeDefinition.getOwnerType())
+                    .ownerRef(nodeDefinition.getOwnerRef())
+                    .creatorName(nodeDefinition.getCreatorName())
+                    .creatorRef(nodeDefinition.getCreatorRef())
+                    .type(nodeDefinition.getType())
+                    .description(nodeDefinition.getDescription())
+                    .ref(nodeDefinition.getRef())
+                    .sourceLink(nodeDefinition.getSourceLink())
+                    .documentLink(nodeDefinition.getDocumentLink())
+                    .versions(versions)
+                    .deprecated(nodeDefinition.getDeprecated())
+                    .build();
+        }).orElseThrow(() -> new DataNotFoundException("未找到该节点"));
     }
 
     @GetMapping("/projects")
