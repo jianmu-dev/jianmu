@@ -9,6 +9,7 @@ import dev.jianmu.el.ElContext;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
+import dev.jianmu.workflow.aggregate.definition.AsyncTask;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
@@ -17,6 +18,7 @@ import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
+import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WorkflowInternalApplication {
     private final WorkflowRepository workflowRepository;
+    private final WorkflowInstanceRepository workflowInstanceRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final ExpressionLanguage expressionLanguage;
     private final InstanceParameterRepository instanceParameterRepository;
@@ -47,6 +50,7 @@ public class WorkflowInternalApplication {
 
     public WorkflowInternalApplication(
             WorkflowRepository workflowRepository,
+            WorkflowInstanceRepository workflowInstanceRepository,
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             ExpressionLanguage expressionLanguage,
             InstanceParameterRepository instanceParameterRepository,
@@ -55,6 +59,7 @@ public class WorkflowInternalApplication {
             ParameterRepository parameterRepository
     ) {
         this.workflowRepository = workflowRepository;
+        this.workflowInstanceRepository = workflowInstanceRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.expressionLanguage = expressionLanguage;
         this.instanceParameterRepository = instanceParameterRepository;
@@ -165,6 +170,33 @@ public class WorkflowInternalApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(cmd.getTriggerId())
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var node = workflow.findNode(cmd.getNodeRef());
+        var list = this.asyncTaskInstanceRepository
+                .findByTriggerIdAndTaskRef(cmd.getTriggerId(), cmd.getNodeRef());
+        if (list.size() > 0) {
+            log.info("发现逻辑回环，忽略跳过事件");
+            return;
+        }
+
+        if (node instanceof AsyncTask) {
+            var asyncTaskInstance = AsyncTaskInstance.Builder
+                    .anAsyncTaskInstance()
+                    .workflowInstanceId(workflowInstance.getId())
+                    .triggerId(cmd.getTriggerId())
+                    .workflowRef(cmd.getWorkflowRef())
+                    .workflowVersion(cmd.getWorkflowVersion())
+                    .name(node.getName())
+                    .description(node.getDescription())
+                    .asyncTaskRef(node.getRef())
+                    .asyncTaskType(node.getType())
+                    .build();
+            asyncTaskInstance.skip();
+            log.info("创建跳过状态的异步任务");
+            this.asyncTaskInstanceRepository.add(asyncTaskInstance);
+        }
+
         workflow.skipNode(cmd.getTriggerId(), cmd.getNodeRef());
         this.workflowRepository.commitEvents(workflow);
     }
