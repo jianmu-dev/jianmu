@@ -43,6 +43,7 @@
               <button
                 :class="{ del: true, doing: deletings[ns.name] }"
                 @click="del(ns.name)"
+                @keypress.enter.prevent
               ></button>
             </div>
           </div>
@@ -55,7 +56,9 @@
                 <div class="vault-icon"></div>
               </router-link>
               <router-link :to="{name:'manage-secret-key',params:{namespace:ns.name}}">
-                <div class="vault-name"><jm-text-viewer :value="ns.name"/></div>
+                <div class="vault-name">
+                  <jm-text-viewer :value="ns.name"/>
+                </div>
               </router-link>
             </div>
             <div class="operation">
@@ -264,7 +267,7 @@ export default defineComponent({
     flex-wrap: wrap;
 
     .item {
-      width:100%;
+      width: 100%;
       display: flex;
       flex-wrap: wrap;
 
@@ -308,7 +311,8 @@ export default defineComponent({
           .description {
             font-size: 13px;
             color: #6b7b8d;
-            .text-viewer{
+
+            .text-viewer {
               height: 90px;
             }
           }
@@ -364,29 +368,35 @@ export default defineComponent({
           display: flex;
           flex-direction: column;
           align-items: center;
+
           .vault-icon {
             width: 64px;
             height: 64px;
             margin: 20px 0px;
             background: url('@/assets/svgs/secret-key/key-title-icon.svg');
           }
-          a{
-            &:nth-child(2){
+
+          a {
+            &:nth-child(2) {
               align-self: stretch;
             }
           }
+
           .vault-name {
             font-size: 20px;
             font-weight: bold;
             color: #082340;
             cursor: pointer;
-            ::v-deep(.jm-text-viewer){
+
+            ::v-deep(.jm-text-viewer) {
               width: 100%;
-              .content{
-                .text-line{
-                  &:last-child{
+
+              .content {
+                .text-line {
+                  &:last-child {
                     text-align: center;
-                    &::after{
+
+                    &::after {
                       display: none;
                     }
                   }

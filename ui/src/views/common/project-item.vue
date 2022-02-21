@@ -75,6 +75,7 @@
           <button
             :class="{ execute: true, doing: !enabled || executing }"
             @click="execute(project.id)"
+            @keypress.enter.prevent
           ></button>
         </jm-tooltip>
         <jm-tooltip
@@ -95,6 +96,7 @@
           <button
             :class="{ sync: true, doing: synchronizing }"
             @click="sync(project.id)"
+            @keypress.enter.prevent
           ></button>
         </jm-tooltip>
         <jm-tooltip
