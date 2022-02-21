@@ -22,7 +22,7 @@ function parseWebhook(nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: bool
   const label = key;
   const type = NodeTypeEnum.WEBHOOK;
 
-  nodes.push({
+  nodes.splice(0, 0, {
     id: key,
     label,
     description: key,
@@ -34,7 +34,7 @@ function parseWebhook(nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: bool
   if (isWorkflow) {
     startNode = nodes.find(item => item.type === NodeTypeEnum.START) as NodeConfig;
   } else {
-    startNode = nodes[0];
+    startNode = nodes[1];
   }
 
   edges.push({
@@ -63,7 +63,7 @@ function parseCron(cron: string | undefined, nodes: NodeConfig[], edges: EdgeCon
   const description = cron;
   const type = NodeTypeEnum.CRON;
 
-  nodes.push({
+  nodes.splice(0, 0, {
     id: key,
     label,
     description,
@@ -75,7 +75,7 @@ function parseCron(cron: string | undefined, nodes: NodeConfig[], edges: EdgeCon
   if (isWorkflow) {
     startNode = nodes.find(item => item.type === NodeTypeEnum.START) as NodeConfig;
   } else {
-    startNode = nodes[0];
+    startNode = nodes[1];
   }
 
   edges.push({

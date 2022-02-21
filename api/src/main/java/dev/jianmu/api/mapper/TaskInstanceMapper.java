@@ -25,6 +25,7 @@ public interface TaskInstanceMapper {
     @Mapping(target = "nodeName", source = "asyncTaskRef")
     TaskInstanceVo toTaskInstanceVo(TaskInstance taskInstance);
 
+    @Mapping(target = "instanceId", source = "id")
     @Mapping(target = "defKey", source = "asyncTaskType")
     @Mapping(target = "nodeName", source = "asyncTaskRef")
     TaskInstanceVo asyncTaskInstanceToTaskInstanceVo(AsyncTaskInstance asyncTaskInstance);
