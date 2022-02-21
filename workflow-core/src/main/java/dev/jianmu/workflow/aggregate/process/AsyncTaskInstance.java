@@ -110,6 +110,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     public void skip() {
         this.status = TaskStatus.SKIPPED;
         this.startTime = LocalDateTime.now();
+        this.activatingTime = LocalDateTime.now();
         this.endTime = LocalDateTime.now();
     }
 
