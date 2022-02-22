@@ -656,6 +656,7 @@ public class TriggerApplication {
         var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
-        this.webRequestRepositoryImpl.updateStatusCode(webRequest);
+        webRequest.setErrorMsg("该流程运行中");
+        this.webRequestRepositoryImpl.update(webRequest);
     }
 }
