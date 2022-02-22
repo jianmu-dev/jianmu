@@ -104,7 +104,7 @@ export default defineComponent({
     };
     // 没有登录时做的弹框判断
     if (!sessionState.session) {
-      proxy.$confirm('未登录,操作内容将会丢失。', '尚未登录', {
+      proxy.$confirm('未登录，操作内容将会丢失。', '尚未登录', {
         confirmButtonText: '登录',
         cancelButtonText: '取消',
         type: 'info',
