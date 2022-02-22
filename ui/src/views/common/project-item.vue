@@ -171,8 +171,6 @@ import router from '@/router';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
-import { namespace } from '@/store/modules/session';
-import { useStore } from 'vuex';
 
 export default defineComponent({
   components: { ProjectPreviewDialog, WebhookDrawer },
@@ -195,7 +193,6 @@ export default defineComponent({
   emits: ['running', 'synchronized', 'deleted'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
-    const store = useStore();
     const isMove = computed<boolean>(() => props.move);
     const isMoveMode = computed<boolean>(() => props.moveMode);
     const executing = ref<boolean>(false);
@@ -301,20 +298,6 @@ export default defineComponent({
         });
       },
       edit: (id: string) => {
-        const sessionState = { ...store.state[namespace] };
-        if (!sessionState.session) {
-          proxy.$confirm('此操作需要登录, 是否继续？', '尚未登录', {
-            confirmButtonText: '登录',
-            cancelButtonText: '取消',
-            type: 'info',
-          }).then(async () => {
-            await router.push({
-              name: 'login',
-            });
-          }).catch(() => {
-          });
-          return;
-        }
         router.push({ name: 'update-project', params: { id } });
       },
       sync: (id: string) => {
