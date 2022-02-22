@@ -1,9 +1,7 @@
 package dev.jianmu.infrastructure.mapper.trigger;
 
 import dev.jianmu.trigger.aggregate.WebRequest;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,4 +38,7 @@ public interface WebRequestMapper {
     @Result(column = "error_msg", property = "errorMsg")
     @Result(column = "request_time", property = "requestTime")
     Optional<WebRequest> findById(String id);
+
+    @Update("UPDATE jianmu_web_request set status_code = #{statusCode} where id = #{id}")
+    void updateStatusCode(WebRequest webRequest);
 }

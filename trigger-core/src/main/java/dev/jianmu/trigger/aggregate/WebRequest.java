@@ -15,6 +15,7 @@ public class WebRequest {
         NOT_ACCEPTABLE,
         UNAUTHORIZED,
         NOT_FOUND,
+        ALREADY_RUNNING,
         UNKNOWN
     }
 

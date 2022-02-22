@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -643,5 +644,18 @@ public class TriggerApplication {
         trigger.getParam().forEach(webhookParameter ->
                 webhookParameter.setValue(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp())));
         return trigger;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateTriggerStatus(String triggerId, String triggerType) {
+        if (!triggerType.equals(Trigger.Type.WEBHOOK.name())) {
+            return;
+        }
+        var triggerEvent = this.triggerEventRepository.findById(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
+        var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
+                .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
+        webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
+        this.webRequestRepositoryImpl.updateStatusCode(webRequest);
     }
 }

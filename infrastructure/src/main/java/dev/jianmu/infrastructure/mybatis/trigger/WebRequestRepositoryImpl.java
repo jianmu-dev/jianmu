@@ -33,6 +33,11 @@ public class WebRequestRepositoryImpl implements WebRequestRepository {
         return this.webRequestMapper.findById(id);
     }
 
+    @Override
+    public void updateStatusCode(WebRequest webRequest) {
+        this.webRequestMapper.updateStatusCode(webRequest);
+    }
+
     public PageInfo<WebRequest> findPage(String projectId, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> this.webRequestMapper.findPage(projectId));
