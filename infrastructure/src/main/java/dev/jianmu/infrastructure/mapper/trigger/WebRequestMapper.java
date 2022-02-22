@@ -39,6 +39,6 @@ public interface WebRequestMapper {
     @Result(column = "request_time", property = "requestTime")
     Optional<WebRequest> findById(String id);
 
-    @Update("UPDATE jianmu_web_request set status_code = #{statusCode} where id = #{id}")
-    void updateStatusCode(WebRequest webRequest);
+    @Update("UPDATE jianmu_web_request set status_code = #{statusCode}, error_msg = #{errorMsg} where id = #{id}")
+    void update(WebRequest webRequest);
 }

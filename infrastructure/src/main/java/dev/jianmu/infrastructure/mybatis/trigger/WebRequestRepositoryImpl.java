@@ -34,8 +34,8 @@ public class WebRequestRepositoryImpl implements WebRequestRepository {
     }
 
     @Override
-    public void updateStatusCode(WebRequest webRequest) {
-        this.webRequestMapper.updateStatusCode(webRequest);
+    public void update(WebRequest webRequest) {
+        this.webRequestMapper.update(webRequest);
     }
 
     public PageInfo<WebRequest> findPage(String projectId, int pageNum, int pageSize) {
