@@ -65,6 +65,7 @@ import { IProcessTemplateVo, IProjectIdVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { useStore } from 'vuex';
 import { IRootState } from '@/model';
+import { namespace } from '@/store/modules/session';
 
 export default defineComponent({
   props: {
@@ -73,6 +74,8 @@ export default defineComponent({
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
+    const store = useStore();
+    const sessionState = { ...store.state[namespace] };
     const reloadMain = inject('reloadMain') as () => void;
     const route = useRoute();
     const editMode = !!props.id;
@@ -84,7 +87,6 @@ export default defineComponent({
     const projectGroupList = ref<IProjectGroupVo[]>([]);
     const form = ref<any>();
     const loading = ref<boolean>(false);
-    const store = useStore();
     const rootState = store.state as IRootState;
     onMounted(async () => {
       // 请求项目组列表
@@ -100,6 +102,19 @@ export default defineComponent({
         { required: true, message: '请选择项目组', trigger: 'change' },
       ],
     };
+    // 没有登录时做的弹框判断
+    if (!sessionState.session) {
+      proxy.$confirm('未登录,操作内容将会丢失。', '尚未登录', {
+        confirmButtonText: '登录',
+        cancelButtonText: '取消',
+        type: 'info',
+      }).then(async () => {
+        await router.push({
+          name: 'login',
+        });
+      }).catch(() => {
+      });
+    }
     if (route.query.templateId) {
       getProcessTemplate(route.query.templateId as unknown as number)
         .then((res: IProcessTemplateVo) => {
