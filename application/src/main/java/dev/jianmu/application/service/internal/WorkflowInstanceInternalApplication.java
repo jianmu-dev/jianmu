@@ -2,6 +2,7 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.trigger.event.TriggerFailedEvent;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
@@ -10,6 +11,7 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,15 +29,17 @@ public class WorkflowInstanceInternalApplication {
     private final WorkflowRepository workflowRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final WorkflowInstanceDomainService workflowInstanceDomainService;
+    private final ApplicationEventPublisher publisher;
 
     public WorkflowInstanceInternalApplication(
             WorkflowRepository workflowRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
-            WorkflowInstanceDomainService workflowInstanceDomainService
-    ) {
+            WorkflowInstanceDomainService workflowInstanceDomainService,
+            ApplicationEventPublisher publisher) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
+        this.publisher = publisher;
     }
 
     // 创建并启动流程
@@ -49,6 +53,11 @@ public class WorkflowInstanceInternalApplication {
                 .findByRefAndVersionAndStatus(workflow.getRef(), workflow.getVersion(), ProcessStatus.RUNNING)
                 .size();
         if (i > 0) {
+            var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()
+                    .triggerId(cmd.getTriggerId())
+                    .triggerType(cmd.getTriggerType())
+                    .build();
+            this.publisher.publishEvent(triggerFailedEvent);
             throw new RuntimeException("该流程运行中");
         }
         // 查询serialNo
