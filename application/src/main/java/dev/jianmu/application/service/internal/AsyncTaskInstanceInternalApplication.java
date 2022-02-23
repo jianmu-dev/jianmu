@@ -1,6 +1,7 @@
 package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
+import dev.jianmu.application.command.SkipNodeCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;

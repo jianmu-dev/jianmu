@@ -12,7 +12,7 @@
     </jm-form>
     <div class="operation">
       <jm-button v-if="!disabled" type="text" @click="save" :loading="savingLoading">保存</jm-button>
-      <jm-button type="text" @click="del" :loading="deletingLoading">删除</jm-button>
+      <jm-button type="text" @click="del" :loading="deletingLoading" @keypress.enter.prevent>删除</jm-button>
     </div>
   </div>
 </template>

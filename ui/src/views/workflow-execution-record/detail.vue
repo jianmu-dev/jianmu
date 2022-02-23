@@ -5,7 +5,7 @@
     </div>
     <div class="basic-section">
       <jm-tooltip content="触发" placement="left">
-        <button class="trigger-btn jm-icon-button-on" @click="execute"></button>
+        <button class="trigger-btn jm-icon-button-on" @click="execute" @keypress.enter.prevent></button>
       </jm-tooltip>
       <div class="info">
         <div class="name">
@@ -82,11 +82,11 @@
         </div>
         <div class="item">
           <div v-if="!data.record?.id" class="value">无</div>
-          <jm-text-viewer v-else :value="data.record?.id" class="value" />
+          <jm-text-viewer v-else :value="data.record?.id" class="value"/>
           <div>流程实例ID</div>
         </div>
         <div class="item">
-          <jm-text-viewer :value="data.record?.workflowVersion" class="value" />
+          <jm-text-viewer :value="data.record?.workflowVersion" class="value"/>
           <div>流程版本号</div>
         </div>
         <jm-tooltip
@@ -99,6 +99,7 @@
           <button
             class="terminate-btn jm-icon-button-stop"
             @click="terminate"
+            @keypress.enter.prevent
           ></button>
         </jm-tooltip>
       </div>

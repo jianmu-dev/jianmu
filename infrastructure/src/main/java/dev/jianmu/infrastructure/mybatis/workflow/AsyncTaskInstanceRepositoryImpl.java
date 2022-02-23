@@ -41,6 +41,11 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     }
 
     @Override
+    public List<AsyncTaskInstance> findByTriggerIdAndTaskRef(String triggerId, String taskRef) {
+        return this.asyncTaskInstanceMapper.findByTriggerIdAndTaskRef(triggerId, taskRef);
+    }
+
+    @Override
     public void add(AsyncTaskInstance asyncTaskInstance) {
         this.asyncTaskInstanceMapper.add(asyncTaskInstance);
         this.publisher.publishEvent(asyncTaskInstance);

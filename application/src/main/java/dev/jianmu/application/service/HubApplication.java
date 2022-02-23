@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,6 +77,7 @@ public class HubApplication {
                 .creatorName("local")
                 .creatorRef("local")
                 .type(NodeDefinition.Type.DOCKER)
+                .deprecated(false)
                 .build();
 
         List<Parameter> parameters = new ArrayList<>();
@@ -163,6 +165,10 @@ public class HubApplication {
         events.forEach(this.publisher::publishEvent);
     }
 
+    public Optional<NodeDefinition> findById(String id) {
+        return this.nodeDefinitionRepository.findById(id);
+    }
+
     public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {
         return this.nodeDefinitionRepository.findPage(pageNum, pageSize);
     }
@@ -210,6 +216,7 @@ public class HubApplication {
                 .ref(defDto.getRef())
                 .sourceLink(defDto.getSourceLink())
                 .documentLink(defDto.getDocumentLink())
+                .deprecated(defDto.getDeprecated())
                 .build();
     }
 

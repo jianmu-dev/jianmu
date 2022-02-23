@@ -107,12 +107,6 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
         return container;
     }
 
-    private V1ConfigMap initConfigMap(String mapName) {
-        return new V1ConfigMap()
-                .metadata(new V1ObjectMeta().namespace("jianmu").name(mapName))
-                .data(Map.of("foo", "boo"));
-    }
-
     private List<V1ConfigMap> initConfigMaps(String podName, Map<String, ContainerSpec> specMap) {
         return specMap.keySet().stream()
                 .map(spec -> new V1ConfigMap().metadata(new V1ObjectMeta().namespace("jianmu").name(podName + spec))
@@ -244,7 +238,31 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
 
     @Override
     public void resumeTask(EmbeddedWorkerTask embeddedWorkerTask, BufferedWriter logWriter) {
+        try {
+            var pod = this.client.getPod(embeddedWorkerTask.getTriggerId());
 
+            // Add Task Watcher
+            var podWatcher = this.watcher.getPodWatcher(embeddedWorkerTask.getTriggerId());
+            var taskWatcher = TaskWatcher.builder()
+                    .taskInstanceId(embeddedWorkerTask.getTaskInstanceId())
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskName(embeddedWorkerTask.getTaskName())
+                    .placeholder(placeholder)
+                    .logWriter(logWriter)
+                    .hasResult(embeddedWorkerTask.getResultFile() != null)
+                    .state(TaskWatcher.State.WAITING)
+                    .client(this.client)
+                    .publisher(this.publisher)
+                    .build();
+            podWatcher.addTaskWatcher(taskWatcher);
+        } catch (ApiException e) {
+            log.warn("e: {}", e.getResponseBody());
+            this.publisher.publishEvent(TaskFailedEvent.builder()
+                    .triggerId(embeddedWorkerTask.getTriggerId())
+                    .taskId(embeddedWorkerTask.getTaskInstanceId())
+                    .errorMsg(e.getResponseBody())
+                    .build());
+        }
     }
 
     @Override
