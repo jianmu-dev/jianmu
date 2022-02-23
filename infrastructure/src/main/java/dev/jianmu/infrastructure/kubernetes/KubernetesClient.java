@@ -83,8 +83,11 @@ public class KubernetesClient {
         try {
             this.connect();
             this.createNamespace();
-        } catch (IOException | ApiException e) {
+        } catch (IOException e) {
             log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        } catch (ApiException e) {
+            log.warn("error: {}", e.getResponseBody());
             throw new RuntimeException("无法连接到Kubernetes集群");
         }
     }
@@ -95,8 +98,11 @@ public class KubernetesClient {
         try {
             this.connectWithConfig();
             this.createNamespace();
-        } catch (IOException | ApiException e) {
+        } catch (IOException e) {
             log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        } catch (ApiException e) {
+            log.warn("error: {}", e.getResponseBody());
             throw new RuntimeException("无法连接到Kubernetes集群");
         }
     }
@@ -107,8 +113,11 @@ public class KubernetesClient {
         try {
             this.connectWithConfig();
             this.createNamespace();
-        } catch (IOException | ApiException e) {
+        } catch (IOException e) {
             log.warn("error: {}", e.getMessage());
+            throw new RuntimeException("无法连接到Kubernetes集群");
+        } catch (ApiException e) {
+            log.warn("error: {}", e.getResponseBody());
             throw new RuntimeException("无法连接到Kubernetes集群");
         }
     }
