@@ -40,7 +40,7 @@ public class TaskWatcher {
     private State state;
 
     private int exitCode;
-    private String reason;
+    private String reason = "";
 
     private LocalDateTime addedAt;
     private LocalDateTime failedAt;
