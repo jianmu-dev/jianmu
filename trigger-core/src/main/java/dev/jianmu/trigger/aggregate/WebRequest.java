@@ -30,6 +30,10 @@ public class WebRequest {
     private String errorMsg;
     private LocalDateTime requestTime;
 
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
+
     public void setStatusCode(StatusCode statusCode) {
         this.statusCode = statusCode;
     }

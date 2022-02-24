@@ -20,4 +20,8 @@ public interface StorageService {
     File logFile(String LogFileName);
 
     File workflowLogFile(String LogFileName);
+
+    BufferedWriter writeWebhook(String webhookFileName);
+
+    String readWebhook(String webhookFileName);
 }
