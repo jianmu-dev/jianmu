@@ -42,12 +42,13 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
         this.publisher = publisher;
         this.properties = properties;
         var kubeConfigPath = properties.getWorker().getK8s().getKubeConfigPath();
+        var namespace = this.properties.getWorker().getK8s().getNamespace();
         if (kubeConfigPath == null) {
-            this.client = new KubernetesClient();
-            this.watcher = new KubernetesWatcher();
+            this.client = new KubernetesClient(namespace);
+            this.watcher = new KubernetesWatcher(namespace);
         } else {
-            this.client = new KubernetesClient(kubeConfigPath);
-            this.watcher = new KubernetesWatcher(kubeConfigPath);
+            this.client = new KubernetesClient(kubeConfigPath, namespace);
+            this.watcher = new KubernetesWatcher(kubeConfigPath, namespace);
         }
         this.watcher.watch();
     }
@@ -109,7 +110,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
 
     private List<V1ConfigMap> initConfigMaps(String podName, Map<String, ContainerSpec> specMap) {
         return specMap.keySet().stream()
-                .map(spec -> new V1ConfigMap().metadata(new V1ObjectMeta().namespace("jianmu").name(podName + spec))
+                .map(spec -> new V1ConfigMap().metadata(new V1ObjectMeta().namespace(this.client.defaultNamespace).name(podName + spec))
                         .data(Map.of("foo", "boo"))
                 ).collect(Collectors.toList());
     }

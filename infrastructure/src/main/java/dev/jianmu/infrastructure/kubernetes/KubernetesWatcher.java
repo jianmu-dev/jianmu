@@ -37,21 +37,10 @@ public class KubernetesWatcher {
     private final Map<String, PodWatcher> podWatcherMap = new ConcurrentHashMap<>();
     private Resource kubeConfigPath;
 
-    public KubernetesWatcher() {
-        this.defaultNamespace = "jianmu";
+    public KubernetesWatcher(String namespace) {
+        this.defaultNamespace = namespace;
         try {
             this.connect();
-        } catch (IOException e) {
-            log.warn("error: {}", e.getMessage());
-            throw new RuntimeException("无法连接到Kubernetes集群");
-        }
-    }
-
-    public KubernetesWatcher(Resource kubeConfigPath) {
-        this.defaultNamespace = "jianmu";
-        this.kubeConfigPath = kubeConfigPath;
-        try {
-            this.connectWithConfig();
         } catch (IOException e) {
             log.warn("error: {}", e.getMessage());
             throw new RuntimeException("无法连接到Kubernetes集群");

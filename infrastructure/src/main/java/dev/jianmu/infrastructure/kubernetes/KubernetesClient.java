@@ -78,25 +78,10 @@ public class KubernetesClient {
         }
     }
 
-    public KubernetesClient() {
-        this.defaultNamespace = "jianmu";
+    public KubernetesClient(String namespace) {
+        this.defaultNamespace = namespace;
         try {
             this.connect();
-            this.createNamespace();
-        } catch (IOException e) {
-            log.warn("error: {}", e.getMessage());
-            throw new RuntimeException("无法连接到Kubernetes集群");
-        } catch (ApiException e) {
-            log.warn("error: {}", e.getResponseBody());
-            throw new RuntimeException("无法连接到Kubernetes集群");
-        }
-    }
-
-    public KubernetesClient(Resource kubeConfigPath) {
-        this.defaultNamespace = "jianmu";
-        this.kubeConfigPath = kubeConfigPath;
-        try {
-            this.connectWithConfig();
             this.createNamespace();
         } catch (IOException e) {
             log.warn("error: {}", e.getMessage());
