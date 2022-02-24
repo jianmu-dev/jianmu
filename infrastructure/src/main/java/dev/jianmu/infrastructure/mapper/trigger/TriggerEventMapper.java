@@ -22,7 +22,7 @@ public interface TriggerEventMapper {
     @Result(column = "occurred_time", property = "occurredTime")
     Optional<TriggerEvent> findById(String id);
 
-    @Insert("insert into jianmu_trigger_event(id, project_id, trigger_id, web_request_id, trigger_type, payload, occurred_time) " +
-            "values(#{id}, #{projectId}, #{triggerId}, #{webRequestId}, #{triggerType}, #{payload}, #{occurredTime})")
+    @Insert("insert into jianmu_trigger_event(id, project_id, trigger_id, web_request_id, trigger_type, occurred_time) " +
+            "values(#{id}, #{projectId}, #{triggerId}, #{webRequestId}, #{triggerType}, #{occurredTime})")
     void save(TriggerEvent triggerEvent);
 }

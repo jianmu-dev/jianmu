@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create 2021-11-15 13:44
  */
 public interface WebRequestMapper {
-    @Insert("insert into jianmu_web_request(id, project_id, workflow_ref, workflow_version, trigger_id, user_agent, payload, status_code, error_msg, request_time) " +
-            "values(#{id}, #{projectId}, #{workflowRef}, #{workflowVersion}, #{triggerId}, #{userAgent}, #{payload}, #{statusCode}, #{errorMsg}, #{requestTime})")
+    @Insert("insert into jianmu_web_request(id, project_id, workflow_ref, workflow_version, trigger_id, user_agent, status_code, error_msg, request_time) " +
+            "values(#{id}, #{projectId}, #{workflowRef}, #{workflowVersion}, #{triggerId}, #{userAgent}, #{statusCode}, #{errorMsg}, #{requestTime})")
     void add(WebRequest webRequest);
 
     @Select("SELECT * FROM jianmu_web_request where project_id = #{projectId} order by request_time desc")
