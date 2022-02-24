@@ -489,7 +489,7 @@ export default defineComponent({
         const payloadContent = await getPayloadParams(webhookListId.value);
         webhookLog.value = JSON.stringify(JSON.parse(payloadContent.payload), null, 2);
       } catch (err) {
-        proxy.$thorw(err, proxy);
+        proxy.$throw(err, proxy);
       }
     };
     // 触发器
