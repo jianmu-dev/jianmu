@@ -84,6 +84,7 @@ public class TaskWatcher {
 
     public void taskSucceed() {
         this.copyResult();
+        this.fetchLog();
         this.publisher.publishEvent(
                 TaskFinishedEvent.builder()
                         .triggerId(triggerId)
