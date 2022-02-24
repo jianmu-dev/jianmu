@@ -119,10 +119,6 @@ public class TaskWatcher {
     }
 
     private void copyResult() {
-        if (!hasResult) {
-            log.info("Task id: {} 无需获取结果文件", taskInstanceId);
-            return;
-        }
         var resultPath = "/" + this.triggerId + "/" + this.taskName;
         log.info("copy file: " + resultPath + " from container....");
         try {
@@ -130,11 +126,7 @@ public class TaskWatcher {
             log.info("result: {}", this.resultFile);
         } catch (IOException | ApiException e) {
             log.warn("获取结果文件失败: {}", e.getMessage());
-            this.publisher.publishEvent(TaskFailedEvent.builder()
-                    .triggerId(triggerId)
-                    .taskId(taskInstanceId)
-                    .errorMsg("获取结果文件失败")
-                    .build());
+            this.resultFile = "";
         }
         log.info("copy file:" + resultPath + " from container done");
     }
