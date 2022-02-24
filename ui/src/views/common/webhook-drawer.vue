@@ -223,6 +223,7 @@ import {
   getWebhookList,
   retryWebRequest,
   getWebhookParams,
+  getPayloadParams,
 } from '@/api/trigger';
 import {
   IWebRequestVo,
@@ -464,14 +465,8 @@ export default defineComponent({
     // 查看payload
     const seePayload = (id: string) => {
       webhookListId.value = id;
-      const { payload } = webhookRequestList.value.find(
-        item => item.id === webhookListId.value,
-      ) as IWebRequestVo;
-      webhookLog.value = JSON.stringify(JSON.parse(payload), null, 2);
-      nextTick(() => {
-        payloadDialogVisible.value = true;
-        getTriggerParam();
-      });
+      payloadDialogVisible.value = true;
+      getTriggerParam();
     };
     // 显示更多
     const btnDown = () => {
@@ -488,8 +483,14 @@ export default defineComponent({
       return row.id;
     };
     // payload
-    const toTrigger = () => {
+    const toTrigger = async () => {
       payloadTab.value = false;
+      try {
+        const payloadContent = await getPayloadParams(webhookListId.value);
+        webhookLog.value = JSON.stringify(JSON.parse(payloadContent.payload), null, 2);
+      } catch (err) {
+        proxy.$thorw(err, proxy);
+      }
     };
     // 触发器
     const toPayload = () => {
@@ -518,7 +519,7 @@ export default defineComponent({
       }
     };
     // 刷新
-    const refresh = async() =>{
+    const refresh = async () => {
       refreshFlag.value = true;
       refreshVisible.value = false;
       tableLoading.value = true;
@@ -573,7 +574,7 @@ export default defineComponent({
       },
       refresh,
       refreshVisible,
-      refreshFlag
+      refreshFlag,
     };
   },
 });
@@ -662,26 +663,29 @@ export default defineComponent({
     }
 
     .table-title {
-      height:16px;
+      height: 16px;
       margin-bottom: 14px;
       font-size: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      .title{
+
+      .title {
         color: #082340;
       }
-      .jm-icon-button-refresh{
-        padding:0px;
-        min-height:16px;
-        background:#f0f4f8;
+
+      .jm-icon-button-refresh {
+        padding: 0px;
+        min-height: 16px;
+        background: #f0f4f8;
         box-shadow: none;
-        border:#f0f4f8;
+        border: #f0f4f8;
         display: inline-block;
         content: '\e80d';
-        color:#818c9b;
-        &:active{
-          color:#096DD9;
+        color: #818c9b;
+
+        &:active {
+          color: #096DD9;
         }
       }
 
