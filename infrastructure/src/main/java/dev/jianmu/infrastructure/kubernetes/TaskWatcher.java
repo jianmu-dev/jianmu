@@ -84,6 +84,7 @@ public class TaskWatcher {
 
     public void taskSucceed() {
         this.copyResult();
+        this.fetchLog();
         this.publisher.publishEvent(
                 TaskFinishedEvent.builder()
                         .triggerId(triggerId)
@@ -107,7 +108,10 @@ public class TaskWatcher {
     private void fetchLog() {
         try {
             this.client.fetchLog(triggerId, taskName, logWriter);
-        } catch (IOException | ApiException e) {
+            logWriter.close();
+        } catch (IOException e) {
+            log.warn("logWriter异常: {}", e.getMessage());
+        } catch (ApiException e) {
             log.warn("获取日志失败: {}", e.getMessage());
             this.publisher.publishEvent(TaskFailedEvent.builder()
                     .triggerId(triggerId)
