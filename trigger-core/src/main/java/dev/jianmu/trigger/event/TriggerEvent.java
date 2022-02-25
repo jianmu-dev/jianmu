@@ -22,6 +22,10 @@ public class TriggerEvent {
     private LocalDateTime occurredTime;
     private List<TriggerEventParameter> parameters;
 
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
+
     public void setParameters(List<TriggerEventParameter> parameters) {
         this.parameters = parameters;
     }

@@ -41,6 +41,11 @@ mybatis:
 
 storage:
   logfile-path: task_log
+  webhook-file-path: webhook
+embedded:
+  docker-worker:
+    docker-host: tcp://127.0.0.1:2375
+    api-version: v1.39
 jianmu:
   api:
     jwtSecret: Hahhahhhaahh

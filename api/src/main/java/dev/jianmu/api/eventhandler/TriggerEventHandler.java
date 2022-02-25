@@ -7,6 +7,7 @@ import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.infrastructure.quartz.CronTriggerEvent;
 import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.trigger.event.TriggerFailedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -61,5 +62,11 @@ public class TriggerEventHandler {
     public void handleManualEvent(ManualEvent manualEvent) {
         // 删除相关触发器
         this.triggerApplication.deleteByProjectId(manualEvent.getProjectId());
+    }
+
+    @EventListener
+    public void handleTriggerFailedEvent(TriggerFailedEvent triggerFailedEvent) {
+        // 修改Webhook状态
+        this.triggerApplication.updateTriggerStatus(triggerFailedEvent.getTriggerId(), triggerFailedEvent.getTriggerType());
     }
  }

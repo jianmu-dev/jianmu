@@ -15,6 +15,7 @@ public class WebRequest {
         NOT_ACCEPTABLE,
         UNAUTHORIZED,
         NOT_FOUND,
+        ALREADY_RUNNING,
         UNKNOWN
     }
 
@@ -28,6 +29,10 @@ public class WebRequest {
     private StatusCode statusCode;
     private String errorMsg;
     private LocalDateTime requestTime;
+
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
 
     public void setStatusCode(StatusCode statusCode) {
         this.statusCode = statusCode;

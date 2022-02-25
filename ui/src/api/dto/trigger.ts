@@ -1,6 +1,7 @@
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { IPageDto } from '@/api/dto/common';
 import { WebhookRequstStateEnum } from '@/api/dto/enumeration';
+
 /**
  * 事件参数vo
  */
@@ -30,17 +31,17 @@ export interface ITriggerEventVo {
 export interface ITriggerWebhookVo
   extends Readonly<{
     webhook: string;
-  }> {}
+  }> {
+}
 
 /**
  * 分页返回Webhook请求列表 dto
  */
 export interface ITriggerViewingDto
-  extends Readonly<
-    IPageDto & {
-      projectId: string;
-    }
-  > {}
+  extends Readonly<IPageDto & {
+    projectId: string;
+  }> {
+}
 
 /**
  * WebRequest
@@ -57,7 +58,8 @@ export interface IWebRequestVo
     statusCode: WebhookRequstStateEnum;
     errorMsg?: string;
     requestTime: string;
-  }> {}
+  }> {
+}
 
 /**
  * 获取webhook参数
@@ -68,15 +70,29 @@ export interface IWebhookParameterVo
     type: string;
     exp: string;
     value: object;
-  }> {}
+  }> {
+}
+
 export interface IWebhookAuthVo
   extends Readonly<{
     token: string;
     value: string;
-  }> {}
+  }> {
+}
+
 export interface IWebhookParamVo
   extends Readonly<{
     param: IWebhookParameterVo[];
     auth: IWebhookAuthVo;
     only: string;
-  }> {}
+  }> {
+}
+
+/**
+ * 获取payload参数
+ */
+export interface IWebRequestPayloadVo
+  extends Readonly<{
+    payload: string;
+  }> {
+}
