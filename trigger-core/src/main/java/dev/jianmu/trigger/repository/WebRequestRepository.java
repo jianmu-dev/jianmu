@@ -14,4 +14,6 @@ public interface WebRequestRepository {
     void add(WebRequest webRequest);
 
     Optional<WebRequest> findById(String id);
+
+    void update(WebRequest webRequest);
 }

@@ -1,12 +1,12 @@
 <template>
-  <jm-scrollbar class="jm-dsl-editor" @click="clickEmpty">
+  <div class="jm-dsl-editor" @click="clickEmpty">
     <div v-if="readonly" class="operation">
       <jm-tooltip content="复制" placement="top">
         <div class="copy" @click="copy"></div>
       </jm-tooltip>
     </div>
     <textarea ref="textareaRef"></textarea>
-  </jm-scrollbar>
+  </div>
 </template>
 
 <script type="text/ecmascript-6">

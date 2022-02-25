@@ -6,11 +6,12 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
-import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
 import dev.jianmu.infrastructure.quartz.PublishJob;
+import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -31,11 +32,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -71,6 +75,7 @@ public class TriggerApplication {
     private final ObjectMapper objectMapper;
     // 表达式计算服务
     private final ExpressionLanguage expressionLanguage;
+    private final StorageService storageService;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -83,7 +88,8 @@ public class TriggerApplication {
             Scheduler quartzScheduler,
             ApplicationEventPublisher publisher,
             ObjectMapper objectMapper,
-            ExpressionLanguage expressionLanguage) {
+            ExpressionLanguage expressionLanguage,
+            StorageService storageService) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
@@ -95,6 +101,13 @@ public class TriggerApplication {
         this.publisher = publisher;
         this.objectMapper = objectMapper;
         this.expressionLanguage = expressionLanguage;
+        this.storageService = storageService;
+    }
+
+    private static String decode(final String encoded) {
+        return Optional.ofNullable(encoded)
+                .map(e -> URLDecoder.decode(e, StandardCharsets.UTF_8))
+                .orElse(null);
     }
 
     @Transactional
@@ -283,6 +296,9 @@ public class TriggerApplication {
     public TriggerEvent findTriggerEvent(String triggerEventId) {
         var event = this.triggerEventRepository.findById(triggerEventId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该触发事件"));
+        if ("WEBHOOK".equals(event.getTriggerType()) && ObjectUtils.isEmpty(event.getPayload())) {
+            event.setPayload(this.storageService.readWebhook(event.getWebRequestId()));
+        }
         return event;
     }
 
@@ -300,10 +316,11 @@ public class TriggerApplication {
         var webRequest = this.webRequestRepositoryImpl.findById(webRequestId)
                 .orElseThrow(() -> new DataNotFoundException("未找到可重试的记录"));
         var newWebRequest = WebRequest.Builder.aWebRequest()
-                .payload(webRequest.getPayload())
+                .payload(this.storageService.readWebhook(webRequest.getId()))
                 .userAgent(webRequest.getUserAgent())
                 .statusCode(WebRequest.StatusCode.OK)
                 .build();
+        this.writeWebhook(newWebRequest.getId(), newWebRequest.getPayload());
         var project = this.projectRepository.findById(webRequest.getProjectId())
                 .orElseThrow(() -> {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
@@ -390,6 +407,7 @@ public class TriggerApplication {
 
     public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
         var webRequest = this.createWebRequest(request, contentType);
+        this.writeWebhook(webRequest.getId(), webRequest.getPayload());
         var project = this.projectRepository.findByName(projectName)
                 .orElseThrow(() -> {
                     webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
@@ -472,6 +490,15 @@ public class TriggerApplication {
         }
         this.webRequestRepositoryImpl.add(webRequest);
         this.trigger(eventParameters, parameters, webRequest);
+    }
+
+    private void writeWebhook(String webhookRequestId, String payload) {
+        try (var webhookWriter = this.storageService.writeWebhook(webhookRequestId)) {
+            webhookWriter.write(payload);
+            webhookWriter.flush();
+        } catch (IOException e) {
+            log.error("写入webhook文件异常:", e);
+        }
     }
 
     private String findSecret(String secretExp) {
@@ -625,12 +652,6 @@ public class TriggerApplication {
         }
     }
 
-    private static String decode(final String encoded) {
-        return Optional.ofNullable(encoded)
-                .map(e -> URLDecoder.decode(e, StandardCharsets.UTF_8))
-                .orElse(null);
-    }
-
     public dev.jianmu.application.dsl.webhook.Webhook getWebhookParam(String id) {
         var webRequest = webRequestRepositoryImpl.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
@@ -640,8 +661,29 @@ public class TriggerApplication {
         if (trigger.getParam() == null) {
             return trigger;
         }
+        if (ObjectUtils.isEmpty(webRequest.getPayload())) {
+            webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
+        }
         trigger.getParam().forEach(webhookParameter ->
                 webhookParameter.setValue(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp())));
         return trigger;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateTriggerStatus(String triggerId, String triggerType) {
+        if (!triggerType.equals(Trigger.Type.WEBHOOK.name())) {
+            return;
+        }
+        var triggerEvent = this.triggerEventRepository.findById(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到触发器"));
+        var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
+                .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
+        webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
+        webRequest.setErrorMsg("该流程运行中");
+        this.webRequestRepositoryImpl.update(webRequest);
+    }
+
+    public Optional<WebRequest> findWebRequestById(String webRequestId) {
+        return this.webRequestRepositoryImpl.findById(webRequestId);
     }
 }

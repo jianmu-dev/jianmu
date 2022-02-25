@@ -16,4 +16,6 @@ import org.springframework.stereotype.Component;
 public class StorageProperties {
     // 日志文件存储路径
     private String logfilePath;
+    // webhook存储路径
+    private String webhookFilePath;
 }

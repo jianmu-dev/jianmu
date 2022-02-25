@@ -11,8 +11,9 @@ import './array';
 /**
  * 检查内容是否溢出
  * @param graph
+ * @param ratio
  */
-function checkContentOverflow(graph: Graph): boolean {
+function checkContentOverflow(graph: Graph, ratio: number = 1): boolean {
   const bBoxes: IBBox[] = [];
   bBoxes.push(...graph.getNodes().map(node => node.getCanvasBBox()));
   bBoxes.push(...graph.getEdges().map(node => node.getCanvasBBox()));
@@ -21,7 +22,7 @@ function checkContentOverflow(graph: Graph): boolean {
   let tag = false;
 
   for (const { maxX, maxY } of bBoxes) {
-    tag = maxX > graph.getWidth() || maxY > graph.getHeight();
+    tag = maxX > graph.getWidth() / ratio || maxY > graph.getHeight() / ratio;
 
     if (tag) {
       break;
@@ -85,6 +86,9 @@ function calculateLayout(dslType: DslTypeEnum, nodes: NodeConfig[]): LayoutConfi
   };
 }
 
+// 最小缩放
+export const MIN_ZOOM = 20;
+
 /**
  * 适配到画布
  * @param graph
@@ -94,13 +98,27 @@ export function fitCanvas(graph: Graph): void {
     return;
   }
 
-  if (checkContentOverflow(graph)) {
-    // 适配到画布中
-    graph.fitView();
-  } else {
+  // 判断原始大小（100%）是否溢出
+  if (!checkContentOverflow(graph)) {
     // 对齐到画布中心
     graph.fitCenter();
+    return;
   }
+
+  const minRatio = MIN_ZOOM / 100;
+
+  // 缩放到最小，判断是否溢出
+  if (checkContentOverflow(graph, minRatio)) {
+    // 对齐到画布中心
+    graph.fitCenter();
+
+    // 溢出时，缩放到最小
+    graph.zoomTo(minRatio, graph.getGraphCenterPoint());
+    return;
+  }
+
+  // 没有溢出时，适配到画布中
+  graph.fitView();
 }
 
 /**
