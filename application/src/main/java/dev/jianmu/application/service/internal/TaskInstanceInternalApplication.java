@@ -9,6 +9,7 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
@@ -178,11 +179,16 @@ public class TaskInstanceInternalApplication {
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        // TODO 未来需要在Worker进行去重处理
+        if (taskInstance.getStatus() == InstanceStatus.EXECUTION_SUCCEEDED) {
+            log.info("过滤重复触发的成功事件");
+            return;
+        }
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
-        if (nodeVersion.getResultFile() != null) {
+        if (resultFile != null && !resultFile.isBlank()) {
             outputParameters = this.handleOutputParameter(
                     resultFile, nodeVersion, workflow.getType().name(), taskInstance
             );
