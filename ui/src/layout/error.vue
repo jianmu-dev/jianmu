@@ -42,7 +42,7 @@ export default defineComponent({});
       left: 110px;
       top: 55px;
       width: 150px;
-      height: 40px;
+      height: 34px;
       background-image: url('@/assets/svgs/logo/main.svg');
       background-repeat: no-repeat;
       background-size: contain;
