@@ -127,7 +127,7 @@ export default defineComponent({
 
     .logo {
       width: 150px;
-      height: 40px;
+      height: 34px;
       background-image: url('@/assets/svgs/logo/main.svg');
       background-repeat: no-repeat;
       background-size: contain;
@@ -137,8 +137,8 @@ export default defineComponent({
 
     .version {
       position: absolute;
-      left: 170px;
-      bottom: 8px;
+      left: 160px;
+      bottom: 2px;
       letter-spacing: normal;
       white-space: nowrap;
       padding: 0 10px 1px;
