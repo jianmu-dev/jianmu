@@ -44,12 +44,13 @@
         </div>
         <div class="btn">
           <jm-button type="primary" @click="login" :loading="loading"
-            >登录</jm-button
+          >登录
+          </jm-button
           >
         </div>
       </jm-form>
     </div>
-    <bottom-nav />
+    <bottom-nav/>
   </div>
 </template>
 
@@ -151,8 +152,8 @@ export default defineComponent({
     justify-content: center;
 
     .icon {
-      width: 160px;
-      height: 50px;
+      width: 150px;
+      height: 40px;
       background-image: url('@/assets/svgs/logo/main.svg');
       background-repeat: no-repeat;
       background-size: contain;
