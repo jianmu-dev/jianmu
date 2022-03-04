@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,13 +71,21 @@ public class NodeTest {
     @DisplayName("Condition节点测试1")
     void conditionTest1() {
         String exp = "1==1";
-        Map<Boolean, String> targetMap = Map.of(true, testNode1.getRef(), false, testNode2.getRef());
+        var b1 = Branch.Builder.aBranch()
+                .matchedCondition(true)
+                .target(testNode1.getRef())
+                .build();
+        var b2 = Branch.Builder.aBranch()
+                .matchedCondition(false)
+                .target(testNode2.getRef())
+                .build();
+        List<Branch> branches = List.of(b1, b2);
         Condition condition = Condition.Builder.aCondition()
                 .name("Condition1")
                 .ref("condition_1")
                 .description("Condition节点1")
                 .expression(exp)
-                .targetMap(targetMap)
+                .branches(branches)
                 .build();
         assertEquals(condition.ref, "condition_1");
     }
@@ -86,12 +95,17 @@ public class NodeTest {
     void conditionTest2() {
         String exp = "1+1 == 2";
         Map<Boolean, String> targetMap = Map.of(true, testNode1.getRef());
+        var b1 = Branch.Builder.aBranch()
+                .matchedCondition(true)
+                .target(testNode1.getRef())
+                .build();
+        List<Branch> branches = List.of(b1);
         Condition condition = Condition.Builder.aCondition()
                 .name("Condition1")
                 .ref("condition_1")
                 .description("Condition节点1")
                 .expression(exp)
-                .targetMap(targetMap)
+                .branches(branches)
                 .build();
         Throwable exception = Assertions.assertThrows(RuntimeException.class, () -> condition.setTargets(Set.of(testNode1.getRef(),testNode2.getRef(),testNode3.getRef())));
         assertEquals("条件网关下游节点不得超过2个",exception.getMessage());

@@ -48,6 +48,8 @@ public class DslParser {
     private final List<ShellNode> shellNodes = new ArrayList<>();
     private Set<GlobalParameter> globalParameters = new HashSet<>();
 
+    private Map<String, Node> symbolTable = new HashMap<>();
+
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION));
 
     public static DslParser parse(String dslText) {
@@ -78,9 +80,20 @@ public class DslParser {
         }
     }
 
+    private void calculateLoop(Node node, Branch branch, String targetRef) {
+        var target = symbolTable.get(targetRef);
+        if (target.getRef().equals(node.getRef())) {
+            branch.setLoop(true);
+            return;
+        }
+        if (target instanceof End) {
+            return;
+        }
+        target.getTargets().forEach(nextTargetRef -> this.calculateLoop(node, branch, nextTargetRef));
+    }
+
     private Set<Node> calculateWorkflowNodes(List<NodeDef> nodeDefs) {
         // 创建节点
-        Map<String, Node> symbolTable = new HashMap<>();
         dslNodes.forEach(dslNode -> {
             if (dslNode.getType().equals("start")) {
                 var start = Start.Builder.aStart().name(dslNode.getName()).ref(dslNode.getName()).build();
@@ -93,18 +106,13 @@ public class DslParser {
                 return;
             }
             if (dslNode.getType().equals("condition")) {
-                var cases = dslNode.getCases();
-                Map<Boolean, String> targetMap = new HashMap<>();
-                targetMap.put(true, cases.get("true"));
-                targetMap.put(false, cases.get("false"));
-
+                var branches = dslNode.getBranches();
                 var condition = Condition.Builder.aCondition()
                         .name(dslNode.getName())
                         .ref(dslNode.getName())
                         .expression(dslNode.getExpression())
-                        .targetMap(targetMap)
+                        .branches(branches)
                         .build();
-                condition.setTargets(Set.of(cases.get("true"), cases.get("false")));
                 symbolTable.put(dslNode.getName(), condition);
                 return;
             }
@@ -125,16 +133,24 @@ public class DslParser {
         // 添加节点引用关系
         dslNodes.forEach(dslNode -> {
             var n = symbolTable.get(dslNode.getName());
+            if (n instanceof Condition) {
+                for (Branch branch : dslNode.getBranches()) {
+                    var target = symbolTable.get(branch.getTarget());
+                    if (target == null) {
+                        throw new DslException("条件网关" + dslNode.getName() + "指定的case目标: " + branch.getTarget() + "不存在");
+                    } else {
+                        n.addTarget(target.getRef());
+                    }
+                    this.calculateLoop(n, branch, target.getRef());
+                }
+            }
             if (null != n) {
                 dslNode.getTargets().forEach(nodeName -> {
                     var target = symbolTable.get(nodeName);
                     if (null != target) {
-                        if (!n.getType().equals("Condition")) {
-                            n.addTarget(target.getRef());
-                        }
+                        n.addTarget(target.getRef());
                     } else {
-                        var node_target = n.getType().equals("Condition") ? "case" : "target";
-                        throw new DslException("节点" + dslNode.getName() + "指定的" + node_target + ": " + nodeName + "不存在");
+                        throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
                     }
                 });
                 dslNode.getSources().forEach(nodeName -> {
@@ -553,7 +569,12 @@ public class DslParser {
             throw new DslException("cases数量错误");
         }
         if (null != targets) {
-            throw new DslException("条件网关节点不能设置targets");
+            throw new DslException("条件网关节点无需设置targets");
+        }
+        var t = ((Map<?, ?>) cases).get("true");
+        var f = ((Map<?, ?>) cases).get("false");
+        if (t == null || f == null) {
+            throw new DslException("条件网关case设置错误");
         }
     }
 
