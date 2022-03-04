@@ -8,6 +8,7 @@ import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 import dev.jianmu.embedded.worker.aggregate.spec.HostConfig;
 import dev.jianmu.embedded.worker.aggregate.spec.Mount;
 import dev.jianmu.embedded.worker.aggregate.spec.MountType;
+import dev.jianmu.infrastructure.docker.EmbeddedDockerWorkerProperties;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.event.NodeDeletedEvent;
 import dev.jianmu.node.definition.event.NodeUpdatedEvent;
@@ -33,6 +34,7 @@ public class EmbeddedWorkerApplication {
     private final StorageService storageService;
     private final DockerWorker dockerWorker;
     private final ObjectMapper objectMapper;
+    private final EmbeddedDockerWorkerProperties properties;
 
     private final String optionScript = "set -e";
     private final String traceScript = "\necho + %s\n%s";
@@ -40,11 +42,12 @@ public class EmbeddedWorkerApplication {
     public EmbeddedWorkerApplication(
             StorageService storageService,
             DockerWorker dockerWorker,
-            ObjectMapper objectMapper
-    ) {
+            ObjectMapper objectMapper,
+            EmbeddedDockerWorkerProperties properties) {
         this.storageService = storageService;
         this.dockerWorker = dockerWorker;
         this.objectMapper = objectMapper;
+        this.properties = properties;
     }
 
     public void createVolume(String volumeName) {
@@ -100,8 +103,8 @@ public class EmbeddedWorkerApplication {
     public void deleteImage(NodeDeletedEvent event) {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
-            log.info("删除镜像: {}", spec.getImage());
-            this.dockerWorker.deleteImage(spec.getImage());
+            log.info("删除镜像: {}", spec.getImage(this.properties.getRegistryUrl()));
+            this.dockerWorker.deleteImage(spec.getImage(this.properties.getRegistryUrl()));
         } catch (Exception e) {
             log.error("节点镜像删除失败：", e);
         }
@@ -110,8 +113,8 @@ public class EmbeddedWorkerApplication {
     public void updateImage(NodeUpdatedEvent event) {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
-            log.info("更新镜像: {}", spec.getImage());
-            this.dockerWorker.updateImage(spec.getImage());
+            log.info("更新镜像: {}", spec.getImage(this.properties.getRegistryUrl()));
+            this.dockerWorker.updateImage(spec.getImage(this.properties.getRegistryUrl()));
         } catch (JsonProcessingException e) {
             log.error("节点镜像更新失败：", e);
         }

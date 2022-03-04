@@ -97,7 +97,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
     public void runTask(DockerTask dockerTask, BufferedWriter logWriter) {
         var spec = dockerTask.getSpec();
         // 创建容器参数
-        var createContainerCmd = dockerClient.createContainerCmd(spec.getImage())
+        var createContainerCmd = dockerClient.createContainerCmd(spec.getImage(this.registryUrl))
                 .withName(dockerTask.getTaskInstanceId());
         if (!spec.getWorkingDir().isBlank()) {
             createContainerCmd.withWorkingDir(spec.getWorkingDir());
@@ -145,7 +145,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 检查镜像是否存在本地
         boolean imagePull = false;
         try {
-            this.dockerClient.inspectImageCmd(spec.getImage()).exec();
+            this.dockerClient.inspectImageCmd(spec.getImage(this.registryUrl)).exec();
         } catch (NotFoundException e) {
             logger.info("镜像不存在，需要下载");
             imagePull = true;
@@ -153,7 +153,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         // 拉取镜像
         if (imagePull) {
             try {
-                this.dockerClient.pullImageCmd(spec.getImage()).exec(new ResultCallback.Adapter<>() {
+                this.dockerClient.pullImageCmd(spec.getImage(this.registryUrl)).exec(new ResultCallback.Adapter<>() {
                     @Override
                     public void onNext(PullResponseItem object) {
                         logger.info("镜像下载成功: {} status: {}", object.getId(), object.getStatus());
