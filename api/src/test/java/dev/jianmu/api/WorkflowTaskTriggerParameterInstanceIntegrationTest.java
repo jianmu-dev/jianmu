@@ -66,14 +66,20 @@ public class WorkflowTaskTriggerParameterInstanceIntegrationTest {
                 .ref("asyncTask_3")
                 .description("异步任务节点3")
                 .build();
-        Map<Boolean, String> targetMap = new HashMap<>();
-        targetMap.put(true, asyncTask1.getRef());
-        targetMap.put(false, asyncTask2.getRef());
+        var b1 = Branch.Builder.aBranch()
+                .matchedCondition(true)
+                .target(asyncTask1.getRef())
+                .build();
+        var b2 = Branch.Builder.aBranch()
+                .matchedCondition(false)
+                .target(asyncTask2.getRef())
+                .build();
+        List<Branch> branches = List.of(b1, b2);
         Condition condition = Condition.Builder.aCondition()
                 .name("Condition1")
                 .ref("condition_1")
                 .description("条件网关1")
-                .targetMap(targetMap)
+                .branches(branches)
                 .expression("1+1==2")
                 .build();
         End end = End.Builder.anEnd()

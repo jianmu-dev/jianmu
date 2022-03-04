@@ -12,6 +12,7 @@ import dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec;
 import dev.jianmu.embedded.worker.aggregate.spec.HostConfig;
 import dev.jianmu.embedded.worker.aggregate.spec.Mount;
 import dev.jianmu.embedded.worker.aggregate.spec.MountType;
+import dev.jianmu.infrastructure.docker.EmbeddedDockerWorkerProperties;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.node.definition.event.NodeDeletedEvent;
 import dev.jianmu.node.definition.event.NodeUpdatedEvent;
@@ -37,6 +38,7 @@ public class EmbeddedWorkerApplication {
     private final StorageService storageService;
     private final EmbeddedWorker embeddedWorker;
     private final ObjectMapper objectMapper;
+    private final EmbeddedDockerWorkerProperties properties;
 
     private final WorkflowRepository workflowRepository;
     private final NodeDefApi nodeDefApi;
@@ -139,8 +141,8 @@ public class EmbeddedWorkerApplication {
     public void deleteImage(NodeDeletedEvent event) {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
-            log.info("删除镜像: {}", spec.getImage());
-            this.embeddedWorker.deleteImage(spec.getImage());
+            log.info("删除镜像: {}", spec.getImage(this.properties.getRegistryUrl()));
+            this.embeddedWorker.deleteImage(spec.getImage(this.properties.getRegistryUrl()));
         } catch (Exception e) {
             log.error("节点镜像删除失败：", e);
         }
@@ -149,8 +151,8 @@ public class EmbeddedWorkerApplication {
     public void updateImage(NodeUpdatedEvent event) {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
-            log.info("更新镜像: {}", spec.getImage());
-            this.embeddedWorker.updateImage(spec.getImage());
+            log.info("更新镜像: {}", spec.getImage(this.properties.getRegistryUrl()));
+            this.embeddedWorker.updateImage(spec.getImage(this.properties.getRegistryUrl()));
         } catch (JsonProcessingException e) {
             log.error("节点镜像更新失败：", e);
         }

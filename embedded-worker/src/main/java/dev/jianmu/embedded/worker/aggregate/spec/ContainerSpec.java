@@ -59,6 +59,19 @@ public class ContainerSpec {
         return image;
     }
 
+    public String getImage(String registryUrl) {
+        if (null == registryUrl) {
+            return this.image;
+        }
+        if (this.image.contains("/")) {
+            return registryUrl + "/" + this.image;
+        }
+        if (this.image.contains(":")) {
+            return registryUrl + "/library/" + this.image;
+        }
+        return registryUrl + "/library/" + this.image + ":latest";
+    }
+
     public String getWorkingDir() {
         return workingDir;
     }

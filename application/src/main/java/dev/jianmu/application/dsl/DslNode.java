@@ -1,5 +1,6 @@
 package dev.jianmu.application.dsl;
 
+import dev.jianmu.workflow.aggregate.definition.Branch;
 import lombok.Getter;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class DslNode {
     private List<String> targets;
     private Map<String, String> param;
     private String expression;
-    private Map<String, String> cases;
+    private List<Branch> branches;
     // Shell Node
     private String image;
     private Map<String, String> environment;
@@ -79,13 +80,18 @@ public class DslNode {
         }
         var c = node.get("cases");
         if (c instanceof Map) {
-            dslNode.cases = ((Map<?, ?>) c)
+            dslNode.branches = ((Map<?, ?>) c)
                     .entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
-                    .map(entry -> Map.entry((String) entry.getKey(), (String) entry.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .map(entry ->
+                            Branch.Builder.aBranch()
+                                    .matchedCondition(entry.getKey())
+                                    .target((String) entry.getValue())
+                                    .build()
+                    )
+                    .collect(Collectors.toList());
         } else {
-            dslNode.cases = Map.of();
+            dslNode.branches = List.of();
         }
         var e = node.get("expression");
         if (e instanceof String) {
@@ -108,10 +114,6 @@ public class DslNode {
             dslNode.targets = ((List<?>) t).stream().map(i -> (String) i).collect(Collectors.toList());
         } else {
             dslNode.targets = List.of();
-        }
-        if ("condition".equals(dslNode.getType())) {
-            var c = node.get("cases");
-            dslNode.targets = ((Map<?, ?>) c).values().stream().map(i -> (String) i).collect(Collectors.toList());
         }
     }
 

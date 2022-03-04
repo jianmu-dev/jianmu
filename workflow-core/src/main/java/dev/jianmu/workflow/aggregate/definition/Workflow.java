@@ -86,28 +86,30 @@ public class Workflow extends AggregateRoot {
             return;
         }
         if (node instanceof Gateway) {
-            String nextNodeRef = ((Gateway) node).calculateTarget(expressionLanguage, context);
-            // 发布其他节点跳过事件
-            var targets = node.getTargets().stream()
-                    .filter(targetRef -> !targetRef.equals(nextNodeRef))
-                    .collect(Collectors.toList());
-            targets.forEach(targetRef -> {
-                var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
-                        .nodeRef(targetRef)
-                        .triggerId(triggerId)
-                        .workflowRef(this.ref)
-                        .workflowVersion(this.version)
-                        .build();
-                this.raiseEvent(nodeSkipEvent);
-            });
+            var branch = ((Gateway) node).calculateTarget(expressionLanguage, context);
             // 发布下一个节点激活事件并返回
             NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
-                    .nodeRef(nextNodeRef)
+                    .nodeRef(branch.getTarget())
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
                     .build();
             this.raiseEvent(activatingEvent);
+            // 如果是非环回分支，则发布其他节点跳过事件
+            if (!branch.isLoop()) {
+                var targets = node.getTargets().stream()
+                        .filter(targetRef -> !targetRef.equals(branch.getTarget()))
+                        .collect(Collectors.toList());
+                targets.forEach(targetRef -> {
+                    var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                            .nodeRef(targetRef)
+                            .triggerId(triggerId)
+                            .workflowRef(this.ref)
+                            .workflowVersion(this.version)
+                            .build();
+                    this.raiseEvent(nodeSkipEvent);
+                });
+            }
             return;
         }
         if (node instanceof Start) {
