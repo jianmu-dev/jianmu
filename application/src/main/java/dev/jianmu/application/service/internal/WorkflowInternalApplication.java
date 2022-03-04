@@ -24,10 +24,7 @@ import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -144,7 +141,10 @@ public class WorkflowInternalApplication {
         workflow.setExpressionLanguage(this.expressionLanguage);
         workflow.setContext(context);
         // 激活节点
-        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
+        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId()).stream()
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(AsyncTaskInstance::getAsyncTaskRef))), ArrayList::new)
+                );
         // 返回当前节点上游Task的ref List
         List<String> refList = workflow.findTasks(cmd.getNodeRef());
         List<String> instanceList = asyncTaskInstances.stream()
