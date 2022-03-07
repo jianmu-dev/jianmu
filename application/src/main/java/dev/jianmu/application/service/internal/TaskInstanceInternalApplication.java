@@ -85,7 +85,7 @@ public class TaskInstanceInternalApplication {
         var asyncTask = workflow.findNode(event.getNodeRef());
         var nodeDef = this.nodeDefApi.getByType(asyncTask.getType());
         // 创建任务实例
-        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(event.getNodeRef(), event.getAsyncTaskInstanceId());
+        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByBusinessId(event.getAsyncTaskInstanceId());
         // 运行前检查规则
         this.instanceDomainService.runningCheck(taskInstances);
         var nodeInfo = NodeInfo.Builder.aNodeDef()
@@ -169,7 +169,7 @@ public class TaskInstanceInternalApplication {
     }
 
     public void terminate(String asyncTaskInstanceId) {
-        var taskInstance = this.taskInstanceRepository.findByBusinessId(asyncTaskInstanceId)
+        var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         this.workerApplication.terminateTask(taskInstance.getId());
     }
