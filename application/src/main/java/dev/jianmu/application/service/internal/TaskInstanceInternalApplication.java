@@ -85,7 +85,7 @@ public class TaskInstanceInternalApplication {
         var asyncTask = workflow.findNode(event.getNodeRef());
         var nodeDef = this.nodeDefApi.getByType(asyncTask.getType());
         // 创建任务实例
-        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(event.getNodeRef(), event.getWorkflowInstanceId());
+        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(event.getNodeRef(), event.getAsyncTaskInstanceId());
         // 运行前检查规则
         this.instanceDomainService.runningCheck(taskInstances);
         var nodeInfo = NodeInfo.Builder.aNodeDef()
