@@ -26,4 +26,6 @@ public class EmbeddedDockerWorkerProperties {
     private Boolean dockerTlsVerify;
 
     private String sockFile;
+
+    private String mirror;
 }
