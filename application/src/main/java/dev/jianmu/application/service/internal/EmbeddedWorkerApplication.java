@@ -103,8 +103,8 @@ public class EmbeddedWorkerApplication {
     public void deleteImage(NodeDeletedEvent event) {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
-            log.info("删除镜像: {}", spec.getImage(this.properties.getRegistryUrl()));
-            this.dockerWorker.deleteImage(spec.getImage(this.properties.getRegistryUrl()));
+            log.info("删除镜像: {}", spec.getImage(this.properties.getMirror()));
+            this.dockerWorker.deleteImage(spec.getImage(this.properties.getMirror()));
         } catch (Exception e) {
             log.error("节点镜像删除失败：", e);
         }
@@ -113,8 +113,8 @@ public class EmbeddedWorkerApplication {
     public void updateImage(NodeUpdatedEvent event) {
         try {
             var spec = objectMapper.readValue(event.getSpec(), ContainerSpec.class);
-            log.info("更新镜像: {}", spec.getImage(this.properties.getRegistryUrl()));
-            this.dockerWorker.updateImage(spec.getImage(this.properties.getRegistryUrl()));
+            log.info("更新镜像: {}", spec.getImage(this.properties.getMirror()));
+            this.dockerWorker.updateImage(spec.getImage(this.properties.getMirror()));
         } catch (JsonProcessingException e) {
             log.error("节点镜像更新失败：", e);
         }
