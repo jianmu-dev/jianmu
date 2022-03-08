@@ -12,7 +12,6 @@ import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
-import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
@@ -20,6 +19,7 @@ import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
+import dev.jianmu.workflow.service.WorkflowDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +47,7 @@ public class WorkflowInternalApplication {
     private final ParameterDomainService parameterDomainService;
     private final TriggerEventRepository triggerEventRepository;
     private final ParameterRepository parameterRepository;
+    private final WorkflowDomainService workflowDomainService = new WorkflowDomainService();
 
     public WorkflowInternalApplication(
             WorkflowRepository workflowRepository,
@@ -137,18 +138,6 @@ public class WorkflowInternalApplication {
         this.workflowRepository.commitEvents(workflow);
     }
 
-    // 根据上游节点列表，统计已完成的任务数量
-    public long countCompletedTask(List<AsyncTaskInstance> asyncTaskInstances, List<String> refList) {
-        return asyncTaskInstances.stream()
-                .filter(t -> refList.contains(t.getAsyncTaskRef()) &&
-                        (
-                                t.getStatus().equals(TaskStatus.FAILED)
-                                        || t.getStatus().equals(TaskStatus.SUCCEEDED)
-                                        || t.getStatus().equals(TaskStatus.SKIPPED)
-                        ))
-                .count();
-    }
-
     public void next(NextNodeCmd cmd) {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
@@ -167,24 +156,11 @@ public class WorkflowInternalApplication {
         workflow.setContext(context);
         // 激活节点
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
-        // 返回当前节点上游Task的ref List
-        List<String> refList = workflow.findTasks(cmd.getNodeRef());
-        List<String> instanceList = asyncTaskInstances.stream()
-                .map(AsyncTaskInstance::getAsyncTaskRef)
-                .collect(Collectors.toList());
-        instanceList.retainAll(refList);
-        // 统计上游Task已完成数量
-        long completed = this.countCompletedTask(asyncTaskInstances, instanceList);
-        log.info("当前节点{}上游Task数量为{}", cmd.getNodeRef(), refList.size());
-        log.info("当前节点{}上游Task已完成数量为{}", cmd.getNodeRef(), completed);
-        // 如果上游任务执行完成数量小于上游任务总数，则当前节点不激活
-        if (completed < refList.size()) {
-            log.info("当前节点{}上游任务执行完成数量{}小于上游任务总数{}", cmd.getNodeRef(), completed, refList.size());
-            return;
+        if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            log.info("activateNode: " + cmd.getNodeRef());
+            workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
+            this.workflowRepository.commitEvents(workflow);
         }
-        log.info("activateNode: " + cmd.getNodeRef());
-        workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
-        this.workflowRepository.commitEvents(workflow);
     }
 
     // 节点跳过
@@ -192,8 +168,16 @@ public class WorkflowInternalApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        workflow.skipNode(cmd.getTriggerId(), cmd.getNodeRef());
-        log.info("跳过节点: {}", cmd.getNodeRef());
-        this.workflowRepository.commitEvents(workflow);
+        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
+        if (this.workflowDomainService.canSkipNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            workflow.skipNode(cmd.getTriggerId(), cmd.getNodeRef());
+            log.info("跳过节点: {}", cmd.getNodeRef());
+            this.workflowRepository.commitEvents(workflow);
+        } else if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            log.info("activateNode: " + cmd.getNodeRef());
+            workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
+            this.workflowRepository.commitEvents(workflow);
+        }
+
     }
 }
