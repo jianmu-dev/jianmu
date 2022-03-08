@@ -86,6 +86,7 @@
                             <password>${env.JIANMU_DOCKER_PASSWORD}</password>
                         </auth>
                     </to>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
                     <container>
                         <!--解决中文乱码-->
                         <environment>
