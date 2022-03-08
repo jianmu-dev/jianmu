@@ -1,7 +1,6 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
@@ -114,8 +113,8 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
-    public Optional<TaskInstance> findByBusinessId(String businessId) {
-        return this.taskInstanceMapper.findByBusinessId(businessId);
+    public Optional<TaskInstance> findByBusinessIdAndMaxSerialNo(String businessId) {
+        return this.taskInstanceMapper.findByBusinessIdAndMaxSerialNo(businessId);
     }
 
     @Override
@@ -129,8 +128,8 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
-    public List<TaskInstance> findByAsyncTaskRefAndBusinessId(String asyncTaskRef, String businessId) {
-        return this.taskInstanceMapper.findByAsyncTaskRefAndBusinessId(asyncTaskRef, businessId);
+    public List<TaskInstance> findByBusinessId(String businessId) {
+        return this.taskInstanceMapper.findByBusinessId(businessId);
     }
 
     @Override

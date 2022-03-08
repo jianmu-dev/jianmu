@@ -88,7 +88,7 @@ public class WorkflowEventHandler {
                 .asyncTaskType(event.getNodeType())
                 .build();
         this.workflowInstanceInternalApplication.statusCheck(event.getTriggerId());
-        this.asyncTaskInstanceInternalApplication.create(cmd);
+        this.asyncTaskInstanceInternalApplication.activate(cmd);
         log.info("handle AsyncTaskActivatingEvent end-----------------------------------------------------");
     }
 
@@ -104,6 +104,7 @@ public class WorkflowEventHandler {
                 .nodeRef(event.getNodeRef())
                 .build();
         this.workflowInternalApplication.skipNode(cmd);
+        this.asyncTaskInstanceInternalApplication.skip(cmd);
         log.info("handle NodeSkipEvent end-----------------------------------------------------");
     }
 

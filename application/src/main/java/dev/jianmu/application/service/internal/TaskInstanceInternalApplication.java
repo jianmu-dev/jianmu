@@ -85,7 +85,7 @@ public class TaskInstanceInternalApplication {
         var asyncTask = workflow.findNode(event.getNodeRef());
         var nodeDef = this.nodeDefApi.getByType(asyncTask.getType());
         // 创建任务实例
-        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByAsyncTaskRefAndBusinessId(event.getNodeRef(), event.getWorkflowInstanceId());
+        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByBusinessId(event.getAsyncTaskInstanceId());
         // 运行前检查规则
         this.instanceDomainService.runningCheck(taskInstances);
         var nodeInfo = NodeInfo.Builder.aNodeDef()
@@ -169,7 +169,7 @@ public class TaskInstanceInternalApplication {
     }
 
     public void terminate(String asyncTaskInstanceId) {
-        var taskInstance = this.taskInstanceRepository.findByBusinessId(asyncTaskInstanceId)
+        var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         this.workerApplication.terminateTask(taskInstance.getId());
     }
@@ -254,6 +254,7 @@ public class TaskInstanceInternalApplication {
                                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                                 .businessId(taskInstance.getBusinessId())
                                 .ref(entry.getKey())
+                                .serialNo(taskInstance.getSerialNo())
                                 .parameterId(entry.getValue().getId())
                                 .required(nodeParameters.stream()
                                         .filter(nodeParameter -> nodeParameter.getRef().equals(entry.getKey()))
@@ -276,6 +277,7 @@ public class TaskInstanceInternalApplication {
                         .asyncTaskRef(taskInstance.getAsyncTaskRef())
                         .businessId(taskInstance.getBusinessId())
                         .ref(nodeParameter.getRef())
+                        .serialNo(taskInstance.getSerialNo())
                         .parameterId(nodeParameter.getParameterId())
                         .type(InstanceParameter.Type.INPUT)
                         .required(nodeParameter.getRequired())
@@ -299,6 +301,7 @@ public class TaskInstanceInternalApplication {
                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                 .businessId(taskInstance.getBusinessId())
                 .ref("inner.execution_status")
+                .serialNo(taskInstance.getSerialNo())
                 .parameterId(executionStatusValue.getId())
                 .required(true)
                 .type(InstanceParameter.Type.OUTPUT)
@@ -315,6 +318,7 @@ public class TaskInstanceInternalApplication {
                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                 .businessId(taskInstance.getBusinessId())
                 .ref("inner.start_time")
+                .serialNo(taskInstance.getSerialNo())
                 .parameterId(startTimeValue.getId())
                 .required(true)
                 .type(InstanceParameter.Type.OUTPUT)
@@ -331,6 +335,7 @@ public class TaskInstanceInternalApplication {
                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                 .businessId(taskInstance.getBusinessId())
                 .ref("inner.end_time")
+                .serialNo(taskInstance.getSerialNo())
                 .parameterId(endTimeValue.getId())
                 .required(true)
                 .type(InstanceParameter.Type.OUTPUT)
@@ -366,6 +371,7 @@ public class TaskInstanceInternalApplication {
                                 .businessId(taskInstance.getBusinessId())
                                 .triggerId(taskInstance.getTriggerId())
                                 .ref(nodeParameter.getRef())
+                                .serialNo(taskInstance.getSerialNo())
                                 .type(InstanceParameter.Type.OUTPUT)
                                 .required(nodeParameter.getRequired())
                                 .workflowType(workflowType)
