@@ -51,6 +51,7 @@ public class WorkflowInstanceEventHandler {
             log.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
+        workflowInstance.clear();
         log.info("-----------------------------------------------------");
     }
 

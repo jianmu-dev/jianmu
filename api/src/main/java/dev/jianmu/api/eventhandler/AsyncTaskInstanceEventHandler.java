@@ -52,6 +52,7 @@ public class AsyncTaskInstanceEventHandler {
             log.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
+        asyncTaskInstance.clear();
         log.info("-----------------------------------------------------");
     }
 
