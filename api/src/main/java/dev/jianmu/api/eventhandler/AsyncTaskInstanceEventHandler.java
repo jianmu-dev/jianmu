@@ -84,6 +84,7 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleTaskSucceededEvent(TaskSucceededEvent event) {
         MDC.put("triggerId", event.getTriggerId());

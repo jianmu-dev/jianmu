@@ -55,6 +55,7 @@ public class WorkflowInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleProcessStartedEvent(ProcessStartedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
