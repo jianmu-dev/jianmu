@@ -138,6 +138,7 @@ public class WorkflowInternalApplication {
         this.workflowRepository.commitEvents(workflow);
     }
 
+    @Transactional
     public void next(NextNodeCmd cmd) {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
@@ -147,6 +148,7 @@ public class WorkflowInternalApplication {
     }
 
     // 节点启动
+    @Transactional
     public void activateNode(ActivateNodeCmd cmd) {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
@@ -164,6 +166,7 @@ public class WorkflowInternalApplication {
     }
 
     // 节点跳过
+    @Transactional
     public void skipNode(SkipNodeCmd cmd) {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
