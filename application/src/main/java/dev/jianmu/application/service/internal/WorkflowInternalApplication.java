@@ -175,8 +175,17 @@ public class WorkflowInternalApplication {
         if (this.workflowDomainService.canSkipNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
             workflow.skipNode(cmd.getTriggerId(), cmd.getNodeRef());
             log.info("跳过节点: {}", cmd.getNodeRef());
+            this.asyncTaskInstanceRepository
+                    .findByTriggerIdAndTaskRef(cmd.getTriggerId(), cmd.getNodeRef())
+                    .ifPresent(asyncTaskInstance -> {
+                        asyncTaskInstance.skip();
+                        log.info("跳过异步任务: {}", asyncTaskInstance.getAsyncTaskRef());
+                        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                    });
             this.workflowRepository.commitEvents(workflow);
-        } else if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            return;
+        }
+        if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
             log.info("activateNode: " + cmd.getNodeRef());
             workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
             this.workflowRepository.commitEvents(workflow);
