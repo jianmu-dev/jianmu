@@ -566,7 +566,7 @@ public class TriggerApplication {
             }
             var type = Parameter.Type.getTypeByName(webhookType);
             if (type == Parameter.Type.SECRET || type == Parameter.Type.STRING) {
-                return vars.get(0) == null ? null : vars.get(0).toString();
+                return vars.get(0) == null ? null : vars.get(0).toString().trim();
             }
             return vars.get(0);
         } catch (PathNotFoundException e) {
