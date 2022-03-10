@@ -109,7 +109,6 @@ public class WorkflowEventHandler {
                 .nodeRef(event.getNodeRef())
                 .build();
         this.workflowInternalApplication.skipNode(cmd);
-        this.asyncTaskInstanceInternalApplication.skip(cmd);
         log.info("handle NodeSkipEvent end-----------------------------------------------------");
     }
 

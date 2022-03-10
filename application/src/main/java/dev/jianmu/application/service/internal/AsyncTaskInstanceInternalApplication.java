@@ -1,7 +1,6 @@
 package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
-import dev.jianmu.application.command.SkipNodeCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
@@ -85,17 +84,6 @@ public class AsyncTaskInstanceInternalApplication {
         this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
                 .ifPresent(asyncTaskInstance -> {
                     asyncTaskInstance.succeed();
-                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
-                });
-    }
-
-    @Transactional
-    public void skip(SkipNodeCmd cmd) {
-        this.asyncTaskInstanceRepository
-                .findByTriggerIdAndTaskRef(cmd.getTriggerId(), cmd.getNodeRef())
-                .ifPresent(asyncTaskInstance -> {
-                    asyncTaskInstance.skip();
-                    log.info("跳过异步任务: {}", asyncTaskInstance.getAsyncTaskRef());
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
     }
