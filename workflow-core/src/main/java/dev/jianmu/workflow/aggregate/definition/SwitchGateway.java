@@ -7,6 +7,7 @@ import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @program: workflow
@@ -55,6 +56,14 @@ public class SwitchGateway extends BaseNode implements Gateway {
         this.expressionLanguage = expressionLanguage;
         this.context = context;
         return this.getNext();
+    }
+
+    @Override
+    public List<String> findNonLoopBranch() {
+        return branches.stream()
+                .filter(branch -> !branch.isLoop())
+                .map(Branch::getTarget)
+                .collect(Collectors.toList());
     }
 
     public static final class Builder {

@@ -51,9 +51,11 @@ public class WorkflowInstanceEventHandler {
             log.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
+        workflowInstance.clear();
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleProcessStartedEvent(ProcessStartedEvent event) {
         MDC.put("triggerId", event.getTriggerId());

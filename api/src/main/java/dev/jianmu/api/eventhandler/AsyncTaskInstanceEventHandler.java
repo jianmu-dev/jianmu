@@ -52,6 +52,7 @@ public class AsyncTaskInstanceEventHandler {
             log.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
+        asyncTaskInstance.clear();
         log.info("-----------------------------------------------------");
     }
 
@@ -83,6 +84,7 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleTaskSucceededEvent(TaskSucceededEvent event) {
         MDC.put("triggerId", event.getTriggerId());

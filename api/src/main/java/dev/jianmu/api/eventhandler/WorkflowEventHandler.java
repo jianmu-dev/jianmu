@@ -14,6 +14,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @author Ethan Liu
@@ -41,13 +43,14 @@ public class WorkflowEventHandler {
         this.publisher = publisher;
     }
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleProcessEvents(Workflow workflow) {
         log.info("Get Workflow Events here -------------------------");
         workflow.getUncommittedDomainEvents().forEach(event -> {
             log.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
+        workflow.clear();
         log.info("-----------------------------------------------------");
     }
 
@@ -59,6 +62,7 @@ public class WorkflowEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleNodeActivatingEvent(NodeActivatingEvent event) {
         MDC.put("triggerId", event.getTriggerId());
@@ -88,10 +92,11 @@ public class WorkflowEventHandler {
                 .asyncTaskType(event.getNodeType())
                 .build();
         this.workflowInstanceInternalApplication.statusCheck(event.getTriggerId());
-        this.asyncTaskInstanceInternalApplication.create(cmd);
+        this.asyncTaskInstanceInternalApplication.activate(cmd);
         log.info("handle AsyncTaskActivatingEvent end-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleNodeSkipEvent(NodeSkipEvent event) {
         MDC.put("triggerId", event.getTriggerId());
@@ -104,6 +109,7 @@ public class WorkflowEventHandler {
                 .nodeRef(event.getNodeRef())
                 .build();
         this.workflowInternalApplication.skipNode(cmd);
+        this.asyncTaskInstanceInternalApplication.skip(cmd);
         log.info("handle NodeSkipEvent end-----------------------------------------------------");
     }
 
