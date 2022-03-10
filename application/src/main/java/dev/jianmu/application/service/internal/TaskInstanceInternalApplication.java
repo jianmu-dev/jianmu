@@ -187,7 +187,8 @@ public class TaskInstanceInternalApplication {
                     resultFile, nodeVersion, workflow.getType().name(), taskInstance
             );
             if (outputParameters.isEmpty()) {
-                taskInstance.executeFailed();
+                this.executeFailed(taskInstanceId);
+                return;
             }
         }
         taskInstance.executeSucceeded();
