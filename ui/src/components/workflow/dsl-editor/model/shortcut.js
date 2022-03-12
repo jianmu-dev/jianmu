@@ -61,6 +61,9 @@ export class Comment {
 
     cm.setValue(lineVals.join(cm.lineSeparator()));
     doc.setSelection(anchor, head);
+
+    const { scrollLeft, scrollTop } = cm.doc;
+    setTimeout(() => cm.scrollTo(scrollLeft, scrollTop));
   }
 }
 
