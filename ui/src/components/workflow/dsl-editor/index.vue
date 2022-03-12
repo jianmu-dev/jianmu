@@ -189,7 +189,9 @@ export default defineComponent({
     background-color: #19253B;
 
     * {
-      font-family: Hiragino Sans GB, sans-serif;
+      // 字体设为等宽
+      font-family: Menlo, Monaco, 'Courier New', monospace;
+      line-height: 20px;
     }
 
     .CodeMirror-gutters {
@@ -198,11 +200,7 @@ export default defineComponent({
     }
 
     .CodeMirror-linenumber {
-      // 字体设为等宽
-      font-family: 'Helvetica Neue';
       color: #C1D7FF;
-      font-weight: 400;
-      line-height: 25px;
     }
   }
 }
