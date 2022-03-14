@@ -69,13 +69,13 @@ public class StringTemplateTest {
     }
 
     @Test
-    @DisplayName("未找到的变量不替换测试")
+    @DisplayName("未找到的变量替换为字符串null测试")
     void tempTest6() {
         this.context.add("a", "aaa");
         this.context.add("b", new BigDecimal("32.3"));
         String eq = "`${a} != ${b} == ${c}`";
         Object result = El.eval(this.context, eq);
-        assertEquals(result, "aaa != 32.3 == ${c}");
+        assertEquals(result, "aaa != 32.3 == null");
     }
 
     @Test
