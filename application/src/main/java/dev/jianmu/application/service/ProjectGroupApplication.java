@@ -264,4 +264,26 @@ public class ProjectGroupApplication {
     public Optional<ProjectLinkGroup> findLinkByProjectId(String projectId) {
         return this.projectLinkGroupRepository.findByProjectId(projectId);
     }
+
+    public void moveProject(String dslId, String projectGroupId) {
+        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(dslId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
+        if (projectLinkGroup.getProjectGroupId().equals(projectGroupId)) {
+            return;
+        }
+        var targetGroupId = this.projectGroupRepository.findById(projectGroupId).map(ProjectGroup::getId)
+                .orElseThrow(() -> new DataNotFoundException("未找到目标项目组"));
+        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
+        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(targetGroupId)
+                .map(ProjectLinkGroup::getSort)
+                .orElse(-1);
+        var newProjectLinkGroup = ProjectLinkGroup.Builder.aReference()
+                .projectGroupId(targetGroupId)
+                .projectId(projectLinkGroup.getProjectId())
+                .sort(++sort)
+                .build();
+        this.projectLinkGroupRepository.add(newProjectLinkGroup);
+        this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
+        this.projectGroupRepository.addProjectCountById(targetGroupId, 1);
+    }
 }
