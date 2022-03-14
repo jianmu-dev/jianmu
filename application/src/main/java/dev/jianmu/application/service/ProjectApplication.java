@@ -16,6 +16,7 @@ import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
+import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.project.repository.ProjectGroupRepository;
@@ -286,7 +287,7 @@ public class ProjectApplication {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
         }
         // 修改项目组
-        this.updateProjectGroup(dslId, projectGroupId);
+        this.publisher.publishEvent(new MovedEvent(project.getId(), projectGroupId));
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
@@ -309,28 +310,6 @@ public class ProjectApplication {
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
-    }
-
-    private void updateProjectGroup(String dslId, String projectGroupId) {
-        var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(dslId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
-        if (projectLinkGroup.getProjectGroupId().equals(projectGroupId)) {
-            return;
-        }
-        var targetGroupId = this.projectGroupRepository.findById(projectGroupId).map(ProjectGroup::getId)
-                .orElseThrow(() -> new DataNotFoundException("未找到目标项目组"));
-        this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
-        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(targetGroupId)
-                .map(ProjectLinkGroup::getSort)
-                .orElse(-1);
-        var newProjectLinkGroup = ProjectLinkGroup.Builder.aReference()
-                .projectGroupId(targetGroupId)
-                .projectId(projectLinkGroup.getProjectId())
-                .sort(++sort)
-                .build();
-        this.projectLinkGroupRepository.add(newProjectLinkGroup);
-        this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
-        this.projectGroupRepository.addProjectCountById(targetGroupId, 1);
     }
 
     @Transactional
