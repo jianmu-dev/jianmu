@@ -27,16 +27,6 @@ public class GlobalProperties {
     public class Global {
         @NotNull
         private Record record = new Record();
-        @NotNull
-        private Workflow workflow = new Workflow();
-
-        @Data
-        @Component
-        @Validated
-        public class Workflow {
-            @NotNull
-            private Boolean concurrent = false;
-        }
 
         @Data
         @Component
