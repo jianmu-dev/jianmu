@@ -41,6 +41,7 @@ public class DslParser {
     private Map<String, Object> pipeline;
     private boolean enabled = true;
     private boolean mutable = false;
+    private boolean concurrent = false;
     private String name;
     private String description;
     private Workflow.Type type;
@@ -221,6 +222,10 @@ public class DslParser {
             if (mutable instanceof Boolean) {
                 this.mutable = (Boolean) mutable;
             }
+        }
+        var concurrent = this.global.get("concurrent");
+        if (concurrent instanceof Boolean) {
+            this.concurrent = (Boolean)concurrent;
         }
     }
 
@@ -658,6 +663,10 @@ public class DslParser {
 
     public boolean isMutable() {
         return mutable;
+    }
+
+    public boolean isConcurrent() {
+        return concurrent;
     }
 
     public String getName() {
