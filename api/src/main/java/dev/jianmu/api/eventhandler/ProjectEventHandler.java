@@ -73,7 +73,7 @@ public class ProjectEventHandler {
 
     @TransactionalEventListener
     public void handleGroupUpdate(MovedEvent movedEvent) {
-        // 项目移动事件
+        // 移动项目到项目组事件
         this.projectGroupApplication.moveProject(movedEvent.getProjectId(), movedEvent.getProjectGroupId());
     }
 }
