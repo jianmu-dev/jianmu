@@ -40,7 +40,7 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     }
 
     @Override
-    public List<InstanceParameter> findOutputParamByTriggerId(String triggerId) {
-        return this.instanceParameterMapper.findOutputParamByTriggerId(triggerId);
+    public List<InstanceParameter> findLastOutputParamByTriggerId(String triggerId) {
+        return this.instanceParameterMapper.findLastOutputParamByTriggerId(triggerId);
     }
 }
