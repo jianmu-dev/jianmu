@@ -75,7 +75,7 @@ public class WorkflowInternalApplication {
                 .map(TriggerEvent::getParameters)
                 .orElseGet(List::of);
         var instanceParameters = this.instanceParameterRepository
-                .findOutputParamByTriggerId(triggerId);
+                .findLastOutputParamByTriggerId(triggerId);
         // 创建表达式上下文
         var context = new ElContext();
         // 全局参数加入上下文
