@@ -2,6 +2,7 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.trigger.event.TriggerFailedEvent;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -30,35 +31,42 @@ public class WorkflowInstanceInternalApplication {
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final WorkflowInstanceDomainService workflowInstanceDomainService;
     private final ApplicationEventPublisher publisher;
+    private final ProjectRepository projectRepository;
 
     public WorkflowInstanceInternalApplication(
             WorkflowRepository workflowRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
             WorkflowInstanceDomainService workflowInstanceDomainService,
-            ApplicationEventPublisher publisher) {
+            ApplicationEventPublisher publisher,
+            ProjectRepository projectRepository) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
         this.publisher = publisher;
+        this.projectRepository = projectRepository;
     }
 
     // 创建并启动流程
     @Transactional
-    public void createAndStart(WorkflowStartCmd cmd) {
+    public void createAndStart(WorkflowStartCmd cmd, String projectId) {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        // 检查是否存在运行中的流程
-        int i = this.workflowInstanceRepository
-                .findByRefAndVersionAndStatus(workflow.getRef(), workflow.getVersion(), ProcessStatus.RUNNING)
-                .size();
-        if (i > 0) {
-            var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()
-                    .triggerId(cmd.getTriggerId())
-                    .triggerType(cmd.getTriggerType())
-                    .build();
-            this.publisher.publishEvent(triggerFailedEvent);
-            throw new RuntimeException("该流程运行中");
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目ID:" + projectId));
+        if (!project.isConcurrent()) {
+            // 检查是否存在运行中的流程
+            int i = this.workflowInstanceRepository
+                    .findByRefAndVersionAndStatus(workflow.getRef(), workflow.getVersion(), ProcessStatus.RUNNING)
+                    .size();
+            if (i > 0) {
+                var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()
+                        .triggerId(cmd.getTriggerId())
+                        .triggerType(cmd.getTriggerType())
+                        .build();
+                this.publisher.publishEvent(triggerFailedEvent);
+                throw new RuntimeException("该流程运行中");
+            }
         }
         // 查询serialNo
         AtomicInteger serialNo = new AtomicInteger(1);

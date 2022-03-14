@@ -169,6 +169,7 @@ public class ProjectApplication {
                 .steps(parser.getSteps())
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
+                .concurrent(parser.isConcurrent())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
                 .triggerType(parser.getTriggerType())
@@ -220,6 +221,7 @@ public class ProjectApplication {
         project.setSteps(parser.getSteps());
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
+        project.setConcurrent(parser.isConcurrent());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -249,6 +251,7 @@ public class ProjectApplication {
                 .steps(parser.getSteps())
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
+                .concurrent(parser.isConcurrent())
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
@@ -297,6 +300,7 @@ public class ProjectApplication {
         project.setSteps(parser.getSteps());
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
+        project.setConcurrent(parser.isConcurrent());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();

@@ -45,7 +45,7 @@ public class ProjectEventHandler {
                 .workflowRef(triggerEvent.getWorkflowRef())
                 .workflowVersion(triggerEvent.getWorkflowVersion())
                 .build();
-        this.workflowInstanceInternalApplication.createAndStart(cmd);
+        this.workflowInstanceInternalApplication.createAndStart(cmd, triggerEvent.getProjectId());
     }
 
     @EventListener

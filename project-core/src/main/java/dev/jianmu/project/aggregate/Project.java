@@ -51,6 +51,8 @@ public class Project {
     private boolean enabled = true;
     // 状态是否可变
     private boolean mutable = false;
+    // 可否并发执行
+    private boolean concurrent = false;
     // 原始DSL文本
     private String dslText;
     // 创建时间
@@ -73,6 +75,10 @@ public class Project {
 
     public void setMutable(boolean mutable) {
         this.mutable = mutable;
+    }
+
+    public void setConcurrent(boolean concurrent) {
+        this.concurrent = concurrent;
     }
 
     public void setWorkflowName(String workflowName) {
@@ -159,6 +165,10 @@ public class Project {
         return mutable;
     }
 
+    public boolean isConcurrent() {
+        return concurrent;
+    }
+
     public String getDslText() {
         return dslText;
     }
@@ -198,6 +208,8 @@ public class Project {
         private boolean enabled;
         // 状态是否可变
         private boolean mutable;
+        // 可否并发执行
+        private boolean concurrent = false;
         // 原始DSL文本
         private String dslText;
         // 最后修改者
@@ -265,6 +277,11 @@ public class Project {
             return this;
         }
 
+        public Builder concurrent(boolean concurrent) {
+            this.concurrent = concurrent;
+            return this;
+        }
+
         public Builder dslText(String dslText) {
             this.dslText = dslText;
             return this;
@@ -291,6 +308,7 @@ public class Project {
             project.steps = this.steps;
             project.enabled = this.enabled;
             project.mutable = this.mutable;
+            project.concurrent = this.concurrent;
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;
             project.lastModifiedBy = this.lastModifiedBy;
