@@ -6,13 +6,14 @@ import dev.jianmu.workflow.el.EvaluationContext;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
+ * @author Ethan Liu
  * @class Context
  * @description TODO
- * @author Ethan Liu
  * @create 2021-02-25 10:45
-*/
+ */
 public class ElContext implements EvaluationContext {
 
     private Map<String, Object> map = new HashMap<>();
@@ -100,9 +101,6 @@ public class ElContext implements EvaluationContext {
     @Override
     public Object getVariable(String variableName) {
         var value = this.map.get(variableName);
-        if (value == null) {
-            return "${" + variableName + "}";
-        }
-        return value;
+        return Objects.requireNonNullElse(value, "null");
     }
 }
