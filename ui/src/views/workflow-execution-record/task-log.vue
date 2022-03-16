@@ -3,69 +3,67 @@
     <div class="basic-section">
       <div class="item">
         <div>
-          <div class="param-key">流程名称</div>
+          <div class="param-key">流程名称：</div>
           <div class="param-value">
             <jm-text-viewer :value="workflowName"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">执行次数</div>
-          <div class="total times">{{ total }}</div>
+          <div class="total times">{{ taskStatus.total }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">节点名称</div>
+          <div class="param-key">节点名称：</div>
           <div class="param-value">
             <jm-text-viewer :value="task.nodeName"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">成功次数</div>
-          <div class="success times">{{ successNum }}</div>
+          <div class="success times">{{ taskStatus.successNum }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">节点定义</div>
+          <div class="param-key">节点定义：</div>
           <div class="param-value">
             <jm-text-viewer :value="nodeDef"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">失败次数</div>
-          <div class="fail times">{{ failNum }}</div>
+          <div class="fail times">{{ taskStatus.failNum }}</div>
         </div>
       </div>
       <div class="item">
         <div>
-          <div class="param-key">启动时间</div>
+          <div class="param-key">启动时间：</div>
           <div class="param-value">
             <jm-text-viewer :value="datetimeFormatter(task.startTime)"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">跳过次数</div>
-          <div class="skip times">{{ skipNum }}</div>
+          <div class="skip times">{{ taskStatus.skipNum }}</div>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">执行时长</div>
+        <div class="param-key">执行时长：</div>
         <div class="param-value">
           <jm-text-viewer :value="executionTime"/>
         </div>
       </div>
       <div>
-        <div class="param-key">执行状态</div>
+        <div class="param-key">执行状态：</div>
         <div>
           <task-state :status="task.status"/>
         </div>
       </div>
     </div>
-
     <div class="tab-section">
-      <task-list :taskParma="tasks" @currentId="getCurrentId" @totalParams="getTotal" @successParams="getSuccess"
-                 @failParams="getFail" @skipParams="getSkip"/>
+      <task-list :taskParma="tasks" @currentId="getCurrentId" @statusParams="getStatusParams"/>
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
@@ -341,10 +339,13 @@ export default defineComponent({
     // 当前节点id
     const currentInstanceId = ref<string>('');
     // 运行状态次数
-    const total = ref<number>(0);
-    const successNum = ref<number>(0);
-    const failNum = ref<number>(0);
-    const skipNum = ref<number>(0);
+    const taskStatus = ref<{ total: number; successNum: number; failNum: number; skipNum: number }>({
+      total: 0,
+      successNum: 0,
+      failNum: 0,
+      skipNum: 0,
+    });
+
 
     const loadData = async (func: (id: string) => Promise<void>, id: string, retry: number = 0) => {
       if (!taskInstanceId.value || taskInstanceId.value !== id) {
@@ -448,21 +449,9 @@ export default defineComponent({
         changeTask(taskInstanceId.value);
       }
     };
-    // 获取总数
-    const getTotal = (totalNum: number) => {
-      total.value = totalNum;
-    };
-    // 获取成功次数
-    const getSuccess = (success: number) => {
-      successNum.value = success;
-    };
-    // 获取失败次数
-    const getFail = (fail: number) => {
-      failNum.value = fail;
-    };
-    // 获取跳过次数
-    const getSkip = (skip: number) => {
-      skipNum.value = skip;
+    // 获取所有参数
+    const getStatusParams = (status: any) => {
+      taskStatus.value = status;
     };
     return {
       copy,
@@ -510,17 +499,11 @@ export default defineComponent({
 
         return await fetchTaskLog(taskInstanceId.value);
       },
-      // task-list参数
-      total,
-      successNum,
-      failNum,
-      skipNum,
       TaskStatusEnum,
       getCurrentId,
-      getTotal,
-      getSuccess,
-      getFail,
-      getSkip,
+      getStatusParams,
+      // task-list参数
+      taskStatus,
     };
   },
 });

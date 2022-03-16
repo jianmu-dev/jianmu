@@ -47,13 +47,13 @@ export function executionTimeFormatter(startTime: string, endTime: string | unde
     result += `${days} 天 `;
   }
   if (hours > 0) {
-    result += `${hours} 小时 `;
+    result += `${hours} h`;
   }
   if (minutes > 0) {
-    result += `${minutes} 分钟 `;
+    result += `${minutes} m `;
   }
   if (seconds >= 0) {
-    result += `${seconds} 秒 `;
+    result += `${seconds} s `;
   }
 
   return result || '无';
