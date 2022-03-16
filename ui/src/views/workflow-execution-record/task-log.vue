@@ -2,37 +2,61 @@
   <div class="workflow-execution-record-task-log">
     <div class="basic-section">
       <div class="item">
-        <div class="param-key">流程名称：</div>
-        <div class="param-value">
-          <jm-text-viewer :value="workflowName"/>
+        <div>
+          <div class="param-key">流程名称</div>
+          <div class="param-value">
+            <jm-text-viewer :value="workflowName"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">执行次数</div>
+          <div class="total times">{{ total }}</div>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">节点名称：</div>
-        <div class="param-value">
-          <jm-text-viewer :value="task.nodeName"/>
+        <div>
+          <div class="param-key">节点名称</div>
+          <div class="param-value">
+            <jm-text-viewer :value="task.nodeName"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">成功次数</div>
+          <div class="success times">{{ successNum }}</div>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">节点定义：</div>
-        <div class="param-value">
-          <jm-text-viewer :value="nodeDef"/>
+        <div>
+          <div class="param-key">节点定义</div>
+          <div class="param-value">
+            <jm-text-viewer :value="nodeDef"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">失败次数</div>
+          <div class="fail times">{{ failNum }}</div>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">启动时间：</div>
-        <div class="param-value">
-          <jm-text-viewer :value="datetimeFormatter(task.startTime)"/>
+        <div>
+          <div class="param-key">启动时间</div>
+          <div class="param-value">
+            <jm-text-viewer :value="datetimeFormatter(task.startTime)"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">跳过次数</div>
+          <div class="skip times">{{ skipNum }}</div>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">执行时长：</div>
+        <div class="param-key">执行时长</div>
         <div class="param-value">
           <jm-text-viewer :value="executionTime"/>
         </div>
       </div>
       <div>
-        <div class="param-key">执行状态：</div>
+        <div class="param-key">执行状态</div>
         <div>
           <task-state :status="task.status"/>
         </div>
@@ -40,16 +64,8 @@
     </div>
 
     <div class="tab-section">
-      <div class="task-list" v-if="tasks.length > 1">
-        <jm-select v-model="taskInstanceId" @change="changeTask">
-          <jm-option
-            v-for="item in tasks"
-            :key="item.instanceId"
-            :label="datetimeFormatter(item.startTime)"
-            :value="item.instanceId">
-          </jm-option>
-        </jm-select>
-      </div>
+      <task-list :taskParma="tasks" @currentId="getCurrentId" @totalParams="getTotal" @successParams="getSuccess"
+                 @failParams="getFail" @skipParams="getSkip"/>
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
@@ -247,6 +263,7 @@ import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
 import TaskState from '@/views/workflow-execution-record/task-state.vue';
+import TaskList from '@/views/workflow-execution-record/task-list.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
@@ -256,7 +273,7 @@ import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/mod
 import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
-  components: { TaskState },
+  components: { TaskState, TaskList },
   props: {
     id: {
       type: String,
@@ -321,6 +338,13 @@ export default defineComponent({
     // 最大日志大小为1MB
     const maxLogLength = 1024 * 1024;
     const moreLog = ref<boolean>(false);
+    // 当前节点id
+    const currentInstanceId = ref<string>('');
+    // 运行状态次数
+    const total = ref<number>(0);
+    const successNum = ref<number>(0);
+    const failNum = ref<number>(0);
+    const skipNum = ref<number>(0);
 
     const loadData = async (func: (id: string) => Promise<void>, id: string, retry: number = 0) => {
       if (!taskInstanceId.value || taskInstanceId.value !== id) {
@@ -408,6 +432,38 @@ export default defineComponent({
       }
     };
     const maxWidthRecord = ref<Record<string, number>>({});
+    const changeTask = (instanceId: string) => {
+      // 销毁旧任务
+      destroy();
+      //  清空日志
+      taskLog.value = '';
+      // 初始化新任务
+      nextTick(() => initialize(instanceId));
+    };
+    // 获取当前id
+    const getCurrentId = (id: string) => {
+      currentInstanceId.value = id;
+      if (taskInstanceId.value !== currentInstanceId.value) {
+        taskInstanceId.value = currentInstanceId.value;
+        changeTask(taskInstanceId.value);
+      }
+    };
+    // 获取总数
+    const getTotal = (totalNum: number) => {
+      total.value = totalNum;
+    };
+    // 获取成功次数
+    const getSuccess = (success: number) => {
+      successNum.value = success;
+    };
+    // 获取失败次数
+    const getFail = (fail: number) => {
+      failNum.value = fail;
+    };
+    // 获取跳过次数
+    const getSkip = (skip: number) => {
+      skipNum.value = skip;
+    };
     return {
       copy,
       ParamTypeEnum,
@@ -438,16 +494,6 @@ export default defineComponent({
 
         return params;
       }),
-      changeTask: (instanceId: string) => {
-        // 销毁旧任务
-        destroy();
-
-        // 清空日志
-        taskLog.value = '';
-
-        // 初始化新任务
-        nextTick(() => initialize(instanceId));
-      },
       datetimeFormatter,
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
@@ -464,6 +510,17 @@ export default defineComponent({
 
         return await fetchTaskLog(taskInstanceId.value);
       },
+      // task-list参数
+      total,
+      successNum,
+      failNum,
+      skipNum,
+      TaskStatusEnum,
+      getCurrentId,
+      getTotal,
+      getSuccess,
+      getFail,
+      getSkip,
     };
   },
 });
@@ -482,11 +539,37 @@ export default defineComponent({
     padding: 16px 20px 0;
     display: flex;
     justify-content: space-between;
-    box-shadow: 0 0 8px 0 #9eb1c5;
+    border-bottom: 1px solid #E6EBF2;
 
     > div {
       &.item {
         flex: 1;
+
+        .param-number {
+          margin-top: 20px;
+
+          .title {
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #6B7B8D;
+          }
+
+          .times {
+            font-weight: 500;
+          }
+
+          .success {
+            color: #3EBB03;
+          }
+
+          .fail {
+            color: #CF1322;
+          }
+
+          .skip {
+            color: #979797;
+          }
+        }
       }
 
       margin-bottom: 16px;
@@ -519,7 +602,7 @@ export default defineComponent({
     .task-list {
       position: absolute;
       right: 0;
-      top: 0;
+      top: 9px;
       z-index: 2;
     }
 
@@ -649,7 +732,8 @@ export default defineComponent({
       .log {
         margin: 16px;
         position: relative;
-        height: calc(100vh - 286px);
+        //height: calc(100vh - 286px);
+        height: calc(100vh - 351px);
 
         .loading {
           position: absolute;
@@ -668,7 +752,8 @@ export default defineComponent({
         background-color: #ffffff;
         border-radius: 4px;
         color: #082340;
-        height: calc(100vh - 254px);
+        //height: calc(100vh - 254px);
+        height: calc(100vh - 319px);
 
         .content {
           padding: 0 16px 16px 16px;
