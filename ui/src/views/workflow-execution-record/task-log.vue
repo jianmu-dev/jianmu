@@ -10,7 +10,7 @@
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">执行次数</div>
-          <div class="total times">{{ taskStatus.total }}</div>
+          <div class="total times">{{ statusParams.total }}</div>
         </div>
       </div>
       <div class="item">
@@ -22,7 +22,7 @@
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">成功次数</div>
-          <div class="success times">{{ taskStatus.successNum }}</div>
+          <div class="success times">{{ statusParams.successNum }}</div>
         </div>
       </div>
       <div class="item">
@@ -34,7 +34,7 @@
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">失败次数</div>
-          <div class="fail times">{{ taskStatus.failNum }}</div>
+          <div class="fail times">{{ statusParams.failNum }}</div>
         </div>
       </div>
       <div class="item">
@@ -46,7 +46,7 @@
         </div>
         <div class="param-number" v-if="tasks.length > 1">
           <div class="title">跳过次数</div>
-          <div class="skip times">{{ taskStatus.skipNum }}</div>
+          <div class="skip times">{{ statusParams.skipNum }}</div>
         </div>
       </div>
       <div class="item">
@@ -63,7 +63,7 @@
       </div>
     </div>
     <div class="tab-section">
-      <task-list :taskParma="tasks" @currentId="getCurrentId" @statusParams="getStatusParams"/>
+      <task-list :taskParams="tasks" @change="getCurrentId"/>
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
@@ -339,13 +339,27 @@ export default defineComponent({
     // 当前节点id
     const currentInstanceId = ref<string>('');
     // 运行状态次数
-    const taskStatus = ref<{ total: number; successNum: number; failNum: number; skipNum: number }>({
-      total: 0,
-      successNum: 0,
-      failNum: 0,
-      skipNum: 0,
-    });
+    const statusParams = computed<{ total: number; successNum: number; failNum: number; skipNum: number }>(() => {
+      const statusNum = {
+        total: 0,
+        successNum: 0,
+        failNum: 0,
+        skipNum: 0,
+      };
 
+      tasks.value.forEach(item => {
+        if (item.status === TaskStatusEnum.SUCCEEDED) {
+          statusNum.successNum++;
+        } else if (item.status === TaskStatusEnum.FAILED) {
+          statusNum.failNum++;
+        } else if (item.status === TaskStatusEnum.SKIPPED) {
+          statusNum.skipNum++;
+        }
+      });
+      statusNum.total = statusNum.successNum + statusNum.failNum + statusNum.skipNum;
+
+      return statusNum;
+    });
 
     const loadData = async (func: (id: string) => Promise<void>, id: string, retry: number = 0) => {
       if (!taskInstanceId.value || taskInstanceId.value !== id) {
@@ -406,7 +420,9 @@ export default defineComponent({
       }, id);
 
       // 加载参数
-      loadData(async (id: string) => (taskParams.value = await listTaskParam(id)), id);
+      loadData(async (id: string) => {
+        taskParams.value = await listTaskParam(id);
+      }, id);
     };
 
     const destroy = () => {
@@ -448,10 +464,6 @@ export default defineComponent({
         taskInstanceId.value = currentInstanceId.value;
         changeTask(taskInstanceId.value);
       }
-    };
-    // 获取所有参数
-    const getStatusParams = (status: any) => {
-      taskStatus.value = status;
     };
     return {
       copy,
@@ -501,9 +513,7 @@ export default defineComponent({
       },
       TaskStatusEnum,
       getCurrentId,
-      getStatusParams,
-      // task-list参数
-      taskStatus,
+      statusParams,
     };
   },
 });
