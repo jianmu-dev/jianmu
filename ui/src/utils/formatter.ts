@@ -44,16 +44,16 @@ export function executionTimeFormatter(startTime: string, endTime: string | unde
 
   let result = '';
   if (days > 0) {
-    result += `${days} 天 `;
+    result += `${days} d`;
   }
   if (hours > 0) {
-    result += `${hours} 小时 `;
+    result += `${hours} h`;
   }
   if (minutes > 0) {
-    result += `${minutes} 分钟 `;
+    result += `${minutes} m `;
   }
   if (seconds >= 0) {
-    result += `${seconds} 秒 `;
+    result += `${seconds} s `;
   }
 
   return result || '无';
