@@ -185,7 +185,11 @@ public class WorkflowInternalApplication {
             this.workflowRepository.commitEvents(workflow);
             return;
         }
+        // 如果不能跳过，看看能不能激活，汇聚节点时因为涉及并发，因此都需要判断
         if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            EvaluationContext context = this.findContext(workflow, cmd.getTriggerId());
+            workflow.setExpressionLanguage(this.expressionLanguage);
+            workflow.setContext(context);
             log.info("activateNode: " + cmd.getNodeRef());
             workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
             this.workflowRepository.commitEvents(workflow);
