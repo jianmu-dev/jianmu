@@ -44,7 +44,7 @@ export function executionTimeFormatter(startTime: string, endTime: string | unde
 
   let result = '';
   if (days > 0) {
-    result += `${days} 天 `;
+    result += `${days} d`;
   }
   if (hours > 0) {
     result += `${hours} h`;
