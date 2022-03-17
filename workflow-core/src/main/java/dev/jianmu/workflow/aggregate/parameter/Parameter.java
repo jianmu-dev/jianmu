@@ -1,16 +1,17 @@
 package dev.jianmu.workflow.aggregate.parameter;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
+ * @author Ethan Liu
  * @program: Parameter
  * @description 参数类
- * @author Ethan Liu
  * @create 2021-01-21 13:13
-*/
+ */
 public abstract class Parameter<T> {
     public enum Type {
         STRING {
@@ -20,7 +21,12 @@ public abstract class Parameter<T> {
                     return defaultParameter();
                 }
                 if (value instanceof String) {
-                    return new StringParameter((String) value);
+                    var s = (String) value;
+                    var l = s.getBytes(StandardCharsets.UTF_8).length;
+                    if (l > 65535) {
+                        throw new ClassCastException("参数长度为" + l + "已超过最大长度(65535个字节)");
+                    }
+                    return new StringParameter(s);
                 }
                 throw new ClassCastException("参数值与类型不匹配，无法转换");
             }
