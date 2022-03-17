@@ -5,7 +5,7 @@
             #{{ currentDropdown }}<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
       <template #dropdown>
-        <jm-dropdown-menu style="height:186px;">
+        <jm-dropdown-menu style="max-height:186px;">
           <jm-dropdown-item v-for="item in tasks" :key="item.instanceId" @click="getParams(item.instanceId)"
                             style="padding:0 20px;">
             <div style="display: flex;color:#606266;">
