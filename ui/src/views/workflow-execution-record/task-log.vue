@@ -3,7 +3,7 @@
     <div class="basic-section">
       <div class="item">
         <div>
-          <div class="param-key">流程名称：</div>
+          <div class="param-key">流程名称</div>
           <div class="param-value">
             <jm-text-viewer :value="workflowName"/>
           </div>
@@ -15,7 +15,7 @@
       </div>
       <div class="item">
         <div>
-          <div class="param-key">节点名称：</div>
+          <div class="param-key">节点名称</div>
           <div class="param-value">
             <jm-text-viewer :value="task.nodeName"/>
           </div>
@@ -27,7 +27,7 @@
       </div>
       <div class="item">
         <div>
-          <div class="param-key">节点定义：</div>
+          <div class="param-key">节点定义</div>
           <div class="param-value">
             <jm-text-viewer :value="nodeDef"/>
           </div>
@@ -39,7 +39,7 @@
       </div>
       <div class="item">
         <div>
-          <div class="param-key">启动时间：</div>
+          <div class="param-key">启动时间</div>
           <div class="param-value">
             <jm-text-viewer :value="datetimeFormatter(task.startTime)"/>
           </div>
@@ -50,13 +50,13 @@
         </div>
       </div>
       <div class="item">
-        <div class="param-key">执行时长：</div>
+        <div class="param-key">执行时长</div>
         <div class="param-value">
           <jm-text-viewer :value="executionTime"/>
         </div>
       </div>
       <div>
-        <div class="param-key">执行状态：</div>
+        <div class="param-key">执行状态</div>
         <div>
           <task-state :status="task.status"/>
         </div>
@@ -70,7 +70,7 @@
             <div class="tab">日志</div>
           </template>
           <div class="tab-content">
-            <div class="log">
+            <div :class="[tasks.length>1?'tasks-log':'task-log']" class="log">
               <div class="loading" v-if="executing">
                 <jm-button type="text" size="small" :loading="executing">
                   加载中...
@@ -90,7 +90,7 @@
             <div class="tab">业务参数</div>
           </template>
           <div class="tab-content">
-            <div class="params">
+            <div :class="[tasks.length>1?'tasks-params':'task-params']" class="params">
               <jm-scrollbar>
                 <div class="content">
                   <div class="title">输入参数</div>
@@ -528,8 +528,7 @@ export default defineComponent({
   height: 100%;
 
   .basic-section {
-    margin: 20px;
-    padding: 16px 20px 0;
+    margin: 20px 24px;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid #E6EBF2;
@@ -722,11 +721,18 @@ export default defineComponent({
         }
       }
 
+      .task-log {
+        height: calc(100vh - 260px);
+      }
+
+      .tasks-log {
+        height: calc(100vh - 330px);
+      }
+
       .log {
         margin: 16px;
         position: relative;
         //height: calc(100vh - 286px);
-        height: calc(100vh - 351px);
 
         .loading {
           position: absolute;
@@ -741,12 +747,19 @@ export default defineComponent({
         }
       }
 
+      .task-params {
+        height: calc(100vh - 228px);
+      }
+
+      .tasks-params {
+        height: calc(100vh - 298px);
+      }
+
       .params {
         background-color: #ffffff;
         border-radius: 4px;
         color: #082340;
         //height: calc(100vh - 254px);
-        height: calc(100vh - 319px);
 
         .content {
           padding: 0 16px 16px 16px;
