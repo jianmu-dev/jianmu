@@ -160,6 +160,17 @@ public class Workflow extends AggregateRoot {
     // 跳过节点
     public void skipNode(String triggerId, String nodeRef) {
         Node node = this.findNode(nodeRef);
+        if (node instanceof End) {
+            // 发布流程结束事件并返回
+            WorkflowEndEvent workflowEndEvent = WorkflowEndEvent.Builder.aWorkflowEndEvent()
+                    .nodeRef(node.getRef())
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(workflowEndEvent);
+            return;
+        }
         // 发布下游节点跳过事件
         var targets = node.getTargets();
         targets.forEach(targetRef -> {
