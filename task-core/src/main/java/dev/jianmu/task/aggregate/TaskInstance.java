@@ -49,7 +49,7 @@ public class TaskInstance extends AggregateRoot {
 
     public void executeFailed() {
         if (this.status == InstanceStatus.EXECUTION_FAILED) {
-            throw new RuntimeException("任务已完成，不能变更状态");
+            return;
         }
         this.status = InstanceStatus.EXECUTION_FAILED;
         this.endTime = LocalDateTime.now();

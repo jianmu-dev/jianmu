@@ -13,6 +13,7 @@ import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +89,7 @@ public class WorkflowInstanceInternalApplication {
     }
 
     // 终止流程
+    @Async
     @Transactional
     public void stop(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)

@@ -54,8 +54,8 @@ public class AsyncTaskInstanceInternalApplication {
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.terminate();
                     log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
-        this.asyncTaskInstanceRepository.updateAll(asyncTaskInstances);
     }
 
     // 任务已启动命令
