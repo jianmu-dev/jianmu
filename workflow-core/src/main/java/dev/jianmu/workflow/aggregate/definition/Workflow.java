@@ -97,9 +97,6 @@ public class Workflow extends AggregateRoot {
             this.raiseEvent(activatingEvent);
             // 如果是非环回分支，则发布其他节点跳过事件
             if (!branch.isLoop()) {
-//                var targets = node.getTargets().stream()
-//                        .filter(targetRef -> !targetRef.equals(branch.getTarget()))
-//                        .collect(Collectors.toList());
                 var targets = ((Gateway) node).findNonLoopBranch().stream()
                         .filter(targetRef -> !targetRef.equals(branch.getTarget()))
                         .collect(Collectors.toList());
