@@ -20,7 +20,7 @@ public class WorkflowDomainService {
 
     public boolean canActivateNode(String nodeRef, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
         // 返回当前节点上游Task的ref List
-        List<String> refList = workflow.findTasks(nodeRef);
+        List<String> refList = workflow.findNodes(nodeRef);
         List<String> instanceList = asyncTaskInstances.stream()
                 .map(AsyncTaskInstance::getAsyncTaskRef)
                 .collect(Collectors.toList());
@@ -46,7 +46,7 @@ public class WorkflowDomainService {
 
     public boolean canSkipNode(String nodeRef, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
         // 返回当前节点上游Task的ref List
-        List<String> refList = workflow.findTasks(nodeRef);
+        List<String> refList = workflow.findNodes(nodeRef);
         List<String> instanceList = asyncTaskInstances.stream()
                 .map(AsyncTaskInstance::getAsyncTaskRef)
                 .collect(Collectors.toList());

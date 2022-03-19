@@ -120,7 +120,7 @@ public class WorkflowInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         // 启动流程
         workflow.start(cmd.getTriggerId());
-        var asyncTaskInstances = workflow.findTasks().stream().map(node ->
+        var asyncTaskInstances = workflow.getNodes().stream().map(node ->
                 AsyncTaskInstance.Builder
                         .anAsyncTaskInstance()
                         .workflowInstanceId(workflowInstance.getId())

@@ -64,6 +64,14 @@ public class Workflow extends AggregateRoot {
     public void activateNode(String triggerId, String nodeRef) {
         Node node = this.findNode(nodeRef);
         if (node instanceof End) {
+            // 发布结束节点执行成功事件
+            NodeSucceedEvent succeedEvent = NodeSucceedEvent.Builder.aNodeSucceedEvent()
+                    .nodeRef(node.getRef())
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(succeedEvent);
             // 发布流程结束事件并返回
             WorkflowEndEvent workflowEndEvent = WorkflowEndEvent.Builder.aWorkflowEndEvent()
                     .nodeRef(node.getRef())
@@ -87,7 +95,15 @@ public class Workflow extends AggregateRoot {
         }
         if (node instanceof Gateway) {
             var branch = ((Gateway) node).calculateTarget(expressionLanguage, context);
-            // 发布下一个节点激活事件并返回
+            // 发布网关节点执行成功事件
+            NodeSucceedEvent succeedEvent = NodeSucceedEvent.Builder.aNodeSucceedEvent()
+                    .nodeRef(node.getRef())
+                    .triggerId(triggerId)
+                    .workflowRef(this.ref)
+                    .workflowVersion(this.version)
+                    .build();
+            this.raiseEvent(succeedEvent);
+            // 发布下一个节点激活事件
             NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
                     .nodeRef(branch.getTarget())
                     .triggerId(triggerId)
@@ -110,17 +126,6 @@ public class Workflow extends AggregateRoot {
                     this.raiseEvent(nodeSkipEvent);
                 });
             }
-            return;
-        }
-        if (node instanceof Start) {
-            // 发布流程启动事件
-            WorkflowStartEvent workflowStartEvent = WorkflowStartEvent.Builder.aWorkflowStartEvent()
-                    .nodeRef(node.getRef())
-                    .triggerId(triggerId)
-                    .workflowRef(this.ref)
-                    .workflowVersion(this.version)
-                    .build();
-            this.raiseEvent(workflowStartEvent);
         }
     }
 
@@ -141,6 +146,14 @@ public class Workflow extends AggregateRoot {
 
     public void start(String triggerId) {
         Node node = this.findStart();
+        // 发布开始节点执行成功事件
+        NodeSucceedEvent succeedEvent = NodeSucceedEvent.Builder.aNodeSucceedEvent()
+                .nodeRef(node.getRef())
+                .triggerId(triggerId)
+                .workflowRef(this.ref)
+                .workflowVersion(this.version)
+                .build();
+        this.raiseEvent(succeedEvent);
         // 发布所有下游节点激活事件
         Set<String> nodes = node.getTargets();
         nodes.forEach(n -> {
@@ -276,6 +289,15 @@ public class Workflow extends AggregateRoot {
                 .filter(n -> n.getRef().equals(nodeRef))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("未找到该节点定义: " + nodeRef));
+    }
+
+    // 返回当前节点上游Node的ref List
+    public List<String> findNodes(String nodeRef) {
+        Node node = this.findNode(nodeRef);
+        return this.nodes.stream()
+                .map(Node::getRef)
+                .filter(ref -> node.getSources().contains(ref))
+                .collect(Collectors.toList());
     }
 
     // 返回当前节点上游Task的ref List

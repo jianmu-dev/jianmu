@@ -44,6 +44,15 @@ public class AsyncTaskInstanceInternalApplication {
         this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
     }
 
+    @Transactional
+    public void nodeSucceed(String triggerId, String nodeRef) {
+        var asyncTaskInstance = this.asyncTaskInstanceRepository
+                .findByTriggerIdAndTaskRef(triggerId, nodeRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
+        asyncTaskInstance.succeed();
+        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+    }
+
     // 发布全部任务终止事件
     @Transactional
     public void terminateAll(String instanceId) {

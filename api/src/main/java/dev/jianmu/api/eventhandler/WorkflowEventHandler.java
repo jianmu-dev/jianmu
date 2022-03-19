@@ -59,7 +59,7 @@ public class WorkflowEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get WorkflowStartEvent here -------------------------");
         log.info(event.toString());
-        log.info("-----------------------------------------------------");
+        log.info("handle WorkflowStartEvent end-----------------------------------------------------");
     }
 
     @Async
@@ -98,6 +98,16 @@ public class WorkflowEventHandler {
 
     @Async
     @EventListener
+    public void handleNodeSucceedEvent(NodeSucceedEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get NodeSucceedEvent here -------------------------");
+        log.info(event.toString());
+        this.asyncTaskInstanceInternalApplication.nodeSucceed(event.getTriggerId(), event.getNodeRef());
+        log.info("handle NodeSucceedEvent end-----------------------------------------------------");
+    }
+
+    @Async
+    @EventListener
     public void handleNodeSkipEvent(NodeSkipEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get NodeSkipEvent here -------------------------");
@@ -119,6 +129,6 @@ public class WorkflowEventHandler {
         log.info("Get WorkflowEndEvent here -------------------------");
         log.info(event.toString());
         this.workflowInstanceInternalApplication.end(event.getTriggerId());
-        log.info("-----------------------------------------------------");
+        log.info("handle WorkflowEndEvent end-----------------------------------------------------");
     }
 }
