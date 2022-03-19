@@ -277,13 +277,6 @@ public class Workflow extends AggregateRoot {
                 .orElseThrow(() -> new RuntimeException("未找到启动节点"));
     }
 
-    public Node findEnd() {
-        return this.nodes.stream()
-                .filter(n -> n instanceof End)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("未找到结束节点"));
-    }
-
     public Node findNode(String nodeRef) {
         return this.nodes.stream()
                 .filter(n -> n.getRef().equals(nodeRef))
@@ -297,23 +290,6 @@ public class Workflow extends AggregateRoot {
         return this.nodes.stream()
                 .map(Node::getRef)
                 .filter(ref -> node.getSources().contains(ref))
-                .collect(Collectors.toList());
-    }
-
-    // 返回当前节点上游Task的ref List
-    public List<String> findTasks(String nodeRef) {
-        Node node = this.findNode(nodeRef);
-        return this.nodes.stream()
-                .filter(n -> n instanceof AsyncTask)
-                .map(Node::getRef)
-                .filter(taskRef -> node.getSources().contains(taskRef))
-                .collect(Collectors.toList());
-    }
-
-    // 返回AsyncTask列表
-    public List<Node> findTasks() {
-        return this.nodes.stream()
-                .filter(n -> n instanceof AsyncTask)
                 .collect(Collectors.toList());
     }
 
