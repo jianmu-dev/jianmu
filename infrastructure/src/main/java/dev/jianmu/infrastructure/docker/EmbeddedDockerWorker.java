@@ -286,6 +286,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
                         .taskId(dockerTask.getTaskInstanceId())
                         .errorMsg(e.getMessage())
                         .build());
+                return;
             }
         }
         // 清除容器
