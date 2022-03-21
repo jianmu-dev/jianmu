@@ -1,14 +1,16 @@
 package dev.jianmu.workflow.aggregate.definition;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description 流程组件父类
- * @author Ethan Liu
  * @create 2021-01-21 13:13
-*/
+ */
 public abstract class BaseNode implements Node {
     // 显示名称
     protected String name;
@@ -20,6 +22,8 @@ public abstract class BaseNode implements Node {
     protected Set<String> sources = new HashSet<>();
     // 下游节点列表
     protected Set<String> targets = new HashSet<>();
+    // 环路对列表
+    protected List<LoopPair> loopPairs = new ArrayList<>();
     // 类型
     protected String type;
     // 节点元数据快照
@@ -41,6 +45,11 @@ public abstract class BaseNode implements Node {
     }
 
     @Override
+    public void setLoopPairs(List<LoopPair> loopPairs) {
+        this.loopPairs = loopPairs;
+    }
+
+    @Override
     public void addSource(String source) {
         this.sources.add(source);
     }
@@ -48,6 +57,11 @@ public abstract class BaseNode implements Node {
     @Override
     public void addTarget(String target) {
         this.targets.add(target);
+    }
+
+    @Override
+    public void addLoopPair(LoopPair loopPair) {
+        this.loopPairs.add(loopPair);
     }
 
     @Override
@@ -83,6 +97,11 @@ public abstract class BaseNode implements Node {
     @Override
     public Set<String> getTargets() {
         return Set.copyOf(this.targets);
+    }
+
+    @Override
+    public List<LoopPair> getLoopPairs() {
+        return loopPairs;
     }
 
     @Override

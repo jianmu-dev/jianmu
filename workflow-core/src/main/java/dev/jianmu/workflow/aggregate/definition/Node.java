@@ -1,13 +1,14 @@
 package dev.jianmu.workflow.aggregate.definition;
 
+import java.util.List;
 import java.util.Set;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description 流程节点接口定义
- * @author Ethan Liu
  * @create 2021-01-21 14:13
-*/
+ */
 public interface Node {
     // 返回节点显示名称
     String getName();
@@ -30,17 +31,26 @@ public interface Node {
     // 返回下游节点列表
     Set<String> getTargets();
 
+    // 返回环路对列表
+    List<LoopPair> getLoopPairs();
+
     // 设置上游节点列表
     void setSources(Set<String> sources);
 
     // 设置下游节点列表
     void setTargets(Set<String> targets);
 
+    // 设置环路对列表
+    void setLoopPairs(List<LoopPair> loopPairs);
+
     // 增加上游节点
     void addSource(String source);
 
     // 增加下游节点
     void addTarget(String target);
+
+    // 增加环路对
+    void addLoopPair(LoopPair loopPair);
 
     // 获取参数列表
     Set<TaskParameter> getTaskParameters();
