@@ -78,6 +78,7 @@ export default defineComponent({
   }
 
   .content {
+    height: 100%;
     .text-line-last {
       // 解决最后一行会被换行显示
       word-break: normal;
