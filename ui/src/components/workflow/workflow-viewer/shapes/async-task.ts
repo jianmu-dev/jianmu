@@ -119,7 +119,7 @@ export default function (G6: typeof _G6) {
 
             // label背景
             background: {
-              fill: '#FFFFFF',
+              // fill: '#FFFFFF',
               padding: [0, 0, 10, 0],
             },
           },
