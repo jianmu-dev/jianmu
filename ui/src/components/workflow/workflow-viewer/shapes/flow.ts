@@ -27,12 +27,12 @@ export default function (G6: typeof _G6) {
         },
       },
       style: {
-        stroke: '#B9BFCD',
+        stroke: '#C7CFE3',
         lineWidth: 2.5,
         endArrow: {
           path: G6.Arrow.vee(18, 18, 1.4),
           d: 2.6,
-          fill: '#B9BFCD',
+          fill: '#C7CFE3',
           stroke: 'transparent',
         },
       },
