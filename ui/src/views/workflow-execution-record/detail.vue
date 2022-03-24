@@ -433,6 +433,7 @@ export default defineComponent({
       .desc {
         margin-top: 5px;
         width: 80%;
+        min-height: 20px;
         font-size: 14px;
         color: #6b7b8d;
       }
