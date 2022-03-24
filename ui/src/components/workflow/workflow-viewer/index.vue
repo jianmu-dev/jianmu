@@ -142,7 +142,7 @@ export default defineComponent({
       };
     });
 
-    onBeforeUpdate(() => {
+    const refreshGraph = () => {
       if (!graph.value) {
         graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
 
@@ -157,8 +157,9 @@ export default defineComponent({
 
       // 更新状态
       updateNodeStates(props.tasks, graph.value);
-    });
+    };
 
+    onBeforeUpdate(() => refreshGraph());
 
     let resizeObserver: ResizeObserver;
 
@@ -175,15 +176,7 @@ export default defineComponent({
 
       proxy.$nextTick(() => {
         // 保证整个视图都渲染完毕，才能确定图的宽高
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
-
-        updateZoom();
-
-        // 配置节点行为
-        nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
-
-        // 更新状态
-        updateNodeStates(props.tasks, graph.value);
+        refreshGraph();
       });
     });
 
