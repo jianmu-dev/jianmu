@@ -229,11 +229,15 @@ export default defineComponent({
         updateZoom();
       },
       handleFullscreen: (_: boolean) => {
-        container.value!.style.visibility = 'hidden';
+        if (container.value) {
+          container.value.style.visibility = 'hidden';
+        }
 
         setTimeout(() => {
           fitCanvas(graph.value);
-          container.value!.style.visibility = '';
+          if (container.value) {
+            container.value.style.visibility = '';
+          }
         }, 100);
       },
       taskStates: computed(() => {
