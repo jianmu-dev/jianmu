@@ -93,7 +93,7 @@ export const MIN_ZOOM = 20;
  * 适配到画布
  * @param graph
  */
-export function fitCanvas(graph: Graph): void {
+export function fitCanvas(graph?: Graph): void {
   if (!graph) {
     return;
   }
