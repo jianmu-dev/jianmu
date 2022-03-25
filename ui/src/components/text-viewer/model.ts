@@ -11,6 +11,7 @@ type Callback = (event: ICallbackEvent) => void
 export class TextViewer {
   private readonly value: Ref<string>;
   private readonly tipPlacement: string;
+  private readonly tipAppendToBody: boolean;
   // 解决element组件未被注册的警告提示
   private readonly appContext: AppContext;
   private readonly temporaryContent: Ref<string>;
@@ -26,6 +27,7 @@ export class TextViewer {
   constructor(
     value: Ref<string>,
     tipPlacement: string,
+    tipAppendToBody:boolean,
     temporaryContent: Ref<string>,
     transitCalculator: Ref<HTMLElement | undefined>,
     appContext: AppContext,
@@ -36,6 +38,7 @@ export class TextViewer {
     this.transitCalculator = transitCalculator;
     this.appContext = appContext;
     this.tipPlacement = tipPlacement;
+    this.tipAppendToBody=tipAppendToBody;
     this.callback = callback;
     this.resizeObserver = new ResizeObserver(_throttle(async () => {
       await this.reload();
@@ -248,7 +251,11 @@ export class TextViewer {
       }
       // 创建tooltip的VNode
       const toolTipVNode = createVNode(Tip, {
-        effect: 'dark', content: value, placement: this.tipPlacement, style: { cursor: 'default' },
+        effect: 'dark',
+        content: value,
+        placement: this.tipPlacement,
+        style: { cursor: 'default' },
+        appendToBody:this.tipAppendToBody,
       }, null);
       toolTipVNode.appContext = this.appContext;
       // 创建出...的vNode
