@@ -18,6 +18,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @Schema(description = "项目查看Dto")
 public class ProjectViewingDto extends PageDto {
+    public enum SortType{
+        DEFAULT_SORT,
+        LAST_MODIFIED_TIME,
+        LAST_EXECUTION_TIME
+    }
     private String projectGroupId;
     private String name;
+    private SortType sortType;
+
+    public String getSortTypeName() {
+        if (this.sortType == null) {
+            return SortType.DEFAULT_SORT.name();
+        }
+        return this.sortType.name();
+    }
 }
