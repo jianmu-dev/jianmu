@@ -22,9 +22,9 @@ export default defineComponent({
       default: 'bottom',
     },
     // 控制tooltip是否被放置到body元素上
-    tipAppendToBody:{
-      type:Boolean,
-      default:true,
+    tipAppendToBody: {
+      type: Boolean,
+      default: true,
     },
   },
   setup(props, { emit }) {
@@ -86,6 +86,7 @@ export default defineComponent({
 
   .content {
     height: 100%;
+
     .text-line-last {
       // 解决最后一行会被换行显示
       word-break: normal;

@@ -2,6 +2,7 @@ import { createVNode, nextTick, render, Ref, AppContext, VNode } from 'vue';
 import Tip from './tip.vue';
 import TextLine from './text-line.vue';
 import _throttle from 'lodash/throttle';
+
 export interface ICallbackEvent {
   contentMaxWidth: number;
 }
@@ -27,7 +28,7 @@ export class TextViewer {
   constructor(
     value: Ref<string>,
     tipPlacement: string,
-    tipAppendToBody:boolean,
+    tipAppendToBody: boolean,
     temporaryContent: Ref<string>,
     transitCalculator: Ref<HTMLElement | undefined>,
     appContext: AppContext,
@@ -38,7 +39,7 @@ export class TextViewer {
     this.transitCalculator = transitCalculator;
     this.appContext = appContext;
     this.tipPlacement = tipPlacement;
-    this.tipAppendToBody=tipAppendToBody;
+    this.tipAppendToBody = tipAppendToBody;
     this.callback = callback;
     this.resizeObserver = new ResizeObserver(_throttle(async () => {
       await this.reload();
@@ -255,7 +256,7 @@ export class TextViewer {
         content: value,
         placement: this.tipPlacement,
         style: { cursor: 'default' },
-        appendToBody:this.tipAppendToBody,
+        appendToBody: this.tipAppendToBody,
       }, null);
       toolTipVNode.appContext = this.appContext;
       // 创建出...的vNode
@@ -275,22 +276,22 @@ export class TextViewer {
     const lineHeight = await this.calculateLineHeight();
     // 获取外层元素的宽高，如果外层元素未指定高度，默认将文字占据的行高值设置为高度。
     const wrapperSize = this.calculateContainerSize(lineHeight);
-    let isOverFlow:boolean=false;
-    this.temporaryContent.value=this.value.value;
+    let isOverFlow: boolean = false;
+    this.temporaryContent.value = this.value.value;
     await nextTick();
-    isOverFlow=this.transitCalculator.value!.getBoundingClientRect().width>wrapperSize.width;
-    this.temporaryContent.value='';
+    isOverFlow = this.transitCalculator.value!.getBoundingClientRect().width > wrapperSize.width;
+    this.temporaryContent.value = '';
     if (value.length === 0) {
       // 如果传入的内容为空字符串，生成一个类名为content的空div 作为VNode
       const wrapperNode = await this.generateVNode([], 0, lineHeight, wrapperSize, value);
       render(wrapperNode, this.transitCalculator.value!.parentElement as HTMLElement);
       return;
     }
-    if(isOverFlow){
-      const element=document.createElement('div');
-      element.innerHTML=this.value.value;
+    if (isOverFlow) {
+      const element = document.createElement('div');
+      element.innerHTML = this.value.value;
       this.transitCalculator.value.nextElementSibling!.appendChild(element);
-      element.parentElement!.style.overflow='hidden';
+      element.parentElement!.style.overflow = 'hidden';
       await nextTick();
       element.parentElement!.style.removeProperty('overflow');
       // 获取...占据的宽度
@@ -314,7 +315,7 @@ export class TextViewer {
       // 将VNode渲染到页面
       render(wrapperNode, this.transitCalculator.value.parentElement as HTMLElement);
       this.transitCalculator.value.nextElementSibling!.removeChild(element);
-    }else{
+    } else {
       // 传入字符占据的宽度小于外层盒子的宽度，直接渲染
       const wrapperNode = await this.generateVNode([this.value.value], 1, lineHeight, wrapperSize, this.value.value);
       render(wrapperNode, this.transitCalculator.value!.parentElement as HTMLElement);
