@@ -343,7 +343,7 @@ public class ViewController {
     @GetMapping("/v2/projects")
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
-        var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName());
+        var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName());
         var projectVos = projects.getList().stream().map(project -> this.instanceApplication
                 .findByRefAndSerialNoMax(project.getWorkflowRef())
                 .map(workflowInstance -> {

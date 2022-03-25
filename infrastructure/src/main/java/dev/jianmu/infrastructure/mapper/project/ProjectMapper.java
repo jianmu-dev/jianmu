@@ -98,7 +98,8 @@ public interface ProjectMapper {
             "   <if test='projectGroupId != null'> AND `plp`.`project_group_id` = #{projectGroupId} </if>" +
             "   <if test='workflowName != null'> AND (`jp`.`workflow_name` like concat('%', #{workflowName}, '%') OR `jp`.`workflow_description` like concat('%', #{workflowName}, '%'))</if>" +
             "</where>" +
-            "ORDER BY `plp`.`sort` asc" +
+            "<if test='sortType == \"DEFAULT_SORT\"'> ORDER BY `plp`.`sort` asc</if>" +
+            "<if test='sortType == \"LAST_MODIFIED_TIME\"'> ORDER BY `jp`.`last_modified_time` desc</if>" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "workflow_description", property = "workflowDescription")
@@ -113,5 +114,5 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
-    List<Project> findAllByGroupId(@Param("projectGroupId") String projectGroupId, @Param("workflowName") String workflowName);
+    List<Project> findAllByGroupId(@Param("projectGroupId") String projectGroupId, @Param("workflowName") String workflowName, @Param("sortType") String sortType);
 }
