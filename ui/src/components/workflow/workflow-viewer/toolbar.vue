@@ -1,50 +1,44 @@
 <template>
   <div class="jm-workflow-viewer-toolbar">
     <div class="group" v-if="!dslMode">
-      <jm-tooltip :content="isFullscreen? '退出全屏' : '全屏'" placement="top">
+      <jm-tooltip :content="isFullscreen? '退出全屏' : '全屏'" placement="top" :appendToBody="false">
         <div :class="isFullscreen? 'screen-normal-icon' : 'screen-full-icon'"
-             @click="handleFullScreen(!isFullscreen)"
-             :title="isFullscreen? '退出全屏' : ''"></div>
+             @click="handleFullScreen(!isFullscreen)"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-tooltip content="原始大小" placement="top">
-        <div class="full-icon" @click="normalize" :title="isFullscreen? '原始大小' : ''"></div>
+      <jm-tooltip content="原始大小" placement="top" :appendToBody="false">
+        <div class="full-icon" @click="normalize"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-tooltip content="适屏" placement="top">
-        <div class="normal-icon" @click="fitViewer" :title="isFullscreen? '适屏' : ''"></div>
+      <jm-tooltip content="适屏" placement="top" :appendToBody="false">
+        <div class="normal-icon" @click="fitViewer"></div>
       </jm-tooltip>
     </div>
     <div class="group" v-if="!dslMode">
-      <jm-tooltip content="缩小" placement="top">
+      <jm-tooltip content="缩小" placement="top" :appendToBody="false">
         <div :class="{'narrow-icon': true, disabled: zoom === MIN_ZOOM}"
-             @click="changeZoom(false)"
-             :title="isFullscreen? '缩小' : ''"></div>
+             @click="changeZoom(false)"></div>
       </jm-tooltip>
       <div class="percentage">{{ zoom }}%</div>
-      <jm-tooltip content="放大" placement="top">
+      <jm-tooltip content="放大" placement="top" :appendToBody="false">
         <div :class="{'enlarge-icon': true, disabled: zoom === MAX_ZOOM}"
-             @click="changeZoom(true)"
-             :title="isFullscreen? '放大' : ''"></div>
+             @click="changeZoom(true)"></div>
       </jm-tooltip>
     </div>
     <div class="group" v-if="!readonly && !dslMode">
-      <jm-tooltip content="流程日志" placement="top">
+      <jm-tooltip content="流程日志" placement="top" :appendToBody="false">
         <div class="process-log-icon"
-             @click="processLog"
-             :title="isFullscreen? '流程日志' : ''"></div>
+             @click="processLog"></div>
       </jm-tooltip>
     </div>
     <div :class="{group: true, dsl: dslMode}">
-      <jm-tooltip content="查看DSL" placement="top" v-if="!dslMode">
+      <jm-tooltip content="查看DSL" placement="top" :appendToBody="false" v-if="!dslMode">
         <div class="dsl-icon"
-             @click="viewDsl(true)"
-             :title="isFullscreen? '查看DSL' : ''"></div>
+             @click="viewDsl(true)"></div>
       </jm-tooltip>
-      <jm-tooltip :content="`返回${isWorkflow ? '流程' : '管道'}`" placement="top" v-else>
+      <jm-tooltip :content="`返回${isWorkflow ? '流程' : '管道'}`" placement="top" :appendToBody="false" v-else>
         <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'"
-             @click="viewDsl(false)"
-             :title="isFullscreen? `返回${isWorkflow ? '流程' : '管道'}` : ''"></div>
+             @click="viewDsl(false)"></div>
       </jm-tooltip>
     </div>
   </div>
