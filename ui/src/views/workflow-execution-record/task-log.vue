@@ -118,6 +118,7 @@
                           <jm-tooltip
                             content="必填项"
                             placement="top"
+                            :appendToBody="false"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
@@ -193,6 +194,7 @@
                           <jm-tooltip
                             content="必填项"
                             placement="top"
+                            :appendToBody="false"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
@@ -657,39 +659,11 @@ export default defineComponent({
               &.param-value {
                 .value {
                   width: 100%;
-
-                  //&.jm-text-viewer {
-                  //  .content {
-                  //    .text-line {
-                  //      &:last-child {
-                  //        text-align: left;
-                  //
-                  //        &::after {
-                  //          display: none;
-                  //        }
-                  //      }
-                  //    }
-                  //  }
-                  //}
                 }
               }
 
               .value {
                 width: 100%;
-
-                //&.jm-text-viewer {
-                //  .content {
-                //    .text-line {
-                //      &:last-child {
-                //        text-align: center;
-                //
-                //        &::after {
-                //          display: none;
-                //        }
-                //      }
-                //    }
-                //  }
-                //}
               }
             }
 
@@ -715,6 +689,8 @@ export default defineComponent({
         }
 
         .cell {
+          overflow: visible;
+
           .is-required {
             color: #ff0000;
           }
