@@ -1,11 +1,11 @@
 <template>
   <div class="jm-log-viewer">
     <div class="operation">
-      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'" placement="top">
+      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'" placement="top" :append-to-body="false">
         <div :class="{download: true, doing: downloading}" @click="download"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-tooltip :content="copying ? '复制中，请稍后...' : '复制'" placement="top">
+      <jm-tooltip :content="copying ? '复制中，请稍后...' : '复制'" placement="top" :append-to-body="false">
         <div :class="{copy: true, doing: copying}" @click="copy"></div>
       </jm-tooltip>
     </div>

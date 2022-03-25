@@ -36,7 +36,10 @@
         <div class="dsl-icon"
              @click="viewDsl(true)"></div>
       </jm-tooltip>
-      <jm-tooltip :content="`返回${isWorkflow ? '流程' : '管道'}`" placement="top" :appendToBody="false" v-else>
+      <jm-tooltip placement="top" :appendToBody="false" v-else>
+        <template #content>
+          <div style="white-space: nowrap;">{{ `返回${isWorkflow ? '流程' : '管道'}` }}</div>
+        </template>
         <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'"
              @click="viewDsl(false)"></div>
       </jm-tooltip>

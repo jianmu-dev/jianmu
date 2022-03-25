@@ -1,7 +1,7 @@
 <template>
   <div class="jm-dsl-editor" @click="clickEmpty">
     <div v-if="readonly" class="operation">
-      <jm-tooltip content="复制" placement="top">
+      <jm-tooltip content="复制" placement="top" :append-to-body="false">
         <div class="copy" @click="copy"></div>
       </jm-tooltip>
     </div>
