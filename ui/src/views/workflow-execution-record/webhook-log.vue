@@ -139,7 +139,7 @@ export default defineComponent({
         return;
       }
       try {
-        await toClipboard(value);
+        await toClipboard(value, proxy.$el);
         proxy.$success('复制成功');
       } catch (err) {
         proxy.$error('复制失败，请手动复制');
