@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 public class GlobalProperties {
     @NotNull
     private Global global = new Global();
+    private Boolean authMode = true;
 
     @Data
     @Component
