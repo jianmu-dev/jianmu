@@ -1,7 +1,9 @@
 <template>
   <div class="jm-log-viewer">
     <div class="operation">
-      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'" placement="top" :append-to-body="false">
+      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'"
+                  :placement="downloading? 'top-end': 'top'"
+                  :append-to-body="false">
         <div :class="{download: true, doing: downloading}" @click="download"></div>
       </jm-tooltip>
       <div class="separator"></div>
@@ -229,6 +231,7 @@ export default defineComponent({
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
     border: 1px solid #767F91;
+    white-space: nowrap;
 
     visibility: hidden;
 
