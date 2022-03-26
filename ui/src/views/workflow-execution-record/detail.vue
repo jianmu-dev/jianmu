@@ -112,7 +112,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, inject, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -249,12 +249,12 @@ export default defineComponent({
       }
     });
 
-    // onBeforeUnmount(() => {
-    //   terminateLoad = true;
-    //
-    //   // 清空数据
-    //   proxy.mutateRecordDetail({});
-    // });
+    onBeforeUnmount(() => {
+      terminateLoad = true;
+
+      // 清空数据
+      proxy.mutateRecordDetail({});
+    });
 
     const data = computed<{
       project?: IProjectDetailVo;
