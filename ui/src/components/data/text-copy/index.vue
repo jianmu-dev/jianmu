@@ -1,16 +1,16 @@
 <template>
   <span class="jm-text-copy">
-    <jm-tooltip placement="top" :append-to-body="false">
+    <jm-tooltip v-if="tip" placement="top" :append-to-body="false">
       <template #content>
         <div class="tip-content" v-html="tipContent"/>
       </template>
-      <span class="jm-icon-button-copy" @click="copy"></span>
+      <span :class="{'jm-icon-button-copy': true, 'doing': copying}" @click="copy"></span>
     </jm-tooltip>
   </span>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, PropType, ref } from 'vue';
+import { defineComponent, getCurrentInstance, nextTick, PropType, ref } from 'vue';
 import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
@@ -28,19 +28,28 @@ export default defineComponent({
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
     const { toClipboard } = useClipboard();
-    const tipContent = ref<string>('点击复制');
+    const tip = ref<boolean>(true);
+    const tipContent = ref<string>('复制');
     const copying = ref<boolean>(false);
 
-    const reset = (msg: string) => {
+    const reloadTip = async (msg: string) => {
+      tip.value = false;
+      await nextTick();
       tipContent.value = msg;
+      tip.value = true;
+    };
 
-      setTimeout(() => {
-        tipContent.value = '点击复制';
+    const reset = async (msg: string) => {
+      await reloadTip(msg);
+
+      setTimeout(async () => {
         copying.value = false;
+        await reloadTip('复制');
       }, 2000);
     };
 
     return {
+      tip,
       tipContent,
       copying,
       copy: async () => {
@@ -60,9 +69,9 @@ export default defineComponent({
           }
 
           await toClipboard(value, proxy.$el);
-          reset('复制成功');
+          await reset('已复制');
         } catch (err) {
-          reset(`复制失败<br/>原因：${err.message}`);
+          await reset(`复制失败<br/>原因：${err.message}`);
           console.error(err);
         }
       },
@@ -81,6 +90,7 @@ export default defineComponent({
     .tip-content {
       text-align: left;
       padding: 10px;
+      white-space: nowrap;
     }
   }
 
@@ -89,6 +99,7 @@ export default defineComponent({
     color: #6B7B8D;
     cursor: pointer;
     opacity: 0.5;
+    user-select: none;
 
     &:hover {
       opacity: 1;
@@ -100,6 +111,15 @@ export default defineComponent({
 
     &::before {
       margin: 0;
+    }
+
+    &.doing {
+      opacity: 0.35;
+      cursor: not-allowed;
+
+      &:hover {
+        opacity: 0.35;
+      }
     }
   }
 }
