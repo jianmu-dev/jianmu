@@ -4,7 +4,7 @@
       <template #content>
         <div class="tip-content" v-html="tipContent"/>
       </template>
-      <span class="jm-icon-button-copy" @click="copy"></span>
+      <span :class="{'jm-icon-button-copy': true, 'doing': copying}" @click="copy"></span>
     </jm-tooltip>
   </span>
 </template>
@@ -99,6 +99,7 @@ export default defineComponent({
     color: #6B7B8D;
     cursor: pointer;
     opacity: 0.5;
+    user-select: none;
 
     &:hover {
       opacity: 1;
@@ -110,6 +111,15 @@ export default defineComponent({
 
     &::before {
       margin: 0;
+    }
+
+    &.doing {
+      opacity: 0.35;
+      cursor: not-allowed;
+
+      &:hover {
+        opacity: 0.35;
+      }
     }
   }
 }
