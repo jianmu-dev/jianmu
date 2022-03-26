@@ -16,9 +16,9 @@ public interface WorkflowInstanceRepository {
 
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
 
-    WorkflowInstance add(WorkflowInstance workflowInstance);
+    void add(WorkflowInstance workflowInstance);
 
-    WorkflowInstance save(WorkflowInstance workflowInstance);
+    void save(WorkflowInstance workflowInstance);
 
     void commitEvents(WorkflowInstance workflowInstance);
 

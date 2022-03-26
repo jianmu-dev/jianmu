@@ -2,14 +2,13 @@ package dev.jianmu.workflow.event.definition;
 
 /**
  * @author Ethan Liu
- * @class NodeActivatingEvent
- * @description 节点激活事件
- * @create 2021-03-17 13:53
+ * @class NodeSucceedEvent
+ * @description NodeSucceedEvent
+ * @create 2022-03-18 17:30
  */
-public class NodeActivatingEvent extends DefinitionEvent {
-    private NodeActivatingEvent() {
+public class NodeSucceedEvent extends DefinitionEvent {
+    private NodeSucceedEvent() {
     }
-
 
     public static final class Builder {
         // 流程定义唯一引用名称
@@ -22,13 +21,11 @@ public class NodeActivatingEvent extends DefinitionEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
-        // 事件发送者
-        protected String sender;
 
         private Builder() {
         }
 
-        public static Builder aNodeActivatingEvent() {
+        public static Builder aNodeSucceedEvent() {
             return new Builder();
         }
 
@@ -57,20 +54,14 @@ public class NodeActivatingEvent extends DefinitionEvent {
             return this;
         }
 
-        public Builder sender(String sender) {
-            this.sender = sender;
-            return this;
-        }
-
-        public NodeActivatingEvent build() {
-            NodeActivatingEvent nodeActivatingEvent = new NodeActivatingEvent();
-            nodeActivatingEvent.triggerId = this.triggerId;
-            nodeActivatingEvent.workflowRef = this.workflowRef;
-            nodeActivatingEvent.workflowVersion = this.workflowVersion;
-            nodeActivatingEvent.nodeRef = this.nodeRef;
-            nodeActivatingEvent.nodeType = this.nodeType;
-            nodeActivatingEvent.sender = this.sender;
-            return nodeActivatingEvent;
+        public NodeSucceedEvent build() {
+            NodeSucceedEvent nodeSucceedEvent = new NodeSucceedEvent();
+            nodeSucceedEvent.workflowRef = this.workflowRef;
+            nodeSucceedEvent.workflowVersion = this.workflowVersion;
+            nodeSucceedEvent.nodeType = this.nodeType;
+            nodeSucceedEvent.nodeRef = this.nodeRef;
+            nodeSucceedEvent.triggerId = this.triggerId;
+            return nodeSucceedEvent;
         }
     }
 }
