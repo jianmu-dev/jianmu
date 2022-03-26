@@ -165,8 +165,10 @@
                               {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)"
-                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value)">
+                            <jm-text-copy :value="scope.row.value"/>
+                          </div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -242,8 +244,10 @@
                               {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)"
-                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value)">
+                            <jm-text-copy :value="scope.row.value"/>
+                          </div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -259,7 +263,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, nextTick, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -272,7 +276,6 @@ import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
-import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
   components: { TaskState, TaskList },
@@ -288,8 +291,6 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
-    const { proxy } = getCurrentInstance() as any;
-    const { toClipboard } = useClipboard();
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
       return state.recordDetail.taskRecords.find(
@@ -439,19 +440,6 @@ export default defineComponent({
     // 销毁任务
     onBeforeUnmount(destroy);
 
-    // 一键复制
-    const copy = async (value: string) => {
-      if (!value) {
-        return;
-      }
-      try {
-        await toClipboard(value, proxy.$el);
-        proxy.$success('复制成功');
-      } catch (err) {
-        proxy.$error('复制失败，请手动复制');
-        console.error(err);
-      }
-    };
     const maxWidthRecord = ref<Record<string, number>>({});
     const changeTask = (instanceId: string) => {
       // 销毁旧任务
@@ -470,7 +458,6 @@ export default defineComponent({
       }
     };
     return {
-      copy,
       ParamTypeEnum,
       maxWidthRecord,
       workflowName: state.recordDetail.record?.name,
@@ -765,7 +752,6 @@ export default defineComponent({
 
               display: flex;
               align-items: center;
-              position: relative;
 
               &:hover {
                 .copy-btn {
@@ -776,17 +762,9 @@ export default defineComponent({
               .copy-btn {
                 margin-left: 5px;
                 flex-shrink: 0;
+                font-size: 1.25em;
                 width: 16px;
-                height: 16px;
-                background: url('@/assets/svgs/btn/copy.svg') no-repeat;
-                background-size: 100%;
-                cursor: pointer;
                 display: none;
-                opacity: 0.5;
-
-                &:hover {
-                  opacity: 1;
-                }
               }
             }
           }
