@@ -18,7 +18,7 @@ public class AggregateRoot {
         this.events.add(event);
     }
 
-    protected void clear() {
+    public void clear() {
         this.events.clear();
     }
 

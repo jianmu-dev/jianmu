@@ -14,6 +14,9 @@ import dev.jianmu.trigger.aggregate.WebhookParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
+import org.jgrapht.alg.cycle.JohnsonSimpleCycles;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.builder.GraphTypeBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -41,12 +44,15 @@ public class DslParser {
     private Map<String, Object> pipeline;
     private boolean enabled = true;
     private boolean mutable = false;
+    private boolean concurrent = false;
     private String name;
     private String description;
     private Workflow.Type type;
     private final List<DslNode> dslNodes = new ArrayList<>();
     private final List<ShellNode> shellNodes = new ArrayList<>();
     private Set<GlobalParameter> globalParameters = new HashSet<>();
+
+    private Map<String, Node> symbolTable = new HashMap<>();
 
     private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION));
 
@@ -78,9 +84,33 @@ public class DslParser {
         }
     }
 
+    private void calculateLoop(Node node, Branch branch, String targetRef) {
+        var target = symbolTable.get(targetRef);
+        if (target.getRef().equals(node.getRef())) {
+            branch.setLoop(true);
+            return;
+        }
+        if (target instanceof End) {
+            return;
+        }
+        target.getTargets().forEach(nextTargetRef -> this.calculateLoop(node, branch, nextTargetRef));
+    }
+
+    private List<List<String>> findCycles(Set<Node> nodes) {
+        var graph = GraphTypeBuilder
+                .<String, DefaultEdge>directed().allowingMultipleEdges(true)
+                .allowingSelfLoops(false).edgeClass(DefaultEdge.class).weighted(false)
+                .buildGraph();
+        nodes.forEach(node -> graph.addVertex(node.getRef()));
+        nodes.stream()
+                .filter(node -> !(node instanceof End))
+                .forEach(node -> node.getTargets().forEach(target -> graph.addEdge(node.getRef(), target)));
+        JohnsonSimpleCycles<String, DefaultEdge> johnson = new JohnsonSimpleCycles<>(graph);
+        return johnson.findSimpleCycles();
+    }
+
     private Set<Node> calculateWorkflowNodes(List<NodeDef> nodeDefs) {
         // 创建节点
-        Map<String, Node> symbolTable = new HashMap<>();
         dslNodes.forEach(dslNode -> {
             if (dslNode.getType().equals("start")) {
                 var start = Start.Builder.aStart().name(dslNode.getName()).ref(dslNode.getName()).build();
@@ -93,18 +123,13 @@ public class DslParser {
                 return;
             }
             if (dslNode.getType().equals("condition")) {
-                var cases = dslNode.getCases();
-                Map<Boolean, String> targetMap = new HashMap<>();
-                targetMap.put(true, cases.get("true"));
-                targetMap.put(false, cases.get("false"));
-
+                var branches = dslNode.getBranches();
                 var condition = Condition.Builder.aCondition()
                         .name(dslNode.getName())
                         .ref(dslNode.getName())
                         .expression(dslNode.getExpression())
-                        .targetMap(targetMap)
+                        .branches(branches)
                         .build();
-                condition.setTargets(Set.of(cases.get("true"), cases.get("false")));
                 symbolTable.put(dslNode.getName(), condition);
                 return;
             }
@@ -125,16 +150,24 @@ public class DslParser {
         // 添加节点引用关系
         dslNodes.forEach(dslNode -> {
             var n = symbolTable.get(dslNode.getName());
+            if (n instanceof Condition) {
+                for (Branch branch : dslNode.getBranches()) {
+                    var target = symbolTable.get(branch.getTarget());
+                    if (target == null) {
+                        throw new DslException("条件网关" + dslNode.getName() + "指定的case目标: " + branch.getTarget() + "不存在");
+                    } else {
+                        n.addTarget(target.getRef());
+                    }
+                    this.calculateLoop(n, branch, target.getRef());
+                }
+            }
             if (null != n) {
                 dslNode.getTargets().forEach(nodeName -> {
                     var target = symbolTable.get(nodeName);
                     if (null != target) {
-                        if (!n.getType().equals("Condition")) {
-                            n.addTarget(target.getRef());
-                        }
+                        n.addTarget(target.getRef());
                     } else {
-                        var node_target = n.getType().equals("Condition") ? "case" : "target";
-                        throw new DslException("节点" + dslNode.getName() + "指定的" + node_target + ": " + nodeName + "不存在");
+                        throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
                     }
                 });
                 dslNode.getSources().forEach(nodeName -> {
@@ -162,7 +195,28 @@ public class DslParser {
                 }
             });
         });
-        return new HashSet<>(symbolTable.values());
+        var nodes = new HashSet<>(symbolTable.values());
+        var cycles= this.findCycles(nodes);
+        cycles.forEach(cycle -> {
+            cycle.forEach(nodeRef -> {
+                var node = symbolTable.get(nodeRef);
+                var sources = new HashSet<>(node.getSources());
+                sources.retainAll(cycle);
+                var targets = new HashSet<>(node.getTargets());
+                targets.retainAll(cycle);
+                if (sources.isEmpty() || targets.isEmpty()) {
+                    log.warn("环路节点与节点上下游不匹配");
+                    return;
+                }
+                node.addLoopPair(
+                        LoopPair.Builder.aLoopPair()
+                                .source(sources.iterator().next())
+                                .target(targets.iterator().next())
+                                .build()
+                );
+            });
+        });
+        return nodes;
     }
 
     private void createGlobalParameters(Object globalParam) {
@@ -205,6 +259,10 @@ public class DslParser {
             if (mutable instanceof Boolean) {
                 this.mutable = (Boolean) mutable;
             }
+        }
+        var concurrent = this.global.get("concurrent");
+        if (concurrent instanceof Boolean) {
+            this.concurrent = (Boolean) concurrent;
         }
     }
 
@@ -553,7 +611,12 @@ public class DslParser {
             throw new DslException("cases数量错误");
         }
         if (null != targets) {
-            throw new DslException("条件网关节点不能设置targets");
+            throw new DslException("条件网关节点无需设置targets");
+        }
+        var t = ((Map<?, ?>) cases).get("true");
+        var f = ((Map<?, ?>) cases).get("false");
+        if (t == null || f == null) {
+            throw new DslException("条件网关case设置错误");
         }
     }
 
@@ -637,6 +700,10 @@ public class DslParser {
 
     public boolean isMutable() {
         return mutable;
+    }
+
+    public boolean isConcurrent() {
+        return concurrent;
     }
 
     public String getName() {

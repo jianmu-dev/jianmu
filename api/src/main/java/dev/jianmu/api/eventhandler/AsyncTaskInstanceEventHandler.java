@@ -47,11 +47,12 @@ public class AsyncTaskInstanceEventHandler {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAggregateRootEvents(AsyncTaskInstance asyncTaskInstance) {
-        log.info("Get workflowInstance here -------------------------");
+        log.info("Get AsyncTaskInstance here -------------------------");
         asyncTaskInstance.getUncommittedDomainEvents().forEach(event -> {
             log.info("publish {} here", event.getClass().getSimpleName());
             this.publisher.publishEvent(event);
         });
+        asyncTaskInstance.clear();
         log.info("-----------------------------------------------------");
     }
 
@@ -83,6 +84,7 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleTaskSucceededEvent(TaskSucceededEvent event) {
         MDC.put("triggerId", event.getTriggerId());

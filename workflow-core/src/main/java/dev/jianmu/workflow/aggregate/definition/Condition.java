@@ -5,23 +5,25 @@ import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description 条件网关
- * @author Ethan Liu
  * @create 2021-01-21 13:14
-*/
+ */
 public class Condition extends BaseNode implements Gateway {
     private Map<Boolean, String> targetMap = new HashMap<>();
+    private List<Branch> branches;
     private String expression;
     private ExpressionLanguage expressionLanguage;
     private EvaluationContext context;
+    private static final Logger logger = LoggerFactory.getLogger(Condition.class);
 
     private Condition() {
         this.type = this.getClass().getSimpleName();
@@ -29,6 +31,18 @@ public class Condition extends BaseNode implements Gateway {
 
     public Map<Boolean, String> getTargetMap() {
         return targetMap;
+    }
+
+    public void setTargetMap(Map<Boolean, String> targetMap) {
+        this.targetMap = Map.copyOf(targetMap);
+    }
+
+    public List<Branch> getBranches() {
+        return branches;
+    }
+
+    public void setBranches(List<Branch> branches) {
+        this.branches = branches;
     }
 
     public String getExpression() {
@@ -43,31 +57,41 @@ public class Condition extends BaseNode implements Gateway {
         super.setTargets(targets);
     }
 
-    private String getNext() {
+    private Branch getNext() {
         Boolean expResult = false;
         Expression expression = expressionLanguage.parseExpression(this.expression);
         EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
         if (!evaluationResult.isFailure() && evaluationResult.getValue() instanceof BoolParameter) {
             expResult = ((BoolParameter) evaluationResult.getValue()).getValue();
+            logger.info("条件网关表达式计算：{} 计算成功结果为：{}", this.expression, evaluationResult.getValue().getStringValue());
+        } else {
+            logger.info("条件网关表达式计算: {} 计算错误: {}", this.expression, evaluationResult.getFailureMessage());
         }
-        String targetRef = this.targetMap.get(expResult);
-        String target = this.getTargets()
-                .stream()
-                .filter(nodeRef -> nodeRef.equals(targetRef))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Condition无法找到匹配的节点"));
-        return target;
+        Optional<Branch> found = Optional.empty();
+        for (Branch branch : this.branches) {
+            var c = Boolean.parseBoolean((String) branch.getMatchedCondition());
+            if (c == expResult) {
+                found = Optional.of(branch);
+                break;
+            }
+        }
+        return found
+                .orElseThrow(() -> new RuntimeException("Condition无法找到匹配的条件"));
     }
 
     @Override
-    public String calculateTarget(ExpressionLanguage expressionLanguage, EvaluationContext context) {
+    public Branch calculateTarget(ExpressionLanguage expressionLanguage, EvaluationContext context) {
         this.expressionLanguage = expressionLanguage;
         this.context = context;
         return this.getNext();
     }
 
-    public void setTargetMap(Map<Boolean, String> targetMap) {
-        this.targetMap = Map.copyOf(targetMap);
+    @Override
+    public List<String> findNonLoopBranch() {
+        return branches.stream()
+                .filter(branch -> !branch.isLoop())
+                .map(Branch::getTarget)
+                .collect(Collectors.toList());
     }
 
     public void setExpression(String expression) {
@@ -83,7 +107,7 @@ public class Condition extends BaseNode implements Gateway {
         protected String description;
         // 上游节点列表
         protected Set<String> sources = new HashSet<>();
-        private Map<Boolean, String> targetMap = new HashMap<>();
+        private List<Branch> branches;
         private String expression;
 
         private Builder() {
@@ -98,8 +122,8 @@ public class Condition extends BaseNode implements Gateway {
             return this;
         }
 
-        public Builder targetMap(Map<Boolean, String> targetMap) {
-            this.targetMap = targetMap;
+        public Builder branches(List<Branch> branches) {
+            this.branches = branches;
             return this;
         }
 
@@ -130,7 +154,7 @@ public class Condition extends BaseNode implements Gateway {
             condition.expression = this.expression;
             condition.description = this.description;
             condition.sources = this.sources;
-            condition.targetMap = this.targetMap;
+            condition.branches = this.branches;
             return condition;
         }
     }

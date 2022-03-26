@@ -59,6 +59,19 @@ public class ContainerSpec {
         return image;
     }
 
+    public String getImage(String mirror) {
+        if (null == mirror) {
+            return this.image;
+        }
+        if (this.image.contains("/")) {
+            return mirror + "/" + this.image;
+        }
+        if (this.image.contains(":")) {
+            return mirror + "/library/" + this.image;
+        }
+        return mirror + "/library/" + this.image + ":latest";
+    }
+
     public String getWorkingDir() {
         return workingDir;
     }

@@ -83,6 +83,7 @@ public class GlobalProperties {
             private String dockerCertPath;
             private Boolean dockerTlsVerify;
             private String sockFile;
+            private String mirror;
         }
 
         @Data
@@ -91,6 +92,7 @@ public class GlobalProperties {
         public static class K8s {
             private Resource kubeConfigPath;
             private String namespace = "jianmu";
+            private String placeholder = "jianmudev/placeholder:0.3";
         }
     }
 }

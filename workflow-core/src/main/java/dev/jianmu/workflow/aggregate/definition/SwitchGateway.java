@@ -6,10 +6,8 @@ import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @program: workflow
@@ -21,6 +19,7 @@ public class SwitchGateway extends BaseNode implements Gateway {
     private String expression;
     // Switch网关条件Case暂时只支持String类型比较，区分大小写
     private Map<String, String> cases = new HashMap<>();
+    private List<Branch> branches;
     private ExpressionLanguage expressionLanguage;
     private EvaluationContext context;
 
@@ -32,11 +31,7 @@ public class SwitchGateway extends BaseNode implements Gateway {
         return expression;
     }
 
-    public Map<String, String> getCases() {
-        return cases;
-    }
-
-    private String getNext() {
+    private Branch getNext() {
         // TODO expression 表达式求值返回String类型的Case，应支持number类型
         String expResult = "";
         Expression expression = this.expressionLanguage.parseExpression(this.expression);
@@ -45,20 +40,30 @@ public class SwitchGateway extends BaseNode implements Gateway {
             expResult = ((StringParameter) evaluationResult.getValue()).getValue();
         }
         // TODO 如果没有匹配case，是否应该使用default
-        String targetRef = this.cases.get(expResult);
-        String target = this.getTargets()
-                .stream()
-                .filter(nodeRef -> nodeRef.equals(targetRef))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Switch无法找到匹配的节点"));
-        return target;
+        Optional<Branch> found = Optional.empty();
+        for (Branch branch : this.branches) {
+            if (branch.getMatchedCondition().equals(expResult)) {
+                found = Optional.of(branch);
+                break;
+            }
+        }
+        return found
+                .orElseThrow(() -> new RuntimeException("Switch无法找到匹配的条件"));
     }
 
     @Override
-    public String calculateTarget(ExpressionLanguage expressionLanguage, EvaluationContext context) {
+    public Branch calculateTarget(ExpressionLanguage expressionLanguage, EvaluationContext context) {
         this.expressionLanguage = expressionLanguage;
         this.context = context;
         return this.getNext();
+    }
+
+    @Override
+    public List<String> findNonLoopBranch() {
+        return branches.stream()
+                .filter(branch -> !branch.isLoop())
+                .map(Branch::getTarget)
+                .collect(Collectors.toList());
     }
 
     public static final class Builder {

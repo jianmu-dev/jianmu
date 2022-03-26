@@ -2,7 +2,7 @@
   <div class="top-nav">
     <div class="left">
       <router-link to="/">
-        <div class="logo" />
+        <div class="logo"/>
       </router-link>
       <jm-popconfirm
         v-if="newVersion"
@@ -33,8 +33,8 @@
         <span class="el-dropdown-link">
           <jm-tooltip :content="session.username" placement="left">
             <span class="username">{{
-              session.username.charAt(0).toUpperCase()
-            }}</span>
+                session.username.charAt(0).toUpperCase()
+              }}</span>
           </jm-tooltip>
           <i class="el-icon-arrow-down el-icon--right"></i>
         </span>
@@ -126,8 +126,8 @@ export default defineComponent({
     position: relative;
 
     .logo {
-      width: 160px;
-      height: 50px;
+      width: 150px;
+      height: 34px;
       background-image: url('@/assets/svgs/logo/main.svg');
       background-repeat: no-repeat;
       background-size: contain;
@@ -137,8 +137,8 @@ export default defineComponent({
 
     .version {
       position: absolute;
-      left: 170px;
-      bottom: 8px;
+      left: 160px;
+      bottom: 2px;
       letter-spacing: normal;
       white-space: nowrap;
       padding: 0 10px 1px;
