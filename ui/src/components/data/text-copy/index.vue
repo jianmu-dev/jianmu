@@ -1,12 +1,12 @@
 <template>
-  <div class="jm-text-copy">
+  <span class="jm-text-copy">
     <jm-tooltip placement="top" :append-to-body="false">
       <template #content>
         <div class="tip-content" v-html="tipContent"/>
       </template>
       <span class="jm-icon-button-copy" @click="copy"></span>
     </jm-tooltip>
-  </div>
+  </span>
 </template>
 
 <script lang="ts">
@@ -73,7 +73,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-text-copy {
-  display: inline-block;
+  display: inline;
 
   ::v-deep(.el-popper) {
     padding: 0;
@@ -85,6 +85,7 @@ export default defineComponent({
   }
 
   .jm-icon-button-copy {
+    display: inline;
     color: #6B7B8D;
     cursor: pointer;
     opacity: 0.5;
