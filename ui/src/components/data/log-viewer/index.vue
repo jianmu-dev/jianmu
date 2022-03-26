@@ -238,9 +238,11 @@ export default defineComponent({
     .download {
       width: 20px;
       height: 20px;
+      padding: 4px;
       background-image: url('./svgs/download.svg');
       background-repeat: no-repeat;
-      background-size: contain;
+      background-size: 20px;
+      background-position: center;
       cursor: pointer;
 
       &.doing {
