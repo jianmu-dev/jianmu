@@ -34,7 +34,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     // 任务定义类型
     private String asyncTaskType;
     // 创建时间
-    private LocalDateTime activatingTime;
+    private LocalDateTime activatingTime = LocalDateTime.now();
     // 开始时间
     private LocalDateTime startTime;
     // 结束时间
@@ -183,7 +183,7 @@ public class AsyncTaskInstance extends AggregateRoot {
 
     public static final class Builder {
         // ID
-        private String id = UUID.randomUUID().toString().replace("-", "");
+        private final String id = UUID.randomUUID().toString().replace("-", "");
         // 触发器ID
         private String triggerId;
         // 流程定义唯一引用名称

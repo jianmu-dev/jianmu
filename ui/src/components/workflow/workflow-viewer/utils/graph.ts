@@ -93,7 +93,7 @@ export const MIN_ZOOM = 20;
  * 适配到画布
  * @param graph
  */
-export function fitCanvas(graph: Graph): void {
+export function fitCanvas(graph?: Graph): void {
   if (!graph) {
     return;
   }
@@ -169,8 +169,8 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
  * @param container
  */
 export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined,
-  nodeInfos: INodeDefVo[], container: HTMLElement): Graph | undefined {
-  if (!dsl || !triggerType) {
+  nodeInfos: INodeDefVo[], container: HTMLElement | undefined): Graph | undefined {
+  if (!dsl || !triggerType || !container) {
     return undefined;
   }
 
@@ -222,6 +222,27 @@ export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | und
 }
 
 /**
+ * 排序任务列表
+ * @param tasks
+ * @param nodeName
+ */
+export function sortTasks(tasks: ITaskExecutionRecordVo[], nodeName: string): ITaskExecutionRecordVo[] {
+  return tasks.filter(task => task.nodeName === nodeName)
+    // 按开始时间降序排序
+    .sort((t1, t2) => {
+      const st1 = Date.parse(t1.startTime);
+      const st2 = Date.parse(t2.startTime);
+      if (st1 === st2) {
+        return 0;
+      }
+      if (st1 > st2) {
+        return -1;
+      }
+      return 1;
+    });
+}
+
+/**
  * 更新节点状态
  * @param tasks
  * @param graph
@@ -235,7 +256,7 @@ export function updateNodeStates(tasks: ITaskExecutionRecordVo[], graph?: Graph)
     .getNodes()
     .filter(node => node.getModel().type === NodeTypeEnum.ASYNC_TASK)
     .forEach(node => {
-      const task = tasks.find(task => task.nodeName === node.getID());
+      const task = sortTasks(tasks, node.getID())[0];
       const status = task ? task.status : TaskStatusEnum.INIT;
 
       graph.setItemState(node, 'status', status);

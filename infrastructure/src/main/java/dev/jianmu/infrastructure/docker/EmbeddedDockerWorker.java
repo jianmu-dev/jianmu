@@ -55,6 +55,8 @@ public class EmbeddedDockerWorker implements EmbeddedWorker {
 
     private String sockFile;
 
+    private String mirror;
+
     private static final Logger logger = LoggerFactory.getLogger(EmbeddedDockerWorker.class);
     private DockerClient dockerClient;
     private Map<String, Integer> runStatusMap = new ConcurrentHashMap<>();
@@ -72,6 +74,7 @@ public class EmbeddedDockerWorker implements EmbeddedWorker {
         this.dockerCertPath = properties.getWorker().getDocker().getDockerCertPath();
         this.dockerTlsVerify = properties.getWorker().getDocker().getDockerTlsVerify();
         this.sockFile = properties.getWorker().getDocker().getSockFile();
+        this.mirror = properties.getMirror();
         this.publisher = publisher;
         this.connect();
     }
@@ -98,7 +101,7 @@ public class EmbeddedDockerWorker implements EmbeddedWorker {
     public void runTask(EmbeddedWorkerTask embeddedWorkerTask, BufferedWriter logWriter) {
         var spec = embeddedWorkerTask.getSpec();
         // 创建容器参数
-        var createContainerCmd = dockerClient.createContainerCmd(spec.getImage(this.registryUrl))
+        var createContainerCmd = dockerClient.createContainerCmd(spec.getImage(this.mirror))
                 .withName(embeddedWorkerTask.getTaskInstanceId());
         if (!spec.getWorkingDir().isBlank()) {
             createContainerCmd.withWorkingDir(spec.getWorkingDir());
@@ -146,7 +149,7 @@ public class EmbeddedDockerWorker implements EmbeddedWorker {
         // 检查镜像是否存在本地
         boolean imagePull = false;
         try {
-            this.dockerClient.inspectImageCmd(spec.getImage(this.registryUrl)).exec();
+            this.dockerClient.inspectImageCmd(spec.getImage(this.mirror)).exec();
         } catch (NotFoundException e) {
             logger.info("镜像不存在，需要下载");
             imagePull = true;
@@ -154,7 +157,7 @@ public class EmbeddedDockerWorker implements EmbeddedWorker {
         // 拉取镜像
         if (imagePull) {
             try {
-                this.dockerClient.pullImageCmd(spec.getImage(this.registryUrl)).exec(new ResultCallback.Adapter<>() {
+                this.dockerClient.pullImageCmd(spec.getImage(this.mirror)).exec(new ResultCallback.Adapter<>() {
                     @Override
                     public void onNext(PullResponseItem object) {
                         logger.info("镜像下载成功: {} status: {}", object.getId(), object.getStatus());
@@ -284,6 +287,7 @@ public class EmbeddedDockerWorker implements EmbeddedWorker {
                         .taskId(embeddedWorkerTask.getTaskInstanceId())
                         .errorMsg(e.getMessage())
                         .build());
+                return;
             }
         }
         // 清除容器

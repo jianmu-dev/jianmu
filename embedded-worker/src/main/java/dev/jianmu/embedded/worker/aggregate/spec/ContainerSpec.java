@@ -59,17 +59,17 @@ public class ContainerSpec {
         return image;
     }
 
-    public String getImage(String registryUrl) {
-        if (null == registryUrl) {
+    public String getImage(String mirror) {
+        if (null == mirror) {
             return this.image;
         }
         if (this.image.contains("/")) {
-            return registryUrl + "/" + this.image;
+            return mirror + "/" + this.image;
         }
         if (this.image.contains(":")) {
-            return registryUrl + "/library/" + this.image;
+            return mirror + "/library/" + this.image;
         }
-        return registryUrl + "/library/" + this.image + ":latest";
+        return mirror + "/library/" + this.image + ":latest";
     }
 
     public String getWorkingDir() {

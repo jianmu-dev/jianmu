@@ -1,13 +1,10 @@
 package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
-import dev.jianmu.application.command.SkipNodeCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
-import dev.jianmu.workflow.repository.WorkflowRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,42 +20,37 @@ import org.springframework.transaction.annotation.Transactional;
 public class AsyncTaskInstanceInternalApplication {
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
-    private final WorkflowRepository workflowRepository;
 
     public AsyncTaskInstanceInternalApplication(
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
-            WorkflowInstanceRepository workflowInstanceRepository,
-            WorkflowRepository workflowRepository
+            WorkflowInstanceRepository workflowInstanceRepository
     ) {
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
-        this.workflowRepository = workflowRepository;
     }
 
     @Transactional
-    public void create(AsyncTaskActivatingCmd cmd) {
+    public void activate(AsyncTaskActivatingCmd cmd) {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(cmd.getTriggerId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         if (!workflowInstance.isRunning()) {
-            log.warn("该流程实例已结束，无法创建新任务");
+            log.warn("该流程实例已结束，无法创建新任务: {}", cmd.getAsyncTaskRef());
             return;
         }
-        var workflow = this.workflowRepository.findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到该流程定义"));
-        var node = workflow.findNode(cmd.getAsyncTaskRef());
-        var asyncTaskInstance = AsyncTaskInstance.Builder
-                .anAsyncTaskInstance()
-                .workflowInstanceId(workflowInstance.getId())
-                .triggerId(cmd.getTriggerId())
-                .workflowRef(cmd.getWorkflowRef())
-                .workflowVersion(cmd.getWorkflowVersion())
-                .name(node.getName())
-                .description(node.getDescription())
-                .asyncTaskRef(cmd.getAsyncTaskRef())
-                .asyncTaskType(cmd.getAsyncTaskType())
-                .build();
+        var asyncTaskInstance = this.asyncTaskInstanceRepository
+                .findByTriggerIdAndTaskRef(cmd.getTriggerId(), cmd.getAsyncTaskRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
         asyncTaskInstance.activating();
-        this.asyncTaskInstanceRepository.add(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+    }
+
+    @Transactional
+    public void nodeSucceed(String triggerId, String nodeRef) {
+        var asyncTaskInstance = this.asyncTaskInstanceRepository
+                .findByTriggerIdAndTaskRef(triggerId, nodeRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
+        asyncTaskInstance.succeed();
+        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
     }
 
     // 发布全部任务终止事件
@@ -71,8 +63,8 @@ public class AsyncTaskInstanceInternalApplication {
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.terminate();
                     log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
-        this.asyncTaskInstanceRepository.updateAll(asyncTaskInstances);
     }
 
     // 任务已启动命令

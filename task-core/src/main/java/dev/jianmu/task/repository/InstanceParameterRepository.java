@@ -19,5 +19,5 @@ public interface InstanceParameterRepository {
 
     List<InstanceParameter> findByInstanceIdAndType(String instanceId, InstanceParameter.Type type);
 
-    List<InstanceParameter> findOutputParamByTriggerId(String triggerId);
+    List<InstanceParameter> findLastOutputParamByTriggerId(String triggerId);
 }

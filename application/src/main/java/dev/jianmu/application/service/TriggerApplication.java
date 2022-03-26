@@ -358,7 +358,7 @@ public class TriggerApplication {
             webhook.getParam().forEach(webhookParameter -> {
                 Parameter<?> parameter = Parameter.Type
                         .getTypeByName(webhookParameter.getType())
-                        .newParameter(this.extractParameter(newWebRequest.getPayload(), webhookParameter.getExp()));
+                        .newParameter(this.extractParameter(newWebRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType()));
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
@@ -445,7 +445,7 @@ public class TriggerApplication {
             webhook.getParam().forEach(webhookParameter -> {
                 Parameter<?> parameter = Parameter.Type
                         .getTypeByName(webhookParameter.getType())
-                        .newParameter(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp()));
+                        .newParameter(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType()));
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
@@ -551,7 +551,7 @@ public class TriggerApplication {
         return matcher.lookingAt();
     }
 
-    private Object extractParameter(String payload, String exp) {
+    private Object extractParameter(String payload, String exp, String webhookType) {
         if (exp.startsWith("$.header.")) {
             exp = exp.toLowerCase(Locale.ROOT);
         }
@@ -563,6 +563,10 @@ public class TriggerApplication {
             List<?> vars = JsonPath.using(conf).parse(document).read(exp);
             if (vars.isEmpty()) {
                 return null;
+            }
+            var type = Parameter.Type.getTypeByName(webhookType);
+            if (type == Parameter.Type.SECRET || type == Parameter.Type.STRING) {
+                return vars.get(0) == null ? null : vars.get(0).toString().trim();
             }
             return vars.get(0);
         } catch (PathNotFoundException e) {
@@ -665,7 +669,7 @@ public class TriggerApplication {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
         trigger.getParam().forEach(webhookParameter ->
-                webhookParameter.setValue(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp())));
+                webhookParameter.setValue(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType())));
         return trigger;
     }
 

@@ -5,8 +5,10 @@
                   :key="status" :status="status" :count="count"/>
     </div>
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
+             :fullscreen-el="fullscreenEl"
              @click-process-log="clickProcessLog"
-             @on-zoom="handleZoom"/>
+             @on-zoom="handleZoom"
+             @on-fullscreen="handleFullscreen"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
@@ -33,7 +35,7 @@ import G6, { Graph, NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
-import { configNodeAction, init, updateNodeStates } from './utils/graph';
+import { configNodeAction, fitCanvas, init, sortTasks, updateNodeStates } from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
@@ -61,6 +63,7 @@ export default defineComponent({
       type: Array as PropType<ITaskExecutionRecordVo[]>,
       default: () => [],
     },
+    fullscreenRef: HTMLElement,
   },
   emits: ['click-task-node', 'click-webhook-node', 'click-process-log'],
   setup(props: any, { emit }: SetupContext) {
@@ -85,21 +88,8 @@ export default defineComponent({
 
       switch (evt.type) {
         case NodeTypeEnum.ASYNC_TASK: {
-          const tasks = (props.tasks as ITaskExecutionRecordVo[]).filter(item => item.nodeName === evt.id);
+          const tasks = sortTasks(props.tasks, evt.id);
           if (tasks.length > 0) {
-            // 按开始时间降序排序
-            tasks.sort((t1, t2) => {
-              const st1 = Date.parse(t1.startTime);
-              const st2 = Date.parse(t2.startTime);
-              if (st1 === st2) {
-                return 0;
-              }
-              if (st1 > st2) {
-                return -1;
-              }
-              return 1;
-            });
-
             taskInstanceId.value = tasks[0].instanceId;
           }
           break;
@@ -152,7 +142,7 @@ export default defineComponent({
       };
     });
 
-    onBeforeUpdate(() => {
+    const refreshGraph = () => {
       if (!graph.value) {
         graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
 
@@ -167,8 +157,9 @@ export default defineComponent({
 
       // 更新状态
       updateNodeStates(props.tasks, graph.value);
-    });
+    };
 
+    onBeforeUpdate(() => refreshGraph());
 
     let resizeObserver: ResizeObserver;
 
@@ -185,15 +176,7 @@ export default defineComponent({
 
       proxy.$nextTick(() => {
         // 保证整个视图都渲染完毕，才能确定图的宽高
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
-
-        updateZoom();
-
-        // 配置节点行为
-        nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
-
-        // 更新状态
-        updateNodeStates(props.tasks, graph.value);
+        refreshGraph();
       });
     });
 
@@ -212,6 +195,7 @@ export default defineComponent({
       dslType: computed<DslTypeEnum>(() => allTaskNodes.value.dslType),
       dslMode,
       nodeEvent,
+      fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
       clickProcessLog: () => {
         emit('click-process-log');
       },
@@ -244,6 +228,18 @@ export default defineComponent({
 
         updateZoom();
       },
+      handleFullscreen: (_: boolean) => {
+        if (container.value) {
+          container.value.style.visibility = 'hidden';
+        }
+
+        setTimeout(() => {
+          fitCanvas(graph.value);
+          if (container.value) {
+            container.value.style.visibility = '';
+          }
+        }, 100);
+      },
       taskStates: computed(() => {
         const sArr: {
           status: string;
@@ -274,6 +270,7 @@ export default defineComponent({
 
 <style lang="less">
 .jm-workflow-viewer {
+  background-color: #FFFFFF;
   position: relative;
   height: 100%;
 

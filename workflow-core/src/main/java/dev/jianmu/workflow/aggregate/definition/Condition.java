@@ -5,8 +5,11 @@ import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.EvaluationResult;
 import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ethan Liu
@@ -20,6 +23,7 @@ public class Condition extends BaseNode implements Gateway {
     private String expression;
     private ExpressionLanguage expressionLanguage;
     private EvaluationContext context;
+    private static final Logger logger = LoggerFactory.getLogger(Condition.class);
 
     private Condition() {
         this.type = this.getClass().getSimpleName();
@@ -59,6 +63,9 @@ public class Condition extends BaseNode implements Gateway {
         EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
         if (!evaluationResult.isFailure() && evaluationResult.getValue() instanceof BoolParameter) {
             expResult = ((BoolParameter) evaluationResult.getValue()).getValue();
+            logger.info("条件网关表达式计算：{} 计算成功结果为：{}", this.expression, evaluationResult.getValue().getStringValue());
+        } else {
+            logger.info("条件网关表达式计算: {} 计算错误: {}", this.expression, evaluationResult.getFailureMessage());
         }
         Optional<Branch> found = Optional.empty();
         for (Branch branch : this.branches) {
@@ -77,6 +84,14 @@ public class Condition extends BaseNode implements Gateway {
         this.expressionLanguage = expressionLanguage;
         this.context = context;
         return this.getNext();
+    }
+
+    @Override
+    public List<String> findNonLoopBranch() {
+        return branches.stream()
+                .filter(branch -> !branch.isLoop())
+                .map(Branch::getTarget)
+                .collect(Collectors.toList());
     }
 
     public void setExpression(String expression) {

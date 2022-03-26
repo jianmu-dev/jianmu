@@ -21,6 +21,11 @@ export default defineComponent({
       type: String,
       default: 'bottom',
     },
+    // 控制tooltip是否被放置到body元素上
+    tipAppendToBody: {
+      type: Boolean,
+      default: true,
+    },
   },
   setup(props, { emit }) {
     const transitCalculator = ref<HTMLElement>();
@@ -35,6 +40,7 @@ export default defineComponent({
       const textViewer = new TextViewer(
         text,
         props.tipPlacement,
+        props.tipAppendToBody,
         temporaryContent,
         transitCalculator,
         appContext,
@@ -52,6 +58,7 @@ export default defineComponent({
       const textViewer = new TextViewer(
         text,
         props.tipPlacement,
+        props.tipAppendToBody,
         temporaryContent,
         transitCalculator,
         appContext,
@@ -78,6 +85,8 @@ export default defineComponent({
   }
 
   .content {
+    height: 100%;
+
     .text-line-last {
       // 解决最后一行会被换行显示
       word-break: normal;

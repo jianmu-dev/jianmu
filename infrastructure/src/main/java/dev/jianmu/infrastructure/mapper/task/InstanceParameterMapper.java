@@ -46,7 +46,15 @@ public interface InstanceParameterMapper {
     @Result(column = "workflow_type", property = "workflowType")
     List<InstanceParameter> findByInstanceIdAndType(@Param("instanceId") String instanceId, @Param("type") InstanceParameter.Type type);
 
-    @Select("select * from task_instance_parameter where trigger_id = #{triggerId} and type = 'OUTPUT'")
+    @Select("SELECT T.* FROM task_instance_parameter as T," +
+            "(" +
+            "SELECT max(serial_no) as max_no, async_task_ref, ref FROM task_instance_parameter " +
+            "    WHERE trigger_id=#{triggerId} " +
+            "    AND type='OUTPUT'" +
+            "    GROUP BY  async_task_ref, ref" +
+            ") as B " +
+            "WHERE trigger_id=#{triggerId} " +
+            "AND T.async_task_ref=B.async_task_ref AND T.ref=B.ref AND T.serial_no=B.max_no")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
@@ -55,5 +63,5 @@ public interface InstanceParameterMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "parameter_id", property = "parameterId")
     @Result(column = "workflow_type", property = "workflowType")
-    List<InstanceParameter> findOutputParamByTriggerId(String triggerId);
+    List<InstanceParameter> findLastOutputParamByTriggerId(String triggerId);
 }
