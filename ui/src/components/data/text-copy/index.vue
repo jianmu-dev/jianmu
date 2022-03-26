@@ -81,6 +81,7 @@ export default defineComponent({
     .tip-content {
       text-align: left;
       padding: 10px;
+      white-space: nowrap;
     }
   }
 
