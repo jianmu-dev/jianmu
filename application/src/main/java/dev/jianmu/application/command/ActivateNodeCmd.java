@@ -16,4 +16,5 @@ public class ActivateNodeCmd {
     private String workflowRef;
     private String workflowVersion;
     private String nodeRef;
+    private String sender;
 }

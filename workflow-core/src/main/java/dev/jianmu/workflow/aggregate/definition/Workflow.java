@@ -94,7 +94,6 @@ public class Workflow extends AggregateRoot {
             return;
         }
         if (node instanceof Gateway) {
-            var branch = ((Gateway) node).calculateTarget(expressionLanguage, context);
             // 发布网关节点执行成功事件
             NodeSucceedEvent succeedEvent = NodeSucceedEvent.Builder.aNodeSucceedEvent()
                     .nodeRef(node.getRef())
@@ -103,12 +102,20 @@ public class Workflow extends AggregateRoot {
                     .workflowVersion(this.version)
                     .build();
             this.raiseEvent(succeedEvent);
+        }
+    }
+
+    public void next(String triggerId, String nodeRef) {
+        Node node = this.findNode(nodeRef);
+        if (node instanceof Gateway) {
+            var branch = ((Gateway) node).calculateTarget(expressionLanguage, context);
             // 发布下一个节点激活事件
             NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
                     .nodeRef(branch.getTarget())
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .sender(nodeRef)
                     .build();
             this.raiseEvent(activatingEvent);
             // 如果是非环回分支，则发布其他节点跳过事件
@@ -126,11 +133,8 @@ public class Workflow extends AggregateRoot {
                     this.raiseEvent(nodeSkipEvent);
                 });
             }
+            return;
         }
-    }
-
-    public void next(String triggerId, String nodeRef) {
-        Node node = this.findNode(nodeRef);
         // 发布所有下游节点激活事件
         Set<String> nodes = node.getTargets();
         nodes.forEach(n -> {
@@ -139,6 +143,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .sender(nodeRef)
                     .build();
             this.raiseEvent(activatingEvent);
         });
@@ -154,17 +159,6 @@ public class Workflow extends AggregateRoot {
                 .workflowVersion(this.version)
                 .build();
         this.raiseEvent(succeedEvent);
-        // 发布所有下游节点激活事件
-        Set<String> nodes = node.getTargets();
-        nodes.forEach(n -> {
-            NodeActivatingEvent activatingEvent = NodeActivatingEvent.Builder.aNodeActivatingEvent()
-                    .nodeRef(n)
-                    .triggerId(triggerId)
-                    .workflowRef(this.ref)
-                    .workflowVersion(this.version)
-                    .build();
-            this.raiseEvent(activatingEvent);
-        });
     }
 
     // 跳过节点

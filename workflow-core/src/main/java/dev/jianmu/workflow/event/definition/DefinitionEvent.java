@@ -29,6 +29,8 @@ public class DefinitionEvent implements DomainEvent {
     protected String nodeRef;
     // 节点类型
     protected String nodeType;
+    // 事件发送者
+    protected String sender;
 
     public DefinitionEvent() {
         this.occurredTime = LocalDateTime.now();
@@ -69,6 +71,10 @@ public class DefinitionEvent implements DomainEvent {
         return nodeType;
     }
 
+    public String getSender() {
+        return sender;
+    }
+
     @Override
     public String toString() {
         return "DefinitionEvent{" +
@@ -80,6 +86,7 @@ public class DefinitionEvent implements DomainEvent {
                 ", triggerId='" + triggerId + '\'' +
                 ", nodeRef='" + nodeRef + '\'' +
                 ", nodeType='" + nodeType + '\'' +
+                ", sender='" + sender + '\'' +
                 '}';
     }
 }

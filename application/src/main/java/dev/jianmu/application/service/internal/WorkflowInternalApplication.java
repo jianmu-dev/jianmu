@@ -143,6 +143,9 @@ public class WorkflowInternalApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        EvaluationContext context = this.findContext(workflow, cmd.getTriggerId());
+        workflow.setExpressionLanguage(this.expressionLanguage);
+        workflow.setContext(context);
         workflow.next(cmd.getTriggerId(), cmd.getNodeRef());
         this.workflowRepository.commitEvents(workflow);
     }
@@ -153,12 +156,9 @@ public class WorkflowInternalApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        EvaluationContext context = this.findContext(workflow, cmd.getTriggerId());
-        workflow.setExpressionLanguage(this.expressionLanguage);
-        workflow.setContext(context);
         // 激活节点
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
-        if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+        if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
             log.info("activateNode: " + cmd.getNodeRef());
             workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
             this.workflowRepository.commitEvents(workflow);

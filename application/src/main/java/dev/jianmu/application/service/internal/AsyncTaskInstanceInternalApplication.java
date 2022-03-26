@@ -34,7 +34,7 @@ public class AsyncTaskInstanceInternalApplication {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(cmd.getTriggerId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         if (!workflowInstance.isRunning()) {
-            log.warn("该流程实例已结束，无法创建新任务");
+            log.warn("该流程实例已结束，无法创建新任务: {}", cmd.getAsyncTaskRef());
             return;
         }
         var asyncTaskInstance = this.asyncTaskInstanceRepository

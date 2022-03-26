@@ -22,6 +22,8 @@ public class NodeActivatingEvent extends DefinitionEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
+        // 事件发送者
+        protected String sender;
 
         private Builder() {
         }
@@ -55,6 +57,11 @@ public class NodeActivatingEvent extends DefinitionEvent {
             return this;
         }
 
+        public Builder sender(String sender) {
+            this.sender = sender;
+            return this;
+        }
+
         public NodeActivatingEvent build() {
             NodeActivatingEvent nodeActivatingEvent = new NodeActivatingEvent();
             nodeActivatingEvent.triggerId = this.triggerId;
@@ -62,6 +69,7 @@ public class NodeActivatingEvent extends DefinitionEvent {
             nodeActivatingEvent.workflowVersion = this.workflowVersion;
             nodeActivatingEvent.nodeRef = this.nodeRef;
             nodeActivatingEvent.nodeType = this.nodeType;
+            nodeActivatingEvent.sender = this.sender;
             return nodeActivatingEvent;
         }
     }

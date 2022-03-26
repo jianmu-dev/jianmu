@@ -73,6 +73,7 @@ public class WorkflowEventHandler {
                 .workflowRef(event.getWorkflowRef())
                 .workflowVersion(event.getWorkflowVersion())
                 .nodeRef(event.getNodeRef())
+                .sender(event.getSender())
                 .build();
         this.workflowInternalApplication.activateNode(cmd);
         log.info("handle NodeActivatingEvent end-----------------------------------------------------");
