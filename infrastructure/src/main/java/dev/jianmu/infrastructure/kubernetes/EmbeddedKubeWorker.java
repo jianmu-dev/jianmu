@@ -32,7 +32,6 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private final KubernetesClient client;
     private final KubernetesWatcher watcher;
 
-    private final String placeholder = "jianmudev/placeholder:0.3";
     private final String imagePullPolicy = "IfNotPresent"; // IfNotPresent, Always and Never
 
     private final ApplicationEventPublisher publisher;
@@ -71,7 +70,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                     .imagePullPolicy(imagePullPolicy)
                     .volumeMounts(List.of(new V1VolumeMount().name(sharedName).mountPath(sharedName)))
                     .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName + containerName)))
-                    .image(placeholder);
+                    .image(this.properties.getWorker().getK8s().getPlaceholder());
         }
         var container = new V1Container()
                 .name(containerName)
@@ -79,7 +78,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                 .workingDir(spec.getWorkingDir())
                 .volumeMounts(List.of(new V1VolumeMount().name(sharedName).mountPath(sharedName)))
                 .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName + containerName)))
-                .image(placeholder);
+                .image(this.properties.getWorker().getK8s().getPlaceholder());
         if (null != spec.getEnv()) {
             Arrays.stream(spec.getEnv()).map(s -> {
                 var ss = s.split("=", 2);
@@ -216,7 +215,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                     .taskInstanceId(embeddedWorkerTask.getTaskInstanceId())
                     .triggerId(embeddedWorkerTask.getTriggerId())
                     .taskName(embeddedWorkerTask.getTaskName())
-                    .placeholder(placeholder)
+                    .placeholder(this.properties.getWorker().getK8s().getPlaceholder())
                     .logWriter(logWriter)
                     .hasResult(embeddedWorkerTask.getResultFile() != null)
                     .state(TaskWatcher.State.WAITING)
@@ -248,7 +247,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
                     .taskInstanceId(embeddedWorkerTask.getTaskInstanceId())
                     .triggerId(embeddedWorkerTask.getTriggerId())
                     .taskName(embeddedWorkerTask.getTaskName())
-                    .placeholder(placeholder)
+                    .placeholder(this.properties.getWorker().getK8s().getPlaceholder())
                     .logWriter(logWriter)
                     .hasResult(embeddedWorkerTask.getResultFile() != null)
                     .state(TaskWatcher.State.WAITING)

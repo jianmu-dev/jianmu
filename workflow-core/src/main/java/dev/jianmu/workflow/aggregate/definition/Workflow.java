@@ -287,6 +287,13 @@ public class Workflow extends AggregateRoot {
                 .collect(Collectors.toList());
     }
 
+    // 返回AsyncTask列表
+    public List<Node> findTasks() {
+        return this.nodes.stream()
+                .filter(n -> n instanceof AsyncTask)
+                .collect(Collectors.toList());
+    }
+
     public String getName() {
         return name;
     }

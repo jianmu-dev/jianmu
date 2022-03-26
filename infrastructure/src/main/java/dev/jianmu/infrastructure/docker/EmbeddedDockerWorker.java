@@ -74,7 +74,7 @@ public class EmbeddedDockerWorker implements EmbeddedWorker {
         this.dockerCertPath = properties.getWorker().getDocker().getDockerCertPath();
         this.dockerTlsVerify = properties.getWorker().getDocker().getDockerTlsVerify();
         this.sockFile = properties.getWorker().getDocker().getSockFile();
-        this.mirror = properties.getMirror();
+        this.mirror = properties.getWorker().getDocker().getMirror();
         this.publisher = publisher;
         this.connect();
     }
