@@ -1,35 +1,45 @@
 <template>
   <div class="jm-workflow-viewer-toolbar">
     <div class="group" v-if="!dslMode">
-      <jm-tooltip content="原始大小" placement="top">
+      <jm-tooltip :content="isFullscreen? '退出全屏' : '全屏'" placement="top" :appendToBody="false">
+        <div :class="isFullscreen? 'screen-normal-icon' : 'screen-full-icon'"
+             @click="handleFullScreen(!isFullscreen)"></div>
+      </jm-tooltip>
+      <div class="separator"></div>
+      <jm-tooltip content="原始大小" placement="top" :appendToBody="false">
         <div class="full-icon" @click="normalize"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-tooltip content="适屏" placement="top">
+      <jm-tooltip content="适屏" placement="top" :appendToBody="false">
         <div class="normal-icon" @click="fitViewer"></div>
       </jm-tooltip>
     </div>
     <div class="group" v-if="!dslMode">
-      <jm-tooltip content="缩小" placement="top">
+      <jm-tooltip content="缩小" placement="top" :appendToBody="false">
         <div :class="{'narrow-icon': true, disabled: zoom === MIN_ZOOM}"
              @click="changeZoom(false)"></div>
       </jm-tooltip>
       <div class="percentage">{{ zoom }}%</div>
-      <jm-tooltip content="放大" placement="top">
+      <jm-tooltip content="放大" placement="top" :appendToBody="false">
         <div :class="{'enlarge-icon': true, disabled: zoom === MAX_ZOOM}"
              @click="changeZoom(true)"></div>
       </jm-tooltip>
     </div>
     <div class="group" v-if="!readonly && !dslMode">
-      <jm-tooltip content="流程日志" placement="top">
-        <div class="process-log-icon" @click="processLog"></div>
+      <jm-tooltip content="流程日志" placement="top" :appendToBody="false">
+        <div class="process-log-icon"
+             @click="processLog"></div>
       </jm-tooltip>
     </div>
     <div :class="{group: true, dsl: dslMode}">
-      <jm-tooltip content="查看DSL" placement="top" v-if="!dslMode">
-        <div class="dsl-icon" @click="viewDsl(true)"></div>
+      <jm-tooltip content="查看DSL" placement="top" :appendToBody="false" v-if="!dslMode">
+        <div class="dsl-icon"
+             @click="viewDsl(true)"></div>
       </jm-tooltip>
-      <jm-tooltip :content="`返回${isWorkflow ? '流程' : '管道'}`" placement="top" v-else>
+      <jm-tooltip placement="top" :appendToBody="false" v-else>
+        <template #content>
+          <div style="white-space: nowrap;">{{ `返回${isWorkflow ? '流程' : '管道'}` }}</div>
+        </template>
         <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'"
              @click="viewDsl(false)"></div>
       </jm-tooltip>
@@ -41,6 +51,7 @@
 import { computed, defineComponent, onBeforeUpdate, PropType, ref, SetupContext } from 'vue';
 import { DslTypeEnum } from '@/api/dto/enumeration';
 import { MIN_ZOOM } from './utils/graph';
+import screenfull from 'screenfull';
 
 const ZOOM_INTERVAL = 10;
 const ORIGINAL_ZOOM = 100;
@@ -64,10 +75,19 @@ export default defineComponent({
       type: Number,
       default: MAX_ZOOM,
     },
+    fullscreenEl: HTMLElement,
   },
-  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode'],
+  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode', 'on-fullscreen'],
   setup(props, { emit }: SetupContext) {
     const zoom = ref<number>(props.zoomValue);
+    const isFullscreen = ref<boolean>(screenfull.isFullscreen);
+
+    if (screenfull.isEnabled) {
+      screenfull.on('change', () => {
+        isFullscreen.value = screenfull.isFullscreen;
+        emit('on-fullscreen', isFullscreen.value);
+      });
+    }
 
     onBeforeUpdate(() => {
       zoom.value = props.zoomValue;
@@ -75,6 +95,7 @@ export default defineComponent({
 
     return {
       zoom,
+      isFullscreen,
       MIN_ZOOM,
       MAX_ZOOM,
       isWorkflow: computed<boolean>(() => props.dslType === DslTypeEnum.WORKFLOW),
@@ -83,6 +104,13 @@ export default defineComponent({
       },
       viewDsl: (mode: boolean) => {
         emit('update:dsl-mode', mode);
+      },
+      handleFullScreen: (val: boolean) => {
+        if (val) {
+          screenfull.request(props.fullscreenEl);
+        } else {
+          screenfull.exit();
+        }
       },
       normalize: () => {
         emit('on-zoom', ORIGINAL_ZOOM);
@@ -162,6 +190,22 @@ export default defineComponent({
 
     .pipeline-icon {
       background-image: url('./svgs/tool/pipeline.svg');
+    }
+
+    .screen-full-icon {
+      background-image: url('./svgs/tool/screen-full.svg');
+
+      &:hover {
+        background-image: url('./svgs/tool/screen-full-hover.svg');
+      }
+    }
+
+    .screen-normal-icon {
+      background-image: url('./svgs/tool/screen-normal.svg');
+
+      &:hover {
+        background-image: url('./svgs/tool/screen-normal-hover.svg');
+      }
     }
 
     .full-icon {

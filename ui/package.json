@@ -1,7 +1,7 @@
 {
   "name": "jianmu-ci-ui",
   "version": "2.2.4",
-  "repository": "https://gitee.com/jianmu-dev/jianmu-ci-ui.git",
+  "repository": "https://gitee.com/jianmu-dev/jianmu-ci-server.git",
   "license": "MulanPubL-2.0",
   "scripts": {
     "serve": "vite",
@@ -17,6 +17,7 @@
     "element-plus": "^1.0.2-beta.41",
     "mockjs": "^1.1.0",
     "qs": "^6.10.1",
+    "screenfull": "^6.0.1",
     "smart-tagz": "^0.2.0",
     "uuid": "^8.3.2",
     "vue": "^3.0.5",

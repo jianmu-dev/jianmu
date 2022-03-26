@@ -5,7 +5,7 @@
         <div>
           <div class="param-key">流程名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="workflowName"/>
+            <jm-text-viewer :value="workflowName" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -17,7 +17,7 @@
         <div>
           <div class="param-key">节点名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="task.nodeName"/>
+            <jm-text-viewer :value="task.nodeName" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -29,7 +29,7 @@
         <div>
           <div class="param-key">节点定义</div>
           <div class="param-value">
-            <jm-text-viewer :value="nodeDef"/>
+            <jm-text-viewer :value="nodeDef" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -41,7 +41,7 @@
         <div>
           <div class="param-key">启动时间</div>
           <div class="param-value">
-            <jm-text-viewer :value="datetimeFormatter(task.startTime)"/>
+            <jm-text-viewer :value="datetimeFormatter(task.startTime)" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -52,7 +52,7 @@
       <div class="item">
         <div class="param-key">执行时长</div>
         <div class="param-value">
-          <jm-text-viewer :value="executionTime"/>
+          <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
         </div>
       </div>
       <div>
@@ -113,11 +113,13 @@
                           :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
+                                            :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
                           <jm-tooltip
                             content="必填项"
                             placement="top"
+                            :appendToBody="false"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
@@ -154,7 +156,7 @@
                           <div
                             :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value"
+                                            :value="scope.row.value" :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
                                             class="value"
                             >
@@ -188,11 +190,13 @@
                           :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
+                                            :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
                           <jm-tooltip
                             content="必填项"
                             placement="top"
+                            :appendToBody="false"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
@@ -229,7 +233,7 @@
                           <div
                             :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value"
+                                            :value="scope.row.value" :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
                                             class="value"
                             >
@@ -441,7 +445,7 @@ export default defineComponent({
         return;
       }
       try {
-        await toClipboard(value);
+        await toClipboard(value, proxy.$el);
         proxy.$success('复制成功');
       } catch (err) {
         proxy.$error('复制失败，请手动复制');
@@ -657,39 +661,11 @@ export default defineComponent({
               &.param-value {
                 .value {
                   width: 100%;
-
-                  //&.jm-text-viewer {
-                  //  .content {
-                  //    .text-line {
-                  //      &:last-child {
-                  //        text-align: left;
-                  //
-                  //        &::after {
-                  //          display: none;
-                  //        }
-                  //      }
-                  //    }
-                  //  }
-                  //}
                 }
               }
 
               .value {
                 width: 100%;
-
-                //&.jm-text-viewer {
-                //  .content {
-                //    .text-line {
-                //      &:last-child {
-                //        text-align: center;
-                //
-                //        &::after {
-                //          display: none;
-                //        }
-                //      }
-                //    }
-                //  }
-                //}
               }
             }
 
@@ -715,6 +691,8 @@ export default defineComponent({
         }
 
         .cell {
+          overflow: visible;
+
           .is-required {
             color: #ff0000;
           }
