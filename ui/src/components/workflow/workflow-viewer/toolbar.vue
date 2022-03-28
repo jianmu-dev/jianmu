@@ -1,11 +1,13 @@
 <template>
   <div class="jm-workflow-viewer-toolbar">
     <div class="group" v-if="!dslMode">
-      <jm-tooltip :content="isFullscreen? '退出全屏' : '全屏'" placement="top" :appendToBody="false">
-        <div :class="isFullscreen? 'screen-normal-icon' : 'screen-full-icon'"
-             @click="handleFullScreen(!isFullscreen)"></div>
-      </jm-tooltip>
-      <div class="separator"></div>
+      <template v-if="fullscreenEnabled">
+        <jm-tooltip :content="isFullscreen? '退出全屏' : '全屏'" placement="top" :appendToBody="false">
+          <div :class="isFullscreen? 'screen-normal-icon' : 'screen-full-icon'"
+               @click="handleFullScreen(!isFullscreen)"></div>
+        </jm-tooltip>
+        <div class="separator"></div>
+      </template>
       <jm-tooltip content="原始大小" placement="top" :appendToBody="false">
         <div class="full-icon" @click="normalize"></div>
       </jm-tooltip>
@@ -80,6 +82,7 @@ export default defineComponent({
   emits: ['on-zoom', 'click-process-log', 'update:dsl-mode', 'on-fullscreen'],
   setup(props, { emit }: SetupContext) {
     const zoom = ref<number>(props.zoomValue);
+    const fullscreenEnabled = ref<boolean>(screenfull.isEnabled);
     const isFullscreen = ref<boolean>(screenfull.isFullscreen);
 
     if (screenfull.isEnabled) {
@@ -95,6 +98,7 @@ export default defineComponent({
 
     return {
       zoom,
+      fullscreenEnabled,
       isFullscreen,
       MIN_ZOOM,
       MAX_ZOOM,
