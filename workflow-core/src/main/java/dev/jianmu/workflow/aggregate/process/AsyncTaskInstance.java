@@ -33,6 +33,8 @@ public class AsyncTaskInstance extends AggregateRoot {
     private String asyncTaskRef;
     // 任务定义类型
     private String asyncTaskType;
+    // 完成次数计数，从0开始
+    private int serialNo;
     // 创建时间
     private LocalDateTime activatingTime = LocalDateTime.now();
     // 开始时间
@@ -76,6 +78,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     public void succeed() {
         this.status = TaskStatus.SUCCEEDED;
         this.endTime = LocalDateTime.now();
+        this.serialNo++;
         // 发布任务执行成功事件
         this.raiseEvent(
                 TaskSucceededEvent.Builder.aTaskSucceededEvent()
@@ -93,6 +96,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     public void fail() {
         this.status = TaskStatus.FAILED;
         this.endTime = LocalDateTime.now();
+        this.serialNo++;
         // 发布任务执行失败事件
         this.raiseEvent(
                 TaskFailedEvent.Builder.aTaskFailedEvent()
@@ -112,6 +116,7 @@ public class AsyncTaskInstance extends AggregateRoot {
         this.startTime = LocalDateTime.now();
         this.activatingTime = LocalDateTime.now();
         this.endTime = LocalDateTime.now();
+        this.serialNo++;
     }
 
     // 中止任务执行
@@ -169,6 +174,10 @@ public class AsyncTaskInstance extends AggregateRoot {
         return asyncTaskType;
     }
 
+    public int getSerialNo() {
+        return serialNo;
+    }
+
     public LocalDateTime getActivatingTime() {
         return activatingTime;
     }
@@ -200,6 +209,8 @@ public class AsyncTaskInstance extends AggregateRoot {
         private String asyncTaskRef;
         // 任务定义类型
         private String asyncTaskType;
+        // 执行次数计数，从0开始
+        private int serialNo = 0;
 
         private Builder() {
         }
@@ -259,6 +270,7 @@ public class AsyncTaskInstance extends AggregateRoot {
             asyncTaskInstance.name = this.name;
             asyncTaskInstance.asyncTaskRef = this.asyncTaskRef;
             asyncTaskInstance.asyncTaskType = this.asyncTaskType;
+            asyncTaskInstance.serialNo = this.serialNo;
             return asyncTaskInstance;
         }
     }
