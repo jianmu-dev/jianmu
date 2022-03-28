@@ -15,4 +15,6 @@ public interface Gateway {
     Branch calculateTarget(ExpressionLanguage expressionLanguage, EvaluationContext context);
 
     List<String> findNonLoopBranch();
+
+    List<String> findLoopBranch();
 }

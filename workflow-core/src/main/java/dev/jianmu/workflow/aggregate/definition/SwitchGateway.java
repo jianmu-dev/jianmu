@@ -10,11 +10,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * @author Ethan Liu
  * @program: workflow
  * @description Switch网关
- * @author Ethan Liu
  * @create 2021-01-21 13:14
-*/
+ */
 public class SwitchGateway extends BaseNode implements Gateway {
     private String expression;
     // Switch网关条件Case暂时只支持String类型比较，区分大小写
@@ -62,6 +62,14 @@ public class SwitchGateway extends BaseNode implements Gateway {
     public List<String> findNonLoopBranch() {
         return branches.stream()
                 .filter(branch -> !branch.isLoop())
+                .map(Branch::getTarget)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> findLoopBranch() {
+        return branches.stream()
+                .filter(Branch::isLoop)
                 .map(Branch::getTarget)
                 .collect(Collectors.toList());
     }

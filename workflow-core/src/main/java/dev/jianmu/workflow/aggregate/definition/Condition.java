@@ -94,6 +94,14 @@ public class Condition extends BaseNode implements Gateway {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<String> findLoopBranch() {
+        return branches.stream()
+                .filter(Branch::isLoop)
+                .map(Branch::getTarget)
+                .collect(Collectors.toList());
+    }
+
     public void setExpression(String expression) {
         this.expression = expression;
     }
