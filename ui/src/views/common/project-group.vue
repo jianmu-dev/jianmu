@@ -136,7 +136,7 @@ export default defineComponent({
   setup(props: any) {
     const store = useStore();
     const { mapMutations } = createNamespacedHelpers(namespace);
-    const projectGroupFoldingMapping = store.state[namespace].projectGroupFoldStatusMapping;
+    const projectGroupFoldingMapping = store.state[namespace];
     // 根据项目组在vuex中保存的状态，进行展开、折叠间的切换
     const toggle = computed<boolean>(() => {
       // 只有全等于为undefined说明该项目组一开始根本没有做折叠操作
