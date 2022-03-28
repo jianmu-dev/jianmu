@@ -32,8 +32,6 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private final KubernetesClient client;
     private final KubernetesWatcher watcher;
 
-    private final String imagePullPolicy = "IfNotPresent"; // IfNotPresent, Always and Never
-
     private final ApplicationEventPublisher publisher;
     private final GlobalProperties properties;
 
@@ -67,14 +65,14 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
         if (spec == null) {
             return new V1Container()
                     .name(containerName)
-                    .imagePullPolicy(imagePullPolicy)
+                    .imagePullPolicy(this.properties.getWorker().getK8s().getImagePullPolicy())
                     .volumeMounts(List.of(new V1VolumeMount().name(sharedName).mountPath(sharedName)))
                     .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName + containerName)))
                     .image(this.properties.getWorker().getK8s().getPlaceholder());
         }
         var container = new V1Container()
                 .name(containerName)
-                .imagePullPolicy(imagePullPolicy)
+                .imagePullPolicy(this.properties.getWorker().getK8s().getImagePullPolicy())
                 .workingDir(spec.getWorkingDir())
                 .volumeMounts(List.of(new V1VolumeMount().name(sharedName).mountPath(sharedName)))
                 .addEnvFromItem(new V1EnvFromSource().configMapRef(new V1ConfigMapEnvSource().name(sharedName + containerName)))
@@ -98,9 +96,9 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
     private V1Container buildKeepalive(String podName) {
         var container = new V1Container()
                 .name("jianmu-keepalive")
-                .imagePullPolicy(imagePullPolicy)
+                .imagePullPolicy(this.properties.getWorker().getK8s().getImagePullPolicy())
                 .volumeMounts(List.of(new V1VolumeMount().name(podName).mountPath(podName)))
-                .image("alpine:3.13.6");
+                .image(this.properties.getWorker().getK8s().getKeepalive());
         container.addCommandItem("/bin/sh");
         container.addCommandItem("-c");
         container.addArgsItem("tail -f /dev/null");
