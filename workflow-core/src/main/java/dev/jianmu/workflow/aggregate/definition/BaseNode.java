@@ -1,5 +1,6 @@
 package dev.jianmu.workflow.aggregate.definition;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +61,9 @@ public abstract class BaseNode implements Node {
 
     @Override
     public void addLoopPair(LoopPair loopPair) {
+        if (loopPairs == null) {
+            this.loopPairs = new ArrayList<>();
+        }
         var checked = loopPairs.stream()
                 .filter(l -> l.getSource().equals(loopPair.getSource()) && l.getTarget().equals(loopPair.getTarget()))
                 .count();
@@ -106,6 +110,9 @@ public abstract class BaseNode implements Node {
 
     @Override
     public List<LoopPair> getLoopPairs() {
+        if (loopPairs == null) {
+            return List.of();
+        }
         return loopPairs;
     }
 
