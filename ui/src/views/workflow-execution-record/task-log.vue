@@ -5,7 +5,7 @@
         <div>
           <div class="param-key">流程名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="workflowName"/>
+            <jm-text-viewer :value="workflowName" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -17,7 +17,7 @@
         <div>
           <div class="param-key">节点名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="task.nodeName"/>
+            <jm-text-viewer :value="task.nodeName" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -29,7 +29,7 @@
         <div>
           <div class="param-key">节点定义</div>
           <div class="param-value">
-            <jm-text-viewer :value="nodeDef"/>
+            <jm-text-viewer :value="nodeDef" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -41,7 +41,7 @@
         <div>
           <div class="param-key">启动时间</div>
           <div class="param-value">
-            <jm-text-viewer :value="datetimeFormatter(task.startTime)"/>
+            <jm-text-viewer :value="datetimeFormatter(task.startTime)" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -52,7 +52,7 @@
       <div class="item">
         <div class="param-key">执行时长</div>
         <div class="param-value">
-          <jm-text-viewer :value="executionTime"/>
+          <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
         </div>
       </div>
       <div>
@@ -113,11 +113,13 @@
                           :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
+                                            :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
                           <jm-tooltip
                             content="必填项"
                             placement="top"
+                            :appendToBody="false"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
@@ -154,7 +156,7 @@
                           <div
                             :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value"
+                                            :value="scope.row.value" :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
                                             class="value"
                             >
@@ -163,8 +165,10 @@
                               {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)"
-                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value)">
+                            <jm-text-copy :value="scope.row.value"/>
+                          </div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -188,11 +192,13 @@
                           :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
                             <jm-text-viewer :value="scope.row.ref" class="value"
+                                            :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
                           <jm-tooltip
                             content="必填项"
                             placement="top"
+                            :appendToBody="false"
                             v-if="scope.row.required"
                           >
                             <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
@@ -229,7 +235,7 @@
                           <div
                             :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value"
+                                            :value="scope.row.value" :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
                                             class="value"
                             >
@@ -238,8 +244,10 @@
                               {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)"
-                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value!=='')"></div>
+                          <div class="copy-btn"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value)">
+                            <jm-text-copy :value="scope.row.value"/>
+                          </div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -255,7 +263,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, nextTick, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -268,7 +276,6 @@ import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
-import useClipboard from 'vue-clipboard3';
 
 export default defineComponent({
   components: { TaskState, TaskList },
@@ -284,8 +291,6 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
-    const { proxy } = getCurrentInstance() as any;
-    const { toClipboard } = useClipboard();
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
       return state.recordDetail.taskRecords.find(
@@ -435,19 +440,6 @@ export default defineComponent({
     // 销毁任务
     onBeforeUnmount(destroy);
 
-    // 一键复制
-    const copy = async (value: string) => {
-      if (!value) {
-        return;
-      }
-      try {
-        await toClipboard(value);
-        proxy.$success('复制成功');
-      } catch (err) {
-        proxy.$error('复制失败，请手动复制');
-        console.error(err);
-      }
-    };
     const maxWidthRecord = ref<Record<string, number>>({});
     const changeTask = (instanceId: string) => {
       // 销毁旧任务
@@ -466,7 +458,6 @@ export default defineComponent({
       }
     };
     return {
-      copy,
       ParamTypeEnum,
       maxWidthRecord,
       workflowName: state.recordDetail.record?.name,
@@ -657,39 +648,11 @@ export default defineComponent({
               &.param-value {
                 .value {
                   width: 100%;
-
-                  //&.jm-text-viewer {
-                  //  .content {
-                  //    .text-line {
-                  //      &:last-child {
-                  //        text-align: left;
-                  //
-                  //        &::after {
-                  //          display: none;
-                  //        }
-                  //      }
-                  //    }
-                  //  }
-                  //}
                 }
               }
 
               .value {
                 width: 100%;
-
-                //&.jm-text-viewer {
-                //  .content {
-                //    .text-line {
-                //      &:last-child {
-                //        text-align: center;
-                //
-                //        &::after {
-                //          display: none;
-                //        }
-                //      }
-                //    }
-                //  }
-                //}
               }
             }
 
@@ -715,6 +678,8 @@ export default defineComponent({
         }
 
         .cell {
+          overflow: visible;
+
           .is-required {
             color: #ff0000;
           }
@@ -787,7 +752,6 @@ export default defineComponent({
 
               display: flex;
               align-items: center;
-              position: relative;
 
               &:hover {
                 .copy-btn {
@@ -798,17 +762,9 @@ export default defineComponent({
               .copy-btn {
                 margin-left: 5px;
                 flex-shrink: 0;
+                font-size: 1.25em;
                 width: 16px;
-                height: 16px;
-                background: url('@/assets/svgs/btn/copy.svg') no-repeat;
-                background-size: 100%;
-                cursor: pointer;
                 display: none;
-                opacity: 0.5;
-
-                &:hover {
-                  opacity: 1;
-                }
               }
             }
           }

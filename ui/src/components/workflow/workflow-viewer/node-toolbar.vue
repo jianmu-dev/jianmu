@@ -2,16 +2,16 @@
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
     <div class="mask"></div>
     <div v-if="operationVisible" class="operation">
-      <jm-tooltip content="日志" placement="left">
+      <jm-tooltip content="日志" placement="left" :appendToBody="false">
         <button class="view-log-btn" @click="handleClick(NodeToolbarTabTypeEnum.LOG)"></button>
       </jm-tooltip>
-      <jm-tooltip content="业务参数" placement="right">
+      <jm-tooltip content="业务参数" placement="right" :appendToBody="false">
         <button class="view-params-btn" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)"></button>
       </jm-tooltip>
     </div>
-    <jm-tooltip v-if="tips" placement="bottom">
+    <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
       <template #content>
-        <div v-html="tips"/>
+        <div style="white-space: nowrap" v-html="tips"/>
       </template>
       <div class="tooltip-section"></div>
     </jm-tooltip>

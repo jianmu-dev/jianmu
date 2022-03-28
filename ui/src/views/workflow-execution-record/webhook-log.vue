@@ -3,11 +3,11 @@
     <div class="basic-section">
       <div class="param-key">流程名称：
       </div>
-      <jm-text-viewer :value="workflowName" class="param-value"/>
+      <jm-text-viewer :value="workflowName" :tip-append-to-body="false" class="param-value"/>
       <div class="param-key">节点名称：</div>
-      <jm-text-viewer :value="nodeName" class="param-value node-name"/>
+      <jm-text-viewer :value="nodeName" :tip-append-to-body="false" class="param-value node-name"/>
       <div class="param-key">启动时间：</div>
-      <jm-text-viewer :value="startTime" class="param-value"/>
+      <jm-text-viewer :value="startTime" :tip-append-to-body="false" class="param-value"/>
     </div>
 
     <div class="tab-section">
@@ -35,7 +35,7 @@
                     border>
                     <jm-table-column label="参数唯一标识" align="center">
                       <template #default="scope">
-                        <jm-text-viewer :value="scope.row.name" class="params-name"/>
+                        <jm-text-viewer :value="scope.row.name" :tip-append-to-body="false" class="params-name"/>
                       </template>
                     </jm-table-column>
                     <jm-table-column
@@ -44,7 +44,7 @@
                       prop="type">
                       <template #default="scope">
                         <div class="text-viewer">
-                          <jm-text-viewer :value="scope.row.type" class="params-name"/>
+                          <jm-text-viewer :value="scope.row.type" :tip-append-to-body="false" class="params-name"/>
                         </div>
                       </template>
                     </jm-table-column>
@@ -56,7 +56,7 @@
                           <div class="param-value"
                                :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
                             <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value"
+                                            :value="scope.row.value" :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
                                             class="value"
                             >
@@ -65,8 +65,10 @@
                               {{ scope.row.value }}
                             </template>
                           </div>
-                          <div class="copy-btn" @click="copy(scope.row.value)"
-                               v-if="scope.row.valueType !== ParamTypeEnum.SECRET"></div>
+                          <div class="copy-btn"
+                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value)">
+                            <jm-text-copy :value="scope.row.value"/>
+                          </div>
                         </div>
                       </template>
                     </jm-table-column>
@@ -133,26 +135,12 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     });
-    // 一键复制
-    const copy = async (value: string) => {
-      if (!value) {
-        return;
-      }
-      try {
-        await toClipboard(value);
-        proxy.$success('复制成功');
-      } catch (err) {
-        proxy.$error('复制失败，请手动复制');
-        console.error(err);
-      }
-    };
     return {
       workflowName: state.recordDetail.record?.name,
       startTime: datetimeFormatter(state.recordDetail.record?.startTime),
       tabActiveName,
       webhookLog,
       webhookParams,
-      copy,
       ParamTypeEnum,
       maxWidthRecord,
       getTotalWidth(width: number, ref: string) {
@@ -298,32 +286,27 @@ export default defineComponent({
           }
 
           .copy-container {
+            height: 25px;
+
+            & > div {
+              width: 100%;
+            }
+
             display: flex;
             align-items: center;
 
-            .param-value {
-              flex: 1;
-              margin-right: 5px;
-            }
-
-            // 表格参数
-            .webhook-param-value {
-              width: 88%;
-            }
-
             &:hover {
               .copy-btn {
-                width: 16px;
-                height: 16px;
-                background: url('@/assets/svgs/btn/copy.svg') no-repeat;
-                background-size: 100%;
-                cursor: pointer;
-                opacity: 0.5;
-
-                &:hover {
-                  opacity: 1;
-                }
+                display: block;
               }
+            }
+
+            .copy-btn {
+              margin-left: 5px;
+              flex-shrink: 0;
+              font-size: 1.25em;
+              width: 16px;
+              display: none;
             }
           }
         }

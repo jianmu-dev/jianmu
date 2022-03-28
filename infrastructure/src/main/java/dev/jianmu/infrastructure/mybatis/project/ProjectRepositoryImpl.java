@@ -58,8 +58,8 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findAll();
     }
 
-    public PageInfo<Project> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName) {
+    public PageInfo<Project> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.projectMapper.findAllByGroupId(projectGroupId, workflowName));
+                .doSelectPageInfo(() -> this.projectMapper.findAllByGroupId(projectGroupId, workflowName, sortType));
     }
 }

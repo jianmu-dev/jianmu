@@ -1,6 +1,5 @@
 package dev.jianmu.infrastructure.mybatis.workflow;
 
-import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowInstanceMapper;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
@@ -46,28 +45,15 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
-    public WorkflowInstance add(WorkflowInstance workflowInstance) {
-        boolean succeed = this.workflowInstanceMapper.add(workflowInstance, 1);
-        if (!succeed) {
-            throw new DBException.InsertFailed("流程实例插入失败");
-        }
-        Optional<WorkflowInstance> instanceOptional = this.workflowInstanceMapper.findById(workflowInstance.getId());
+    public void add(WorkflowInstance workflowInstance) {
+        this.workflowInstanceMapper.add(workflowInstance, 1);
         publisher.publishEvent(workflowInstance);
-        return instanceOptional.orElseThrow(() -> new DBException.DataNotFound("未找到流程实例"));
     }
 
     @Override
-    public WorkflowInstance save(WorkflowInstance workflowInstance) {
-        // TODO 乐观锁已不需要，可以去掉
-        int version = this.workflowInstanceMapper.getVersion(workflowInstance.getId());
-        logger.info("-------------------------the version is: {}", version);
-        boolean succeed = this.workflowInstanceMapper.save(workflowInstance, version);
-        if (!succeed) {
-            throw new DBException.OptimisticLocking("未找到对应的乐观锁版本数据，无法完成数据更新");
-        }
-        Optional<WorkflowInstance> instanceOptional = this.workflowInstanceMapper.findById(workflowInstance.getId());
+    public void save(WorkflowInstance workflowInstance) {
+        this.workflowInstanceMapper.save(workflowInstance);
         this.publisher.publishEvent(workflowInstance);
-        return instanceOptional.orElseThrow(() -> new DBException.UpdateFailed("流程实例更新失败"));
     }
 
     @Override

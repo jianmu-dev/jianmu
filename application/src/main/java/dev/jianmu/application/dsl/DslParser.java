@@ -14,6 +14,9 @@ import dev.jianmu.trigger.aggregate.WebhookParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import lombok.extern.slf4j.Slf4j;
+import org.jgrapht.alg.cycle.JohnsonSimpleCycles;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.builder.GraphTypeBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -91,6 +94,19 @@ public class DslParser {
             return;
         }
         target.getTargets().forEach(nextTargetRef -> this.calculateLoop(node, branch, nextTargetRef));
+    }
+
+    private List<List<String>> findCycles(Set<Node> nodes) {
+        var graph = GraphTypeBuilder
+                .<String, DefaultEdge>directed().allowingMultipleEdges(true)
+                .allowingSelfLoops(false).edgeClass(DefaultEdge.class).weighted(false)
+                .buildGraph();
+        nodes.forEach(node -> graph.addVertex(node.getRef()));
+        nodes.stream()
+                .filter(node -> !(node instanceof End))
+                .forEach(node -> node.getTargets().forEach(target -> graph.addEdge(node.getRef(), target)));
+        JohnsonSimpleCycles<String, DefaultEdge> johnson = new JohnsonSimpleCycles<>(graph);
+        return johnson.findSimpleCycles();
     }
 
     private Set<Node> calculateWorkflowNodes(List<NodeDef> nodeDefs) {
@@ -179,7 +195,28 @@ public class DslParser {
                 }
             });
         });
-        return new HashSet<>(symbolTable.values());
+        var nodes = new HashSet<>(symbolTable.values());
+        var cycles= this.findCycles(nodes);
+        cycles.forEach(cycle -> {
+            cycle.forEach(nodeRef -> {
+                var node = symbolTable.get(nodeRef);
+                var sources = new HashSet<>(node.getSources());
+                sources.retainAll(cycle);
+                var targets = new HashSet<>(node.getTargets());
+                targets.retainAll(cycle);
+                if (sources.isEmpty() || targets.isEmpty()) {
+                    log.warn("环路节点与节点上下游不匹配");
+                    return;
+                }
+                node.addLoopPair(
+                        LoopPair.Builder.aLoopPair()
+                                .source(sources.iterator().next())
+                                .target(targets.iterator().next())
+                                .build()
+                );
+            });
+        });
+        return nodes;
     }
 
     private void createGlobalParameters(Object globalParam) {
@@ -225,7 +262,7 @@ public class DslParser {
         }
         var concurrent = this.global.get("concurrent");
         if (concurrent instanceof Boolean) {
-            this.concurrent = (Boolean)concurrent;
+            this.concurrent = (Boolean) concurrent;
         }
     }
 

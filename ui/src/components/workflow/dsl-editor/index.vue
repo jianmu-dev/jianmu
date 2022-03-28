@@ -1,17 +1,14 @@
 <template>
   <div class="jm-dsl-editor" @click="clickEmpty">
     <div v-if="readonly" class="operation">
-      <jm-tooltip content="复制" placement="top">
-        <div class="copy" @click="copy"></div>
-      </jm-tooltip>
+      <jm-text-copy :value="value"/>
     </div>
     <textarea ref="textareaRef"></textarea>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { defineComponent, getCurrentInstance, onBeforeUpdate, onMounted, ref } from 'vue';
-import useClipboard from 'vue-clipboard3';
+import { defineComponent, onBeforeUpdate, onMounted, ref } from 'vue';
 // 引入全局实例
 import CodeMirror from 'codemirror';
 import { Comment, Tab } from './model/shortcut';
@@ -77,8 +74,6 @@ export default defineComponent({
     readonly: Boolean,
   },
   setup(props, { emit }) {
-    const { proxy } = getCurrentInstance();
-    const { toClipboard } = useClipboard();
     const textareaRef = ref(null);
 
     let instance;
@@ -129,15 +124,6 @@ export default defineComponent({
         // Set the cursor at the end of existing content
         instance.setCursor(instance.lineCount(), 0);
       },
-      copy: async () => {
-        try {
-          await toClipboard(props.value);
-          proxy.$success('复制成功');
-        } catch (err) {
-          proxy.$error('复制失败，请手动复制');
-          console.error(err);
-        }
-      },
     };
   },
 });
@@ -173,13 +159,13 @@ export default defineComponent({
 
     visibility: hidden;
 
-    .copy {
-      width: 24px;
-      height: 24px;
-      background-image: url('./svgs/copy.svg');
-      background-repeat: no-repeat;
-      background-size: contain;
-      cursor: pointer;
+    ::v-deep(.jm-text-copy) {
+      font-size: 24px;
+
+      .jm-icon-button-copy {
+        color: #FFFFFF;
+        opacity: 1;
+      }
     }
   }
 
