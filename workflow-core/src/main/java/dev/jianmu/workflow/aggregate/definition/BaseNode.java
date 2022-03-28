@@ -1,6 +1,5 @@
 package dev.jianmu.workflow.aggregate.definition;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +22,7 @@ public abstract class BaseNode implements Node {
     // 下游节点列表
     protected Set<String> targets = new HashSet<>();
     // 环路对列表
-    protected List<LoopPair> loopPairs = new ArrayList<>();
+    protected List<LoopPair> loopPairs;
     // 类型
     protected String type;
     // 节点元数据快照
