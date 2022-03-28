@@ -61,6 +61,12 @@ public abstract class BaseNode implements Node {
 
     @Override
     public void addLoopPair(LoopPair loopPair) {
+        var checked = loopPairs.stream()
+                .filter(l -> l.getSource().equals(loopPair.getSource()) && l.getTarget().equals(loopPair.getTarget()))
+                .count();
+        if (checked > 0) {
+            return;
+        }
         this.loopPairs.add(loopPair);
     }
 
