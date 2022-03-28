@@ -15,7 +15,7 @@
         <jm-input
           v-model="projectName"
           @change="searchProject"
-          placeholder="请输入项目名称或描述"
+          placeholder="请输入项目名称"
         />
         <i class="jm-icon-button-search"></i>
       </div>
@@ -126,30 +126,34 @@ export default defineComponent({
   background-color: #fff;
   min-height: calc(100vh - 300px);
   margin-bottom: 20px;
+
   .search {
-    height: 66px;
-    background: #f6fafe;
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    padding: 15px 20px;
+    margin: 0 0 18px;
+    padding: 30px 20px 0;
+
     ::v-deep(.el-select) {
       width: 390px;
       height: 36px;
       border-radius: 2px;
       margin-right: 30px;
     }
+
     ::v-deep(.el-input) {
       height: 36px;
+
       .el-input__inner {
         text-indent: 32px;
-        border: 1px solid #fff;
       }
+
       .el-input__inner:focus {
         text-indent: 32px;
         border: 1px solid #096dd9;
       }
     }
+
     // 搜索框缩进
     ::v-deep(.el-select) {
       .select-trigger {
@@ -157,15 +161,18 @@ export default defineComponent({
           .el-input__inner {
             text-indent: 1px;
           }
+
           .el-input__inner:focus {
             text-indent: 1px;
           }
         }
       }
     }
+
     .search-container {
       width: 100%;
       position: relative;
+
       .jm-icon-button-search::before {
         z-index: 100;
         content: '\e80b';
@@ -177,8 +184,10 @@ export default defineComponent({
       }
     }
   }
+
   .project {
     padding: 0 20px;
+
     .project-group {
       margin-top: 10px;
     }
