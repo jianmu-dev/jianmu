@@ -4,7 +4,7 @@ import {
   DslTypeEnum,
   NodeTypeEnum,
   ProjectImporterTypeEnum,
-  ProjectStatusEnum,
+  ProjectStatusEnum, SORT_TYPE_ENUM,
   TriggerTypeEnum,
 } from '@/api/dto/enumeration';
 
@@ -65,6 +65,7 @@ export interface IProjectQueryingDto
   extends Readonly<IPageDto & {
     projectGroupId?: string;
     name?: string;
+    sortType?: SORT_TYPE_ENUM
   }> {
 }
 

@@ -1,36 +1,18 @@
-import { IState, IProjectGroupFoldStatusMapping } from '@/model/modules/project-group';
+import { IState } from '@/model/modules/project-group';
 import { Module } from 'vuex';
 import { IRootState } from '@/model';
+import { getStorage, setStorage } from '@/utils/storage';
 
 /**
  * 命名空间
  */
 export const namespace = 'project-group';
-const DEFAULT_MAPPING: IProjectGroupFoldStatusMapping = {};
-
-function getStorage() {
-  let storage;
-  const storageStr = localStorage.getItem(namespace);
-  if (storageStr) {
-    try {
-      storage = JSON.parse(storageStr);
-    } catch (err) {
-      console.warn('Abnormal session storage, restore default');
-    }
-  }
-
-  if (!storage) {
-    storage = DEFAULT_MAPPING;
-  }
-
-  return storage;
-}
+const DEFAULT_STATE: IState = {
+  projectGroupFoldStatusMapping: {},
+};
 
 function getState(): IState {
-  const storage = getStorage();
-  return {
-    projectGroupFoldStatusMapping: storage,
-  };
+  return getStorage<IState>(namespace) || DEFAULT_STATE;
 }
 
 export default {
@@ -43,7 +25,7 @@ export default {
       const { id, status } = payload;
       // 根据项目组id存入对应的折叠状态
       state.projectGroupFoldStatusMapping[id] = status;
-      localStorage.setItem(namespace, JSON.stringify(state.projectGroupFoldStatusMapping));
+      setStorage(namespace, state);
     },
   },
 } as Module<IState, IRootState>;
