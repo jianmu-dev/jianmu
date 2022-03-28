@@ -112,3 +112,12 @@ export enum WebhookRequstStateEnum {
 export enum ParamTypeEnum {
   SECRET = 'SECRET'
 }
+
+/**
+ * 项目排序枚举
+ */
+export enum SORT_TYPE_ENUM {
+  DEFAULT_SORT = 'DEFAULT_SORT',
+  LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME',
+  LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME'
+}

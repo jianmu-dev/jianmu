@@ -67,9 +67,23 @@ public class WorkflowDomainService {
                 .map(AsyncTaskInstance::getAsyncTaskRef)
                 .collect(Collectors.toList());
         instanceList.retainAll(refList);
+        // 上游节点列表
+        var sources = asyncTaskInstances.stream()
+                .filter(t -> refList.contains(t.getAsyncTaskRef()))
+                .collect(Collectors.toList());
+        // 计算上游节点完成次数是否相同
+        var sets = sources.stream()
+                .map(AsyncTaskInstance::getSerialNo)
+                .collect(Collectors.toSet())
+                .size();
+        // 如果大于1意味着存在不同次数的节点，不能跳过
+        if (sets > 1) {
+            logger.info("找到不同次数的节点，不能跳过");
+            return false;
+        }
         // 根据上游节点列表，统计已跳过的任务数量
-        long skipped = asyncTaskInstances.stream()
-                .filter(t -> refList.contains(t.getAsyncTaskRef()) && (t.getStatus().equals(TaskStatus.SKIPPED)))
+        long skipped = sources.stream()
+                .filter(t -> t.getStatus().equals(TaskStatus.SKIPPED))
                 .count();
         logger.info("当前节点{}上游Task数量为{}", nodeRef, refList.size());
         logger.info("当前节点{}上游Task已跳过数量为{}", nodeRef, skipped);

@@ -1,8 +1,9 @@
 import { ActionContext, Module } from 'vuex';
-import { ILoginForm, IState, IStorage } from '@/model/modules/session';
+import { ILoginForm, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
 import { create } from '@/api/session';
 import { ISessionVo } from '@/api/dto/session';
+import { getStorage, setStorage } from '@/utils/storage';
 
 /**
  * 命名空间
@@ -19,36 +20,16 @@ const DEFAULT_STATE: IState = {
 };
 
 /**
- * 获取存储
+ * 获取状态
+ * @param username
  */
-function getStorage(): IStorage {
-  let storage;
-
-  const storageStr = localStorage.getItem(namespace);
-  if (storageStr) {
-    try {
-      storage = JSON.parse(storageStr);
-    } catch (err) {
-      console.warn('Abnormal session storage, restore default');
-    }
-  }
-
+function getState(username?: string): IState {
+  let storage = getStorage<Record<string, IState>>(namespace);
   if (!storage) {
     storage = {
       [DEFAULT_STATE_KEY]: DEFAULT_STATE,
     };
   }
-
-  return storage as IStorage;
-}
-
-/**
- * 获取状态
- * @param username
- */
-function getState(username?: string): IState {
-  const storage = getStorage();
-
   return storage[username ? `${namespace}_${username}` : DEFAULT_STATE_KEY];
 }
 
@@ -57,13 +38,15 @@ function getState(username?: string): IState {
  * @param state
  */
 function saveState(state: IState): void {
-  const storage = getStorage();
-
+  let storage = getStorage<Record<string, IState>>(namespace) as Record<string, IState>;
+  if (!storage) {
+    storage = {};
+  }
   storage[DEFAULT_STATE_KEY] = state;
   // 备份，用于下次使用
   storage[`${namespace}_${state.username}`] = state;
 
-  localStorage.setItem(namespace, JSON.stringify(storage));
+  setStorage(namespace, storage);
 }
 
 export default {
@@ -106,7 +89,7 @@ export default {
     },
   },
   actions: {
-    async create({ commit }: ActionContext<IState, IRootState>, loginForm: ILoginForm): Promise<void> {
+    async create({ commit, state }: ActionContext<IState, IRootState>, loginForm: ILoginForm): Promise<void> {
       const session = await create({
         username: loginForm.username,
         password: loginForm.password,

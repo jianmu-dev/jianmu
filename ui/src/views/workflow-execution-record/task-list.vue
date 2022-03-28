@@ -1,6 +1,7 @@
 <template>
   <div class="task-list" v-if="tasks.length > 1">
-    <jm-dropdown placement="bottom-start" trigger="hover" class="task-dropdown" max-height="186px">
+    <jm-dropdown placement="bottom-start" trigger="hover" class="task-dropdown" max-height="186px"
+                 :append-to-body="false">
           <span class="el-dropdown-link">
             #{{ currentDropdown }}<i class="el-icon-arrow-down el-icon--right"></i>
           </span>

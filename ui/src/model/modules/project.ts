@@ -5,6 +5,7 @@ import {
   IProjectQueryingDto,
   IProjectSavingDto,
 } from '@/api/dto/project';
+import { SORT_TYPE_ENUM } from '@/api/dto/enumeration';
 
 /**
  * vuex状态
@@ -30,3 +31,11 @@ export interface IGitCloneForm extends Mutable<IGitCloningDto> {}
  * 导入表单
  */
 export interface IImportForm extends Mutable<IProjectImportingDto> {}
+
+/**
+ * Vuex状态
+ */
+export interface IState {
+  // 项目列表排序类型
+  sortType: SORT_TYPE_ENUM
+}

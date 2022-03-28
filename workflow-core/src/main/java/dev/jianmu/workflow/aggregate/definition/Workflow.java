@@ -118,9 +118,26 @@ public class Workflow extends AggregateRoot {
                     .sender(nodeRef)
                     .build();
             this.raiseEvent(activatingEvent);
-            // 如果是非环回分支，则发布其他节点跳过事件
+            // 如果当前激活的是非环回分支，则发布其他节点跳过事件
             if (!branch.isLoop()) {
+                // 如果其他分支是环回分支，则不发布跳过事件
                 var targets = ((Gateway) node).findNonLoopBranch().stream()
+                        // 排除当前命中的分支
+                        .filter(targetRef -> !targetRef.equals(branch.getTarget()))
+                        .collect(Collectors.toList());
+                targets.forEach(targetRef -> {
+                    var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                            .nodeRef(targetRef)
+                            .triggerId(triggerId)
+                            .workflowRef(this.ref)
+                            .workflowVersion(this.version)
+                            .build();
+                    this.raiseEvent(nodeSkipEvent);
+                });
+            } else {
+                // 如果当前激活的是环回分支，则其他环回分支发布跳过事件
+                var targets =  ((Gateway) node).findLoopBranch().stream()
+                        // 排除当前命中的分支
                         .filter(targetRef -> !targetRef.equals(branch.getTarget()))
                         .collect(Collectors.toList());
                 targets.forEach(targetRef -> {
