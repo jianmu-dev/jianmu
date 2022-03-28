@@ -17,10 +17,6 @@ export interface IProjectGroupAddingForm
   extends Mutable<IProjectGroupAddingDto> {
 }
 
-export interface IProjectGroupFoldStatusMapping {
-  [key: string]: boolean
-}
-
 export interface IState {
-  projectGroupFoldStatusMapping: IProjectGroupFoldStatusMapping
+  [key: string]: boolean
 }

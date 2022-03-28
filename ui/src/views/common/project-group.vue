@@ -93,9 +93,8 @@ import { IProjectVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
-import { ProjectStatusEnum } from '@/api/dto/enumeration';
+import { ProjectStatusEnum, SORT_TYPE_ENUM } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
-import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IPageVo } from '@/api/dto/common';
 import { Mutable } from '@/utils/lib';
 import { updateProjectGroupProjectSort } from '@/api/project-group';
@@ -128,11 +127,17 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    // 项目组排序类型
+    sortType: {
+      type: String,
+      default: SORT_TYPE_ENUM.DEFAULT_SORT,
+    },
   },
   setup(props: any) {
     const store = useStore();
     const { mapMutations } = createNamespacedHelpers(namespace);
-    const projectGroupFoldingMapping = store.state[namespace].projectGroupFoldStatusMapping;
+    const projectGroupFoldingMapping = store.state[namespace];
+    // 根据项目组在vuex中保存的状态，进行展开、折叠间的切换
     const toggle = computed<boolean>(() => {
       // 只有全等于为undefined说明该项目组一开始根本没有做折叠操作
       if (projectGroupFoldingMapping[props.projectGroup?.id] === undefined) {
@@ -157,6 +162,7 @@ export default defineComponent({
       pageSize: props.pageable ? 40 : DEFAULT_PAGE_SIZE,
       projectGroupId: props.projectGroup?.id,
       name: props.name,
+      sortType: props.sortType,
     });
     const autoRefreshingOfNoRunningCount = ref<number>(0);
     const loadingMore = ref<boolean>(false);
@@ -193,6 +199,7 @@ export default defineComponent({
             pageSize: props.pageable ? projects.value.length : DEFAULT_PAGE_SIZE,
             projectGroupId: props.projectGroup?.id,
             name: props.name,
+            sortType: props.sortType,
           });
         } catch (err) {
           // 忽略错误
@@ -229,6 +236,7 @@ export default defineComponent({
         loadingMore.value = false;
       }
     };
+    // 项目组加载更多
     const btnDown = async () => {
       // 如果状态为没有更多控制加载
       if (loadState.value === StateEnum.NO_MORE) {
@@ -286,6 +294,7 @@ export default defineComponent({
     const currentSelected = ref<boolean>(false);
     const currentItem = ref<string>('-1');
     let setCurrentItemTimer: any;
+    // 保存单个项目组的展开折叠状态
     const saveFoldStatus = (status: boolean, id: string) => {
       // 改变状态
       const toggle = !status;

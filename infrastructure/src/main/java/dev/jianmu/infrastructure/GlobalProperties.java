@@ -23,6 +23,7 @@ public class GlobalProperties {
     private Global global = new Global();
     private JwtProperties api;
     private Worker worker;
+    private Boolean authMode = true;
 
     @Data
     @Component
@@ -93,6 +94,9 @@ public class GlobalProperties {
             private Resource kubeConfigPath;
             private String namespace = "jianmu";
             private String placeholder = "jianmudev/placeholder:0.3";
+            private String keepalive = "alpine:3.13.6";
+            // IfNotPresent, Always and Never
+            private String imagePullPolicy = "IfNotPresent";
         }
     }
 }

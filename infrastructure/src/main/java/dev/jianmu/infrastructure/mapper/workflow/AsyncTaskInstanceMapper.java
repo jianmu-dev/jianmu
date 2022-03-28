@@ -20,6 +20,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
@@ -32,6 +33,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
@@ -44,6 +46,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
@@ -56,24 +59,25 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     Optional<AsyncTaskInstance> findByTriggerIdAndTaskRef(@Param("triggerId") String triggerId, @Param("taskRef") String taskRef);
 
-    @Insert("insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, activating_time, start_time, end_time) " +
-            "values(#{id}, #{triggerId}, #{workflowRef}, #{workflowVersion}, #{workflowInstanceId}, #{name}, #{description}, #{status}, #{asyncTaskRef}, #{asyncTaskType}, #{activatingTime}, #{startTime}, #{endTime})")
+    @Insert("insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, serial_no, activating_time, start_time, end_time) " +
+            "values(#{id}, #{triggerId}, #{workflowRef}, #{workflowVersion}, #{workflowInstanceId}, #{name}, #{description}, #{status}, #{asyncTaskRef}, #{asyncTaskType}, #{i.serialNo}, #{activatingTime}, #{startTime}, #{endTime})")
     void add(AsyncTaskInstance asyncTaskInstance);
 
     @Insert("<script>" +
-            "insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, activating_time, start_time, end_time) values" +
+            "insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, serial_no, activating_time, start_time, end_time) values" +
             "<foreach collection='asyncTaskInstances' item='i' index='key' separator=','>" +
-            "(#{i.id}, #{i.triggerId}, #{i.workflowRef}, #{i.workflowVersion}, #{i.workflowInstanceId}, #{i.name}, #{i.description}, #{i.status}, #{i.asyncTaskRef}, #{i.asyncTaskType}, #{i.activatingTime}, #{i.startTime}, #{i.endTime})" +
+            "(#{i.id}, #{i.triggerId}, #{i.workflowRef}, #{i.workflowVersion}, #{i.workflowInstanceId}, #{i.name}, #{i.description}, #{i.status}, #{i.asyncTaskRef}, #{i.asyncTaskType}, #{i.serialNo}, #{i.activatingTime}, #{i.startTime}, #{i.endTime})" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("asyncTaskInstances") List<AsyncTaskInstance> asyncTaskInstances);
 
-    @Update("update async_task_instance set status=#{status}, start_time=#{startTime}, end_time=#{endTime} where id=#{id}")
+    @Update("update async_task_instance set status=#{status}, serial_no=#{serialNo}, start_time=#{startTime}, end_time=#{endTime} where id=#{id}")
     void updateById(AsyncTaskInstance asyncTaskInstance);
 
     @Delete("delete from async_task_instance where workflow_instance_id = #{workflowInstanceId}")

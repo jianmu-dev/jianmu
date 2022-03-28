@@ -88,7 +88,7 @@ export default defineComponent({
 
       switch (evt.type) {
         case NodeTypeEnum.ASYNC_TASK: {
-          const tasks = sortTasks(props.tasks, evt.id);
+          const tasks = sortTasks(props.tasks, true, evt.id);
           if (tasks.length > 0) {
             taskInstanceId.value = tasks[0].instanceId;
           }
@@ -247,7 +247,9 @@ export default defineComponent({
         }[] = [];
 
         const taskMap = new Map();
-        props.tasks.forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
+        // 按开始时间生序排序，保证最后一个是最新的
+        sortTasks([...props.tasks], false)
+          .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,

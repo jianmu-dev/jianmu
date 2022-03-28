@@ -45,7 +45,7 @@ public class UpgradeRunner implements ApplicationRunner {
                             .collect(Collectors.toList());
                     var count = conditions.stream()
                             .map(node -> (Condition) node)
-                            .filter(condition -> condition.getBranches() == null)
+                            .filter(condition -> condition.getLoopPairs() == null)
                             .count();
                     return count > 0;
                 })

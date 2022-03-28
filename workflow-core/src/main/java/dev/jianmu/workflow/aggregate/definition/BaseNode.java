@@ -23,7 +23,7 @@ public abstract class BaseNode implements Node {
     // 下游节点列表
     protected Set<String> targets = new HashSet<>();
     // 环路对列表
-    protected List<LoopPair> loopPairs = new ArrayList<>();
+    protected List<LoopPair> loopPairs;
     // 类型
     protected String type;
     // 节点元数据快照
@@ -61,6 +61,15 @@ public abstract class BaseNode implements Node {
 
     @Override
     public void addLoopPair(LoopPair loopPair) {
+        if (loopPairs == null) {
+            this.loopPairs = new ArrayList<>();
+        }
+        var checked = loopPairs.stream()
+                .filter(l -> l.getSource().equals(loopPair.getSource()) && l.getTarget().equals(loopPair.getTarget()))
+                .count();
+        if (checked > 0) {
+            return;
+        }
         this.loopPairs.add(loopPair);
     }
 
@@ -101,6 +110,9 @@ public abstract class BaseNode implements Node {
 
     @Override
     public List<LoopPair> getLoopPairs() {
+        if (loopPairs == null) {
+            return List.of();
+        }
         return loopPairs;
     }
 
