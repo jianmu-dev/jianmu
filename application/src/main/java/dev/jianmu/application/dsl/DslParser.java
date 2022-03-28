@@ -158,7 +158,6 @@ public class DslParser {
                     } else {
                         n.addTarget(target.getRef());
                     }
-                    this.calculateLoop(n, branch, target.getRef());
                 }
             }
             if (null != n) {
@@ -195,6 +194,7 @@ public class DslParser {
                 }
             });
         });
+        // 环路计算
         var nodes = new HashSet<>(symbolTable.values());
         var cycles= this.findCycles(nodes);
         cycles.forEach(cycle -> {
@@ -214,6 +214,14 @@ public class DslParser {
                                 .target(targets.iterator().next())
                                 .build()
                 );
+                // 网关分支是否为循环
+                if (node instanceof Condition) {
+                    for (Branch branch : ((Condition) node).getBranches()) {
+                        if (cycle.contains(branch.getTarget())) {
+                            branch.setLoop(true);
+                        }
+                    }
+                }
             });
         });
         return nodes;
