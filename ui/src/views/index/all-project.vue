@@ -62,6 +62,7 @@ export default defineComponent({
     // 项目组排序类型
     const sortTypeList = ref<Array<{ label: string, value: SORT_TYPE_ENUM }>>([
       { label: '默认排序', value: SORT_TYPE_ENUM.DEFAULT_SORT },
+      { label: '最近执行', value: SORT_TYPE_ENUM.LAST_EXECUTION_TIME },
       { label: '最近修改', value: SORT_TYPE_ENUM.LAST_MODIFIED_TIME },
     ]);
     // 所有项目组在vuex中保存的排序类型
