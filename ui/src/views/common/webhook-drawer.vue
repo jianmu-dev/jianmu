@@ -180,7 +180,9 @@
                             {{ scope.row.value }}
                           </template>
                         </div>
-                        <div class="copy-btn" @click="copyParam(scope.row.value)"></div>
+                        <div class="copy-btn">
+                          <jm-text-copy :value="scope.row.value"/>
+                        </div>
                       </template>
                       <template v-else>
                         {{ scope.row.value }}
@@ -210,29 +212,13 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  getCurrentInstance,
-  computed,
-  nextTick,
-  onUpdated,
-} from 'vue';
+import { computed, defineComponent, getCurrentInstance, nextTick, onUpdated, ref } from 'vue';
 import useClipboard from 'vue-clipboard3';
-import {
-  getWebhookList,
-  retryWebRequest,
-  getWebhookParams,
-  getPayloadParams,
-} from '@/api/trigger';
-import {
-  IWebRequestVo,
-  IWebhookParamVo,
-  IWebhookAuthVo,
-} from '@/api/dto/trigger';
+import { getPayloadParams, getWebhookList, getWebhookParams, retryWebRequest } from '@/api/trigger';
+import { IWebhookAuthVo, IWebhookParamVo, IWebRequestVo } from '@/api/dto/trigger';
 import { datetimeFormatter } from '@/utils/formatter';
 import { IPageVo } from '@/api/dto/common';
-import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { DEFAULT_PAGE_SIZE, START_PAGE_NUM } from '@/utils/constants';
 import { fetchTriggerWebhook } from '@/api/view-no-auth';
 import { ElScrollbar } from 'element-plus';
 import { StateEnum } from '@/components/load-more/enumeration';
@@ -879,33 +865,25 @@ export default defineComponent({
 
       .trigger-table {
         .params-container {
+          & > div {
+            width: 100%;
+          }
+
           display: flex;
           align-items: center;
 
-          .param-value {
-            flex: 1;
-            margin-right: 5px;
-          }
-
           &:hover {
             .copy-btn {
-              width: 16px;
-              height: 16px;
-              background: url('@/assets/svgs/btn/copy.svg') no-repeat;
-              background-size: 100%;
-              cursor: pointer;
-              opacity: 0.5;
-
-              &:hover {
-                opacity: 1;
-              }
+              display: block;
             }
           }
 
-          // 普通参数
-          .trigger-value {
-            max-width: 280px;
-            //margin-right:20px;
+          .copy-btn {
+            margin-left: 5px;
+            flex-shrink: 0;
+            font-size: 1.25em;
+            width: 16px;
+            display: none;
           }
         }
 

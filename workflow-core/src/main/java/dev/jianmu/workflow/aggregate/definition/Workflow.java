@@ -294,6 +294,16 @@ public class Workflow extends AggregateRoot {
                 .collect(Collectors.toList());
     }
 
+    // 返回不包含网关节点的当前节点上游Node的ref List
+    public List<String> findNodesWithoutGateway(String nodeRef) {
+        Node node = this.findNode(nodeRef);
+        return this.nodes.stream()
+                .filter(n -> !(n instanceof Gateway))
+                .map(Node::getRef)
+                .filter(ref -> node.getSources().contains(ref))
+                .collect(Collectors.toList());
+    }
+
     public String getName() {
         return name;
     }

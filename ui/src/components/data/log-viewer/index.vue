@@ -1,13 +1,13 @@
 <template>
   <div class="jm-log-viewer">
     <div class="operation">
-      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'" placement="top" :append-to-body="false">
+      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'"
+                  :placement="downloading? 'top-end': 'top'"
+                  :append-to-body="false">
         <div :class="{download: true, doing: downloading}" @click="download"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-tooltip :content="copying ? '复制中，请稍后...' : '复制'" placement="top" :append-to-body="false">
-        <div :class="{copy: true, doing: copying}" @click="copy"></div>
-      </jm-tooltip>
+      <jm-text-copy :async-value="() => getLog(true)"/>
     </div>
     <div class="auto-scroll" @click="handleAutoScroll(true)"
          :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}"></div>
@@ -31,8 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, nextTick, onMounted, PropType, ref, watch } from 'vue';
-import useClipboard from 'vue-clipboard3';
+import { defineComponent, nextTick, onMounted, PropType, ref, watch } from 'vue';
 
 export default defineComponent({
   name: 'jm-log-viewer',
@@ -52,14 +51,11 @@ export default defineComponent({
     fetchLog: Function as PropType<(isCopy: boolean) => Promise<string>>,
   },
   setup(props) {
-    const { proxy } = getCurrentInstance() as any;
-    const { toClipboard } = useClipboard();
     const data = ref<string[]>([]);
     const contentRef = ref<HTMLDivElement>();
     const noWidth = ref<number>(0);
     const autoScroll = ref<boolean>(true);
     const downloading = ref<boolean>(false);
-    const copying = ref<boolean>(false);
 
     const virtualNoDiv = document.createElement('div');
     virtualNoDiv.style.position = 'fixed';
@@ -117,8 +113,8 @@ export default defineComponent({
       noWidth,
       autoScroll,
       downloading,
-      copying,
       handleAutoScroll,
+      getLog,
       download: async () => {
         if (downloading.value) {
           return;
@@ -138,36 +134,9 @@ export default defineComponent({
           // 释放url
           window.URL.revokeObjectURL(url);
         } catch (err) {
-          proxy.$error('下载失败');
           console.warn(err.message);
         } finally {
           downloading.value = false;
-        }
-      },
-      copy: async () => {
-        if (copying.value) {
-          return;
-        }
-        copying.value = true;
-        let log = '';
-        try {
-          log = await getLog(true);
-        } catch (err) {
-          proxy.$error(err.message);
-          console.warn(err.message);
-          return;
-        } finally {
-          copying.value = false;
-        }
-
-        try {
-          await toClipboard(log);
-          proxy.$success('复制成功');
-        } catch (err) {
-          proxy.$error('复制失败，请手动复制');
-          console.error(err);
-        } finally {
-          copying.value = false;
         }
       },
     };
@@ -262,15 +231,18 @@ export default defineComponent({
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
     border: 1px solid #767F91;
+    white-space: nowrap;
 
     visibility: hidden;
 
     .download {
       width: 20px;
       height: 20px;
+      padding: 4px;
       background-image: url('./svgs/download.svg');
       background-repeat: no-repeat;
-      background-size: contain;
+      background-size: 20px;
+      background-position: center;
       cursor: pointer;
 
       &.doing {
@@ -279,17 +251,12 @@ export default defineComponent({
       }
     }
 
-    .copy {
-      width: 20px;
-      height: 20px;
-      background-image: url('./svgs/copy.svg');
-      background-repeat: no-repeat;
-      background-size: contain;
-      cursor: pointer;
+    ::v-deep(.jm-text-copy) {
+      font-size: 20px;
 
-      &.doing {
-        opacity: 0.5;
-        cursor: not-allowed;
+      .jm-icon-button-copy {
+        color: #FFFFFF;
+        opacity: 1;
       }
     }
 

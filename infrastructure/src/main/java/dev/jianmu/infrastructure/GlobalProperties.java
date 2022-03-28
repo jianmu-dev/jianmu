@@ -23,6 +23,7 @@ public class GlobalProperties {
     private Global global = new Global();
     private JwtProperties api;
     private Worker worker;
+    private Boolean authMode = true;
 
     @Data
     @Component
