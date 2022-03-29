@@ -91,6 +91,7 @@ public class WorkflowDomainService {
                 .filter(t -> t.getStatus().equals(TaskStatus.SKIPPED))
                 .count();
         long gatewaySkipped = gatewaySources.stream()
+                .filter(t -> t.getStatus().equals(TaskStatus.INIT))
                 .filter(t -> !t.isNextTarget(nodeRef))
                 .count();
         logger.info("当前节点{}上游Task数量为{}", nodeRef, refList.size());
