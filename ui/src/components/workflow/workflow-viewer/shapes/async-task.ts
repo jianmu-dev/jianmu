@@ -135,6 +135,7 @@ export default function (G6: typeof _G6) {
           keyShape.attr({
             ...style,
             shadowColor: value ? style.stroke : attrs.keyShape.default.shadowColor,
+            shadowBlur: value ? 35 : attrs.keyShape.default.shadowBlur,
           });
           return;
         }
