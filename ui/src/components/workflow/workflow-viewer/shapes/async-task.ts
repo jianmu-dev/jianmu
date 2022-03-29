@@ -6,9 +6,7 @@ import SKIPPED from '../svgs/shape/async-task/SKIPPED.svg';
 import FAILED from '../svgs/shape/async-task/FAILED.svg';
 import SUCCEEDED from '../svgs/shape/async-task/SUCCEEDED.svg';
 import { NodeTypeEnum } from '../utils/enumeration';
-import AsyncTaskRunningAnimation, {
-  attrs,
-} from '../animations/async-task-running-animation';
+import AsyncTaskRunningAnimation, { attrs } from '../animations/async-task-running-animation';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 import { SHELL_NODE_TYPE } from '../utils/model';
@@ -127,44 +125,58 @@ export default function (G6: typeof _G6) {
         style: attrs.keyShape.default,
       },
       setState(name, value, item) {
-        if (name !== 'status') {
+        if (name === 'highlight') {
+          const keyShape = item?.get('keyShape') as IShape;
+
+          const status = (item?.getStates().find(state => state.startsWith('status:')) as string).substring(7);
+          // 更新样式
+          // 定义setState后，需手动设置stateStyles
+          const style = states[status].style;
+          keyShape.attr({
+            ...style,
+            shadowColor: value ? style.stroke : attrs.keyShape.default.shadowColor,
+          });
           return;
         }
 
-        const status = value as string;
-        const cfg = item?._cfg as IItemBaseConfig;
-        const group = item?._cfg?.group as IGroup;
-        const defaultIcon = group
-          .getChildren()
-          .find(child => child.cfg.name === 'async_task_default_icon');
-        if (defaultIcon) {
-          // 更新默认icon
-          defaultIcon.attr('img', imgs[status]);
-        }
-        const stateIndicator = group
-          .getChildren()
-          .find(child => child.cfg.name === 'async_task_state_indicator');
-        if (stateIndicator) {
-          // 更新状态指示灯样式
-          stateIndicator.attr(states[status].indicatorStyle);
-        }
-
-        if (status === TaskStatusEnum.RUNNING) {
-          if (!cfg.runningAnimation) {
-            cfg.runningAnimation = new AsyncTaskRunningAnimation(item as Item);
+        if (name === 'status') {
+          const status = value as string;
+          const cfg = item?._cfg as IItemBaseConfig;
+          const group = item?._cfg?.group as IGroup;
+          const defaultIcon = group
+            .getChildren()
+            .find(child => child.cfg.name === 'async_task_default_icon');
+          if (defaultIcon) {
+            // 更新默认icon
+            defaultIcon.attr('img', imgs[status]);
+          }
+          const stateIndicator = group
+            .getChildren()
+            .find(child => child.cfg.name === 'async_task_state_indicator');
+          if (stateIndicator) {
+            // 更新状态指示灯样式
+            stateIndicator.attr(states[status].indicatorStyle);
           }
 
-          cfg.runningAnimation.start();
-        } else {
-          if (cfg.runningAnimation) {
-            cfg.runningAnimation.stop();
-            delete cfg.runningAnimation;
+          if (status === TaskStatusEnum.RUNNING) {
+            if (!cfg.runningAnimation) {
+              cfg.runningAnimation = new AsyncTaskRunningAnimation(item as Item);
+            }
+
+            cfg.runningAnimation.start();
+          } else {
+            if (cfg.runningAnimation) {
+              cfg.runningAnimation.stop();
+              delete cfg.runningAnimation;
+            }
+
+            const keyShape = item?.get('keyShape') as IShape;
+            // 更新样式
+            // 定义setState后，需手动设置stateStyles
+            keyShape.attr(states[status].style);
           }
 
-          const keyShape = item?.get('keyShape') as IShape;
-          // 更新样式
-          // 定义setState后，需手动设置stateStyles
-          keyShape.attr(states[status].style);
+          return;
         }
       },
       afterDraw(cfg, group) {

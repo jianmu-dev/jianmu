@@ -275,3 +275,25 @@ export function updateNodeStates(tasks: ITaskExecutionRecordVo[], graph?: Graph)
     graph.setItemState(edge, 'running', !!status);
   });
 }
+
+/**
+ * 高亮节点状态
+ * @param status
+ * @param active
+ * @param graph
+ */
+export function highlightNodeState(status: TaskStatusEnum, active: boolean, graph?: Graph) {
+  if (!graph) {
+    return;
+  }
+
+  graph
+    .getNodes()
+    .filter(node =>
+      node.getModel().type === NodeTypeEnum.ASYNC_TASK &&
+      node.getStates().includes(`status:${status}`),
+    )
+    .forEach(node => {
+      graph.setItemState(node, 'highlight', active);
+    });
+}
