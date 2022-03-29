@@ -3,3 +3,6 @@ ALTER TABLE `jianmu_project`
 
 ALTER TABLE `async_task_instance`
     add `serial_no` integer DEFAULT 0 COMMENT '完成次数累计';
+
+ALTER TABLE `async_task_instance`
+    add `next_target` varchar(45) DEFAULT NULL COMMENT '下一个要触发的节点';

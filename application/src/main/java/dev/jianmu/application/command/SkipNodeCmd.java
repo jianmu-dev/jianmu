@@ -16,4 +16,5 @@ public class SkipNodeCmd {
     private String workflowRef;
     private String workflowVersion;
     private String nodeRef;
+    private String sender;
 }
