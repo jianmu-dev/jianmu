@@ -45,11 +45,11 @@ public class AsyncTaskInstanceInternalApplication {
     }
 
     @Transactional
-    public void nodeSucceed(String triggerId, String nodeRef) {
+    public void nodeSucceed(String triggerId, String nodeRef, String nextTarget) {
         var asyncTaskInstance = this.asyncTaskInstanceRepository
                 .findByTriggerIdAndTaskRef(triggerId, nodeRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
-        asyncTaskInstance.succeed();
+        asyncTaskInstance.succeed(nextTarget);
         this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
     }
 
