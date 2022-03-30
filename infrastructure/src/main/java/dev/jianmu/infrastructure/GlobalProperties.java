@@ -66,7 +66,7 @@ public class GlobalProperties {
 
         @NotNull
         private Type type = Type.EMBEDDED_DOCKER;
-        private Docker docker;
+        private Docker docker = new Docker();
         private K8s k8s = new K8s();
 
         @Data
