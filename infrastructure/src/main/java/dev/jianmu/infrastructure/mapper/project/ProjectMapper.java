@@ -105,7 +105,7 @@ public interface ProjectMapper {
             "</where>" +
             "<if test='sortType == \"DEFAULT_SORT\"'> ORDER BY `plp`.`sort` asc</if>" +
             "<if test='sortType == \"LAST_MODIFIED_TIME\"'> ORDER BY `jp`.`last_modified_time` desc</if>" +
-            "<if test='sortType == \"LAST_EXECUTION_TIME\"'> ORDER BY `wi`.`end_time` desc</if>" +
+            "<if test='sortType == \"LAST_EXECUTION_TIME\"'> ORDER BY `wi`.`sort_end_time` desc</if>" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "workflow_description", property = "workflowDescription")
