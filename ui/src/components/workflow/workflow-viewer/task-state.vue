@@ -70,6 +70,7 @@ export default defineComponent({
   align-items: center;
   font-size: 14px;
   color: #595959;
+  cursor: default;
 
   .signal {
     width: 16px;

@@ -2,7 +2,9 @@
   <div class="jm-workflow-viewer">
     <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
-                  :key="status" :status="status" :count="count"/>
+                  :key="status" :status="status" :count="count"
+                  @mouseenter="highlightNodeState(status, true, graph)"
+                  @mouseleave="highlightNodeState(status, false, graph)"/>
     </div>
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
@@ -35,7 +37,7 @@ import G6, { Graph, NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
-import { configNodeAction, fitCanvas, init, sortTasks, updateNodeStates } from './utils/graph';
+import { configNodeAction, fitCanvas, highlightNodeState, init, sortTasks, updateNodeStates } from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
@@ -210,6 +212,7 @@ export default defineComponent({
             emit('click-webhook-node', id, tabType);
         }
       },
+      highlightNodeState,
       handleNodeBarMouseout,
       zoom,
       handleZoom: (val?: number) => {

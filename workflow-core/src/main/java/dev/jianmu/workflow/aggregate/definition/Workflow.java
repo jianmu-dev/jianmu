@@ -94,12 +94,15 @@ public class Workflow extends AggregateRoot {
             return;
         }
         if (node instanceof Gateway) {
+            var branch = ((Gateway) node).calculateTarget(expressionLanguage, context);
             // 发布网关节点执行成功事件
             NodeSucceedEvent succeedEvent = NodeSucceedEvent.Builder.aNodeSucceedEvent()
                     .nodeRef(node.getRef())
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    // TODO 3.0需要重新设计
+                    .nextTarget(branch.getTarget())
                     .build();
             this.raiseEvent(succeedEvent);
         }
@@ -131,12 +134,13 @@ public class Workflow extends AggregateRoot {
                             .triggerId(triggerId)
                             .workflowRef(this.ref)
                             .workflowVersion(this.version)
+                            .sender(nodeRef)
                             .build();
                     this.raiseEvent(nodeSkipEvent);
                 });
             } else {
                 // 如果当前激活的是环回分支，则其他环回分支发布跳过事件
-                var targets =  ((Gateway) node).findLoopBranch().stream()
+                var targets = ((Gateway) node).findLoopBranch().stream()
                         // 排除当前命中的分支
                         .filter(targetRef -> !targetRef.equals(branch.getTarget()))
                         .collect(Collectors.toList());
@@ -146,6 +150,7 @@ public class Workflow extends AggregateRoot {
                             .triggerId(triggerId)
                             .workflowRef(this.ref)
                             .workflowVersion(this.version)
+                            .sender(nodeRef)
                             .build();
                     this.raiseEvent(nodeSkipEvent);
                 });
@@ -200,6 +205,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .sender(nodeRef)
                     .build();
             this.raiseEvent(nodeSkipEvent);
         });
@@ -299,6 +305,16 @@ public class Workflow extends AggregateRoot {
     public List<String> findNodes(String nodeRef) {
         Node node = this.findNode(nodeRef);
         return this.nodes.stream()
+                .map(Node::getRef)
+                .filter(ref -> node.getSources().contains(ref))
+                .collect(Collectors.toList());
+    }
+
+    // 返回当前节点上游GateWay的ref List
+    public List<String> findGateWay(String nodeRef) {
+        Node node = this.findNode(nodeRef);
+        return this.nodes.stream()
+                .filter(n -> n instanceof Gateway)
                 .map(Node::getRef)
                 .filter(ref -> node.getSources().contains(ref))
                 .collect(Collectors.toList());

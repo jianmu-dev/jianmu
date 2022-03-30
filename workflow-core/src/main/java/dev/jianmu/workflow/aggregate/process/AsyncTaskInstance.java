@@ -35,12 +35,21 @@ public class AsyncTaskInstance extends AggregateRoot {
     private String asyncTaskType;
     // 完成次数计数，从0开始
     private int serialNo;
+    // 下一个要触发的节点, TODO 3.0需要重构
+    private String nextTarget;
     // 创建时间
     private LocalDateTime activatingTime = LocalDateTime.now();
     // 开始时间
     private LocalDateTime startTime;
     // 结束时间
     private LocalDateTime endTime;
+
+    public boolean isNextTarget(String ref) {
+        if (nextTarget == null) {
+            return false;
+        }
+        return nextTarget.equals(ref);
+    }
 
     public void activating() {
         this.activatingTime = LocalDateTime.now();
@@ -79,6 +88,25 @@ public class AsyncTaskInstance extends AggregateRoot {
         this.status = TaskStatus.SUCCEEDED;
         this.endTime = LocalDateTime.now();
         this.serialNo++;
+        // 发布任务执行成功事件
+        this.raiseEvent(
+                TaskSucceededEvent.Builder.aTaskSucceededEvent()
+                        .nodeRef(this.asyncTaskRef)
+                        .triggerId(this.triggerId)
+                        .workflowInstanceId(this.workflowInstanceId)
+                        .asyncTaskInstanceId(this.id)
+                        .workflowRef(this.workflowRef)
+                        .workflowVersion(this.workflowVersion)
+                        .nodeType(this.asyncTaskType)
+                        .build()
+        );
+    }
+
+    public void succeed(String nextTarget) {
+        this.nextTarget = nextTarget;
+        this.endTime = LocalDateTime.now();
+        this.serialNo++;
+        this.status = TaskStatus.SUCCEEDED;
         // 发布任务执行成功事件
         this.raiseEvent(
                 TaskSucceededEvent.Builder.aTaskSucceededEvent()
@@ -178,6 +206,10 @@ public class AsyncTaskInstance extends AggregateRoot {
         return serialNo;
     }
 
+    public String getNextTarget() {
+        return nextTarget;
+    }
+
     public LocalDateTime getActivatingTime() {
         return activatingTime;
     }
@@ -209,8 +241,6 @@ public class AsyncTaskInstance extends AggregateRoot {
         private String asyncTaskRef;
         // 任务定义类型
         private String asyncTaskType;
-        // 执行次数计数，从0开始
-        private int serialNo = 0;
 
         private Builder() {
         }
@@ -270,7 +300,8 @@ public class AsyncTaskInstance extends AggregateRoot {
             asyncTaskInstance.name = this.name;
             asyncTaskInstance.asyncTaskRef = this.asyncTaskRef;
             asyncTaskInstance.asyncTaskType = this.asyncTaskType;
-            asyncTaskInstance.serialNo = this.serialNo;
+            // 执行次数计数，从0开始
+            asyncTaskInstance.serialNo = 0;
             return asyncTaskInstance;
         }
     }

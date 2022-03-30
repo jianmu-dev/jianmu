@@ -21,6 +21,8 @@ public class NodeSkipEvent extends DefinitionEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
+        // 事件发送者
+        protected String sender;
 
         private Builder() {
         }
@@ -54,6 +56,11 @@ public class NodeSkipEvent extends DefinitionEvent {
             return this;
         }
 
+        public Builder sender(String sender) {
+            this.sender = sender;
+            return this;
+        }
+
         public NodeSkipEvent build() {
             NodeSkipEvent nodeSkipEvent = new NodeSkipEvent();
             nodeSkipEvent.triggerId = this.triggerId;
@@ -61,6 +68,7 @@ public class NodeSkipEvent extends DefinitionEvent {
             nodeSkipEvent.workflowVersion = this.workflowVersion;
             nodeSkipEvent.nodeRef = this.nodeRef;
             nodeSkipEvent.workflowRef = this.workflowRef;
+            nodeSkipEvent.sender = this.sender;
             return nodeSkipEvent;
         }
     }

@@ -15,8 +15,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 @Slf4j
 public class ProjectEventHandler {
-    private static final Map<String, Lock> PROJECT_LOCK_MAP = new HashMap<>();
+    private static final Map<String, Lock> PROJECT_LOCK_MAP = new ConcurrentHashMap<>();
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
@@ -57,6 +57,7 @@ public class ProjectEventHandler {
                 .workflowRef(triggerEvent.getWorkflowRef())
                 .workflowVersion(triggerEvent.getWorkflowVersion())
                 .build();
+        // TODO 集群环境需优化成分布式锁
         PROJECT_LOCK_MAP.putIfAbsent(triggerEvent.getProjectId(), new ReentrantLock());
         Lock lock = PROJECT_LOCK_MAP.get(triggerEvent.getProjectId());
         lock.lock();
