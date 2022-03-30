@@ -96,7 +96,7 @@ public interface ProjectMapper {
     @Select("<script>" +
             "SELECT jp.*, `wi`.`end_time`, `wi`.`status`, `wi`.`start_time` FROM `jianmu_project` `jp` INNER JOIN `project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
             "LEFT JOIN (select * " +
-            "           from (select DISTINCT(`workflow_ref`), `end_time`, `start_time`, `status` from `workflow_instance` ORDER BY `end_time` desc) `t` " +
+            "           from (select DISTINCT(`workflow_ref`), `end_time`, `start_time`, `status`, if(`end_time` is null, now(), `end_time`) `sort_end_time` from `workflow_instance` ORDER BY `sort_end_time` desc) `t` " +
             "           GROUP BY `t`.`workflow_ref`) `wi` " +
             "ON `wi`.`workflow_ref` = `jp`.`workflow_ref` COLLATE utf8mb4_unicode_ci " +
             "<where>" +
