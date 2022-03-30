@@ -103,7 +103,7 @@ public class WorkflowEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get NodeSucceedEvent here -------------------------");
         log.info(event.toString());
-        this.asyncTaskInstanceInternalApplication.nodeSucceed(event.getTriggerId(), event.getNodeRef());
+        this.asyncTaskInstanceInternalApplication.nodeSucceed(event.getTriggerId(), event.getNodeRef(), event.getNextTarget());
         log.info("handle NodeSucceedEvent end-----------------------------------------------------");
     }
 
@@ -118,6 +118,7 @@ public class WorkflowEventHandler {
                 .workflowRef(event.getWorkflowRef())
                 .workflowVersion(event.getWorkflowVersion())
                 .nodeRef(event.getNodeRef())
+                .sender(event.getSender())
                 .build();
         this.workflowInternalApplication.skipNode(cmd);
         log.info("handle NodeSkipEvent end-----------------------------------------------------");

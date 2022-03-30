@@ -7,6 +7,13 @@ package dev.jianmu.workflow.event.definition;
  * @create 2022-03-18 17:30
  */
 public class NodeSucceedEvent extends DefinitionEvent {
+    // 要触发的下游节点
+    private String nextTarget;
+
+    public String getNextTarget() {
+        return nextTarget;
+    }
+
     private NodeSucceedEvent() {
     }
 
@@ -21,6 +28,8 @@ public class NodeSucceedEvent extends DefinitionEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
+        // 要触发的下游节点
+        private String nextTarget;
 
         private Builder() {
         }
@@ -54,12 +63,18 @@ public class NodeSucceedEvent extends DefinitionEvent {
             return this;
         }
 
+        public Builder nextTarget(String nextTarget) {
+            this.nextTarget = nextTarget;
+            return this;
+        }
+
         public NodeSucceedEvent build() {
             NodeSucceedEvent nodeSucceedEvent = new NodeSucceedEvent();
             nodeSucceedEvent.workflowRef = this.workflowRef;
             nodeSucceedEvent.workflowVersion = this.workflowVersion;
             nodeSucceedEvent.nodeType = this.nodeType;
             nodeSucceedEvent.nodeRef = this.nodeRef;
+            nodeSucceedEvent.nextTarget = this.nextTarget;
             nodeSucceedEvent.triggerId = this.triggerId;
             return nodeSucceedEvent;
         }
