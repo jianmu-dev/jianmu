@@ -63,13 +63,18 @@ public class WorkflowDomainService {
     public boolean canSkipNode(String nodeRef, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
         // 返回当前节点上游Task的ref List
         List<String> refList = workflow.findNodesWithoutGateway(nodeRef);
+        List<String> gatewayRefs = workflow.findGateWay(nodeRef);
         List<String> instanceList = asyncTaskInstances.stream()
                 .map(AsyncTaskInstance::getAsyncTaskRef)
                 .collect(Collectors.toList());
         instanceList.retainAll(refList);
-        // 上游节点列表
+        instanceList.retainAll(gatewayRefs);
+        // 上游节点实例列表
         var sources = asyncTaskInstances.stream()
                 .filter(t -> refList.contains(t.getAsyncTaskRef()))
+                .collect(Collectors.toList());
+        var gatewaySources = asyncTaskInstances.stream()
+                .filter(t -> gatewayRefs.contains(t.getAsyncTaskRef()))
                 .collect(Collectors.toList());
         // 计算上游节点完成次数是否相同
         var sets = sources.stream()
@@ -82,14 +87,21 @@ public class WorkflowDomainService {
             return false;
         }
         // 根据上游节点列表，统计已跳过的任务数量
-        long skipped = sources.stream()
+        long taskSkipped = sources.stream()
                 .filter(t -> t.getStatus().equals(TaskStatus.SKIPPED))
                 .count();
+        long gatewaySkipped = gatewaySources.stream()
+                .filter(t -> !t.getStatus().equals(TaskStatus.INIT))
+                .filter(t -> !t.isNextTarget(nodeRef))
+                .count();
         logger.info("当前节点{}上游Task数量为{}", nodeRef, refList.size());
-        logger.info("当前节点{}上游Task已跳过数量为{}", nodeRef, skipped);
+        logger.info("当前节点{}上游Task已跳过数量为{}", nodeRef, taskSkipped);
+        logger.info("当前节点{}上游Gateway数量为{}", nodeRef, gatewaySources.size());
+        logger.info("当前节点{}上游Gateway已跳过数量为{}", nodeRef, gatewaySkipped);
+        var skipped = taskSkipped + gatewaySkipped;
         // 如果上游任务执行完成数量小于上游任务总数，则当前节点不激活
-        if (skipped == refList.size()) {
-            logger.info("当前节点{}上游任务已跳过数量{}等于上游任务总数{}，继续跳过", nodeRef, skipped, refList.size());
+        if (skipped == (refList.size() + gatewaySources.size())) {
+            logger.info("当前节点{}上游节点已跳过数量{}等于上游节点总数{}，继续跳过", nodeRef, skipped, refList.size() + gatewaySources.size());
             return true;
         }
         return false;

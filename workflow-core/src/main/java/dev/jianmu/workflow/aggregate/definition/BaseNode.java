@@ -111,7 +111,7 @@ public abstract class BaseNode implements Node {
     @Override
     public List<LoopPair> getLoopPairs() {
         if (loopPairs == null) {
-            return List.of();
+            return new ArrayList<>();
         }
         return loopPairs;
     }
