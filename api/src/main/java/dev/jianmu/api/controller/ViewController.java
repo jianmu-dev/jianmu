@@ -344,8 +344,6 @@ public class ViewController {
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
             projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-            if (project.getStatus() == null)
-                return projectVo;
             if (project.getStatus().equals(ProcessStatus.TERMINATED.name())) {
                 projectVo.setStatus("FAILED");
             }
