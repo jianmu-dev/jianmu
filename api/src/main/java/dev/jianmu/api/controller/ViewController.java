@@ -3,10 +3,7 @@ package dev.jianmu.api.controller;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.PageDto;
 import dev.jianmu.api.dto.ProjectViewingDto;
-import dev.jianmu.api.mapper.ProjectMapper;
-import dev.jianmu.api.mapper.TaskInstanceMapper;
-import dev.jianmu.api.mapper.WorkflowInstanceMapper;
-import dev.jianmu.api.mapper.WorkflowMapper;
+import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
@@ -344,29 +341,24 @@ public class ViewController {
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
         var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName());
-        var projectVos = projects.getList().stream().map(project -> this.instanceApplication
-                .findByRefAndSerialNoMax(project.getWorkflowRef())
-                .map(workflowInstance -> {
-                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                    projectVo.setLatestTime(workflowInstance.getEndTime());
-                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                    if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
-                        projectVo.setStatus("FAILED");
-                    }
-                    if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
-                        projectVo.setStatus("SUCCEEDED");
-                    }
-                    if (workflowInstance.getStatus().equals(ProcessStatus.RUNNING)) {
-                        projectVo.setStartTime(workflowInstance.getStartTime());
-                        projectVo.setStatus("RUNNING");
-                    }
-                    return projectVo;
-                })
-                .orElseGet(() -> {
-                    var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
-                    projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-                    return projectVo;
-                })).collect(Collectors.toList());
+        var projectVos = projects.getList().stream().map(project -> {
+            var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
+            projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+            if (project.getStatus() == null){
+                return projectVo;
+            }
+            if (project.getStatus().equals(ProcessStatus.TERMINATED.name())) {
+                projectVo.setStatus("FAILED");
+            }
+            if (project.getStatus().equals(ProcessStatus.FINISHED.name())) {
+                projectVo.setStatus("SUCCEEDED");
+            }
+            if (project.getStatus().equals(ProcessStatus.RUNNING.name())) {
+                projectVo.setStartTime(project.getStartTime());
+                projectVo.setStatus("RUNNING");
+            }
+            return projectVo;
+        }).collect(Collectors.toList());
         PageInfo<ProjectVo> pageInfo = PageUtils.pageInfo2PageInfoVo(projects);
         pageInfo.setList(projectVos);
         return pageInfo;

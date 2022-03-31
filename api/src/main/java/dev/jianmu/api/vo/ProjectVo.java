@@ -48,6 +48,8 @@ public class ProjectVo {
     private boolean enabled;
     @Schema(description = "状态是否可变")
     private boolean mutable;
+    @Schema(description = "可否并发执行")
+    private boolean concurrent;
     @Schema(description = "Git库ID")
     private String gitRepoId;
     @Schema(description = "开始执行时间")

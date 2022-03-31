@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.mapper.project;
 
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.query.ProjectVo;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -93,13 +94,18 @@ public interface ProjectMapper {
     List<Project> findAll();
 
     @Select("<script>" +
-            "SELECT jp.* FROM `jianmu_project` `jp` INNER JOIN `project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
+            "SELECT jp.*, `wi`.`end_time`, `wi`.`status`, `wi`.`start_time` FROM `jianmu_project` `jp` INNER JOIN `project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
+            "LEFT JOIN (select * " +
+            "           from (select DISTINCT(`workflow_ref`), `end_time`, `start_time`, `status`, if(`end_time` is null, now(), `end_time`) `sort_end_time` from `workflow_instance` ORDER BY `sort_end_time` desc) `t` " +
+            "           GROUP BY `t`.`workflow_ref`) `wi` " +
+            "ON `wi`.`workflow_ref` = `jp`.`workflow_ref` COLLATE utf8mb4_unicode_ci " +
             "<where>" +
             "   <if test='projectGroupId != null'> AND `plp`.`project_group_id` = #{projectGroupId} </if>" +
             "   <if test='workflowName != null'> AND (`jp`.`workflow_name` like concat('%', #{workflowName}, '%') OR `jp`.`workflow_description` like concat('%', #{workflowName}, '%'))</if>" +
             "</where>" +
             "<if test='sortType == \"DEFAULT_SORT\"'> ORDER BY `plp`.`sort` asc</if>" +
             "<if test='sortType == \"LAST_MODIFIED_TIME\"'> ORDER BY `jp`.`last_modified_time` desc</if>" +
+            "<if test='sortType == \"LAST_EXECUTION_TIME\"'> ORDER BY `wi`.`sort_end_time` desc</if>" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "workflow_description", property = "workflowDescription")
@@ -114,5 +120,8 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
-    List<Project> findAllByGroupId(@Param("projectGroupId") String projectGroupId, @Param("workflowName") String workflowName, @Param("sortType") String sortType);
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "latestTime")
+    List<ProjectVo> findAllByGroupId(@Param("projectGroupId") String projectGroupId, @Param("workflowName") String workflowName, @Param("sortType") String sortType);
 }
