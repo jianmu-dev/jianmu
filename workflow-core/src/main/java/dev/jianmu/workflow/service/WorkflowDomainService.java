@@ -60,8 +60,14 @@ public class WorkflowDomainService {
         return true;
     }
 
-    public boolean canSkipNode(String nodeRef, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
+    public boolean canSkipNode(String nodeRef, String sender, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
         // 返回当前节点上游Task的ref List
+        var node = workflow.findNode(nodeRef);
+        // 获取环路对上游节点列表
+        var loopTargets = node.getLoopPairs().stream()
+                .map(LoopPair::getSource)
+                .filter(source -> !source.equals(sender))
+                .collect(Collectors.toList());
         List<String> refList = workflow.findNodesWithoutGateway(nodeRef);
         List<String> gatewayRefs = workflow.findGateWay(nodeRef);
         List<String> instanceList = asyncTaskInstances.stream()
@@ -98,12 +104,13 @@ public class WorkflowDomainService {
         logger.info("当前节点{}上游Task已跳过数量为{}", nodeRef, taskSkipped);
         logger.info("当前节点{}上游Gateway数量为{}", nodeRef, gatewaySources.size());
         logger.info("当前节点{}上游Gateway已跳过数量为{}", nodeRef, gatewaySkipped);
-        var skipped = taskSkipped + gatewaySkipped;
+        logger.info("当前节点{}上游环路对数量为{}", nodeRef, loopTargets.size());
+        var skipped = taskSkipped + gatewaySkipped + loopTargets.size();
         // 如果上游任务执行完成数量小于上游任务总数，则当前节点不激活
-        if (skipped == (refList.size() + gatewaySources.size())) {
-            logger.info("当前节点{}上游节点已跳过数量{}等于上游节点总数{}，继续跳过", nodeRef, skipped, refList.size() + gatewaySources.size());
-            return true;
+        if (skipped < (refList.size() + gatewaySources.size())) {
+            logger.info("当前节点{}上游节点已跳过数量{}小于上游节点总数{}，不能跳过", nodeRef, skipped, refList.size() + gatewaySources.size());
+            return false;
         }
-        return false;
+        return true;
     }
 }

@@ -102,6 +102,14 @@ public class Condition extends BaseNode implements Gateway {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean hasNonLoopBranch() {
+        var c = branches.stream()
+                .filter(branch -> !branch.isLoop())
+                .count();
+        return c > 0;
+    }
+
     public void setExpression(String expression) {
         this.expression = expression;
     }
