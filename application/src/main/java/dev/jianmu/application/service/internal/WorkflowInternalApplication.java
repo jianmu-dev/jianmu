@@ -190,6 +190,9 @@ public class WorkflowInternalApplication {
             log.info("不能跳过，计算是否需要激活节点");
             if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
                 log.info("activateNode: " + cmd.getNodeRef());
+                EvaluationContext context = this.findContext(workflow, cmd.getTriggerId());
+                workflow.setExpressionLanguage(this.expressionLanguage);
+                workflow.setContext(context);
                 workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
                 this.workflowRepository.commitEvents(workflow);
             }
