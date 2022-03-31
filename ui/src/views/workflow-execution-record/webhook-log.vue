@@ -300,16 +300,16 @@ export default defineComponent({
 
               &:hover {
                 .copy-btn {
-                  display: block;
+                  visibility: visible;
                 }
               }
 
               .copy-btn {
-                margin-left: 5px;
+                margin-left: 10px;
                 flex-shrink: 0;
                 font-size: 1.25em;
                 width: 16px;
-                display: none;
+                visibility: hidden;
               }
             }
           }
