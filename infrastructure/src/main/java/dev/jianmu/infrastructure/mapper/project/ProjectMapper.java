@@ -95,9 +95,9 @@ public interface ProjectMapper {
 
     @Select("<script>" +
             "SELECT jp.*, `wi`.`end_time`, `wi`.`status`, `wi`.`start_time` FROM `jianmu_project` `jp` INNER JOIN `project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
-            "LEFT JOIN (select * " +
-            "           from (select DISTINCT(`workflow_ref`), `end_time`, `start_time`, `status`, if(`end_time` is null, now(), `end_time`) `sort_end_time` from `workflow_instance` ORDER BY `sort_end_time` desc) `t` " +
-            "           GROUP BY `t`.`workflow_ref`) `wi` " +
+            "LEFT JOIN (select  `t1`.`workflow_ref`, `t1`.`end_time`, `t1`.`start_time`, `t1`.`status`,  if(`end_time` is null, now(), `end_time`) `sort_end_time` " +
+            "           FROM `workflow_instance` `t1`, (select `workflow_ref`,max(`serial_no`) `serial_no` from `workflow_instance` GROUP BY `workflow_ref`) t2 " +
+            "           WHERE `t1`.`workflow_ref` = `t2`.`workflow_ref` and `t1`.`serial_no` = `t2`.`serial_no`) `wi` " +
             "ON `wi`.`workflow_ref` = `jp`.`workflow_ref` COLLATE utf8mb4_unicode_ci " +
             "<where>" +
             "   <if test='projectGroupId != null'> AND `plp`.`project_group_id` = #{projectGroupId} </if>" +
