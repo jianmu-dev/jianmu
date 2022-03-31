@@ -631,57 +631,61 @@ export default defineComponent({
       border: 1px solid #eef0f7;
 
       ::v-deep(.el-table) {
-        td {
-          &.required-cell {
-            .cell {
-              padding-right: 40px;
+        .el-table__body-wrapper {
+          overflow: visible;
+
+          td {
+            &.required-cell {
+              .cell {
+                padding-right: 40px;
+              }
             }
-          }
 
-          .cell {
-            padding: 0 20px;
+            .cell {
+              padding: 0 20px;
 
-            .text-viewer {
-              display: flex;
-              align-items: center;
+              .text-viewer {
+                display: flex;
+                align-items: center;
 
-              &.param-value {
+                &.param-value {
+                  .value {
+                    width: 100%;
+                  }
+                }
+
                 .value {
                   width: 100%;
                 }
               }
 
-              .value {
+              & > div {
+                display: inline-block;
                 width: 100%;
+                position: relative;
+
+                img {
+                  position: absolute;
+                  left: 100%;
+                  margin-left: 5px;
+                  bottom: 0
+                }
               }
             }
 
-            & > div {
-              display: inline-block;
-              width: 100%;
-              position: relative;
-
-              img {
-                position: absolute;
-                left: 100%;
-                margin-left: 5px;
-                bottom: 0
+            &.is-center {
+              .cell {
+                padding: 0px 10px;
               }
             }
           }
 
-          &.is-center {
-            .cell {
-              padding: 0px 10px;
+          .cell {
+            overflow: visible;
+
+            .is-required {
+              color: #ff0000;
             }
-          }
-        }
-
-        .cell {
-          overflow: visible;
-
-          .is-required {
-            color: #ff0000;
           }
         }
       }
