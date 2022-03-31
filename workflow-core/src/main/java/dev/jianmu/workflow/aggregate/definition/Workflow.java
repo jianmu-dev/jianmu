@@ -197,6 +197,24 @@ public class Workflow extends AggregateRoot {
             this.raiseEvent(workflowEndEvent);
             return;
         }
+        if (node instanceof Gateway) {
+            // 如果存在非环回分支
+            if (((Gateway) node).hasNonLoopBranch()) {
+                // 过滤环回分支，非环回分支发布跳过事件
+                ((Gateway) node).findNonLoopBranch()
+                        .forEach(targetRef -> {
+                            var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                                    .nodeRef(targetRef)
+                                    .triggerId(triggerId)
+                                    .workflowRef(this.ref)
+                                    .workflowVersion(this.version)
+                                    .sender(nodeRef)
+                                    .build();
+                            this.raiseEvent(nodeSkipEvent);
+                        });
+                return;
+            }
+        }
         // 发布下游节点跳过事件
         var targets = node.getTargets();
         targets.forEach(targetRef -> {
