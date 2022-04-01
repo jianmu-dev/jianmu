@@ -96,6 +96,7 @@ export interface IProjectVo
     enabled: boolean;
     mutable: boolean;
     description?: string;
+    concurrent: boolean;
   }> {
 }
 
