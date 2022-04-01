@@ -47,15 +47,6 @@ public class WorkflowDomainService {
                                         || t.getStatus().equals(TaskStatus.SKIPPED)
                         ))
                 .collect(Collectors.toList());
-        var sets = completedSources.stream()
-                .map(AsyncTaskInstance::getSerialNo)
-                .collect(Collectors.toSet())
-                .size();
-        // 如果大于1意味着存在不同次数的节点，不能跳过
-        if (sets > 1) {
-            logger.info("找到不同次数的节点，不能激活");
-            return false;
-        }
         logger.info("当前节点{}上游Task数量为{}", nodeRef, refList.size());
         logger.info("当前节点{}上游Task已完成数量为{}", nodeRef, completedSources.size());
         // 如果上游任务执行完成数量小于上游任务总数，则当前节点不激活
