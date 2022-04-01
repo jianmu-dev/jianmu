@@ -39,19 +39,28 @@ public class WorkflowDomainService {
                 .collect(Collectors.toList());
         instanceList.retainAll(refList);
         // 根据上游节点列表，统计已完成的任务数量
-        long completed = asyncTaskInstances.stream()
+        var completedSources = asyncTaskInstances.stream()
                 .filter(t -> refList.contains(t.getAsyncTaskRef()) &&
                         (
                                 t.getStatus().equals(TaskStatus.FAILED)
                                         || t.getStatus().equals(TaskStatus.SUCCEEDED)
                                         || t.getStatus().equals(TaskStatus.SKIPPED)
                         ))
-                .count();
+                .collect(Collectors.toList());
+        var sets = completedSources.stream()
+                .map(AsyncTaskInstance::getSerialNo)
+                .collect(Collectors.toSet())
+                .size();
+        // 如果大于1意味着存在不同次数的节点，不能跳过
+        if (sets > 1) {
+            logger.info("找到不同次数的节点，不能激活");
+            return false;
+        }
         logger.info("当前节点{}上游Task数量为{}", nodeRef, refList.size());
-        logger.info("当前节点{}上游Task已完成数量为{}", nodeRef, completed);
+        logger.info("当前节点{}上游Task已完成数量为{}", nodeRef, completedSources.size());
         // 如果上游任务执行完成数量小于上游任务总数，则当前节点不激活
-        if (completed < refList.size()) {
-            logger.info("当前节点{}上游任务执行完成数量{}小于上游任务总数{}", nodeRef, completed, refList.size());
+        if (completedSources.size() < refList.size()) {
+            logger.info("当前节点{}上游任务执行完成数量{}小于上游任务总数{}", nodeRef, completedSources.size(), refList.size());
             if (loopTargets.size() > 0 && loop == loopTargets.size()) {
                 logger.info("环路检测: 环路对下游数量为{}, 未执行状态的任务数量为{}, 可以继续触发", loopTargets.size(), loop);
                 return true;
