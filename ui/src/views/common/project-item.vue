@@ -7,7 +7,7 @@
       }"
     ></div>
     <div class="content">
-      <div class="content-top">
+      <div :class="['content-top',concurrent?'concurrent':'']">
         <span class="concurrent" v-if="concurrent">可并发</span>
         <router-link
           :to="{
