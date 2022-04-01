@@ -267,6 +267,8 @@ export default defineComponent({
         }
 
         ::v-deep(.el-table) {
+          overflow: visible;
+
           .el-table__body-wrapper {
             overflow: visible;
 
