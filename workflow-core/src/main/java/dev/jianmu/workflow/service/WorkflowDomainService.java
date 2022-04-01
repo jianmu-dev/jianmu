@@ -7,6 +7,7 @@ import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,7 +84,9 @@ public class WorkflowDomainService {
                 .filter(t -> gatewayRefs.contains(t.getAsyncTaskRef()))
                 .collect(Collectors.toList());
         // 计算上游节点完成次数是否相同
-        var sets = sources.stream()
+        List<AsyncTaskInstance> allSources = new ArrayList<>(sources);
+        allSources.addAll(gatewaySources);
+        var sets = allSources.stream()
                 .map(AsyncTaskInstance::getSerialNo)
                 .collect(Collectors.toSet())
                 .size();
