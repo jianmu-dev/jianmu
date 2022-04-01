@@ -34,25 +34,10 @@ public class WorkflowDomainService {
                 .filter(t -> !t.getStatus().equals(TaskStatus.RUNNING))
                 .count();
         List<String> refList = workflow.findNodes(nodeRef);
-        List<String> gatewayRefs = workflow.findGateWay(nodeRef);
         List<String> instanceList = asyncTaskInstances.stream()
                 .map(AsyncTaskInstance::getAsyncTaskRef)
                 .collect(Collectors.toList());
         instanceList.retainAll(refList);
-        instanceList.retainAll(gatewayRefs);
-        // 如果Sender类型为网关，获取Sender为跳过状态的数量
-        long senderSkipped;
-        if (gatewayRefs.contains(sender)) {
-            senderSkipped = asyncTaskInstances.stream()
-                    .filter(t -> t.getAsyncTaskRef().equals(sender))
-                    .filter(t -> !t.isNextTarget(nodeRef))
-                    .count();
-        } else {
-            senderSkipped = asyncTaskInstances.stream()
-                    .filter(t -> t.getAsyncTaskRef().equals(sender))
-                    .filter(t -> t.getStatus().equals(TaskStatus.SKIPPED))
-                    .count();
-        }
         // 根据上游节点列表，统计已完成的任务数量
         var completedSources = asyncTaskInstances.stream()
                 .filter(t -> refList.contains(t.getAsyncTaskRef()) &&
@@ -73,11 +58,10 @@ public class WorkflowDomainService {
         }
         logger.info("当前节点{}上游Task数量为{}", nodeRef, refList.size());
         logger.info("当前节点{}上游Task已完成数量为{}", nodeRef, completedSources.size());
-        logger.info("事件发送者{}状态为跳过的数量为{}", sender, senderSkipped);
         // 如果上游任务执行完成数量小于上游任务总数，则当前节点不激活
         if (completedSources.size() < refList.size()) {
             logger.info("当前节点{}上游任务执行完成数量{}小于上游任务总数{}", nodeRef, completedSources.size(), refList.size());
-            if (loopTargets.size() > 0 && loop == loopTargets.size() && senderSkipped != 1) {
+            if (loopTargets.size() > 0 && loop == loopTargets.size()) {
                 logger.info("环路检测: 环路对下游数量为{}, 未执行状态的任务数量为{}, 可以继续触发", loopTargets.size(), loop);
                 return true;
             }
@@ -115,8 +99,8 @@ public class WorkflowDomainService {
                 .map(AsyncTaskInstance::getSerialNo)
                 .collect(Collectors.toSet())
                 .size();
-        // 如果大于1意味着存在不同次数的节点，不能跳过
-        if (sets > 1) {
+        // 如果上游没有环路并且大于1意味着存在不同次数的节点，不能跳过
+        if (sets > 1 && loopSources.size() > 0) {
             logger.info("找到不同次数的节点，不能跳过");
             return false;
         }
