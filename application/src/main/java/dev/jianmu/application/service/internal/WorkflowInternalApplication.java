@@ -192,6 +192,9 @@ public class WorkflowInternalApplication {
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
+        if (this.workflowDomainService.hasSameSerialNo(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            return;
+        }
         if (this.workflowDomainService.canSkipNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
             this.doSkip(workflow, cmd.getNodeRef(), cmd.getTriggerId());
         } else {
