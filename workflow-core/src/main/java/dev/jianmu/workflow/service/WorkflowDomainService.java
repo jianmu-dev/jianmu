@@ -1,6 +1,7 @@
 package dev.jianmu.workflow.service;
 
 import dev.jianmu.workflow.aggregate.definition.LoopPair;
+import dev.jianmu.workflow.aggregate.definition.Start;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
@@ -22,6 +23,33 @@ public class WorkflowDomainService {
     public boolean canActivateNode(String nodeRef, String sender, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
         // 返回当前节点上游Task的ref List
         var node = workflow.findNode(nodeRef);
+        var senderNode = workflow.findNode(sender);
+        if (!(senderNode instanceof Start)) {
+            // 串行并发汇聚检查
+            var loopSource = node.getLoopPairs().stream()
+                    .map(LoopPair::getSource)
+                    .filter(source -> source.equals(sender))
+                    .count();
+            var sourceTask = asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(sender))
+                    .findFirst().orElseThrow(() -> new RuntimeException("未找到事件发送节点任务"));
+            var nodeTask = asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(nodeRef))
+                    .findFirst().orElseThrow(() -> new RuntimeException("未找到待激活节点任务"));
+            if (loopSource == 0) {
+                // 如果事件发送者不在环路中
+                if (nodeTask.getVersion() >= sourceTask.getVersion()) {
+                    logger.warn("非环路: 当前节点已执行，不触发激活事件");
+                    return false;
+                }
+            } else {
+                // 如果事件发送者在环路中
+                if (nodeTask.getVersion() > sourceTask.getVersion()) {
+                    logger.warn("环路: 当前节点已执行，不触发激活事件");
+                    return false;
+                }
+            }
+        }
         // 获取环路下游任务列表，不包含触发环路
         var loopTargets = node.getLoopPairs().stream()
                 .filter(loopPair -> !loopPair.getSource().equals(sender))

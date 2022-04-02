@@ -61,7 +61,7 @@ public class Workflow extends AggregateRoot {
     }
 
     // 激活节点
-    public void activateNode(String triggerId, String nodeRef) {
+    public void activateNode(String triggerId, String nodeRef, int version) {
         Node node = this.findNode(nodeRef);
         if (node instanceof End) {
             // 发布结束节点执行成功事件
@@ -70,6 +70,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .version(version)
                     .build();
             this.raiseEvent(succeedEvent);
             // 发布流程结束事件并返回
@@ -89,6 +90,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .version(version)
                     .build();
             this.raiseEvent(asyncTaskActivatingEvent);
             return;
@@ -103,6 +105,7 @@ public class Workflow extends AggregateRoot {
                     .workflowVersion(this.version)
                     // TODO 3.0需要重新设计
                     .nextTarget(branch.getTarget())
+                    .version(version)
                     .build();
             this.raiseEvent(succeedEvent);
         }
@@ -179,6 +182,7 @@ public class Workflow extends AggregateRoot {
                 .triggerId(triggerId)
                 .workflowRef(this.ref)
                 .workflowVersion(this.version)
+                .version(0)
                 .build();
         this.raiseEvent(succeedEvent);
     }

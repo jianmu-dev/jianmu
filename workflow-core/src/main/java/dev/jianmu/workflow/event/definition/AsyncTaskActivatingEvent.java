@@ -7,6 +7,13 @@ package dev.jianmu.workflow.event.definition;
  * @create 2021-12-31 22:55
  */
 public class AsyncTaskActivatingEvent extends DefinitionEvent {
+    // 乐观锁版本
+    private int version;
+
+    public int getVersion() {
+        return version;
+    }
+
     private AsyncTaskActivatingEvent() {
     }
 
@@ -21,6 +28,8 @@ public class AsyncTaskActivatingEvent extends DefinitionEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
+        // 乐观锁版本
+        private int version;
 
         private Builder() {
         }
@@ -54,6 +63,11 @@ public class AsyncTaskActivatingEvent extends DefinitionEvent {
             return this;
         }
 
+        public Builder version(int version) {
+            this.version = version;
+            return this;
+        }
+
         public AsyncTaskActivatingEvent build() {
             AsyncTaskActivatingEvent asyncTaskActivatingEvent = new AsyncTaskActivatingEvent();
             asyncTaskActivatingEvent.workflowVersion = this.workflowVersion;
@@ -61,6 +75,7 @@ public class AsyncTaskActivatingEvent extends DefinitionEvent {
             asyncTaskActivatingEvent.workflowRef = this.workflowRef;
             asyncTaskActivatingEvent.triggerId = this.triggerId;
             asyncTaskActivatingEvent.nodeRef = this.nodeRef;
+            asyncTaskActivatingEvent.version = this.version;
             return asyncTaskActivatingEvent;
         }
     }

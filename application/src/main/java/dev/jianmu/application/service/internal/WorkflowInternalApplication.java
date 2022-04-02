@@ -159,16 +159,18 @@ public class WorkflowInternalApplication {
         // 激活节点
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
         if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
-            this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId());
+            asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(cmd.getNodeRef()))
+                    .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
     }
 
-    private void doActivate(Workflow workflow, String nodeRef, String triggerId) {
+    private void doActivate(Workflow workflow, String nodeRef, String triggerId, int version) {
         log.info("activateNode: " + nodeRef);
         EvaluationContext context = this.findContext(workflow, triggerId);
         workflow.setExpressionLanguage(this.expressionLanguage);
         workflow.setContext(context);
-        workflow.activateNode(triggerId, nodeRef);
+        workflow.activateNode(triggerId, nodeRef, version);
         this.workflowRepository.commitEvents(workflow);
     }
 
@@ -202,7 +204,9 @@ public class WorkflowInternalApplication {
             return;
         }
         if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
-            this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId());
+            asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(cmd.getNodeRef()))
+                    .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
     }
 }

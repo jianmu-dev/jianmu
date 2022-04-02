@@ -22,4 +22,6 @@ public class AsyncTaskActivatingCmd {
     private String asyncTaskRef;
     // 任务类型
     private String asyncTaskType;
+    // 乐观锁版本
+    private int version;
 }
