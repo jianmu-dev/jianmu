@@ -101,7 +101,7 @@ public class WorkflowDomainService {
                 .collect(Collectors.toSet())
                 .size();
         // 如果上游没有环路并且大于1意味着存在不同次数的节点，不能跳过
-        if (sets > 1 && loopSources.size() == 0) {
+        if (sets > 1) {
             logger.info("找到不同次数的节点，不能跳过");
             return false;
         }
