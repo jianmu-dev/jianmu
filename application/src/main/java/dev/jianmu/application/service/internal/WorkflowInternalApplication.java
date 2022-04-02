@@ -192,16 +192,17 @@ public class WorkflowInternalApplication {
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
-        if (!this.workflowDomainService.hasSameSerialNo(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
-            return;
-        }
         if (this.workflowDomainService.canSkipNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
             this.doSkip(workflow, cmd.getNodeRef(), cmd.getTriggerId());
-        } else {
-            log.info("不能跳过，计算是否需要激活节点");
-            if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
-                this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId());
-            }
+            return;
+        }
+        log.info("不能跳过，计算是否需要激活节点");
+        if (!this.workflowDomainService.hasSameSerialNo(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            log.info("找到不同次数的节点，无需计算激活");
+            return;
+        }
+        if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
+            this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId());
         }
     }
 }
