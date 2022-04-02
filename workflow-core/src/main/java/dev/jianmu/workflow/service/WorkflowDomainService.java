@@ -61,6 +61,28 @@ public class WorkflowDomainService {
         return true;
     }
 
+    public boolean hasSameSerialNo(String nodeRef, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
+        List<String> refList = workflow.findNodes(nodeRef);
+        List<String> instanceList = asyncTaskInstances.stream()
+                .map(AsyncTaskInstance::getAsyncTaskRef)
+                .collect(Collectors.toList());
+        instanceList.retainAll(refList);
+        // 上游节点实例列表
+        var sources = asyncTaskInstances.stream()
+                .filter(t -> refList.contains(t.getAsyncTaskRef()))
+                .collect(Collectors.toList());
+        var sets = sources.stream()
+                .map(AsyncTaskInstance::getSerialNo)
+                .collect(Collectors.toSet())
+                .size();
+        // 如果上游没有环路并且大于1意味着存在不同次数的节点，不能跳过
+        if (sets > 1) {
+            logger.info("找到不同次数的节点，不能跳过");
+            return false;
+        }
+        return true;
+    }
+
     public boolean canSkipNode(String nodeRef, String sender, Workflow workflow, List<AsyncTaskInstance> asyncTaskInstances) {
         // 返回当前节点上游Task的ref List
         var node = workflow.findNode(nodeRef);
@@ -93,18 +115,6 @@ public class WorkflowDomainService {
         var gatewaySources = asyncTaskInstances.stream()
                 .filter(t -> gatewayRefs.contains(t.getAsyncTaskRef()))
                 .collect(Collectors.toList());
-        // 计算上游节点完成次数是否相同
-        List<AsyncTaskInstance> allSources = new ArrayList<>(sources);
-        allSources.addAll(gatewaySources);
-        var sets = allSources.stream()
-                .map(AsyncTaskInstance::getSerialNo)
-                .collect(Collectors.toSet())
-                .size();
-        // 如果上游没有环路并且大于1意味着存在不同次数的节点，不能跳过
-        if (sets > 1) {
-            logger.info("找到不同次数的节点，不能跳过");
-            return false;
-        }
         // 根据上游节点列表，统计已跳过的任务数量
         long taskSkipped = sources.stream()
                 .filter(t -> t.getStatus().equals(TaskStatus.SKIPPED))
