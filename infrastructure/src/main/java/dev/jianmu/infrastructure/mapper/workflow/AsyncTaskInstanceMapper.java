@@ -100,7 +100,7 @@ public interface AsyncTaskInstanceMapper {
             "where id = #{ati.id} and _version = #{version}")
     boolean succeedById(@Param("ati") AsyncTaskInstance asyncTaskInstance, @Param("version") int version);
 
-    @Update("update async_task_instance set status=#{status}, serial_no=#{serialNo}, next_target=#{nextTarget}, start_time=#{startTime}, end_time=#{endTime} where id=#{id}")
+    @Update("update async_task_instance set status=#{status}, serial_no=#{serialNo}, next_target=#{nextTarget}, start_time=#{startTime}, end_time=#{endTime}, _version=#{ati.version} where id=#{id}")
     void updateById(AsyncTaskInstance asyncTaskInstance);
 
     @Delete("delete from async_task_instance where workflow_instance_id = #{workflowInstanceId}")
