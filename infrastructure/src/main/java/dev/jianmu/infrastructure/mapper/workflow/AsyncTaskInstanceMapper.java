@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.mapper.workflow;
 
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
+import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -80,6 +81,15 @@ public interface AsyncTaskInstanceMapper {
             "</foreach>" +
             " </script>")
     void addAll(@Param("asyncTaskInstances") List<AsyncTaskInstance> asyncTaskInstances);
+
+    @Select("select _version from async_task_instance where id = #{id}")
+    int getVersion(String id);
+
+    @Update("update async_task_instance " +
+            "set status=#{ati.status},serial_no=#{ati.serialNo}," +
+            "next_target=#{ati.nextTarget},start_time=#{ati.startTime},end_time=#{ati.endTime},_version= _version+1 " +
+            "where id = #{ati.id} and _version = #{version}")
+    boolean activateById(@Param("ati") AsyncTaskInstance asyncTaskInstance, @Param("version") int version);
 
     @Update("update async_task_instance set status=#{status}, serial_no=#{serialNo}, next_target=#{nextTarget}, start_time=#{startTime}, end_time=#{endTime} where id=#{id}")
     void updateById(AsyncTaskInstance asyncTaskInstance);
