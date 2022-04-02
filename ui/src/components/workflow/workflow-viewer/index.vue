@@ -249,9 +249,10 @@ export default defineComponent({
           count: number;
         }[] = [];
 
+        const tasks = props.tasks.filter(({ defKey }) => defKey !== 'Condition');
         const taskMap = new Map();
         // 按开始时间生序排序，保证最后一个是最新的
-        sortTasks([...props.tasks], false)
+        sortTasks(tasks, false)
           .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
