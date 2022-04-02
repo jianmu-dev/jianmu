@@ -2,10 +2,14 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +45,11 @@ public class AsyncTaskInstanceInternalApplication {
                 .findByTriggerIdAndTaskRef(cmd.getTriggerId(), cmd.getAsyncTaskRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
         asyncTaskInstance.activating();
-        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+        try {
+            this.asyncTaskInstanceRepository.activateById(asyncTaskInstance);
+        } catch (DBException.OptimisticLocking e) {
+            log.warn("乐观锁异常，忽略");
+        }
     }
 
     @Transactional

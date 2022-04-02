@@ -1,8 +1,10 @@
 package dev.jianmu.infrastructure.mybatis.workflow;
 
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.mapper.workflow.AsyncTaskInstanceMapper;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +17,7 @@ import java.util.Optional;
  * @description AsyncTaskInstanceRepositoryImpl
  * @create 2022-01-02 23:20
  */
+@Slf4j
 @Repository
 public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceRepository {
     private final AsyncTaskInstanceMapper asyncTaskInstanceMapper;
@@ -53,6 +56,17 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     @Override
     public void updateById(AsyncTaskInstance asyncTaskInstance) {
         this.asyncTaskInstanceMapper.updateById(asyncTaskInstance);
+        this.publisher.publishEvent(asyncTaskInstance);
+    }
+
+    @Override
+    public void activateById(AsyncTaskInstance asyncTaskInstance) {
+        var version = this.asyncTaskInstanceMapper.getVersion(asyncTaskInstance.getId());
+        log.info("-------------------------the version is: {}", version);
+        var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
+        if (!succeed) {
+            throw new DBException.OptimisticLocking("未找到对应的乐观锁版本数据，无法完成数据更新");
+        }
         this.publisher.publishEvent(asyncTaskInstance);
     }
 
