@@ -43,6 +43,8 @@ public class AsyncTaskInstance extends AggregateRoot {
     private LocalDateTime startTime;
     // 结束时间
     private LocalDateTime endTime;
+    // 乐观锁字段
+    private int version;
 
     public boolean isNextTarget(String ref) {
         if (nextTarget == null) {
@@ -52,6 +54,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     }
 
     public void activating() {
+        this.version++;
         this.activatingTime = LocalDateTime.now();
         // 发布任务激活事件并返回
         TaskActivatingEvent taskActivatingEvent = TaskActivatingEvent.Builder.aTaskActivatingEvent()
@@ -103,6 +106,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     }
 
     public void succeed(String nextTarget) {
+        this.version++;
         this.nextTarget = nextTarget;
         this.endTime = LocalDateTime.now();
         this.serialNo++;
@@ -220,6 +224,10 @@ public class AsyncTaskInstance extends AggregateRoot {
 
     public LocalDateTime getEndTime() {
         return endTime;
+    }
+
+    public int getVersion() {
+        return version;
     }
 
     public static final class Builder {

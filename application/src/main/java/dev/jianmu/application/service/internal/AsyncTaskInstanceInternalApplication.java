@@ -7,9 +7,6 @@ import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,19 +43,23 @@ public class AsyncTaskInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
         asyncTaskInstance.activating();
         try {
-            this.asyncTaskInstanceRepository.activateById(asyncTaskInstance);
+            this.asyncTaskInstanceRepository.activateById(asyncTaskInstance, cmd.getVersion());
         } catch (DBException.OptimisticLocking e) {
             log.warn("乐观锁异常，忽略");
         }
     }
 
     @Transactional
-    public void nodeSucceed(String triggerId, String nodeRef, String nextTarget) {
+    public void nodeSucceed(String triggerId, String nodeRef, String nextTarget, int version) {
         var asyncTaskInstance = this.asyncTaskInstanceRepository
                 .findByTriggerIdAndTaskRef(triggerId, nodeRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
         asyncTaskInstance.succeed(nextTarget);
-        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+        try {
+            this.asyncTaskInstanceRepository.succeedById(asyncTaskInstance, version);
+        } catch (DBException.OptimisticLocking e) {
+            log.warn("乐观锁异常，忽略");
+        }
     }
 
     // 发布全部任务终止事件
