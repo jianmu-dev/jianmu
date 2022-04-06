@@ -248,6 +248,7 @@ export default defineComponent({
 
         setTimeout(() => {
           fitCanvas(graph.value);
+          updateZoom();
           if (container.value) {
             container.value.style.visibility = '';
           }
