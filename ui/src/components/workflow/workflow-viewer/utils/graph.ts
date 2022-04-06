@@ -36,12 +36,13 @@ function checkContentOverflow(graph: Graph, ratio: number = 1): boolean {
  * 计算布局配置
  * @param dslType
  * @param nodes
+ * @param rankdir
  */
-function calculateLayout(dslType: DslTypeEnum, nodes: NodeConfig[]): LayoutConfig {
+function calculateLayout(dslType: DslTypeEnum, nodes: NodeConfig[], rankdir: string): LayoutConfig {
   if (dslType === DslTypeEnum.WORKFLOW || nodes.length < 8) {
     return {
       type: 'dagre',
-      rankdir: 'LR',
+      rankdir,
       // 节点间距（px）。在rankdir 为 'TB' 或 'BT' 时是节点的水平间距；在rankdir 为 'LR' 或 'RL' 时代表节点的竖直方向间距
       nodesep: 35,
       // 层间距（px）。在rankdir 为 'TB' 或 'BT' 时是竖直方向相邻层间距；在rankdir 为 'LR' 或 'RL' 时代表水平方向相邻层间距
@@ -167,9 +168,10 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
  * @param triggerType
  * @param nodeInfos
  * @param container
+ * @param rankdir
  */
 export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined,
-  nodeInfos: INodeDefVo[], container: HTMLElement | undefined): Graph | undefined {
+  nodeInfos: INodeDefVo[], container: HTMLElement | undefined, rankdir: string): Graph | undefined {
   if (!dsl || !triggerType || !container) {
     return undefined;
   }
@@ -196,7 +198,7 @@ export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | und
     width: parentElement.clientWidth,
     // 图的高度
     height: parentElement.clientHeight,
-    layout: calculateLayout(dslType, nodes),
+    layout: calculateLayout(dslType, nodes, rankdir),
   });
 
   // 加载数据

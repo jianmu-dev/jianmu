@@ -10,7 +10,8 @@
              :fullscreen-el="fullscreenEl"
              @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"
-             @on-fullscreen="handleFullscreen"/>
+             @on-fullscreen="handleFullscreen"
+             @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
@@ -144,9 +145,9 @@ export default defineComponent({
       };
     });
 
-    const refreshGraph = () => {
+    const refreshGraph = (rankdir: string = 'LR') => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, rankdir);
 
         updateZoom();
       }
@@ -190,11 +191,13 @@ export default defineComponent({
       graph.value?.destroy();
     });
 
+    const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
+
     return {
       container,
       graph,
       taskInstanceId,
-      dslType: computed<DslTypeEnum>(() => allTaskNodes.value.dslType),
+      dslType,
       dslMode,
       nodeEvent,
       fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
@@ -242,6 +245,23 @@ export default defineComponent({
             container.value.style.visibility = '';
           }
         }, 100);
+      },
+      handleRotation: () => {
+        if (!graph.value || dslType.value !== DslTypeEnum.WORKFLOW) {
+          return;
+        }
+
+        let rankdir = graph.value.get('layout').rankdir;
+        if (rankdir === 'TB') {
+          rankdir = undefined;
+        } else {
+          rankdir = 'TB';
+        }
+
+        graph.value?.destroy();
+        graph.value = undefined;
+
+        refreshGraph(rankdir);
       },
       taskStates: computed(() => {
         const sArr: {
