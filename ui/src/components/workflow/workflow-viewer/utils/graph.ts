@@ -44,7 +44,7 @@ function calculateLayout(dslType: DslTypeEnum, nodes: NodeConfig[], rankdir: str
       type: 'dagre',
       rankdir,
       // 节点间距（px）。在rankdir 为 'TB' 或 'BT' 时是节点的水平间距；在rankdir 为 'LR' 或 'RL' 时代表节点的竖直方向间距
-      nodesep: 35,
+      nodesep: rankdir === 'TB' ? 60 : 35,
       // 层间距（px）。在rankdir 为 'TB' 或 'BT' 时是竖直方向相邻层间距；在rankdir 为 'LR' 或 'RL' 时代表水平方向相邻层间距
       ranksep: 70,
       // 是否保留布局连线的控制点，默认false
