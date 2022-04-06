@@ -38,7 +38,15 @@ import G6, { Graph, NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
-import { configNodeAction, fitCanvas, highlightNodeState, init, sortTasks, updateNodeStates } from './utils/graph';
+import {
+  configNodeAction,
+  fitCanvas,
+  fitView,
+  highlightNodeState,
+  init,
+  sortTasks,
+  updateNodeStates,
+} from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
@@ -226,8 +234,7 @@ export default defineComponent({
         const g = graph.value as Graph;
 
         if (val === undefined) {
-          // fitCanvas(g);
-          g.fitView();
+          fitView(g);
         } else {
           g.zoomTo(val / 100, g.getGraphCenterPoint());
         }

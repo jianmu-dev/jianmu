@@ -123,6 +123,38 @@ export function fitCanvas(graph?: Graph): void {
 }
 
 /**
+ * 适配到视图
+ * @param graph
+ */
+export function fitView(graph?: Graph): void {
+  if (!graph) {
+    return;
+  }
+
+  // 判断原始大小（100%）是否溢出
+  if (!checkContentOverflow(graph)) {
+    // 适配到画布中
+    graph.fitView();
+    return;
+  }
+
+  const minRatio = MIN_ZOOM / 100;
+
+  // 缩放到最小，判断是否溢出
+  if (checkContentOverflow(graph, minRatio)) {
+    // 对齐到画布中心
+    graph.fitCenter();
+
+    // 溢出时，缩放到最小
+    graph.zoomTo(minRatio, graph.getGraphCenterPoint());
+    return;
+  }
+
+  // 没有溢出时，适配到画布中
+  graph.fitView();
+}
+
+/**
  * 配置节点行为
  * @param graph
  * @param mouseoverNode
