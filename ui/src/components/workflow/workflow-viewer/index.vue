@@ -267,6 +267,7 @@ export default defineComponent({
 
         graph.value?.destroy();
         graph.value = undefined;
+        nodeActionConfigured.value = false;
 
         refreshGraph(rankdir);
       },
