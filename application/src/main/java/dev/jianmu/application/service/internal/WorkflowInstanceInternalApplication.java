@@ -7,6 +7,7 @@ import dev.jianmu.trigger.event.TriggerFailedEvent;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
+import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
@@ -30,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WorkflowInstanceInternalApplication {
     private final WorkflowRepository workflowRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final WorkflowInstanceDomainService workflowInstanceDomainService;
     private final ApplicationEventPublisher publisher;
     private final ProjectRepository projectRepository;
@@ -37,11 +39,13 @@ public class WorkflowInstanceInternalApplication {
     public WorkflowInstanceInternalApplication(
             WorkflowRepository workflowRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             WorkflowInstanceDomainService workflowInstanceDomainService,
             ApplicationEventPublisher publisher,
             ProjectRepository projectRepository) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
+        this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
         this.publisher = publisher;
         this.projectRepository = projectRepository;
@@ -98,6 +102,19 @@ public class WorkflowInstanceInternalApplication {
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.stop();
         this.workflowInstanceRepository.save(workflowInstance);
+    }
+
+    @Transactional
+    public void resume(String instanceId, String taskRef) {
+        var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        // 恢复流程
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByInstanceId(instanceId);
+        if (this.workflowInstanceDomainService.canResume(asyncTaskInstances, taskRef)) {
+            workflowInstance.resume();
+            this.workflowInstanceRepository.save(workflowInstance);
+        }
     }
 
     // 终止流程

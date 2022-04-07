@@ -3,6 +3,7 @@ package dev.jianmu.application.service.internal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.jianmu.application.command.TaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
@@ -79,13 +80,13 @@ public class TaskInstanceInternalApplication {
     }
 
     @Transactional
-    public void create(TaskActivatingEvent event) {
-        var workflow = this.workflowRepository.findByRefAndVersion(event.getWorkflowRef(), event.getWorkflowVersion())
-                .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + event.getWorkflowRef()));
-        var asyncTask = workflow.findNode(event.getNodeRef());
+    public void create(TaskActivatingCmd cmd) {
+        var workflow = this.workflowRepository.findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + cmd.getWorkflowRef()));
+        var asyncTask = workflow.findNode(cmd.getNodeRef());
         var nodeDef = this.nodeDefApi.getByType(asyncTask.getType());
         // 创建任务实例
-        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByBusinessId(event.getAsyncTaskInstanceId());
+        List<TaskInstance> taskInstances = this.taskInstanceRepository.findByBusinessId(cmd.getAsyncTaskInstanceId());
         // 运行前检查规则
         this.instanceDomainService.runningCheck(taskInstances);
         var nodeInfo = NodeInfo.Builder.aNodeDef()
@@ -109,15 +110,15 @@ public class TaskInstanceInternalApplication {
                 .asyncTaskRef(asyncTask.getRef())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
-                .businessId(event.getAsyncTaskInstanceId())
-                .triggerId(event.getTriggerId())
+                .businessId(cmd.getAsyncTaskInstanceId())
+                .triggerId(cmd.getTriggerId())
                 .build();
         // 查询参数源
-        var eventParameters = this.triggerEventRepository.findById(event.getTriggerId())
+        var eventParameters = this.triggerEventRepository.findById(cmd.getTriggerId())
                 .map(TriggerEvent::getParameters)
                 .orElseGet(List::of);
         var instanceParameters = this.instanceParameterRepository
-                .findLastOutputParamByTriggerId(event.getTriggerId());
+                .findLastOutputParamByTriggerId(cmd.getTriggerId());
         // 创建表达式上下文
         var context = new ElContext();
         // 全局参数加入上下文

@@ -87,6 +87,23 @@ public class AsyncTaskInstance extends AggregateRoot {
         );
     }
 
+    public void retry() {
+        if (this.status != TaskStatus.FAILED) {
+            throw new RuntimeException("非失败状态的任务不能重试");
+        }
+        this.activatingTime = LocalDateTime.now();
+        var taskRetryEvent = TaskRetryEvent.Builder.aTaskRetryEvent()
+                .nodeRef(this.asyncTaskRef)
+                .triggerId(this.triggerId)
+                .workflowInstanceId(this.workflowInstanceId)
+                .asyncTaskInstanceId(this.id)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .nodeType(this.asyncTaskType)
+                .build();
+        this.raiseEvent(taskRetryEvent);
+    }
+
     public void succeed() {
         this.status = TaskStatus.SUCCEEDED;
         this.endTime = LocalDateTime.now();
@@ -128,7 +145,6 @@ public class AsyncTaskInstance extends AggregateRoot {
     public void fail() {
         this.status = TaskStatus.FAILED;
         this.endTime = LocalDateTime.now();
-        this.serialNo++;
         // 发布任务执行失败事件
         this.raiseEvent(
                 TaskFailedEvent.Builder.aTaskFailedEvent()

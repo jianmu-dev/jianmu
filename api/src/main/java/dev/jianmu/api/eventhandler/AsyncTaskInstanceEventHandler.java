@@ -1,6 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.command.NextNodeCmd;
+import dev.jianmu.application.command.TaskActivatingCmd;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
@@ -62,7 +63,34 @@ public class AsyncTaskInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskActivatingEvent here -------------------------");
         log.info(event.toString());
-        this.taskInstanceInternalApplication.create(event);
+        var cmd = TaskActivatingCmd.builder()
+                .workflowRef(event.getWorkflowRef())
+                .workflowVersion(event.getWorkflowVersion())
+                .workflowInstanceId(event.getWorkflowInstanceId())
+                .triggerId(event.getTriggerId())
+                .nodeRef(event.getNodeRef())
+                .nodeType(event.getNodeType())
+                .asyncTaskInstanceId(event.getAsyncTaskInstanceId())
+                .build();
+        this.taskInstanceInternalApplication.create(cmd);
+        log.info("-----------------------------------------------------");
+    }
+
+    @Async
+    @EventListener
+    public void handleTaskRetryEvent(TaskRetryEvent event) {
+        log.info("Get TaskRetryEvent here -------------------------");
+        var cmd = TaskActivatingCmd.builder()
+                .workflowRef(event.getWorkflowRef())
+                .workflowVersion(event.getWorkflowVersion())
+                .workflowInstanceId(event.getWorkflowInstanceId())
+                .triggerId(event.getTriggerId())
+                .nodeRef(event.getNodeRef())
+                .nodeType(event.getNodeType())
+                .asyncTaskInstanceId(event.getAsyncTaskInstanceId())
+                .build();
+        log.info(event.toString());
+        this.taskInstanceInternalApplication.create(cmd);
         log.info("-----------------------------------------------------");
     }
 
@@ -81,6 +109,7 @@ public class AsyncTaskInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskRunningEvent here -------------------------");
         log.info(event.toString());
+        this.workflowInstanceInternalApplication.resume(event.getWorkflowInstanceId(), event.getNodeRef());
         log.info("-----------------------------------------------------");
     }
 
@@ -106,7 +135,6 @@ public class AsyncTaskInstanceEventHandler {
         log.info("Get TaskFailedEvent here -------------------------");
         log.info(event.toString());
         this.workflowInstanceInternalApplication.stop(event.getWorkflowInstanceId());
-        this.workerApplication.cleanupWorkspace(event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 }
