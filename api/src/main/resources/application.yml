@@ -11,6 +11,8 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/jianmu?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 12345678
+    hikari:
+      validation-timeout: 300000
   flyway:
     enabled: true
     clean-disabled: true
