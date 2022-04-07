@@ -23,7 +23,9 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByRefAndVersionAndStatus(
             @Param("workflowRef") String workflowRef,
@@ -38,7 +40,9 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findById(String instanceId);
 
@@ -49,18 +53,20 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
 
-    @Insert("insert into workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, start_time, end_time, _version) " +
-            "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
-            "#{wk.startTime},#{wk.endTime},#{version})")
+    @Insert("insert into workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, failure_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
+            "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.failureMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
+            "#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
     @Update("update workflow_instance " +
             "set run_mode=#{wk.runMode},status=#{wk.status}," +
-            "end_time=#{wk.endTime},_version= _version+1 " +
+            "suspended_time=#{wk.suspendedTime},end_time=#{wk.endTime},_version= _version+1 " +
             "where id = #{wk.id}")
     void save(@Param("wk") WorkflowInstance workflowInstance);
 
@@ -77,7 +83,9 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByRefOffset(@Param("workflowRef") String workflowRef, @Param("offset") long offset);
 
@@ -88,7 +96,9 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findAll(
             @Param("pageNum") int pageNum,
@@ -111,7 +121,9 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findAllPage(
             @Param("id") String id,
@@ -127,7 +139,9 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByWorkflowRef(@Param("workflowRef") String workflowRef, @Param("offset") long offset);
 
@@ -138,7 +152,9 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findByRefAndSerialNoMax(@Param("workflowRef") String workflowRef);
 }

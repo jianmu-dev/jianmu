@@ -7,6 +7,7 @@ import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,6 +85,17 @@ public class AsyncTaskInstanceInternalApplication {
                     asyncTaskInstance.run();
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
+    }
+
+    @Transactional
+    public void retry(String instanceId, String taskRef) {
+        var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
+        asyncTaskInstance.retry();
+        this.asyncTaskInstanceRepository.retryById(asyncTaskInstance);
     }
 
     // 任务已失败命令

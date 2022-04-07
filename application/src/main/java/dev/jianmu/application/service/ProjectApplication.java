@@ -10,7 +10,10 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
-import dev.jianmu.project.aggregate.*;
+import dev.jianmu.project.aggregate.GitRepo;
+import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.aggregate.ProjectGroup;
+import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
@@ -148,6 +151,7 @@ public class ProjectApplication {
                 .nodes(nodes)
                 .globalParameters(parser.getGlobalParameters())
                 .dslText(dslText)
+                .failureMode(parser.getFailureMode())
                 .build();
     }
 
