@@ -9,9 +9,15 @@ package dev.jianmu.workflow.event.definition;
 public class NodeSucceedEvent extends DefinitionEvent {
     // 要触发的下游节点
     private String nextTarget;
+    // 乐观锁版本
+    private int version;
 
     public String getNextTarget() {
         return nextTarget;
+    }
+
+    public int getVersion() {
+        return version;
     }
 
     private NodeSucceedEvent() {
@@ -30,6 +36,8 @@ public class NodeSucceedEvent extends DefinitionEvent {
         protected String nodeType;
         // 要触发的下游节点
         private String nextTarget;
+        // 乐观锁版本
+        private int version;
 
         private Builder() {
         }
@@ -68,6 +76,11 @@ public class NodeSucceedEvent extends DefinitionEvent {
             return this;
         }
 
+        public Builder version(int version) {
+            this.version = version;
+            return this;
+        }
+
         public NodeSucceedEvent build() {
             NodeSucceedEvent nodeSucceedEvent = new NodeSucceedEvent();
             nodeSucceedEvent.workflowRef = this.workflowRef;
@@ -76,6 +89,7 @@ public class NodeSucceedEvent extends DefinitionEvent {
             nodeSucceedEvent.nodeRef = this.nodeRef;
             nodeSucceedEvent.nextTarget = this.nextTarget;
             nodeSucceedEvent.triggerId = this.triggerId;
+            nodeSucceedEvent.version = this.version;
             return nodeSucceedEvent;
         }
     }

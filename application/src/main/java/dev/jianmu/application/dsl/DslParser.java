@@ -45,6 +45,7 @@ public class DslParser {
     private boolean enabled = true;
     private boolean mutable = false;
     private boolean concurrent = false;
+    private FailureMode failureMode = FailureMode.TERMINATE;
     private String name;
     private String description;
     private Workflow.Type type;
@@ -196,7 +197,7 @@ public class DslParser {
         });
         // 环路计算
         var nodes = new HashSet<>(symbolTable.values());
-        var cycles= this.findCycles(nodes);
+        var cycles = this.findCycles(nodes);
         cycles.forEach(cycle -> {
             cycle.forEach(nodeRef -> {
                 var node = symbolTable.get(nodeRef);
@@ -255,6 +256,7 @@ public class DslParser {
         var globalParam = this.global.get("param");
         this.createGlobalParameters(globalParam);
         var enabled = this.global.get("enabled");
+        var onFailure = this.global.get("on-failure");
         if (enabled instanceof Boolean) {
             this.enabled = (Boolean) enabled;
         }
@@ -271,6 +273,11 @@ public class DslParser {
         var concurrent = this.global.get("concurrent");
         if (concurrent instanceof Boolean) {
             this.concurrent = (Boolean) concurrent;
+        }
+        if (onFailure instanceof String) {
+            if (onFailure.equals("manual")) {
+                this.failureMode = FailureMode.MANUAL;
+            }
         }
     }
 
@@ -712,6 +719,10 @@ public class DslParser {
 
     public boolean isConcurrent() {
         return concurrent;
+    }
+
+    public FailureMode getFailureMode() {
+        return failureMode;
     }
 
     public String getName() {

@@ -38,6 +38,7 @@
               <transition-group type="transition" name="flip-list">
                 <project-item
                   v-for="(project, index) in projectList"
+                  :concurrent="project.concurrent"
                   :key="project.id"
                   :_id="project.id"
                   :project="project"
@@ -54,6 +55,7 @@
             <project-item
               v-else
               v-for="project of projects"
+              :concurrent="project.concurrent"
               :key="project.id"
               :project="project"
               @running="handleProjectRunning"

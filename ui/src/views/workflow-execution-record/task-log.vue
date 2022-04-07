@@ -631,6 +631,8 @@ export default defineComponent({
       border: 1px solid #eef0f7;
 
       ::v-deep(.el-table) {
+        overflow: visible;
+
         .el-table__body-wrapper {
           overflow: visible;
 

@@ -2,10 +2,12 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,16 +43,24 @@ public class AsyncTaskInstanceInternalApplication {
                 .findByTriggerIdAndTaskRef(cmd.getTriggerId(), cmd.getAsyncTaskRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
         asyncTaskInstance.activating();
-        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+        try {
+            this.asyncTaskInstanceRepository.activateById(asyncTaskInstance, cmd.getVersion());
+        } catch (DBException.OptimisticLocking e) {
+            log.warn("乐观锁异常，忽略");
+        }
     }
 
     @Transactional
-    public void nodeSucceed(String triggerId, String nodeRef, String nextTarget) {
+    public void nodeSucceed(String triggerId, String nodeRef, String nextTarget, int version) {
         var asyncTaskInstance = this.asyncTaskInstanceRepository
                 .findByTriggerIdAndTaskRef(triggerId, nodeRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到异步任务示例"));
         asyncTaskInstance.succeed(nextTarget);
-        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+        try {
+            this.asyncTaskInstanceRepository.succeedById(asyncTaskInstance, version);
+        } catch (DBException.OptimisticLocking e) {
+            log.warn("乐观锁异常，忽略");
+        }
     }
 
     // 发布全部任务终止事件
@@ -75,6 +85,17 @@ public class AsyncTaskInstanceInternalApplication {
                     asyncTaskInstance.run();
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
+    }
+
+    @Transactional
+    public void retry(String instanceId, String taskRef) {
+        var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
+        asyncTaskInstance.retry();
+        this.asyncTaskInstanceRepository.retryById(asyncTaskInstance);
     }
 
     // 任务已失败命令

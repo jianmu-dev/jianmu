@@ -10,7 +10,8 @@
              :fullscreen-el="fullscreenEl"
              @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"
-             @on-fullscreen="handleFullscreen"/>
+             @on-fullscreen="handleFullscreen"
+             @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
                   :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
@@ -37,7 +38,15 @@ import G6, { Graph, NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
-import { configNodeAction, fitCanvas, highlightNodeState, init, sortTasks, updateNodeStates } from './utils/graph';
+import {
+  configNodeAction,
+  fitCanvas,
+  fitView,
+  highlightNodeState,
+  init,
+  sortTasks,
+  updateNodeStates,
+} from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
@@ -144,9 +153,9 @@ export default defineComponent({
       };
     });
 
-    const refreshGraph = () => {
+    const refreshGraph = (rankdir: string = 'LR') => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, rankdir);
 
         updateZoom();
       }
@@ -190,11 +199,13 @@ export default defineComponent({
       graph.value?.destroy();
     });
 
+    const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
+
     return {
       container,
       graph,
       taskInstanceId,
-      dslType: computed<DslTypeEnum>(() => allTaskNodes.value.dslType),
+      dslType,
       dslMode,
       nodeEvent,
       fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
@@ -223,8 +234,7 @@ export default defineComponent({
         const g = graph.value as Graph;
 
         if (val === undefined) {
-          // fitCanvas(g);
-          g.fitView();
+          fitView(g);
         } else {
           g.zoomTo(val / 100, g.getGraphCenterPoint());
         }
@@ -238,10 +248,29 @@ export default defineComponent({
 
         setTimeout(() => {
           fitCanvas(graph.value);
+          updateZoom();
           if (container.value) {
             container.value.style.visibility = '';
           }
         }, 100);
+      },
+      handleRotation: () => {
+        if (!graph.value || dslType.value !== DslTypeEnum.WORKFLOW) {
+          return;
+        }
+
+        let rankdir = graph.value.get('layout').rankdir;
+        if (rankdir === 'TB') {
+          rankdir = undefined;
+        } else {
+          rankdir = 'TB';
+        }
+
+        graph.value?.destroy();
+        graph.value = undefined;
+        nodeActionConfigured.value = false;
+
+        refreshGraph(rankdir);
       },
       taskStates: computed(() => {
         const sArr: {
@@ -249,9 +278,10 @@ export default defineComponent({
           count: number;
         }[] = [];
 
+        const tasks = props.tasks.filter(({ defKey }) => defKey !== 'Condition');
         const taskMap = new Map();
         // 按开始时间生序排序，保证最后一个是最新的
-        sortTasks([...props.tasks], false)
+        sortTasks(tasks, false)
           .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({

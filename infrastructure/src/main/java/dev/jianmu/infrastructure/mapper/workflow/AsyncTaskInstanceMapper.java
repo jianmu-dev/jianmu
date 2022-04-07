@@ -25,6 +25,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
+    @Result(column = "_version", property = "version")
     Optional<AsyncTaskInstance> findById(String id);
 
     @Select("select * from async_task_instance where workflow_instance_id = #{instanceId}")
@@ -39,6 +40,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
+    @Result(column = "_version", property = "version")
     List<AsyncTaskInstance> findByInstanceId(String instanceId);
 
     @Select("select * from async_task_instance where trigger_id = #{triggerId}")
@@ -53,6 +55,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
+    @Result(column = "_version", property = "version")
     List<AsyncTaskInstance> findByTriggerId(String triggerId);
 
     @Select("select * from async_task_instance where trigger_id = #{triggerId} and async_task_ref = #{taskRef}")
@@ -67,6 +70,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "activating_time", property = "activatingTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
+    @Result(column = "_version", property = "version")
     Optional<AsyncTaskInstance> findByTriggerIdAndTaskRef(@Param("triggerId") String triggerId, @Param("taskRef") String taskRef);
 
     @Insert("insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, serial_no, next_target, activating_time, start_time, end_time) " +
@@ -81,7 +85,22 @@ public interface AsyncTaskInstanceMapper {
             " </script>")
     void addAll(@Param("asyncTaskInstances") List<AsyncTaskInstance> asyncTaskInstances);
 
-    @Update("update async_task_instance set status=#{status}, serial_no=#{serialNo}, next_target=#{nextTarget}, start_time=#{startTime}, end_time=#{endTime} where id=#{id}")
+    @Select("select _version from async_task_instance where id = #{id}")
+    int getVersion(String id);
+
+    @Update("update async_task_instance " +
+            "set status=#{ati.status},serial_no=#{ati.serialNo}," +
+            "next_target=#{ati.nextTarget},start_time=#{ati.startTime},end_time=#{ati.endTime},_version=#{ati.version} " +
+            "where id = #{ati.id} and _version = #{version}")
+    boolean activateById(@Param("ati") AsyncTaskInstance asyncTaskInstance, @Param("version") int version);
+
+    @Update("update async_task_instance " +
+            "set status=#{ati.status},serial_no=#{ati.serialNo}," +
+            "next_target=#{ati.nextTarget},start_time=#{ati.startTime},end_time=#{ati.endTime},_version=#{ati.version} " +
+            "where id = #{ati.id} and _version = #{version}")
+    boolean succeedById(@Param("ati") AsyncTaskInstance asyncTaskInstance, @Param("version") int version);
+
+    @Update("update async_task_instance set status=#{status}, serial_no=#{serialNo}, next_target=#{nextTarget}, start_time=#{startTime}, end_time=#{endTime}, _version=#{version} where id=#{id}")
     void updateById(AsyncTaskInstance asyncTaskInstance);
 
     @Delete("delete from async_task_instance where workflow_instance_id = #{workflowInstanceId}")

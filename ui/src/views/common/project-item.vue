@@ -7,14 +7,17 @@
       }"
     ></div>
     <div class="content">
-      <router-link
-        :to="{
+      <div :class="['content-top',concurrent?'concurrent':'']">
+        <span class="concurrent" v-if="concurrent">可并发</span>
+        <router-link
+          :to="{
           name: 'workflow-execution-record-detail',
           query: { projectId: project.id },
         }"
-      >
-        <jm-text-viewer :value="project.name" class="title"/>
-      </router-link>
+        >
+          <jm-text-viewer :value="project.name" class="title"/>
+        </router-link>
+      </div>
       <div class="time">
         <span v-if="project.status === ProjectStatusEnum.RUNNING"
         >执行时长：{{
@@ -43,14 +46,17 @@
       }"
     ></div>
     <div class="content">
-      <router-link
-        :to="{
+      <div :class="['content-top',concurrent?'concurrent':'']">
+        <span class="concurrent" v-if="concurrent">可并发</span>
+        <router-link
+          :to="{
           name: 'workflow-execution-record-detail',
           query: { projectId: project.id },
         }"
-      >
-        <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}"/>
-      </router-link>
+        >
+          <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}"/>
+        </router-link>
+      </div>
       <div :class="{
         time: true,
         disabled: !enabled,
@@ -186,6 +192,11 @@ export default defineComponent({
     },
     // 控制是否处于拖拽模式
     moveMode: {
+      type: Boolean,
+      default: false,
+    },
+    // 控制项目是否展示可并发
+    concurrent: {
       type: Boolean,
       default: false,
     },
@@ -469,6 +480,29 @@ export default defineComponent({
     min-height: 116px;
     position: relative;
     padding: 20px 20px 16px 20px;
+
+    .content-top {
+      vertical-align: middle;
+
+      &.concurrent {
+        .jm-text-viewer {
+          width: 65%;
+          display: inline-block;
+        }
+      }
+
+      .concurrent {
+        height: 20px;
+        line-height: 20px;
+        background: #FFF7E6;
+        border-radius: 2px;
+        padding: 3px;
+        font-size: 12px;
+        font-weight: 400;
+        color: #6D4C41;
+        margin-right: 5px;
+      }
+    }
 
     .title {
       margin-right: 20px;

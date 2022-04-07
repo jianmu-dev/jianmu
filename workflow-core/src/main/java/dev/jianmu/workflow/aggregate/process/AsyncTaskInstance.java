@@ -43,6 +43,8 @@ public class AsyncTaskInstance extends AggregateRoot {
     private LocalDateTime startTime;
     // 结束时间
     private LocalDateTime endTime;
+    // 乐观锁字段
+    private int version;
 
     public boolean isNextTarget(String ref) {
         if (nextTarget == null) {
@@ -52,6 +54,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     }
 
     public void activating() {
+        this.version++;
         this.activatingTime = LocalDateTime.now();
         // 发布任务激活事件并返回
         TaskActivatingEvent taskActivatingEvent = TaskActivatingEvent.Builder.aTaskActivatingEvent()
@@ -84,6 +87,23 @@ public class AsyncTaskInstance extends AggregateRoot {
         );
     }
 
+    public void retry() {
+        if (this.status != TaskStatus.FAILED) {
+            throw new RuntimeException("非失败状态的任务不能重试");
+        }
+        this.activatingTime = LocalDateTime.now();
+        var taskRetryEvent = TaskRetryEvent.Builder.aTaskRetryEvent()
+                .nodeRef(this.asyncTaskRef)
+                .triggerId(this.triggerId)
+                .workflowInstanceId(this.workflowInstanceId)
+                .asyncTaskInstanceId(this.id)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .nodeType(this.asyncTaskType)
+                .build();
+        this.raiseEvent(taskRetryEvent);
+    }
+
     public void succeed() {
         this.status = TaskStatus.SUCCEEDED;
         this.endTime = LocalDateTime.now();
@@ -103,6 +123,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     }
 
     public void succeed(String nextTarget) {
+        this.version++;
         this.nextTarget = nextTarget;
         this.endTime = LocalDateTime.now();
         this.serialNo++;
@@ -124,7 +145,6 @@ public class AsyncTaskInstance extends AggregateRoot {
     public void fail() {
         this.status = TaskStatus.FAILED;
         this.endTime = LocalDateTime.now();
-        this.serialNo++;
         // 发布任务执行失败事件
         this.raiseEvent(
                 TaskFailedEvent.Builder.aTaskFailedEvent()
@@ -140,6 +160,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     }
 
     public void skip() {
+        this.version++;
         this.status = TaskStatus.SKIPPED;
         this.startTime = LocalDateTime.now();
         this.activatingTime = LocalDateTime.now();
@@ -220,6 +241,10 @@ public class AsyncTaskInstance extends AggregateRoot {
 
     public LocalDateTime getEndTime() {
         return endTime;
+    }
+
+    public int getVersion() {
+        return version;
     }
 
     public static final class Builder {
