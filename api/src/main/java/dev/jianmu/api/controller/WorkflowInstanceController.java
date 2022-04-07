@@ -28,10 +28,10 @@ public class WorkflowInstanceController {
     }
 
     @PutMapping("/stop/{instanceId}")
-    @Operation(summary = "流程结束接口", description = "流程结束接口")
-    public void stop(
+    @Operation(summary = "流程终止接口", description = "流程终止接口")
+    public void terminate(
             @Parameter(description = "流程实例ID") @PathVariable String instanceId
     ) {
-        this.instanceApplication.stop(instanceId);
+        this.instanceApplication.terminate(instanceId);
     }
 }

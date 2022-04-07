@@ -1,5 +1,6 @@
 package dev.jianmu.workflow.service;
 
+import dev.jianmu.workflow.aggregate.definition.FailureMode;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ public class WorkflowInstanceDomainService {
                 .description(workflow.getDescription())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
+                .failureMode(workflow.getFailureMode())
                 .build();
     }
 }
