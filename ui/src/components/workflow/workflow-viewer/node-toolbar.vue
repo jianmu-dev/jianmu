@@ -1,13 +1,14 @@
 <template>
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
     <template v-if="!operationVisible">
-      <div class="mask"></div>
-      <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
-        <template #content>
-          <div style="white-space: nowrap" v-html="tips"/>
-        </template>
-        <div class="tooltip-section"></div>
-      </jm-tooltip>
+      <div class="mask">
+        <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
+          <template #content>
+            <div style="white-space: nowrap" v-html="tips"/>
+          </template>
+          <div class="tooltip-section"></div>
+        </jm-tooltip>
+      </div>
     </template>
     <jm-popover v-else
                 :append-to-body="false"
@@ -16,13 +17,14 @@
                 width="auto"
                 placement="top">
       <template #reference>
-        <div class="mask"></div>
-        <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
-          <template #content>
-            <div style="white-space: nowrap" v-html="tips"/>
-          </template>
-          <div class="tooltip-section"></div>
-        </jm-tooltip>
+        <div class="mask">
+          <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
+            <template #content>
+              <div style="white-space: nowrap" v-html="tips"/>
+            </template>
+            <div class="tooltip-section"></div>
+          </jm-tooltip>
+        </div>
       </template>
       <div class="operation">
         <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
@@ -178,6 +180,14 @@ export default defineComponent({
     top: -10px;
     width: 100%;
     height: calc(100% + 10px);
+
+    .tooltip-section {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 95%;
+    }
   }
 
   .operation {
@@ -236,14 +246,6 @@ export default defineComponent({
       background-color: #D9DEE7;
       overflow: hidden;
     }
-  }
-
-  .tooltip-section {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 97%;
   }
 }
 </style>
