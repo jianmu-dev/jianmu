@@ -5,6 +5,7 @@ import RUNNING from '../svgs/shape/async-task/RUNNING.svg';
 import SKIPPED from '../svgs/shape/async-task/SKIPPED.svg';
 import FAILED from '../svgs/shape/async-task/FAILED.svg';
 import SUCCEEDED from '../svgs/shape/async-task/SUCCEEDED.svg';
+import SUSPENDED from '../svgs/shape/async-task/SUSPENDED.svg';
 import { NodeTypeEnum } from '../utils/enumeration';
 import AsyncTaskRunningAnimation, { attrs } from '../animations/async-task-running-animation';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
@@ -25,6 +26,7 @@ const imgs: {
   [TaskStatusEnum.SKIPPED]: SKIPPED,
   [TaskStatusEnum.FAILED]: FAILED,
   [TaskStatusEnum.SUCCEEDED]: SUCCEEDED,
+  [TaskStatusEnum.SUSPENDED]: SUSPENDED,
 };
 
 const states: {

@@ -1,13 +1,28 @@
 <template>
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
     <div class="mask"></div>
-    <div v-if="operationVisible" class="operation">
-      <jm-tooltip content="日志" placement="left" :appendToBody="false">
-        <button class="view-log-btn" @click="handleClick(NodeToolbarTabTypeEnum.LOG)"></button>
-      </jm-tooltip>
-      <jm-tooltip content="业务参数" placement="right" :appendToBody="false">
-        <button class="view-params-btn" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)"></button>
-      </jm-tooltip>
+    <div v-if="operationVisible" class="operation" ref="operation">
+      <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
+        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.RETRY)">
+          <div class="icon retry"></div>
+          <div class="txt">重试</div>
+        </div>
+        <div class="separator"></div>
+        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.IGNORE)">
+          <div class="icon ignore"></div>
+          <div class="txt">忽略</div>
+        </div>
+        <div class="separator"></div>
+      </template>
+      <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
+        <div class="icon view-log"/>
+        <div class="txt">日志</div>
+      </div>
+      <div class="separator"></div>
+      <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)">
+        <div class="icon view-params"/>
+        <div class="txt">参数</div>
+      </div>
     </div>
     <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
       <template #content>
@@ -23,6 +38,7 @@ import { computed, defineComponent, onMounted, PropType, ref, SetupContext } fro
 import { INodeMouseoverEvent } from './utils/model';
 import { MAX_LABEL_LENGTH } from './utils/dsl';
 import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
+import { TaskStatusEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   props: {
@@ -31,6 +47,7 @@ export default defineComponent({
       required: true,
     },
     taskInstanceId: String,
+    taskStatus: String as PropType<TaskStatusEnum>,
     nodeEvent: {
       type: Object as PropType<INodeMouseoverEvent>,
       required: true,
@@ -42,21 +59,25 @@ export default defineComponent({
   },
   emits: ['node-click'],
   setup(props: any, { emit }: SetupContext) {
-    const toolbar = ref();
+    const toolbar = ref<HTMLElement>();
+    const operation = ref<HTMLElement>();
 
     onMounted(() => {
       const z = props.zoom / 100;
       const w = props.nodeEvent.width + 10;
       const h = props.nodeEvent.height + 10;
 
-      toolbar.value.style.left = (props.nodeEvent.x - w / 2) + 'px';
+      toolbar.value.style.left = props.nodeEvent.x - w / 2 + 'px';
       toolbar.value.style.top = (props.nodeEvent.y - h / 2) + 'px';
       toolbar.value.style.width = w + 'px';
       toolbar.value.style.height = (h + 23 * z) + 'px';
+
+      operation.value!.style.left = (w - operation.value!.offsetWidth) / 2 + 'px';
     });
 
     return {
       NodeToolbarTabTypeEnum,
+      TaskStatusEnum,
       tips: computed<string>(() => {
         let str = '';
 
@@ -85,6 +106,7 @@ export default defineComponent({
         return !!(props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK && props.taskInstanceId);
       }),
       toolbar,
+      operation,
       handleClick: (tabType: NodeToolbarTabTypeEnum) => {
         if (props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK) {
           emit('node-click', props.taskInstanceId, props.nodeEvent.type, tabType);
@@ -112,40 +134,65 @@ export default defineComponent({
 
   .operation {
     position: absolute;
-    top: -29px;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    white-space: nowrap;
+    top: -65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 16px;
+    box-shadow: 0 5px 16px 2px #CDD5E6;
+    border-radius: 3px;
+    background-color: #FFFFFF;
 
-    button {
-      width: 28px;
-      height: 28px;
-      background-color: transparent;
-      border: 0;
-      background-position: center center;
-      background-repeat: no-repeat;
+    .item {
+      user-select: none;
       cursor: pointer;
 
-      & + & {
-        margin-left: 8px;
-      }
-
-      &.view-log-btn {
-        background-image: url('./svgs/task-tool/view-log.svg');
-
-        &:hover {
-          background-image: url('./svgs/task-tool/view-log-hover.svg');
+      &:active {
+        .icon {
+          background-color: #EFF7FF;
+          border-radius: 2px;
         }
       }
 
-      &.view-params-btn {
-        background-image: url('./svgs/task-tool/view-params.svg');
+      .icon {
+        width: 28px;
+        height: 28px;
+        background-color: transparent;
+        border: 0;
+        background-position: center center;
+        background-repeat: no-repeat;
 
-        &:hover {
-          background-image: url('./svgs/task-tool/view-params-hover.svg');
+        &.retry {
+          background-image: url('./svgs/task-tool/retry.svg');
+        }
+
+        &.ignore {
+          background-image: url('./svgs/task-tool/ignore.svg');
+        }
+
+        &.view-log {
+          background-image: url('./svgs/task-tool/view-log.svg');
+        }
+
+        &.view-params {
+          background-image: url('./svgs/task-tool/view-params.svg');
         }
       }
+
+      .txt {
+        text-align: center;
+        font-size: 12px;
+        color: #082340;
+        line-height: 20px;
+      }
+    }
+
+    .separator {
+      margin: 0 10px 20px 10px;
+      width: 1px;
+      height: 15px;
+      background-color: #D9DEE7;
+      overflow: hidden;
     }
   }
 

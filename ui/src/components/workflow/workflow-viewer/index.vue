@@ -14,7 +14,10 @@
              @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
-                  :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
+                  :task-instance-id="taskInstanceId"
+                  :task-status="taskStatus"
+                  :node-event="nodeEvent"
+                  :zoom="zoom"
                   @node-click="clickNode"
                   @mouseout="handleNodeBarMouseout"/>
     <div v-show="!dslMode" class="canvas" ref="container"/>
@@ -83,10 +86,12 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeActionConfigured = ref<boolean>(false);
     const taskInstanceId = ref<string>();
+    const taskStatus = ref<TaskStatusEnum>();
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
       taskInstanceId.value = undefined;
+      taskStatus.value = undefined;
       nodeEvent.value = undefined;
     };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
@@ -102,6 +107,7 @@ export default defineComponent({
           const tasks = sortTasks(props.tasks, true, evt.id);
           if (tasks.length > 0) {
             taskInstanceId.value = tasks[0].instanceId;
+            taskStatus.value = tasks[0].status;
           }
           break;
         }
@@ -205,6 +211,7 @@ export default defineComponent({
       container,
       graph,
       taskInstanceId,
+      taskStatus,
       dslType,
       dslMode,
       nodeEvent,

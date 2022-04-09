@@ -39,6 +39,10 @@ const states: {
     signal: '#51C41B',
     label: '执行成功',
   },
+  [TaskStatusEnum.SUSPENDED]: {
+    signal: '#7986CB',
+    label: '已挂起',
+  },
 };
 
 export default defineComponent({

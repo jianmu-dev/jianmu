@@ -27,6 +27,7 @@ export enum TaskStatusEnum {
   SKIPPED = 'SKIPPED',
   FAILED = 'FAILED',
   SUCCEEDED = 'SUCCEEDED',
+  SUSPENDED = 'SUSPENDED',
 }
 
 /**
