@@ -125,7 +125,7 @@ public class TaskWatcher {
         var resultPath = "/" + this.triggerId + "/" + this.taskName;
         log.info("copy file: " + resultPath + " from container....");
         try {
-            this.resultFile = this.client.copyArchivedFromContainer(triggerId, "jianmu-keepalive", resultPath);
+            this.resultFile = this.client.copyArchivedFromContainer(triggerId, triggerId + "-jianmu-keepalive", resultPath);
             log.info("result: {}", this.resultFile);
         } catch (IOException | ApiException e) {
             log.warn("获取结果文件失败: {}", e.getMessage());

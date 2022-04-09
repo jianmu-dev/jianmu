@@ -267,46 +267,52 @@ export default defineComponent({
         }
 
         ::v-deep(.el-table) {
-          th, td {
-            color: #082340;
-          }
+          overflow: visible;
 
-          tr {
-            td:first-child,
-            td:last-child {
-              text-align: left;
-              padding-left: 20px;
+          .el-table__body-wrapper {
+            overflow: visible;
+
+            th, td {
+              color: #082340;
             }
 
-            td:first-child {
-              .cell {
-                width: 100% !important;
+            tr {
+              td:first-child,
+              td:last-child {
+                text-align: left;
+                padding-left: 20px;
+              }
+
+              td:first-child {
+                .cell {
+                  width: 100% !important;
+                }
               }
             }
-          }
 
-          .copy-container {
-            height: 25px;
+            .copy-container {
+              height: 25px;
 
-            & > div {
-              width: 100%;
-            }
+              & > div {
+                width: 100%;
+              }
 
-            display: flex;
-            align-items: center;
+              display: flex;
+              align-items: center;
 
-            &:hover {
+              &:hover {
+                .copy-btn {
+                  visibility: visible;
+                }
+              }
+
               .copy-btn {
-                display: block;
+                margin-left: 10px;
+                flex-shrink: 0;
+                font-size: 1.25em;
+                width: 16px;
+                visibility: hidden;
               }
-            }
-
-            .copy-btn {
-              margin-left: 5px;
-              flex-shrink: 0;
-              font-size: 1.25em;
-              width: 16px;
-              display: none;
             }
           }
         }

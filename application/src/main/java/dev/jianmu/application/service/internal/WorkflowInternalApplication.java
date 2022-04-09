@@ -159,13 +159,32 @@ public class WorkflowInternalApplication {
         // 激活节点
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
         if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
-            log.info("activateNode: " + cmd.getNodeRef());
-            EvaluationContext context = this.findContext(workflow, cmd.getTriggerId());
-            workflow.setExpressionLanguage(this.expressionLanguage);
-            workflow.setContext(context);
-            workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
-            this.workflowRepository.commitEvents(workflow);
+            asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(cmd.getNodeRef()))
+                    .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
+    }
+
+    private void doActivate(Workflow workflow, String nodeRef, String triggerId, int version) {
+        log.info("activateNode: " + nodeRef);
+        EvaluationContext context = this.findContext(workflow, triggerId);
+        workflow.setExpressionLanguage(this.expressionLanguage);
+        workflow.setContext(context);
+        workflow.activateNode(triggerId, nodeRef, version);
+        this.workflowRepository.commitEvents(workflow);
+    }
+
+    private void doSkip(Workflow workflow, String nodeRef, String triggerId) {
+        workflow.skipNode(triggerId, nodeRef);
+        log.info("跳过节点: {}", nodeRef);
+        this.asyncTaskInstanceRepository
+                .findByTriggerIdAndTaskRef(triggerId, nodeRef)
+                .ifPresent(asyncTaskInstance -> {
+                    asyncTaskInstance.skip();
+                    log.info("跳过异步任务: {}", asyncTaskInstance.getAsyncTaskRef());
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                });
+        this.workflowRepository.commitEvents(workflow);
     }
 
     // 节点跳过
@@ -175,24 +194,19 @@ public class WorkflowInternalApplication {
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
-        if (this.workflowDomainService.canSkipNode(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
-            workflow.skipNode(cmd.getTriggerId(), cmd.getNodeRef());
-            log.info("跳过节点: {}", cmd.getNodeRef());
-            this.asyncTaskInstanceRepository
-                    .findByTriggerIdAndTaskRef(cmd.getTriggerId(), cmd.getNodeRef())
-                    .ifPresent(asyncTaskInstance -> {
-                        asyncTaskInstance.skip();
-                        log.info("跳过异步任务: {}", asyncTaskInstance.getAsyncTaskRef());
-                        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
-                    });
-            this.workflowRepository.commitEvents(workflow);
-        } else {
-            log.info("不能跳过，计算是否需要激活节点");
-            if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
-                log.info("activateNode: " + cmd.getNodeRef());
-                workflow.activateNode(cmd.getTriggerId(), cmd.getNodeRef());
-                this.workflowRepository.commitEvents(workflow);
-            }
+        if (this.workflowDomainService.canSkipNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
+            this.doSkip(workflow, cmd.getNodeRef(), cmd.getTriggerId());
+            return;
+        }
+        log.info("不能跳过，计算是否需要激活节点");
+        if (!this.workflowDomainService.hasSameSerialNo(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            log.info("找到不同次数的节点，无需计算激活");
+            return;
+        }
+        if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
+            asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(cmd.getNodeRef()))
+                    .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
     }
 }

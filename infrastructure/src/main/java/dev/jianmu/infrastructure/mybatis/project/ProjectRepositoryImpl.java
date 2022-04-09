@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.mapper.project.ProjectMapper;
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.query.ProjectVo;
 import dev.jianmu.project.repository.ProjectRepository;
 import org.springframework.stereotype.Repository;
 
@@ -58,7 +59,7 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findAll();
     }
 
-    public PageInfo<Project> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType) {
+    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType) {
         return PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> this.projectMapper.findAllByGroupId(projectGroupId, workflowName, sortType));
     }

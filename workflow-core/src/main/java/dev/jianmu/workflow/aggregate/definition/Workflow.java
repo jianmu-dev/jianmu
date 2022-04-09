@@ -8,6 +8,7 @@ import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.event.definition.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +45,10 @@ public class Workflow extends AggregateRoot {
     private Set<GlobalParameter> globalParameters = Set.of();
     // DSL原始内容
     private String dslText;
+    // 错误处理模式
+    private FailureMode failureMode = FailureMode.TERMINATE;
+    // 创建时间
+    private final LocalDateTime createdTime = LocalDateTime.now();
     // 表达式计算服务
     private ExpressionLanguage expressionLanguage;
     // 参数上下文
@@ -61,7 +66,7 @@ public class Workflow extends AggregateRoot {
     }
 
     // 激活节点
-    public void activateNode(String triggerId, String nodeRef) {
+    public void activateNode(String triggerId, String nodeRef, int version) {
         Node node = this.findNode(nodeRef);
         if (node instanceof End) {
             // 发布结束节点执行成功事件
@@ -70,6 +75,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .version(version)
                     .build();
             this.raiseEvent(succeedEvent);
             // 发布流程结束事件并返回
@@ -89,6 +95,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .version(version)
                     .build();
             this.raiseEvent(asyncTaskActivatingEvent);
             return;
@@ -103,6 +110,7 @@ public class Workflow extends AggregateRoot {
                     .workflowVersion(this.version)
                     // TODO 3.0需要重新设计
                     .nextTarget(branch.getTarget())
+                    .version(version)
                     .build();
             this.raiseEvent(succeedEvent);
         }
@@ -179,6 +187,7 @@ public class Workflow extends AggregateRoot {
                 .triggerId(triggerId)
                 .workflowRef(this.ref)
                 .workflowVersion(this.version)
+                .version(0)
                 .build();
         this.raiseEvent(succeedEvent);
     }
@@ -196,6 +205,24 @@ public class Workflow extends AggregateRoot {
                     .build();
             this.raiseEvent(workflowEndEvent);
             return;
+        }
+        if (node instanceof Gateway) {
+            // 如果存在非环回分支
+            if (((Gateway) node).hasNonLoopBranch()) {
+                // 过滤环回分支，非环回分支发布跳过事件
+                ((Gateway) node).findNonLoopBranch()
+                        .forEach(targetRef -> {
+                            var nodeSkipEvent = NodeSkipEvent.Builder.aNodeSkipEvent()
+                                    .nodeRef(targetRef)
+                                    .triggerId(triggerId)
+                                    .workflowRef(this.ref)
+                                    .workflowVersion(this.version)
+                                    .sender(nodeRef)
+                                    .build();
+                            this.raiseEvent(nodeSkipEvent);
+                        });
+                return;
+            }
         }
         // 发布下游节点跳过事件
         var targets = node.getTargets();
@@ -369,6 +396,14 @@ public class Workflow extends AggregateRoot {
         return dslText;
     }
 
+    public FailureMode getFailureMode() {
+        return failureMode;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
     public static final class Builder {
         // 显示名称
         private String name;
@@ -384,6 +419,8 @@ public class Workflow extends AggregateRoot {
         private Set<GlobalParameter> globalParameters;
         // DSL原始内容
         private String dslText;
+        // 错误处理模式
+        private FailureMode failureMode = FailureMode.TERMINATE;
 
         private Builder() {
         }
@@ -427,6 +464,11 @@ public class Workflow extends AggregateRoot {
             return this;
         }
 
+        public Builder failureMode(FailureMode failureMode) {
+            this.failureMode = failureMode;
+            return this;
+        }
+
         public Workflow build() {
 
             // 添加业务规则检查
@@ -459,6 +501,7 @@ public class Workflow extends AggregateRoot {
             workflow.type = this.type;
             workflow.name = this.name;
             workflow.description = this.description;
+            workflow.failureMode = this.failureMode;
             return workflow;
         }
     }

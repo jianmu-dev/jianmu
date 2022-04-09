@@ -17,4 +17,6 @@ public interface Gateway {
     List<String> findNonLoopBranch();
 
     List<String> findLoopBranch();
+
+    boolean hasNonLoopBranch();
 }
