@@ -95,7 +95,7 @@ public class EmbeddedKubeWorker implements EmbeddedWorker {
 
     private V1Container buildKeepalive(String podName) {
         var container = new V1Container()
-                .name("jianmu-keepalive")
+                .name(podName + "-jianmu-keepalive")
                 .imagePullPolicy(this.properties.getWorker().getK8s().getImagePullPolicy())
                 .volumeMounts(List.of(new V1VolumeMount().name(podName).mountPath(podName)))
                 .image(this.properties.getWorker().getK8s().getKeepalive());
