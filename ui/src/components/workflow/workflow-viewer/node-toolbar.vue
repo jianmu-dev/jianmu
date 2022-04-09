@@ -2,16 +2,42 @@
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
     <div class="mask"></div>
     <div v-if="operationVisible" class="operation" ref="operation">
-      <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
-        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.RETRY)">
-          <div class="icon retry"></div>
-          <div class="txt">重试</div>
-        </div>
+      <template v-if="taskStatus !== TaskStatusEnum.SUSPENDED">
+        <jm-popconfirm
+          title="确定要重试吗？"
+          icon="jm-icon-warning"
+          confirmButtonText="确定"
+          cancelButtonText="取消"
+          confirmButtonIcon="jm-icon-button-confirm"
+          cancelButtonIcon="jm-icon-button-cancel"
+          @confirm="handleClick(NodeToolbarTabTypeEnum.RETRY)"
+          :append-to-body="false"
+        >
+          <template #reference>
+            <div class="item">
+              <div class="icon retry"></div>
+              <div class="txt">重试</div>
+            </div>
+          </template>
+        </jm-popconfirm>
         <div class="separator"></div>
-        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.IGNORE)">
-          <div class="icon ignore"></div>
-          <div class="txt">忽略</div>
-        </div>
+        <jm-popconfirm
+          title="确定要忽略吗？"
+          icon="jm-icon-warning"
+          confirmButtonText="确定"
+          cancelButtonText="取消"
+          confirmButtonIcon="jm-icon-button-confirm"
+          cancelButtonIcon="jm-icon-button-cancel"
+          @confirm="handleClick(NodeToolbarTabTypeEnum.IGNORE)"
+          :append-to-body="false"
+        >
+          <template #reference>
+            <div class="item">
+              <div class="icon ignore"></div>
+              <div class="txt">忽略</div>
+            </div>
+          </template>
+        </jm-popconfirm>
         <div class="separator"></div>
       </template>
       <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
@@ -134,7 +160,7 @@ export default defineComponent({
 
   .operation {
     position: absolute;
-    top: -65px;
+    top: -64px;
     display: flex;
     justify-content: center;
     align-items: center;
