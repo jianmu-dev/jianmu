@@ -1,19 +1,45 @@
 CREATE TABLE `jianmu_project`
 (
-    `id`                 varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_source`         varchar(45) DEFAULT NULL COMMENT 'DSL来源',
-    `dsl_type`           varchar(45) DEFAULT NULL COMMENT 'DSL 类型',
-    `event_bridge_id`    varchar(45) DEFAULT NULL COMMENT 'Event Bridge Id',
-    `trigger_type`       varchar(45) DEFAULT NULL COMMENT '触发类型',
-    `git_repo_id`        varchar(150) NOT NULL COMMENT 'Git仓库ID',
-    `workflow_name`      varchar(45)  NOT NULL COMMENT '流程定义显示名称',
-    `workflow_ref`       varchar(45)  NOT NULL COMMENT '流程定义Ref',
-    `workflow_version`   varchar(45)  NOT NULL COMMENT '流程定义版本',
-    `steps`              int          NOT NULL COMMENT '步骤数量',
-    `dsl_text`           longtext     NOT NULL COMMENT 'DSL内容文本',
-    `created_time`       datetime    DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`   varchar(45) DEFAULT NULL COMMENT '最后修改人',
-    `last_modified_time` datetime     NOT NULL COMMENT '最后修改时间',
+    `id`                   varchar(45)  NOT NULL COMMENT 'ID',
+    `dsl_source`           varchar(45)  DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_type`             varchar(45)  DEFAULT NULL COMMENT 'DSL 类型',
+    `trigger_type`         varchar(45)  DEFAULT NULL COMMENT '触发类型',
+    `git_repo_id`          varchar(150) NOT NULL COMMENT 'Git仓库ID',
+    `workflow_name`        varchar(45)  NOT NULL COMMENT '流程定义显示名称',
+    `workflow_ref`         varchar(45)  NOT NULL COMMENT '流程定义Ref',
+    `workflow_version`     varchar(45)  NOT NULL COMMENT '流程定义版本',
+    `steps`                int          NOT NULL COMMENT '步骤数量',
+    `dsl_text`             longtext     NOT NULL COMMENT 'DSL内容文本',
+    `created_time`         datetime     DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`     varchar(45)  DEFAULT NULL COMMENT '最后修改人',
+    `last_modified_time`   datetime     NOT NULL COMMENT '最后修改时间',
+    `workflow_description` varchar(255) DEFAULT NULL COMMENT '描述',
+    `enabled`              tinyint(1)   DEFAULT NULL COMMENT '项目是否可触发',
+    `mutable`              tinyint(1)   DEFAULT NULL COMMENT '项目状态是否可变',
+    `concurrent`           bit(1)       DEFAULT '0' COMMENT '可否并发执行',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `project_group`
+(
+    `id`                 varchar(45) NOT NULL COMMENT 'ID',
+    `name`               varchar(45) NOT NULL COMMENT '名称',
+    `description`        varchar(256) DEFAULT NULL COMMENT '描述',
+    `sort`               int         NOT NULL COMMENT '排序',
+    `is_show`            bit(1)      NOT NULL COMMENT '是否展示',
+    `project_count`      int         NOT NULL COMMENT '项目数量',
+    `created_time`       datetime    NOT NULL COMMENT '创建时间',
+    `last_modified_time` datetime    NOT NULL COMMENT '最后修改时间',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `project_link_group`
+(
+    `id`               varchar(45) NOT NULL COMMENT 'ID',
+    `project_id`       varchar(45) NOT NULL COMMENT '项目ID',
+    `project_group_id` varchar(45) NOT NULL COMMENT '项目组ID',
+    `sort`             int         NOT NULL COMMENT '排序',
+    `created_time`     datetime    NOT NULL COMMENT '创建时间',
     PRIMARY KEY (`id`)
 );
 
@@ -86,6 +112,8 @@ CREATE TABLE `workflow`
     `nodes`             longblob COMMENT 'Node列表',
     `global_parameters` blob COMMENT '全局参数',
     `dsl_text`          longtext     NOT NULL COMMENT 'DSL内容',
+    `failure_mode`      varchar(45)  DEFAULT NULL COMMENT '错误处理模式',
+    `created_time`      datetime     DEFAULT NULL COMMENT '创建时间',
     PRIMARY KEY (`ref_version`)
 );
 
@@ -98,13 +126,36 @@ CREATE TABLE `workflow_instance`
     `name`             varchar(255) DEFAULT NULL COMMENT '显示名称',
     `description`      varchar(255) DEFAULT NULL COMMENT '描述',
     `run_mode`         varchar(45)  NOT NULL COMMENT '运行模式',
+    `failure_mode`     varchar(45)  DEFAULT NULL COMMENT '错误处理模式',
     `status`           varchar(45)  NOT NULL COMMENT '运行状态',
     `workflow_ref`     varchar(45)  NOT NULL COMMENT '流程定义唯一引用名称',
     `workflow_version` varchar(45)  NOT NULL COMMENT '流程定义版本',
     `task_instances`   blob COMMENT '任务实例列表',
     `start_time`       datetime     DEFAULT NULL COMMENT '开始时间',
+    `suspended_time`   datetime     DEFAULT NULL COMMENT '挂起时间',
     `end_time`         datetime     DEFAULT NULL COMMENT '结束时间',
     `_version`         int          NOT NULL COMMENT '乐观锁版本字段',
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `async_task_instance`
+(
+    `id`                   varchar(45)  NOT NULL,
+    `trigger_id`           varchar(45)  NOT NULL COMMENT 'Trigger ID',
+    `workflow_ref`         varchar(45)  NOT NULL COMMENT '流程Ref',
+    `workflow_version`     varchar(45)  NOT NULL COMMENT '流程版本',
+    `workflow_instance_id` varchar(45)  NOT NULL COMMENT '流程实例ID',
+    `name`                 varchar(45)  NOT NULL COMMENT '名称',
+    `description`          varchar(255) NOT NULL COMMENT '描述',
+    `status`               varchar(45)  NOT NULL COMMENT '状态',
+    `async_task_ref`       varchar(45)  NOT NULL COMMENT '任务定义Ref',
+    `async_task_type`      varchar(45)  NOT NULL COMMENT '任务定义类型',
+    `activating_time`      datetime     NOT NULL COMMENT '激活时间',
+    `start_time`           datetime    DEFAULT NULL COMMENT '开始时间',
+    `end_time`             datetime    DEFAULT NULL COMMENT '结束时间',
+    `serial_no`            int         DEFAULT '0' COMMENT '完成次数累计',
+    `next_target`          varchar(45) DEFAULT NULL COMMENT '下一个要触发的节点',
+    `_version`             int         DEFAULT '0' COMMENT '乐观锁版本字段',
     PRIMARY KEY (`id`)
 );
 
@@ -121,7 +172,6 @@ CREATE TABLE `task_instance`
     `trigger_id`       varchar(255) NOT NULL COMMENT 'Trigger ID',
     `start_time`       datetime    DEFAULT NULL COMMENT '开始时间',
     `end_time`         datetime    DEFAULT NULL COMMENT '结束时间',
-    `result_file`      longtext COMMENT '执行结果文件',
     `status`           varchar(45)  NOT NULL COMMENT '任务运行状态',
     PRIMARY KEY (`id`)
 );
