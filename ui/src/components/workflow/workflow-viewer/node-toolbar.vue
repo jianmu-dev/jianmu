@@ -35,6 +35,7 @@
             cancelButtonIcon="jm-icon-button-cancel"
             @confirm="handleClick(NodeToolbarTabTypeEnum.RETRY)"
             :append-to-body="false"
+            :offset="7"
           >
             <template #reference>
               <div class="item">
@@ -53,6 +54,7 @@
             cancelButtonIcon="jm-icon-button-cancel"
             @confirm="handleClick(NodeToolbarTabTypeEnum.IGNORE)"
             :append-to-body="false"
+            :offset="7"
           >
             <template #reference>
               <div class="item">
@@ -163,6 +165,12 @@ export default defineComponent({
 .jm-workflow-viewer-node-toolbar {
   position: fixed;
   z-index: 1;
+
+  ::v-deep(.el-popover) {
+    &.el-popper {
+      padding: 6px 16px;
+    }
+  }
 
   .mask {
     position: absolute;
