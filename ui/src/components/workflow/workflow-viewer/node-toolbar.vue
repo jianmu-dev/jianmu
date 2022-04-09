@@ -1,55 +1,64 @@
 <template>
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
-    <div class="mask"></div>
-    <div v-if="operationVisible" class="operation" ref="operation">
-      <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
-        <jm-popconfirm
-          title="确定要重试吗？"
-          icon="jm-icon-warning"
-          confirmButtonText="确定"
-          cancelButtonText="取消"
-          confirmButtonIcon="jm-icon-button-confirm"
-          cancelButtonIcon="jm-icon-button-cancel"
-          @confirm="handleClick(NodeToolbarTabTypeEnum.RETRY)"
-          :append-to-body="false"
-        >
-          <template #reference>
-            <div class="item">
-              <div class="icon retry"></div>
-              <div class="txt">重试</div>
-            </div>
-          </template>
-        </jm-popconfirm>
-        <div class="separator"></div>
-        <jm-popconfirm
-          title="确定要忽略吗？"
-          icon="jm-icon-warning"
-          confirmButtonText="确定"
-          cancelButtonText="取消"
-          confirmButtonIcon="jm-icon-button-confirm"
-          cancelButtonIcon="jm-icon-button-cancel"
-          @confirm="handleClick(NodeToolbarTabTypeEnum.IGNORE)"
-          :append-to-body="false"
-        >
-          <template #reference>
-            <div class="item">
-              <div class="icon ignore"></div>
-              <div class="txt">忽略</div>
-            </div>
-          </template>
-        </jm-popconfirm>
-        <div class="separator"></div>
+    <jm-popover v-if="operationVisible"
+                :append-to-body="false"
+                :offset="0"
+                trigger="hover"
+                width="auto"
+                placement="top">
+      <template #reference>
+        <div class="mask"></div>
       </template>
-      <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
-        <div class="icon view-log"/>
-        <div class="txt">日志</div>
+      <div class="operation">
+        <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
+          <jm-popconfirm
+            title="确定要重试吗？"
+            icon="jm-icon-warning"
+            confirmButtonText="确定"
+            cancelButtonText="取消"
+            confirmButtonIcon="jm-icon-button-confirm"
+            cancelButtonIcon="jm-icon-button-cancel"
+            @confirm="handleClick(NodeToolbarTabTypeEnum.RETRY)"
+            :append-to-body="false"
+          >
+            <template #reference>
+              <div class="item">
+                <div class="icon retry"></div>
+                <div class="txt">重试</div>
+              </div>
+            </template>
+          </jm-popconfirm>
+          <div class="separator"></div>
+          <jm-popconfirm
+            title="确定要忽略吗？"
+            icon="jm-icon-warning"
+            confirmButtonText="确定"
+            cancelButtonText="取消"
+            confirmButtonIcon="jm-icon-button-confirm"
+            cancelButtonIcon="jm-icon-button-cancel"
+            @confirm="handleClick(NodeToolbarTabTypeEnum.IGNORE)"
+            :append-to-body="false"
+          >
+            <template #reference>
+              <div class="item">
+                <div class="icon ignore"></div>
+                <div class="txt">忽略</div>
+              </div>
+            </template>
+          </jm-popconfirm>
+          <div class="separator"></div>
+        </template>
+        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
+          <div class="icon view-log"/>
+          <div class="txt">日志</div>
+        </div>
+        <div class="separator"></div>
+        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)">
+          <div class="icon view-params"/>
+          <div class="txt">参数</div>
+        </div>
       </div>
-      <div class="separator"></div>
-      <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)">
-        <div class="icon view-params"/>
-        <div class="txt">参数</div>
-      </div>
-    </div>
+    </jm-popover>
     <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
       <template #content>
         <div style="white-space: nowrap" v-html="tips"/>
@@ -86,7 +95,6 @@ export default defineComponent({
   emits: ['node-click'],
   setup(props: any, { emit }: SetupContext) {
     const toolbar = ref<HTMLElement>();
-    const operation = ref<HTMLElement>();
 
     onMounted(() => {
       const z = props.zoom / 100;
@@ -97,8 +105,6 @@ export default defineComponent({
       toolbar.value.style.top = (props.nodeEvent.y - h / 2) + 'px';
       toolbar.value.style.width = w + 'px';
       toolbar.value.style.height = (h + 23 * z) + 'px';
-
-      operation.value!.style.left = (w - operation.value!.offsetWidth) / 2 + 'px';
     });
 
     return {
@@ -132,7 +138,6 @@ export default defineComponent({
         return !!(props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK && props.taskInstanceId);
       }),
       toolbar,
-      operation,
       handleClick: (tabType: NodeToolbarTabTypeEnum) => {
         if (props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK) {
           emit('node-click', props.taskInstanceId, props.nodeEvent.type, tabType);
@@ -153,21 +158,15 @@ export default defineComponent({
   .mask {
     position: absolute;
     left: 0;
-    top: 0;
+    top: -10px;
     width: 100%;
-    height: 100%;
+    height: calc(100% + 10px);
   }
 
   .operation {
-    position: absolute;
-    top: -64px;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 8px 16px;
-    box-shadow: 0 5px 16px 2px #CDD5E6;
-    border-radius: 3px;
-    background-color: #FFFFFF;
 
     .item {
       user-select: none;
