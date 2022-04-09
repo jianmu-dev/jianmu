@@ -102,6 +102,16 @@ export default defineComponent({
       datetimeFormatter,
       executionTimeFormatter,
       openTaskLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
+        if (tabType === NodeToolbarTabTypeEnum.RETRY) {
+          // TODO 调用重试API
+          return;
+        }
+
+        if (tabType === NodeToolbarTabTypeEnum.IGNORE) {
+          // TODO 调用忽略API
+          return;
+        }
+
         taskLogForm.value.drawerVisible = true;
         taskLogForm.value.id = nodeId;
         taskLogForm.value.tabType = tabType;

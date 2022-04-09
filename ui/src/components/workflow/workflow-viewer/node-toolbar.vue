@@ -2,7 +2,7 @@
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
     <div class="mask"></div>
     <div v-if="operationVisible" class="operation" ref="operation">
-      <template v-if="taskStatus !== TaskStatusEnum.SUSPENDED">
+      <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
         <jm-popconfirm
           title="确定要重试吗？"
           icon="jm-icon-warning"
