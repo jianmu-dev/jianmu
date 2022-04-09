@@ -8,13 +8,11 @@ spring:
     activate:
       on-profile: @profile.active@
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/jianmu?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 12345678
-    hikari:
-      validation-timeout: 300000
+    url: jdbc:h2:mem:db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false
+    username: sa
+    password: sa
   flyway:
-    enabled: true
+    enabled: false
     clean-disabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
@@ -22,6 +20,9 @@ spring:
     out-of-order: false
     validate-on-migrate: true
     encoding: UTF-8
+  sql:
+    init:
+      schema-locations: classpath:testdb/migration/schema.sql
   jackson:
     parser:
       ALLOW_UNQUOTED_CONTROL_CHARS: true
