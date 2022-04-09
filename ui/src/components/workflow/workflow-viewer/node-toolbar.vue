@@ -1,6 +1,15 @@
 <template>
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
-    <jm-popover v-if="operationVisible"
+    <template v-if="!operationVisible">
+      <div class="mask"></div>
+      <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
+        <template #content>
+          <div style="white-space: nowrap" v-html="tips"/>
+        </template>
+        <div class="tooltip-section"></div>
+      </jm-tooltip>
+    </template>
+    <jm-popover v-else
                 :append-to-body="false"
                 :offset="0"
                 trigger="hover"
@@ -8,6 +17,12 @@
                 placement="top">
       <template #reference>
         <div class="mask"></div>
+        <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
+          <template #content>
+            <div style="white-space: nowrap" v-html="tips"/>
+          </template>
+          <div class="tooltip-section"></div>
+        </jm-tooltip>
       </template>
       <div class="operation">
         <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
@@ -59,12 +74,6 @@
         </div>
       </div>
     </jm-popover>
-    <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
-      <template #content>
-        <div style="white-space: nowrap" v-html="tips"/>
-      </template>
-      <div class="tooltip-section"></div>
-    </jm-tooltip>
   </div>
 </template>
 
