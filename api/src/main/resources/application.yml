@@ -12,7 +12,7 @@ spring:
     username: sa
     password: sa
   flyway:
-    enabled: false
+    enabled: true
     clean-disabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
@@ -20,9 +20,6 @@ spring:
     out-of-order: false
     validate-on-migrate: true
     encoding: UTF-8
-  sql:
-    init:
-      schema-locations: classpath:testdb/migration/schema.sql
   jackson:
     parser:
       ALLOW_UNQUOTED_CONTROL_CHARS: true
