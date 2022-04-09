@@ -100,10 +100,10 @@ public class AsyncTaskInstanceInternalApplication {
 
     // 任务已失败命令
     @Transactional
-    public void fail(String asyncTaskInstanceId) {
+    public void stop(String asyncTaskInstanceId) {
         this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
                 .ifPresent(asyncTaskInstance -> {
-                    asyncTaskInstance.fail();
+                    asyncTaskInstance.stop();
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
     }

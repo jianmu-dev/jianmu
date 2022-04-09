@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class DslNode {
     private String name;
     private String type;
+    private String onFailure;
     private List<String> sources;
     private List<String> targets;
     private Map<String, String> param;
@@ -36,6 +37,7 @@ public class DslNode {
         node.name = nodeName;
         setRelation(nodeMap, node);
         node.image = (String) nodeMap.get("image");
+        node.onFailure = (String) nodeMap.get("on-failure");
 
         var environment = nodeMap.get("environment");
         if (environment instanceof Map) {
@@ -60,6 +62,7 @@ public class DslNode {
         var dslNode = new DslNode();
         dslNode.name = nodeName;
         dslNode.type = (String) node.get("type");
+        dslNode.onFailure = (String) node.get("on-failure");
         setRelation(node, dslNode);
 
         var p = node.get("param");

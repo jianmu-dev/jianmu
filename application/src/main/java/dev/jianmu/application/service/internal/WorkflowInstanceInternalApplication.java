@@ -95,12 +95,12 @@ public class WorkflowInstanceInternalApplication {
     // 停止流程
     @Async
     @Transactional
-    public void stop(String instanceId) {
+    public void suspend(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
-        workflowInstance.stop();
+        workflowInstance.suspend();
         this.workflowInstanceRepository.save(workflowInstance);
     }
 

@@ -29,6 +29,8 @@ public class AsyncTaskInstance extends AggregateRoot {
     private String description;
     // 运行状态
     private TaskStatus status = TaskStatus.INIT;
+    // 错误处理模式
+    private FailureMode failureMode = FailureMode.FAIL;
     // 任务定义唯一引用名称
     private String asyncTaskRef;
     // 任务定义类型
@@ -88,8 +90,8 @@ public class AsyncTaskInstance extends AggregateRoot {
     }
 
     public void retry() {
-        if (this.status != TaskStatus.FAILED) {
-            throw new RuntimeException("非失败状态的任务不能重试");
+        if (this.status != TaskStatus.SUSPENDED) {
+            throw new RuntimeException("非挂起状态的任务不能重试");
         }
         this.activatingTime = LocalDateTime.now();
         var taskRetryEvent = TaskRetryEvent.Builder.aTaskRetryEvent()
@@ -102,6 +104,56 @@ public class AsyncTaskInstance extends AggregateRoot {
                 .nodeType(this.asyncTaskType)
                 .build();
         this.raiseEvent(taskRetryEvent);
+    }
+
+    public void stop() {
+        switch (this.failureMode) {
+            case IGNORE:
+                this.ignore();
+                return;
+            case SUSPEND:
+                this.suspend();
+                return;
+            case FAIL:
+                this.fail();
+                return;
+            default:
+                throw new RuntimeException("未知错误处理模式");
+        }
+    }
+
+    private void suspend() {
+        this.status = TaskStatus.SUSPENDED;
+        // 发布任务执行失败事件
+        this.raiseEvent(
+                TaskSuspendedEvent.Builder.aTaskSuspendedEvent()
+                        .nodeRef(this.asyncTaskRef)
+                        .triggerId(this.triggerId)
+                        .workflowInstanceId(this.workflowInstanceId)
+                        .asyncTaskInstanceId(this.id)
+                        .workflowRef(this.workflowRef)
+                        .workflowVersion(this.workflowVersion)
+                        .nodeType(this.asyncTaskType)
+                        .build()
+        );
+    }
+
+    private void ignore() {
+        this.status = TaskStatus.IGNORED;
+        this.endTime = LocalDateTime.now();
+        this.serialNo++;
+        // 发布任务忽略事件
+        this.raiseEvent(
+                TaskIgnoredEvent.Builder.aTaskIgnoredEvent()
+                        .nodeRef(this.asyncTaskRef)
+                        .triggerId(this.triggerId)
+                        .workflowInstanceId(this.workflowInstanceId)
+                        .asyncTaskInstanceId(this.id)
+                        .workflowRef(this.workflowRef)
+                        .workflowVersion(this.workflowVersion)
+                        .nodeType(this.asyncTaskType)
+                        .build()
+        );
     }
 
     public void succeed() {
@@ -142,7 +194,7 @@ public class AsyncTaskInstance extends AggregateRoot {
         );
     }
 
-    public void fail() {
+    private void fail() {
         this.status = TaskStatus.FAILED;
         this.endTime = LocalDateTime.now();
         // 发布任务执行失败事件
@@ -215,6 +267,10 @@ public class AsyncTaskInstance extends AggregateRoot {
         return status;
     }
 
+    public FailureMode getFailureMode() {
+        return failureMode;
+    }
+
     public String getAsyncTaskRef() {
         return asyncTaskRef;
     }
@@ -266,6 +322,8 @@ public class AsyncTaskInstance extends AggregateRoot {
         private String asyncTaskRef;
         // 任务定义类型
         private String asyncTaskType;
+        // 错误处理模式
+        private FailureMode failureMode = FailureMode.FAIL;
 
         private Builder() {
         }
@@ -314,6 +372,11 @@ public class AsyncTaskInstance extends AggregateRoot {
             return this;
         }
 
+        public Builder failureMode(FailureMode failureMode) {
+            this.failureMode = failureMode;
+            return this;
+        }
+
         public AsyncTaskInstance build() {
             AsyncTaskInstance asyncTaskInstance = new AsyncTaskInstance();
             asyncTaskInstance.id = this.id;
@@ -325,6 +388,7 @@ public class AsyncTaskInstance extends AggregateRoot {
             asyncTaskInstance.name = this.name;
             asyncTaskInstance.asyncTaskRef = this.asyncTaskRef;
             asyncTaskInstance.asyncTaskType = this.asyncTaskType;
+            asyncTaskInstance.failureMode = this.failureMode;
             // 执行次数计数，从0开始
             asyncTaskInstance.serialNo = 0;
             return asyncTaskInstance;

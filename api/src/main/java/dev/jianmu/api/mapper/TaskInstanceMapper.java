@@ -42,8 +42,10 @@ public interface TaskInstanceMapper {
     @ValueMappings({
             @ValueMapping(target = "INIT", source = "INIT"),
             @ValueMapping(target = "RUNNING", source = "RUNNING"),
+            @ValueMapping(target = "SUSPENDED", source = "SUSPENDED"),
             @ValueMapping(target = "SKIPPED", source = "SKIPPED"),
             @ValueMapping(target = "FAILED", source = "FAILED"),
+            @ValueMapping(target = "IGNORED", source = "IGNORED"),
             @ValueMapping(target = "SUCCEEDED", source = "SUCCEEDED")
     })
     TaskInstanceVo.Status toTaskInstanceStatus(TaskStatus taskStatus);

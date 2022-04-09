@@ -1,13 +1,13 @@
-package dev.jianmu.workflow.aggregate.definition;
+package dev.jianmu.workflow.aggregate.process;
 
 /**
  * @author Ethan Liu
  * @class FailureMode
  * @description 失败处理模式
- * @create 2022-04-06 15:42
+ * @create 2022-04-09 20:23
  */
 public enum FailureMode {
-    TERMINATE,
+    FAIL,
     IGNORE,
-    MANUAL
+    SUSPEND
 }
