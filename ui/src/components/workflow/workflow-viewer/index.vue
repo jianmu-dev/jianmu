@@ -285,7 +285,8 @@ export default defineComponent({
           count: number;
         }[] = [];
 
-        const tasks = props.tasks.filter(({ defKey }) => defKey !== 'Condition');
+        const tasks = props.tasks.filter(({ defKey }) =>
+          defKey !== 'Start' && defKey !== 'End' && defKey !== 'Condition' && defKey !== 'Switch');
         const taskMap = new Map();
         // 按开始时间生序排序，保证最后一个是最新的
         sortTasks(tasks, false)

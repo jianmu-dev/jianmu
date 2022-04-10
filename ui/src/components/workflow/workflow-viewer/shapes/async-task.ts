@@ -96,6 +96,17 @@ const states: {
       fill: '#51C41B',
     },
   },
+  [TaskStatusEnum.SUSPENDED]: {
+    img: SUSPENDED,
+    style: {
+      // TODO 待适配
+      fill: '#EEEEEE',
+      stroke: '#7986CB',
+    },
+    indicatorStyle: {
+      fill: '#7986CB',
+    },
+  },
 };
 
 export default function (G6: typeof _G6) {
