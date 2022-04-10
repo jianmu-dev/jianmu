@@ -61,7 +61,7 @@
           <div class="suspend times">{{ statusParams.suspendNum }}</div>
         </div>
       </div>
-      <div>
+      <div class="item">
         <div>
           <div class="param-key">执行状态</div>
           <div>
