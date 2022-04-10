@@ -46,7 +46,7 @@ public class WorkflowInstance extends AggregateRoot {
     }
 
     public boolean isRunning() {
-        return this.status == ProcessStatus.RUNNING;
+        return (this.status == ProcessStatus.RUNNING || this.status == ProcessStatus.SUSPENDED);
     }
 
     public void statusCheck() {
