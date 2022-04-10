@@ -29,6 +29,7 @@ public class WorkflowInstanceVo {
     private String workflowVersion;
     private String description;
     private LocalDateTime startTime;
+    private LocalDateTime suspendedTime;
     private LocalDateTime endTime;
     private ProcessStatus status;
 }
