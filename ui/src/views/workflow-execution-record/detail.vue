@@ -102,9 +102,7 @@
           <div>流程版本号</div>
         </div>
         <jm-tooltip
-          v-if="
-            data.record?.status === WorkflowExecutionRecordStatusEnum.RUNNING
-          "
+          v-if="[WorkflowExecutionRecordStatusEnum.RUNNING, WorkflowExecutionRecordStatusEnum.SUSPENDED].includes(data.record?.status)"
           content="终止"
           placement="left"
         >
