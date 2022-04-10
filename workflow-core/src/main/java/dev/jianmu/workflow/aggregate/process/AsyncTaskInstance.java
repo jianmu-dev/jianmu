@@ -122,6 +122,13 @@ public class AsyncTaskInstance extends AggregateRoot {
         }
     }
 
+    public void doIgnore() {
+        if (this.status != TaskStatus.SUSPENDED) {
+            throw new RuntimeException("当前任务不能忽略");
+        }
+        this.ignore();
+    }
+
     private void suspend() {
         this.status = TaskStatus.SUSPENDED;
         // 发布任务执行失败事件
