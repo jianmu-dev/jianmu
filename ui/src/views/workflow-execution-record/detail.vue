@@ -107,7 +107,11 @@
           placement="left"
         >
           <button
-            class="terminate-btn jm-icon-button-stop"
+            :class="{
+              'terminate-btn': true,
+              'jm-icon-button-stop': true,
+              [!data.record?.status ? 'init' : data.record.status.toLowerCase()]: true,
+            }"
             @click="terminate"
             @keypress.enter.prevent
           ></button>
@@ -634,7 +638,13 @@ export default defineComponent({
         cursor: pointer;
 
         &:active {
-          background-color: #55dbdb;
+          &.running {
+            background-color: #55dbdb;
+          }
+
+          &.suspended {
+            background-color: #8e9ded;
+          }
         }
       }
     }
