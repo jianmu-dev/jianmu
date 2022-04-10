@@ -16,6 +16,7 @@ export enum ProjectStatusEnum {
   RUNNING = 'RUNNING',
   FAILED = 'FAILED',
   SUCCEEDED = 'SUCCEEDED',
+  SUSPENDED = 'SUSPENDED',
 }
 
 /**
