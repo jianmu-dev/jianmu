@@ -87,6 +87,7 @@ public class AsyncTaskInstanceInternalApplication {
                 });
     }
 
+    // 任务重试
     @Transactional
     public void retry(String instanceId, String taskRef) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
@@ -96,6 +97,18 @@ public class AsyncTaskInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
         asyncTaskInstance.retry();
         this.asyncTaskInstanceRepository.retryById(asyncTaskInstance);
+    }
+
+    // 任务忽略
+    @Transactional
+    public void ignore(String instanceId, String taskRef) {
+        var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
+        asyncTaskInstance.doIgnore();
+        this.asyncTaskInstanceRepository.ignoreById(asyncTaskInstance);
     }
 
     // 任务已失败命令

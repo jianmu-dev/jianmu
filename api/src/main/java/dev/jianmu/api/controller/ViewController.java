@@ -12,10 +12,10 @@ import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
-import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
@@ -254,17 +254,17 @@ public class ViewController {
     @Operation(summary = "任务实例列表接口", description = "任务实例列表接口")
     public List<TaskInstanceVo> findByTriggerId(@PathVariable String triggerId) {
         List<TaskInstanceVo> list = new ArrayList<>();
-        var taskInstances = this.taskInstanceApplication.findByTriggerId(triggerId);
-        this.asyncTaskInstanceApplication.findByTriggerId(triggerId).stream()
-                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus().equals(TaskStatus.SKIPPED))
+        this.asyncTaskInstanceApplication.findByTriggerId(triggerId)
                 .forEach(asyncTaskInstance -> {
                     var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
                     list.add(vo);
                 });
-        taskInstances.forEach(taskInstance -> {
-            var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
-            list.add(vo);
-        });
+        this.taskInstanceApplication.findByTriggerId(triggerId).stream()
+                .filter(taskInstance -> taskInstance.getStatus() == InstanceStatus.WAITING)
+                .forEach(taskInstance -> {
+                    list.stream().filter(taskInstanceVo -> taskInstanceVo.getInstanceId().equals(taskInstance.getId()))
+                            .forEach(taskInstanceVo -> taskInstanceVo.setStatus(TaskInstanceVo.Status.WAITING));
+                });
         return list;
     }
 
@@ -344,7 +344,7 @@ public class ViewController {
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
             projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-            if (project.getStatus() == null){
+            if (project.getStatus() == null) {
                 return projectVo;
             }
             if (project.getStatus().equals(ProcessStatus.TERMINATED.name())) {
