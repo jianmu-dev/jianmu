@@ -51,7 +51,7 @@
       </div>
       <div class="item">
         <div>
-          <div class="param-key">{{ isSuspended ? '挂起时长' : '执行时长' }}</div>
+          <div class="param-key">执行时长</div>
           <div class="param-value">
             <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
           </div>
