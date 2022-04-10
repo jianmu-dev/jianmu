@@ -6,6 +6,7 @@ import SKIPPED from '../svgs/shape/async-task/SKIPPED.svg';
 import FAILED from '../svgs/shape/async-task/FAILED.svg';
 import SUCCEEDED from '../svgs/shape/async-task/SUCCEEDED.svg';
 import SUSPENDED from '../svgs/shape/async-task/SUSPENDED.svg';
+import IGNORED from '../svgs/shape/async-task/IGNORED.svg';
 import { NodeTypeEnum } from '../utils/enumeration';
 import AsyncTaskRunningAnimation, { attrs } from '../animations/async-task-running-animation';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
@@ -27,6 +28,7 @@ const imgs: {
   [TaskStatusEnum.FAILED]: FAILED,
   [TaskStatusEnum.SUCCEEDED]: SUCCEEDED,
   [TaskStatusEnum.SUSPENDED]: SUSPENDED,
+  [TaskStatusEnum.IGNORED]: IGNORED,
 };
 
 const states: {
@@ -105,6 +107,17 @@ const states: {
     },
     indicatorStyle: {
       fill: '#7986CB',
+    },
+  },
+  [TaskStatusEnum.IGNORED]: {
+    img: IGNORED,
+    style: {
+      // TODO 待适配
+      fill: '#EEEEEE',
+      stroke: '#5F85AE',
+    },
+    indicatorStyle: {
+      fill: '#5F85AE',
     },
   },
 };

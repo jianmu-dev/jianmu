@@ -62,9 +62,15 @@
         </div>
       </div>
       <div>
-        <div class="param-key">执行状态</div>
         <div>
-          <task-state :status="task.status"/>
+          <div class="param-key">执行状态</div>
+          <div>
+            <task-state :status="task.status"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">忽略次数</div>
+          <div class="ignore times">{{ statusParams.ignoreNum }}</div>
         </div>
       </div>
     </div>
@@ -357,6 +363,7 @@ export default defineComponent({
       failNum: number;
       skipNum: number;
       suspendNum: number;
+      ignoreNum: number;
     }>(() => {
       const statusNum = {
         total: 0,
@@ -364,6 +371,7 @@ export default defineComponent({
         failNum: 0,
         skipNum: 0,
         suspendNum: 0,
+        ignoreNum: 0,
       };
 
       tasks.value.forEach(item => {
@@ -375,9 +383,12 @@ export default defineComponent({
           statusNum.skipNum++;
         } else if (item.status === TaskStatusEnum.SUSPENDED) {
           statusNum.suspendNum++;
+        } else if (item.status === TaskStatusEnum.IGNORED) {
+          statusNum.ignoreNum++;
         }
       });
-      statusNum.total = statusNum.successNum + statusNum.failNum + statusNum.skipNum + statusNum.suspendNum;
+      statusNum.total = statusNum.successNum + statusNum.failNum +
+        statusNum.skipNum + statusNum.suspendNum + statusNum.ignoreNum;
 
       return statusNum;
     });
@@ -572,6 +583,10 @@ export default defineComponent({
 
           .suspend {
             color: #7986CB;
+          }
+
+          .ignore {
+            color: #5F85AE;
           }
         }
       }
