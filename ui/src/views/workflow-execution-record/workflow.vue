@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, inject, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IOpenTaskLogForm, IOpenWebhookLogForm, IState } from '@/model/modules/workflow-execution-record';
@@ -64,6 +64,7 @@ import { ignoreTask, retryTask } from '@/api/workflow-execution-record';
 export default defineComponent({
   components: { TaskLog, ProcessLog, WebhookLog },
   setup() {
+    const loadData = inject('loadData') as (refreshing?: boolean) => void;
     const workflowRef = ref<HTMLElement>();
     const router = useRouter();
     const store = useStore();
@@ -102,16 +103,18 @@ export default defineComponent({
       },
       datetimeFormatter,
       executionTimeFormatter,
-      openTaskLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
+      openTaskLog: async (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         if (tabType === NodeToolbarTabTypeEnum.RETRY) {
           const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
-          retryTask(data.value.record.id, nodeName);
+          await retryTask(data.value.record.id, nodeName);
+          await loadData();
           return;
         }
 
         if (tabType === NodeToolbarTabTypeEnum.IGNORE) {
           const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
-          ignoreTask(data.value.record.id, nodeName);
+          await ignoreTask(data.value.record.id, nodeName);
+          await loadData();
           return;
         }
 
