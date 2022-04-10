@@ -95,8 +95,8 @@ export default class AsyncTaskRunningAnimation {
   constructor(item: Item) {
     const group = item._cfg?.group as IGroup;
     const children = [...group.getChildren()];
-    children[1].setZIndex(-2);
-    children[2].setZIndex(-2);
+    // children[1].setZIndex(-2);
+    // children[2].setZIndex(-2);
 
     this.group = group;
     this.iconShape = children.find(child => child.cfg.name === 'async_task_icon') as IShape | undefined;
