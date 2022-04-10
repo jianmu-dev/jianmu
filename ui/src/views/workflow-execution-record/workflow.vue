@@ -59,6 +59,7 @@ import { useRouter } from 'vue-router';
 import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 import { IRootState } from '@/model';
+import { ignoreTask, retryTask } from '@/api/workflow-execution-record';
 
 export default defineComponent({
   components: { TaskLog, ProcessLog, WebhookLog },
@@ -103,12 +104,14 @@ export default defineComponent({
       executionTimeFormatter,
       openTaskLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         if (tabType === NodeToolbarTabTypeEnum.RETRY) {
-          // TODO 调用重试API
+          const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
+          retryTask(data.value.record.id, nodeName);
           return;
         }
 
         if (tabType === NodeToolbarTabTypeEnum.IGNORE) {
-          // TODO 调用忽略API
+          const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
+          ignoreTask(data.value.record.id, nodeName);
           return;
         }
 
