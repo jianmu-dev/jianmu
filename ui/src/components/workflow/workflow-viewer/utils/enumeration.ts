@@ -14,6 +14,8 @@ export enum NodeTypeEnum {
  * 节点工具栏tab类型枚举
  */
 export enum NodeToolbarTabTypeEnum {
+  RETRY = 'retry',
+  IGNORE = 'ignore',
   LOG = 'log',
   PARAMS = 'params',
 }

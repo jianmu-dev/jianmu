@@ -14,7 +14,10 @@
              @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
-                  :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
+                  :task-instance-id="selectedTask.instanceId"
+                  :task-status="selectedTask.status"
+                  :node-event="nodeEvent"
+                  :zoom="zoom"
                   @node-click="clickNode"
                   @mouseout="handleNodeBarMouseout"/>
     <div v-show="!dslMode" class="canvas" ref="container"/>
@@ -82,11 +85,9 @@ export default defineComponent({
     const container = ref<HTMLElement>();
     const graph = ref<Graph>();
     const nodeActionConfigured = ref<boolean>(false);
-    const taskInstanceId = ref<string>();
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
-      taskInstanceId.value = undefined;
       nodeEvent.value = undefined;
     };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
@@ -96,17 +97,6 @@ export default defineComponent({
         proxy.$nextTick(() => mouseoverNode(evt));
         return;
       }
-
-      switch (evt.type) {
-        case NodeTypeEnum.ASYNC_TASK: {
-          const tasks = sortTasks(props.tasks, true, evt.id);
-          if (tasks.length > 0) {
-            taskInstanceId.value = tasks[0].instanceId;
-          }
-          break;
-        }
-      }
-
       nodeEvent.value = evt;
     };
     const handleNodeBarMouseout = (evt: any) => {
@@ -204,7 +194,26 @@ export default defineComponent({
     return {
       container,
       graph,
-      taskInstanceId,
+      selectedTask: computed<{
+        instanceId: string;
+        status: TaskStatusEnum;
+      }>(() => {
+        const defaultValue = {
+          instanceId: '',
+          status: TaskStatusEnum.INIT,
+        };
+
+        if (!nodeEvent.value || nodeEvent.value.type !== NodeTypeEnum.ASYNC_TASK) {
+          return defaultValue;
+        }
+
+        // 按开始时间降序排序，保证第一个是最新的
+        const tasks = sortTasks(props.tasks, true, nodeEvent.value.id);
+        return tasks.length === 0 ? defaultValue : {
+          instanceId: tasks[0].instanceId,
+          status: tasks[0].status,
+        };
+      }),
       dslType,
       dslMode,
       nodeEvent,
@@ -278,7 +287,8 @@ export default defineComponent({
           count: number;
         }[] = [];
 
-        const tasks = props.tasks.filter(({ defKey }) => defKey !== 'Condition');
+        const tasks = props.tasks.filter(({ defKey }) =>
+          defKey !== 'Start' && defKey !== 'End' && defKey !== 'Condition' && defKey !== 'Switch');
         const taskMap = new Map();
         // 按开始时间生序排序，保证最后一个是最新的
         sortTasks(tasks, false)

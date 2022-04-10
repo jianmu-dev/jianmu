@@ -68,7 +68,19 @@
           <div class="value">{{ datetimeFormatter(data.record?.endTime) }}</div>
           <div>完成时间</div>
         </div>
-        <div class="item">
+        <div class="item" v-if="data.record?.status === WorkflowExecutionRecordStatusEnum.SUSPENDED">
+          <div class="value">
+            {{
+              executionTimeFormatter(
+                data.record?.suspendedTime,
+                undefined,
+                true,
+              )
+            }}
+          </div>
+          <div>挂起时长</div>
+        </div>
+        <div class="item" v-else>
           <div class="value">
             {{
               executionTimeFormatter(
@@ -90,14 +102,16 @@
           <div>流程版本号</div>
         </div>
         <jm-tooltip
-          v-if="
-            data.record?.status === WorkflowExecutionRecordStatusEnum.RUNNING
-          "
+          v-if="[WorkflowExecutionRecordStatusEnum.RUNNING, WorkflowExecutionRecordStatusEnum.SUSPENDED].includes(data.record?.status)"
           content="终止"
           placement="left"
         >
           <button
-            class="terminate-btn jm-icon-button-stop"
+            :class="{
+              'terminate-btn': true,
+              'jm-icon-button-stop': true,
+              [!data.record?.status ? 'init' : data.record.status.toLowerCase()]: true,
+            }"
             @click="terminate"
             @keypress.enter.prevent
           ></button>
@@ -112,7 +126,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -149,6 +163,33 @@ export default defineComponent({
     const reloadMain = inject('reloadMain') as () => void;
     const navScrollBar = ref();
     let terminateLoad = false;
+    const loadData = async (refreshing?: boolean) => {
+      try {
+        await proxy.fetchDetail({
+          projectId: props.projectId,
+          workflowExecutionRecordId: props.workflowExecutionRecordId,
+        });
+      } catch (err) {
+        if (!refreshing) {
+          throw err;
+        }
+
+        if (err instanceof TimeoutError) {
+          // 忽略超时错误
+          console.warn(err.message);
+        } else if (err instanceof HttpError) {
+          const { response } = err as HttpError;
+
+          if (response && response.status !== 502) {
+            throw err;
+          }
+
+          // 忽略错误
+          console.warn(err.message);
+        }
+      }
+    };
+    provide('loadData', loadData);
 
     const loadDetail = async (refreshing?: boolean) => {
       if (terminateLoad) {
@@ -161,30 +202,7 @@ export default defineComponent({
           loading.value = !loading.value;
         }
 
-        try {
-          await proxy.fetchDetail({
-            projectId: props.projectId,
-            workflowExecutionRecordId: props.workflowExecutionRecordId,
-          });
-        } catch (err) {
-          if (!refreshing) {
-            throw err;
-          }
-
-          if (err instanceof TimeoutError) {
-            // 忽略超时错误
-            console.warn(err.message);
-          } else if (err instanceof HttpError) {
-            const { response } = err as HttpError;
-
-            if (response && response.status !== 502) {
-              throw err;
-            }
-
-            // 忽略错误
-            console.warn(err.message);
-          }
-        }
+        await loadData(refreshing);
         if (!refreshing) {
           loading.value = !loading.value;
         }
@@ -192,14 +210,9 @@ export default defineComponent({
         const { status } = state.recordDetail
           .record as IWorkflowExecutionRecordVo;
 
-        if (
-          status === WorkflowExecutionRecordStatusEnum.RUNNING ||
+        if ([WorkflowExecutionRecordStatusEnum.RUNNING, WorkflowExecutionRecordStatusEnum.SUSPENDED].includes(status) ||
           state.recordDetail.taskRecords.find(item =>
-            [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(
-              item.status,
-            ),
-          )
-        ) {
+            [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING, TaskStatusEnum.SUSPENDED].includes(item.status))) {
           console.debug('3秒后刷新');
           await sleep(3000);
           await loadDetail(true);
@@ -525,6 +538,14 @@ export default defineComponent({
           }
         }
 
+        &.suspended {
+          &,
+          .left-horn,
+          .right-horn {
+            background-color: #7986cb;
+          }
+        }
+
         &.unselected {
           cursor: pointer;
           height: 59px;
@@ -585,6 +606,10 @@ export default defineComponent({
         background-color: #cf1524;
       }
 
+      &.suspended {
+        background-color: #7986cb;
+      }
+
       .item + .item {
         margin-left: 80px;
       }
@@ -613,7 +638,13 @@ export default defineComponent({
         cursor: pointer;
 
         &:active {
-          background-color: #55dbdb;
+          &.running {
+            background-color: #55dbdb;
+          }
+
+          &.suspended {
+            background-color: #8e9ded;
+          }
         }
       }
     }

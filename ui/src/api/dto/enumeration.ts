@@ -5,6 +5,7 @@ export enum WorkflowExecutionRecordStatusEnum {
   RUNNING = 'RUNNING',
   FINISHED = 'FINISHED',
   TERMINATED = 'TERMINATED',
+  SUSPENDED = 'SUSPENDED',
 }
 
 /**
@@ -15,6 +16,7 @@ export enum ProjectStatusEnum {
   RUNNING = 'RUNNING',
   FAILED = 'FAILED',
   SUCCEEDED = 'SUCCEEDED',
+  SUSPENDED = 'SUSPENDED',
 }
 
 /**
@@ -27,6 +29,8 @@ export enum TaskStatusEnum {
   SKIPPED = 'SKIPPED',
   FAILED = 'FAILED',
   SUCCEEDED = 'SUCCEEDED',
+  SUSPENDED = 'SUSPENDED',
+  IGNORED = 'IGNORED',
 }
 
 /**
