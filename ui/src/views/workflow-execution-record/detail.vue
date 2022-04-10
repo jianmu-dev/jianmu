@@ -68,7 +68,19 @@
           <div class="value">{{ datetimeFormatter(data.record?.endTime) }}</div>
           <div>完成时间</div>
         </div>
-        <div class="item">
+        <div class="item" v-if="WorkflowExecutionRecordStatusEnum.SUSPENDED">
+          <div class="value">
+            {{
+              executionTimeFormatter(
+                data.record?.suspendedTime,
+                undefined,
+                true,
+              )
+            }}
+          </div>
+          <div>挂起时长</div>
+        </div>
+        <div class="item" v-else>
           <div class="value">
             {{
               executionTimeFormatter(
@@ -192,14 +204,9 @@ export default defineComponent({
         const { status } = state.recordDetail
           .record as IWorkflowExecutionRecordVo;
 
-        if (
-          status === WorkflowExecutionRecordStatusEnum.RUNNING ||
+        if ([WorkflowExecutionRecordStatusEnum.RUNNING, WorkflowExecutionRecordStatusEnum.SUSPENDED].includes(status) ||
           state.recordDetail.taskRecords.find(item =>
-            [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(
-              item.status,
-            ),
-          )
-        ) {
+            [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING, TaskStatusEnum.SUSPENDED].includes(item.status))) {
           console.debug('3秒后刷新');
           await sleep(3000);
           await loadDetail(true);
@@ -525,6 +532,14 @@ export default defineComponent({
           }
         }
 
+        &.suspended {
+          &,
+          .left-horn,
+          .right-horn {
+            background-color: #7986cb;
+          }
+        }
+
         &.unselected {
           cursor: pointer;
           height: 59px;
@@ -583,6 +598,10 @@ export default defineComponent({
 
       &.terminated {
         background-color: #cf1524;
+      }
+
+      &.suspended {
+        background-color: #7986cb;
       }
 
       .item + .item {

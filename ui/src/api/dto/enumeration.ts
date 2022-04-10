@@ -5,6 +5,7 @@ export enum WorkflowExecutionRecordStatusEnum {
   RUNNING = 'RUNNING',
   FINISHED = 'FINISHED',
   TERMINATED = 'TERMINATED',
+  SUSPENDED = 'SUSPENDED',
 }
 
 /**
