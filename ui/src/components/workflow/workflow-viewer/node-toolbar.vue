@@ -10,7 +10,7 @@
         </jm-tooltip>
       </div>
     </template>
-    <jm-popover v-else
+    <jm-popover v-else-if="popoverVisible"
                 :append-to-body="false"
                 :offset="0"
                 trigger="hover"
@@ -27,7 +27,7 @@
         </div>
       </template>
       <div class="operation">
-        <template v-if="taskStatus === TaskStatusEnum.SUSPENDED">
+        <template v-if="status === TaskStatusEnum.SUSPENDED">
           <jm-popconfirm
             title="确定要重试吗？"
             icon="jm-icon-warning"
@@ -82,7 +82,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref, SetupContext } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, onUpdated, PropType, ref, SetupContext } from 'vue';
 import { INodeMouseoverEvent } from './utils/model';
 import { MAX_LABEL_LENGTH } from './utils/dsl';
 import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
@@ -108,6 +108,19 @@ export default defineComponent({
   emits: ['node-click'],
   setup(props: any, { emit }: SetupContext) {
     const toolbar = ref<HTMLElement>();
+    const popoverVisible = ref<boolean>(true);
+    const status = ref<TaskStatusEnum>(props.taskStatus);
+
+    onUpdated(async () => {
+      if (status.value === props.taskStatus) {
+        return;
+      }
+      status.value = props.taskStatus;
+      popoverVisible.value = false;
+      // 保证状态变化时，重新渲染
+      await nextTick();
+      popoverVisible.value = true;
+    });
 
     onMounted(() => {
       const z = props.zoom / 100;
@@ -123,6 +136,8 @@ export default defineComponent({
     return {
       NodeToolbarTabTypeEnum,
       TaskStatusEnum,
+      popoverVisible,
+      status,
       tips: computed<string>(() => {
         let str = '';
 

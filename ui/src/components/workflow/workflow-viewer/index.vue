@@ -86,12 +86,10 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeActionConfigured = ref<boolean>(false);
     const taskInstanceId = ref<string>();
-    const taskStatus = ref<TaskStatusEnum>();
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
       taskInstanceId.value = undefined;
-      taskStatus.value = undefined;
       nodeEvent.value = undefined;
     };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
@@ -107,7 +105,6 @@ export default defineComponent({
           const tasks = sortTasks(props.tasks, true, evt.id);
           if (tasks.length > 0) {
             taskInstanceId.value = tasks[0].instanceId;
-            taskStatus.value = tasks[0].status;
           }
           break;
         }
@@ -211,7 +208,10 @@ export default defineComponent({
       container,
       graph,
       taskInstanceId,
-      taskStatus,
+      taskStatus: computed<TaskStatusEnum>(() => {
+        const task = props.tasks.find(({ instanceId }) => instanceId === taskInstanceId.value);
+        return task ? task.status : TaskStatusEnum.INIT;
+      }),
       dslType,
       dslMode,
       nodeEvent,
