@@ -54,6 +54,8 @@ public class ProjectVo {
     private String gitRepoId;
     @Schema(description = "开始执行时间")
     private LocalDateTime startTime;
+    @Schema(description = "挂起时间")
+    private LocalDateTime suspendedTime;
     @Schema(description = "最后执行时间")
     private LocalDateTime latestTime;
     @Schema(description = "下次执行时间")

@@ -69,7 +69,7 @@ public class AsyncTaskInstanceInternalApplication {
         // 终止同一流程实例中所有运行中的任务
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByInstanceId(instanceId);
         asyncTaskInstances.stream()
-                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING || asyncTaskInstance.getStatus() == TaskStatus.SUSPENDED)
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.terminate();
                     log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());

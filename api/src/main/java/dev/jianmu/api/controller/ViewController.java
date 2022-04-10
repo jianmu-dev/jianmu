@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -190,9 +189,13 @@ public class ViewController {
                 .map(workflowInstance -> {
                     var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
                     projectVo.setLatestTime(workflowInstance.getEndTime());
+                    projectVo.setSuspendedTime(workflowInstance.getSuspendedTime());
                     projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
                     if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
                         projectVo.setStatus("FAILED");
+                    }
+                    if (workflowInstance.getStatus() == ProcessStatus.SUSPENDED) {
+                        projectVo.setStatus("SUSPENDED");
                     }
                     if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
                         projectVo.setStatus("SUCCEEDED");
@@ -253,11 +256,18 @@ public class ViewController {
     @GetMapping("/task_instances/{triggerId}")
     @Operation(summary = "任务实例列表接口", description = "任务实例列表接口")
     public List<TaskInstanceVo> findByTriggerId(@PathVariable String triggerId) {
-        List<TaskInstanceVo> list = new ArrayList<>();
-        this.asyncTaskInstanceApplication.findByTriggerId(triggerId)
-                .forEach(asyncTaskInstance -> {
-                    var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
-                    list.add(vo);
+        List<TaskInstanceVo> list = this.taskInstanceApplication.findByTriggerId(triggerId).stream()
+                .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
+                .collect(Collectors.toList());
+        var asyncTaskInstances = this.asyncTaskInstanceApplication.findByTriggerId(triggerId);
+        list.stream()
+                .filter(taskInstanceVo -> taskInstanceVo.getStatus() != TaskInstanceVo.Status.WAITING)
+                .forEach(taskInstanceVo -> {
+                    asyncTaskInstances.stream()
+                            .filter(asyncTaskInstance -> taskInstanceVo.getBusinessId().equals(asyncTaskInstance.getId()))
+                            .forEach(
+                                    asyncTaskInstance -> taskInstanceVo.setStatus(TaskInstanceMapper.INSTANCE.toTaskInstanceStatus(asyncTaskInstance.getStatus()))
+                            );
                 });
         this.taskInstanceApplication.findByTriggerId(triggerId).stream()
                 .filter(taskInstance -> taskInstance.getStatus() == InstanceStatus.WAITING)
@@ -352,6 +362,10 @@ public class ViewController {
             }
             if (project.getStatus().equals(ProcessStatus.FINISHED.name())) {
                 projectVo.setStatus("SUCCEEDED");
+            }
+            if (project.getStatus().equals(ProcessStatus.SUSPENDED.name())) {
+                projectVo.setSuspendedTime(project.getSuspendedTime());
+                projectVo.setStatus("SUSPENDED");
             }
             if (project.getStatus().equals(ProcessStatus.RUNNING.name())) {
                 projectVo.setStartTime(project.getStartTime());
