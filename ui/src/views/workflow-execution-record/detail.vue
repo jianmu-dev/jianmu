@@ -68,7 +68,7 @@
           <div class="value">{{ datetimeFormatter(data.record?.endTime) }}</div>
           <div>完成时间</div>
         </div>
-        <div class="item" v-if="WorkflowExecutionRecordStatusEnum.SUSPENDED">
+        <div class="item" v-if="data.record?.status === WorkflowExecutionRecordStatusEnum.SUSPENDED">
           <div class="value">
             {{
               executionTimeFormatter(
