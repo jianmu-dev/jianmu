@@ -201,7 +201,7 @@ public class AsyncTaskInstance extends AggregateRoot {
         );
     }
 
-    private void fail() {
+    public void fail() {
         this.status = TaskStatus.FAILED;
         this.endTime = LocalDateTime.now();
         // 发布任务执行失败事件
