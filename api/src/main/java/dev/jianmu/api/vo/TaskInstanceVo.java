@@ -23,8 +23,10 @@ public class TaskInstanceVo {
         INIT,
         WAITING,
         RUNNING,
+        SUSPENDED,
         SKIPPED,
         FAILED,
+        IGNORED,
         SUCCEEDED,
     }
 

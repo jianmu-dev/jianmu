@@ -151,7 +151,6 @@ public class ProjectApplication {
                 .nodes(nodes)
                 .globalParameters(parser.getGlobalParameters())
                 .dslText(dslText)
-                .failureMode(parser.getFailureMode())
                 .build();
     }
 

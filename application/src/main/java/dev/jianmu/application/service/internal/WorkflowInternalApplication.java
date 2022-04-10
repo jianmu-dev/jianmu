@@ -131,6 +131,7 @@ public class WorkflowInternalApplication {
                         .description(node.getDescription())
                         .asyncTaskRef(node.getRef())
                         .asyncTaskType(node.getType())
+                        .failureMode(node.getFailureMode())
                         .build()
         ).collect(Collectors.toList());
 

@@ -129,12 +129,37 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
+    @EventListener
+    public void handleTaskIgnoredEvent(TaskIgnoredEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get TaskIgnoredEvent here -------------------------");
+        log.info(event.toString());
+        var cmd = NextNodeCmd.builder()
+                .triggerId(event.getTriggerId())
+                .workflowRef(event.getWorkflowRef())
+                .workflowVersion(event.getWorkflowVersion())
+                .nodeRef(event.getNodeRef())
+                .build();
+        this.workflowInternalApplication.next(cmd);
+        log.info("-----------------------------------------------------");
+    }
+
+    @EventListener
+    public void handleTaskSuspendedEvent(TaskSuspendedEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get TaskSuspendedEvent here -------------------------");
+        log.info(event.toString());
+        this.workflowInstanceInternalApplication.suspend(event.getWorkflowInstanceId());
+        log.info("-----------------------------------------------------");
+    }
+
     @EventListener
     public void handleTaskFailedEvent(TaskFailedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskFailedEvent here -------------------------");
         log.info(event.toString());
-        this.workflowInstanceInternalApplication.stop(event.getWorkflowInstanceId());
+        this.workflowInstanceInternalApplication.terminate(event.getWorkflowInstanceId());
         log.info("-----------------------------------------------------");
     }
 }
