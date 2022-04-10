@@ -387,8 +387,7 @@ export default defineComponent({
           statusNum.ignoreNum++;
         }
       });
-      statusNum.total = statusNum.successNum + statusNum.failNum +
-        statusNum.skipNum + statusNum.suspendNum + statusNum.ignoreNum;
+      statusNum.total = tasks.value.length;
 
       return statusNum;
     });
