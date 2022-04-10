@@ -122,7 +122,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -159,6 +159,33 @@ export default defineComponent({
     const reloadMain = inject('reloadMain') as () => void;
     const navScrollBar = ref();
     let terminateLoad = false;
+    const loadData = async (refreshing?: boolean) => {
+      try {
+        await proxy.fetchDetail({
+          projectId: props.projectId,
+          workflowExecutionRecordId: props.workflowExecutionRecordId,
+        });
+      } catch (err) {
+        if (!refreshing) {
+          throw err;
+        }
+
+        if (err instanceof TimeoutError) {
+          // 忽略超时错误
+          console.warn(err.message);
+        } else if (err instanceof HttpError) {
+          const { response } = err as HttpError;
+
+          if (response && response.status !== 502) {
+            throw err;
+          }
+
+          // 忽略错误
+          console.warn(err.message);
+        }
+      }
+    };
+    provide('loadData', loadData);
 
     const loadDetail = async (refreshing?: boolean) => {
       if (terminateLoad) {
@@ -171,30 +198,7 @@ export default defineComponent({
           loading.value = !loading.value;
         }
 
-        try {
-          await proxy.fetchDetail({
-            projectId: props.projectId,
-            workflowExecutionRecordId: props.workflowExecutionRecordId,
-          });
-        } catch (err) {
-          if (!refreshing) {
-            throw err;
-          }
-
-          if (err instanceof TimeoutError) {
-            // 忽略超时错误
-            console.warn(err.message);
-          } else if (err instanceof HttpError) {
-            const { response } = err as HttpError;
-
-            if (response && response.status !== 502) {
-              throw err;
-            }
-
-            // 忽略错误
-            console.warn(err.message);
-          }
-        }
+        await loadData(refreshing);
         if (!refreshing) {
           loading.value = !loading.value;
         }
