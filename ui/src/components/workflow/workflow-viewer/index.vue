@@ -4,7 +4,8 @@
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"
                   @mouseenter="highlightNodeState(status, true, graph)"
-                  @mouseleave="highlightNodeState(status, false, graph)"/>
+                  @mouseleave="highlightNodeState(status, false, graph)"
+                  @change="refreshNodeStateHighlight(status, graph)"/>
     </div>
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
@@ -47,6 +48,7 @@ import {
   fitView,
   highlightNodeState,
   init,
+  refreshNodeStateHighlight,
   sortTasks,
   updateNodeStates,
 } from './utils/graph';
@@ -233,6 +235,7 @@ export default defineComponent({
         }
       },
       highlightNodeState,
+      refreshNodeStateHighlight,
       handleNodeBarMouseout,
       zoom,
       handleZoom: (val?: number) => {
