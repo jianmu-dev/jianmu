@@ -10,6 +10,16 @@ public class WebhookParameter {
     private String name;
     private String type;
     private String exp;
+    private Boolean required = false;
+    private Object defaultValue;
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 
     public String getName() {
         return name;
@@ -27,6 +37,8 @@ public class WebhookParameter {
         private String name;
         private String type;
         private String exp;
+        private Boolean required;
+        private Object defaultValue;
 
         private Builder() {
         }
@@ -50,11 +62,23 @@ public class WebhookParameter {
             return this;
         }
 
+        public Builder required(Boolean required) {
+            this.required = required;
+            return this;
+        }
+
+        public Builder defaultVault(Object defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
         public WebhookParameter build() {
             WebhookParameter webhookParameter = new WebhookParameter();
             webhookParameter.type = this.type;
             webhookParameter.name = this.name;
             webhookParameter.exp = this.exp;
+            webhookParameter.required = this.required;
+            webhookParameter.defaultValue = this.defaultValue;
             return webhookParameter;
         }
     }
@@ -65,6 +89,8 @@ public class WebhookParameter {
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", exp='" + exp + '\'' +
+                ", required=" + required +
+                ", defaultValue=" + defaultValue +
                 '}';
     }
 }
