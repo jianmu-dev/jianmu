@@ -321,6 +321,8 @@ export function highlightNodeState(status: TaskStatusEnum, active: boolean, grap
     return;
   }
 
+  graph.set('HIGHLIGHT_STATUS', active ? status : undefined);
+
   graph
     .getNodes()
     .filter(node =>
@@ -330,4 +332,29 @@ export function highlightNodeState(status: TaskStatusEnum, active: boolean, grap
     .forEach(node => {
       graph.setItemState(node, 'highlight', active);
     });
+}
+
+/**
+ * 刷新节点状态高亮
+ * @param status
+ * @param graph
+ */
+export function refreshNodeStateHighlight(status: TaskStatusEnum, graph?: Graph) {
+  if (!graph) {
+    return;
+  }
+
+  const highlightStatus = graph.get('HIGHLIGHT_STATUS');
+  
+  if (!highlightStatus) {
+    return;
+  }
+
+  if (highlightStatus !== status) {
+    // 关灯
+    highlightNodeState(status, false, graph);
+  }
+
+  // 开灯
+  highlightNodeState(highlightStatus, true, graph);
 }
