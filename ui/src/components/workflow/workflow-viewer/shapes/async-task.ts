@@ -101,8 +101,7 @@ const states: {
   [TaskStatusEnum.SUSPENDED]: {
     img: SUSPENDED,
     style: {
-      // TODO 待适配
-      fill: '#EEEEEE',
+      fill: '#E2E7FF',
       stroke: '#7986CB',
     },
     indicatorStyle: {
@@ -112,12 +111,11 @@ const states: {
   [TaskStatusEnum.IGNORED]: {
     img: IGNORED,
     style: {
-      // TODO 待适配
-      fill: '#EEEEEE',
-      stroke: '#5F85AE',
+      fill: '#F0E3FF',
+      stroke: '#9847FC',
     },
     indicatorStyle: {
-      fill: '#5F85AE',
+      fill: '#9847FC',
     },
   },
 };

@@ -44,7 +44,7 @@ const states: {
     label: '已挂起',
   },
   [TaskStatusEnum.IGNORED]: {
-    signal: '#5F85AE',
+    signal: '#9847FC',
     label: '已忽略',
   },
 };
