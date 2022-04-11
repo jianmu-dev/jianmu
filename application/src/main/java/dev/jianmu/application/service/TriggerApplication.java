@@ -356,9 +356,16 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             webhook.getParam().forEach(webhookParameter -> {
+                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+                if (value == null && webhookParameter.isRequired()) {
+                    newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
+                    newWebRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
+                    this.webRequestRepositoryImpl.add(newWebRequest);
+                    throw new IllegalArgumentException("项目：" + project.getWorkflowName() + " 触发器参数" + webhookParameter.getName() + "的值为null");
+                }
                 Parameter<?> parameter = Parameter.Type
                         .getTypeByName(webhookParameter.getType())
-                        .newParameter(this.extractParameter(newWebRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType()));
+                        .newParameter(value == null ? webhookParameter.getDefaultValue() : value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
@@ -443,9 +450,16 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             webhook.getParam().forEach(webhookParameter -> {
+                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+                if (value == null && webhookParameter.isRequired()) {
+                    webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
+                    webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
+                    this.webRequestRepositoryImpl.add(webRequest);
+                    throw new IllegalArgumentException("项目：" + project.getWorkflowName() + " 触发器参数" + webhookParameter.getName() + "的值为null");
+                }
                 Parameter<?> parameter = Parameter.Type
                         .getTypeByName(webhookParameter.getType())
-                        .newParameter(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType()));
+                        .newParameter(value == null ? webhookParameter.getDefaultValue() : value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
@@ -668,8 +682,12 @@ public class TriggerApplication {
         if (ObjectUtils.isEmpty(webRequest.getPayload())) {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
-        trigger.getParam().forEach(webhookParameter ->
-                webhookParameter.setValue(this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType())));
+        trigger.getParam().forEach(webhookParameter -> {
+            var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+            if (value != null) {
+                webhookParameter.setValue(value);
+            }
+        });
         return trigger;
     }
 
