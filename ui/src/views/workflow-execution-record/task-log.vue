@@ -585,7 +585,7 @@ export default defineComponent({
           }
 
           .ignore {
-            color: #5F85AE;
+            color: #9847FC;
           }
         }
       }

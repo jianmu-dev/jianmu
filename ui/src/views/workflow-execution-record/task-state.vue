@@ -22,7 +22,7 @@
     <template #default>已挂起<span v-if="count" class="count">{{ count }}</span></template>
   </jm-state>
   <jm-state class="workflow-execution-record-task-state" v-else-if="status === 'IGNORED'"
-            custom-signal-color="#5F85AE">
+            custom-signal-color="#9847FC">
     <template #default>已忽略<span v-if="count" class="count">{{ count }}</span></template>
   </jm-state>
   <!--            <jm-state class="workflow-execution-record-task-state" custom-signal-color="#FF862B">排队中</jm-state>-->
