@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -62,7 +63,7 @@ public class WorkflowInstanceInternalApplication {
         if (!project.isConcurrent()) {
             // 检查是否存在运行中的流程
             int i = this.workflowInstanceRepository
-                    .findByRefAndVersionAndStatus(workflow.getRef(), workflow.getVersion(), ProcessStatus.RUNNING)
+                    .findByRefAndVersionAndStatuses(workflow.getRef(), workflow.getVersion(), List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                     .size();
             if (i > 0) {
                 var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()

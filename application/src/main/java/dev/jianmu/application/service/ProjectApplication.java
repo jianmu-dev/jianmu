@@ -318,7 +318,7 @@ public class ProjectApplication {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var running = this.workflowInstanceRepository
-                .findByRefAndVersionAndStatus(project.getWorkflowRef(), project.getWorkflowVersion(), ProcessStatus.RUNNING)
+                .findByRefAndVersionAndStatuses(project.getWorkflowRef(), project.getWorkflowVersion(), List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
         if (running > 0) {
             throw new RuntimeException("仍有流程执行中，不能删除");

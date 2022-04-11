@@ -15,8 +15,14 @@ import java.util.Optional;
  */
 public interface WorkflowInstanceMapper {
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} " +
-            "and workflow_version = #{workflowVersion} and status = #{status}")
+    @Select("<script>" +
+            "SELECT * FROM workflow_instance " +
+            "<where>" +
+            " workflow_ref = #{workflowRef} AND workflow_version = #{workflowVersion} AND status IN " +
+            " <foreach collection='statuses' item='item' open='(' close=')' separator=','> #{item} " +
+            " </foreach>" +
+            "</where>" +
+            "</script>")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -26,10 +32,10 @@ public interface WorkflowInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findByRefAndVersionAndStatus(
+    List<WorkflowInstance> findByRefAndVersionAndStatuses(
             @Param("workflowRef") String workflowRef,
             @Param("workflowVersion") String workflowVersion,
-            @Param("status") ProcessStatus status
+            @Param("statuses") List<ProcessStatus> statuses
     );
 
     @Select("select * from workflow_instance where id = #{instanceId}")
