@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, inject, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IOpenTaskLogForm, IOpenWebhookLogForm, IState } from '@/model/modules/workflow-execution-record';
@@ -59,10 +59,12 @@ import { useRouter } from 'vue-router';
 import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
 import { IRootState } from '@/model';
+import { ignoreTask, retryTask } from '@/api/workflow-execution-record';
 
 export default defineComponent({
   components: { TaskLog, ProcessLog, WebhookLog },
   setup() {
+    const loadData = inject('loadData') as (refreshing?: boolean) => void;
     const workflowRef = ref<HTMLElement>();
     const router = useRouter();
     const store = useStore();
@@ -101,7 +103,21 @@ export default defineComponent({
       },
       datetimeFormatter,
       executionTimeFormatter,
-      openTaskLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
+      openTaskLog: async (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
+        if (tabType === NodeToolbarTabTypeEnum.RETRY) {
+          const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
+          await retryTask(data.value.record.id, nodeName);
+          await loadData();
+          return;
+        }
+
+        if (tabType === NodeToolbarTabTypeEnum.IGNORE) {
+          const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
+          await ignoreTask(data.value.record.id, nodeName);
+          await loadData();
+          return;
+        }
+
         taskLogForm.value.drawerVisible = true;
         taskLogForm.value.id = nodeId;
         taskLogForm.value.tabType = tabType;

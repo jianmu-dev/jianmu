@@ -1,12 +1,12 @@
 <template>
   <div class="task-state">
     <div class="signal" :style="{ backgroundColor: signal }"></div>
-    <div class="label">{{ label }}{{ count === 0 ? '' : ` ${count}` }}</div>
+    <div class="label">{{ label }}{{ amount === 0 ? '' : ` ${amount}` }}</div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onUpdated, ref, SetupContext } from 'vue';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
 const states: {
@@ -39,6 +39,14 @@ const states: {
     signal: '#51C41B',
     label: '执行成功',
   },
+  [TaskStatusEnum.SUSPENDED]: {
+    signal: '#7986CB',
+    label: '已挂起',
+  },
+  [TaskStatusEnum.IGNORED]: {
+    signal: '#9847FC',
+    label: '已忽略',
+  },
 };
 
 export default defineComponent({
@@ -52,11 +60,22 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  emit: ['change'],
+  setup(props, { emit }: SetupContext) {
     const state = states[props.status];
     const { signal, label } = state;
 
+    const amount = ref<number>(props.count);
+    onUpdated(() => {
+      if (amount.value === props.count) {
+        return;
+      }
+      amount.value = props.count;
+      emit('change');
+    });
+
     return {
+      amount,
       signal,
       label,
     };

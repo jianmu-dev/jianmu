@@ -18,6 +18,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
     @Result(column = "serial_no", property = "serialNo")
@@ -33,6 +34,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
     @Result(column = "serial_no", property = "serialNo")
@@ -48,6 +50,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
     @Result(column = "serial_no", property = "serialNo")
@@ -63,6 +66,7 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "async_task_ref", property = "asyncTaskRef")
     @Result(column = "async_task_type", property = "asyncTaskType")
     @Result(column = "serial_no", property = "serialNo")
@@ -73,14 +77,14 @@ public interface AsyncTaskInstanceMapper {
     @Result(column = "_version", property = "version")
     Optional<AsyncTaskInstance> findByTriggerIdAndTaskRef(@Param("triggerId") String triggerId, @Param("taskRef") String taskRef);
 
-    @Insert("insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, serial_no, next_target, activating_time, start_time, end_time) " +
-            "values(#{id}, #{triggerId}, #{workflowRef}, #{workflowVersion}, #{workflowInstanceId}, #{name}, #{description}, #{status}, #{asyncTaskRef}, #{asyncTaskType}, #{serialNo}, #{nextTarget}, #{activatingTime}, #{startTime}, #{endTime})")
+    @Insert("insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, failure_mode, async_task_ref, async_task_type, serial_no, next_target, activating_time, start_time, end_time) " +
+            "values(#{id}, #{triggerId}, #{workflowRef}, #{workflowVersion}, #{workflowInstanceId}, #{name}, #{description}, #{status}, #{failureMode}, #{asyncTaskRef}, #{asyncTaskType}, #{serialNo}, #{nextTarget}, #{activatingTime}, #{startTime}, #{endTime})")
     void add(AsyncTaskInstance asyncTaskInstance);
 
     @Insert("<script>" +
-            "insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, async_task_ref, async_task_type, serial_no, next_target, activating_time, start_time, end_time) values" +
+            "insert into async_task_instance(id, trigger_id, workflow_ref, workflow_version, workflow_instance_id, name, description, status, failure_mode, async_task_ref, async_task_type, serial_no, next_target, activating_time, start_time, end_time) values" +
             "<foreach collection='asyncTaskInstances' item='i' index='key' separator=','>" +
-            "(#{i.id}, #{i.triggerId}, #{i.workflowRef}, #{i.workflowVersion}, #{i.workflowInstanceId}, #{i.name}, #{i.description}, #{i.status}, #{i.asyncTaskRef}, #{i.asyncTaskType}, #{i.serialNo}, #{i.nextTarget}, #{i.activatingTime}, #{i.startTime}, #{i.endTime})" +
+            "(#{i.id}, #{i.triggerId}, #{i.workflowRef}, #{i.workflowVersion}, #{i.workflowInstanceId}, #{i.name}, #{i.description}, #{i.status}, #{i.failureMode}, #{i.asyncTaskRef}, #{i.asyncTaskType}, #{i.serialNo}, #{i.nextTarget}, #{i.activatingTime}, #{i.startTime}, #{i.endTime})" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("asyncTaskInstances") List<AsyncTaskInstance> asyncTaskInstances);

@@ -13,6 +13,7 @@ import dev.jianmu.trigger.aggregate.WebhookAuth;
 import dev.jianmu.trigger.aggregate.WebhookParameter;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.aggregate.process.FailureMode;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.alg.cycle.JohnsonSimpleCycles;
 import org.jgrapht.graph.DefaultEdge;
@@ -45,7 +46,6 @@ public class DslParser {
     private boolean enabled = true;
     private boolean mutable = false;
     private boolean concurrent = false;
-    private FailureMode failureMode = FailureMode.TERMINATE;
     private String name;
     private String description;
     private Workflow.Type type;
@@ -256,7 +256,6 @@ public class DslParser {
         var globalParam = this.global.get("param");
         this.createGlobalParameters(globalParam);
         var enabled = this.global.get("enabled");
-        var onFailure = this.global.get("on-failure");
         if (enabled instanceof Boolean) {
             this.enabled = (Boolean) enabled;
         }
@@ -273,11 +272,6 @@ public class DslParser {
         var concurrent = this.global.get("concurrent");
         if (concurrent instanceof Boolean) {
             this.concurrent = (Boolean) concurrent;
-        }
-        if (onFailure instanceof String) {
-            if (onFailure.equals("manual")) {
-                this.failureMode = FailureMode.MANUAL;
-            }
         }
     }
 
@@ -337,7 +331,7 @@ public class DslParser {
         if (dslNode.getEnvironment() != null) {
             taskParameters = AsyncTask.createTaskParameters(dslNode.getEnvironment());
         }
-        return AsyncTask.Builder.anAsyncTask()
+        var asyncTask = AsyncTask.Builder.anAsyncTask()
                 .name("Shell Node")
                 .ref(dslNode.getName())
                 .type(dslNode.getType())
@@ -345,6 +339,15 @@ public class DslParser {
                 .description("Shell Node")
                 .metadata("{}")
                 .build();
+        if (dslNode.getOnFailure() != null) {
+            if (dslNode.getOnFailure().equals("suspend")) {
+                asyncTask.setFailureMode(FailureMode.SUSPEND);
+            }
+            if (dslNode.getOnFailure().equals("ignore")) {
+                asyncTask.setFailureMode(FailureMode.IGNORE);
+            }
+        }
+        return asyncTask;
     }
 
     private AsyncTask createAsyncTask(DslNode dslNode, NodeDef nodeDef) {
@@ -356,7 +359,7 @@ public class DslParser {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             taskParameters = AsyncTask.createTaskParameters(dslNode.getParam(), inputParameters);
         }
-        return AsyncTask.Builder.anAsyncTask()
+        var asyncTask = AsyncTask.Builder.anAsyncTask()
                 .name(nodeDef.getName())
                 .ref(dslNode.getName())
                 .type(dslNode.getType())
@@ -364,6 +367,15 @@ public class DslParser {
                 .description(nodeDef.getDescription())
                 .metadata(nodeDef.toJsonString())
                 .build();
+        if (dslNode.getOnFailure() != null) {
+            if (dslNode.getOnFailure().equals("suspend")) {
+                asyncTask.setFailureMode(FailureMode.SUSPEND);
+            }
+            if (dslNode.getOnFailure().equals("ignore")) {
+                asyncTask.setFailureMode(FailureMode.IGNORE);
+            }
+        }
+        return asyncTask;
     }
 
     private static <T> Consumer<T> withCounter(BiConsumer<Integer, T> consumer) {
@@ -490,6 +502,8 @@ public class DslParser {
                             var name = p.get("name");
                             var type = p.get("type");
                             var exp = p.get("exp");
+                            var required = p.get("required");
+                            var defaultValue = p.get("default");
                             if (!(name instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数名配置错误");
                             }
@@ -499,11 +513,16 @@ public class DslParser {
                             if (!(exp instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数表达式配置错误");
                             }
-                            Parameter.Type.getTypeByName((String) type);
+                            if (required != null && !(required instanceof Boolean)) {
+                                throw new IllegalArgumentException("Webhook参数是否必填配置错误");
+                            }
+                            Parameter.Type.getTypeByName((String) type).newParameter(defaultValue);
                             return WebhookParameter.Builder.aWebhookParameter()
                                     .name((String) name)
                                     .type((String) type)
                                     .exp((String) exp)
+                                    .required(required != null && (Boolean) required)
+                                    .defaultVault(defaultValue)
                                     .build();
                         }).collect(Collectors.toList());
                 webhookBuilder.param(ps);
@@ -719,10 +738,6 @@ public class DslParser {
 
     public boolean isConcurrent() {
         return concurrent;
-    }
-
-    public FailureMode getFailureMode() {
-        return failureMode;
     }
 
     public String getName() {

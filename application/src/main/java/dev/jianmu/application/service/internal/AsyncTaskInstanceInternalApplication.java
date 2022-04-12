@@ -72,7 +72,14 @@ public class AsyncTaskInstanceInternalApplication {
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.terminate();
-                    log.info("terminateNode: " + asyncTaskInstance.getAsyncTaskRef());
+                    log.info("终止运行中任务: " + asyncTaskInstance.getAsyncTaskRef());
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                });
+        asyncTaskInstances.stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.SUSPENDED)
+                .forEach(asyncTaskInstance -> {
+                    asyncTaskInstance.fail();
+                    log.info("终止挂起任务: " + asyncTaskInstance.getAsyncTaskRef());
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
     }
@@ -87,6 +94,7 @@ public class AsyncTaskInstanceInternalApplication {
                 });
     }
 
+    // 任务重试
     @Transactional
     public void retry(String instanceId, String taskRef) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
@@ -98,12 +106,24 @@ public class AsyncTaskInstanceInternalApplication {
         this.asyncTaskInstanceRepository.retryById(asyncTaskInstance);
     }
 
+    // 任务忽略
+    @Transactional
+    public void ignore(String instanceId, String taskRef) {
+        var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
+        asyncTaskInstance.doIgnore();
+        this.asyncTaskInstanceRepository.ignoreById(asyncTaskInstance);
+    }
+
     // 任务已失败命令
     @Transactional
-    public void fail(String asyncTaskInstanceId) {
+    public void stop(String asyncTaskInstanceId) {
         this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
                 .ifPresent(asyncTaskInstance -> {
-                    asyncTaskInstance.fail();
+                    asyncTaskInstance.stop();
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
     }

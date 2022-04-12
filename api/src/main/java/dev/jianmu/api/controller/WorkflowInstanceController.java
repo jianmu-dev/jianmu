@@ -43,4 +43,10 @@ public class WorkflowInstanceController {
     public void retry(@PathVariable String instanceId, @PathVariable String taskRef) {
         this.taskInstanceInternalApplication.retry(instanceId, taskRef);
     }
+
+    @PutMapping("/ignore/{instanceId}/{taskRef}")
+    @Operation(summary = "流程实例任务忽略接口", description = "流程实例任务忽略接口")
+    public void ignore(@PathVariable String instanceId, @PathVariable String taskRef) {
+        this.taskInstanceInternalApplication.ignore(instanceId, taskRef);
+    }
 }

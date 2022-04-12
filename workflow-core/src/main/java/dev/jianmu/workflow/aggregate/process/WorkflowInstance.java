@@ -1,7 +1,6 @@
 package dev.jianmu.workflow.aggregate.process;
 
 import dev.jianmu.workflow.aggregate.AggregateRoot;
-import dev.jianmu.workflow.aggregate.definition.FailureMode;
 import dev.jianmu.workflow.event.process.*;
 
 import java.time.LocalDateTime;
@@ -28,8 +27,6 @@ public class WorkflowInstance extends AggregateRoot {
     private String description;
     // 运行模式
     private RunMode runMode = RunMode.AUTO;
-    // 错误处理模式
-    private FailureMode failureMode = FailureMode.TERMINATE;
     // 运行状态
     private ProcessStatus status = ProcessStatus.RUNNING;
     // 流程定义唯一引用名称
@@ -49,7 +46,7 @@ public class WorkflowInstance extends AggregateRoot {
     }
 
     public boolean isRunning() {
-        return this.status == ProcessStatus.RUNNING;
+        return (this.status == ProcessStatus.RUNNING || this.status == ProcessStatus.SUSPENDED);
     }
 
     public void statusCheck() {
@@ -81,24 +78,8 @@ public class WorkflowInstance extends AggregateRoot {
         this.raiseEvent(processStartedEvent);
     }
 
-    // 停止流程实例
-    public void stop() {
-        switch (this.failureMode) {
-            case TERMINATE:
-                terminate();
-                return;
-            case MANUAL:
-                suspend();
-                return;
-            case IGNORE:
-                // TODO 3.0待实现
-            default:
-                throw new RuntimeException("未知失败处理配置");
-        }
-    }
-
     // 挂起流程实例
-    private void suspend() {
+    public void suspend() {
         if (!this.isRunning()) {
             throw new RuntimeException("流程实例已终止或结束，无法挂起");
         }
@@ -113,6 +94,7 @@ public class WorkflowInstance extends AggregateRoot {
         this.raiseEvent(processSuspendedEvent);
     }
 
+    // 恢复流程运行
     public void resume() {
         if (this.status != ProcessStatus.SUSPENDED) {
             throw new RuntimeException("流程实例未挂起，无法恢复");
@@ -188,10 +170,6 @@ public class WorkflowInstance extends AggregateRoot {
         return runMode;
     }
 
-    public FailureMode getFailureMode() {
-        return failureMode;
-    }
-
     public ProcessStatus getStatus() {
         return status;
     }
@@ -238,8 +216,6 @@ public class WorkflowInstance extends AggregateRoot {
         private String workflowRef;
         // 流程定义版本
         private String workflowVersion;
-        // 错误处理模式
-        private FailureMode failureMode = FailureMode.TERMINATE;
 
         private Builder() {
         }
@@ -283,11 +259,6 @@ public class WorkflowInstance extends AggregateRoot {
             return this;
         }
 
-        public Builder failureMode(FailureMode failureMode) {
-            this.failureMode = failureMode;
-            return this;
-        }
-
         public WorkflowInstance build() {
             WorkflowInstance workflowInstance = new WorkflowInstance();
             workflowInstance.workflowVersion = this.workflowVersion;
@@ -298,7 +269,6 @@ public class WorkflowInstance extends AggregateRoot {
             workflowInstance.description = this.description;
             workflowInstance.id = this.id;
             workflowInstance.workflowRef = this.workflowRef;
-            workflowInstance.failureMode = this.failureMode;
             return workflowInstance;
         }
     }

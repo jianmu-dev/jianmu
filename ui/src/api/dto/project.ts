@@ -88,6 +88,7 @@ export interface IProjectVo
     dslType: DslTypeEnum;
     gitRepoId?: string;
     startTime?: string;
+    suspendedTime?: string;
     latestTime?: string;
     nextTime?: string;
     status: ProjectStatusEnum;

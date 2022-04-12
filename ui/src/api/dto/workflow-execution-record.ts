@@ -17,6 +17,7 @@ export interface IWorkflowExecutionRecordVo extends Readonly<{
   description?: string;
   startTime: string;
   endTime?: string;
+  suspendedTime?: string;
   status: WorkflowExecutionRecordStatusEnum | '';
   triggerId: string;
   triggerType: TriggerTypeEnum;

@@ -2,37 +2,37 @@
   <div class="workflow-execution-record-process-log">
     <div class="basic-section">
       <div class="item">
-        <div class="param-key">流程名称：</div>
+        <div class="param-key">流程名称</div>
         <div class="param-value">
           <jm-text-viewer :value="workflowName" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">启动时间：</div>
+        <div class="param-key">启动时间</div>
         <div class="param-value">
           <jm-text-viewer :value="datetimeFormatter(process.startTime)" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">最后完成时间：</div>
+        <div class="param-key">最后完成时间</div>
         <div class="param-value">
           <jm-text-viewer :value="datetimeFormatter(process.endTime)" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
-        <div class="param-key ">执行时长：</div>
+        <div class="param-key ">{{ isSuspended ? '挂起时长' : '执行时长' }}</div>
         <div class="param-value">
-          <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
+          <jm-text-viewer :value="isSuspended ? suspendedTime : executionTime" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">流程实例ID：</div>
+        <div class="param-key">流程实例ID</div>
         <div class="param-value">
           <jm-text-viewer :value="process.id" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
-        <div class="param-key">流程版本号：</div>
+        <div class="param-key">流程版本号</div>
         <div class="param-value">
           <jm-text-viewer :value="process.workflowVersion" :tip-append-to-body="false"/>
         </div>
@@ -80,6 +80,9 @@ export default defineComponent({
     }) as IWorkflowExecutionRecordVo);
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
     const executionTime = computed<string>(() => executionTimeFormatter(process.value.startTime, process.value.endTime, executing.value));
+    const isSuspended = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.SUSPENDED === (process.value.status as WorkflowExecutionRecordStatusEnum));
+    const suspendedTime = computed<string>(() =>
+      executionTimeFormatter(process.value.suspendedTime, undefined, true));
     const processLog = ref<string>('');
 
     let terminateLogLoad = false;
@@ -136,10 +139,12 @@ export default defineComponent({
     return {
       workflowName: state.recordDetail.record?.name,
       process,
+      executing,
       executionTime,
+      isSuspended,
+      suspendedTime,
       datetimeFormatter,
       processLog,
-      executing,
     };
   },
 });

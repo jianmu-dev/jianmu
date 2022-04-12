@@ -71,6 +71,7 @@ public class WorkflowDomainService {
                         (
                                 t.getStatus().equals(TaskStatus.FAILED)
                                         || t.getStatus().equals(TaskStatus.SUCCEEDED)
+                                        || t.getStatus().equals(TaskStatus.IGNORED)
                                         || t.getStatus().equals(TaskStatus.SKIPPED)
                         ))
                 .collect(Collectors.toList());

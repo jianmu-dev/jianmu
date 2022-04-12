@@ -24,6 +24,10 @@
                       style="color:#096DD9;">待启动</span>
                 <span v-else-if="item.status === TaskStatusEnum.WAITING"
                       style="color:#FF862B">排队中</span>
+                <span v-else-if="item.status === TaskStatusEnum.SUSPENDED"
+                      style="color:#7986CB">已挂起</span>
+                <span v-else-if="item.status === TaskStatusEnum.IGNORED"
+                      style="color:#9847FC">已忽略</span>
               </div>
               <div style="text-align:right;"
                    v-if="!(item.status === TaskStatusEnum.RUNNING || item.status === TaskStatusEnum.INIT || item.status === TaskStatusEnum.WAITING)">

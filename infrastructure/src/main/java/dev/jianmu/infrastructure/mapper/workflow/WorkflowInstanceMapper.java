@@ -15,22 +15,27 @@ import java.util.Optional;
  */
 public interface WorkflowInstanceMapper {
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} " +
-            "and workflow_version = #{workflowVersion} and status = #{status}")
+    @Select("<script>" +
+            "SELECT * FROM workflow_instance " +
+            "<where>" +
+            " workflow_ref = #{workflowRef} AND workflow_version = #{workflowVersion} AND status IN " +
+            " <foreach collection='statuses' item='item' open='(' close=')' separator=','> #{item} " +
+            " </foreach>" +
+            "</where>" +
+            "</script>")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findByRefAndVersionAndStatus(
+    List<WorkflowInstance> findByRefAndVersionAndStatuses(
             @Param("workflowRef") String workflowRef,
             @Param("workflowVersion") String workflowVersion,
-            @Param("status") ProcessStatus status
+            @Param("statuses") List<ProcessStatus> statuses
     );
 
     @Select("select * from workflow_instance where id = #{instanceId}")
@@ -40,7 +45,6 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -53,14 +57,13 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
 
-    @Insert("insert into workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, failure_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
-            "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.failureMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
+    @Insert("insert into workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
+            "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
             "#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
@@ -83,7 +86,6 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -96,7 +98,6 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -121,7 +122,6 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -139,7 +139,6 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -152,7 +151,6 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
-    @Result(column = "failure_mode", property = "failureMode")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")

@@ -16,6 +16,7 @@ public class WebRequest {
         UNAUTHORIZED,
         NOT_FOUND,
         ALREADY_RUNNING,
+        PARAMETER_WAS_NULL,
         UNKNOWN
     }
 

@@ -28,7 +28,6 @@ public class WorkflowInstanceDomainService {
                 .description(workflow.getDescription())
                 .workflowRef(workflow.getRef())
                 .workflowVersion(workflow.getVersion())
-                .failureMode(workflow.getFailureMode())
                 .build();
     }
 
@@ -36,6 +35,7 @@ public class WorkflowInstanceDomainService {
         // 除了当前任务之外，没有失败的任务时可以恢复
         var c = asyncTaskInstances.stream()
                 .filter(t -> !t.getAsyncTaskRef().equals(taskRef))
+                .filter(t -> t.getStatus() != TaskStatus.SUSPENDED)
                 .filter(t -> t.getStatus() != TaskStatus.FAILED)
                 .count();
         return c != 0;

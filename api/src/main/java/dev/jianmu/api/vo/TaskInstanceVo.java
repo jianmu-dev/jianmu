@@ -23,12 +23,15 @@ public class TaskInstanceVo {
         INIT,
         WAITING,
         RUNNING,
+        SUSPENDED,
         SKIPPED,
         FAILED,
+        IGNORED,
         SUCCEEDED,
     }
 
     private String instanceId;
+    private String businessId;
     private String nodeName;
     private String defKey;
     private LocalDateTime startTime;
