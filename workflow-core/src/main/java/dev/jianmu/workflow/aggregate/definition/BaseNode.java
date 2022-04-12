@@ -29,7 +29,7 @@ public abstract class BaseNode implements Node {
     // 类型
     protected String type;
     // 错误处理模式
-    protected FailureMode failureMode = FailureMode.FAIL;
+    protected FailureMode failureMode = FailureMode.SUSPEND;
     // 节点元数据快照
     protected String metadata;
     // 参数列表
