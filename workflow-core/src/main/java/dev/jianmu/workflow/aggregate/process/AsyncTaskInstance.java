@@ -30,7 +30,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     // 运行状态
     private TaskStatus status = TaskStatus.INIT;
     // 错误处理模式
-    private FailureMode failureMode = FailureMode.FAIL;
+    private FailureMode failureMode = FailureMode.SUSPEND;
     // 任务定义唯一引用名称
     private String asyncTaskRef;
     // 任务定义类型
@@ -113,9 +113,6 @@ public class AsyncTaskInstance extends AggregateRoot {
                 return;
             case SUSPEND:
                 this.suspend();
-                return;
-            case FAIL:
-                this.fail();
                 return;
             default:
                 throw new RuntimeException("未知错误处理模式");
@@ -330,7 +327,7 @@ public class AsyncTaskInstance extends AggregateRoot {
         // 任务定义类型
         private String asyncTaskType;
         // 错误处理模式
-        private FailureMode failureMode = FailureMode.FAIL;
+        private FailureMode failureMode = FailureMode.SUSPEND;
 
         private Builder() {
         }
