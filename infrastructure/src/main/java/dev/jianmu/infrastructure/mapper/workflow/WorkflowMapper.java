@@ -13,30 +13,32 @@ import java.util.Optional;
 
 
 /**
+ * @author Ethan Liu
  * @class WorkflowMapper
  * @description 流程DB映射接口
- * @author Ethan Liu
  * @create 2021-03-21 11:24
-*/
+ */
 public interface WorkflowMapper {
 
     @Select("select * from workflow where ref_version = #{refVersion}")
     @Result(column = "nodes", property = "nodes", typeHandler = NodeSetTypeHandler.class)
     @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
     Optional<Workflow> findByRefAndVersion(String refVersion);
 
     @Select("select * from workflow where ref = #{ref}")
     @Result(column = "nodes", property = "nodes", typeHandler = NodeSetTypeHandler.class)
     @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
     List<Workflow> findByRef(String ref);
 
-    @Insert("insert into workflow(ref_version, ref, version, type, name, description, nodes, global_parameters, dsl_text)" +
+    @Insert("insert into workflow(ref_version, ref, version, type, name, description, nodes, global_parameters, dsl_text, created_time)" +
             "values('${ref + version}', #{ref}, #{version}, #{type}, #{name}, #{description}, " +
             "#{nodes, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeSetTypeHandler}, " +
             "#{globalParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.ParameterSetTypeHandler}, " +
-            "#{dslText})")
+            "#{dslText}, #{createdTime})")
     void add(Workflow workflow);
 
     @Delete("delete from workflow where ref_version = #{refVersion}")

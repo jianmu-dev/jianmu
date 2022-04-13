@@ -15,6 +15,12 @@
       <jm-tooltip content="适屏" placement="top" :appendToBody="false">
         <div class="normal-icon" @click="fitViewer"></div>
       </jm-tooltip>
+      <template v-if="isWorkflow">
+        <div class="separator"></div>
+        <jm-tooltip content="旋转" placement="top" :appendToBody="false">
+          <div class="rotate-icon" @click="rotate"></div>
+        </jm-tooltip>
+      </template>
     </div>
     <div class="group" v-if="!dslMode">
       <jm-tooltip content="缩小" placement="top" :appendToBody="false">
@@ -79,7 +85,7 @@ export default defineComponent({
     },
     fullscreenEl: HTMLElement,
   },
-  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode', 'on-fullscreen'],
+  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode', 'on-fullscreen', 'rotate'],
   setup(props, { emit }: SetupContext) {
     const zoom = ref<number>(props.zoomValue);
     const fullscreenEnabled = ref<boolean>(screenfull.isEnabled);
@@ -121,6 +127,9 @@ export default defineComponent({
       },
       fitViewer: () => {
         emit('on-zoom');
+      },
+      rotate: () => {
+        emit('rotate');
       },
       changeZoom: (enlarging: boolean) => {
         let temp = zoom.value + (enlarging ? 1 : -1) * ZOOM_INTERVAL;
@@ -225,6 +234,14 @@ export default defineComponent({
 
       &:hover {
         background-image: url('./svgs/tool/normal-hover.svg');
+      }
+    }
+
+    .rotate-icon {
+      background-image: url('./svgs/tool/rotate.svg');
+
+      &:hover {
+        background-image: url('./svgs/tool/rotate-hover.svg');
       }
     }
 

@@ -8,6 +8,7 @@ import dev.jianmu.workflow.el.Expression;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.event.definition.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +45,8 @@ public class Workflow extends AggregateRoot {
     private Set<GlobalParameter> globalParameters = Set.of();
     // DSL原始内容
     private String dslText;
+    // 创建时间
+    private final LocalDateTime createdTime = LocalDateTime.now();
     // 表达式计算服务
     private ExpressionLanguage expressionLanguage;
     // 参数上下文
@@ -61,7 +64,7 @@ public class Workflow extends AggregateRoot {
     }
 
     // 激活节点
-    public void activateNode(String triggerId, String nodeRef) {
+    public void activateNode(String triggerId, String nodeRef, int version) {
         Node node = this.findNode(nodeRef);
         if (node instanceof End) {
             // 发布结束节点执行成功事件
@@ -70,6 +73,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .version(version)
                     .build();
             this.raiseEvent(succeedEvent);
             // 发布流程结束事件并返回
@@ -89,6 +93,7 @@ public class Workflow extends AggregateRoot {
                     .triggerId(triggerId)
                     .workflowRef(this.ref)
                     .workflowVersion(this.version)
+                    .version(version)
                     .build();
             this.raiseEvent(asyncTaskActivatingEvent);
             return;
@@ -103,6 +108,7 @@ public class Workflow extends AggregateRoot {
                     .workflowVersion(this.version)
                     // TODO 3.0需要重新设计
                     .nextTarget(branch.getTarget())
+                    .version(version)
                     .build();
             this.raiseEvent(succeedEvent);
         }
@@ -179,6 +185,7 @@ public class Workflow extends AggregateRoot {
                 .triggerId(triggerId)
                 .workflowRef(this.ref)
                 .workflowVersion(this.version)
+                .version(0)
                 .build();
         this.raiseEvent(succeedEvent);
     }
@@ -378,6 +385,10 @@ public class Workflow extends AggregateRoot {
 
     public String getDslText() {
         return dslText;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
     }
 
     public static final class Builder {

@@ -131,6 +131,7 @@ public class WorkflowInternalApplication {
                         .description(node.getDescription())
                         .asyncTaskRef(node.getRef())
                         .asyncTaskType(node.getType())
+                        .failureMode(node.getFailureMode())
                         .build()
         ).collect(Collectors.toList());
 
@@ -159,16 +160,18 @@ public class WorkflowInternalApplication {
         // 激活节点
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
         if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
-            this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId());
+            asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(cmd.getNodeRef()))
+                    .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
     }
 
-    private void doActivate(Workflow workflow, String nodeRef, String triggerId) {
+    private void doActivate(Workflow workflow, String nodeRef, String triggerId, int version) {
         log.info("activateNode: " + nodeRef);
         EvaluationContext context = this.findContext(workflow, triggerId);
         workflow.setExpressionLanguage(this.expressionLanguage);
         workflow.setContext(context);
-        workflow.activateNode(triggerId, nodeRef);
+        workflow.activateNode(triggerId, nodeRef, version);
         this.workflowRepository.commitEvents(workflow);
     }
 
@@ -194,11 +197,17 @@ public class WorkflowInternalApplication {
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(cmd.getTriggerId());
         if (this.workflowDomainService.canSkipNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
             this.doSkip(workflow, cmd.getNodeRef(), cmd.getTriggerId());
-        } else {
-            log.info("不能跳过，计算是否需要激活节点");
-            if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
-                this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId());
-            }
+            return;
+        }
+        log.info("不能跳过，计算是否需要激活节点");
+        if (!this.workflowDomainService.hasSameSerialNo(cmd.getNodeRef(), workflow, asyncTaskInstances)) {
+            log.info("找到不同次数的节点，无需计算激活");
+            return;
+        }
+        if (this.workflowDomainService.canActivateNode(cmd.getNodeRef(), cmd.getSender(), workflow, asyncTaskInstances)) {
+            asyncTaskInstances.stream()
+                    .filter(t -> t.getAsyncTaskRef().equals(cmd.getNodeRef()))
+                    .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
     }
 }

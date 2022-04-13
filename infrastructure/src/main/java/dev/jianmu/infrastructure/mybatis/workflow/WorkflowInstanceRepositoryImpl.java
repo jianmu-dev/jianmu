@@ -30,8 +30,8 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     private WorkflowInstanceMapper workflowInstanceMapper;
 
     @Override
-    public List<WorkflowInstance> findByRefAndVersionAndStatus(String workflowRef, String workflowVersion, ProcessStatus status) {
-        return this.workflowInstanceMapper.findByRefAndVersionAndStatus(workflowRef, workflowVersion, status);
+    public List<WorkflowInstance> findByRefAndVersionAndStatuses(String workflowRef, String workflowVersion, List<ProcessStatus> statuses) {
+        return this.workflowInstanceMapper.findByRefAndVersionAndStatuses(workflowRef, workflowVersion, statuses);
     }
 
     @Override

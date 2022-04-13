@@ -1,10 +1,7 @@
 package dev.jianmu.workflow.aggregate.process;
 
 import dev.jianmu.workflow.aggregate.AggregateRoot;
-import dev.jianmu.workflow.event.process.ProcessEndedEvent;
-import dev.jianmu.workflow.event.process.ProcessNotRunningEvent;
-import dev.jianmu.workflow.event.process.ProcessStartedEvent;
-import dev.jianmu.workflow.event.process.ProcessTerminatedEvent;
+import dev.jianmu.workflow.event.process.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -40,6 +37,8 @@ public class WorkflowInstance extends AggregateRoot {
     private final LocalDateTime createTime = LocalDateTime.now();
     // 开始时间
     private LocalDateTime startTime;
+    // 挂起时间
+    private LocalDateTime suspendedTime;
     // 结束时间
     private LocalDateTime endTime;
 
@@ -47,7 +46,7 @@ public class WorkflowInstance extends AggregateRoot {
     }
 
     public boolean isRunning() {
-        return this.status == ProcessStatus.RUNNING;
+        return (this.status == ProcessStatus.RUNNING || this.status == ProcessStatus.SUSPENDED);
     }
 
     public void statusCheck() {
@@ -74,8 +73,40 @@ public class WorkflowInstance extends AggregateRoot {
                 .triggerId(triggerId)
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processStartedEvent);
+    }
+
+    // 挂起流程实例
+    public void suspend() {
+        if (!this.isRunning()) {
+            throw new RuntimeException("流程实例已终止或结束，无法挂起");
+        }
+        this.status = ProcessStatus.SUSPENDED;
+        this.suspendedTime = LocalDateTime.now();
+        var processSuspendedEvent = ProcessSuspendedEvent.Builder.aProcessSuspendedEvent()
+                .triggerId(triggerId)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
+                .build();
+        this.raiseEvent(processSuspendedEvent);
+    }
+
+    // 恢复流程运行
+    public void resume() {
+        if (this.status != ProcessStatus.SUSPENDED) {
+            throw new RuntimeException("流程实例未挂起，无法恢复");
+        }
+        this.status = ProcessStatus.RUNNING;
+        var processRunningEvent = ProcessRunningEvent.Builder.aProcessRunningEvent()
+                .triggerId(triggerId)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
+                .build();
+        this.raiseEvent(processRunningEvent);
     }
 
     // 终止流程实例
@@ -106,6 +137,7 @@ public class WorkflowInstance extends AggregateRoot {
                 .triggerId(triggerId)
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processEndedEvent);
     }
@@ -156,6 +188,10 @@ public class WorkflowInstance extends AggregateRoot {
 
     public LocalDateTime getStartTime() {
         return startTime;
+    }
+
+    public LocalDateTime getSuspendedTime() {
+        return suspendedTime;
     }
 
     public LocalDateTime getEndTime() {

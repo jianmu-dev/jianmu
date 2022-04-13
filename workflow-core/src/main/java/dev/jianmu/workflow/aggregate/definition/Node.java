@@ -1,5 +1,7 @@
 package dev.jianmu.workflow.aggregate.definition;
 
+import dev.jianmu.workflow.aggregate.process.FailureMode;
+
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +23,12 @@ public interface Node {
 
     // 返回节点类型
     String getType();
+
+    // 设置错误处理模式
+    void setFailureMode(FailureMode failureMode);
+
+    // 返回错误处理模式
+    FailureMode getFailureMode();
 
     // 返回节点元数据快照
     String getMetadata();

@@ -104,8 +104,8 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
             }
             return stringBuilder.toString();
         } catch (IOException e) {
-            logger.error("获取webhook文件异常:", e);
+            logger.warn("获取webhook文件异常: {}", e.getMessage());
+            throw new RuntimeException("webhook文件不存在");
         }
-        return null;
     }
 }

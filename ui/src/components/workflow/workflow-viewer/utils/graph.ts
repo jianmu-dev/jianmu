@@ -36,14 +36,15 @@ function checkContentOverflow(graph: Graph, ratio: number = 1): boolean {
  * 计算布局配置
  * @param dslType
  * @param nodes
+ * @param rankdir
  */
-function calculateLayout(dslType: DslTypeEnum, nodes: NodeConfig[]): LayoutConfig {
+function calculateLayout(dslType: DslTypeEnum, nodes: NodeConfig[], rankdir: string): LayoutConfig {
   if (dslType === DslTypeEnum.WORKFLOW || nodes.length < 8) {
     return {
       type: 'dagre',
-      rankdir: 'LR',
+      rankdir,
       // 节点间距（px）。在rankdir 为 'TB' 或 'BT' 时是节点的水平间距；在rankdir 为 'LR' 或 'RL' 时代表节点的竖直方向间距
-      nodesep: 35,
+      nodesep: rankdir === 'TB' ? 60 : 35,
       // 层间距（px）。在rankdir 为 'TB' 或 'BT' 时是竖直方向相邻层间距；在rankdir 为 'LR' 或 'RL' 时代表水平方向相邻层间距
       ranksep: 70,
       // 是否保留布局连线的控制点，默认false
@@ -122,6 +123,38 @@ export function fitCanvas(graph?: Graph): void {
 }
 
 /**
+ * 适配到视图
+ * @param graph
+ */
+export function fitView(graph?: Graph): void {
+  if (!graph) {
+    return;
+  }
+
+  // 判断原始大小（100%）是否溢出
+  if (!checkContentOverflow(graph)) {
+    // 适配到画布中
+    graph.fitView();
+    return;
+  }
+
+  const minRatio = MIN_ZOOM / 100;
+
+  // 缩放到最小，判断是否溢出
+  if (checkContentOverflow(graph, minRatio)) {
+    // 对齐到画布中心
+    graph.fitCenter();
+
+    // 溢出时，缩放到最小
+    graph.zoomTo(minRatio, graph.getGraphCenterPoint());
+    return;
+  }
+
+  // 没有溢出时，适配到画布中
+  graph.fitView();
+}
+
+/**
  * 配置节点行为
  * @param graph
  * @param mouseoverNode
@@ -167,9 +200,10 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
  * @param triggerType
  * @param nodeInfos
  * @param container
+ * @param rankdir
  */
 export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined,
-  nodeInfos: INodeDefVo[], container: HTMLElement | undefined): Graph | undefined {
+  nodeInfos: INodeDefVo[], container: HTMLElement | undefined, rankdir: string): Graph | undefined {
   if (!dsl || !triggerType || !container) {
     return undefined;
   }
@@ -196,7 +230,7 @@ export function init(dsl: string | undefined, triggerType: TriggerTypeEnum | und
     width: parentElement.clientWidth,
     // 图的高度
     height: parentElement.clientHeight,
-    layout: calculateLayout(dslType, nodes),
+    layout: calculateLayout(dslType, nodes, rankdir),
   });
 
   // 加载数据
@@ -287,6 +321,8 @@ export function highlightNodeState(status: TaskStatusEnum, active: boolean, grap
     return;
   }
 
+  graph.set('HIGHLIGHT_STATUS', active ? status : undefined);
+
   graph
     .getNodes()
     .filter(node =>
@@ -296,4 +332,29 @@ export function highlightNodeState(status: TaskStatusEnum, active: boolean, grap
     .forEach(node => {
       graph.setItemState(node, 'highlight', active);
     });
+}
+
+/**
+ * 刷新节点状态高亮
+ * @param status
+ * @param graph
+ */
+export function refreshNodeStateHighlight(status: TaskStatusEnum, graph?: Graph) {
+  if (!graph) {
+    return;
+  }
+
+  const highlightStatus = graph.get('HIGHLIGHT_STATUS');
+  
+  if (!highlightStatus) {
+    return;
+  }
+
+  if (highlightStatus !== status) {
+    // 关灯
+    highlightNodeState(status, false, graph);
+  }
+
+  // 开灯
+  highlightNodeState(highlightStatus, true, graph);
 }

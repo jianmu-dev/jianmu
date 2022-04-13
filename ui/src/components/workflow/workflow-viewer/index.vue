@@ -4,16 +4,21 @@
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"
                   @mouseenter="highlightNodeState(status, true, graph)"
-                  @mouseleave="highlightNodeState(status, false, graph)"/>
+                  @mouseleave="highlightNodeState(status, false, graph)"
+                  @change="refreshNodeStateHighlight(status, graph)"/>
     </div>
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
              @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"
-             @on-fullscreen="handleFullscreen"/>
+             @on-fullscreen="handleFullscreen"
+             @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
-                  :task-instance-id="taskInstanceId" :node-event="nodeEvent" :zoom="zoom"
+                  :task-instance-id="selectedTask.instanceId"
+                  :task-status="selectedTask.status"
+                  :node-event="nodeEvent"
+                  :zoom="zoom"
                   @node-click="clickNode"
                   @mouseout="handleNodeBarMouseout"/>
     <div v-show="!dslMode" class="canvas" ref="container"/>
@@ -37,7 +42,16 @@ import G6, { Graph, NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
-import { configNodeAction, fitCanvas, highlightNodeState, init, sortTasks, updateNodeStates } from './utils/graph';
+import {
+  configNodeAction,
+  fitCanvas,
+  fitView,
+  highlightNodeState,
+  init,
+  refreshNodeStateHighlight,
+  sortTasks,
+  updateNodeStates,
+} from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
@@ -73,11 +87,9 @@ export default defineComponent({
     const container = ref<HTMLElement>();
     const graph = ref<Graph>();
     const nodeActionConfigured = ref<boolean>(false);
-    const taskInstanceId = ref<string>();
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
-      taskInstanceId.value = undefined;
       nodeEvent.value = undefined;
     };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
@@ -87,17 +99,6 @@ export default defineComponent({
         proxy.$nextTick(() => mouseoverNode(evt));
         return;
       }
-
-      switch (evt.type) {
-        case NodeTypeEnum.ASYNC_TASK: {
-          const tasks = sortTasks(props.tasks, true, evt.id);
-          if (tasks.length > 0) {
-            taskInstanceId.value = tasks[0].instanceId;
-          }
-          break;
-        }
-      }
-
       nodeEvent.value = evt;
     };
     const handleNodeBarMouseout = (evt: any) => {
@@ -144,9 +145,9 @@ export default defineComponent({
       };
     });
 
-    const refreshGraph = () => {
+    const refreshGraph = (rankdir: string = 'LR') => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement);
+        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, rankdir);
 
         updateZoom();
       }
@@ -190,11 +191,32 @@ export default defineComponent({
       graph.value?.destroy();
     });
 
+    const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
+
     return {
       container,
       graph,
-      taskInstanceId,
-      dslType: computed<DslTypeEnum>(() => allTaskNodes.value.dslType),
+      selectedTask: computed<{
+        instanceId: string;
+        status: TaskStatusEnum;
+      }>(() => {
+        const defaultValue = {
+          instanceId: '',
+          status: TaskStatusEnum.INIT,
+        };
+
+        if (!nodeEvent.value || nodeEvent.value.type !== NodeTypeEnum.ASYNC_TASK) {
+          return defaultValue;
+        }
+
+        // 按开始时间降序排序，保证第一个是最新的
+        const tasks = sortTasks(props.tasks, true, nodeEvent.value.id);
+        return tasks.length === 0 ? defaultValue : {
+          instanceId: tasks[0].instanceId,
+          status: tasks[0].status,
+        };
+      }),
+      dslType,
       dslMode,
       nodeEvent,
       fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
@@ -213,6 +235,7 @@ export default defineComponent({
         }
       },
       highlightNodeState,
+      refreshNodeStateHighlight,
       handleNodeBarMouseout,
       zoom,
       handleZoom: (val?: number) => {
@@ -223,8 +246,7 @@ export default defineComponent({
         const g = graph.value as Graph;
 
         if (val === undefined) {
-          // fitCanvas(g);
-          g.fitView();
+          fitView(g);
         } else {
           g.zoomTo(val / 100, g.getGraphCenterPoint());
         }
@@ -238,10 +260,29 @@ export default defineComponent({
 
         setTimeout(() => {
           fitCanvas(graph.value);
+          updateZoom();
           if (container.value) {
             container.value.style.visibility = '';
           }
         }, 100);
+      },
+      handleRotation: () => {
+        if (!graph.value || dslType.value !== DslTypeEnum.WORKFLOW) {
+          return;
+        }
+
+        let rankdir = graph.value.get('layout').rankdir;
+        if (rankdir === 'TB') {
+          rankdir = undefined;
+        } else {
+          rankdir = 'TB';
+        }
+
+        graph.value?.destroy();
+        graph.value = undefined;
+        nodeActionConfigured.value = false;
+
+        refreshGraph(rankdir);
       },
       taskStates: computed(() => {
         const sArr: {
@@ -249,9 +290,11 @@ export default defineComponent({
           count: number;
         }[] = [];
 
+        const tasks = props.tasks.filter(({ defKey }) =>
+          defKey !== 'Start' && defKey !== 'End' && defKey !== 'Condition' && defKey !== 'Switch');
         const taskMap = new Map();
         // 按开始时间生序排序，保证最后一个是最新的
-        sortTasks([...props.tasks], false)
+        sortTasks(tasks, false)
           .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({

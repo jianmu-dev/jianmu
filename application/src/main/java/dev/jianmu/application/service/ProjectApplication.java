@@ -10,7 +10,10 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
-import dev.jianmu.project.aggregate.*;
+import dev.jianmu.project.aggregate.GitRepo;
+import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.aggregate.ProjectGroup;
+import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
@@ -315,7 +318,7 @@ public class ProjectApplication {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var running = this.workflowInstanceRepository
-                .findByRefAndVersionAndStatus(project.getWorkflowRef(), project.getWorkflowVersion(), ProcessStatus.RUNNING)
+                .findByRefAndVersionAndStatuses(project.getWorkflowRef(), project.getWorkflowVersion(), List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
         if (running > 0) {
             throw new RuntimeException("仍有流程执行中，不能删除");

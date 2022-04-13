@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false
+    username: sa
+    password: sa
+  flyway:
+    enabled: false
+    clean-disabled: false
+    locations: classpath:testdb/migration
+    baseline-on-migrate: true
+    baseline-version: 1
+    out-of-order: true
+    validate-on-migrate: false
+  sql:
+    init:
+      schema-locations: classpath:testdb/migration/schema.sql
+
+credential:
+  type: local

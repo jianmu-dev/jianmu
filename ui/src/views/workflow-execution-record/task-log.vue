@@ -50,15 +50,27 @@
         </div>
       </div>
       <div class="item">
-        <div class="param-key">执行时长</div>
-        <div class="param-value">
-          <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
+        <div>
+          <div class="param-key">执行时长</div>
+          <div class="param-value">
+            <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">挂起次数</div>
+          <div class="suspend times">{{ statusParams.suspendNum }}</div>
         </div>
       </div>
-      <div>
-        <div class="param-key">执行状态</div>
+      <div class="item">
         <div>
-          <task-state :status="task.status"/>
+          <div class="param-key">执行状态</div>
+          <div>
+            <task-state :status="task.status"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">忽略次数</div>
+          <div class="ignore times">{{ statusParams.ignoreNum }}</div>
         </div>
       </div>
     </div>
@@ -333,8 +345,9 @@ export default defineComponent({
         TaskStatusEnum.RUNNING,
       ].includes(task.value.status),
     );
+    const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
     const executionTime = computed<string>(() =>
-      executionTimeFormatter(task.value.startTime, task.value.endTime, executing.value));
+      executionTimeFormatter(task.value.startTime, task.value.endTime, isSuspended.value || executing.value));
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
@@ -344,12 +357,21 @@ export default defineComponent({
     // 当前节点id
     const currentInstanceId = ref<string>('');
     // 运行状态次数
-    const statusParams = computed<{ total: number; successNum: number; failNum: number; skipNum: number }>(() => {
+    const statusParams = computed<{
+      total: number;
+      successNum: number;
+      failNum: number;
+      skipNum: number;
+      suspendNum: number;
+      ignoreNum: number;
+    }>(() => {
       const statusNum = {
         total: 0,
         successNum: 0,
         failNum: 0,
         skipNum: 0,
+        suspendNum: 0,
+        ignoreNum: 0,
       };
 
       tasks.value.forEach(item => {
@@ -359,9 +381,13 @@ export default defineComponent({
           statusNum.failNum++;
         } else if (item.status === TaskStatusEnum.SKIPPED) {
           statusNum.skipNum++;
+        } else if (item.status === TaskStatusEnum.SUSPENDED) {
+          statusNum.suspendNum++;
+        } else if (item.status === TaskStatusEnum.IGNORED) {
+          statusNum.ignoreNum++;
         }
       });
-      statusNum.total = statusNum.successNum + statusNum.failNum + statusNum.skipNum;
+      statusNum.total = tasks.value.length;
 
       return statusNum;
     });
@@ -466,6 +492,7 @@ export default defineComponent({
       tasks,
       executing,
       executionTime,
+      isSuspended,
       tabActiveName,
       taskLog,
       moreLog,
@@ -551,6 +578,14 @@ export default defineComponent({
 
           .skip {
             color: #979797;
+          }
+
+          .suspend {
+            color: #7986CB;
+          }
+
+          .ignore {
+            color: #9847FC;
           }
         }
       }

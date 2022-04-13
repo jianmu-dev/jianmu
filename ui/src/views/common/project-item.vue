@@ -19,14 +19,13 @@
         </router-link>
       </div>
       <div class="time">
-        <span v-if="project.status === ProjectStatusEnum.RUNNING"
-        >执行时长：{{
+        <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
             executionTimeFormatter(project.startTime, undefined, true)
-          }}</span
-        >
-        <span v-else
-        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
-        >
+          }}</span>
+        <span v-else-if="project.status === ProjectStatusEnum.SUSPENDED">挂起时长：{{
+            executionTimeFormatter(project.suspendedTime, undefined, true)
+          }}</span>
+        <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
       <div class="time">
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
@@ -61,14 +60,13 @@
         time: true,
         disabled: !enabled,
       }">
-        <span v-if="project.status === ProjectStatusEnum.RUNNING"
-        >执行时长：{{
+        <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
             executionTimeFormatter(project.startTime, undefined, true)
-          }}</span
-        >
-        <span v-else
-        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
-        >
+          }}</span>
+        <span v-else-if="project.status === ProjectStatusEnum.SUSPENDED">挂起时长：{{
+            executionTimeFormatter(project.suspendedTime, undefined, true)
+          }}</span>
+        <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
       <div :class="{
         time: true,
@@ -473,6 +471,10 @@ export default defineComponent({
 
     &.failed {
       background-color: #cf1524;
+    }
+
+    &.suspended {
+      background-color: #7986cb;
     }
   }
 

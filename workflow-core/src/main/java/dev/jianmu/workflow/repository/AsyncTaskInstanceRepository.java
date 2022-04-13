@@ -24,6 +24,14 @@ public interface AsyncTaskInstanceRepository {
 
     void updateById(AsyncTaskInstance asyncTaskInstance);
 
+    void succeedById(AsyncTaskInstance asyncTaskInstance, int version);
+
+    void activateById(AsyncTaskInstance asyncTaskInstance, int version);
+
+    void retryById(AsyncTaskInstance asyncTaskInstance);
+
+    void ignoreById(AsyncTaskInstance asyncTaskInstance);
+
     void updateAll(List<AsyncTaskInstance> asyncTaskInstances);
 
     void deleteByWorkflowInstanceId(String workflowInstanceId);
