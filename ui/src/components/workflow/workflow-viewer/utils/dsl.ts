@@ -177,6 +177,80 @@ function parseWorkflow(workflow: any): {
     }
   });
 
+  // ====================================================================================================
+
+  const groupByTarget: {
+    [key: string]: EdgeConfig[];
+  } = {};
+  // 按target分组
+  edges.forEach(edge => {
+    const key = edge.target!;
+    let arr = groupByTarget[key];
+    if (!arr) {
+      arr = [];
+      groupByTarget[key] = arr;
+    }
+    arr.push(edge);
+  });
+
+  const flowNodeMap: {
+    [flowNodeId: string]: {
+      target: string;
+      edges: EdgeConfig[];
+    }[];
+  } = {};
+  Object.keys(groupByTarget).forEach(key => {
+    const edges = groupByTarget[key];
+    if (edges.length === 1) {
+      return;
+    }
+    const id = 'group_by_target_' + edges.map(edge => edge.source!).join('_');
+
+    let list = flowNodeMap[id];
+    if (!list) {
+      list = [];
+      flowNodeMap[id] = list;
+    }
+    list.push({
+      target: key,
+      edges,
+    });
+  });
+
+  Object.keys(flowNodeMap).forEach(flowNodeId => {
+    const flowNodes = flowNodeMap[flowNodeId];
+
+    if (flowNodes.length === 1) {
+      // 忽略
+      return;
+    }
+
+    nodes.push({
+      id: flowNodeId,
+      type: NodeTypeEnum.FLOW_NODE,
+    });
+
+    flowNodes.forEach(({ target, edges: eArr }) => {
+      // 删除交叉线
+      eArr.forEach(e => edges.splice(edges.indexOf(e), 1));
+
+      // 构建flow node相关线
+      edges.push({
+        source: flowNodeId,
+        target,
+        type: 'flow',
+      });
+    });
+
+    // 构建flow node相关线
+    flowNodes[0].edges.forEach(edge => {
+      edges.push({
+        ...edge,
+        target: flowNodeId,
+      });
+    });
+  });
+
   return { nodes, edges };
 }
 
@@ -262,105 +336,6 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
       }
       node.iconUrl = nodeInfos.find(nodeInfo => nodeInfo.type === node.uniqueKey)?.icon;
     });
-  }
-
-  if (workflow) {
-    // 按target分组
-    const groupByTarget: {
-      [key: string]: EdgeConfig[];
-    } = {};
-    edges.forEach(edge => {
-      const key = edge.target!;
-      let arr = groupByTarget[key];
-      if (!arr) {
-        arr = [];
-        groupByTarget[key] = arr;
-      }
-      arr.push(edge);
-    });
-    Object.keys(groupByTarget).forEach(key => {
-      const arr = groupByTarget[key];
-      if (arr.length === 1) {
-        return;
-      }
-      const id = 'group_by_target_' + arr.map(item => item.source!).join('_');
-      // 去重
-      if (!nodes.find(node => node.id === id)) {
-        nodes.push({
-          id,
-          type: NodeTypeEnum.FLOW_NODE,
-        });
-      }
-      edges.push({
-        source: id,
-        target: key,
-        type: 'flow',
-      });
-      arr.forEach(item => (item.target = id));
-    });
-
-    // 按source分组
-    const groupBySource: {
-      [key: string]: EdgeConfig[];
-    } = {};
-    edges.forEach(edge => {
-      // 忽略source为flow node
-      const sourceNode = nodes.find(node => node.id === edge.source)!;
-      if (sourceNode.type === NodeTypeEnum.FLOW_NODE) {
-        return;
-      }
-      // 忽略target为flow node
-      const targetNode = nodes.find(node => node.id === edge.target)!;
-      if (targetNode.type === NodeTypeEnum.FLOW_NODE) {
-        return;
-      }
-
-      const key = edge.source!;
-      let arr = groupBySource[key];
-      if (!arr) {
-        arr = [];
-        groupBySource[key] = arr;
-      }
-      arr.push(edge);
-    });
-    Object.keys(groupBySource).forEach(key => {
-      const keyNode = nodes.find(node => node.id === key)!;
-      const arr = groupBySource[key];
-      if (arr.length === 1 ||
-        // 忽略条件网关
-        // TODO 1. 待适配每个分支可并发情况
-        // TODO 2. 待适配switch网关
-        keyNode.type === NodeTypeEnum.CONDITION) {
-        return;
-      }
-      const id = 'group_by_source_' + arr.map(item => item.target!).join('_');
-
-      // 去重
-      if (!nodes.find(node => node.id === id)) {
-        nodes.push({
-          id,
-          type: NodeTypeEnum.FLOW_NODE,
-        });
-      }
-
-      edges.push({
-        source: key,
-        target: id,
-        type: 'flow',
-      });
-
-      arr.forEach(item => (item.source = id));
-    });
-
-    // 去重
-    for (let i = 0; i < edges.length - 1; i++) {
-      for (let j = i + 1; j < edges.length; j++) {
-        if (edges[i].source === edges[j].source && edges[i].target === edges[j].target) {
-          edges.splice(j, 1);
-          j--;
-        }
-      }
-    }
   }
 
   return { nodes, edges, dslType: workflow ? DslTypeEnum.WORKFLOW : DslTypeEnum.PIPELINE };
