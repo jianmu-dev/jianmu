@@ -253,9 +253,25 @@ public class ViewController {
         return WorkflowMapper.INSTANCE.toWorkflowVo(workflow);
     }
 
+    @GetMapping("/async_task_instances/{triggerId}")
+    @Operation(summary = "异步任务实例列表接口", description = "异步任务实例列表接口")
+    public List<AsyncTaskInstanceVo> findAsyncTasksByTriggerId(@PathVariable String triggerId) {
+        return this.asyncTaskInstanceApplication.findByTriggerId(triggerId).stream()
+                .map(AsyncTaskInstanceMapper.INSTANCE::toAsyncTaskInstanceVo)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/v2/task_instances/{businessId}")
+    @Operation(summary = "任务实例列表接口", description = "根据异步任务实例ID查询")
+    public List<TaskInstanceVo> findByBusinessId(@PathVariable String businessId) {
+        return this.taskInstanceApplication.findByBusinessId(businessId).stream()
+                .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/task_instances/{triggerId}")
-    @Operation(summary = "任务实例列表接口", description = "任务实例列表接口")
-    public List<TaskInstanceVo> findByTriggerId(@PathVariable String triggerId) {
+    @Operation(summary = "任务实例列表接口", description = "根据triggerId查询", deprecated = true)
+    public List<TaskInstanceVo> findTasksByTriggerId(@PathVariable String triggerId) {
         List<TaskInstanceVo> list = this.taskInstanceApplication.findByTriggerId(triggerId).stream()
                 .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
                 .collect(Collectors.toList());

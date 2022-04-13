@@ -36,6 +36,10 @@ public class TaskInstanceApplication {
         return this.taskInstanceRepository.findByTriggerId(triggerId);
     }
 
+    public List<TaskInstance> findByBusinessId(String businessId) {
+        return this.taskInstanceRepository.findByBusinessId(businessId);
+    }
+
     public Optional<TaskInstance> findById(String instanceId) {
         return this.taskInstanceRepository.findById(instanceId);
     }
