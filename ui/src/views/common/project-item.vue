@@ -7,7 +7,7 @@
       }"
     ></div>
     <div class="content">
-      <div :class="['content-top',concurrent?'concurrent':'']">
+      <div class="content-top">
         <span class="concurrent" v-if="concurrent">可并发</span>
         <router-link
           :to="{
@@ -46,7 +46,7 @@
       }"
     ></div>
     <div class="content">
-      <div :class="['content-top',concurrent?'concurrent':'']">
+      <div class="content-top">
         <span class="concurrent" v-if="concurrent">可并发</span>
         <router-link
           :to="{
@@ -482,13 +482,11 @@ export default defineComponent({
     padding: 20px 20px 16px 20px;
 
     .content-top {
-      vertical-align: middle;
+      display: flex;
+      align-items: center;
 
-      &.concurrent {
-        .jm-text-viewer {
-          width: 65%;
-          display: inline-block;
-        }
+      a {
+        flex: 1;
       }
 
       .concurrent {
