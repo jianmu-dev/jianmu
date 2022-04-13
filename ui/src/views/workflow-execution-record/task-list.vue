@@ -29,7 +29,7 @@
                 <span v-else-if="item.status === TaskStatusEnum.IGNORED"
                       style="color:#9847FC">已忽略</span>
               </div>
-              <div style="text-align:right;"
+              <div style="text-align:right; white-space: nowrap;"
                    v-if="!(item.status === TaskStatusEnum.RUNNING || item.status === TaskStatusEnum.INIT || item.status === TaskStatusEnum.WAITING)">
                 {{ executionTimeFormatter(item.startTime, item.endTime) }}
               </div>

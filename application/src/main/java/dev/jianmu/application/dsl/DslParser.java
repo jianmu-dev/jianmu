@@ -1,8 +1,6 @@
 package dev.jianmu.application.dsl;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
@@ -18,6 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.alg.cycle.JohnsonSimpleCycles;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
 import java.io.IOException;
 import java.util.*;
@@ -55,15 +56,24 @@ public class DslParser {
 
     private Map<String, Node> symbolTable = new HashMap<>();
 
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory().enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION));
+    private final Yaml yaml;
+    ObjectMapper mapper = new ObjectMapper();
+
+    public DslParser() {
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setAllowDuplicateKeys(false);
+        yaml = new Yaml(loaderOptions);
+    }
 
     public static DslParser parse(String dslText) {
         var parser = new DslParser();
         try {
-            parser = parser.mapper.readValue(dslText, DslParser.class);
+            Map<String, Object> yamlMap = parser.yaml.load(dslText);
+            String yamlJson = parser.mapper.writeValueAsString(yamlMap);
+            parser = parser.mapper.readValue(yamlJson, DslParser.class);
             parser.syntaxCheck();
             parser.createGlobal();
-        } catch (IOException e) {
+        } catch (IOException | DuplicateKeyException e) {
             throw new DslException("DSL解析异常: " + e.getMessage());
         }
         return parser;
