@@ -204,12 +204,12 @@ function parseWorkflow(workflow: any): {
     if (edges.length === 1) {
       return;
     }
-    const id = 'group_by_target_' + edges.map(edge => edge.source!).join('_');
+    const flowNodeId = edges.map(edge => edge.source!).join('_');
 
-    let list = flowNodeMap[id];
+    let list = flowNodeMap[flowNodeId];
     if (!list) {
       list = [];
-      flowNodeMap[id] = list;
+      flowNodeMap[flowNodeId] = list;
     }
     list.push({
       target: key,
