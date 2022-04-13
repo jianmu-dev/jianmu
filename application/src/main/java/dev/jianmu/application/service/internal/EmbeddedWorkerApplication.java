@@ -76,6 +76,7 @@ public class EmbeddedWorkerApplication {
             }
             parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
             parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
+            parameterMap.put("JM_TRIGGER_ID", workerTask.getTriggerId());
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
             var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId());
