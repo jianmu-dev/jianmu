@@ -634,10 +634,10 @@ public class DslParser {
         var sources = node.get("sources");
         var targets = node.get("targets");
         if (!(sources instanceof List) || ((List<?>) sources).isEmpty()) {
-            throw new DslException("任务节点" + nodeName + "sources未设置");
+            throw new DslException("任务节点" + nodeName + "：sources未设置");
         }
         if (!(targets instanceof List) || ((List<?>) targets).isEmpty()) {
-            throw new DslException("任务节点" + nodeName + "targets未设置");
+            throw new DslException("任务节点" + nodeName + "：targets未设置");
         }
     }
 
