@@ -11,24 +11,7 @@
                             style="padding:0 20px;">
             <div style="display: flex;color:#606266;">
               <div style="width:26px;">#{{ tasksList.indexOf(item.instanceId) + 1 }}</div>
-              <div style="margin:0 30px;width:45px;">
-                <span v-if="item.status === TaskStatusEnum.SUCCEEDED"
-                      style="color:#51C41B;">成功</span>
-                <span v-else-if="item.status === TaskStatusEnum.FAILED"
-                      style="color:#FF4D4F;">失败</span>
-                <span v-else-if="item.status === TaskStatusEnum.SKIPPED"
-                      style="color:#979797;">已跳过</span>
-                <span v-else-if="item.status === TaskStatusEnum.RUNNING"
-                      style="color:#11C2C2;">执行中</span>
-                <span v-else-if="item.status === TaskStatusEnum.INIT"
-                      style="color:#096DD9;">待启动</span>
-                <span v-else-if="item.status === TaskStatusEnum.WAITING"
-                      style="color:#FF862B">排队中</span>
-                <span v-else-if="item.status === TaskStatusEnum.SUSPENDED"
-                      style="color:#7986CB">已挂起</span>
-                <span v-else-if="item.status === TaskStatusEnum.IGNORED"
-                      style="color:#9847FC">已忽略</span>
-              </div>
+              <jm-task-state :value="item.status"/>
               <div style="text-align:right; white-space: nowrap;"
                    v-if="!(item.status === TaskStatusEnum.RUNNING || item.status === TaskStatusEnum.INIT || item.status === TaskStatusEnum.WAITING)">
                 {{ executionTimeFormatter(item.startTime, item.endTime) }}
@@ -115,3 +98,8 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="less" scoped>
+.jm-task-state {
+  margin: 0 35px 0 30px;
+}
+</style>
