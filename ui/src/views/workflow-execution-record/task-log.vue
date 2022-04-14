@@ -65,7 +65,7 @@
         <div>
           <div class="param-key">执行状态</div>
           <div>
-            <task-state :status="task.status"/>
+            <jm-task-state :value="task.status"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -280,7 +280,6 @@ import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
-import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import TaskList from '@/views/workflow-execution-record/task-list.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
@@ -290,7 +289,7 @@ import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
 
 export default defineComponent({
-  components: { TaskState, TaskList },
+  components: { TaskList },
   props: {
     id: {
       type: String,
