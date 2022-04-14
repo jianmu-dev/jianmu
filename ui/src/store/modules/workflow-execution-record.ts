@@ -2,7 +2,12 @@ import { ActionContext, Module } from 'vuex';
 import { IRootState } from '@/model';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { fetchProjectDetail, fetchWorkflow, listTask, listWorkflowExecutionRecord } from '@/api/view-no-auth';
+import {
+  fetchProjectDetail,
+  fetchWorkflow,
+  listAsyncTaskInstance,
+  listWorkflowExecutionRecord,
+} from '@/api/view-no-auth';
 import yaml from 'yaml';
 import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
 
@@ -87,7 +92,17 @@ export default {
           triggerType: project.triggerType,
         };
       }
-      const taskRecords = !record.triggerId ? [] : await listTask(record.triggerId);
+      const taskRecords = !record.triggerId ? [] : (await listAsyncTaskInstance(record.triggerId)).map(instance => {
+        return {
+          instanceId: '',
+          businessId: instance.id,
+          nodeName: instance.asyncTaskRef,
+          defKey: instance.asyncTaskType,
+          startTime: instance.startTime,
+          endTime: instance.endTime,
+          status: instance.status,
+        };
+      });
       commit('mutateRecordDetail', { project, allRecords, record, recordDsl, taskRecords, nodeInfos });
     },
   },
