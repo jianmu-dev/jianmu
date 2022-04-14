@@ -5,7 +5,7 @@ import {
   IProjectQueryingDto,
   IProjectSavingDto,
 } from '@/api/dto/project';
-import { SORT_TYPE_ENUM } from '@/api/dto/enumeration';
+import { SortTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * vuex状态
@@ -37,5 +37,5 @@ export interface IImportForm extends Mutable<IProjectImportingDto> {}
  */
 export interface IState {
   // 项目列表排序类型
-  sortType: SORT_TYPE_ENUM
+  sortType: SortTypeEnum
 }
