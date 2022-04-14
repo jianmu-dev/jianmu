@@ -57,7 +57,6 @@ export default defineComponent({
 
 <style lang="less">
 .jm-task-state {
-  min-width: 40px;
   //  待启动
   &.init {
     color: #096DD9;

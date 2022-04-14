@@ -100,6 +100,7 @@ export default defineComponent({
 </script>
 <style lang="less" scoped>
 .jm-task-state {
-  margin: 0 35px 0 30px;
+  width: 50px;
+  margin: 0 30px;
 }
 </style>
