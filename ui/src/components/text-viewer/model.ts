@@ -1,4 +1,4 @@
-import { createVNode, nextTick, render, Ref, AppContext, VNode } from 'vue';
+import { createVNode, nextTick, render, Ref, AppContext, VNode, ref } from 'vue';
 import Tip from './tip.vue';
 import TextLine from './text-line.vue';
 import _throttle from 'lodash/throttle';
@@ -13,6 +13,8 @@ export class TextViewer {
   private readonly value: Ref<string>;
   private readonly tipPlacement: string;
   private readonly tipAppendToBody: boolean;
+  // 控制tooltip的显示与隐藏
+  private readonly tipVisible: Ref<boolean> = ref<boolean>(false);
   // 解决element组件未被注册的警告提示
   private readonly appContext: AppContext;
   private readonly temporaryContent: Ref<string>;
@@ -291,6 +293,7 @@ export class TextViewer {
           placement: this.tipPlacement,
           style: { cursor: 'default' },
           appendToBody: this.tipAppendToBody,
+          visible: this.tipVisible,
         },
         null,
       );
@@ -323,21 +326,16 @@ export class TextViewer {
             style: { height: `${lineHeight}px` },
             // 挂载vNode后监听鼠标的移动情况，控制tooltip的显示与隐藏
             onVnodeMounted: (v: VNode) => {
-              // 获取toolTip组件实例
-              const tooltipInstance: any = toolTipVNode.component;
               v.el?.parentElement.addEventListener('mouseenter', () => {
-                // 控制tooltip的显隐
-                tooltipInstance.ctx.toggle(true);
+                this.tipVisible.value = true;
               });
               // 单独处理点击事件，因为文本组件应用在链接的地方，会导致tooltip不会消失的问题
               v.el?.parentElement.addEventListener('click', (e: any) => {
                 e.stopPropagation();
-                // 控制tooltip的显隐
-                tooltipInstance.ctx.toggle(false);
+                this.tipVisible.value = false;
               });
               v.el?.parentElement.addEventListener('mouseleave', () => {
-                // 控制tooltip的显隐
-                tooltipInstance.ctx.toggle(false);
+                this.tipVisible.value = false;
               });
             },
           },

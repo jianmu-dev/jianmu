@@ -1,24 +1,26 @@
 <template>
-  <jm-tooltip @update:modelValue="()=>{}" :model-value="visible" :manual="true">
+  <jm-tooltip @update:modelValue="()=>{}" :model-value="v" :manual="true">
     <span style="display: inline">...</span>
   </jm-tooltip>
 </template>
 <script lang="ts">
 import {
+  computed,
   defineComponent,
-  ref,
 } from 'vue';
 
 export default defineComponent({
-  setup() {
+  props: {
+    visible: {
+      type: Object,
+      default: () => ({}),
+    },
+  },
+  setup(props) {
     // 控制tooltip的显示与隐藏
-    const visible = ref<boolean>(false);
-    const toggle = (flag: boolean) => {
-      visible.value = flag;
-    };
+    const v = computed<boolean>(() => props.visible.value);
     return {
-      visible,
-      toggle,
+      v,
     };
   },
 });
