@@ -161,18 +161,27 @@ function parseWorkflow(workflow: any): {
     });
   });
 
-  edges.forEach(edge => {
+  edges.forEach((edge, index, self) => {
     const { type, cases } = workflow[edge.source as string];
-    if (type === NodeTypeEnum.CONDITION) {
-      // 设置从条件网关出来的边内容
-      for (const k of Object.keys(cases)) {
-        const v = cases[k];
+    // TODO 待扩展switch
+    if (type !== NodeTypeEnum.CONDITION) {
+      return;
+    }
 
-        if (v === edge.target) {
+    const kArr = Object.keys(cases);
+    // 设置从条件网关出来的边内容
+    for (const k of kArr) {
+      const v = cases[k];
+      // TODO 待扩展并发场景
+      if (v === edge.target) {
+        if (self.filter(({ source }) => source === edge.source).length === 1) {
+          // 表示网关两条分支都连接到统一节点
+          edge.label = kArr.join(' | ');
+        } else {
           edge.label = k;
-
-          break;
         }
+
+        break;
       }
     }
   });
