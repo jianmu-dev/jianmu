@@ -40,7 +40,7 @@ import { computed, defineComponent, getCurrentInstance, inject, nextTick, onBefo
 import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/project';
 import { createNamespacedHelpers, useStore } from 'vuex';
-import { SORT_TYPE_ENUM } from '@/api/dto/enumeration';
+import { SortTypeEnum } from '@/api/dto/enumeration';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -60,13 +60,13 @@ export default defineComponent({
     // 改变项目组排序后强制数据及时刷新
     const groupListRefresh = ref<boolean>(true);
     // 项目组排序类型
-    const sortTypeList = ref<Array<{ label: string, value: SORT_TYPE_ENUM }>>([
-      { label: '默认排序', value: SORT_TYPE_ENUM.DEFAULT_SORT },
-      { label: '最近执行', value: SORT_TYPE_ENUM.LAST_EXECUTION_TIME },
-      { label: '最近修改', value: SORT_TYPE_ENUM.LAST_MODIFIED_TIME },
+    const sortTypeList = ref<Array<{ label: string, value: SortTypeEnum }>>([
+      { label: '默认排序', value: SortTypeEnum.DEFAULT_SORT },
+      { label: '最近执行', value: SortTypeEnum.LAST_EXECUTION_TIME },
+      { label: '最近修改', value: SortTypeEnum.LAST_MODIFIED_TIME },
     ]);
     // 所有项目组在vuex中保存的排序类型
-    const sortType = computed<SORT_TYPE_ENUM>(() => store.state[namespace].sortType);
+    const sortType = computed<SortTypeEnum>(() => store.state[namespace].sortType);
     // 改变项目排序规则
     const sortChange = async (e: number) => {
       // 更改vuex中的项目组排序状态
