@@ -120,7 +120,7 @@ export enum ParamTypeEnum {
 /**
  * 项目排序枚举
  */
-export enum SORT_TYPE_ENUM {
+export enum SortTypeEnum {
   DEFAULT_SORT = 'DEFAULT_SORT',
   LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME',
   LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME'
