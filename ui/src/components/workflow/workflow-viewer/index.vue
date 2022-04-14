@@ -13,7 +13,7 @@
              @on-zoom="handleZoom"
              @on-fullscreen="handleFullscreen"
              @rotate="handleRotation"/>
-    <node-toolbar v-if="!dslMode && nodeEvent"
+    <node-toolbar v-if="!dslMode && nodeEvent && selectedTask.status !== TaskStatusEnum.INIT"
                   :readonly="readonly"
                   :task-business-id="selectedTask.businessId"
                   :task-status="selectedTask.status"
@@ -194,6 +194,7 @@ export default defineComponent({
     const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
 
     return {
+      TaskStatusEnum,
       container,
       graph,
       selectedTask: computed<{
