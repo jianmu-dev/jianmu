@@ -1,5 +1,10 @@
 import { restProxy } from '@/api/index';
-import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import {
+  IAsyncTaskInstanceVo,
+  ITaskExecutionRecordVo,
+  ITaskParamVo,
+  IWorkflowExecutionRecordVo,
+} from '@/api/dto/workflow-execution-record';
 import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
@@ -13,7 +18,9 @@ export const baseUrl = {
   // TODO 待改善，与/view/projects合并
   projectV2: '/view/v2/projects',
   workflow: '/view/workflow_instances',
-  tasks: '/view/task_instances',
+  asyncTasks: '/view/async_task_instances',
+  // tasks: '/view/task_instances',
+  tasksV2: '/view/v2/task_instances',
   task: '/view/task_instance',
   log: '/view/logs',
   dsl: '/view/workflow',
@@ -92,14 +99,25 @@ export function listWorkflowExecutionRecord(
 }
 
 /**
- * 获取任务执行记录列表
- * @param workflowExecutionRecordId
+ * 获取异步任务实例列表
+ * @param triggerId
  */
-export function listTask(
-  triggerId: string,
+export function listAsyncTaskInstance(triggerId: string): Promise<IAsyncTaskInstanceVo[]> {
+  return restProxy<IAsyncTaskInstanceVo[]>({
+    url: `${baseUrl.asyncTasks}/${triggerId}`,
+    method: 'get',
+  });
+}
+
+/**
+ * 获取任务实例列表
+ * @param businessId
+ */
+export function listTaskInstance(
+  businessId: string,
 ): Promise<ITaskExecutionRecordVo[]> {
   return restProxy<ITaskExecutionRecordVo[]>({
-    url: `${baseUrl.tasks}/${triggerId}`,
+    url: `${baseUrl.tasksV2}/${businessId}`,
     method: 'get',
   });
 }

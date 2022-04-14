@@ -125,3 +125,11 @@ export enum SORT_TYPE_ENUM {
   LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME',
   LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME'
 }
+
+/**
+ * 失败处理模式
+ */
+export enum FailureModeEnum {
+  IGNORE = 'IGNORE',
+  SUSPEND = 'SUSPEND',
+}
