@@ -308,6 +308,7 @@ export default defineComponent({
         item => item.instanceId === taskInstanceId.value,
       ) || {
         instanceId: '',
+        businessId: '',
         nodeName: '',
         defKey: '',
         startTime: '',
