@@ -323,16 +323,21 @@ export class TextViewer {
             style: { height: `${lineHeight}px` },
             // 挂载vNode后监听鼠标的移动情况，控制tooltip的显示与隐藏
             onVnodeMounted: (v: VNode) => {
+              // 获取toolTip组件实例
+              const tooltipInstance: any = toolTipVNode.component;
               v.el?.parentElement.addEventListener('mouseenter', () => {
-                (toolTipVNode?.component as any).ctx.toggle(true);
+                // 控制tooltip的显隐
+                tooltipInstance.ctx.toggle(true);
               });
               // 单独处理点击事件，因为文本组件应用在链接的地方，会导致tooltip不会消失的问题
               v.el?.parentElement.addEventListener('click', (e: any) => {
                 e.stopPropagation();
-                (toolTipVNode?.component as any).ctx.toggle(false);
+                // 控制tooltip的显隐
+                tooltipInstance.ctx.toggle(false);
               });
               v.el?.parentElement.addEventListener('mouseleave', () => {
-                (toolTipVNode?.component as any).ctx.toggle(false);
+                // 控制tooltip的显隐
+                tooltipInstance.ctx.toggle(false);
               });
             },
           },
