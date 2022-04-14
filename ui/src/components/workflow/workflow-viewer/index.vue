@@ -15,7 +15,7 @@
              @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
-                  :task-instance-id="selectedTask.instanceId"
+                  :task-business-id="selectedTask.businessId"
                   :task-status="selectedTask.status"
                   :node-event="nodeEvent"
                   :zoom="zoom"
@@ -197,11 +197,11 @@ export default defineComponent({
       container,
       graph,
       selectedTask: computed<{
-        instanceId: string;
+        businessId: string;
         status: TaskStatusEnum;
       }>(() => {
         const defaultValue = {
-          instanceId: '',
+          businessId: '',
           status: TaskStatusEnum.INIT,
         };
 
@@ -212,7 +212,7 @@ export default defineComponent({
         // 按开始时间降序排序，保证第一个是最新的
         const tasks = sortTasks(props.tasks, true, nodeEvent.value.id);
         return tasks.length === 0 ? defaultValue : {
-          instanceId: tasks[0].instanceId,
+          businessId: tasks[0].businessId,
           status: tasks[0].status,
         };
       }),

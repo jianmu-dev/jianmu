@@ -34,7 +34,7 @@ export enum TaskStatusEnum {
 }
 
 /**
- * 项目导入类型
+ * 项目导入类型枚举
  */
 export enum ProjectImporterTypeEnum {
   SSH = 'SSH',
@@ -92,7 +92,7 @@ export enum OwnerTypeEnum {
 }
 
 /**
- * 密钥管理器类型
+ * 密钥管理器类型枚举
  */
 export enum CredentialManagerTypeEnum {
   LOCAL = 'local',
@@ -100,7 +100,7 @@ export enum CredentialManagerTypeEnum {
 }
 
 /**
- * webhook请求状态
+ * webhook请求状态枚举
  */
 export enum WebhookRequstStateEnum {
   OK = 'OK',
@@ -111,7 +111,7 @@ export enum WebhookRequstStateEnum {
 }
 
 /**
- * 参数类型
+ * 参数类型枚举
  */
 export enum ParamTypeEnum {
   SECRET = 'SECRET'
@@ -124,4 +124,12 @@ export enum SortTypeEnum {
   DEFAULT_SORT = 'DEFAULT_SORT',
   LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME',
   LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME'
+}
+
+/**
+ * 失败处理模式枚举
+ */
+export enum FailureModeEnum {
+  IGNORE = 'IGNORE',
+  SUSPEND = 'SUSPEND',
 }

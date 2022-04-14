@@ -94,7 +94,7 @@ export default defineComponent({
       type: Boolean,
       required: true,
     },
-    taskInstanceId: String,
+    taskBusinessId: String,
     taskStatus: String as PropType<TaskStatusEnum>,
     nodeEvent: {
       type: Object as PropType<INodeMouseoverEvent>,
@@ -163,12 +163,12 @@ export default defineComponent({
         if (props.nodeEvent.type === NodeTypeEnum.WEBHOOK) {
           return true;
         }
-        return !!(props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK && props.taskInstanceId);
+        return !!(props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK && props.taskBusinessId);
       }),
       toolbar,
       handleClick: (tabType: NodeToolbarTabTypeEnum) => {
         if (props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK) {
-          emit('node-click', props.taskInstanceId, props.nodeEvent.type, tabType);
+          emit('node-click', props.taskBusinessId, props.nodeEvent.type, tabType);
           return;
         }
         emit('node-click', props.nodeEvent.id, props.nodeEvent.type, tabType);
