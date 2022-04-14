@@ -225,14 +225,6 @@ public class ViewController {
         return projectVo;
     }
 
-    @GetMapping("/projects/{projectId}/dsl")
-    @Operation(summary = "获取项目DSL", description = "获取项目DSL", deprecated = true)
-    public String getProjectDsl(@PathVariable String projectId) {
-        return this.projectApplication.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"))
-                .getDslText();
-    }
-
     @GetMapping("/repo/{gitRepoId}")
     public void gotoRepo(@PathVariable String gitRepoId, HttpServletResponse response) throws IOException {
         var repo = this.projectApplication.findGitRepoById(gitRepoId);
@@ -267,31 +259,6 @@ public class ViewController {
         return this.taskInstanceApplication.findByBusinessId(businessId).stream()
                 .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
                 .collect(Collectors.toList());
-    }
-
-    @GetMapping("/task_instances/{triggerId}")
-    @Operation(summary = "任务实例列表接口", description = "根据triggerId查询", deprecated = true)
-    public List<TaskInstanceVo> findTasksByTriggerId(@PathVariable String triggerId) {
-        List<TaskInstanceVo> list = this.taskInstanceApplication.findByTriggerId(triggerId).stream()
-                .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
-                .collect(Collectors.toList());
-        var asyncTaskInstances = this.asyncTaskInstanceApplication.findByTriggerId(triggerId);
-        list.stream()
-                .filter(taskInstanceVo -> taskInstanceVo.getStatus() != TaskInstanceVo.Status.WAITING)
-                .forEach(taskInstanceVo -> {
-                    asyncTaskInstances.stream()
-                            .filter(asyncTaskInstance -> taskInstanceVo.getBusinessId().equals(asyncTaskInstance.getId()))
-                            .forEach(
-                                    asyncTaskInstance -> taskInstanceVo.setStatus(TaskInstanceMapper.INSTANCE.toTaskInstanceStatus(asyncTaskInstance.getStatus()))
-                            );
-                });
-        this.taskInstanceApplication.findByTriggerId(triggerId).stream()
-                .filter(taskInstance -> taskInstance.getStatus() == InstanceStatus.WAITING)
-                .forEach(taskInstance -> {
-                    list.stream().filter(taskInstanceVo -> taskInstanceVo.getInstanceId().equals(taskInstance.getId()))
-                            .forEach(taskInstanceVo -> taskInstanceVo.setStatus(TaskInstanceVo.Status.WAITING));
-                });
-        return list;
     }
 
     @GetMapping("/task_instance/{instanceId}")
