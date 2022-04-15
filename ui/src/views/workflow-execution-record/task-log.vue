@@ -275,7 +275,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, onUpdated, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -303,27 +303,25 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
+    const asyncTask = computed<ITaskExecutionRecordVo>(() => {
+      return state.recordDetail.taskRecords.find(item => item.businessId === props.businessId) || {
+        instanceId: '',
+        businessId: '',
+        nodeName: '',
+        defKey: '',
+        startTime: '',
+        status: TaskStatusEnum.INIT,
+      };
+    });
     const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
-      const at = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId);
-      if (!at) {
-        return {
-          instanceId: '',
-          businessId: '',
-          nodeName: '',
-          defKey: '',
-          startTime: '',
-          status: TaskStatusEnum.INIT,
-        };
-      }
-
       const t = taskInstances.value.find(({ instanceId }) => instanceId === taskInstanceId.value);
       return {
-        ...at,
-        instanceId: t ? t.instanceId : at.instanceId,
-        startTime: t ? t.startTime : at.startTime,
-        endTime: t ? t.endTime : at.endTime,
+        ...asyncTask.value,
+        instanceId: t ? t.instanceId : asyncTask.value.instanceId,
+        startTime: t ? t.startTime : asyncTask.value.startTime,
+        endTime: t ? t.endTime : asyncTask.value.endTime,
       };
     });
     const tasks = computed<ITaskExecutionRecordVo[]>(() => {
@@ -337,6 +335,17 @@ export default defineComponent({
       }, ...taskInstances.value.slice(1));
 
       return arr;
+    });
+    const asyncTaskStartTime = ref<string>('');
+    onUpdated(async () => {
+      if (asyncTask.value.startTime === asyncTaskStartTime.value) {
+        return;
+      }
+      // 开始时间变化时，表示开始新任务
+      if (asyncTaskStartTime.value) {
+        taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
+      }
+      asyncTaskStartTime.value = asyncTask.value.startTime;
     });
     const executing = computed<boolean>(() =>
       [
