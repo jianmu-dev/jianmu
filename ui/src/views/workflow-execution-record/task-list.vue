@@ -47,8 +47,14 @@ export default defineComponent({
     const tasks = computed<ITaskExecutionRecordVo[]>(() => props.taskParams);
     // 当前选择
     const currentSelect = ref<number>(tasks.value.length);
+    // 日志状态
+    const logStatus = ref<boolean>(false);
 
     onUpdated(() => {
+      // 手动选择查看后不更新日志
+      if (logStatus.value) {
+        return;
+      }
       emit('change', tasks.value[0].instanceId);
     });
     return {
@@ -57,6 +63,7 @@ export default defineComponent({
       executionTimeFormatter,
       currentSelect,
       getCurrentId: (current: ITaskExecutionRecordVo) => {
+        logStatus.value = true;
         currentSelect.value = tasks.value.length - tasks.value.indexOf(current);
         emit('change', tasks.value[tasks.value.indexOf(current)].instanceId);
       },
