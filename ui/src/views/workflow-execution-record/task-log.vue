@@ -75,7 +75,7 @@
       </div>
     </div>
     <div class="tab-section">
-      <task-list :taskParams="tasks" @change="getCurrentId"/>
+      <task-list :tasks="tasks" @change="changeTask"/>
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
@@ -275,7 +275,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, onUpdated, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
@@ -303,11 +303,10 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
-    const taskInstanceId = ref<string>('');
-    const task = computed<ITaskExecutionRecordVo>(() => {
-      return state.recordDetail.taskRecords.find(
-        item => item.businessId === props.businessId,
-      ) || {
+    const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
+    const asyncTask = computed<ITaskExecutionRecordVo>(() => {
+      const latestTaskInstanceId = taskInstances.value.length === 0 ? '' : taskInstances.value[0].instanceId;
+      const at = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId) || {
         instanceId: '',
         businessId: '',
         nodeName: '',
@@ -315,8 +314,18 @@ export default defineComponent({
         startTime: '',
         status: TaskStatusEnum.INIT,
       };
+      return {
+        ...at,
+        instanceId: latestTaskInstanceId,
+      };
     });
-    const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
+    const taskInstanceId = ref<string>('');
+    const task = computed<ITaskExecutionRecordVo>(() => {
+      const t = taskInstances.value.find(({ instanceId }) => instanceId === taskInstanceId.value);
+      return {
+        ...(t || asyncTask.value),
+      };
+    });
     const tasks = computed<ITaskExecutionRecordVo[]>(() => {
       if (taskInstances.value.length === 0) {
         return [];
@@ -324,8 +333,7 @@ export default defineComponent({
 
       const arr: ITaskExecutionRecordVo[] = [];
       arr.push({
-        ...task.value,
-        instanceId: taskInstances.value[0].instanceId,
+        ...asyncTask.value,
       }, ...taskInstances.value.slice(1));
 
       return arr;
@@ -346,8 +354,6 @@ export default defineComponent({
     // 最大日志大小为1MB
     const maxLogLength = 1024 * 1024;
     const moreLog = ref<boolean>(false);
-    // 当前节点id
-    const currentInstanceId = ref<string>('');
     // 运行状态次数
     const statusParams = computed<{
       total: number;
@@ -455,7 +461,9 @@ export default defineComponent({
     // 初始化任务
     onBeforeMount(async () => {
       taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
-      initialize(taskInstances.value[0].instanceId);
+      if (taskInstances.value.length > 0) {
+        initialize(taskInstances.value[0].instanceId);
+      }
     });
 
     // 销毁任务
@@ -463,6 +471,10 @@ export default defineComponent({
 
     const maxWidthRecord = ref<Record<string, number>>({});
     const changeTask = (instanceId: string) => {
+      if (taskInstanceId.value === instanceId) {
+        return;
+      }
+
       // 销毁旧任务
       destroy();
       //  清空日志
@@ -470,14 +482,22 @@ export default defineComponent({
       // 初始化新任务
       nextTick(() => initialize(instanceId));
     };
-    // 获取当前id
-    const getCurrentId = (id: string) => {
-      currentInstanceId.value = id;
-      if (taskInstanceId.value !== currentInstanceId.value) {
-        taskInstanceId.value = currentInstanceId.value;
-        changeTask(taskInstanceId.value);
+
+    const asyncTaskStartTime = ref<string>('');
+    onUpdated(async () => {
+      if (asyncTask.value.startTime === asyncTaskStartTime.value) {
+        return;
       }
-    };
+      // 开始时间变化时，表示开始新任务
+      if (asyncTaskStartTime.value) {
+        taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
+
+        if (!taskInstanceId.value && taskInstances.value.length > 0) {
+          changeTask(taskInstances.value[0].instanceId);
+        }
+      }
+      asyncTaskStartTime.value = asyncTask.value.startTime;
+    });
     return {
       ParamTypeEnum,
       maxWidthRecord,
@@ -525,7 +545,7 @@ export default defineComponent({
         return await fetchTaskLog(taskInstanceId.value);
       },
       TaskStatusEnum,
-      getCurrentId,
+      changeTask,
       statusParams,
     };
   },

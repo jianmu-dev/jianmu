@@ -190,6 +190,9 @@ public class TaskInstanceInternalApplication {
         Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
         if (!nodeVersion.getOutputParameters().isEmpty()) {
             if (resultFile != null && !resultFile.isBlank()) {
+        if (nodeVersion.getOutputParameters() != null &&
+                !nodeVersion.getOutputParameters().isEmpty()) {
+            if (nodeVersion.getResultFile() != null) {
                 outputParameters = this.handleOutputParameter(
                         resultFile, nodeVersion, workflow.getType().name(), taskInstance
                 );

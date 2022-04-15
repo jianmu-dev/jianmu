@@ -82,14 +82,14 @@ import {
   computed,
   defineComponent,
   getCurrentInstance,
+  inject,
+  nextTick,
   onBeforeMount,
   onBeforeUnmount,
   onUpdated,
   PropType,
-  nextTick,
   ref,
   watch,
-  inject,
 } from 'vue';
 import { IProjectVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
@@ -100,7 +100,7 @@ import ProjectItem from '@/views/common/project-item.vue';
 import { IPageVo } from '@/api/dto/common';
 import { Mutable } from '@/utils/lib';
 import { updateProjectGroupProjectSort } from '@/api/project-group';
-import { START_PAGE_NUM, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { DEFAULT_PAGE_SIZE, START_PAGE_NUM } from '@/utils/constants';
 import { StateEnum } from '@/components/load-more/enumeration';
 import Folding from '@/views/common/folding.vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
@@ -425,6 +425,7 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    padding-right: 0.7%;
 
     .group-name {
       .desc {
