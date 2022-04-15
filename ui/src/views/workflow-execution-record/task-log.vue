@@ -75,7 +75,7 @@
       </div>
     </div>
     <div class="tab-section">
-      <task-list :taskParams="tasks" @change="changeTask"/>
+      <task-list :tasks="tasks" @change="changeTask"/>
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
