@@ -58,14 +58,15 @@ public class Condition extends BaseNode implements Gateway {
     }
 
     private Branch getNext() {
-        Boolean expResult = false;
-        Expression expression = expressionLanguage.parseExpression(this.expression);
-        EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
+        Boolean expResult;
+        Expression expression = this.expressionLanguage.parseExpression(this.expression);
+        EvaluationResult evaluationResult = this.expressionLanguage.evaluateExpression(expression, context);
         if (!evaluationResult.isFailure() && evaluationResult.getValue() instanceof BoolParameter) {
             expResult = ((BoolParameter) evaluationResult.getValue()).getValue();
             logger.info("条件网关表达式计算：{} 计算成功结果为：{}", this.expression, evaluationResult.getValue().getStringValue());
         } else {
             logger.info("条件网关表达式计算: {} 计算错误: {}", this.expression, evaluationResult.getFailureMessage());
+            throw new RuntimeException("条件网关表达式计算错误");
         }
         Optional<Branch> found = Optional.empty();
         for (Branch branch : this.branches) {
