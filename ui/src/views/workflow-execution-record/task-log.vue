@@ -75,7 +75,7 @@
       </div>
     </div>
     <div class="tab-section">
-      <task-list :taskParams="tasks" @change="getCurrentId"/>
+      <task-list :taskParams="tasks" @change="changeTask"/>
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
@@ -305,15 +305,20 @@ export default defineComponent({
     const state = useStore().state[namespace] as IState;
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
-      return state.recordDetail.taskRecords.find(
-        item => item.businessId === props.businessId,
-      ) || {
-        instanceId: '',
-        businessId: '',
-        nodeName: '',
-        defKey: '',
-        startTime: '',
-        status: TaskStatusEnum.INIT,
+      const t = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId);
+      if (!t) {
+        return {
+          instanceId: '',
+          businessId: '',
+          nodeName: '',
+          defKey: '',
+          startTime: '',
+          status: TaskStatusEnum.INIT,
+        };
+      }
+      return {
+        ...t,
+        instanceId: taskInstanceId.value,
       };
     });
     const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
@@ -325,7 +330,6 @@ export default defineComponent({
       const arr: ITaskExecutionRecordVo[] = [];
       arr.push({
         ...task.value,
-        instanceId: taskInstances.value[0].instanceId,
       }, ...taskInstances.value.slice(1));
 
       return arr;
@@ -346,8 +350,6 @@ export default defineComponent({
     // 最大日志大小为1MB
     const maxLogLength = 1024 * 1024;
     const moreLog = ref<boolean>(false);
-    // 当前节点id
-    const currentInstanceId = ref<string>('');
     // 运行状态次数
     const statusParams = computed<{
       total: number;
@@ -463,20 +465,16 @@ export default defineComponent({
 
     const maxWidthRecord = ref<Record<string, number>>({});
     const changeTask = (instanceId: string) => {
+      if (taskInstanceId.value === instanceId) {
+        return;
+      }
+
       // 销毁旧任务
       destroy();
       //  清空日志
       taskLog.value = '';
       // 初始化新任务
       nextTick(() => initialize(instanceId));
-    };
-    // 获取当前id
-    const getCurrentId = (id: string) => {
-      currentInstanceId.value = id;
-      if (taskInstanceId.value !== currentInstanceId.value) {
-        taskInstanceId.value = currentInstanceId.value;
-        changeTask(taskInstanceId.value);
-      }
     };
     return {
       ParamTypeEnum,
@@ -525,7 +523,7 @@ export default defineComponent({
         return await fetchTaskLog(taskInstanceId.value);
       },
       TaskStatusEnum,
-      getCurrentId,
+      changeTask,
       statusParams,
     };
   },
