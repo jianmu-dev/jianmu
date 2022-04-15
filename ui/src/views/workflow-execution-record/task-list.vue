@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, onUpdated, PropType, ref } from 'vue';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 import { executionTimeFormatter } from '@/utils/formatter';
@@ -47,6 +47,10 @@ export default defineComponent({
     const tasks = computed<ITaskExecutionRecordVo[]>(() => props.taskParams);
     // 当前选择
     const currentSelect = ref<number>(tasks.value.length);
+
+    onUpdated(() => {
+      emit('change', tasks.value[0].instanceId);
+    });
     return {
       tasks,
       TaskStatusEnum,
