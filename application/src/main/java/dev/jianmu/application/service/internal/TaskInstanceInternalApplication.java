@@ -188,11 +188,9 @@ public class TaskInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
-        if (!nodeVersion.getOutputParameters().isEmpty()) {
-            if (resultFile != null && !resultFile.isBlank()) {
         if (nodeVersion.getOutputParameters() != null &&
                 !nodeVersion.getOutputParameters().isEmpty()) {
-            if (nodeVersion.getResultFile() != null) {
+            if (resultFile != null && !resultFile.isBlank()) {
                 outputParameters = this.handleOutputParameter(
                         resultFile, nodeVersion, workflow.getType().name(), taskInstance
                 );
