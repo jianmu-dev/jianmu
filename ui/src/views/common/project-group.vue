@@ -95,7 +95,7 @@ import { IProjectVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
-import { ProjectStatusEnum, SORT_TYPE_ENUM } from '@/api/dto/enumeration';
+import { ProjectStatusEnum, SortTypeEnum } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
 import { IPageVo } from '@/api/dto/common';
 import { Mutable } from '@/utils/lib';
@@ -132,7 +132,7 @@ export default defineComponent({
     // 项目组排序类型
     sortType: {
       type: String,
-      default: SORT_TYPE_ENUM.DEFAULT_SORT,
+      default: SortTypeEnum.DEFAULT_SORT,
     },
   },
   setup(props: any) {

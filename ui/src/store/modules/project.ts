@@ -1,14 +1,14 @@
 import { IState } from '@/model/modules/project';
 import { Module } from 'vuex';
 import { IRootState } from '@/model';
-import { SORT_TYPE_ENUM } from '@/api/dto/enumeration';
+import { SortTypeEnum } from '@/api/dto/enumeration';
 import { getStorage, setStorage } from '@/utils/storage';
 
 /**
  * 命名空间
  */
 export const namespace = 'project';
-const DEFAULT_STATE: IState = { sortType: SORT_TYPE_ENUM.DEFAULT_SORT };
+const DEFAULT_STATE: IState = { sortType: SortTypeEnum.DEFAULT_SORT };
 
 // module的state
 function getState(): IState {
@@ -21,7 +21,7 @@ export default {
     return getState();
   },
   mutations: {
-    mutate(state: IState, payload: SORT_TYPE_ENUM) {
+    mutate(state: IState, payload: SortTypeEnum) {
       // 改变项目组列表的排序方式
       state.sortType = payload;
       setStorage(namespace, { sortType: payload });

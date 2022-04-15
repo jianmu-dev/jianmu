@@ -79,7 +79,7 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessTerminatedEvent here -------------------------");
         log.info(event.toString());
-        this.asyncTaskInstanceInternalApplication.terminateAll(event.getWorkflowInstanceId());
+        this.asyncTaskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 

@@ -8,6 +8,7 @@ export enum NodeTypeEnum {
   CONDITION = 'condition',
   ASYNC_TASK = 'async-task',
   WEBHOOK = 'webhook',
+  FLOW_NODE = 'flow-node'
 }
 
 /**

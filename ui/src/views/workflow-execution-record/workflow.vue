@@ -17,7 +17,7 @@
       direction="rtl"
       destroy-on-close
     >
-      <task-log :id="taskLogForm.id" :tab-type="taskLogForm.tabType"/>
+      <task-log :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType"/>
     </jm-drawer>
     <jm-drawer
       title="查看流程日志"
@@ -104,16 +104,9 @@ export default defineComponent({
       datetimeFormatter,
       executionTimeFormatter,
       openTaskLog: async (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
-        if (tabType === NodeToolbarTabTypeEnum.RETRY) {
-          const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
-          await retryTask(data.value.record.id, nodeName);
-          await loadData();
-          return;
-        }
-
-        if (tabType === NodeToolbarTabTypeEnum.IGNORE) {
-          const { nodeName } = data.value.taskRecords.find<ITaskExecutionRecordVo>(({ instanceId }) => instanceId === nodeId);
-          await ignoreTask(data.value.record.id, nodeName);
+        if ([NodeToolbarTabTypeEnum.RETRY, NodeToolbarTabTypeEnum.IGNORE].includes(tabType)) {
+          const { nodeName } = data.value.taskRecords.find(({ businessId }) => businessId === nodeId)!;
+          await (tabType === NodeToolbarTabTypeEnum.RETRY ? retryTask : ignoreTask)(data.value.record!.id, nodeName);
           await loadData();
           return;
         }

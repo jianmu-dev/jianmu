@@ -65,9 +65,9 @@ public class AsyncTaskInstanceInternalApplication {
 
     // 发布全部任务终止事件
     @Transactional
-    public void terminateAll(String instanceId) {
+    public void terminateByTriggerId(String triggerId) {
         // 终止同一流程实例中所有运行中的任务
-        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByInstanceId(instanceId);
+        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(triggerId);
         asyncTaskInstances.stream()
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
                 .forEach(asyncTaskInstance -> {

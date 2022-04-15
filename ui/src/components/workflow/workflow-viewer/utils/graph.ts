@@ -169,6 +169,11 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
     const node = ev.item as Item;
     const model = node.getModel();
 
+    if (model.type === NodeTypeEnum.FLOW_NODE) {
+      // flow node时，忽略
+      return;
+    }
+
     if (ev.shape.get('name').includes('animate_')) {
       // 非异步任务或滑过动画相关shape时，忽略
       return;
@@ -345,7 +350,7 @@ export function refreshNodeStateHighlight(status: TaskStatusEnum, graph?: Graph)
   }
 
   const highlightStatus = graph.get('HIGHLIGHT_STATUS');
-  
+
   if (!highlightStatus) {
     return;
   }
