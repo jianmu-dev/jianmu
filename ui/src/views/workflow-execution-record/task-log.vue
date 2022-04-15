@@ -303,8 +303,10 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
+    const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     const asyncTask = computed<ITaskExecutionRecordVo>(() => {
-      return state.recordDetail.taskRecords.find(item => item.businessId === props.businessId) || {
+      const latestTaskInstanceId = taskInstances.value.length === 0 ? '' : taskInstances.value[0].instanceId;
+      const at = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId) || {
         instanceId: '',
         businessId: '',
         nodeName: '',
@@ -312,8 +314,11 @@ export default defineComponent({
         startTime: '',
         status: TaskStatusEnum.INIT,
       };
+      return {
+        ...at,
+        instanceId: latestTaskInstanceId,
+      };
     });
-    const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
       const t = taskInstances.value.find(({ instanceId }) => instanceId === taskInstanceId.value);
@@ -331,7 +336,7 @@ export default defineComponent({
 
       const arr: ITaskExecutionRecordVo[] = [];
       arr.push({
-        ...task.value,
+        ...asyncTask.value,
       }, ...taskInstances.value.slice(1));
 
       return arr;
