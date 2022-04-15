@@ -189,7 +189,7 @@ public class TaskInstanceInternalApplication {
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
         if (!nodeVersion.getOutputParameters().isEmpty()) {
-            if (nodeVersion.getResultFile() != null) {
+            if (resultFile != null && !resultFile.isBlank()) {
                 outputParameters = this.handleOutputParameter(
                         resultFile, nodeVersion, workflow.getType().name(), taskInstance
                 );
@@ -198,14 +198,7 @@ public class TaskInstanceInternalApplication {
                     return;
                 }
             } else {
-                log.warn("输出参数存在，但是未定义ResultFile");
-        if (resultFile != null && !resultFile.isBlank()) {
-            outputParameters = this.handleOutputParameter(
-                    resultFile, nodeVersion, workflow.getType().name(), taskInstance
-            );
-            if (outputParameters.isEmpty()) {
-                this.executeFailed(taskInstanceId);
-                return;
+                log.warn("输出参数已定义，但是未输出ResultFile");
             }
         }
         taskInstance.executeSucceeded();
