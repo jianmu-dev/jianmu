@@ -54,6 +54,13 @@ public class WorkflowEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
+    public void handleWorkflowException(WorkflowErrorEvent event) {
+        log.info("Get WorkflowErrorEvent here, because something wrong -------------------------");
+        log.info(event.toString());
+        this.workflowInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
+    }
+
     @EventListener
     public void handleWorkflowStartEvent(WorkflowStartEvent event) {
         MDC.put("triggerId", event.getTriggerId());
