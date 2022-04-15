@@ -401,7 +401,7 @@ export default defineComponent({
 }
 
 .project-item {
-  margin: 1%;
+  margin: 0.8%;
   margin-bottom: 0px;
   width: 19.2%;
   min-width: 260px;
@@ -625,9 +625,5 @@ export default defineComponent({
 
 .project-item {
   margin-left: 0px;
-}
-
-.project-item:nth-child(5n) {
-  margin-right: 0px;
 }
 </style>
