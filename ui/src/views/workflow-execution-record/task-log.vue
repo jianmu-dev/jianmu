@@ -303,10 +303,11 @@ export default defineComponent({
   },
   setup(props: any) {
     const state = useStore().state[namespace] as IState;
+    const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
-      const t = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId);
-      if (!t) {
+      const at = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId);
+      if (!at) {
         return {
           instanceId: '',
           businessId: '',
@@ -316,12 +317,15 @@ export default defineComponent({
           status: TaskStatusEnum.INIT,
         };
       }
+
+      const t = taskInstances.value.find(({ instanceId }) => instanceId === taskInstanceId.value);
       return {
-        ...t,
-        instanceId: taskInstanceId.value,
+        ...at,
+        instanceId: t ? t.instanceId : at.instanceId,
+        startTime: t ? t.startTime : at.startTime,
+        endTime: t ? t.endTime : at.endTime,
       };
     });
-    const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     const tasks = computed<ITaskExecutionRecordVo[]>(() => {
       if (taskInstances.value.length === 0) {
         return [];
