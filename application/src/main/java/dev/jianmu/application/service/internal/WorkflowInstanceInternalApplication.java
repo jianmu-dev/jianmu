@@ -130,6 +130,18 @@ public class WorkflowInstanceInternalApplication {
         this.workflowInstanceRepository.save(workflowInstance);
     }
 
+    // 终止流程
+    @Async
+    @Transactional
+    public void terminateByTriggerId(String triggerId) {
+        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        // 终止流程
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        workflowInstance.terminate();
+        this.workflowInstanceRepository.save(workflowInstance);
+    }
+
     @Transactional
     public void statusCheck(String triggerId) {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
