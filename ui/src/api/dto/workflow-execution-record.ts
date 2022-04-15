@@ -1,4 +1,5 @@
 import {
+  FailureModeEnum,
   TaskParamTypeEnum,
   TaskStatusEnum,
   TriggerTypeEnum,
@@ -17,9 +18,31 @@ export interface IWorkflowExecutionRecordVo extends Readonly<{
   description?: string;
   startTime: string;
   endTime?: string;
+  suspendedTime?: string;
   status: WorkflowExecutionRecordStatusEnum | '';
   triggerId: string;
   triggerType: TriggerTypeEnum;
+}> {
+}
+
+/**
+ * 异步任务实例vo
+ */
+export interface IAsyncTaskInstanceVo extends Readonly<{
+  id: string;
+  triggerId: string;
+  workflowRef: string;
+  workflowVersion: string;
+  workflowInstanceId: string;
+  name: string;
+  description: string;
+  status: TaskStatusEnum;
+  failureMode: FailureModeEnum;
+  asyncTaskRef: string;
+  asyncTaskType: string;
+  serialNo: number;
+  startTime: string;
+  endTime?: string;
 }> {
 }
 
@@ -28,6 +51,7 @@ export interface IWorkflowExecutionRecordVo extends Readonly<{
  */
 export interface ITaskExecutionRecordVo extends Readonly<{
   instanceId: string;
+  businessId: string;
   nodeName: string;
   defKey: string;
   startTime: string;

@@ -14,6 +14,7 @@ import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.event.definition.WorkflowErrorEvent;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -21,9 +22,11 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import dev.jianmu.workflow.service.WorkflowDomainService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +51,8 @@ public class WorkflowInternalApplication {
     private final TriggerEventRepository triggerEventRepository;
     private final ParameterRepository parameterRepository;
     private final WorkflowDomainService workflowDomainService = new WorkflowDomainService();
+    @Resource
+    private ApplicationEventPublisher publisher;
 
     public WorkflowInternalApplication(
             WorkflowRepository workflowRepository,
@@ -131,6 +136,7 @@ public class WorkflowInternalApplication {
                         .description(node.getDescription())
                         .asyncTaskRef(node.getRef())
                         .asyncTaskType(node.getType())
+                        .failureMode(node.getFailureMode())
                         .build()
         ).collect(Collectors.toList());
 
@@ -140,6 +146,14 @@ public class WorkflowInternalApplication {
 
     @Transactional
     public void next(NextNodeCmd cmd) {
+        this.publisher.publishEvent(
+                WorkflowErrorEvent.Builder.aWorkflowErrorEvent()
+                        .workflowRef(cmd.getWorkflowRef())
+                        .workflowVersion(cmd.getWorkflowVersion())
+                        .triggerId(cmd.getTriggerId())
+                        .nodeRef(cmd.getNodeRef())
+                        .build()
+        );
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
@@ -153,6 +167,15 @@ public class WorkflowInternalApplication {
     // 节点启动
     @Transactional
     public void activateNode(ActivateNodeCmd cmd) {
+        this.publisher.publishEvent(
+                WorkflowErrorEvent.Builder.aWorkflowErrorEvent()
+                        .workflowRef(cmd.getWorkflowRef())
+                        .workflowVersion(cmd.getWorkflowVersion())
+                        .triggerId(cmd.getTriggerId())
+                        .nodeRef(cmd.getNodeRef())
+                        .sender(cmd.getSender())
+                        .build()
+        );
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
@@ -190,6 +213,15 @@ public class WorkflowInternalApplication {
     // 节点跳过
     @Transactional
     public void skipNode(SkipNodeCmd cmd) {
+        this.publisher.publishEvent(
+                WorkflowErrorEvent.Builder.aWorkflowErrorEvent()
+                        .workflowRef(cmd.getWorkflowRef())
+                        .workflowVersion(cmd.getWorkflowVersion())
+                        .triggerId(cmd.getTriggerId())
+                        .nodeRef(cmd.getNodeRef())
+                        .sender(cmd.getSender())
+                        .build()
+        );
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));

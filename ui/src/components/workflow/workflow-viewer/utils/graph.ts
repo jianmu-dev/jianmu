@@ -169,6 +169,11 @@ export function configNodeAction(graph: undefined | Graph, mouseoverNode: ((evt:
     const node = ev.item as Item;
     const model = node.getModel();
 
+    if (model.type === NodeTypeEnum.FLOW_NODE) {
+      // flow node时，忽略
+      return;
+    }
+
     if (ev.shape.get('name').includes('animate_')) {
       // 非异步任务或滑过动画相关shape时，忽略
       return;
@@ -321,6 +326,8 @@ export function highlightNodeState(status: TaskStatusEnum, active: boolean, grap
     return;
   }
 
+  graph.set('HIGHLIGHT_STATUS', active ? status : undefined);
+
   graph
     .getNodes()
     .filter(node =>
@@ -330,4 +337,29 @@ export function highlightNodeState(status: TaskStatusEnum, active: boolean, grap
     .forEach(node => {
       graph.setItemState(node, 'highlight', active);
     });
+}
+
+/**
+ * 刷新节点状态高亮
+ * @param status
+ * @param graph
+ */
+export function refreshNodeStateHighlight(status: TaskStatusEnum, graph?: Graph) {
+  if (!graph) {
+    return;
+  }
+
+  const highlightStatus = graph.get('HIGHLIGHT_STATUS');
+
+  if (!highlightStatus) {
+    return;
+  }
+
+  if (highlightStatus !== status) {
+    // 关灯
+    highlightNodeState(status, false, graph);
+  }
+
+  // 开灯
+  highlightNodeState(highlightStatus, true, graph);
 }

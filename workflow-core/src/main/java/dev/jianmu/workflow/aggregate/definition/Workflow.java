@@ -45,8 +45,6 @@ public class Workflow extends AggregateRoot {
     private Set<GlobalParameter> globalParameters = Set.of();
     // DSL原始内容
     private String dslText;
-    // 错误处理模式
-    private FailureMode failureMode = FailureMode.TERMINATE;
     // 创建时间
     private final LocalDateTime createdTime = LocalDateTime.now();
     // 表达式计算服务
@@ -396,10 +394,6 @@ public class Workflow extends AggregateRoot {
         return dslText;
     }
 
-    public FailureMode getFailureMode() {
-        return failureMode;
-    }
-
     public LocalDateTime getCreatedTime() {
         return createdTime;
     }
@@ -419,8 +413,6 @@ public class Workflow extends AggregateRoot {
         private Set<GlobalParameter> globalParameters;
         // DSL原始内容
         private String dslText;
-        // 错误处理模式
-        private FailureMode failureMode = FailureMode.TERMINATE;
 
         private Builder() {
         }
@@ -464,11 +456,6 @@ public class Workflow extends AggregateRoot {
             return this;
         }
 
-        public Builder failureMode(FailureMode failureMode) {
-            this.failureMode = failureMode;
-            return this;
-        }
-
         public Workflow build() {
 
             // 添加业务规则检查
@@ -501,7 +488,6 @@ public class Workflow extends AggregateRoot {
             workflow.type = this.type;
             workflow.name = this.name;
             workflow.description = this.description;
-            workflow.failureMode = this.failureMode;
             return workflow;
         }
     }

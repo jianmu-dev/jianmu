@@ -20,7 +20,6 @@ import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
-import dev.jianmu.workflow.event.process.TaskActivatingEvent;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
@@ -189,13 +188,17 @@ public class TaskInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
-        if (resultFile != null && !resultFile.isBlank()) {
-            outputParameters = this.handleOutputParameter(
-                    resultFile, nodeVersion, workflow.getType().name(), taskInstance
-            );
-            if (outputParameters.isEmpty()) {
-                this.executeFailed(taskInstanceId);
-                return;
+        if (!nodeVersion.getOutputParameters().isEmpty()) {
+            if (resultFile != null && !resultFile.isBlank()) {
+                outputParameters = this.handleOutputParameter(
+                        resultFile, nodeVersion, workflow.getType().name(), taskInstance
+                );
+                if (outputParameters.isEmpty()) {
+                    this.executeFailed(taskInstanceId);
+                    return;
+                }
+            } else {
+                log.warn("输出参数已定义，但是未输出ResultFile");
             }
         }
         taskInstance.executeSucceeded();

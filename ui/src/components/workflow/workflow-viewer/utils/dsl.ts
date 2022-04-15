@@ -161,20 +161,103 @@ function parseWorkflow(workflow: any): {
     });
   });
 
-  edges.forEach(edge => {
+  edges.forEach((edge, index, self) => {
     const { type, cases } = workflow[edge.source as string];
-    if (type === NodeTypeEnum.CONDITION) {
-      // 设置从条件网关出来的边内容
-      for (const k of Object.keys(cases)) {
-        const v = cases[k];
+    // TODO 待扩展switch
+    if (type !== NodeTypeEnum.CONDITION) {
+      return;
+    }
 
-        if (v === edge.target) {
+    const kArr = Object.keys(cases);
+    // 设置从条件网关出来的边内容
+    for (const k of kArr) {
+      const v = cases[k];
+      // TODO 待扩展并发场景
+      if (v === edge.target) {
+        if (self.filter(({ source }) => source === edge.source).length === 1) {
+          // 表示网关两条分支都连接到统一节点
+          edge.label = kArr.join(' | ');
+        } else {
           edge.label = k;
-
-          break;
         }
+
+        break;
       }
     }
+  });
+
+  // ====================================================================================================
+
+  const groupByTarget: {
+    [key: string]: EdgeConfig[];
+  } = {};
+  // 按target分组
+  edges.forEach(edge => {
+    const key = edge.target!;
+    let arr = groupByTarget[key];
+    if (!arr) {
+      arr = [];
+      groupByTarget[key] = arr;
+    }
+    arr.push(edge);
+  });
+
+  const flowNodeMap: {
+    [flowNodeId: string]: {
+      target: string;
+      edges: EdgeConfig[];
+    }[];
+  } = {};
+  Object.keys(groupByTarget).forEach(key => {
+    const edges = groupByTarget[key];
+    if (edges.length === 1) {
+      return;
+    }
+    const flowNodeId = edges.map(edge => edge.source!).join('_');
+
+    let list = flowNodeMap[flowNodeId];
+    if (!list) {
+      list = [];
+      flowNodeMap[flowNodeId] = list;
+    }
+    list.push({
+      target: key,
+      edges,
+    });
+  });
+
+  Object.keys(flowNodeMap).forEach(flowNodeId => {
+    const flowNodes = flowNodeMap[flowNodeId];
+
+    if (flowNodes.length === 1) {
+      // 忽略
+      return;
+    }
+
+    nodes.push({
+      id: flowNodeId,
+      type: NodeTypeEnum.FLOW_NODE,
+    });
+
+    flowNodes.forEach(({ target, edges: eArr }) => {
+      // 删除交叉线
+      eArr.forEach(e => edges.splice(edges.indexOf(e), 1));
+
+      // 构建flow node相关线
+      edges.push({
+        source: flowNodeId,
+        target,
+        type: 'flow',
+      });
+    });
+
+    // 构建flow node相关线
+    flowNodes[0].edges.forEach(edge => {
+      edges.push({
+        ...edge,
+        target: flowNodeId,
+      });
+    });
   });
 
   return { nodes, edges };

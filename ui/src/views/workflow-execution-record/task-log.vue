@@ -50,15 +50,27 @@
         </div>
       </div>
       <div class="item">
-        <div class="param-key">执行时长</div>
-        <div class="param-value">
-          <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
+        <div>
+          <div class="param-key">执行时长</div>
+          <div class="param-value">
+            <jm-text-viewer :value="executionTime" :tip-append-to-body="false"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">挂起次数</div>
+          <div class="suspend times">{{ statusParams.suspendNum }}</div>
         </div>
       </div>
-      <div>
-        <div class="param-key">执行状态</div>
+      <div class="item">
         <div>
-          <task-state :status="task.status"/>
+          <div class="param-key">执行状态</div>
+          <div>
+            <jm-task-state :value="task.status"/>
+          </div>
+        </div>
+        <div class="param-number" v-if="tasks.length > 1">
+          <div class="title">忽略次数</div>
+          <div class="ignore times">{{ statusParams.ignoreNum }}</div>
         </div>
       </div>
     </div>
@@ -268,19 +280,19 @@ import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
-import TaskState from '@/views/workflow-execution-record/task-state.vue';
 import TaskList from '@/views/workflow-execution-record/task-list.vue';
 import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
-import { checkTaskLog, fetchTaskLog, listTaskParam } from '@/api/view-no-auth';
+import { checkTaskLog, fetchTaskLog, listTaskInstance, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
+import { sortTasks } from '@/components/workflow/workflow-viewer/utils/graph';
 
 export default defineComponent({
-  components: { TaskState, TaskList },
+  components: { TaskList },
   props: {
-    id: {
+    businessId: {
       type: String,
       required: true,
     },
@@ -294,37 +306,29 @@ export default defineComponent({
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
       return state.recordDetail.taskRecords.find(
-        item => item.instanceId === taskInstanceId.value,
+        item => item.businessId === props.businessId,
       ) || {
         instanceId: '',
+        businessId: '',
         nodeName: '',
         defKey: '',
         startTime: '',
         status: TaskStatusEnum.INIT,
       };
     });
+    const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     const tasks = computed<ITaskExecutionRecordVo[]>(() => {
-      if (!task.value.nodeName) {
+      if (taskInstances.value.length === 0) {
         return [];
       }
 
-      const tempArr = state.recordDetail.taskRecords.filter(item => item.nodeName === task.value.nodeName);
-      if (tempArr.length > 0) {
-        // 按开始时间降序排序
-        tempArr.sort((t1, t2) => {
-          const st1 = Date.parse(t1.startTime);
-          const st2 = Date.parse(t2.startTime);
-          if (st1 === st2) {
-            return 0;
-          }
-          if (st1 > st2) {
-            return -1;
-          }
-          return 1;
-        });
-      }
+      const arr: ITaskExecutionRecordVo[] = [];
+      arr.push({
+        ...task.value,
+        instanceId: taskInstances.value[0].instanceId,
+      }, ...taskInstances.value.slice(1));
 
-      return tempArr;
+      return arr;
     });
     const executing = computed<boolean>(() =>
       [
@@ -333,8 +337,9 @@ export default defineComponent({
         TaskStatusEnum.RUNNING,
       ].includes(task.value.status),
     );
+    const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
     const executionTime = computed<string>(() =>
-      executionTimeFormatter(task.value.startTime, task.value.endTime, executing.value));
+      executionTimeFormatter(task.value.startTime, task.value.endTime, isSuspended.value || executing.value));
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
@@ -344,12 +349,21 @@ export default defineComponent({
     // 当前节点id
     const currentInstanceId = ref<string>('');
     // 运行状态次数
-    const statusParams = computed<{ total: number; successNum: number; failNum: number; skipNum: number }>(() => {
+    const statusParams = computed<{
+      total: number;
+      successNum: number;
+      failNum: number;
+      skipNum: number;
+      suspendNum: number;
+      ignoreNum: number;
+    }>(() => {
       const statusNum = {
         total: 0,
         successNum: 0,
         failNum: 0,
         skipNum: 0,
+        suspendNum: 0,
+        ignoreNum: 0,
       };
 
       tasks.value.forEach(item => {
@@ -359,9 +373,13 @@ export default defineComponent({
           statusNum.failNum++;
         } else if (item.status === TaskStatusEnum.SKIPPED) {
           statusNum.skipNum++;
+        } else if (item.status === TaskStatusEnum.SUSPENDED) {
+          statusNum.suspendNum++;
+        } else if (item.status === TaskStatusEnum.IGNORED) {
+          statusNum.ignoreNum++;
         }
       });
-      statusNum.total = statusNum.successNum + statusNum.failNum + statusNum.skipNum;
+      statusNum.total = tasks.value.length;
 
       return statusNum;
     });
@@ -435,7 +453,10 @@ export default defineComponent({
     };
 
     // 初始化任务
-    onBeforeMount(() => initialize(props.id));
+    onBeforeMount(async () => {
+      taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
+      initialize(taskInstances.value[0].instanceId);
+    });
 
     // 销毁任务
     onBeforeUnmount(destroy);
@@ -466,6 +487,7 @@ export default defineComponent({
       tasks,
       executing,
       executionTime,
+      isSuspended,
       tabActiveName,
       taskLog,
       moreLog,
@@ -551,6 +573,14 @@ export default defineComponent({
 
           .skip {
             color: #979797;
+          }
+
+          .suspend {
+            color: #7986CB;
+          }
+
+          .ignore {
+            color: #9847FC;
           }
         }
       }

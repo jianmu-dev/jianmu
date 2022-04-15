@@ -12,10 +12,10 @@ import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
-import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -190,9 +189,13 @@ public class ViewController {
                 .map(workflowInstance -> {
                     var projectVo = ProjectMapper.INSTANCE.toProjectVo(project);
                     projectVo.setLatestTime(workflowInstance.getEndTime());
+                    projectVo.setSuspendedTime(workflowInstance.getSuspendedTime());
                     projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
                     if (workflowInstance.getStatus().equals(ProcessStatus.TERMINATED)) {
                         projectVo.setStatus("FAILED");
+                    }
+                    if (workflowInstance.getStatus() == ProcessStatus.SUSPENDED) {
+                        projectVo.setStatus("SUSPENDED");
                     }
                     if (workflowInstance.getStatus().equals(ProcessStatus.FINISHED)) {
                         projectVo.setStatus("SUCCEEDED");
@@ -222,14 +225,6 @@ public class ViewController {
         return projectVo;
     }
 
-    @GetMapping("/projects/{projectId}/dsl")
-    @Operation(summary = "获取项目DSL", description = "获取项目DSL", deprecated = true)
-    public String getProjectDsl(@PathVariable String projectId) {
-        return this.projectApplication.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"))
-                .getDslText();
-    }
-
     @GetMapping("/repo/{gitRepoId}")
     public void gotoRepo(@PathVariable String gitRepoId, HttpServletResponse response) throws IOException {
         var repo = this.projectApplication.findGitRepoById(gitRepoId);
@@ -250,22 +245,20 @@ public class ViewController {
         return WorkflowMapper.INSTANCE.toWorkflowVo(workflow);
     }
 
-    @GetMapping("/task_instances/{triggerId}")
-    @Operation(summary = "任务实例列表接口", description = "任务实例列表接口")
-    public List<TaskInstanceVo> findByTriggerId(@PathVariable String triggerId) {
-        List<TaskInstanceVo> list = new ArrayList<>();
-        var taskInstances = this.taskInstanceApplication.findByTriggerId(triggerId);
-        this.asyncTaskInstanceApplication.findByTriggerId(triggerId).stream()
-                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus().equals(TaskStatus.SKIPPED))
-                .forEach(asyncTaskInstance -> {
-                    var vo = TaskInstanceMapper.INSTANCE.asyncTaskInstanceToTaskInstanceVo(asyncTaskInstance);
-                    list.add(vo);
-                });
-        taskInstances.forEach(taskInstance -> {
-            var vo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(taskInstance);
-            list.add(vo);
-        });
-        return list;
+    @GetMapping("/async_task_instances/{triggerId}")
+    @Operation(summary = "异步任务实例列表接口", description = "异步任务实例列表接口")
+    public List<AsyncTaskInstanceVo> findAsyncTasksByTriggerId(@PathVariable String triggerId) {
+        return this.asyncTaskInstanceApplication.findByTriggerId(triggerId).stream()
+                .map(AsyncTaskInstanceMapper.INSTANCE::toAsyncTaskInstanceVo)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/v2/task_instances/{businessId}")
+    @Operation(summary = "任务实例列表接口", description = "根据异步任务实例ID查询")
+    public List<TaskInstanceVo> findByBusinessId(@PathVariable String businessId) {
+        return this.taskInstanceApplication.findByBusinessId(businessId).stream()
+                .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/task_instance/{instanceId}")
@@ -344,7 +337,7 @@ public class ViewController {
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
             projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
-            if (project.getStatus() == null){
+            if (project.getStatus() == null) {
                 return projectVo;
             }
             if (project.getStatus().equals(ProcessStatus.TERMINATED.name())) {
@@ -352,6 +345,10 @@ public class ViewController {
             }
             if (project.getStatus().equals(ProcessStatus.FINISHED.name())) {
                 projectVo.setStatus("SUCCEEDED");
+            }
+            if (project.getStatus().equals(ProcessStatus.SUSPENDED.name())) {
+                projectVo.setSuspendedTime(project.getSuspendedTime());
+                projectVo.setStatus("SUSPENDED");
             }
             if (project.getStatus().equals(ProcessStatus.RUNNING.name())) {
                 projectVo.setStartTime(project.getStartTime());

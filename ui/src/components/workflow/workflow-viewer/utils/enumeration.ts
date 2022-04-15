@@ -8,12 +8,15 @@ export enum NodeTypeEnum {
   CONDITION = 'condition',
   ASYNC_TASK = 'async-task',
   WEBHOOK = 'webhook',
+  FLOW_NODE = 'flow-node'
 }
 
 /**
  * 节点工具栏tab类型枚举
  */
 export enum NodeToolbarTabTypeEnum {
+  RETRY = 'retry',
+  IGNORE = 'ignore',
   LOG = 'log',
   PARAMS = 'params',
 }

@@ -1,5 +1,7 @@
 package dev.jianmu.workflow.aggregate.definition;
 
+import dev.jianmu.workflow.aggregate.process.FailureMode;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,12 +28,19 @@ public abstract class BaseNode implements Node {
     protected List<LoopPair> loopPairs;
     // 类型
     protected String type;
+    // 错误处理模式
+    protected FailureMode failureMode = FailureMode.SUSPEND;
     // 节点元数据快照
     protected String metadata;
     // 参数列表
     protected Set<TaskParameter> taskParameters;
 
     protected BaseNode() {
+    }
+
+    @Override
+    public void setFailureMode(FailureMode failureMode) {
+        this.failureMode = failureMode;
     }
 
     @Override
@@ -91,6 +100,11 @@ public abstract class BaseNode implements Node {
     @Override
     public String getType() {
         return this.type;
+    }
+
+    @Override
+    public FailureMode getFailureMode() {
+        return this.failureMode;
     }
 
     @Override

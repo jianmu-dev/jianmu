@@ -7,7 +7,7 @@
       }"
     ></div>
     <div class="content">
-      <div :class="['content-top',concurrent?'concurrent':'']">
+      <div class="content-top">
         <span class="concurrent" v-if="concurrent">可并发</span>
         <router-link
           :to="{
@@ -19,14 +19,13 @@
         </router-link>
       </div>
       <div class="time">
-        <span v-if="project.status === ProjectStatusEnum.RUNNING"
-        >执行时长：{{
+        <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
             executionTimeFormatter(project.startTime, undefined, true)
-          }}</span
-        >
-        <span v-else
-        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
-        >
+          }}</span>
+        <span v-else-if="project.status === ProjectStatusEnum.SUSPENDED">挂起时长：{{
+            executionTimeFormatter(project.suspendedTime, undefined, true)
+          }}</span>
+        <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
       <div class="time">
         下次执行时间：{{ datetimeFormatter(project.nextTime) }}
@@ -46,7 +45,7 @@
       }"
     ></div>
     <div class="content">
-      <div :class="['content-top',concurrent?'concurrent':'']">
+      <div class="content-top">
         <span class="concurrent" v-if="concurrent">可并发</span>
         <router-link
           :to="{
@@ -61,14 +60,13 @@
         time: true,
         disabled: !enabled,
       }">
-        <span v-if="project.status === ProjectStatusEnum.RUNNING"
-        >执行时长：{{
+        <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
             executionTimeFormatter(project.startTime, undefined, true)
-          }}</span
-        >
-        <span v-else
-        >最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span
-        >
+          }}</span>
+        <span v-else-if="project.status === ProjectStatusEnum.SUSPENDED">挂起时长：{{
+            executionTimeFormatter(project.suspendedTime, undefined, true)
+          }}</span>
+        <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
       <div :class="{
         time: true,
@@ -474,6 +472,10 @@ export default defineComponent({
     &.failed {
       background-color: #cf1524;
     }
+
+    &.suspended {
+      background-color: #7986cb;
+    }
   }
 
   .content {
@@ -482,13 +484,11 @@ export default defineComponent({
     padding: 20px 20px 16px 20px;
 
     .content-top {
-      vertical-align: middle;
+      display: flex;
+      align-items: center;
 
-      &.concurrent {
-        .jm-text-viewer {
-          width: 65%;
-          display: inline-block;
-        }
+      a {
+        flex: 1;
       }
 
       .concurrent {

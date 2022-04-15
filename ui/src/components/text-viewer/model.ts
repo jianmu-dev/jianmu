@@ -1,4 +1,4 @@
-import { createVNode, nextTick, render, Ref, AppContext, VNode } from 'vue';
+import { createVNode, nextTick, render, Ref, AppContext, VNode, ref } from 'vue';
 import Tip from './tip.vue';
 import TextLine from './text-line.vue';
 import _throttle from 'lodash/throttle';
@@ -7,12 +7,14 @@ export interface ICallbackEvent {
   contentMaxWidth: number;
 }
 
-type Callback = (event: ICallbackEvent) => void
+type Callback = (event: ICallbackEvent) => void;
 
 export class TextViewer {
   private readonly value: Ref<string>;
   private readonly tipPlacement: string;
   private readonly tipAppendToBody: boolean;
+  // 控制tooltip的显示与隐藏
+  private readonly tipVisible: Ref<boolean> = ref<boolean>(false);
   // 解决element组件未被注册的警告提示
   private readonly appContext: AppContext;
   private readonly temporaryContent: Ref<string>;
@@ -20,7 +22,7 @@ export class TextViewer {
   private readonly transitCalculator: Ref<HTMLElement | undefined>;
   // 事件监听器
   private readonly resizeObserver: ResizeObserver;
-
+  // 组件外层容器宽度变化触发的回调函数
   private readonly callback: Callback;
   // 身略号占据的宽度
   private ellipsisWidth: number = 0;
@@ -41,10 +43,14 @@ export class TextViewer {
     this.tipPlacement = tipPlacement;
     this.tipAppendToBody = tipAppendToBody;
     this.callback = callback;
-    this.resizeObserver = new ResizeObserver(_throttle(async () => {
-      await this.reload();
-    }, 800));
-    this.resizeObserver.observe(this.transitCalculator.value!.parentElement!.parentElement as Element);
+    this.resizeObserver = new ResizeObserver(
+      _throttle(async () => {
+        await this.reload();
+      }, 800),
+    );
+    this.resizeObserver.observe(
+      this.transitCalculator.value!.parentElement!.parentElement as Element,
+    );
   }
 
   /**
@@ -54,13 +60,20 @@ export class TextViewer {
    * @param w
    * @return 最大宽度
    */
-  private async calculateMaxCharWidth(value: string, i: number = 0, w: number = 0): Promise<number> {
-    this.temporaryContent.value = value[i];
-    await nextTick();
+  private async calculateMaxCharWidth(
+    value: string,
+    i: number = 0,
+    w: number = 0,
+  ): Promise<number> {
     if (!this.transitCalculator.value) {
       return 0;
     }
-    const maxWidth = Math.max(w, this.transitCalculator.value.getBoundingClientRect().width);
+    this.temporaryContent.value = value[i];
+    await nextTick();
+    const maxWidth = Math.max(
+      w,
+      this.transitCalculator.value.getBoundingClientRect().width,
+    );
     // 比较到字符内容的最后一位的字符得到最大的宽度值，结束递归。
     if (i === value.length - 1) {
       this.temporaryContent.value = '';
@@ -74,10 +87,15 @@ export class TextViewer {
    * @param value
    * @return 传入文本在页面会占据的最大宽度
    */
-  private async calculateContentMaxWidth(value: string = this.value.value): Promise<number> {
+  private async calculateContentMaxWidth(
+    value: string = this.value.value,
+  ): Promise<number> {
     this.temporaryContent.value = value;
     await nextTick();
-    if (!this.transitCalculator.value || !this.transitCalculator.value.getBoundingClientRect()) {
+    if (
+      !this.transitCalculator.value ||
+      !this.transitCalculator.value.getBoundingClientRect()
+    ) {
       return 0;
     }
     // 需要用getClientRects去获取元素的宽度精确到小数点后三位
@@ -89,7 +107,8 @@ export class TextViewer {
   private async calculateEllipsisWidth(): Promise<number> {
     this.temporaryContent.value = '...';
     await nextTick();
-    const ellipsisWidth = this.transitCalculator.value!.getBoundingClientRect().width;
+    const ellipsisWidth =
+      this.transitCalculator.value!.getBoundingClientRect().width;
     this.temporaryContent.value = '';
     return ellipsisWidth;
   }
@@ -103,10 +122,15 @@ export class TextViewer {
     await nextTick();
     this.temporaryContent.value = '';
     // 火狐浏览器计算的offsetHeight精确到小数两位，会大1px
-    if (!this.transitCalculator.value || !this.transitCalculator.value.getBoundingClientRect()) {
+    if (
+      !this.transitCalculator.value ||
+      !this.transitCalculator.value.getBoundingClientRect()
+    ) {
       return 0;
     }
-    return Math.floor(this.transitCalculator.value!.getBoundingClientRect().height);
+    return Math.floor(
+      this.transitCalculator.value!.getBoundingClientRect().height,
+    );
   }
 
   /**
@@ -124,7 +148,8 @@ export class TextViewer {
         height: 0,
       };
     }
-    const { clientWidth, clientHeight } = this.transitCalculator.value.parentElement as HTMLElement;
+    const { clientWidth, clientHeight } = this.transitCalculator.value
+      .parentElement as HTMLElement;
     return {
       width: clientWidth,
       height: clientHeight || lineHeight,
@@ -156,15 +181,24 @@ export class TextViewer {
     this.temporaryContent.value += value[i];
     await nextTick();
     // 获取到此时用于计算的元素中的文字在页面中占据的实际宽度
-    let contentWidth = this.transitCalculator.value.getBoundingClientRect().width;
+    let contentWidth =
+      this.transitCalculator.value.getBoundingClientRect().width;
     // 提前先判断最后剩余的文本内容占据的宽度是否会大于外层容器的宽度，若大于外层容器的宽度，控制只让最后一行文本是带着...去计算生成截取的文本
-    if (rows === contentArr.length + 1 && await this.calculateLastLineMaxWidth(contentArr) > wrapperSize.width) {
+    if (
+      rows === contentArr.length + 1 &&
+      (await this.calculateLastLineMaxWidth(contentArr)) > wrapperSize.width
+    ) {
       contentWidth += this.ellipsisWidth;
     }
     // 截取到字符串的offsetWidth大于外层元素设置的宽度
     if (contentWidth > wrapperSize.width) {
       // 用于计算的元素中的文本的内容的倒数第二位的文本内容加入数组中，因为此时文本内容已经超过外层盒子的宽度，所以应当减一位。
-      contentArr.push(this.temporaryContent.value.substring(0, this.temporaryContent.value.length - 1));
+      contentArr.push(
+        this.temporaryContent.value.substring(
+          0,
+          this.temporaryContent.value.length - 1,
+        ),
+      );
       // 文本内容截取后将响应式占位宽度的span内容清空
       this.temporaryContent.value = '';
       // 如果生成的文本内容数组长度和指定的行数相等递归结束。
@@ -172,7 +206,13 @@ export class TextViewer {
         return contentArr;
       }
       // 当生成的文本内容数组小于指定的行数时，继续重复步骤生成文本字段。
-      return await this.generateVNodesInnerText(wrapperSize, value, rows, i, contentArr);
+      return await this.generateVNodesInnerText(
+        wrapperSize,
+        value,
+        rows,
+        i,
+        contentArr,
+      );
     }
     // 截取到字符串最后一位递归结束（当rows计算出得特别大也会在追加到最后一个字符后终止递归）
     if (i === value.length - 1) {
@@ -182,7 +222,13 @@ export class TextViewer {
       return contentArr;
     }
     // 当行追加内容
-    return await this.generateVNodesInnerText(wrapperSize, value, rows, i + 1, contentArr);
+    return await this.generateVNodesInnerText(
+      wrapperSize,
+      value,
+      rows,
+      i + 1,
+      contentArr,
+    );
   }
 
   /**
@@ -191,7 +237,10 @@ export class TextViewer {
    * @param value
    * @return 最后一行文本内容占据的最大宽度
    */
-  private async calculateLastLineMaxWidth(contentArr: string[], value: string = this.value.value): Promise<number> {
+  private async calculateLastLineMaxWidth(
+    contentArr: string[],
+    value: string = this.value.value,
+  ): Promise<number> {
     // 将此时用于占据计算元素中的值当成临时变量保存。
     const temp = this.temporaryContent.value;
     // 获取此时保存在文本数组中的所有文本长度
@@ -235,7 +284,25 @@ export class TextViewer {
       if (!contentArr[i]) {
         break;
       }
-      const textLineVNode = createVNode(TextLine, { value: contentArr[i], style: { height: `${lineHeight}px` } });
+      // 创建tooltip的VNode
+      const toolTipVNode = createVNode(
+        Tip,
+        {
+          effect: 'dark',
+          content: value,
+          placement: this.tipPlacement,
+          style: { cursor: 'default' },
+          appendToBody: this.tipAppendToBody,
+          visible: this.tipVisible,
+        },
+        null,
+      );
+      toolTipVNode.appContext = this.appContext;
+      // 创建每行文本的vNode
+      const textLineVNode = createVNode(TextLine, {
+        value: contentArr[i],
+        style: { height: `${lineHeight}px` },
+      });
       // 对非最后一行生成其VNode
       if (i < Math.min(contentArr.length, rows) - 1) {
         // 循环向vNode中追加文本，只有vNode中存在内容时才添加，减少没有意义的vNode
@@ -250,20 +317,31 @@ export class TextViewer {
         vNodes.push(textLineVNode);
         continue;
       }
-      // 创建tooltip的VNode
-      const toolTipVNode = createVNode(Tip, {
-        effect: 'dark',
-        content: value,
-        placement: this.tipPlacement,
-        style: { cursor: 'default' },
-        appendToBody: this.tipAppendToBody,
-      }, null);
-      toolTipVNode.appContext = this.appContext;
       // 创建出...的vNode
-      vNodes.push(createVNode('span', {
-        class: 'text-line-last',
-        style: { height: `${lineHeight}px` },
-      }, [textLineVNode, toolTipVNode]));
+      vNodes.push(
+        createVNode(
+          'span',
+          {
+            class: 'text-line-last',
+            style: { height: `${lineHeight}px` },
+            // 挂载vNode后监听鼠标的移动情况，控制tooltip的显示与隐藏
+            onVnodeMounted: (v: VNode) => {
+              v.el?.parentElement.addEventListener('mouseenter', () => {
+                this.tipVisible.value = true;
+              });
+              // 单独处理点击事件，因为文本组件应用在链接的地方，会导致tooltip不会消失的问题
+              v.el?.parentElement.addEventListener('click', (e: any) => {
+                e.stopPropagation();
+                this.tipVisible.value = false;
+              });
+              v.el?.parentElement.addEventListener('mouseleave', () => {
+                this.tipVisible.value = false;
+              });
+            },
+          },
+          [textLineVNode, toolTipVNode],
+        ),
+      );
     }
     return createVNode('div', { class: 'content' }, vNodes);
   }
@@ -276,15 +354,38 @@ export class TextViewer {
     const lineHeight = await this.calculateLineHeight();
     // 获取外层元素的宽高，如果外层元素未指定高度，默认将文字占据的行高值设置为高度。
     const wrapperSize = this.calculateContainerSize(lineHeight);
+    // 防止在组件外部使用flex布局，造成宽度为0
+    if (!wrapperSize.width) {
+      console.warn('未指定宽度');
+      return;
+    }
     let isOverFlow: boolean = false;
     this.temporaryContent.value = this.value.value;
     await nextTick();
-    isOverFlow = this.transitCalculator.value!.getBoundingClientRect().width > wrapperSize.width;
+    isOverFlow =
+      this.transitCalculator.value!.getBoundingClientRect().width >
+      wrapperSize.width;
     this.temporaryContent.value = '';
     if (value.length === 0) {
       // 如果传入的内容为空字符串，生成一个类名为content的空div 作为VNode
-      const wrapperNode = await this.generateVNode([], 0, lineHeight, wrapperSize, value);
-      render(wrapperNode, this.transitCalculator.value!.parentElement as HTMLElement);
+      const wrapperNode = await this.generateVNode(
+        [],
+        0,
+        lineHeight,
+        wrapperSize,
+        value,
+      );
+      render(
+        wrapperNode,
+        this.transitCalculator.value!.parentElement as HTMLElement,
+      );
+      return;
+    }
+    // 获取传入文本中最大的字符占据的宽度。（注意：获取传入文本最大字符占据的宽度，应当是在value值存在的情况下）
+    const maxCharWidth = await this.calculateMaxCharWidth(value);
+    // 如果外层盒子的宽度没有达到一个字符占据的宽度组件不展示内容
+    if (wrapperSize.width < maxCharWidth) {
+      console.warn('设置的宽度太小');
       return;
     }
     if (isOverFlow) {
@@ -292,33 +393,47 @@ export class TextViewer {
       element.innerHTML = this.value.value;
       this.transitCalculator.value.nextElementSibling!.appendChild(element);
       element.parentElement!.style.overflow = 'hidden';
-      await nextTick();
-      element.parentElement!.style.removeProperty('overflow');
       // 获取...占据的宽度
       this.ellipsisWidth = await this.calculateEllipsisWidth();
-      // 获取传入文本中最大的字符占据的宽度。
-      const maxCharWidth = await this.calculateMaxCharWidth(value);
-      // 如果外层盒子的宽度没有达到一个字符占据的宽度组件不展示内容
-      if (wrapperSize.width < maxCharWidth) {
-        console.warn('设置的宽度太小');
-        return;
-      }
       // 计算行数
       const rows = Math.floor(wrapperSize.height / lineHeight);
       if (rows === 0) {
         console.warn('指定的高度太低无法显示');
         return;
       }
-      const contentArr = await this.generateVNodesInnerText(wrapperSize, value, rows);
-      const wrapperNode = await this.generateVNode(contentArr, rows, lineHeight, wrapperSize, value);
+      const contentArr = await this.generateVNodesInnerText(
+        wrapperSize,
+        value,
+        rows,
+      );
+      const wrapperNode = await this.generateVNode(
+        contentArr,
+        rows,
+        lineHeight,
+        wrapperSize,
+        value,
+      );
       this.temporaryContent.value = '';
-      // 将VNode渲染到页面
-      render(wrapperNode, this.transitCalculator.value.parentElement as HTMLElement);
+      element.parentElement!.style.removeProperty('overflow');
       this.transitCalculator.value.nextElementSibling!.removeChild(element);
+      // 将VNode渲染到页面
+      render(
+        wrapperNode,
+        this.transitCalculator.value.parentElement as HTMLElement,
+      );
     } else {
       // 传入字符占据的宽度小于外层盒子的宽度，直接渲染
-      const wrapperNode = await this.generateVNode([this.value.value], 1, lineHeight, wrapperSize, this.value.value);
-      render(wrapperNode, this.transitCalculator.value!.parentElement as HTMLElement);
+      const wrapperNode = await this.generateVNode(
+        [this.value.value],
+        1,
+        lineHeight,
+        wrapperSize,
+        this.value.value,
+      );
+      render(
+        wrapperNode,
+        this.transitCalculator.value!.parentElement as HTMLElement,
+      );
     }
   }
 
