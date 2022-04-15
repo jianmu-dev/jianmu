@@ -338,17 +338,6 @@ export default defineComponent({
 
       return arr;
     });
-    const asyncTaskStartTime = ref<string>('');
-    onUpdated(async () => {
-      if (asyncTask.value.startTime === asyncTaskStartTime.value) {
-        return;
-      }
-      // 开始时间变化时，表示开始新任务
-      if (asyncTaskStartTime.value) {
-        taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
-      }
-      asyncTaskStartTime.value = asyncTask.value.startTime;
-    });
     const executing = computed<boolean>(() =>
       [
         TaskStatusEnum.INIT,
@@ -472,7 +461,9 @@ export default defineComponent({
     // 初始化任务
     onBeforeMount(async () => {
       taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
-      initialize(taskInstances.value[0].instanceId);
+      if (taskInstances.value.length > 0) {
+        initialize(taskInstances.value[0].instanceId);
+      }
     });
 
     // 销毁任务
@@ -491,6 +482,22 @@ export default defineComponent({
       // 初始化新任务
       nextTick(() => initialize(instanceId));
     };
+
+    const asyncTaskStartTime = ref<string>('');
+    onUpdated(async () => {
+      if (asyncTask.value.startTime === asyncTaskStartTime.value) {
+        return;
+      }
+      // 开始时间变化时，表示开始新任务
+      if (asyncTaskStartTime.value) {
+        taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
+
+        if (!taskInstanceId.value && taskInstances.value.length > 0) {
+          changeTask(taskInstances.value[0].instanceId);
+        }
+      }
+      asyncTaskStartTime.value = asyncTask.value.startTime;
+    });
     return {
       ParamTypeEnum,
       maxWidthRecord,
