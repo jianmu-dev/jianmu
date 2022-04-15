@@ -2,12 +2,12 @@
   <div class="task-list" v-if="tasks.length > 1">
     <jm-dropdown placement="bottom-start" trigger="hover" max-height="186px"
                  :append-to-body="false">
-      <span>#{{ currentSelect === 0 ? tasks.length : currentSelect }}<i
+      <span>#{{ tasks.length - selectedIndex }}<i
         class="el-icon-arrow-down el-icon--right"></i></span>
       <template #dropdown>
         <jm-dropdown-menu>
           <jm-dropdown-item v-for="item in tasks" :key="item.instanceId" style="padding:0 20px;"
-                            @click="getCurrentId(item)">
+                            @click="changeTask(item)">
             <div style="display: flex;color:#606266;">
               <div style="width:26px;">#{{ tasks.length - tasks.indexOf(item) }}</div>
               <jm-task-state :value="item.status"/>
@@ -37,36 +37,38 @@ import { executionTimeFormatter } from '@/utils/formatter';
 
 export default defineComponent({
   props: {
-    taskParams: {
+    tasks: {
       type: Array as PropType<ITaskExecutionRecordVo[]>,
       required: true,
     },
   },
   emits: ['change'],
   setup(props, { emit }) {
-    const tasks = computed<ITaskExecutionRecordVo[]>(() => props.taskParams);
     // 当前选择
-    const currentSelect = ref<number>(tasks.value.length);
-    // 日志状态
-    const logStatus = ref<boolean>(false);
-
-    onUpdated(() => {
-      // 手动选择查看后不更新日志
-      if (logStatus.value) {
-        return;
+    const selectedTask = ref<ITaskExecutionRecordVo>();
+    const latestTask = computed<ITaskExecutionRecordVo | undefined>(() => {
+      if (props.tasks.length === 0) {
+        return undefined;
       }
-      emit('change', tasks.value[0].instanceId);
+      return props.tasks[0];
+    });
+
+    const changeTask = (t: ITaskExecutionRecordVo) => {
+      selectedTask.value = { ...t };
+      emit('change', selectedTask.value.instanceId);
+    };
+    onUpdated(() => {
+      if (latestTask.value && !selectedTask.value) {
+        changeTask(latestTask.value);
+      }
     });
     return {
-      tasks,
       TaskStatusEnum,
       executionTimeFormatter,
-      currentSelect,
-      getCurrentId: (current: ITaskExecutionRecordVo) => {
-        logStatus.value = true;
-        currentSelect.value = tasks.value.length - tasks.value.indexOf(current);
-        emit('change', tasks.value[tasks.value.indexOf(current)].instanceId);
-      },
+      changeTask,
+      selectedIndex: computed<number>(() => {
+        return props.tasks.findIndex(({ instanceId }) => instanceId === selectedTask.value?.instanceId);
+      }),
     };
   },
 });
