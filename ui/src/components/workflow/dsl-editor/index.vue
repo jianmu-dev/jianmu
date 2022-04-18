@@ -11,7 +11,7 @@
 import { defineComponent, onBeforeUpdate, onMounted, ref } from 'vue';
 // 引入全局实例
 import CodeMirror from 'codemirror';
-import { Comment, Tab } from './model/shortcut';
+import { Comment, Find, Tab } from './model/shortcut';
 
 // 核心样式
 import 'codemirror/lib/codemirror.css';
@@ -22,6 +22,9 @@ import 'codemirror/theme/ayu-mirage.css';
 // codemirror 官方其实支持通过 /addon/mode/loadmode.js 和 /mode/meta.js 来实现动态加载对应语法高亮库
 // 但 vue 貌似没有无法在实例初始化后再动态加载对应 JS ，所以此处才把对应的 JS 提前引入
 import 'codemirror/mode/yaml/yaml.js';
+
+// 查找插件
+import './addon/search.js';
 
 // 尝试获取全局实例
 const codemirror = window.CodeMirror || CodeMirror;
@@ -53,6 +56,8 @@ function initialize(textarea, readonly, onChange) {
       [Comment.shortcut]: Comment.command,
       // 制表符
       [Tab.shortcut]: Tab.command,
+      // 查找
+      [Find.shortcut]: Find.command,
     },
   });
 
