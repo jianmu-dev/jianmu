@@ -324,6 +324,8 @@ export default defineComponent({
       const t = taskInstances.value.find(({ instanceId }) => instanceId === taskInstanceId.value);
       return {
         ...(t || asyncTask.value),
+        endTime: asyncTask.value.endTime,
+        status: asyncTask.value.status,
       };
     });
     const tasks = computed<ITaskExecutionRecordVo[]>(() => {
