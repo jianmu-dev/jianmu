@@ -18,7 +18,7 @@ import 'codemirror/addon/dialog/dialog.css';
     return {
       token: function (stream) {
         query.lastIndex = stream.pos;
-        var match = query.exec(stream.string);
+        const match = query.exec(stream.string);
         if (match && match.index === stream.pos) {
           stream.pos += match[0].length || 1;
           return 'searching';
@@ -73,10 +73,11 @@ import 'codemirror/addon/dialog/dialog.css';
   }
 
   function parseQuery(query) {
-    var isRE = query.match(/^\/(.*)\/([a-z]*)$/);
+    const isRE = query.match(/^\/(.*)\/([a-z]*)$/);
     if (isRE) {
       try {
         query = new RegExp(isRE[1], isRE[2].indexOf('i') === -1 ? '' : 'i');
+        // eslint-disable-next-line no-empty
       } catch (e) {
       } // Not a regular expression after all, do a string search
     } else {
@@ -103,13 +104,13 @@ import 'codemirror/addon/dialog/dialog.css';
   }
 
   function doSearch(cm, rev, immediate) {
-    var state = getSearchState(cm);
+    const state = getSearchState(cm);
     if (state.query) return findNext(cm, rev);
-    var q = cm.getSelection() || state.lastQuery;
+    let q = cm.getSelection() || state.lastQuery;
     if (q instanceof RegExp && q.source === 'x^') q = null;
 
-    var hiding = null;
-    var searchNext = function (query, event) {
+    let hiding = null;
+    const searchNext = function (query, event) {
       CodeMirror.e_stop(event);
       if (!query) return;
       if (query !== state.queryText) {
@@ -118,7 +119,7 @@ import 'codemirror/addon/dialog/dialog.css';
       }
       if (hiding) hiding.style.opacity = 1;
       findNext(cm, event.shiftKey, function (_, to) {
-        var dialog;
+        let dialog;
         if (to.line < 3 && document.querySelector &&
           (dialog = cm.display.wrapper.querySelector('.CodeMirror-dialog')) &&
           dialog.getBoundingClientRect().bottom - 4 > cm.cursorCoords(to, 'window').top)
@@ -126,9 +127,9 @@ import 'codemirror/addon/dialog/dialog.css';
       });
     };
     persistentDialog(cm, getQueryDialog(cm), q, searchNext, function (event, query) {
-      var keyName = CodeMirror.keyName(event);
-      var extra = cm.getOption('extraKeys');
-      var cmd = (extra && extra[keyName]) || CodeMirror.keyMap[cm.getOption('keyMap')][keyName];
+      const keyName = CodeMirror.keyName(event);
+      const extra = cm.getOption('extraKeys');
+      let cmd = (extra && extra[keyName]) || CodeMirror.keyMap[cm.getOption('keyMap')][keyName];
       if (!cmd) {
         switch (keyName) {
           case 'Up':
@@ -158,8 +159,8 @@ import 'codemirror/addon/dialog/dialog.css';
 
   function findNext(cm, rev, callback) {
     cm.operation(function () {
-      var state = getSearchState(cm);
-      var cursor = getSearchCursor(cm, state.query, rev ? state.posFrom : state.posTo);
+      const state = getSearchState(cm);
+      let cursor = getSearchCursor(cm, state.query, rev ? state.posFrom : state.posTo);
       if (!cursor.find(rev)) {
         cursor = getSearchCursor(cm, state.query, rev ? CodeMirror.Pos(cm.lastLine()) : CodeMirror.Pos(cm.firstLine(), 0));
         if (!cursor.find(rev)) return;
@@ -174,7 +175,7 @@ import 'codemirror/addon/dialog/dialog.css';
 
   function clearSearch(cm) {
     cm.operation(function () {
-      var state = getSearchState(cm);
+      const state = getSearchState(cm);
       state.lastQuery = state.query;
       if (!state.query) return;
       state.query = state.queryText = null;
