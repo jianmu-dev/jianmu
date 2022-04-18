@@ -13,10 +13,10 @@
              @on-zoom="handleZoom"
              @on-fullscreen="handleFullscreen"
              @rotate="handleRotation"/>
-    <node-toolbar v-if="!dslMode && nodeEvent && selectedTask.status !== TaskStatusEnum.INIT"
+    <node-toolbar v-if="!dslMode && nodeEvent"
                   :readonly="readonly"
-                  :task-business-id="selectedTask.businessId"
-                  :task-status="selectedTask.status"
+                  :task-business-id="selectedTask?.businessId"
+                  :task-status="selectedTask?.status"
                   :node-event="nodeEvent"
                   :zoom="zoom"
                   @node-click="clickNode"
@@ -200,32 +200,17 @@ export default defineComponent({
       selectedTask: computed<{
         businessId: string;
         status: TaskStatusEnum;
-      }>(() => {
-        const defaultValue = {
-          businessId: '',
-          status: TaskStatusEnum.INIT,
-        };
-
-        if (!nodeEvent.value) {
-          return defaultValue;
-        }
-
-        switch (nodeEvent.value.type) {
-          case NodeTypeEnum.ASYNC_TASK:
-            break;
-          case NodeTypeEnum.WEBHOOK:
-          case NodeTypeEnum.CRON:
-            return {
-              businessId: '',
-              status: TaskStatusEnum.SUCCEEDED,
-            };
-          default:
-            return defaultValue;
+      } | undefined>(() => {
+        if (!nodeEvent.value || nodeEvent.value.type !== NodeTypeEnum.ASYNC_TASK) {
+          return;
         }
 
         // 按开始时间降序排序，保证第一个是最新的
         const tasks = sortTasks(props.tasks, true, nodeEvent.value.id);
-        return tasks.length === 0 ? defaultValue : {
+        return tasks.length === 0 ? {
+          businessId: '',
+          status: TaskStatusEnum.INIT,
+        } : {
           businessId: tasks[0].businessId,
           status: tasks[0].status,
         };

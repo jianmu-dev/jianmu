@@ -159,11 +159,13 @@ export default defineComponent({
         if (props.readonly) {
           return false;
         }
-
-        if (props.nodeEvent.type === NodeTypeEnum.WEBHOOK) {
+        if (NodeTypeEnum.WEBHOOK === props.nodeEvent.type) {
           return true;
         }
-        return !!(props.nodeEvent.type === NodeTypeEnum.ASYNC_TASK && props.taskBusinessId);
+        if (NodeTypeEnum.ASYNC_TASK === props.nodeEvent.type) {
+          return props.taskStatus !== TaskStatusEnum.INIT;
+        }
+        return false;
       }),
       toolbar,
       handleClick: (tabType: NodeToolbarTabTypeEnum) => {
