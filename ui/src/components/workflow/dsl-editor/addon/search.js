@@ -127,8 +127,19 @@ import 'codemirror/addon/dialog/dialog.css';
     };
     persistentDialog(cm, getQueryDialog(cm), q, searchNext, function (event, query) {
       var keyName = CodeMirror.keyName(event);
-      var extra = cm.getOption('extraKeys'),
-        cmd = (extra && extra[keyName]) || CodeMirror.keyMap[cm.getOption('keyMap')][keyName];
+      var extra = cm.getOption('extraKeys');
+      var cmd = (extra && extra[keyName]) || CodeMirror.keyMap[cm.getOption('keyMap')][keyName];
+      if (!cmd) {
+        switch (keyName) {
+          case 'Up':
+            cmd = 'findPrev';
+            break;
+          case 'Down':
+            cmd = 'findNext';
+            break;
+        }
+      }
+
       if (cmd === 'findNext' || cmd === 'findPrev' ||
         cmd === 'findPersistentNext' || cmd === 'findPersistentPrev') {
         CodeMirror.e_stop(event);
@@ -193,5 +204,9 @@ import 'codemirror/addon/dialog/dialog.css';
   };
   CodeMirror.commands.findPersistentPrev = function (cm) {
     doSearch(cm, true, true);
+  };
+  CodeMirror.commands.findNext = doSearch;
+  CodeMirror.commands.findPrev = function (cm) {
+    doSearch(cm, true);
   };
 })();
