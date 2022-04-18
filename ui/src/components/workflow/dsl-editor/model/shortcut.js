@@ -85,3 +85,18 @@ export class Tab {
     cm.replaceSelection(Array(cm.getOption('indentUnit') + 1).join(' '));
   }
 }
+
+/**
+ * 查找
+ */
+export class Find {
+
+  static get shortcut() {
+    const codemirror = window.CodeMirror || CodeMirror;
+    return (codemirror.keyMap.default === codemirror.keyMap.macDefault ? 'Cmd' : 'Ctrl') + '-F';
+  }
+
+  static command(cm) {
+    cm.execCommand('findPersistent');
+  }
+}
