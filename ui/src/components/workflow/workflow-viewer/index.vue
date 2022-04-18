@@ -206,8 +206,21 @@ export default defineComponent({
           status: TaskStatusEnum.INIT,
         };
 
-        if (!nodeEvent.value || nodeEvent.value.type !== NodeTypeEnum.ASYNC_TASK) {
+        if (!nodeEvent.value) {
           return defaultValue;
+        }
+
+        switch (nodeEvent.value.type) {
+          case NodeTypeEnum.ASYNC_TASK:
+            break;
+          case NodeTypeEnum.WEBHOOK:
+          case NodeTypeEnum.CRON:
+            return {
+              businessId: '',
+              status: TaskStatusEnum.SUCCEEDED,
+            };
+          default:
+            return defaultValue;
         }
 
         // 按开始时间降序排序，保证第一个是最新的
