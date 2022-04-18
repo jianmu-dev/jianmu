@@ -190,9 +190,8 @@ import 'codemirror/addon/dialog/dialog.css';
 
   function getQueryDialog(cm) {
     return `
-      <span class="CodeMirror-search-label">${cm.phrase('查找:')}</span>
-      <input type="text" style="width: 10em" class="CodeMirror-search-field"/>
-      <span style="color: #888" class="CodeMirror-search-hint">${cm.phrase('(支持正则表达式，格式为/re/)')}</span>
+      <input type="text" style="width: 100%" class="CodeMirror-search-field" 
+        placeholder="${cm.phrase('请输入查找内容，支持正则表达式，格式为/re/')}"/>
     `;
   }
 
