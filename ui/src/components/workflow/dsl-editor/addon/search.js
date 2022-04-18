@@ -191,7 +191,7 @@ import 'codemirror/addon/dialog/dialog.css';
   function getQueryDialog(cm) {
     return `
       <input type="text" style="width: 100%" class="CodeMirror-search-field" 
-        placeholder="${cm.phrase('请输入查找内容，支持正则表达式，格式为/re/')}"/>
+        placeholder="${cm.phrase('请输入查找内容，支持正则表达式，格式为/reg/')}"/>
     `;
   }
 
