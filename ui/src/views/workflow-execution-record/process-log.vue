@@ -22,7 +22,9 @@
       <div class="item">
         <div class="param-key ">{{ isSuspended ? '挂起时长' : '执行时长' }}</div>
         <div class="param-value">
-          <jm-text-viewer :value="isSuspended ? suspendedTime : executionTime" :tip-append-to-body="false"/>
+          <jm-timer v-if="isSuspended" :start-time="process.suspendedTime" :tip-append-to-body="false"></jm-timer>
+          <jm-timer v-else :start-time="process.startTime" :end-time="process.endTime"
+                    :tip-append-to-body="false"></jm-timer>
         </div>
       </div>
       <div class="item">
