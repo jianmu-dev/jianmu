@@ -18,8 +18,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
-import { DslTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import { defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
+import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail, fetchWorkflow } from '@/api/view-no-auth';
 import { INodeDefVo } from '@/api/dto/project';
 
@@ -29,16 +29,13 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    dslType: {
-      type: String,
-      required: true,
-    },
   },
   // 覆盖dialog的close事件
   emits: ['close'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const dialogVisible = ref<boolean>(true);
+    const title = ref<string>('');
     const loading = ref<boolean>(false);
     const dsl = ref<string>();
     const nodeDefs = ref<INodeDefVo[]>([]);
@@ -52,7 +49,9 @@ export default defineComponent({
       try {
         loading.value = true;
 
-        const { workflowRef, workflowVersion } = await fetchProjectDetail(props.projectId);
+        const { workflowName, workflowRef, workflowVersion } = await fetchProjectDetail(props.projectId);
+        title.value = workflowName;
+
         const { nodes, dslText } = await fetchWorkflow(workflowRef, workflowVersion);
         dsl.value = dslText;
         nodeDefs.value = nodes
@@ -71,19 +70,8 @@ export default defineComponent({
 
     return {
       TriggerTypeEnum,
-      title: computed<string>(() => {
-        let t = '预览';
-        switch (props.dslType) {
-          case DslTypeEnum.WORKFLOW:
-            t += '流程';
-            break;
-          case DslTypeEnum.PIPELINE:
-            t += '管道';
-            break;
-        }
-        return t;
-      }),
       dialogVisible,
+      title,
       loading,
       dsl,
       nodeDefs,
