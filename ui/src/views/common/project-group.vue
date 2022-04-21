@@ -384,6 +384,7 @@ export default defineComponent({
         const index = projects.value.findIndex(item => item.id === id);
         projects.value[index] = {
           ...projects.value[index],
+          startTime: new Date().toISOString(),
           status: ProjectStatusEnum.RUNNING,
         };
       },
