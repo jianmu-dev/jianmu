@@ -159,7 +159,6 @@
     <project-preview-dialog
       v-if="dslDialogFlag"
       :project-id="project.id"
-      :dsl-type="project.dslType"
       @close="dslDialogFlag = false"
     />
     <div class="cover"></div>
