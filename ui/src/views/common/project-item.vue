@@ -19,12 +19,14 @@
         </router-link>
       </div>
       <div class="time">
-        <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
-            executionTimeFormatter(project.startTime, undefined, true)
-          }}</span>
-        <span v-else-if="project.status === ProjectStatusEnum.SUSPENDED">挂起时长：{{
-            executionTimeFormatter(project.suspendedTime, undefined, true)
-          }}</span>
+        <div class="running" v-if="project.status === ProjectStatusEnum.RUNNING">
+          <span>执行时长：</span>
+          <jm-timer :start-time="project.startTime"></jm-timer>
+        </div>
+        <div class="running" v-else-if="project.status === ProjectStatusEnum.SUSPENDED">
+          <span>挂起时长：</span>
+          <jm-timer :start-time="project.startTime"></jm-timer>
+        </div>
         <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
       <div class="time">
@@ -60,12 +62,14 @@
         time: true,
         disabled: !enabled,
       }">
-        <span v-if="project.status === ProjectStatusEnum.RUNNING">执行时长：{{
-            executionTimeFormatter(project.startTime, undefined, true)
-          }}</span>
-        <span v-else-if="project.status === ProjectStatusEnum.SUSPENDED">挂起时长：{{
-            executionTimeFormatter(project.suspendedTime, undefined, true)
-          }}</span>
+        <div class="running" v-if="project.status === ProjectStatusEnum.RUNNING">
+          <span>执行时长：</span>
+          <jm-timer :start-time="project.startTime"></jm-timer>
+        </div>
+        <div class="running" v-else-if="project.status === ProjectStatusEnum.SUSPENDED">
+          <span>挂起时长：</span>
+          <jm-timer :start-time="project.startTime"></jm-timer>
+        </div>
         <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
       <div :class="{
@@ -523,6 +527,14 @@ export default defineComponent({
       font-size: 13px;
       color: #6b7b8d;
       white-space: nowrap;
+
+      .running {
+        display: flex;
+
+        .jm-timer {
+          flex: 1
+        }
+      }
 
       &.disabled {
         color: #979797;

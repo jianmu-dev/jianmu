@@ -326,12 +326,15 @@ export class TextViewer {
             style: { height: `${lineHeight}px` },
             // 挂载vNode后监听鼠标的移动情况，控制tooltip的显示与隐藏
             onVnodeMounted: (v: VNode) => {
+              // 去除因为触控板快捷切换页面，tooltip不消失问题
+              window.addEventListener('popstate', () => {
+                this.tipVisible.value = false;
+              });
               v.el?.parentElement.addEventListener('mouseenter', () => {
                 this.tipVisible.value = true;
               });
               // 单独处理点击事件，因为文本组件应用在链接的地方，会导致tooltip不会消失的问题
-              v.el?.parentElement.addEventListener('click', (e: any) => {
-                e.stopPropagation();
+              v.el?.parentElement.addEventListener('click', () => {
                 this.tipVisible.value = false;
               });
               v.el?.parentElement.addEventListener('mouseleave', () => {
@@ -356,7 +359,6 @@ export class TextViewer {
     const wrapperSize = this.calculateContainerSize(lineHeight);
     // 防止在组件外部使用flex布局，造成宽度为0
     if (!wrapperSize.width) {
-      console.warn('未指定宽度');
       return;
     }
     let isOverFlow: boolean = false;

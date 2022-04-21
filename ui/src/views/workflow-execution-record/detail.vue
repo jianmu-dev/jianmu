@@ -69,27 +69,13 @@
           <div>完成时间</div>
         </div>
         <div class="item" v-if="data.record?.status === WorkflowExecutionRecordStatusEnum.SUSPENDED">
-          <div class="value">
-            {{
-              executionTimeFormatter(
-                data.record?.suspendedTime,
-                undefined,
-                true,
-              )
-            }}
-          </div>
+          <jm-timer class="value" :start-time="data.record?.suspendedTime"></jm-timer>
           <div>挂起时长</div>
         </div>
         <div class="item" v-else>
-          <div class="value">
-            {{
-              executionTimeFormatter(
-                data.record?.startTime,
-                data.record?.endTime,
-                data.record?.status === WorkflowExecutionRecordStatusEnum.RUNNING
-              )
-            }}
-          </div>
+          <jm-timer class="value" v-if="data.record?.startTime" :start-time="data.record?.startTime"
+                    :end-time="data.record?.endTime">
+          </jm-timer>
           <div>执行时长</div>
         </div>
         <div class="item">
@@ -621,6 +607,10 @@ export default defineComponent({
           font-size: 16px;
           font-weight: bold;
           margin-bottom: 5px;
+
+          &.jm-timer {
+            width: 100px;
+          }
         }
       }
 
