@@ -1,9 +1,9 @@
 <template>
-  <jm-text-viewer class="jm-timer" :value="timeValue" :tip-append-to-body="tipAppendToBody"/>
+  <jm-text-viewer class="jm-timer" :value="time" :tip-append-to-body="tipAppendToBody"/>
 </template>
 
 <script lang='ts'>
-import { computed, defineComponent, ref, onUpdated, onBeforeUnmount } from 'vue';
+import { computed, defineComponent, ref, onBeforeUnmount } from 'vue';
 
 export default defineComponent({
   name: 'jm-timer',
@@ -24,18 +24,17 @@ export default defineComponent({
     },
   },
   setup(props) {
-    /**
-     * 执行时间格式器
-     * @param startTime     格式：yyyy-MM-ddTHH:mm:ss
-     * @param endTime       格式：yyyy-MM-ddTHH:mm:ss
-     */
-    const executionTimeFormatter = (startTime: string, endTime?: string): string => {
-      const startTimeMillis = Date.parse(startTime);
+    const now = ref<Date>(new Date());
+    const timer = setInterval(() => {
+      now.value = new Date();
+    }, 1000);
+    const time = computed<string>(() => {
+      const startTimeMillis = Date.parse(props.startTime);
       let endTimeMillis;
-      if (!endTime) {
-        endTimeMillis = new Date().getTime();
+      if (!props.endTime) {
+        endTimeMillis = now.value.getTime();
       } else {
-        endTimeMillis = Date.parse(endTime);
+        endTimeMillis = Date.parse(props.endTime);
       }
       const millisecond = endTimeMillis - startTimeMillis;
       const days = Math.floor(millisecond / (1000 * 60 * 60 * 24));
@@ -57,42 +56,12 @@ export default defineComponent({
         result += `${seconds}s`;
       }
       return result || '无';
-    };
-
-    // formatter转化后的值
-    const time = ref<string>(executionTimeFormatter(props.startTime, props.endTime));
-    // 最终展示的值
-    const timeValue = computed<string>({
-      get() {
-        return time.value;
-      },
-      set(value) {
-        time.value = value;
-      },
-    });
-    let timer = setInterval(() => {
-      timeValue.value = executionTimeFormatter(props.startTime, props.endTime);
-    }, 1000);
-    onUpdated(() => {
-      // 如果执行完成，停止计时
-      if (props.endTime && timer) {
-        // 清除定时器
-        clearInterval(timer);
-      } else {
-        timer = setInterval(() => {
-          timeValue.value = executionTimeFormatter(props.startTime, props.endTime);
-        }, 1000);
-      }
     });
     onBeforeUnmount(() => {
-      // 清除定时器
-      if (!timer) {
-        return;
-      }
       clearInterval(timer);
     });
     return {
-      timeValue,
+      time,
     };
   },
 });
