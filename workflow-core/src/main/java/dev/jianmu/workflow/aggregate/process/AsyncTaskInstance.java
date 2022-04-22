@@ -75,6 +75,7 @@ public class AsyncTaskInstance extends AggregateRoot {
     public void run() {
         this.status = TaskStatus.RUNNING;
         this.startTime = LocalDateTime.now();
+        this.endTime = null;
         // 发布任务开始执行事件
         this.raiseEvent(
                 TaskRunningEvent.Builder.aTaskRunningEvent()
