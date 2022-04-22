@@ -321,12 +321,17 @@ export default defineComponent({
     });
     const taskInstanceId = ref<string>('');
     const task = computed<ITaskExecutionRecordVo>(() => {
-      const t = taskInstances.value.find(({ instanceId }) => instanceId === taskInstanceId.value);
-      return {
-        ...(t || asyncTask.value),
-        endTime: asyncTask.value.endTime,
-        status: asyncTask.value.status,
+      const index = taskInstances.value.findIndex(({ instanceId }) => instanceId === taskInstanceId.value);
+      const t = {
+        ...(index === -1 ? asyncTask.value : taskInstances.value[index]),
       };
+      if (index === 0) {
+        // 最后一个任务时，用异步任务状态
+        t.startTime = asyncTask.value.startTime;
+        t.endTime = asyncTask.value.endTime;
+        t.status = asyncTask.value.status;
+      }
+      return t;
     });
     const tasks = computed<ITaskExecutionRecordVo[]>(() => {
       if (taskInstances.value.length === 0) {
