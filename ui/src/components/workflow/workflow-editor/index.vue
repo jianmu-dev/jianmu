@@ -19,15 +19,11 @@ import { IWorkflowData } from './model/data';
 import { KeyValue } from '@antv/x6/es/types';
 import { HistoryManager } from '@antv/x6/es/graph/history';
 import { Graph } from '@antv/x6';
+import registerCustomVueShape from './shapes/custom-vue-shape';
 import Command = HistoryManager.Command;
 
 // 注册自定义x6元素
-Object.values(import.meta.globEager('./shapes/**')).forEach(({ default: register }) => {
-  if (typeof register !== 'function') {
-    return;
-  }
-  register();
-});
+registerCustomVueShape();
 
 export default defineComponent({
   name: 'jm-workflow-editor',
