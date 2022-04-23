@@ -1,16 +1,24 @@
 <template>
-  <div class="jm-workflow-editor" ref="container">
-    <div class="stencil" ref="stencilContainer"></div>
-    <div class="graph-container" ref="graphContainer"></div>
+  <div class="jm-workflow-editor">
+    <template v-if="container">
+      <toolbar/>
+      <node-stencil-panel/>
+      <node-config-panel/>
+    </template>
+    <div class="graph-container" ref="container"></div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
-import { WorkflowLayout } from './layout/model/workflow-layout';
-import { IWorkflowData } from './layout/model/data';
+import { defineComponent, onMounted, PropType, provide, ref } from 'vue';
+import Toolbar from './layout/top/toolbar.vue';
+import NodeStencilPanel from './layout/left/node-stencil-panel.vue';
+import NodeConfigPanel from './layout/right/node-config-panel.vue';
+import WorkflowGraph from './model/workflow-graph';
+import { IWorkflowData } from './model/data';
 import { KeyValue } from '@antv/x6/es/types';
 import { HistoryManager } from '@antv/x6/es/graph/history';
+import { Graph } from '@antv/x6';
 import Command = HistoryManager.Command;
 
 // 注册自定义x6元素
@@ -23,6 +31,7 @@ Object.values(import.meta.globEager('./shapes/**')).forEach(({ default: register
 
 export default defineComponent({
   name: 'jm-workflow-editor',
+  components: { Toolbar, NodeStencilPanel, NodeConfigPanel },
   props: {
     modelValue: Object as PropType<IWorkflowData>,
   },
@@ -30,30 +39,41 @@ export default defineComponent({
   setup(props, { emit }) {
     const data = ref<IWorkflowData>(props.modelValue);
     const container = ref<HTMLElement>();
-    const stencilContainer = ref<HTMLElement>();
-    const graphContainer = ref<HTMLElement>();
 
     onMounted(() => {
-      const layout = new WorkflowLayout(graphContainer.value!, stencilContainer.value!, data.value);
+      // 初始化画布
+      const workflowGraph = new WorkflowGraph(container.value!);
+      provide('getX6Graph', (): Graph => {
+        return workflowGraph.x6Graph;
+      });
 
-      layout.x6Graph.history.on('change', (args: {
+      workflowGraph.x6Graph.history.on('change', (args: {
         cmds: Command[] | null
         options: KeyValue
       }) => {
         // code here
-        console.log(11111, data.value, layout.x6Graph.toJSON());
-        emit('update:modelValue', layout.x6Graph.toJSON());
-        console.log(222222, data.value);
+        emit('update:modelValue', workflowGraph.x6Graph.toJSON());
       });
     });
 
     return {
       container,
-      stencilContainer,
-      graphContainer,
     };
   },
 });
 </script>
 
-<style lang="less" src="./index.less"/>
+<style lang="less">
+.jm-workflow-editor {
+  width: 100%;
+  height: 100%;
+  border: 10px solid #dfe3e8;
+  position: relative;
+  box-sizing: border-box;
+
+  .graph-container {
+    width: 100%;
+    height: 100%;
+  }
+}
+</style>
