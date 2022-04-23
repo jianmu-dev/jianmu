@@ -3,10 +3,10 @@ import { Graph, Shape } from '@antv/x6';
 export default class WorkflowGraph {
   private readonly graph: Graph;
 
-  constructor(graphContainer: HTMLElement) {
+  constructor(container: HTMLElement) {
     // #region 初始化画布
     this.graph = new Graph({
-      container: graphContainer,
+      container,
       grid: true,
       history: true,
       mousewheel: {
@@ -90,11 +90,11 @@ export default class WorkflowGraph {
     });
 
     this.registerShortcut();
-    this.bindEvent(graphContainer);
+    this.bindEvent(container);
 
     // 禁止篡改宽高，强制继承
-    graphContainer.style.width = 'inherit';
-    graphContainer.style.height = 'inherit';
+    container.style.width = 'inherit';
+    container.style.height = 'inherit';
   }
 
   /**
@@ -173,10 +173,10 @@ export default class WorkflowGraph {
 
   /**
    * 绑定事件
-   * @param graphContainer
+   * @param container
    * @private
    */
-  private bindEvent(graphContainer: HTMLElement) {
+  private bindEvent(container: HTMLElement) {
     // 控制连接桩显示/隐藏
     const showPorts = (ports: NodeListOf<SVGElement>, show: boolean) => {
       for (let i = 0, len = ports.length; i < len; i = i + 1) {
@@ -184,14 +184,12 @@ export default class WorkflowGraph {
       }
     };
     this.graph.on('node:mouseenter', () => {
-      const container = graphContainer!;
       const ports = container.querySelectorAll(
         '.x6-port-body',
       ) as NodeListOf<SVGElement>;
       showPorts(ports, true);
     });
     this.graph.on('node:mouseleave', () => {
-      const container = graphContainer!;
       const ports = container.querySelectorAll(
         '.x6-port-body',
       ) as NodeListOf<SVGElement>;
