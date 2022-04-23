@@ -1,5 +1,10 @@
 import { Addon, Graph } from '@antv/x6';
-import { INodeData } from '@/components/workflow/workflow-editor/layout/model/data';
+import { INodeData } from './data';
+import cron from '../shapes/trigger/cron';
+import webhook from '../shapes/trigger/webhook';
+import shell from '../shapes/inner/shell';
+import { ports, shapeSize } from '../shapes/gengral-config';
+import { NodeTypeEnum } from '../model/enumeration';
 
 export default class WorkflowStencil {
   private readonly graph: Graph;
@@ -52,38 +57,11 @@ export default class WorkflowStencil {
   }
 
   private loadInnerTriggers() {
-    const r1 = this.graph.createNode({
-      shape: 'custom-rect',
-      label: 'Cron',
-      attrs: {
-        body: {
-          rx: 20,
-          ry: 26,
-        },
-      },
-    });
-    const r2 = this.graph.createNode({
-      shape: 'custom-rect',
-      label: 'Webhook',
-    });
-    this.stencil.load([r1, r2], 'inner_triggers');
+    this.stencil.load([cron, webhook], 'inner_triggers');
   }
 
   private loadInnerNodes() {
-    const r3 = this.graph.createNode({
-      shape: 'custom-rect',
-      attrs: {
-        body: {
-          rx: 6,
-          ry: 6,
-        },
-      },
-      label: 'Shell',
-      data: {
-        type: 'shell',
-      },
-    });
-    this.stencil.load([r3], 'inner_nodes');
+    this.stencil.load([shell], 'inner_nodes');
   }
 
   loadLocalNodes(nodes: INodeData[]) {
@@ -91,17 +69,28 @@ export default class WorkflowStencil {
   }
 
   loadOfficialNodes(nodes: INodeData[]) {
-    const r1 = this.graph.createNode({
-      shape: 'custom-image',
-      label: 'git loggit loggit loggit loggit loggit loggit loggit log',
-      attrs: {
-        image: {
-          'xlink:href': 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3?roundPic/radius/!25.5p',
-        },
-      },
-    });
+    const arr = [{
+      image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3',
+      text: '克隆建木CI代码',
+    }, {
+      image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu',
+      text: 'NodeJs构建前端项目',
+    }];
 
-    this.stencil.load([r1], 'official_nodes');
+    const { width, height } = shapeSize;
+
+    this.stencil.load(arr.map(({ image, text }) => ({
+      shape: 'vue-shape',
+      width,
+      height,
+      component: 'custom-vue-shape',
+      data: {
+        nodeType: NodeTypeEnum.ASYNC_TASK,
+        image,
+        text,
+      },
+      ports: { ...ports },
+    })), 'official_nodes');
   }
 
   loadCommunityNodes(nodes: INodeData[]) {
