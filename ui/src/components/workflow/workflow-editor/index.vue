@@ -19,7 +19,7 @@ import { IWorkflowData } from './model/data';
 import { KeyValue } from '@antv/x6/es/types';
 import { HistoryManager } from '@antv/x6/es/graph/history';
 import { Graph } from '@antv/x6';
-import registerCustomVueShape from './shapes/custom-vue-shape';
+import registerCustomVueShape from './shape/custom-vue-shape';
 import Command = HistoryManager.Command;
 
 // 注册自定义x6元素

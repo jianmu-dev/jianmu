@@ -1,9 +1,9 @@
 import { Addon, Graph } from '@antv/x6';
 import { INodeData } from './data';
-import cron from '../shapes/trigger/cron';
-import webhook from '../shapes/trigger/webhook';
-import shell from '../shapes/inner/shell';
-import { ports, shapeSize } from '../shapes/gengral-config';
+import cron from '../shape/trigger/cron';
+import webhook from '../shape/trigger/webhook';
+import shell from '../shape/inner/shell';
+import { ports, shapeSize } from '../shape/gengral-config';
 import { NodeTypeEnum } from '../model/enumeration';
 
 export default class WorkflowStencil {
