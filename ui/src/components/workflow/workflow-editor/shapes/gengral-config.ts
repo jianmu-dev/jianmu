@@ -1,4 +1,9 @@
-export default {
+export const shapeSize = {
+  width: 80,
+  height: 80,
+};
+
+export const ports = {
   groups: {
     top: {
       position: 'top',
