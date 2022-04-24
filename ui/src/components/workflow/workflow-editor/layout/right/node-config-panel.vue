@@ -1,16 +1,16 @@
 <template>
   <jm-drawer
     title="节点配置面板"
-    :size="400"
+    :size="500"
     direction="rtl"
     destroy-on-close
   >
     <div class="jm-workflow-editor-node-config-panel">
-      <div>
-        <div>{{ nodeData.nodeRef }}</div>
-        <div>{{ nodeData.nodeType }}</div>
-        <div>{{ nodeData.text }}</div>
-        <div>{{ nodeData.image }}</div>
+      <div class="panel-container">
+        <cron-panel v-if="panelForm.nodeType === NodeTypeEnum.CRON" v-model="panelForm"/>
+        <webhook-panel v-else-if="panelForm.nodeType === NodeTypeEnum.WEBHOOK" v-model="panelForm"/>
+        <shell-panel v-else-if="panelForm.nodeType === NodeTypeEnum.SHELL" v-model="panelForm"/>
+        <async-task-panel v-else-if="panelForm.nodeType === NodeTypeEnum.ASYNC_TASK" v-model="panelForm"/>
       </div>
       <div class="footer">
         <jm-button @click="cancel">取消</jm-button>
@@ -21,37 +21,58 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { INodeData } from '../../model/data';
+import { NodeTypeEnum } from '../../model/enumeration';
+import CronPanel from './cron-panel.vue';
+import WebhookPanel from './webhook-panel.vue';
+import ShellPanel from './shell-panel.vue';
+import AsyncTaskPanel from './async-task-panel.vue';
 
 export default defineComponent({
+  components: { CronPanel, WebhookPanel, ShellPanel, AsyncTaskPanel },
   props: {
     nodeData: {
       type: Object as PropType<INodeData>,
       required: true,
     },
   },
-  emits: ['update:model-value'],
   setup(props, { emit }) {
+    const panelForm = ref<INodeData>(props.nodeData);
+
     return {
+      NodeTypeEnum,
+      panelForm,
       cancel: () => {
         emit('update:model-value', false);
       },
       save: () => {
+        console.log('panelForm', {
+          ...panelForm.value,
+        });
+
         emit('update:model-value', false);
       },
     };
   },
+  emits: ['update:model-value'],
 });
 </script>
 
 <style scoped lang="less">
 .jm-workflow-editor-node-config-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .panel-container {
+    // 铺满剩余高度
+    flex-grow: 1;
+    background-color: #8e9ded;
+  }
+
   .footer {
     box-sizing: border-box;
-    position: absolute;
-    left: 0;
-    bottom: 0;
     width: 100%;
     height: 60px;
     display: flex;
