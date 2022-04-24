@@ -3,8 +3,9 @@
     <template v-if="graph">
       <toolbar/>
       <node-config-panel
-        v-model="nodeConfigPanel.visible"
-        :node-data="nodeConfigPanel.data"
+        v-if="selectedNodeData"
+        v-model="nodeConfigPanelVisible"
+        :node-data="selectedNodeData"
         @closed="handleNodeConfigPanelClosed"/>
     </template>
     <div class="main">
@@ -30,10 +31,6 @@ import registerCustomVueShape from './shape/custom-vue-shape';
 // 注册自定义x6元素
 registerCustomVueShape();
 
-const DEFAULT_NODE_CONFIG_PANEL = {
-  visible: false,
-};
-
 export default defineComponent({
   name: 'jm-workflow-editor',
   components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel },
@@ -43,16 +40,15 @@ export default defineComponent({
   emits: ['update:model-value'],
   setup(props, { emit }) {
     const graph = ref<Graph>();
-    const nodeConfigPanel = ref<{
-      readonly visible: boolean;
-      readonly data?: INodeData;
-    }>(DEFAULT_NODE_CONFIG_PANEL);
+    const nodeConfigPanelVisible = ref<boolean>(false);
+    const selectedNodeData = ref<INodeData>();
 
     provide('getGraph', (): Graph => graph.value);
 
     return {
       graph,
-      nodeConfigPanel,
+      nodeConfigPanelVisible,
+      selectedNodeData,
       handleModelValueUpdated: (newVal: IWorkflowData) => {
         emit('update:model-value', newVal);
       },
@@ -60,13 +56,11 @@ export default defineComponent({
         graph.value = g;
       },
       handleNodeSelected: (data: INodeData) => {
-        nodeConfigPanel.value = {
-          visible: true,
-          data,
-        };
+        nodeConfigPanelVisible.value = true;
+        selectedNodeData.value = data;
       },
       handleNodeConfigPanelClosed: () => {
-        nodeConfigPanel.value = DEFAULT_NODE_CONFIG_PANEL;
+        selectedNodeData.value = undefined;
       },
     };
   },
