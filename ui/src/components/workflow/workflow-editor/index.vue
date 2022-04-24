@@ -80,8 +80,7 @@ export default defineComponent({
 
   .main {
     display: flex;
-    // 铺满剩余高度
-    flex-grow: 1;
+    height: calc(100% - @tool-bar-height);
   }
 }
 </style>

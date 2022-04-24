@@ -1,15 +1,17 @@
 <template>
   <div class="jm-workflow-editor-node-panel" ref="container">
     <div class="collapse" @click="collapse"></div>
-    <div class="groups">
-      <div class="group">
-        <x6-vue-shape
-          v-for="item in nodes"
-          :key="item.nodeRef"
-          :node-data="item"
-          @mousedown="(e) => drag(item, e)"/>
+    <jm-scrollbar>
+      <div class="groups">
+        <div class="group">
+          <x6-vue-shape
+            v-for="item in nodes"
+            :key="item.nodeRef"
+            :node-data="item"
+            @mousedown="(e) => drag(item, e)"/>
+        </div>
       </div>
-    </div>
+    </jm-scrollbar>
   </div>
 </template>
 
