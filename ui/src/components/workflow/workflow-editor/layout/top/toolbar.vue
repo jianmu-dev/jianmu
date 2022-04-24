@@ -16,6 +16,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-editor-toolbar {
-
+  height: 50px;
+  background: #3f536e;
 }
 </style>

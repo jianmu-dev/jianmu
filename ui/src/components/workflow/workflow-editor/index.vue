@@ -2,10 +2,14 @@
   <div class="jm-workflow-editor">
     <template v-if="container">
       <toolbar/>
-      <node-stencil-panel/>
       <node-config-panel/>
     </template>
-    <div class="graph-container" ref="container"></div>
+    <div class="main">
+      <node-stencil-panel v-if="container"/>
+      <div class="graph-container">
+        <div ref="container"></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -67,9 +71,15 @@ export default defineComponent({
   position: relative;
   box-sizing: border-box;
 
-  .graph-container {
-    width: 100%;
-    height: 100%;
+  .main {
+    // 50px为工具栏高度
+    height: calc(100% - 50px);
+    display: flex;
+
+    .graph-container {
+      // 280px为左侧栏宽度
+      width: calc(100% - 280px);
+    }
   }
 }
 </style>

@@ -93,8 +93,8 @@ export default class WorkflowGraph {
     this.bindEvent(container);
 
     // 禁止篡改宽高，强制继承
-    container.style.width = 'inherit';
-    container.style.height = 'inherit';
+    container.style.width = '100%';
+    container.style.height = '100%';
   }
 
   /**
