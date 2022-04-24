@@ -87,7 +87,7 @@ export default defineComponent({
   .main {
     display: flex;
     // 铺满剩余高度
-    flex: 1;
+    flex-grow: 1;
   }
 }
 </style>
