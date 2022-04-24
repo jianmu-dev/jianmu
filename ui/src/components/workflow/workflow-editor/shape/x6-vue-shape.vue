@@ -6,24 +6,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, ref } from 'vue';
+import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { Graph, Node } from '@antv/x6';
 import cronImg from '../svgs/shape/cron.svg';
 import webhookImg from '../svgs/shape/webhook.svg';
 import shellImg from '../svgs/shape/shell.svg';
 import asyncTaskImg from '../svgs/shape/async-task.svg';
 import { NodeTypeEnum } from '../model/enumeration';
+import { INodeData } from '../model/data';
 
 export default defineComponent({
-  setup() {
+  props: {
+    nodeData: Object as PropType<INodeData>,
+  },
+  setup(props) {
     const imgUrl = ref<string>('');
     const txt = ref<string>('');
     const getGraph = inject('getGraph') as () => Graph;
     const getNode = inject('getNode') as () => Node;
 
     onMounted(() => {
-      const node = getNode();
-      const { nodeType, image, text } = node.getData();
+      const { nodeType, image, text } = props.nodeData || getNode().getData() as INodeData;
       switch (nodeType) {
         case NodeTypeEnum.CRON:
           imgUrl.value = cronImg;
@@ -39,10 +42,10 @@ export default defineComponent({
           break;
       }
       txt.value = text;
-      // 监听数据改变事件
-      node.on('change:data', ({ current }) => {
-        console.log('----,', current);
-      });
+      // // 监听数据改变事件
+      // node.on('change:data', ({ current }) => {
+      //   console.log('----,', current);
+      // });
     });
 
     return {

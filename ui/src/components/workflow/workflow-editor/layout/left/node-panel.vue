@@ -1,6 +1,8 @@
 <template>
   <div class="jm-workflow-editor-node-panel">
-    <span @mousedown="drag">ttttt</span>
+    <div class="group">
+      <x6-vue-shape v-for="item in arr" :node-data="item" @mousedown="(e) => drag(item, e)"/>
+    </div>
   </div>
 </template>
 
@@ -9,22 +11,30 @@ import { defineComponent, inject, onMounted } from 'vue';
 import { Graph } from '@antv/x6';
 import WorkflowDnd from '../../model/workflow-dnd';
 import { NodeTypeEnum } from '../../model/enumeration';
+import X6VueShape from '../../shape/x6-vue-shape.vue';
+import { INodeData } from '../../model/data';
 
 export default defineComponent({
+  components: { X6VueShape },
   setup(props, context) {
     const arr = [{
+      nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3',
       text: '克隆建木CI代码',
     }, {
+      nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu',
       text: 'NodeJs构建前端项目',
     }, {
+      nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv',
       text: 'docker镜像构建',
     }, {
+      nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT',
       text: '发布npm依赖包',
     }, {
+      nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl',
       text: '组织治理',
     }];
@@ -37,11 +47,9 @@ export default defineComponent({
     });
 
     return {
-      drag: (event: Event) => {
-        dnd.drag({
-          nodeType: NodeTypeEnum.ASYNC_TASK,
-          ...arr[1],
-        }, event);
+      arr,
+      drag: (data: INodeData, event: Event) => {
+        dnd.drag(data, event);
       },
     };
   },
@@ -52,5 +60,11 @@ export default defineComponent({
 .jm-workflow-editor-node-panel {
   width: 300px;
   position: relative;
+
+  .group {
+    display: flex;
+    flex-wrap: wrap;
+    //justify-content: left;
+  }
 }
 </style>
