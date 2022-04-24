@@ -1,7 +1,12 @@
 <template>
   <div class="jm-workflow-editor-node-panel">
     <div class="group">
-      <x6-vue-shape v-for="item in arr" :node-data="item" @mousedown="(e) => drag(item, e)"/>
+      <x6-vue-shape
+        v-for="item in arr"
+        :key="item.nodeRef"
+        :node-data="item"
+        @mousedown="(e) => drag(item, e)"
+      />
     </div>
   </div>
 </template>
@@ -17,23 +22,28 @@ import { INodeData } from '../../model/data';
 export default defineComponent({
   components: { X6VueShape },
   setup(props, context) {
-    const arr = [{
+    const arr: INodeData[] = [{
+      nodeRef: 'git_clone',
       nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3',
       text: '克隆建木CI代码',
     }, {
+      nodeRef: 'node_build',
       nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu',
       text: 'NodeJs构建前端项目',
     }, {
+      nodeRef: 'docker_build',
       nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv',
       text: 'docker镜像构建',
     }, {
+      nodeRef: 'npm_publish',
       nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT',
       text: '发布npm依赖包',
     }, {
+      nodeRef: 'org_gov',
       nodeType: NodeTypeEnum.ASYNC_TASK,
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl',
       text: '组织治理',
@@ -61,7 +71,7 @@ export default defineComponent({
 
 .jm-workflow-editor-node-panel {
   width: @node-panel-width;
-  position: relative;
+  //position: relative;
 
   .group {
     display: flex;
