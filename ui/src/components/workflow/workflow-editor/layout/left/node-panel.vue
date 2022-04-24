@@ -51,6 +51,8 @@ export default defineComponent({
     // 初始化dnd
     const dnd = new WorkflowDnd(getGraph());
 
+    // TODO 异步加载触发器、内置/本地/官方/社区节点列表
+
     return {
       arr,
       drag: (data: INodeData, event: Event) => {
