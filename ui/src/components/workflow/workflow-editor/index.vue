@@ -1,63 +1,70 @@
 <template>
   <div class="jm-workflow-editor">
-    <template v-if="container">
+    <template v-if="graph">
       <toolbar/>
-      <node-config-panel/>
+      <node-config-panel v-model="nodeConfigPanel.visible" @closed="handleNodeConfigPanelClosed"/>
     </template>
     <div class="main">
-      <node-panel v-if="container"/>
-      <div class="graph-container">
-        <div ref="container"></div>
-      </div>
+      <node-panel v-if="graph"/>
+      <graph-panel :model-value="modelValue"
+                   @update:model-value="handleModelValueUpdated"
+                   @graph-created="handleGraphCreated"
+                   @node-selected="handleNodeSelected"/>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, provide, ref } from 'vue';
+import { defineComponent, PropType, provide, ref } from 'vue';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
-import WorkflowGraph from './model/workflow-graph';
-import { IWorkflowData } from './model/data';
-import { KeyValue } from '@antv/x6/es/types';
-import { HistoryManager } from '@antv/x6/es/graph/history';
+import GraphPanel from './layout/main/graph-panel.vue';
+import { INodeData, IWorkflowData } from './model/data';
 import { Graph } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
-import Command = HistoryManager.Command;
 
 // 注册自定义x6元素
 registerCustomVueShape();
 
+const DEFAULT_NODE_CONFIG_PANEL = {
+  visible: false,
+};
+
 export default defineComponent({
   name: 'jm-workflow-editor',
-  components: { Toolbar, NodePanel, NodeConfigPanel },
+  components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel },
   props: {
     modelValue: Object as PropType<IWorkflowData>,
   },
-  emits: ['update:modelValue'],
+  emits: ['update:model-value'],
   setup(props, { emit }) {
-    const data = ref<IWorkflowData>(props.modelValue);
-    const container = ref<HTMLElement>();
+    const graph = ref<Graph>();
+    const nodeConfigPanel = ref<{
+      readonly visible: boolean;
+      readonly data?: INodeData;
+    }>(DEFAULT_NODE_CONFIG_PANEL);
 
-    onMounted(() => {
-      // 初始化画布
-      const workflowGraph = new WorkflowGraph(container.value!);
-      provide('getGraph', (): Graph => {
-        return workflowGraph.x6Graph;
-      });
-
-      workflowGraph.x6Graph.history.on('change', (args: {
-        cmds: Command[] | null
-        options: KeyValue
-      }) => {
-        // code here
-        emit('update:modelValue', workflowGraph.x6Graph.toJSON());
-      });
-    });
+    provide('getGraph', (): Graph => graph.value);
 
     return {
-      container,
+      graph,
+      nodeConfigPanel,
+      handleModelValueUpdated: (newVal: IWorkflowData) => {
+        emit('update:model-value', newVal);
+      },
+      handleGraphCreated: (g: Graph) => {
+        graph.value = g;
+      },
+      handleNodeSelected: (data: INodeData) => {
+        nodeConfigPanel.value = {
+          visible: true,
+          data,
+        };
+      },
+      handleNodeConfigPanelClosed: () => {
+        nodeConfigPanel.value = DEFAULT_NODE_CONFIG_PANEL;
+      },
     };
   },
 });
@@ -74,14 +81,8 @@ export default defineComponent({
   box-sizing: border-box;
 
   .main {
-    // 50px为工具栏高度
-    height: calc(100% - 50px);
+    height: calc(100% - @tool-bar-height);
     display: flex;
-
-    .graph-container {
-      // 280px为左侧栏宽度
-      width: calc(100% - @node-panel-width);
-    }
   }
 }
 </style>

@@ -5,8 +5,7 @@
         v-for="item in arr"
         :key="item.nodeRef"
         :node-data="item"
-        @mousedown="(e) => drag(item, e)"
-      />
+        @mousedown="(e) => drag(item, e)"/>
     </div>
   </div>
 </template>
