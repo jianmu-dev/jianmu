@@ -1,14 +1,13 @@
 <template>
   <div class="jm-workflow-x6-vue-shape">
-    <img :src="imgUrl" width="80" height="80"/>
-    <jm-text-viewer :value="txt"/>
+    <div class="image"><img :src="imgUrl"/></div>
+    <div class="text">{{ txt }}</div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, ref } from 'vue';
 import { Graph, Node } from '@antv/x6';
-import JmTextViewer from '@/components/text-viewer/index.vue';
 import cronImg from '../svgs/shape/cron.svg';
 import webhookImg from '../svgs/shape/webhook.svg';
 import shellImg from '../svgs/shape/shell.svg';
@@ -16,7 +15,6 @@ import asyncTaskImg from '../svgs/shape/async-task.svg';
 import { NodeTypeEnum } from '../model/enumeration';
 
 export default defineComponent({
-  components: { JmTextViewer },
   setup() {
     const imgUrl = ref<string>('');
     const txt = ref<string>('');
@@ -58,11 +56,25 @@ export default defineComponent({
 <style scoped lang="less">
 .jm-workflow-x6-vue-shape {
   width: 80px;
-  height: 80px;
-  text-align: center;
 
-  img {
-    border-radius: 25.5%;
+  .image {
+    width: 80px;
+    height: 80px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 25.5%;
+    }
+  }
+
+  .text {
+    font-size: 14px;
+    text-align: center;
+    // 英文单词换行
+    word-wrap: break-word;
+    // 中文换行
+    white-space: pre-wrap;
   }
 }
 </style>
