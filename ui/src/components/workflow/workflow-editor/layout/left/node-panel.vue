@@ -57,8 +57,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+@import '../../vars';
+
 .jm-workflow-editor-node-panel {
-  width: 300px;
+  width: @node-panel-width;
   position: relative;
 
   .group {

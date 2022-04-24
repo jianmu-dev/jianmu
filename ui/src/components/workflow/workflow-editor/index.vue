@@ -64,6 +64,8 @@ export default defineComponent({
 </script>
 
 <style lang="less">
+@import './vars';
+
 .jm-workflow-editor {
   width: 100%;
   height: 100%;
@@ -78,7 +80,7 @@ export default defineComponent({
 
     .graph-container {
       // 280px为左侧栏宽度
-      width: calc(100% - 300px);
+      width: calc(100% - @node-panel-width);
     }
   }
 }
