@@ -5,7 +5,7 @@
       <node-config-panel/>
     </template>
     <div class="main">
-      <node-stencil-panel v-if="container"/>
+      <node-panel v-if="container"/>
       <div class="graph-container">
         <div ref="container"></div>
       </div>
@@ -16,7 +16,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, PropType, provide, ref } from 'vue';
 import Toolbar from './layout/top/toolbar.vue';
-import NodeStencilPanel from './layout/left/node-stencil-panel.vue';
+import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
 import WorkflowGraph from './model/workflow-graph';
 import { IWorkflowData } from './model/data';
@@ -31,7 +31,7 @@ registerCustomVueShape();
 
 export default defineComponent({
   name: 'jm-workflow-editor',
-  components: { Toolbar, NodeStencilPanel, NodeConfigPanel },
+  components: { Toolbar, NodePanel, NodeConfigPanel },
   props: {
     modelValue: Object as PropType<IWorkflowData>,
   },
@@ -43,7 +43,7 @@ export default defineComponent({
     onMounted(() => {
       // 初始化画布
       const workflowGraph = new WorkflowGraph(container.value!);
-      provide('getX6Graph', (): Graph => {
+      provide('getGraph', (): Graph => {
         return workflowGraph.x6Graph;
       });
 
