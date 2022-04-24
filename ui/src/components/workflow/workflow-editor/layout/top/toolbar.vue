@@ -15,8 +15,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+@import '../../vars';
+
 .jm-workflow-editor-toolbar {
-  height: 50px;
+  height: @tool-bar-height;
   background: #3f536e;
 }
 </style>

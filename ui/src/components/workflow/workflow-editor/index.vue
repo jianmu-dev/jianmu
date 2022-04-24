@@ -77,12 +77,14 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   border: 10px solid #dfe3e8;
-  position: relative;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 
   .main {
-    height: calc(100% - @tool-bar-height);
     display: flex;
+    // 铺满剩余高度
+    flex: 1;
   }
 }
 </style>

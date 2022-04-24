@@ -53,6 +53,7 @@ export default defineComponent({
 @import '../../vars';
 
 .jm-workflow-editor-graph-panel {
-  width: calc(100% - @node-panel-width);
+  // 铺满剩余宽度
+  flex-grow: 1;
 }
 </style>
