@@ -2,7 +2,10 @@
   <div class="jm-workflow-editor">
     <template v-if="graph">
       <toolbar/>
-      <node-config-panel v-model="nodeConfigPanel.visible" @closed="handleNodeConfigPanelClosed"/>
+      <node-config-panel
+        v-model="nodeConfigPanel.visible"
+        :node-data="nodeConfigPanel.data"
+        @closed="handleNodeConfigPanelClosed"/>
     </template>
     <div class="main">
       <node-panel v-if="graph"/>

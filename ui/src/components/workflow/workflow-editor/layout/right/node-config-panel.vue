@@ -6,7 +6,12 @@
     destroy-on-close
   >
     <div class="jm-workflow-editor-node-config-panel">
-      <div>This is node config panel</div>
+      <div>
+        <div>{{ nodeData.nodeRef }}</div>
+        <div>{{ nodeData.nodeType }}</div>
+        <div>{{ nodeData.text }}</div>
+        <div>{{ nodeData.image }}</div>
+      </div>
       <div class="footer">
         <jm-button @click="cancel">取消</jm-button>
         <jm-button type="primary" @click="save">保存</jm-button>
@@ -16,9 +21,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
+import { INodeData } from '../../model/data';
 
 export default defineComponent({
+  props: {
+    nodeData: {
+      type: Object as PropType<INodeData>,
+      required: true,
+    },
+  },
   emits: ['update:model-value'],
   setup(props, { emit }) {
     return {
