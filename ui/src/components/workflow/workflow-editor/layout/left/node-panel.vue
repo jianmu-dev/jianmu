@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { Graph } from '@antv/x6';
 import WorkflowDnd from '../../model/workflow-dnd';
 import { NodeTypeEnum } from '../../model/enumeration';
@@ -48,13 +48,9 @@ export default defineComponent({
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl',
       text: '组织治理',
     }];
-    let dnd: WorkflowDnd;
-    onMounted(() => {
-      const getGraph = inject('getGraph') as () => Graph;
-
-      // 初始化dnd
-      dnd = new WorkflowDnd(getGraph());
-    });
+    const getGraph = inject('getGraph') as () => Graph;
+    // 初始化dnd
+    const dnd = new WorkflowDnd(getGraph());
 
     return {
       arr,
@@ -71,6 +67,7 @@ export default defineComponent({
 
 .jm-workflow-editor-node-panel {
   width: @node-panel-width;
+  background: #6F8794;
   //position: relative;
 
   .group {
