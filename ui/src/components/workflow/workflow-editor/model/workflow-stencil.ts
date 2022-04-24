@@ -15,17 +15,18 @@ export default class WorkflowStencil {
     this.stencil = new Addon.Stencil({
       title: '流程图',
       target: graph,
-      stencilGraphWidth: 200,
-      stencilGraphHeight: 180,
+      stencilGraphWidth: 300,
       collapsable: false,
       groups: [
         {
           title: '触发器',
           name: 'inner_triggers',
+          graphHeight: 130,
         },
         {
           title: '内置节点',
           name: 'inner_nodes',
+          graphHeight: 130,
         },
         // {
         //   title: '本地节点',
@@ -34,6 +35,7 @@ export default class WorkflowStencil {
         {
           title: '官网节点',
           name: 'official_nodes',
+          graphHeight: 500,
         },
         // {
         //   title: '社区节点',
@@ -41,9 +43,12 @@ export default class WorkflowStencil {
         // },
       ],
       layoutOptions: {
-        columns: 2,
-        columnWidth: 80,
-        rowHeight: 55,
+        columns: 4,
+        dx: 0,
+        dy: 0,
+        columnWidth: 100,
+        rowHeight: 120,
+        // resizeToFit: true,
       },
     });
     stencilContainer.appendChild(this.stencil.container);
@@ -75,6 +80,15 @@ export default class WorkflowStencil {
     }, {
       image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu',
       text: 'NodeJs构建前端项目',
+    }, {
+      image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv',
+      text: 'docker镜像构建',
+    }, {
+      image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT',
+      text: '发布npm依赖包',
+    }, {
+      image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl',
+      text: '组织治理',
     }];
 
     const { width, height } = shapeSize;

@@ -28,7 +28,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-editor-node-stencil-panel {
-  width: 280px;
+  width: 300px;
   position: relative;
 }
 </style>

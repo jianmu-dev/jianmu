@@ -78,7 +78,7 @@ export default defineComponent({
 
     .graph-container {
       // 280px为左侧栏宽度
-      width: calc(100% - 280px);
+      width: calc(100% - 300px);
     }
   }
 }
