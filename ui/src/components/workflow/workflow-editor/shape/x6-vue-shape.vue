@@ -56,7 +56,12 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-x6-vue-shape {
+  cursor: pointer;
   width: 80px;
+
+  &:active {
+    cursor: move;
+  }
 
   .image {
     width: 80px;
