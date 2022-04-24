@@ -55,5 +55,10 @@ export default defineComponent({
 .jm-workflow-editor-graph-panel {
   // 铺满剩余宽度
   flex-grow: 1;
+
+  ::v-deep(.x6-graph-background) {
+    // 遮挡折叠后的节点列表
+    background-color: #FFFFFF;
+  }
 }
 </style>
