@@ -1,11 +1,11 @@
-export const shapeSize = {
+export const SHAPE_SIZE = {
   width: 80,
   height: 80,
 };
 
-export const shapeTextMaxHeight = 40;
+export const SHAPE_TEXT_MAX_HEIGHT = 40;
 
-export const ports = {
+export const PORTS = {
   groups: {
     top: {
       position: 'top',

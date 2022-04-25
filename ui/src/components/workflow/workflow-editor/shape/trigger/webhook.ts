@@ -1,7 +1,7 @@
-import { ports, shapeSize } from '../gengral-config';
+import { PORTS, SHAPE_SIZE } from '../gengral-config';
 import { NodeTypeEnum } from '../../model/enumeration';
 
-const { width, height } = shapeSize;
+const { width, height } = SHAPE_SIZE;
 
 export default {
   shape: 'vue-shape',
@@ -12,5 +12,5 @@ export default {
     nodeType: NodeTypeEnum.WEBHOOK,
     text: 'webhook',
   },
-  ports: { ...ports },
+  ports: { ...PORTS },
 };
