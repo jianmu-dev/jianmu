@@ -76,6 +76,10 @@ export default defineComponent({
   }
 
   .text {
+    max-height: 40px;
+    line-height: 20px;
+    // 超过两行直接截断
+    overflow: hidden;
     font-size: 14px;
     text-align: center;
     // 英文单词换行
