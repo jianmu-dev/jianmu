@@ -3,6 +3,8 @@ export const shapeSize = {
   height: 80,
 };
 
+export const shapeTextMaxHeight = 40;
+
 export const ports = {
   groups: {
     top: {
