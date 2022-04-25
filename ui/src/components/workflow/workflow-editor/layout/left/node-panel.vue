@@ -65,7 +65,8 @@ export default defineComponent({
   // 折叠动画
   transition: width 0.3s;
   width: @node-panel-width;
-  background: #6F8794;
+  border-right: 1px solid #8e9ded;
+  background: #FFFFFF;
   position: relative;
 
   .collapse {
@@ -92,6 +93,10 @@ export default defineComponent({
     .group {
       display: flex;
       flex-wrap: wrap;
+
+      .jm-workflow-x6-vue-shape {
+        margin: 10px;
+      }
     }
   }
 }
