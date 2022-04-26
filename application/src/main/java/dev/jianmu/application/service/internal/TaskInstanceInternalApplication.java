@@ -155,6 +155,9 @@ public class TaskInstanceInternalApplication {
         } catch (RuntimeException e) {
             log.warn("任务参数计算错误：{}", e.getMessage());
             taskInstance.executeFailed();
+            // 保存任务实例
+            this.taskInstanceRepository.add(taskInstance);
+            return;
         }
 
         // 创建任务实例输入参数
