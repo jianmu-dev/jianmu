@@ -45,7 +45,7 @@ export default defineComponent({
       collapse: () => {
         const panel = container.value!;
         const collapse = panel.querySelector('.collapse');
-        if (panel.offsetWidth > 0) {
+        if (panel.clientWidth > 0) {
           panel.style.width = '0px';
           collapse.style.display = 'block';
           return;
