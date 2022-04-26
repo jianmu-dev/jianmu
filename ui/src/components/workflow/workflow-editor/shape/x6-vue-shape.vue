@@ -1,5 +1,5 @@
 <template>
-  <div class="jm-workflow-x6-vue-shape">
+  <div :class="{ 'jm-workflow-x6-vue-shape': true, clickable }">
     <div class="image"><img :src="imgUrl"/></div>
     <div class="text">{{ txt }}</div>
   </div>
@@ -47,6 +47,7 @@ export default defineComponent({
     });
 
     return {
+      clickable: !props.nodeData,
       imgUrl,
       txt,
     };
@@ -56,8 +57,11 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-x6-vue-shape {
-  cursor: pointer;
   width: 80px;
+
+  &.clickable {
+    cursor: pointer;
+  }
 
   &:active {
     cursor: move;
