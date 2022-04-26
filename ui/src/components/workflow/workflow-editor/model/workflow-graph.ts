@@ -183,17 +183,31 @@ export default class WorkflowGraph {
         ports[i].style.visibility = show ? 'visible' : 'hidden';
       }
     };
-    this.graph.on('node:mouseenter', () => {
+    this.graph.on('node:mouseenter', ({ node }) => {
       const ports = container.querySelectorAll(
         '.x6-port-body',
       ) as NodeListOf<SVGElement>;
       showPorts(ports, true);
+
+      // 添加删除按钮
+      node.addTools({
+        name: 'button-remove',
+        args: {
+          x: 0,
+          y: 0,
+          // TODO 根据svg内容确定markup
+          markup: {},
+        },
+      });
     });
-    this.graph.on('node:mouseleave', () => {
+    this.graph.on('node:mouseleave', ({ node }) => {
       const ports = container.querySelectorAll(
         '.x6-port-body',
       ) as NodeListOf<SVGElement>;
       showPorts(ports, false);
+
+      // 移除删除按钮
+      node.removeTools();
     });
   }
 
