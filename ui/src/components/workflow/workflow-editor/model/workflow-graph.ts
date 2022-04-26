@@ -183,6 +183,7 @@ export default class WorkflowGraph {
         ports[i].style.visibility = show ? 'visible' : 'hidden';
       }
     };
+
     this.graph.on('node:mouseenter', ({ node }) => {
       const ports = container.querySelectorAll(
         '.x6-port-body',
@@ -208,6 +209,22 @@ export default class WorkflowGraph {
 
       // 移除删除按钮
       node.removeTools();
+    });
+
+    this.graph.on('edge:mouseenter', ({ cell }) => {
+      // 添加删除按钮
+      cell.addTools({
+        name: 'button-remove',
+        args: {
+          distance: '50%',
+          // TODO 根据svg内容确定markup
+          markup: {},
+        },
+      });
+    });
+    this.graph.on('edge:mouseleave', ({ cell }) => {
+      // 移除删除按钮
+      cell.removeTools();
     });
   }
 
