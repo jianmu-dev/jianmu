@@ -225,10 +225,18 @@ export default class WorkflowGraph {
         {
           // 路径点
           name: 'vertices',
+          args: {
+            // TODO 根据svg内容确定attr
+            attrs: {},
+          },
         },
         {
           // 线段
           name: 'segments',
+          args: {
+            // TODO 根据svg内容确定attr
+            attrs: {},
+          },
         },
         {
           // 删除按钮
