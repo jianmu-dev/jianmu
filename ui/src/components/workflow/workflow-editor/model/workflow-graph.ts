@@ -220,18 +220,29 @@ export default class WorkflowGraph {
     });
 
     this.graph.on('edge:mouseenter', ({ cell }) => {
-      // 添加删除按钮
-      cell.addTools({
-        name: 'button-remove',
-        args: {
-          distance: '50%',
-          // TODO 根据svg内容确定markup
-          markup: {},
+      // 添加所有工具
+      cell.addTools([
+        {
+          // 路径点
+          name: 'vertices',
         },
-      });
+        {
+          // 线段
+          name: 'segments',
+        },
+        {
+          // 删除按钮
+          name: 'button-remove',
+          args: {
+            distance: '50%',
+            // TODO 根据svg内容确定markup
+            markup: {},
+          },
+        },
+      ]);
     });
     this.graph.on('edge:mouseleave', ({ cell }) => {
-      // 移除删除按钮
+      // 移除所有工具
       cell.removeTools();
     });
   }
