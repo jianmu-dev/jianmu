@@ -50,6 +50,14 @@ export default class WorkflowGraph {
                 },
               },
             },
+            router: {
+              // 直线路由
+              name: 'normal',
+            },
+            connector: {
+              // 圆角连接器
+              name: 'rounded',
+            },
             zIndex: 0,
           });
         },
