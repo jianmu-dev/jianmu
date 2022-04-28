@@ -1,9 +1,23 @@
 import { Graph, Shape } from '@antv/x6';
+import normalizeWheel from 'normalize-wheel';
+import { nextTick } from 'vue';
+
+interface IGraphPosition {
+  x: number;
+  y: number;
+}
+
+// 容器大小比例，相对父元素
+const CONTAINER_SIZE_SCALE = 2;
 
 export default class WorkflowGraph {
+  private readonly container: HTMLElement;
   private readonly graph: Graph;
+  private readonly containerPosition: IGraphPosition = { x: 0, y: 0 };
 
   constructor(container: HTMLElement) {
+    this.container = container;
+
     // #region 初始化画布
     this.graph = new Graph({
       container,
@@ -100,9 +114,102 @@ export default class WorkflowGraph {
     this.registerShortcut();
     this.bindEvent(container);
 
-    // 禁止篡改宽高，强制继承
-    container.style.width = '100%';
-    container.style.height = '100%';
+    // 保证渲染完成
+    nextTick(() => {
+      // 初始化大小&坐标
+      this.initContainer();
+
+      // 注册容器大小变化监听器
+      this.registerContainerResizeListener();
+    }).then(() => {
+    });
+  }
+
+  /**
+   * 滚轮容器
+   * @param e
+   */
+  wheelScrollContainer(e: WheelEvent) {
+    const containerParent = this.container.parentElement!;
+
+    const minX = containerParent.clientWidth - this.container.offsetWidth;
+    const minY = containerParent.clientHeight - this.container.offsetHeight;
+    const maxX = 0;
+    const maxY = 0;
+
+    // 画布滚动事件
+    const { pixelX, pixelY } = normalizeWheel(e);
+
+    let tempX = this.containerPosition.x - pixelX;
+    let tempY = this.containerPosition.y - pixelY;
+
+    if (tempX > maxX) {
+      tempX = maxX;
+    } else if (tempX < minX) {
+      tempX = minX;
+    }
+
+    if (tempY > maxY) {
+      tempY = maxY;
+    } else if (tempY < minY) {
+      tempY = minY;
+    }
+
+    this.moveContainer(tempX, tempY);
+  }
+
+  /**
+   * 初始化容器
+   * @private
+   */
+  private initContainer() {
+    this.resizeContainer();
+
+    const containerParent = this.container.parentElement!;
+
+    // 水平&垂直居中
+    const x = (containerParent.clientWidth - this.container.offsetWidth) / 2;
+    const y = (containerParent.clientHeight - this.container.offsetHeight) / 2;
+
+    this.moveContainer(x, y);
+  }
+
+  /**
+   * 移动容器
+   * @param x
+   * @param y
+   * @private
+   */
+  private moveContainer(x: number, y: number) {
+    this.containerPosition.x = x;
+    this.containerPosition.y = y;
+
+    this.container.style.left = `${x}px`;
+    this.container.style.top = `${y}px`;
+  }
+
+  /**
+   * 改变容器大小
+   * @private
+   */
+  private resizeContainer() {
+    const containerParent = this.container.parentElement!;
+
+    const w = containerParent.clientWidth * CONTAINER_SIZE_SCALE;
+    const h = containerParent.clientHeight * CONTAINER_SIZE_SCALE;
+
+    this.container.style.width = `${w}px`;
+    this.container.style.height = `${h}px`;
+  }
+
+  /**
+   * 注册容器大小变化监听器
+   * @private
+   */
+  private registerContainerResizeListener() {
+    const containerParent = this.container.parentElement!;
+
+    new ResizeObserver(() => this.resizeContainer()).observe(containerParent);
   }
 
   /**

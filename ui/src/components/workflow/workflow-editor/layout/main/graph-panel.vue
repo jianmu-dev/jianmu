@@ -1,6 +1,6 @@
 <template>
-  <div class="jm-workflow-editor-graph-panel">
-    <div ref="container"></div>
+  <div class="jm-workflow-editor-graph-panel" @wheel.prevent="wheelScroll">
+    <div class="container" ref="container"></div>
   </div>
 </template>
 
@@ -19,10 +19,11 @@ export default defineComponent({
   emits: ['update:model-value', 'graph-created', 'node-selected'],
   setup(props, { emit }) {
     const container = ref<HTMLElement>();
+    let workflowGraph: WorkflowGraph;
 
     onMounted(() => {
       // 初始化画布
-      const workflowGraph = new WorkflowGraph(container.value!);
+      workflowGraph = new WorkflowGraph(container.value!);
       const graph = workflowGraph.x6Graph;
 
       // 单击节点事件
@@ -44,6 +45,13 @@ export default defineComponent({
 
     return {
       container,
+      wheelScroll(e: WheelEvent) {
+        if (!workflowGraph) {
+          return;
+        }
+
+        workflowGraph.wheelScrollContainer(e);
+      },
     };
   },
 });
@@ -55,6 +63,12 @@ export default defineComponent({
 .jm-workflow-editor-graph-panel {
   // 铺满剩余宽度
   flex-grow: 1;
+  position: relative;
+  overflow: hidden;
+
+  .container {
+    position: absolute;
+  }
 
   ::v-deep(.x6-graph-background) {
     // 遮挡折叠后的节点列表
