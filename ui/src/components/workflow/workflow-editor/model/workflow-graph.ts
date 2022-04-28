@@ -323,7 +323,7 @@ export default class WorkflowGraph {
       showPorts(ports, false);
 
       // 移除删除按钮
-      node.removeTools();
+      node.removeTool('button-remove');
     });
 
     this.graph.on('edge:mouseenter', ({ cell }) => {
@@ -357,8 +357,12 @@ export default class WorkflowGraph {
       ]);
     });
     this.graph.on('edge:mouseleave', ({ cell }) => {
-      // 移除所有工具
-      cell.removeTools();
+      // 移除路径点
+      cell.removeTool('vertices');
+      // 移除线段
+      cell.removeTool('segments');
+      // 移除删除按钮
+      cell.removeTool('button-remove');
     });
   }
 
