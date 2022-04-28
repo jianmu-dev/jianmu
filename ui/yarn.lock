@@ -389,6 +389,11 @@
   resolved "https://registry.npmmirror.com/@types/node/-/node-14.14.41.tgz#d0b939d94c1d7bd53d04824af45f1139b8c45615"
   integrity sha512-dueRKfaJL4RTtSa7bWeTK1M+VH+Gns73oCgzvYfHZywRCoPSd8EkXBL0mZ9unPTveBn+D9phZBaxuzpwjWkW0g==
 
+"@types/normalize-wheel@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/@types/normalize-wheel/-/normalize-wheel-1.0.0.tgz#d973b53557dc59c6136b5b737ae930e9218cb452"
+  integrity sha512-SzWYVzP7Q8w4/976Gi3a6+J/8/VNTq6AW7wDafXorr1MYTxyZqJTbUvwQt1hiG3PXyFUMIKr+s6q3+MLz2c/TQ==
+
 "@types/qs@^6.9.6":
   version "6.9.6"
   resolved "https://registry.npmmirror.com/@types/qs/-/qs-6.9.6.tgz#df9c3c8b31a247ec315e6996566be3171df4b3b1"
@@ -1822,7 +1827,7 @@ normalize-path@^3.0.0, normalize-path@~3.0.0:
 normalize-wheel@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/normalize-wheel/-/normalize-wheel-1.0.1.tgz#aec886affdb045070d856447df62ecf86146ec45"
-  integrity sha1-rsiGr/2wRQcNhWRH32Ls+GFG7EU=
+  integrity sha512-1OnlAPZ3zgrk8B91HyRj+eVv+kS5u+Z0SCsak6Xil/kmgEia50ga7zfkumayonZrImffAxPU/5WcyGhzetHNPA==
 
 object-inspect@^1.9.0:
   version "1.10.2"
