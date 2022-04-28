@@ -1,6 +1,7 @@
 import { Addon, Graph, Node } from '@antv/x6';
 import { INodeData } from '../model/data';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
+import alertImg from '../svgs/alert.svg';
 
 const { width, height } = SHAPE_SIZE;
 
@@ -30,6 +31,26 @@ export default class WorkflowDnd {
           // 保证不偏移
           const { x, y } = targetNode.getPosition();
           targetNode.setPosition(x, y - SHAPE_TEXT_MAX_HEIGHT / 2);
+        });
+
+        targetNode.addTools({
+          name: 'button',
+          args: {
+            markup: [
+              {
+                tagName: 'image',
+                attrs: {
+                  width: 24,
+                  height: 24,
+                  'xlink:href': alertImg,
+                  cursor: 'pointer',
+                },
+              },
+            ],
+            x: '100%',
+            y: 0,
+            offset: { x: -16, y: 0 },
+          },
         });
 
         return targetNode;
