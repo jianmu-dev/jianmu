@@ -215,6 +215,7 @@ public class WorkerApplication {
 
         HashMap<String, String> env = new HashMap<>();
         env.put("JIANMU_SHARE_DIR", "/" + event.getTriggerId());
+        env.put("JM_SHARE_DIR", "/" + event.getTriggerId());
 
         env.put("JM_WORKER_ID", worker.getId());
         env.put("JM_WORKER_TYPE", worker.getType().name());
