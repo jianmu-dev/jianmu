@@ -48,6 +48,7 @@ export default class WorkflowDnd {
           targetNode.setPosition(x, y - SHAPE_TEXT_MAX_HEIGHT / 2);
         });
 
+        // TODO 未填写必填参数时显示警告
         targetNode.addTools({
           name: 'button',
           args: {
