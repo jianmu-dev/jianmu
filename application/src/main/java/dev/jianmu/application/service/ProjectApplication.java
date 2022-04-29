@@ -66,7 +66,7 @@ public class ProjectApplication {
     private final ProjectLinkGroupRepository projectLinkGroupRepository;
     private final ProjectGroupRepository projectGroupRepository;
     private final GlobalProperties globalProperties;
-    private TriggerEventRepository triggerEventRepository;
+    private final TriggerEventRepository triggerEventRepository;
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
             GitRepoRepository gitRepoRepository,
