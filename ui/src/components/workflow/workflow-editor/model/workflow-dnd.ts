@@ -1,4 +1,4 @@
-import { Addon, Graph, Node } from '@antv/x6';
+import { Addon, Cell, CellView, Graph, JQuery, Node } from '@antv/x6';
 import { INodeData } from '../model/data';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
 import alertImg from '../svgs/alert.svg';
@@ -9,7 +9,7 @@ export default class WorkflowDnd {
   private readonly graph: Graph;
   private readonly dnd: Addon.Dnd;
 
-  constructor(graph: Graph) {
+  constructor(graph: Graph, showTipCallback: (data: INodeData) => void) {
     this.graph = graph;
     this.dnd = new Addon.Dnd({
       target: graph,
@@ -50,6 +50,9 @@ export default class WorkflowDnd {
             x: '100%',
             y: 0,
             offset: { x: -16, y: 0 },
+            onClick: ({ cell: { data } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
+              showTipCallback(data);
+            },
           },
         });
 

@@ -9,7 +9,7 @@
         @closed="handleNodeConfigPanelClosed"/>
     </template>
     <div class="main">
-      <node-panel v-if="graph"/>
+      <node-panel v-if="graph" @node-selected="handleNodeSelected"/>
       <graph-panel :model-value="modelValue"
                    @update:model-value="handleModelValueUpdated"
                    @graph-created="handleGraphCreated"

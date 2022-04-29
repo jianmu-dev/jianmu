@@ -25,13 +25,16 @@ import WorkflowNode from '../../model/workflow-node';
 
 export default defineComponent({
   components: { X6VueShape },
-  setup(props, context) {
+  emits: ['node-selected'],
+  setup(props, { emit }) {
     const workflowNode = new WorkflowNode();
     const container = ref<HTMLElement>();
     const containerWidth = ref<number>(0);
     const getGraph = inject('getGraph') as () => Graph;
     // 初始化dnd
-    const dnd = new WorkflowDnd(getGraph());
+    const dnd = new WorkflowDnd(getGraph(), (data: INodeData) => {
+      emit('node-selected', data);
+    });
 
     // 确定容器宽度
     onMounted(() => (containerWidth.value = container.value!.offsetWidth));
