@@ -4,6 +4,7 @@ import listen from 'good-listener';
 import { INodeData } from '../model/data';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
 import alertImg from '../svgs/alert.svg';
+import { NodeTypeEnum } from '../model/enumeration';
 
 const { width, height } = SHAPE_SIZE;
 
@@ -80,6 +81,20 @@ export default class WorkflowDnd {
 
         // 销毁监听器
         this.destroyListener();
+
+        const { nodeType } = droppingNode.getData<INodeData>();
+
+        if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(nodeType)) {
+          // 表示当前拖放的节点为trigger
+          const currentTrigger = this.graph.getNodes().find(node =>
+            [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(node.getData<INodeData>().nodeType));
+
+          if (currentTrigger) {
+            // TODO 需加提示
+            console.log('只能有一个触发器节点');
+            return false;
+          }
+        }
 
         if (mousePosX >= x && mousePosX <= maxX &&
           mousePosY >= y && mousePosY <= maxY) {
