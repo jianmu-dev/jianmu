@@ -73,7 +73,13 @@ public class EmbeddedWorkerApplication {
             } else {
                 parameterMap = workerTask.getParameterMap().entrySet().stream()
                         .filter(entry -> entry.getKey() != null)
-                        .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue() == null ? "" : entry.getValue()))
+                        .map(entry -> {
+                            var key = entry.getKey().toUpperCase();
+                            if (key.startsWith("JIANMU_") || key.startsWith("JM")) {
+                                return Map.entry(key, entry.getValue() == null ? "" : entry.getValue());
+                            }
+                            return Map.entry("JIANMU_" + key, entry.getValue() == null ? "" : entry.getValue());
+                        })
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             }
 
