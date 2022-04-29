@@ -39,12 +39,12 @@ export default defineComponent({
     return {
       nodes: ref<INodeData[]>(workflowNode.search().flat(Infinity)),
       container,
-      drag: (data: INodeData, event: Event) => {
+      drag: (data: INodeData, event: MouseEvent) => {
         dnd.drag(data, event);
       },
       collapse: () => {
         const panel = container.value!;
-        const collapse = panel.querySelector('.collapse');
+        const collapse = panel.querySelector('.collapse') as HTMLElement;
         if (panel.clientWidth > 0) {
           panel.style.width = '0px';
           collapse.style.display = 'block';

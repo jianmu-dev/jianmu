@@ -43,7 +43,7 @@ export default defineComponent({
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeData = ref<INodeData>();
 
-    provide('getGraph', (): Graph => graph.value);
+    provide('getGraph', (): Graph => graph.value!);
 
     return {
       graph,
