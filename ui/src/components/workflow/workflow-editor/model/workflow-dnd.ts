@@ -9,7 +9,7 @@ export default class WorkflowDnd {
   private readonly graph: Graph;
   private readonly dnd: Addon.Dnd;
 
-  constructor(graph: Graph, showTipCallback: (data: INodeData) => void) {
+  constructor(graph: Graph, alertCallback: (data: INodeData) => void) {
     this.graph = graph;
     this.dnd = new Addon.Dnd({
       target: graph,
@@ -51,7 +51,7 @@ export default class WorkflowDnd {
             y: 0,
             offset: { x: -16, y: 0 },
             onClick: ({ cell: { data } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-              showTipCallback(data);
+              alertCallback(data);
             },
           },
         });
