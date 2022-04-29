@@ -31,19 +31,28 @@ export default defineComponent({
     const container = ref<HTMLElement>();
     const containerWidth = ref<number>(0);
     const getGraph = inject('getGraph') as () => Graph;
-    // 初始化dnd
-    const dnd = new WorkflowDnd(getGraph(), (data: INodeData) => {
-      emit('node-selected', data);
-    });
+    let workflowDnd: WorkflowDnd;
 
     // 确定容器宽度
-    onMounted(() => (containerWidth.value = container.value!.offsetWidth));
+    onMounted(() => {
+      containerWidth.value = container.value!.offsetWidth;
+
+      const graphPanelEl = container.value!.nextElementSibling! as HTMLElement;
+      // 初始化dnd
+      workflowDnd = new WorkflowDnd(getGraph(), graphPanelEl, (data: INodeData) => {
+        emit('node-selected', data);
+      });
+    });
 
     return {
       nodes: ref<INodeData[]>(workflowNode.search().flat(Infinity)),
       container,
       drag: (data: INodeData, event: MouseEvent) => {
-        dnd.drag(data, event);
+        if (!workflowDnd) {
+          return;
+        }
+
+        workflowDnd.drag(data, event);
       },
       collapse: () => {
         const panel = container.value!;

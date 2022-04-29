@@ -1,16 +1,30 @@
 import { Addon, Cell, CellView, Graph, JQuery, Node } from '@antv/x6';
+// @ts-ignore
+import listen from 'good-listener';
 import { INodeData } from '../model/data';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
 import alertImg from '../svgs/alert.svg';
 
 const { width, height } = SHAPE_SIZE;
 
+interface IDraggingListener {
+  mousePosX: number;
+  mousePosY: number;
+  listener?: any;
+}
+
 export default class WorkflowDnd {
   private readonly graph: Graph;
   private readonly dnd: Addon.Dnd;
+  private readonly graphPanelEl: HTMLElement;
+  private readonly draggingListener: IDraggingListener = {
+    mousePosX: -1,
+    mousePosY: -1,
+  }
 
-  constructor(graph: Graph, alertCallback: (data: INodeData) => void) {
+  constructor(graph: Graph, graphPanelEl: HTMLElement, alertCallback: (data: INodeData) => void) {
     this.graph = graph;
+    this.graphPanelEl = graphPanelEl;
     this.dnd = new Addon.Dnd({
       target: graph,
       animation: true,
@@ -58,10 +72,30 @@ export default class WorkflowDnd {
 
         return targetNode;
       },
+      validateNode: (droppingNode: Node) => {
+        const { mousePosX, mousePosY } = this.draggingListener;
+        const { x, y, width, height } = this.graphPanelEl.getBoundingClientRect();
+        const maxX = x + width;
+        const maxY = y + height;
+
+        // 销毁监听器
+        this.destroyListener();
+
+        if (mousePosX >= x && mousePosX <= maxX &&
+          mousePosY >= y && mousePosY <= maxY) {
+          // 在画布面板中拖放时，才能成功
+          return true;
+        }
+
+        return false;
+      },
     });
   }
 
   drag(data: INodeData, event: MouseEvent) {
+    // 构建监听器
+    this.buildListener();
+
     const node = this.graph.createNode({
       shape: 'vue-shape',
       width,
@@ -74,5 +108,22 @@ export default class WorkflowDnd {
     });
 
     this.dnd.start(node, event);
+  }
+
+  private buildListener() {
+    this.draggingListener.listener = listen(document.body, 'mousemove', (e: MouseEvent) => {
+      this.draggingListener.mousePosX = e.x;
+      this.draggingListener.mousePosY = e.y;
+    });
+  }
+
+  private destroyListener() {
+    if (this.draggingListener.listener) {
+      this.draggingListener.listener.destroy();
+    }
+
+    this.draggingListener.mousePosX = -1;
+    this.draggingListener.mousePosY = -1;
+    delete this.draggingListener.listener;
   }
 }
