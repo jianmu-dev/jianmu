@@ -1,4 +1,4 @@
-import { Graph, Point } from '@antv/x6';
+import { Graph } from '@antv/x6';
 import { ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/enumeration';
 
 const MIN_ZOOM = 0.2;
@@ -32,7 +32,16 @@ export class WorkflowTool {
         factor = factor < MIN_ZOOM ? MIN_ZOOM : factor;
         break;
       case ZoomTypeEnum.FIT:
-        factor = this.getFitFactor();
+        if (this.graph.getNodes().length === 0) {
+          factor = 1;
+        } else if (this.checkMinContentOverflow()) {
+          // 缩放到最小，判断是否溢出
+          factor = MIN_ZOOM;
+        } else {
+          // 缩放画布内容，使画布内容充满视口
+          this.graph.zoomToFit();
+          return;
+        }
         break;
       // case ZoomTypeEnum.ORIGINAL:
       default:
@@ -56,84 +65,17 @@ export class WorkflowTool {
       return;
     }
 
-    this.fitCenter(factor);
+    const { x, y, width, height } = this.graph.getContentBBox();
 
-    const center = this.getZoomCenter();
-    this.graph.zoomTo(factor, { center });
-  }
+    this.graph.zoomTo(factor, {
+      center: {
+        x: width / 2 + x,
+        y: height / 2 + y,
+      },
+    });
 
-  /**
-   * 获取缩放中心
-   * @private
-   */
-  private getZoomCenter(): Point.PointLike {
-    if (this.isGraphEmpty()) {
-      const { x, y } = this.getContainerCenter();
-      return { x, y };
-    }
-    const { x, y } = this.getContentCenter();
-    return { x, y };
-  }
-
-
-  /**
-   * 获取适配系数
-   * @private
-   */
-  private getFitFactor(): number {
-    if (this.isGraphEmpty()) {
-      return 1;
-    }
-
-    // 缩放到最小，判断是否溢出
-    if (this.checkMinContentOverflow()) {
-      return MIN_ZOOM;
-    }
-
-    const { clientWidth: panelW, clientHeight: panelH } = this.container.parentElement!;
-    const { width: contentW, height: contentH } = this.graph.getContentArea();
-
-    const wRatio = panelW / contentW;
-    const hRatio = panelH / contentH;
-
-    return Math.min(wRatio, hRatio, MAX_ZOOM);
-  }
-
-  /**
-   * 获取容器中心坐标，相对容器左上角
-   * @private
-   */
-  private getContainerCenter(): Point.PointLike {
-    const minX = 0;
-    const minY = 0;
-    const maxX = this.container.offsetWidth;
-    const maxY = this.container.offsetHeight;
-
-    return {
-      x: (maxX - minX) / 2,
-      y: (maxY - minY) / 2,
-    };
-  }
-
-  /**
-   * 获取内容中心坐标，相对容器左上角
-   * @private
-   */
-  private getContentCenter(): Point.PointLike {
-    const { x, y, width, height } = this.graph.getContentArea();
-
-    return {
-      x: width / 2 + x,
-      y: height / 2 + y,
-    };
-  }
-
-  /**
-   * 画布内容是否为空
-   * @private
-   */
-  private isGraphEmpty(): boolean {
-    return this.graph.getNodes().length === 0;
+    // 将画布内容中心与视口中心对齐
+    this.graph.centerContent();
   }
 
   /**
@@ -147,53 +89,5 @@ export class WorkflowTool {
     const minContentH = contentH * MIN_ZOOM;
 
     return minContentW > panelW || minContentH > panelH;
-  }
-
-  /**
-   * 内容移动到中心
-   * @param factor
-   * @private
-   */
-  private fitCenter(factor: number) {
-    if (!this.isGraphEmpty()) {
-      this.moveContentToContainerCenter(factor);
-    }
-    this.moveContainerToPanelCenter();
-  }
-
-  /**
-   * 移动内容到容器中心
-   * @param factor
-   * @private
-   */
-  private moveContentToContainerCenter(factor: number) {
-    const { x: containerX, y: containerY } = this.getContainerCenter();
-    const { x: contentX, y: contentY } = this.getContentCenter();
-
-    console.log(containerX, contentX);
-    console.log(containerY, contentY);
-
-    const moveX = Math.floor((containerX - contentX) / factor);
-    const moveY = Math.floor((containerY - contentY) / factor);
-
-    console.log(moveX, moveY);
-
-    // 移动所有节点到容器中心
-    this.graph.getNodes().forEach(node => node.translate(moveX, moveY));
-  }
-
-  /**
-   * 移动容器到面板中心
-   */
-  private moveContainerToPanelCenter() {
-    const containerParent = this.container.parentElement!;
-
-    // 水平&垂直居中
-    const x = (containerParent.clientWidth - this.container.offsetWidth) / 2;
-    const y = (containerParent.clientHeight - this.container.offsetHeight) / 2;
-
-
-    this.container.style.left = `${x}px`;
-    this.container.style.top = `${y}px`;
   }
 }
