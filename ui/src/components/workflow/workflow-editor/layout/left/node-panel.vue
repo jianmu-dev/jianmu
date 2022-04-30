@@ -1,6 +1,8 @@
 <template>
   <div class="jm-workflow-editor-node-panel" ref="container">
-    <div class="collapse" @click="collapse"></div>
+    <div class="collapse" @click="collapse">
+      <div :class="{ icon: true, collapsed }"></div>
+    </div>
     <jm-scrollbar>
       <div class="groups">
         <div class="group">
@@ -28,6 +30,7 @@ export default defineComponent({
   emits: ['node-selected'],
   setup(props, { emit }) {
     const workflowNode = new WorkflowNode();
+    const collapsed = ref<boolean>(false);
     const container = ref<HTMLElement>();
     const containerWidth = ref<number>(0);
     const getGraph = inject('getGraph') as () => Graph;
@@ -45,6 +48,7 @@ export default defineComponent({
     });
 
     return {
+      collapsed,
       nodes: ref<INodeData[]>(workflowNode.search().flat(Infinity)),
       container,
       drag: (data: INodeData, event: MouseEvent) => {
@@ -60,10 +64,12 @@ export default defineComponent({
         if (panel.clientWidth > 0) {
           panel.style.width = '0px';
           collapse.style.display = 'block';
+          collapsed.value = true;
           return;
         }
         panel.style.width = `${containerWidth.value}px`;
         collapse.style.display = '';
+        collapsed.value = false;
       },
     };
   },
@@ -87,13 +93,25 @@ export default defineComponent({
   .collapse {
     display: none;
     position: absolute;
-    z-index: 1;
     top: -1px;
-    right: -50px;
+    right: -41px;
 
-    width: 50px;
-    height: 50px;
-    background: red;
+    width: 40px;
+    height: 40px;
+    background-color: #082340;
+    border-radius: 0 10px 10px 0;
+    cursor: pointer;
+
+    .icon {
+      width: 100%;
+      height: 100%;
+      background-image: url('../../svgs/collapse.svg');
+      transition: transform 0.5s ease-in-out;
+
+      &.collapsed {
+        transform: scaleX(-1);
+      }
+    }
   }
 
   &:hover {
