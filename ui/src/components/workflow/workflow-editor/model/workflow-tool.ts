@@ -1,15 +1,10 @@
 import { Graph, Point } from '@antv/x6';
 import { ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/enumeration';
-import { Size } from '@antv/x6/src/types/common';
 
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 5;
 // 缩放间隔
 const ZOOM_INTERVAL = 0.1;
-
-const nodePositionOptions = {
-  relative: true,
-};
 
 export class WorkflowTool {
   private readonly container: HTMLElement;
@@ -96,7 +91,7 @@ export class WorkflowTool {
     }
 
     const { clientWidth: panelW, clientHeight: panelH } = this.container.parentElement!;
-    const { width: contentW, height: contentH } = this.getContentSize();
+    const { width: contentW, height: contentH } = this.graph.getContentArea();
 
     const wRatio = panelW / contentW;
     const hRatio = panelH / contentH;
@@ -125,77 +120,12 @@ export class WorkflowTool {
    * @private
    */
   private getContentCenter(): Point.PointLike {
-    const nodes = this.graph.getNodes();
-
-    // x轴升序排序
-    nodes.sort((n1, n2) => {
-      const { x: x1 } = n1.position(nodePositionOptions);
-      const { x: x2 } = n2.position(nodePositionOptions);
-      if (x1 === x2) {
-        return 0;
-      }
-      return x1 > x2 ? 1 : -1;
-    });
-
-    const minX = nodes[0].position(nodePositionOptions).x;
-    const maxX = nodes[nodes.length - 1].position(nodePositionOptions).x + nodes[nodes.length - 1].size().width;
-
-    // y轴升序排序
-    nodes.sort((n1, n2) => {
-      const { y: y1 } = n1.position(nodePositionOptions);
-      const { y: y2 } = n2.position(nodePositionOptions);
-      if (y1 === y2) {
-        return 0;
-      }
-      return y1 > y2 ? 1 : -1;
-    });
-
-    const minY = nodes[0].position(nodePositionOptions).y;
-    const maxY = nodes[nodes.length - 1].position(nodePositionOptions).y + nodes[nodes.length - 1].size().height;
+    const { x, y, width, height } = this.graph.getContentArea();
 
     return {
-      x: (maxX - minX) / 2 + minX,
-      y: (maxY - minY) / 2 + minY,
+      x: width / 2 + x,
+      y: height / 2 + y,
     };
-  }
-
-  /**
-   * 获取内容大小
-   * @private
-   */
-  private getContentSize(): Size {
-    const nodes = this.graph.getNodes();
-
-    // x轴升序排序
-    nodes.sort((n1, n2) => {
-      const { x: x1 } = n1.position(nodePositionOptions);
-      const { x: x2 } = n2.position(nodePositionOptions);
-      if (x1 === x2) {
-        return 0;
-      }
-      return x1 > x2 ? 1 : -1;
-    });
-
-    const minX = nodes[0].position(nodePositionOptions).x;
-    const maxX = nodes[nodes.length - 1].position(nodePositionOptions).x + nodes[nodes.length - 1].size().width;
-
-    // y轴升序排序
-    nodes.sort((n1, n2) => {
-      const { y: y1 } = n1.position(nodePositionOptions);
-      const { y: y2 } = n2.position(nodePositionOptions);
-      if (y1 === y2) {
-        return 0;
-      }
-      return y1 > y2 ? 1 : -1;
-    });
-
-    const minY = nodes[0].position(nodePositionOptions).y;
-    const maxY = nodes[nodes.length - 1].position(nodePositionOptions).y + nodes[nodes.length - 1].size().height;
-
-    const width = maxX - minX;
-    const height = maxY - minY;
-
-    return { width, height };
   }
 
   /**
@@ -211,7 +141,7 @@ export class WorkflowTool {
    */
   private checkMinContentOverflow(): boolean {
     const { clientWidth: panelW, clientHeight: panelH } = this.container.parentElement!;
-    const { width: contentW, height: contentH } = this.getContentSize();
+    const { width: contentW, height: contentH } = this.graph.getContentArea();
 
     const minContentW = contentW * MIN_ZOOM;
     const minContentH = contentH * MIN_ZOOM;
