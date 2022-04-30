@@ -105,9 +105,11 @@ export default defineComponent({
       width: 100%;
       height: 100%;
       background-image: url('../../svgs/collapse.svg');
+      // 反转动画
       transition: transform 0.5s ease-in-out;
 
       &.collapsed {
+        // 反转
         transform: scaleX(-1);
       }
     }
