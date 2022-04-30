@@ -11,7 +11,8 @@ import java.util.UUID;
 public class Trigger {
     public enum Type {
         CRON,
-        WEBHOOK
+        WEBHOOK,
+        MANUAL
     }
 
     private String id;

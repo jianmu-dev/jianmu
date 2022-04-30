@@ -23,7 +23,9 @@ import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.Webhook;
+import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
@@ -64,7 +66,7 @@ public class ProjectApplication {
     private final ProjectLinkGroupRepository projectLinkGroupRepository;
     private final ProjectGroupRepository projectGroupRepository;
     private final GlobalProperties globalProperties;
-
+    private final TriggerEventRepository triggerEventRepository;
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
             GitRepoRepository gitRepoRepository,
@@ -77,7 +79,8 @@ public class ProjectApplication {
             JgitService jgitService,
             ProjectLinkGroupRepository projectLinkGroupRepository,
             ProjectGroupRepository projectGroupRepository,
-            GlobalProperties globalProperties
+            GlobalProperties globalProperties,
+            TriggerEventRepository triggerEventRepository
     ) {
         this.projectRepository = projectRepository;
         this.gitRepoRepository = gitRepoRepository;
@@ -91,6 +94,7 @@ public class ProjectApplication {
         this.projectLinkGroupRepository = projectLinkGroupRepository;
         this.projectGroupRepository = projectGroupRepository;
         this.globalProperties = globalProperties;
+        this.triggerEventRepository = triggerEventRepository;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -120,12 +124,20 @@ public class ProjectApplication {
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
-        var triggerId = UUID.randomUUID().toString().replace("-", "");
-        MDC.put("triggerId", triggerId);
+
+        var evt = dev.jianmu.trigger.event.TriggerEvent.Builder
+                .aTriggerEvent()
+                .projectId(project.getId())
+                .triggerId("")
+                .triggerType(Trigger.Type.MANUAL.name())
+                .build();
+        this.triggerEventRepository.save(evt);
+
+        MDC.put("triggerId", evt.getId());
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(project.getId())
-                .triggerId(triggerId)
-                .triggerType("MANUAL")
+                .triggerId(evt.getId())
+                .triggerType(Trigger.Type.MANUAL.name())
                 .workflowRef(project.getWorkflowRef())
                 .workflowVersion(project.getWorkflowVersion())
                 .build();

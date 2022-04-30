@@ -67,16 +67,22 @@ public class EmbeddedWorkerApplication {
             Map<String, String> parameterMap;
             if (workerTask.isShellTask()) {
                 parameterMap = workerTask.getParameterMap().entrySet().stream()
-                        .map(entry -> Map.entry(entry.getKey().toUpperCase(), entry.getValue()))
+                        .filter(entry -> entry.getKey() != null)
+                        .map(entry -> Map.entry(entry.getKey().toUpperCase(), entry.getValue() == null ? "" : entry.getValue()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             } else {
                 parameterMap = workerTask.getParameterMap().entrySet().stream()
-                        .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue()))
+                        .filter(entry -> entry.getKey() != null)
+                        .map(entry -> {
+                            var key = entry.getKey().toUpperCase();
+                            if (key.startsWith("JIANMU_") || key.startsWith("JM")) {
+                                return Map.entry(key, entry.getValue() == null ? "" : entry.getValue());
+                            }
+                            return Map.entry("JIANMU_" + key, entry.getValue() == null ? "" : entry.getValue());
+                        })
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             }
-            parameterMap.put("JIANMU_SHARE_DIR", "/" + workerTask.getTriggerId());
-            parameterMap.put("JM_SHARE_DIR", "/" + workerTask.getTriggerId());
-            parameterMap.put("JM_TRIGGER_ID", workerTask.getTriggerId());
+
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
             var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId());
