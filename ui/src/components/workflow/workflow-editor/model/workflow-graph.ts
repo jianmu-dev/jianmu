@@ -1,18 +1,15 @@
-import { Graph, Point, Shape } from '@antv/x6';
+import { Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 
 export default class WorkflowGraph {
-  private readonly container: HTMLElement;
   private readonly graph: Graph;
 
   constructor(container: HTMLElement) {
-    this.container = container;
-
     // #region 初始化画布
     this.graph = new Graph({
       container,
       // 不绘制网格背景
-      grid: true,
+      grid: false,
       history: true,
       mousewheel: {
         enabled: true,
@@ -106,19 +103,7 @@ export default class WorkflowGraph {
     this.bindEvent(container);
 
     // 注册容器大小变化监听器
-    this.registerContainerResizeListener();
-  }
-
-  /**
-   * 获取容器位置
-   * @private
-   */
-  private getContainerPosition(): Point.PointLike {
-    const { left, top } = this.container.style;
-    const x = +(left.substring(0, left.length - 2));
-    const y = +(top.substring(0, top.length - 2));
-
-    return { x, y };
+    this.registerContainerResizeListener(container.parentElement!);
   }
 
   /**
@@ -136,9 +121,7 @@ export default class WorkflowGraph {
    * 注册容器大小变化监听器
    * @private
    */
-  private registerContainerResizeListener() {
-    const containerParent = this.container.parentElement!;
-
+  private registerContainerResizeListener(containerParent: HTMLElement) {
     new ResizeObserver(() => {
       const { clientWidth, clientHeight } = containerParent;
       this.graph.resizeGraph(clientWidth, clientHeight);
