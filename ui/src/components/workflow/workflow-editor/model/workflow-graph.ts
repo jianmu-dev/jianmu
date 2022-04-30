@@ -1,11 +1,6 @@
-import { Graph, Shape } from '@antv/x6';
+import { Graph, Point, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { nextTick } from 'vue';
-
-interface IGraphPosition {
-  x: number;
-  y: number;
-}
 
 // 容器大小比例，相对父元素
 const CONTAINER_SIZE_SCALE = 2;
@@ -13,7 +8,6 @@ const CONTAINER_SIZE_SCALE = 2;
 export default class WorkflowGraph {
   private readonly container: HTMLElement;
   private readonly graph: Graph;
-  private readonly containerPosition: IGraphPosition = { x: 0, y: 0 };
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -127,6 +121,18 @@ export default class WorkflowGraph {
   }
 
   /**
+   * 获取容器位置
+   * @private
+   */
+  private getContainerPosition(): Point.PointLike {
+    const { left, top } = this.container.style;
+    const x = +(left.substring(0, left.length - 2));
+    const y = +(top.substring(0, top.length - 2));
+
+    return { x, y };
+  }
+
+  /**
    * 滚轮容器
    * @param e
    */
@@ -138,11 +144,12 @@ export default class WorkflowGraph {
     const maxX = 0;
     const maxY = 0;
 
+    const { x, y } = this.getContainerPosition();
     // 画布滚动事件
     const { pixelX, pixelY } = normalizeWheel(e);
 
-    let tempX = this.containerPosition.x - pixelX;
-    let tempY = this.containerPosition.y - pixelY;
+    let tempX = x - pixelX;
+    let tempY = y - pixelY;
 
     if (tempX > maxX) {
       tempX = maxX;
@@ -182,9 +189,6 @@ export default class WorkflowGraph {
    * @private
    */
   private moveContainer(x: number, y: number) {
-    this.containerPosition.x = x;
-    this.containerPosition.y = y;
-
     this.container.style.left = `${x}px`;
     this.container.style.top = `${y}px`;
   }
