@@ -10,3 +10,13 @@ export enum NodeTypeEnum {
   SHELL = 'shell',
   ASYNC_TASK = 'async-task',
 }
+
+/**
+ * 缩放类型
+ */
+export enum ZoomTypeEnum {
+  IN = 'IN',
+  OUT = 'OUT',
+  ORIGINAL = 'ORIGINAL',
+  FIT = 'FIT',
+}

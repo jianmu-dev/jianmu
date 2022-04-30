@@ -1,17 +1,26 @@
 <template>
   <div class="jm-workflow-editor-toolbar">
     <div class="left">
-      <button class="jm-icon-workflow-back"></button>
+      <button class="jm-icon-workflow-back" @click="goBack"></button>
       <div class="title">未命名项目</div>
-      <button class="jm-icon-workflow-edit"></button>
+      <button class="jm-icon-workflow-edit" @click="edit"></button>
     </div>
     <div class="right">
       <div class="tools">
-        <button class="jm-icon-workflow-zoom-out"></button>
-        <div class="ratio">100%</div>
-        <button class="jm-icon-workflow-zoom-in"></button>
-
-        <button :class="['jm-icon-workflow-zoom-normal']"></button>
+        <jm-tooltip content="缩小" placement="bottom" :appendToBody="false">
+          <button class="jm-icon-workflow-zoom-out" @click="zoom(ZoomTypeEnum.OUT)"></button>
+        </jm-tooltip>
+        <div class="ratio">{{ zoomPercentage }}</div>
+        <jm-tooltip content="放大" placement="bottom" :appendToBody="false">
+          <button class="jm-icon-workflow-zoom-in" @click="zoom(ZoomTypeEnum.IN)"></button>
+        </jm-tooltip>
+        <!--        <jm-tooltip v-if="zoomPercentage === '100%'" content="适屏" placement="bottom" :appendToBody="false">-->
+        <jm-tooltip v-if="true" content="适屏" placement="bottom" :appendToBody="false">
+          <button class="jm-icon-workflow-zoom-fit" @click="zoom(ZoomTypeEnum.FIT)"></button>
+        </jm-tooltip>
+        <jm-tooltip v-else content="原始大小" placement="bottom" :appendToBody="false">
+          <button class="jm-icon-workflow-zoom-original" @click="zoom(ZoomTypeEnum.ORIGINAL)"></button>
+        </jm-tooltip>
       </div>
       <div class="configs">
         <div>并发执行</div>
@@ -20,20 +29,45 @@
         </div>
       </div>
       <div class="operations">
-        <jm-button>保存并返回</jm-button>
-        <jm-button type="primary">保存</jm-button>
+        <jm-button @click="save(true)">保存并返回</jm-button>
+        <jm-button type="primary" @click="save(false)">保存</jm-button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent, inject, ref } from 'vue';
+import { Graph } from '@antv/x6';
+import { ZoomTypeEnum } from '../../model/enumeration';
+import { WorkflowTool } from '../../model/workflow-tool';
 
 export default defineComponent({
   emits: ['back', 'save'],
   setup(props, context) {
+    const getGraph = inject('getGraph') as () => Graph;
+    const graph = getGraph();
+    const zoomVal = ref<number>(graph.zoom());
 
+    const workflowTool: WorkflowTool = new WorkflowTool(graph);
+
+    return {
+      ZoomTypeEnum,
+      zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
+      goBack: () => {
+        console.log('go back');
+      },
+      edit: () => {
+        console.log('edit');
+      },
+      zoom: async (type: ZoomTypeEnum) => {
+        workflowTool.zoom(type);
+        zoomVal.value = graph.zoom();
+      },
+      save: (back: boolean) => {
+        console.log('save', back);
+      },
+    };
   },
 });
 </script>
@@ -98,8 +132,8 @@ export default defineComponent({
         text-align: center;
       }
 
-      > :last-child {
-        margin-left: 10px;
+      .jm-icon-workflow-zoom-in {
+        margin-right: 10px;
       }
     }
 
