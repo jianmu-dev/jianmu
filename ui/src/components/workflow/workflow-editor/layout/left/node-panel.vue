@@ -74,18 +74,21 @@ export default defineComponent({
 @import '../../vars';
 
 .jm-workflow-editor-node-panel {
+  margin-top: 20px;
   // 折叠动画
   transition: width 0.3s;
   width: @node-panel-width;
-  border-right: 1px solid #8e9ded;
+  border: 1px solid #E6EBF2;
+  box-sizing: border-box;
   background: #FFFFFF;
   position: relative;
+  z-index: 1;
 
   .collapse {
     display: none;
     position: absolute;
     z-index: 1;
-    top: calc((100% - 50px) / 2);
+    top: -1px;
     right: -50px;
 
     width: 50px;

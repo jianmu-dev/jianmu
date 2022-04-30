@@ -21,7 +21,8 @@ export default class WorkflowGraph {
     // #region 初始化画布
     this.graph = new Graph({
       container,
-      grid: true,
+      // 不绘制网格背景
+      grid: false,
       history: true,
       mousewheel: {
         enabled: true,

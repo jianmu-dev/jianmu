@@ -73,10 +73,9 @@ export default defineComponent({
 .jm-workflow-editor {
   width: 100%;
   height: 100%;
-  border: 10px solid #dfe3e8;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  background-color: #F0F2F5;
 
   .main {
     display: flex;

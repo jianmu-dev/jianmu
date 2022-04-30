@@ -20,5 +20,6 @@ export default defineComponent({
 .jm-workflow-editor-toolbar {
   height: @tool-bar-height;
   background: #3f536e;
+  z-index: 1;
 }
 </style>

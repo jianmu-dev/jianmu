@@ -64,15 +64,9 @@ export default defineComponent({
   // 铺满剩余宽度
   flex-grow: 1;
   position: relative;
-  overflow: hidden;
 
   .container {
     position: absolute;
-  }
-
-  ::v-deep(.x6-graph-background) {
-    // 遮挡折叠后的节点列表
-    background-color: #FFFFFF;
   }
 }
 </style>
