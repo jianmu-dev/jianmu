@@ -82,10 +82,9 @@ export default defineComponent({
 .jm-workflow-editor-node-panel {
   margin-top: 20px;
   // 折叠动画
-  transition: width 0.3s;
+  transition: width 0.3s ease-in-out;
   width: @node-panel-width;
   border: 1px solid #E6EBF2;
-  box-sizing: border-box;
   background: #FFFFFF;
   position: relative;
   z-index: 1;
