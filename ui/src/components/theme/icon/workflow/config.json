@@ -64,7 +64,7 @@
     },
     {
       "uid": "3b01faf48e7fca3d5fb72f88d34ca7e5",
-      "css": "zoom-full",
+      "css": "zoom-original",
       "code": 59394,
       "src": "custom_icons",
       "selected": true,
@@ -73,12 +73,12 @@
         "width": 1000
       },
       "search": [
-        "zoom-full"
+        "zoom-original"
       ]
     },
     {
       "uid": "cd58f7ce9da8a0ee4f1affea4cad1eee",
-      "css": "zoom-normal",
+      "css": "zoom-fit",
       "code": 59395,
       "src": "custom_icons",
       "selected": true,
@@ -87,7 +87,7 @@
         "width": 958
       },
       "search": [
-        "zoom-normal"
+        "zoom-fit"
       ]
     }
   ]
