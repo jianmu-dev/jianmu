@@ -6,7 +6,7 @@
         <div class="group">
           <x6-vue-shape
             v-for="item in nodes"
-            :key="item.nodeRef"
+            :key="item.ref"
             :node-data="item"
             @mousedown="(e) => drag(item, e)"/>
         </div>

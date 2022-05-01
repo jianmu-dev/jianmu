@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-webhook-panel">
     <div>This is webhook panel</div>
-    <div>{{ modelValue.nodeRef }}</div>
+    <div>{{ modelValue.ref }}</div>
   </div>
 </template>
 

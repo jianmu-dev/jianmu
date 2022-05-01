@@ -49,16 +49,16 @@ export class WorkflowValidator {
   }
 
   private checkTrigger(droppingNode: Node): boolean {
-    const { nodeType } = droppingNode.getData<INodeData>();
+    const { type } = droppingNode.getData<INodeData>();
 
-    if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(nodeType)) {
+    if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(type)) {
       // 非trigger时，忽略
       return true;
     }
 
     // 表示当前拖放的节点为trigger
     const currentTrigger = this.graph.getNodes().find(node =>
-      [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(node.getData<INodeData>().nodeType));
+      [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(node.getData<INodeData>().type));
 
     if (currentTrigger) {
       // TODO 需加提示

@@ -1,7 +1,7 @@
 <template>
   <div :class="{ 'jm-workflow-x6-vue-shape': true, clickable }">
-    <div class="image"><img :src="imgUrl"/></div>
-    <div class="text">{{ txt }}</div>
+    <div class="icon"><img :src="iconUrl"/></div>
+    <div class="name">{{ nameVal }}</div>
   </div>
 </template>
 
@@ -19,27 +19,27 @@ export default defineComponent({
     nodeData: Object as PropType<INodeData>,
   },
   setup(props) {
-    const imgUrl = ref<string>('');
-    const txt = ref<string>('');
+    const iconUrl = ref<string>('');
+    const nameVal = ref<string>('');
 
     onMounted(() => {
       // const getGraph = inject('getGraph') as () => Graph;
-      const { nodeType, image, text } = props.nodeData || inject('getNode')().getData() as INodeData;
-      switch (nodeType) {
+      const { type, icon, name } = props.nodeData || inject('getNode')().getData() as INodeData;
+      switch (type) {
         case NodeTypeEnum.CRON:
-          imgUrl.value = cronImg;
+          iconUrl.value = cronImg;
           break;
         case NodeTypeEnum.WEBHOOK:
-          imgUrl.value = webhookImg;
+          iconUrl.value = webhookImg;
           break;
         case NodeTypeEnum.SHELL:
-          imgUrl.value = shellImg;
+          iconUrl.value = shellImg;
           break;
         case NodeTypeEnum.ASYNC_TASK:
-          imgUrl.value = image || asyncTaskImg;
+          iconUrl.value = icon || asyncTaskImg;
           break;
       }
-      txt.value = text;
+      nameVal.value = name;
       // // 监听数据改变事件
       // node.on('change:data', ({ current }) => {
       //   console.log('----,', current);
@@ -48,8 +48,8 @@ export default defineComponent({
 
     return {
       clickable: !props.nodeData,
-      imgUrl,
-      txt,
+      iconUrl,
+      nameVal,
     };
   },
 });
@@ -67,7 +67,7 @@ export default defineComponent({
     cursor: move;
   }
 
-  .image {
+  .icon {
     width: 80px;
     height: 80px;
 
@@ -79,7 +79,7 @@ export default defineComponent({
     }
   }
 
-  .text {
+  .name {
     max-height: 40px;
     line-height: 20px;
     // 超过两行直接截断

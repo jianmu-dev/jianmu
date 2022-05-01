@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-async-task-panel">
     <div>This is async task panel</div>
-    <div>{{ modelValue.nodeRef }}</div>
+    <div>{{ modelValue.ref }}</div>
   </div>
 </template>
 
