@@ -5,9 +5,13 @@ export default class WorkflowGraph {
   private readonly graph: Graph;
 
   constructor(container: HTMLElement) {
+    const containerParentEl = container.parentElement!;
+
     // #region 初始化画布
     this.graph = new Graph({
       container,
+      width: containerParentEl.clientWidth,
+      height: containerParentEl.clientHeight,
       // 不绘制网格背景
       grid: false,
       history: true,
@@ -103,7 +107,7 @@ export default class WorkflowGraph {
     this.bindEvent(container);
 
     // 注册容器大小变化监听器
-    this.registerContainerResizeListener(container);
+    this.registerContainerResizeListener(containerParentEl);
   }
 
   /**
@@ -121,11 +125,11 @@ export default class WorkflowGraph {
    * 注册容器大小变化监听器
    * @private
    */
-  private registerContainerResizeListener(container: HTMLElement) {
+  private registerContainerResizeListener(containerParentEl: HTMLElement) {
     new ResizeObserver(() => {
-      const { clientWidth, clientHeight } = container;
+      const { clientWidth, clientHeight } = containerParentEl;
       this.graph.resizeGraph(clientWidth, clientHeight);
-    }).observe(container);
+    }).observe(containerParentEl);
   }
 
   /**

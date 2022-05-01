@@ -78,7 +78,7 @@ export default defineComponent({
   background-color: #F0F2F5;
 
   .main {
-    display: flex;
+    position: relative;
     height: calc(100% - @tool-bar-height);
   }
 }
