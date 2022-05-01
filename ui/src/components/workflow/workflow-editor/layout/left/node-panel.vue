@@ -43,7 +43,7 @@ export default defineComponent({
       // 初始化dnd
       workflowDnd = new WorkflowDnd(
         getGraph(),
-        container.value!.nextElementSibling! as HTMLElement,
+        container.value! as HTMLElement,
         (data: INodeData) => {
           emit('node-selected', data);
         });
@@ -80,15 +80,18 @@ export default defineComponent({
 
 <style scoped lang="less">
 @import '../../vars';
+@node-panel-top: 20px;
 
 .jm-workflow-editor-node-panel {
-  margin-top: 20px;
   // 折叠动画
   transition: width 0.3s ease-in-out;
   width: @node-panel-width;
+  height: calc(100% - @node-panel-top);
   border: 1px solid #E6EBF2;
   background: #FFFFFF;
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: @node-panel-top;
   z-index: 1;
 
   .collapse {

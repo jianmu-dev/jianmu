@@ -17,15 +17,15 @@ interface IDraggingListener {
 export default class WorkflowDnd {
   private readonly graph: Graph;
   private readonly dnd: Addon.Dnd;
-  private readonly graphContainer: HTMLElement;
+  private readonly nodeContainer: HTMLElement;
   private readonly draggingListener: IDraggingListener = {
     mousePosX: -1,
     mousePosY: -1,
   }
 
-  constructor(graph: Graph, graphContainer: HTMLElement, alertCallback: (data: INodeData) => void) {
+  constructor(graph: Graph, nodeContainer: HTMLElement, alertCallback: (data: INodeData) => void) {
     this.graph = graph;
-    this.graphContainer = graphContainer;
+    this.nodeContainer = nodeContainer;
     this.dnd = new Addon.Dnd({
       target: graph,
       animation: true,
@@ -76,7 +76,7 @@ export default class WorkflowDnd {
       },
       validateNode: (droppingNode: Node) => {
         const { mousePosX, mousePosY } = this.draggingListener;
-        const { x, y, width, height } = this.graphContainer.getBoundingClientRect();
+        const { x, y, width, height } = this.nodeContainer.getBoundingClientRect();
         const maxX = x + width;
         const maxY = y + height;
 
@@ -99,11 +99,11 @@ export default class WorkflowDnd {
 
         if (mousePosX >= x && mousePosX <= maxX &&
           mousePosY >= y && mousePosY <= maxY) {
-          // 在画布面板中拖放时，才能成功
-          return true;
+          // 在节点面板中拖放时，失败
+          return false;
         }
 
-        return false;
+        return true;
       },
     });
   }
