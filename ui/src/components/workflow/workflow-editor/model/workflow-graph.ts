@@ -161,20 +161,6 @@ export default class WorkflowGraph {
       return false;
     });
 
-    // undo redo
-    this.graph.bindKey(['meta+z', 'ctrl+z'], () => {
-      if (this.graph.history.canUndo()) {
-        this.graph.history.undo();
-      }
-      return false;
-    });
-    this.graph.bindKey(['meta+shift+z', 'ctrl+shift+z'], () => {
-      if (this.graph.history.canRedo()) {
-        this.graph.history.redo();
-      }
-      return false;
-    });
-
     // select all
     this.graph.bindKey(['meta+a', 'ctrl+a'], () => {
       const nodes = this.graph.getNodes();
@@ -188,20 +174,6 @@ export default class WorkflowGraph {
       const cells = this.graph.getSelectedCells();
       if (cells.length) {
         this.graph.removeCells(cells);
-      }
-    });
-
-    // zoom
-    this.graph.bindKey(['ctrl+1', 'meta+1'], () => {
-      const zoom = this.graph.zoom();
-      if (zoom < 1.5) {
-        this.graph.zoom(0.1);
-      }
-    });
-    this.graph.bindKey(['ctrl+2', 'meta+2'], () => {
-      const zoom = this.graph.zoom();
-      if (zoom > 0.5) {
-        this.graph.zoom(-0.1);
       }
     });
   }
