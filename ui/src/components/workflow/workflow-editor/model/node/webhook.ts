@@ -48,6 +48,8 @@ export class Webhook implements INodeData {
     if (!this.name) {
       throw new Error('名称不能为空');
     }
+
+    // TODO 待完善校验规则
   }
 }
 
