@@ -40,12 +40,12 @@ export default class WorkflowNode {
   private loadOfficialNodes(keyword?: string): INodeData[] {
     // TODO 加载hub官方节点
     const arr: INodeData[] = [
-      new AsyncTask('克隆建木CI代码', 'git_clone', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3'),
-      new AsyncTask('NodeJs构建前端项目', 'node_build', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu'),
-      new AsyncTask('docker镜像构建', 'docker_build', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv'),
-      new AsyncTask('发布npm依赖包', 'npm_publish', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT'),
-      new AsyncTask('组织治理', 'org_gov', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl'),
-      new AsyncTask('测试节点', 'test', ''),
+      new AsyncTask('git_clone', '克隆建木CI代码', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3'),
+      new AsyncTask('node_build', 'NodeJs构建前端项目', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu'),
+      new AsyncTask('docker_build', 'docker镜像构建', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv'),
+      new AsyncTask('npm_publish', '发布npm依赖包', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT'),
+      new AsyncTask('org_gov', '组织治理', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl'),
+      new AsyncTask('test', '测试节点', ''),
     ];
 
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;

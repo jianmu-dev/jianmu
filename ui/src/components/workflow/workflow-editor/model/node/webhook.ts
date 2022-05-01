@@ -1,26 +1,39 @@
-import { INodeData } from '../data';
-import { NodeTypeEnum } from '../enumeration';
+import { INodeData, ISecretKey } from '../data';
+import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../svgs/shape/webhook.svg';
 
-export class Webhook implements INodeData {
+export interface IWebhookParam {
   name: string;
-  readonly ref: string;
+  type: ParamTypeEnum;
+  exp: string;
+}
 
-  constructor(name: string = 'webhook') {
+export interface IWebhookAuth {
+  token: string;
+  value: ISecretKey;
+}
+
+export class Webhook implements INodeData {
+  readonly ref: string = 'webhook';
+  name: string;
+  readonly params: IWebhookParam[];
+  auth: IWebhookAuth | undefined;
+  only: string;
+
+  constructor(name: string = 'webhook', params: IWebhookParam[] = [],
+    auth: IWebhookAuth | undefined = undefined, only: string = '') {
     this.name = name;
-    this.ref = 'webhook';
+    this.params = params;
+    this.auth = auth;
+    this.only = only;
   }
 
-  static build({ name }: any): Webhook {
-    return new Webhook(name);
+  static build({ name, params, auth, only }: any): Webhook {
+    return new Webhook(name, params, auth, only);
   }
 
   getName(): string {
     return this.name;
-  }
-
-  getRef(): string {
-    return this.ref;
   }
 
   getType(): NodeTypeEnum {

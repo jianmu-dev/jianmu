@@ -2,25 +2,31 @@ import { INodeData } from '../data';
 import { NodeTypeEnum } from '../enumeration';
 import icon from '../../svgs/shape/shell.svg';
 
-export class Shell implements INodeData {
+export interface IShellEnv {
   name: string;
-  readonly ref: string;
+  value: string;
+}
 
-  constructor(name: string = 'shell') {
+export class Shell implements INodeData {
+  readonly ref: string = 'shell';
+  name: string;
+  image: string;
+  readonly envs: IShellEnv[];
+  readonly scripts: string[];
+
+  constructor(name: string = 'shell', image: string = '', envs: IShellEnv[] = [], scripts: string[] = []) {
     this.name = name;
-    this.ref = 'shell';
+    this.image = image;
+    this.envs = envs;
+    this.scripts = scripts;
   }
 
-  static build({ name }: any): Shell {
-    return new Shell(name);
+  static build({ name, image, envs, scripts }: any): Shell {
+    return new Shell(name, image, envs, scripts);
   }
 
   getName(): string {
     return this.name;
-  }
-
-  getRef(): string {
-    return this.ref;
   }
 
   getType(): NodeTypeEnum {

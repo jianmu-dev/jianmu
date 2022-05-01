@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-cron-panel">
     <div>This is cron panel</div>
-    <div>{{ modelValue.getRef() }}</div>
+    <div>{{ modelValue.getName() }}</div>
   </div>
 </template>
 

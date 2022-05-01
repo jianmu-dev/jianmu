@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-shell-panel">
     <div>This is shell panel</div>
-    <div>{{ modelValue.getRef() }}</div>
+    <div>{{ modelValue.getName() }}</div>
   </div>
 </template>
 

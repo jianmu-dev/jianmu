@@ -1,28 +1,45 @@
 import { INodeData } from '../data';
-import { NodeTypeEnum } from '../enumeration';
+import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../svgs/shape/async-task.svg';
 
-export class AsyncTask implements INodeData {
-  name: string;
-  readonly ref: string;
-  readonly icon?: string;
+export type ParamValueType = string | number | boolean;
 
-  constructor(name: string, ref: string, icon: string | undefined) {
-    this.name = name;
+export interface IAsyncTaskParam {
+  ref: string;
+  name: string;
+  type: ParamTypeEnum;
+  required: boolean;
+  value: ParamValueType;
+  description?: string;
+}
+
+export class AsyncTask implements INodeData {
+  readonly ref: string;
+  name: string;
+  readonly icon: string;
+  version: string;
+  readonly inputs: IAsyncTaskParam[];
+  readonly outputs: IAsyncTaskParam[];
+  failureMode: FailureModeEnum;
+
+  constructor(ref: string, name: string, icon: string = '', version: string = '',
+    inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
+    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND) {
     this.ref = ref;
+    this.name = name;
     this.icon = icon;
+    this.version = version;
+    this.inputs = inputs;
+    this.outputs = outputs;
+    this.failureMode = failureMode;
   }
 
-  static build({ name, ref, icon }: any): AsyncTask {
-    return new AsyncTask(name, ref, icon);
+  static build({ ref, name, icon, version, inputs, outputs, failureMode }: any): AsyncTask {
+    return new AsyncTask(ref, name, icon, version, inputs, outputs, failureMode);
   }
 
   getName(): string {
     return this.name;
-  }
-
-  getRef(): string {
-    return this.ref;
   }
 
   getType(): NodeTypeEnum {

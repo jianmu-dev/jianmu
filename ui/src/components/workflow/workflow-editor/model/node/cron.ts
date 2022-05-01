@@ -3,13 +3,12 @@ import { NodeTypeEnum } from '../enumeration';
 import icon from '../../svgs/shape/cron.svg';
 
 export class Cron implements INodeData {
+  readonly ref: string = 'cron';
   name: string;
-  readonly ref: string;
   schedule: string;
 
   constructor(name: string = 'cron', schedule: string = '') {
     this.name = name;
-    this.ref = 'cron';
     this.schedule = schedule;
   }
 
@@ -19,10 +18,6 @@ export class Cron implements INodeData {
 
   getName(): string {
     return this.name;
-  }
-
-  getRef(): string {
-    return this.ref;
   }
 
   getType(): NodeTypeEnum {
