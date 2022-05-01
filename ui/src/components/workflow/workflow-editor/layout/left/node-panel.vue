@@ -1,8 +1,6 @@
 <template>
-  <div class="jm-workflow-editor-node-panel" ref="container">
-    <div class="collapse" @click="collapse">
-      <div :class="{ icon: true, collapsed }"></div>
-    </div>
+  <div :class="{ 'jm-workflow-editor-node-panel': true, collapsed }" ref="container">
+    <div class="collapse-btn " @click="collapse"/>
     <jm-scrollbar>
       <div class="groups">
         <div class="group">
@@ -32,14 +30,11 @@ export default defineComponent({
     const workflowNode = new WorkflowNode();
     const collapsed = ref<boolean>(false);
     const container = ref<HTMLElement>();
-    const containerWidth = ref<number>(0);
     const getGraph = inject('getGraph') as () => Graph;
     let workflowDnd: WorkflowDnd;
 
     // 确定容器宽度
     onMounted(() => {
-      containerWidth.value = container.value!.offsetWidth;
-
       // 初始化dnd
       workflowDnd = new WorkflowDnd(
         getGraph(),
@@ -61,17 +56,7 @@ export default defineComponent({
         workflowDnd.drag(data, event);
       },
       collapse: () => {
-        const panel = container.value!;
-        const collapse = panel.querySelector('.collapse') as HTMLElement;
-        if (panel.clientWidth > 0) {
-          panel.style.width = '0px';
-          collapse.style.display = 'block';
-          collapsed.value = true;
-          return;
-        }
-        panel.style.width = `${containerWidth.value}px`;
-        collapse.style.display = '';
-        collapsed.value = false;
+        collapsed.value = container.value!.clientWidth > 0;
       },
     };
   },
@@ -81,6 +66,7 @@ export default defineComponent({
 <style scoped lang="less">
 @import '../../vars';
 @node-panel-top: 20px;
+@collapse-btn-width: 40px;
 
 .jm-workflow-editor-node-panel {
   // 折叠动画
@@ -94,34 +80,36 @@ export default defineComponent({
   top: @node-panel-top;
   z-index: 1;
 
-  .collapse {
+  &.collapsed {
+    width: 0;
+
+    .collapse-btn {
+      display: block;
+      // 反转
+      transform: scaleX(-1);
+      border-radius: 10px 0 0 10px;
+    }
+  }
+
+  .collapse-btn {
     display: none;
     position: absolute;
     top: -1px;
-    right: -41px;
+    right: calc(-1px - @collapse-btn-width);
 
-    width: 40px;
+    width: @collapse-btn-width;
     height: 40px;
     background-color: #082340;
     border-radius: 0 10px 10px 0;
     cursor: pointer;
 
-    .icon {
-      width: 100%;
-      height: 100%;
-      background-image: url('../../svgs/collapse.svg');
-      // 反转动画
-      transition: transform 0.5s ease-in-out;
-
-      &.collapsed {
-        // 反转
-        transform: scaleX(-1);
-      }
-    }
+    background-image: url('../../svgs/collapse.svg');
+    // 反转动画
+    transition: transform 0.5s ease-in-out;
   }
 
   &:hover {
-    .collapse {
+    .collapse-btn {
       display: block;
     }
   }
