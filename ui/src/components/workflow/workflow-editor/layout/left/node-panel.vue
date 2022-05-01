@@ -40,11 +40,13 @@ export default defineComponent({
     onMounted(() => {
       containerWidth.value = container.value!.offsetWidth;
 
-      const graphPanelEl = container.value!.nextElementSibling! as HTMLElement;
       // 初始化dnd
-      workflowDnd = new WorkflowDnd(getGraph(), graphPanelEl, (data: INodeData) => {
-        emit('node-selected', data);
-      });
+      workflowDnd = new WorkflowDnd(
+        getGraph(),
+        container.value!.nextElementSibling! as HTMLElement,
+        (data: INodeData) => {
+          emit('node-selected', data);
+        });
     });
 
     return {

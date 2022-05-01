@@ -17,15 +17,15 @@ interface IDraggingListener {
 export default class WorkflowDnd {
   private readonly graph: Graph;
   private readonly dnd: Addon.Dnd;
-  private readonly graphPanelEl: HTMLElement;
+  private readonly graphContainer: HTMLElement;
   private readonly draggingListener: IDraggingListener = {
     mousePosX: -1,
     mousePosY: -1,
   }
 
-  constructor(graph: Graph, graphPanelEl: HTMLElement, alertCallback: (data: INodeData) => void) {
+  constructor(graph: Graph, graphContainer: HTMLElement, alertCallback: (data: INodeData) => void) {
     this.graph = graph;
-    this.graphPanelEl = graphPanelEl;
+    this.graphContainer = graphContainer;
     this.dnd = new Addon.Dnd({
       target: graph,
       animation: true,
@@ -76,7 +76,7 @@ export default class WorkflowDnd {
       },
       validateNode: (droppingNode: Node) => {
         const { mousePosX, mousePosY } = this.draggingListener;
-        const { x, y, width, height } = this.graphPanelEl.getBoundingClientRect();
+        const { x, y, width, height } = this.graphContainer.getBoundingClientRect();
         const maxX = x + width;
         const maxY = y + height;
 
