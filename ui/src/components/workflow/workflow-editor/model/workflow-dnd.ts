@@ -3,7 +3,7 @@ import { Addon, Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 import listen from 'good-listener';
 import { INodeData } from '../model/data';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
-import alertImg from '../svgs/alert.svg';
+import nodeWarningImg from '../svgs/node-warning.svg';
 import { WorkflowValidator } from './workflow-validator';
 
 const { width, height } = SHAPE_SIZE;
@@ -23,7 +23,7 @@ export default class WorkflowDnd {
   constructor(graph: Graph,
     workflowValidator: WorkflowValidator,
     nodeContainer: HTMLElement,
-    alertCallback: (data: INodeData) => void) {
+    clickNodeWarningCallback: (data: INodeData) => void) {
     this.graph = graph;
     this.dnd = new Addon.Dnd({
       target: graph,
@@ -57,7 +57,7 @@ export default class WorkflowDnd {
                 attrs: {
                   width: 24,
                   height: 24,
-                  'xlink:href': alertImg,
+                  'xlink:href': nodeWarningImg,
                   cursor: 'pointer',
                 },
               },
@@ -66,7 +66,7 @@ export default class WorkflowDnd {
             y: 0,
             offset: { x: -16, y: 0 },
             onClick: ({ cell: { data } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-              alertCallback(data);
+              clickNodeWarningCallback(data);
             },
           },
         });

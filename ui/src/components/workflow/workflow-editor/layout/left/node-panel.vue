@@ -42,9 +42,7 @@ export default defineComponent({
         getGraph(),
         getWorkflowValidator(),
         container.value! as HTMLElement,
-        (data: INodeData) => {
-          emit('node-selected', data);
-        });
+        (data: INodeData) => emit('node-selected', data));
     });
 
     return {

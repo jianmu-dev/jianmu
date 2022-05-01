@@ -1,11 +1,14 @@
 import { Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
+import { INodeData } from './data';
 
 export default class WorkflowGraph {
   private readonly graph: Graph;
+  private readonly clickNodeCallback: (data: INodeData) => void;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, clickNodeCallback: (data: INodeData) => void) {
     const containerParentEl = container.parentElement!;
+    this.clickNodeCallback = clickNodeCallback;
 
     // #region 初始化画布
     this.graph = new Graph({
@@ -190,6 +193,10 @@ export default class WorkflowGraph {
         ports[i].style.visibility = show ? 'visible' : 'hidden';
       }
     };
+
+    this.graph.on('node:click', ({ node: { data } }) => {
+      this.clickNodeCallback(data);
+    });
 
     this.graph.on('node:mouseenter', ({ node }) => {
       const ports = container.querySelectorAll(

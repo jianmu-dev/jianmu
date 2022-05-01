@@ -4,11 +4,8 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, PropType, ref } from 'vue';
-import { KeyValue } from '@antv/x6/es/types';
-import { HistoryManager } from '@antv/x6/es/graph/history';
 import WorkflowGraph from '../../model/workflow-graph';
-import { IWorkflowData } from '../../model/data';
-import Command = HistoryManager.Command;
+import { INodeData, IWorkflowData } from '../../model/data';
 
 export default defineComponent({
   props: {
@@ -21,24 +18,10 @@ export default defineComponent({
 
     onMounted(() => {
       // 初始化画布
-      workflowGraph = new WorkflowGraph(container.value!);
-      const graph = workflowGraph.x6Graph;
+      workflowGraph = new WorkflowGraph(container.value!,
+        (data: INodeData) => emit('node-selected', data));
 
-      // 单击节点事件
-      graph.on('node:click', ({ e, x, y, node, view }) => {
-        emit('node-selected', node.getData());
-      });
-
-      // 画布变化事件
-      graph.history.on('change', (args: {
-        cmds: Command[] | null
-        options: KeyValue
-      }) => {
-        // code here
-        emit('update:model-value', graph.toJSON());
-      });
-
-      emit('graph-created', graph);
+      emit('graph-created', workflowGraph.x6Graph);
     });
 
     return {
