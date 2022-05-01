@@ -6,9 +6,13 @@ export class Webhook implements INodeData {
   name: string;
   readonly ref: string;
 
-  constructor() {
-    this.name = 'webhook';
+  constructor(name: string = 'webhook') {
+    this.name = name;
     this.ref = 'webhook';
+  }
+
+  static build({ name }: any): Webhook {
+    return new Webhook(name);
   }
 
   getName(): string {

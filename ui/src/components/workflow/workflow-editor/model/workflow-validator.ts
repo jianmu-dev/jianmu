@@ -1,6 +1,6 @@
 import { Graph, Node, Point } from '@antv/x6';
-import { INodeData } from './data';
 import { NodeTypeEnum } from './enumeration';
+import { CustomX6NodeProxy } from './custom-x6-node-proxy';
 
 export class WorkflowValidator {
   private readonly graph: Graph;
@@ -37,7 +37,8 @@ export class WorkflowValidator {
   }
 
   private checkTrigger(droppingNode: Node): boolean {
-    const data = droppingNode.getData<INodeData>();
+    const proxy = new CustomX6NodeProxy(droppingNode);
+    const data = proxy.getData();
 
     if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(data.getType())) {
       // 非trigger时，忽略
@@ -45,8 +46,10 @@ export class WorkflowValidator {
     }
 
     // 表示当前拖放的节点为trigger
-    const currentTrigger = this.graph.getNodes().find(node =>
-      [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(node.getData<INodeData>().getType()));
+    const currentTrigger = this.graph.getNodes().find(node => {
+      const proxy = new CustomX6NodeProxy(node);
+      return [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(proxy.getData().getType());
+    });
 
     if (currentTrigger) {
       // TODO 需加提示

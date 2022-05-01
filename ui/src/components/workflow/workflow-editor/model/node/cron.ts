@@ -7,10 +7,14 @@ export class Cron implements INodeData {
   readonly ref: string;
   schedule: string;
 
-  constructor() {
-    this.name = 'cron';
+  constructor(name: string = 'cron', schedule: string = '') {
+    this.name = name;
     this.ref = 'cron';
-    this.schedule = '';
+    this.schedule = schedule;
+  }
+
+  static build({ name, schedule }: any): Cron {
+    return new Cron(name, schedule);
   }
 
   getName(): string {

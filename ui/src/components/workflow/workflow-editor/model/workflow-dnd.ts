@@ -5,6 +5,7 @@ import { INodeData } from '../model/data';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
 import nodeWarningImg from '../svgs/node-warning.svg';
 import { WorkflowValidator } from './workflow-validator';
+import { CustomX6NodeProxy } from './custom-x6-node-proxy';
 
 const { width, height } = SHAPE_SIZE;
 
@@ -46,9 +47,11 @@ export default class WorkflowDnd {
           const { x, y } = targetNode.getPosition();
           targetNode.setPosition(x, y - SHAPE_TEXT_MAX_HEIGHT / 2);
         });
-        
+
+        const proxy = new CustomX6NodeProxy(targetNode);
+
         try {
-          targetNode.getData<INodeData>().validate();
+          proxy.getData().validate();
         } catch (err) {
           console.warn(err);
 
@@ -70,8 +73,9 @@ export default class WorkflowDnd {
               x: '100%',
               y: 0,
               offset: { x: -16, y: 0 },
-              onClick: ({ cell: { data } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-                clickNodeWarningCallback(data);
+              onClick: ({ cell }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
+                const proxy = new CustomX6NodeProxy(cell as Node);
+                clickNodeWarningCallback(proxy.getData());
               },
             },
           });
@@ -100,10 +104,7 @@ export default class WorkflowDnd {
       width,
       height,
       component: 'custom-vue-shape',
-      // TODO Can only serialize node with plain-object props, but got a "[object Object]"
-      data: {
-        ...data,
-      },
+      data: CustomX6NodeProxy.plainObject(data),
       ports: { ...PORTS },
     });
 

@@ -1,6 +1,7 @@
 import { Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { INodeData } from './data';
+import { CustomX6NodeProxy } from './custom-x6-node-proxy';
 
 export default class WorkflowGraph {
   private readonly graph: Graph;
@@ -194,8 +195,9 @@ export default class WorkflowGraph {
       }
     };
 
-    this.graph.on('node:click', ({ node: { data } }) => {
-      this.clickNodeCallback(data);
+    this.graph.on('node:click', ({ node }) => {
+      const proxy = new CustomX6NodeProxy(node);
+      this.clickNodeCallback(proxy.getData());
     });
 
     this.graph.on('node:mouseenter', ({ node }) => {

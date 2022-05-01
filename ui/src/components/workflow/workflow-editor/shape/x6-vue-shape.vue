@@ -8,6 +8,7 @@
 <script lang="ts">
 import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { INodeData } from '../model/data';
+import { CustomX6NodeProxy } from '../model/custom-x6-node-proxy';
 
 export default defineComponent({
   props: {
@@ -19,7 +20,8 @@ export default defineComponent({
 
     onMounted(() => {
       // const getGraph = inject('getGraph') as () => Graph;
-      const data = props.nodeData || inject('getNode')().getData() as INodeData;
+      const data = props.nodeData ||
+        new CustomX6NodeProxy(inject('getNode')()).getData();
       iconUrl.value = data.getIcon();
       nameVal.value = data.getName();
       // // 监听数据改变事件

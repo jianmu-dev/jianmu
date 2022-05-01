@@ -13,6 +13,10 @@ export class AsyncTask implements INodeData {
     this.icon = icon;
   }
 
+  static build({ name, ref, icon }: any): AsyncTask {
+    return new AsyncTask(name, ref, icon);
+  }
+
   getName(): string {
     return this.name;
   }

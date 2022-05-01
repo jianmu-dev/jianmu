@@ -6,9 +6,13 @@ export class Shell implements INodeData {
   name: string;
   readonly ref: string;
 
-  constructor() {
-    this.name = 'shell';
+  constructor(name: string = 'shell') {
+    this.name = name;
     this.ref = 'shell';
+  }
+
+  static build({ name }: any): Shell {
+    return new Shell(name);
   }
 
   getName(): string {
