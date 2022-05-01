@@ -42,8 +42,9 @@ export class WorkflowTool {
           return;
         }
         break;
-      // case ZoomTypeEnum.ORIGINAL:
-      default:
+      case ZoomTypeEnum.ORIGINAL:
+        // 将画布内容中心与视口中心对齐
+        this.graph.centerContent();
         factor = 1;
         break;
     }
