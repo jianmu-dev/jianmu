@@ -9,6 +9,18 @@ export class WorkflowValidator {
     this.graph = graph;
   }
 
+  checkNode(node: Node): boolean {
+    const { inputs } = node.getData<INodeData>();
+
+    if (inputs.length === 0) {
+      // 无参数时，忽略
+      return true;
+    }
+
+    // TODO 检查必填项
+    return false;
+  }
+
   checkDroppingNode(node: Node, mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
     if (!this.checkDroppingPosition(mousePosition, nodePanelRect)) {
       return false;

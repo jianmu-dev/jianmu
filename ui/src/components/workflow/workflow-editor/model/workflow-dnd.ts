@@ -47,29 +47,31 @@ export default class WorkflowDnd {
           targetNode.setPosition(x, y - SHAPE_TEXT_MAX_HEIGHT / 2);
         });
 
-        // TODO 未填写必填参数时显示警告
-        targetNode.addTools({
-          name: 'button',
-          args: {
-            markup: [
-              {
-                tagName: 'image',
-                attrs: {
-                  width: 24,
-                  height: 24,
-                  'xlink:href': nodeWarningImg,
-                  cursor: 'pointer',
+        if (!workflowValidator.checkNode(targetNode)) {
+          // 检查节点有误时，加警告
+          targetNode.addTools({
+            name: 'button',
+            args: {
+              markup: [
+                {
+                  tagName: 'image',
+                  attrs: {
+                    width: 24,
+                    height: 24,
+                    'xlink:href': nodeWarningImg,
+                    cursor: 'pointer',
+                  },
                 },
+              ],
+              x: '100%',
+              y: 0,
+              offset: { x: -16, y: 0 },
+              onClick: ({ cell: { data } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
+                clickNodeWarningCallback(data);
               },
-            ],
-            x: '100%',
-            y: 0,
-            offset: { x: -16, y: 0 },
-            onClick: ({ cell: { data } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-              clickNodeWarningCallback(data);
             },
-          },
-        });
+          });
+        }
 
         return targetNode;
       },
