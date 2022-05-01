@@ -1,7 +1,5 @@
 <template>
-  <div class="jm-workflow-editor-graph-panel" @wheel.prevent="wheelScroll">
-    <div class="container" ref="container"></div>
-  </div>
+  <div class="jm-workflow-editor-graph-panel" ref="container" @wheel.prevent="wheelScroll"/>
 </template>
 
 <script lang="ts">
@@ -63,10 +61,5 @@ export default defineComponent({
 .jm-workflow-editor-graph-panel {
   // 铺满剩余宽度
   flex-grow: 1;
-  position: relative;
-
-  .container {
-    position: absolute;
-  }
 }
 </style>

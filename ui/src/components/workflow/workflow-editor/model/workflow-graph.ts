@@ -103,7 +103,7 @@ export default class WorkflowGraph {
     this.bindEvent(container);
 
     // 注册容器大小变化监听器
-    this.registerContainerResizeListener(container.parentElement!);
+    this.registerContainerResizeListener(container);
   }
 
   /**
@@ -121,11 +121,11 @@ export default class WorkflowGraph {
    * 注册容器大小变化监听器
    * @private
    */
-  private registerContainerResizeListener(containerParent: HTMLElement) {
+  private registerContainerResizeListener(container: HTMLElement) {
     new ResizeObserver(() => {
-      const { clientWidth, clientHeight } = containerParent;
+      const { clientWidth, clientHeight } = container;
       this.graph.resizeGraph(clientWidth, clientHeight);
-    }).observe(containerParent);
+    }).observe(container);
   }
 
   /**

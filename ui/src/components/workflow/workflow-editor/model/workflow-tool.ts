@@ -30,7 +30,7 @@ export class WorkflowTool {
         factor = factor < MIN_ZOOM ? MIN_ZOOM : factor;
         break;
       case ZoomTypeEnum.FIT:
-        // 缩放画布内容，使画布内容充满视口
+        // 缩放画布内容，使画布(graph)内容充满视口
         this.graph.zoomToFit();
 
         factor = this.graph.zoom();
