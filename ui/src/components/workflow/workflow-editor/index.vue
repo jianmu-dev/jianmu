@@ -76,6 +76,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   background-color: #F0F2F5;
+  user-select: none;
 
   .main {
     position: relative;
