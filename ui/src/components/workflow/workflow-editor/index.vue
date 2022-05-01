@@ -27,6 +27,7 @@ import GraphPanel from './layout/main/graph-panel.vue';
 import { INodeData, IWorkflowData } from './model/data';
 import { Graph } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
+import { WorkflowValidator } from './model/workflow-validator';
 
 // 注册自定义x6元素
 registerCustomVueShape();
@@ -42,8 +43,10 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeData = ref<INodeData>();
+    let workflowValidator: WorkflowValidator;
 
     provide('getGraph', (): Graph => graph.value!);
+    provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
 
     return {
       graph,
@@ -53,6 +56,7 @@ export default defineComponent({
         emit('update:model-value', newVal);
       },
       handleGraphCreated: (g: Graph) => {
+        workflowValidator = new WorkflowValidator(g);
         graph.value = g;
       },
       handleNodeSelected: (data: INodeData) => {

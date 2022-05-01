@@ -22,6 +22,7 @@ import WorkflowDnd from '../../model/workflow-dnd';
 import X6VueShape from '../../shape/x6-vue-shape.vue';
 import { INodeData } from '../../model/data';
 import WorkflowNode from '../../model/workflow-node';
+import { WorkflowValidator } from '../../model/workflow-validator';
 
 export default defineComponent({
   components: { X6VueShape },
@@ -31,6 +32,7 @@ export default defineComponent({
     const collapsed = ref<boolean>(false);
     const container = ref<HTMLElement>();
     const getGraph = inject('getGraph') as () => Graph;
+    const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     let workflowDnd: WorkflowDnd;
 
     // 确定容器宽度
@@ -38,6 +40,7 @@ export default defineComponent({
       // 初始化dnd
       workflowDnd = new WorkflowDnd(
         getGraph(),
+        getWorkflowValidator(),
         container.value! as HTMLElement,
         (data: INodeData) => {
           emit('node-selected', data);

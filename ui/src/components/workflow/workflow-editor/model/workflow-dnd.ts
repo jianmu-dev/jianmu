@@ -1,31 +1,30 @@
-import { Addon, Cell, CellView, Graph, JQuery, Node } from '@antv/x6';
+import { Addon, Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 // @ts-ignore
 import listen from 'good-listener';
 import { INodeData } from '../model/data';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
 import alertImg from '../svgs/alert.svg';
-import { NodeTypeEnum } from '../model/enumeration';
+import { WorkflowValidator } from './workflow-validator';
 
 const { width, height } = SHAPE_SIZE;
 
 interface IDraggingListener {
-  mousePosX: number;
-  mousePosY: number;
+  mousePosition: Point.PointLike;
   listener?: any;
 }
 
 export default class WorkflowDnd {
   private readonly graph: Graph;
   private readonly dnd: Addon.Dnd;
-  private readonly nodeContainer: HTMLElement;
   private readonly draggingListener: IDraggingListener = {
-    mousePosX: -1,
-    mousePosY: -1,
+    mousePosition: { x: -1, y: -1 },
   }
 
-  constructor(graph: Graph, nodeContainer: HTMLElement, alertCallback: (data: INodeData) => void) {
+  constructor(graph: Graph,
+    workflowValidator: WorkflowValidator,
+    nodeContainer: HTMLElement,
+    alertCallback: (data: INodeData) => void) {
     this.graph = graph;
-    this.nodeContainer = nodeContainer;
     this.dnd = new Addon.Dnd({
       target: graph,
       animation: true,
@@ -75,35 +74,13 @@ export default class WorkflowDnd {
         return targetNode;
       },
       validateNode: (droppingNode: Node) => {
-        const { mousePosX, mousePosY } = this.draggingListener;
-        const { x, y, width, height } = this.nodeContainer.getBoundingClientRect();
-        const maxX = x + width;
-        const maxY = y + height;
-
-        // 销毁监听器
+        const { mousePosition } = this.draggingListener;
+        // 销毁监听器，必须先获取鼠标位置后销毁
         this.destroyListener();
 
-        const { nodeType } = droppingNode.getData<INodeData>();
+        const nodePanelRect = nodeContainer.getBoundingClientRect();
 
-        if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(nodeType)) {
-          // 表示当前拖放的节点为trigger
-          const currentTrigger = this.graph.getNodes().find(node =>
-            [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(node.getData<INodeData>().nodeType));
-
-          if (currentTrigger) {
-            // TODO 需加提示
-            console.log('只能有一个触发器节点');
-            return false;
-          }
-        }
-
-        if (mousePosX >= x && mousePosX <= maxX &&
-          mousePosY >= y && mousePosY <= maxY) {
-          // 在节点面板中拖放时，失败
-          return false;
-        }
-
-        return true;
+        return workflowValidator.checkDroppingNode(droppingNode, mousePosition, nodePanelRect);
       },
     });
   }
@@ -128,8 +105,8 @@ export default class WorkflowDnd {
 
   private buildListener() {
     this.draggingListener.listener = listen(document.body, 'mousemove', (e: MouseEvent) => {
-      this.draggingListener.mousePosX = e.x;
-      this.draggingListener.mousePosY = e.y;
+      this.draggingListener.mousePosition.x = e.x;
+      this.draggingListener.mousePosition.y = e.y;
     });
   }
 
@@ -138,8 +115,7 @@ export default class WorkflowDnd {
       this.draggingListener.listener.destroy();
     }
 
-    this.draggingListener.mousePosX = -1;
-    this.draggingListener.mousePosY = -1;
+    this.draggingListener.mousePosition = { x: -1, y: -1 };
     delete this.draggingListener.listener;
   }
 }
