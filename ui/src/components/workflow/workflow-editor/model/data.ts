@@ -1,6 +1,13 @@
 import { NodeTypeEnum } from './enumeration';
 
 /**
+ * 参数数据
+ */
+export interface IParamData {
+
+}
+
+/**
  * 节点数据
  */
 export interface INodeData {
@@ -8,6 +15,9 @@ export interface INodeData {
   nodeType: NodeTypeEnum;
   image?: string,
   text: string,
+
+  inputs: IParamData[];
+  outputs: IParamData[];
 }
 
 /**

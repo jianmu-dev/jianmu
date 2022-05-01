@@ -22,11 +22,15 @@ export default class WorkflowNode {
         nodeRef: 'cron',
         nodeType: NodeTypeEnum.CRON,
         text: 'cron',
+        inputs: [],
+        outputs: [],
       },
       {
         nodeRef: 'webhook',
         nodeType: NodeTypeEnum.WEBHOOK,
         text: 'webhook',
+        inputs: [],
+        outputs: [],
       },
     ];
 
@@ -39,6 +43,8 @@ export default class WorkflowNode {
         nodeRef: 'shell',
         nodeType: NodeTypeEnum.SHELL,
         text: 'shell',
+        inputs: [],
+        outputs: [],
       },
     ];
 
@@ -59,30 +65,40 @@ export default class WorkflowNode {
         nodeType: NodeTypeEnum.ASYNC_TASK,
         image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3',
         text: '克隆建木CI代码',
+        inputs: [],
+        outputs: [],
       },
       {
         nodeRef: 'node_build',
         nodeType: NodeTypeEnum.ASYNC_TASK,
         image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu',
         text: 'NodeJs构建前端项目',
+        inputs: [],
+        outputs: [],
       },
       {
         nodeRef: 'docker_build',
         nodeType: NodeTypeEnum.ASYNC_TASK,
         image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv',
         text: 'docker镜像构建',
+        inputs: [],
+        outputs: [],
       },
       {
         nodeRef: 'npm_publish',
         nodeType: NodeTypeEnum.ASYNC_TASK,
         image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT',
         text: '发布npm依赖包',
+        inputs: [],
+        outputs: [],
       },
       {
         nodeRef: 'org_gov',
         nodeType: NodeTypeEnum.ASYNC_TASK,
         image: 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl',
         text: '组织治理',
+        inputs: [],
+        outputs: [],
       },
     ];
   }
