@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'jm-workflow-editor-node-panel': true, collapsed }" ref="container">
-    <div class="collapse-btn " @click="collapse"/>
+    <div class="collapse-btn jm-icon-workflow-back" @click="collapse"/>
     <jm-scrollbar>
       <div class="groups">
         <div class="group">
@@ -65,6 +65,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 @import '../../vars';
+
 @node-panel-top: 20px;
 @collapse-btn-width: 40px;
 
@@ -99,11 +100,14 @@ export default defineComponent({
 
     width: @collapse-btn-width;
     height: 40px;
+    line-height: 40px;
+    text-align: center;
+    color: #FFFFFF;
+    font-size: 20px;
     background-color: #082340;
     border-radius: 0 10px 10px 0;
     cursor: pointer;
 
-    background-image: url('../../svgs/collapse.svg');
     // 反转动画
     transition: transform 0.5s ease-in-out;
   }
