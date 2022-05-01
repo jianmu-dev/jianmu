@@ -1,18 +1,18 @@
 <template>
   <div class="jm-workflow-editor-async-task-panel">
     <div>This is async task panel</div>
-    <div>{{ modelValue.ref }}</div>
+    <div>{{ modelValue.getRef() }}</div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IAsyncTaskData } from '../../model/data';
+import { AsyncTask } from '../../model/node/async-task';
 
 export default defineComponent({
   props: {
     modelValue: {
-      type: Object as PropType<IAsyncTaskData>,
+      type: Object as PropType<AsyncTask>,
       required: true,
     },
   },

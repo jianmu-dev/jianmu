@@ -1,18 +1,18 @@
 <template>
   <div class="jm-workflow-editor-shell-panel">
     <div>This is shell panel</div>
-    <div>{{ modelValue.ref }}</div>
+    <div>{{ modelValue.getRef() }}</div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IShellData } from '../../model/data';
+import { Shell } from '../../model/node/shell';
 
 export default defineComponent({
   props: {
     modelValue: {
-      type: Object as PropType<IShellData>,
+      type: Object as PropType<Shell>,
       required: true,
     },
   },

@@ -21,48 +21,41 @@ export interface IParamData {
  * 节点数据
  */
 export interface INodeData {
-  name: string;
-  ref: string;
-  type: NodeTypeEnum;
-  description?: string;
-  version: string;
-  versionDescription?: string;
-  icon?: string;
-  inputs: IParamData[];
-  outputs: IParamData[];
+  // name: string;
+  // ref: string;
+  // type: NodeTypeEnum;
+  // description?: string;
+  // version: string;
+  // versionDescription?: string;
+  // icon?: string;
+  // inputs: IParamData[];
+  // outputs: IParamData[];
+
+  getName(): string;
+
+  getRef(): string;
+
+  getType(): NodeTypeEnum;
+
+  getIcon(): string;
+
+  /**
+   * 校验
+   * @throws Error
+   */
+  validate(): void;
+
+  // getDescription(): string | undefined;
+  // getVersion(): string;
+  // getVersionDescription(): string | undefined;
+
+  // getInputs(): IParamData[];
+  // getOutputs(): IParamData[];
 }
 
 /**
  * 工作流数据
  */
 export interface IWorkflowData {
-
-}
-
-/**
- * Cron节点数据
- */
-export interface ICronData extends INodeData {
-
-}
-
-/**
- * Webhook节点数据
- */
-export interface IWebhookData extends INodeData {
-
-}
-
-/**
- * Shell节点数据
- */
-export interface IShellData extends INodeData {
-
-}
-
-/**
- * 异步任务节点数据
- */
-export interface IAsyncTaskData extends INodeData {
 
 }

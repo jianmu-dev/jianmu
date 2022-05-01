@@ -1,18 +1,18 @@
 <template>
   <div class="jm-workflow-editor-cron-panel">
     <div>This is cron panel</div>
-    <div>{{ modelValue.ref }}</div>
+    <div>{{ modelValue.getRef() }}</div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { ICronData } from '../../model/data';
+import { Cron } from '../../model/node/cron';
 
 export default defineComponent({
   props: {
     modelValue: {
-      type: Object as PropType<ICronData>,
+      type: Object as PropType<Cron>,
       required: true,
     },
   },

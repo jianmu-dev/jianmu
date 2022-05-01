@@ -1,18 +1,18 @@
 <template>
   <div class="jm-workflow-editor-webhook-panel">
     <div>This is webhook panel</div>
-    <div>{{ modelValue.ref }}</div>
+    <div>{{ modelValue.getRef() }}</div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IWebhookData } from '../../model/data';
+import { Webhook } from '../../model/node/webhook';
 
 export default defineComponent({
   props: {
     modelValue: {
-      type: Object as PropType<IWebhookData>,
+      type: Object as PropType<Webhook>,
       required: true,
     },
   },

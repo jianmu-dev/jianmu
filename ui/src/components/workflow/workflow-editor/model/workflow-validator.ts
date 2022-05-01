@@ -9,18 +9,6 @@ export class WorkflowValidator {
     this.graph = graph;
   }
 
-  checkNode(node: Node): boolean {
-    const { inputs } = node.getData<INodeData>();
-
-    if (inputs.length === 0) {
-      // 无参数时，忽略
-      return true;
-    }
-
-    // TODO 检查必填项
-    return false;
-  }
-
   checkDroppingNode(node: Node, mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
     if (!this.checkDroppingPosition(mousePosition, nodePanelRect)) {
       return false;
@@ -49,16 +37,16 @@ export class WorkflowValidator {
   }
 
   private checkTrigger(droppingNode: Node): boolean {
-    const { type } = droppingNode.getData<INodeData>();
+    const data = droppingNode.getData<INodeData>();
 
-    if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(type)) {
+    if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(data.getType())) {
       // 非trigger时，忽略
       return true;
     }
 
     // 表示当前拖放的节点为trigger
     const currentTrigger = this.graph.getNodes().find(node =>
-      [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(node.getData<INodeData>().type));
+      [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(node.getData<INodeData>().getType()));
 
     if (currentTrigger) {
       // TODO 需加提示

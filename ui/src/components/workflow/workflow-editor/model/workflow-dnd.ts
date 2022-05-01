@@ -46,8 +46,12 @@ export default class WorkflowDnd {
           const { x, y } = targetNode.getPosition();
           targetNode.setPosition(x, y - SHAPE_TEXT_MAX_HEIGHT / 2);
         });
+        
+        try {
+          targetNode.getData<INodeData>().validate();
+        } catch (err) {
+          console.warn(err);
 
-        if (!workflowValidator.checkNode(targetNode)) {
           // 检查节点有误时，加警告
           targetNode.addTools({
             name: 'button',
@@ -96,6 +100,7 @@ export default class WorkflowDnd {
       width,
       height,
       component: 'custom-vue-shape',
+      // TODO Can only serialize node with plain-object props, but got a "[object Object]"
       data: {
         ...data,
       },

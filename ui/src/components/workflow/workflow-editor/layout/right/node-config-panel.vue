@@ -7,10 +7,10 @@
   >
     <div class="jm-workflow-editor-node-config-panel">
       <div class="panel-container">
-        <cron-panel v-if="panelForm.type === NodeTypeEnum.CRON" v-model="panelForm"/>
-        <webhook-panel v-else-if="panelForm.type === NodeTypeEnum.WEBHOOK" v-model="panelForm"/>
-        <shell-panel v-else-if="panelForm.type === NodeTypeEnum.SHELL" v-model="panelForm"/>
-        <async-task-panel v-else-if="panelForm.type === NodeTypeEnum.ASYNC_TASK" v-model="panelForm"/>
+        <cron-panel v-if="panelForm.getType() === NodeTypeEnum.CRON" v-model="panelForm"/>
+        <webhook-panel v-else-if="panelForm.getType() === NodeTypeEnum.WEBHOOK" v-model="panelForm"/>
+        <shell-panel v-else-if="panelForm.getType() === NodeTypeEnum.SHELL" v-model="panelForm"/>
+        <async-task-panel v-else-if="panelForm.getType() === NodeTypeEnum.ASYNC_TASK" v-model="panelForm"/>
       </div>
       <div class="footer">
         <jm-button @click="cancel">取消</jm-button>

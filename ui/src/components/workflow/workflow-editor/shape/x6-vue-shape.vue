@@ -7,11 +7,6 @@
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
-import cronImg from '../svgs/shape/cron.svg';
-import webhookImg from '../svgs/shape/webhook.svg';
-import shellImg from '../svgs/shape/shell.svg';
-import asyncTaskImg from '../svgs/shape/async-task.svg';
-import { NodeTypeEnum } from '../model/enumeration';
 import { INodeData } from '../model/data';
 
 export default defineComponent({
@@ -24,22 +19,9 @@ export default defineComponent({
 
     onMounted(() => {
       // const getGraph = inject('getGraph') as () => Graph;
-      const { type, icon, name } = props.nodeData || inject('getNode')().getData() as INodeData;
-      switch (type) {
-        case NodeTypeEnum.CRON:
-          iconUrl.value = cronImg;
-          break;
-        case NodeTypeEnum.WEBHOOK:
-          iconUrl.value = webhookImg;
-          break;
-        case NodeTypeEnum.SHELL:
-          iconUrl.value = shellImg;
-          break;
-        case NodeTypeEnum.ASYNC_TASK:
-          iconUrl.value = icon || asyncTaskImg;
-          break;
-      }
-      nameVal.value = name;
+      const data = props.nodeData || inject('getNode')().getData() as INodeData;
+      iconUrl.value = data.getIcon();
+      nameVal.value = data.getName();
       // // 监听数据改变事件
       // node.on('change:data', ({ current }) => {
       //   console.log('----,', current);
