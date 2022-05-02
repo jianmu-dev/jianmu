@@ -66,7 +66,7 @@ export class WorkflowValidator {
     });
 
     if (currentTrigger) {
-      this.proxy.$warning('只能有一个触发器节点');
+      this.proxy.$warning('只能有一个触发器');
       return false;
     }
 
