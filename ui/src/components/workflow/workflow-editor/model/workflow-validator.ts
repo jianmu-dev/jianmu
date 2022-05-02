@@ -9,6 +9,18 @@ export class WorkflowValidator {
     this.graph = graph;
   }
 
+  /**
+   * 检查所有节点
+   * @throws 尚未通过检查时，抛异常
+   */
+  async checkNodes(): Promise<void> {
+    const workflowNodes = this.graph.getNodes().map(node => new CustomX6NodeProxy(node).getData());
+
+    for (const workflowNode of workflowNodes) {
+      await workflowNode.validate();
+    }
+  }
+
   checkDroppingNode(node: Node, mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
     if (!this.checkDroppingPosition(mousePosition, nodePanelRect)) {
       return false;

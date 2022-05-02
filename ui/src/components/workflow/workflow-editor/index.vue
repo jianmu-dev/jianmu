@@ -67,13 +67,19 @@ export default defineComponent({
       handleBack: () => {
         emit('back');
       },
-      handleSave: (back: boolean) => {
-        workflowData.value.data = JSON.stringify(graph.value!.toJSON());
+      handleSave: async (back: boolean) => {
+        try {
+          await workflowValidator.checkNodes();
 
-        // 必须克隆后发事件，否则外部的数据绑定会受影响
-        emit('update:model-value', cloneDeep(workflowData.value));
+          workflowData.value.data = JSON.stringify(graph.value!.toJSON());
 
-        emit('save', back);
+          // 必须克隆后发事件，否则外部的数据绑定会受影响
+          emit('update:model-value', cloneDeep(workflowData.value));
+
+          emit('save', back);
+        } catch (err) {
+          console.warn('所有节点尚未通过检查');
+        }
       },
       handleGraphCreated: (g: Graph) => {
         workflowValidator = new WorkflowValidator(g);
