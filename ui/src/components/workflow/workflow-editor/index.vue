@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor">
     <template v-if="graph">
-      <toolbar :workflow-data="workflowData"/>
+      <toolbar :workflow-data="workflowData" @back="handleBack" @save="handleSave"/>
       <node-config-panel
         v-if="selectedNodeId"
         v-model="nodeConfigPanelVisible"
@@ -38,7 +38,7 @@ export default defineComponent({
   props: {
     modelValue: Object as PropType<IWorkflow>,
   },
-  emits: ['update:model-value'],
+  emits: ['update:model-value', 'back', 'save'],
   setup(props, { emit }) {
     const workflowData = ref<IWorkflow>(props.modelValue ? cloneDeep(props.modelValue) : {
       name: '未命名项目',
@@ -61,6 +61,15 @@ export default defineComponent({
       graph,
       nodeConfigPanelVisible,
       selectedNodeId,
+      handleBack: () => {
+        emit('back');
+      },
+      handleSave: (back: boolean) => {
+        // 必须克隆后发事件，否则外部的数据绑定会受影响
+        emit('update:model-value', cloneDeep(workflowData.value));
+
+        emit('save', back);
+      },
       handleGraphCreated: (g: Graph) => {
         workflowValidator = new WorkflowValidator(g);
         graph.value = g;
