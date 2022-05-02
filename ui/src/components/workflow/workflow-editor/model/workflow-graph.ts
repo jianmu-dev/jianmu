@@ -1,5 +1,7 @@
 import { Cell, Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
+import { WorkflowTool } from './workflow-tool';
+import { ZoomTypeEnum } from './data/enumeration';
 
 export default class WorkflowGraph {
   private readonly graph: Graph;
@@ -128,6 +130,14 @@ export default class WorkflowGraph {
       this.graph.setAsync(false);
       // 2. 注销渲染事件
       this.graph.off('render:done');
+
+      const workflowTool = new WorkflowTool(this.graph);
+      // 渲染完成后，适屏展示
+      workflowTool.zoom(ZoomTypeEnum.FIT);
+      if (this.graph.zoom() > 1) {
+        // 适屏后，缩放比例超过100%，原始大小展示
+        workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
+      }
     });
 
     // 启用异步渲染的画布处于冻结状态
