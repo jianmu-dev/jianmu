@@ -6,13 +6,14 @@
         v-if="selectedNodeId"
         v-model="nodeConfigPanelVisible"
         :node-id="selectedNodeId"
+        :node-waring-clicked="nodeWaringClicked"
         @closed="handleNodeConfigPanelClosed"/>
     </template>
     <div class="main">
-      <node-panel v-if="graph" @node-selected="handleNodeSelected"/>
+      <node-panel v-if="graph" @node-selected="nodeId => handleNodeSelected(nodeId, true)"/>
       <graph-panel :workflow-data="workflowData"
                    @graph-created="handleGraphCreated"
-                   @node-selected="handleNodeSelected"/>
+                   @node-selected="nodeId => handleNodeSelected(nodeId, false)"/>
     </div>
   </div>
 </template>
@@ -50,7 +51,8 @@ export default defineComponent({
     });
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
-    const selectedNodeId = ref<string>();
+    const selectedNodeId = ref<string>('');
+    const nodeWaringClicked = ref<boolean>(false);
     let workflowValidator: WorkflowValidator;
 
     provide('getGraph', (): Graph => graph.value!);
@@ -61,6 +63,7 @@ export default defineComponent({
       graph,
       nodeConfigPanelVisible,
       selectedNodeId,
+      nodeWaringClicked,
       handleBack: () => {
         emit('back');
       },
@@ -76,9 +79,10 @@ export default defineComponent({
         workflowValidator = new WorkflowValidator(g);
         graph.value = g;
       },
-      handleNodeSelected: (nodeId: string) => {
+      handleNodeSelected: (nodeId: string, waringClicked: boolean) => {
         nodeConfigPanelVisible.value = true;
         selectedNodeId.value = nodeId;
+        nodeWaringClicked.value = waringClicked;
       },
       handleNodeConfigPanelClosed: () => {
         selectedNodeId.value = undefined;
