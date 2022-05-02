@@ -14,6 +14,17 @@ export class Cron extends BaseNode {
     return new Cron(name, schedule);
   }
 
+  getFormRules(): any {
+    const rules = super.getFormRules();
+
+    return {
+      ...rules,
+      schedule: [
+        { required: true, message: 'schedule不能为空', trigger: 'blur' },
+      ],
+    };
+  }
+
   validate(): void {
     super.validate();
 

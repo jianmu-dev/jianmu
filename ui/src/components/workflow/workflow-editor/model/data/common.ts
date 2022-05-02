@@ -22,6 +22,8 @@ export interface IWorkflowNode {
 
   getDocUrl(): string;
 
+  getFormRules(): any;
+
   /**
    * 校验
    * @throws Error

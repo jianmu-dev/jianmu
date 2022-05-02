@@ -42,6 +42,15 @@ export class AsyncTask extends BaseNode {
     return new AsyncTask(ref, name, icon, version, inputs, outputs, failureMode);
   }
 
+  getFormRules(): any {
+    const rules = super.getFormRules();
+
+    return {
+      ...rules,
+      // TODO 待完善校验规则
+    };
+  }
+
   validate(): void {
     super.validate();
 

@@ -31,6 +31,15 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
+  getFormRules(): any {
+    const rules = super.getFormRules();
+
+    return {
+      ...rules,
+      // TODO 待完善校验规则
+    };
+  }
+
   validate(): void {
     super.validate();
 

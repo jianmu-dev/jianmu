@@ -37,6 +37,14 @@ export abstract class BaseNode implements IWorkflowNode {
     return this.docUrl;
   }
 
+  getFormRules(): any {
+    return {
+      name: [
+        { required: true, message: '节点名称不能为空', trigger: 'blur' },
+      ],
+    };
+  }
+
   validate(): void {
     if (!this.name) {
       throw new Error('名称不能为空');

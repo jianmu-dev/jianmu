@@ -24,6 +24,15 @@ export class Shell extends BaseNode {
     return new Shell(name, image, envs, scripts);
   }
 
+  getFormRules(): any {
+    const rules = super.getFormRules();
+
+    return {
+      ...rules,
+      // TODO 待完善校验规则
+    };
+  }
+
   validate(): void {
     super.validate();
 
