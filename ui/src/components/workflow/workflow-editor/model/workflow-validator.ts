@@ -4,9 +4,11 @@ import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 export class WorkflowValidator {
   private readonly graph: Graph;
+  private readonly proxy: any;
 
-  constructor(graph: Graph) {
+  constructor(graph: Graph, proxy: any) {
     this.graph = graph;
+    this.proxy = proxy;
   }
 
   /**
@@ -64,8 +66,7 @@ export class WorkflowValidator {
     });
 
     if (currentTrigger) {
-      // TODO 需加提示
-      console.log('只能有一个触发器节点');
+      this.proxy.$warning('只能有一个触发器节点');
       return false;
     }
 

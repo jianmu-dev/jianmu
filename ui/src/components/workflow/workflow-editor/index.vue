@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, PropType, provide, ref } from 'vue';
 import { cloneDeep } from 'lodash';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
@@ -41,6 +41,7 @@ export default defineComponent({
   },
   emits: ['update:model-value', 'back', 'save'],
   setup(props, { emit }) {
+    const { proxy } = getCurrentInstance() as any;
     const workflowData = ref<IWorkflow>(props.modelValue ? cloneDeep(props.modelValue) : {
       name: '未命名项目',
       groupId: '',
@@ -78,11 +79,11 @@ export default defineComponent({
 
           emit('save', back);
         } catch (err) {
-          console.warn('所有节点尚未通过校验');
+          proxy.$error('所有节点尚未通过校验，请检查');
         }
       },
       handleGraphCreated: (g: Graph) => {
-        workflowValidator = new WorkflowValidator(g);
+        workflowValidator = new WorkflowValidator(g, proxy);
         graph.value = g;
       },
       handleNodeSelected: (nodeId: string, waringClicked: boolean) => {
