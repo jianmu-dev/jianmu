@@ -13,29 +13,26 @@ export class CustomX6NodeProxy {
     this.node = node;
   }
 
-  static plainObject(data: IWorkflowNode): any {
-    const obj = JSON.parse(JSON.stringify(data));
-    obj.type = data.getType();
-
-    return obj;
+  static plainObject(data: IWorkflowNode): string {
+    return JSON.stringify(data);
   }
 
   getData(): IWorkflowNode {
-    const plainObj = this.node.getData<any>();
+    const obj = JSON.parse(this.node.getData<string>());
     let nodeData: IWorkflowNode;
 
-    switch (plainObj.type) {
+    switch (obj.type) {
       case NodeTypeEnum.CRON:
-        nodeData = Cron.build(plainObj);
+        nodeData = Cron.build(obj);
         break;
       case NodeTypeEnum.WEBHOOK:
-        nodeData = Webhook.build(plainObj);
+        nodeData = Webhook.build(obj);
         break;
       case NodeTypeEnum.SHELL:
-        nodeData = Shell.build(plainObj);
+        nodeData = Shell.build(obj);
         break;
       case NodeTypeEnum.ASYNC_TASK:
-        nodeData = AsyncTask.build(plainObj);
+        nodeData = AsyncTask.build(obj);
         break;
     }
 
