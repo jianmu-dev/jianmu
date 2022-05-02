@@ -45,7 +45,7 @@ export default class WorkflowNode {
       new AsyncTask('_/docker_image_build', 'docker镜像构建', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv'),
       new AsyncTask('_/npm_publish', '发布npm依赖包', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT'),
       new AsyncTask('_/org_gov', '组织治理', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl'),
-      new AsyncTask('_/test', '测试节点', ''),
+      new AsyncTask('_/test', '测试节点', 'https://jianmu-hub.assets.dghub.cn/jianmu-hub-ui/1.6.21/assets/default.d4db0995.svg'),
     ];
 
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
