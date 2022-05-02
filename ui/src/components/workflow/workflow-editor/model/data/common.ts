@@ -25,9 +25,16 @@ export interface IWorkflowNode {
   validate(): void;
 }
 
+export interface IGlobal {
+  concurrent: boolean;
+}
+
 /**
  * 工作流数据
  */
 export interface IWorkflow {
-
+  name: string;
+  description?: string;
+  groupId: string;
+  global: IGlobal;
 }

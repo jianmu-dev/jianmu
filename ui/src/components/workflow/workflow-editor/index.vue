@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor">
     <template v-if="graph">
-      <toolbar/>
+      <toolbar :workflow-data="modelValue"/>
       <node-config-panel
         v-if="selectedNodeData"
         v-model="nodeConfigPanelVisible"

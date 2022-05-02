@@ -2,7 +2,7 @@
   <div class="jm-workflow-editor-toolbar">
     <div class="left">
       <button class="jm-icon-workflow-back" @click="goBack"></button>
-      <div class="title">未命名项目</div>
+      <div class="title">{{ workflowForm.name }}</div>
       <button class="jm-icon-workflow-edit" @click="edit"></button>
     </div>
     <div class="right">
@@ -14,7 +14,6 @@
         <jm-tooltip content="放大" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-in" @click="zoom(ZoomTypeEnum.IN)"></button>
         </jm-tooltip>
-        <!--        <jm-tooltip v-if="true" content="适屏" placement="bottom" :appendToBody="false">-->
         <jm-tooltip v-if="zoomPercentage === '100%'" content="适屏" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-fit" @click="zoom(ZoomTypeEnum.FIT)"></button>
         </jm-tooltip>
@@ -25,7 +24,7 @@
       <div class="configs">
         <div>并发执行</div>
         <div>
-          <jm-switch></jm-switch>
+          <jm-switch v-model="workflowForm.global.concurrent"></jm-switch>
         </div>
       </div>
       <div class="operations">
@@ -39,16 +38,24 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref } from 'vue';
+import { computed, defineComponent, inject, PropType, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import { ZoomTypeEnum } from '../../model/data/enumeration';
 import { WorkflowTool } from '../../model/workflow-tool';
 import ProjectPanel from './project-panel.vue';
+import { IWorkflow } from '../../model/data/common';
 
 export default defineComponent({
   components: { ProjectPanel },
+  props: {
+    workflowData: {
+      type: Object as PropType<IWorkflow>,
+      required: true,
+    },
+  },
   emits: ['back', 'save'],
-  setup(props, context) {
+  setup(props, { emit }) {
+    const workflowForm = ref<IWorkflow>(props.workflowData);
     const projectPanelVisible = ref<boolean>(false);
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
@@ -58,10 +65,11 @@ export default defineComponent({
 
     return {
       ZoomTypeEnum,
+      workflowForm,
       projectPanelVisible,
       zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
       goBack: () => {
-        console.log('go back');
+        emit('back');
       },
       edit: () => {
         projectPanelVisible.value = true;
@@ -71,7 +79,7 @@ export default defineComponent({
         zoomVal.value = graph.zoom();
       },
       save: (back: boolean) => {
-        console.log('save', back);
+        emit('save', back);
       },
     };
   },
