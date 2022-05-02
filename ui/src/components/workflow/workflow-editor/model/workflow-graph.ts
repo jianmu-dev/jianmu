@@ -1,4 +1,4 @@
-import { Graph, Shape } from '@antv/x6';
+import { Cell, Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { IWorkflowNode } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
@@ -18,7 +18,6 @@ export default class WorkflowGraph {
       height: containerParentEl.clientHeight,
       // 不绘制网格背景
       grid: false,
-      history: true,
       mousewheel: {
         enabled: true,
         zoomAtMousePosition: true,
@@ -112,6 +111,41 @@ export default class WorkflowGraph {
 
     // 注册容器大小变化监听器
     this.registerContainerResizeListener(containerParentEl);
+  }
+
+  render(data: string) {
+    if (!data) {
+      return;
+    }
+
+    // 启用异步渲染的画布
+    // 异步渲染不会阻塞 UI，对需要添加大量节点和边时的性能提升非常明显
+    this.graph.setAsync(true);
+    // 注册渲染事件
+    this.graph.on('render:done', () => {
+      // 确保所有变更都已经生效，然后在事件回调中进行这些操作。
+
+      // 初始化完成后
+      // 1. 禁用异步渲染的画布。
+      this.graph.setAsync(false);
+      // 2. 注销渲染事件
+      this.graph.off('render:done');
+    });
+
+    // 启用异步渲染的画布处于冻结状态
+    // 处于冻结状态的画布不会立即响应画布中节点和边的变更，直到调用 unfreeze(...) 方法来解除冻结并重新渲染画布
+    this.graph.freeze();
+
+    const metadataArr: Cell.Metadata[] = JSON.parse(data).cells;
+    this.graph.resetCells(metadataArr.map(metadata => {
+      if (metadata.shape === 'edge') {
+        return this.graph.createEdge(metadata);
+      }
+      return this.graph.createNode(metadata);
+    }));
+
+    // 解除冻结并重新渲染画布
+    this.graph.unfreeze();
   }
 
   /**

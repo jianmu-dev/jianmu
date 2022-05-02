@@ -37,4 +37,5 @@ export interface IWorkflow {
   description?: string;
   groupId: string;
   global: IGlobal;
+  data: string;
 }

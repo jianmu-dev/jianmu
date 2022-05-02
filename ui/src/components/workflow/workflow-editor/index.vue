@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor">
     <template v-if="graph">
-      <toolbar :workflow-data="modelValue"/>
+      <toolbar :workflow-data="workflowData"/>
       <node-config-panel
         v-if="selectedNodeData"
         v-model="nodeConfigPanelVisible"
@@ -10,8 +10,7 @@
     </template>
     <div class="main">
       <node-panel v-if="graph" @node-selected="handleNodeSelected"/>
-      <graph-panel :model-value="modelValue"
-                   @update:model-value="handleModelValueUpdated"
+      <graph-panel :workflow-data="workflowData"
                    @graph-created="handleGraphCreated"
                    @node-selected="handleNodeSelected"/>
     </div>
@@ -20,6 +19,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, provide, ref } from 'vue';
+import { cloneDeep } from 'lodash';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
@@ -40,6 +40,14 @@ export default defineComponent({
   },
   emits: ['update:model-value'],
   setup(props, { emit }) {
+    const workflowData = ref<IWorkflow>(props.modelValue ? cloneDeep(props.modelValue) : {
+      name: '未命名项目',
+      groupId: '',
+      global: {
+        concurrent: false,
+      },
+      data: '',
+    });
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeData = ref<IWorkflowNode>();
@@ -49,12 +57,10 @@ export default defineComponent({
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
 
     return {
+      workflowData,
       graph,
       nodeConfigPanelVisible,
       selectedNodeData,
-      handleModelValueUpdated: (newVal: IWorkflow) => {
-        emit('update:model-value', newVal);
-      },
       handleGraphCreated: (g: Graph) => {
         workflowValidator = new WorkflowValidator(g);
         graph.value = g;

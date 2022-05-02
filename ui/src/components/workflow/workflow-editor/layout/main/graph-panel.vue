@@ -9,9 +9,12 @@ import { IWorkflow, IWorkflowNode } from '../../model/data/common';
 
 export default defineComponent({
   props: {
-    modelValue: Object as PropType<IWorkflow>,
+    workflowData: {
+      type: Object as PropType<IWorkflow>,
+      required: true,
+    },
   },
-  emits: ['update:model-value', 'graph-created', 'node-selected'],
+  emits: ['graph-created', 'node-selected'],
   setup(props, { emit }) {
     const container = ref<HTMLElement>();
     let workflowGraph: WorkflowGraph;
@@ -22,6 +25,8 @@ export default defineComponent({
         (data: IWorkflowNode) => emit('node-selected', data));
 
       emit('graph-created', workflowGraph.x6Graph);
+      // 渲染画布，回显
+      workflowGraph.render(props.workflowData.data);
     });
 
     return {
