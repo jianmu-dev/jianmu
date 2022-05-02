@@ -1,10 +1,10 @@
 import { Graph } from '@antv/x6';
 import { ZoomTypeEnum } from './data/enumeration';
 
-const MIN_ZOOM = 0.2;
-const MAX_ZOOM = 5;
+const MIN_ZOOM = 20;
+const MAX_ZOOM = 500;
 // 缩放间隔
-const ZOOM_INTERVAL = 0.1;
+const ZOOM_INTERVAL = 10;
 
 export class WorkflowTool {
   private readonly graph: Graph;
@@ -18,7 +18,10 @@ export class WorkflowTool {
    * @param type
    */
   zoom(type: ZoomTypeEnum) {
-    let factor = this.graph.zoom();
+    // 四舍五入保证与页面上的显示一致
+    let factor = Math.round(this.graph.zoom() * 100);
+    const remainder = factor % ZOOM_INTERVAL;
+    factor -= remainder;
 
     switch (type) {
       case ZoomTypeEnum.IN:
@@ -28,12 +31,16 @@ export class WorkflowTool {
       case ZoomTypeEnum.OUT:
         factor -= ZOOM_INTERVAL;
         factor = factor < MIN_ZOOM ? MIN_ZOOM : factor;
+        if (remainder > 0) {
+          factor += ZOOM_INTERVAL;
+        }
         break;
       case ZoomTypeEnum.FIT:
         // 缩放画布内容，使画布(graph)内容充满视口
         this.graph.zoomToFit();
 
-        factor = this.graph.zoom();
+        // 四舍五入保证与页面上的显示一致
+        factor = Math.round(this.graph.zoom() * 100);
         if (factor < MIN_ZOOM) {
           factor = MIN_ZOOM;
         } else if (factor > MAX_ZOOM) {
@@ -45,13 +52,13 @@ export class WorkflowTool {
       case ZoomTypeEnum.ORIGINAL:
         // 将画布内容中心与视口中心对齐
         this.graph.centerContent();
-        factor = 1;
+        factor = 100;
         break;
     }
 
     const { x, y, width, height } = this.graph.getContentBBox();
 
-    this.graph.zoomTo(factor, {
+    this.graph.zoomTo(factor / 100, {
       center: {
         x: width / 2 + x,
         y: height / 2 + y,
