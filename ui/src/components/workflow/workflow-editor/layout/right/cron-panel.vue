@@ -1,12 +1,23 @@
 <template>
   <div class="jm-workflow-editor-cron-panel">
-    <div>This is cron panel</div>
-    <div>{{ form.getName() }}</div>
+    <jm-form
+      :model="form"
+      :rules="form.getFormRules()"
+      ref="formRef"
+      @submit.prevent
+    >
+      <jm-form-item label="节点名称" prop="name">
+        <jm-input v-model="form.name" clearable></jm-input>
+      </jm-form-item>
+      <jm-form-item label="schedule" prop="schedule">
+        <jm-input v-model="form.schedule" clearable></jm-input>
+      </jm-form-item>
+    </jm-form>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { Cron } from '../../model/data/node/cron';
 
 export default defineComponent({
@@ -16,10 +27,15 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  emits: ['form-created'],
+  setup(props, { emit }) {
+    const formRef = ref();
     const form = ref<Cron>(props.nodeData);
 
+    onMounted(() => emit('form-created', formRef.value));
+
     return {
+      formRef,
       form,
     };
   },

@@ -54,6 +54,7 @@ export default defineComponent({
     const getGraph = inject('getGraph') as () => Graph;
     const node = getGraph().getNodes().find(({ id }) => props.nodeId === id)!;
     const proxy = new CustomX6NodeProxy(node);
+    // 不能为ref，否则，表单内容的变化影响数据绑定
     const nodeData = proxy.getData();
     const formRef = ref();
 
@@ -98,6 +99,7 @@ export default defineComponent({
   .panel-container {
     // 铺满剩余高度
     flex-grow: 1;
+    margin: 20px;
   }
 
   .footer {

@@ -1,12 +1,20 @@
 <template>
   <div class="jm-workflow-editor-webhook-panel">
-    <div>This is webhook panel</div>
-    <div>{{ form.getName() }}</div>
+    <jm-form
+      :model="form"
+      :rules="form.getFormRules()"
+      ref="formRef"
+      @submit.prevent
+    >
+      <jm-form-item label="节点名称" prop="name">
+        <jm-input v-model="form.name" clearable></jm-input>
+      </jm-form-item>
+    </jm-form>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { Webhook } from '../../model/data/node/webhook';
 
 export default defineComponent({
@@ -16,10 +24,15 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  emits: ['form-created'],
+  setup(props, { emit }) {
+    const formRef = ref();
     const form = ref<Webhook>(props.nodeData);
 
+    onMounted(() => emit('form-created', formRef.value));
+
     return {
+      formRef,
       form,
     };
   },
