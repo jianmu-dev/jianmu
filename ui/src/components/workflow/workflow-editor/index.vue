@@ -78,7 +78,7 @@ export default defineComponent({
 
           emit('save', back);
         } catch (err) {
-          console.warn('所有节点尚未通过检查');
+          console.warn('所有节点尚未通过校验');
         }
       },
       handleGraphCreated: (g: Graph) => {

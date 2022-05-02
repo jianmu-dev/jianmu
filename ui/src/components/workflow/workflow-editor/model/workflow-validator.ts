@@ -10,8 +10,8 @@ export class WorkflowValidator {
   }
 
   /**
-   * 检查所有节点
-   * @throws 尚未通过检查时，抛异常
+   * 校验所有节点
+   * @throws 尚未通过校验时，抛异常
    */
   async checkNodes(): Promise<void> {
     const workflowNodes = this.graph.getNodes().map(node => new CustomX6NodeProxy(node).getData());

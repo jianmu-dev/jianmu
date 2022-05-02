@@ -84,6 +84,9 @@ export default defineComponent({
           proxy.setData(nodeData);
           // 关闭抽屉
           emit('update:model-value', false);
+
+          // 通过校验时，删除警告
+          node.removeTool('button');
         });
       },
     };
