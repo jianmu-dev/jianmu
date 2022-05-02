@@ -1,5 +1,7 @@
+import Schema from 'async-validator';
 import { IWorkflowNode } from '../common';
 import { NodeTypeEnum } from '../enumeration';
+import { Value } from 'async-validator/dist-types/interface';
 
 export abstract class BaseNode implements IWorkflowNode {
   private readonly ref: string;
@@ -45,9 +47,12 @@ export abstract class BaseNode implements IWorkflowNode {
     };
   }
 
-  validate(): void {
-    if (!this.name) {
-      throw new Error('名称不能为空');
-    }
+  async validate(): Promise<void> {
+    const validator = new Schema(this.getFormRules());
+
+    const source: Record<string, Value> = {};
+    Object.keys(this).forEach(key => (source[key] = (this as any)[key]));
+
+    await validator.validate(source);
   }
 }

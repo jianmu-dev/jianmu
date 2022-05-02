@@ -50,11 +50,8 @@ export default class WorkflowDnd {
 
         const proxy = new CustomX6NodeProxy(targetNode);
 
-        try {
-          proxy.getData().validate();
-        } catch (err) {
-          console.warn(err);
-
+        proxy.getData().validate().catch(() => {
+          // TODO 考虑初始化回显时，是否需要校验
           // 检查节点有误时，加警告
           targetNode.addTools({
             name: 'button',
@@ -78,7 +75,7 @@ export default class WorkflowDnd {
               },
             },
           });
-        }
+        });
 
         return targetNode;
       },

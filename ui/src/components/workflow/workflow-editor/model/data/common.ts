@@ -28,7 +28,7 @@ export interface IWorkflowNode {
    * 校验
    * @throws Error
    */
-  validate(): void;
+  validate(): Promise<void>;
 }
 
 export interface IGlobal {

@@ -24,13 +24,5 @@ export class Cron extends BaseNode {
       ],
     };
   }
-
-  validate(): void {
-    super.validate();
-
-    if (!this.schedule) {
-      throw new Error('schedule不能为空');
-    }
-  }
 }
 

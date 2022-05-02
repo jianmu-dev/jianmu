@@ -39,11 +39,5 @@ export class Webhook extends BaseNode {
       // TODO 待完善校验规则
     };
   }
-
-  validate(): void {
-    super.validate();
-
-    // TODO 待完善校验规则
-  }
 }
 
