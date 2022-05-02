@@ -3,6 +3,7 @@
     title="节点配置面板"
     :size="500"
     direction="rtl"
+    :modal="false"
     destroy-on-close
   >
     <template #title>
