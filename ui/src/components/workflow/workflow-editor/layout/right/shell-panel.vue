@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-shell-panel">
     <div>This is shell panel</div>
-    <div>{{ modelValue.getName() }}</div>
+    <div>{{ nodeData.getName() }}</div>
   </div>
 </template>
 
@@ -11,12 +11,11 @@ import { Shell } from '../../model/data/node/shell';
 
 export default defineComponent({
   props: {
-    modelValue: {
+    nodeData: {
       type: Object as PropType<Shell>,
       required: true,
     },
   },
-  emits: ['update:model-value'],
   setup(props, context) {
 
   },

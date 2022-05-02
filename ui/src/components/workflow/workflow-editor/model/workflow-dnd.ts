@@ -103,9 +103,10 @@ export default class WorkflowDnd {
       width,
       height,
       component: 'custom-vue-shape',
-      data: CustomX6NodeProxy.plainObject(data),
       ports: { ...PORTS },
     });
+    const proxy = new CustomX6NodeProxy(node);
+    proxy.setData(data);
 
     this.dnd.start(node, event);
   }

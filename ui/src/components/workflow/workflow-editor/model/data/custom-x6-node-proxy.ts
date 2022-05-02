@@ -13,10 +13,6 @@ export class CustomX6NodeProxy {
     this.node = node;
   }
 
-  static plainObject(data: IWorkflowNode): string {
-    return JSON.stringify(data);
-  }
-
   getData(): IWorkflowNode {
     const obj = JSON.parse(this.node.getData<string>());
     let nodeData: IWorkflowNode;
@@ -37,5 +33,14 @@ export class CustomX6NodeProxy {
     }
 
     return nodeData!;
+  }
+
+  setData(data: IWorkflowNode): void {
+    this.node.setData(JSON.stringify(data), {
+      // 必须覆盖，否则出错
+      overwrite: true,
+    });
+
+    // TODO 校验节点，同步节点警告状态
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-webhook-panel">
     <div>This is webhook panel</div>
-    <div>{{ modelValue.getName() }}</div>
+    <div>{{ nodeData.getName() }}</div>
   </div>
 </template>
 
@@ -11,12 +11,11 @@ import { Webhook } from '../../model/data/node/webhook';
 
 export default defineComponent({
   props: {
-    modelValue: {
+    nodeData: {
       type: Object as PropType<Webhook>,
       required: true,
     },
   },
-  emits: ['update:model-value'],
   setup(props, context) {
 
   },

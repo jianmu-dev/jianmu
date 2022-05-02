@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-cron-panel">
     <div>This is cron panel</div>
-    <div>{{ modelValue.getName() }}</div>
+    <div>{{ nodeData.getName() }}</div>
   </div>
 </template>
 
@@ -11,12 +11,11 @@ import { Cron } from '../../model/data/node/cron';
 
 export default defineComponent({
   props: {
-    modelValue: {
+    nodeData: {
       type: Object as PropType<Cron>,
       required: true,
     },
   },
-  emits: ['update:model-value'],
   setup(props, context) {
 
   },

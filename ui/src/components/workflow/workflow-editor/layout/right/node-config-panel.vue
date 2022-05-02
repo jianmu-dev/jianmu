@@ -7,10 +7,10 @@
   >
     <div class="jm-workflow-editor-node-config-panel">
       <div class="panel-container">
-        <cron-panel v-if="panelForm.getType() === NodeTypeEnum.CRON" v-model="panelForm"/>
-        <webhook-panel v-else-if="panelForm.getType() === NodeTypeEnum.WEBHOOK" v-model="panelForm"/>
-        <shell-panel v-else-if="panelForm.getType() === NodeTypeEnum.SHELL" v-model="panelForm"/>
-        <async-task-panel v-else-if="panelForm.getType() === NodeTypeEnum.ASYNC_TASK" v-model="panelForm"/>
+        <cron-panel v-if="nodeData.getType() === NodeTypeEnum.CRON" :node-data="nodeData"/>
+        <webhook-panel v-else-if="nodeData.getType() === NodeTypeEnum.WEBHOOK" :node-data="nodeData"/>
+        <shell-panel v-else-if="nodeData.getType() === NodeTypeEnum.SHELL" :node-data="nodeData"/>
+        <async-task-panel v-else-if="nodeData.getType() === NodeTypeEnum.ASYNC_TASK" :node-data="nodeData"/>
       </div>
       <div class="footer">
         <jm-button @click="cancel">取消</jm-button>
@@ -21,36 +21,40 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
-import { IWorkflowNode } from '../../model/data/common';
+import { defineComponent, inject } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
 import ShellPanel from './shell-panel.vue';
 import AsyncTaskPanel from './async-task-panel.vue';
+import { Graph } from '@antv/x6';
+import { CustomX6NodeProxy } from '../../model/data/custom-x6-node-proxy';
 
 export default defineComponent({
   components: { CronPanel, WebhookPanel, ShellPanel, AsyncTaskPanel },
   props: {
-    nodeData: {
-      type: Object as PropType<IWorkflowNode>,
+    nodeId: {
+      type: String,
       required: true,
     },
   },
   setup(props, { emit }) {
-    const panelForm = ref<IWorkflowNode>(props.nodeData);
+    const getGraph = inject('getGraph') as () => Graph;
+    const node = getGraph().getNodes().find(({ id }) => props.nodeId === id)!;
+    const proxy = new CustomX6NodeProxy(node);
+    const nodeData = proxy.getData();
 
     return {
       NodeTypeEnum,
-      panelForm,
+      nodeData,
       cancel: () => {
+        // 关闭抽屉
         emit('update:model-value', false);
       },
       save: () => {
-        console.log('panelForm', {
-          ...panelForm.value,
-        });
+        proxy.setData(nodeData);
 
+        // 关闭抽屉
         emit('update:model-value', false);
       },
     };
