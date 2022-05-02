@@ -41,8 +41,8 @@ export default class WorkflowNode {
     // TODO 加载hub官方节点
     const arr: IWorkflowNode[] = [
       new AsyncTask('_/git_clone', '克隆建木CI代码', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3'),
-      new AsyncTask('_/node_build', 'NodeJs构建前端项目', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu'),
-      new AsyncTask('_/docker_build', 'docker镜像构建', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv'),
+      new AsyncTask('_/nodejs_build', 'NodeJs构建前端项目', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu'),
+      new AsyncTask('_/docker_image_build', 'docker镜像构建', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv'),
       new AsyncTask('_/npm_publish', '发布npm依赖包', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FtRbpLVb0vl5qURYdyxMAHE8c7tT'),
       new AsyncTask('_/org_gov', '组织治理', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FlENvzR04GwGJMgUvC_UGadygwXl'),
       new AsyncTask('_/test', '测试节点', ''),
