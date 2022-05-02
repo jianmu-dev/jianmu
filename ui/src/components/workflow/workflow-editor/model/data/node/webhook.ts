@@ -21,7 +21,7 @@ export class Webhook extends BaseNode {
 
   constructor(name: string = 'webhook', params: IWebhookParam[] = [],
     auth: IWebhookAuth | undefined = undefined, only: string = '') {
-    super('webhook', name, NodeTypeEnum.WEBHOOK, icon);
+    super('webhook', name, NodeTypeEnum.WEBHOOK, icon, 'https://docs.jianmu.dev/guide/webhook.html');
     this.params = params;
     this.auth = auth;
     this.only = only;

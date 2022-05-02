@@ -20,6 +20,8 @@ export interface IWorkflowNode {
 
   getIcon(): string;
 
+  getDocUrl(): string;
+
   /**
    * 校验
    * @throws Error

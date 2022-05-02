@@ -6,12 +6,15 @@ export abstract class BaseNode implements IWorkflowNode {
   name: string;
   private readonly type: NodeTypeEnum;
   private readonly icon: string;
+  private readonly docUrl: string
 
-  protected constructor(ref: string, name: string, type: NodeTypeEnum, icon: string) {
+  protected constructor(ref: string, name: string,
+    type: NodeTypeEnum, icon: string, docUrl: string) {
     this.ref = ref;
     this.name = name;
     this.type = type;
     this.icon = icon;
+    this.docUrl = docUrl;
   }
 
   getRef(): string {
@@ -28,6 +31,10 @@ export abstract class BaseNode implements IWorkflowNode {
 
   getIcon(): string {
     return this.icon;
+  }
+
+  getDocUrl(): string {
+    return this.docUrl;
   }
 
   validate(): void {

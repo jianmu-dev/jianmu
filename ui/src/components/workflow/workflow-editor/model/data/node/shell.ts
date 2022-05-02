@@ -14,7 +14,7 @@ export class Shell extends BaseNode {
 
   constructor(name: string = 'shell', image: string = '',
     envs: IShellEnv[] = [], scripts: string[] = []) {
-    super('shell', name, NodeTypeEnum.SHELL, icon);
+    super('shell', name, NodeTypeEnum.SHELL, icon, 'https://docs.jianmu.dev/guide/shell-node.html');
     this.image = image;
     this.envs = envs;
     this.scripts = scripts;

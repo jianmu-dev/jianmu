@@ -6,7 +6,7 @@ export class Cron extends BaseNode {
   schedule: string;
 
   constructor(name: string = 'cron', schedule: string = '') {
-    super('cron', name, NodeTypeEnum.CRON, icon);
+    super('cron', name, NodeTypeEnum.CRON, icon, 'https://docs.jianmu.dev/guide/cron.html');
     this.schedule = schedule;
   }
 
