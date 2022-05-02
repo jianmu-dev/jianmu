@@ -1,4 +1,5 @@
-import { ISecretKey, IWorkflowNode } from '../common';
+import { BaseNode } from './base-node';
+import { ISecretKey } from '../common';
 import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
 
@@ -13,16 +14,14 @@ export interface IWebhookAuth {
   value: ISecretKey;
 }
 
-export class Webhook implements IWorkflowNode {
-  readonly ref: string = 'webhook';
-  name: string;
+export class Webhook extends BaseNode {
   readonly params: IWebhookParam[];
   auth: IWebhookAuth | undefined;
   only: string;
 
   constructor(name: string = 'webhook', params: IWebhookParam[] = [],
     auth: IWebhookAuth | undefined = undefined, only: string = '') {
-    this.name = name;
+    super('webhook', name, NodeTypeEnum.WEBHOOK, icon);
     this.params = params;
     this.auth = auth;
     this.only = only;
@@ -32,22 +31,8 @@ export class Webhook implements IWorkflowNode {
     return new Webhook(name, params, auth, only);
   }
 
-  getName(): string {
-    return this.name;
-  }
-
-  getType(): NodeTypeEnum {
-    return NodeTypeEnum.WEBHOOK;
-  }
-
-  getIcon(): string {
-    return icon;
-  }
-
   validate(): void {
-    if (!this.name) {
-      throw new Error('名称不能为空');
-    }
+    super.validate();
 
     // TODO 待完善校验规则
   }

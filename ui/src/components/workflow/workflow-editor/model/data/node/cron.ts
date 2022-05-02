@@ -1,14 +1,12 @@
-import { IWorkflowNode } from '../common';
+import { BaseNode } from './base-node';
 import { NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/cron.svg';
 
-export class Cron implements IWorkflowNode {
-  readonly ref: string = 'cron';
-  name: string;
+export class Cron extends BaseNode {
   schedule: string;
 
   constructor(name: string = 'cron', schedule: string = '') {
-    this.name = name;
+    super('cron', name, NodeTypeEnum.CRON, icon);
     this.schedule = schedule;
   }
 
@@ -16,22 +14,8 @@ export class Cron implements IWorkflowNode {
     return new Cron(name, schedule);
   }
 
-  getName(): string {
-    return this.name;
-  }
-
-  getType(): NodeTypeEnum {
-    return NodeTypeEnum.CRON;
-  }
-
-  getIcon(): string {
-    return icon;
-  }
-
   validate(): void {
-    if (!this.name) {
-      throw new Error('名称不能为空');
-    }
+    super.validate();
 
     if (!this.schedule) {
       throw new Error('schedule不能为空');

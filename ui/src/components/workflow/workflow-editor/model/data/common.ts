@@ -12,6 +12,8 @@ export interface ISecretKey {
  * 节点数据
  */
 export interface IWorkflowNode {
+  getRef(): string;
+
   getName(): string;
 
   getType(): NodeTypeEnum;

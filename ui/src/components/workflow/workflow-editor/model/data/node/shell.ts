@@ -1,4 +1,4 @@
-import { IWorkflowNode } from '../common';
+import { BaseNode } from './base-node';
 import { NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/shell.svg';
 
@@ -7,15 +7,14 @@ export interface IShellEnv {
   value: string;
 }
 
-export class Shell implements IWorkflowNode {
-  readonly ref: string = 'shell';
-  name: string;
+export class Shell extends BaseNode {
   image: string;
   readonly envs: IShellEnv[];
   readonly scripts: string[];
 
-  constructor(name: string = 'shell', image: string = '', envs: IShellEnv[] = [], scripts: string[] = []) {
-    this.name = name;
+  constructor(name: string = 'shell', image: string = '',
+    envs: IShellEnv[] = [], scripts: string[] = []) {
+    super('shell', name, NodeTypeEnum.SHELL, icon);
     this.image = image;
     this.envs = envs;
     this.scripts = scripts;
@@ -25,22 +24,8 @@ export class Shell implements IWorkflowNode {
     return new Shell(name, image, envs, scripts);
   }
 
-  getName(): string {
-    return this.name;
-  }
-
-  getType(): NodeTypeEnum {
-    return NodeTypeEnum.SHELL;
-  }
-
-  getIcon(): string {
-    return icon;
-  }
-
   validate(): void {
-    if (!this.name) {
-      throw new Error('名称不能为空');
-    }
+    super.validate();
 
     // TODO 待完善校验规则
   }
