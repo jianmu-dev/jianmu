@@ -61,7 +61,7 @@ export default defineComponent({
     const graph = getGraph();
     const zoomVal = ref<number>(graph.zoom());
 
-    const workflowTool: WorkflowTool = new WorkflowTool(graph);
+    const workflowTool = new WorkflowTool(graph);
 
     return {
       ZoomTypeEnum,
