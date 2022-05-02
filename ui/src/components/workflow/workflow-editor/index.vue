@@ -103,6 +103,24 @@ export default defineComponent({
   background-color: #F0F2F5;
   user-select: none;
 
+  .el-drawer {
+    box-shadow: none;
+
+    &.rtl {
+      top: @tool-bar-height;
+      height: calc(100% - @tool-bar-height);
+    }
+
+    .el-drawer__header {
+      border-color: #E6EBF2;
+    }
+
+    .el-drawer__body {
+      border: 1px solid #E6EBF2;
+      border-top-width: 0;
+    }
+  }
+
   .main {
     position: relative;
     height: calc(100% - @tool-bar-height);
