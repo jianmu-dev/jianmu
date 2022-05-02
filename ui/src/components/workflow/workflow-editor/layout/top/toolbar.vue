@@ -33,6 +33,8 @@
         <jm-button type="primary" @click="save(false)">保存</jm-button>
       </div>
     </div>
+    <project-panel v-if="projectPanelVisible"
+                   v-model="projectPanelVisible"/>
   </div>
 </template>
 
@@ -41,10 +43,13 @@ import { computed, defineComponent, inject, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import { ZoomTypeEnum } from '../../model/data/enumeration';
 import { WorkflowTool } from '../../model/workflow-tool';
+import ProjectPanel from './project-panel.vue';
 
 export default defineComponent({
+  components: { ProjectPanel },
   emits: ['back', 'save'],
   setup(props, context) {
+    const projectPanelVisible = ref<boolean>(false);
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
     const zoomVal = ref<number>(graph.zoom());
@@ -53,12 +58,13 @@ export default defineComponent({
 
     return {
       ZoomTypeEnum,
+      projectPanelVisible,
       zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
       goBack: () => {
         console.log('go back');
       },
       edit: () => {
-        console.log('edit');
+        projectPanelVisible.value = true;
       },
       zoom: async (type: ZoomTypeEnum) => {
         workflowTool.zoom(type);
@@ -78,7 +84,7 @@ export default defineComponent({
 .jm-workflow-editor-toolbar {
   height: @tool-bar-height;
   background: #FFFFFF;
-  z-index: 1;
+  z-index: 2;
   font-size: 14px;
   color: #042749;
   padding: 0 30px;
