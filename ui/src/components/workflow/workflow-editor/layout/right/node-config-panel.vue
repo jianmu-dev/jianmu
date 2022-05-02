@@ -68,7 +68,8 @@ export default defineComponent({
           return;
         }
         // 点击节点警告按钮打开配置面板时，自动校验一次表单，实现自动展示错误信息
-        formRef.value.validate();
+        formRef.value.validate().catch(() => {
+        });
       },
       cancel: () => {
         // 关闭抽屉
