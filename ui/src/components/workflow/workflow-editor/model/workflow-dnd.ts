@@ -24,7 +24,7 @@ export default class WorkflowDnd {
   constructor(graph: Graph,
     workflowValidator: WorkflowValidator,
     nodeContainer: HTMLElement,
-    clickNodeWarningCallback: (data: IWorkflowNode) => void) {
+    clickNodeWarningCallback: (nodeId: string) => void) {
     this.graph = graph;
     this.dnd = new Addon.Dnd({
       target: graph,
@@ -73,9 +73,8 @@ export default class WorkflowDnd {
               x: '100%',
               y: 0,
               offset: { x: -16, y: 0 },
-              onClick: ({ cell }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-                const proxy = new CustomX6NodeProxy(cell as Node);
-                clickNodeWarningCallback(proxy.getData());
+              onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
+                clickNodeWarningCallback(id);
               },
             },
           });

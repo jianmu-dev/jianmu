@@ -1,13 +1,11 @@
 import { Cell, Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
-import { IWorkflowNode } from './data/common';
-import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 export default class WorkflowGraph {
   private readonly graph: Graph;
-  private readonly clickNodeCallback: (data: IWorkflowNode) => void;
+  private readonly clickNodeCallback: (nodeId: string) => void;
 
-  constructor(container: HTMLElement, clickNodeCallback: (data: IWorkflowNode) => void) {
+  constructor(container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
     const containerParentEl = container.parentElement!;
     this.clickNodeCallback = clickNodeCallback;
 
@@ -230,8 +228,7 @@ export default class WorkflowGraph {
     };
 
     this.graph.on('node:click', ({ node }) => {
-      const proxy = new CustomX6NodeProxy(node);
-      this.clickNodeCallback(proxy.getData());
+      this.clickNodeCallback(node.id);
     });
 
     this.graph.on('node:mouseenter', ({ node }) => {

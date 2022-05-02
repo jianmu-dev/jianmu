@@ -3,9 +3,9 @@
     <template v-if="graph">
       <toolbar :workflow-data="workflowData"/>
       <node-config-panel
-        v-if="selectedNodeData"
+        v-if="selectedNodeId"
         v-model="nodeConfigPanelVisible"
-        :node-data="selectedNodeData"
+        :node-id="selectedNodeId"
         @closed="handleNodeConfigPanelClosed"/>
     </template>
     <div class="main">
@@ -24,7 +24,7 @@ import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
-import { IWorkflow, IWorkflowNode } from './model/data/common';
+import { IWorkflow } from './model/data/common';
 import { Graph } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
@@ -50,7 +50,7 @@ export default defineComponent({
     });
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
-    const selectedNodeData = ref<IWorkflowNode>();
+    const selectedNodeId = ref<string>();
     let workflowValidator: WorkflowValidator;
 
     provide('getGraph', (): Graph => graph.value!);
@@ -60,17 +60,17 @@ export default defineComponent({
       workflowData,
       graph,
       nodeConfigPanelVisible,
-      selectedNodeData,
+      selectedNodeId,
       handleGraphCreated: (g: Graph) => {
         workflowValidator = new WorkflowValidator(g);
         graph.value = g;
       },
-      handleNodeSelected: (data: IWorkflowNode) => {
+      handleNodeSelected: (nodeId: string) => {
         nodeConfigPanelVisible.value = true;
-        selectedNodeData.value = data;
+        selectedNodeId.value = nodeId;
       },
       handleNodeConfigPanelClosed: () => {
-        selectedNodeData.value = undefined;
+        selectedNodeId.value = undefined;
       },
     };
   },
