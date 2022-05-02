@@ -1,12 +1,12 @@
 <template>
   <div class="jm-workflow-editor-async-task-panel">
     <div>This is async task panel</div>
-    <div>{{ nodeData.getName() }}</div>
+    <div>{{ form.getName() }}</div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { AsyncTask } from '../../model/data/node/async-task';
 
 export default defineComponent({
@@ -16,8 +16,12 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, context) {
+  setup(props) {
+    const form = ref<AsyncTask>(props.nodeData);
 
+    return {
+      form,
+    };
   },
 });
 </script>

@@ -1,12 +1,12 @@
 <template>
   <div class="jm-workflow-editor-webhook-panel">
     <div>This is webhook panel</div>
-    <div>{{ nodeData.getName() }}</div>
+    <div>{{ form.getName() }}</div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { Webhook } from '../../model/data/node/webhook';
 
 export default defineComponent({
@@ -16,8 +16,12 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, context) {
+  setup(props) {
+    const form = ref<Webhook>(props.nodeData);
 
+    return {
+      form,
+    };
   },
 });
 </script>

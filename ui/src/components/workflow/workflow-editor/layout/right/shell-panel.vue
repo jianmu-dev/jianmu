@@ -1,12 +1,12 @@
 <template>
   <div class="jm-workflow-editor-shell-panel">
     <div>This is shell panel</div>
-    <div>{{ nodeData.getName() }}</div>
+    <div>{{ form.getName() }}</div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { Shell } from '../../model/data/node/shell';
 
 export default defineComponent({
@@ -16,8 +16,12 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, context) {
+  setup(props) {
+    const form = ref<Shell>(props.nodeData);
 
+    return {
+      form,
+    };
   },
 });
 </script>
