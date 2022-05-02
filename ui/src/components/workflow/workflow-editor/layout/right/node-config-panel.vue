@@ -5,6 +5,10 @@
     direction="rtl"
     destroy-on-close
   >
+    <template #title>
+      {{ nodeData.getName() }}
+      <a :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help"/>
+    </template>
     <div class="jm-workflow-editor-node-config-panel">
       <div class="panel-container">
         <cron-panel v-if="nodeData.getType() === NodeTypeEnum.CRON" :node-data="nodeData"/>
