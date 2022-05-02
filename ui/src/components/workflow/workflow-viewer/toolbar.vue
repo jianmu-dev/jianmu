@@ -133,7 +133,11 @@ export default defineComponent({
       },
       changeZoom: (enlarging: boolean) => {
         let temp = zoom.value + (enlarging ? 1 : -1) * ZOOM_INTERVAL;
-        temp = temp - temp % ZOOM_INTERVAL;
+        const remainder = temp % ZOOM_INTERVAL;
+        temp -= remainder;
+        if (!enlarging && remainder > 0) {
+          temp += ZOOM_INTERVAL;
+        }
 
         if (temp < MIN_ZOOM) {
           temp = MIN_ZOOM;
