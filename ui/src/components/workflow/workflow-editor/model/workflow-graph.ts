@@ -136,12 +136,12 @@ export default class WorkflowGraph {
     // 处于冻结状态的画布不会立即响应画布中节点和边的变更，直到调用 unfreeze(...) 方法来解除冻结并重新渲染画布
     this.graph.freeze();
 
-    const metadataArr: Cell.Metadata[] = JSON.parse(data).cells;
-    this.graph.resetCells(metadataArr.map(metadata => {
-      if (metadata.shape === 'edge') {
-        return this.graph.createEdge(metadata);
+    const propertiesArr: Cell.Properties[] = JSON.parse(data).cells;
+    this.graph.resetCells(propertiesArr.map(properties => {
+      if (properties.shape === 'edge') {
+        return this.graph.createEdge(properties);
       }
-      return this.graph.createNode(metadata);
+      return this.graph.createNode(properties);
     }));
 
     // 解除冻结并重新渲染画布
