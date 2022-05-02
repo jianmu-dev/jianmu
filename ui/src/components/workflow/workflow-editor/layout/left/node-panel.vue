@@ -20,7 +20,7 @@ import { defineComponent, inject, onMounted, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import WorkflowDnd from '../../model/workflow-dnd';
 import X6VueShape from '../../shape/x6-vue-shape.vue';
-import { INodeData } from '../../model/data';
+import { IWorkflowNode } from '../../model/data/common';
 import WorkflowNode from '../../model/workflow-node';
 import { WorkflowValidator } from '../../model/workflow-validator';
 
@@ -42,14 +42,14 @@ export default defineComponent({
         getGraph(),
         getWorkflowValidator(),
         container.value! as HTMLElement,
-        (data: INodeData) => emit('node-selected', data));
+        (data: IWorkflowNode) => emit('node-selected', data));
     });
 
     return {
       collapsed,
-      nodes: ref<INodeData[]>(workflowNode.search().flat(Infinity)),
+      nodes: ref<IWorkflowNode[]>(workflowNode.search().flat(Infinity)),
       container,
-      drag: (data: INodeData, event: MouseEvent) => {
+      drag: (data: IWorkflowNode, event: MouseEvent) => {
         if (!workflowDnd) {
           return;
         }

@@ -1,5 +1,5 @@
 import { Graph } from '@antv/x6';
-import { ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/enumeration';
+import { ZoomTypeEnum } from './data/enumeration';
 
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 5;

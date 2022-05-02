@@ -11,7 +11,7 @@ export interface ISecretKey {
 /**
  * 节点数据
  */
-export interface INodeData {
+export interface IWorkflowNode {
   getName(): string;
 
   getType(): NodeTypeEnum;
@@ -28,6 +28,6 @@ export interface INodeData {
 /**
  * 工作流数据
  */
-export interface IWorkflowData {
+export interface IWorkflow {
 
 }

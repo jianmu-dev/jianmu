@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { Webhook } from '../../model/node/webhook';
+import { Webhook } from '../../model/data/node/webhook';
 
 export default defineComponent({
   props: {

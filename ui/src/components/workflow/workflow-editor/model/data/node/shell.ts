@@ -1,13 +1,13 @@
-import { INodeData } from '../data';
+import { IWorkflowNode } from '../common';
 import { NodeTypeEnum } from '../enumeration';
-import icon from '../../svgs/shape/shell.svg';
+import icon from '../../../svgs/shape/shell.svg';
 
 export interface IShellEnv {
   name: string;
   value: string;
 }
 
-export class Shell implements INodeData {
+export class Shell implements IWorkflowNode {
   readonly ref: string = 'shell';
   name: string;
   image: string;

@@ -1,5 +1,5 @@
 import { Node } from '@antv/x6';
-import { INodeData } from './data';
+import { IWorkflowNode } from './common';
 import { NodeTypeEnum } from './enumeration';
 import { Cron } from './node/cron';
 import { Webhook } from './node/webhook';
@@ -13,16 +13,16 @@ export class CustomX6NodeProxy {
     this.node = node;
   }
 
-  static plainObject(data: INodeData): any {
+  static plainObject(data: IWorkflowNode): any {
     const obj = JSON.parse(JSON.stringify(data));
     obj.type = data.getType();
 
     return obj;
   }
 
-  getData(): INodeData {
+  getData(): IWorkflowNode {
     const plainObj = this.node.getData<any>();
-    let nodeData: INodeData;
+    let nodeData: IWorkflowNode;
 
     switch (plainObj.type) {
       case NodeTypeEnum.CRON:

@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { Cron } from '../../model/node/cron';
+import { Cron } from '../../model/data/node/cron';
 
 export default defineComponent({
   props: {

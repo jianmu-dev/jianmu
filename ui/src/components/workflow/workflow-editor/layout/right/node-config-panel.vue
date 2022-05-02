@@ -22,8 +22,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { INodeData } from '../../model/data';
-import { NodeTypeEnum } from '../../model/enumeration';
+import { IWorkflowNode } from '../../model/data/common';
+import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
 import ShellPanel from './shell-panel.vue';
@@ -33,12 +33,12 @@ export default defineComponent({
   components: { CronPanel, WebhookPanel, ShellPanel, AsyncTaskPanel },
   props: {
     nodeData: {
-      type: Object as PropType<INodeData>,
+      type: Object as PropType<IWorkflowNode>,
       required: true,
     },
   },
   setup(props, { emit }) {
-    const panelForm = ref<INodeData>(props.nodeData);
+    const panelForm = ref<IWorkflowNode>(props.nodeData);
 
     return {
       NodeTypeEnum,

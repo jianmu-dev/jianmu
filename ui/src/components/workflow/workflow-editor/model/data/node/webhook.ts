@@ -1,6 +1,6 @@
-import { INodeData, ISecretKey } from '../data';
+import { ISecretKey, IWorkflowNode } from '../common';
 import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
-import icon from '../../svgs/shape/webhook.svg';
+import icon from '../../../svgs/shape/webhook.svg';
 
 export interface IWebhookParam {
   name: string;
@@ -13,7 +13,7 @@ export interface IWebhookAuth {
   value: ISecretKey;
 }
 
-export class Webhook implements INodeData {
+export class Webhook implements IWorkflowNode {
   readonly ref: string = 'webhook';
   name: string;
   readonly params: IWebhookParam[];

@@ -24,7 +24,7 @@ import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
-import { INodeData, IWorkflowData } from './model/data';
+import { IWorkflow, IWorkflowNode } from './model/data/common';
 import { Graph } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
@@ -36,13 +36,13 @@ export default defineComponent({
   name: 'jm-workflow-editor',
   components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel },
   props: {
-    modelValue: Object as PropType<IWorkflowData>,
+    modelValue: Object as PropType<IWorkflow>,
   },
   emits: ['update:model-value'],
   setup(props, { emit }) {
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
-    const selectedNodeData = ref<INodeData>();
+    const selectedNodeData = ref<IWorkflowNode>();
     let workflowValidator: WorkflowValidator;
 
     provide('getGraph', (): Graph => graph.value!);
@@ -52,14 +52,14 @@ export default defineComponent({
       graph,
       nodeConfigPanelVisible,
       selectedNodeData,
-      handleModelValueUpdated: (newVal: IWorkflowData) => {
+      handleModelValueUpdated: (newVal: IWorkflow) => {
         emit('update:model-value', newVal);
       },
       handleGraphCreated: (g: Graph) => {
         workflowValidator = new WorkflowValidator(g);
         graph.value = g;
       },
-      handleNodeSelected: (data: INodeData) => {
+      handleNodeSelected: (data: IWorkflowNode) => {
         nodeConfigPanelVisible.value = true;
         selectedNodeData.value = data;
       },

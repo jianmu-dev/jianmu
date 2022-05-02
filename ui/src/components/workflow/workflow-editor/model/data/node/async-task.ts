@@ -1,6 +1,6 @@
-import { INodeData } from '../data';
+import { IWorkflowNode } from '../common';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
-import defaultIcon from '../../svgs/shape/async-task.svg';
+import defaultIcon from '../../../svgs/shape/async-task.svg';
 
 export type ParamValueType = string | number | boolean;
 
@@ -13,7 +13,7 @@ export interface IAsyncTaskParam {
   description?: string;
 }
 
-export class AsyncTask implements INodeData {
+export class AsyncTask implements IWorkflowNode {
   readonly ref: string;
   name: string;
   readonly icon: string;

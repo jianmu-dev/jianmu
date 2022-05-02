@@ -1,8 +1,8 @@
-import { INodeData } from '../data';
+import { IWorkflowNode } from '../common';
 import { NodeTypeEnum } from '../enumeration';
-import icon from '../../svgs/shape/cron.svg';
+import icon from '../../../svgs/shape/cron.svg';
 
-export class Cron implements INodeData {
+export class Cron implements IWorkflowNode {
   readonly ref: string = 'cron';
   name: string;
   schedule: string;

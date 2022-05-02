@@ -5,11 +5,11 @@
 <script lang="ts">
 import { defineComponent, onMounted, PropType, ref } from 'vue';
 import WorkflowGraph from '../../model/workflow-graph';
-import { INodeData, IWorkflowData } from '../../model/data';
+import { IWorkflow, IWorkflowNode } from '../../model/data/common';
 
 export default defineComponent({
   props: {
-    modelValue: Object as PropType<IWorkflowData>,
+    modelValue: Object as PropType<IWorkflow>,
   },
   emits: ['update:model-value', 'graph-created', 'node-selected'],
   setup(props, { emit }) {
@@ -19,7 +19,7 @@ export default defineComponent({
     onMounted(() => {
       // 初始化画布
       workflowGraph = new WorkflowGraph(container.value!,
-        (data: INodeData) => emit('node-selected', data));
+        (data: IWorkflowNode) => emit('node-selected', data));
 
       emit('graph-created', workflowGraph.x6Graph);
     });

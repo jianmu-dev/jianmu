@@ -7,12 +7,12 @@
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
-import { INodeData } from '../model/data';
-import { CustomX6NodeProxy } from '../model/custom-x6-node-proxy';
+import { IWorkflowNode } from '../model/data/common';
+import { CustomX6NodeProxy } from '../model/data/custom-x6-node-proxy';
 
 export default defineComponent({
   props: {
-    nodeData: Object as PropType<INodeData>,
+    nodeData: Object as PropType<IWorkflowNode>,
   },
   setup(props) {
     const iconUrl = ref<string>('');

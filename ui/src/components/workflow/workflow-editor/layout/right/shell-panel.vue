@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { Shell } from '../../model/node/shell';
+import { Shell } from '../../model/data/node/shell';
 
 export default defineComponent({
   props: {

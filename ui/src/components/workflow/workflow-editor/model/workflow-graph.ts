@@ -1,13 +1,13 @@
 import { Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
-import { INodeData } from './data';
-import { CustomX6NodeProxy } from './custom-x6-node-proxy';
+import { IWorkflowNode } from './data/common';
+import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 export default class WorkflowGraph {
   private readonly graph: Graph;
-  private readonly clickNodeCallback: (data: INodeData) => void;
+  private readonly clickNodeCallback: (data: IWorkflowNode) => void;
 
-  constructor(container: HTMLElement, clickNodeCallback: (data: INodeData) => void) {
+  constructor(container: HTMLElement, clickNodeCallback: (data: IWorkflowNode) => void) {
     const containerParentEl = container.parentElement!;
     this.clickNodeCallback = clickNodeCallback;
 

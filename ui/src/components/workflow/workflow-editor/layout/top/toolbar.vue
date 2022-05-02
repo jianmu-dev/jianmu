@@ -39,7 +39,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from 'vue';
 import { Graph } from '@antv/x6';
-import { ZoomTypeEnum } from '../../model/enumeration';
+import { ZoomTypeEnum } from '../../model/data/enumeration';
 import { WorkflowTool } from '../../model/workflow-tool';
 
 export default defineComponent({

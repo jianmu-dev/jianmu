@@ -1,11 +1,11 @@
 import { Addon, Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 // @ts-ignore
 import listen from 'good-listener';
-import { INodeData } from '../model/data';
+import { IWorkflowNode } from './data/common';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
 import nodeWarningImg from '../svgs/node-warning.svg';
 import { WorkflowValidator } from './workflow-validator';
-import { CustomX6NodeProxy } from './custom-x6-node-proxy';
+import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 const { width, height } = SHAPE_SIZE;
 
@@ -24,7 +24,7 @@ export default class WorkflowDnd {
   constructor(graph: Graph,
     workflowValidator: WorkflowValidator,
     nodeContainer: HTMLElement,
-    clickNodeWarningCallback: (data: INodeData) => void) {
+    clickNodeWarningCallback: (data: IWorkflowNode) => void) {
     this.graph = graph;
     this.dnd = new Addon.Dnd({
       target: graph,
@@ -95,7 +95,7 @@ export default class WorkflowDnd {
     });
   }
 
-  drag(data: INodeData, event: MouseEvent) {
+  drag(data: IWorkflowNode, event: MouseEvent) {
     // 构建监听器
     this.buildListener();
 

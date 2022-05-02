@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { AsyncTask } from '../../model/node/async-task';
+import { AsyncTask } from '../../model/data/node/async-task';
 
 export default defineComponent({
   props: {

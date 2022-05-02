@@ -1,15 +1,15 @@
-import { INodeData } from './data';
-import { Cron } from './node/cron';
-import { Webhook } from './node/webhook';
-import { Shell } from './node/shell';
-import { AsyncTask } from './node/async-task';
+import { IWorkflowNode } from './data/common';
+import { Cron } from './data/node/cron';
+import { Webhook } from './data/node/webhook';
+import { Shell } from './data/node/shell';
+import { AsyncTask } from './data/node/async-task';
 
 export default class WorkflowNode {
 
   constructor() {
   }
 
-  search(keyword?: string): INodeData[][] {
+  search(keyword?: string): IWorkflowNode[][] {
     return [
       this.loadInnerTriggers(keyword),
       this.loadInnerNodes(keyword),
@@ -19,27 +19,27 @@ export default class WorkflowNode {
     ];
   }
 
-  private loadInnerTriggers(keyword?: string): INodeData[] {
-    const arr: INodeData[] = [new Cron(), new Webhook()];
+  private loadInnerTriggers(keyword?: string): IWorkflowNode[] {
+    const arr: IWorkflowNode[] = [new Cron(), new Webhook()];
 
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
   }
 
-  private loadInnerNodes(keyword?: string): INodeData[] {
-    const arr: INodeData[] = [new Shell()];
+  private loadInnerNodes(keyword?: string): IWorkflowNode[] {
+    const arr: IWorkflowNode[] = [new Shell()];
 
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
 
   }
 
-  private loadLocalNodes(keyword?: string): INodeData[] {
+  private loadLocalNodes(keyword?: string): IWorkflowNode[] {
     // TODO 加载本地节点
     return [];
   }
 
-  private loadOfficialNodes(keyword?: string): INodeData[] {
+  private loadOfficialNodes(keyword?: string): IWorkflowNode[] {
     // TODO 加载hub官方节点
-    const arr: INodeData[] = [
+    const arr: IWorkflowNode[] = [
       new AsyncTask('git_clone', '克隆建木CI代码', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3'),
       new AsyncTask('node_build', 'NodeJs构建前端项目', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FpON0edVLhS5j3Kgvs9i-rwljruu'),
       new AsyncTask('docker_build', 'docker镜像构建', 'https://jianmuhub.img.dghub.cn/node-definition/icon/FvWtndEdOK9WmEc8WCmvKLYpy2Xv'),
@@ -51,7 +51,7 @@ export default class WorkflowNode {
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
   }
 
-  private loadCommunityNodes(keyword?: string): INodeData[] {
+  private loadCommunityNodes(keyword?: string): IWorkflowNode[] {
     // TODO 加载hub社区节点
     return [];
 

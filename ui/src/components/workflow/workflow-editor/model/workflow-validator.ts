@@ -1,6 +1,6 @@
 import { Graph, Node, Point } from '@antv/x6';
-import { NodeTypeEnum } from './enumeration';
-import { CustomX6NodeProxy } from './custom-x6-node-proxy';
+import { NodeTypeEnum } from './data/enumeration';
+import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 export class WorkflowValidator {
   private readonly graph: Graph;
