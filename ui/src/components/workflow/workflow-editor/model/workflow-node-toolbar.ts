@@ -20,8 +20,8 @@ export class WorkflowNodeToolbar {
     this.move();
   }
 
-  hide({ relatedTarget }: MouseEvent): void {
-    if (relatedTarget === this.el) {
+  hide(e?: MouseEvent): void {
+    if (e && e.relatedTarget === this.el) {
       return;
     }
 

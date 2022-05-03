@@ -43,6 +43,7 @@ export default defineComponent({
       nodeToolbar,
       container,
       mouseLeaveNodeToolbar: (e: MouseEvent) => {
+        // 隐藏节点工具栏
         workflowGraph.workflowNodeToolbar.hide(e);
       },
       wheelScrollGraph: (e: WheelEvent) => {

@@ -164,8 +164,8 @@ export default class WorkflowGraph {
 
     this.graph.translateBy(-pixelX, -pixelY);
 
-    // 移动节点工具栏
-    this.workflowNodeToolbar.move();
+    // 隐藏节点工具栏
+    this.workflowNodeToolbar.hide();
   }
 
   /**
