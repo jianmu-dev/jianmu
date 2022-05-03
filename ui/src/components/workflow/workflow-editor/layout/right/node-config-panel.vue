@@ -104,7 +104,7 @@ export default defineComponent({
   .panel-container {
     // 铺满剩余高度
     flex-grow: 1;
-    margin: 20px;
+    margin: 10px 20px 0;
   }
 
   .footer {
