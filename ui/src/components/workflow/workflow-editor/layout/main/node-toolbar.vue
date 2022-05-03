@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { WorkflowNodeToolbar } from '@/components/workflow/workflow-editor/model/workflow-node-toolbar';
+import { WorkflowNodeToolbar } from '../../model/workflow-node-toolbar';
 
 export default defineComponent({
   setup(props, context) {
@@ -28,7 +28,6 @@ export default defineComponent({
   top: -1000px;
   z-index: 1;
 
-  width: 100px;
   height: 30px;
 
   .jm-icon-button-delete {

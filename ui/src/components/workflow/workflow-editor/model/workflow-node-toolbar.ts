@@ -1,6 +1,7 @@
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { NodeTypeEnum } from './data/enumeration';
+import { SHAPE_SIZE } from '../shape/gengral-config';
 
 export class WorkflowNodeToolbar {
   private readonly proxy: any;
@@ -93,6 +94,8 @@ export class WorkflowNodeToolbar {
       const left = x * zoom + tx + (nodeW * zoom - toolbarW) / 2;
       const top = y * zoom + ty - toolbarH - scaleYOffset;
 
+      // 与节点宽度保持一致
+      this.el.style.width = `${SHAPE_SIZE.width}px`;
       this.el.style.transform = `scale(${zoom},${zoom})`;
       this.el.style.left = `${left}px`;
       this.el.style.top = `${top}px`;
