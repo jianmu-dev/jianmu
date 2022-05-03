@@ -3,7 +3,7 @@ import { Addon, Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 import listen from 'good-listener';
 import { IWorkflowNode } from './data/common';
 import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
-import nodeWarningImg from '../svgs/node-warning.svg';
+import nodeWarningIcon from '../svgs/node-warning.svg';
 import { WorkflowValidator } from './workflow-validator';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
@@ -61,7 +61,7 @@ export default class WorkflowDnd {
                   attrs: {
                     width: 24,
                     height: 24,
-                    'xlink:href': nodeWarningImg,
+                    'xlink:href': nodeWarningIcon,
                     cursor: 'pointer',
                   },
                 },
