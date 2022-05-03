@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-graph-panel">
-    <node-toolbar ref="nodeToolbar"/>
-    <div ref="container" @wheel.prevent="wheelScroll"/>
+    <node-toolbar ref="nodeToolbar" @mouseleave="mouseLeaveNodeToolbar"/>
+    <div ref="container" @wheel.prevent="wheelScrollGraph"/>
   </div>
 </template>
 
@@ -39,7 +39,10 @@ export default defineComponent({
     return {
       nodeToolbar,
       container,
-      wheelScroll(e: WheelEvent) {
+      mouseLeaveNodeToolbar: (e: MouseEvent) => {
+        workflowGraph.workflowNodeToolbar.hide(e);
+      },
+      wheelScrollGraph: (e: WheelEvent) => {
         if (!workflowGraph) {
           return;
         }

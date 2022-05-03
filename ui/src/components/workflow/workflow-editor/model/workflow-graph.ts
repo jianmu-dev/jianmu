@@ -7,7 +7,7 @@ import { WorkflowNodeToolbar } from './workflow-node-toolbar';
 export default class WorkflowGraph {
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
-  private readonly workflowNodeToolbar: WorkflowNodeToolbar;
+  readonly workflowNodeToolbar: WorkflowNodeToolbar;
 
   constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
     const containerParentEl = container.parentElement!.parentElement!;
@@ -258,14 +258,14 @@ export default class WorkflowGraph {
       // 显示节点工具栏
       this.workflowNodeToolbar.show(node);
     });
-    this.graph.on('node:mouseleave', ({ node }) => {
+    this.graph.on('node:mouseleave', ({ e, node }) => {
       const ports = container.querySelectorAll(
         '.x6-port-body',
       ) as NodeListOf<SVGElement>;
       showPorts(ports, false);
 
       // 隐藏节点工具栏
-      this.workflowNodeToolbar.hide();
+      this.workflowNodeToolbar.hide(e.originalEvent);
     });
 
     this.graph.on('edge:mouseenter', ({ cell }) => {
