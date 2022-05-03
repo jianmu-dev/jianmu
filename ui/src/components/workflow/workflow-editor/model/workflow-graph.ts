@@ -248,6 +248,10 @@ export default class WorkflowGraph {
     this.graph.on('node:click', ({ node }) => {
       this.clickNodeCallback(node.id);
     });
+    this.graph.on('node:mousemove', ({ e, node }) => {
+      // 移动节点工具栏
+      this.workflowNodeToolbar.move();
+    });
 
     this.graph.on('node:mouseenter', ({ node }) => {
       const ports = container.querySelectorAll(
