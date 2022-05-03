@@ -1,13 +1,16 @@
-import { Cell, Graph, Shape } from '@antv/x6';
+import { Cell, CellView, Graph, JQuery, Node, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
-import { ZoomTypeEnum } from './data/enumeration';
+import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
+import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 export default class WorkflowGraph {
+  private readonly proxy: any;
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
 
-  constructor(container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
+  constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
+    this.proxy = proxy;
     const containerParentEl = container.parentElement!;
     this.clickNodeCallback = clickNodeCallback;
 
@@ -255,6 +258,34 @@ export default class WorkflowGraph {
           y: 0,
           // TODO 根据svg内容确定markup
           markup: {},
+          onClick: ({ cell }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
+            const proxy = new CustomX6NodeProxy(cell as Node);
+            const nodeData = proxy.getData();
+
+            let msg = '<div>确定要删除吗?</div>';
+            msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${nodeData.getName()}</div>`;
+            let title = '删除';
+            switch (nodeData.getType()) {
+              case NodeTypeEnum.ASYNC_TASK:
+              case NodeTypeEnum.SHELL:
+                title += '节点';
+                break;
+              case NodeTypeEnum.CRON:
+              case NodeTypeEnum.WEBHOOK:
+                title += '触发器';
+                break;
+            }
+
+            this.proxy.$confirm(msg, title, {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning',
+              dangerouslyUseHTMLString: true,
+            }).then(async () => {
+              this.graph.removeCell(cell);
+            }).catch(() => {
+            });
+          },
         },
       });
     });

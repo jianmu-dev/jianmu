@@ -72,12 +72,19 @@ export default defineComponent({
         try {
           await workflowValidator.checkNodes();
 
-          workflowData.value.data = JSON.stringify(graph.value!.toJSON());
+          proxy.$confirm(' ', '保存此次修改', {
+            confirmButtonText: '保存',
+            cancelButtonText: '不保存',
+            type: 'info',
+          }).then(async () => {
+            workflowData.value.data = JSON.stringify(graph.value!.toJSON());
 
-          // 必须克隆后发事件，否则外部的数据绑定会受影响
-          emit('update:model-value', cloneDeep(workflowData.value));
+            // 必须克隆后发事件，否则外部的数据绑定会受影响
+            emit('update:model-value', cloneDeep(workflowData.value));
 
-          emit('save', back);
+            emit('save', back);
+          }).catch(() => {
+          });
         } catch (err) {
           proxy.$error('所有节点尚未通过校验，请检查');
         }

@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, PropType, ref } from 'vue';
 import WorkflowGraph from '../../model/workflow-graph';
 import { IWorkflow } from '../../model/data/common';
 
@@ -16,12 +16,13 @@ export default defineComponent({
   },
   emits: ['graph-created', 'node-selected'],
   setup(props, { emit }) {
+    const { proxy } = getCurrentInstance() as any;
     const container = ref<HTMLElement>();
     let workflowGraph: WorkflowGraph;
 
     onMounted(() => {
       // 初始化画布
-      workflowGraph = new WorkflowGraph(container.value!,
+      workflowGraph = new WorkflowGraph(proxy, container.value!,
         (nodeId: string) => emit('node-selected', nodeId));
 
       emit('graph-created', workflowGraph.x6Graph);
