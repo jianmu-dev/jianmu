@@ -1,14 +1,22 @@
 <template>
   <div class="jm-workflow-editor-node-toolbar">
-
+    <i class="jm-icon-button-delete" @click="deleteNode"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
+import { WorkflowNodeToolbar } from '@/components/workflow/workflow-editor/model/workflow-node-toolbar';
 
 export default defineComponent({
   setup(props, context) {
+    const getWorkflowNodeToolbar = inject('getWorkflowNodeToolbar') as () => WorkflowNodeToolbar;
+
+    return {
+      deleteNode: () => {
+        getWorkflowNodeToolbar().removeNode();
+      },
+    };
   },
 });
 </script>
@@ -22,7 +30,14 @@ export default defineComponent({
 
   width: 100px;
   height: 30px;
-  background: #6b7b8d;
-  opacity: 0.5;
+
+  .jm-icon-button-delete {
+    cursor: pointer;
+    font-size: 18px;
+
+    &:hover {
+      color: #F5222D;
+    }
+  }
 }
 </style>

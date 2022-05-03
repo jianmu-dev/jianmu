@@ -6,10 +6,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onMounted, PropType, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, PropType, provide, ref } from 'vue';
 import WorkflowGraph from '../../model/workflow-graph';
 import { IWorkflow } from '../../model/data/common';
 import NodeToolbar from './node-toolbar.vue';
+import { WorkflowNodeToolbar } from '../../model/workflow-node-toolbar';
 
 export default defineComponent({
   components: { NodeToolbar },
@@ -25,6 +26,8 @@ export default defineComponent({
     const nodeToolbar = ref<HTMLElement>();
     const container = ref<HTMLElement>();
     let workflowGraph: WorkflowGraph;
+
+    provide('getWorkflowNodeToolbar', (): WorkflowNodeToolbar => workflowGraph!.workflowNodeToolbar);
 
     onMounted(() => {
       // 初始化画布

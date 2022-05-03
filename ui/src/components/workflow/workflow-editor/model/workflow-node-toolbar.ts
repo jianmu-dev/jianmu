@@ -24,6 +24,10 @@ export class WorkflowNodeToolbar {
       return;
     }
 
+    this.deleteNode();
+  }
+
+  private deleteNode() {
     delete this.node;
     this.el.style.left = '';
     this.el.style.top = '';
@@ -59,6 +63,8 @@ export class WorkflowNodeToolbar {
       dangerouslyUseHTMLString: true,
     }).then(async () => {
       this.graph.removeCell(node);
+
+      this.deleteNode();
     }).catch(() => {
     });
   }
