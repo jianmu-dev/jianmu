@@ -1,17 +1,16 @@
-import { Cell, CellView, Graph, JQuery, Node, Shape } from '@antv/x6';
+import { Cell, Graph, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
-import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
-import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import { ZoomTypeEnum } from './data/enumeration';
+import { WorkflowNodeToolbar } from './workflow-node-toolbar';
 
 export default class WorkflowGraph {
-  private readonly proxy: any;
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
+  private readonly workflowNodeToolbar: WorkflowNodeToolbar;
 
   constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
-    this.proxy = proxy;
-    const containerParentEl = container.parentElement!;
+    const containerParentEl = container.parentElement!.parentElement!;
     this.clickNodeCallback = clickNodeCallback;
 
     // #region 初始化画布
@@ -109,6 +108,9 @@ export default class WorkflowGraph {
       clipboard: true,
     });
 
+    // 初始化节点工具栏
+    this.workflowNodeToolbar = new WorkflowNodeToolbar(proxy, this.graph);
+
     this.registerShortcut();
     this.bindEvent(container);
 
@@ -168,6 +170,9 @@ export default class WorkflowGraph {
     const { pixelX, pixelY } = normalizeWheel(e);
 
     this.graph.translateBy(-pixelX, -pixelY);
+
+    // 移动节点工具栏
+    this.workflowNodeToolbar.move();
   }
 
   /**
@@ -250,44 +255,8 @@ export default class WorkflowGraph {
       ) as NodeListOf<SVGElement>;
       showPorts(ports, true);
 
-      // 添加删除按钮
-      node.addTools({
-        name: 'button-remove',
-        args: {
-          x: 0,
-          y: 0,
-          // TODO 根据svg内容确定markup
-          markup: {},
-          onClick: ({ cell }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-            const proxy = new CustomX6NodeProxy(cell as Node);
-            const nodeData = proxy.getData();
-
-            let msg = '<div>确定要删除吗?</div>';
-            msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${nodeData.getName()}</div>`;
-            let title = '删除';
-            switch (nodeData.getType()) {
-              case NodeTypeEnum.ASYNC_TASK:
-              case NodeTypeEnum.SHELL:
-                title += '节点';
-                break;
-              case NodeTypeEnum.CRON:
-              case NodeTypeEnum.WEBHOOK:
-                title += '触发器';
-                break;
-            }
-
-            this.proxy.$confirm(msg, title, {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning',
-              dangerouslyUseHTMLString: true,
-            }).then(async () => {
-              this.graph.removeCell(cell);
-            }).catch(() => {
-            });
-          },
-        },
-      });
+      // 显示节点工具栏
+      this.workflowNodeToolbar.show(node);
     });
     this.graph.on('node:mouseleave', ({ node }) => {
       const ports = container.querySelectorAll(
@@ -295,8 +264,8 @@ export default class WorkflowGraph {
       ) as NodeListOf<SVGElement>;
       showPorts(ports, false);
 
-      // 移除删除按钮
-      node.removeTool('button-remove');
+      // 隐藏节点工具栏
+      this.workflowNodeToolbar.hide();
     });
 
     this.graph.on('edge:mouseenter', ({ cell }) => {

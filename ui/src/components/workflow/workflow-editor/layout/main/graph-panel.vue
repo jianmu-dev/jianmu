@@ -1,13 +1,18 @@
 <template>
-  <div class="jm-workflow-editor-graph-panel" ref="container" @wheel.prevent="wheelScroll"/>
+  <div class="jm-workflow-editor-graph-panel">
+    <node-toolbar ref="nodeToolbar"/>
+    <div ref="container" @wheel.prevent="wheelScroll"/>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, getCurrentInstance, onMounted, PropType, ref } from 'vue';
 import WorkflowGraph from '../../model/workflow-graph';
 import { IWorkflow } from '../../model/data/common';
+import NodeToolbar from './node-toolbar.vue';
 
 export default defineComponent({
+  components: { NodeToolbar },
   props: {
     workflowData: {
       type: Object as PropType<IWorkflow>,
@@ -17,6 +22,7 @@ export default defineComponent({
   emits: ['graph-created', 'node-selected'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
+    const nodeToolbar = ref<HTMLElement>();
     const container = ref<HTMLElement>();
     let workflowGraph: WorkflowGraph;
 
@@ -31,6 +37,7 @@ export default defineComponent({
     });
 
     return {
+      nodeToolbar,
       container,
       wheelScroll(e: WheelEvent) {
         if (!workflowGraph) {
@@ -50,5 +57,6 @@ export default defineComponent({
 .jm-workflow-editor-graph-panel {
   // 铺满剩余宽度
   flex-grow: 1;
+  position: relative;
 }
 </style>

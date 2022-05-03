@@ -80,7 +80,7 @@ export default defineComponent({
   position: absolute;
   left: 0;
   top: @node-panel-top;
-  z-index: 1;
+  z-index: 2;
 
   &.collapsed {
     width: 0;

@@ -42,8 +42,8 @@ export default class WorkflowDnd {
 
         // 结束拖拽时，必须克隆拖动的节点，因为拖动的节点和目标节点不在一个画布
         const targetNode = draggingNode.clone();
+        // 保证不偏移
         setTimeout(() => {
-          // 保证不偏移
           const { x, y } = targetNode.getPosition();
           targetNode.setPosition(x, y - SHAPE_TEXT_MAX_HEIGHT / 2);
         });
