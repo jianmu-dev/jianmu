@@ -55,6 +55,15 @@ export default defineComponent({
 .jm-workflow-x6-vue-shape {
   width: @node-icon-width;
 
+  &:hover {
+    .icon {
+      img {
+        //box-shadow: 0 0 10px 4px #C6D3DF;
+        box-shadow: 0 0 8px 1px #C5D9FF;
+      }
+    }
+  }
+
   &.clickable {
     cursor: pointer;
   }
@@ -71,7 +80,6 @@ export default defineComponent({
       width: 100%;
       height: 100%;
       border-radius: 25.5%;
-      box-shadow: 0 0 8px 1px #C5D9FF;
     }
   }
 
