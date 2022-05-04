@@ -16,11 +16,6 @@ export class WorkflowNodeToolbar {
   }
 
   show(node: Node): void {
-    if (this.graph.isSelected(node)) {
-      // 节点已被选中时，忽略
-      return;
-    }
-
     this.node = node;
     this.move();
   }

@@ -269,6 +269,11 @@ export default class WorkflowGraph {
     });
 
     this.graph.on('node:mouseenter', ({ node }) => {
+      if (this.graph.isSelected(node)) {
+        // 节点已被选中时，忽略
+        return;
+      }
+
       // 显示连接桩
       this.getVisiblePorts(node).forEach(port => (port.style.visibility = 'visible'));
 
