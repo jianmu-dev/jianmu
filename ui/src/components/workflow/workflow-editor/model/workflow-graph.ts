@@ -376,9 +376,10 @@ export default class WorkflowGraph {
       return;
     }
 
-    const selectionBox = nodeList.item(0);
-    selectionBox.style.width = '';
-    selectionBox.style.height = '';
+    Array.from(nodeList).forEach(selectionBox => {
+      selectionBox.style.width = '';
+      selectionBox.style.height = '';
+    });
   }
 
   /**
