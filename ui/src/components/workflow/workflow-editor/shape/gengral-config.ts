@@ -1,3 +1,5 @@
+export const PRIMARY_COLOR = '#096DD9';
+
 export const NODE = {
   iconSize: {
     width: 72,
@@ -7,10 +9,18 @@ export const NODE = {
 };
 
 export const EDGE = {
-  lineColor: {
+  stroke: {
     _default: '#667085',
     connecting: '#A7B0BB',
     hover: '#B9CFE6',
+  },
+};
+
+export const PORT = {
+  fill: {
+    _default: '#FFFFFF',
+    connectingSource: '#A7B0BB',
+    connectingTarget: PRIMARY_COLOR,
   },
 };
 
@@ -24,7 +34,7 @@ export const PORTS = {
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#FFFFFF',
+          fill: PORT.fill._default,
           style: {
             visibility: 'hidden',
           },
@@ -39,7 +49,7 @@ export const PORTS = {
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#FFFFFF',
+          fill: PORT.fill._default,
           style: {
             visibility: 'hidden',
           },
@@ -54,7 +64,7 @@ export const PORTS = {
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#FFFFFF',
+          fill: PORT.fill._default,
           style: {
             visibility: 'hidden',
           },
@@ -69,7 +79,7 @@ export const PORTS = {
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#FFFFFF',
+          fill: PORT.fill._default,
           style: {
             visibility: 'hidden',
           },

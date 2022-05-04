@@ -3,9 +3,10 @@ import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
 import { ZoomTypeEnum } from './data/enumeration';
 import { WorkflowNodeToolbar } from './workflow-node-toolbar';
-import { EDGE } from '../shape/gengral-config';
+import { EDGE, PORT } from '../shape/gengral-config';
 
-const { lineColor } = EDGE;
+const { stroke: lineColor } = EDGE;
+const { fill: circleBgColor } = PORT;
 
 export default class WorkflowGraph {
   private readonly container: HTMLElement;
@@ -30,8 +31,14 @@ export default class WorkflowGraph {
         connectionPoint: 'anchor',
         // 禁止在相同的起始节点和终止之间创建多条边
         allowMulti: false,
-        // 禁止连接到画布空白位置的点
-        allowBlank: false,
+        allowBlank({ sourcePort }) {
+          const sourceMagnet = Array.from(this.container.querySelectorAll<SVGElement>('.x6-port-body'))
+            .find(port => sourcePort === port.getAttribute('port'))!;
+          sourceMagnet.setAttribute('fill', circleBgColor._default);
+
+          // 禁止连接到画布空白位置的点
+          return false;
+        },
         // 禁止创建循环连线，即边的起始节点和终止节点为同一节点
         allowLoop: false,
         // 禁止边链接到节点（非节点上的链接桩）
@@ -77,14 +84,19 @@ export default class WorkflowGraph {
         validateConnection({ targetMagnet }) {
           return !!targetMagnet;
         },
+        validateMagnet({ e, magnet, view, cell }) {
+          magnet.setAttribute('fill', circleBgColor.connectingSource);
+          return true;
+        },
       },
       highlighting: {
         // 连线过程中，自动吸附到链接桩时被使用
         magnetAdsorbed: {
           name: 'stroke',
           args: {
+            padding: 0,
             attrs: {
-              stroke: '#096DD9',
+              stroke: circleBgColor.connectingTarget,
             },
           },
         },
