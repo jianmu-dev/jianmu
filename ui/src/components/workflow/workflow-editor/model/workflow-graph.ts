@@ -246,7 +246,12 @@ export default class WorkflowGraph {
     this.graph.on('node:selected', ({ node }) => {
       this.optimizeSelectionBoxStyle();
     });
-    this.graph.on('node:click', ({ node }) => {
+    this.graph.on('node:click', ({ e, node }) => {
+      if (e.target.getAttribute('class') === 'x6-port-body') {
+        // 表示点击连接桩，忽略
+        return;
+      }
+
       this.clickNodeCallback(node.id);
     });
     this.graph.on('node:mousemove', ({ e, node }) => {
