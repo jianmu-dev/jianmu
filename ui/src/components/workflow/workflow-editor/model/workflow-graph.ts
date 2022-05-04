@@ -331,8 +331,7 @@ export default class WorkflowGraph {
     // 环路检测：排除以当前节点为终点的上游所有节点
     const nodes = this.graph.getNodes().filter(node => !excludedNodes.includes(node));
 
-    const visiblePortIds = [...currentNodePortIds];
-    visiblePortIds.push(...nodes.flatMap(node => {
+    const visiblePortIds = nodes.flatMap(node => {
       const nodePortIds = node.getPorts().map(metadata => metadata.id);
       flag = !!allEdges.find(edge => {
         const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
@@ -346,7 +345,13 @@ export default class WorkflowGraph {
       }
 
       return nodePortIds;
-    }));
+    });
+
+    if (visiblePortIds.length === 0) {
+      return [];
+    }
+
+    visiblePortIds.push(...currentNodePortIds);
 
     return Array.from(this.container.querySelectorAll<SVGElement>('.x6-port-body'))
       .filter(element => {
