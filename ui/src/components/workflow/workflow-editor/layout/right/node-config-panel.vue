@@ -7,8 +7,10 @@
     destroy-on-close
   >
     <template #title>
-      {{ nodeData.getName() }}
-      <a :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help"/>
+      <div>
+        <span>{{ nodeData.getName() }}</span>
+        <a :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help"/>
+      </div>
     </template>
     <div class="jm-workflow-editor-node-config-panel">
       <div class="panel-container">

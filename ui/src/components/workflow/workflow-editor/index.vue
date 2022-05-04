@@ -110,30 +110,15 @@ export default defineComponent({
 @import './vars';
 
 .jm-workflow-editor {
+  @import './theme/x6';
+  @import './theme/el';
+
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   background-color: #F0F2F5;
   user-select: none;
-
-  .el-drawer {
-    box-shadow: none;
-
-    &.rtl {
-      top: @tool-bar-height;
-      height: calc(100% - @tool-bar-height);
-    }
-
-    .el-drawer__header {
-      border-color: #E6EBF2;
-    }
-
-    .el-drawer__body {
-      border: 1px solid #E6EBF2;
-      border-top-width: 0;
-    }
-  }
 
   .main {
     position: relative;
