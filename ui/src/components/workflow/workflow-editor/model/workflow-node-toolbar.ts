@@ -1,7 +1,7 @@
-import { Graph, Node } from '@antv/x6';
+import { Edge, Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { NodeTypeEnum } from './data/enumeration';
-import { NODE } from '../shape/gengral-config';
+import { NODE, PORTS } from '../shape/gengral-config';
 
 export class WorkflowNodeToolbar {
   private readonly proxy: any;
@@ -16,14 +16,26 @@ export class WorkflowNodeToolbar {
   }
 
   show(node: Node): void {
+    if (this.graph.isSelected(node)) {
+      // 节点已被选中时，忽略
+      return;
+    }
+
     this.node = node;
+
+    // 显示连接桩
+    this.showPorts(node);
+
     this.move();
   }
 
   hide(e?: MouseEvent): void {
-    if (e && e.relatedTarget === this.el) {
+    if (!this.node || e && e.relatedTarget === this.el) {
       return;
     }
+
+    // 隐藏连接桩
+    this.hidePorts();
 
     this.deleteNode();
   }
@@ -70,7 +82,7 @@ export class WorkflowNodeToolbar {
     });
   }
 
-  move(): void {
+  private move(): void {
     if (!this.node) {
       return;
     }
@@ -100,5 +112,101 @@ export class WorkflowNodeToolbar {
       this.el.style.left = `${left}px`;
       this.el.style.top = `${top}px`;
     });
+  }
+
+  /**
+   * 显示连接桩
+   * pipeline节点边只能有一个进、一个出
+   * @param currentNode
+   * @private
+   */
+  private showPorts(currentNode: Node) {
+    const currentNodePortIds = currentNode.getPorts().map(metadata => metadata.id);
+    const allEdges = this.graph.getEdges();
+
+    if (allEdges.find(edge => {
+      const { port: sourcePortId } = edge.getSource() as Edge.TerminalCellData;
+      return currentNodePortIds.includes(sourcePortId);
+    })) {
+      // 表示当前节点存在出的边
+      return;
+    }
+
+    const excludedNodes = this.getNodesInLine(currentNode, allEdges);
+    // 环路检测：排除以当前节点为终点的上游所有节点
+    const nodes = this.graph.getNodes()
+      .filter(node => !excludedNodes.includes(node))
+      // 筛选不存在出的边
+      .filter(node => {
+        const nodePortIds = node.getPorts().map(metadata => metadata.id);
+        return !allEdges.find(edge => {
+          const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
+          return nodePortIds.includes(targetPortId);
+        });
+      });
+
+    if (nodes.length === 0) {
+      return;
+    }
+
+    nodes.push(currentNode);
+
+    nodes.forEach(node =>
+      node.getPorts().forEach(port => {
+        node.portProp(port.id!, {
+          args: {
+            dx: 0, dy: 0,
+          },
+          attrs: {
+            circle: {
+              style: {
+                visibility: 'visible',
+              },
+            },
+          },
+        });
+      }));
+  }
+
+  /**
+   * 隐藏连接桩
+   * @private
+   */
+  private hidePorts() {
+    this.graph.getNodes().forEach(node =>
+      node.getPorts().forEach(port =>
+        node.portProp(port.id!, {
+          args: PORTS.items.find(item => item.group === port.group)!.args,
+          attrs: {
+            circle: {
+              style: {
+                visibility: 'hidden',
+              },
+            },
+          },
+        })));
+  }
+
+  /**
+   * 获取以当前节点为终点的上游所有节点
+   * @param targetNode
+   * @param edges
+   * @private
+   */
+  private getNodesInLine(targetNode: Node, edges: Edge[]): Node[] {
+    const nodes: Node[] = [targetNode];
+
+    const targetNodePortsIds = targetNode.getPorts().map(metadata => metadata.id);
+    const edge = edges.find(edge => {
+      const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
+
+      return targetNodePortsIds.includes(targetPortId);
+    });
+
+    if (edge) {
+      nodes.push(...this.getNodesInLine(edge.getSourceNode()!, edges));
+    }
+
+    return nodes;
   }
 }
