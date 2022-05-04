@@ -24,21 +24,18 @@ export default class WorkflowGraph {
       // 不绘制网格背景
       grid: false,
       connecting: {
-        router: {
-          name: 'manhattan',
-          args: {
-            padding: 1,
-          },
-        },
-        connector: {
-          name: 'rounded',
-          args: {
-            radius: 8,
-          },
-        },
         anchor: 'center',
         connectionPoint: 'anchor',
+        // 禁止在相同的起始节点和终止之间创建多条边
+        allowMulti: false,
+        // 禁止连接到画布空白位置的点
         allowBlank: false,
+        // 禁止创建循环连线，即边的起始节点和终止节点为同一节点
+        allowLoop: false,
+        // 禁止边链接到节点（非节点上的链接桩）
+        allowNode: false,
+        // 禁止边链接到另一个边
+        allowEdge: false,
         snap: {
           radius: 20,
         },
@@ -82,12 +79,12 @@ export default class WorkflowGraph {
         },
       },
       highlighting: {
+        // 连线过程中，自动吸附到链接桩时被使用
         magnetAdsorbed: {
           name: 'stroke',
           args: {
             attrs: {
-              fill: '#5F95FF',
-              stroke: '#5F95FF',
+              stroke: '#096DD9',
             },
           },
         },

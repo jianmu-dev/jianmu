@@ -20,11 +20,11 @@ export const PORTS = {
       position: 'top',
       attrs: {
         circle: {
-          r: 4,
+          r: 5,
           magnet: true,
-          stroke: '#5F95FF',
+          stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#fff',
+          fill: '#FFFFFF',
           style: {
             visibility: 'hidden',
           },
@@ -35,11 +35,11 @@ export const PORTS = {
       position: 'right',
       attrs: {
         circle: {
-          r: 4,
+          r: 5,
           magnet: true,
-          stroke: '#5F95FF',
+          stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#fff',
+          fill: '#FFFFFF',
           style: {
             visibility: 'hidden',
           },
@@ -50,11 +50,11 @@ export const PORTS = {
       position: 'bottom',
       attrs: {
         circle: {
-          r: 4,
+          r: 5,
           magnet: true,
-          stroke: '#5F95FF',
+          stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#fff',
+          fill: '#FFFFFF',
           style: {
             visibility: 'hidden',
           },
@@ -65,11 +65,11 @@ export const PORTS = {
       position: 'left',
       attrs: {
         circle: {
-          r: 4,
+          r: 5,
           magnet: true,
-          stroke: '#5F95FF',
+          stroke: '#A7B0BB',
           strokeWidth: 1,
-          fill: '#fff',
+          fill: '#FFFFFF',
           style: {
             visibility: 'hidden',
           },
