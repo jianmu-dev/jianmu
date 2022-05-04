@@ -99,6 +99,8 @@ export default defineComponent({
         nodeWaringClicked.value = waringClicked;
       },
       handleNodeConfigPanelClosed: () => {
+        // 取消选中
+        graph.value!.unselect(selectedNodeId.value);
         selectedNodeId.value = undefined;
       },
     };

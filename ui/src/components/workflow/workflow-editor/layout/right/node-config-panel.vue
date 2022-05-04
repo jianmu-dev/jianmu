@@ -55,8 +55,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const getGraph = inject('getGraph') as () => Graph;
-    const graph = getGraph();
-    const node = graph.getNodes().find(({ id }) => props.nodeId === id)!;
+    const node = getGraph().getNodes().find(({ id }) => props.nodeId === id)!;
     const proxy = new CustomX6NodeProxy(node);
     // 不能为ref，否则，表单内容的变化影响数据绑定
     const nodeData = proxy.getData();
@@ -78,9 +77,6 @@ export default defineComponent({
       cancel: () => {
         // 关闭抽屉
         emit('update:model-value', false);
-
-        // 取消选中
-        graph.unselect(node);
       },
       save: () => {
         formRef.value.validate((valid: boolean) => {
@@ -90,9 +86,6 @@ export default defineComponent({
           proxy.setData(nodeData);
           // 关闭抽屉
           emit('update:model-value', false);
-
-          // 取消选中
-          graph.unselect(node);
 
           // 通过校验时，删除警告
           node.removeTool('button');
