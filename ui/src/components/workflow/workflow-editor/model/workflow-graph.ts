@@ -246,7 +246,7 @@ export default class WorkflowGraph {
    */
   private bindEvent() {
     this.graph.on('node:selected', ({ node }) => {
-      this.optimizeSelectionBoxStyle();
+      this.optimizeSelectionBoxStyle(node);
     });
     this.graph.on('node:click', ({ e, node }) => {
       if (e.target.getAttribute('class') === 'x6-port-body') {
@@ -257,7 +257,7 @@ export default class WorkflowGraph {
       this.clickNodeCallback(node.id);
     });
     this.graph.on('node:mousemove', ({ e, node }) => {
-      this.optimizeSelectionBoxStyle();
+      this.optimizeSelectionBoxStyle(node);
 
       // 移动节点工具栏
       this.workflowNodeToolbar.move();
@@ -370,16 +370,16 @@ export default class WorkflowGraph {
     return nodes;
   }
 
-  private optimizeSelectionBoxStyle(): void {
-    const nodeList = this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box');
-    if (nodeList.length === 0) {
+  private optimizeSelectionBoxStyle(node: Node): void {
+    const selectionBox = Array.from(this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box'))
+      .find(item => item.getAttribute('data-cell-id') === node.id);
+
+    if (!selectionBox) {
       return;
     }
 
-    Array.from(nodeList).forEach(selectionBox => {
-      selectionBox.style.width = '';
-      selectionBox.style.height = '';
-    });
+    selectionBox.style.width = '';
+    selectionBox.style.height = '';
   }
 
   /**
