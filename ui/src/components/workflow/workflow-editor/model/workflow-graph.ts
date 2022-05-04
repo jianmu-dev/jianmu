@@ -4,6 +4,7 @@ import { WorkflowTool } from './workflow-tool';
 import { ZoomTypeEnum } from './data/enumeration';
 import { WorkflowNodeToolbar } from './workflow-node-toolbar';
 import { EDGE, PORT } from '../shape/gengral-config';
+import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
 
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
@@ -13,6 +14,7 @@ export default class WorkflowGraph {
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
   readonly workflowNodeToolbar: WorkflowNodeToolbar;
+  private readonly workflowEdgeToolbar: WorkflowEdgeToolbar;
 
   constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
     const containerParentEl = container.parentElement!.parentElement!;
@@ -116,6 +118,8 @@ export default class WorkflowGraph {
 
     // 初始化节点工具栏
     this.workflowNodeToolbar = new WorkflowNodeToolbar(proxy, this.graph);
+    // 初始化边工具栏
+    this.workflowEdgeToolbar = new WorkflowEdgeToolbar(this.graph);
 
     this.registerShortcut();
     this.bindEvent();
@@ -277,50 +281,13 @@ export default class WorkflowGraph {
       this.workflowNodeToolbar.hide(e.originalEvent);
     });
 
-    this.graph.on('edge:mouseenter', ({ cell }) => {
-      // 设置颜色
-      cell.setAttrByPath('line/stroke', lineColor.hover);
-      // 添加所有工具
-      cell.addTools([
-        {
-          // 路径点
-          name: 'vertices',
-          args: {
-            // TODO 根据svg内容确定attr
-            attrs: {},
-          },
-        },
-        {
-          // 线段
-          name: 'segments',
-          args: {
-            // TODO 根据svg内容确定attr
-            attrs: {},
-          },
-        },
-        {
-          // 删除按钮
-          name: 'button-remove',
-          args: {
-            distance: '50%',
-            offset: {
-              y: -12,
-            },
-            // TODO 根据svg内容确定markup
-            markup: {},
-          },
-        },
-      ]);
+    this.graph.on('edge:mouseenter', ({ edge }) => {
+      // 显示边工具栏
+      this.workflowEdgeToolbar.show(edge);
     });
-    this.graph.on('edge:mouseleave', ({ cell }) => {
-      // 设置颜色
-      cell.setAttrByPath('line/stroke', lineColor._default);
-      // 移除路径点
-      cell.removeTool('vertices');
-      // 移除线段
-      cell.removeTool('segments');
-      // 移除删除按钮
-      cell.removeTool('button-remove');
+    this.graph.on('edge:mouseleave', ({ edge }) => {
+      // 隐藏边工具栏
+      this.workflowEdgeToolbar.hide();
     });
   }
 
