@@ -1,7 +1,7 @@
 import { Edge, Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { NodeTypeEnum } from './data/enumeration';
-import { NODE, PORTS } from '../shape/gengral-config';
+import { NODE, PORT } from '../shape/gengral-config';
 
 export class WorkflowNodeToolbar {
   private readonly proxy: any;
@@ -154,14 +154,9 @@ export class WorkflowNodeToolbar {
     nodes.forEach(node =>
       node.getPorts().forEach(port => {
         node.portProp(port.id!, {
-          args: {
-            dx: 0, dy: 0,
-          },
           attrs: {
             circle: {
-              style: {
-                visibility: 'visible',
-              },
+              r: PORT.r,
             },
           },
         });
@@ -176,12 +171,9 @@ export class WorkflowNodeToolbar {
     this.graph.getNodes().forEach(node =>
       node.getPorts().forEach(port =>
         node.portProp(port.id!, {
-          args: PORTS.items.find(item => item.group === port.group)!.args,
           attrs: {
             circle: {
-              style: {
-                visibility: 'hidden',
-              },
+              r: 0,
             },
           },
         })));
