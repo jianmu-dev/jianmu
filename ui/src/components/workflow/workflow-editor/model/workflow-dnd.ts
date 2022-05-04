@@ -2,12 +2,12 @@ import { Addon, Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 // @ts-ignore
 import listen from 'good-listener';
 import { IWorkflowNode } from './data/common';
-import { PORTS, SHAPE_SIZE, SHAPE_TEXT_MAX_HEIGHT } from '../shape/gengral-config';
+import { NODE, PORTS } from '../shape/gengral-config';
 import nodeWarningIcon from '../svgs/node-warning.svg';
 import { WorkflowValidator } from './workflow-validator';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
-const { width, height } = SHAPE_SIZE;
+const { iconSize: { width, height }, textMaxHeight } = NODE;
 
 interface IDraggingListener {
   mousePosition: Point.PointLike;
@@ -31,21 +31,21 @@ export default class WorkflowDnd {
       animation: true,
       getDragNode: (sourceNode: Node) => {
         const { width, height } = sourceNode.getSize();
-        sourceNode.resize(width, height + SHAPE_TEXT_MAX_HEIGHT);
+        sourceNode.resize(width, height + textMaxHeight);
 
         // 开始拖拽时初始化的节点，直接使用，无需克隆
         return sourceNode;
       },
       getDropNode: (draggingNode: Node) => {
         const { width, height } = draggingNode.getSize();
-        draggingNode.resize(width, height - SHAPE_TEXT_MAX_HEIGHT);
+        draggingNode.resize(width, height - textMaxHeight);
 
         // 结束拖拽时，必须克隆拖动的节点，因为拖动的节点和目标节点不在一个画布
         const targetNode = draggingNode.clone();
         // 保证不偏移
         setTimeout(() => {
           const { x, y } = targetNode.getPosition();
-          targetNode.setPosition(x, y - SHAPE_TEXT_MAX_HEIGHT / 2);
+          targetNode.setPosition(x, y - textMaxHeight / 2);
         });
 
         const proxy = new CustomX6NodeProxy(targetNode);

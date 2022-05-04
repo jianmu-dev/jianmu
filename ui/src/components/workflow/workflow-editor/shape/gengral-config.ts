@@ -1,9 +1,10 @@
-export const SHAPE_SIZE = {
-  width: 80,
-  height: 80,
+export const NODE = {
+  iconSize: {
+    width: 80,
+    height: 80,
+  },
+  textMaxHeight: 40,
 };
-
-export const SHAPE_TEXT_MAX_HEIGHT = 40;
 
 export const PORTS = {
   groups: {
