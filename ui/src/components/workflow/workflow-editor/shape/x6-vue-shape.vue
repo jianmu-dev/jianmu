@@ -1,6 +1,8 @@
 <template>
   <div :class="{ 'jm-workflow-x6-vue-shape': true, clickable }">
-    <div class="icon"><img :src="iconUrl"/></div>
+    <div class="icon">
+      <div class="img" :style="`background-image: url('${iconUrl}');`"></div>
+    </div>
     <div class="name">{{ nameVal }}</div>
   </div>
 </template>
@@ -57,7 +59,7 @@ export default defineComponent({
 
   &:hover {
     .icon {
-      img {
+      .img {
         //box-shadow: 0 0 10px 4px #C6D3DF;
         box-shadow: 0 0 8px 1px #C5D9FF;
       }
@@ -76,10 +78,11 @@ export default defineComponent({
     width: @node-icon-width;
     height: @node-icon-height;
 
-    img {
+    .img {
       width: 100%;
       height: 100%;
       border-radius: 25.5%;
+      background-size: cover;
     }
   }
 
