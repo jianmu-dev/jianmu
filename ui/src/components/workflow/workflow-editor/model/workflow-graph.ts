@@ -238,10 +238,15 @@ export default class WorkflowGraph {
       }
     };
 
+    this.graph.on('node:selected', ({ node }) => {
+      this.optimizeSelectionBoxStyle(container);
+    });
     this.graph.on('node:click', ({ node }) => {
       this.clickNodeCallback(node.id);
     });
     this.graph.on('node:mousemove', ({ e, node }) => {
+      this.optimizeSelectionBoxStyle(container);
+
       // 移动节点工具栏
       this.workflowNodeToolbar.move();
     });
@@ -303,6 +308,14 @@ export default class WorkflowGraph {
       // 移除删除按钮
       cell.removeTool('button-remove');
     });
+  }
+
+  private optimizeSelectionBoxStyle(container: HTMLElement): void {
+    const selectionBox = container
+      .querySelectorAll<HTMLElement>('.x6-widget-selection-box')
+      .item(0);
+    selectionBox.style.width = '';
+    selectionBox.style.height = '';
   }
 
   /**
