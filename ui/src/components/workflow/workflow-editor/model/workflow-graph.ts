@@ -386,7 +386,7 @@ export default class WorkflowGraph {
       return;
     }
 
-    Array.from(this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box'))
+    Array.from(this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box-node'))
       .forEach(selectionBox => {
         selectionBox.style.width = '';
         selectionBox.style.height = '';
@@ -394,7 +394,7 @@ export default class WorkflowGraph {
   }
 
   private optimizeSelectionBoxStyle(node: Node): void {
-    const selectionBox = Array.from(this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box'))
+    const selectionBox = Array.from(this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box-node'))
       .find(item => item.getAttribute('data-cell-id') === node.id);
 
     if (!selectionBox) {

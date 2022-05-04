@@ -121,6 +121,9 @@ export default defineComponent({
   flex-direction: column;
   background-color: #F0F2F5;
   user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 
   .main {
     position: relative;
