@@ -50,8 +50,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+@import '../vars';
+
 .jm-workflow-x6-vue-shape {
-  width: 80px;
+  width: @node-icon-width;
 
   &.clickable {
     cursor: pointer;
@@ -62,8 +64,8 @@ export default defineComponent({
   }
 
   .icon {
-    width: 80px;
-    height: 80px;
+    width: @node-icon-width;
+    height: @node-icon-height;
 
     img {
       width: 100%;
@@ -74,7 +76,7 @@ export default defineComponent({
   }
 
   .name {
-    max-height: 40px;
+    max-height: @node-text-max-height;
     line-height: 20px;
     // 超过两行直接截断
     overflow: hidden;

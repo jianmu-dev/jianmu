@@ -1,7 +1,7 @@
 export const NODE = {
   iconSize: {
-    width: 80,
-    height: 80,
+    width: 72,
+    height: 72,
   },
   textMaxHeight: 40,
 };
