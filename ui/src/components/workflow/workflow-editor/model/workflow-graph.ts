@@ -1,4 +1,4 @@
-import { Cell, Graph, Shape } from '@antv/x6';
+import { Cell, Edge, Graph, Node, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
 import { ZoomTypeEnum } from './data/enumeration';
@@ -8,12 +8,14 @@ import { EDGE } from '../shape/gengral-config';
 const { lineColor } = EDGE;
 
 export default class WorkflowGraph {
+  private readonly container: HTMLElement;
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
   readonly workflowNodeToolbar: WorkflowNodeToolbar;
 
   constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
     const containerParentEl = container.parentElement!.parentElement!;
+    this.container = container;
     this.clickNodeCallback = clickNodeCallback;
 
     // #region 初始化画布
@@ -66,8 +68,6 @@ export default class WorkflowGraph {
           });
         },
         validateEdge({ edge, type, previous }) {
-          // TODO 校验pipeline箭头只能有一个进、一个出
-
           // 移除虚线
           edge.removeAttrByPath('line/strokeDasharray');
           // 设置颜色
@@ -106,7 +106,7 @@ export default class WorkflowGraph {
     this.workflowNodeToolbar = new WorkflowNodeToolbar(proxy, this.graph);
 
     this.registerShortcut();
-    this.bindEvent(container);
+    this.bindEvent();
 
     // 注册容器大小变化监听器
     this.registerContainerResizeListener(containerParentEl);
@@ -228,44 +228,33 @@ export default class WorkflowGraph {
 
   /**
    * 绑定事件
-   * @param container
    * @private
    */
-  private bindEvent(container: HTMLElement) {
-    // 控制连接桩显示/隐藏
-    const showPorts = (ports: NodeListOf<SVGElement>, show: boolean) => {
-      for (let i = 0, len = ports.length; i < len; i = i + 1) {
-        ports[i].style.visibility = show ? 'visible' : 'hidden';
-      }
-    };
-
+  private bindEvent() {
     this.graph.on('node:selected', ({ node }) => {
-      this.optimizeSelectionBoxStyle(container);
+      this.optimizeSelectionBoxStyle();
     });
     this.graph.on('node:click', ({ node }) => {
       this.clickNodeCallback(node.id);
     });
     this.graph.on('node:mousemove', ({ e, node }) => {
-      this.optimizeSelectionBoxStyle(container);
+      this.optimizeSelectionBoxStyle();
 
       // 移动节点工具栏
       this.workflowNodeToolbar.move();
     });
 
     this.graph.on('node:mouseenter', ({ node }) => {
-      const ports = container.querySelectorAll(
-        '.x6-port-body',
-      ) as NodeListOf<SVGElement>;
-      showPorts(ports, true);
+      // 显示连接桩
+      this.getVisiblePorts(node).forEach(port => (port.style.visibility = 'visible'));
 
       // 显示节点工具栏
       this.workflowNodeToolbar.show(node);
     });
     this.graph.on('node:mouseleave', ({ e, node }) => {
-      const ports = container.querySelectorAll(
-        '.x6-port-body',
-      ) as NodeListOf<SVGElement>;
-      showPorts(ports, false);
+      // 隐藏连接桩
+      Array.from(this.container.querySelectorAll<SVGElement>('.x6-port-body'))
+        .forEach(port => (port.style.visibility = 'hidden'));
 
       // 隐藏节点工具栏
       this.workflowNodeToolbar.hide(e.originalEvent);
@@ -318,8 +307,84 @@ export default class WorkflowGraph {
     });
   }
 
-  private optimizeSelectionBoxStyle(container: HTMLElement): void {
-    const nodeList = container.querySelectorAll<HTMLElement>('.x6-widget-selection-box');
+  /**
+   * 获取可见的连接桩
+   * pipeline节点边只能有一个进、一个出
+   * @param currentNode
+   * @private
+   */
+  private getVisiblePorts(currentNode: Node): SVGElement[] {
+    const currentNodePortIds = currentNode.getPorts().map(metadata => metadata.id);
+    const allEdges = this.graph.getEdges();
+    let flag = !!allEdges.find(edge => {
+      const { port: sourcePortId } = edge.getSource() as Edge.TerminalCellData;
+
+      return currentNodePortIds.includes(sourcePortId);
+    });
+
+    if (flag) {
+      // 表示存在出的边
+      return [];
+    }
+
+    const excludedNodes = this.getNodesInLine(currentNode, allEdges);
+    // 环路检测：排除以当前节点为终点的上游所有节点
+    const nodes = this.graph.getNodes().filter(node => !excludedNodes.includes(node));
+
+    const visiblePortIds = [...currentNodePortIds];
+    visiblePortIds.push(...nodes.flatMap(node => {
+      const nodePortIds = node.getPorts().map(metadata => metadata.id);
+      flag = !!allEdges.find(edge => {
+        const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
+
+        return nodePortIds.includes(targetPortId);
+      });
+
+      if (flag) {
+        // 表示存在出的边
+        return [];
+      }
+
+      return nodePortIds;
+    }));
+
+    return Array.from(this.container.querySelectorAll<SVGElement>('.x6-port-body'))
+      .filter(element => {
+        const index = visiblePortIds.indexOf(element.getAttribute('port') as string);
+        if (index >= 0) {
+          // 优化循环次数
+          visiblePortIds.splice(index, 1);
+          return true;
+        }
+        return false;
+      });
+  }
+
+  /**
+   * 获取以当前节点为终点的上游所有节点
+   * @param targetNode
+   * @param edges
+   * @private
+   */
+  private getNodesInLine(targetNode: Node, edges: Edge[]): Node[] {
+    const nodes: Node[] = [targetNode];
+
+    const targetNodePortsIds = targetNode.getPorts().map(metadata => metadata.id);
+    const edge = edges.find(edge => {
+      const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
+
+      return targetNodePortsIds.includes(targetPortId);
+    });
+
+    if (edge) {
+      nodes.push(...this.getNodesInLine(edge.getSourceNode()!, edges));
+    }
+
+    return nodes;
+  }
+
+  private optimizeSelectionBoxStyle(): void {
+    const nodeList = this.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box');
     if (nodeList.length === 0) {
       return;
     }
