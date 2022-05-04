@@ -179,6 +179,8 @@ export default class WorkflowGraph {
 
     this.graph.translateBy(-pixelX, -pixelY);
 
+    this.optimizeAllSelectionBoxStyle();
+
     // 隐藏节点工具栏
     this.workflowNodeToolbar.hide();
   }
@@ -371,6 +373,19 @@ export default class WorkflowGraph {
     }
 
     return nodes;
+  }
+
+  private optimizeAllSelectionBoxStyle() {
+    if (this.graph.getSelectedCellCount() === 0) {
+      // 没有选中的节点时，忽略
+      return;
+    }
+
+    Array.from(this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box'))
+      .forEach(selectionBox => {
+        selectionBox.style.width = '';
+        selectionBox.style.height = '';
+      });
   }
 
   private optimizeSelectionBoxStyle(node: Node): void {
