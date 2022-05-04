@@ -247,6 +247,9 @@ export default class WorkflowGraph {
   private bindEvent() {
     this.graph.on('node:selected', ({ node }) => {
       this.optimizeSelectionBoxStyle(node);
+
+      // 隐藏节点工具栏
+      this.workflowNodeToolbar.hide();
     });
     this.graph.on('node:click', ({ e, node }) => {
       if (e.target.getAttribute('class') === 'x6-port-body') {
