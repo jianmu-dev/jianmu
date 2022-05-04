@@ -10,7 +10,6 @@ const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
 
 export default class WorkflowGraph {
-  private readonly container: HTMLElement;
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
   readonly workflowNodeToolbar: WorkflowNodeToolbar;
@@ -18,7 +17,6 @@ export default class WorkflowGraph {
 
   constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
     const containerParentEl = container.parentElement!.parentElement!;
-    this.container = container;
     this.clickNodeCallback = clickNodeCallback;
 
     // #region 初始化画布
@@ -33,8 +31,8 @@ export default class WorkflowGraph {
         connectionPoint: 'anchor',
         // 禁止在相同的起始节点和终止之间创建多条边
         allowMulti: false,
-        allowBlank({ sourcePort }) {
-          const sourceMagnet = Array.from(this.container.querySelectorAll<SVGElement>('.x6-port-body'))
+        allowBlank: ({ sourcePort }) => {
+          const sourceMagnet = Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-port-body'))
             .find(port => sourcePort === port.getAttribute('port'))!;
           sourceMagnet.setAttribute('fill', circleBgColor._default);
 
@@ -274,7 +272,7 @@ export default class WorkflowGraph {
     });
     this.graph.on('node:mouseleave', ({ e, node }) => {
       // 隐藏连接桩
-      Array.from(this.container.querySelectorAll<SVGElement>('.x6-port-body'))
+      Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-port-body'))
         .forEach(port => (port.style.visibility = 'hidden'));
 
       // 隐藏节点工具栏
@@ -337,7 +335,7 @@ export default class WorkflowGraph {
 
     visiblePortIds.push(...currentNodePortIds);
 
-    return Array.from(this.container.querySelectorAll<SVGElement>('.x6-port-body'))
+    return Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-port-body'))
       .filter(element => {
         const index = visiblePortIds.indexOf(element.getAttribute('port') as string);
         if (index >= 0) {
@@ -373,7 +371,7 @@ export default class WorkflowGraph {
   }
 
   private optimizeSelectionBoxStyle(): void {
-    const nodeList = this.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box');
+    const nodeList = this.graph.container.querySelectorAll<HTMLElement>('.x6-widget-selection-box');
     if (nodeList.length === 0) {
       return;
     }
