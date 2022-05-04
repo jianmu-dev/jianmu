@@ -126,8 +126,14 @@ export default defineComponent({
       display: flex;
       flex-wrap: wrap;
 
-      .jm-workflow-x6-vue-shape {
+      ::v-deep(.jm-workflow-x6-vue-shape) {
         margin: 10px;
+        width: 56px;
+
+        .icon {
+          width: 56px;
+          height: 56px;
+        }
       }
     }
   }
