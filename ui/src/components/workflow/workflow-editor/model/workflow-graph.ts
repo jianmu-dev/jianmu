@@ -311,9 +311,12 @@ export default class WorkflowGraph {
   }
 
   private optimizeSelectionBoxStyle(container: HTMLElement): void {
-    const selectionBox = container
-      .querySelectorAll<HTMLElement>('.x6-widget-selection-box')
-      .item(0);
+    const nodeList = container.querySelectorAll<HTMLElement>('.x6-widget-selection-box');
+    if (nodeList.length === 0) {
+      return;
+    }
+    
+    const selectionBox = nodeList.item(0);
     selectionBox.style.width = '';
     selectionBox.style.height = '';
   }
