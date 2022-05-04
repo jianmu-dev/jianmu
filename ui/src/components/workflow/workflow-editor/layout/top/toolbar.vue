@@ -118,7 +118,7 @@ export default defineComponent({
 
     &:hover {
       background-color: #EFF7FF;
-      color: #096DD9;
+      color: @primary-color;
     }
   }
 
