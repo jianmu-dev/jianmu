@@ -6,6 +6,14 @@ export const NODE = {
   textMaxHeight: 40,
 };
 
+export const EDGE = {
+  lineColor: {
+    _default: '#667085',
+    connecting: '#A7B0BB',
+    hover: '#B9CFE6',
+  },
+};
+
 export const PORTS = {
   groups: {
     top: {

@@ -3,6 +3,9 @@ import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
 import { ZoomTypeEnum } from './data/enumeration';
 import { WorkflowNodeToolbar } from './workflow-node-toolbar';
+import { EDGE } from '../shape/gengral-config';
+
+const { lineColor } = EDGE;
 
 export default class WorkflowGraph {
   private readonly graph: Graph;
@@ -44,13 +47,13 @@ export default class WorkflowGraph {
             attrs: {
               line: {
                 // 虚线
-                strokeDasharray: '4,2,1,2',
-                stroke: '#A2B1C3',
-                strokeWidth: 2,
+                strokeDasharray: '4,1.5',
+                stroke: lineColor.connecting,
+                strokeWidth: 1.5,
                 targetMarker: {
                   name: 'block',
                   width: 12,
-                  height: 8,
+                  height: 12,
                 },
               },
             },
@@ -66,11 +69,12 @@ export default class WorkflowGraph {
           });
         },
         validateEdge({ edge, type, previous }) {
-          // this.graph.batchUpdate('add-edge', () => {
-          // TODO UNDO/REDO有问题
+          // TODO 校验pipeline箭头只能有一个进、一个出
+
           // 移除虚线
           edge.removeAttrByPath('line/strokeDasharray');
-          // });
+          // 设置颜色
+          edge.setAttrByPath('line/stroke', lineColor._default);
           return true;
         },
         validateConnection({ targetMagnet }) {
@@ -271,6 +275,8 @@ export default class WorkflowGraph {
     });
 
     this.graph.on('edge:mouseenter', ({ cell }) => {
+      // 设置颜色
+      cell.setAttrByPath('line/stroke', lineColor.hover);
       // 添加所有工具
       cell.addTools([
         {
@@ -294,6 +300,9 @@ export default class WorkflowGraph {
           name: 'button-remove',
           args: {
             distance: '50%',
+            offset: {
+              y: -12,
+            },
             // TODO 根据svg内容确定markup
             markup: {},
           },
@@ -301,6 +310,8 @@ export default class WorkflowGraph {
       ]);
     });
     this.graph.on('edge:mouseleave', ({ cell }) => {
+      // 设置颜色
+      cell.setAttrByPath('line/stroke', lineColor._default);
       // 移除路径点
       cell.removeTool('vertices');
       // 移除线段
@@ -315,7 +326,7 @@ export default class WorkflowGraph {
     if (nodeList.length === 0) {
       return;
     }
-    
+
     const selectionBox = nodeList.item(0);
     selectionBox.style.width = '';
     selectionBox.style.height = '';
