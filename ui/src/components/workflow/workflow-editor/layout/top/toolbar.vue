@@ -162,17 +162,6 @@ export default defineComponent({
     }
 
     .operations {
-      display: flex;
-      align-items: center;
-
-      .el-button {
-        padding: 8px 24px;
-        min-height: 36px;
-
-        & + .el-button {
-          margin-left: 20px;
-        }
-      }
     }
   }
 }
