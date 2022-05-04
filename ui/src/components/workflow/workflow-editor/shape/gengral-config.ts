@@ -22,6 +22,7 @@ export const PORT = {
     connectingSource: '#A7B0BB',
     connectingTarget: PRIMARY_COLOR,
   },
+  r: 5,
 };
 
 export const PORTS = {
@@ -30,7 +31,7 @@ export const PORTS = {
       position: 'top',
       attrs: {
         circle: {
-          r: 5,
+          r: PORT.r,
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
@@ -45,7 +46,7 @@ export const PORTS = {
       position: 'right',
       attrs: {
         circle: {
-          r: 5,
+          r: PORT.r,
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
@@ -60,7 +61,7 @@ export const PORTS = {
       position: 'bottom',
       attrs: {
         circle: {
-          r: 5,
+          r: PORT.r,
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
@@ -75,7 +76,7 @@ export const PORTS = {
       position: 'left',
       attrs: {
         circle: {
-          r: 5,
+          r: PORT.r,
           magnet: true,
           stroke: '#A7B0BB',
           strokeWidth: 1,
@@ -90,15 +91,31 @@ export const PORTS = {
   items: [
     {
       group: 'top',
+      args: {
+        dx: 0,
+        dy: NODE.iconSize.height / 2,
+      },
     },
     {
       group: 'right',
+      args: {
+        dx: -NODE.iconSize.width / 2,
+        dy: 0,
+      },
     },
     {
       group: 'bottom',
+      args: {
+        dx: 0,
+        dy: -NODE.iconSize.height / 2,
+      },
     },
     {
       group: 'left',
+      args: {
+        dx: NODE.iconSize.width / 2,
+        dy: 0,
+      },
     },
   ],
 };
