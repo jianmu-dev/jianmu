@@ -32,7 +32,8 @@ export const PORTS = {
       attrs: {
         circle: {
           r: 0,
-          magnet: true,
+          // 连接桩在连线交互时不可被连接
+          magnet: false,
           stroke: '#A7B0BB',
           strokeWidth: 1,
           fill: PORT.fill._default,
@@ -44,7 +45,8 @@ export const PORTS = {
       attrs: {
         circle: {
           r: 0,
-          magnet: true,
+          // 连接桩在连线交互时不可被连接
+          magnet: false,
           stroke: '#A7B0BB',
           strokeWidth: 1,
           fill: PORT.fill._default,
@@ -56,7 +58,8 @@ export const PORTS = {
       attrs: {
         circle: {
           r: 0,
-          magnet: true,
+          // 连接桩在连线交互时不可被连接
+          magnet: false,
           stroke: '#A7B0BB',
           strokeWidth: 1,
           fill: PORT.fill._default,
@@ -68,7 +71,8 @@ export const PORTS = {
       attrs: {
         circle: {
           r: 0,
-          magnet: true,
+          // 连接桩在连线交互时不可被连接
+          magnet: false,
           stroke: '#A7B0BB',
           strokeWidth: 1,
           fill: PORT.fill._default,

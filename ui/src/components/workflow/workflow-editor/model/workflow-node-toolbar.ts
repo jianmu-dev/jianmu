@@ -157,6 +157,8 @@ export class WorkflowNodeToolbar {
           attrs: {
             circle: {
               r: PORT.r,
+              // 连接桩在连线交互时可以被连接
+              magnet: true,
             },
           },
         });
@@ -174,6 +176,8 @@ export class WorkflowNodeToolbar {
           attrs: {
             circle: {
               r: 0,
+              // 连接桩在连线交互时不可被连接
+              magnet: false,
             },
           },
         })));
