@@ -128,11 +128,11 @@ export default defineComponent({
 
       ::v-deep(.jm-workflow-x6-vue-shape) {
         margin: 10px;
-        width: 56px;
+        width: 64px;
 
         .icon {
-          width: 56px;
-          height: 56px;
+          width: 64px;
+          height: 64px;
         }
       }
     }
