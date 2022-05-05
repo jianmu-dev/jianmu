@@ -27,7 +27,6 @@
     "uuid": "^8.3.2",
     "vue": "^3.0.5",
     "vue-clipboard3": "^1.0.1",
-    "vue-draggable-next": "^2.0.1",
     "vue-router": "^4.0.5",
     "vuex": "^4.0.0",
     "yaml": "^2.0.0-5"
