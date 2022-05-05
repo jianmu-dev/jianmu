@@ -5,7 +5,7 @@ import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { NodeTypeEnum } from './data/enumeration';
 import { NODE, PORT } from '../shape/gengral-config';
 
-const { toolbarDistance } = NODE;
+const { toolbarDistance, icon: { width: iconW, marginBottom: iconMarginBottom }, textMaxHeight } = NODE;
 
 export class WorkflowNodeToolbar {
   private readonly proxy: any;
@@ -119,7 +119,7 @@ export class WorkflowNodeToolbar {
       const top = y * zoom + ty - toolbarH - scaleYOffset;
 
       // 与节点宽度保持一致
-      this.el.style.width = `${NODE.iconSize.width}px`;
+      this.el.style.width = `${iconW}px`;
       this.el.style.transform = `scale(${zoom},${zoom})`;
       this.el.style.left = `${left}px`;
       this.el.style.top = `${top - toolbarDistance * zoom}px`;
@@ -144,7 +144,7 @@ export class WorkflowNodeToolbar {
       x: elX,
       y: elY,
       w: elW,
-      h: elH + (nodeH + toolbarDistance) * zoom,
+      h: elH + (nodeH + toolbarDistance + iconMarginBottom + textMaxHeight) * zoom,
     };
 
     if (elX < -mouseMovableRect.w && elY < -mouseMovableRect.h) {

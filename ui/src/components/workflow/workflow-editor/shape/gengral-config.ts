@@ -2,9 +2,10 @@ export const PRIMARY_COLOR = '#096DD9';
 
 export const NODE = {
   toolbarDistance: 5,
-  iconSize: {
+  icon: {
     width: 72,
     height: 72,
+    marginBottom: 6,
   },
   textMaxHeight: 40,
   selectedBorderWidth: 6,

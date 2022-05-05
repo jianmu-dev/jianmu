@@ -60,6 +60,7 @@ export default defineComponent({
   .x6-vue-shape-icon {
     width: @node-icon-width;
     height: @node-icon-height;
+    margin-bottom: @node-icon-margin-bottom;
 
     &:hover {
       .img {

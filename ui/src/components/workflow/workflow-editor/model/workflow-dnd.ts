@@ -7,7 +7,7 @@ import nodeWarningIcon from '../svgs/node-warning.svg';
 import { WorkflowValidator } from './workflow-validator';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
-const { iconSize: { width, height }, textMaxHeight } = NODE;
+const { icon: { width, height }, textMaxHeight } = NODE;
 
 interface IDraggingListener {
   mousePosition: Point.PointLike;
