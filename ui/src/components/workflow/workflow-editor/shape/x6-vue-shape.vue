@@ -87,6 +87,7 @@ export default defineComponent({
   }
 
   .name {
+    margin-top: 6px;
     max-height: @node-text-max-height;
     line-height: 20px;
     // 超过两行直接截断
