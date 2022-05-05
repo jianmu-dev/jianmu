@@ -30,8 +30,20 @@ export class WorkflowNodeToolbar {
   }
 
   hide(e?: MouseEvent): void {
-    if (!this.node || e && e.relatedTarget === this.el) {
+    if (!this.node) {
       return;
+    }
+
+    if (e) {
+      const { x, y } = e;
+      const { x: minX, y: minY, width, height } = this.el.getBoundingClientRect();
+      const maxX = minX + width;
+      const maxY = minY + height;
+
+      if (minX <= x && x <= maxX && minY <= y && y <= maxY) {
+        // 表示鼠标滑进节点工具栏
+        return;
+      }
     }
 
     // 隐藏连接桩
