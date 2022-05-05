@@ -68,7 +68,7 @@ export default class WorkflowDnd {
               ],
               x: '100%',
               y: 0,
-              offset: { x: -16, y: 0 },
+              offset: { x: -13, y: -11 },
               onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
                 clickNodeWarningCallback(id);
               },
