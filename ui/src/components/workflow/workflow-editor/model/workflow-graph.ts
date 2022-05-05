@@ -12,6 +12,7 @@ const { fill: circleBgColor } = PORT;
 export default class WorkflowGraph {
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
+  private readonly workflowTool: WorkflowTool;
   readonly workflowNodeToolbar: WorkflowNodeToolbar;
   private readonly workflowEdgeToolbar: WorkflowEdgeToolbar;
 
@@ -101,19 +102,22 @@ export default class WorkflowGraph {
           },
         },
       },
-      resizing: false,
+      resizing: true,
       rotating: false,
       selecting: {
         enabled: true,
         // 是否框选
         rubberband: true,
-        showNodeSelectionBox: true,
+        // safari存在选中节点时，虚线框的宽度有偏差，用resizing代替
+        // showNodeSelectionBox: true,
       },
       snapline: true,
       keyboard: true,
       clipboard: true,
     });
 
+    // 初始化工具
+    this.workflowTool = new WorkflowTool(this.graph);
     // 初始化节点工具栏
     this.workflowNodeToolbar = new WorkflowNodeToolbar(proxy, this.graph);
     // 初始化边工具栏
@@ -145,12 +149,11 @@ export default class WorkflowGraph {
       // 2. 注销渲染事件
       this.graph.off('render:done');
 
-      const workflowTool = new WorkflowTool(this.graph);
       // 渲染完成后，适屏展示
-      workflowTool.zoom(ZoomTypeEnum.FIT);
+      this.workflowTool.zoom(ZoomTypeEnum.FIT);
       if (this.graph.zoom() > 1) {
         // 适屏后，缩放比例超过100%，原始大小展示
-        workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
+        this.workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
       }
     });
 
@@ -246,6 +249,9 @@ export default class WorkflowGraph {
    * @private
    */
   private bindEvent() {
+    this.graph.on('node:selected', () => {
+      this.workflowTool.optimizeSelectionBoxStyle();
+    });
     this.graph.on('node:mousedown', ({ e }) => {
       // 隐藏节点工具栏
       this.workflowNodeToolbar.hide(e);

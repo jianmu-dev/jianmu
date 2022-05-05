@@ -6,6 +6,7 @@ export const NODE = {
     height: 72,
   },
   textMaxHeight: 40,
+  selectedBorderWidth: 6,
 };
 
 export const EDGE = {

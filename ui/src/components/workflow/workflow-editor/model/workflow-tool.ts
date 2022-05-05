@@ -1,5 +1,8 @@
 import { Graph } from '@antv/x6';
 import { ZoomTypeEnum } from './data/enumeration';
+import { NODE } from '../shape/gengral-config';
+
+const { selectedBorderWidth } = NODE;
 
 const MIN_ZOOM = 20;
 const MAX_ZOOM = 500;
@@ -46,6 +49,7 @@ export class WorkflowTool {
         } else if (factor > MAX_ZOOM) {
           factor = MAX_ZOOM;
         } else {
+          this.optimizeSelectionBoxStyle();
           return;
         }
         break;
@@ -64,5 +68,19 @@ export class WorkflowTool {
         y: height / 2 + y,
       },
     });
+
+    this.optimizeSelectionBoxStyle();
+  }
+
+  optimizeSelectionBoxStyle(): void {
+    const factor = this.graph.zoom();
+
+    Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-widget-transform'))
+      .forEach(el => {
+        const t = selectedBorderWidth * factor;
+        el.style.borderWidth = `${t}px`;
+        el.style.marginLeft = `-${t}px`;
+        el.style.marginTop = `-${t}px`;
+      });
   }
 }
