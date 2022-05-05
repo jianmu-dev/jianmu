@@ -130,7 +130,7 @@ export default defineComponent({
         margin: 10px;
         width: 64px;
 
-        .icon {
+        .x6-vue-shape-icon {
           width: 64px;
           height: 64px;
         }
