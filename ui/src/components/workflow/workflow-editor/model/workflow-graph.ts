@@ -85,8 +85,10 @@ export default class WorkflowGraph {
         validateConnection({ targetMagnet }) {
           return !!targetMagnet;
         },
-        validateMagnet({ e, magnet, view, cell }) {
+        validateMagnet: ({ e, magnet, view, cell }) => {
           magnet.setAttribute('fill', circleBgColor.connectingSource);
+          // 隐藏节点工具栏，但显示连接桩
+          this.workflowNodeToolbar.hide(true);
           return true;
         },
       },
