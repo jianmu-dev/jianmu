@@ -34,13 +34,15 @@ export class WorkflowNodeToolbar {
     this.move();
   }
 
-  hide(): void {
+  hide(portsVisible: boolean = false): void {
     if (!this.node) {
       return;
     }
 
-    // 隐藏连接桩
-    this.hidePorts();
+    if (!portsVisible) {
+      // 隐藏连接桩
+      this.hidePorts();
+    }
 
     this.deleteNode();
   }
@@ -217,7 +219,7 @@ export class WorkflowNodeToolbar {
    * 隐藏连接桩
    * @private
    */
-  private hidePorts() {
+  hidePorts() {
     this.graph.getNodes().forEach(node =>
       node.getPorts().forEach(port =>
         node.portProp(port.id!, {

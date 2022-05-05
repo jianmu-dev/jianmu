@@ -75,11 +75,14 @@ export default class WorkflowGraph {
             zIndex: 0,
           });
         },
-        validateEdge({ edge, type, previous }) {
+        validateEdge: ({ edge, type, previous }) => {
           // 移除虚线
           edge.removeAttrByPath('line/strokeDasharray');
           // 设置颜色
           edge.setAttrByPath('line/stroke', lineColor._default);
+
+          // 连线后，隐藏连接桩
+          this.workflowNodeToolbar.hidePorts();
           return true;
         },
         validateConnection({ targetMagnet }) {
