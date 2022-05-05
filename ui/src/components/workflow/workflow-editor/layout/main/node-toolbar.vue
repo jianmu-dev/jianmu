@@ -27,8 +27,7 @@ export default defineComponent({
   left: -1000px;
   top: -1000px;
   z-index: 1;
-
-  height: 30px;
+  padding-top: 5px;
 
   .jm-icon-button-delete {
     cursor: pointer;
