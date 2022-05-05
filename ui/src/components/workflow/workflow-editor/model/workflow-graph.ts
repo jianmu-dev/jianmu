@@ -17,14 +17,14 @@ export default class WorkflowGraph {
   private readonly workflowEdgeToolbar: WorkflowEdgeToolbar;
 
   constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
-    const containerParentEl = container.parentElement!.parentElement!;
+    const { clientWidth: width, clientHeight: height } = container.parentElement!;
     this.clickNodeCallback = clickNodeCallback;
 
     // #region 初始化画布
     this.graph = new Graph({
       container,
-      width: containerParentEl.clientWidth,
-      height: containerParentEl.clientHeight,
+      width,
+      height,
       // 不绘制网格背景
       grid: false,
       connecting: {
@@ -128,7 +128,7 @@ export default class WorkflowGraph {
     this.bindEvent();
 
     // 注册容器大小变化监听器
-    this.registerContainerResizeListener(containerParentEl);
+    this.registerContainerResizeListener();
   }
 
   render(data: string) {
@@ -191,7 +191,8 @@ export default class WorkflowGraph {
    * 注册容器大小变化监听器
    * @private
    */
-  private registerContainerResizeListener(containerParentEl: HTMLElement) {
+  private registerContainerResizeListener() {
+    const containerParentEl = this.graph.container.parentElement!;
     new ResizeObserver(() => {
       const { clientWidth, clientHeight } = containerParentEl;
       this.graph.resizeGraph(clientWidth, clientHeight);
@@ -252,9 +253,9 @@ export default class WorkflowGraph {
     this.graph.on('node:selected', () => {
       this.workflowTool.optimizeSelectionBoxStyle();
     });
-    this.graph.on('node:mousedown', ({ e }) => {
+    this.graph.on('node:mousedown', () => {
       // 隐藏节点工具栏
-      this.workflowNodeToolbar.hide(e);
+      this.workflowNodeToolbar.hide();
     });
     this.graph.on('node:mouseup', ({ node }) => {
       // 显示节点工具栏
@@ -271,10 +272,6 @@ export default class WorkflowGraph {
     this.graph.on('node:mouseenter', ({ node }) => {
       // 显示节点工具栏
       this.workflowNodeToolbar.show(node);
-    });
-    this.graph.on('node:mouseleave', ({ e }) => {
-      // 隐藏节点工具栏
-      this.workflowNodeToolbar.hide(e.originalEvent);
     });
 
     this.graph.on('edge:mouseenter', ({ edge }) => {

@@ -1,13 +1,18 @@
 import { Edge, Graph, Node } from '@antv/x6';
+// @ts-ignore
+import listen from 'good-listener';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { NodeTypeEnum } from './data/enumeration';
 import { NODE, PORT } from '../shape/gengral-config';
+
+const { toolbarDistance } = NODE;
 
 export class WorkflowNodeToolbar {
   private readonly proxy: any;
   private readonly el: HTMLElement;
   private readonly graph: Graph;
   private node?: Node;
+  private listener?: any;
 
   constructor(proxy: any, graph: Graph) {
     this.proxy = proxy;
@@ -29,21 +34,9 @@ export class WorkflowNodeToolbar {
     this.move();
   }
 
-  hide(e?: MouseEvent): void {
+  hide(): void {
     if (!this.node) {
       return;
-    }
-
-    if (e) {
-      const { x, y } = e;
-      const { x: minX, y: minY, width, height } = this.el.getBoundingClientRect();
-      const maxX = minX + width;
-      const maxY = minY + height;
-
-      if (minX <= x && x <= maxX && minY <= y && y <= maxY) {
-        // 表示鼠标滑进节点工具栏
-        return;
-      }
     }
 
     // 隐藏连接桩
@@ -53,7 +46,12 @@ export class WorkflowNodeToolbar {
   }
 
   private deleteNode() {
+    if (this.listener) {
+      this.listener.destroy();
+    }
+
     delete this.node;
+    delete this.listener;
     this.el.style.left = '';
     this.el.style.top = '';
   }
@@ -122,8 +120,46 @@ export class WorkflowNodeToolbar {
       this.el.style.width = `${NODE.iconSize.width}px`;
       this.el.style.transform = `scale(${zoom},${zoom})`;
       this.el.style.left = `${left}px`;
-      this.el.style.top = `${top}px`;
+      this.el.style.top = `${top - toolbarDistance * zoom}px`;
+
+      this.listener = listen(this.graph.container.parentElement, 'mousemove', (e: MouseEvent) => this.handleHidden(e));
     });
+  }
+
+  private handleHidden(e: MouseEvent) {
+    if (!this.node) {
+      return;
+    }
+
+    const { x: elX, y: elY, width: elW, height: elH } = this.el.getBoundingClientRect();
+    // 缩放比例
+    const zoom = this.graph.zoom();
+    // 节点大小
+    const { height: nodeH } = this.node.size();
+    // 鼠标可移动区域
+    // 在此区域移动鼠标时，显示节点工具栏
+    const mouseMovableRect = {
+      x: elX,
+      y: elY,
+      w: elW,
+      h: elH + (nodeH + toolbarDistance) * zoom,
+    };
+
+    if (elX < -mouseMovableRect.w && elY < -mouseMovableRect.h) {
+      return;
+    }
+
+    const { x: mouseX, y: mouseY } = e;
+
+    const maxX = mouseMovableRect.x + mouseMovableRect.w;
+    const maxY = mouseMovableRect.y + mouseMovableRect.h;
+
+    if (elX <= mouseX && mouseX <= maxX && elY <= mouseY && mouseY <= maxY) {
+      // 表示鼠标滑进显示节点工具栏返回
+      return;
+    }
+
+    this.hide();
   }
 
   /**

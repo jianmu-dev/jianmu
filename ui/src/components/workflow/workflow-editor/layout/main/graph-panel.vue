@@ -1,6 +1,6 @@
 <template>
   <div class="jm-workflow-editor-graph-panel">
-    <node-toolbar ref="nodeToolbar" @mouseleave="mouseLeaveNodeToolbar"/>
+    <node-toolbar ref="nodeToolbar"/>
     <div ref="container" @wheel.prevent="wheelScrollGraph"/>
   </div>
 </template>
@@ -42,10 +42,6 @@ export default defineComponent({
     return {
       nodeToolbar,
       container,
-      mouseLeaveNodeToolbar: (e: MouseEvent) => {
-        // 隐藏节点工具栏
-        workflowGraph.workflowNodeToolbar.hide(e);
-      },
       wheelScrollGraph: (e: WheelEvent) => {
         if (!workflowGraph) {
           return;
@@ -62,8 +58,6 @@ export default defineComponent({
 @import '../../vars';
 
 .jm-workflow-editor-graph-panel {
-  // 铺满剩余宽度
-  flex-grow: 1;
-  position: relative;
+  height: 100%;
 }
 </style>
