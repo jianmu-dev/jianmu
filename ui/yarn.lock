@@ -263,7 +263,7 @@
   dependencies:
     vue-demi "^0.7.4"
 
-"@antv/x6@^1.31.3":
+"@antv/x6@^1.31.4":
   version "1.31.4"
   resolved "https://registry.npmmirror.com/@antv/x6/-/x6-1.31.4.tgz#c5ba46b260ff04321246850d34aa0353cb2cff93"
   integrity sha512-XgMIjaCGA3sJe7mcWoBHMuHoZ4AVVWjZSohWNFvg6b29p3x1kJEBAm7hunWMfw8oURUiJjq453sQ7DHD3zGwIw==
