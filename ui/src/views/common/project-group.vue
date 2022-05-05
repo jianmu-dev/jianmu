@@ -25,33 +25,29 @@
       </template>
       <template #default>
         <div>
-          <div class="projects">
+          <div class="projects" ref="projectsRef">
             <jm-empty v-if="projects.length === 0 && pageable"/>
-            <jm-draggable
+            <jm-sorter
               v-else-if="moveListener"
               class="list"
               v-model="projectList"
               @change="sortList"
-              @start="start"
-              @end="() => (currentSelected = false)"
             >
-              <transition-group type="transition" name="flip-list">
-                <project-item
-                  v-for="(project, index) in projectList"
-                  :concurrent="project.concurrent"
-                  :key="project.id"
-                  :_id="project.id"
-                  :project="project"
-                  @mouseenter="over(project.id)"
-                  @mouseleave="leave"
-                  :move-mode="moveListener"
-                  :move="moveClassList[index] === 'move'"
-                  @running="handleProjectRunning"
-                  @synchronized="handleProjectSynchronized"
-                  @deleted="handleProjectDeleted"
-                />
-              </transition-group>
-            </jm-draggable>
+              <project-item
+                v-for="(project, index) in projectList"
+                :concurrent="project.concurrent"
+                :key="project.id"
+                :_id="project.id"
+                :project="project"
+                @mouseenter="enter(project.id)"
+                @mouseleave="leave"
+                :move-mode="moveListener"
+                :move="moveClassList[index] === 'move'"
+                @running="handleProjectRunning"
+                @synchronized="handleProjectSynchronized"
+                @deleted="handleProjectDeleted"
+              />
+            </jm-sorter>
             <project-item
               v-else
               v-for="project of projects"
@@ -105,11 +101,13 @@ import { StateEnum } from '@/components/load-more/enumeration';
 import Folding from '@/views/common/folding.vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/project-group';
+import JmSorter from '@/components/sorter/index.vue';
+import sleep from '@/utils/sleep';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
 export default defineComponent({
-  components: { ProjectItem, Folding },
+  components: { JmSorter, ProjectItem, Folding },
   props: {
     // 项目组
     projectGroup: {
@@ -147,6 +145,10 @@ export default defineComponent({
       }
       return projectGroupFoldingMapping[props.projectGroup.id];
     });
+    const projectsRef = ref<HTMLElement>();
+    const spacing = ref<string>('');
+    // 是否正在排序
+    const isSorting = ref<boolean>(false);
     const { proxy } = getCurrentInstance() as any;
     const loading = ref<boolean>(false);
     const scrollableEl = inject('scrollableEl');
@@ -273,28 +275,20 @@ export default defineComponent({
       queryForm.value.name = props.name;
       queryForm.value.projectGroupId = props.projectGroup?.id;
     });
-    // onUpdated(() => {
-    //   if (props.move) {
-    //     return;
-    //   }
-    //   // 关闭拖拽模式将拖拽后的新数组数据同步
-    //   projectPage.value.list = projectList.value;
-    // });
-
     // TODO watch待优化
     watch(
       () => props.move,
       flag => {
         if (flag) {
+          // 计算每个项之间的间距大小
+          spacing.value = projectsRef.value?.offsetWidth * 0.008 + 'px';
           return;
         }
         // 关闭拖拽模式将拖拽后的新数组数据同步
         projectPage.value.list = projectList.value;
       },
     );
-    // 拖拽排序
-    const currentSelected = ref<boolean>(false);
-    const currentItem = ref<string>('-1');
+    const currentItem = ref<string>('');
     let setCurrentItemTimer: any;
     // 保存单个项目组的展开折叠状态
     const saveFoldStatus = (status: boolean, id: string) => {
@@ -307,37 +301,26 @@ export default defineComponent({
       });
     };
     const sortList = async (e: any) => {
-      const {
-        moved: { newIndex: targetSort, oldIndex: originSort, element },
-      } = e;
+      isSorting.value = true;
+      const { oldElement, newElement, originArr } = e;
       try {
-        // 向移动
-        targetSort < originSort
-          ? await updateProjectGroupProjectSort(props.projectGroup.id, {
-            originProjectId: element.id,
-            targetProjectId: projectList.value[targetSort + 1].id,
-          })
-          : await updateProjectGroupProjectSort(props.projectGroup.id, {
-            originProjectId: element.id,
-            targetProjectId: projectList.value[targetSort - 1].id,
-          });
+        await updateProjectGroupProjectSort(props.projectGroup.id, {
+          originProjectId: newElement.id,
+          targetProjectId: oldElement.id,
+        });
       } catch (err) {
         proxy.$throw(err, proxy);
         // 未调换成功，将数据位置对调状态还原
-        const spliceProjectList = projectList.value.splice(targetSort, 1);
-        projectList.value.splice(originSort, 0, ...spliceProjectList);
+        projectList.value = originArr;
       }
-      // 设置定时延迟，不让mouseenter事件因为页面渲染的问题被自动触发，导致选中样式出现问题
-      currentSelected.value = true;
-      setCurrentItemTimer = setTimeout(() => {
-        currentItem.value = e.moved.element.id;
-        currentSelected.value = false;
-      }, 400);
+      await sleep(300);
+      isSorting.value = false;
     };
-    const moveClassList = computed<string[]>(() =>
-      projectList.value.map(({ id }) => {
+    const moveClassList = computed<string[]>(() => {
+      return projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
-      }),
+      });
+    },
     );
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
@@ -349,6 +332,8 @@ export default defineComponent({
       scrollableEl,
     };
     return {
+      projectsRef,
+      spacing,
       ...mapMutations({
         mutate: 'mutate',
       }),
@@ -359,21 +344,19 @@ export default defineComponent({
       btnDown,
       moveClassList,
       leave() {
+        if (isSorting.value) {
+          return;
+        }
         currentItem.value = '';
       },
-      over(id: string) {
-        if (currentSelected.value) {
+      enter(id: string) {
+        if (isSorting.value) {
           return;
         }
         currentItem.value = id;
       },
       projectList,
       sortList,
-      start(e: any) {
-        currentSelected.value = true;
-        currentItem.value = e.item.getAttribute('_id');
-      },
-      currentSelected,
       moveListener,
       loading,
       ProjectStatusEnum,
@@ -484,6 +467,26 @@ export default defineComponent({
   .projects {
     display: flex;
     flex-wrap: wrap;
+
+    ::v-deep(.jm-sorter) {
+      .drag-target-insertion {
+        width: v-bind(spacing);
+        border-width: 0;
+        background-color: transparent;
+
+        &::after {
+          content: '';
+          width: 60%;
+          height: 100%;
+          box-sizing: border-box;
+          border: 2px solid #096DD9;
+          background: rgba(9, 109, 217, 0.3);
+          position: absolute;
+          top: 0;
+          left: 20%;
+        }
+      }
+    }
 
     .list {
       width: 100%;
