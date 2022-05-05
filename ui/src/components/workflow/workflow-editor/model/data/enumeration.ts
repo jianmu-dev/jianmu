@@ -29,6 +29,7 @@ export enum ZoomTypeEnum {
   OUT = 'OUT',
   ORIGINAL = 'ORIGINAL',
   FIT = 'FIT',
+  CENTER = 'CENTER',
 }
 
 /**

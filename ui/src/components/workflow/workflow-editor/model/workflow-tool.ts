@@ -38,6 +38,23 @@ export class WorkflowTool {
           factor += ZOOM_INTERVAL;
         }
         break;
+      case ZoomTypeEnum.CENTER:
+        // 缩放画布内容，使画布(graph)内容充满视口
+        this.graph.zoomToFit();
+
+        // 四舍五入保证与页面上的显示一致
+        factor = Math.round(this.graph.zoom() * 100);
+        if (factor > 100) {
+          // 大于100%场景
+          factor = 100;
+        } else if (factor < MIN_ZOOM) {
+          // 小于最小场景
+          factor = MIN_ZOOM;
+        } else {
+          this.optimizeSelectionBoxStyle();
+          return;
+        }
+        break;
       case ZoomTypeEnum.FIT:
         // 缩放画布内容，使画布(graph)内容充满视口
         this.graph.zoomToFit();
