@@ -123,8 +123,8 @@ export default class WorkflowGraph {
     // 初始化边工具栏
     this.workflowEdgeToolbar = new WorkflowEdgeToolbar(this.graph);
 
-    // 不激活快捷键
-    // this.registerShortcut();
+    // 激活快捷键
+    this.registerShortcut();
     this.bindEvent();
 
     // 注册容器大小变化监听器
@@ -211,13 +211,13 @@ export default class WorkflowGraph {
       }
       return false;
     });
-    this.graph.bindKey(['meta+x', 'ctrl+x'], () => {
-      const cells = this.graph.getSelectedCells();
-      if (cells.length) {
-        this.graph.cut(cells);
-      }
-      return false;
-    });
+    // this.graph.bindKey(['meta+x', 'ctrl+x'], () => {
+    //   const cells = this.graph.getSelectedCells();
+    //   if (cells.length) {
+    //     this.graph.cut(cells);
+    //   }
+    //   return false;
+    // });
     this.graph.bindKey(['meta+v', 'ctrl+v'], () => {
       if (!this.graph.isClipboardEmpty()) {
         const cells = this.graph.paste({ offset: 32 });
@@ -235,13 +235,13 @@ export default class WorkflowGraph {
       }
     });
 
-    // delete
-    this.graph.bindKey('backspace', () => {
-      const cells = this.graph.getSelectedCells();
-      if (cells.length) {
-        this.graph.removeCells(cells);
-      }
-    });
+    // // delete
+    // this.graph.bindKey('backspace', () => {
+    //   const cells = this.graph.getSelectedCells();
+    //   if (cells.length) {
+    //     this.graph.removeCells(cells);
+    //   }
+    // });
   }
 
   /**
