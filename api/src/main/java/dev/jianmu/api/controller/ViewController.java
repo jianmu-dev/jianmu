@@ -1,7 +1,7 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.dto.NodeDefViewingDto;
 import dev.jianmu.api.dto.ProjectViewingDto;
 import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
@@ -12,7 +12,6 @@ import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -124,7 +123,7 @@ public class ViewController {
 
     @GetMapping("/nodes")
     @Operation(summary = "分页查询节点定义列表", description = "分页查询节点定义列表")
-    public PageInfo<NodeDefVo> findNodeAll(PageDto dto) {
+    public PageInfo<NodeDefVo> findNodeAll(NodeDefViewingDto dto) {
         var page = this.hubApplication.findPage(
                 dto.getPageNum(),
                 dto.getPageSize(),
