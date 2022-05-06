@@ -179,10 +179,10 @@ export default class WorkflowGraph {
   }
 
   /**
-   * 滚轮容器
+   * 滚轮滚动
    * @param e
    */
-  wheelScrollContainer(e: WheelEvent) {
+  wheelScroll(e: WheelEvent) {
     // 画布滚动事件
     const { pixelX, pixelY } = normalizeWheel(e);
 
