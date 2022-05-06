@@ -1,13 +1,11 @@
 <template>
   <div class="other-draggable">
     拖拽排序：
-    <jm-draggable class="list" v-model="list" @change="log">
-      <transition-group type="transition" name="flip-list">
-        <div v-for="item in list" :key="item.id">
-          {{ item.name }}
-        </div>
-      </transition-group>
-    </jm-draggable>
+    <jm-sorter class="list" v-model="list" @change="log">
+      <div v-for="item in list" :key="item.id" class="item">
+        {{ item.name }}
+      </div>
+    </jm-sorter>
   </div>
 </template>
 
@@ -32,13 +30,9 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.other-draggable {
-  .list {
-    cursor: move;
-
-    .flip-list-move {
-      transition: transform 0.5s;
-    }
+.list {
+  .item {
+    margin: 0 10px;
   }
 }
 </style>
