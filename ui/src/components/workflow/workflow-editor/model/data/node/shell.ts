@@ -10,18 +10,18 @@ export interface IShellEnv {
 export class Shell extends BaseNode {
   image: string;
   readonly envs: IShellEnv[];
-  readonly scripts: string[];
+  script: string;
 
   constructor(name: string = 'shell', image: string = '',
-    envs: IShellEnv[] = [], scripts: string[] = []) {
+    envs: IShellEnv[] = [], script: string = '') {
     super('shell', name, NodeTypeEnum.SHELL, icon, 'https://docs.jianmu.dev/guide/shell-node.html');
     this.image = image;
     this.envs = envs;
-    this.scripts = scripts;
+    this.script = script;
   }
 
-  static build({ name, image, envs, scripts }: any): Shell {
-    return new Shell(name, image, envs, scripts);
+  static build({ name, image, envs, script }: any): Shell {
+    return new Shell(name, image, envs, script);
   }
 
   getFormRules(): any {
@@ -30,6 +30,10 @@ export class Shell extends BaseNode {
     return {
       ...rules,
       // TODO 待完善校验规则
+      image: [],
+      env_name: [],
+      env_value: [],
+      script: [],
     };
   }
 }
