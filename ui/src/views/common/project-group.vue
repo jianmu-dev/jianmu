@@ -388,7 +388,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .project-group {
-  margin-top: 23px;
+  margin-top: 20px;
 
   .prefix {
     cursor: pointer;

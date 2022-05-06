@@ -18,6 +18,7 @@
         />
       </div>
     </div>
+    <div class="divider-line"></div>
     <div class="project">
       <template v-if="initialized && groupListRefresh">
         <project-group
@@ -133,8 +134,7 @@ export default defineComponent({
 
   .project-operator {
     overflow: hidden;
-    margin: 0 0 30px;
-    padding: 30px 20px 0;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
 
@@ -194,6 +194,13 @@ export default defineComponent({
         color: #7f8c9b;
       }
     }
+  }
+
+  .divider-line {
+    margin: 20px auto 0;
+    width: calc(100% - 40px);
+    height: 1px;
+    background-color: #E6EBF2;
   }
 
   .project {
