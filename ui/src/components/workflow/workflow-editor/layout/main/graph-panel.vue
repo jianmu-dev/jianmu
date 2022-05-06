@@ -47,7 +47,7 @@ export default defineComponent({
           return;
         }
 
-        workflowGraph.wheelScrollContainer(e);
+        workflowGraph.wheelScroll(e);
       },
     };
   },
