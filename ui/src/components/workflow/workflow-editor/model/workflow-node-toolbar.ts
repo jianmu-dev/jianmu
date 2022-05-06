@@ -35,10 +35,6 @@ export class WorkflowNodeToolbar {
   }
 
   hide(portsVisible: boolean = false): void {
-    if (!this.node) {
-      return;
-    }
-
     if (!portsVisible) {
       // 隐藏连接桩
       this.hidePorts();
