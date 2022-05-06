@@ -47,6 +47,8 @@ const router = createRouter({
     },
     // platform模块
     loadModuleRoute(PLATFORM_INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
+    // full模块
+    loadModuleRoute('/full', undefined, false, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
     // error模块
     loadModuleRoute('/error', undefined, false, import('@/layout/error.vue'), import.meta.globEager('./modules/error.ts')),
     {
