@@ -37,6 +37,12 @@ export class Webhook extends BaseNode {
     return {
       ...rules,
       // TODO 待完善校验规则
+      param_name: [],
+      param_type: [],
+      param_exp: [],
+      auth_token: [],
+      auth_value: [],
+      only: [],
     };
   }
 }

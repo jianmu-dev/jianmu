@@ -4,12 +4,12 @@ import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 export type ParamValueType = string | number | boolean;
 
 export interface IAsyncTaskParam {
-  ref: string;
-  name: string;
-  type: ParamTypeEnum;
-  required: boolean;
+  readonly ref: string;
+  readonly name: string;
+  readonly type: ParamTypeEnum;
+  readonly required: boolean;
   value: ParamValueType;
-  description?: string;
+  readonly description?: string;
 }
 
 export class AsyncTask extends BaseNode {
@@ -48,6 +48,8 @@ export class AsyncTask extends BaseNode {
     return {
       ...rules,
       // TODO 待完善校验规则
+      version: [],
+      param_value: [],
     };
   }
 }
