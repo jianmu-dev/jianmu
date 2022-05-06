@@ -29,7 +29,7 @@ export class WorkflowNodeToolbar {
     this.node = node;
 
     // 显示连接桩
-    this.showPorts(node);
+    this.showPorts();
 
     this.move();
   }
@@ -133,11 +133,12 @@ export class WorkflowNodeToolbar {
       return;
     }
 
+    const node = this.node;
     const { x: elX, y: elY, width: elW, height: elH } = this.el.getBoundingClientRect();
     // 缩放比例
     const zoom = this.graph.zoom();
     // 节点大小
-    const { height: nodeH } = this.node.size();
+    const { height: nodeH } = node.size();
     // 鼠标可移动区域
     // 在此区域移动鼠标时，显示节点工具栏
     const mouseMovableRect = {
@@ -167,10 +168,14 @@ export class WorkflowNodeToolbar {
   /**
    * 显示连接桩
    * pipeline节点边只能有一个进、一个出
-   * @param currentNode
    * @private
    */
-  private showPorts(currentNode: Node) {
+  private showPorts() {
+    if (!this.node) {
+      return;
+    }
+
+    const currentNode = this.node;
     const currentNodePortIds = currentNode.getPorts().map(metadata => metadata.id);
     const allEdges = this.graph.getEdges();
 
