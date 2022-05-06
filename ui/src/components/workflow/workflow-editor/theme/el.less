@@ -1,0 +1,29 @@
+@import '../vars';
+
+.el-drawer {
+  box-shadow: none;
+
+  &.rtl {
+    top: @tool-bar-height;
+    height: calc(100% - @tool-bar-height);
+  }
+
+  .el-drawer__header {
+    border-color: #E6EBF2;
+    align-items: flex-start;
+  }
+
+  .el-drawer__body {
+    border: 1px solid #E6EBF2;
+    border-top-width: 0;
+  }
+}
+
+.el-button {
+  padding: 8px 24px;
+  min-height: 36px;
+
+  & + .el-button {
+    margin-left: 20px;
+  }
+}

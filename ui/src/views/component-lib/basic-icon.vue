@@ -35,6 +35,13 @@
         {{ cls }}
       </div>
     </div>
+    <div class="group">
+      <div class="title">流程icons:</div>
+      <div v-for="cls in workflowIconClasses" :key="cls">
+        <i :class="cls"></i>
+        {{ cls }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -63,12 +70,17 @@ export default defineComponent({
     Object.keys(import.meta.globEager('../../components/theme/input/svgs/*.svg')).forEach(key =>
       inputIconClasses.push(`jm-icon-input-${key.substring(key.lastIndexOf('/') + 1, key.lastIndexOf('.'))}`));
 
+    const workflowIconClasses: string[] = [];
+    Object.keys(import.meta.globEager('../../components/theme/workflow/svgs/*.svg')).forEach(key =>
+      workflowIconClasses.push(`jm-icon-workflow-${key.substring(key.lastIndexOf('/') + 1, key.lastIndexOf('.'))}`));
+
     return {
       buttonIconClasses,
       tabIconClasses,
       linkIconClasses,
       menuIconClasses,
       inputIconClasses,
+      workflowIconClasses,
     };
   },
 });
