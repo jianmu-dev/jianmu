@@ -22,4 +22,20 @@ public class PageDto {
     private int pageNum;
     @Schema(required = true)
     private int pageSize;
+    @Schema(required = true)
+    private Type type;
+
+    public String getType() {
+        if (type == Type.LOCAL) {
+            return "local";
+        }
+        return null;
+    }
+
+    public enum Type {
+        // 全部节点
+        ALL,
+        // 本地节点
+        LOCAL
+    }
 }

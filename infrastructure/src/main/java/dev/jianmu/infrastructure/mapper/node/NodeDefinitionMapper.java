@@ -23,7 +23,10 @@ public interface NodeDefinitionMapper {
     @Result(column = "document_link", property = "documentLink")
     Optional<NodeDefinition> findById(String id);
 
-    @Select("SELECT * FROM hub_node_definition")
+    @Select("<script>" +
+            "SELECT * FROM `hub_node_definition` " +
+            "<if test='ownerRef != null'> WHERE `owner_ref` = #{ownerRef}</if>" +
+            "</script>")
     @Result(column = "owner_name", property = "ownerName")
     @Result(column = "owner_type", property = "ownerType")
     @Result(column = "owner_ref", property = "ownerRef")
@@ -31,7 +34,7 @@ public interface NodeDefinitionMapper {
     @Result(column = "creator_ref", property = "creatorRef")
     @Result(column = "source_link", property = "sourceLink")
     @Result(column = "document_link", property = "documentLink")
-    List<NodeDefinition> findPage();
+    List<NodeDefinition> findPage(String ownerRef);
 
     @Insert("insert into hub_node_definition(id, icon, name, owner_name, owner_type, owner_ref, creator_name, creator_ref, type, description, ref, source_link, document_link, deprecated) " +
             "values(#{id}, #{icon}, #{name}, #{ownerName}, #{ownerType}, #{ownerRef}, #{creatorName}, #{creatorRef}, #{type}, #{description}, #{ref}, #{sourceLink}, #{documentLink}, #{deprecated})" +
