@@ -28,7 +28,7 @@ function addInsertion(el: HTMLElement, insertAfter: boolean) {
 }
 
 function removeInsertion(el: HTMLElement) {
-  if (el.lastElementChild!.className !== 'drag-target-insertion') {
+  if (el.lastElementChild?.className !== 'drag-target-insertion') {
     return;
   }
   el.style.position = '';

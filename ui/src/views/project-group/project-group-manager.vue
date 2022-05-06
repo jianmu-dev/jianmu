@@ -5,7 +5,8 @@
       <div class="right-top-btn">
         <router-link :to="{ name: 'index' }">
           <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-            >关闭</jm-button
+          >关闭
+          </jm-button
           >
         </router-link>
       </div>
@@ -29,50 +30,46 @@
           <div class="move" @click="() => (isActive = !isActive)"></div>
         </jm-tooltip>
       </div>
-      <div class="content" v-loading="loading">
-        <jm-empty v-if="projectGroupList.length === 0" />
-        <jm-draggable
+      <div class="content" v-loading="loading" ref="contentRef">
+        <jm-empty v-if="projectGroupList.length === 0"/>
+        <jm-sorter
           class="list"
           v-model="projectGroupList"
           @change="sortList"
-          @start="start"
-          @end="() => (currentSelected = false)"
           v-else-if="isActive"
         >
-          <transition-group type="transition" name="flip-list">
-            <div
-              v-for="(i, index) in projectGroupList"
-              :class="['item', moveClassList[index]]"
-              :key="i.id"
-              :_id="i.id"
-              @mouseenter="over(i.id)"
-              @mouseleave="leave"
-            >
-              <div class="wrapper">
-                <div class="top">
-                  <router-link :to="{ path: `/project-group/detail/${i.id}` }">
-                    <div class="name">
-                      <jm-text-viewer :value="i.name"/>
-                    </div>
-                  </router-link>
-                </div>
-                <div class="description">
-                  <jm-text-viewer class="text-viewer" :value="(i.description || '无')"/>
-                </div>
-                <div class="update-time">
+          <div
+            v-for="(i, index) in projectGroupList"
+            :class="['item', moveClassList[index]]"
+            :key="i.id"
+            :_id="i.id"
+            @mouseenter="enter(i.id)"
+            @mouseleave="leave"
+          >
+            <div class="wrapper">
+              <div class="top">
+                <router-link :to="{ path: `/project-group/detail/${i.id}` }">
+                  <div class="name">
+                    <jm-text-viewer :value="i.name"/>
+                  </div>
+                </router-link>
+              </div>
+              <div class="description">
+                <jm-text-viewer class="text-viewer" :value="(i.description || '无')"/>
+              </div>
+              <div class="update-time">
                   <span>最后修改时间：</span
                   ><span>{{ datetimeFormatter(i.lastModifiedTime) }}</span>
-                </div>
-                <div class="total">
-                  共<span class="count"> {{ i.projectCount }} </span>条项目
-                </div>
-                <div class="cover">
-                  <div class="drag-icon"></div>
-                </div>
+              </div>
+              <div class="total">
+                共<span class="count"> {{ i.projectCount }} </span>条项目
+              </div>
+              <div class="cover">
+                <div class="drag-icon"></div>
               </div>
             </div>
-          </transition-group>
-        </jm-draggable>
+          </div>
+        </jm-sorter>
         <div class="item" v-for="i in projectGroupList" :key="i.id" v-else>
           <div class="wrapper">
             <div class="top">
@@ -147,9 +144,6 @@ import {
   getCurrentInstance,
   onMounted,
   computed,
-  nextTick,
-  provide,
-  inject,
   Ref,
 } from 'vue';
 import GroupCreator from './project-group-creator.vue';
@@ -169,6 +163,8 @@ import {
   RouteLocationNormalizedLoaded,
   useRoute,
 } from 'vue-router';
+import sleep from '@/utils/sleep';
+
 export default defineComponent({
   components: {
     GroupCreator,
@@ -178,7 +174,22 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const isShow = ref<boolean>(false);
     const loading = ref<boolean>();
-    const isActive = ref<boolean>(false);
+    // 是否正在排序
+    const isSorting = ref<boolean>(false);
+    const contentRef = ref<HTMLElement>();
+    const spacing = ref<string>('');
+    const active = ref<boolean>(false);
+    const isActive = computed<boolean>({
+      get() {
+        return active.value;
+      },
+      set(value) {
+        if (value) {
+          spacing.value = contentRef.value?.offsetWidth * 0.01 + 'px';
+        }
+        active.value = value;
+      },
+    });
     const creationActivated = ref<boolean>(false);
     const editionActivated = ref<boolean>(false);
     const projectGroupList = ref<Mutable<IProjectGroupVo>[]>([]);
@@ -199,12 +210,14 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     };
+
     function changeView(
       childRoute: Ref<boolean>,
       route: RouteLocationNormalizedLoaded | RouteLocationNormalized,
     ) {
       childRoute.value = route.matched.length > 2;
     }
+
     const moveClassList = computed<string[]>(() =>
       projectGroupList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
@@ -266,45 +279,41 @@ export default defineComponent({
             proxy.$throw(err, proxy);
           }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
     };
     const sortList = async (e: any) => {
-      const {
-        moved: { newIndex: targetSort, oldIndex: originSort, element },
-      } = e;
-
+      isSorting.value = true;
+      const { oldElement, newElement, originArr } = e;
+      console.log(oldElement, newElement);
       try {
-        // 向移动
-        targetSort < originSort
-          ? await updateProjectGroupSort({
-            targetGroupId: projectGroupList.value[targetSort + 1].id,
-            originGroupId: element.id,
-          })
-          : await updateProjectGroupSort({
-            targetGroupId: projectGroupList.value[targetSort - 1].id,
-            originGroupId: element.id,
-          });
-        nextTick(() => {
-          currentItem.value = e.moved.element.id;
-          currentSelected.value = false;
+        await updateProjectGroupSort({
+          originGroupId: newElement.id,
+          targetGroupId: oldElement.id,
         });
       } catch (err) {
         proxy.$throw(err, proxy);
         // 未调换成功，将数据位置对调状态还原
-        const spliceProjectList = projectGroupList.value.splice(targetSort, 1);
-        projectGroupList.value.splice(originSort, 0, ...spliceProjectList);
+        projectGroupList.value = originArr;
       }
+      await sleep(300);
+      isSorting.value = false;
     };
     const childRoute = ref<boolean>(false);
     changeView(childRoute, useRoute());
     onBeforeRouteUpdate(to => changeView(childRoute, to));
     return {
+      spacing,
+      contentRef,
       childRoute,
       leave() {
+        if (isSorting.value) {
+          return;
+        }
         currentItem.value = '';
       },
-      over(id: string) {
-        if (currentSelected.value) {
+      enter(id: string) {
+        if (isSorting.value) {
           return;
         }
         currentItem.value = id;
@@ -344,6 +353,7 @@ export default defineComponent({
   padding: 15px;
   background-color: #ffffff;
   margin-bottom: 20px;
+
   .right-top-btn {
     position: fixed;
     right: 20px;
@@ -353,6 +363,7 @@ export default defineComponent({
       font-weight: bold;
     }
   }
+
   .menu-bar {
     button {
       position: relative;
@@ -381,6 +392,7 @@ export default defineComponent({
       }
     }
   }
+
   .title {
     font-size: 20px;
     font-weight: bold;
@@ -392,12 +404,14 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     .move {
       cursor: pointer;
       width: 24px;
       height: 24px;
       background-image: url('@/assets/svgs/sort/move.svg');
       background-size: contain;
+
       &.active {
         background-image: url('@/assets/svgs/sort/move-active.svg');
       }
@@ -411,19 +425,44 @@ export default defineComponent({
       opacity: 0.46;
     }
   }
+
   .content {
     display: flex;
     flex-wrap: wrap;
+
+    ::v-deep(.jm-sorter) {
+      .drag-target-insertion {
+        width: v-bind(spacing);
+        border-width: 0;
+        background-color: transparent;
+
+        &::after {
+          content: '';
+          width: 60%;
+          height: 100%;
+          box-sizing: border-box;
+          border: 2px solid #096DD9;
+          background: rgba(9, 109, 217, 0.3);
+          position: absolute;
+          top: 0;
+          left: 20%;
+        }
+      }
+    }
+
     .list {
       display: flex;
       flex-wrap: wrap;
       width: 100%;
+
       .item {
         cursor: move;
+
         &.move {
           .wrapper {
             position: relative;
             border-color: #096dd9;
+
             .cover {
               position: absolute;
               top: 0;
@@ -431,6 +470,7 @@ export default defineComponent({
               width: 100%;
               height: 170px;
               background-color: rgba(140, 140, 140, 0.3);
+
               .drag-icon {
                 position: absolute;
                 right: 0;
@@ -445,6 +485,7 @@ export default defineComponent({
         }
       }
     }
+
     .item {
       position: relative;
       margin: 0.5%;
@@ -453,6 +494,7 @@ export default defineComponent({
       height: 170px;
       background-color: #ffffff;
       box-shadow: 0px 0px 8px 4px #eff4f9;
+
       .wrapper {
         padding: 15px;
         border: 1px solid transparent;
@@ -464,43 +506,53 @@ export default defineComponent({
         &:hover {
           border-color: #096dd9;
           box-shadow: 0px 6px 16px 4px #e6eef6;
+
           .top {
             .operation {
               display: flex;
             }
           }
         }
+
         .top {
           display: flex;
           justify-content: space-between;
           align-items: center;
           white-space: nowrap;
-          a{
+
+          a {
             flex: 1;
           }
+
           .name {
             color: #082340;
             font-size: 20px;
             font-weight: 500;
+
             &:hover {
               color: #096dd9;
             }
           }
+
           .operation {
             margin-left: 5px;
             display: none;
+
             .op-item {
               width: 22px;
               height: 22px;
               background-size: contain;
               cursor: pointer;
+
               &:active {
                 background-color: #eff7ff;
                 border-radius: 4px;
               }
+
               &.edit {
                 background-image: url('@/assets/svgs/btn/edit.svg');
               }
+
               &.delete {
                 margin-left: 15px;
                 background-image: url('@/assets/svgs/btn/del.svg');
@@ -508,28 +560,35 @@ export default defineComponent({
             }
           }
         }
+
         .description {
           margin-top: 5px;
-          .text-viewer{
+
+          .text-viewer {
             height: 54px;
           }
+
           line-height: 20px;
         }
+
         .update-time {
           position: absolute;
           bottom: 38px;
         }
+
         .switch {
           position: absolute;
           bottom: 10px;
           left: 15px;
           display: flex;
           align-items: center;
+
           span {
             margin-left: 5px;
             opacity: 0.5;
           }
         }
+
         .total {
           position: absolute;
           bottom: 12px;
@@ -537,6 +596,7 @@ export default defineComponent({
           font-weight: 400;
           text-align: end;
           margin-top: 10px;
+
           .count {
             color: #096dd9;
           }
