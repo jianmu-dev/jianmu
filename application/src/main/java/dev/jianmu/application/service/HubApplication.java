@@ -169,8 +169,8 @@ public class HubApplication {
         return this.nodeDefinitionRepository.findById(id);
     }
 
-    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {
-        return this.nodeDefinitionRepository.findPage(pageNum, pageSize);
+    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize, String ownerRef) {
+        return this.nodeDefinitionRepository.findPage(pageNum, pageSize, ownerRef);
     }
 
     public List<NodeDefinitionVersion> findByOwnerRefAndRef(String ownerRef, String ref) {

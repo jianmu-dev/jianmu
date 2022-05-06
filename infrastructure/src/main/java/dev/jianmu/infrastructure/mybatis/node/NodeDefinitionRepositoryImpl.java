@@ -29,9 +29,9 @@ public class NodeDefinitionRepositoryImpl implements NodeDefinitionRepository {
     }
 
 
-    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {
+    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize, String ownerRef) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(this.nodeDefinitionMapper::findPage);
+                .doSelectPageInfo(() -> this.nodeDefinitionMapper.findPage(ownerRef));
     }
 
     @Override
