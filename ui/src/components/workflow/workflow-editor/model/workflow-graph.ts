@@ -93,7 +93,7 @@ export default class WorkflowGraph {
         validateMagnet: ({ e, magnet, view, cell }) => {
           magnet.setAttribute('fill', circleBgColor.connectingSource);
           // 隐藏节点工具栏，但显示连接桩
-          this.workflowNodeToolbar.hide(true);
+          this.workflowNodeToolbar.hide(magnet.getAttribute('port')!);
           // 显示可连接的连接桩
           this.showConnectablePorts(cell as Node);
 

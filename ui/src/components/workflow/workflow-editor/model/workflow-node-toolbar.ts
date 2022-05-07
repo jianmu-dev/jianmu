@@ -34,11 +34,9 @@ export class WorkflowNodeToolbar {
     this.move();
   }
 
-  hide(portsVisible: boolean = false): void {
-    if (!portsVisible) {
-      // 隐藏连接桩
-      this.hidePorts();
-    }
+  hide(visiblePortId?: string): void {
+    // 隐藏连接桩
+    this.hidePorts(visiblePortId);
 
     this.deleteNode();
   }
@@ -200,16 +198,22 @@ export class WorkflowNodeToolbar {
 
   /**
    * 隐藏连接桩
+   * @param visiblePortId
    * @private
    */
-  private hidePorts() {
+  private hidePorts(visiblePortId?: string) {
     if (!this.node) {
       return;
     }
 
     const currentNode = this.node;
-    currentNode.getPorts().forEach(port =>
-      currentNode.portProp(port.id!, {
+    currentNode.getPorts().forEach(port => {
+      const portId = port.id!;
+      if (portId === visiblePortId) {
+        return;
+      }
+
+      currentNode.portProp(portId, {
         attrs: {
           circle: {
             r: 0,
@@ -217,6 +221,7 @@ export class WorkflowNodeToolbar {
             magnet: false,
           },
         },
-      }));
+      });
+    });
   }
 }
