@@ -133,27 +133,30 @@ export class WorkflowNodeToolbar {
     const { x: elX, y: elY, width: elW, height: elH } = this.el.getBoundingClientRect();
     // 缩放比例
     const zoom = this.graph.zoom();
+    // 连接桩半径
+    const portR = PORT.r * zoom;
     // 节点大小
     const { height: nodeH } = node.size();
     // 鼠标可移动区域
     // 在此区域移动鼠标时，显示节点工具栏
     const mouseMovableRect = {
-      x: elX,
+      x: elX - portR,
       y: elY,
-      w: elW,
+      w: elW + portR * 2,
       h: elH + (nodeH + toolbarDistance + iconMarginBottom + textMaxHeight) * zoom,
     };
+    const { x, y, w, h } = mouseMovableRect;
 
-    if (elX < -mouseMovableRect.w && elY < -mouseMovableRect.h) {
+    if (x < -w && y < -h) {
       return;
     }
 
     const { x: mouseX, y: mouseY } = e;
 
-    const maxX = mouseMovableRect.x + mouseMovableRect.w;
-    const maxY = mouseMovableRect.y + mouseMovableRect.h;
+    const maxX = x + w;
+    const maxY = y + h;
 
-    if (elX <= mouseX && mouseX <= maxX && elY <= mouseY && mouseY <= maxY) {
+    if (x <= mouseX && mouseX <= maxX && y <= mouseY && mouseY <= maxY) {
       // 表示鼠标滑进显示节点工具栏返回
       return;
     }
