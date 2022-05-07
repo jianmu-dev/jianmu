@@ -163,7 +163,6 @@ export class WorkflowNodeToolbar {
 
   /**
    * 显示连接桩
-   * pipeline节点边只能有一个进、一个出
    * @private
    */
   private showPorts() {
@@ -183,80 +182,38 @@ export class WorkflowNodeToolbar {
       return;
     }
 
-    const excludedNodes = this.getNodesInLine(currentNode, allEdges);
-    const nodes = this.graph.getNodes()
-      // 环路检测：排除以当前节点为终点的上游所有节点
-      .filter(node => !excludedNodes.includes(node))
-      // 筛选不存在入边的所有节点
-      .filter(node => {
-        const nodePortIds = node.getPorts().map(metadata => metadata.id);
-        return !allEdges.find(edge => {
-          const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
-          return nodePortIds.includes(targetPortId);
-        });
-      })
-      // 筛选非触发器节点
-      .filter(node =>
-        ![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(new CustomX6NodeProxy(node).getData().getType()));
-
-    if (nodes.length === 0) {
-      return;
-    }
-
-    nodes.push(currentNode);
-
-    nodes.forEach(node =>
-      node.getPorts().forEach(port => {
-        node.portProp(port.id!, {
-          attrs: {
-            circle: {
-              r: PORT.r,
-              // 连接桩在连线交互时可以被连接
-              magnet: true,
-            },
+    currentNode.getPorts().forEach(port => {
+      currentNode.portProp(port.id!, {
+        attrs: {
+          circle: {
+            r: PORT.r,
+            // 连接桩在连线交互时可以被连接
+            magnet: true,
           },
-        });
-      }));
+        },
+      });
+    });
   }
 
   /**
    * 隐藏连接桩
    * @private
    */
-  hidePorts() {
-    this.graph.getNodes().forEach(node =>
-      node.getPorts().forEach(port =>
-        node.portProp(port.id!, {
-          attrs: {
-            circle: {
-              r: 0,
-              // 连接桩在连线交互时不可被连接
-              magnet: false,
-            },
-          },
-        })));
-  }
-
-  /**
-   * 获取以当前节点为终点的上游所有节点
-   * @param targetNode
-   * @param edges
-   * @private
-   */
-  private getNodesInLine(targetNode: Node, edges: Edge[]): Node[] {
-    const nodes: Node[] = [targetNode];
-
-    const targetNodePortsIds = targetNode.getPorts().map(metadata => metadata.id);
-    const edge = edges.find(edge => {
-      const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
-
-      return targetNodePortsIds.includes(targetPortId);
-    });
-
-    if (edge) {
-      nodes.push(...this.getNodesInLine(edge.getSourceNode()!, edges));
+  private hidePorts() {
+    if (!this.node) {
+      return;
     }
 
-    return nodes;
+    const currentNode = this.node;
+    currentNode.getPorts().forEach(port =>
+      currentNode.portProp(port.id!, {
+        attrs: {
+          circle: {
+            r: 0,
+            // 连接桩在连线交互时不可被连接
+            magnet: false,
+          },
+        },
+      }));
   }
 }
