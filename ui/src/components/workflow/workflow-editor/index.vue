@@ -85,8 +85,8 @@ export default defineComponent({
             emit('save', back);
           }).catch(() => {
           });
-        } catch (err) {
-          proxy.$error('所有节点尚未通过校验，请检查');
+        } catch ({ message }) {
+          proxy.$error(message);
         }
       },
       handleGraphCreated: (g: Graph) => {
