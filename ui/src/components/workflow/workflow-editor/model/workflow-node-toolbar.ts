@@ -184,17 +184,20 @@ export class WorkflowNodeToolbar {
     }
 
     const excludedNodes = this.getNodesInLine(currentNode, allEdges);
-    // 环路检测：排除以当前节点为终点的上游所有节点
     const nodes = this.graph.getNodes()
+      // 环路检测：排除以当前节点为终点的上游所有节点
       .filter(node => !excludedNodes.includes(node))
-      // 筛选不存在出的边
+      // 筛选不存在入边的所有节点
       .filter(node => {
         const nodePortIds = node.getPorts().map(metadata => metadata.id);
         return !allEdges.find(edge => {
           const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
           return nodePortIds.includes(targetPortId);
         });
-      });
+      })
+      // 筛选非触发器节点
+      .filter(node =>
+        ![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(new CustomX6NodeProxy(node).getData().getType()));
 
     if (nodes.length === 0) {
       return;
