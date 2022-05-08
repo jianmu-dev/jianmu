@@ -22,6 +22,11 @@ export class WorkflowValidator {
       throw new Error('未存在任何节点');
     }
 
+    if (!nodes.find(node => [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK]
+      .includes(new CustomX6NodeProxy(node).getData().getType()))) {
+      throw new Error('至少有一个shell或任务节点');
+    }
+
     if (nodes.length > 1) {
       const nodeSet = new Set<Node>();
       this.graph.getEdges().forEach(edge => {
