@@ -101,7 +101,7 @@ export default defineComponent({
       handleNodeConfigPanelClosed: () => {
         // 取消选中
         graph.value!.unselect(selectedNodeId.value);
-        selectedNodeId.value = undefined;
+        selectedNodeId.value = '';
       },
     };
   },
