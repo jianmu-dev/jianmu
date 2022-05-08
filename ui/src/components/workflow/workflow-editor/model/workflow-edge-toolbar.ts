@@ -88,16 +88,27 @@ export class WorkflowEdgeToolbar {
         // 路径点
         name: 'vertices',
         args: {
-          // TODO 根据svg内容确定attr
-          attrs: {},
+          attrs: {
+            r: 3,
+            'stroke-width': 0,
+            fill: '#666666',
+          },
         },
       },
       {
         // 线段
         name: 'segments',
         args: {
-          // TODO 根据svg内容确定attr
-          attrs: {},
+          attrs: {
+            width: 8,
+            height: 4,
+            x: -4,
+            y: -2,
+            rx: 1,
+            ry: 1,
+            'stroke-width': 0,
+            fill: '#666666',
+          },
         },
       },
       {
