@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'jm-workflow-editor-node-panel': true, collapsed }" ref="container">
-    <div class="collapse-btn jm-icon-workflow-back" @click="collapse"/>
+    <div class="collapse-btn jm-icon-button-left" @click="collapse"/>
     <jm-scrollbar>
       <div class="groups">
         <div class="group">

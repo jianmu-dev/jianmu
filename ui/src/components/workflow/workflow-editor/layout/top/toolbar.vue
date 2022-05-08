@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-toolbar">
     <div class="left">
-      <button class="jm-icon-workflow-back" @click="goBack"></button>
+      <button class="jm-icon-button-left" @click="goBack"></button>
       <div class="title">{{ workflowForm.name }}</div>
       <button class="jm-icon-workflow-edit" @click="edit"></button>
     </div>
@@ -116,7 +116,7 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
 
-  button[class^="jm-icon-workflow-"] {
+  button[class^="jm-icon-"] {
     border-radius: 2px;
     border-width: 0;
     background-color: transparent;
