@@ -4,6 +4,7 @@ import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
 import { NODE } from '../shape/gengral-config';
 import { IWorkflow, IWorkflowNode } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import { AsyncTask } from './data/node/async-task';
 
 const { selectedBorderWidth } = NODE;
 
@@ -124,6 +125,7 @@ export class WorkflowTool {
 
     let trigger;
     if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(nodeDataArr[0].getType())) {
+      idArr.splice(0, 1);
       const nodeData = nodeDataArr.splice(0, 1)[0];
       trigger = nodeData.toDsl();
     }
@@ -131,13 +133,29 @@ export class WorkflowTool {
       [key: string]: object;
     } = {};
 
-    nodeDataArr.forEach((nodeData, index) => (pipeline[idArr[index]] = nodeData.toDsl()));
+    const idMap = new Map<string, string>();
+    nodeDataArr.forEach((nodeData, index) => {
+      const ref = `task_${index}`;
 
-    return yaml.stringify({
+      if (nodeData instanceof AsyncTask &&
+        (nodeData as AsyncTask).outputs.length > 0) {
+        // 只有在异步任务节点有输出参数时，才有可能被下游节点引用
+        idMap.set(idArr[index], ref);
+      }
+
+      pipeline[ref] = nodeData.toDsl();
+    });
+
+    let dsl = yaml.stringify({
       name: workflowData.name,
       description: workflowData.description,
       trigger,
       pipeline,
     });
+
+    idMap.forEach((value, key) =>
+      (dsl = dsl.replaceAll('${' + key + '.', '${' + value + '.')));
+
+    return dsl;
   }
 }
