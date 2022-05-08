@@ -91,6 +91,7 @@ export default defineComponent({
             cancelButtonText: '不保存',
             type: 'info',
           }).then(async () => {
+            workflowForm.value.data = btoa(JSON.stringify(graph.toJSON()));
             emit('save', back, workflowTool.toDsl(workflowForm.value));
           }).catch(() => {
           });

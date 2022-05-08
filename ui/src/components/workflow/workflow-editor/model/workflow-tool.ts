@@ -151,6 +151,7 @@ export class WorkflowTool {
       description: workflowData.description,
       trigger,
       pipeline,
+      'raw-data': workflowData.data,
     });
 
     idMap.forEach((value, key) =>

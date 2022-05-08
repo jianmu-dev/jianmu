@@ -69,8 +69,6 @@ export default defineComponent({
         emit('back');
       },
       handleSave: async (back: boolean, dsl: string) => {
-        workflowData.value.data = JSON.stringify(graph.value!.toJSON());
-
         // 必须克隆后发事件，否则外部的数据绑定会受影响
         emit('update:model-value', cloneDeep(workflowData.value));
 
