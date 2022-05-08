@@ -38,12 +38,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, PropType, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import { ZoomTypeEnum } from '../../model/data/enumeration';
 import { WorkflowTool } from '../../model/workflow-tool';
 import ProjectPanel from './project-panel.vue';
 import { IWorkflow } from '../../model/data/common';
+import { WorkflowValidator } from '../../model/workflow-validator';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -55,10 +56,13 @@ export default defineComponent({
   },
   emits: ['back', 'save'],
   setup(props, { emit }) {
+    const { proxy } = getCurrentInstance() as any;
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const projectPanelVisible = ref<boolean>(false);
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
+    const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
+    const workflowValidator = getWorkflowValidator();
     const zoomVal = ref<number>(graph.zoom());
 
     const workflowTool = new WorkflowTool(graph);
@@ -78,8 +82,21 @@ export default defineComponent({
         workflowTool.zoom(type);
         zoomVal.value = graph.zoom();
       },
-      save: (back: boolean) => {
-        emit('save', back);
+      save: async (back: boolean) => {
+        try {
+          await workflowValidator.checkNodes();
+
+          proxy.$confirm(' ', '保存此次修改', {
+            confirmButtonText: '保存',
+            cancelButtonText: '不保存',
+            type: 'info',
+          }).then(async () => {
+            emit('save', back, workflowTool.toDsl(workflowForm.value));
+          }).catch(() => {
+          });
+        } catch ({ message }) {
+          proxy.$error(message);
+        }
       },
     };
   },

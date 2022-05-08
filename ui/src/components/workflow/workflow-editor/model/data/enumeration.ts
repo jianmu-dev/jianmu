@@ -36,6 +36,6 @@ export enum ZoomTypeEnum {
  * 失败处理模式枚举
  */
 export enum FailureModeEnum {
-  IGNORE = 'IGNORE',
-  SUSPEND = 'SUSPEND',
+  IGNORE = 'ignore',
+  SUSPEND = 'suspend',
 }

@@ -1,10 +1,11 @@
-import { Cell, Graph, Shape } from '@antv/x6';
+import { Cell, Edge, Graph, Node, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
-import { ZoomTypeEnum } from './data/enumeration';
+import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
 import { WorkflowNodeToolbar } from './workflow-node-toolbar';
 import { EDGE, PORT } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
+import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
@@ -36,6 +37,9 @@ export default class WorkflowGraph {
           const sourceMagnet = Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-port-body'))
             .find(port => sourcePort === port.getAttribute('port'))!;
           sourceMagnet.setAttribute('fill', circleBgColor._default);
+
+          // 隐藏所有连接桩
+          this.hideAllPorts();
 
           // 禁止连接到画布空白位置的点
           return false;
@@ -81,8 +85,6 @@ export default class WorkflowGraph {
           // 设置颜色
           edge.setAttrByPath('line/stroke', lineColor._default);
 
-          // 连线后，隐藏连接桩
-          this.workflowNodeToolbar.hidePorts();
           return true;
         },
         validateConnection({ targetMagnet }) {
@@ -91,7 +93,10 @@ export default class WorkflowGraph {
         validateMagnet: ({ e, magnet, view, cell }) => {
           magnet.setAttribute('fill', circleBgColor.connectingSource);
           // 隐藏节点工具栏，但显示连接桩
-          this.workflowNodeToolbar.hide(true);
+          this.workflowNodeToolbar.hide(magnet.getAttribute('port')!);
+          // 显示可连接的连接桩
+          this.showConnectablePorts(cell as Node);
+
           return true;
         },
       },
@@ -287,6 +292,85 @@ export default class WorkflowGraph {
       // 隐藏边工具栏
       this.workflowEdgeToolbar.hide();
     });
+  }
+
+  /**
+   * 显示可连接的连接桩
+   * pipeline节点边只能有一个进、一个出
+   * @param currentNode
+   * @private
+   */
+  private showConnectablePorts(currentNode: Node): void {
+    const allEdges = this.graph.getEdges();
+    const excludedNodes = this.getNodesInLine(currentNode, allEdges);
+
+    this.graph.getNodes()
+      // 环路检测：排除以当前节点为终点的上游所有节点
+      .filter(node => !excludedNodes.includes(node))
+      // 筛选不存在入边的所有节点
+      .filter(node => {
+        const nodePortIds = node.getPorts().map(metadata => metadata.id);
+        return !allEdges.find(edge => {
+          const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
+          return nodePortIds.includes(targetPortId);
+        });
+      })
+      // 筛选非触发器节点
+      .filter(node =>
+        ![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(new CustomX6NodeProxy(node).getData().getType()))
+      .forEach(node =>
+        node.getPorts().forEach(port => {
+          node.portProp(port.id!, {
+            attrs: {
+              circle: {
+                r: PORT.r,
+                // 连接桩在连线交互时可以被连接
+                magnet: true,
+              },
+            },
+          });
+        }));
+  }
+
+  /**
+   * 隐藏所有连接桩
+   * @private
+   */
+  private hideAllPorts() {
+    this.graph.getNodes().forEach(node =>
+      node.getPorts().forEach(port =>
+        node.portProp(port.id!, {
+          attrs: {
+            circle: {
+              r: 0,
+              // 连接桩在连线交互时不可被连接
+              magnet: false,
+            },
+          },
+        })));
+  }
+
+  /**
+   * 获取以当前节点为终点的上游所有节点
+   * @param targetNode
+   * @param edges
+   * @private
+   */
+  private getNodesInLine(targetNode: Node, edges: Edge[]): Node[] {
+    const nodes: Node[] = [targetNode];
+
+    const targetNodePortsIds = targetNode.getPorts().map(metadata => metadata.id);
+    const edge = edges.find(edge => {
+      const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
+
+      return targetNodePortsIds.includes(targetPortId);
+    });
+
+    if (edge) {
+      nodes.push(...this.getNodesInLine(edge.getSourceNode()!, edges));
+    }
+
+    return nodes;
   }
 
   /**

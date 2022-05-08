@@ -34,11 +34,9 @@ export class WorkflowNodeToolbar {
     this.move();
   }
 
-  hide(portsVisible: boolean = false): void {
-    if (!portsVisible) {
-      // 隐藏连接桩
-      this.hidePorts();
-    }
+  hide(visiblePortId?: string): void {
+    // 隐藏连接桩
+    this.hidePorts(visiblePortId);
 
     this.deleteNode();
   }
@@ -133,27 +131,30 @@ export class WorkflowNodeToolbar {
     const { x: elX, y: elY, width: elW, height: elH } = this.el.getBoundingClientRect();
     // 缩放比例
     const zoom = this.graph.zoom();
+    // 连接桩半径
+    const portR = PORT.r * zoom;
     // 节点大小
     const { height: nodeH } = node.size();
     // 鼠标可移动区域
     // 在此区域移动鼠标时，显示节点工具栏
     const mouseMovableRect = {
-      x: elX,
+      x: elX - portR,
       y: elY,
-      w: elW,
+      w: elW + portR * 2,
       h: elH + (nodeH + toolbarDistance + iconMarginBottom + textMaxHeight) * zoom,
     };
+    const { x, y, w, h } = mouseMovableRect;
 
-    if (elX < -mouseMovableRect.w && elY < -mouseMovableRect.h) {
+    if (x < -w && y < -h) {
       return;
     }
 
     const { x: mouseX, y: mouseY } = e;
 
-    const maxX = mouseMovableRect.x + mouseMovableRect.w;
-    const maxY = mouseMovableRect.y + mouseMovableRect.h;
+    const maxX = x + w;
+    const maxY = y + h;
 
-    if (elX <= mouseX && mouseX <= maxX && elY <= mouseY && mouseY <= maxY) {
+    if (x <= mouseX && mouseX <= maxX && y <= mouseY && mouseY <= maxY) {
       // 表示鼠标滑进显示节点工具栏返回
       return;
     }
@@ -163,7 +164,6 @@ export class WorkflowNodeToolbar {
 
   /**
    * 显示连接桩
-   * pipeline节点边只能有一个进、一个出
    * @private
    */
   private showPorts() {
@@ -183,77 +183,45 @@ export class WorkflowNodeToolbar {
       return;
     }
 
-    const excludedNodes = this.getNodesInLine(currentNode, allEdges);
-    // 环路检测：排除以当前节点为终点的上游所有节点
-    const nodes = this.graph.getNodes()
-      .filter(node => !excludedNodes.includes(node))
-      // 筛选不存在出的边
-      .filter(node => {
-        const nodePortIds = node.getPorts().map(metadata => metadata.id);
-        return !allEdges.find(edge => {
-          const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
-          return nodePortIds.includes(targetPortId);
-        });
-      });
-
-    if (nodes.length === 0) {
-      return;
-    }
-
-    nodes.push(currentNode);
-
-    nodes.forEach(node =>
-      node.getPorts().forEach(port => {
-        node.portProp(port.id!, {
-          attrs: {
-            circle: {
-              r: PORT.r,
-              // 连接桩在连线交互时可以被连接
-              magnet: true,
-            },
+    currentNode.getPorts().forEach(port => {
+      currentNode.portProp(port.id!, {
+        attrs: {
+          circle: {
+            r: PORT.r,
+            // 连接桩在连线交互时可以被连接
+            magnet: true,
           },
-        });
-      }));
+        },
+      });
+    });
   }
 
   /**
    * 隐藏连接桩
+   * @param visiblePortId
    * @private
    */
-  hidePorts() {
-    this.graph.getNodes().forEach(node =>
-      node.getPorts().forEach(port =>
-        node.portProp(port.id!, {
-          attrs: {
-            circle: {
-              r: 0,
-              // 连接桩在连线交互时不可被连接
-              magnet: false,
-            },
-          },
-        })));
-  }
-
-  /**
-   * 获取以当前节点为终点的上游所有节点
-   * @param targetNode
-   * @param edges
-   * @private
-   */
-  private getNodesInLine(targetNode: Node, edges: Edge[]): Node[] {
-    const nodes: Node[] = [targetNode];
-
-    const targetNodePortsIds = targetNode.getPorts().map(metadata => metadata.id);
-    const edge = edges.find(edge => {
-      const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
-
-      return targetNodePortsIds.includes(targetPortId);
-    });
-
-    if (edge) {
-      nodes.push(...this.getNodesInLine(edge.getSourceNode()!, edges));
+  private hidePorts(visiblePortId?: string) {
+    if (!this.node) {
+      return;
     }
 
-    return nodes;
+    const currentNode = this.node;
+    currentNode.getPorts().forEach(port => {
+      const portId = port.id!;
+      if (portId === visiblePortId) {
+        return;
+      }
+
+      currentNode.portProp(portId, {
+        attrs: {
+          circle: {
+            r: 0,
+            // 连接桩在连线交互时不可被连接
+            magnet: false,
+          },
+        },
+      });
+    });
   }
 }

@@ -52,5 +52,20 @@ export class AsyncTask extends BaseNode {
       param_value: [],
     };
   }
+
+  toDsl(): object {
+    const { name, version, inputs, failureMode } = this;
+    const param: {
+      [key: string]: ParamValueType;
+    } = {};
+    inputs.forEach(({ ref, value }) => (param[ref] = value));
+
+    return {
+      alias: name,
+      'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
+      type: `${super.getRef()}:${version}`,
+      param: inputs.length === 0 ? undefined : param,
+    };
+  }
 }
 
