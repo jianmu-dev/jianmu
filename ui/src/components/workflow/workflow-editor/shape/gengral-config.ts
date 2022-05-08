@@ -38,7 +38,7 @@ export const PORTS = {
           // 连接桩在连线交互时不可被连接
           magnet: false,
           stroke: '#A7B0BB',
-          strokeWidth: 1,
+          'stroke-width': 1,
           fill: PORT.fill._default,
         },
       },
@@ -51,7 +51,7 @@ export const PORTS = {
           // 连接桩在连线交互时不可被连接
           magnet: false,
           stroke: '#A7B0BB',
-          strokeWidth: 1,
+          'stroke-width': 1,
           fill: PORT.fill._default,
         },
       },
@@ -64,7 +64,7 @@ export const PORTS = {
           // 连接桩在连线交互时不可被连接
           magnet: false,
           stroke: '#A7B0BB',
-          strokeWidth: 1,
+          'stroke-width': 1,
           fill: PORT.fill._default,
         },
       },
@@ -77,7 +77,7 @@ export const PORTS = {
           // 连接桩在连线交互时不可被连接
           magnet: false,
           stroke: '#A7B0BB',
-          strokeWidth: 1,
+          'stroke-width': 1,
           fill: PORT.fill._default,
         },
       },

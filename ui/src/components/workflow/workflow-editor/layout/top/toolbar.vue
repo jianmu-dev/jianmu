@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-editor-toolbar">
     <div class="left">
-      <button class="jm-icon-workflow-back" @click="goBack"></button>
+      <button class="jm-icon-button-left" @click="goBack"></button>
       <div class="title">{{ workflowForm.name }}</div>
       <button class="jm-icon-workflow-edit" @click="edit"></button>
     </div>
@@ -14,11 +14,8 @@
         <jm-tooltip content="放大" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-in" @click="zoom(ZoomTypeEnum.IN)"></button>
         </jm-tooltip>
-        <jm-tooltip v-if="zoomPercentage === '100%'" content="适屏" placement="bottom" :appendToBody="false">
-          <button class="jm-icon-workflow-zoom-fit" @click="zoom(ZoomTypeEnum.FIT)"></button>
-        </jm-tooltip>
-        <jm-tooltip v-else content="原始大小" placement="bottom" :appendToBody="false">
-          <button class="jm-icon-workflow-zoom-original" @click="zoom(ZoomTypeEnum.ORIGINAL)"></button>
+        <jm-tooltip content="适屏" placement="bottom" :appendToBody="false">
+          <button class="jm-icon-workflow-zoom-center" @click="zoom(ZoomTypeEnum.CENTER)"></button>
         </jm-tooltip>
       </div>
       <div class="configs">
@@ -91,6 +88,7 @@ export default defineComponent({
             cancelButtonText: '不保存',
             type: 'info',
           }).then(async () => {
+            workflowForm.value.data = btoa(JSON.stringify(graph.toJSON()));
             emit('save', back, workflowTool.toDsl(workflowForm.value));
           }).catch(() => {
           });
@@ -118,7 +116,7 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
 
-  button[class^="jm-icon-workflow-"] {
+  button[class^="jm-icon-"] {
     border-radius: 2px;
     border-width: 0;
     background-color: transparent;

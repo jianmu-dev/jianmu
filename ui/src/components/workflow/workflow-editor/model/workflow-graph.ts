@@ -60,7 +60,7 @@ export default class WorkflowGraph {
                 // 虚线
                 strokeDasharray: '4,1.5',
                 stroke: lineColor.connecting,
-                strokeWidth: 1.5,
+                'stroke-width': 1.5,
                 targetMarker: {
                   name: 'block',
                   width: 12,
