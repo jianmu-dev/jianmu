@@ -1,6 +1,9 @@
 import { Graph } from '@antv/x6';
-import { ZoomTypeEnum } from './data/enumeration';
+import yaml from 'yaml';
+import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
 import { NODE } from '../shape/gengral-config';
+import { IWorkflow, IWorkflowNode } from './data/common';
+import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 const { selectedBorderWidth } = NODE;
 
@@ -99,5 +102,42 @@ export class WorkflowTool {
         el.style.marginLeft = `-${t}px`;
         el.style.marginTop = `-${t}px`;
       });
+  }
+
+  toDsl(workflowData: IWorkflow): string {
+    const idArr: string[] = [];
+    const nodeDataArr: IWorkflowNode[] = [];
+
+    let node = this.graph.getRootNodes()[0];
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      idArr.push(node.id);
+      nodeDataArr.push(new CustomX6NodeProxy(node).getData());
+
+      const edges = this.graph.getOutgoingEdges(node);
+      if (!edges) {
+        break;
+      }
+      node = edges[0].getTargetNode()!;
+    }
+
+    let trigger;
+    if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(nodeDataArr[0].getType())) {
+      const nodeData = nodeDataArr.splice(0, 1)[0];
+      trigger = nodeData.toDsl();
+    }
+    const pipeline: {
+      [key: string]: object;
+    } = {};
+
+    nodeDataArr.forEach((nodeData, index) => (pipeline[idArr[index]] = nodeData.toDsl()));
+
+    return yaml.stringify({
+      name: workflowData.name,
+      description: workflowData.description,
+      trigger,
+      pipeline,
+    });
   }
 }
