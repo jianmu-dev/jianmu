@@ -39,5 +39,21 @@ export class Shell extends BaseNode {
       script: [],
     };
   }
+
+  toDsl(): object {
+    const { name, image, envs, script, failureMode } = this;
+    const environment: {
+      [key: string]: string;
+    } = {};
+    envs.forEach(({ name, value }) => (environment[name] = value));
+
+    return {
+      alias: name,
+      'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
+      image,
+      environment: envs.length === 0 ? undefined : environment,
+      script: script.split('\n'),
+    };
+  }
 }
 

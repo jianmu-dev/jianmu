@@ -55,4 +55,8 @@ export abstract class BaseNode implements IWorkflowNode {
 
     await validator.validate(source);
   }
+
+  toDsl(): object {
+    return {};
+  }
 }

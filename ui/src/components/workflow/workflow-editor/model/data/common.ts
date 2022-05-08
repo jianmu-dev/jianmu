@@ -29,6 +29,8 @@ export interface IWorkflowNode {
    * @throws Error
    */
   validate(): Promise<void>;
+
+  toDsl(): object;
 }
 
 export interface IGlobal {

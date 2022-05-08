@@ -24,5 +24,14 @@ export class Cron extends BaseNode {
       ],
     };
   }
+
+  toDsl(): object {
+    const { schedule } = this;
+
+    return {
+      type: NodeTypeEnum.CRON,
+      schedule,
+    };
+  }
 }
 

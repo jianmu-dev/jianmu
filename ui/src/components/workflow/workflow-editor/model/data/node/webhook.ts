@@ -47,5 +47,16 @@ export class Webhook extends BaseNode {
       only: [],
     };
   }
+
+  toDsl(): object {
+    const { params, auth, only } = this;
+
+    return {
+      type: NodeTypeEnum.WEBHOOK,
+      param: params.length === 0 ? undefined : params,
+      auth,
+      only,
+    };
+  }
 }
 
