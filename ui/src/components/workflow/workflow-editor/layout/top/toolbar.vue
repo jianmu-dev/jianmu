@@ -14,11 +14,8 @@
         <jm-tooltip content="放大" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-in" @click="zoom(ZoomTypeEnum.IN)"></button>
         </jm-tooltip>
-        <jm-tooltip v-if="zoomPercentage === '100%'" content="适屏" placement="bottom" :appendToBody="false">
-          <button class="jm-icon-workflow-zoom-fit" @click="zoom(ZoomTypeEnum.FIT)"></button>
-        </jm-tooltip>
-        <jm-tooltip v-else content="原始大小" placement="bottom" :appendToBody="false">
-          <button class="jm-icon-workflow-zoom-original" @click="zoom(ZoomTypeEnum.ORIGINAL)"></button>
+        <jm-tooltip content="适屏" placement="bottom" :appendToBody="false">
+          <button class="jm-icon-workflow-zoom-center" @click="zoom(ZoomTypeEnum.CENTER)"></button>
         </jm-tooltip>
       </div>
       <div class="configs">
