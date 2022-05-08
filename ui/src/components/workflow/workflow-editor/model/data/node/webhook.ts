@@ -7,6 +7,8 @@ export interface IWebhookParam {
   name: string;
   type: ParamTypeEnum;
   exp: string;
+  required: boolean;
+  default: string | undefined;
 }
 
 export interface IWebhookAuth {
@@ -17,10 +19,10 @@ export interface IWebhookAuth {
 export class Webhook extends BaseNode {
   readonly params: IWebhookParam[];
   auth: IWebhookAuth | undefined;
-  only: string;
+  only: string | undefined;
 
   constructor(name: string = 'webhook', params: IWebhookParam[] = [],
-    auth: IWebhookAuth | undefined = undefined, only: string = '') {
+    auth: IWebhookAuth | undefined = undefined, only: string | undefined = undefined) {
     super('webhook', name, NodeTypeEnum.WEBHOOK, icon, 'https://docs.jianmu.dev/guide/webhook.html');
     this.params = params;
     this.auth = auth;
