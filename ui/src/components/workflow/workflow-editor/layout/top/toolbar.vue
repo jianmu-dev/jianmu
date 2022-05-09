@@ -25,8 +25,8 @@
         </div>
       </div>
       <div class="operations">
-        <jm-button @click="save(true)">保存并返回</jm-button>
-        <jm-button type="primary" @click="save(false)">保存</jm-button>
+        <jm-button @click="save(true)" @keypress.enter.prevent>保存并返回</jm-button>
+        <jm-button type="primary" @click="save(false)" @keypress.enter.prevent>保存</jm-button>
       </div>
     </div>
     <project-panel v-if="projectPanelVisible"

@@ -112,6 +112,7 @@ export default defineComponent({
 
   .main {
     position: relative;
+    z-index: 1;
     height: calc(100% - @tool-bar-height);
   }
 }
