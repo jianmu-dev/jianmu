@@ -99,6 +99,7 @@ export default defineComponent({
     word-wrap: break-word;
     // 中文换行
     white-space: pre-wrap;
+    color: @label-color;
   }
 }
 </style>
