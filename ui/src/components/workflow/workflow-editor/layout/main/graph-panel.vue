@@ -36,7 +36,7 @@ export default defineComponent({
 
       emit('graph-created', workflowGraph.x6Graph);
       // 渲染画布，回显
-      workflowGraph.render(atob(props.workflowData.data));
+      workflowGraph.render(props.workflowData.data);
     });
 
     return {
