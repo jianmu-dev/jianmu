@@ -1,5 +1,6 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
+import defaultIcon from '../../../svgs/shape/async-task.svg';
 
 export type ParamValueType = string | number | boolean;
 
@@ -31,7 +32,7 @@ export class AsyncTask extends BaseNode {
   constructor(ref: string, name: string, icon: string = '', version: string = '',
     inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND) {
-    super(ref, name, NodeTypeEnum.ASYNC_TASK, icon, `https://jianmuhub.com/${ref}/${version}`);
+    super(ref, name, NodeTypeEnum.ASYNC_TASK, icon || defaultIcon, `https://jianmuhub.com/${ref}/${version}`);
     this.version = version;
     this.inputs = inputs;
     this.outputs = outputs;
