@@ -9,8 +9,8 @@
 
 <script lang="ts">
 import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
+import { Node } from '@antv/x6';
 import { IWorkflowNode } from '../model/data/common';
-import { BaseNode } from '../model/data/node/base-node';
 import { CustomX6NodeProxy } from '../model/data/custom-x6-node-proxy';
 
 export default defineComponent({
@@ -21,9 +21,9 @@ export default defineComponent({
     const iconUrl = ref<string>('');
     const nameVal = ref<string>('');
 
-    const refresh = ({ icon, name }: BaseNode) => {
-      iconUrl.value = icon;
-      nameVal.value = name;
+    const refresh = (data: IWorkflowNode) => {
+      iconUrl.value = data.getIcon();
+      nameVal.value = data.getName();
     };
 
     onMounted(() => {
@@ -31,7 +31,7 @@ export default defineComponent({
       let data = props.nodeData;
 
       if (!data) {
-        const node = inject('getNode')();
+        const node = (inject('getNode') as () => Node)();
         const proxy = new CustomX6NodeProxy(node);
         // 监听数据改变事件
         node.on('change:data', () => refresh(proxy.getData()));
