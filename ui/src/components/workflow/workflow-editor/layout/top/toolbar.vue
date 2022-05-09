@@ -14,7 +14,7 @@
         <jm-tooltip content="放大" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-in" @click="zoom(ZoomTypeEnum.IN)"></button>
         </jm-tooltip>
-        <jm-tooltip content="适屏" placement="bottom" :appendToBody="false">
+        <jm-tooltip content="居中" placement="bottom" :appendToBody="false">
           <button class="jm-icon-workflow-zoom-center" @click="zoom(ZoomTypeEnum.CENTER)"></button>
         </jm-tooltip>
       </div>
