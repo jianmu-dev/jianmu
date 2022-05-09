@@ -20,6 +20,8 @@ import lombok.Setter;
 public class NodeDefViewingDto extends PageDto {
     @Schema(required = true)
     private Type type;
+    @Schema(required = true)
+    private String name;
 
     public String getType() {
         if (type == Type.LOCAL) {
