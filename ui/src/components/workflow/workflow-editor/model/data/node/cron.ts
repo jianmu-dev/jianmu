@@ -1,3 +1,4 @@
+import { isValidCronExpression } from 'cron-expression-validator';
 import { BaseNode } from './base-node';
 import { NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/cron.svg';
@@ -21,6 +22,13 @@ export class Cron extends BaseNode {
       ...rules,
       schedule: [
         { required: true, message: 'schedule不能为空', trigger: 'blur' },
+        {
+          validator: (rule: any, value: any, callback: any) => {
+            if (!isValidCronExpression(value)) {
+              callback(new Error('请输入正确的cron表达式'));
+            }
+          }, trigger: 'blur',
+        },
       ],
     };
   }
