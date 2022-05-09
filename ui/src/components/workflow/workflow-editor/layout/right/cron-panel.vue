@@ -6,9 +6,6 @@
       ref="formRef"
       @submit.prevent
     >
-      <jm-form-item label="节点名称" prop="name">
-        <jm-input v-model="form.name" clearable></jm-input>
-      </jm-form-item>
       <jm-form-item label="schedule" prop="schedule">
         <jm-input v-model="form.schedule" clearable></jm-input>
       </jm-form-item>
