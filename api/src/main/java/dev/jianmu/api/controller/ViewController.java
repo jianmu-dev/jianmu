@@ -127,7 +127,8 @@ public class ViewController {
         var page = this.hubApplication.findPage(
                 dto.getPageNum(),
                 dto.getPageSize(),
-                dto.getType()
+                dto.getType(),
+                dto.getName()
         );
         var nodes = page.getList();
         List<NodeDefVo> nodeDefVos = nodes.stream().map(nodeDefinition -> {
