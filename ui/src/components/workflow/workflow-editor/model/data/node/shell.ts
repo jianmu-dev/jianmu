@@ -1,7 +1,7 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/shell.svg';
-import { CustomRule, CustomRuleItem } from '../common';
+import { CustomRule } from '../common';
 
 export interface IShellEnv {
   name: string;
@@ -31,6 +31,17 @@ export class Shell extends BaseNode {
   getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
 
+    const shellEnvFields: Record<string, CustomRule> = {};
+    this.envs.forEach((_, index) => {
+      shellEnvFields[index] = {
+        type: 'object',
+        required: true,
+        fields: {
+          name: [{ required: true, message: '请输入环境变量名称', trigger: 'blur' }],
+        } as Record<string, CustomRule>,
+      };
+    });
+
     return {
       ...rules,
       // TODO 待完善校验规则
@@ -39,17 +50,7 @@ export class Shell extends BaseNode {
         type: 'array',
         required: true,
         len: this.envs.length,
-        fields: {
-          name: [
-            {
-              required: true,
-              message: '环境变量名称不能为空',
-              trigger: 'blur',
-            },
-          ] as CustomRuleItem[],
-          type: [],
-          exp: [],
-        },
+        fields: shellEnvFields,
       },
       script: [],
     };
