@@ -98,6 +98,6 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceFailedEvent: {}", event);
-        this.asyncTaskInstanceInternalApplication.stop(event.getBusinessId());
+        this.asyncTaskInstanceInternalApplication.stop(event.getTriggerId(), event.getBusinessId());
     }
 }
