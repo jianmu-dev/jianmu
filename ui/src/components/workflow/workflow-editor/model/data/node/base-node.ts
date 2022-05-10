@@ -1,7 +1,6 @@
-import Schema from 'async-validator';
-import { IWorkflowNode } from '../common';
+import Schema, { Value } from 'async-validator';
+import { CustomRule, IWorkflowNode } from '../common';
 import { NodeTypeEnum } from '../enumeration';
-import { Value } from 'async-validator/dist-types/interface';
 
 export abstract class BaseNode implements IWorkflowNode {
   private readonly ref: string;
@@ -39,10 +38,14 @@ export abstract class BaseNode implements IWorkflowNode {
     return this.docUrl;
   }
 
-  getFormRules(): any {
+  getFormRules(): Record<string, CustomRule> {
     return {
       name: [
-        { required: true, message: '节点名称不能为空', trigger: 'blur' },
+        {
+          required: true,
+          message: '节点名称不能为空',
+          trigger: 'blur',
+        },
       ],
     };
   }

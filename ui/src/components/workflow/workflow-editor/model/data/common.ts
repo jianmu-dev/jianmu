@@ -1,4 +1,11 @@
+import { RuleItem } from 'async-validator';
 import { NodeTypeEnum } from './enumeration';
+
+export interface CustomRuleItem extends RuleItem {
+  trigger: string;
+}
+
+export type CustomRule = CustomRuleItem | CustomRuleItem[];
 
 /**
  * 密钥
@@ -22,7 +29,7 @@ export interface IWorkflowNode {
 
   getDocUrl(): string;
 
-  getFormRules(): any;
+  getFormRules(): Record<string, CustomRule>;
 
   /**
    * 校验
