@@ -100,6 +100,10 @@ export default defineComponent({
       transform: scaleX(-1);
       border-radius: 50% 0 0 50%;
       right: calc(-@collapse-btn-width * 2 / 2);
+
+      &::before {
+        margin-left: 5.5px;
+      }
     }
   }
 
@@ -120,8 +124,10 @@ export default defineComponent({
     background-color: #FFFFFF;
     border-radius: 50%;
     cursor: pointer;
-    // 反转动画
-    transition: transform 0.5s ease-in-out;
+
+    &::before {
+      margin-left: -1.5px;
+    }
   }
 
   .search {
