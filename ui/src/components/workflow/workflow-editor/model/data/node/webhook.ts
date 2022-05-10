@@ -36,9 +36,9 @@ export class Webhook extends BaseNode {
   getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
 
-    const webhookFields: Record<string, CustomRule> = {};
+    const webhookParamFields: Record<string, CustomRule> = {};
     this.params.forEach((_, index) => {
-      webhookFields[index] = {
+      webhookParamFields[index] = {
         type: 'object',
         required: true,
         fields: {
@@ -57,7 +57,7 @@ export class Webhook extends BaseNode {
         type: 'array',
         required: false,
         len: this.params.length,
-        fields: webhookFields,
+        fields: webhookParamFields,
       },
     };
   }
