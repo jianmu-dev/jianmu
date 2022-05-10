@@ -5,7 +5,7 @@
       <span class="group-name">{{ groupName }}</span>
       <div class="loading" v-loading="loading"></div>
     </div>
-    <div class="nodes" v-show="!collapsed && !loading">
+    <div class="nodes" v-show="!collapsed">
       <!-- 网络异常 -->
       <div class="network-anomaly" v-if="networkAnomaly">
         <div class="anomaly-img"></div>

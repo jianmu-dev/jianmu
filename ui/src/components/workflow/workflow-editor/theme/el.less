@@ -73,18 +73,22 @@
 }
 
 // el-loading的样式
-.el-loading-spinner {
-  top: 0;
-  left: 5px;
-  margin-top: -3px;
+.el-loading-mask {
+  z-index: 1;
 
-  &::before {
-    font-size: 14px;
-  }
+  .el-loading-spinner {
+    top: 0;
+    left: 5px;
+    margin-top: -3px;
 
-  .circular {
-    width: 14px;
-    height: 14px;
+    &::before {
+      font-size: 14px;
+    }
+
+    .circular {
+      width: 14px;
+      height: 14px;
+    }
   }
 }
 
