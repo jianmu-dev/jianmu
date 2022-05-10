@@ -106,7 +106,7 @@ export default defineComponent({
   .collapse-btn {
     box-sizing: border-box;
     border: 1px solid #EBEEFB;
-    z-index: 2;
+    z-index: 3;
     position: absolute;
     top: 58px;
     right: calc(-@collapse-btn-width / 2);
@@ -131,7 +131,7 @@ export default defineComponent({
     padding: 20px 0 20px;
     display: flex;
     justify-content: center;
-    z-index: 1;
+    z-index: 2;
     background-color: #FFFFFF;
 
     ::v-deep(.el-input) {
