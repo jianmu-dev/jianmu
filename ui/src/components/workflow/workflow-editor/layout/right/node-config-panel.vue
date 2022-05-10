@@ -1,7 +1,7 @@
 <template>
   <jm-drawer
     title="节点配置面板"
-    :size="500"
+    :size="380"
     direction="rtl"
     :modal="false"
     destroy-on-close
@@ -13,7 +13,7 @@
       </div>
     </template>
     <div class="jm-workflow-editor-node-config-panel">
-      <div class="panel-container">
+      <jm-scrollbar class="panel-container">
         <cron-panel v-if="nodeData.getType() === NodeTypeEnum.CRON"
                     :node-data="nodeData" @form-created="handleFormCreated"/>
         <webhook-panel v-else-if="nodeData.getType() === NodeTypeEnum.WEBHOOK"
@@ -22,7 +22,7 @@
                      :node-data="nodeData" @form-created="handleFormCreated"/>
         <async-task-panel v-else-if="nodeData.getType() === NodeTypeEnum.ASYNC_TASK"
                           :node-data="nodeData" @form-created="handleFormCreated"/>
-      </div>
+      </jm-scrollbar>
       <div class="footer">
         <jm-button @click="cancel">取消</jm-button>
         <jm-button type="primary" @click="save">保存</jm-button>
@@ -98,25 +98,41 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.jm-workflow-editor-node-config-panel {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+.el-drawer {
+  .jm-icon-button-help {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    font-size: 14px;
+    margin-left: 7px;
 
-  .panel-container {
-    // 铺满剩余高度
-    flex-grow: 1;
-    margin: 10px 20px 0;
+    &:hover {
+      background: #EFF7FF;
+      color: #086CD8;
+    }
   }
 
-  .footer {
-    box-sizing: border-box;
-    width: 100%;
-    height: 60px;
+  .jm-workflow-editor-node-config-panel {
+    height: 100%;
     display: flex;
-    border-top: 1px solid #E6EBF2;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+
+    .panel-container {
+      height: calc(100vh - 210px);
+      padding: 10px 20px 0;
+    }
+
+    .footer {
+      box-sizing: border-box;
+      width: 100%;
+      height: 75px;
+      display: flex;
+      border-top: 1px solid #E6EBF2;
+      justify-content: center;
+      align-items: center;
+    }
   }
 }
 </style>
