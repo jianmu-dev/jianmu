@@ -38,10 +38,23 @@ export class Webhook extends BaseNode {
 
     return {
       ...rules,
-      // TODO 待完善校验规则
-      param_name: [],
-      param_type: [],
-      param_exp: [],
+      // param_name: [{ required: true, message: '__请输入参数名称', trigger: 'blur' }],
+      // param_type: [{ required: true, message: '__请选择参数类型', trigger: 'change' }],
+      // param_exp: [{ required: true, message: '__请输入参数表达式', trigger: 'blur' }],
+      // param_required: [{ required: true }],
+      // param_default: [],
+      params: {
+        type: 'array',
+        required: true,
+        len: this.params.length,
+        fields: {
+          name: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
+          type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
+          exp: [{ required: true, message: '请输入参数表达式', trigger: 'blur' }],
+          required: [{ required: true }],
+          default: [],
+        } as Record<string, CustomRule>,
+      },
       auth_token: [],
       auth_value: [],
       only: [],
