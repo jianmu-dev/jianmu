@@ -1,6 +1,7 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
+import { CustomRule, CustomRuleItem } from '../common';
 
 export type ParamValueType = string | number | boolean;
 
@@ -43,14 +44,30 @@ export class AsyncTask extends BaseNode {
     return new AsyncTask(ref, name, icon, version, inputs, outputs, failureMode);
   }
 
-  getFormRules(): any {
+  getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
 
     return {
       ...rules,
       // TODO 待完善校验规则
       version: [],
-      param_value: [],
+      inputs: {
+        type: 'array',
+        required: true,
+        len: this.inputs.length,
+        fields: {
+          value: [
+            {
+              // TODO 根据required动态确定
+              required: true,
+              message: '参数值不能为空',
+              trigger: 'blur',
+            },
+          ] as CustomRuleItem[],
+          type: [],
+          exp: [],
+        },
+      },
     };
   }
 
