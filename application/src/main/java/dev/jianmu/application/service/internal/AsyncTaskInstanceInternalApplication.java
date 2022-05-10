@@ -120,7 +120,19 @@ public class AsyncTaskInstanceInternalApplication {
 
     // 任务已失败命令
     @Transactional
-    public void stop(String asyncTaskInstanceId) {
+    public void stop(String triggerId, String  asyncTaskInstanceId) {
+        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + triggerId));
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        if (!workflowInstance.isRunning()) {
+            log.info("流程已终止，任务无需挂起");
+            this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
+                    .ifPresent(asyncTaskInstance -> {
+                        asyncTaskInstance.fail();
+                        this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                    });
+            return;
+        }
         this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
                 .ifPresent(asyncTaskInstance -> {
                     asyncTaskInstance.stop();

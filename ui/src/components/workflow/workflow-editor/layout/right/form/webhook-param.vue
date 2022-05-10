@@ -1,7 +1,7 @@
 <template>
   <div :class="{'webhook-param':true,'switch-bgc':switchBackgroundFlag}">
     <i class="jm-icon-button-delete" @click="deleteParam"/>
-    <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.params.fields.name">
+    <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.params.fields[index].fields.name">
       <jm-input
         v-model="nameVal"
         placeholder="请输入参数名称"
@@ -10,7 +10,7 @@
         @blur="switchBackgroundFlag = false;"
       />
     </jm-form-item>
-    <jm-form-item label="类型" :prop="`${formModelName}.${index}.type`" :rules="rules.params.fields.type">
+    <jm-form-item label="类型" :prop="`${formModelName}.${index}.type`" :rules="rules.params.fields[index].fields.type">
       <jm-select
         v-model="typeVal" @change="changeType"
         placeholder="请选择参数类型"
@@ -19,7 +19,7 @@
         <jm-option v-for="(item,index) in ParamTypeEnum" :key="index" :label="item" :value="item"/>
       </jm-select>
     </jm-form-item>
-    <jm-form-item :prop="`${formModelName}.${index}.exp`" :rules="rules.params.fields.exp">
+    <jm-form-item :prop="`${formModelName}.${index}.exp`" :rules="rules.params.fields[index].fields.exp">
       <template #label>
         表达式
         <jm-tooltip placement="top">
