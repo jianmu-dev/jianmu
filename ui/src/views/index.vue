@@ -89,13 +89,13 @@ export default defineComponent({
     .menu-bar {
       margin-top: 20px;
       background-color: #FFFFFF;
-      padding: 30px 20px;
+      padding: 40px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
 
       a {
-        margin-right: 80px;
+        margin-right: 60px;
 
         &:last-child {
           margin-right: 0;
@@ -114,8 +114,8 @@ export default defineComponent({
         }
 
         button {
-          width: 44px;
-          height: 44px;
+          width: 56px;
+          height: 56px;
           border: none;
           background-color: #ffffff;
           cursor: pointer;
@@ -149,7 +149,7 @@ export default defineComponent({
 
         .text {
           font-size: 14px;
-          margin-top: 12px;
+          margin-top: 6px;
           font-weight: 400;
           color: #082340;
         }

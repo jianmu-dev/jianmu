@@ -2,39 +2,51 @@
   <div :class="{ 'jm-workflow-editor-node-panel': true, collapsed }" ref="container">
     <div class="collapse-btn jm-icon-button-left" @click="collapse"/>
     <jm-scrollbar>
+      <div class="search">
+        <jm-input placeholder="搜索" v-model="keyword" @change="changeKeyword">
+          <template #prefix>
+            <i class="jm-icon-button-search"></i>
+          </template>
+        </jm-input>
+      </div>
       <div class="groups">
-        <div class="group">
-          <x6-vue-shape
-            v-for="item in nodes"
-            :key="item.ref"
-            :node-data="item"
-            @mousedown="(e) => drag(item, e)"/>
-        </div>
+        <node-group
+          :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword"/>
+        <node-group
+          :type="NodeGroupEnum.INNER" :keyword="tempKeyword"/>
+        <node-group
+          :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword"/>
+        <node-group
+          :type="NodeGroupEnum.OFFICIAL" :keyword="tempKeyword"/>
+        <node-group
+          :type="NodeGroupEnum.COMMUNITY" :keyword="tempKeyword"/>
       </div>
     </jm-scrollbar>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, ref } from 'vue';
+import { defineComponent, inject, onMounted, provide, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import WorkflowDnd from '../../model/workflow-dnd';
-import X6VueShape from '../../shape/x6-vue-shape.vue';
 import { IWorkflowNode } from '../../model/data/common';
-import WorkflowNode from '../../model/workflow-node';
 import { WorkflowValidator } from '../../model/workflow-validator';
+import NodeGroup from './node-group.vue';
+import { NodeGroupEnum } from '../../model/data/enumeration';
 
 export default defineComponent({
-  components: { X6VueShape },
+  components: { NodeGroup },
   emits: ['node-selected'],
   setup(props, { emit }) {
-    const workflowNode = new WorkflowNode();
     const collapsed = ref<boolean>(false);
-    const container = ref<HTMLElement>();
+    const keyword = ref<string>('');
+    // 输入框触发change事件后传递给组件的keyword
+    const tempKeyword = ref<string>('');
     const getGraph = inject('getGraph') as () => Graph;
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     let workflowDnd: WorkflowDnd;
-
+    provide('getWorkflowDnd', () => workflowDnd);
+    const container = ref<HTMLElement>();
     // 确定容器宽度
     onMounted(() => {
       // 初始化dnd
@@ -44,20 +56,18 @@ export default defineComponent({
         container.value! as HTMLElement,
         (nodeId: IWorkflowNode) => emit('node-selected', nodeId));
     });
-
     return {
+      NodeGroupEnum,
+      workflowDnd,
       collapsed,
-      nodes: ref<IWorkflowNode[]>(workflowNode.search().flat(Infinity)),
+      keyword,
+      tempKeyword,
       container,
-      drag: (data: IWorkflowNode, event: MouseEvent) => {
-        if (!workflowDnd) {
-          return;
-        }
-
-        workflowDnd.drag(data, event);
-      },
       collapse: () => {
         collapsed.value = container.value!.clientWidth > 0;
+      },
+      changeKeyword(key) {
+        tempKeyword.value = key;
       },
     };
   },
@@ -68,8 +78,7 @@ export default defineComponent({
 @import '../../vars';
 
 @node-panel-top: 20px;
-@collapse-btn-width: 40px;
-
+@collapse-btn-width: 36px;
 .jm-workflow-editor-node-panel {
   // 折叠动画
   transition: width 0.3s ease-in-out;
@@ -89,53 +98,57 @@ export default defineComponent({
       display: block;
       // 反转
       transform: scaleX(-1);
-      border-radius: 10px 0 0 10px;
+      border-radius: 50% 0 0 50%;
+      right: calc(-@collapse-btn-width * 2 / 2);
     }
   }
 
   .collapse-btn {
-    display: none;
+    box-sizing: border-box;
+    border: 1px solid #EBEEFB;
+    z-index: 2;
     position: absolute;
-    top: -1px;
-    right: calc(-1px - @collapse-btn-width);
+    top: 58px;
+    right: calc(-@collapse-btn-width / 2);
 
     width: @collapse-btn-width;
-    height: 40px;
-    line-height: 40px;
+    height: 36px;
+    line-height: 36px;
     text-align: center;
-    color: #FFFFFF;
-    font-size: 20px;
-    background-color: #082340;
-    border-radius: 0 10px 10px 0;
+    color: #6B7B8D;
+    font-size: 16px;
+    background-color: #FFFFFF;
+    border-radius: 50%;
     cursor: pointer;
-
     // 反转动画
     transition: transform 0.5s ease-in-out;
   }
 
-  &:hover {
-    .collapse-btn {
-      display: block;
+  .search {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 20px 0 20px;
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+    background-color: #FFFFFF;
+
+    ::v-deep(.el-input) {
+      width: calc(100% - 37px);
+    }
+
+    border-bottom: 1px solid #EBEEFB;
+
+    .jm-icon-button-search {
+      font-size: 16px;
+      color: #7B8C9C;
     }
   }
 
   .groups {
+    padding-top: 96px;
     width: @node-panel-width;
-
-    .group {
-      display: flex;
-      flex-wrap: wrap;
-
-      ::v-deep(.jm-workflow-x6-vue-shape) {
-        margin: 10px;
-        width: 64px;
-
-        .x6-vue-shape-icon {
-          width: 64px;
-          height: 64px;
-        }
-      }
-    }
   }
 }
 </style>
