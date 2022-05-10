@@ -19,7 +19,7 @@
         <jm-option v-for="(item,index) in ParamTypeEnum" :key="index" :label="item" :value="item"/>
       </jm-select>
     </jm-form-item>
-    <jm-form-item :prop="`${formModelName}.${index}.exp`">
+    <jm-form-item :prop="`${formModelName}.${index}.exp`" :rules="rules.params.fields[index].fields.exp">
       <template #label>
         表达式
         <jm-tooltip placement="top">
