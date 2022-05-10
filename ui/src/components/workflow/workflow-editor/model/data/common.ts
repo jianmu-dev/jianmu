@@ -1,8 +1,10 @@
 import { RuleItem } from 'async-validator';
 import { NodeTypeEnum } from './enumeration';
 
+type TriggerValue = 'blur' | 'change';
+
 export interface CustomRuleItem extends RuleItem {
-  trigger: string;
+  trigger?: TriggerValue;
 }
 
 export type CustomRule = CustomRuleItem | CustomRuleItem[];
