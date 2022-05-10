@@ -36,17 +36,11 @@ export class Webhook extends BaseNode {
   getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
 
-    return {
-      ...rules,
-      // param_name: [{ required: true, message: '__请输入参数名称', trigger: 'blur' }],
-      // param_type: [{ required: true, message: '__请选择参数类型', trigger: 'change' }],
-      // param_exp: [{ required: true, message: '__请输入参数表达式', trigger: 'blur' }],
-      // param_required: [{ required: true }],
-      // param_default: [],
-      params: {
-        type: 'array',
+    const webhookFields: Record<string, CustomRule> = {};
+    this.params.forEach((_, index) => {
+      webhookFields[index] = {
+        type: 'object',
         required: true,
-        len: this.params.length,
         fields: {
           name: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
@@ -54,10 +48,17 @@ export class Webhook extends BaseNode {
           required: [{ required: true }],
           default: [],
         } as Record<string, CustomRule>,
+      };
+    });
+
+    return {
+      ...rules,
+      params: {
+        type: 'array',
+        required: false,
+        len: this.params.length,
+        fields: webhookFields,
       },
-      auth_token: [],
-      auth_value: [],
-      only: [],
     };
   }
 
