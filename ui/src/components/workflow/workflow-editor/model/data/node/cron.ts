@@ -2,6 +2,7 @@ import { isValidCronExpression } from 'cron-expression-validator';
 import { BaseNode } from './base-node';
 import { NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/cron.svg';
+import { CustomRule } from '../common';
 
 export class Cron extends BaseNode {
   schedule: string;
@@ -15,7 +16,7 @@ export class Cron extends BaseNode {
     return new Cron(name, schedule);
   }
 
-  getFormRules(): any {
+  getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
 
     return {
@@ -27,7 +28,8 @@ export class Cron extends BaseNode {
             if (!isValidCronExpression(value)) {
               callback(new Error('请输入正确的cron表达式'));
             }
-          }, trigger: 'blur',
+          },
+          trigger: 'blur',
         },
       ],
     };

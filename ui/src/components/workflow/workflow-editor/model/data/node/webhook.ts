@@ -1,5 +1,5 @@
 import { BaseNode } from './base-node';
-import { ISecretKey } from '../common';
+import { CustomRule, ISecretKey } from '../common';
 import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
 
@@ -33,7 +33,7 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
-  getFormRules(): any {
+  getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
 
     return {
