@@ -39,3 +39,14 @@ export enum FailureModeEnum {
   IGNORE = 'ignore',
   SUSPEND = 'suspend',
 }
+
+/**
+ * 节点分组枚举
+ */
+export enum NodeGroupEnum {
+  TRIGGER = 'trigger',
+  INNER = 'inner',
+  LOCAL = 'local',
+  OFFICIAL = 'official',
+  COMMUNITY = 'community'
+}
