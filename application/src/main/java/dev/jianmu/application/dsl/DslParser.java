@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.alg.cycle.JohnsonSimpleCycles;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
+import org.springframework.util.ObjectUtils;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.DuplicateKeyException;
@@ -602,6 +603,7 @@ public class DslParser {
         // 如果为Shell Node，不校验type
         var image = node.get("image");
         if (image != null) {
+            this.checkShellNode(nodeName, node);
             return;
         }
         var type = node.get("type");
@@ -675,6 +677,17 @@ public class DslParser {
         var targets = node.get("targets");
         if (!(targets instanceof List)) {
             throw new DslException("开始节点targets未设置");
+        }
+    }
+
+    private void checkShellNode(String nodeName, Map<?, ?> node) {
+        var script = node.get("script");
+        if (script instanceof List) {
+            if (((List<?>) script).stream().allMatch(ObjectUtils::isEmpty)) {
+                throw new DslException("节点 " + nodeName + " 的script参数不能为空");
+            }
+        } else {
+            throw new DslException("节点 " + nodeName + " 的script参数不能为空");
         }
     }
 
