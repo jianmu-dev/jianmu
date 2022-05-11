@@ -4,6 +4,7 @@ import icon from '../../../svgs/shape/shell.svg';
 import { CustomRule } from '../common';
 
 export interface IShellEnv {
+  key: string;
   name: string;
   value: string;
 }
@@ -37,22 +38,22 @@ export class Shell extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          name: [{ required: true, message: '请输入环境变量名称', trigger: 'blur' }],
+          name: [{ required: true, message: '请输入变量名', trigger: 'blur' }],
+          value: [{ required: true, message: '请输入变量值', trigger: 'blur' }],
         } as Record<string, CustomRule>,
       };
     });
 
     return {
       ...rules,
-      // TODO 待完善校验规则
-      image: [],
+      image: [{ required: true, message: '请输入镜像', trigger: 'blur' }],
       envs: {
         type: 'array',
         required: true,
         len: this.envs.length,
         fields: shellEnvFields,
       },
-      script: [],
+      script: [{ required: true, message: '请输入shell脚本', trigger: 'blur' }],
     };
   }
 
