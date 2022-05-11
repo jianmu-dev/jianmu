@@ -13,17 +13,17 @@ export interface IWebhookParam {
 }
 
 export interface IWebhookAuth {
-  token?: string;
-  value?: ISecretKey;
+  token: string;
+  value: ISecretKey | undefined;
 }
 
 export class Webhook extends BaseNode {
   readonly params: IWebhookParam[];
-  auth: IWebhookAuth;
+  auth?: IWebhookAuth;
   only?: string;
 
   constructor(name: string = 'webhook', params: IWebhookParam[] = [],
-    auth: IWebhookAuth = {}, only: string | undefined = undefined) {
+    auth: IWebhookAuth | undefined = undefined, only: string | undefined = undefined) {
     super('webhook', name, NodeTypeEnum.WEBHOOK, icon, 'https://docs.jianmu.dev/guide/webhook.html');
     this.params = params;
     this.auth = auth;
@@ -59,17 +59,24 @@ export class Webhook extends BaseNode {
         len: this.params.length,
         fields: webhookParamFields,
       },
+      auth: {
+        type: 'object',
+        required: false,
+        fields: {
+          token: [{ required: true, message: '请输入token', trigger: 'blur' }],
+          value: [{ required: true, message: '请选择value', trigger: 'change' }],
+        } as Record<string, CustomRule>,
+      },
     };
   }
 
   toDsl(): object {
     const { params, auth, only } = this;
-    const { token, value } = auth;
 
     return {
       type: NodeTypeEnum.WEBHOOK,
       param: params.length === 0 ? undefined : params,
-      auth: token && value ? auth : undefined,
+      auth,
       only,
     };
   }

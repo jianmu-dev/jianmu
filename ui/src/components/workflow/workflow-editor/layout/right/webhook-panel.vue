@@ -52,12 +52,20 @@
         <div class="setting-content" v-if="foldSettingFlag">
           <i class="line"></i>
           <div class="rules">
-            认证规则
-            <a href="https://docs.jianmu.dev/guide/webhook.html#%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89" target="_blank"><i
-              class="jm-icon-button-help"></i></a>
+            <div class="rules-title">
+              认证规则
+              <jm-tooltip placement="top">
+                <template #content>
+                  <div>若关闭认证规则，任何人皆可通过</div>
+                  <div>webhook触发此流程</div>
+                </template>
+                <i class="jm-icon-button-help"></i>
+              </jm-tooltip>
+            </div>
+            <jm-switch v-model="authSwitch" @change="changeAuth"/>
           </div>
-          <div class="rules-content">
-            <jm-form-item>
+          <div class="rules-content" v-if="authSwitch">
+            <jm-form-item prop="auth.token" :rules="nodeData.getFormRules().auth.fields.token">
               <template #label>
                 token
                 <jm-tooltip content="Webhook请求携带的认证鉴权数据" placement="top">
@@ -66,7 +74,7 @@
               </template>
               <jm-input v-model="form.auth.token" placeholder="请输入token"/>
             </jm-form-item>
-            <jm-form-item>
+            <jm-form-item prop="auth.value" :rules="nodeData.getFormRules().auth.fields.value">
               <template #label>
                 value
                 <jm-tooltip placement="top">
@@ -79,14 +87,18 @@
               <secret-key-selector v-model="form.auth.value" placeholder="请输入value值"/>
             </jm-form-item>
           </div>
-          <jm-form-item>
+          <jm-form-item class="only-container">
             <template #label>
               only
               <jm-tooltip placement="top">
                 <template #content>
-                  匹配规则，结果为 true 时触发流程，当<br/>前只可引用触发器参数详见<a href="https://docs.jianmu.dev/guide/expression.html"
-                                                           target="_blank"
-                                                           style="color:#fff;text-decoration: underline;">运算表达式</a>
+                  <div>匹配规则，结果为 true 时触发流程，当</div>
+                  <div>
+                    <span>前只可引用触发器参数详见</span>
+                    <a href="https://docs.jianmu.dev/guide/expression.html"
+                       target="_blank"
+                       style="color:#fff;text-decoration: underline;">运算表达式</a>
+                  </div>
                 </template>
                 <i class="jm-icon-button-help"></i>
               </jm-tooltip>
@@ -125,12 +137,14 @@ export default defineComponent({
     // 折叠
     const foldParamFlag = ref<boolean>(true);
     const foldSettingFlag = ref<boolean>(true);
+    const authSwitch = ref<boolean>(!!props.nodeData.auth);
 
     return {
       formRef,
       form,
       foldParamFlag,
       foldSettingFlag,
+      authSwitch,
       //  删除
       deleteParam: (index: number) => {
         form.value.params.splice(index, 1);
@@ -144,6 +158,12 @@ export default defineComponent({
       foldSetting: () => {
         foldSettingFlag.value = !foldSettingFlag.value;
       },
+      changeAuth: (val: boolean) => {
+        form.value.auth = val ? {
+          token: '',
+          value: undefined,
+        } : undefined;
+      },
     };
   },
 });
@@ -156,6 +176,7 @@ export default defineComponent({
   color: @label-color;
   font-size: 14px;
   margin-bottom: 25px;
+  margin-top: 20px;
 
   // 页面全局设置，所有折叠按钮生效
   .jm-icon-button-right::before {
@@ -187,7 +208,6 @@ export default defineComponent({
 
 
   .webhook-param {
-    margin-top: 20px;
     // 折叠
     .fold {
       cursor: pointer;
@@ -246,28 +266,20 @@ export default defineComponent({
       }
 
       .rules {
-        .jm-icon-button-help {
-          display: inline-block;
-          cursor: pointer;
-          width: 20px;
-          height: 20px;
-
-          &:hover {
-            background: #EFF7FF;
-            color: #086CD8;
-          }
-        }
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
 
       .rules-content {
         padding: 20px;
         border-radius: 2px;
         border: 1px solid #E6EBF2;
-        margin: 10px 0 20px;
+        margin-top: 10px;
       }
 
-      .only {
-        margin: 20px 0 10px 0;
+      .only-container {
+        margin-top: 20px;
       }
     }
   }
