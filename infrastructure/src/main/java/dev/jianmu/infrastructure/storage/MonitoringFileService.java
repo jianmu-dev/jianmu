@@ -6,10 +6,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -30,8 +28,13 @@ public class MonitoringFileService implements DisposableBean {
     private final Map<String, Consumer<Path>> callbackMap = new ConcurrentHashMap<>();
 
     public MonitoringFileService(StorageProperties properties) throws IOException {
-        this.monitoringDirectory = Paths.get("ci", properties.getLogfilePath());
-//        this.file = monitoringDirectory.resolve(fileName);
+        var rootLocation = Paths.get("ci", properties.getLogfilePath());
+        try {
+            Files.createDirectories(rootLocation);
+        } catch (FileAlreadyExistsException e) {
+            log.info("the directory already exits");
+        }
+        this.monitoringDirectory = rootLocation;
         this.watchService = FileSystems.getDefault().newWatchService();
         var key = monitoringDirectory.register(watchService, ENTRY_MODIFY);
         System.out.println(key);
@@ -50,7 +53,6 @@ public class MonitoringFileService implements DisposableBean {
                 for (final WatchEvent<?> event : key.pollEvents()) {
                     final Path changed = monitoringDirectory.resolve((Path) event.context());
                     final String fileName = changed.getFileName().toString();
-                    log.info("-------------------{}-----------", fileName);
                     var callback = callbackMap.get(fileName);
 
                     if (event.kind() == ENTRY_MODIFY && callback != null) {
