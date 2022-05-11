@@ -121,7 +121,7 @@ export default defineComponent({
 
     .panel-container {
       height: calc(100vh - 210px);
-      padding: 10px 20px 0;
+      padding: 20px 20px 0;
     }
 
     .footer {
