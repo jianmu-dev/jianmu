@@ -1,7 +1,7 @@
 <template>
   <div :class="{'webhook-param':true,'switch-bgc':switchBackgroundFlag}">
     <i class="jm-icon-button-delete" @click="deleteParam"/>
-    <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.params.fields[index].fields.name">
+    <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.name">
       <jm-input
         v-model="nameVal"
         placeholder="请输入参数名称"
@@ -10,7 +10,7 @@
         @blur="switchBackgroundFlag = false;"
       />
     </jm-form-item>
-    <jm-form-item label="类型" :prop="`${formModelName}.${index}.type`" :rules="rules.params.fields[index].fields.type">
+    <jm-form-item label="类型" :prop="`${formModelName}.${index}.type`" :rules="rules.type">
       <jm-select
         v-model="typeVal" @change="changeType"
         placeholder="请选择参数类型"
@@ -19,7 +19,7 @@
         <jm-option v-for="(item,index) in ParamTypeEnum" :key="index" :label="item" :value="item"/>
       </jm-select>
     </jm-form-item>
-    <jm-form-item :prop="`${formModelName}.${index}.exp`" :rules="rules.params.fields[index].fields.exp">
+    <jm-form-item :prop="`${formModelName}.${index}.exp`" :rules="rules.exp">
       <template #label>
         表达式
         <jm-tooltip placement="top">
@@ -41,13 +41,14 @@
       />
     </jm-form-item>
     <!--  是否必填  -->
-    <jm-form-item :prop="`${formModelName}.${index}.required`" :rules="rules.params.fields.required" label="是否必填">
+    <jm-form-item :prop="`${formModelName}.${index}.required`" :rules="rules.required"
+                  label="是否必填">
       <jm-radio-group v-model="requiredVal" @change="changeRequired">
         <jm-radio :label="false">否</jm-radio>
         <jm-radio :label="true">是</jm-radio>
       </jm-radio-group>
     </jm-form-item>
-    <jm-form-item :prop="`${formModelName}.${index}.default`" :rules="rules.params.fields.default" label="默认值"
+    <jm-form-item label="默认值"
                   v-if="!requiredVal">
       <jm-input v-model="defaultVal" @change="changeDefault" placeholder="请输入默认值" @focus="switchBackgroundFlag = true;"
                 @blur="switchBackgroundFlag = false;"/>
@@ -56,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUpdated, PropType, ref } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { ParamTypeEnum } from '../../../model/data/enumeration';
 import { CustomRule } from '../../../model/data/common';
 
@@ -107,20 +108,6 @@ export default defineComponent({
     // 初始化required的值
     emit('update:required', requiredVal.value);
 
-    onUpdated(() => {
-      if (nameVal.value !== props.name) {
-        nameVal.value = props.name;
-      }
-      if (typeVal.value !== props.type) {
-        typeVal.value = props.type;
-      }
-      if (expVal.value !== props.exp) {
-        expVal.value = props.exp;
-      }
-      if (defaultVal.value !== props.default) {
-        defaultVal.value = props.default;
-      }
-    });
     return {
       nameVal,
       typeVal,

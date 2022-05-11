@@ -4,8 +4,9 @@ import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
 
 export interface IWebhookParam {
+  key: string;
   name: string;
-  type: ParamTypeEnum;
+  type: ParamTypeEnum | undefined;
   exp: string;
   required: boolean;
   default?: string;
@@ -46,7 +47,6 @@ export class Webhook extends BaseNode {
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           exp: [{ required: true, message: '请输入参数表达式', trigger: 'blur' }],
           required: [{ required: true }],
-          default: [],
         } as Record<string, CustomRule>,
       };
     });

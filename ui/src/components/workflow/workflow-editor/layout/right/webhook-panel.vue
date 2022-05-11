@@ -2,7 +2,6 @@
   <div class="jm-workflow-editor-webhook-panel">
     <jm-form
       :model="form"
-      :rules="form.getFormRules()"
       ref="formRef"
       @submit.prevent
       label-position="top"
@@ -25,7 +24,7 @@
         <div class="param-content" v-if="foldParamFlag">
           <webhook-param
             v-for="(param,index) in form.params"
-            :key="index"
+            :key="param.key"
             v-model:name="param.name"
             v-model:exp="param.exp"
             v-model:type="param.type"
@@ -33,7 +32,7 @@
             v-model:default="param.default"
             :form-model-name="'params'"
             :index="index"
-            :rules="nodeData.getFormRules()"
+            :rules="nodeData.getFormRules().params.fields[index].fields"
             @delete="deleteParam"
           />
           <div class="add-param" @click="addParam">
@@ -58,7 +57,7 @@
               class="jm-icon-button-help"></i></a>
           </div>
           <div class="rules-content">
-            <jm-form-item prop="auth_token">
+            <jm-form-item>
               <template #label>
                 token
                 <jm-tooltip content="Webhook请求携带的认证鉴权数据" placement="top">
@@ -67,24 +66,27 @@
               </template>
               <jm-input v-model="form.auth.token" placeholder="请输入token"/>
             </jm-form-item>
-            <jm-form-item prop="auth_value">
+            <jm-form-item>
               <template #label>
                 value
-                <jm-tooltip content="用于校验token值，相同则验证成功，必须是密钥类型" placement="top">
+                <jm-tooltip placement="top">
+                  <template #content>
+                    用于校验token值，相同则验证成<br/>功，必须是密钥类型
+                  </template>
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
               <secret-key-selector v-model="form.auth.value" placeholder="请输入value值"/>
             </jm-form-item>
           </div>
-          <jm-form-item prop="only">
+          <jm-form-item>
             <template #label>
               only
               <jm-tooltip placement="top">
                 <template #content>
-                  匹配规则，结果为 true 时触发流程，当前只可引用触发器参数详见<a href="https://docs.jianmu.dev/guide/expression.html"
-                                                      target="_blank"
-                                                      style="color:#fff;text-decoration: underline;">运算表达式</a>
+                  匹配规则，结果为 true 时触发流程，当<br/>前只可引用触发器参数详见<a href="https://docs.jianmu.dev/guide/expression.html"
+                                                           target="_blank"
+                                                           style="color:#fff;text-decoration: underline;">运算表达式</a>
                 </template>
                 <i class="jm-icon-button-help"></i>
               </jm-tooltip>
@@ -104,6 +106,7 @@ import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { Webhook } from '../../model/data/node/webhook';
 import WebhookParam from './form/webhook-param.vue';
 import SecretKeySelector from './form/secret-key-selector.vue';
+import { v4 as uuidv4 } from 'uuid';
 
 export default defineComponent({
   components: { WebhookParam, SecretKeySelector },
@@ -133,7 +136,7 @@ export default defineComponent({
         form.value.params.splice(index, 1);
       },
       addParam: () => {
-        form.value.params.push({ name: '', exp: '', type: '', required: false, default: '' });
+        form.value.params.push({ key: uuidv4(), name: '', exp: '', type: undefined, required: false });
       },
       foldParam: () => {
         foldParamFlag.value = !foldParamFlag.value;
@@ -152,11 +155,7 @@ export default defineComponent({
 .jm-workflow-editor-webhook-panel {
   color: @label-color;
   font-size: 14px;
-  margin-bottom: 36px;
-
-  ::v-deep(.el-form-item__error) {
-    position: static;
-  }
+  margin-bottom: 25px;
 
   // 页面全局设置，所有折叠按钮生效
   .jm-icon-button-right::before {
@@ -201,7 +200,7 @@ export default defineComponent({
     }
 
     .param-title {
-      margin: 10px 0;
+      margin-bottom: 10px;
     }
 
     .param-content {
