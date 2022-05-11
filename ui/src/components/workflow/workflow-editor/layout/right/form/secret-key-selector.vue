@@ -1,5 +1,5 @@
 <template>
-  <div class="secret-key-selector">
+  <div class="secret-key-selector" v-loading="loading">
     <jm-cascader :props="cascaderProps" clearable placeholder="请选择密钥" v-model="selectorValue"
                  @change="getValue"/>
   </div>
@@ -22,10 +22,11 @@ export default defineComponent({
   },
   emits: ['update:model-value'],
   setup(props, { emit }) {
-
     const selectorValue = ref<string[]>(props.modelValue ? [props.modelValue.namespace, props.modelValue.key] : []);
+    const loading = ref<boolean>(selectorValue.value.length > 0);
     return {
       selectorValue,
+      loading,
       getValue: (val: string[] | undefined) => {
         emit('update:model-value', val ? { namespace: val[0], key: val[1] } : undefined);
       },
@@ -54,6 +55,7 @@ export default defineComponent({
 
           // 通过调用resolve将子节点数据返回，通知组件数据加载完成
           resolve(nodes);
+          loading.value = false;
         },
       },
     };
