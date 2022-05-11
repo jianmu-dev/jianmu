@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>SSE Test</title>
+</head>
+<body>
+<div>
+    <ul id="events"></ul>
+</div>
+<script type="application/javascript">
+    function addMessage(message) {
+        const el = document.createElement("li")
+        el.innerHTML = message;
+        document.getElementById("events").appendChild(el);
+    }
+
+    if (!!window.EventSource) {
+        console.log("浏览器支持EventSource")
+        const eventSource = new EventSource("http://127.0.0.1:8081/view/logs/subscribe/0a435d2481884a90bf32fb5b5bf2bc71")
+        window.onbeforeunload = function () {
+            console.log("关闭页面，关闭连接")
+            eventSource.close();
+        }
+        eventSource.onopen = function (event) {
+            console.log("连接已经打开" + JSON.stringify(event))
+        }
+        eventSource.onmessage = function (event) {
+            console.log(event)
+            addMessage(event.data)
+        }
+        eventSource.onerror = function (event) {
+            if (event.readyState === EventSource.CONNECTING) {
+                console.log('connecting to server')
+            } else if (event.readyState === EventSource.OPEN) {
+                console.log('connection opened')
+            } else if (event.readyState === EventSource.CLOSED) {
+                console.log('connection closed')
+            }
+        }
+    } else {
+        addMessage("浏览器不支持SSE")
+    }
+</script>
+</body>
+</html>

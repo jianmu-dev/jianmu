@@ -1,5 +1,7 @@
 package dev.jianmu.infrastructure.storage;
 
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,7 +17,7 @@ public interface StorageService {
 
     BufferedWriter writeLog(String LogFileName);
 
-    BufferedReader readLog(String LogFileName);
+    SseEmitter readLog(String logFileName);
 
     File logFile(String LogFileName);
 

@@ -21,6 +21,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -312,6 +313,13 @@ public class ViewController {
                     .contentType(MediaType.TEXT_PLAIN)
                     .build();
         }
+    }
+
+    @CrossOrigin
+    @GetMapping(path = "/logs/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "日志订阅接口", description = "日志订阅接口,可以使用SSE方式订阅最新日志")
+    public SseEmitter streamSseLog(@PathVariable String logId) {
+        return this.storageService.readLog(logId);
     }
 
     @GetMapping("/logs/workflow/{logId}")
