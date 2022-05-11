@@ -152,7 +152,6 @@ export default defineComponent({
         if (err instanceof TimeoutError) {
           networkAnomaly.value = true;
         }
-        proxy.$throw(err, proxy);
       } finally {
         loading.value = false;
         // 如果没有数据或者网络超时折叠

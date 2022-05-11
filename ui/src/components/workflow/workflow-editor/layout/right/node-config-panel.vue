@@ -32,13 +32,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref } from 'vue';
+import { defineComponent, inject, provide, ref } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
 import ShellPanel from './shell-panel.vue';
 import AsyncTaskPanel from './async-task-panel.vue';
-import { Graph } from '@antv/x6';
+import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../model/data/custom-x6-node-proxy';
 
 export default defineComponent({
@@ -60,6 +60,7 @@ export default defineComponent({
     // 不能为ref，否则，表单内容的变化影响数据绑定
     const nodeData = proxy.getData();
     const formRef = ref();
+    provide('getNode', (): Node => node);
 
     return {
       NodeTypeEnum,
