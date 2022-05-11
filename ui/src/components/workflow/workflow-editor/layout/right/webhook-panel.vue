@@ -187,6 +187,7 @@ export default defineComponent({
 
 
   .webhook-param {
+    margin-top: 20px;
     // 折叠
     .fold {
       cursor: pointer;
