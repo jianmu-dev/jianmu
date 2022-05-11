@@ -64,11 +64,12 @@ export class Webhook extends BaseNode {
 
   toDsl(): object {
     const { params, auth, only } = this;
+    const { token, value } = auth;
 
     return {
       type: NodeTypeEnum.WEBHOOK,
       param: params.length === 0 ? undefined : params,
-      auth,
+      auth: token && value ? auth : undefined,
       only,
     };
   }

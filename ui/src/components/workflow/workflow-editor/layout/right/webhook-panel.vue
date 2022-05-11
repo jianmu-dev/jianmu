@@ -187,6 +187,7 @@ export default defineComponent({
 
 
   .webhook-param {
+    margin-top: 20px;
     // 折叠
     .fold {
       cursor: pointer;
@@ -210,7 +211,7 @@ export default defineComponent({
       .add-param {
         padding: 10px 20px;
         font-size: 14px;
-        color: #096DD9;
+        color: @primary-color;
         cursor: pointer;
 
         .jm-icon-button-add::before {
