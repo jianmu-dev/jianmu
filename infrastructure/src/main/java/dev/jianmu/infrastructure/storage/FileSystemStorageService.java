@@ -1,10 +1,12 @@
 package dev.jianmu.infrastructure.storage;
 
+import dev.jianmu.infrastructure.SseTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +14,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Ethan Liu
@@ -24,11 +27,17 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     private static final Logger logger = LoggerFactory.getLogger(FileSystemStorageService.class);
     private static final String LogfilePostfix = ".log";
     private static final String webhookFilePostfix = ".json";
+    // For SSE
+    private final SseTemplate template;
+    private final MonitoringFileService monitoringFileService;
+    private static final AtomicLong COUNTER = new AtomicLong(0);
 
     private final Path rootLocation;
     private final Path webhookRootLocation;
 
-    public FileSystemStorageService(StorageProperties properties) {
+    public FileSystemStorageService(SseTemplate template, MonitoringFileService monitoringFileService, StorageProperties properties) {
+        this.template = template;
+        this.monitoringFileService = monitoringFileService;
         this.rootLocation = Paths.get("ci", properties.getLogfilePath());
         this.webhookRootLocation = Paths.get("ci", properties.getWebhookFilePath());
     }
@@ -62,14 +71,20 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     @Override
-    public BufferedReader readLog(String LogFileName) {
-        try {
-            return new BufferedReader(
-                    new FileReader(this.rootLocation + File.separator + LogFileName + LogfilePostfix, StandardCharsets.UTF_8)
-            );
-        } catch (IOException e) {
-            throw new StorageFileNotFoundException("Could not find log file", e);
-        }
+    public SseEmitter readLog(String logFileName) {
+        var fullName = logFileName + LogfilePostfix;
+        this.monitoringFileService.listen(fullName, (file -> {
+            try (var stream = Files.lines(file)) {
+                stream.skip(COUNTER.get())
+                        .forEach(line ->
+                                template.broadcast(fullName, SseEmitter.event()
+                                        .id(String.valueOf(COUNTER.incrementAndGet()))
+                                        .data(line)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+        return this.template.newSseEmitter(fullName);
     }
 
     @Override

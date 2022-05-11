@@ -7,12 +7,6 @@ spring:
     password: sa
   flyway:
     enabled: false
-    clean-disabled: false
-    locations: classpath:testdb/migration
-    baseline-on-migrate: true
-    baseline-version: 1
-    out-of-order: true
-    validate-on-migrate: false
   sql:
     init:
       schema-locations: classpath:testdb/migration/schema.sql
