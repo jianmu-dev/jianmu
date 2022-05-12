@@ -50,30 +50,37 @@ export default defineComponent({
 
 <style lang="less">
 .jm-workflow-expression-editor {
-  margin: 50px;
-  border: 1px solid red;
-  width: 800px;
-  height: 500px;
+  width: 100%;
+  height: 100%;
   outline: none;
-
-  line-height: 20px;
-  font-size: 14px;
+  border: 1px solid #E6EBF2;
+  padding: 10px;
+  line-height: 24px;
+  font-size: 12px;
+  color: #082340;
+  background-color: #FFFFFF;
 
   input {
+    padding: 2px 5px;
+    margin: 2px;
+
+    &:first-child, &:-moz-first-node {
+      margin-left: 0;
+    }
+
+    &:-moz-last-node, &:last-child {
+      margin-right: 0;
+    }
+
     // 必须继承，否则，在Chrome粘贴时附带样式
     color: inherit;
-    background-color: #ccc;
+    background-color: #E8E8E8;
     border-width: 0;
-
-    margin: 0 2px;
-    height: 20px;
-    line-height: 20px;
-    font-size: 14px;
-    width: 110px;
+    font-size: inherit;
   }
 
   .input-hover {
-    background-color: #9EB1C5;
+    background-color: #EFF7FF;
   }
 }
 </style>
