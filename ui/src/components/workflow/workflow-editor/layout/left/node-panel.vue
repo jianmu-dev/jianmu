@@ -126,7 +126,7 @@ export default defineComponent({
     cursor: pointer;
 
     &::before {
-      margin-left: -1.5px;
+      margin-left: 1.5px;
     }
   }
 

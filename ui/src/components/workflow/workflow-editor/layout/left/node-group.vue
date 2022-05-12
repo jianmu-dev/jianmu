@@ -16,7 +16,7 @@
         <div class="nodes-wrapper">
           <x6-vue-shape
             v-for="item in nodes"
-            :key="item.ref"
+            :key="item.getRef()"
             :node-data="item"
             @mousedown="(e) => drag(item, e)"/>
         </div>
@@ -170,7 +170,7 @@ export default defineComponent({
       await loadNodes(keyWord.value, false, currentPage.value += 1);
     };
     onMounted(async () => {
-      await loadNodes(keyWord.value);
+      await loadNodes(keyWord.value, false);
     });
     onUpdated(async () => {
       if (keyWord.value === props.keyword) {
@@ -178,7 +178,7 @@ export default defineComponent({
       }
       keyWord.value = props.keyword;
       // 搜索节点
-      await loadNodes(keyWord.value);
+      await loadNodes(keyWord.value, false);
       // 搜索后将currentPage初始化
       currentPage.value = 1;
     });
@@ -269,7 +269,7 @@ export default defineComponent({
       .reload-btn {
         cursor: pointer;
         font-size: 16px;
-        color: #096DD9;
+        color: @primary-color;
         margin-bottom: 10px;
       }
     }
