@@ -50,15 +50,38 @@ export class ExpressionEditor {
   }
 
   insertParam(nodeId: string, paramRef: string): void {
-    const selection = document.getSelection();
-    if (!selection || selection.anchorNode !== this.editorEl) {
-      throw new Error('请确定要插入的位置');
-    }
+    this.validateSelectionInEditor();
 
     const param = this.getParam(nodeId, paramRef);
 
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
     document.execCommand('insertHTML', false, this.getParamHtml(param));
+  }
+
+  private validateSelectionInEditor() {
+    const selection = document.getSelection();
+    if (!selection || !selection.anchorNode) {
+      throw new Error('请确定要插入的位置');
+    }
+
+    let node = selection.anchorNode;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (node === document.body) {
+        throw new Error('请确定要插入的位置');
+      }
+
+      if (node === this.editorEl) {
+        break;
+      }
+
+      const { parentNode } = node;
+      if (!parentNode) {
+        throw new Error('请确定要插入的位置');
+      }
+
+      node = parentNode;
+    }
   }
 
   cut(e: ClipboardEvent): void {
