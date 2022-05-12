@@ -14,12 +14,59 @@ const TEXT_NODE_TYPE = 3;
 const ELEMENT_NODE_TYPE = 1;
 const NEW_LINE = '\n';
 
+class ParamToolbar {
+  private readonly toolbarEl: HTMLElement;
+  private paramRefEl?: HTMLInputElement;
+
+  constructor(toolbarEl: HTMLElement) {
+    this.toolbarEl = toolbarEl;
+  }
+
+  show(paramRefEl: HTMLInputElement): void {
+    this.paramRefEl = paramRefEl;
+    this.toolbarEl.firstElementChild!.innerHTML = paramRefEl.value;
+
+    const { x, y, width, height } = this.paramRefEl.getBoundingClientRect();
+
+    this.toolbarEl.style.left = `${x}px`;
+    this.toolbarEl.style.top = `${y}px`;
+    this.toolbarEl.style.width = `${width}px`;
+    this.toolbarEl.style.height = `${height}px`;
+
+    const deleteIconEl = this.toolbarEl.lastElementChild! as HTMLElement;
+    const { offsetWidth: deleteIconWidth, offsetHeight: deleteIconHeight } = deleteIconEl;
+    deleteIconEl.style.right = `${-deleteIconWidth / 2}px`;
+    deleteIconEl.style.top = `${-deleteIconHeight / 2}px`;
+  }
+
+  hide(): void {
+    delete this.paramRefEl;
+
+    this.toolbarEl.style.left = '';
+    this.toolbarEl.style.top = '';
+    this.toolbarEl.style.width = '';
+    this.toolbarEl.style.height = '';
+  }
+
+  removeParam(): void {
+    if (!this.paramRefEl) {
+      return;
+    }
+
+    this.paramRefEl.parentNode!.removeChild(this.paramRefEl);
+
+    this.hide();
+  }
+}
+
 export class ExpressionEditor {
+  readonly toolbar: ParamToolbar;
   private readonly editorEl: HTMLDivElement;
   private readonly getParam: GetParamFn;
   private listener: any;
 
-  constructor(editorEl: HTMLDivElement, value: string, getParam: GetParamFn) {
+  constructor(paramToolbarEl: HTMLElement, editorEl: HTMLDivElement, value: string, getParam: GetParamFn) {
+    this.toolbar = new ParamToolbar(paramToolbarEl);
     this.editorEl = editorEl;
     this.getParam = getParam;
     this.editorEl.innerHTML = this.parse(value);
@@ -32,16 +79,8 @@ export class ExpressionEditor {
 
       const el = e.target as HTMLElement;
       if (el.tagName === 'INPUT' && el.parentNode) {
-        el.className = 'input-hover';
+        this.toolbar.show(el as HTMLInputElement);
       }
-
-      Array.from(this.editorEl.querySelectorAll('.input-hover')).forEach(input => {
-        if (input === el) {
-          return;
-        }
-
-        input.className = '';
-      });
     });
   }
 
