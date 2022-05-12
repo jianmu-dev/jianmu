@@ -23,7 +23,7 @@ export default defineComponent({
   emits: ['graph-created', 'node-selected'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
-    const nodeToolbar = ref<HTMLElement>();
+    const nodeToolbar = ref();
     const container = ref<HTMLElement>();
     let workflowGraph: WorkflowGraph;
 
