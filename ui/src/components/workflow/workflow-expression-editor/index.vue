@@ -55,7 +55,7 @@ export default defineComponent({
   outline: none;
 
   input {
-    padding: 2px 5px;
+    padding: 2px 0.5em;
     margin: 2px;
 
     &:first-child, &:-moz-first-node {
