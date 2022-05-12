@@ -1,6 +1,7 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.vo.NodeDefVersionListVo;
 import dev.jianmu.api.dto.NodeDefViewingDto;
 import dev.jianmu.api.dto.ProjectViewingDto;
 import dev.jianmu.api.mapper.*;
@@ -180,6 +181,34 @@ public class ViewController {
                     .deprecated(nodeDefinition.getDeprecated())
                     .build();
         }).orElseThrow(() -> new DataNotFoundException("未找到该节点"));
+    }
+
+    @GetMapping("nodes/{ownerRef}/{ref}/versions")
+    @Operation(summary = "获取节点定义版本列表", description = "获取节点定义版本列表")
+    public NodeDefVersionListVo findNodeVersions(@PathVariable String ownerRef, @PathVariable String ref) {
+        return NodeDefVersionListVo.builder()
+                .versions(this.hubApplication.findByOwnerRefAndRef(ownerRef, ref).stream()
+                        .map(NodeDefinitionVersion::getVersion)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    @GetMapping("nodes/{ownerRef}/{ref}/versions/{version}")
+    @Operation(summary = "获取节点定义版本", description = "获取节点定义版本")
+    public NodeDefVersionVo findNodeVersions(@PathVariable String ownerRef, @PathVariable String ref, @PathVariable String version) {
+        return this.hubApplication.findByOwnerRefAndRefAndVersion(ownerRef, ref, version)
+                .map(nodeDefinitionVersion -> NodeDefVersionVo.builder()
+                        .ownerRef(nodeDefinitionVersion.getOwnerRef())
+                        .ref((nodeDefinitionVersion.getRef()))
+                        .creatorName(nodeDefinitionVersion.getCreatorName())
+                        .creatorRef(nodeDefinitionVersion.getCreatorRef())
+                        .version(nodeDefinitionVersion.getVersion())
+                        .inputParameters(nodeDefinitionVersion.getInputParameters())
+                        .outputParameters(nodeDefinitionVersion.getOutputParameters())
+                        .resultFile(nodeDefinitionVersion.getResultFile())
+                        .spec(nodeDefinitionVersion.getSpec())
+                .build())
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + ownerRef + "/" + ref + ":" +version));
     }
 
     @GetMapping("/projects")
