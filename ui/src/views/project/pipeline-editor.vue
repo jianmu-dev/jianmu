@@ -8,16 +8,23 @@
 import { defineComponent, getCurrentInstance, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
 import { useRouter } from 'vue-router';
-import { save } from '@/api/project';
-import { IProjectIdVo } from '@/api/dto/project';
+import { save as saveProject } from '@/api/project';
 import { IRootState } from '@/model';
 import { useStore } from 'vuex';
 
 export default defineComponent({
-  setup() {
+  setup(props) {
     const router = useRouter();
     const store = useStore();
-    const workflow = ref<IWorkflow>();
+    const editMode = !!props.id;
+    const workflow = ref<IWorkflow>({
+      name: '未命名项目',
+      groupId: '1',
+      global: {
+        concurrent: false,
+      },
+      data: '',
+    });
     const { proxy } = getCurrentInstance() as any;
     const rootState = store.state as IRootState;
     const close = () => {
@@ -30,21 +37,17 @@ export default defineComponent({
     return {
       workflow,
       close,
-      save: (back: boolean, dsl: string) => {
-        const dslText = JSON.parse(JSON.stringify(dsl)).split('raw-data')[0];
-        save({ projectGroupId: '1', dslText })
-          .then(async ({ id }: IProjectIdVo) => {
-            if (back) {
-              close();
-              return;
-            }
-          })
-          .catch((err: Error) => {
-            // 关闭loading
-            proxy.$throw(err, proxy);
-          });
-        console.log(JSON.parse(JSON.stringify(workflow.value?.data)));
-        console.log(`This is save${back ? ' and back' : ''}`, dsl);
+      save: async (back: boolean, dsl: string) => {
+        try {
+          const { id } = await saveProject({ projectGroupId: workflow.value.groupId, dslText: dsl });
+          proxy.$success(editMode ? '编辑成功' : '新增成功');
+          if (!back) {
+            return;
+          }
+          close();
+        } catch (err) {
+          proxy.$throw(err, proxy);
+        }
       },
     };
   },

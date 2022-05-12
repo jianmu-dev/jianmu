@@ -37,19 +37,15 @@ export default defineComponent({
   name: 'jm-workflow-editor',
   components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel },
   props: {
-    modelValue: Object as PropType<IWorkflow>,
+    modelValue: {
+      type: Object as PropType<IWorkflow>,
+      required: true,
+    },
   },
   emits: ['update:model-value', 'back', 'save'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
-    const workflowData = ref<IWorkflow>(props.modelValue ? cloneDeep(props.modelValue) : {
-      name: '未命名项目',
-      groupId: '',
-      global: {
-        concurrent: false,
-      },
-      data: '',
-    });
+    const workflowData = ref<IWorkflow>(cloneDeep(props.modelValue));
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeId = ref<string>('');
