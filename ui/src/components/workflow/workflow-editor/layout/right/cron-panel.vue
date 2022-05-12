@@ -6,7 +6,7 @@
       ref="formRef"
       @submit.prevent
     >
-      <jm-form-item label="schedule" prop="schedule">
+      <jm-form-item label="schedule" prop="schedule" class="schedule-item">
         <jm-input v-model="form.schedule" clearable></jm-input>
       </jm-form-item>
     </jm-form>
@@ -41,6 +41,8 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-editor-cron-panel {
-
+  .schedule-item {
+    margin-top: 20px;
+  }
 }
 </style>
