@@ -27,7 +27,9 @@ export class Cron extends BaseNode {
           validator: (rule: any, value: any, callback: any) => {
             if (!isValidCronExpression(value)) {
               callback(new Error('请输入正确的cron表达式'));
+              return;
             }
+            callback();
           },
           trigger: 'blur',
         },
