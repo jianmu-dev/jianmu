@@ -49,11 +49,10 @@ export class Shell extends BaseNode {
       image: [{ required: true, message: '请输入镜像', trigger: 'blur' }],
       envs: {
         type: 'array',
-        required: true,
+        required: false,
         len: this.envs.length,
         fields: shellEnvFields,
       },
-      script: [{ required: true, message: '请输入shell脚本', trigger: 'blur' }],
     };
   }
 

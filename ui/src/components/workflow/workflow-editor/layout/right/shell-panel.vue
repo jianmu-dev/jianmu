@@ -45,7 +45,7 @@
           </div>
         </div>
       </jm-form-item>
-      <jm-form-item label="脚本" class="script-container" prop="script" :rules="nodeData.getFormRules().script">
+      <jm-form-item label="脚本" class="script-container">
         <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script"/>
       </jm-form-item>
     </jm-form>
