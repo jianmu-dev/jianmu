@@ -110,7 +110,26 @@ export class ExpressionEditor {
   }
 
   private getParamHtml({ ref, name, nodeId, nodeName }: IParam): string {
-    return `<input type="text" disabled="disabled" value="${nodeName}.${name}" data-raw="\${${nodeId}.${ref}}"/>`;
+    const tempDiv = document.createElement('div');
+    tempDiv.className = 'jm-workflow-expression-editor';
+    tempDiv.style.position = 'fixed';
+    tempDiv.style.left = '-1000px';
+    tempDiv.style.top = '-1000px';
+    tempDiv.style.whiteSpace = 'nowrap';
+    tempDiv.style.visibility = 'hidden';
+
+    const tempSpan = document.createElement('span');
+    tempSpan.style.padding = '0';
+    tempSpan.style.borderWidth = '0';
+    tempSpan.innerText = `${nodeName}.${name}`;
+    tempDiv.appendChild(tempSpan);
+
+    document.body.appendChild(tempDiv);
+    const width = tempSpan.offsetWidth;
+    const height = tempSpan.offsetHeight;
+    document.body.removeChild(tempDiv);
+
+    return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${nodeName}.${name}" data-raw="\${${nodeId}.${ref}}"/>`;
   }
 
   private parse(text: string): string {
