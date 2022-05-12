@@ -72,7 +72,7 @@
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <jm-input v-model="form.auth.token" placeholder="请输入token"/>
+              <jm-input v-model="form.auth.token" placeholder="请输入token值"/>
             </jm-form-item>
             <jm-form-item prop="auth.value" :rules="nodeData.getFormRules().auth.fields.value">
               <template #label>

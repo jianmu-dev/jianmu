@@ -31,7 +31,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { CustomRule } from '@/components/workflow/workflow-editor/model/data/common';
+import { CustomRule } from '../../../model/data/common';
 
 export default defineComponent({
   props: {

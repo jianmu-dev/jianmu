@@ -2,7 +2,7 @@
   <div class="jm-workflow-editor-toolbar">
     <div class="left">
       <button class="jm-icon-button-left" @click="goBack"></button>
-      <div class="title">{{ workflowForm.name }}</div>
+      <div class="title">{{ workflowData.name }}</div>
       <button class="jm-icon-workflow-edit" @click="edit"></button>
     </div>
     <div class="right">
@@ -29,8 +29,11 @@
         <jm-button type="primary" @click="save(false)" @keypress.enter.prevent>保存</jm-button>
       </div>
     </div>
-    <project-panel v-if="projectPanelVisible"
-                   v-model="projectPanelVisible"/>
+    <project-panel
+      v-if="projectPanelVisible"
+      v-model="projectPanelVisible"
+      :workflow-data="workflowData"
+    />
   </div>
 </template>
 

@@ -46,7 +46,7 @@ export class Webhook extends BaseNode {
           name: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           exp: [{ required: true, message: '请输入参数表达式', trigger: 'blur' }],
-          required: [{ required: true }],
+          required: [{ required: true, type: 'boolean' }],
         } as Record<string, CustomRule>,
       };
     });
@@ -63,8 +63,8 @@ export class Webhook extends BaseNode {
         type: 'object',
         required: false,
         fields: {
-          token: [{ required: true, message: '请输入token', trigger: 'blur' }],
-          value: [{ required: true, message: '请选择value', trigger: 'change' }],
+          token: [{ required: true, message: '请输入token值', trigger: 'blur' }],
+          value: [{ required: true, message: '请选择密钥', trigger: 'change' }],
         } as Record<string, CustomRule>,
       },
     };

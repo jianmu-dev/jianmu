@@ -365,4 +365,8 @@ public class HubApplication {
         return types.stream().map(this::findByType)
                 .collect(Collectors.toList());
     }
+
+    public Optional<NodeDefinitionVersion> findByOwnerRefAndRefAndVersion(String ownerRef, String ref, String version) {
+        return this.nodeDefinitionVersionRepository.findByOwnerRefAndRefAndVersion(ownerRef, ref, version);
+    }
 }
