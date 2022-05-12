@@ -50,6 +50,11 @@ export class ExpressionEditor {
   }
 
   insertParam(nodeId: string, paramRef: string): void {
+    const selection = document.getSelection();
+    if (!selection || selection.anchorNode !== this.editorEl) {
+      throw new Error('请确定要插入的位置');
+    }
+
     const param = this.getParam(nodeId, paramRef);
 
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
