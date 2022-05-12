@@ -129,10 +129,10 @@ export class ExpressionEditor {
     tempSpan.innerText = `${nodeName}.${name}`;
     tempDiv.appendChild(tempSpan);
 
-    document.body.appendChild(tempDiv);
+    this.editorEl.parentNode!.appendChild(tempDiv);
     const width = tempSpan.offsetWidth;
     const height = tempSpan.offsetHeight;
-    document.body.removeChild(tempDiv);
+    this.editorEl.parentNode!.removeChild(tempDiv);
 
     return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${nodeName}.${name}" data-raw="\${${nodeId}.${ref}}"/>`;
   }

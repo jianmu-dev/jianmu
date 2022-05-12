@@ -53,12 +53,6 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   outline: none;
-  border: 1px solid #E6EBF2;
-  padding: 10px;
-  line-height: 24px;
-  font-size: 12px;
-  color: #082340;
-  background-color: #FFFFFF;
 
   input {
     padding: 2px 5px;
