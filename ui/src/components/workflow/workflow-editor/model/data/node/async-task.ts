@@ -15,33 +15,25 @@ export interface IAsyncTaskParam {
 }
 
 export class AsyncTask extends BaseNode {
+  readonly ownerRef: string;
   version: string;
   readonly inputs: IAsyncTaskParam[];
   readonly outputs: IAsyncTaskParam[];
   failureMode: FailureModeEnum;
 
-  /**
-   * 构造方法
-   * @param ref 格式：ownerRef/ref
-   * @param name
-   * @param icon
-   * @param version
-   * @param inputs
-   * @param outputs
-   * @param failureMode
-   */
-  constructor(ref: string, name: string, icon: string = '', version: string = '',
+  constructor(ownerRef: string, ref: string, name: string, icon: string = '', version: string = '',
     inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND) {
-    super(ref, name, NodeTypeEnum.ASYNC_TASK, icon || defaultIcon, `https://jianmuhub.com/${ref}/${version}`);
+    super(ref, name, NodeTypeEnum.ASYNC_TASK, icon || defaultIcon, `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
+    this.ownerRef = ownerRef;
     this.version = version;
     this.inputs = inputs;
     this.outputs = outputs;
     this.failureMode = failureMode;
   }
 
-  static build({ ref, name, icon, version, inputs, outputs, failureMode }: any): AsyncTask {
-    return new AsyncTask(ref, name, icon, version, inputs, outputs, failureMode);
+  static build({ ownerRef, ref, name, icon, version, inputs, outputs, failureMode }: any): AsyncTask {
+    return new AsyncTask(ownerRef, ref, name, icon, version, inputs, outputs, failureMode);
   }
 
   getFormRules(): Record<string, CustomRule> {
@@ -81,7 +73,7 @@ export class AsyncTask extends BaseNode {
     return {
       alias: name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
-      type: `${super.getRef()}:${version}`,
+      type: `${this.ownerRef}/${super.getRef()}:${version}`,
       param: inputs.length === 0 ? undefined : param,
     };
   }
