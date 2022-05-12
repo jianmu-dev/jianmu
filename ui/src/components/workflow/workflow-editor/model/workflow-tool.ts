@@ -135,7 +135,7 @@ export class WorkflowTool {
 
     const idMap = new Map<string, string>();
     nodeDataArr.forEach((nodeData, index) => {
-      const ref = `task_${index}`;
+      const ref = `node_${index}`;
 
       if (nodeData instanceof AsyncTask &&
         (nodeData as AsyncTask).outputs.length > 0) {
