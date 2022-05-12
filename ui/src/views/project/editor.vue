@@ -66,6 +66,7 @@ import { IProjectGroupVo } from '@/api/dto/project-group';
 import { useStore } from 'vuex';
 import { IRootState } from '@/model';
 import { namespace } from '@/store/modules/session';
+import yaml from 'yaml';
 
 export default defineComponent({
   props: {
@@ -88,6 +89,9 @@ export default defineComponent({
     const form = ref<any>();
     const loading = ref<boolean>(false);
     const rootState = store.state as IRootState;
+    const checkDsl = (dslText: string): boolean => {
+      return !!yaml.parse(dslText)['raw-data'];
+    };
     onMounted(async () => {
       // 请求项目组列表
       projectGroupList.value = await listProjectGroup();
@@ -143,6 +147,15 @@ export default defineComponent({
 
       fetchProjectDetail(props.id)
         .then(({ dslText, projectGroupId }) => {
+          if (checkDsl(dslText)) {
+            router.replace({
+              name: 'update-pipeline',
+              params: {
+                id: props.id,
+              },
+            });
+            return;
+          }
           editorForm.value.dslText = dslText;
           // 回显项目组
           editorForm.value.projectGroupId = projectGroupId;
