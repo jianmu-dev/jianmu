@@ -3,23 +3,30 @@
     <div class="collapse-btn jm-icon-button-left" @click="collapse"/>
     <jm-scrollbar>
       <div class="search">
-        <jm-input placeholder="搜索" v-model="keyword" @change="changeKeyword">
+        <jm-input placeholder="搜索" v-model="keyword" @change="changeKeyword" :clearable="true">
           <template #prefix>
             <i class="jm-icon-button-search"></i>
           </template>
         </jm-input>
       </div>
-      <div class="groups">
+      <div class="groups" v-show="nodeCount>0">
         <node-group
-          :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword"/>
+          :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
         <node-group
-          :type="NodeGroupEnum.INNER" :keyword="tempKeyword"/>
+          :type="NodeGroupEnum.INNER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
         <node-group
-          :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword"/>
+          :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
         <node-group
-          :type="NodeGroupEnum.OFFICIAL" :keyword="tempKeyword"/>
+          :type="NodeGroupEnum.OFFICIAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
         <node-group
-          :type="NodeGroupEnum.COMMUNITY" :keyword="tempKeyword"/>
+          :type="NodeGroupEnum.COMMUNITY" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
+      </div>
+      <div class="empty" v-if="nodeCount<=0">
+        <jm-empty description="没有搜到相关结果" :image="noDataImage">
+        </jm-empty>
+        <div class="submit-issue" @click="submitIssue">
+          欢迎提交节点需求
+        </div>
       </div>
     </jm-scrollbar>
   </div>
@@ -33,6 +40,7 @@ import { IWorkflowNode } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import NodeGroup from './node-group.vue';
 import { NodeGroupEnum } from '../../model/data/enumeration';
+import noDataImage from '../../svgs/no-data.svg';
 
 export default defineComponent({
   components: { NodeGroup },
@@ -47,6 +55,19 @@ export default defineComponent({
     let workflowDnd: WorkflowDnd;
     provide('getWorkflowDnd', () => workflowDnd);
     const container = ref<HTMLElement>();
+    // 控制节点拖拽面板是否显示
+    const nodeCount = ref<number>(0);
+    const getNodeCount = (count: number) => {
+      if (!count) {
+        return;
+      }
+      // 如果node-group中都找不到节点拖拽面板不展示
+      nodeCount.value += count;
+    };
+    // 提交issie
+    const submitIssue = () => {
+      window.open('https://gitee.com/jianmu-runners/jianmu-runner-list/issues', '_blank');
+    };
     // 确定容器宽度
     onMounted(() => {
       // 初始化dnd
@@ -57,6 +78,10 @@ export default defineComponent({
         (nodeId: IWorkflowNode) => emit('node-selected', nodeId));
     });
     return {
+      submitIssue,
+      noDataImage,
+      nodeCount,
+      getNodeCount,
       NodeGroupEnum,
       workflowDnd,
       collapsed,
@@ -66,8 +91,9 @@ export default defineComponent({
       collapse: () => {
         collapsed.value = container.value!.clientWidth > 0;
       },
-      changeKeyword(key) {
+      changeKeyword(key: string) {
         tempKeyword.value = key;
+        nodeCount.value = 0;
       },
     };
   },
@@ -155,6 +181,17 @@ export default defineComponent({
   .groups {
     padding-top: 96px;
     width: @node-panel-width;
+  }
+
+  .empty {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 20px;
+
+    .submit-issue {
+      cursor: pointer;
+      color: @primary-color;
+    }
   }
 }
 </style>

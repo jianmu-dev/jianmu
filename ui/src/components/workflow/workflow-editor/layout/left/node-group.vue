@@ -1,5 +1,5 @@
 <template>
-  <div class="group">
+  <div class="group" v-if="isShow">
     <div class="fold-switch" @click="toggle">
       <i :class="['jm-icon-button-right',collapsed?'':'rotate']"></i>
       <span class="group-name">{{ groupName }}</span>
@@ -10,7 +10,7 @@
       <div class="network-anomaly" v-if="networkAnomaly">
         <div class="anomaly-img"></div>
         <span class="anomaly-tip">网络开小差啦</span>
-        <div class="reload-btn" @click="loadNodes(keyword,true)">重新加载</div>
+        <div class="reload-btn" @click="loadNodes(keyword,true,initialPageSize)">重新加载</div>
       </div>
       <template v-else-if="nodes.length>0">
         <div class="nodes-wrapper">
@@ -25,13 +25,11 @@
           <jm-load-more :state="loadState" :load-more="btnDown"></jm-load-more>
         </div>
       </template>
-      <!-- 节点不存在 -->
-      <jm-empty v-else></jm-empty>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, inject, onMounted, onUpdated, PropType, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, onUpdated, PropType, ref } from 'vue';
 import X6VueShape from '../../shape/x6-vue-shape.vue';
 import { IWorkflowNode } from '../../model/data/common';
 import { NodeGroupEnum } from '../../model/data/enumeration';
@@ -41,6 +39,7 @@ import { StateEnum } from '@/components/load-more/enumeration';
 import WorkflowDnd from '../../model/workflow-dnd';
 
 export default defineComponent({
+  emits: ['getNodeCount'],
   props: {
     type: {
       type: String as PropType<NodeGroupEnum>,
@@ -54,7 +53,7 @@ export default defineComponent({
   components: {
     X6VueShape,
   },
-  setup(props) {
+  setup(props, { emit }) {
     const groupName = computed<string>(() => {
       if (props.type === NodeGroupEnum.TRIGGER) {
         return '触发器';
@@ -70,11 +69,13 @@ export default defineComponent({
         return '';
       }
     });
-    const { proxy } = getCurrentInstance() as any;
-    // 分页的pageSize
-    const pageSize: number = 6;
+    // 组件初始加载的节点个数
+    const initialPageSize: number = 6;
+    const searchPageSize: number = 10000;
     // 显示更多组件状态
     const loadState = ref<StateEnum>(StateEnum.NONE);
+    // 控制整个分组的显隐
+    const isShow = ref<boolean>(true);
     const loading = ref<boolean>(false);
     const collapsed = ref<boolean>(true);
     const nodes = ref<IWorkflowNode[]>([]);
@@ -89,8 +90,9 @@ export default defineComponent({
      * @param keyword 搜索关键字
      * @param reload 网络异常点击重试
      * @param currentPage 节点数据分页，当前第几页
+     * @param pageSize 一页加载几条数据
      */
-    const loadNodes = async (keyword: string, reload: boolean, currentPage: number = 1) => {
+    const loadNodes = async (keyword: string, reload: boolean, pageSize: number, currentPage: number = 1) => {
       // 点击重试，将请求超时的状态还原到初始状态
       if (reload) {
         networkAnomaly.value = false;
@@ -110,7 +112,7 @@ export default defineComponent({
           case NodeGroupEnum.LOCAL: {
             const { content, totalPages } = await workflowNode.loadLocalNodes(currentPage, pageSize, keyword);
             // 显示更多
-            totalPages <= currentPage ? (loadState.value = StateEnum.NO_MORE) : (loadState.value = StateEnum.MORE);
+            totalPages <= currentPage ? (loadState.value = StateEnum.NONE) : (loadState.value = StateEnum.MORE);
             currentPage > 1 ? nodes.value = [...nodes.value, ...content] : nodes.value = content;
             break;
           }
@@ -121,7 +123,7 @@ export default defineComponent({
               totalPages,
             } = await workflowNode.loadOfficialNodes(currentPage ? currentPage : 1, pageSize, keyword);
             // 显示更多
-            totalPages <= currentPage ? (loadState.value = StateEnum.NO_MORE) : (loadState.value = StateEnum.MORE);
+            totalPages <= currentPage ? (loadState.value = StateEnum.NONE) : (loadState.value = StateEnum.MORE);
             currentPage > 1 ? nodes.value = [...nodes.value, ...content] : nodes.value = content;
             break;
           }
@@ -132,32 +134,29 @@ export default defineComponent({
               totalPages,
             } = await workflowNode.loadCommunityNodes(currentPage ? currentPage : 1, pageSize, keyword);
             // 显示更多
-            totalPages <= currentPage ? (loadState.value = StateEnum.NO_MORE) : (loadState.value = StateEnum.MORE);
+            totalPages <= currentPage ? (loadState.value = StateEnum.NONE) : (loadState.value = StateEnum.MORE);
             currentPage > 1 ? nodes.value = [...nodes.value, ...content] : nodes.value = content;
             break;
           }
         }
+        // 传递当前分组已加载的节点数量
+        emit('getNodeCount', nodes.value.length);
         if (nodes.value.length <= 0) {
+          isShow.value = false;
           return;
         }
-
         // 加载的节点数量，大于0分组展开
         collapsed.value = false;
-        // 如果节点数量小于pageSize，隐藏显示更多组件
-        if (nodes.value.length < pageSize) {
-          loadState.value = StateEnum.NONE;
-        }
+        isShow.value = true;
       } catch (err) {
         // 网络超时
         if (err instanceof TimeoutError) {
           networkAnomaly.value = true;
+          // 网络超时折叠分组
+          collapsed.value = true;
         }
       } finally {
         loading.value = false;
-        // 如果没有数据或者网络超时折叠
-        if (nodes.value.length === 0 || networkAnomaly.value) {
-          collapsed.value = true;
-        }
       }
     };
     // 切换分组的折叠状态
@@ -167,10 +166,10 @@ export default defineComponent({
     // 显示更多
     const btnDown = async () => {
       loadState.value = StateEnum.LOADING;
-      await loadNodes(keyWord.value, false, currentPage.value += 1);
+      await loadNodes(keyWord.value, false, initialPageSize * 3, currentPage.value += 1);
     };
     onMounted(async () => {
-      await loadNodes(keyWord.value, false);
+      await loadNodes(keyWord.value, false, initialPageSize);
     });
     onUpdated(async () => {
       if (keyWord.value === props.keyword) {
@@ -178,11 +177,13 @@ export default defineComponent({
       }
       keyWord.value = props.keyword;
       // 搜索节点
-      await loadNodes(keyWord.value, false);
+      await loadNodes(keyWord.value, false, keyWord.value === '' ? initialPageSize : searchPageSize);
       // 搜索后将currentPage初始化
       currentPage.value = 1;
     });
     return {
+      initialPageSize,
+      isShow,
       groupName,
       loadState,
       networkAnomaly,
@@ -300,7 +301,7 @@ export default defineComponent({
       margin: 0 20px 10px 10px;
       width: 64px;
 
-      .x6-vue-shape-icon {
+      .icon {
         width: 64px;
         height: 64px;
       }

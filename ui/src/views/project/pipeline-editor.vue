@@ -17,7 +17,6 @@ export default defineComponent({
   props: {
     id: {
       type: String,
-      required: true,
     },
   },
   setup(props) {
@@ -38,7 +37,7 @@ export default defineComponent({
       if (editMode) {
         try {
           loading.value = true;
-          const { dslText, projectGroupId } = await fetchProjectDetail(props.id);
+          const { dslText, projectGroupId } = await fetchProjectDetail(props.id as string);
           const rawData = yaml.parse(dslText)['raw-data'];
           const { name, global } = yaml.parse(dslText);
           workflow.value = {

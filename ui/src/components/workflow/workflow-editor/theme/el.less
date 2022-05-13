@@ -31,10 +31,21 @@
 // 输入框高度设置
 .el-input {
   line-height: 36px;
+  // el-input清除按钮样式
+  .el-input__suffix {
+    .el-input__suffix-inner {
+      .el-icon-circle-close {
+        line-height: 36px;
+        transform: scale(.75);
 
-  .el-input__inner {
-    height: 36px;
-    line-height: 36px;
+        &::before {
+          color: #FFFFFF;
+          background-color: #6B7B8D;
+          padding: 2px;
+          border-radius: 50%;
+        }
+      }
+    }
   }
 }
 
@@ -93,7 +104,13 @@
 }
 
 .el-empty {
-  padding: 0 0 10px;
+  padding: 180px 0 10px;
+
+  .el-empty__image {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 15px;
+  }
 }
 
 // 输入框高度设置
