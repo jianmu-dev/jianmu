@@ -24,33 +24,36 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  setup() {
     const opened = ref<boolean>(false);
     const selectedVal = ref<string[]>();
     const getExpressionEditor = inject('getExpressionEditor') as () => ExpressionEditor;
+
+    const hide = () => {
+      selectedVal.value = undefined;
+      opened.value = false;
+      getExpressionEditor().toolbar.hide();
+    };
 
     return {
       opened,
       selectedVal,
       changeParam: () => {
-        const param = getExpressionEditor().toolbar.getParam()!;
+        const param = getExpressionEditor().toolbar.getCurrentParam()!;
         selectedVal.value = [];
         selectedVal.value.push(param.nodeId);
         selectedVal.value.push(param.ref);
       },
       handleChange: (val: string[]) => {
-        const nodeId = val[0];
-        const ref = val[1];
-        const { label: nodeName, children } = props.selectableParams.find(({ value }) => value === val[0])!;
-        const { label: name } = children!.find(({ value }) => value === val[1])!;
+        const { toolbar } = getExpressionEditor();
+        const param = toolbar.getParam(val[0], val[1]);
 
-        getExpressionEditor().toolbar.updateParam({ ref, name, nodeId, nodeName });
+        toolbar.updateParam(param);
+
+        // 更新参数后，需隐藏工具栏，否则有视觉延迟
+        hide();
       },
-      hide: () => {
-        selectedVal.value = undefined;
-        opened.value = false;
-        getExpressionEditor().toolbar.hide();
-      },
+      hide,
     };
   },
 });
