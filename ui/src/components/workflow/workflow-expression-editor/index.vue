@@ -77,15 +77,6 @@ export default defineComponent({
 
     input {
       margin: 2px 0.25em;
-
-      &:first-child, &:-moz-first-node {
-        margin-left: 0;
-      }
-
-      &:-moz-last-node, &:last-child {
-        margin-right: 0;
-      }
-
       background-color: #E8E8E8;
       border-width: 0;
     }
