@@ -24,10 +24,16 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  setup() {
     const opened = ref<boolean>(false);
     const selectedVal = ref<string[]>();
     const getExpressionEditor = inject('getExpressionEditor') as () => ExpressionEditor;
+
+    const hide = () => {
+      selectedVal.value = undefined;
+      opened.value = false;
+      getExpressionEditor().toolbar.hide();
+    };
 
     return {
       opened,
@@ -43,12 +49,11 @@ export default defineComponent({
         const param = toolbar.getParam(val[0], val[1]);
 
         toolbar.updateParam(param);
+
+        // 更新参数后，需隐藏工具栏，否则有视觉延迟
+        hide();
       },
-      hide: () => {
-        selectedVal.value = undefined;
-        opened.value = false;
-        getExpressionEditor().toolbar.hide();
-      },
+      hide,
     };
   },
 });
