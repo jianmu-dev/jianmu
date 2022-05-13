@@ -72,6 +72,10 @@ export default defineComponent({
   }
 
   .container {
+    // 英文单词换行
+    word-wrap: break-word;
+    // 中文换行
+    white-space: pre-wrap;
     outline: none;
 
     &:empty::before {
