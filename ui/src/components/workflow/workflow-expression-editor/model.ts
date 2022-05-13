@@ -126,6 +126,7 @@ export class ExpressionEditor {
   private readonly editorEl: HTMLDivElement;
   private readonly observer: MutationObserver;
   private listener: any;
+  private lastRange?: Range;
 
   constructor(paramToolbarEl: HTMLElement, editorEl: HTMLDivElement,
     value: string, selectableParams: ISelectableParam[]) {
@@ -160,41 +161,31 @@ export class ExpressionEditor {
   destroy(): void {
     this.observer.disconnect();
     this.listener.destroy();
+    delete this.lastRange;
+  }
+
+  refreshLastRange(): void {
+    const selection = document.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      delete this.lastRange;
+      return;
+    }
+
+    this.lastRange = selection.getRangeAt(0);
   }
 
   insertParam(nodeId: string, paramRef: string): void {
-    this.validateSelectionInEditor();
+    this.editorEl.focus();
+
+    const selection = document.getSelection();
+    if (selection && this.lastRange) {
+      selection.removeAllRanges();
+      selection.addRange(this.lastRange);
+    }
 
     const param = this.toolbar.getParam(nodeId, paramRef);
-
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
     document.execCommand('insertHTML', false, this.getParamHtml(param));
-  }
-
-  private validateSelectionInEditor() {
-    const selection = document.getSelection();
-    if (!selection || !selection.anchorNode) {
-      throw new Error('请确定要插入的位置');
-    }
-
-    let node = selection.anchorNode;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      if (node === document.body) {
-        throw new Error('请确定要插入的位置');
-      }
-
-      if (node === this.editorEl) {
-        break;
-      }
-
-      const { parentNode } = node;
-      if (!parentNode) {
-        throw new Error('请确定要插入的位置');
-      }
-
-      node = parentNode;
-    }
   }
 
   cut(e: ClipboardEvent): void {

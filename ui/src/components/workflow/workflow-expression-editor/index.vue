@@ -2,7 +2,8 @@
   <div class="jm-workflow-expression-editor">
     <param-toolbar ref="paramToolbar" :selectable-params="selectableParams"/>
     <div class="container" ref="editorRef" contenteditable="true" :placeholder="placeholder"
-         @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @blur="handleBlur"/>
+         @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @blur="handleBlur"
+         @keyup="refreshLastRange" @mouseup="refreshLastRange"/>
   </div>
 </template>
 
@@ -52,6 +53,9 @@ export default defineComponent({
       handleBlur: () => {
         const el = editorRef.value!.cloneNode(true) as HTMLDivElement;
         emit('update:model-value', expressionEditor.getRaw(el));
+      },
+      refreshLastRange: () => {
+        expressionEditor.refreshLastRange();
       },
     };
   },
