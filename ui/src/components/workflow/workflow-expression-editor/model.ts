@@ -8,11 +8,46 @@ export interface IParam {
   nodeName: string;
 }
 
+export interface ISelectableParam {
+  readonly value: string;
+  readonly label: string;
+  readonly children?: ISelectableParam[];
+}
+
 export type GetParamFn = (nodeId: string, paramRef: string) => IParam;
 
 const TEXT_NODE_TYPE = 3;
 const ELEMENT_NODE_TYPE = 1;
 const NEW_LINE = '\n';
+const RAW_ATTR_NAME = 'data-raw';
+
+interface ISize {
+  width: number;
+  height: number;
+}
+
+function calcTextSize(container: Node, { nodeName, name }: IParam): ISize {
+  const tempDiv = document.createElement('div');
+  tempDiv.className = 'jm-workflow-expression-editor';
+  tempDiv.style.position = 'fixed';
+  tempDiv.style.left = '-1000px';
+  tempDiv.style.top = '-1000px';
+  tempDiv.style.whiteSpace = 'nowrap';
+  tempDiv.style.visibility = 'hidden';
+
+  const tempSpan = document.createElement('span');
+  tempSpan.style.padding = '0';
+  tempSpan.style.borderWidth = '0';
+  tempSpan.innerText = `${nodeName}.${name}`;
+  tempDiv.appendChild(tempSpan);
+
+  container.appendChild(tempDiv);
+  const width = tempSpan.offsetWidth;
+  const height = tempSpan.offsetHeight;
+  container.removeChild(tempDiv);
+
+  return { width, height };
+}
 
 class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
@@ -48,6 +83,24 @@ class ParamToolbar {
     this.toolbarEl.style.height = '';
   }
 
+  getParam(): IParam | undefined {
+    if (!this.paramRefEl) {
+      return undefined;
+    }
+
+    // 格式：
+    const data = this.paramRefEl.getAttribute(RAW_ATTR_NAME)!;
+    const tempArr1 = this.paramRefEl.value.split('.');
+    const tempArr2 = data.substring(2, data.length - 1).split('.');
+
+    return {
+      ref: tempArr2[1],
+      name: tempArr1[1],
+      nodeId: tempArr2[0],
+      nodeName: tempArr1[0],
+    };
+  }
+
   removeParam(): void {
     if (!this.paramRefEl) {
       return;
@@ -56,6 +109,19 @@ class ParamToolbar {
     this.paramRefEl.parentNode!.removeChild(this.paramRefEl);
 
     this.hide();
+  }
+
+  updateParam(newVal: IParam): void {
+    if (!this.paramRefEl) {
+      return;
+    }
+
+    const { width, height } = calcTextSize(this.toolbarEl.parentNode!, newVal);
+    this.paramRefEl.style.width = `${width}px`;
+    this.paramRefEl.style.height = `${height}px`;
+
+    this.paramRefEl.value = `${newVal.nodeName}.${newVal.name}`;
+    this.paramRefEl.setAttribute(RAW_ATTR_NAME, `\${${newVal.nodeId}.${newVal.ref}}`);
   }
 }
 
@@ -78,7 +144,7 @@ export class ExpressionEditor {
       }
 
       const el = e.target as HTMLElement;
-      if (el.tagName === 'INPUT' && el.parentNode) {
+      if (el.tagName === 'INPUT' && el.parentNode && el.getAttribute(RAW_ATTR_NAME)) {
         this.toolbar.show(el as HTMLInputElement);
       }
     });
@@ -176,25 +242,9 @@ export class ExpressionEditor {
     document.execCommand('insertHTML', false, tempDiv.innerHTML);
   }
 
-  private getParamHtml({ ref, name, nodeId, nodeName }: IParam): string {
-    const tempDiv = document.createElement('div');
-    tempDiv.className = 'jm-workflow-expression-editor';
-    tempDiv.style.position = 'fixed';
-    tempDiv.style.left = '-1000px';
-    tempDiv.style.top = '-1000px';
-    tempDiv.style.whiteSpace = 'nowrap';
-    tempDiv.style.visibility = 'hidden';
-
-    const tempSpan = document.createElement('span');
-    tempSpan.style.padding = '0';
-    tempSpan.style.borderWidth = '0';
-    tempSpan.innerText = `${nodeName}.${name}`;
-    tempDiv.appendChild(tempSpan);
-
-    this.editorEl.parentNode!.appendChild(tempDiv);
-    const width = tempSpan.offsetWidth;
-    const height = tempSpan.offsetHeight;
-    this.editorEl.parentNode!.removeChild(tempDiv);
+  private getParamHtml(param: IParam): string {
+    const { ref, name, nodeId, nodeName } = param;
+    const { width, height } = calcTextSize(this.editorEl.parentNode!, param);
 
     return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${nodeName}.${name}" data-raw="\${${nodeId}.${ref}}"/>`;
   }
@@ -227,7 +277,7 @@ export class ExpressionEditor {
 
     this.getLines(selectedEl).forEach(line => {
       Array.from(line.querySelectorAll('input')).forEach(input => {
-        const textNode = document.createTextNode(input.getAttribute('data-raw')!);
+        const textNode = document.createTextNode(input.getAttribute(RAW_ATTR_NAME)!);
         line.insertBefore(textNode, input);
         line.removeChild(input);
       });

@@ -1,6 +1,6 @@
 <template>
   <div class="jm-workflow-expression-editor">
-    <param-toolbar ref="paramToolbar"/>
+    <param-toolbar ref="paramToolbar" :selectable-params="selectableParams"/>
     <div class="container" ref="editorRef" contenteditable="true"
          @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @blur="handleBlur"/>
   </div>
@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
-import { ExpressionEditor, GetParamFn } from './model';
+import { ExpressionEditor, GetParamFn, ISelectableParam } from './model';
 import ParamToolbar from './param-toolbar.vue';
 
 export default defineComponent({
@@ -18,6 +18,10 @@ export default defineComponent({
     modelValue: {
       type: String,
       default: '',
+    },
+    selectableParams: {
+      type: Array as PropType<ISelectableParam[]>,
+      required: true,
     },
     getParam: {
       type: Function as PropType<GetParamFn>,
