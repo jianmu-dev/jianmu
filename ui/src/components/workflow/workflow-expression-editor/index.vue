@@ -71,8 +71,6 @@ export default defineComponent({
   }
 
   .container {
-    width: inherit;
-    height: inherit;
     outline: none;
 
     input {
