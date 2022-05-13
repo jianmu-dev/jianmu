@@ -1,15 +1,9 @@
 <template>
   <div class="param-toolbar" @mouseleave="hide">
-    <div class="text" @mouseenter="changeParam"></div>
-    <jm-cascader
-      v-if="selectedVal"
-      v-model="selectedVal"
-      :options="selectableParams"
-      :offset="0"
-      :append-to-body="false"
-      :class="{ opened }"
-      @focus="opened = true"
-      @change="handleChange"></jm-cascader>
+    <div class="text" @mouseenter="changeParam"/>
+    <jm-cascader v-if="selectedVal" v-model="selectedVal"
+                 :options="selectableParams" :offset="0" :append-to-body="false"
+                 :class="{ opened }" @focus="opened = true" @change="handleChange"/>
   </div>
 </template>
 
@@ -73,6 +67,7 @@ export default defineComponent({
   align-items: center;
 
   .text {
+    // 适配某些场景下，强制不换行
     white-space: nowrap;
     cursor: pointer;
   }
