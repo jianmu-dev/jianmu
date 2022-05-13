@@ -6,6 +6,7 @@ export interface IParam {
   name: string;
   nodeId: string;
   nodeName: string;
+  inner: boolean;
 }
 
 export interface ISelectableParam {
@@ -18,33 +19,11 @@ const TEXT_NODE_TYPE = 3;
 const ELEMENT_NODE_TYPE = 1;
 const NEW_LINE = '\n';
 const RAW_ATTR_NAME = 'data-raw';
+export const INNER_PARAM_TAG = 'inner';
 
 interface ISize {
   width: number;
   height: number;
-}
-
-function calcTextSize(container: Node, { nodeName, name }: IParam): ISize {
-  const tempDiv = document.createElement('div');
-  tempDiv.className = 'jm-workflow-expression-editor';
-  tempDiv.style.position = 'fixed';
-  tempDiv.style.left = '-1000px';
-  tempDiv.style.top = '-1000px';
-  tempDiv.style.whiteSpace = 'nowrap';
-  tempDiv.style.visibility = 'hidden';
-
-  const tempSpan = document.createElement('span');
-  tempSpan.style.padding = '0';
-  tempSpan.style.borderWidth = '0';
-  tempSpan.innerText = `${nodeName}.${name}`;
-  tempDiv.appendChild(tempSpan);
-
-  container.appendChild(tempDiv);
-  const width = tempSpan.offsetWidth;
-  const height = tempSpan.offsetHeight;
-  container.removeChild(tempDiv);
-
-  return { width, height };
 }
 
 class ParamToolbar {
@@ -82,11 +61,16 @@ class ParamToolbar {
     this.toolbarEl.style.height = '';
   }
 
-  getParam(nodeId: string, ref: string): IParam {
-    const { label: nodeName, children } = this.selectableParams.find(({ value }) => value === nodeId)!;
-    const { label: name } = children!.find(({ value }) => value === ref)!;
+  getParam(arr: string[]): IParam {
+    const nodeId = arr[0];
+    const ref = arr[arr.length - 1];
+    const inner = arr.length === 3;
 
-    return { ref, name, nodeId, nodeName };
+    const { label: nodeName, children } = this.selectableParams.find(({ value }) => value === nodeId)!;
+    const { label: name } = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
+      .find(({ value }) => value === ref)!;
+
+    return { ref, name, nodeId, nodeName, inner };
   }
 
   getCurrentParam(): IParam | undefined {
@@ -94,17 +78,10 @@ class ParamToolbar {
       return undefined;
     }
 
-    // 格式：
-    const data = this.paramRefEl.getAttribute(RAW_ATTR_NAME)!;
-    const tempArr1 = this.paramRefEl.value.split('.');
-    const tempArr2 = data.substring(2, data.length - 1).split('.');
-
-    return {
-      ref: tempArr2[1],
-      name: tempArr1[1],
-      nodeId: tempArr2[0],
-      nodeName: tempArr1[0],
-    };
+    // 格式：${xxx.[xxx.]xxx}
+    const raw = this.paramRefEl.getAttribute(RAW_ATTR_NAME)!;
+    const arr = raw.substring(2, raw.length - 1).split('.');
+    return this.getParam(arr);
   }
 
   updateParam(newVal: IParam): void {
@@ -112,12 +89,45 @@ class ParamToolbar {
       return;
     }
 
-    const { width, height } = calcTextSize(this.toolbarEl.parentNode!, newVal);
+    const { width, height } = this.calcTextSize(this.toolbarEl.parentNode!, newVal);
     this.paramRefEl.style.width = `${width}px`;
     this.paramRefEl.style.height = `${height}px`;
 
-    this.paramRefEl.value = `${newVal.nodeName}.${newVal.name}`;
-    this.paramRefEl.setAttribute(RAW_ATTR_NAME, `\${${newVal.nodeId}.${newVal.ref}}`);
+    this.paramRefEl.value = this.toValue(newVal);
+    this.paramRefEl.setAttribute(RAW_ATTR_NAME, `\${${this.toRaw(newVal)}}`);
+  }
+
+  toValue(param: IParam): string {
+    const { name, nodeName, inner } = param;
+    return `${nodeName}.${inner ? '内置输出参数.' : ''}${name}`;
+  }
+
+  toRaw(param: IParam): string {
+    const { ref, nodeId, inner } = param;
+    return `${nodeId}.${inner ? 'inner.' : ''}${ref}`;
+  }
+
+  calcTextSize(container: Node, param: IParam): ISize {
+    const tempDiv = document.createElement('div');
+    tempDiv.className = 'jm-workflow-expression-editor';
+    tempDiv.style.position = 'fixed';
+    tempDiv.style.left = '-1000px';
+    tempDiv.style.top = '-1000px';
+    tempDiv.style.whiteSpace = 'nowrap';
+    tempDiv.style.visibility = 'hidden';
+
+    const tempSpan = document.createElement('span');
+    tempSpan.style.padding = '0';
+    tempSpan.style.borderWidth = '0';
+    tempSpan.innerText = this.toValue(param);
+    tempDiv.appendChild(tempSpan);
+
+    container.appendChild(tempDiv);
+    const width = tempSpan.offsetWidth;
+    const height = tempSpan.offsetHeight;
+    container.removeChild(tempDiv);
+
+    return { width, height };
   }
 }
 
@@ -174,7 +184,7 @@ export class ExpressionEditor {
     this.lastRange = selection.getRangeAt(0);
   }
 
-  insertParam(nodeId: string, paramRef: string): void {
+  insertParam(arr: string[]): void {
     this.editorEl.focus();
 
     const selection = document.getSelection();
@@ -183,7 +193,7 @@ export class ExpressionEditor {
       selection.addRange(this.lastRange);
     }
 
-    const param = this.toolbar.getParam(nodeId, paramRef);
+    const param = this.toolbar.getParam(arr);
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
     document.execCommand('insertHTML', false, this.getParamHtml(param));
   }
@@ -242,15 +252,14 @@ export class ExpressionEditor {
   }
 
   private getParamHtml(param: IParam): string {
-    const { ref, name, nodeId, nodeName } = param;
-    const { width, height } = calcTextSize(this.editorEl.parentNode!, param);
+    const { width, height } = this.toolbar.calcTextSize(this.editorEl.parentNode!, param);
 
-    return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${nodeName}.${name}" data-raw="\${${nodeId}.${ref}}"/>`;
+    return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${this.toolbar.toValue(param)}" data-raw="\${${this.toolbar.toRaw(param)}}"/>`;
   }
 
   private parse(text: string): string {
-    // 提取所有${xxx.xxx}
-    const matches = text.match(/\$\{[0-9a-zA-Z_]+\.[0-9a-zA-Z_]+\}/g);
+    // 格式：${xxx.[xxx.]xxx}
+    const matches = text.match(/\$\{[0-9a-zA-Z_]+.[[0-9a-zA-Z_]+.]?[0-9a-zA-Z_]+\}/g);
     if (!matches) {
       return text;
     }
@@ -261,9 +270,7 @@ export class ExpressionEditor {
 
     set.forEach(match => {
       const arr = match.substring(2, match.length - 1).split('.');
-      const nodeId = arr[0];
-      const paramRef = arr[1];
-      const param = this.toolbar.getParam(nodeId, paramRef);
+      const param = this.toolbar.getParam(arr);
 
       text = text.replaceAll(match, this.getParamHtml(param));
     });

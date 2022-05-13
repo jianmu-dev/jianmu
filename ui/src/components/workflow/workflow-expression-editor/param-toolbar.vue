@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent, inject, PropType, ref } from 'vue';
-import { ExpressionEditor, ISelectableParam } from './model';
+import { ExpressionEditor, INNER_PARAM_TAG, ISelectableParam } from './model';
 
 export default defineComponent({
   props: {
@@ -39,14 +39,17 @@ export default defineComponent({
       opened,
       selectedVal,
       changeParam: () => {
-        const param = getExpressionEditor().toolbar.getCurrentParam()!;
+        const { nodeId, ref, inner } = getExpressionEditor().toolbar.getCurrentParam()!;
         selectedVal.value = [];
-        selectedVal.value.push(param.nodeId);
-        selectedVal.value.push(param.ref);
+        selectedVal.value.push(nodeId);
+        if (inner) {
+          selectedVal.value.push(INNER_PARAM_TAG);
+        }
+        selectedVal.value.push(ref);
       },
-      handleChange: (val: string[]) => {
+      handleChange: (arr: string[]) => {
         const { toolbar } = getExpressionEditor();
-        const param = toolbar.getParam(val[0], val[1]);
+        const param = toolbar.getParam(arr);
 
         toolbar.updateParam(param);
 
@@ -70,6 +73,7 @@ export default defineComponent({
   align-items: center;
 
   .text {
+    white-space: nowrap;
     cursor: pointer;
   }
 
