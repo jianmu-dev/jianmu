@@ -51,24 +51,14 @@ function calcTextSize(container: Node, { nodeName, name }: IParam): ISize {
 
 class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
-  private readonly observer: MutationObserver;
   private paramRefEl?: HTMLInputElement;
 
   constructor(toolbarEl: HTMLElement) {
     this.toolbarEl = toolbarEl;
-    this.observer = new MutationObserver(() => {
-      if (!this.paramRefEl || this.paramRefEl.parentNode) {
-        return;
-      }
-
-      // 当工具栏显示在某个参数引用上时，删除参数引用要隐藏工具栏
-      this.hide();
-    });
-    this.observer.observe(this.toolbarEl.nextElementSibling!, { childList: true, subtree: true });
   }
 
-  destroy() {
-    this.observer.disconnect();
+  getParamRefEl(): HTMLInputElement | undefined {
+    return this.paramRefEl;
   }
 
   show(paramRefEl: HTMLInputElement): void {
@@ -128,6 +118,7 @@ export class ExpressionEditor {
   readonly toolbar: ParamToolbar;
   private readonly editorEl: HTMLDivElement;
   private readonly getParam: GetParamFn;
+  private readonly observer: MutationObserver;
   private listener: any;
 
   constructor(paramToolbarEl: HTMLElement, editorEl: HTMLDivElement, value: string, getParam: GetParamFn) {
@@ -135,6 +126,17 @@ export class ExpressionEditor {
     this.editorEl = editorEl;
     this.getParam = getParam;
     this.editorEl.innerHTML = this.parse(value);
+
+    this.observer = new MutationObserver(() => {
+      const paramRefEl = this.toolbar.getParamRefEl();
+      if (!paramRefEl || paramRefEl.parentNode) {
+        return;
+      }
+
+      // 当工具栏显示在某个参数引用上时，删除参数引用要隐藏工具栏
+      this.toolbar.hide();
+    });
+    this.observer.observe(this.editorEl, { childList: true, subtree: true });
 
     // 必须是mousemove，才能识别disabled的input
     this.listener = listen(document.body, 'mousemove', (e: MouseEvent) => {
@@ -150,7 +152,7 @@ export class ExpressionEditor {
   }
 
   destroy(): void {
-    this.toolbar.destroy();
+    this.observer.disconnect();
     this.listener.destroy();
   }
 
