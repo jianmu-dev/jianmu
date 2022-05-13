@@ -51,10 +51,24 @@ function calcTextSize(container: Node, { nodeName, name }: IParam): ISize {
 
 class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
+  private readonly observer: MutationObserver;
   private paramRefEl?: HTMLInputElement;
 
   constructor(toolbarEl: HTMLElement) {
     this.toolbarEl = toolbarEl;
+    this.observer = new MutationObserver(() => {
+      if (!this.paramRefEl || this.paramRefEl.parentNode) {
+        return;
+      }
+
+      // 当工具栏显示在某个参数引用上时，删除参数引用要隐藏工具栏
+      this.hide();
+    });
+    this.observer.observe(this.toolbarEl.nextElementSibling!, { childList: true, subtree: true });
+  }
+
+  destroy() {
+    this.observer.disconnect();
   }
 
   show(paramRefEl: HTMLInputElement): void {
@@ -136,6 +150,7 @@ export class ExpressionEditor {
   }
 
   destroy(): void {
+    this.toolbar.destroy();
     this.listener.destroy();
   }
 
