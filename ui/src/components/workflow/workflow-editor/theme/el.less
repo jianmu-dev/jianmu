@@ -36,6 +36,24 @@
     height: 36px;
     line-height: 36px;
   }
+
+  // el-input清除按钮样式
+  .el-input__suffix {
+    .el-input__suffix-inner {
+      .el-icon-circle-close {
+        height: 36px;
+        line-height: 36px;
+
+        &::before {
+          font-size: 12px;
+          box-sizing: border-box;
+          color: #FFFFFF;
+          background-color: #6B7B8D;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
 }
 
 // 下拉框
@@ -93,7 +111,13 @@
 }
 
 .el-empty {
-  padding: 0 0 10px;
+  padding: 180px 0 10px;
+
+  .el-empty__image {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 15px;
+  }
 }
 
 // 输入框高度设置
@@ -103,6 +127,67 @@
   .el-input__inner {
     height: 36px;
     line-height: 36px;
+  }
+}
+
+.el-dialog {
+  .el-dialog__header {
+    padding: 0 30px;
+    box-sizing: border-box;
+    height: 64px;
+    border-bottom: 1px solid #E6EBF2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .el-cascader {
+      &:hover {
+        .el-input {
+          ::placeholder {
+            color: @primary-color;
+          }
+
+          .el-input__inner {
+            background-color: #EFF7FF;
+          }
+
+          .el-input__suffix {
+            color: @primary-color;
+          }
+        }
+      }
+
+      .el-input {
+        .el-input__inner {
+          height: 36px;
+          line-height: 36px;
+          border: none;
+          border-radius: 2px;
+        }
+
+        ::placeholder {
+          color: #082340;
+        }
+
+        .el-input__suffix {
+          color: #000000;
+        }
+
+        &.is-focus {
+          ::placeholder {
+            color: @primary-color;
+          }
+
+          .el-input__inner {
+            background-color: #EFF7FF;
+          }
+
+          .el-input__suffix {
+            color: @primary-color;
+          }
+        }
+      }
+    }
   }
 }
 
