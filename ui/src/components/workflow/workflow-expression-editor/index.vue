@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-expression-editor">
     <param-toolbar ref="paramToolbar" :selectable-params="selectableParams"/>
-    <div class="container" ref="editorRef" contenteditable="true"
+    <div class="container" ref="editorRef" contenteditable="true" :placeholder="placeholder"
          @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @blur="handleBlur"/>
   </div>
 </template>
@@ -16,6 +16,10 @@ export default defineComponent({
   components: { ParamToolbar },
   props: {
     modelValue: {
+      type: String,
+      default: '',
+    },
+    placeholder: {
       type: String,
       default: '',
     },
@@ -60,9 +64,6 @@ export default defineComponent({
 
 <style lang="less">
 .jm-workflow-expression-editor {
-  width: inherit;
-  height: inherit;
-
   .container input, .param-toolbar {
     padding: 2px 0.5em;
     // 必须继承，否则，在Chrome粘贴时附带样式
@@ -72,6 +73,11 @@ export default defineComponent({
 
   .container {
     outline: none;
+
+    &:empty::before {
+      color: #7B8C9C;
+      content: attr(placeholder);
+    }
 
     input {
       margin: 2px 0.25em;
