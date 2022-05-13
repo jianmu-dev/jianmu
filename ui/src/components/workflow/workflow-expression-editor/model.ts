@@ -14,8 +14,6 @@ export interface ISelectableParam {
   readonly children?: ISelectableParam[];
 }
 
-export type GetParamFn = (nodeId: string, paramRef: string) => IParam;
-
 const TEXT_NODE_TYPE = 3;
 const ELEMENT_NODE_TYPE = 1;
 const NEW_LINE = '\n';
@@ -51,10 +49,12 @@ function calcTextSize(container: Node, { nodeName, name }: IParam): ISize {
 
 class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
+  private readonly selectableParams: ISelectableParam[];
   private paramRefEl?: HTMLInputElement;
 
-  constructor(toolbarEl: HTMLElement) {
+  constructor(toolbarEl: HTMLElement, selectableParams: ISelectableParam[]) {
     this.toolbarEl = toolbarEl;
+    this.selectableParams = selectableParams;
   }
 
   getParamRefEl(): HTMLInputElement | undefined {
@@ -82,7 +82,14 @@ class ParamToolbar {
     this.toolbarEl.style.height = '';
   }
 
-  getParam(): IParam | undefined {
+  getParam(nodeId: string, ref: string): IParam {
+    const { label: nodeName, children } = this.selectableParams.find(({ value }) => value === nodeId)!;
+    const { label: name } = children!.find(({ value }) => value === ref)!;
+
+    return { ref, name, nodeId, nodeName };
+  }
+
+  getCurrentParam(): IParam | undefined {
     if (!this.paramRefEl) {
       return undefined;
     }
@@ -117,14 +124,13 @@ class ParamToolbar {
 export class ExpressionEditor {
   readonly toolbar: ParamToolbar;
   private readonly editorEl: HTMLDivElement;
-  private readonly getParam: GetParamFn;
   private readonly observer: MutationObserver;
   private listener: any;
 
-  constructor(paramToolbarEl: HTMLElement, editorEl: HTMLDivElement, value: string, getParam: GetParamFn) {
-    this.toolbar = new ParamToolbar(paramToolbarEl);
+  constructor(paramToolbarEl: HTMLElement, editorEl: HTMLDivElement,
+    value: string, selectableParams: ISelectableParam[]) {
+    this.toolbar = new ParamToolbar(paramToolbarEl, selectableParams);
     this.editorEl = editorEl;
-    this.getParam = getParam;
     this.editorEl.innerHTML = this.parse(value);
 
     this.observer = new MutationObserver(() => {
@@ -159,7 +165,7 @@ export class ExpressionEditor {
   insertParam(nodeId: string, paramRef: string): void {
     this.validateSelectionInEditor();
 
-    const param = this.getParam(nodeId, paramRef);
+    const param = this.toolbar.getParam(nodeId, paramRef);
 
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
     document.execCommand('insertHTML', false, this.getParamHtml(param));
@@ -266,7 +272,7 @@ export class ExpressionEditor {
       const arr = match.substring(2, match.length - 1).split('.');
       const nodeId = arr[0];
       const paramRef = arr[1];
-      const param = this.getParam(nodeId, paramRef);
+      const param = this.toolbar.getParam(nodeId, paramRef);
 
       text = text.replaceAll(match, this.getParamHtml(param));
     });

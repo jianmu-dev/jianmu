@@ -33,18 +33,16 @@ export default defineComponent({
       opened,
       selectedVal,
       changeParam: () => {
-        const param = getExpressionEditor().toolbar.getParam()!;
+        const param = getExpressionEditor().toolbar.getCurrentParam()!;
         selectedVal.value = [];
         selectedVal.value.push(param.nodeId);
         selectedVal.value.push(param.ref);
       },
       handleChange: (val: string[]) => {
-        const nodeId = val[0];
-        const ref = val[1];
-        const { label: nodeName, children } = props.selectableParams.find(({ value }) => value === val[0])!;
-        const { label: name } = children!.find(({ value }) => value === val[1])!;
+        const { toolbar } = getExpressionEditor();
+        const param = toolbar.getParam(val[0], val[1]);
 
-        getExpressionEditor().toolbar.updateParam({ ref, name, nodeId, nodeName });
+        toolbar.updateParam(param);
       },
       hide: () => {
         selectedVal.value = undefined;

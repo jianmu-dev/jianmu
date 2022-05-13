@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
-import { ExpressionEditor, GetParamFn, ISelectableParam } from './model';
+import { ExpressionEditor, ISelectableParam } from './model';
 import ParamToolbar from './param-toolbar.vue';
 
 export default defineComponent({
@@ -27,10 +27,6 @@ export default defineComponent({
       type: Array as PropType<ISelectableParam[]>,
       required: true,
     },
-    getParam: {
-      type: Function as PropType<GetParamFn>,
-      required: true,
-    },
   },
   emits: ['update:model-value', 'editor-created'],
   setup(props, { emit }) {
@@ -40,7 +36,7 @@ export default defineComponent({
     provide('getExpressionEditor', (): ExpressionEditor => expressionEditor);
 
     onMounted(() => {
-      expressionEditor = new ExpressionEditor(paramToolbar.value.$el, editorRef.value!, props.modelValue, props.getParam);
+      expressionEditor = new ExpressionEditor(paramToolbar.value.$el, editorRef.value!, props.modelValue, props.selectableParams);
 
       emit('editor-created', expressionEditor);
     });
