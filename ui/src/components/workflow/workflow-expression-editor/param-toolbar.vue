@@ -1,21 +1,15 @@
 <template>
   <div class="param-toolbar" @mouseleave="hide">
-    <div class="text" @mouseenter="changeParam"></div>
-    <jm-cascader
-      v-if="selectedVal"
-      v-model="selectedVal"
-      :options="selectableParams"
-      :offset="0"
-      :append-to-body="false"
-      :class="{ opened }"
-      @focus="opened = true"
-      @change="handleChange"></jm-cascader>
+    <div class="text" @mouseenter="changeParam"/>
+    <jm-cascader v-if="selectedVal" v-model="selectedVal"
+                 :options="selectableParams" :offset="0" :append-to-body="false"
+                 :class="{ opened }" @focus="opened = true" @change="handleChange"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, inject, PropType, ref } from 'vue';
-import { ExpressionEditor, ISelectableParam } from './model';
+import { ExpressionEditor, INNER_PARAM_TAG, ISelectableParam } from './model';
 
 export default defineComponent({
   props: {
@@ -39,14 +33,17 @@ export default defineComponent({
       opened,
       selectedVal,
       changeParam: () => {
-        const param = getExpressionEditor().toolbar.getCurrentParam()!;
+        const { nodeId, ref, inner } = getExpressionEditor().toolbar.getCurrentParam()!;
         selectedVal.value = [];
-        selectedVal.value.push(param.nodeId);
-        selectedVal.value.push(param.ref);
+        selectedVal.value.push(nodeId);
+        if (inner) {
+          selectedVal.value.push(INNER_PARAM_TAG);
+        }
+        selectedVal.value.push(ref);
       },
-      handleChange: (val: string[]) => {
+      handleChange: (arr: string[]) => {
         const { toolbar } = getExpressionEditor();
-        const param = toolbar.getParam(val[0], val[1]);
+        const param = toolbar.getParam(arr);
 
         toolbar.updateParam(param);
 
@@ -70,6 +67,8 @@ export default defineComponent({
   align-items: center;
 
   .text {
+    // 适配某些场景下，强制不换行
+    white-space: nowrap;
     cursor: pointer;
   }
 
