@@ -10,7 +10,6 @@
       :class="{ opened }"
       @focus="opened = true"
       @change="handleChange"></jm-cascader>
-    <div class="jm-icon-button-cancel" @click="remove"></div>
   </div>
 </template>
 
@@ -51,11 +50,6 @@ export default defineComponent({
         selectedVal.value = undefined;
         opened.value = false;
         getExpressionEditor().toolbar.hide();
-      },
-      remove: () => {
-        selectedVal.value = undefined;
-        opened.value = false;
-        getExpressionEditor().toolbar.removeParam();
       },
     };
   },
@@ -100,24 +94,6 @@ export default defineComponent({
       .el-input__icon {
         line-height: 0;
       }
-    }
-  }
-
-  .jm-icon-button-cancel {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    width: 0.75em;
-    height: 0.75em;
-    overflow: hidden;
-    border-radius: 50%;
-    background: #6B7B8D;
-    color: #FFFFFF;
-
-    &::before {
-      margin: 0;
     }
   }
 }

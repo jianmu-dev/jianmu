@@ -67,11 +67,6 @@ class ParamToolbar {
     this.toolbarEl.style.top = `${y}px`;
     this.toolbarEl.style.width = `${width}px`;
     this.toolbarEl.style.height = `${height}px`;
-
-    const deleteIconEl = this.toolbarEl.lastElementChild! as HTMLElement;
-    const { offsetWidth: deleteIconWidth, offsetHeight: deleteIconHeight } = deleteIconEl;
-    deleteIconEl.style.right = `${-deleteIconWidth / 2}px`;
-    deleteIconEl.style.top = `${-deleteIconHeight / 2}px`;
   }
 
   hide(): void {
@@ -99,16 +94,6 @@ class ParamToolbar {
       nodeId: tempArr2[0],
       nodeName: tempArr1[0],
     };
-  }
-
-  removeParam(): void {
-    if (!this.paramRefEl) {
-      return;
-    }
-
-    this.paramRefEl.parentNode!.removeChild(this.paramRefEl);
-
-    this.hide();
   }
 
   updateParam(newVal: IParam): void {
