@@ -1,6 +1,6 @@
 import { IParam, IParamReference, ISelectableParam } from './data';
 import { INNER_PARAM_TAG, RAW_ATTR_NAME } from './const';
-import { calculateContentSize, parseParamReference, toContent, toRaw } from './util';
+import { calculateContentSize, fromRaw, toContent, toRaw } from './util';
 
 export class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
@@ -62,7 +62,7 @@ export class ParamToolbar {
     }
 
     const raw = this.paramRefEl.getAttribute(RAW_ATTR_NAME)!;
-    return this.getParam(parseParamReference(raw));
+    return this.getParam(fromRaw(raw));
   }
 
   updateParam(newVal: IParam): void {

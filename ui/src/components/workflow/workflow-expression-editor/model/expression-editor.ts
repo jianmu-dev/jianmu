@@ -2,7 +2,7 @@
 import listen from 'good-listener';
 import { IParam, ISelectableParam } from './data';
 import { ELEMENT_NODE_TYPE, NEW_LINE, RAW_ATTR_NAME, TEXT_NODE_TYPE } from './const';
-import { calculateContentSize, extractParamReferences, parseParamReference, toContent, toRaw } from './util';
+import { calculateContentSize, extractReferences, fromRaw, toContent, toRaw } from './util';
 import { ParamToolbar } from './param-toolbar';
 
 export class ExpressionEditor {
@@ -68,7 +68,7 @@ export class ExpressionEditor {
     }
 
     const raw = toRaw(arr);
-    const param = this.toolbar.getParam(parseParamReference(raw));
+    const param = this.toolbar.getParam(fromRaw(raw));
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
     document.execCommand('insertHTML', false, this.getParamHtml(param));
   }
@@ -133,7 +133,7 @@ export class ExpressionEditor {
   }
 
   private parseExp(text: string): string {
-    const references = extractParamReferences(text);
+    const references = extractReferences(text);
 
     references.forEach(reference => {
       try {
