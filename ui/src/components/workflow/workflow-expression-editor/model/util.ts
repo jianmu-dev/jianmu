@@ -38,7 +38,7 @@ export function toContent(param: IParam): string {
  */
 export function extractReferences(text: string): IParamReference[] {
   // 格式：${xxx.[inner.]xxx}
-  const matches = text.match(/\$\{[0-9a-zA-Z_]+.(inner.)?[0-9a-zA-Z_]+\}/g);
+  const matches = text.match(/\$\{[0-9a-zA-Z_]+\.(inner\.)?[0-9a-zA-Z_]+\}/g);
   if (!matches) {
     return [];
   }
