@@ -122,9 +122,9 @@ export class ExpressionEditor {
   }
 
   private buildHtml(plainText: string): string {
-    const children = plainText.trim().split(NEW_LINE).map((text => {
+    const children = plainText.trim().split(NEW_LINE).map((pText => {
       const child = document.createElement('div');
-      child.innerHTML = this.parseExp(text);
+      child.innerHTML = this.parse(pText);
 
       return child;
     }));
@@ -141,7 +141,7 @@ export class ExpressionEditor {
     return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="${param.raw}"/>`;
   }
 
-  private parseExp(plainText: string): string {
+  private parse(plainText: string): string {
     const references = extractReferences(plainText);
 
     references.forEach(reference => {
@@ -153,7 +153,7 @@ export class ExpressionEditor {
       }
     });
 
-    return plainText;
+    return plainText || '<br/>';
   }
 
   getPlainText(selectedEl: HTMLDivElement): string {
