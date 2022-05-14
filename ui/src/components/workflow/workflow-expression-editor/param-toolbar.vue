@@ -8,8 +8,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, PropType, ref } from 'vue';
-import { ExpressionEditor, INNER_PARAM_TAG, ISelectableParam } from './model';
+import { defineComponent, inject, nextTick, PropType, ref } from 'vue';
+import { ISelectableParam } from './model/data';
+import { INNER_PARAM_TAG } from './model/const';
+import { ExpressionEditor } from './model/expression-editor';
+import { fromArray } from './model/util';
 
 export default defineComponent({
   props: {
@@ -41,11 +44,13 @@ export default defineComponent({
         }
         selectedVal.value.push(ref);
       },
-      handleChange: (arr: string[]) => {
+      handleChange: async (arr: string[]) => {
         const { toolbar } = getExpressionEditor();
-        const param = toolbar.getParam(arr);
+        const param = toolbar.getParam(fromArray(arr));
 
         toolbar.updateParam(param);
+
+        await nextTick();
 
         // 更新参数后，需隐藏工具栏，否则有视觉延迟
         hide();

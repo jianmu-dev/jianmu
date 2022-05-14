@@ -2,6 +2,8 @@ import { BaseNode } from './base-node';
 import { CustomRule, ISecretKey } from '../common';
 import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
+import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
+import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 
 export interface IWebhookParam {
   key: string;
@@ -32,6 +34,19 @@ export class Webhook extends BaseNode {
 
   static build({ name, params, auth, only }: any): Webhook {
     return new Webhook(name, params, auth, only);
+  }
+
+  buildSelectableParam(): ISelectableParam {
+    return {
+      value: super.getRef(),
+      label: super.getName(),
+      children: this.params.map(({ name }) => {
+        return {
+          value: name,
+          label: name,
+        };
+      }),
+    };
   }
 
   getFormRules(): Record<string, CustomRule> {
@@ -67,6 +82,34 @@ export class Webhook extends BaseNode {
           value: [{ required: true, message: '请选择密钥', trigger: 'change' }],
         } as Record<string, CustomRule>,
       },
+      only: [
+        { required: false },
+        {
+          validator: (rule: any, value: any, callback: any) => {
+            if (!value) {
+              callback();
+              return;
+            }
+
+            const references = extractReferences(value);
+            if (references.length > 0) {
+              const selectableParams = [this.buildSelectableParam()];
+              for (const reference of references) {
+                try {
+                  // 检查引用的触发器参数是否存在
+                  getParam(reference, selectableParams);
+                } catch ({ message }) {
+                  callback(new Error(`${reference.raw}触发器参数不存在`));
+                  return;
+                }
+              }
+            }
+
+            callback();
+          },
+          trigger: 'blur',
+        },
+      ],
     };
   }
 

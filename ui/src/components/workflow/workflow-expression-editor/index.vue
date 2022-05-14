@@ -9,8 +9,10 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
-import { ExpressionEditor, ISelectableParam } from './model';
+import { ISelectableParam } from './model/data';
+import { ExpressionEditor } from './model/expression-editor';
 import ParamToolbar from './param-toolbar.vue';
+import { extractReferences } from './model/util';
 
 export default defineComponent({
   name: 'jm-workflow-expression-editor',
@@ -52,7 +54,18 @@ export default defineComponent({
       handlePaste: (e: ClipboardEvent) => expressionEditor.paste(e),
       handleBlur: () => {
         const el = editorRef.value!.cloneNode(true) as HTMLDivElement;
-        emit('update:model-value', expressionEditor.getRaw(el));
+        const plainText = expressionEditor.getPlainText(el);
+
+        const references = extractReferences(el.innerText);
+        if (references.length > 0) {
+          // 表示手动输入了参数引用
+          expressionEditor.refresh(plainText);
+
+          // 必须刷新，否则有误
+          expressionEditor.refreshLastRange();
+        }
+
+        emit('update:model-value', plainText);
       },
       refreshLastRange: () => {
         expressionEditor.refreshLastRange();

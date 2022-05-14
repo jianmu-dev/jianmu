@@ -1,6 +1,7 @@
 import Schema, { Value } from 'async-validator';
 import { CustomRule, IWorkflowNode } from '../common';
 import { NodeTypeEnum } from '../enumeration';
+import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 
 export abstract class BaseNode implements IWorkflowNode {
   private readonly ref: string;
@@ -38,6 +39,10 @@ export abstract class BaseNode implements IWorkflowNode {
     return this.docUrl;
   }
 
+  buildSelectableParam(): ISelectableParam | undefined {
+    return undefined;
+  }
+
   getFormRules(): Record<string, CustomRule> {
     return {
       name: [
@@ -56,7 +61,9 @@ export abstract class BaseNode implements IWorkflowNode {
     const source: Record<string, Value> = {};
     Object.keys(this).forEach(key => (source[key] = (this as any)[key]));
 
-    await validator.validate(source);
+    await validator.validate(source, {
+      first: true,
+    });
   }
 
   toDsl(): object {

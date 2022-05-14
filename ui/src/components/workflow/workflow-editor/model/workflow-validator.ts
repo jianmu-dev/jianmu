@@ -42,7 +42,7 @@ export class WorkflowValidator {
       }
     }
 
-    const workflowNodes = nodes.map(node => new CustomX6NodeProxy(node).getData());
+    const workflowNodes = nodes.map(node => new CustomX6NodeProxy(node).getData(this.graph));
     for (const workflowNode of workflowNodes) {
       try {
         await workflowNode.validate();

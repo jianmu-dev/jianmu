@@ -87,7 +87,7 @@
               <secret-key-selector v-model="form.auth.value" placeholder="请输入value值"/>
             </jm-form-item>
           </div>
-          <jm-form-item class="only-container">
+          <jm-form-item class="only-container" prop="only" :rules="nodeData.getFormRules().only">
             <template #label>
               only
               <jm-tooltip placement="top">
