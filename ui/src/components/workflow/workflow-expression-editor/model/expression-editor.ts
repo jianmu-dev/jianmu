@@ -2,7 +2,7 @@
 import listen from 'good-listener';
 import { IParam, ISelectableParam } from './data';
 import { ELEMENT_NODE_TYPE, NEW_LINE, RAW_ATTR_NAME, TEXT_NODE_TYPE } from './const';
-import { extractParamReferences, parseParamReference } from './util';
+import { calculateContentSize, extractParamReferences, parseParamReference, toContent, toRaw } from './util';
 import { ParamToolbar } from './param-toolbar';
 
 export class ExpressionEditor {
@@ -67,7 +67,7 @@ export class ExpressionEditor {
       selection.addRange(this.lastRange);
     }
 
-    const raw = this.toolbar.toRaw(arr);
+    const raw = toRaw(arr);
     const param = this.toolbar.getParam(parseParamReference(raw));
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
     document.execCommand('insertHTML', false, this.getParamHtml(param));
@@ -127,9 +127,9 @@ export class ExpressionEditor {
   }
 
   private getParamHtml(param: IParam): string {
-    const { width, height } = this.toolbar.calcTextSize(this.editorEl.parentNode!, param);
+    const { width, height } = calculateContentSize(this.editorEl.parentNode!, param);
 
-    return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${this.toolbar.toValue(param)}" data-raw="\${${this.toolbar.toRaw(param)}}"/>`;
+    return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="\${${toRaw(param)}}"/>`;
   }
 
   private parseExp(text: string): string {

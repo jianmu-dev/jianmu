@@ -1,11 +1,6 @@
 import { IParam, IParamReference, ISelectableParam } from './data';
 import { INNER_PARAM_TAG, RAW_ATTR_NAME } from './const';
-import { parseParamReference } from './util';
-
-export interface ISize {
-  width: number;
-  height: number;
-}
+import { calculateContentSize, parseParamReference, toContent, toRaw } from './util';
 
 export class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
@@ -48,13 +43,13 @@ export class ParamToolbar {
     const node = this.selectableParams.find(({ value }) => value === nodeId);
     if (!node) {
       // 节点不存在
-      throw new Error(`参数引用\${${this.toRaw(reference)}}对应的节点不存在`);
+      throw new Error(`参数引用\${${toRaw(reference)}}对应的节点不存在`);
     }
     const { label: nodeName, children } = node;
     const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
       .find(({ value }) => value === ref);
     if (!param) {
-      throw new Error(`参数引用\${${this.toRaw(reference)}}对应的参数不存在`);
+      throw new Error(`参数引用\${${toRaw(reference)}}对应的参数不存在`);
     }
     const { label: name } = param;
 
@@ -75,53 +70,11 @@ export class ParamToolbar {
       return;
     }
 
-    const { width, height } = this.calcTextSize(this.toolbarEl.parentNode!, newVal);
+    const { width, height } = calculateContentSize(this.toolbarEl.parentNode!, newVal);
     this.paramRefEl.style.width = `${width}px`;
     this.paramRefEl.style.height = `${height}px`;
 
-    this.paramRefEl.value = this.toValue(newVal);
-    this.paramRefEl.setAttribute(RAW_ATTR_NAME, `\${${this.toRaw(newVal)}}`);
-  }
-
-  toValue(param: IParam): string {
-    const { name, nodeName, inner } = param;
-    return `${nodeName}.${inner ? '内置输出参数.' : ''}${name}`;
-  }
-
-  toRaw(val: IParamReference | string[]): string {
-    let ref, nodeId, inner;
-    if (val instanceof Array) {
-      nodeId = val[0];
-      ref = val[val.length - 1];
-      inner = val.length === 3;
-    } else {
-      nodeId = val.nodeId;
-      ref = val.ref;
-      inner = val.inner;
-    }
-    return `${nodeId}.${inner ? 'inner.' : ''}${ref}`;
-  }
-
-  calcTextSize(container: Node, param: IParam): ISize {
-    const tempDiv = document.createElement('div');
-    tempDiv.className = 'jm-workflow-expression-editor';
-    tempDiv.style.position = 'fixed';
-    tempDiv.style.left = '-1000px';
-    tempDiv.style.top = '-1000px';
-    tempDiv.style.whiteSpace = 'nowrap';
-    tempDiv.style.visibility = 'hidden';
-
-    const tempSpan = document.createElement('span');
-    tempSpan.style.padding = '0';
-    tempSpan.style.borderWidth = '0';
-    tempSpan.innerText = this.toValue(param);
-    tempDiv.appendChild(tempSpan);
-
-    container.appendChild(tempDiv);
-    const width = tempSpan.offsetWidth;
-    const height = tempSpan.offsetHeight;
-    container.removeChild(tempDiv);
-
-    return { width, height };
+    this.paramRefEl.value = toContent(newVal);
+    this.paramRefEl.setAttribute(RAW_ATTR_NAME, `\${${toRaw(newVal)}}`);
   }
 }
