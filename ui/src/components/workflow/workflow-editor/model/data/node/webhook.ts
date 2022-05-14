@@ -99,7 +99,7 @@ export class Webhook extends BaseNode {
                   // 检查引用的触发器参数是否存在
                   getParam(reference, selectableParams);
                 } catch ({ message }) {
-                  callback(new Error(message));
+                  callback(new Error(`${reference.raw}触发器参数不存在`));
                   return;
                 }
               }
