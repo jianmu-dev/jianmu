@@ -9,7 +9,8 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
-import { ExpressionEditor, ISelectableParam } from './model';
+import { ISelectableParam } from './model/data';
+import { ExpressionEditor } from './model/expression-editor';
 import ParamToolbar from './param-toolbar.vue';
 
 export default defineComponent({

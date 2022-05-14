@@ -9,7 +9,9 @@
 
 <script lang="ts">
 import { defineComponent, inject, PropType, ref } from 'vue';
-import { ExpressionEditor, INNER_PARAM_TAG, ISelectableParam } from './model';
+import { ISelectableParam } from './model/data';
+import { INNER_PARAM_TAG } from './model/const';
+import { ExpressionEditor } from './model/expression-editor';
 
 export default defineComponent({
   props: {
