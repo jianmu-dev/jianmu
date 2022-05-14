@@ -26,6 +26,24 @@ interface ISize {
   height: number;
 }
 
+/**
+ * 提取参数引用
+ * @param text
+ */
+export function extractParamReferences(text: string): string[] {
+  // 格式：${xxx.[inner.]xxx}
+  const matches = text.match(/\$\{[0-9a-zA-Z_]+.(inner.)?[0-9a-zA-Z_]+\}/g);
+  if (!matches) {
+    return [];
+  }
+
+  const set = new Set<string>();
+  // 去重
+  matches.forEach(match => set.add(match));
+
+  return Array.from(set);
+}
+
 class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
   private readonly selectableParams: ISelectableParam[];
@@ -276,22 +294,14 @@ export class ExpressionEditor {
   }
 
   private parseExp(text: string): string {
-    // 格式：${xxx.[inner.]xxx}
-    const matches = text.match(/\$\{[0-9a-zA-Z_]+.(inner.)?[0-9a-zA-Z_]+\}/g);
-    if (!matches) {
-      return text;
-    }
+    const references = extractParamReferences(text);
 
-    const set = new Set<string>();
-    // 去重
-    matches.forEach(match => set.add(match));
-
-    set.forEach(match => {
-      const arr = match.substring(2, match.length - 1).split('.');
+    references.forEach(reference => {
+      const arr = reference.substring(2, reference.length - 1).split('.');
 
       try {
         const param = this.toolbar.getParam(arr);
-        text = text.replaceAll(match, this.getParamHtml(param));
+        text = text.replaceAll(reference, this.getParamHtml(param));
       } catch (err) {
         console.warn(err.message);
       }
