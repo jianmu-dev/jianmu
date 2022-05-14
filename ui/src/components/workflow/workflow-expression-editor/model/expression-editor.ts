@@ -122,7 +122,7 @@ export class ExpressionEditor {
   }
 
   private buildHtml(plainText: string): string {
-    const children = plainText.split(NEW_LINE).map((text => {
+    const children = plainText.trim().split(NEW_LINE).map((text => {
       const child = document.createElement('div');
       child.innerHTML = this.parseExp(text);
 
@@ -169,7 +169,7 @@ export class ExpressionEditor {
       plainText += line.innerText + NEW_LINE;
     });
 
-    return plainText;
+    return plainText.trim();
   }
 
   private getLines(selectedEl: HTMLDivElement, lines: HTMLDivElement[] = []): HTMLDivElement[] {
