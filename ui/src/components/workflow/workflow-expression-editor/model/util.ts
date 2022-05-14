@@ -1,4 +1,18 @@
 import { IContentSize, IParam, IParamReference } from './data';
+import { INNER_PARAM_TAG } from './const';
+
+/**
+ * 解析参数引用
+ * @param arr
+ */
+export function fromArray(arr: string[]): IParamReference {
+  const ref = arr[arr.length - 1];
+  const nodeId = arr[0];
+  const inner = arr.length === 3;
+  const raw = `\${${nodeId}.${inner ? `${INNER_PARAM_TAG}.` : ''}${ref}}`;
+
+  return { ref, nodeId, inner, raw };
+}
 
 /**
  * 解析参数引用
@@ -6,12 +20,16 @@ import { IContentSize, IParam, IParamReference } from './data';
  */
 export function fromRaw(raw: string): IParamReference {
   const arr = raw.substring(2, raw.length - 1).split('.');
-  return {
-    ref: arr[arr.length - 1],
-    nodeId: arr[0],
-    inner: arr.length === 3,
-    raw,
-  };
+  return fromArray(arr);
+}
+
+/**
+ * 转成显示内容
+ * @param param
+ */
+export function toContent(param: IParam): string {
+  const { name, nodeName, inner } = param;
+  return `${nodeName}.${inner ? '内置输出参数.' : ''}${name}`;
 }
 
 /**
@@ -30,33 +48,6 @@ export function extractReferences(text: string): IParamReference[] {
   matches.forEach(match => set.add(match));
 
   return Array.from(set).map(raw => fromRaw(raw));
-}
-
-/**
- * 转成显示内容
- * @param param
- */
-export function toContent(param: IParam): string {
-  const { name, nodeName, inner } = param;
-  return `${nodeName}.${inner ? '内置输出参数.' : ''}${name}`;
-}
-
-/**
- * 转成原始数据
- * @param val
- */
-export function toRaw(val: IParamReference | string[]): string {
-  let ref, nodeId, inner;
-  if (val instanceof Array) {
-    nodeId = val[0];
-    ref = val[val.length - 1];
-    inner = val.length === 3;
-  } else {
-    nodeId = val.nodeId;
-    ref = val.ref;
-    inner = val.inner;
-  }
-  return `${nodeId}.${inner ? 'inner.' : ''}${ref}`;
 }
 
 /**
