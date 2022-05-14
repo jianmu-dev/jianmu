@@ -1,12 +1,17 @@
 // @ts-ignore
 import listen from 'good-listener';
 
-export interface IParam {
+export interface IParamReference {
   ref: string;
-  name: string;
   nodeId: string;
-  nodeName: string;
   inner: boolean;
+  // 格式：${xxx.[inner.]xxx}
+  raw: string;
+}
+
+export interface IParam extends IParamReference {
+  name: string;
+  nodeName: string;
 }
 
 export interface ISelectableParam {
@@ -27,10 +32,24 @@ interface ISize {
 }
 
 /**
+ * 解析参数引用
+ * @param raw 格式：${xxx.[inner.]xxx}
+ */
+export function parseParamReference(raw: string): IParamReference {
+  const arr = raw.substring(2, raw.length - 1).split('.');
+  return {
+    ref: arr[arr.length - 1],
+    nodeId: arr[0],
+    inner: arr.length === 3,
+    raw,
+  };
+}
+
+/**
  * 提取参数引用
  * @param text
  */
-export function extractParamReferences(text: string): string[] {
+export function extractParamReferences(text: string): IParamReference[] {
   // 格式：${xxx.[inner.]xxx}
   const matches = text.match(/\$\{[0-9a-zA-Z_]+.(inner.)?[0-9a-zA-Z_]+\}/g);
   if (!matches) {
@@ -41,7 +60,7 @@ export function extractParamReferences(text: string): string[] {
   // 去重
   matches.forEach(match => set.add(match));
 
-  return Array.from(set);
+  return Array.from(set).map(raw => parseParamReference(raw));
 }
 
 class ParamToolbar {
@@ -79,25 +98,23 @@ class ParamToolbar {
     this.toolbarEl.style.height = '';
   }
 
-  getParam(arr: string[]): IParam {
-    const nodeId = arr[0];
-    const ref = arr[arr.length - 1];
-    const inner = arr.length === 3;
+  getParam(reference: IParamReference): IParam {
+    const { ref, nodeId, inner, raw } = reference;
 
     const node = this.selectableParams.find(({ value }) => value === nodeId);
     if (!node) {
       // 节点不存在
-      throw new Error(`参数引用\${${this.toRaw(arr)}}对应的节点不存在`);
+      throw new Error(`参数引用\${${this.toRaw(reference)}}对应的节点不存在`);
     }
     const { label: nodeName, children } = node;
     const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
       .find(({ value }) => value === ref);
     if (!param) {
-      throw new Error(`参数引用\${${this.toRaw(arr)}}对应的参数不存在`);
+      throw new Error(`参数引用\${${this.toRaw(reference)}}对应的参数不存在`);
     }
     const { label: name } = param;
 
-    return { ref, name, nodeId, nodeName, inner };
+    return { ref, name, nodeId, nodeName, inner, raw };
   }
 
   getCurrentParam(): IParam | undefined {
@@ -105,10 +122,8 @@ class ParamToolbar {
       return undefined;
     }
 
-    // 格式：${xxx.[inner.]xxx}
     const raw = this.paramRefEl.getAttribute(RAW_ATTR_NAME)!;
-    const arr = raw.substring(2, raw.length - 1).split('.');
-    return this.getParam(arr);
+    return this.getParam(parseParamReference(raw));
   }
 
   updateParam(newVal: IParam): void {
@@ -129,7 +144,7 @@ class ParamToolbar {
     return `${nodeName}.${inner ? '内置输出参数.' : ''}${name}`;
   }
 
-  toRaw(val: IParam | string[]): string {
+  toRaw(val: IParamReference | string[]): string {
     let ref, nodeId, inner;
     if (val instanceof Array) {
       nodeId = val[0];
@@ -229,7 +244,8 @@ export class ExpressionEditor {
       selection.addRange(this.lastRange);
     }
 
-    const param = this.toolbar.getParam(arr);
+    const raw = this.toolbar.toRaw(arr);
+    const param = this.toolbar.getParam(parseParamReference(raw));
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
     document.execCommand('insertHTML', false, this.getParamHtml(param));
   }
@@ -297,11 +313,9 @@ export class ExpressionEditor {
     const references = extractParamReferences(text);
 
     references.forEach(reference => {
-      const arr = reference.substring(2, reference.length - 1).split('.');
-
       try {
-        const param = this.toolbar.getParam(arr);
-        text = text.replaceAll(reference, this.getParamHtml(param));
+        const param = this.toolbar.getParam(reference);
+        text = text.replaceAll(reference.raw, this.getParamHtml(param));
       } catch (err) {
         console.warn(err.message);
       }
