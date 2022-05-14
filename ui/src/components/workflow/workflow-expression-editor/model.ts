@@ -66,9 +66,18 @@ class ParamToolbar {
     const ref = arr[arr.length - 1];
     const inner = arr.length === 3;
 
-    const { label: nodeName, children } = this.selectableParams.find(({ value }) => value === nodeId)!;
-    const { label: name } = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
-      .find(({ value }) => value === ref)!;
+    const node = this.selectableParams.find(({ value }) => value === nodeId);
+    if (!node) {
+      // 节点不存在
+      throw new Error(`参数引用\${${this.toRaw(arr)}}对应的节点不存在`);
+    }
+    const { label: nodeName, children } = node;
+    const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
+      .find(({ value }) => value === ref);
+    if (!param) {
+      throw new Error(`参数引用\${${this.toRaw(arr)}}对应的参数不存在`);
+    }
+    const { label: name } = param;
 
     return { ref, name, nodeId, nodeName, inner };
   }
@@ -102,8 +111,17 @@ class ParamToolbar {
     return `${nodeName}.${inner ? '内置输出参数.' : ''}${name}`;
   }
 
-  toRaw(param: IParam): string {
-    const { ref, nodeId, inner } = param;
+  toRaw(val: IParam | string[]): string {
+    let ref, nodeId, inner;
+    if (val instanceof Array) {
+      nodeId = val[0];
+      ref = val[val.length - 1];
+      inner = val.length === 3;
+    } else {
+      nodeId = val.nodeId;
+      ref = val.ref;
+      inner = val.inner;
+    }
     return `${nodeId}.${inner ? 'inner.' : ''}${ref}`;
   }
 
@@ -142,7 +160,7 @@ export class ExpressionEditor {
     value: string, selectableParams: ISelectableParam[]) {
     this.toolbar = new ParamToolbar(paramToolbarEl, selectableParams);
     this.editorEl = editorEl;
-    this.editorEl.innerHTML = this.parse(value);
+    this.editorEl.innerHTML = this.parseExp(value);
 
     this.observer = new MutationObserver(() => {
       const paramRefEl = this.toolbar.getParamRefEl();
@@ -239,7 +257,7 @@ export class ExpressionEditor {
       .split(NEW_LINE)
       .map((text => {
         const child = document.createElement('div');
-        child.innerHTML = this.parse(text);
+        child.innerHTML = this.parseExp(text);
 
         return child;
       }));
@@ -257,7 +275,7 @@ export class ExpressionEditor {
     return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${this.toolbar.toValue(param)}" data-raw="\${${this.toolbar.toRaw(param)}}"/>`;
   }
 
-  private parse(text: string): string {
+  private parseExp(text: string): string {
     // 格式：${xxx.[inner.]xxx}
     const matches = text.match(/\$\{[0-9a-zA-Z_]+.(inner.)?[0-9a-zA-Z_]+\}/g);
     if (!matches) {
@@ -270,9 +288,13 @@ export class ExpressionEditor {
 
     set.forEach(match => {
       const arr = match.substring(2, match.length - 1).split('.');
-      const param = this.toolbar.getParam(arr);
 
-      text = text.replaceAll(match, this.getParamHtml(param));
+      try {
+        const param = this.toolbar.getParam(arr);
+        text = text.replaceAll(match, this.getParamHtml(param));
+      } catch (err) {
+        console.warn(err.message);
+      }
     });
 
     return text;
