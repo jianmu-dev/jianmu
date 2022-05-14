@@ -1,5 +1,6 @@
 import { RuleItem } from 'async-validator';
 import { NodeTypeEnum } from './enumeration';
+import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
 
 type TriggerValue = 'blur' | 'change';
 
@@ -30,6 +31,8 @@ export interface IWorkflowNode {
   getIcon(): string;
 
   getDocUrl(): string;
+
+  getSelectableParams(): ISelectableParam[];
 
   getFormRules(): Record<string, CustomRule>;
 

@@ -1,6 +1,7 @@
 import Schema, { Value } from 'async-validator';
 import { CustomRule, IWorkflowNode } from '../common';
 import { NodeTypeEnum } from '../enumeration';
+import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 
 export abstract class BaseNode implements IWorkflowNode {
   private readonly ref: string;
@@ -36,6 +37,10 @@ export abstract class BaseNode implements IWorkflowNode {
 
   getDocUrl(): string {
     return this.docUrl;
+  }
+
+  getSelectableParams(): ISelectableParam[] {
+    return [];
   }
 
   getFormRules(): Record<string, CustomRule> {
