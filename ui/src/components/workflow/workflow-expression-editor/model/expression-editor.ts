@@ -16,7 +16,10 @@ export class ExpressionEditor {
     value: string, selectableParams: ISelectableParam[]) {
     this.toolbar = new ParamToolbar(paramToolbarEl, selectableParams);
     this.editorEl = editorEl;
-    this.editorEl.innerHTML = this.parseExp(value);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = value;
+    // 因确定不了外部传进来的数据格式，强制转成纯文本
+    this.refresh(tempDiv.innerText);
 
     this.observer = new MutationObserver(() => {
       const paramRefEl = this.toolbar.getParamRefEl();
@@ -99,7 +102,7 @@ export class ExpressionEditor {
 
     const tempDiv = document.createElement('div');
     tempDiv.append(fragment);
-    e.clipboardData.setData('text/plain', this.getRaw(tempDiv));
+    e.clipboardData.setData('text/plain', this.getPlainText(tempDiv));
   }
 
   paste(e: ClipboardEvent): void {
@@ -109,20 +112,27 @@ export class ExpressionEditor {
       return;
     }
 
-    const children = e.clipboardData.getData('text/plain')
-      .split(NEW_LINE)
-      .map((text => {
-        const child = document.createElement('div');
-        child.innerHTML = this.parseExp(text);
+    // 插入html
+    document.execCommand('insertHTML', false,
+      this.buildHtml(e.clipboardData.getData('text/plain')));
+  }
 
-        return child;
-      }));
+  refresh(plainText: string): void {
+    this.editorEl.innerHTML = this.buildHtml(plainText);
+  }
+
+  private buildHtml(plainText: string): string {
+    const children = plainText.split(NEW_LINE).map((text => {
+      const child = document.createElement('div');
+      child.innerHTML = this.parseExp(text);
+
+      return child;
+    }));
 
     const tempDiv = document.createElement('div');
     tempDiv.append(...children);
 
-    // 插入html
-    document.execCommand('insertHTML', false, tempDiv.innerHTML);
+    return tempDiv.innerHTML;
   }
 
   private getParamHtml(param: IParam): string {
@@ -131,23 +141,23 @@ export class ExpressionEditor {
     return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="${param.raw}"/>`;
   }
 
-  private parseExp(text: string): string {
-    const references = extractReferences(text);
+  private parseExp(plainText: string): string {
+    const references = extractReferences(plainText);
 
     references.forEach(reference => {
       try {
         const param = this.toolbar.getParam(reference);
-        text = text.replaceAll(reference.raw, this.getParamHtml(param));
+        plainText = plainText.replaceAll(reference.raw, this.getParamHtml(param));
       } catch (err) {
         console.warn(err.message);
       }
     });
 
-    return text;
+    return plainText;
   }
 
-  getRaw(selectedEl: HTMLDivElement): string {
-    let raw = '';
+  getPlainText(selectedEl: HTMLDivElement): string {
+    let plainText = '';
 
     this.getLines(selectedEl).forEach(line => {
       Array.from(line.querySelectorAll('input')).forEach(input => {
@@ -156,10 +166,10 @@ export class ExpressionEditor {
         line.removeChild(input);
       });
 
-      raw += line.innerText + NEW_LINE;
+      plainText += line.innerText + NEW_LINE;
     });
 
-    return raw;
+    return plainText;
   }
 
   private getLines(selectedEl: HTMLDivElement, lines: HTMLDivElement[] = []): HTMLDivElement[] {
