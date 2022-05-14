@@ -34,11 +34,11 @@ export function toContent(param: IParam): string {
 
 /**
  * 提取参数引用
- * @param text
+ * @param plainText
  */
-export function extractReferences(text: string): IParamReference[] {
+export function extractReferences(plainText: string): IParamReference[] {
   // 格式：${xxx.[inner.]xxx}
-  const matches = text.match(/\$\{[0-9a-zA-Z_]+\.(inner\.)?[0-9a-zA-Z_]+\}/g);
+  const matches = plainText.match(/\$\{[0-9a-zA-Z_]+\.(inner\.)?[0-9a-zA-Z_]+\}/g);
   if (!matches) {
     return [];
   }
