@@ -6,6 +6,8 @@ import { Webhook } from './node/webhook';
 import { Shell } from './node/shell';
 import { AsyncTask } from './node/async-task';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
+import { extractReferences, getParam } from '../../../workflow-expression-editor/model/util';
+import { NodeError, ParamError } from '../../../workflow-expression-editor/model/error';
 
 export class CustomX6NodeProxy {
   private readonly node: Node;
@@ -29,7 +31,7 @@ export class CustomX6NodeProxy {
         nodeData = Shell.build(obj);
         break;
       case NodeTypeEnum.ASYNC_TASK:
-        nodeData = AsyncTask.build(obj, graph ? () => this.getSelectableParams(graph) : undefined);
+        nodeData = AsyncTask.build(obj, graph ? (value: string) => this.validateParam(graph, value) : undefined);
         break;
     }
 
@@ -45,7 +47,7 @@ export class CustomX6NodeProxy {
     // TODO 校验节点，同步节点警告状态
   }
 
-  private getSelectableParams(graph: Graph): ISelectableParam[] {
+  getSelectableParams(graph: Graph): ISelectableParam[] {
     // TODO 完善获取上游节点列表
     const nodes: Node[] = graph.getNodes();
 
@@ -62,5 +64,39 @@ export class CustomX6NodeProxy {
     }
 
     return params;
+  }
+
+  private validateParam(graph: Graph, value: string) {
+    const references = extractReferences(value);
+    if (references.length === 0) {
+      return;
+    }
+
+    const selectableParams = this.getSelectableParams(graph);
+    for (const reference of references) {
+      try {
+        // 检查参数引用对应的节点或参数是否存在
+        getParam(reference, selectableParams);
+      } catch (err) {
+        if (err instanceof NodeError) {
+          const cell = graph.getCellById(reference.nodeId);
+          if (cell) {
+            const workflowNode = new CustomX6NodeProxy(cell as Node).getData();
+            const nodeName = workflowNode.getName();
+            throw new Error(`${reference.raw}参数不可用，${nodeName}节点参数不可引用`);
+          }
+          throw new Error(`${reference.raw}参数不可用，对应的节点不存在`);
+        }
+
+        if (err instanceof ParamError) {
+          const node = graph.getCellById(reference.nodeId) as Node;
+          const workflowNode = new CustomX6NodeProxy(node).getData();
+          const nodeName = workflowNode.getName();
+          throw new Error(`${reference.raw}参数不可用，${nodeName}节点不存在此参数`);
+        }
+
+        throw err;
+      }
+    }
   }
 }

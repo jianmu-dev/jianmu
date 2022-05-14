@@ -4,7 +4,6 @@ import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, CustomRuleItem } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
-import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
 
 export interface IAsyncTaskParam {
   readonly ref: string;
@@ -15,30 +14,31 @@ export interface IAsyncTaskParam {
   readonly description?: string;
 }
 
+type ValidateParamFn = (value: string) => void;
+
 export class AsyncTask extends BaseNode {
   readonly ownerRef: string;
   version: string;
   readonly inputs: IAsyncTaskParam[];
   readonly outputs: IAsyncTaskParam[];
   failureMode: FailureModeEnum;
-  private readonly getSelectableParams?: () => ISelectableParam[];
+  private readonly validateParam?: ValidateParamFn;
 
   constructor(ownerRef: string, ref: string, name: string, icon: string = '', version: string = '',
     inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
-    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
-    getSelectableParams?: () => ISelectableParam[]) {
+    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
     super(ref, name, NodeTypeEnum.ASYNC_TASK, icon || defaultIcon, `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
     this.ownerRef = ownerRef;
     this.version = version;
     this.inputs = inputs;
     this.outputs = outputs;
     this.failureMode = failureMode;
-    this.getSelectableParams = getSelectableParams;
+    this.validateParam = validateParam;
   }
 
   static build({ ownerRef, ref, name, icon, version, inputs, outputs, failureMode }: any,
-    getSelectableParams?: () => ISelectableParam[]): AsyncTask {
-    return new AsyncTask(ownerRef, ref, name, icon, version, inputs, outputs, failureMode, getSelectableParams);
+    validateParam?: ValidateParamFn): AsyncTask {
+    return new AsyncTask(ownerRef, ref, name, icon, version, inputs, outputs, failureMode, validateParam);
   }
 
   buildSelectableParam(): ISelectableParam {
@@ -84,7 +84,7 @@ export class AsyncTask extends BaseNode {
       version: [],
       inputs: {
         type: 'array',
-        required: true,
+        required: this.inputs.length > 0,
         len: this.inputs.length,
         fields: {
           value: [
@@ -96,25 +96,14 @@ export class AsyncTask extends BaseNode {
             },
             {
               validator: (rule: any, value: any, callback: any) => {
-                if (!value || !this.getSelectableParams) {
-                  callback();
-                  return;
-                }
-
-                const references = extractReferences(value);
-                if (references.length > 0) {
-                  const selectableParams = this.getSelectableParams();
-                  for (const reference of references) {
-                    try {
-                      // 检查参数引用对应的节点或参数是否存在
-                      getParam(reference, selectableParams);
-                    } catch ({ message }) {
-                      callback(new Error(message));
-                      return;
-                    }
+                if (value && this.validateParam) {
+                  try {
+                    this.validateParam(value);
+                  } catch ({ message }) {
+                    callback(message);
+                    return;
                   }
                 }
-
                 callback();
               },
               trigger: 'blur',
