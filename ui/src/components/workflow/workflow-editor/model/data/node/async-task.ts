@@ -2,6 +2,8 @@ import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, CustomRuleItem } from '../common';
+import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
+import { INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 
 export interface IAsyncTaskParam {
   readonly ref: string;
@@ -32,6 +34,40 @@ export class AsyncTask extends BaseNode {
 
   static build({ ownerRef, ref, name, icon, version, inputs, outputs, failureMode }: any): AsyncTask {
     return new AsyncTask(ownerRef, ref, name, icon, version, inputs, outputs, failureMode);
+  }
+
+  getSelectableParams(): ISelectableParam[] {
+    const children: ISelectableParam[] = this.outputs.map(({ ref, name }) => {
+      return {
+        value: ref,
+        label: name,
+      };
+    });
+    children.push({
+      // 文档：https://docs.jianmu.dev/guide/custom-node.html#_4-%E5%86%85%E7%BD%AE%E8%BE%93%E5%87%BA%E5%8F%82%E6%95%B0
+      value: INNER_PARAM_TAG,
+      label: '内置输出参数',
+      children: [
+        {
+          value: 'execution_status',
+          label: '节点任务执行状态',
+        },
+        {
+          value: 'start_time',
+          label: '节点任务开始时间',
+        },
+        {
+          value: 'end_time',
+          label: '节点任务结束时间',
+        },
+      ],
+    });
+
+    return [{
+      value: super.getRef(),
+      label: super.getName(),
+      children,
+    }];
   }
 
   getFormRules(): Record<string, CustomRule> {
