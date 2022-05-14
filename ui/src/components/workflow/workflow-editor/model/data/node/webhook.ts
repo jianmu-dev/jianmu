@@ -36,8 +36,8 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
-  getSelectableParams(): ISelectableParam[] {
-    return [{
+  buildSelectableParam(): ISelectableParam {
+    return {
       value: super.getRef(),
       label: super.getName(),
       children: this.params.map(({ name }) => {
@@ -46,7 +46,7 @@ export class Webhook extends BaseNode {
           label: name,
         };
       }),
-    }];
+    };
   }
 
   getFormRules(): Record<string, CustomRule> {
@@ -93,7 +93,7 @@ export class Webhook extends BaseNode {
 
             const references = extractReferences(value);
             if (references.length > 0) {
-              const selectableParams = this.getSelectableParams();
+              const selectableParams = [this.buildSelectableParam()];
               for (const reference of references) {
                 try {
                   // 检查引用的参数对应节点是否存在

@@ -32,7 +32,7 @@ export interface IWorkflowNode {
 
   getDocUrl(): string;
 
-  getSelectableParams(): ISelectableParam[];
+  buildSelectableParam(): ISelectableParam | undefined;
 
   getFormRules(): Record<string, CustomRule>;
 

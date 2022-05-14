@@ -39,8 +39,8 @@ export abstract class BaseNode implements IWorkflowNode {
     return this.docUrl;
   }
 
-  getSelectableParams(): ISelectableParam[] {
-    return [];
+  buildSelectableParam(): ISelectableParam | undefined {
+    return undefined;
   }
 
   getFormRules(): Record<string, CustomRule> {
