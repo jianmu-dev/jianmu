@@ -54,9 +54,9 @@ export default defineComponent({
       handlePaste: (e: ClipboardEvent) => expressionEditor.paste(e),
       handleBlur: () => {
         const el = editorRef.value!.cloneNode(true) as HTMLDivElement;
+        const references = extractReferences(el.innerText);
         const plainText = expressionEditor.getPlainText(el);
 
-        const references = extractReferences(el.innerText);
         if (references.length > 0) {
           // 表示手动输入了参数引用
           expressionEditor.refresh(plainText);
