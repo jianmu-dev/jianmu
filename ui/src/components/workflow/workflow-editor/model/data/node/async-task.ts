@@ -3,14 +3,12 @@ import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, CustomRuleItem } from '../common';
 
-export type ParamValueType = string | number | boolean;
-
 export interface IAsyncTaskParam {
   readonly ref: string;
   readonly name: string;
   readonly type: ParamTypeEnum;
   readonly required: boolean;
-  value: ParamValueType;
+  value: string;
   readonly description?: string;
 }
 
@@ -66,9 +64,34 @@ export class AsyncTask extends BaseNode {
   toDsl(): object {
     const { name, version, inputs, failureMode } = this;
     const param: {
-      [key: string]: ParamValueType;
+      [key: string]: string | number | boolean;
     } = {};
-    inputs.forEach(({ ref, value }) => (param[ref] = value));
+    inputs.forEach(({ ref, type, value }) => {
+      switch (type) {
+        case ParamTypeEnum.NUMBER: {
+          const val = parseFloat(value);
+          if (!isNaN(val)) {
+            param[ref] = val;
+          }
+          break;
+        }
+        case ParamTypeEnum.BOOL: {
+          switch (value) {
+            case 'true':
+              param[ref] = true;
+              break;
+            case 'false':
+              param[ref] = false;
+              break;
+          }
+          break;
+        }
+      }
+
+      if (!param[ref]) {
+        param[ref] = value;
+      }
+    });
 
     return {
       alias: name,
