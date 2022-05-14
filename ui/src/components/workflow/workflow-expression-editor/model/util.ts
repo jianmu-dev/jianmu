@@ -90,13 +90,13 @@ export function getParam(reference: IParamReference, selectableParams: ISelectab
   const node = selectableParams.find(({ value }) => value === nodeId);
   if (!node) {
     // 节点不存在
-    throw new Error(`参数引用${raw}对应的节点不存在`);
+    throw new Error(`${raw}参数不可引用或对应的节点不存在`);
   }
   const { label: nodeName, children } = node;
   const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
     .find(({ value }) => value === ref);
   if (!param) {
-    throw new Error(`参数引用${raw}对应的参数不存在`);
+    throw new Error(`${raw}参数引用或对应的参数不存在`);
   }
   const { label: name } = param;
 
