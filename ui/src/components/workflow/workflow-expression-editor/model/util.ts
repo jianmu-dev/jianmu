@@ -96,7 +96,7 @@ export function getParam(reference: IParamReference, selectableParams: ISelectab
   const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
     .find(({ value }) => value === ref);
   if (!param) {
-    throw new Error(`${raw}参数引用或对应的参数不存在`);
+    throw new Error(`${raw}参数不可引用或不存在`);
   }
   const { label: name } = param;
 
