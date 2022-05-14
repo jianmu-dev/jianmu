@@ -56,7 +56,9 @@ export abstract class BaseNode implements IWorkflowNode {
     const source: Record<string, Value> = {};
     Object.keys(this).forEach(key => (source[key] = (this as any)[key]));
 
-    await validator.validate(source);
+    await validator.validate(source, {
+      first: true,
+    });
   }
 
   toDsl(): object {
