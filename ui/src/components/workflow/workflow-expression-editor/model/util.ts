@@ -1,5 +1,6 @@
 import { IContentSize, IParam, IParamReference, ISelectableParam } from './data';
 import { INNER_PARAM_TAG } from './const';
+import { NodeError, ParamError } from './error';
 
 /**
  * 解析参数引用
@@ -90,13 +91,13 @@ export function getParam(reference: IParamReference, selectableParams: ISelectab
   const node = selectableParams.find(({ value }) => value === nodeId);
   if (!node) {
     // 节点不存在
-    throw new Error(`${raw}参数不可引用或对应的节点不存在`);
+    throw new NodeError(reference);
   }
   const { label: nodeName, children } = node;
   const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
     .find(({ value }) => value === ref);
   if (!param) {
-    throw new Error(`${raw}参数不可引用或不存在`);
+    throw new ParamError(reference);
   }
   const { label: name } = param;
 
