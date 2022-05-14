@@ -1,4 +1,4 @@
-import { IContentSize, IParam, IParamReference } from './data';
+import { IContentSize, IParam, IParamReference, ISelectableParam } from './data';
 import { INNER_PARAM_TAG } from './const';
 
 /**
@@ -76,4 +76,29 @@ export function calculateContentSize(container: Node, param: IParam): IContentSi
   container.removeChild(tempDiv);
 
   return { width, height };
+}
+
+/**
+ * 获取参数
+ * @param reference
+ * @param selectableParams
+ * @throws 找不到节点或参数时，抛异常
+ */
+export function getParam(reference: IParamReference, selectableParams: ISelectableParam[]): IParam {
+  const { ref, nodeId, inner, raw } = reference;
+
+  const node = selectableParams.find(({ value }) => value === nodeId);
+  if (!node) {
+    // 节点不存在
+    throw new Error(`参数引用${raw}对应的节点不存在`);
+  }
+  const { label: nodeName, children } = node;
+  const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
+    .find(({ value }) => value === ref);
+  if (!param) {
+    throw new Error(`参数引用${raw}对应的参数不存在`);
+  }
+  const { label: name } = param;
+
+  return { ref, name, nodeId, nodeName, inner, raw };
 }

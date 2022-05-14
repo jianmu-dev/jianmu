@@ -1,6 +1,6 @@
 import { IParam, IParamReference, ISelectableParam } from './data';
-import { INNER_PARAM_TAG, RAW_ATTR_NAME } from './const';
-import { calculateContentSize, fromRaw, toContent } from './util';
+import { RAW_ATTR_NAME } from './const';
+import { calculateContentSize, fromRaw, getParam, toContent } from './util';
 
 export class ParamToolbar {
   private readonly toolbarEl: HTMLElement;
@@ -38,22 +38,7 @@ export class ParamToolbar {
   }
 
   getParam(reference: IParamReference): IParam {
-    const { ref, nodeId, inner, raw } = reference;
-
-    const node = this.selectableParams.find(({ value }) => value === nodeId);
-    if (!node) {
-      // 节点不存在
-      throw new Error(`参数引用${raw}对应的节点不存在`);
-    }
-    const { label: nodeName, children } = node;
-    const param = (inner ? children!.find(({ value }) => value === INNER_PARAM_TAG)!.children : children)!
-      .find(({ value }) => value === ref);
-    if (!param) {
-      throw new Error(`参数引用${raw}对应的参数不存在`);
-    }
-    const { label: name } = param;
-
-    return { ref, name, nodeId, nodeName, inner, raw };
+    return getParam(reference, this.selectableParams);
   }
 
   getCurrentParam(): IParam | undefined {
