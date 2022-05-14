@@ -4,6 +4,7 @@ import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, CustomRuleItem } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
+import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
 
 export interface IAsyncTaskParam {
   readonly ref: string;
@@ -20,20 +21,24 @@ export class AsyncTask extends BaseNode {
   readonly inputs: IAsyncTaskParam[];
   readonly outputs: IAsyncTaskParam[];
   failureMode: FailureModeEnum;
+  private readonly getSelectableParams?: () => ISelectableParam[];
 
   constructor(ownerRef: string, ref: string, name: string, icon: string = '', version: string = '',
     inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
-    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND) {
+    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
+    getSelectableParams?: () => ISelectableParam[]) {
     super(ref, name, NodeTypeEnum.ASYNC_TASK, icon || defaultIcon, `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
     this.ownerRef = ownerRef;
     this.version = version;
     this.inputs = inputs;
     this.outputs = outputs;
     this.failureMode = failureMode;
+    this.getSelectableParams = getSelectableParams;
   }
 
-  static build({ ownerRef, ref, name, icon, version, inputs, outputs, failureMode }: any): AsyncTask {
-    return new AsyncTask(ownerRef, ref, name, icon, version, inputs, outputs, failureMode);
+  static build({ ownerRef, ref, name, icon, version, inputs, outputs, failureMode }: any,
+    getSelectableParams?: () => ISelectableParam[]): AsyncTask {
+    return new AsyncTask(ownerRef, ref, name, icon, version, inputs, outputs, failureMode, getSelectableParams);
   }
 
   buildSelectableParam(): ISelectableParam {
@@ -87,6 +92,31 @@ export class AsyncTask extends BaseNode {
               // TODO 根据required动态确定
               required: true,
               message: '参数值不能为空',
+              trigger: 'blur',
+            },
+            {
+              validator: (rule: any, value: any, callback: any) => {
+                if (!value || !this.getSelectableParams) {
+                  callback();
+                  return;
+                }
+
+                const references = extractReferences(value);
+                if (references.length > 0) {
+                  const selectableParams = this.getSelectableParams();
+                  for (const reference of references) {
+                    try {
+                      // 检查参数引用对应的节点或参数是否存在
+                      getParam(reference, selectableParams);
+                    } catch ({ message }) {
+                      callback(new Error(message));
+                      return;
+                    }
+                  }
+                }
+
+                callback();
+              },
               trigger: 'blur',
             },
           ] as CustomRuleItem[],
