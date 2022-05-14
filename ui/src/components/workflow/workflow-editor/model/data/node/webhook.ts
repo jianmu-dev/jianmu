@@ -96,7 +96,7 @@ export class Webhook extends BaseNode {
               const selectableParams = [this.buildSelectableParam()];
               for (const reference of references) {
                 try {
-                  // 检查引用的参数对应节点是否存在
+                  // 检查引用的触发器参数是否存在
                   getParam(reference, selectableParams);
                 } catch ({ message }) {
                   callback(new Error(message));
