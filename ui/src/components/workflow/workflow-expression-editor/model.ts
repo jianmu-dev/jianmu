@@ -78,7 +78,7 @@ class ParamToolbar {
       return undefined;
     }
 
-    // 格式：${xxx.[xxx.]xxx}
+    // 格式：${xxx.[inner.]xxx}
     const raw = this.paramRefEl.getAttribute(RAW_ATTR_NAME)!;
     const arr = raw.substring(2, raw.length - 1).split('.');
     return this.getParam(arr);
@@ -258,8 +258,8 @@ export class ExpressionEditor {
   }
 
   private parse(text: string): string {
-    // 格式：${xxx.[xxx.]xxx}
-    const matches = text.match(/\$\{[0-9a-zA-Z_]+.[[0-9a-zA-Z_]+.]?[0-9a-zA-Z_]+\}/g);
+    // 格式：${xxx.[inner.]xxx}
+    const matches = text.match(/\$\{[0-9a-zA-Z_]+.(inner.)?[0-9a-zA-Z_]+\}/g);
     if (!matches) {
       return text;
     }
