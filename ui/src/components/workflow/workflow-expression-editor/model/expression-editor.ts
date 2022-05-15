@@ -122,7 +122,12 @@ export class ExpressionEditor {
   }
 
   private buildHtml(plainText: string): string {
-    const children = plainText.trim().split(NEW_LINE).map((pText => {
+    plainText = plainText.trim();
+    if (!plainText) {
+      return '';
+    }
+
+    const children = plainText.split(NEW_LINE).map((pText => {
       const child = document.createElement('div');
       child.innerHTML = this.parse(pText);
 
