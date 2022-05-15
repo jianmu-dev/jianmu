@@ -49,7 +49,6 @@ import {
   highlightNodeState,
   init,
   refreshNodeStateHighlight,
-  sortTasks,
   updateNodeStates,
 } from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
@@ -57,6 +56,7 @@ import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumerat
 import { parse } from './utils/dsl';
 import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/utils/model';
+import { sortTasks } from './model/util';
 
 // 注册自定义g6元素
 Object.values(import.meta.globEager('./shapes/**')).forEach(({ default: register }) => register(G6));
