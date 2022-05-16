@@ -76,7 +76,7 @@ export class WorkflowTool {
         break;
       case ZoomTypeEnum.ORIGINAL:
         // 将画布内容中心与视口中心对齐
-        this.graph.centerContent();
+        // this.graph.centerContent();
         factor = 100;
         break;
     }
