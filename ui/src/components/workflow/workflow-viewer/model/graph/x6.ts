@@ -53,4 +53,8 @@ export class X6Graph extends BaseGraph {
         .includes(new CustomX6NodeProxy(node).getData().getType()))
       .length;
   }
+
+  changeSize(width: number, height: number): void {
+    this.graph.resizeGraph(width, height);
+  }
 }
