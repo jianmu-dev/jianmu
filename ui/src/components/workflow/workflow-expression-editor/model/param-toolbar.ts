@@ -46,7 +46,7 @@ export class ParamToolbar {
             return;
           }
 
-          movingEl = movingEl.parentElement!;
+          movingEl = movingEl.parentElement || undefined;
         }
       }
     }
