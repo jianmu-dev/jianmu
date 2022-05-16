@@ -5,7 +5,7 @@ import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { WorkflowTool } from '@/components/workflow/workflow-editor/model/workflow-tool';
 import { render } from '@/components/workflow/workflow-editor/model/workflow-graph';
 import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
-import { NodeTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 
 export class X6Graph extends BaseGraph {
   private readonly graph: Graph;
@@ -45,6 +45,36 @@ export class X6Graph extends BaseGraph {
     this.workflowTool = new WorkflowTool(this.graph);
 
     render(this.graph, data, this.workflowTool);
+  }
+
+  zoomTo(factor: number): void {
+    if (factor === 100) {
+      this.workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
+      return;
+    }
+
+    const curFactor = Math.round(this.graph.zoom() * 100);
+    if (factor > curFactor) {
+      this.workflowTool.zoom(ZoomTypeEnum.IN);
+      return;
+    }
+
+    if (factor < curFactor) {
+      this.workflowTool.zoom(ZoomTypeEnum.OUT);
+      return;
+    }
+  }
+
+  getZoom(): number {
+    return this.graph.zoom();
+  }
+
+  fitCanvas(): void {
+    this.workflowTool.zoom(ZoomTypeEnum.CENTER);
+  }
+
+  fitView(): void {
+    this.workflowTool.zoom(ZoomTypeEnum.FIT);
   }
 
   getAsyncTaskNodeCount(): number {
