@@ -12,12 +12,13 @@ export class WorkflowGraph {
     nodeInfos: INodeDefVo[], container: HTMLElement, direction: GraphDirectionEnum) {
     this.graph = new G6Graph(dsl, triggerType, nodeInfos, container, direction);
 
-    const parentElement = container.parentElement as HTMLElement;
+    const containerParentEl = container.parentElement!;
     this.resizeObserver = new ResizeObserver(() => {
-      this.graph.changeSize(parentElement.clientWidth, parentElement.clientHeight);
+      const { clientWidth, clientHeight } = containerParentEl;
+      this.graph.changeSize(clientWidth, clientHeight);
     });
     // 监控容器大小变化
-    this.resizeObserver.observe(parentElement);
+    this.resizeObserver.observe(containerParentEl);
   }
 
   destroy() {

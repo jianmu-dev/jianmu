@@ -312,7 +312,7 @@ function parsePipeline(pipeline: any): {
  * @param nodeInfos
  */
 export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined, nodeInfos?: INodeDefVo[]): {
-  dslType: DslTypeEnum,
+  dslType: DslTypeEnum;
   nodes: NodeConfig[];
   edges: EdgeConfig[];
 } {

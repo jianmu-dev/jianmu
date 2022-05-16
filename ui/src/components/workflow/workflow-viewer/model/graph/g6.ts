@@ -74,7 +74,8 @@ export class G6Graph extends BaseGraph {
     const { dslType, nodes, edges } = parse(dsl, triggerType, nodeInfos);
     super(dslType);
 
-    const parentElement = container.parentElement as HTMLElement;
+    const containerParentEl = container.parentElement!;
+    const { clientWidth: width, clientHeight: height } = containerParentEl;
     this.graph = new Graph({
       modes: {
         default: [
@@ -90,9 +91,9 @@ export class G6Graph extends BaseGraph {
       // 指定挂载容器
       container,
       // 图的宽度
-      width: parentElement.clientWidth,
+      width,
       // 图的高度
-      height: parentElement.clientHeight,
+      height,
       layout: calculateLayout(dslType, nodes, direction),
     });
 
