@@ -130,16 +130,9 @@ export default defineComponent({
 
     onBeforeUpdate(() => refreshGraph());
 
-    onMounted(() => {
-      proxy.$nextTick(() => {
-        // 保证整个视图都渲染完毕，才能确定图的宽高
-        refreshGraph();
-      });
-    });
-
-    onUnmounted(() => {
-      workflowGraph?.destroy();
-    });
+    // 保证整个视图都渲染完毕，才能确定图的宽高
+    onMounted(() => proxy.$nextTick(() => refreshGraph()));
+    onUnmounted(() => workflowGraph?.destroy());
 
     return {
       TaskStatusEnum,
