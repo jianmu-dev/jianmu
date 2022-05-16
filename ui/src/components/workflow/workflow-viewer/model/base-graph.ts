@@ -19,8 +19,8 @@ export abstract class BaseGraph {
     this.dslType = dslType;
   }
 
-  getNodes(): INode[] {
-    return [];
+  getAsyncTaskNodeCount(): number {
+    return 0;
   }
 
   getDirection(): GraphDirectionEnum {

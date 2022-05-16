@@ -8,11 +8,10 @@
         </jm-tooltip>
         <div class="separator"></div>
       </template>
-      <jm-tooltip content="原始大小" placement="top" :appendToBody="false">
+      <jm-tooltip v-if="zoom !== ORIGINAL_ZOOM" content="原始大小" placement="top" :appendToBody="false">
         <div class="full-icon" @click="normalize"></div>
       </jm-tooltip>
-      <div class="separator"></div>
-      <jm-tooltip content="适屏" placement="top" :appendToBody="false">
+      <jm-tooltip v-else content="适屏" placement="top" :appendToBody="false">
         <div class="normal-icon" @click="fitViewer"></div>
       </jm-tooltip>
       <template v-if="isWorkflow">
@@ -106,6 +105,7 @@ export default defineComponent({
       zoom,
       fullscreenEnabled,
       isFullscreen,
+      ORIGINAL_ZOOM,
       MIN_ZOOM,
       MAX_ZOOM,
       isWorkflow: computed<boolean>(() => props.dslType === DslTypeEnum.WORKFLOW),

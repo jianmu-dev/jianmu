@@ -250,12 +250,9 @@ export default defineComponent({
         sortTasks(tasks, false)
           .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
-        const allTaskNodes = (graph.value?.getNodes() || [])
-          .filter(node => node.type === NodeTypeEnum.ASYNC_TASK);
-
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,
-          count: status === TaskStatusEnum.INIT ? (allTaskNodes.length - taskMap.size) : 0,
+          count: status === TaskStatusEnum.INIT ? (graph.value?.getAsyncTaskNodeCount() - taskMap.size) : 0,
         }));
 
         taskMap.forEach(({ status }: ITaskExecutionRecordVo) => {
