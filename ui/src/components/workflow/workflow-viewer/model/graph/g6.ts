@@ -146,7 +146,7 @@ export class G6Graph extends BaseGraph {
         return;
       }
 
-      const zoom = this.graph.getZoom();
+      const zoom = this.getZoom();
       const width = size.width * zoom;
       const height = size.height * zoom;
 
