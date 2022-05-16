@@ -28,12 +28,8 @@ export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
     // 2. 注销渲染事件
     graph.off('render:done');
 
-    // 渲染完成后，适屏展示
-    workflowTool.zoom(ZoomTypeEnum.FIT);
-    if (graph.zoom() > 1) {
-      // 适屏后，缩放比例超过100%，原始大小展示
-      workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
-    }
+    // 渲染完成后，居中展示
+    workflowTool.zoom(ZoomTypeEnum.CENTER);
   });
 
   // 启用异步渲染的画布处于冻结状态
