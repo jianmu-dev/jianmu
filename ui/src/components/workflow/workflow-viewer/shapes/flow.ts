@@ -1,6 +1,6 @@
 import _G6, { INode, IShape } from '@antv/g6';
 import { IElement } from '@antv/g-base/lib/interfaces';
-import { NodeTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
+import { NodeTypeEnum } from '../model/data/enumeration';
 
 // lineDash array
 const lineDash = [4, 2, 1, 2];

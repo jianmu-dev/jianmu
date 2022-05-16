@@ -58,11 +58,11 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeUpdate, PropType, ref, SetupContext } from 'vue';
 import { DslTypeEnum } from '@/api/dto/enumeration';
-import { MIN_ZOOM } from './utils/graph';
 import screenfull from 'screenfull';
 
 const ZOOM_INTERVAL = 10;
 const ORIGINAL_ZOOM = 100;
+const MIN_ZOOM = 20;
 const MAX_ZOOM = 500;
 
 export default defineComponent({

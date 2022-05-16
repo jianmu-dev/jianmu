@@ -286,8 +286,8 @@ import { checkTaskLog, fetchTaskLog, listTaskInstance, listTaskParam } from '@/a
 import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
-import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/utils/model';
-import { sortTasks } from '@/components/workflow/workflow-viewer/utils/graph';
+import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/model/data/common';
+import { sortTasks } from '@/components/workflow/workflow-viewer/model/util';
 
 export default defineComponent({
   components: { TaskList },

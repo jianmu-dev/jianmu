@@ -57,7 +57,7 @@ import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { useRouter } from 'vue-router';
 import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
-import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
+import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/model/data/enumeration';
 import { IRootState } from '@/model';
 import { ignoreTask, retryTask } from '@/api/workflow-execution-record';
 

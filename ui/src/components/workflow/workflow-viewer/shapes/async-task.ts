@@ -7,11 +7,11 @@ import FAILED from '../svgs/shape/async-task/FAILED.svg';
 import SUCCEEDED from '../svgs/shape/async-task/SUCCEEDED.svg';
 import SUSPENDED from '../svgs/shape/async-task/SUSPENDED.svg';
 import IGNORED from '../svgs/shape/async-task/IGNORED.svg';
-import { NodeTypeEnum } from '../utils/enumeration';
+import { NodeTypeEnum } from '../model/data/enumeration';
 import AsyncTaskRunningAnimation, { attrs } from '../animations/async-task-running-animation';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
-import { SHELL_NODE_TYPE } from '../utils/model';
+import { SHELL_NODE_TYPE } from '../model/data/common';
 
 export const size = {
   width: 80,

@@ -1,10 +1,10 @@
 import { EdgeConfig, NodeConfig } from '@antv/g6';
 import yaml from 'yaml';
-import { NodeTypeEnum } from '../utils/enumeration';
+import { NodeTypeEnum } from '../model/data/enumeration';
 import { DslTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
 import shellIcon from '../svgs/shape/shell.svg';
-import { SHELL_NODE_TYPE } from './model';
+import { SHELL_NODE_TYPE } from '../model/data/common';
 
 /**
  * 节点标签最长长度
