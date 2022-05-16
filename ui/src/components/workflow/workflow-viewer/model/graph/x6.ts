@@ -4,6 +4,8 @@ import { parse } from '../dsl/x6';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { WorkflowTool } from '@/components/workflow/workflow-editor/model/workflow-tool';
 import { render } from '@/components/workflow/workflow-editor/model/workflow-graph';
+import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
+import { NodeTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 
 export class X6Graph extends BaseGraph {
   private readonly graph: Graph;
@@ -41,5 +43,12 @@ export class X6Graph extends BaseGraph {
     this.workflowTool = new WorkflowTool(this.graph);
 
     render(this.graph, data, this.workflowTool);
+  }
+
+  getAsyncTaskNodeCount(): number {
+    return this.graph.getNodes()
+      .filter(node => [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK]
+        .includes(new CustomX6NodeProxy(node).getData().getType()))
+      .length;
   }
 }
