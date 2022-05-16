@@ -1,5 +1,5 @@
 import { BaseGraph } from './base-graph';
-import { G6Graph } from './antd/g6-graph';
+import { G6Graph } from './graph/g6';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
 import { GraphDirectionEnum } from './data/enumeration';
