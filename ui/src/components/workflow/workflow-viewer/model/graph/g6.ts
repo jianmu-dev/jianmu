@@ -1,8 +1,8 @@
 import { BaseGraph } from '../base-graph';
-import { G6Event, Graph, IBBox, IG6GraphEvent, Item, LayoutConfig, NodeConfig } from '@antv/g6';
+import { G6Event, Graph, IBBox, IG6GraphEvent, INode, Item, LayoutConfig, NodeConfig } from '@antv/g6';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
-import { parse } from '../../utils/dsl';
+import { parse } from '../../model/dsl/g6';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { GraphDirectionEnum, NodeTypeEnum } from '../data/enumeration';
 import { sortTasks } from '../util';
@@ -71,12 +71,11 @@ export class G6Graph extends BaseGraph {
 
   constructor(dsl: string, triggerType: TriggerTypeEnum, nodeInfos: INodeDefVo[],
     container: HTMLElement, direction: GraphDirectionEnum) {
-    super();
-
-    const parentElement = container.parentElement as HTMLElement;
-
     const { dslType, nodes, edges } = parse(dsl, triggerType, nodeInfos);
+    super(dslType);
 
+    const containerParentEl = container.parentElement!;
+    const { clientWidth: width, clientHeight: height } = containerParentEl;
     this.graph = new Graph({
       modes: {
         default: [
@@ -92,9 +91,9 @@ export class G6Graph extends BaseGraph {
       // 指定挂载容器
       container,
       // 图的宽度
-      width: parentElement.clientWidth,
+      width,
       // 图的高度
-      height: parentElement.clientHeight,
+      height,
       layout: calculateLayout(dslType, nodes, direction),
     });
 
@@ -116,6 +115,10 @@ export class G6Graph extends BaseGraph {
 
       container.style.visibility = '';
     });
+  }
+
+  getNodes(): INode[] {
+    return this.graph.getNodes();
   }
 
   getDirection(): GraphDirectionEnum {

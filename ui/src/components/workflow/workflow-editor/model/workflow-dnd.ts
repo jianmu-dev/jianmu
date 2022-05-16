@@ -14,7 +14,7 @@ interface IDraggingListener {
   listener?: any;
 }
 
-export default class WorkflowDnd {
+export class WorkflowDnd {
   private readonly graph: Graph;
   private readonly dnd: Addon.Dnd;
   private readonly draggingListener: IDraggingListener = {

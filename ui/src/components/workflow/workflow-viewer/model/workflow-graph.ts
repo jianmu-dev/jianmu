@@ -1,5 +1,7 @@
+import yaml from 'yaml';
 import { BaseGraph } from './base-graph';
-import { G6Graph } from './antd/g6-graph';
+import { G6Graph } from './graph/g6';
+import { X6Graph } from './graph/x6';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
 import { GraphDirectionEnum } from './data/enumeration';
@@ -10,14 +12,18 @@ export class WorkflowGraph {
 
   constructor(dsl: string, triggerType: TriggerTypeEnum,
     nodeInfos: INodeDefVo[], container: HTMLElement, direction: GraphDirectionEnum) {
-    this.graph = new G6Graph(dsl, triggerType, nodeInfos, container, direction);
+    const { 'raw-data': rawData } = yaml.parse(dsl);
 
-    const parentElement = container.parentElement as HTMLElement;
+    this.graph = rawData ? new X6Graph(dsl, triggerType, container) :
+      new G6Graph(dsl, triggerType, nodeInfos, container, direction);
+
+    const containerParentEl = container.parentElement!;
     this.resizeObserver = new ResizeObserver(() => {
-      this.graph.changeSize(parentElement.clientWidth, parentElement.clientHeight);
+      const { clientWidth, clientHeight } = containerParentEl;
+      this.graph.changeSize(clientWidth, clientHeight);
     });
     // 监控容器大小变化
-    this.resizeObserver.observe(parentElement);
+    this.resizeObserver.observe(containerParentEl);
   }
 
   destroy() {

@@ -3,11 +3,11 @@
     <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"
-                  @mouseenter="highlightNodeState(status, true)"
-                  @mouseleave="highlightNodeState(status, false)"
-                  @change="refreshNodeStateHighlight(status)"/>
+                  @mouseenter="graph?.highlightNodeState(status, true)"
+                  @mouseleave="graph?.highlightNodeState(status, false)"
+                  @change="graph?.refreshNodeStateHighlight(status)"/>
     </div>
-    <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
+    <toolbar v-if="graph" :readonly="readonly" :dsl-type="graph?.dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
              @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"
@@ -38,13 +38,12 @@ import {
   ref,
   SetupContext,
 } from 'vue';
-import G6, { NodeConfig } from '@antv/g6';
+import G6 from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import { parse } from './utils/dsl';
 import { GraphDirectionEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
 import { INodeMouseoverEvent } from './model/data/common';
 import { sortTasks } from './model/util';
@@ -77,8 +76,8 @@ export default defineComponent({
   emits: ['click-task-node', 'click-webhook-node', 'click-process-log'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
-    let workflowGraph: WorkflowGraph | undefined;
     const container = ref<HTMLElement>();
+    let workflowGraph: WorkflowGraph | undefined;
     const graph = ref<BaseGraph>();
     const nodeActionConfigured = ref<boolean>(false);
     const dslMode = ref<boolean>(false);
@@ -95,27 +94,6 @@ export default defineComponent({
       }
       nodeEvent.value = evt;
     };
-    const handleNodeBarMouseout = (evt: any) => {
-      let isOut = true;
-      let tempObj = evt.relatedTarget || evt.toElement;
-      // 10级以内可定位
-      for (let i = 0; i < 10; i++) {
-        if (!tempObj) {
-          break;
-        }
-
-        if (tempObj.className === 'jm-workflow-viewer-node-toolbar') {
-          isOut = false;
-          break;
-        }
-
-        tempObj = tempObj.parentElement;
-      }
-
-      if (isOut) {
-        destroyNodeToolbar();
-      }
-    };
     const zoom = ref<number>();
     const updateZoom = () => {
       setTimeout(() => {
@@ -126,18 +104,6 @@ export default defineComponent({
         zoom.value = Math.round(graph.value!.getZoom() * 100);
       });
     };
-
-    const allTaskNodes = computed<{
-      nodes: NodeConfig[];
-      dslType: DslTypeEnum;
-    }>(() => {
-      const { nodes, dslType } = parse(props.dsl, props.triggerType);
-
-      return {
-        nodes: nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK),
-        dslType,
-      };
-    });
 
     const refreshGraph = (direction: GraphDirectionEnum = GraphDirectionEnum.HORIZONTAL) => {
       if (!graph.value) {
@@ -164,18 +130,9 @@ export default defineComponent({
 
     onBeforeUpdate(() => refreshGraph());
 
-    onMounted(() => {
-      proxy.$nextTick(() => {
-        // 保证整个视图都渲染完毕，才能确定图的宽高
-        refreshGraph();
-      });
-    });
-
-    onUnmounted(() => {
-      workflowGraph?.destroy();
-    });
-
-    const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
+    // 保证整个视图都渲染完毕，才能确定图的宽高
+    onMounted(() => proxy.$nextTick(() => refreshGraph()));
+    onUnmounted(() => workflowGraph?.destroy());
 
     return {
       TaskStatusEnum,
@@ -199,7 +156,6 @@ export default defineComponent({
           status: tasks[0].status,
         };
       }),
-      dslType,
       dslMode,
       nodeEvent,
       fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
@@ -217,13 +173,27 @@ export default defineComponent({
             emit('click-webhook-node', id, tabType);
         }
       },
-      highlightNodeState: (status: TaskStatusEnum, active: boolean) => {
-        graph.value?.highlightNodeState(status, active);
+      handleNodeBarMouseout: (evt: any) => {
+        let isOut = true;
+        let tempObj = evt.relatedTarget || evt.toElement;
+        // 10级以内可定位
+        for (let i = 0; i < 10; i++) {
+          if (!tempObj) {
+            break;
+          }
+
+          if (tempObj.className === 'jm-workflow-viewer-node-toolbar') {
+            isOut = false;
+            break;
+          }
+
+          tempObj = tempObj.parentElement;
+        }
+
+        if (isOut) {
+          destroyNodeToolbar();
+        }
       },
-      refreshNodeStateHighlight: (status: TaskStatusEnum) => {
-        graph.value?.refreshNodeStateHighlight(status);
-      },
-      handleNodeBarMouseout,
       zoom,
       handleZoom: (val?: number) => {
         if (!graph.value) {
@@ -252,14 +222,16 @@ export default defineComponent({
         }, 100);
       },
       handleRotation: () => {
-        if (!graph.value || dslType.value !== DslTypeEnum.WORKFLOW) {
+        if (!graph.value || graph.value?.dslType !== DslTypeEnum.WORKFLOW) {
           return;
         }
 
         const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ?
           GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
 
-        graph.value!.destroy();
+        workflowGraph!.destroy();
+
+        workflowGraph = undefined;
         graph.value = undefined;
         nodeActionConfigured.value = false;
 
@@ -278,9 +250,12 @@ export default defineComponent({
         sortTasks(tasks, false)
           .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
+        const allTaskNodes = (graph.value?.getNodes() || [])
+          .filter(node => node.type === NodeTypeEnum.ASYNC_TASK);
+
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,
-          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.nodes.length - taskMap.size) : 0,
+          count: status === TaskStatusEnum.INIT ? (allTaskNodes.length - taskMap.size) : 0,
         }));
 
         taskMap.forEach(({ status }: ITaskExecutionRecordVo) => {
