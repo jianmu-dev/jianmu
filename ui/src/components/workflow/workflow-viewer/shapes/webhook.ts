@@ -1,6 +1,6 @@
 import _G6 from '@antv/g6';
 import img from '../svgs/shape/webhook.svg';
-import { NodeTypeEnum } from '../utils/enumeration';
+import { NodeTypeEnum } from '../model/data/enumeration';
 
 export default function (G6: typeof _G6) {
   G6.registerNode(NodeTypeEnum.WEBHOOK, {

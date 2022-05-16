@@ -1,4 +1,4 @@
-import { NodeTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
+import { NodeTypeEnum } from './enumeration';
 
 // shell节点类型
 export const SHELL_NODE_TYPE = 'shell';

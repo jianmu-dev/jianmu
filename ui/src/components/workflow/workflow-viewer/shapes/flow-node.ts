@@ -1,5 +1,5 @@
 import _G6 from '@antv/g6';
-import { NodeTypeEnum } from '../utils/enumeration';
+import { NodeTypeEnum } from '../model/data/enumeration';
 import img from '../svgs/shape/flow-node.svg';
 
 export default function (G6: typeof _G6) {

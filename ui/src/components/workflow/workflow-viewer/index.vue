@@ -3,9 +3,9 @@
     <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"
-                  @mouseenter="highlightNodeState(status, true, graph)"
-                  @mouseleave="highlightNodeState(status, false, graph)"
-                  @change="refreshNodeStateHighlight(status, graph)"/>
+                  @mouseenter="highlightNodeState(status, true)"
+                  @mouseleave="highlightNodeState(status, false)"
+                  @change="refreshNodeStateHighlight(status)"/>
     </div>
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
@@ -38,25 +38,18 @@ import {
   ref,
   SetupContext,
 } from 'vue';
-import G6, { Graph, NodeConfig } from '@antv/g6';
+import G6, { NodeConfig } from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
-import {
-  configNodeAction,
-  fitCanvas,
-  fitView,
-  highlightNodeState,
-  init,
-  refreshNodeStateHighlight,
-  sortTasks,
-  updateNodeStates,
-} from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { parse } from './utils/dsl';
-import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
-import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/utils/model';
+import { GraphDirectionEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
+import { INodeMouseoverEvent } from './model/data/common';
+import { sortTasks } from './model/util';
+import { BaseGraph } from './model/base-graph';
+import { WorkflowGraph } from './model/workflow-graph';
 
 // 注册自定义g6元素
 Object.values(import.meta.globEager('./shapes/**')).forEach(({ default: register }) => register(G6));
@@ -84,8 +77,9 @@ export default defineComponent({
   emits: ['click-task-node', 'click-webhook-node', 'click-process-log'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
+    let workflowGraph: WorkflowGraph | undefined;
     const container = ref<HTMLElement>();
-    const graph = ref<Graph>();
+    const graph = ref<BaseGraph>();
     const nodeActionConfigured = ref<boolean>(false);
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
@@ -129,7 +123,7 @@ export default defineComponent({
           return;
         }
 
-        zoom.value = Math.round(graph.value.getZoom() * 100);
+        zoom.value = Math.round(graph.value!.getZoom() * 100);
       });
     };
 
@@ -145,9 +139,14 @@ export default defineComponent({
       };
     });
 
-    const refreshGraph = (rankdir: string = 'LR') => {
+    const refreshGraph = (direction: GraphDirectionEnum = GraphDirectionEnum.HORIZONTAL) => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, rankdir);
+        if (!props.dsl || !props.triggerType || !container.value) {
+          return;
+        }
+
+        workflowGraph = new WorkflowGraph(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, direction);
+        graph.value = workflowGraph.graph;
 
         updateZoom();
       }
@@ -155,28 +154,17 @@ export default defineComponent({
       if (!nodeActionConfigured.value) {
         // 禁止多次配置
         // 配置节点行为
-        nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
+        graph.value!.configNodeAction(mouseoverNode);
+        nodeActionConfigured.value = true;
       }
 
       // 更新状态
-      updateNodeStates(props.tasks, graph.value);
+      graph.value!.updateNodeStates(props.tasks);
     };
 
     onBeforeUpdate(() => refreshGraph());
 
-    let resizeObserver: ResizeObserver;
-
     onMounted(() => {
-      const parentElement = container.value!.parentElement as HTMLElement;
-      resizeObserver = new ResizeObserver(() => {
-        if (!graph.value) {
-          return;
-        }
-        graph.value.changeSize(parentElement.clientWidth, parentElement.clientHeight);
-      });
-      // 监控容器大小变化
-      resizeObserver.observe(parentElement);
-
       proxy.$nextTick(() => {
         // 保证整个视图都渲染完毕，才能确定图的宽高
         refreshGraph();
@@ -184,11 +172,7 @@ export default defineComponent({
     });
 
     onUnmounted(() => {
-      // 销毁监控容器大小变化
-      resizeObserver.disconnect();
-
-      // 销毁画布
-      graph.value?.destroy();
+      workflowGraph?.destroy();
     });
 
     const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
@@ -233,8 +217,12 @@ export default defineComponent({
             emit('click-webhook-node', id, tabType);
         }
       },
-      highlightNodeState,
-      refreshNodeStateHighlight,
+      highlightNodeState: (status: TaskStatusEnum, active: boolean) => {
+        graph.value?.highlightNodeState(status, active);
+      },
+      refreshNodeStateHighlight: (status: TaskStatusEnum) => {
+        graph.value?.refreshNodeStateHighlight(status);
+      },
       handleNodeBarMouseout,
       zoom,
       handleZoom: (val?: number) => {
@@ -242,12 +230,10 @@ export default defineComponent({
           return;
         }
 
-        const g = graph.value as Graph;
-
         if (val === undefined) {
-          fitView(g);
+          graph.value!.fitView();
         } else {
-          g.zoomTo(val / 100, g.getGraphCenterPoint());
+          graph.value!.zoomTo(val);
         }
 
         updateZoom();
@@ -258,7 +244,7 @@ export default defineComponent({
         }
 
         setTimeout(() => {
-          fitCanvas(graph.value);
+          graph.value!.fitCanvas();
           updateZoom();
           if (container.value) {
             container.value.style.visibility = '';
@@ -270,18 +256,14 @@ export default defineComponent({
           return;
         }
 
-        let rankdir = graph.value.get('layout').rankdir;
-        if (rankdir === 'TB') {
-          rankdir = undefined;
-        } else {
-          rankdir = 'TB';
-        }
+        const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ?
+          GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
 
-        graph.value?.destroy();
+        graph.value!.destroy();
         graph.value = undefined;
         nodeActionConfigured.value = false;
 
-        refreshGraph(rankdir);
+        refreshGraph(direction);
       },
       taskStates: computed(() => {
         const sArr: {

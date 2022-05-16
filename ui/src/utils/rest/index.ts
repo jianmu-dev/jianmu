@@ -88,8 +88,8 @@ export default async function rest({
       data,
       transformRequest,
       onDownloadProgress,
-      // 设置10秒超时
-      timeout: onDownloadProgress ? 0 : (timeout || 10 * 1000),
+      // 设置20秒超时
+      timeout: onDownloadProgress ? 0 : (timeout || 20 * 1000),
     });
   } catch (err) {
     if (err.message.startsWith('timeout of')) {

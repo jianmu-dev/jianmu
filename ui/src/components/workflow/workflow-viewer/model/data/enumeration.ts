@@ -1,4 +1,12 @@
 /**
+ * 画布方向枚举
+ */
+export enum GraphDirectionEnum {
+  HORIZONTAL = 'HORIZONTAL',
+  VERTICAL = 'VERTICAL',
+}
+
+/**
  * 节点类型枚举
  */
 export enum NodeTypeEnum {
