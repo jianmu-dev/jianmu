@@ -1,8 +1,8 @@
 <template>
-  <div class="param-toolbar" @mouseleave="hide">
+  <div class="param-toolbar">
     <div class="text" @mouseenter="changeParam"/>
     <jm-cascader v-if="selectedVal" v-model="selectedVal"
-                 :options="selectableParams" :offset="0" :append-to-body="false"
+                 :options="selectableParams" :offset="0"
                  :class="{ opened }" @focus="opened = true" @change="handleChange"/>
   </div>
 </template>
@@ -26,17 +26,14 @@ export default defineComponent({
     const selectedVal = ref<string[]>();
     const getExpressionEditor = inject('getExpressionEditor') as () => ExpressionEditor;
 
-    const hide = () => {
-      selectedVal.value = undefined;
-      opened.value = false;
-      getExpressionEditor().toolbar.hide();
-    };
-
     return {
       opened,
       selectedVal,
       changeParam: () => {
-        const { nodeId, ref, inner } = getExpressionEditor().toolbar.getCurrentParam()!;
+        const { nodeId, ref, inner } = getExpressionEditor().toolbar.getCurrentParam(() => {
+          selectedVal.value = undefined;
+          opened.value = false;
+        })!;
         selectedVal.value = [];
         selectedVal.value.push(nodeId);
         if (inner) {
@@ -53,9 +50,8 @@ export default defineComponent({
         await nextTick();
 
         // 更新参数后，需隐藏工具栏，否则有视觉延迟
-        hide();
+        getExpressionEditor().toolbar.hide();
       },
-      hide,
     };
   },
 });

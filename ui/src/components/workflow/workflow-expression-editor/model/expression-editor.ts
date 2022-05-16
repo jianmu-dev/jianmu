@@ -41,7 +41,10 @@ export class ExpressionEditor {
       const el = e.target as HTMLElement;
       if (el.tagName === 'INPUT' && el.parentNode && el.getAttribute(RAW_ATTR_NAME)) {
         this.toolbar.show(el as HTMLInputElement);
+        return;
       }
+
+      this.toolbar.hide(el);
     });
   }
 
