@@ -12,7 +12,7 @@ interface IPageInfo {
   content: IWorkflowNode[];
 }
 
-export default class WorkflowNode {
+export class WorkflowNode {
 
   constructor() {
   }

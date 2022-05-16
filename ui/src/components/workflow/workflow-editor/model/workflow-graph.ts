@@ -10,7 +10,49 @@ import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
 
-export default class WorkflowGraph {
+export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
+  if (!data) {
+    return;
+  }
+
+  // 启用异步渲染的画布
+  // 异步渲染不会阻塞 UI，对需要添加大量节点和边时的性能提升非常明显
+  graph.setAsync(true);
+  // 注册渲染事件
+  graph.on('render:done', () => {
+    // 确保所有变更都已经生效，然后在事件回调中进行这些操作。
+
+    // 初始化完成后
+    // 1. 禁用异步渲染的画布。
+    graph.setAsync(false);
+    // 2. 注销渲染事件
+    graph.off('render:done');
+
+    // 渲染完成后，适屏展示
+    workflowTool.zoom(ZoomTypeEnum.FIT);
+    if (graph.zoom() > 1) {
+      // 适屏后，缩放比例超过100%，原始大小展示
+      workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
+    }
+  });
+
+  // 启用异步渲染的画布处于冻结状态
+  // 处于冻结状态的画布不会立即响应画布中节点和边的变更，直到调用 unfreeze(...) 方法来解除冻结并重新渲染画布
+  graph.freeze();
+
+  const propertiesArr: Cell.Properties[] = JSON.parse(data).cells;
+  graph.resetCells(propertiesArr.map(properties => {
+    if (properties.shape === 'edge') {
+      return graph.createEdge(properties);
+    }
+    return graph.createNode(properties);
+  }));
+
+  // 解除冻结并重新渲染画布
+  graph.unfreeze();
+}
+
+export class WorkflowGraph {
   private readonly graph: Graph;
   private readonly clickNodeCallback: (nodeId: string) => void;
   private readonly workflowTool: WorkflowTool;
@@ -148,45 +190,7 @@ export default class WorkflowGraph {
   }
 
   render(data: string) {
-    if (!data) {
-      return;
-    }
-
-    // 启用异步渲染的画布
-    // 异步渲染不会阻塞 UI，对需要添加大量节点和边时的性能提升非常明显
-    this.graph.setAsync(true);
-    // 注册渲染事件
-    this.graph.on('render:done', () => {
-      // 确保所有变更都已经生效，然后在事件回调中进行这些操作。
-
-      // 初始化完成后
-      // 1. 禁用异步渲染的画布。
-      this.graph.setAsync(false);
-      // 2. 注销渲染事件
-      this.graph.off('render:done');
-
-      // 渲染完成后，适屏展示
-      this.workflowTool.zoom(ZoomTypeEnum.FIT);
-      if (this.graph.zoom() > 1) {
-        // 适屏后，缩放比例超过100%，原始大小展示
-        this.workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
-      }
-    });
-
-    // 启用异步渲染的画布处于冻结状态
-    // 处于冻结状态的画布不会立即响应画布中节点和边的变更，直到调用 unfreeze(...) 方法来解除冻结并重新渲染画布
-    this.graph.freeze();
-
-    const propertiesArr: Cell.Properties[] = JSON.parse(data).cells;
-    this.graph.resetCells(propertiesArr.map(properties => {
-      if (properties.shape === 'edge') {
-        return this.graph.createEdge(properties);
-      }
-      return this.graph.createNode(properties);
-    }));
-
-    // 解除冻结并重新渲染画布
-    this.graph.unfreeze();
+    render(this.graph, data, this.workflowTool);
   }
 
   /**

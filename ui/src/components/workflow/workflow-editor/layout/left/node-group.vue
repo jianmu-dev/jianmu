@@ -33,10 +33,10 @@ import { computed, defineComponent, inject, onMounted, onUpdated, PropType, ref 
 import X6VueShape from '../../shape/x6-vue-shape.vue';
 import { IWorkflowNode } from '../../model/data/common';
 import { NodeGroupEnum } from '../../model/data/enumeration';
-import WorkflowNode from '../../model/workflow-node';
+import { WorkflowNode } from '../../model/workflow-node';
 import { TimeoutError } from '@/utils/rest/error';
 import { StateEnum } from '@/components/load-more/enumeration';
-import WorkflowDnd from '../../model/workflow-dnd';
+import { WorkflowDnd } from '../../model/workflow-dnd';
 
 export default defineComponent({
   emits: ['getNodeCount'],

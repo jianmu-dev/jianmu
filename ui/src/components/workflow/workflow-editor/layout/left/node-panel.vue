@@ -35,7 +35,7 @@
 <script lang="ts">
 import { defineComponent, inject, onMounted, provide, ref } from 'vue';
 import { Graph } from '@antv/x6';
-import WorkflowDnd from '../../model/workflow-dnd';
+import { WorkflowDnd } from '../../model/workflow-dnd';
 import { IWorkflowNode } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import NodeGroup from './node-group.vue';
