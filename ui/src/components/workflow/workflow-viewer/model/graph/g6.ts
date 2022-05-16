@@ -1,8 +1,8 @@
 import { BaseGraph } from '../base-graph';
-import { G6Event, Graph, IBBox, IG6GraphEvent, Item, LayoutConfig, NodeConfig, INode } from '@antv/g6';
+import { G6Event, Graph, IBBox, IG6GraphEvent, INode, Item, LayoutConfig, NodeConfig } from '@antv/g6';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
-import { parse } from '../../utils/dsl';
+import { parse } from '../../model/dsl/g6';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { GraphDirectionEnum, NodeTypeEnum } from '../data/enumeration';
 import { sortTasks } from '../util';

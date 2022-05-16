@@ -84,7 +84,7 @@
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, onUpdated, PropType, ref, SetupContext } from 'vue';
 import { INodeMouseoverEvent } from './model/data/common';
-import { MAX_LABEL_LENGTH } from './utils/dsl';
+import { MAX_LABEL_LENGTH } from './model/dsl/g6';
 import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
