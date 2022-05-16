@@ -3,9 +3,9 @@
     <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"
-                  @mouseenter="highlightNodeState(status, true)"
-                  @mouseleave="highlightNodeState(status, false)"
-                  @change="refreshNodeStateHighlight(status)"/>
+                  @mouseenter="graph?.highlightNodeState(status, true)"
+                  @mouseleave="graph?.highlightNodeState(status, false)"
+                  @change="graph?.refreshNodeStateHighlight(status)"/>
     </div>
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
@@ -94,27 +94,6 @@ export default defineComponent({
         return;
       }
       nodeEvent.value = evt;
-    };
-    const handleNodeBarMouseout = (evt: any) => {
-      let isOut = true;
-      let tempObj = evt.relatedTarget || evt.toElement;
-      // 10级以内可定位
-      for (let i = 0; i < 10; i++) {
-        if (!tempObj) {
-          break;
-        }
-
-        if (tempObj.className === 'jm-workflow-viewer-node-toolbar') {
-          isOut = false;
-          break;
-        }
-
-        tempObj = tempObj.parentElement;
-      }
-
-      if (isOut) {
-        destroyNodeToolbar();
-      }
     };
     const zoom = ref<number>();
     const updateZoom = () => {
@@ -217,13 +196,27 @@ export default defineComponent({
             emit('click-webhook-node', id, tabType);
         }
       },
-      highlightNodeState: (status: TaskStatusEnum, active: boolean) => {
-        graph.value?.highlightNodeState(status, active);
+      handleNodeBarMouseout: (evt: any) => {
+        let isOut = true;
+        let tempObj = evt.relatedTarget || evt.toElement;
+        // 10级以内可定位
+        for (let i = 0; i < 10; i++) {
+          if (!tempObj) {
+            break;
+          }
+
+          if (tempObj.className === 'jm-workflow-viewer-node-toolbar') {
+            isOut = false;
+            break;
+          }
+
+          tempObj = tempObj.parentElement;
+        }
+
+        if (isOut) {
+          destroyNodeToolbar();
+        }
       },
-      refreshNodeStateHighlight: (status: TaskStatusEnum) => {
-        graph.value?.refreshNodeStateHighlight(status);
-      },
-      handleNodeBarMouseout,
       zoom,
       handleZoom: (val?: number) => {
         if (!graph.value) {
