@@ -21,6 +21,8 @@ export class X6Graph extends BaseGraph {
       container,
       width,
       height,
+      // 可拖拽平移
+      panning: true,
       // 不绘制网格背景
       grid: false,
       // 定制节点和边的交互行为，false为禁用
