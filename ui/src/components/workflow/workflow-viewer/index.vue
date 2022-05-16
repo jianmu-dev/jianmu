@@ -76,8 +76,8 @@ export default defineComponent({
   emits: ['click-task-node', 'click-webhook-node', 'click-process-log'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
-    let workflowGraph: WorkflowGraph | undefined;
     const container = ref<HTMLElement>();
+    let workflowGraph: WorkflowGraph | undefined;
     const graph = ref<BaseGraph>();
     const nodeActionConfigured = ref<boolean>(false);
     const dslMode = ref<boolean>(false);
@@ -229,7 +229,9 @@ export default defineComponent({
         const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ?
           GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
 
-        graph.value!.destroy();
+        workflowGraph!.destroy();
+
+        workflowGraph = undefined;
         graph.value = undefined;
         nodeActionConfigured.value = false;
 
