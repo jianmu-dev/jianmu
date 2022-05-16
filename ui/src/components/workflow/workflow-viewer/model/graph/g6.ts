@@ -1,5 +1,5 @@
 import { BaseGraph } from '../base-graph';
-import { G6Event, Graph, IBBox, IG6GraphEvent, Item, LayoutConfig, NodeConfig } from '@antv/g6';
+import { G6Event, Graph, IBBox, IG6GraphEvent, Item, LayoutConfig, NodeConfig, INode } from '@antv/g6';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
 import { parse } from '../../utils/dsl';
@@ -71,12 +71,10 @@ export class G6Graph extends BaseGraph {
 
   constructor(dsl: string, triggerType: TriggerTypeEnum, nodeInfos: INodeDefVo[],
     container: HTMLElement, direction: GraphDirectionEnum) {
-    super();
+    const { dslType, nodes, edges } = parse(dsl, triggerType, nodeInfos);
+    super(dslType);
 
     const parentElement = container.parentElement as HTMLElement;
-
-    const { dslType, nodes, edges } = parse(dsl, triggerType, nodeInfos);
-
     this.graph = new Graph({
       modes: {
         default: [
@@ -116,6 +114,10 @@ export class G6Graph extends BaseGraph {
 
       container.style.visibility = '';
     });
+  }
+
+  getNodes(): INode[] {
+    return this.graph.getNodes();
   }
 
   getDirection(): GraphDirectionEnum {

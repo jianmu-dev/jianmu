@@ -1,7 +1,8 @@
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { INodeMouseoverEvent } from './data/common';
-import { TaskStatusEnum } from '@/api/dto/enumeration';
+import { DslTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { GraphDirectionEnum } from './data/enumeration';
+import { INode } from '@antv/g6';
 
 interface Zoom {
   readonly min: number;
@@ -12,6 +13,15 @@ interface Zoom {
 
 export abstract class BaseGraph {
   protected readonly zoom: Zoom = { min: 20, max: 500, interval: 10 };
+  readonly dslType: DslTypeEnum;
+
+  protected constructor(dslType: DslTypeEnum) {
+    this.dslType = dslType;
+  }
+
+  getNodes(): INode[] {
+    return [];
+  }
 
   getDirection(): GraphDirectionEnum {
     return GraphDirectionEnum.HORIZONTAL;

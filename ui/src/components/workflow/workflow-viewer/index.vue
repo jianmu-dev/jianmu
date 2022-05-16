@@ -7,7 +7,7 @@
                   @mouseleave="graph?.highlightNodeState(status, false)"
                   @change="graph?.refreshNodeStateHighlight(status)"/>
     </div>
-    <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
+    <toolbar v-if="graph" :readonly="readonly" :dsl-type="graph?.dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
              @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"
@@ -38,13 +38,12 @@ import {
   ref,
   SetupContext,
 } from 'vue';
-import G6, { NodeConfig } from '@antv/g6';
+import G6 from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import { parse } from './utils/dsl';
 import { GraphDirectionEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
 import { INodeMouseoverEvent } from './model/data/common';
 import { sortTasks } from './model/util';
@@ -106,18 +105,6 @@ export default defineComponent({
       });
     };
 
-    const allTaskNodes = computed<{
-      nodes: NodeConfig[];
-      dslType: DslTypeEnum;
-    }>(() => {
-      const { nodes, dslType } = parse(props.dsl, props.triggerType);
-
-      return {
-        nodes: nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK),
-        dslType,
-      };
-    });
-
     const refreshGraph = (direction: GraphDirectionEnum = GraphDirectionEnum.HORIZONTAL) => {
       if (!graph.value) {
         if (!props.dsl || !props.triggerType || !container.value) {
@@ -154,8 +141,6 @@ export default defineComponent({
       workflowGraph?.destroy();
     });
 
-    const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
-
     return {
       TaskStatusEnum,
       container,
@@ -178,7 +163,6 @@ export default defineComponent({
           status: tasks[0].status,
         };
       }),
-      dslType,
       dslMode,
       nodeEvent,
       fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
@@ -245,7 +229,7 @@ export default defineComponent({
         }, 100);
       },
       handleRotation: () => {
-        if (!graph.value || dslType.value !== DslTypeEnum.WORKFLOW) {
+        if (!graph.value || graph.value?.dslType !== DslTypeEnum.WORKFLOW) {
           return;
         }
 
@@ -271,9 +255,12 @@ export default defineComponent({
         sortTasks(tasks, false)
           .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
+        const allTaskNodes = (graph.value?.getNodes() || [])
+          .filter(node => node.type === NodeTypeEnum.ASYNC_TASK);
+
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,
-          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.nodes.length - taskMap.size) : 0,
+          count: status === TaskStatusEnum.INIT ? (allTaskNodes.length - taskMap.size) : 0,
         }));
 
         taskMap.forEach(({ status }: ITaskExecutionRecordVo) => {
