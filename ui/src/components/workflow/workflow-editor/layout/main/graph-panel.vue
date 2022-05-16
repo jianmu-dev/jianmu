@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onMounted, PropType, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
 import WorkflowGraph from '../../model/workflow-graph';
 import { IWorkflow } from '../../model/data/common';
 import NodeToolbar from './node-toolbar.vue';
@@ -38,6 +38,9 @@ export default defineComponent({
       // 渲染画布，回显
       workflowGraph.render(props.workflowData.data);
     });
+
+    // 销毁画布
+    onUnmounted(() => workflowGraph.destroy());
 
     return {
       nodeToolbar,

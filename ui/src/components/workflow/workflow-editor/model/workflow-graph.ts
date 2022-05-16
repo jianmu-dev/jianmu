@@ -16,9 +16,11 @@ export default class WorkflowGraph {
   private readonly workflowTool: WorkflowTool;
   readonly workflowNodeToolbar: WorkflowNodeToolbar;
   private readonly workflowEdgeToolbar: WorkflowEdgeToolbar;
+  private readonly resizeObserver: ResizeObserver;
 
   constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
-    const { clientWidth: width, clientHeight: height } = container.parentElement!;
+    const containerParentEl = container.parentElement!;
+    const { clientWidth: width, clientHeight: height } = containerParentEl;
     this.clickNodeCallback = clickNodeCallback;
 
     // #region 初始化画布
@@ -138,7 +140,11 @@ export default class WorkflowGraph {
     this.bindEvent();
 
     // 注册容器大小变化监听器
-    this.registerContainerResizeListener();
+    this.resizeObserver = new ResizeObserver(() => {
+      const { clientWidth, clientHeight } = containerParentEl;
+      this.graph.resizeGraph(clientWidth, clientHeight);
+    });
+    this.resizeObserver.observe(containerParentEl);
   }
 
   render(data: string) {
@@ -198,15 +204,10 @@ export default class WorkflowGraph {
   }
 
   /**
-   * 注册容器大小变化监听器
-   * @private
+   * 销毁
    */
-  private registerContainerResizeListener() {
-    const containerParentEl = this.graph.container.parentElement!;
-    new ResizeObserver(() => {
-      const { clientWidth, clientHeight } = containerParentEl;
-      this.graph.resizeGraph(clientWidth, clientHeight);
-    }).observe(containerParentEl);
+  destroy() {
+    this.resizeObserver.disconnect();
   }
 
   /**
