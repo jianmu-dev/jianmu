@@ -6,6 +6,8 @@ import { WorkflowTool } from '@/components/workflow/workflow-editor/model/workfl
 import { render } from '@/components/workflow/workflow-editor/model/workflow-graph';
 import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
 import { NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/model/data/common';
+import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 
 export class X6Graph extends BaseGraph {
   private readonly graph: Graph;
@@ -47,6 +49,43 @@ export class X6Graph extends BaseGraph {
     render(this.graph, data, this.workflowTool);
   }
 
+  getAsyncTaskNodeCount(): number {
+    return this.graph.getNodes()
+      .filter(node => [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK]
+        .includes(new CustomX6NodeProxy(node).getData().getType()))
+      .length;
+  }
+
+  configNodeAction(mouseoverNode: ((evt: INodeMouseoverEvent) => void)): void {
+    // 设置鼠标滑过事件
+    this.graph.on('node:mouseenter', ({ e, node }) => {
+      const workflowNode = new CustomX6NodeProxy(node).getData();
+      let tempEl = e.target;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        if (!tempEl.className.includes('jm-workflow-x6-vue-shape')) {
+          tempEl = tempEl.parentElement;
+          continue;
+        }
+
+        // TODO 非异步任务或滑过动画相关shape时，忽略
+
+        const { width, height, x, y } = tempEl.getBoundingClientRect();
+        mouseoverNode({
+          id: node.id,
+          description: workflowNode.getName(),
+          type: (workflowNode.getType() === NodeTypeEnum.SHELL ? 'async-task' : workflowNode.getType()) as G6NodeTypeEnum,
+          width,
+          height,
+          x,
+          y,
+        });
+
+        break;
+      }
+    });
+  }
+
   zoomTo(factor: number): void {
     if (factor === 100) {
       this.workflowTool.zoom(ZoomTypeEnum.ORIGINAL);
@@ -75,13 +114,6 @@ export class X6Graph extends BaseGraph {
 
   fitView(): void {
     this.workflowTool.zoom(ZoomTypeEnum.FIT);
-  }
-
-  getAsyncTaskNodeCount(): number {
-    return this.graph.getNodes()
-      .filter(node => [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK]
-        .includes(new CustomX6NodeProxy(node).getData().getType()))
-      .length;
   }
 
   changeSize(width: number, height: number): void {
