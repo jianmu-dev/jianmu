@@ -1,7 +1,7 @@
 import { BaseGraph } from '../base-graph';
 import { Graph, Node } from '@antv/x6';
 import { parse } from '../dsl/x6';
-import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { WorkflowTool } from '@/components/workflow/workflow-editor/model/workflow-tool';
 import { render } from '@/components/workflow/workflow-editor/model/workflow-graph';
 import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
@@ -9,6 +9,8 @@ import { NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-edito
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/model/data/common';
 import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 import { Cron } from '@/components/workflow/workflow-editor/model/data/node/cron';
+import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { states } from '@/components/workflow/workflow-viewer/shapes/async-task';
 
 export class X6Graph extends BaseGraph {
   private readonly asyncTaskRefs: string[];
@@ -31,7 +33,20 @@ export class X6Graph extends BaseGraph {
       // 不绘制网格背景
       grid: false,
       // 定制节点和边的交互行为，false为禁用
-      interacting: false,
+      interacting: {
+        edgeMovable: false,
+        edgeLabelMovable: false,
+        arrowheadMovable: false,
+        vertexMovable: false,
+        vertexAddable: false,
+        vertexDeletable: false,
+        useEdgeTools: false,
+        nodeMovable: false,
+        magnetConnectable: false,
+        stopDelegateOnDragging: false,
+        // 可添加工具，用于指示灯
+        toolsAddable: true,
+      },
       // 缩放节点，默认禁用。
       resizing: false,
       // 旋转节点，默认禁用
@@ -109,6 +124,62 @@ export class X6Graph extends BaseGraph {
 
   fitView(): void {
     this.workflowTool.zoom(ZoomTypeEnum.FIT);
+  }
+
+  updateNodeStates(tasks: ITaskExecutionRecordVo[]): void {
+    const nodes: Node[] = [];
+    let tempNode = this.graph.getRootNodes()[0];
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const tempWorkflowNode = new CustomX6NodeProxy(tempNode).getData();
+      if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(tempWorkflowNode.getType())) {
+        nodes.push(tempNode);
+      }
+
+      const edges = this.graph.getOutgoingEdges(tempNode);
+      if (!edges) {
+        break;
+      }
+
+      tempNode = edges[0].getTargetNode()!;
+    }
+
+    tasks.forEach(({ nodeName, status }) => {
+      const index = this.asyncTaskRefs.indexOf(nodeName);
+      if (index === -1) {
+        return;
+      }
+
+      const node = nodes[index];
+      // 移除指示灯
+      node.removeTools();
+      // 添加新指示灯
+      node.addTools({
+        name: 'button',
+        args: {
+          markup: [
+            {
+              tagName: 'circle',
+              selector: 'button',
+              attrs: {
+                r: 4,
+                fill: states[status].indicatorStyle.fill,
+                cursor: 'default',
+              },
+            },
+          ],
+          x: '100%',
+          y: 0,
+          offset: { x: 4, y: 4 },
+        },
+      });
+    });
+  }
+
+  highlightNodeState(status: TaskStatusEnum, active: boolean): void {
+  }
+
+  refreshNodeStateHighlight(status: TaskStatusEnum): void {
   }
 
   changeSize(width: number, height: number): void {

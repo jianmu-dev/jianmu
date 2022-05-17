@@ -31,7 +31,7 @@ const imgs: {
   [TaskStatusEnum.IGNORED]: IGNORED,
 };
 
-const states: {
+export const states: {
   [key: string]: {
     img: any;
     style: ShapeStyle;
