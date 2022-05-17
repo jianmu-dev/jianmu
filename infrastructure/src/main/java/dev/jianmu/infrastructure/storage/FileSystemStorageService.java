@@ -27,31 +27,38 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     private static final Logger logger = LoggerFactory.getLogger(FileSystemStorageService.class);
     private static final String LogfilePostfix = ".log";
     private static final String webhookFilePostfix = ".json";
+    private static final String taskFilepath = "task_log";
+    private static final String workflowFilepath = "workflow_log";
+    private static final String webhookFilepath = "webhook";
     // For SSE
     private final SseTemplate template;
     private final Long sseTimeout;
     private final MonitoringFileService monitoringFileService;
     private final Path rootLocation;
     private final Path webhookRootLocation;
+    private final Path workflowLocation;
 
     public FileSystemStorageService(SseTemplate template, MonitoringFileService monitoringFileService, StorageProperties properties) {
         this.template = template;
         this.sseTimeout = properties.getSseTimeout();
         this.monitoringFileService = monitoringFileService;
-        this.rootLocation = Paths.get("ci", properties.getLogfilePath());
-        this.webhookRootLocation = Paths.get("ci", properties.getWebhookFilePath());
+        this.rootLocation = Paths.get(properties.getFilepath(), taskFilepath);
+        this.webhookRootLocation = Paths.get(properties.getFilepath(), webhookFilepath);
+        this.workflowLocation = Paths.get(properties.getFilepath(), workflowFilepath);
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         this.init();
+        this.monitoringFileService.init(this.rootLocation, this.workflowLocation);
     }
 
     @Override
     public void init() {
         try {
-            Files.createDirectories(rootLocation);
-            Files.createDirectories(webhookRootLocation);
+            Files.createDirectories(this.rootLocation);
+            Files.createDirectories(this.webhookRootLocation);
+            Files.createDirectories(this.workflowLocation);
         } catch (FileAlreadyExistsException e) {
             logger.info("the directory already exits");
         } catch (IOException e) {
@@ -110,7 +117,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     @Override
     public File workflowLogFile(String LogFileName) {
-        return new File("ci" + File.separator + "workflow_log" + File.separator + LogFileName + LogfilePostfix);
+        return new File(this.workflowLocation + File.separator + LogFileName + LogfilePostfix);
     }
 
     @Override

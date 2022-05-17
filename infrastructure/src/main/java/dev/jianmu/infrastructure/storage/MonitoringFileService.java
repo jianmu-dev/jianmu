@@ -28,22 +28,14 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 @Slf4j
 public class MonitoringFileService implements DisposableBean {
     private static Map<WatchKey, Path> keyPathMap = new ConcurrentHashMap<>();
-    private final WatchService watchService;
-    private final Path monitoringTaskDirectory;
-    private final Path monitoringWorkflowDirectory;
     private final Map<String, CopyOnWriteArrayList<ConsumerVo>> callbackMap = new ConcurrentHashMap<>();
+    private WatchService watchService;
+    private Path monitoringTaskDirectory;
+    private Path monitoringWorkflowDirectory;
 
-    public MonitoringFileService(StorageProperties properties) throws IOException {
-        var taskRootLocation = Paths.get("ci", properties.getLogfilePath());
-        var workflowRootLocation = Paths.get("ci", "workflow_log");
-        try {
-            Files.createDirectories(taskRootLocation);
-            Files.createDirectories(workflowRootLocation);
-        } catch (FileAlreadyExistsException e) {
-            log.info("the directory already exits");
-        }
-        this.monitoringTaskDirectory = taskRootLocation;
-        this.monitoringWorkflowDirectory = workflowRootLocation;
+    public void init(Path taskPath, Path workflowPath) throws IOException {
+        this.monitoringTaskDirectory = taskPath;
+        this.monitoringWorkflowDirectory = workflowPath;
         this.watchService = FileSystems.getDefault().newWatchService();
         var taskKey = this.monitoringTaskDirectory.register(this.watchService, ENTRY_MODIFY);
         var workflowKey = this.monitoringWorkflowDirectory.register(this.watchService, ENTRY_MODIFY);

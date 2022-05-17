@@ -14,10 +14,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "storage")
 public class StorageProperties {
-    // 日志文件存储路径
-    private String logfilePath;
-    // webhook存储路径
-    private String webhookFilePath;
+    // 文件路径
+    private String filepath = "ci";
     // SSE超时时间，毫秒值
     private Long sseTimeout = 1000L * 60;
 }
