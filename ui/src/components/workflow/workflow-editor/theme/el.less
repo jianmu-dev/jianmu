@@ -60,7 +60,6 @@
 }
 
 .el-form {
-
   //  表单项设置
   .el-form-item {
     margin-bottom: 10px;
@@ -73,6 +72,10 @@
 
     .el-form-item__error {
       position: static;
+    }
+
+    .el-form-item__content {
+      line-height: 10px;
     }
   }
 }
@@ -116,6 +119,7 @@
 // 输入框高度设置
 .el-input {
   line-height: 36px;
+  overflow: hidden;
 
   .el-input__inner {
     height: 36px;
@@ -140,4 +144,9 @@
   .el-input__count-inner {
     font-size: 14px;
   }
+}
+
+.el-popper {
+  line-height: 22px;
+  font-size: 14px;
 }
