@@ -92,6 +92,10 @@ export default defineComponent({
         collapsed.value = container.value!.clientWidth > 0;
       },
       changeKeyword(key: string) {
+        // 解决用户在输入框中输入了关键字但未进行搜索且点击清空内容，出现未搜索到的情况
+        if (tempKeyword.value === key) {
+          return;
+        }
         tempKeyword.value = key;
         nodeCount.value = 0;
       },
