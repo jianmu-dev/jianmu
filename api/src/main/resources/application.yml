@@ -39,9 +39,6 @@ mybatis:
   configuration:
     jdbc-type-for-null: null
 
-storage:
-  logfile-path: task_log
-  webhook-file-path: webhook
 embedded:
   docker-worker:
     docker-host: tcp://127.0.0.1:2375

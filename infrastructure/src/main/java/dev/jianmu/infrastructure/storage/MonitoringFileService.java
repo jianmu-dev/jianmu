@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.storage;
 
+import dev.jianmu.infrastructure.storage.vo.ConsumerVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Service;
@@ -7,10 +8,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
@@ -23,27 +27,27 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 @Service
 @Slf4j
 public class MonitoringFileService implements DisposableBean {
-    private final WatchService watchService;
-    private final Path monitoringDirectory;
-    private final Map<String, Consumer<Path>> callbackMap = new ConcurrentHashMap<>();
+    private static Map<WatchKey, Path> keyPathMap = new ConcurrentHashMap<>();
+    private final Map<String, CopyOnWriteArrayList<ConsumerVo>> callbackMap = new ConcurrentHashMap<>();
+    private WatchService watchService;
+    private Path monitoringTaskDirectory;
+    private Path monitoringWorkflowDirectory;
 
-    public MonitoringFileService(StorageProperties properties) throws IOException {
-        var rootLocation = Paths.get("ci", properties.getLogfilePath());
-        try {
-            Files.createDirectories(rootLocation);
-        } catch (FileAlreadyExistsException e) {
-            log.info("the directory already exits");
-        }
-        this.monitoringDirectory = rootLocation;
+    public void init(Path taskPath, Path workflowPath) throws IOException {
+        this.monitoringTaskDirectory = taskPath;
+        this.monitoringWorkflowDirectory = workflowPath;
         this.watchService = FileSystems.getDefault().newWatchService();
-        var key = monitoringDirectory.register(watchService, ENTRY_MODIFY);
-        System.out.println(key);
+        var taskKey = this.monitoringTaskDirectory.register(this.watchService, ENTRY_MODIFY);
+        var workflowKey = this.monitoringWorkflowDirectory.register(this.watchService, ENTRY_MODIFY);
+        keyPathMap.put(taskKey, this.monitoringTaskDirectory);
+        keyPathMap.put(workflowKey, this.monitoringWorkflowDirectory);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(this::monitor);
     }
 
-    public void listen(String topic, Consumer<Path> consumer) {
-        callbackMap.put(topic, consumer);
+    public void listen(String topic, String connectionId, BiConsumer<Path, AtomicLong> consumer) {
+        callbackMap.putIfAbsent(topic, new CopyOnWriteArrayList<>());
+        callbackMap.get(topic).add(new ConsumerVo(connectionId, consumer));
     }
 
     void monitor() {
@@ -51,22 +55,53 @@ public class MonitoringFileService implements DisposableBean {
             try {
                 var key = this.watchService.take();
                 for (final WatchEvent<?> event : key.pollEvents()) {
-                    final Path changed = monitoringDirectory.resolve((Path) event.context());
+                    var path = keyPathMap.get(key);
+                    final Path changed = path.resolve((Path) event.context());
                     final String fileName = changed.getFileName().toString();
-                    var callback = callbackMap.get(fileName);
-
-                    if (event.kind() == ENTRY_MODIFY && callback != null) {
-                        log.trace("monitor - ENTRY_MODIFY: " + changed);
-                        callback.accept(changed);
+                    var set = this.callbackMap.get(fileName);
+                    if (event.kind() == ENTRY_MODIFY && set != null) {
+                        set.forEach(consumerVo -> {
+                            log.trace("monitor - ENTRY_MODIFY: " + changed);
+                            consumerVo.getConsumer().accept(changed, consumerVo.getCounter());
+                        });
                     }
                 }
-
                 boolean isKeyStillValid = key.reset();
                 if (!isKeyStillValid) {
                     log.trace("monitor - key is no longer valid: " + key);
+                    keyPathMap.remove(key);
                 }
-            } catch (InterruptedException ex) {
+            } catch (Exception ex) {
+                log.warn("MonitoringFileService:", ex);
                 log.trace("");
+            }
+        }
+    }
+
+    public Path getPath(String topic) {
+        var path = this.monitoringTaskDirectory.resolve(topic);
+        if (!path.toFile().exists()) {
+            path = this.monitoringWorkflowDirectory.resolve(topic);
+        }
+        return path;
+    }
+
+    public Optional<ConsumerVo> getConsumerVo(String topic, String connectionId) {
+        return this.callbackMap.get(topic).stream()
+                .filter(consumerVo -> consumerVo.getConnectionId().equals(connectionId))
+                .findFirst();
+    }
+
+    public void removeConsumer(String connectionId) {
+        String topic = connectionId.split("/")[0];
+        var list = this.callbackMap.get(topic);
+        if (list != null) {
+            list.stream()
+                    .filter(consumerVo -> consumerVo.getConnectionId().equals(connectionId))
+                    .findFirst()
+                    .ifPresent(list::remove);
+            if (list.isEmpty()) {
+                this.callbackMap.remove(topic);
             }
         }
     }

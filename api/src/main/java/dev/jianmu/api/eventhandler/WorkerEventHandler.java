@@ -10,6 +10,7 @@ import dev.jianmu.worker.event.CreateWorkspaceEvent;
 import dev.jianmu.worker.event.TerminateTaskEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,6 +44,7 @@ public class WorkerEventHandler {
         this.embeddedWorkerApplication.terminateTask(terminateTaskEvent.getTaskInstanceId());
     }
 
+    @Async
     @EventListener
     public void embeddedWorkerTask(WorkerTask workerTask) {
         if (workerTask.getType() == Worker.Type.EMBEDDED) {
