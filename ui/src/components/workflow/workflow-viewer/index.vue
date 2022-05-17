@@ -259,6 +259,12 @@ export default defineComponent({
 
 <style lang="less">
 .jm-workflow-viewer {
+  @keyframes x6-edge-running {
+    to {
+      stroke-dashoffset: -1000
+    }
+  }
+
   background-color: #FFFFFF;
   position: relative;
   height: 100%;
