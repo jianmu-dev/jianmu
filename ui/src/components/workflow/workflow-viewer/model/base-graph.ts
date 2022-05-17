@@ -55,17 +55,17 @@ export abstract class BaseGraph {
   }
 
   refreshNodeStateHighlight(status: TaskStatusEnum): void {
-    if (!this.highlightStatus) {
+    const { highlightStatus } = this;
+    if (!highlightStatus) {
       return;
     }
 
-    if (this.highlightStatus !== status) {
+    if (highlightStatus !== status) {
       // 关灯
       this.highlightNodeState(status, false);
     }
-
     // 开灯
-    this.highlightNodeState(this.highlightStatus, true);
+    this.highlightNodeState(highlightStatus, true);
   }
 
   changeSize(width: number, height: number): void {

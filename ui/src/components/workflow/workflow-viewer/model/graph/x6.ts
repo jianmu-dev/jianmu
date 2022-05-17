@@ -159,9 +159,14 @@ export class X6Graph extends BaseGraph {
         },
       });
 
+      let shapeEl = this.getShapeEl(node.id);
+      if (shapeEl) {
+        shapeEl.setAttribute('x6-task-status', status);
+        return;
+      }
       setTimeout(() => {
         // 保证渲染完成
-        const shapeEl = this.getShapeEl(node.id);
+        shapeEl = this.getShapeEl(node.id);
         shapeEl.setAttribute('x6-task-status', status);
       }, 100);
     });
@@ -172,16 +177,12 @@ export class X6Graph extends BaseGraph {
 
     this.graph.getNodes().forEach(node => {
       const shapeEl = this.getShapeEl(node.id);
-      const imgEl = shapeEl.querySelector('.img')! as HTMLElement;
-
-      if (!active) {
-        imgEl.style.boxShadow = 'none';
+      if (shapeEl.getAttribute('x6-task-status') !== status) {
         return;
       }
 
-      imgEl.style.boxShadow =
-        shapeEl.getAttribute('x6-task-status') !== status ? 'none' :
-          `0 0 8px 1px ${states[status].indicatorStyle.fill}`;
+      const imgEl = shapeEl.querySelector('.img')! as HTMLElement;
+      imgEl.style.boxShadow = active ? `0 0 24px 1px ${states[status].indicatorStyle.fill}` : 'none';
     });
   }
 
