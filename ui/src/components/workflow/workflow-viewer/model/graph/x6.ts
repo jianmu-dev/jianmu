@@ -68,9 +68,9 @@ export class X6Graph extends BaseGraph {
   }
 
   hideNodeToolbar(asyncTaskRef: string): void {
-    this.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape .icon .img')
-      // 鼠标离开节点时，去掉阴影
-      .forEach(el => ((el as HTMLElement).style.boxShadow = ''));
+    const node = this.getNodeByAsyncTaskRef(asyncTaskRef);
+    const imgEl = this.getShapeEl(node.id).querySelector('.img')! as HTMLElement;
+    imgEl.style.boxShadow = '';
   }
 
   getAsyncTaskNodeCount(): number {
@@ -82,27 +82,17 @@ export class X6Graph extends BaseGraph {
 
   configNodeAction(mouseoverNode: ((evt: INodeMouseoverEvent) => void)): void {
     // 设置鼠标滑过事件
-    this.graph.on('node:mouseenter', ({ e, node }) => {
-      let tempEl = e.target;
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        if (!tempEl.className.includes('jm-workflow-x6-vue-shape')) {
-          tempEl = tempEl.parentElement;
-          continue;
-        }
+    this.graph.on('node:mouseenter', ({ node }) => {
+      const shapeEl = this.getShapeEl(node.id);
+      // 鼠标进入节点时，显示阴影
+      (shapeEl.querySelector('.img')! as HTMLElement)
+        .style.boxShadow = '0 0 8px 1px #C5D9FF';
 
-        // TODO 非异步任务或滑过动画相关shape时，忽略
+      // TODO 非异步任务或滑过动画相关shape时，忽略
 
-        // 鼠标进入节点时，显示阴影
-        ((tempEl as HTMLElement).querySelector('.img')! as HTMLElement)
-          .style.boxShadow = '0 0 8px 1px #C5D9FF';
-
-        const { id, description, type } = this.buildEvt(node);
-        const { width, height, x, y } = tempEl.getBoundingClientRect();
-
-        mouseoverNode({ id, description, type, width, height, x, y });
-        break;
-      }
+      const { id, description, type } = this.buildEvt(node);
+      const { width, height, x, y } = shapeEl.getBoundingClientRect();
+      mouseoverNode({ id, description, type, width, height, x, y });
     });
   }
 
@@ -204,6 +194,11 @@ export class X6Graph extends BaseGraph {
 
   private getNodeByAsyncTaskRef(asyncTaskRef: string) {
     return this.getTaskNodes()[this.asyncTaskRefs.indexOf(asyncTaskRef)];
+  }
+
+  private getShapeEl(nodeId: string): HTMLElement {
+    return Array.from(this.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
+      .filter(el => (el.getAttribute('data-x6-node-id') === nodeId))[0] as HTMLElement;
   }
 
   private buildEvt(node: Node): {
