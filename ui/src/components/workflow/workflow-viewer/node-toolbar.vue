@@ -123,14 +123,11 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      const z = props.zoom / 100;
-      const w = props.nodeEvent.width + 10;
-      const h = props.nodeEvent.height + 10;
-
-      toolbar.value.style.left = (props.nodeEvent.x - w / 2) + 'px';
-      toolbar.value.style.top = (props.nodeEvent.y - h / 2) + 'px';
-      toolbar.value.style.width = w + 'px';
-      toolbar.value.style.height = (h + 23 * z) + 'px';
+      const { x, y, width, height } = props.nodeEvent;
+      toolbar.value.style.left = `${x}px`;
+      toolbar.value.style.top = `${y}px`;
+      toolbar.value.style.width = `${width}px`;
+      toolbar.value.style.height = `${height}px`;
     });
 
     return {

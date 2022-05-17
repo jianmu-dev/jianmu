@@ -149,6 +149,8 @@ export class G6Graph extends BaseGraph {
       const zoom = this.getZoom();
       const width = size.width * zoom;
       const height = size.height * zoom;
+      const w = width + 10;
+      const h = height + 10;
 
       const { x, y } = this.graph.getClientByPoint(model.x as number, model.y as number);
 
@@ -156,10 +158,10 @@ export class G6Graph extends BaseGraph {
         id: node.getID(),
         description: (model.description || '') as string,
         type: model.type as NodeTypeEnum,
-        width,
-        height,
-        x,
-        y,
+        width: w,
+        height: h + 23 * zoom,
+        x: x - w / 2,
+        y: y - h / 2,
       });
     });
   }

@@ -28,7 +28,7 @@ export class CustomX6NodeProxy {
         nodeData = Webhook.build(obj);
         break;
       case NodeTypeEnum.SHELL:
-        nodeData = Shell.build(obj);
+        nodeData = Shell.build(obj, graph ? (value: string) => this.validateParam(graph, value) : undefined);
         break;
       case NodeTypeEnum.ASYNC_TASK:
         nodeData = AsyncTask.build(obj, graph ? (value: string) => this.validateParam(graph, value) : undefined);

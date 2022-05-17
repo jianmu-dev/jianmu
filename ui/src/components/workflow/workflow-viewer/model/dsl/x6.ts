@@ -3,13 +3,18 @@ import { DslTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 
 export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined): {
   dslType: DslTypeEnum;
+  asyncTaskRefs: string[];
   data: string;
 } {
   if (!dsl || !triggerType) {
-    return { dslType: DslTypeEnum.PIPELINE, data: '' };
+    return { dslType: DslTypeEnum.PIPELINE, asyncTaskRefs: [], data: '' };
   }
 
-  const { workflow, 'raw-data': data } = yaml.parse(dsl);
+  const { workflow, pipeline, 'raw-data': data } = yaml.parse(dsl);
 
-  return { dslType: workflow ? DslTypeEnum.WORKFLOW : DslTypeEnum.PIPELINE, data };
+  return {
+    dslType: workflow ? DslTypeEnum.WORKFLOW : DslTypeEnum.PIPELINE,
+    asyncTaskRefs: Object.keys(workflow || pipeline),
+    data,
+  };
 }
