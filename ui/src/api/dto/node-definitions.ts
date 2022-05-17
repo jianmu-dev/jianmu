@@ -36,3 +36,79 @@ export interface INodeDefinitionVo
     deprecated: boolean;
   }> {
 }
+
+/**
+ * 本地/官方-获取节点定义版本列表
+ */
+export interface INodeDefVersionListVo
+  extends Readonly<{
+    versions: string[]
+  }> {
+}
+
+/**
+ * 本地-获取节点定义版本-输入/输出参数
+ */
+export interface INodeParameter
+  extends Readonly<{
+    name: string;
+    ref: string;
+    type: string;
+    description: string;
+    parameterId: string;
+    value: object;
+    required: boolean;
+  }> {
+}
+
+/**
+ * 本地-获取节点定义版本
+ */
+export interface INodeDefVersionVo
+  extends Readonly<{
+    ownerRef: string;
+    ref: string;
+    creatorName: string;
+    creatorRef: string;
+    version: string;
+    resultFile: string;
+    inputParameters: INodeParameter[];
+    outputParameters: INodeParameter[];
+    spec: string;
+  }> {
+}
+
+
+/**
+ * 官方-获取节点输入输出参数
+ */
+
+export interface IOfficialParamsVo
+  extends Readonly<{
+    ref: string;
+    name: string;
+    type: string;
+    required: boolean;
+    value: object;
+    description: string;
+  }> {
+}
+
+/**
+ * 官方-获取节点版本定义
+ */
+export interface INodeDefinitionVersionExampleVo
+  extends Readonly<{
+    id: number;
+    versionNumber: string;
+    description: string;
+    workflowExample: string;
+    pipelineExample: string;
+    inputParams: IOfficialParamsVo[];
+    outputParams: IOfficialParamsVo[];
+    creatorName: string;
+    creatorRef: string;
+    creatorPortrait: string;
+    createTime: string;
+  }> {
+}
