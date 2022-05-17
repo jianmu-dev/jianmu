@@ -13,15 +13,7 @@
 
     <span class="separate">:</span>
     <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
-      <jm-input
-        v-model="envVal"
-        @change="changeVal"
-        class="shell-env-val"
-        placeholder="变量值"
-        @focus="switchBackgroundFlag= true"
-        @blur="switchBackgroundFlag=false"
-        ref="envValRef"
-      />
+      <expression-editor v-model="envVal" :node-id="nodeId" placeholder="变量值" class="shell-env-val"/>
     </jm-form-item>
     <div class="delete-icon">
       <i class="jm-icon-button-delete" @click="remove"/>
@@ -30,10 +22,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, inject, PropType, ref } from 'vue';
 import { CustomRule } from '../../../model/data/common';
+import ExpressionEditor from './expression-editor.vue';
 
 export default defineComponent({
+  components: { ExpressionEditor },
   props: {
     name: {
       type: String,
@@ -62,12 +56,17 @@ export default defineComponent({
     const envVal = ref<string>(props.value);
     const switchBackgroundFlag = ref<boolean>(false);
     const envValRef = ref<HTMLElement>();
+    const nodeId = ref<string>('');
+    const node = inject('getNode');
+    nodeId.value = node().id;
+
 
     return {
       envName,
       envVal,
       switchBackgroundFlag,
       envValRef,
+      nodeId,
       upperCase: () => {
         envName.value = envName.value.toUpperCase();
       },
@@ -92,7 +91,8 @@ export default defineComponent({
   display: flex;
   align-items: flex-start;
   font-size: 14px;
-  padding: 20px 20px 10px;
+  padding: 44px 20px 10px;
+  border-bottom: 1px solid #E6EBF2;
 
   &.switch-bgc {
     background: #EFF7FF;
@@ -123,7 +123,7 @@ export default defineComponent({
   .delete-icon {
     height: 36px;
     line-height: 36px;
-    margin-left: 10px;
+    margin-left: 7px;
 
     .jm-icon-button-delete {
       width: 20px;

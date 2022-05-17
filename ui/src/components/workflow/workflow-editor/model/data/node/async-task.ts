@@ -1,7 +1,7 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
-import { CustomRule, CustomRuleItem, ValidateParamFn } from '../common';
+import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 
@@ -75,41 +75,47 @@ export class AsyncTask extends BaseNode {
 
   getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
+    const fields: Record<string, CustomRule> = {};
+    this.inputs.forEach((item, index) => {
+      const { required } = item;
+      let value;
+      if (item.type === ParamTypeEnum.SECRET) {
+        value = { required, message: `请选择${item.name}`, trigger: 'change' };
+      } else {
+        value = [
+          { required, message: `请输入${item.name}`, trigger: 'blur' },
+          {
+            validator: (rule: any, value: any, callback: any) => {
+              if (value && this.validateParam) {
+                try {
+                  this.validateParam(value);
+                } catch ({ message }) {
+                  callback(message);
+                  return;
+                }
+              }
+              callback();
+            },
+            trigger: 'blur',
+          }];
+      }
+      fields[index] = {
+        type: 'object',
+        required,
+        fields: {
+          value,
+        } as Record<string, CustomRule>,
+      };
+    });
 
     return {
       ...rules,
-      // TODO 待完善校验规则
-      version: [],
+      version: [{ required: true, message: '请选择节点版本', trigger: 'change' }],
       inputs: {
         type: 'array',
         required: this.inputs.length > 0,
         len: this.inputs.length,
-        fields: {
-          value: [
-            {
-              // TODO 根据required动态确定
-              required: true,
-              message: '参数值不能为空',
-              trigger: 'blur',
-            },
-            {
-              validator: (rule: any, value: any, callback: any) => {
-                if (value && this.validateParam) {
-                  try {
-                    this.validateParam(value);
-                  } catch ({ message }) {
-                    callback(message);
-                    return;
-                  }
-                }
-                callback();
-              },
-              trigger: 'blur',
-            },
-          ] as CustomRuleItem[],
-          type: [],
-          exp: [],
-        },
+        fields: fields,
       },
     };
   }

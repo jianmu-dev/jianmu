@@ -1,34 +1,35 @@
 <template>
   <div class="secret-key-selector" v-loading="loading">
-    <jm-cascader :props="cascaderProps" clearable placeholder="请选择密钥" v-model="selectorValue"
+    <jm-cascader :props="cascaderProps" clearable :placeholder="placeholder" v-model="selectorValue"
                  @change="getValue"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { listNamespace, listSecretKey } from '@/api/view-no-auth';
-
-export interface ISecretKey {
-  namespace: string;
-  key: string;
-}
 
 export default defineComponent({
   props: {
     modelValue: {
-      type: Object as PropType<ISecretKey>,
+      type: String,
+      default: '',
+    },
+    placeholder: {
+      type: String,
+      required: true,
     },
   },
   emits: ['update:model-value'],
   setup(props, { emit }) {
-    const selectorValue = ref<string[]>(props.modelValue ? [props.modelValue.namespace, props.modelValue.key] : []);
+    const selectorValue = ref<string[]>(props.modelValue ?
+      props.modelValue.substring(2, props.modelValue.length - 2).split('.') : []);
     const loading = ref<boolean>(selectorValue.value.length > 0);
     return {
       selectorValue,
       loading,
       getValue: (val: string[] | undefined) => {
-        emit('update:model-value', val ? { namespace: val[0], key: val[1] } : undefined);
+        emit('update:model-value', val ? `((${val[0]}.${val[1]}))` : undefined);
       },
       cascaderProps: {
         lazy: true,
