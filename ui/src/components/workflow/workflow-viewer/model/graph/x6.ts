@@ -69,7 +69,12 @@ export class X6Graph extends BaseGraph {
 
   hideNodeToolbar(asyncTaskRef: string): void {
     const node = this.getNodeByAsyncTaskRef(asyncTaskRef);
-    const imgEl = this.getShapeEl(node.id).querySelector('.img')! as HTMLElement;
+    const shapeEl = this.getShapeEl(node.id);
+    if (!shapeEl) {
+      return;
+    }
+
+    const imgEl = shapeEl.querySelector('.img')! as HTMLElement;
     imgEl.style.boxShadow = '';
   }
 
@@ -84,6 +89,10 @@ export class X6Graph extends BaseGraph {
     // 设置鼠标滑过事件
     this.graph.on('node:mouseenter', ({ node }) => {
       const shapeEl = this.getShapeEl(node.id);
+      if (!shapeEl) {
+        return;
+      }
+
       // 鼠标进入节点时，显示阴影
       (shapeEl.querySelector('.img')! as HTMLElement)
         .style.boxShadow = '0 0 8px 1px #C5D9FF';
@@ -158,13 +167,33 @@ export class X6Graph extends BaseGraph {
           offset: { x: 4, y: 4 },
         },
       });
+
+      const shapeEl = this.getShapeEl(node.id);
+      if (shapeEl) {
+        shapeEl.setAttribute('x6-task-status', status);
+      }
     });
   }
 
   highlightNodeState(status: TaskStatusEnum, active: boolean): void {
-  }
+    super.highlightNodeState(status, active);
 
-  refreshNodeStateHighlight(status: TaskStatusEnum): void {
+    this.graph.getNodes().forEach(node => {
+      const shapeEl = this.getShapeEl(node.id);
+      if (!shapeEl) {
+        return;
+      }
+
+      const imgEl = shapeEl.querySelector('.img')! as HTMLElement;
+      if (!active) {
+        imgEl.style.boxShadow = 'none';
+        return;
+      }
+
+      imgEl.style.boxShadow =
+        shapeEl.getAttribute('x6-task-status') !== status ? 'none' :
+          `0 0 8px 1px ${states[status].indicatorStyle.fill}`;
+    });
   }
 
   changeSize(width: number, height: number): void {
@@ -196,9 +225,11 @@ export class X6Graph extends BaseGraph {
     return this.getTaskNodes()[this.asyncTaskRefs.indexOf(asyncTaskRef)];
   }
 
-  private getShapeEl(nodeId: string): HTMLElement {
-    return Array.from(this.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
-      .filter(el => (el.getAttribute('data-x6-node-id') === nodeId))[0] as HTMLElement;
+  private getShapeEl(nodeId: string): HTMLElement | undefined {
+    const arr = Array.from(this.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
+      .filter(el => (el.getAttribute('data-x6-node-id') === nodeId));
+
+    return arr.length === 0 ? undefined : (arr[0] as HTMLElement);
   }
 
   private buildEvt(node: Node): {
