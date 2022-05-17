@@ -16,7 +16,7 @@ export default defineComponent({
       default: '暂无数据',
     },
     image: {
-      type: Object,
+      type: String,
       default: img,
     },
   },
