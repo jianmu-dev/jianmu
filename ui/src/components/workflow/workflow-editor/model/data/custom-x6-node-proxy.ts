@@ -48,21 +48,22 @@ export class CustomX6NodeProxy {
   }
 
   getSelectableParams(graph: Graph): ISelectableParam[] {
-    // TODO 完善获取上游节点列表
-    const nodes: Node[] = graph.getNodes();
-
+    let graphNode = this.node;
     const params: ISelectableParam[] = [];
-    for (const node of nodes) {
-      const workflowNode = new CustomX6NodeProxy(node).getData();
-
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const edges = graph.getIncomingEdges(graphNode);
+      if (!edges) {
+        break;
+      }
+      graphNode = edges[0].getSourceNode()!;
+      const workflowNode = new CustomX6NodeProxy(graphNode).getData();
       const param = workflowNode.buildSelectableParam();
-      if (!param) {
+      if (!param || !param.children || param.children.length === 0) {
         continue;
       }
-
       params.push(param);
     }
-
     return params;
   }
 
