@@ -1,5 +1,6 @@
 <template>
   <div class="jm-workflow-expression-editor">
+    <param-button :selectableParams="selectableParams" @inserted="handleInserted"/>
     <param-toolbar ref="paramToolbar" :selectable-params="selectableParams"/>
     <div class="container" ref="editorRef" contenteditable="true" :placeholder="placeholder"
          @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @blur="handleBlur"
@@ -13,10 +14,11 @@ import { ISelectableParam } from './model/data';
 import { ExpressionEditor } from './model/expression-editor';
 import ParamToolbar from './param-toolbar.vue';
 import { extractReferences } from './model/util';
+import ParamButton from './param-button.vue';
 
 export default defineComponent({
   name: 'jm-workflow-expression-editor',
-  components: { ParamToolbar },
+  components: { ParamButton, ParamToolbar },
   props: {
     modelValue: {
       type: String,
@@ -31,18 +33,15 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:model-value', 'editor-created'],
+  emits: ['update:model-value'],
   setup(props, { emit }) {
     const paramToolbar = ref();
     const editorRef = ref<HTMLDivElement>();
     let expressionEditor: ExpressionEditor;
     provide('getExpressionEditor', (): ExpressionEditor => expressionEditor);
 
-    onMounted(() => {
-      expressionEditor = new ExpressionEditor(paramToolbar.value.$el, editorRef.value!, props.modelValue, props.selectableParams);
-
-      emit('editor-created', expressionEditor);
-    });
+    onMounted(() => (expressionEditor = new ExpressionEditor(paramToolbar.value.$el,
+      editorRef.value!, props.modelValue, props.selectableParams)));
 
     onUnmounted(() => expressionEditor.destroy());
 
@@ -67,16 +66,19 @@ export default defineComponent({
 
         emit('update:model-value', plainText);
       },
-      refreshLastRange: () => {
-        expressionEditor.refreshLastRange();
-      },
+      refreshLastRange: () => expressionEditor.refreshLastRange(),
+      handleInserted: (arr: string[]) => expressionEditor.insertParam(arr),
     };
   },
 });
 </script>
 
 <style lang="less">
+@import "../workflow-editor/vars";
+
 .jm-workflow-expression-editor {
+  position: relative;
+
   .container input, .param-toolbar {
     padding: 2px 0.5em;
     // 必须继承，否则，在Chrome粘贴时附带样式
@@ -84,7 +86,29 @@ export default defineComponent({
     font-size: inherit;
   }
 
+  .param-button {
+    position: absolute;
+    top: -25px;
+    right: 0;
+  }
+
   .container {
+    line-height: 34px;
+
+    &:hover {
+      border-color: @primary-color;
+    }
+
+    transition: all .1s ease-in-out;
+
+    &:focus {
+      border: 1px solid @primary-color;
+    }
+
+    border-radius: 2px;
+    border: 1px solid #B9CFE6;
+    padding: 0 15px;
+    box-sizing: border-box;
     // 英文单词换行
     word-wrap: break-word;
     // 中文换行
