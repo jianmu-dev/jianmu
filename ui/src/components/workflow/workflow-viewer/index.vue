@@ -20,7 +20,7 @@
                   :node-event="nodeEvent"
                   :zoom="zoom"
                   @node-click="clickNode"
-                  @mouseout="handleNodeBarMouseout"/>
+                  @mouseleave="destroyNodeToolbar"/>
     <div v-show="!dslMode" class="canvas" ref="container"/>
     <jm-dsl-editor v-if="dslMode" :value="dsl" readonly/>
   </div>
@@ -86,6 +86,7 @@ export default defineComponent({
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
+      graph.value?.hideNodeToolbar(nodeEvent.value!.id);
       nodeEvent.value = undefined;
     };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
@@ -176,27 +177,7 @@ export default defineComponent({
             emit('click-webhook-node', id, tabType);
         }
       },
-      handleNodeBarMouseout: (evt: any) => {
-        let isOut = true;
-        let tempObj = evt.relatedTarget || evt.toElement;
-        // 10级以内可定位
-        for (let i = 0; i < 10; i++) {
-          if (!tempObj) {
-            break;
-          }
-
-          if (tempObj.className === 'jm-workflow-viewer-node-toolbar') {
-            isOut = false;
-            break;
-          }
-
-          tempObj = tempObj.parentElement;
-        }
-
-        if (isOut) {
-          destroyNodeToolbar();
-        }
-      },
+      destroyNodeToolbar,
       zoom,
       handleZoom: (val?: number) => {
         if (!graph.value) {

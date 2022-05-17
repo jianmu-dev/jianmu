@@ -19,6 +19,9 @@ export abstract class BaseGraph {
     this.dslType = dslType;
   }
 
+  hideNodeToolbar(nodeId: string): void{
+  }
+
   getAsyncTaskNodeCount(): number {
     return 0;
   }
