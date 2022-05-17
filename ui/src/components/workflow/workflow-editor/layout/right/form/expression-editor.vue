@@ -3,7 +3,7 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, inject } from 'vue';
+import { defineComponent, inject, nextTick } from 'vue';
 import { ElFormItemContext, elFormItemKey } from 'element-plus/es/el-form';
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../../model/data/custom-x6-node-proxy';
@@ -26,7 +26,9 @@ export default defineComponent({
     const selectableParams = proxy.getSelectableParams(graph);
     return {
       selectableParams,
-      handleChange: (val: string) => {
+      handleChange: async (val: string) => {
+        // 必须nextTick，否则外部的change晚于当前，数据更新有延迟
+        await nextTick();
         elFormItem.formItemMitt?.emit('el.form.blur', val);
         elFormItem.formItemMitt?.emit('el.form.change', val);
       },
