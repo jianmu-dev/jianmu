@@ -72,7 +72,7 @@
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <jm-input v-model="form.auth.token" placeholder="请输入token值"/>
+              <expression-editor v-model="form.auth.token" :node-id="nodeId" placeholder="请输入token值"/>
             </jm-form-item>
             <jm-form-item prop="auth.value" :rules="nodeData.getFormRules().auth.fields.value">
               <template #label>
@@ -84,7 +84,7 @@
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <secret-key-selector v-model="form.auth.value" placeholder="请输入value值"/>
+              <secret-key-selector v-model="form.auth.value" :placeholder="'请选择value值'"/>
             </jm-form-item>
           </div>
           <jm-form-item class="only-container" prop="only" :rules="nodeData.getFormRules().only">
@@ -114,14 +114,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { Webhook } from '../../model/data/node/webhook';
 import WebhookParam from './form/webhook-param.vue';
 import SecretKeySelector from './form/secret-key-selector.vue';
+import ExpressionEditor from './form/expression-editor.vue';
+
 import { v4 as uuidv4 } from 'uuid';
 
 export default defineComponent({
-  components: { WebhookParam, SecretKeySelector },
+  components: { WebhookParam, SecretKeySelector, ExpressionEditor },
   props: {
     nodeData: {
       type: Object as PropType<Webhook>,
@@ -132,6 +134,10 @@ export default defineComponent({
   setup(props, { emit }) {
     const formRef = ref();
     const form = ref<Webhook>(props.nodeData);
+    const nodeId = ref<string>('');
+    const node = inject('getNode');
+    nodeId.value = node().id;
+
 
     onMounted(() => emit('form-created', formRef.value));
     // 折叠
@@ -145,6 +151,7 @@ export default defineComponent({
       foldParamFlag,
       foldSettingFlag,
       authSwitch,
+      nodeId,
       //  删除
       deleteParam: (index: number) => {
         form.value.params.splice(index, 1);
