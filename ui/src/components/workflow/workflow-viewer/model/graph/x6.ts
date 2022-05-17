@@ -205,7 +205,7 @@ export class X6Graph extends BaseGraph {
 
   private refreshIndicator(node: Node, status: TaskStatusEnum): void {
     // 移除指示灯
-    node.removeTools();
+    node.removeTool('button');
     // 添加新指示灯
     node.addTools({
       name: 'button',
