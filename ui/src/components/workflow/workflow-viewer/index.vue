@@ -50,6 +50,9 @@ import { sortTasks } from './model/util';
 import { BaseGraph } from './model/base-graph';
 import { WorkflowGraph } from './model/workflow-graph';
 
+// 引入数组工具类
+import './utils/array.ts';
+
 // 注册自定义g6元素
 Object.values(import.meta.globEager('./shapes/**')).forEach(({ default: register }) => register(G6));
 
