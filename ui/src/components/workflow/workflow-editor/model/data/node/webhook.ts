@@ -83,7 +83,7 @@ export class Webhook extends BaseNode {
         } as Record<string, CustomRule>,
       },
       only: [
-        { required: false },
+        { required: false, trigger: 'blur' },
         {
           validator: (rule: any, value: any, callback: any) => {
             if (!value) {
