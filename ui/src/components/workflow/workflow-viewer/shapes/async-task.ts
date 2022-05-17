@@ -236,16 +236,16 @@ export default function (G6: typeof _G6) {
           });
         }
 
-        const indicatorW = 6;
-        const indicatorH = 6;
+        const indicatorW = 8;
+        const indicatorH = 8;
         group?.addShape('rect', {
           attrs: {
             x: width / 2,
-            y: -height / 1.9,
+            y: -height / 2,
             width: indicatorW,
             height: indicatorH,
             fill: 'transparent',
-            radius: 3,
+            radius: 4,
           },
           // must be assigned in G6 3.3 and later versions. it can be any value you want
           name: 'async_task_state_indicator',
