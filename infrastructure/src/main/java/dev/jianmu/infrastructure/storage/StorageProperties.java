@@ -18,4 +18,6 @@ public class StorageProperties {
     private String logfilePath;
     // webhook存储路径
     private String webhookFilePath;
+    // SSE超时时间，毫秒值
+    private Long sseTimeout = 1000L * 60;
 }

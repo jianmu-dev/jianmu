@@ -1,7 +1,6 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.vo.NodeDefVersionListVo;
 import dev.jianmu.api.dto.NodeDefViewingDto;
 import dev.jianmu.api.dto.ProjectViewingDto;
 import dev.jianmu.api.mapper.*;
@@ -207,8 +206,8 @@ public class ViewController {
                         .outputParameters(nodeDefinitionVersion.getOutputParameters())
                         .resultFile(nodeDefinitionVersion.getResultFile())
                         .spec(nodeDefinitionVersion.getSpec())
-                .build())
-                .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + ownerRef + "/" + ref + ":" +version));
+                        .build())
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + ownerRef + "/" + ref + ":" + version));
     }
 
     @GetMapping("/projects")
@@ -328,7 +327,7 @@ public class ViewController {
     }
 
     @GetMapping("/logs/{logId}")
-    @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取")
+    @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取", deprecated = true)
     public ResponseEntity<FileSystemResource> getLog(@PathVariable String logId) {
         var fileSystemResource = new FileSystemResource(this.storageService.logFile(logId));
         if (fileSystemResource.exists()) {
@@ -344,7 +343,6 @@ public class ViewController {
         }
     }
 
-    @CrossOrigin
     @GetMapping(path = "/logs/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "日志订阅接口", description = "日志订阅接口,可以使用SSE方式订阅最新日志")
     public SseEmitter streamSseLog(@PathVariable String logId) {
@@ -352,7 +350,7 @@ public class ViewController {
     }
 
     @GetMapping("/logs/workflow/{logId}")
-    @Operation(summary = "流程日志获取接口", description = "流程日志获取接口,可以使用Range方式分段获取")
+    @Operation(summary = "流程日志获取接口", description = "流程日志获取接口,可以使用Range方式分段获取", deprecated = true)
     public ResponseEntity<FileSystemResource> getWorkflowLog(@PathVariable String logId) {
         var fileSystemResource = new FileSystemResource(this.storageService.workflowLogFile(logId));
         if (fileSystemResource.exists()) {

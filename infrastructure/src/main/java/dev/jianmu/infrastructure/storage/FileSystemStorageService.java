@@ -14,7 +14,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 /**
  * @author Ethan Liu
@@ -29,14 +29,14 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     private static final String webhookFilePostfix = ".json";
     // For SSE
     private final SseTemplate template;
+    private final Long sseTimeout;
     private final MonitoringFileService monitoringFileService;
-    private static final AtomicLong COUNTER = new AtomicLong(0);
-
     private final Path rootLocation;
     private final Path webhookRootLocation;
 
     public FileSystemStorageService(SseTemplate template, MonitoringFileService monitoringFileService, StorageProperties properties) {
         this.template = template;
+        this.sseTimeout = properties.getSseTimeout();
         this.monitoringFileService = monitoringFileService;
         this.rootLocation = Paths.get("ci", properties.getLogfilePath());
         this.webhookRootLocation = Paths.get("ci", properties.getWebhookFilePath());
@@ -73,18 +73,34 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     @Override
     public SseEmitter readLog(String logFileName) {
         var fullName = logFileName + LogfilePostfix;
-        this.monitoringFileService.listen(fullName, (file -> {
+        String connectionId = String.join("/", fullName, UUID.randomUUID().toString().replace("-", ""));
+        this.monitoringFileService.listen(fullName, connectionId, ((file, counter) -> {
             try (var stream = Files.lines(file)) {
-                stream.skip(COUNTER.get())
-                        .forEach(line ->
-                                template.broadcast(fullName, SseEmitter.event()
-                                        .id(String.valueOf(COUNTER.incrementAndGet()))
-                                        .data(line)));
+                stream.skip(counter.get())
+                        .forEach(line -> this.template.broadcast(connectionId, SseEmitter.event()
+                                .id(String.valueOf(counter.incrementAndGet()))
+                                .data(line)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }));
-        return this.template.newSseEmitter(fullName);
+        var sseEmitter = this.template.newSseEmitter(connectionId, this.sseTimeout);
+        this.firstReadLog(fullName, connectionId);
+        return sseEmitter;
+    }
+
+    public void firstReadLog(String topic, String connectionId) {
+        var file = this.monitoringFileService.getPath(topic);
+        this.monitoringFileService.getConsumerVo(topic, connectionId).ifPresent(consumerVo -> {
+            try (var stream = Files.lines(file)) {
+                stream.skip(consumerVo.getCounter().get())
+                        .forEach(line -> this.template.broadcast(connectionId, SseEmitter.event()
+                                .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
+                                .data(line)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
