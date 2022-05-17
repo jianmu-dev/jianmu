@@ -105,8 +105,9 @@ export default defineComponent({
       border: 1px solid @primary-color;
     }
 
+    color: #333333;
     border-radius: 2px;
-    border: 1px solid #B9CFE6;
+    border: 1px solid #D0E0ED;
     padding: 0 15px;
     box-sizing: border-box;
     // 英文单词换行
