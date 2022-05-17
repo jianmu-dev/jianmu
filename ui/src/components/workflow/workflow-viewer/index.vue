@@ -128,8 +128,12 @@ export default defineComponent({
         nodeActionConfigured.value = true;
       }
 
-      // 更新状态
-      graph.value!.updateNodeStates(props.tasks);
+      setTimeout(() => {
+        // 保证渲染完成
+
+        // 更新状态
+        graph.value!.updateNodeStates(props.tasks);
+      }, 50);
     };
 
     onBeforeUpdate(() => refreshGraph());

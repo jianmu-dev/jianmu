@@ -159,16 +159,7 @@ export class X6Graph extends BaseGraph {
         },
       });
 
-      let shapeEl = this.getShapeEl(node.id);
-      if (shapeEl) {
-        shapeEl.setAttribute('x6-task-status', status);
-        return;
-      }
-      setTimeout(() => {
-        // 保证渲染完成
-        shapeEl = this.getShapeEl(node.id);
-        shapeEl.setAttribute('x6-task-status', status);
-      }, 100);
+      this.getShapeEl(node.id).setAttribute('x6-task-status', status);
     });
   }
 
