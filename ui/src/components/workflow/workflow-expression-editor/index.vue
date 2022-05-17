@@ -117,7 +117,7 @@ export default defineComponent({
     outline: none;
 
     &:empty::before {
-      color: #7B8C9C;
+      color: #c0c4cc;
       content: attr(placeholder);
     }
 
