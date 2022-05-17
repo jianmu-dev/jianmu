@@ -21,11 +21,11 @@
       <div class="time">
         <div class="running" v-if="project.status === ProjectStatusEnum.RUNNING">
           <span>执行时长：</span>
-          <jm-timer :start-time="project.startTime"></jm-timer>
+          <jm-timer :start-time="project.startTime" v-if="project.startTime"></jm-timer>
         </div>
         <div class="running" v-else-if="project.status === ProjectStatusEnum.SUSPENDED">
           <span>挂起时长：</span>
-          <jm-timer :start-time="project.suspendedTime"></jm-timer>
+          <jm-timer :start-time="project.suspendedTime" v-if="project.suspendedTime"></jm-timer>
         </div>
         <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
@@ -64,11 +64,11 @@
       }">
         <div class="running" v-if="project.status === ProjectStatusEnum.RUNNING">
           <span>执行时长：</span>
-          <jm-timer :start-time="project.startTime"></jm-timer>
+          <jm-timer :start-time="project.startTime" v-if="project.startTime"></jm-timer>
         </div>
         <div class="running" v-else-if="project.status === ProjectStatusEnum.SUSPENDED">
           <span>挂起时长：</span>
-          <jm-timer :start-time="project.suspendedTime"></jm-timer>
+          <jm-timer :start-time="project.suspendedTime" v-if="project.suspendedTime"></jm-timer>
         </div>
         <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>

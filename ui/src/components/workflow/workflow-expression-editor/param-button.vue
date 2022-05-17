@@ -43,6 +43,7 @@ export default defineComponent({
 @import "../workflow-editor/vars";
 
 .param-button {
+  color: #6B7B8D;
   position: relative;
 
   &:hover {
@@ -50,6 +51,7 @@ export default defineComponent({
   }
 
   .insert-param {
+    color: inherit;
     cursor: pointer;
     display: flex;
     align-items: center;
