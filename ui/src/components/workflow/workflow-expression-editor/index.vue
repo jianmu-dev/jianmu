@@ -33,7 +33,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:model-value'],
+  emits: ['update:model-value', 'change'],
   setup(props, { emit }) {
     const paramToolbar = ref();
     const editorRef = ref<HTMLDivElement>();
@@ -65,6 +65,7 @@ export default defineComponent({
         }
 
         emit('update:model-value', plainText);
+        emit('change', plainText);
       },
       refreshLastRange: () => expressionEditor.refreshLastRange(),
       handleInserted: (arr: string[]) => expressionEditor.insertParam(arr),
