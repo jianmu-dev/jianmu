@@ -124,6 +124,7 @@ export class G6Graph extends BaseGraph {
     // 定义setState后，需手动设置stateStyles
     keyShape.attr({
       ...keyShape.attr(),
+      // 鼠标离开节点时，去掉阴影
       shadowColor: 'transparent',
     });
   }
@@ -156,7 +157,7 @@ export class G6Graph extends BaseGraph {
       // 定义setState后，需手动设置stateStyles
       keyShape.attr({
         ...keyShape.attr(),
-        // attrs.keyShape.default.shadowColor
+        // 鼠标进入节点时，显示阴影
         shadowColor: '#C5D9FF',
       });
     });
