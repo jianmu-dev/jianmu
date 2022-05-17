@@ -297,7 +297,7 @@ export class G6Graph extends BaseGraph {
    * @param active
    */
   highlightNodeState(status: TaskStatusEnum, active: boolean): void {
-    this.graph.set('HIGHLIGHT_STATUS', active ? status : undefined);
+    super.highlightNodeState(status, active);
 
     this.graph.getNodes()
       .filter(node =>
@@ -307,26 +307,6 @@ export class G6Graph extends BaseGraph {
       .forEach(node => {
         this.graph.setItemState(node, 'highlight', active);
       });
-  }
-
-  /**
-   * 刷新节点状态高亮
-   * @param status
-   */
-  refreshNodeStateHighlight(status: TaskStatusEnum): void {
-    const highlightStatus = this.graph.get('HIGHLIGHT_STATUS');
-
-    if (!highlightStatus) {
-      return;
-    }
-
-    if (highlightStatus !== status) {
-      // 关灯
-      this.highlightNodeState(status, false);
-    }
-
-    // 开灯
-    this.highlightNodeState(highlightStatus, true);
   }
 
   /**
