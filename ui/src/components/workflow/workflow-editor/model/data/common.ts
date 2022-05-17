@@ -59,3 +59,5 @@ export interface IWorkflow {
   global: IGlobal;
   data: string;
 }
+
+export type ValidateParamFn = (value: string) => void;

@@ -1,7 +1,7 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
-import { CustomRule, CustomRuleItem } from '../common';
+import { CustomRule, CustomRuleItem, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 
@@ -13,8 +13,6 @@ export interface IAsyncTaskParam {
   value: string;
   readonly description?: string;
 }
-
-type ValidateParamFn = (value: string) => void;
 
 export class AsyncTask extends BaseNode {
   readonly ownerRef: string;

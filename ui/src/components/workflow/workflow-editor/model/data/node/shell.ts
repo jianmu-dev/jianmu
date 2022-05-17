@@ -1,7 +1,7 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/shell.svg';
-import { CustomRule } from '../common';
+import { CustomRule, ValidateParamFn } from '../common';
 
 export interface IShellEnv {
   key: string;
@@ -14,19 +14,22 @@ export class Shell extends BaseNode {
   readonly envs: IShellEnv[];
   script: string;
   failureMode: FailureModeEnum;
+  private readonly validateParam?: ValidateParamFn;
 
   constructor(name: string = 'shell', image: string = '',
     envs: IShellEnv[] = [], script: string = '',
-    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND) {
+    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
     super('shell', name, NodeTypeEnum.SHELL, icon, 'https://docs.jianmu.dev/guide/shell-node.html');
     this.image = image;
     this.envs = envs;
     this.script = script;
     this.failureMode = failureMode;
+    this.validateParam = validateParam;
   }
 
-  static build({ name, image, envs, script, failureMode }: any): Shell {
-    return new Shell(name, image, envs, script, failureMode);
+  static build({ name, image, envs, script, failureMode }: any,
+    validateParam?: ValidateParamFn): Shell {
+    return new Shell(name, image, envs, script, failureMode, validateParam);
   }
 
   getFormRules(): Record<string, CustomRule> {
