@@ -18,12 +18,4 @@ public class ConsumerVo {
         this.connectionId = connectionId;
         this.consumer = consumer;
     }
-
-    @Override
-    public String toString() {
-        return "{" +
-                "connectionId=" + connectionId +
-                ", counter=" + counter +
-                '}';
-    }
 }
