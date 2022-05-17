@@ -67,6 +67,12 @@ export class X6Graph extends BaseGraph {
     render(this.graph, data, this.workflowTool);
   }
 
+  hideNodeToolbar(asyncTaskRef: string): void {
+    this.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape .icon .img')
+      // 鼠标离开节点时，去掉阴影
+      .forEach(el => ((el as HTMLElement).style.boxShadow = ''));
+  }
+
   getAsyncTaskNodeCount(): number {
     return this.graph.getNodes()
       .filter(node => [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK]
@@ -86,6 +92,10 @@ export class X6Graph extends BaseGraph {
         }
 
         // TODO 非异步任务或滑过动画相关shape时，忽略
+
+        // 鼠标进入节点时，显示阴影
+        ((tempEl as HTMLElement).querySelector('.img')! as HTMLElement)
+          .style.boxShadow = '0 0 8px 1px #C5D9FF';
 
         const { id, description, type } = this.buildEvt(node);
         const { width, height, x, y } = tempEl.getBoundingClientRect();
@@ -127,22 +137,7 @@ export class X6Graph extends BaseGraph {
   }
 
   updateNodeStates(tasks: ITaskExecutionRecordVo[]): void {
-    const nodes: Node[] = [];
-    let tempNode = this.graph.getRootNodes()[0];
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const tempWorkflowNode = new CustomX6NodeProxy(tempNode).getData();
-      if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(tempWorkflowNode.getType())) {
-        nodes.push(tempNode);
-      }
-
-      const edges = this.graph.getOutgoingEdges(tempNode);
-      if (!edges) {
-        break;
-      }
-
-      tempNode = edges[0].getTargetNode()!;
-    }
+    const nodes = this.getTaskNodes();
 
     tasks.forEach(({ nodeName, status }) => {
       const index = this.asyncTaskRefs.indexOf(nodeName);
@@ -184,6 +179,31 @@ export class X6Graph extends BaseGraph {
 
   changeSize(width: number, height: number): void {
     this.graph.resizeGraph(width, height);
+  }
+
+  private getTaskNodes(): Node[] {
+    const nodes: Node[] = [];
+    let tempNode = this.graph.getRootNodes()[0];
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const tempWorkflowNode = new CustomX6NodeProxy(tempNode).getData();
+      if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(tempWorkflowNode.getType())) {
+        nodes.push(tempNode);
+      }
+
+      const edges = this.graph.getOutgoingEdges(tempNode);
+      if (!edges) {
+        break;
+      }
+
+      tempNode = edges[0].getTargetNode()!;
+    }
+
+    return nodes;
+  }
+
+  private getNodeByAsyncTaskRef(asyncTaskRef: string) {
+    return this.getTaskNodes()[this.asyncTaskRefs.indexOf(asyncTaskRef)];
   }
 
   private buildEvt(node: Node): {
