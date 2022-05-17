@@ -1,12 +1,12 @@
 <template>
-  <jm-workflow-expression-editor :selectable-params="selectableParams"/>
+  <jm-workflow-expression-editor :selectable-params="selectableParams" @change="handleChange"/>
 </template>
 
 <script lang='ts'>
 import { defineComponent, inject } from 'vue';
+import { ElFormItemContext, elFormItemKey } from 'element-plus/es/el-form';
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../../model/data/custom-x6-node-proxy';
-
 
 export default defineComponent({
   props: {
@@ -16,6 +16,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const elFormItem = inject(elFormItemKey, {} as ElFormItemContext);
     // 获取此时进行编辑的节点信息
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
@@ -25,6 +26,10 @@ export default defineComponent({
     const selectableParams = proxy.getSelectableParams(graph);
     return {
       selectableParams,
+      handleChange: (val: string) => {
+        elFormItem.formItemMitt?.emit('el.form.blur', val);
+        elFormItem.formItemMitt?.emit('el.form.change', val);
+      },
     };
   },
 });

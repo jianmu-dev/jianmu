@@ -13,7 +13,14 @@
 
     <span class="separate">:</span>
     <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
-      <expression-editor v-model="envVal" :node-id="nodeId" placeholder="变量值" class="shell-env-val"/>
+      <expression-editor
+        v-model="envVal"
+        :node-id="nodeId"
+        @change="changeVal"
+        class="shell-env-val"
+        placeholder="变量值"
+        @focus="switchBackgroundFlag=true"
+        @blur="switchBackgroundFlag=false"/>
     </jm-form-item>
     <div class="delete-icon">
       <i class="jm-icon-button-delete" @click="remove"/>

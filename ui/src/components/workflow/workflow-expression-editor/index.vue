@@ -3,7 +3,7 @@
     <param-button :selectableParams="selectableParams" @inserted="handleInserted"/>
     <param-toolbar ref="paramToolbar" :selectable-params="selectableParams"/>
     <div class="container" ref="editorRef" contenteditable="true" :placeholder="placeholder"
-         @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @blur="handleBlur"
+         @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @focus="handleFocus" @blur="handleBlur"
          @keyup="refreshLastRange" @mouseup="refreshLastRange"/>
   </div>
 </template>
@@ -33,7 +33,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:model-value'],
+  emits: ['update:model-value', 'focus', 'blur', 'change'],
   setup(props, { emit }) {
     const paramToolbar = ref();
     const editorRef = ref<HTMLDivElement>();
@@ -51,7 +51,10 @@ export default defineComponent({
       handleCut: (e: ClipboardEvent) => expressionEditor.cut(e),
       handleCopy: (e: ClipboardEvent) => expressionEditor.copy(e),
       handlePaste: (e: ClipboardEvent) => expressionEditor.paste(e),
-      handleBlur: () => {
+      handleFocus: (e: Event) => {
+        emit('focus', e);
+      },
+      handleBlur: (e: Event) => {
         const el = editorRef.value!.cloneNode(true) as HTMLDivElement;
         const references = extractReferences(el.innerText);
         const plainText = expressionEditor.getPlainText(el);
@@ -65,6 +68,8 @@ export default defineComponent({
         }
 
         emit('update:model-value', plainText);
+        emit('blur', e);
+        emit('change', plainText);
       },
       refreshLastRange: () => expressionEditor.refreshLastRange(),
       handleInserted: (arr: string[]) => expressionEditor.insertParam(arr),

@@ -82,34 +82,31 @@ export class Webhook extends BaseNode {
           value: [{ required: true, message: '请选择密钥', trigger: 'change' }],
         } as Record<string, CustomRule>,
       },
-      only: [
-        { required: false },
-        {
-          validator: (rule: any, value: any, callback: any) => {
-            if (!value) {
-              callback();
-              return;
-            }
+      only: [{
+        validator: (rule: any, value: any, callback: any) => {
+          if (!value) {
+            callback();
+            return;
+          }
 
-            const references = extractReferences(value);
-            if (references.length > 0) {
-              const selectableParams = [this.buildSelectableParam()];
-              for (const reference of references) {
-                try {
-                  // 检查引用的触发器参数是否存在
-                  getParam(reference, selectableParams);
-                } catch ({ message }) {
-                  callback(new Error(`${reference.raw}触发器参数不存在`));
-                  return;
-                }
+          const references = extractReferences(value);
+          if (references.length > 0) {
+            const selectableParams = [this.buildSelectableParam()];
+            for (const reference of references) {
+              try {
+                // 检查引用的触发器参数是否存在
+                getParam(reference, selectableParams);
+              } catch ({ message }) {
+                callback(new Error(`${reference.raw}触发器参数不存在`));
+                return;
               }
             }
+          }
 
-            callback();
-          },
-          trigger: 'blur',
+          callback();
         },
-      ],
+        trigger: 'blur',
+      }],
     };
   }
 
