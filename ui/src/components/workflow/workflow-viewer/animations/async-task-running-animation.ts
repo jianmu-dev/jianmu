@@ -45,7 +45,7 @@ export const attrs = {
       radius: 80 * 0.242,
       shadowOffsetX: 0,
       shadowOffsetY: 0,
-      shadowColor: '#C5D9FF',
+      shadowColor: 'transparent',
       shadowBlur: 15,
     },
     first: {

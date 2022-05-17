@@ -20,7 +20,7 @@
                   :node-event="nodeEvent"
                   :zoom="zoom"
                   @node-click="clickNode"
-                  @mouseout="handleNodeBarMouseout"/>
+                  @mouseleave="destroyNodeToolbar"/>
     <div v-show="!dslMode" class="canvas" ref="container"/>
     <jm-dsl-editor v-if="dslMode" :value="dsl" readonly/>
   </div>
@@ -49,6 +49,9 @@ import { INodeMouseoverEvent } from './model/data/common';
 import { sortTasks } from './model/util';
 import { BaseGraph } from './model/base-graph';
 import { WorkflowGraph } from './model/workflow-graph';
+
+// 引入数组工具类
+import './utils/array.ts';
 
 // 注册自定义g6元素
 Object.values(import.meta.globEager('./shapes/**')).forEach(({ default: register }) => register(G6));
@@ -83,6 +86,7 @@ export default defineComponent({
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
+      graph.value?.hideNodeToolbar(nodeEvent.value!.id);
       nodeEvent.value = undefined;
     };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
@@ -173,27 +177,7 @@ export default defineComponent({
             emit('click-webhook-node', id, tabType);
         }
       },
-      handleNodeBarMouseout: (evt: any) => {
-        let isOut = true;
-        let tempObj = evt.relatedTarget || evt.toElement;
-        // 10级以内可定位
-        for (let i = 0; i < 10; i++) {
-          if (!tempObj) {
-            break;
-          }
-
-          if (tempObj.className === 'jm-workflow-viewer-node-toolbar') {
-            isOut = false;
-            break;
-          }
-
-          tempObj = tempObj.parentElement;
-        }
-
-        if (isOut) {
-          destroyNodeToolbar();
-        }
-      },
+      destroyNodeToolbar,
       zoom,
       handleZoom: (val?: number) => {
         if (!graph.value) {

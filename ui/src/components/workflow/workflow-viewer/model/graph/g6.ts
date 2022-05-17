@@ -1,5 +1,5 @@
 import { BaseGraph } from '../base-graph';
-import { G6Event, Graph, IBBox, IG6GraphEvent, Item, LayoutConfig, NodeConfig } from '@antv/g6';
+import { G6Event, Graph, IBBox, IG6GraphEvent, IShape, Item, LayoutConfig, NodeConfig } from '@antv/g6';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { INodeDefVo } from '@/api/dto/project';
 import { parse } from '../../model/dsl/g6';
@@ -117,6 +117,18 @@ export class G6Graph extends BaseGraph {
     });
   }
 
+  hideNodeToolbar(nodeId: string): void {
+    const node = this.graph.findById(nodeId);
+    const keyShape = node.get('keyShape') as IShape;
+    // 更新样式
+    // 定义setState后，需手动设置stateStyles
+    keyShape.attr({
+      ...keyShape.attr(),
+      // 鼠标离开节点时，去掉阴影
+      shadowColor: 'transparent',
+    });
+  }
+
   getAsyncTaskNodeCount(): number {
     return this.graph.getNodes()
       .filter(node => node.getModel().type === NodeTypeEnum.ASYNC_TASK).length;
@@ -131,6 +143,25 @@ export class G6Graph extends BaseGraph {
   }
 
   configNodeAction(mouseoverNode: ((evt: INodeMouseoverEvent) => void)): void {
+    this.graph.on(G6Event.NODE_MOUSEENTER, (ev: IG6GraphEvent) => {
+      const node = ev.item as Item;
+      const model = node.getModel();
+
+      if (model.type === NodeTypeEnum.FLOW_NODE) {
+        // flow node时，忽略
+        return;
+      }
+
+      const keyShape = node.get('keyShape') as IShape;
+      // 更新样式
+      // 定义setState后，需手动设置stateStyles
+      keyShape.attr({
+        ...keyShape.attr(),
+        // 鼠标进入节点时，显示阴影
+        shadowColor: '#C5D9FF',
+      });
+    });
+
     // 设置鼠标滑过事件
     this.graph.on(G6Event.NODE_MOUSEOVER, (ev: IG6GraphEvent) => {
       const node = ev.item as Item;
@@ -266,7 +297,7 @@ export class G6Graph extends BaseGraph {
    * @param active
    */
   highlightNodeState(status: TaskStatusEnum, active: boolean): void {
-    this.graph.set('HIGHLIGHT_STATUS', active ? status : undefined);
+    super.highlightNodeState(status, active);
 
     this.graph.getNodes()
       .filter(node =>
@@ -276,26 +307,6 @@ export class G6Graph extends BaseGraph {
       .forEach(node => {
         this.graph.setItemState(node, 'highlight', active);
       });
-  }
-
-  /**
-   * 刷新节点状态高亮
-   * @param status
-   */
-  refreshNodeStateHighlight(status: TaskStatusEnum): void {
-    const highlightStatus = this.graph.get('HIGHLIGHT_STATUS');
-
-    if (!highlightStatus) {
-      return;
-    }
-
-    if (highlightStatus !== status) {
-      // 关灯
-      this.highlightNodeState(status, false);
-    }
-
-    // 开灯
-    this.highlightNodeState(highlightStatus, true);
   }
 
   /**

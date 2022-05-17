@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'jm-workflow-x6-vue-shape': true, clickable }">
+  <div ref="shape" :class="{ 'jm-workflow-x6-vue-shape': true, clickable }">
     <div class="icon">
       <div class="img" :style="`background-image: url('${iconUrl}');`"></div>
     </div>
@@ -18,6 +18,7 @@ export default defineComponent({
     nodeData: Object as PropType<IWorkflowNode>,
   },
   setup(props) {
+    const shape = ref<HTMLElement>();
     const iconUrl = ref<string>('');
     const nameVal = ref<string>('');
 
@@ -37,12 +38,15 @@ export default defineComponent({
         node.on('change:data', () => refresh(proxy.getData()));
 
         data = proxy.getData();
+
+        shape.value!.setAttribute('data-x6-node-id', node.id);
       }
 
       refresh(data);
     });
 
     return {
+      shape,
       clickable: !props.nodeData,
       iconUrl,
       nameVal,

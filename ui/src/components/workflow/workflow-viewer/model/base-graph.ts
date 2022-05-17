@@ -2,7 +2,6 @@ import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { INodeMouseoverEvent } from './data/common';
 import { DslTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { GraphDirectionEnum } from './data/enumeration';
-import { INode } from '@antv/g6';
 
 interface Zoom {
   readonly min: number;
@@ -14,9 +13,14 @@ interface Zoom {
 export abstract class BaseGraph {
   protected readonly zoom: Zoom = { min: 20, max: 500, interval: 10 };
   readonly dslType: DslTypeEnum;
+  // 当前高亮状态
+  private highlightStatus?: TaskStatusEnum;
 
   protected constructor(dslType: DslTypeEnum) {
     this.dslType = dslType;
+  }
+
+  hideNodeToolbar(nodeId: string): void {
   }
 
   getAsyncTaskNodeCount(): number {
@@ -47,9 +51,21 @@ export abstract class BaseGraph {
   }
 
   highlightNodeState(status: TaskStatusEnum, active: boolean): void {
+    this.highlightStatus = active ? status : undefined;
   }
 
   refreshNodeStateHighlight(status: TaskStatusEnum): void {
+    const { highlightStatus } = this;
+    if (!highlightStatus) {
+      return;
+    }
+
+    if (highlightStatus !== status) {
+      // 关灯
+      this.highlightNodeState(status, false);
+    }
+    // 开灯
+    this.highlightNodeState(highlightStatus, true);
   }
 
   changeSize(width: number, height: number): void {
