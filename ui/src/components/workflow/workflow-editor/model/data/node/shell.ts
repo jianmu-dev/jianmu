@@ -42,7 +42,23 @@ export class Shell extends BaseNode {
         required: true,
         fields: {
           name: [{ required: true, message: '请输入变量名', trigger: 'blur' }],
-          value: [{ required: true, message: '请输入变量值', trigger: 'blur' }],
+          value: [
+            { required: true, message: '请输入变量值', trigger: 'blur' },
+            {
+              validator: (rule: any, value: any, callback: any) => {
+                if (value && this.validateParam) {
+                  try {
+                    this.validateParam(value);
+                  } catch ({ message }) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'blur',
+            },
+          ],
         } as Record<string, CustomRule>,
       };
     });
