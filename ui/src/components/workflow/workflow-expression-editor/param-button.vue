@@ -1,5 +1,5 @@
 <template>
-  <div class="param-button" :class="{disable}">
+  <div class="param-button" v-if="!hidden">
     <jm-cascader
       placement="top"
       :options="selectableParams"
@@ -28,10 +28,10 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const selectValue = ref<string[]>([]);
-    const disable = ref<boolean>(false);
+    const hidden = ref<boolean>(false);
     // 没有数据按钮不可点击
     if (props.selectableParams.length === 0) {
-      disable.value = true;
+      hidden.value = true;
     }
     return {
       insertParam(arr: string[]) {
@@ -39,7 +39,7 @@ export default defineComponent({
         selectValue.value = [];
       },
       selectValue,
-      disable,
+      hidden,
     };
   },
 });
@@ -51,11 +51,6 @@ export default defineComponent({
 .param-button {
   color: #6B7B8D;
   position: relative;
-
-  &.disable {
-    pointer-events: none;
-    color: #A7B0BB;
-  }
 
   &:hover {
     color: @primary-color;

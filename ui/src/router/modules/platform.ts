@@ -1,10 +1,6 @@
 import { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
 
 export default [
-  {
-    path: '/demo',
-    component: () => import('@/views/demo2.vue'),
-  },
   // 首页
   {
     name: 'index',
