@@ -11,11 +11,14 @@ import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 import { Cron } from '@/components/workflow/workflow-editor/model/data/node/cron';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { states } from '@/components/workflow/workflow-viewer/shapes/async-task';
+import { BaseTaskRunning } from '../../animations/base-task-running';
+import X6TaskRunning from '@/components/workflow/workflow-viewer/animations/task-running/x6';
 
 export class X6Graph extends BaseGraph {
   private readonly asyncTaskRefs: string[];
   private readonly graph: Graph;
   private readonly workflowTool: WorkflowTool;
+  private readonly runningAnimations: Record<string, BaseTaskRunning>;
 
   constructor(dsl: string, triggerType: TriggerTypeEnum, container: HTMLElement) {
     const { dslType, asyncTaskRefs, data } = parse(dsl, triggerType);
@@ -63,6 +66,8 @@ export class X6Graph extends BaseGraph {
 
     // 初始化工具
     this.workflowTool = new WorkflowTool(this.graph);
+
+    this.runningAnimations = {};
 
     render(this.graph, data, this.workflowTool);
   }
@@ -229,6 +234,13 @@ export class X6Graph extends BaseGraph {
   }
 
   private startAnimation(node: Node): void {
+    let animation = this.runningAnimations[node.id];
+    if (!animation) {
+      animation = new X6TaskRunning(node);
+      animation.start();
+      this.runningAnimations[node.id] = animation;
+    }
+
     const edges = this.graph.getIncomingEdges(node) || [];
     edges.push(...(this.graph.getOutgoingEdges(node) || []));
 
@@ -239,6 +251,12 @@ export class X6Graph extends BaseGraph {
   }
 
   private stopAnimation(node: Node): void {
+    const animation = this.runningAnimations[node.id];
+    if (animation) {
+      animation.stop();
+      delete this.runningAnimations[node.id];
+    }
+
     const edges = this.graph.getIncomingEdges(node) || [];
     edges.push(...(this.graph.getOutgoingEdges(node) || []));
 
