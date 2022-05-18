@@ -1,3 +1,7 @@
+import { IShape } from '@antv/g6';
+
+export type RunningShape = IShape | SVGElement;
+
 export const attrs = {
   shape: {
     // 默认
@@ -83,8 +87,10 @@ export const durations = {
 };
 
 export abstract class BaseTaskRunning {
+  private readonly shapes: RunningShape[];
 
-  protected constructor() {
+  protected constructor(shapes: RunningShape[]) {
+    this.shapes = shapes;
   }
 
 
@@ -92,5 +98,13 @@ export abstract class BaseTaskRunning {
   }
 
   stop(): void {
+  }
+
+  protected next(shape: RunningShape): RunningShape {
+    return this.shapes[0] === shape ? this.shapes[1] : this.shapes[0];
+  }
+
+  protected getShapes(): RunningShape[] {
+    return this.shapes;
   }
 }

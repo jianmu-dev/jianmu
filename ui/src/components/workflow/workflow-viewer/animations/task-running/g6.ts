@@ -1,5 +1,5 @@
 import { IGroup, IShape, Item } from '@antv/g6';
-import { attrs, BaseTaskRunning, durations } from '../base-task-running';
+import { attrs, BaseTaskRunning, durations, RunningShape } from '../base-task-running';
 
 /**
  * G6任务执行中动画
@@ -7,20 +7,11 @@ import { attrs, BaseTaskRunning, durations } from '../base-task-running';
 export default class G6TaskRunning extends BaseTaskRunning {
   private readonly group: IGroup;
   private readonly keyShape: IShape;
-  private readonly iconShape: IShape | undefined;
-  private readonly shapes: IShape[];
+  private readonly iconShape?: IShape;
 
   constructor(item: Item) {
-    super();
     const group = item._cfg?.group as IGroup;
-    const children = [...group.getChildren()];
-    // children[1].setZIndex(-2);
-    // children[2].setZIndex(-2);
-
-    this.group = group;
-    this.iconShape = children.find(child => child.cfg.name === 'async_task_icon') as IShape | undefined;
-    this.keyShape = item.get('keyShape');
-    this.shapes = [
+    super([
       group.addShape('rect', {
         zIndex: -1,
         attrs: attrs.shape.default,
@@ -31,7 +22,14 @@ export default class G6TaskRunning extends BaseTaskRunning {
         attrs: attrs.shape.default,
         name: 'animate_shape_2',
       }),
-    ];
+    ]);
+    const children = [...group.getChildren()];
+    // children[1].setZIndex(-2);
+    // children[2].setZIndex(-2);
+
+    this.group = group;
+    this.iconShape = children.find(child => child.cfg.name === 'async_task_icon') as IShape | undefined;
+    this.keyShape = item.get('keyShape');
 
     group.sort();
   }
@@ -45,11 +43,12 @@ export default class G6TaskRunning extends BaseTaskRunning {
     this.iconShape?.animate(attrs.iconShape.second, {
       duration: durations.iconShape.second,
     });
-    this.animateShape(this.shapes[0]);
+    this.animateShape(super.getShapes()[0]);
   }
 
   stop(): void {
-    this.shapes.forEach(shape => {
+    super.getShapes().forEach(_shape => {
+      const shape = _shape as IShape;
       shape.stopAnimate(false);
       this.group.removeChild(shape);
     });
@@ -60,11 +59,9 @@ export default class G6TaskRunning extends BaseTaskRunning {
     this.iconShape?.attr(attrs.iconShape.default);
   }
 
-  private next(shape: IShape): IShape {
-    return this.shapes[0] === shape ? this.shapes[1] : this.shapes[0];
-  }
+  private animateShape(_shape: RunningShape) {
+    const shape = _shape as IShape;
 
-  private animateShape(shape: IShape) {
     // 第一步
     // 初始化
     shape.stopAnimate(false);
