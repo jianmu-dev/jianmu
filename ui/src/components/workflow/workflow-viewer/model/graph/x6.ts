@@ -70,6 +70,29 @@ export class X6Graph extends BaseGraph {
     this.runningAnimations = {};
 
     render(this.graph, data, this.workflowTool);
+
+    this.graph.getNodes().forEach(node => {
+      // 添加指示灯
+      node.addTools({
+        name: 'button',
+        args: {
+          markup: [
+            {
+              tagName: 'circle',
+              selector: 'button',
+              attrs: {
+                r: 4,
+                fill: states[TaskStatusEnum.INIT].indicatorStyle.fill,
+                cursor: 'default',
+              },
+            },
+          ],
+          x: '100%',
+          y: 0,
+          offset: { x: 4, y: 4 },
+        },
+      });
+    });
   }
 
   hideNodeToolbar(asyncTaskRef: string): void {
@@ -209,34 +232,17 @@ export class X6Graph extends BaseGraph {
   }
 
   private refreshIndicator(node: Node, status: TaskStatusEnum): void {
-    // 移除指示灯
-    node.removeTool('button');
-    // 添加新指示灯
-    node.addTools({
-      name: 'button',
-      args: {
-        markup: [
-          {
-            tagName: 'circle',
-            selector: 'button',
-            attrs: {
-              r: 4,
-              fill: states[status].indicatorStyle.fill,
-              cursor: 'default',
-            },
-          },
-        ],
-        x: '100%',
-        y: 0,
-        offset: { x: 4, y: 4 },
-      },
-    });
+    // 刷新指示灯
+    const indicator = Array.from(this.graph.container.querySelectorAll('.x6-cell-tool.x6-node-tool.x6-cell-tool-button'))
+      .filter(el => (el.getAttribute('data-cell-id') === node.id))[0] as SVGElement;
+    const circle = (indicator.childNodes.item(0) as SVGElement);
+    circle.setAttribute('fill', states[status].indicatorStyle.fill!);
   }
 
   private startAnimation(node: Node): void {
     let animation = this.runningAnimations[node.id];
     if (!animation) {
-      animation = new X6TaskRunning(node);
+      animation = new X6TaskRunning(this.graph.findView(node)!);
       animation.start();
       this.runningAnimations[node.id] = animation;
     }
