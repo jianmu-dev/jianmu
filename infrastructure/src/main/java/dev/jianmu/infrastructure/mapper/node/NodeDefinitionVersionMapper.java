@@ -32,8 +32,8 @@ public interface NodeDefinitionVersionMapper {
     @Result(column = "output_parameters", property = "outputParameters", typeHandler = NodeParameterSetTypeHandler.class)
     List<NodeDefinitionVersion> findByOwnerRefAndRef(@Param("ownerRef") String ownerRef, @Param("ref") String ref);
 
-    @Insert("insert into hub_node_definition_version(id, owner_ref, ref, creator_name, creator_ref, version, result_file, input_parameters, output_parameters, spec) " +
-            "values(#{id}, #{ownerRef}, #{ref}, #{creatorName}, #{creatorRef}, #{version}, #{resultFile}, " +
+    @Insert("insert into hub_node_definition_version(id, owner_ref, ref, creator_name, creator_ref, version, description, result_file, input_parameters, output_parameters, spec) " +
+            "values(#{id}, #{ownerRef}, #{ref}, #{creatorName}, #{creatorRef}, #{version}, #{description}, #{resultFile}, " +
             "#{inputParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeParameterSetTypeHandler}, " +
             "#{outputParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeParameterSetTypeHandler}, " +
             "#{spec})" +

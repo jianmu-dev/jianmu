@@ -202,6 +202,7 @@ public class ViewController {
                         .creatorName(nodeDefinitionVersion.getCreatorName())
                         .creatorRef(nodeDefinitionVersion.getCreatorRef())
                         .version(nodeDefinitionVersion.getVersion())
+                        .description(nodeDefinitionVersion.getDescription())
                         .inputParameters(nodeDefinitionVersion.getInputParameters())
                         .outputParameters(nodeDefinitionVersion.getOutputParameters())
                         .resultFile(nodeDefinitionVersion.getResultFile())
