@@ -85,7 +85,7 @@ export default class G6TaskRunning extends BaseTaskRunning {
             });
 
             // 重复
-            this.animateShape(this.next(shape));
+            this.animateShape(super.next(_shape));
           },
         });
       },
