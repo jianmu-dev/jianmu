@@ -10,9 +10,10 @@ import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/model
 import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 import { Cron } from '@/components/workflow/workflow-editor/model/data/node/cron';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { states } from '@/components/workflow/workflow-viewer/shapes/async-task';
+import { imgs, states } from '@/components/workflow/workflow-viewer/shapes/async-task';
 import { BaseTaskRunning } from '../../animations/base-task-running';
 import X6TaskRunning from '@/components/workflow/workflow-viewer/animations/task-running/x6';
+import { checkDefaultIcon } from '@/components/workflow/workflow-editor/model/data/node/async-task';
 
 export class X6Graph extends BaseGraph {
   private readonly asyncTaskRefs: string[];
@@ -169,6 +170,11 @@ export class X6Graph extends BaseGraph {
       this.refreshIndicator(node, status);
 
       const shapeEl = this.getShapeEl(node.id);
+
+      const imgEl = shapeEl.querySelector('.img')! as HTMLImageElement;
+      if (checkDefaultIcon(imgEl.style.backgroundImage)) {
+        imgEl.style.backgroundImage = `url('${imgs[status]}')`;
+      }
 
       const previousStatus = shapeEl.getAttribute('x6-task-status');
       if (status === TaskStatusEnum.RUNNING) {

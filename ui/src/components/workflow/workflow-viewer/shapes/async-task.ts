@@ -17,7 +17,7 @@ import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config
 
 const { icon: { width: iconW, height: iconH } } = NODE;
 
-const imgs: {
+export const imgs: {
   [key: string]: any;
 } = {
   [TaskStatusEnum.INIT]: INIT,
