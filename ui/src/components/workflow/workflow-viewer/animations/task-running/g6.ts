@@ -6,7 +6,7 @@ import { attrs, BaseTaskRunning, durations, RunningShape } from '../base-task-ru
  */
 export default class G6TaskRunning extends BaseTaskRunning {
   private readonly group: IGroup;
-  private readonly keyShape: IShape;
+  // private readonly keyShape: IShape;
   private readonly iconShape?: IShape;
 
   constructor(item: Item) {
@@ -29,16 +29,16 @@ export default class G6TaskRunning extends BaseTaskRunning {
 
     this.group = group;
     this.iconShape = children.find(child => child.cfg.name === 'async_task_icon') as IShape | undefined;
-    this.keyShape = item.get('keyShape');
+    // this.keyShape = item.get('keyShape');
 
     group.sort();
   }
 
   start(): void {
-    this.keyShape.attr(attrs.keyShape.first);
-    this.keyShape.animate(attrs.keyShape.second, {
-      duration: durations.keyShape.second,
-    });
+    // this.keyShape.attr(attrs.keyShape.first);
+    // this.keyShape.animate(attrs.keyShape.second, {
+    //   duration: durations.keyShape.second,
+    // });
     this.iconShape?.attr(attrs.iconShape.first);
     this.iconShape?.animate(attrs.iconShape.second, {
       duration: durations.iconShape.second,
@@ -53,8 +53,8 @@ export default class G6TaskRunning extends BaseTaskRunning {
       this.group.removeChild(shape);
     });
 
-    this.keyShape.stopAnimate(false);
-    this.keyShape.attr(attrs.keyShape.default);
+    // this.keyShape.stopAnimate(false);
+    // this.keyShape.attr(attrs.keyShape.default);
     this.iconShape?.stopAnimate(false);
     this.iconShape?.attr(attrs.iconShape.default);
   }
@@ -74,7 +74,7 @@ export default class G6TaskRunning extends BaseTaskRunning {
         if (this.iconShape) {
           this.animateIconShape();
         }
-        this.animateKeyShape();
+        // this.animateKeyShape();
 
         shape.animate(attrs.shape.second, {
           duration: durations.shape.second,
@@ -92,22 +92,22 @@ export default class G6TaskRunning extends BaseTaskRunning {
     });
   }
 
-  private animateKeyShape() {
-    // 初始化
-    this.keyShape.stopAnimate(false);
-    this.keyShape.attr(attrs.keyShape.default);
-
-    // 第一步
-    this.keyShape.animate(attrs.keyShape.first, {
-      duration: durations.keyShape.first,
-      callback: () => {
-        // 第二步
-        this.keyShape.animate(attrs.keyShape.second, {
-          duration: durations.keyShape.second,
-        });
-      },
-    });
-  }
+  // private animateKeyShape() {
+  //   // 初始化
+  //   this.keyShape.stopAnimate(false);
+  //   this.keyShape.attr(attrs.keyShape.default);
+  //
+  //   // 第一步
+  //   this.keyShape.animate(attrs.keyShape.first, {
+  //     duration: durations.keyShape.first,
+  //     callback: () => {
+  //       // 第二步
+  //       this.keyShape.animate(attrs.keyShape.second, {
+  //         duration: durations.keyShape.second,
+  //       });
+  //     },
+  //   });
+  // }
 
   private animateIconShape() {
     if (!this.iconShape) {
