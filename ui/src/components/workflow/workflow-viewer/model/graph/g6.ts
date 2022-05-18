@@ -251,7 +251,7 @@ export class G6Graph extends BaseGraph {
       return;
     }
 
-    const minRatio = super.zoom.min / 100;
+    const minRatio = this.zoom.min / 100;
 
     // 缩放到最小，判断是否溢出
     if (this.checkContentOverflow(minRatio)) {
