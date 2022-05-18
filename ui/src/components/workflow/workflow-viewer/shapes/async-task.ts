@@ -13,11 +13,9 @@ import G6TaskRunning from '../animations/task-running/g6';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 import { SHELL_NODE_TYPE } from '../model/data/common';
+import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
 
-export const size = {
-  width: 80,
-  height: 80,
-};
+const { icon: { width: iconW, height: iconH } } = NODE;
 
 const imgs: {
   [key: string]: any;
@@ -126,7 +124,7 @@ export default function (G6: typeof _G6) {
     NodeTypeEnum.ASYNC_TASK,
     {
       options: {
-        size: [size.width, size.height],
+        size: [iconW, iconH],
         anchorPoints: [
           [0.5, 0],
           [0.5, 1],
@@ -206,13 +204,11 @@ export default function (G6: typeof _G6) {
         }
       },
       afterDraw(cfg, group) {
-        const width = 82;
-        const height = 82;
+        const width = iconW;
+        const height = iconH;
         const { iconUrl, uniqueKey } = group?.cfg.item.getModel();
 
         if (!iconUrl) {
-          const width = 44;
-          const height = 44;
           group?.addShape('image', {
             attrs: {
               x: -width / 2,
@@ -251,22 +247,6 @@ export default function (G6: typeof _G6) {
           // must be assigned in G6 3.3 and later versions. it can be any value you want
           name: 'async_task_state_indicator',
         });
-
-        // const width = 82;
-        // const height = 82;
-        // clipImageBorder(`https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3?imageView2/2/w/${width}/h/${height}/interlace/1/q/100`,
-        //   width, height, 21.42, (base64: string) => {
-        //     group?.addShape('image', {
-        //       attrs: {
-        //         width: width,
-        //         height: height,
-        //         x: -width / 2,
-        //         y: -height / 2,
-        //         img: base64,
-        //       },
-        //       name: 'async_task_icon',
-        //     });
-        //   });
       },
     },
     'rect',
