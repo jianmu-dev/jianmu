@@ -18,6 +18,7 @@
           <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
         </jm-select>
       </jm-form-item>
+      <div class="version-description">{{ form.versionDescription }}</div>
       <div v-if="form.inputs">
         <jm-form-item
           v-for="(item,index) in form.inputs"
@@ -105,7 +106,8 @@ export default defineComponent({
      * @param inputs
      * @param outputs
      */
-    const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[]) => {
+    const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
+      form.value.versionDescription = versionDescription;
       if (inputs) {
         inputs.forEach(item => {
           form.value.inputs.push({
@@ -144,12 +146,12 @@ export default defineComponent({
         try {
           if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
             const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            const { inputParameters: inputs, outputParameters: outputs } = list;
-            pushParams(inputs, outputs);
+            const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
+            pushParams(inputs, outputs, versionDescription);
           } else {
             const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            const { inputParams: inputs, outputParams: outputs } = list;
-            pushParams(inputs, outputs);
+            const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
+            pushParams(inputs, outputs, versionDescription);
           }
         } catch (err) {
           proxy.$throw(err, proxy);
@@ -170,6 +172,17 @@ export default defineComponent({
 
   .jm-icon-button-help::before {
     margin: 0;
+  }
+
+  .node-name {
+    padding-top: 10px;
+  }
+
+  .version-description {
+    font-size: 12px;
+    color: #7B8C9C;
+    line-height: 18px;
+    margin-bottom: 10px;
   }
 }
 </style>
