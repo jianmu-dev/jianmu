@@ -171,5 +171,9 @@ export default defineComponent({
   .name-item {
     margin-top: 20px;
   }
+
+  .jm-icon-button-help::before {
+    margin: 0;
+  }
 }
 </style>
