@@ -28,7 +28,8 @@ export default class G6TaskRunning extends BaseTaskRunning {
     // children[2].setZIndex(-2);
 
     this.group = group;
-    this.iconShape = children.find(child => child.cfg.name === 'async_task_icon') as IShape | undefined;
+    this.iconShape = children.find(child =>
+      ['async_task_default_icon', 'async_task_icon'].includes(child.cfg.name)) as IShape | undefined;
     // this.keyShape = item.get('keyShape');
 
     group.sort();
