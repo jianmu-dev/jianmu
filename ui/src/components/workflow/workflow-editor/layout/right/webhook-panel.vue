@@ -121,6 +121,7 @@ import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
 
 import { v4 as uuidv4 } from 'uuid';
+import { Node } from '@antv/x6';
 
 export default defineComponent({
   components: { WebhookParam, SecretKeySelector, ExpressionEditor },
@@ -135,8 +136,8 @@ export default defineComponent({
     const formRef = ref();
     const form = ref<Webhook>(props.nodeData);
     const nodeId = ref<string>('');
-    const node = inject('getNode');
-    nodeId.value = node().id;
+    const getNode = inject('getNode') as () => Node;
+    nodeId.value = getNode().id;
 
 
     onMounted(() => emit('form-created', formRef.value));

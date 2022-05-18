@@ -47,15 +47,14 @@ export interface INodeDefVersionListVo
 }
 
 /**
- * 本地-获取节点定义版本-输入/输出参数
+ * 获取节点定义版本-输入/输出参数
  */
-export interface INodeParameter
+export interface INodeParameterVo
   extends Readonly<{
     name: string;
     ref: string;
     type: string;
     description: string;
-    parameterId: string;
     value: object;
     required: boolean;
   }> {
@@ -72,25 +71,9 @@ export interface INodeDefVersionVo
     creatorRef: string;
     version: string;
     resultFile: string;
-    inputParameters: INodeParameter[];
-    outputParameters: INodeParameter[];
+    inputParameters: INodeParameterVo[];
+    outputParameters: INodeParameterVo[];
     spec: string;
-  }> {
-}
-
-
-/**
- * 官方-获取节点输入输出参数
- */
-
-export interface IOfficialParamsVo
-  extends Readonly<{
-    ref: string;
-    name: string;
-    type: string;
-    required: boolean;
-    value: object;
-    description: string;
   }> {
 }
 
@@ -104,8 +87,8 @@ export interface INodeDefinitionVersionExampleVo
     description: string;
     workflowExample: string;
     pipelineExample: string;
-    inputParams: IOfficialParamsVo[];
-    outputParams: IOfficialParamsVo[];
+    inputParams: INodeParameterVo[];
+    outputParams: INodeParameterVo[];
     creatorName: string;
     creatorRef: string;
     creatorPortrait: string;
