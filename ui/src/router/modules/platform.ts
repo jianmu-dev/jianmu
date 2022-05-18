@@ -1,6 +1,10 @@
 import { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
 
 export default [
+  {
+    path: '/demo',
+    component: () => import('@/views/demo2.vue'),
+  },
   // 首页
   {
     name: 'index',
@@ -113,20 +117,6 @@ export default [
     props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
     meta: {
       title: '编辑项目',
-    },
-  },
-  {
-    name: 'workflow-execution-record-detail',
-    path: 'workflow-execution-record/detail',
-    component: () => import('@/views/workflow-execution-record/detail.vue'),
-    props: ({
-      query: { projectId, workflowExecutionRecordId },
-    }: RouteLocationNormalizedLoaded) => ({
-      projectId,
-      workflowExecutionRecordId,
-    }),
-    meta: {
-      title: '执行记录',
     },
   },
 ] as RouteRecordRaw[];

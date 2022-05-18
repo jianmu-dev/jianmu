@@ -1,14 +1,13 @@
 <template>
   <div class="workflow-execution-record-detail" v-loading="loading">
-    <div class="right-top-btn">
-      <jm-button type="primary" class="jm-icon-button-cancel" size="small" @click="close">关闭</jm-button>
-    </div>
     <div class="basic-section">
       <jm-tooltip content="触发" placement="left">
         <button class="trigger-btn jm-icon-button-on" @click="execute" @keypress.enter.prevent></button>
       </jm-tooltip>
       <div class="info">
         <div class="name">
+          <i class="jm-icon-button-left back" @click="goBack"></i>
+          <span>{{ data.record?.name }}</span>
           <router-link
             :to="{
               path: `/project-group/detail/${data.project?.projectGroupId}`,
@@ -18,7 +17,6 @@
                 data.project?.projectGroupName
               }}</span>
           </router-link>
-          <span>{{ data.record?.name }}</span>
         </div>
         <div
           class="desc"
@@ -361,6 +359,9 @@ export default defineComponent({
           .catch(() => {
           });
       },
+      goBack() {
+        router.back();
+      },
     };
   },
 });
@@ -374,16 +375,6 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 20px;
-
-  .right-top-btn {
-    position: fixed;
-    right: 20px;
-    top: 78px;
-
-    .jm-icon-button-cancel::before {
-      font-weight: bold;
-    }
-  }
 
   .basic-section {
     position: relative;
@@ -421,9 +412,22 @@ export default defineComponent({
         align-items: center;
         margin-bottom: 8px;
 
+        .back {
+          cursor: pointer;
+          width: 20px;
+          height: 20px;
+          line-height: 20px;
+          color: #6B7B8D;
+          margin-right: 20px;
+
+          &::before {
+            margin: 0;
+          }
+        }
+
         .project-group-name {
           padding: 2px 20px;
-          margin-right: 10px;
+          margin-left: 10px;
           background: #f0f7ff;
           border-radius: 2px;
         }
@@ -570,10 +574,15 @@ export default defineComponent({
       }
     }
 
+    //::v-deep(.el-scrollbar){
+    //  width: calc(100% - 60px);
+    //  margin: 0 auto;
+    //}
     .instance-tab-content {
       position: relative;
       display: flex;
       padding: 15px 30px;
+      //margin: 0 30px;
       color: #ffffff;
 
       &.init {
@@ -642,7 +651,7 @@ export default defineComponent({
 
   .workflow-section {
     > :first-child {
-      height: calc(100vh - 384px);
+      height: calc(100vh - 246px);
     }
   }
 }
