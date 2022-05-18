@@ -14,7 +14,6 @@ const toolItem = {
       'stroke-dasharray': 'none',
       // 线宽
       'stroke-width': attrs.shape.default.lineWidth,
-      // 'fill-opacity': 0.2,
       opacity: attrs.shape.default.opacity,
     },
   },
@@ -25,7 +24,10 @@ const toolItem = {
  */
 export default class X6TaskRunning extends BaseTaskRunning {
   private readonly view: CellView;
-  private readonly iconShape?: HTMLElement;
+  private readonly keyShape: HTMLElement;
+  private keyShapeInterval: any;
+  private readonly iconShape: HTMLElement;
+  private iconShapeInterval: any;
 
   constructor(view: CellView) {
     view.cell.addTools(toolItem);
@@ -34,6 +36,15 @@ export default class X6TaskRunning extends BaseTaskRunning {
       .filter(el => (el.getAttribute('data-cell-id') === view.cell.id)) as SVGElement[]);
 
     this.view = view;
+
+    const vueShape = Array.from(this.view.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
+      .filter(el => (el.getAttribute('data-x6-node-id') === this.view.cell.id))[0];
+    this.keyShape = vueShape.querySelector('.icon') as HTMLElement;
+    this.keyShape.style.transition =
+      `background-color ${Math.round(durations.keyShape.first / 1000)}s linear`;
+    this.iconShape = vueShape.querySelector('.img')! as HTMLElement;
+    this.iconShape.style.transition =
+      `opacity ${Math.round(durations.iconShape.first / 1000)}s linear`;
   }
 
   start(): void {
@@ -48,7 +59,19 @@ export default class X6TaskRunning extends BaseTaskRunning {
   stop(): void {
     this.view.cell.removeTool('boundary');
 
-    console.log(`${this.view.cell.id} stopped`);
+    if (this.keyShapeInterval) {
+      clearInterval(this.keyShapeInterval);
+      delete this.keyShapeInterval;
+    }
+    this.keyShape.style.transition = '';
+    this.keyShape.style.backgroundColor = '';
+
+    if (this.iconShapeInterval) {
+      clearInterval(this.iconShapeInterval);
+      delete this.iconShapeInterval;
+    }
+    this.iconShape.style.transition = '';
+    this.iconShape.style.opacity;
   }
 
   private animateShape(_shape: RunningShape, key: string) {
@@ -134,10 +157,24 @@ export default class X6TaskRunning extends BaseTaskRunning {
   }
 
   private animateKeyShape() {
-    // TODO 待完善
+    // 初始化
+    this.keyShape.style.backgroundColor = attrs.keyShape.default.stroke;
+
+    let index = 0;
+    this.keyShapeInterval = setInterval(() => {
+      this.keyShape.style.backgroundColor = `${index++ % 2 === 0 ?
+        attrs.keyShape.first.stroke : attrs.keyShape.second.stroke}`;
+    }, durations.keyShape.first);
   }
 
   private animateIconShape() {
-    // TODO 待完善
+    // 初始化
+    this.iconShape.style.opacity = `${attrs.iconShape.default}`;
+
+    let index = 0;
+    this.iconShapeInterval = setInterval(() => {
+      this.iconShape.style.opacity = `${index++ % 2 === 0 ?
+        attrs.iconShape.first.opacity : attrs.iconShape.second.opacity}`;
+    }, durations.iconShape.first);
   }
 }
