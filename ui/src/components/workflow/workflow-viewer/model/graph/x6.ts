@@ -128,6 +128,8 @@ export class X6Graph extends BaseGraph {
 
   updateNodeStates(tasks: ITaskExecutionRecordVo[]): void {
     const nodes = this.getTaskNodes();
+    const completeNodes: Node[] = [];
+    const runningNodes: Node[] = [];
 
     tasks.forEach(({ nodeName, status }) => {
       const index = this.asyncTaskRefs.indexOf(nodeName);
@@ -136,40 +138,21 @@ export class X6Graph extends BaseGraph {
       }
 
       const node = nodes[index];
-      // 移除指示灯
-      node.removeTools();
-      // 添加新指示灯
-      node.addTools({
-        name: 'button',
-        args: {
-          markup: [
-            {
-              tagName: 'circle',
-              selector: 'button',
-              attrs: {
-                r: 4,
-                fill: states[status].indicatorStyle.fill,
-                cursor: 'default',
-              },
-            },
-          ],
-          x: '100%',
-          y: 0,
-          offset: { x: 4, y: 4 },
-        },
-      });
+      this.refreshIndicator(node, status);
 
-      let shapeEl = this.getShapeEl(node.id);
-      if (shapeEl) {
-        shapeEl.setAttribute('x6-task-status', status);
-        return;
+      const shapeEl = this.getShapeEl(node.id);
+
+      const previousStatus = shapeEl.getAttribute('x6-task-status');
+      if (status === TaskStatusEnum.RUNNING) {
+        runningNodes.push(node);
+      } else if (previousStatus === TaskStatusEnum.RUNNING) {
+        completeNodes.push(node);
       }
-      setTimeout(() => {
-        // 保证渲染完成
-        shapeEl = this.getShapeEl(node.id);
-        shapeEl.setAttribute('x6-task-status', status);
-      }, 100);
+      shapeEl.setAttribute('x6-task-status', status);
     });
+
+    completeNodes.forEach(node => this.stopAnimation(node));
+    runningNodes.forEach(node => this.startAnimation(node));
   }
 
   highlightNodeState(status: TaskStatusEnum, active: boolean): void {
@@ -218,6 +201,51 @@ export class X6Graph extends BaseGraph {
   private getShapeEl(nodeId: string): HTMLElement {
     return Array.from(this.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
       .filter(el => (el.getAttribute('data-x6-node-id') === nodeId))[0] as HTMLElement;
+  }
+
+  private refreshIndicator(node: Node, status: TaskStatusEnum): void {
+    // 移除指示灯
+    node.removeTool('button');
+    // 添加新指示灯
+    node.addTools({
+      name: 'button',
+      args: {
+        markup: [
+          {
+            tagName: 'circle',
+            selector: 'button',
+            attrs: {
+              r: 4,
+              fill: states[status].indicatorStyle.fill,
+              cursor: 'default',
+            },
+          },
+        ],
+        x: '100%',
+        y: 0,
+        offset: { x: 4, y: 4 },
+      },
+    });
+  }
+
+  private startAnimation(node: Node): void {
+    const edges = this.graph.getIncomingEdges(node) || [];
+    edges.push(...(this.graph.getOutgoingEdges(node) || []));
+
+    edges.forEach(edge => {
+      edge.setAttrByPath('line/strokeDasharray', '4, 2, 1, 2');
+      edge.setAttrByPath('line/style/animation', 'x6-edge-running 10s linear infinite');
+    });
+  }
+
+  private stopAnimation(node: Node): void {
+    const edges = this.graph.getIncomingEdges(node) || [];
+    edges.push(...(this.graph.getOutgoingEdges(node) || []));
+
+    edges.forEach(edge => {
+      edge.removeAttrByPath('line/strokeDasharray');
+      edge.removeAttrByPath('line/style/animation');
+    });
   }
 
   private buildEvt(node: Node): {
