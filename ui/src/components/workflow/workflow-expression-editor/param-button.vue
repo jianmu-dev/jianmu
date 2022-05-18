@@ -1,5 +1,5 @@
 <template>
-  <div class="param-button">
+  <div class="param-button" :class="{disable}">
     <jm-cascader
       placement="top"
       :options="selectableParams"
@@ -28,12 +28,18 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const selectValue = ref<string[]>([]);
+    const disable = ref<boolean>(false);
+    // 没有数据按钮不可点击
+    if (props.selectableParams.length === 0) {
+      disable.value = true;
+    }
     return {
       insertParam(arr: string[]) {
         emit('inserted', arr);
         selectValue.value = [];
       },
       selectValue,
+      disable,
     };
   },
 });
@@ -45,6 +51,11 @@ export default defineComponent({
 .param-button {
   color: #6B7B8D;
   position: relative;
+
+  &.disable {
+    pointer-events: none;
+    color: #A7B0BB;
+  }
 
   &:hover {
     color: @primary-color;
@@ -59,6 +70,7 @@ export default defineComponent({
 
     .text {
       font-size: 12px;
+      margin-left: 3px;
     }
   }
 
@@ -81,6 +93,10 @@ export default defineComponent({
 
       .el-input__icon {
         line-height: 0;
+      }
+
+      .el-input__suffix {
+        display: none;
       }
     }
   }
