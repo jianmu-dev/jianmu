@@ -53,6 +53,9 @@ export default class X6TaskRunning extends BaseTaskRunning {
       Object.keys(attrs.shape.first)
         .flatMap(key => (key === 'radius') ? ['rx', 'ry'] : key)
         .forEach(key => this.animateShape(super.getShapes()[0], key));
+
+      this.animateIconShape();
+      this.animateKeyShape();
     }, 1000);
   }
 
@@ -71,7 +74,7 @@ export default class X6TaskRunning extends BaseTaskRunning {
       delete this.iconShapeInterval;
     }
     this.iconShape.style.transition = '';
-    this.iconShape.style.opacity;
+    this.iconShape.style.opacity = '';
   }
 
   private animateShape(_shape: RunningShape, key: string) {
@@ -84,11 +87,6 @@ export default class X6TaskRunning extends BaseTaskRunning {
     // 第一步
     this.buildAnimations(shape, key, undefined, attrs.shape.first, durations.shape.first, () => {
       // 第二步
-      if (this.iconShape) {
-        this.animateIconShape();
-      }
-      this.animateKeyShape();
-
       this.buildAnimations(shape, key, attrs.shape.first, attrs.shape.second, durations.shape.second, () => {
         // 第三步
         this.buildAnimations(shape, key, attrs.shape.second, attrs.shape.third, durations.shape.third);
