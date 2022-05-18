@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="operations">
-        <jm-button @click="save(true)" @keypress.enter.prevent>保存并返回</jm-button>
+        <jm-button class="save-return" @click="save(true)" @keypress.enter.prevent>保存并返回</jm-button>
         <jm-button type="primary" @click="save(false)" @keypress.enter.prevent>保存</jm-button>
       </div>
     </div>
@@ -180,6 +180,13 @@ export default defineComponent({
     }
 
     .operations {
+      .save-return {
+        background: #F5F5F5;
+        border-radius: 2px;
+        color: #082340;
+        border: none;
+        box-shadow: none;
+      }
     }
   }
 }
