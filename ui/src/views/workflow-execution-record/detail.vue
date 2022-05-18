@@ -574,15 +574,10 @@ export default defineComponent({
       }
     }
 
-    //::v-deep(.el-scrollbar){
-    //  width: calc(100% - 60px);
-    //  margin: 0 auto;
-    //}
     .instance-tab-content {
       position: relative;
       display: flex;
       padding: 15px 30px;
-      //margin: 0 30px;
       color: #ffffff;
 
       &.init {
