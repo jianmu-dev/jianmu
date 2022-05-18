@@ -194,6 +194,7 @@ export default defineComponent({
 
   .jm-icon-button-help::before {
     font-size: 14px;
+    margin: 0;
   }
 
   .jm-icon-button-help {

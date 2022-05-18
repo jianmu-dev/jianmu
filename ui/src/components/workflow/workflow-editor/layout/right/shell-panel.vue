@@ -101,11 +101,15 @@ export default defineComponent({
   }
 
   .shell-env {
+    .jm-icon-button-help::before {
+      margin: 0;
+    }
+
     .shell-env-content {
       border: 1px solid #E6EBF2;
 
       .add-shell-env {
-        padding: 10px 0 10px 20px;
+        padding: 14px 20px;
         color: @primary-color;
         cursor: pointer;
 
