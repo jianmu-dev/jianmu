@@ -32,7 +32,7 @@
             :show-word-limit="true"/>
         </jm-form-item>
         <div class="btn-container">
-          <jm-button @click="cancel">取消</jm-button>
+          <jm-button @click="cancel" class="cancel">取消</jm-button>
           <jm-button type="primary" @click="save(editProjectInfoRef)">确定</jm-button>
         </div>
       </jm-form>
@@ -129,6 +129,14 @@ export default defineComponent({
     .btn-container {
       display: flex;
       justify-content: flex-end;
+
+      .cancel {
+        color: #082340;
+        background: #F5F5F5;
+        border-radius: 2px;
+        border: none;
+        box-shadow: none;
+      }
     }
   }
 }

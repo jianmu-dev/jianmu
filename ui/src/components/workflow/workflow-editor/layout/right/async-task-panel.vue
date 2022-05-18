@@ -7,9 +7,9 @@
       @submit.prevent
     >
       <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
-        <jm-input v-model="form.name" clearable show-word-limit :maxlength="36"/>
+        <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
-      <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version">
+      <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
         <jm-select
           v-model="form.version"
           placeholder="请选择节点版本"
@@ -18,12 +18,14 @@
           <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
         </jm-select>
       </jm-form-item>
+      <div class="version-description">{{ form.versionDescription }}</div>
       <div v-if="form.inputs">
         <jm-form-item
           v-for="(item,index) in form.inputs"
           :key="item.ref"
           :prop="`inputs.${index}.value`"
           :rules="nodeData.getFormRules().inputs.fields[index].fields.value"
+          class="node-name"
         >
           <template #label>
             {{ item.name }}
@@ -55,16 +57,17 @@
 <script lang="ts">
 import { defineComponent, getCurrentInstance, inject, onMounted, PropType, ref } from 'vue';
 import { AsyncTask } from '../../model/data/node/async-task';
-import { ParamTypeEnum } from '../../model/data/enumeration';
+import { NodeGroupEnum, ParamTypeEnum } from '../../model/data/enumeration';
 import {
   getLocalNodeParams,
   getLocalVersionList,
   getOfficialNodeParams,
   getOfficialVersionList,
 } from '@/api/node-library';
-import { INodeDefVersionListVo, INodeParameter, IOfficialParamsVo } from '@/api/dto/node-definitions';
+import { INodeDefVersionListVo, INodeParameterVo } from '@/api/dto/node-definitions';
 import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
+import { Node } from '@antv/x6';
 
 export default defineComponent({
   components: { SecretKeySelector, ExpressionEditor },
@@ -82,14 +85,14 @@ export default defineComponent({
     // 版本列表
     const versionList = ref<INodeDefVersionListVo>({ versions: [] });
     const nodeId = ref<string>('');
-    const node = inject('getNode');
-    nodeId.value = node().id;
+    const getNode = inject('getNode') as () => Node;
+    nodeId.value = getNode().id;
 
     onMounted(async () => {
       emit('form-created', formRef.value);
       // 获取versionList
       try {
-        if (props.nodeData.ownerRef === 'local') {
+        if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
           versionList.value = await getLocalVersionList(form.value.getRef(), form.value.ownerRef);
         } else {
           versionList.value = await getOfficialVersionList(form.value.getRef(), form.value.ownerRef);
@@ -98,6 +101,39 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     });
+
+    /**
+     * push输入/输出参数
+     * @param inputs
+     * @param outputs
+     */
+    const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
+      form.value.versionDescription = versionDescription;
+      if (inputs) {
+        inputs.forEach(item => {
+          form.value.inputs.push({
+            ref: item.ref,
+            name: item.name,
+            type: item.type as ParamTypeEnum,
+            value: (item.value || '').toString(),
+            required: item.required,
+            description: item.description,
+          });
+        });
+      }
+      if (outputs) {
+        outputs.forEach(item => {
+          form.value.outputs.push({
+            ref: item.ref,
+            name: item.name,
+            type: item.type as ParamTypeEnum,
+            value: (item.value || '').toString(),
+            required: item.required,
+            description: item.description,
+          });
+        });
+      }
+    };
     return {
       formRef,
       form,
@@ -108,52 +144,15 @@ export default defineComponent({
       changeVersion: async () => {
         form.value.inputs.length = 0;
         form.value.outputs.length = 0;
-
         try {
-          if (props.nodeData.ownerRef === 'local') {
+          if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
             const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            if (list.inputParameters) {
-              list.inputParameters.forEach((param: INodeParameter) => form.value.inputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
-            if (list.outputParameters) {
-              list.outputParameters.forEach((param: INodeParameter) => form.value.outputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
+            const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
+            pushParams(inputs, outputs, versionDescription);
           } else {
             const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            if (list.inputParams) {
-              list.inputParams.forEach((param: IOfficialParamsVo) => form.value.inputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
-            if (list.outputParams) {
-              list.outputParams.forEach((param: IOfficialParamsVo) => form.value.outputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
+            const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
+            pushParams(inputs, outputs, versionDescription);
           }
         } catch (err) {
           proxy.$throw(err, proxy);
@@ -170,6 +169,25 @@ export default defineComponent({
 
   .name-item {
     margin-top: 20px;
+  }
+
+  .node-item {
+    padding-top: 10px;
+  }
+
+  .jm-icon-button-help::before {
+    margin: 0;
+  }
+
+  .node-name {
+    padding-top: 10px;
+  }
+
+  .version-description {
+    font-size: 12px;
+    color: #7B8C9C;
+    line-height: 18px;
+    margin-bottom: 10px;
   }
 }
 </style>

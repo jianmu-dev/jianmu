@@ -145,6 +145,14 @@ export default defineComponent({
   padding: 20px;
   position: relative;
 
+  &.switch-bgc {
+    background: #EFF7FF;
+
+    &:hover {
+      background: #EFF7FF;
+    }
+  }
+
   //  默认值
   .default-value {
     margin-top: 10px;
@@ -175,13 +183,9 @@ export default defineComponent({
     }
   }
 
-}
-
-.switch-bgc {
-  background: #EFF7FF;
-
-  &:hover {
-    background: #EFF7FF;
+  // 帮助
+  .jm-icon-button-help::before {
+    margin: 0;
   }
 }
 

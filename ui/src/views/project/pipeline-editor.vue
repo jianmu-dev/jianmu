@@ -1,17 +1,19 @@
 <template>
   <div class="pipeline" v-loading="loading">
     <jm-workflow-editor v-model="workflow" @back="close" @save="save"
-                        v-if="!loading"/>
+                        v-if="!loaded"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, inject, onMounted, ref } from 'vue';
+import { defineComponent, getCurrentInstance, inject, nextTick, onMounted, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import yaml from 'yaml';
+import { namespace } from '@/store/modules/session';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
@@ -22,7 +24,13 @@ export default defineComponent({
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
+    const route = useRoute();
+    const store = useStore();
+    const sessionState = { ...store.state[namespace] };
+    const { payload } = route.params;
     const loading = ref<boolean>(false);
+    // workflow数据是否加载完成
+    const loaded = ref<boolean>(false);
     const reloadMain = inject('reloadMain') as () => void;
     const editMode = !!props.id;
     const workflow = ref<IWorkflow>({
@@ -33,10 +41,36 @@ export default defineComponent({
       },
       data: '',
     });
+    // 验证用户是否登录
+    const authLogin = () => {
+      if (sessionState.session) {
+        return;
+      }
+      proxy.$confirm('未登录，操作内容将会丢失。', '尚未登录', {
+        confirmButtonText: '登录',
+        cancelButtonText: '取消',
+        type: 'info',
+      }).then(async () => {
+        await router.push({
+          name: 'login',
+        });
+      }).catch(() => {
+      });
+    };
     onMounted(async () => {
+      // 如果路由中带有workflow的回显数据不在发送请求
+      if (payload && editMode) {
+        workflow.value = JSON.parse(payload as string);
+        loaded.value = true;
+        await nextTick();
+        loaded.value = false;
+        return;
+      }
       if (editMode) {
+        authLogin();
         try {
           loading.value = true;
+          loaded.value = true;
           const { dslText, projectGroupId } = await fetchProjectDetail(props.id as string);
           const rawData = yaml.parse(dslText)['raw-data'];
           const { name, global } = yaml.parse(dslText);
@@ -52,13 +86,17 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         } finally {
           loading.value = false;
+          loaded.value = false;
         }
+      } else {
+        authLogin();
       }
     });
     const close = async () => {
       await router.push({ name: 'index' });
     };
     return {
+      loaded,
       loading,
       workflow,
       close,

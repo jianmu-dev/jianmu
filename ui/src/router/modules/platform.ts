@@ -115,18 +115,4 @@ export default [
       title: '编辑项目',
     },
   },
-  {
-    name: 'workflow-execution-record-detail',
-    path: 'workflow-execution-record/detail',
-    component: () => import('@/views/workflow-execution-record/detail.vue'),
-    props: ({
-      query: { projectId, workflowExecutionRecordId },
-    }: RouteLocationNormalizedLoaded) => ({
-      projectId,
-      workflowExecutionRecordId,
-    }),
-    meta: {
-      title: '执行记录',
-    },
-  },
 ] as RouteRecordRaw[];

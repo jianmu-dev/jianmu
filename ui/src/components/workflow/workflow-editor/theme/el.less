@@ -57,9 +57,11 @@
 // 级联选择框样式
 .el-cascader {
   width: 100%;
+  line-height: 10px;
 }
 
 .el-form {
+  overflow: hidden;
   //  表单项设置
   .el-form-item {
     margin-bottom: 10px;
@@ -68,6 +70,7 @@
       padding: 0;
       line-height: 20px;
       margin-bottom: 10px;
+      color: @label-color;
     }
 
     .el-form-item__error {
@@ -76,6 +79,17 @@
 
     .el-form-item__content {
       line-height: 10px;
+    }
+    // jm-workflow-expression-editor验证错误时边框样式
+    &.is-error {
+      .el-form-item__content {
+        .jm-workflow-expression-editor {
+          .container {
+            border: 1px solid #F56C6C;
+          }
+        }
+      }
+
     }
   }
 }
@@ -119,7 +133,6 @@
 // 输入框高度设置
 .el-input {
   line-height: 36px;
-  overflow: hidden;
 
   .el-input__inner {
     height: 36px;
@@ -149,4 +162,8 @@
 .el-popper {
   line-height: 22px;
   font-size: 14px;
+}
+
+.el-button--primary {
+  box-shadow: none;
 }

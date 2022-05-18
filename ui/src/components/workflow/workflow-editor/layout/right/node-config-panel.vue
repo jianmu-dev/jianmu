@@ -24,7 +24,7 @@
                           :node-data="nodeData" @form-created="handleFormCreated"/>
       </jm-scrollbar>
       <div class="footer">
-        <jm-button @click="cancel">取消</jm-button>
+        <jm-button @click="cancel" class="cancel">取消</jm-button>
         <jm-button type="primary" @click="save">保存</jm-button>
       </div>
     </div>
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, inject, provide, ref } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
@@ -54,6 +54,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
+    const { proxy: instance } = getCurrentInstance() as any;
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
     const node = graph.getNodes().find(({ id }) => props.nodeId === id)!;
@@ -91,6 +92,8 @@ export default defineComponent({
 
           // 通过校验时，删除警告
           node.removeTool('button');
+
+          instance.$success('保存成功');
         });
       },
     };
@@ -108,7 +111,7 @@ export default defineComponent({
     text-align: center;
     line-height: 20px;
     font-size: 14px;
-    margin-left: 7px;
+    margin-left: 2px;
 
     &:hover {
       background: #EFF7FF;
@@ -122,19 +125,28 @@ export default defineComponent({
     flex-direction: column;
 
     .panel-container {
-      height: calc(100vh - 210px);
+      height: calc(100vh - 191px);
       padding: 0 20px;
     }
 
     .footer {
       box-sizing: border-box;
       width: 100%;
-      height: 75px;
+      height: 63px;
       display: flex;
       border-top: 1px solid #E6EBF2;
       justify-content: center;
       align-items: center;
     }
+
+    .cancel {
+      background: #F5F5F5;
+      color: #082340;
+      border-radius: 2px;
+      border: none;
+      box-shadow: none;
+    }
+
   }
 }
 </style>

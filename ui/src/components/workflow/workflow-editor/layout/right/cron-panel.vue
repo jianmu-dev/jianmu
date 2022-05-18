@@ -7,7 +7,7 @@
       @submit.prevent
     >
       <jm-form-item label="schedule" prop="schedule" class="schedule-item">
-        <jm-input v-model="form.schedule" clearable></jm-input>
+        <jm-input v-model="form.schedule" placeholder="请输入cron表达式"></jm-input>
       </jm-form-item>
     </jm-form>
   </div>

@@ -32,6 +32,7 @@
 import { defineComponent, inject, PropType, ref } from 'vue';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from './expression-editor.vue';
+import { Node } from '@antv/x6';
 
 export default defineComponent({
   components: { ExpressionEditor },
@@ -64,8 +65,8 @@ export default defineComponent({
     const switchBackgroundFlag = ref<boolean>(false);
     const envValRef = ref<HTMLElement>();
     const nodeId = ref<string>('');
-    const node = inject('getNode');
-    nodeId.value = node().id;
+    const getNode = inject('getNode') as () => Node;
+    nodeId.value = getNode().id;
 
 
     return {

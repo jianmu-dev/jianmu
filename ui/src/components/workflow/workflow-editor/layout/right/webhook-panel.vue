@@ -94,7 +94,7 @@
                 <template #content>
                   <div>匹配规则，结果为 true 时触发流程，当</div>
                   <div>
-                    <span>前只可引用触发器参数详见</span>
+                    <span>前只可引用触发器参数。详见</span>
                     <a href="https://docs.jianmu.dev/guide/expression.html"
                        target="_blank"
                        style="color:#fff;text-decoration: underline;">运算表达式</a>
@@ -121,6 +121,7 @@ import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
 
 import { v4 as uuidv4 } from 'uuid';
+import { Node } from '@antv/x6';
 
 export default defineComponent({
   components: { WebhookParam, SecretKeySelector, ExpressionEditor },
@@ -135,8 +136,8 @@ export default defineComponent({
     const formRef = ref();
     const form = ref<Webhook>(props.nodeData);
     const nodeId = ref<string>('');
-    const node = inject('getNode');
-    nodeId.value = node().id;
+    const getNode = inject('getNode') as () => Node;
+    nodeId.value = getNode().id;
 
 
     onMounted(() => emit('form-created', formRef.value));
@@ -194,6 +195,7 @@ export default defineComponent({
 
   .jm-icon-button-help::before {
     font-size: 14px;
+    margin: 0;
   }
 
   .jm-icon-button-help {
