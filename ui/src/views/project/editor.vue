@@ -1,5 +1,7 @@
 <template>
-  <div class="project-editor" v-loading="loading">
+  <div class="project-editor">
+    <!-- loading时的加载页面 -->
+    <div class="loading-over" v-show="loading" v-loading="loading"></div>
     <div class="right-top-btn">
       <jm-button class="jm-icon-button-cancel" size="small" @click="close">取消</jm-button>
       <jm-button
@@ -144,22 +146,32 @@ export default defineComponent({
 
     if (editMode) {
       loading.value = !loading.value;
-
       fetchProjectDetail(props.id)
-        .then(({ dslText, projectGroupId }) => {
-          if (checkDsl(dslText)) {
-            router.replace({
-              name: 'update-pipeline',
-              params: {
-                id: props.id,
-              },
-            });
-            return;
-          }
+        .then(async ({ dslText, projectGroupId }) => {
           editorForm.value.dslText = dslText;
           // 回显项目组
           editorForm.value.projectGroupId = projectGroupId;
           loading.value = !loading.value;
+          if (checkDsl(dslText)) {
+            const rawData = yaml.parse(dslText)['raw-data'];
+            const { name, global } = yaml.parse(dslText);
+            const payload = {
+              name,
+              groupId: projectGroupId,
+              global: {
+                concurrent: global ? global.concurrent : false,
+              },
+              data: rawData,
+            };
+            await router.replace({
+              name: 'update-pipeline',
+              params: {
+                id: props.id,
+                payload: JSON.stringify(payload),
+              },
+            });
+            return;
+          }
         })
         .catch((err: Error) => {
           loading.value = !loading.value;
@@ -240,6 +252,16 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
+
+  .loading-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    background-color: #FFFFFF;
+    width: 100vw;
+    height: 100vh;
+  }
 
   .form {
     padding: 24px;
