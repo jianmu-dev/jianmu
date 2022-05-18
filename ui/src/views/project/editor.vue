@@ -148,10 +148,6 @@ export default defineComponent({
       loading.value = !loading.value;
       fetchProjectDetail(props.id)
         .then(async ({ dslText, projectGroupId }) => {
-          editorForm.value.dslText = dslText;
-          // 回显项目组
-          editorForm.value.projectGroupId = projectGroupId;
-          loading.value = !loading.value;
           if (checkDsl(dslText)) {
             const rawData = yaml.parse(dslText)['raw-data'];
             const { name, global } = yaml.parse(dslText);
@@ -172,6 +168,11 @@ export default defineComponent({
             });
             return;
           }
+          // 判断dslText是否有raw-data后再回显数据
+          editorForm.value.dslText = dslText;
+          // 回显项目组
+          editorForm.value.projectGroupId = projectGroupId;
+          loading.value = !loading.value;
         })
         .catch((err: Error) => {
           loading.value = !loading.value;
