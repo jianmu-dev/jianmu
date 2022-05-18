@@ -55,16 +55,17 @@
 <script lang="ts">
 import { defineComponent, getCurrentInstance, inject, onMounted, PropType, ref } from 'vue';
 import { AsyncTask } from '../../model/data/node/async-task';
-import { ParamTypeEnum } from '../../model/data/enumeration';
+import { NodeGroupEnum, ParamTypeEnum } from '../../model/data/enumeration';
 import {
   getLocalNodeParams,
   getLocalVersionList,
   getOfficialNodeParams,
   getOfficialVersionList,
 } from '@/api/node-library';
-import { INodeDefVersionListVo, INodeParameter, IOfficialParamsVo } from '@/api/dto/node-definitions';
+import { INodeDefVersionListVo, INodeParameterVo } from '@/api/dto/node-definitions';
 import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
+import { Node } from '@antv/x6';
 
 export default defineComponent({
   components: { SecretKeySelector, ExpressionEditor },
@@ -82,14 +83,14 @@ export default defineComponent({
     // 版本列表
     const versionList = ref<INodeDefVersionListVo>({ versions: [] });
     const nodeId = ref<string>('');
-    const node = inject('getNode');
-    nodeId.value = node().id;
+    const getNode = inject('getNode') as () => Node;
+    nodeId.value = getNode().id;
 
     onMounted(async () => {
       emit('form-created', formRef.value);
       // 获取versionList
       try {
-        if (props.nodeData.ownerRef === 'local') {
+        if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
           versionList.value = await getLocalVersionList(form.value.getRef(), form.value.ownerRef);
         } else {
           versionList.value = await getOfficialVersionList(form.value.getRef(), form.value.ownerRef);
@@ -98,6 +99,38 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     });
+
+    /**
+     * push输入/输出参数
+     * @param inputs
+     * @param outputs
+     */
+    const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[]) => {
+      if (inputs) {
+        inputs.forEach(item => {
+          form.value.inputs.push({
+            ref: item.ref,
+            name: item.name,
+            type: item.type as ParamTypeEnum,
+            value: (item.value || '').toString(),
+            required: item.required,
+            description: item.description,
+          });
+        });
+      }
+      if (outputs) {
+        outputs.forEach(item => {
+          form.value.outputs.push({
+            ref: item.ref,
+            name: item.name,
+            type: item.type as ParamTypeEnum,
+            value: (item.value || '').toString(),
+            required: item.required,
+            description: item.description,
+          });
+        });
+      }
+    };
     return {
       formRef,
       form,
@@ -108,52 +141,15 @@ export default defineComponent({
       changeVersion: async () => {
         form.value.inputs.length = 0;
         form.value.outputs.length = 0;
-
         try {
-          if (props.nodeData.ownerRef === 'local') {
+          if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
             const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            if (list.inputParameters) {
-              list.inputParameters.forEach((param: INodeParameter) => form.value.inputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
-            if (list.outputParameters) {
-              list.outputParameters.forEach((param: INodeParameter) => form.value.outputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
+            const { inputParameters: inputs, outputParameters: outputs } = list;
+            pushParams(inputs, outputs);
           } else {
             const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            if (list.inputParams) {
-              list.inputParams.forEach((param: IOfficialParamsVo) => form.value.inputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
-            if (list.outputParams) {
-              list.outputParams.forEach((param: IOfficialParamsVo) => form.value.outputs.push({
-                ref: param.ref,
-                name: param.name,
-                type: param.type as ParamTypeEnum,
-                value: (param.value || '').toString(),
-                required: param.required,
-                description: param.description,
-              }));
-            }
+            const { inputParams: inputs, outputParams: outputs } = list;
+            pushParams(inputs, outputs);
           }
         } catch (err) {
           proxy.$throw(err, proxy);
