@@ -7,9 +7,9 @@
       @submit.prevent
     >
       <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
-        <jm-input v-model="form.name" clearable show-word-limit :maxlength="36"/>
+        <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
-      <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version">
+      <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
         <jm-select
           v-model="form.version"
           placeholder="请选择节点版本"
@@ -25,6 +25,7 @@
           :key="item.ref"
           :prop="`inputs.${index}.value`"
           :rules="nodeData.getFormRules().inputs.fields[index].fields.value"
+          class="node-name"
         >
           <template #label>
             {{ item.name }}
@@ -168,6 +169,10 @@ export default defineComponent({
 
   .name-item {
     margin-top: 20px;
+  }
+
+  .node-item {
+    padding-top: 10px;
   }
 
   .jm-icon-button-help::before {
