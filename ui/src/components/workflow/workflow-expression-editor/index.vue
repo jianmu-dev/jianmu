@@ -99,6 +99,7 @@ export default defineComponent({
 
   .container {
     line-height: 34px;
+    background-color: #FFFFFF;
 
     &:hover {
       border-color: @primary-color;
