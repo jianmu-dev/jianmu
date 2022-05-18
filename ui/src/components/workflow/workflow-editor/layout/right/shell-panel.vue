@@ -7,12 +7,12 @@
       @submit.prevent
     >
       <jm-form-item label="节点名称" prop="name" :rules="nodeData.getFormRules().name" class="node-name">
-        <jm-input v-model="form.name" clearable/>
+        <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
-      <jm-form-item label="镜像" prop="image" :rules="nodeData.getFormRules().image">
+      <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">
         <jm-input v-model="form.image" placeholder="请输入docker镜像"/>
       </jm-form-item>
-      <jm-form-item class="shell-env">
+      <jm-form-item class="shell-env node-item">
         <template #label>
           环境变量
           <jm-tooltip placement="top">
@@ -98,6 +98,10 @@ export default defineComponent({
 
   .node-name {
     margin-top: 20px;
+  }
+
+  .node-item {
+    padding-top: 10px;
   }
 
   .shell-env {

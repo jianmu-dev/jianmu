@@ -94,7 +94,7 @@
                 <template #content>
                   <div>匹配规则，结果为 true 时触发流程，当</div>
                   <div>
-                    <span>前只可引用触发器参数详见</span>
+                    <span>前只可引用触发器参数。详见</span>
                     <a href="https://docs.jianmu.dev/guide/expression.html"
                        target="_blank"
                        style="color:#fff;text-decoration: underline;">运算表达式</a>
