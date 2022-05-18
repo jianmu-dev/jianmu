@@ -11,11 +11,14 @@ import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 import { Cron } from '@/components/workflow/workflow-editor/model/data/node/cron';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { states } from '@/components/workflow/workflow-viewer/shapes/async-task';
+import { BaseTaskRunning } from '../../animations/base-task-running';
+import X6TaskRunning from '@/components/workflow/workflow-viewer/animations/task-running/x6';
 
 export class X6Graph extends BaseGraph {
   private readonly asyncTaskRefs: string[];
   private readonly graph: Graph;
   private readonly workflowTool: WorkflowTool;
+  private readonly runningAnimations: Record<string, BaseTaskRunning>;
 
   constructor(dsl: string, triggerType: TriggerTypeEnum, container: HTMLElement) {
     const { dslType, asyncTaskRefs, data } = parse(dsl, triggerType);
@@ -64,7 +67,32 @@ export class X6Graph extends BaseGraph {
     // 初始化工具
     this.workflowTool = new WorkflowTool(this.graph);
 
+    this.runningAnimations = {};
+
     render(this.graph, data, this.workflowTool);
+
+    this.graph.getNodes().forEach(node => {
+      // 添加指示灯
+      node.addTools({
+        name: 'button',
+        args: {
+          markup: [
+            {
+              tagName: 'circle',
+              selector: 'button',
+              attrs: {
+                r: 4,
+                fill: states[TaskStatusEnum.INIT].indicatorStyle.fill,
+                cursor: 'default',
+              },
+            },
+          ],
+          x: '100%',
+          y: 0,
+          offset: { x: 4, y: 4 },
+        },
+      });
+    });
   }
 
   hideNodeToolbar(asyncTaskRef: string): void {
@@ -204,31 +232,21 @@ export class X6Graph extends BaseGraph {
   }
 
   private refreshIndicator(node: Node, status: TaskStatusEnum): void {
-    // 移除指示灯
-    node.removeTool('button');
-    // 添加新指示灯
-    node.addTools({
-      name: 'button',
-      args: {
-        markup: [
-          {
-            tagName: 'circle',
-            selector: 'button',
-            attrs: {
-              r: 4,
-              fill: states[status].indicatorStyle.fill,
-              cursor: 'default',
-            },
-          },
-        ],
-        x: '100%',
-        y: 0,
-        offset: { x: 4, y: 4 },
-      },
-    });
+    // 刷新指示灯
+    const indicator = Array.from(this.graph.container.querySelectorAll('.x6-cell-tool.x6-node-tool.x6-cell-tool-button'))
+      .filter(el => (el.getAttribute('data-cell-id') === node.id))[0] as SVGElement;
+    const circle = (indicator.childNodes.item(0) as SVGElement);
+    circle.setAttribute('fill', states[status].indicatorStyle.fill!);
   }
 
   private startAnimation(node: Node): void {
+    let animation = this.runningAnimations[node.id];
+    if (!animation) {
+      animation = new X6TaskRunning(this.graph.findView(node)!);
+      animation.start();
+      this.runningAnimations[node.id] = animation;
+    }
+
     const edges = this.graph.getIncomingEdges(node) || [];
     edges.push(...(this.graph.getOutgoingEdges(node) || []));
 
@@ -239,6 +257,12 @@ export class X6Graph extends BaseGraph {
   }
 
   private stopAnimation(node: Node): void {
+    const animation = this.runningAnimations[node.id];
+    if (animation) {
+      animation.stop();
+      delete this.runningAnimations[node.id];
+    }
+
     const edges = this.graph.getIncomingEdges(node) || [];
     edges.push(...(this.graph.getOutgoingEdges(node) || []));
 
