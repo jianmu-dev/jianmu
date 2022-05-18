@@ -115,7 +115,7 @@ export class AsyncTask extends BaseNode {
         type: 'array',
         required: this.inputs.length > 0,
         len: this.inputs.length,
-        fields: fields,
+        fields,
       },
     };
   }
