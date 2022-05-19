@@ -1,4 +1,13 @@
 /**
+ * 节点ref枚举
+ */
+export enum NodeRefEnum {
+  CRON = 'cron',
+  WEBHOOK = 'webhook',
+  SHELL= 'shell'
+}
+
+/**
  * 参数类型枚举
  */
 export enum ParamTypeEnum {

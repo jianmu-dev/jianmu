@@ -1,6 +1,6 @@
 import { isValidCronExpression } from 'cron-expression-validator';
 import { BaseNode } from './base-node';
-import { NodeTypeEnum } from '../enumeration';
+import { NodeRefEnum, NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/cron.svg';
 import { CustomRule } from '../common';
 
@@ -8,7 +8,7 @@ export class Cron extends BaseNode {
   schedule: string;
 
   constructor(name: string = 'cron', schedule: string = '') {
-    super('cron', name, NodeTypeEnum.CRON, icon, 'https://docs.jianmu.dev/guide/cron.html');
+    super(NodeRefEnum.CRON, name, NodeTypeEnum.CRON, icon, 'https://docs.jianmu.dev/guide/cron.html');
     this.schedule = schedule;
   }
 

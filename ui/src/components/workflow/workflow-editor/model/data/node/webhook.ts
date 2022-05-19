@@ -1,6 +1,6 @@
 import { BaseNode } from './base-node';
 import { CustomRule } from '../common';
-import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
+import { NodeRefEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
 import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
@@ -26,7 +26,7 @@ export class Webhook extends BaseNode {
 
   constructor(name: string = 'webhook', params: IWebhookParam[] = [],
     auth: IWebhookAuth | undefined = undefined, only: string | undefined = undefined) {
-    super('webhook', name, NodeTypeEnum.WEBHOOK, icon, 'https://docs.jianmu.dev/guide/webhook.html');
+    super(NodeRefEnum.WEBHOOK, name, NodeTypeEnum.WEBHOOK, icon, 'https://docs.jianmu.dev/guide/webhook.html');
     this.params = params;
     this.auth = auth;
     this.only = only;
