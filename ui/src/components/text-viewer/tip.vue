@@ -4,12 +4,11 @@
   </jm-tooltip>
 </template>
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-} from 'vue';
+import { computed, defineComponent } from 'vue';
+import JmTooltip from '@/components/others/tooltip';
 
 export default defineComponent({
+  components: { JmTooltip },
   props: {
     visible: {
       type: Object,
