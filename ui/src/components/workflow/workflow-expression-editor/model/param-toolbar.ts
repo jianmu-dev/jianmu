@@ -30,23 +30,33 @@ export class ParamToolbar {
   }
 
   hide(movingEl?: HTMLElement): void {
-    if (movingEl && (movingEl.className.includes('el-cascader') || movingEl.className.includes('el-input'))) {
-      const cascaderRelavantEl = this.toolbarEl.querySelector('.el-cascader');
-      const cascaderId = cascaderRelavantEl?.getAttribute('ariadescribedby');
+    if (movingEl) {
+      if (movingEl === this.toolbarEl || movingEl.parentElement === this.toolbarEl) {
+        // 鼠标在工具栏上移动时，保持显示
+        return;
+      }
 
-      if (cascaderId) {
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          if (!movingEl) {
-            break;
+      if (movingEl.className.includes('el-cascader') ||
+        movingEl.className.includes('el-input') ||
+        movingEl.className.includes('el-popper__arrow')
+      ) {
+        const cascaderRelavantEl = this.toolbarEl.querySelector('.el-cascader');
+        const cascaderId = cascaderRelavantEl?.getAttribute('ariadescribedby');
+
+        if (cascaderId) {
+          // eslint-disable-next-line no-constant-condition
+          while (true) {
+            if (!movingEl) {
+              break;
+            }
+
+            if (movingEl.id === cascaderId || movingEl === this.toolbarEl) {
+              // 鼠标在工具栏上移动时，保持显示
+              return;
+            }
+
+            movingEl = movingEl.parentElement || undefined;
           }
-
-          if (movingEl.id === cascaderId || movingEl === this.toolbarEl) {
-            // 鼠标在工具栏上移动时，保持显示
-            return;
-          }
-
-          movingEl = movingEl.parentElement || undefined;
         }
       }
     }
