@@ -146,7 +146,7 @@ export class ExpressionEditor {
   private getParamHtml(param: IParam): string {
     const { width, height } = calculateContentSize(this.editorEl.parentNode!, param);
 
-    return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="${param.raw}"/>`;
+    return `<input type="text" class="param-ref" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="${param.raw}"/>`;
   }
 
   private parse(plainText: string): string {
@@ -168,10 +168,10 @@ export class ExpressionEditor {
     let plainText = '';
 
     this.getLines(selectedEl).forEach(line => {
-      Array.from(line.querySelectorAll('input')).forEach(input => {
-        const textNode = document.createTextNode(input.getAttribute(RAW_ATTR_NAME)!);
-        line.insertBefore(textNode, input);
-        line.removeChild(input);
+      Array.from(line.querySelectorAll('.param-ref')).forEach(paramRefEl => {
+        const textNode = document.createTextNode(paramRefEl.getAttribute(RAW_ATTR_NAME)!);
+        line.insertBefore(textNode, paramRefEl);
+        line.removeChild(paramRefEl);
       });
 
       plainText += line.innerText + NEW_LINE;

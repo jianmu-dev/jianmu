@@ -57,24 +57,27 @@ export function extractReferences(plainText: string): IParamReference[] {
  * @param param
  */
 export function calculateContentSize(container: Node, param: IParam): IContentSize {
-  const tempDiv = document.createElement('div');
-  tempDiv.className = 'jm-workflow-expression-editor';
-  tempDiv.style.position = 'fixed';
-  tempDiv.style.left = '-1000px';
-  tempDiv.style.top = '-1000px';
-  tempDiv.style.whiteSpace = 'nowrap';
-  tempDiv.style.visibility = 'hidden';
+  const editorDiv = document.createElement('div');
+  editorDiv.className = 'jm-workflow-expression-editor';
+  editorDiv.style.position = 'fixed';
+  editorDiv.style.left = '-1000px';
+  editorDiv.style.top = '-1000px';
+  editorDiv.style.visibility = 'hidden';
+  container.appendChild(editorDiv);
 
-  const tempSpan = document.createElement('span');
-  tempSpan.style.padding = '0';
-  tempSpan.style.borderWidth = '0';
-  tempSpan.innerText = toContent(param);
-  tempDiv.appendChild(tempSpan);
+  const containerDiv = document.createElement('div');
+  containerDiv.className = 'container';
+  editorDiv.append(containerDiv);
 
-  container.appendChild(tempDiv);
-  const width = tempSpan.offsetWidth;
-  const height = tempSpan.offsetHeight;
-  container.removeChild(tempDiv);
+  const paramRefSpan = document.createElement('span');
+  paramRefSpan.className = 'param-ref';
+  paramRefSpan.innerText = toContent(param);
+  containerDiv.appendChild(paramRefSpan);
+  
+  const width = paramRefSpan.offsetWidth;
+  const height = paramRefSpan.offsetHeight;
+
+  container.removeChild(editorDiv);
 
   return { width, height };
 }
