@@ -78,24 +78,24 @@ export default defineComponent({
     left: 0;
     top: 0;
     width: 100%;
-    background: #3EBB03;
+    height: 100%;
     opacity: 0;
     line-height: 0;
 
     &.opened {
-      height: (100% + 40px);
+      height: calc(100% + 10px);
     }
 
     .el-input {
+      height: 100%;
       line-height: 0;
 
       .el-input__inner {
         height: 100%;
-        line-height: 0;
       }
 
       .el-input__icon {
-        line-height: 0;
+        display: none;
       }
     }
   }
