@@ -92,7 +92,7 @@ export class WorkflowDnd {
 
   drag(data: IWorkflowNode, event: MouseEvent) {
     // 构建监听器
-    this.buildListener();
+    this.buildListener(event);
 
     const node = this.graph.createNode({
       shape: 'vue-shape',
@@ -107,7 +107,8 @@ export class WorkflowDnd {
     this.dnd.start(node, event);
   }
 
-  private buildListener() {
+  private buildListener({ x, y }: MouseEvent) {
+    this.draggingListener.mousePosition = { x, y };
     this.draggingListener.listener = listen(document.body, 'mousemove', (e: MouseEvent) => {
       this.draggingListener.mousePosition.x = e.x;
       this.draggingListener.mousePosition.y = e.y;
