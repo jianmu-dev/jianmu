@@ -5,7 +5,7 @@ import { TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { WorkflowTool } from '@/components/workflow/workflow-editor/model/workflow-tool';
 import { render } from '@/components/workflow/workflow-editor/model/workflow-graph';
 import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
-import { NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { NodeRefEnum, NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/model/data/common';
 import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 import { Cron } from '@/components/workflow/workflow-editor/model/data/node/cron';
@@ -99,8 +99,8 @@ export class X6Graph extends BaseGraph {
     });
   }
 
-  hideNodeToolbar(asyncTaskRef: string): void {
-    const node = this.getNodeByAsyncTaskRef(asyncTaskRef);
+  hideNodeToolbar(nodeRef: string): void {
+    const node = this.getNodeByRef(nodeRef);
     const imgEl = this.getShapeEl(node.id).querySelector('.img')! as HTMLElement;
     imgEl.style.boxShadow = '';
   }
@@ -235,8 +235,12 @@ export class X6Graph extends BaseGraph {
     return nodes;
   }
 
-  private getNodeByAsyncTaskRef(asyncTaskRef: string) {
-    return this.getTaskNodes()[this.asyncTaskRefs.indexOf(asyncTaskRef)];
+  private getNodeByRef(nodeRef: string): Node {
+    if ([NodeRefEnum.WEBHOOK, NodeRefEnum.CRON].includes(nodeRef as NodeRefEnum)) {
+      return this.graph.getRootNodes()[0];
+    }
+
+    return this.getTaskNodes()[this.asyncTaskRefs.indexOf(nodeRef)];
   }
 
   private getShapeEl(nodeId: string): HTMLElement {
