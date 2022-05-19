@@ -84,11 +84,22 @@ export default defineComponent({
 .jm-workflow-expression-editor {
   position: relative;
 
-  .container input, .param-toolbar {
+  .container .param-ref, .param-toolbar {
+    border-left-width: 0.25em;
+    border-right-width: 0.25em;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-style: solid;
+    border-color: #FFFFFF;
     padding: 2px 0.5em;
     // 必须继承，否则，在Chrome粘贴时附带样式
     color: inherit;
     font-size: inherit;
+    box-sizing: border-box;
+    // 英文单词换行
+    word-wrap: break-word;
+    // 中文换行
+    white-space: pre-wrap;
   }
 
   .param-button {
@@ -127,10 +138,12 @@ export default defineComponent({
       content: attr(placeholder);
     }
 
-    input {
-      margin: 2px 0.25em;
+    .param-ref {
       background-color: #E8E8E8;
-      border-width: 0;
+    }
+
+    textarea.param-ref {
+      resize: none;
     }
   }
 }

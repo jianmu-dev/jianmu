@@ -32,4 +32,5 @@ export interface ISelectableParam {
 export interface IContentSize {
   width: number;
   height: number;
+  multiline: boolean;
 }
