@@ -57,29 +57,49 @@ export function extractReferences(plainText: string): IParamReference[] {
  * @param param
  */
 export function calculateContentSize(container: Node, param: IParam): IContentSize {
-  const editorDiv = document.createElement('div');
-  editorDiv.className = 'jm-workflow-expression-editor';
-  editorDiv.style.position = 'fixed';
-  editorDiv.style.left = '-1000px';
-  editorDiv.style.top = '-1000px';
-  editorDiv.style.visibility = 'hidden';
-  container.appendChild(editorDiv);
+  const editorEl = document.createElement('div');
+  editorEl.className = 'jm-workflow-expression-editor';
+  editorEl.style.position = 'absolute';
+  editorEl.style.left = '-10000px';
+  editorEl.style.top = '-10000px';
+  editorEl.style.width = '100%';
+  editorEl.style.visibility = 'hidden';
+  container.appendChild(editorEl);
 
-  const containerDiv = document.createElement('div');
-  containerDiv.className = 'container';
-  editorDiv.append(containerDiv);
+  const containerEl = document.createElement('div');
+  containerEl.className = 'container';
+  editorEl.append(containerEl);
 
-  const paramRefSpan = document.createElement('span');
-  paramRefSpan.className = 'param-ref';
-  paramRefSpan.innerText = toContent(param);
-  containerDiv.appendChild(paramRefSpan);
-  
-  const width = paramRefSpan.offsetWidth;
-  const height = paramRefSpan.offsetHeight;
+  let paramRefEl: HTMLElement = document.createElement('textarea');
+  paramRefEl.className = 'param-ref';
+  paramRefEl.style.width = '100%';
+  paramRefEl.style.height = '0';
+  paramRefEl.innerText = toContent(param);
+  containerEl.appendChild(paramRefEl);
 
-  container.removeChild(editorDiv);
+  let width = paramRefEl.offsetWidth;
+  let height = paramRefEl.scrollHeight;
+  paramRefEl.style.whiteSpace = 'nowrap';
+  const multiline = height > paramRefEl.scrollHeight;
+  height += paramRefEl.offsetHeight - paramRefEl.clientHeight;
 
-  return { width, height };
+  if (multiline) {
+    container.removeChild(editorEl);
+    return { width, height, multiline };
+  }
+
+  containerEl.removeChild(paramRefEl);
+
+  paramRefEl = document.createElement('span');
+  paramRefEl.className = 'param-ref';
+  paramRefEl.innerText = toContent(param);
+  containerEl.appendChild(paramRefEl);
+
+  width = paramRefEl.offsetWidth;
+  height = paramRefEl.offsetHeight;
+
+  container.removeChild(editorEl);
+  return { width, height, multiline };
 }
 
 /**

@@ -68,8 +68,7 @@ export default defineComponent({
   align-items: center;
 
   .text {
-    // 适配某些场景下，强制不换行
-    white-space: nowrap;
+    line-height: normal;
     cursor: pointer;
   }
 

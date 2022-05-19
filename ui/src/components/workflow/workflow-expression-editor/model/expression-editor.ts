@@ -39,7 +39,7 @@ export class ExpressionEditor {
       }
 
       const el = e.target as HTMLElement;
-      if (el.tagName === 'INPUT' && el.parentNode && el.getAttribute(RAW_ATTR_NAME)) {
+      if (['TEXTAREA', 'INPUT'].includes(el.tagName) && el.parentNode && el.getAttribute(RAW_ATTR_NAME)) {
         this.toolbar.show(el as HTMLInputElement);
         return;
       }
@@ -144,8 +144,10 @@ export class ExpressionEditor {
   }
 
   private getParamHtml(param: IParam): string {
-    const { width, height } = calculateContentSize(this.editorEl.parentNode!, param);
-
+    const { width, height, multiline } = calculateContentSize(this.editorEl.parentNode!, param);
+    if (multiline) {
+      return `<textarea class="param-ref" style="width: ${width}px; height: ${height}px;" disabled="disabled" data-raw="${param.raw}"/>${toContent(param)}</textarea>`;
+    }
     return `<input type="text" class="param-ref" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="${param.raw}"/>`;
   }
 
