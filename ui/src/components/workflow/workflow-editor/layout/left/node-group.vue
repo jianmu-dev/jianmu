@@ -70,7 +70,7 @@ export default defineComponent({
       }
     });
     // 组件初始加载的节点个数
-    const initialPageSize: number = 6;
+    const initialPageSize: number = 12;
     const searchPageSize: number = 10000;
     // 显示更多组件状态
     const loadState = ref<StateEnum>(StateEnum.NONE);
@@ -166,7 +166,7 @@ export default defineComponent({
     // 显示更多
     const btnDown = async () => {
       loadState.value = StateEnum.LOADING;
-      await loadNodes(keyWord.value, false, initialPageSize * 3, currentPage.value += 1);
+      await loadNodes(keyWord.value, false, initialPageSize, currentPage.value += 1);
     };
     onMounted(async () => {
       await loadNodes(keyWord.value, false, initialPageSize);
