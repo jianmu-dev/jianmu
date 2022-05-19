@@ -1,8 +1,8 @@
 // @ts-ignore
 import listen from 'good-listener';
-import { IParam, ISelectableParam } from './data';
+import { ISelectableParam } from './data';
 import { ELEMENT_NODE_TYPE, NEW_LINE, RAW_ATTR_NAME, TEXT_NODE_TYPE } from './const';
-import { calculateContentSize, extractReferences, fromArray, toContent } from './util';
+import { extractReferences, fromArray } from './util';
 import { ParamToolbar } from './param-toolbar';
 
 export class ExpressionEditor {
@@ -75,7 +75,7 @@ export class ExpressionEditor {
 
     const param = this.toolbar.getParam(fromArray(arr));
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
-    document.execCommand('insertHTML', false, this.getParamHtml(param));
+    document.execCommand('insertHTML', false, this.toolbar.buildParamEl(param).outerHTML);
   }
 
   cut(e: ClipboardEvent): void {
@@ -143,21 +143,13 @@ export class ExpressionEditor {
     return tempDiv.innerHTML;
   }
 
-  private getParamHtml(param: IParam): string {
-    const { width, height, multiline } = calculateContentSize(this.editorEl.parentNode!, param);
-    if (multiline) {
-      return `<textarea class="param-ref" style="width: ${width}px; height: ${height}px;" disabled="disabled" data-raw="${param.raw}"/>${toContent(param)}</textarea>`;
-    }
-    return `<input type="text" class="param-ref" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="${param.raw}"/>`;
-  }
-
   private parse(plainText: string): string {
     const references = extractReferences(plainText);
 
     references.forEach(reference => {
       try {
         const param = this.toolbar.getParam(reference);
-        plainText = plainText.replaceAll(reference.raw, this.getParamHtml(param));
+        plainText = plainText.replaceAll(reference.raw, this.toolbar.buildParamEl(param).outerHTML);
       } catch (err) {
         console.warn(err.message);
       }
