@@ -297,9 +297,10 @@ export class G6Graph extends BaseGraph {
    * 高亮节点状态
    * @param status
    * @param active
+   * @param refreshing
    */
-  highlightNodeState(status: TaskStatusEnum, active: boolean): void {
-    super.highlightNodeState(status, active);
+  highlightNodeState(status: TaskStatusEnum, active: boolean, refreshing: boolean = false): void {
+    super.highlightNodeState(status, active, refreshing);
 
     this.graph.getNodes()
       .filter(node =>
