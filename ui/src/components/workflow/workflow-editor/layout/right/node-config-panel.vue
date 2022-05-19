@@ -13,7 +13,7 @@
       </div>
     </template>
     <div class="jm-workflow-editor-node-config-panel">
-      <jm-scrollbar class="panel-container">
+      <jm-scrollbar v-if="drawerOpening" class="panel-container">
         <cron-panel v-if="nodeData.getType() === NodeTypeEnum.CRON"
                     :node-data="nodeData" @form-created="handleFormCreated"/>
         <webhook-panel v-else-if="nodeData.getType() === NodeTypeEnum.WEBHOOK"
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, inject, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, inject, nextTick, provide, ref } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
@@ -57,6 +57,7 @@ export default defineComponent({
     const { proxy: instance } = getCurrentInstance() as any;
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
+    const drawerOpening = ref<boolean>(false);
     const node = graph.getNodes().find(({ id }) => props.nodeId === id)!;
     const proxy = new CustomX6NodeProxy(node);
     // 不能为ref，否则，表单内容的变化影响数据绑定
@@ -64,8 +65,11 @@ export default defineComponent({
     const formRef = ref();
     provide('getNode', (): Node => node);
 
+    nextTick(() => (drawerOpening.value = true));
+
     return {
       NodeTypeEnum,
+      drawerOpening,
       nodeData,
       handleFormCreated: (ref: any) => {
         formRef.value = ref;
