@@ -66,6 +66,29 @@ export class Webhook extends BaseNode {
       };
     });
 
+    const validator = (rule: any, value: any, callback: any) => {
+      if (!value) {
+        callback();
+        return;
+      }
+
+      const references = extractReferences(value);
+      if (references.length > 0) {
+        const selectableParams = [this.buildSelectableParam()];
+        for (const reference of references) {
+          try {
+            // 检查引用的触发器参数是否存在
+            getParam(reference, selectableParams);
+          } catch ({ message }) {
+            callback(new Error(`${reference.raw}触发器参数不存在`));
+            return;
+          }
+        }
+      }
+
+      callback();
+    };
+
     return {
       ...rules,
       params: {
@@ -78,35 +101,14 @@ export class Webhook extends BaseNode {
         type: 'object',
         required: false,
         fields: {
-          token: [{ required: true, message: '请输入token值', trigger: 'blur' }],
+          token: [
+            { required: true, message: '请输入token值', trigger: 'blur' },
+            { validator, trigger: 'blur' },
+          ],
           value: [{ required: true, message: '请选择密钥', trigger: 'change' }],
         } as Record<string, CustomRule>,
       },
-      only: [{
-        validator: (rule: any, value: any, callback: any) => {
-          if (!value) {
-            callback();
-            return;
-          }
-
-          const references = extractReferences(value);
-          if (references.length > 0) {
-            const selectableParams = [this.buildSelectableParam()];
-            for (const reference of references) {
-              try {
-                // 检查引用的触发器参数是否存在
-                getParam(reference, selectableParams);
-              } catch ({ message }) {
-                callback(new Error(`${reference.raw}触发器参数不存在`));
-                return;
-              }
-            }
-          }
-
-          callback();
-        },
-        trigger: 'blur',
-      }],
+      only: [{ validator, trigger: 'blur' }],
     };
   }
 
