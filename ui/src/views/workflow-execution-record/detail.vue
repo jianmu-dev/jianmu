@@ -395,6 +395,7 @@ export default defineComponent({
       background-color: transparent;
       color: #6b7b8d;
       cursor: pointer;
+      outline: none;
 
       &:active {
         background-color: #eff7ff;
@@ -631,6 +632,7 @@ export default defineComponent({
         background-color: transparent;
         color: #ffffff;
         cursor: pointer;
+        outline: none;
 
         &:active {
           &.running {
