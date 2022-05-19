@@ -109,7 +109,8 @@ export default defineComponent({
   }
 
   .container {
-    line-height: 34px;
+    line-height: 2em;
+    min-height: 36px;
     background-color: #FFFFFF;
 
     &:hover {
@@ -125,7 +126,7 @@ export default defineComponent({
     color: #333333;
     border-radius: 2px;
     border: 1px solid #D0E0ED;
-    padding: 0 15px;
+    padding: 4px 15px;
     box-sizing: border-box;
     // 英文单词换行
     word-wrap: break-word;
