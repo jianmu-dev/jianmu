@@ -70,6 +70,11 @@ export default defineComponent({
   .text {
     line-height: normal;
     cursor: pointer;
+
+    &.single-line {
+      // 适配某些场景下，强制不换行
+      white-space: nowrap;
+    }
   }
 
   ::v-deep(.el-cascader) {

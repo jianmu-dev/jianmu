@@ -19,7 +19,9 @@ export class ParamToolbar {
 
   show(paramRefEl: HTMLInputElement): void {
     this.paramRefEl = paramRefEl;
-    this.toolbarEl.firstElementChild!.innerHTML = paramRefEl.value;
+    const textEl = this.toolbarEl.firstElementChild!;
+    textEl.className = `text${(paramRefEl.tagName === 'INPUT' ? ' single-line' : '')}`;
+    textEl.innerHTML = paramRefEl.value;
 
     const { x, y, width, height } = this.paramRefEl.getBoundingClientRect();
 
