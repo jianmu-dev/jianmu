@@ -33,7 +33,7 @@
       <jm-scrollbar v-else ref="navScrollBar">
         <div class="instance-tabs">
           <div
-            v-for="(record, idx) of data.allRecords"
+            v-for="(record) of data.allRecords"
             :key="record.id"
             :class="{
               tab: true,
@@ -43,7 +43,7 @@
             @click="changeRecord(record)"
           >
             <div v-if="record.id === data.record.id" class="left-horn"/>
-            <div v-if="record.id === data.record.id && idx !== data.allRecords.length - 1" class="right-horn"/>
+            <div v-if="record.id === data.record.id" class="right-horn"/>
             <div class="label">{{ record.serialNo }}</div>
           </div>
         </div>
@@ -104,7 +104,7 @@
     </div>
 
     <div class="workflow-section">
-      <workflow v-if="!loading"/>
+      <workflow/>
     </div>
   </div>
 </template>
