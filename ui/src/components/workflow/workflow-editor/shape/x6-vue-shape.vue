@@ -3,7 +3,7 @@
     <div class="icon">
       <div class="img" :style="`background-image: url('${iconUrl}');`"></div>
     </div>
-    <div class="name">{{ nameVal }}</div>
+    <jm-text-viewer :value="nameVal" class="name"/>
   </div>
 </template>
 
@@ -12,8 +12,10 @@ import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { Node } from '@antv/x6';
 import { IWorkflowNode } from '../model/data/common';
 import { CustomX6NodeProxy } from '../model/data/custom-x6-node-proxy';
+import JmTextViewer from '@/components/text-viewer/index.vue';
 
 export default defineComponent({
+  components: { JmTextViewer },
   props: {
     nodeData: Object as PropType<IWorkflowNode>,
   },
@@ -92,19 +94,23 @@ export default defineComponent({
     }
   }
 
-  .name {
-    margin-top: 6px;
-    max-height: @node-text-max-height;
-    line-height: 20px;
-    // 超过两行直接截断
-    overflow: hidden;
-    font-size: 14px;
-    text-align: center;
-    // 英文单词换行
-    word-wrap: break-word;
-    // 中文换行
-    white-space: pre-wrap;
-    color: @label-color;
+  ::v-deep(.jm-text-viewer) {
+    &.name {
+      margin-top: 6px;
+      height: @node-text-max-height;
+      line-height: 20px;
+      font-size: 14px;
+      text-align: center;
+      color: @label-color;
+    }
+
+    .text-line {
+      text-align: inherit;
+    }
+
+    .text-line-last {
+      justify-content: center;
+    }
   }
 }
 </style>
