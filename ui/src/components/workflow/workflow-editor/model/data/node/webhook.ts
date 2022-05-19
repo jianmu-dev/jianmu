@@ -1,5 +1,5 @@
 import { BaseNode } from './base-node';
-import { CustomRule, ISecretKey } from '../common';
+import { CustomRule } from '../common';
 import { NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
 import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
@@ -16,7 +16,7 @@ export interface IWebhookParam {
 
 export interface IWebhookAuth {
   token: string;
-  value: ISecretKey | undefined;
+  value: string;
 }
 
 export class Webhook extends BaseNode {

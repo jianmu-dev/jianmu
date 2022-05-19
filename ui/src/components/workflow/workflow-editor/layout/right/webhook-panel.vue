@@ -169,7 +169,7 @@ export default defineComponent({
       changeAuth: (val: boolean) => {
         form.value.auth = val ? {
           token: '',
-          value: undefined,
+          value: '',
         } : undefined;
       },
     };

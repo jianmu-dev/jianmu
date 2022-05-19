@@ -11,14 +11,6 @@ export interface CustomRuleItem extends RuleItem {
 export type CustomRule = CustomRuleItem | CustomRuleItem[];
 
 /**
- * 密钥
- */
-export interface ISecretKey {
-  namespace: string;
-  key: string;
-}
-
-/**
  * 节点数据
  */
 export interface IWorkflowNode {
