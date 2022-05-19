@@ -38,7 +38,7 @@ export class Webhook extends BaseNode {
 
   buildSelectableParam(): ISelectableParam {
     return {
-      value: super.getRef(),
+      value: 'trigger',
       label: super.getName(),
       children: this.params.map(({ name }) => {
         return {
