@@ -148,8 +148,6 @@ export class ParamToolbar {
     el.setAttribute('disabled', 'disabled');
     el.setAttribute('data-raw', param.raw);
 
-    console.log(el.outerHTML);
-
     return el;
   }
 }

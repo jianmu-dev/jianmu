@@ -1,5 +1,6 @@
 // @ts-ignore
 import listen from 'good-listener';
+import { v4 as uuidv4 } from 'uuid';
 import { ISelectableParam } from './data';
 import { ELEMENT_NODE_TYPE, NEW_LINE, RAW_ATTR_NAME, TEXT_NODE_TYPE } from './const';
 import { extractReferences, fromArray } from './util';
@@ -74,8 +75,21 @@ export class ExpressionEditor {
     }
 
     const param = this.toolbar.getParam(fromArray(arr));
+    const paramRefEl = this.toolbar.buildParamEl(param);
+    const isTextarea = paramRefEl.tagName === 'TEXTAREA';
+    if (isTextarea) {
+      // insertHTML无法正常插入文本域的内容，通过临时设置id，后续指定
+      paramRefEl.id = uuidv4();
+    }
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
-    document.execCommand('insertHTML', false, this.toolbar.buildParamEl(param).outerHTML);
+    document.execCommand('insertHTML', false, paramRefEl.outerHTML);
+
+    if (isTextarea) {
+      // insertHTML无法正常插入文本域的内容，通过临时设置id，后续指定
+      const tempEl = document.getElementById(paramRefEl.id)!;
+      tempEl.innerText = paramRefEl.innerText;
+      tempEl.removeAttribute('id');
+    }
   }
 
   cut(e: ClipboardEvent): void {
