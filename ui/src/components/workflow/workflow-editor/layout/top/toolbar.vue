@@ -45,6 +45,7 @@ import { WorkflowTool } from '../../model/workflow-tool';
 import ProjectPanel from './project-panel.vue';
 import { IWorkflow } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
+import { cloneDeep } from 'lodash';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -57,6 +58,7 @@ export default defineComponent({
   emits: ['back', 'save'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
+    const workflowBackUp = cloneDeep(props.workflowData);
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const projectPanelVisible = ref<boolean>(false);
     const getGraph = inject('getGraph') as () => Graph;
@@ -72,8 +74,38 @@ export default defineComponent({
       workflowForm,
       projectPanelVisible,
       zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
-      goBack: () => {
-        emit('back');
+      goBack: async () => {
+        const obj = graph.toJSON();
+        const data = obj.cells.length === 0 ? '' : JSON.stringify(graph.toJSON());
+
+        if (workflowBackUp.name !== workflowForm.value.name ||
+          workflowBackUp.description !== workflowForm.value.description ||
+          workflowBackUp.groupId !== workflowForm.value.groupId ||
+          workflowBackUp.data !== data ||
+          JSON.stringify(workflowBackUp.global) !== JSON.stringify(workflowForm.value.global)
+        ) {
+          proxy.$confirm(' ', '保存此次修改', {
+            confirmButtonText: '保存',
+            cancelButtonText: '不保存',
+            distinguishCancelAndClose: true,
+            type: 'info',
+          }).then(async () => {
+            try {
+              await workflowValidator.checkNodes();
+            } catch ({ message }) {
+              proxy.$error(message);
+              return;
+            }
+            workflowForm.value.data = JSON.stringify(graph.toJSON());
+            emit('save', true, workflowTool.toDsl(workflowForm.value));
+          }).catch((action: string) => {
+            if (action === 'cancel') {
+              emit('back');
+            }
+          });
+        } else {
+          emit('back');
+        }
       },
       edit: () => {
         projectPanelVisible.value = true;
@@ -86,15 +118,8 @@ export default defineComponent({
         try {
           await workflowValidator.checkNodes();
 
-          proxy.$confirm(' ', '保存此次修改', {
-            confirmButtonText: '保存',
-            cancelButtonText: '不保存',
-            type: 'info',
-          }).then(async () => {
-            workflowForm.value.data = JSON.stringify(graph.toJSON());
-            emit('save', back, workflowTool.toDsl(workflowForm.value));
-          }).catch(() => {
-          });
+          workflowForm.value.data = JSON.stringify(graph.toJSON());
+          emit('save', back, workflowTool.toDsl(workflowForm.value));
         } catch ({ message }) {
           proxy.$error(message);
         }
@@ -123,7 +148,7 @@ export default defineComponent({
     border-radius: 2px;
     border-width: 0;
     background-color: transparent;
-    color: #526579;
+    color: #6B7B8D;
     cursor: pointer;
     text-align: center;
     width: 24px;
@@ -131,7 +156,7 @@ export default defineComponent({
     font-size: 18px;
 
     &::before {
-      font-weight: bold;
+      font-weight: 500;
     }
 
     &:hover {
