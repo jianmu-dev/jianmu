@@ -3,7 +3,7 @@ import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
-import { INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
+import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 
 export interface IAsyncTaskParam {
   readonly ref: string;
@@ -64,7 +64,7 @@ export class AsyncTask extends BaseNode {
     children.push({
       // 文档：https://docs.jianmu.dev/guide/custom-node.html#_4-%E5%86%85%E7%BD%AE%E8%BE%93%E5%87%BA%E5%8F%82%E6%95%B0
       value: INNER_PARAM_TAG,
-      label: '内置输出参数',
+      label: INNER_PARAM_LABEL,
       children: [
         {
           value: 'execution_status',
