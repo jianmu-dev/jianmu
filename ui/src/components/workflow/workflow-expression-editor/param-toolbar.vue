@@ -68,9 +68,13 @@ export default defineComponent({
   align-items: center;
 
   .text {
-    // 适配某些场景下，强制不换行
-    white-space: nowrap;
+    line-height: normal;
     cursor: pointer;
+
+    &.single-line {
+      // 适配某些场景下，强制不换行
+      white-space: nowrap;
+    }
   }
 
   ::v-deep(.el-cascader) {
@@ -78,24 +82,24 @@ export default defineComponent({
     left: 0;
     top: 0;
     width: 100%;
-    background: #3EBB03;
+    height: 100%;
     opacity: 0;
     line-height: 0;
 
     &.opened {
-      height: (100% + 40px);
+      height: calc(100% + 10px);
     }
 
     .el-input {
+      height: 100%;
       line-height: 0;
 
       .el-input__inner {
         height: 100%;
-        line-height: 0;
       }
 
       .el-input__icon {
-        line-height: 0;
+        display: none;
       }
     }
   }

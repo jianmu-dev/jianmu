@@ -1,8 +1,9 @@
 // @ts-ignore
 import listen from 'good-listener';
-import { IParam, ISelectableParam } from './data';
+import { v4 as uuidv4 } from 'uuid';
+import { ISelectableParam } from './data';
 import { ELEMENT_NODE_TYPE, NEW_LINE, RAW_ATTR_NAME, TEXT_NODE_TYPE } from './const';
-import { calculateContentSize, extractReferences, fromArray, toContent } from './util';
+import { extractReferences, fromArray } from './util';
 import { ParamToolbar } from './param-toolbar';
 
 export class ExpressionEditor {
@@ -39,7 +40,7 @@ export class ExpressionEditor {
       }
 
       const el = e.target as HTMLElement;
-      if (el.tagName === 'INPUT' && el.parentNode && el.getAttribute(RAW_ATTR_NAME)) {
+      if (['TEXTAREA', 'INPUT'].includes(el.tagName) && el.parentNode && el.getAttribute(RAW_ATTR_NAME)) {
         this.toolbar.show(el as HTMLInputElement);
         return;
       }
@@ -74,8 +75,21 @@ export class ExpressionEditor {
     }
 
     const param = this.toolbar.getParam(fromArray(arr));
+    const paramRefEl = this.toolbar.buildParamEl(param);
+    const isTextarea = paramRefEl.tagName === 'TEXTAREA';
+    if (isTextarea) {
+      // insertHTML无法正常插入文本域的内容，通过临时设置id，后续指定
+      paramRefEl.id = uuidv4();
+    }
     // disabled的input才兼容FF不可编辑input，否则（readonly），用左右键把光标定位到input中可敲键盘插入数据
-    document.execCommand('insertHTML', false, this.getParamHtml(param));
+    document.execCommand('insertHTML', false, paramRefEl.outerHTML);
+
+    if (isTextarea) {
+      // insertHTML无法正常插入文本域的内容，通过临时设置id，后续指定
+      const tempEl = document.getElementById(paramRefEl.id)!;
+      tempEl.innerText = paramRefEl.innerText;
+      tempEl.removeAttribute('id');
+    }
   }
 
   cut(e: ClipboardEvent): void {
@@ -143,19 +157,13 @@ export class ExpressionEditor {
     return tempDiv.innerHTML;
   }
 
-  private getParamHtml(param: IParam): string {
-    const { width, height } = calculateContentSize(this.editorEl.parentNode!, param);
-
-    return `<input type="text" style="width: ${width}px; height: ${height}px;" disabled="disabled" value="${toContent(param)}" data-raw="${param.raw}"/>`;
-  }
-
   private parse(plainText: string): string {
     const references = extractReferences(plainText);
 
     references.forEach(reference => {
       try {
         const param = this.toolbar.getParam(reference);
-        plainText = plainText.replaceAll(reference.raw, this.getParamHtml(param));
+        plainText = plainText.replaceAll(reference.raw, this.toolbar.buildParamEl(param).outerHTML);
       } catch (err) {
         console.warn(err.message);
       }
@@ -168,10 +176,10 @@ export class ExpressionEditor {
     let plainText = '';
 
     this.getLines(selectedEl).forEach(line => {
-      Array.from(line.querySelectorAll('input')).forEach(input => {
-        const textNode = document.createTextNode(input.getAttribute(RAW_ATTR_NAME)!);
-        line.insertBefore(textNode, input);
-        line.removeChild(input);
+      Array.from(line.querySelectorAll('.param-ref')).forEach(paramRefEl => {
+        const textNode = document.createTextNode(paramRefEl.getAttribute(RAW_ATTR_NAME)!);
+        line.insertBefore(textNode, paramRefEl);
+        line.removeChild(paramRefEl);
       });
 
       plainText += line.innerText + NEW_LINE;
