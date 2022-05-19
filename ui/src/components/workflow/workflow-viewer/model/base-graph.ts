@@ -13,8 +13,8 @@ interface Zoom {
 export abstract class BaseGraph {
   protected readonly zoom: Zoom = { min: 20, max: 500, interval: 10 };
   readonly dslType: DslTypeEnum;
-  // 当前高亮状态
-  private highlightStatus?: TaskStatusEnum;
+  // 刷新当前高亮状态监听器
+  private highlightRefreshingListener?: any;
 
   protected constructor(dslType: DslTypeEnum) {
     this.dslType = dslType;
@@ -50,22 +50,32 @@ export abstract class BaseGraph {
   updateNodeStates(tasks: ITaskExecutionRecordVo[]): void {
   }
 
-  highlightNodeState(status: TaskStatusEnum, active: boolean): void {
-    this.highlightStatus = active ? status : undefined;
-  }
-
-  refreshNodeStateHighlight(status: TaskStatusEnum): void {
-    const { highlightStatus } = this;
-    if (!highlightStatus) {
+  highlightNodeState(status: TaskStatusEnum, active: boolean, refreshing: boolean = false): void {
+    if (refreshing) {
+      // 刷新时，忽略，不会改变当前高亮状态
       return;
     }
 
-    if (highlightStatus !== status) {
-      // 关灯
-      this.highlightNodeState(status, false);
+    if (active) {
+      this.highlightRefreshingListener = setInterval(() => {
+        Object.values(TaskStatusEnum).forEach(item => {
+          if (item === status) {
+            // 开灯
+            this.highlightNodeState(item, true, true);
+            return;
+          }
+          // 关灯
+          this.highlightNodeState(item, false, true);
+        });
+      }, 500);
+      return;
     }
-    // 开灯
-    this.highlightNodeState(highlightStatus, true);
+
+    if (!this.highlightRefreshingListener) {
+      return;
+    }
+    clearInterval(this.highlightRefreshingListener);
+    delete this.highlightRefreshingListener;
   }
 
   changeSize(width: number, height: number): void {

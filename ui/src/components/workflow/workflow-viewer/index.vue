@@ -4,8 +4,7 @@
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"
                   @mouseenter="graph?.highlightNodeState(status, true)"
-                  @mouseleave="graph?.highlightNodeState(status, false)"
-                  @change="graph?.refreshNodeStateHighlight(status)"/>
+                  @mouseleave="graph?.highlightNodeState(status, false)"/>
     </div>
     <toolbar v-if="graph" :readonly="readonly" :dsl-type="graph?.dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
