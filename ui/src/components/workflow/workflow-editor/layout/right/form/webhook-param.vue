@@ -144,6 +144,7 @@ export default defineComponent({
   font-size: 14px;
   padding: 20px;
   position: relative;
+  border-bottom: 1px solid #E6EBF2;
 
   &.switch-bgc {
     background: #EFF7FF;

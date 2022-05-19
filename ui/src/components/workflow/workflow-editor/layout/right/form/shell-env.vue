@@ -1,30 +1,27 @@
 <template>
   <div :class="{'shell-env':true,'switch-bgc':switchBackgroundFlag}">
-    <jm-form-item :prop="`${formModelName}.${index}.name`" :rules="rules.name">
+    <jm-form-item :prop="`${formModelName}.${index}.name`" :rules="rules.name" label="变量名称">
       <jm-input
         v-model="envName"
         @input="upperCase"
         @change="changeEnv"
         class="change-env"
-        placeholder="变量名"
+        placeholder="请输入变量名称"
         @focus="switchBackgroundFlag=true"
         @blur="switchBackgroundFlag=false"/>
     </jm-form-item>
 
-    <span class="separate">:</span>
-    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
+    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value" label="变量值">
       <expression-editor
         v-model="envVal"
         :node-id="nodeId"
         @change="changeVal"
         class="shell-env-val"
-        placeholder="变量值"
+        placeholder="请输入变量值"
         @focus="switchBackgroundFlag=true"
         @blur="switchBackgroundFlag=false"/>
     </jm-form-item>
-    <div class="delete-icon">
-      <i class="jm-icon-button-delete" @click="remove"/>
-    </div>
+    <i class="jm-icon-button-delete" @click="remove"/>
   </div>
 </template>
 
@@ -94,13 +91,14 @@ export default defineComponent({
 
 <style scoped lang="less">
 .shell-env {
-  width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  align-items: flex-start;
   font-size: 14px;
-  padding: 44px 20px 10px;
+  padding: 20px 20px 10px;
+  position: relative;
   border-bottom: 1px solid #E6EBF2;
+
+  &:hover {
+    background: #FAFAFA;
+  }
 
   &.switch-bgc {
     background: #EFF7FF;
@@ -110,38 +108,18 @@ export default defineComponent({
     }
   }
 
-  &:hover {
-    background: #FAFAFA;
-  }
+  .jm-icon-button-delete {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 
-  .change-env {
-    width: 106px;
-  }
-
-  .shell-env-val {
-    width: 146px;
-  }
-
-  .separate {
-    margin: 0 10px;
-    height: 36px;
-    line-height: 36px;
-  }
-
-  .delete-icon {
-    height: 36px;
-    line-height: 36px;
-    margin-left: 7px;
-
-    .jm-icon-button-delete {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-
-      &:hover {
-        background: #EFF7FF;
-        color: #086CD8;
-      }
+    &:hover {
+      background: #EFF7FF;
+      color: #086CD8;
     }
   }
 }
