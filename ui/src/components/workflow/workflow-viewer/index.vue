@@ -13,6 +13,7 @@
              @on-fullscreen="handleFullscreen"
              @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
+                  :graph-type="graphType"
                   :readonly="readonly"
                   :task-business-id="selectedTask?.businessId"
                   :task-status="selectedTask?.status"
@@ -43,7 +44,7 @@ import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import { GraphDirectionEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
+import { GraphDirectionEnum, GraphTypeEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
 import { INodeMouseoverEvent } from './model/data/common';
 import { sortTasks } from './model/util';
 import { BaseGraph } from './model/base-graph';
@@ -145,6 +146,12 @@ export default defineComponent({
       TaskStatusEnum,
       container,
       graph,
+      graphType: computed<GraphTypeEnum>(() => {
+        if (!graph.value) {
+          return GraphTypeEnum.G6;
+        }
+        return graph.value!.getGraphType();
+      }),
       selectedTask: computed<{
         businessId: string;
         status: TaskStatusEnum;

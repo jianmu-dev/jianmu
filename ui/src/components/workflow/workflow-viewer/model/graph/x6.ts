@@ -14,6 +14,9 @@ import { imgs, states } from '@/components/workflow/workflow-viewer/shapes/async
 import { BaseTaskRunning } from '../../animations/base-task-running';
 import X6TaskRunning from '@/components/workflow/workflow-viewer/animations/task-running/x6';
 import { checkDefaultIcon } from '@/components/workflow/workflow-editor/model/data/node/async-task';
+import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
+
+const { textMaxHeight } = NODE;
 
 export class X6Graph extends BaseGraph {
   private readonly asyncTaskRefs: string[];
@@ -121,7 +124,7 @@ export class X6Graph extends BaseGraph {
 
       const { id, description, type } = this.buildEvt(node);
       const { width, height, x, y } = shapeEl.getBoundingClientRect();
-      mouseoverNode({ id, description, type, width, height, x, y });
+      mouseoverNode({ id, description, type, width, height: height - textMaxHeight, x, y });
     });
   }
 
