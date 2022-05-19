@@ -6,8 +6,10 @@ import { parse } from '../../model/dsl/g6';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { GraphDirectionEnum, NodeTypeEnum } from '../data/enumeration';
 import { sortTasks } from '../util';
-import { size } from '../../shapes/async-task';
 import { INodeMouseoverEvent } from '../data/common';
+import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
+
+const { icon: { width: iconW, height: iconH } } = NODE;
 
 /**
  * 计算布局配置
@@ -178,8 +180,8 @@ export class G6Graph extends BaseGraph {
       }
 
       const zoom = this.getZoom();
-      const width = size.width * zoom;
-      const height = size.height * zoom;
+      const width = iconW * zoom;
+      const height = iconH * zoom;
       const w = width + 10;
       const h = height + 10;
 

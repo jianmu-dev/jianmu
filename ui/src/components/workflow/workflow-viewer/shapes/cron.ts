@@ -1,11 +1,14 @@
 import _G6 from '@antv/g6';
 import img from '../svgs/shape/cron.svg';
 import { NodeTypeEnum } from '../model/data/enumeration';
+import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
+
+const { icon: { width: iconW, height: iconH } } = NODE;
 
 export default function (G6: typeof _G6) {
   G6.registerNode(NodeTypeEnum.CRON, {
     options: {
-      size: 80,
+      size: [iconW, iconH],
       anchorPoints: [[0.5, 0], [0.5, 1], [0, 0.5], [1, 0.5]],
       labelCfg: {
         position: 'bottom',
@@ -23,9 +26,7 @@ export default function (G6: typeof _G6) {
       },
       style: {
         fill: '#FFFFFF',
-        lineWidth: 1,
-        stroke: '#2962FF',
-        radius: 80 * 0.242,
+        radius: iconW * 0.255,
         shadowOffsetX: 0,
         shadowOffsetY: 0,
         shadowColor: 'transparent',
@@ -37,8 +38,8 @@ export default function (G6: typeof _G6) {
       },
     },
     afterDraw(cfg, group) {
-      const width = 44;
-      const height = 44;
+      const width = iconW;
+      const height = iconH;
       group?.addShape('image', {
         attrs: {
           x: -width / 2,

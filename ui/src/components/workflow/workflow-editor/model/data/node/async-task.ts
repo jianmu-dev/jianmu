@@ -14,6 +14,15 @@ export interface IAsyncTaskParam {
   readonly description?: string;
 }
 
+/**
+ * 检查是否为默认图标
+ * @param icon
+ */
+export function checkDefaultIcon(icon: string) {
+  // TODO 待优化确定默认图标机制
+  return icon.includes('/async-task.');
+}
+
 export class AsyncTask extends BaseNode {
   readonly ownerRef: string;
   version: string;
@@ -26,7 +35,8 @@ export class AsyncTask extends BaseNode {
   constructor(ownerRef: string, ref: string, name: string, icon: string = '', version: string = '',
     versionDescription: string = '', inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
-    super(ref, name, NodeTypeEnum.ASYNC_TASK, icon || defaultIcon, `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
+    super(ref, name, NodeTypeEnum.ASYNC_TASK, checkDefaultIcon(icon) ? defaultIcon : icon,
+      `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
     this.ownerRef = ownerRef;
     this.version = version;
     this.versionDescription = versionDescription;

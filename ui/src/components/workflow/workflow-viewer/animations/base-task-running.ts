@@ -1,4 +1,7 @@
 import { IShape } from '@antv/g6';
+import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
+
+const { icon: { width: iconW } } = NODE;
 
 export type RunningShape = IShape | SVGElement;
 
@@ -45,9 +48,7 @@ export const attrs = {
   keyShape: {
     default: {
       fill: '#E5FFFF',
-      lineWidth: 1,
-      stroke: '#11C2C2',
-      radius: 80 * 0.242,
+      radius: iconW * 0.255,
       shadowOffsetX: 0,
       shadowOffsetY: 0,
       shadowColor: 'transparent',

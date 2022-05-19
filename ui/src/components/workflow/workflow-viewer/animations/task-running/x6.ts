@@ -24,8 +24,8 @@ const toolItem = {
  */
 export default class X6TaskRunning extends BaseTaskRunning {
   private readonly view: CellView;
-  private readonly keyShape: HTMLElement;
-  private keyShapeInterval: any;
+  // private readonly keyShape: HTMLElement;
+  // private keyShapeInterval: any;
   private readonly iconShape: HTMLElement;
   private iconShapeInterval: any;
 
@@ -39,9 +39,9 @@ export default class X6TaskRunning extends BaseTaskRunning {
 
     const vueShape = Array.from(this.view.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
       .filter(el => (el.getAttribute('data-x6-node-id') === this.view.cell.id))[0];
-    this.keyShape = vueShape.querySelector('.icon') as HTMLElement;
-    this.keyShape.style.transition =
-      `background-color ${Math.round(durations.keyShape.first / 1000)}s linear`;
+    // this.keyShape = vueShape.querySelector('.icon') as HTMLElement;
+    // this.keyShape.style.transition =
+    //   `background-color ${Math.round(durations.keyShape.first / 1000)}s linear`;
     this.iconShape = vueShape.querySelector('.img')! as HTMLElement;
     this.iconShape.style.transition =
       `opacity ${Math.round(durations.iconShape.first / 1000)}s linear`;
@@ -55,19 +55,19 @@ export default class X6TaskRunning extends BaseTaskRunning {
         .forEach(key => this.animateShape(super.getShapes()[0], key));
 
       this.animateIconShape();
-      this.animateKeyShape();
+      // this.animateKeyShape();
     }, 1000);
   }
 
   stop(): void {
     this.view.cell.removeTool('boundary');
 
-    if (this.keyShapeInterval) {
-      clearInterval(this.keyShapeInterval);
-      delete this.keyShapeInterval;
-    }
-    this.keyShape.style.transition = '';
-    this.keyShape.style.backgroundColor = '';
+    // if (this.keyShapeInterval) {
+    //   clearInterval(this.keyShapeInterval);
+    //   delete this.keyShapeInterval;
+    // }
+    // this.keyShape.style.transition = '';
+    // this.keyShape.style.backgroundColor = '';
 
     if (this.iconShapeInterval) {
       clearInterval(this.iconShapeInterval);
@@ -154,16 +154,16 @@ export default class X6TaskRunning extends BaseTaskRunning {
     });
   }
 
-  private animateKeyShape() {
-    // 初始化
-    this.keyShape.style.backgroundColor = attrs.keyShape.default.stroke;
-
-    let index = 0;
-    this.keyShapeInterval = setInterval(() => {
-      this.keyShape.style.backgroundColor = `${index++ % 2 === 0 ?
-        attrs.keyShape.first.stroke : attrs.keyShape.second.stroke}`;
-    }, durations.keyShape.first);
-  }
+  // private animateKeyShape() {
+  //   // 初始化
+  //   this.keyShape.style.backgroundColor = attrs.keyShape.default.stroke;
+  //
+  //   let index = 0;
+  //   this.keyShapeInterval = setInterval(() => {
+  //     this.keyShape.style.backgroundColor = `${index++ % 2 === 0 ?
+  //       attrs.keyShape.first.stroke : attrs.keyShape.second.stroke}`;
+  //   }, durations.keyShape.first);
+  // }
 
   private animateIconShape() {
     // 初始化
