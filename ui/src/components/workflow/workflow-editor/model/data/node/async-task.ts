@@ -20,6 +20,9 @@ export interface IAsyncTaskParam {
  */
 export function checkDefaultIcon(icon: string) {
   // TODO 待优化确定默认图标机制
+  if (!icon) {
+    return true;
+  }
   return icon.includes('/async-task.');
 }
 
