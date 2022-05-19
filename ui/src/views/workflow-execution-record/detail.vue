@@ -360,7 +360,8 @@ export default defineComponent({
           });
       },
       goBack() {
-        router.back();
+        const { fullPath } = rootState.fromRoute;
+        router.push(fullPath);
       },
     };
   },
