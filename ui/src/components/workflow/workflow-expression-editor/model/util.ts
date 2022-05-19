@@ -1,5 +1,5 @@
 import { IContentSize, IParam, IParamReference, ISelectableParam } from './data';
-import { INNER_PARAM_TAG } from './const';
+import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from './const';
 import { NodeError, ParamError } from './error';
 
 /**
@@ -30,7 +30,7 @@ export function fromRaw(raw: string): IParamReference {
  */
 export function toContent(param: IParam): string {
   const { name, nodeName, inner } = param;
-  return `${nodeName}.${inner ? '内置输出参数.' : ''}${name}`;
+  return `${nodeName}.${inner ? `${INNER_PARAM_LABEL}.` : ''}${name}`;
 }
 
 /**
