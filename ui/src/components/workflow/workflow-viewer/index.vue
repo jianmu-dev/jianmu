@@ -259,6 +259,8 @@ export default defineComponent({
 
 <style lang="less">
 .jm-workflow-viewer {
+  @import './theme/x6';
+
   @keyframes x6-edge-running {
     to {
       stroke-dashoffset: -1000
