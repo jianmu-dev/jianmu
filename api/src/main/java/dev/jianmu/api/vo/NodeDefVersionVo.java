@@ -31,6 +31,8 @@ public class NodeDefVersionVo {
     private String creatorRef;
     @Schema(required = true, description = "版本")
     private String version;
+    @Schema(description = "描述")
+    private String description;
     @Schema(description = "返回文件路径")
     private String resultFile;
     @Schema(description = "输入参数")

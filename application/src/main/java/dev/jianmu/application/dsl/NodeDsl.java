@@ -43,7 +43,10 @@ public class NodeDsl {
      * 版本
      */
     private String version;
-
+    /**
+     * 描述
+     */
+    private String description;
     /**
      * 返回文件路径
      */
@@ -77,6 +80,7 @@ public class NodeDsl {
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             var dslVo = mapper.readValue(dsl, NodeDsl.class);
             dslVo.checkRef();
+            dslVo.checkDescription();
             if (dslVo.ref.contains("/")) {
                 var arr = dslVo.ref.split("/");
                 dslVo.ownerRef = arr[0];
@@ -100,6 +104,15 @@ public class NodeDsl {
             throw new DslException("节点定义DSL格式不正确");
         }
         RefChecker.check(this.ref);
+    }
+
+    public void checkDescription() {
+        if (this.description == null) {
+            return;
+        }
+        if (this.description.length() > 200) {
+            throw new DslException("节点定义版本描述不能超过200个字符");
+        }
     }
 
     public String getSpecString() {

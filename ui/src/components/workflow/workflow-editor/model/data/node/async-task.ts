@@ -17,26 +17,28 @@ export interface IAsyncTaskParam {
 export class AsyncTask extends BaseNode {
   readonly ownerRef: string;
   version: string;
+  versionDescription: string;
   readonly inputs: IAsyncTaskParam[];
   readonly outputs: IAsyncTaskParam[];
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
 
   constructor(ownerRef: string, ref: string, name: string, icon: string = '', version: string = '',
-    inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
+    versionDescription: string = '', inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
     super(ref, name, NodeTypeEnum.ASYNC_TASK, icon || defaultIcon, `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
     this.ownerRef = ownerRef;
     this.version = version;
+    this.versionDescription = versionDescription;
     this.inputs = inputs;
     this.outputs = outputs;
     this.failureMode = failureMode;
     this.validateParam = validateParam;
   }
 
-  static build({ ownerRef, ref, name, icon, version, inputs, outputs, failureMode }: any,
+  static build({ ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode }: any,
     validateParam?: ValidateParamFn): AsyncTask {
-    return new AsyncTask(ownerRef, ref, name, icon, version, inputs, outputs, failureMode, validateParam);
+    return new AsyncTask(ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode, validateParam);
   }
 
   buildSelectableParam(): ISelectableParam {

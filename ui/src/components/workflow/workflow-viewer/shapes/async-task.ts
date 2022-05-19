@@ -8,7 +8,8 @@ import SUCCEEDED from '../svgs/shape/async-task/SUCCEEDED.svg';
 import SUSPENDED from '../svgs/shape/async-task/SUSPENDED.svg';
 import IGNORED from '../svgs/shape/async-task/IGNORED.svg';
 import { NodeTypeEnum } from '../model/data/enumeration';
-import AsyncTaskRunningAnimation, { attrs } from '../animations/async-task-running-animation';
+import { attrs } from '../animations/base-task-running';
+import G6TaskRunning from '../animations/task-running/g6';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 import { SHELL_NODE_TYPE } from '../model/data/common';
@@ -185,7 +186,7 @@ export default function (G6: typeof _G6) {
 
           if (status === TaskStatusEnum.RUNNING) {
             if (!cfg.runningAnimation) {
-              cfg.runningAnimation = new AsyncTaskRunningAnimation(item as Item);
+              cfg.runningAnimation = new G6TaskRunning(item as Item);
             }
 
             cfg.runningAnimation.start();

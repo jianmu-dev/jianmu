@@ -82,11 +82,12 @@ export default defineComponent({
     width: @node-icon-width;
     height: @node-icon-height;
     margin-bottom: @node-icon-margin-bottom;
+    border-radius: @icon-border-radius;
 
     .img {
       width: 100%;
       height: 100%;
-      border-radius: 25.5%;
+      border-radius: @icon-border-radius;
       background-size: cover;
     }
   }

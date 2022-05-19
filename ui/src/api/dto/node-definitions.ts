@@ -70,6 +70,7 @@ export interface INodeDefVersionVo
     creatorName: string;
     creatorRef: string;
     version: string;
+    description: string;
     resultFile: string;
     inputParameters: INodeParameterVo[];
     outputParameters: INodeParameterVo[];

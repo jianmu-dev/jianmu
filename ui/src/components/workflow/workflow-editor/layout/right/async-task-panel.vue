@@ -7,9 +7,9 @@
       @submit.prevent
     >
       <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
-        <jm-input v-model="form.name" clearable show-word-limit :maxlength="36"/>
+        <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
-      <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version">
+      <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
         <jm-select
           v-model="form.version"
           placeholder="请选择节点版本"
@@ -18,12 +18,14 @@
           <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
         </jm-select>
       </jm-form-item>
+      <div class="version-description">{{ form.versionDescription }}</div>
       <div v-if="form.inputs">
         <jm-form-item
           v-for="(item,index) in form.inputs"
           :key="item.ref"
           :prop="`inputs.${index}.value`"
           :rules="nodeData.getFormRules().inputs.fields[index].fields.value"
+          class="node-name"
         >
           <template #label>
             {{ item.name }}
@@ -105,7 +107,8 @@ export default defineComponent({
      * @param inputs
      * @param outputs
      */
-    const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[]) => {
+    const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
+      form.value.versionDescription = versionDescription;
       if (inputs) {
         inputs.forEach(item => {
           form.value.inputs.push({
@@ -144,12 +147,12 @@ export default defineComponent({
         try {
           if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
             const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            const { inputParameters: inputs, outputParameters: outputs } = list;
-            pushParams(inputs, outputs);
+            const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
+            pushParams(inputs, outputs, versionDescription);
           } else {
             const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            const { inputParams: inputs, outputParams: outputs } = list;
-            pushParams(inputs, outputs);
+            const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
+            pushParams(inputs, outputs, versionDescription);
           }
         } catch (err) {
           proxy.$throw(err, proxy);
@@ -168,8 +171,23 @@ export default defineComponent({
     margin-top: 20px;
   }
 
+  .node-item {
+    padding-top: 10px;
+  }
+
   .jm-icon-button-help::before {
     margin: 0;
+  }
+
+  .node-name {
+    padding-top: 10px;
+  }
+
+  .version-description {
+    font-size: 12px;
+    color: #7B8C9C;
+    line-height: 18px;
+    margin-bottom: 10px;
   }
 }
 </style>

@@ -20,6 +20,7 @@ public class NodeDefinitionVersionDto {
     private String creatorName;
     private String creatorRef;
     private String version;
+    private String description;
     private String resultFile;
     private Set<Parameter> inputParameters = new HashSet<>();
     private Set<Parameter> outputParameters = new HashSet<>();

@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, inject, provide, ref } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
@@ -54,6 +54,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
+    const { proxy: instance } = getCurrentInstance() as any;
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
     const node = graph.getNodes().find(({ id }) => props.nodeId === id)!;
@@ -91,6 +92,8 @@ export default defineComponent({
 
           // 通过校验时，删除警告
           node.removeTool('button');
+
+          instance.$success('保存成功');
         });
       },
     };

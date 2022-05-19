@@ -14,6 +14,7 @@ public class NodeDefinitionVersion {
     private String id;
     private String ownerRef;
     private String ref;
+    private String description;
     private String creatorName;
     private String creatorRef;
     private String version;
@@ -34,6 +35,10 @@ public class NodeDefinitionVersion {
 
     public String getRef() {
         return ref;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public String getCreatorName() {
@@ -68,6 +73,7 @@ public class NodeDefinitionVersion {
         private String id;
         private String ownerRef;
         private String ref;
+        private String description;
         private String creatorName;
         private String creatorRef;
         private String version;
@@ -95,6 +101,11 @@ public class NodeDefinitionVersion {
 
         public Builder ref(String ref) {
             this.ref = ref;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
             return this;
         }
 
@@ -145,6 +156,7 @@ public class NodeDefinitionVersion {
             nodeDefinitionVersion.creatorName = this.creatorName;
             nodeDefinitionVersion.spec = this.spec;
             nodeDefinitionVersion.resultFile = this.resultFile;
+            nodeDefinitionVersion.description = this.description;
             return nodeDefinitionVersion;
         }
     }
