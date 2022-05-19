@@ -31,6 +31,7 @@ export default function (G6: typeof _G6) {
       style: {
         stroke: '#667085',
         lineWidth: 1.5,
+        radius: 10,
       },
     },
     setState(name, value, item) {
