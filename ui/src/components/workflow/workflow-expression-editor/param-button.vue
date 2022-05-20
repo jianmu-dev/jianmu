@@ -15,7 +15,7 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, PropType, ref } from 'vue';
+import { computed, defineComponent, PropType, ref } from 'vue';
 import { ISelectableParam } from './model/data';
 
 export default defineComponent({
@@ -28,11 +28,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const selectValue = ref<string[]>([]);
-    const hidden = ref<boolean>(false);
-    // 没有数据按钮不可点击
-    if (props.selectableParams.length === 0) {
-      hidden.value = true;
-    }
+    const hidden = computed<boolean>(() => props.selectableParams.length === 0);
     return {
       insertParam(arr: string[]) {
         emit('inserted', arr);
