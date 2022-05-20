@@ -72,7 +72,8 @@
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <expression-editor v-model="form.auth.token" :node-id="nodeId" placeholder="请输入token值"/>
+              <expression-editor v-model="form.auth.token" :node-id="nodeId"
+                                 placeholder="请输入token值"/>
             </jm-form-item>
             <jm-form-item prop="auth.value" :rules="nodeData.getFormRules().auth.fields.value">
               <template #label>
@@ -114,7 +115,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
+import { defineComponent, inject, nextTick, onMounted, PropType, ref } from 'vue';
 import { Webhook } from '../../model/data/node/webhook';
 import WebhookParam from './form/webhook-param.vue';
 import SecretKeySelector from './form/secret-key-selector.vue';
@@ -122,6 +123,7 @@ import ExpressionEditor from './form/expression-editor.vue';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Node } from '@antv/x6';
+import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
 
 export default defineComponent({
   components: { WebhookParam, SecretKeySelector, ExpressionEditor },
@@ -133,8 +135,17 @@ export default defineComponent({
   },
   emits: ['form-created'],
   setup(props, { emit }) {
+    const refreshParamsFns: ((params: ISelectableParam[]) => void)[] = [];
+    const handleEditorCreated = (refreshParams: (params: ISelectableParam[]) => void) => {
+      refreshParamsFns.push(refreshParams);
+    };
     const formRef = ref();
     const form = ref<Webhook>(props.nodeData);
+    const refreshEditorParams = async () => {
+      await nextTick();
+      const param = form.value.buildSelectableParam();
+      refreshParamsFns.forEach(fn => fn([param]));
+    };
     const nodeId = ref<string>('');
     const getNode = inject('getNode') as () => Node;
     nodeId.value = getNode().id;
@@ -147,6 +158,8 @@ export default defineComponent({
     const authSwitch = ref<boolean>(!!props.nodeData.auth);
 
     return {
+      refreshEditorParams,
+      handleEditorCreated,
       formRef,
       form,
       foldParamFlag,
@@ -171,6 +184,7 @@ export default defineComponent({
           token: '',
           value: '',
         } : undefined;
+        refreshEditorParams();
       },
     };
   },
