@@ -11,9 +11,9 @@
       </div>
       <div class="groups" v-show="nodeCount>0">
         <node-group
-          :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
+          class="trigger" :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
         <node-group
-          :type="NodeGroupEnum.INNER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
+          class="inner" :type="NodeGroupEnum.INNER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
         <node-group
           :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
         <node-group
