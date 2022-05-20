@@ -48,8 +48,9 @@
         <jm-radio :label="true">是</jm-radio>
       </jm-radio-group>
     </jm-form-item>
-    <jm-form-item label="默认值"
-                  v-if="!requiredVal">
+    <jm-form-item v-if="!requiredVal"
+                  :prop="`${formModelName}.${index}.default`" :rules="rules.default"
+                  label="默认值">
       <jm-input v-model="defaultVal" @change="changeDefault" placeholder="请输入默认值" @focus="switchBackgroundFlag = true;"
                 @blur="switchBackgroundFlag = false;"/>
     </jm-form-item>
@@ -130,6 +131,8 @@ export default defineComponent({
       },
       changeRequired: () => {
         emit('update:required', requiredVal.value);
+        defaultVal.value = requiredVal.value ? undefined : '';
+        emit('update:default', defaultVal.value);
       },
       deleteParam: () => {
         emit('delete', props.index, props.name);

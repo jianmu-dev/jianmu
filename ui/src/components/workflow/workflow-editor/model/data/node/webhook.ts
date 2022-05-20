@@ -69,6 +69,35 @@ export class Webhook extends BaseNode {
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           exp: [{ required: true, message: '请输入参数表达式', trigger: 'blur' }],
           required: [{ required: true, type: 'boolean' }],
+          default: [
+            {
+              validator: ({ fullField }: any, value: any, callback: any) => {
+                const param = this.params[fullField!.split('.')[1]];
+                if (param.required || !param.type) {
+                  callback();
+                  return;
+                }
+
+                const defaultVal = param.default!;
+                switch (param.type) {
+                  case ParamTypeEnum.BOOL:
+                    if (!['true', 'false'].includes(defaultVal)) {
+                      callback('请输入正确的参数默认值');
+                      return;
+                    }
+                    break;
+                  case ParamTypeEnum.NUMBER:
+                    if (isNaN(parseFloat(defaultVal))) {
+                      callback('请输入正确的参数默认值');
+                      return;
+                    }
+                    break;
+                }
+                callback();
+              },
+              trigger: 'blur',
+            },
+          ],
         } as Record<string, CustomRule>,
       };
     });
@@ -128,6 +157,24 @@ export class Webhook extends BaseNode {
       param: params.length === 0 ? undefined : params.map(param => {
         const newParam: any = { ...param };
         delete newParam.key;
+        if (!param.required) {
+          const defaultVal = param.default!;
+          switch (param.type) {
+            case ParamTypeEnum.BOOL:
+              switch (defaultVal) {
+                case 'true':
+                  newParam.default = true;
+                  break;
+                case 'false':
+                  newParam.default = false;
+                  break;
+              }
+              break;
+            case ParamTypeEnum.NUMBER:
+              newParam.default = parseFloat(defaultVal);
+              break;
+          }
+        }
         return newParam;
       }),
       auth,

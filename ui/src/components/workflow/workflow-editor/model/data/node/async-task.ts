@@ -161,6 +161,7 @@ export class AsyncTask extends BaseNode {
           const val = parseFloat(value);
           if (!isNaN(val)) {
             param[ref] = val;
+            return;
           }
           break;
         }
@@ -168,10 +169,10 @@ export class AsyncTask extends BaseNode {
           switch (value) {
             case 'true':
               param[ref] = true;
-              break;
+              return;
             case 'false':
               param[ref] = false;
-              break;
+              return;
           }
           break;
         }
