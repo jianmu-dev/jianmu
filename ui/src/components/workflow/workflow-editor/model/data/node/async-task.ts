@@ -155,7 +155,7 @@ export class AsyncTask extends BaseNode {
     const param: {
       [key: string]: string | number | boolean;
     } = {};
-    inputs.forEach(({ ref, type, value }) => {
+    inputs.forEach(({ ref, type, required, value }) => {
       switch (type) {
         case ParamTypeEnum.NUMBER: {
           const val = parseFloat(value);
@@ -180,6 +180,10 @@ export class AsyncTask extends BaseNode {
 
       if (!param[ref]) {
         param[ref] = value;
+      }
+
+      if (!required && !value) {
+        delete param[ref];
       }
     });
 
