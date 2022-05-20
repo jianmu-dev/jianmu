@@ -72,8 +72,7 @@
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <expression-editor v-model="form.auth.token" :node-id="nodeId"
-                                 placeholder="请输入token值"/>
+              <expression-editor v-model="form.auth.token" :node-id="nodeId" placeholder="请输入token值"/>
             </jm-form-item>
             <jm-form-item prop="auth.value" :rules="nodeData.getFormRules().auth.fields.value">
               <template #label>
@@ -123,7 +122,7 @@ import ExpressionEditor from './form/expression-editor.vue';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Node } from '@antv/x6';
-import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
+import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
 
 export default defineComponent({
   components: { WebhookParam, SecretKeySelector, ExpressionEditor },
@@ -184,7 +183,6 @@ export default defineComponent({
           token: '',
           value: '',
         } : undefined;
-        refreshEditorParams();
       },
     };
   },
