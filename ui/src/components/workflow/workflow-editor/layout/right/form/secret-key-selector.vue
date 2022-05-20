@@ -1,6 +1,6 @@
 <template>
   <div class="secret-key-selector" v-loading="loading">
-    <jm-cascader :props="cascaderProps" :placeholder="placeholder" v-model="selectorValue"
+    <jm-cascader clearable :props="cascaderProps" :placeholder="placeholder" v-model="selectorValue"
                  @change="getValue"/>
   </div>
 </template>

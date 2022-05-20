@@ -52,6 +52,13 @@
             :node-id="nodeId"
             :placeholder="item.description?item.description:'请输入'+item.name"/>
         </jm-form-item>
+        <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().on_failure"
+                      v-if="failureVisible">
+          <jm-radio-group v-model="form.failureMode">
+            <jm-radio :label="'suspend'">挂起</jm-radio>
+            <jm-radio :label="'ignore'">忽略</jm-radio>
+          </jm-radio-group>
+        </jm-form-item>
       </div>
     </jm-form>
   </div>
@@ -91,6 +98,7 @@ export default defineComponent({
     const getNode = inject('getNode') as () => Node;
     nodeId.value = getNode().id;
     const versionLoading = ref<boolean>(false);
+    const failureVisible = ref<boolean>(false);
 
     onMounted(async () => {
       emit('form-created', formRef.value);
@@ -148,6 +156,7 @@ export default defineComponent({
       ParamTypeEnum,
       nodeId,
       versionLoading,
+      failureVisible,
       // 获取节点信息
       changeVersion: async () => {
         form.value.inputs.length = 0;
@@ -167,6 +176,7 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         } finally {
           versionLoading.value = false;
+          failureVisible.value = true;
         }
       },
     };
