@@ -4,6 +4,7 @@ import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
+import { TaskStatusEnum } from '@/api/dto/enumeration';
 
 export interface IAsyncTaskParam {
   readonly ref: string;
@@ -23,7 +24,16 @@ export function checkDefaultIcon(icon: string) {
   if (!icon) {
     return true;
   }
-  return icon.includes('/async-task.');
+
+  const tags = Object.values(TaskStatusEnum).map(status => `/${status}.`);
+  tags.push('/async-task.');
+  for (const tag of tags) {
+    if (icon.includes(tag)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export class AsyncTask extends BaseNode {

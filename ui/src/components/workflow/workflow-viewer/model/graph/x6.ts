@@ -5,7 +5,7 @@ import { TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { WorkflowTool } from '@/components/workflow/workflow-editor/model/workflow-tool';
 import { render } from '@/components/workflow/workflow-editor/model/workflow-graph';
 import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
-import { NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { NodeRefEnum, NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/model/data/common';
 import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 import { Cron } from '@/components/workflow/workflow-editor/model/data/node/cron';
@@ -14,6 +14,9 @@ import { imgs, states } from '@/components/workflow/workflow-viewer/shapes/async
 import { BaseTaskRunning } from '../../animations/base-task-running';
 import X6TaskRunning from '@/components/workflow/workflow-viewer/animations/task-running/x6';
 import { checkDefaultIcon } from '@/components/workflow/workflow-editor/model/data/node/async-task';
+import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
+
+const { textMaxHeight } = NODE;
 
 export class X6Graph extends BaseGraph {
   private readonly asyncTaskRefs: string[];
@@ -96,8 +99,8 @@ export class X6Graph extends BaseGraph {
     });
   }
 
-  hideNodeToolbar(asyncTaskRef: string): void {
-    const node = this.getNodeByAsyncTaskRef(asyncTaskRef);
+  hideNodeToolbar(nodeRef: string): void {
+    const node = this.getNodeByRef(nodeRef);
     const imgEl = this.getShapeEl(node.id).querySelector('.img')! as HTMLElement;
     imgEl.style.boxShadow = '';
   }
@@ -117,11 +120,15 @@ export class X6Graph extends BaseGraph {
       (shapeEl.querySelector('.img')! as HTMLElement)
         .style.boxShadow = '0 0 8px 1px #C5D9FF';
 
-      // TODO 非异步任务或滑过动画相关shape时，忽略
+      const status = shapeEl.getAttribute('x6-task-status');
+      if (status === TaskStatusEnum.RUNNING) {
+        // 滑过动画相关shape时，忽略
+        return;
+      }
 
       const { id, description, type } = this.buildEvt(node);
       const { width, height, x, y } = shapeEl.getBoundingClientRect();
-      mouseoverNode({ id, description, type, width, height, x, y });
+      mouseoverNode({ id, description, type, width, height: height - textMaxHeight, x, y });
     });
   }
 
@@ -228,8 +235,12 @@ export class X6Graph extends BaseGraph {
     return nodes;
   }
 
-  private getNodeByAsyncTaskRef(asyncTaskRef: string) {
-    return this.getTaskNodes()[this.asyncTaskRefs.indexOf(asyncTaskRef)];
+  private getNodeByRef(nodeRef: string): Node {
+    if ([NodeRefEnum.WEBHOOK, NodeRefEnum.CRON].includes(nodeRef as NodeRefEnum)) {
+      return this.graph.getRootNodes()[0];
+    }
+
+    return this.getTaskNodes()[this.asyncTaskRefs.indexOf(nodeRef)];
   }
 
   private getShapeEl(nodeId: string): HTMLElement {

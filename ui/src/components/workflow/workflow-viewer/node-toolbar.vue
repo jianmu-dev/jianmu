@@ -85,11 +85,15 @@
 import { computed, defineComponent, nextTick, onMounted, onUpdated, PropType, ref, SetupContext } from 'vue';
 import { INodeMouseoverEvent } from './model/data/common';
 import { MAX_LABEL_LENGTH } from './model/dsl/g6';
-import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
+import { GraphTypeEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   props: {
+    graphType: {
+      type: String as PropType<GraphTypeEnum>,
+      required: true,
+    },
     readonly: {
       type: Boolean,
       required: true,
@@ -137,6 +141,9 @@ export default defineComponent({
       status,
       tips: computed<string>(() => {
         let str = '';
+        if (props.graphType === GraphTypeEnum.X6) {
+          return str;
+        }
 
         switch (props.nodeEvent.type) {
           case NodeTypeEnum.WEBHOOK:

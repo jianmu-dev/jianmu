@@ -1,4 +1,12 @@
 /**
+ * 画布类型枚举
+ */
+export enum GraphTypeEnum {
+  G6 = 'G6',
+  X6 = 'X6',
+}
+
+/**
  * 画布方向枚举
  */
 export enum GraphDirectionEnum {

@@ -175,7 +175,7 @@ export class G6Graph extends BaseGraph {
       }
 
       if (ev.shape.get('name').includes('animate_')) {
-        // 非异步任务或滑过动画相关shape时，忽略
+        // 滑过动画相关shape时，忽略
         return;
       }
 

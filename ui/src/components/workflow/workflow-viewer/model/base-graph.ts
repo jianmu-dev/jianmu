@@ -1,7 +1,8 @@
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { INodeMouseoverEvent } from './data/common';
 import { DslTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
-import { GraphDirectionEnum } from './data/enumeration';
+import { GraphDirectionEnum, GraphTypeEnum } from './data/enumeration';
+import { G6Graph } from './graph/g6';
 
 interface Zoom {
   readonly min: number;
@@ -18,6 +19,10 @@ export abstract class BaseGraph {
 
   protected constructor(dslType: DslTypeEnum) {
     this.dslType = dslType;
+  }
+
+  getGraphType(): GraphTypeEnum {
+    return this instanceof G6Graph ? GraphTypeEnum.G6 : GraphTypeEnum.X6;
   }
 
   hideNodeToolbar(nodeId: string): void {
