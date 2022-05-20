@@ -152,7 +152,7 @@ export default defineComponent({
     const refreshEditorParams = async () => {
       await nextTick();
       const param = form.value.buildSelectableParam();
-      refreshParamsFns.forEach(fn => fn([param]));
+      refreshParamsFns.forEach(fn => fn(param ? [param] : []));
     };
     const nodeId = ref<string>('');
     const getNode = inject('getNode') as () => Node;
