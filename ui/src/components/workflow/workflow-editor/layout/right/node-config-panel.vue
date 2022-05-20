@@ -149,6 +149,10 @@ export default defineComponent({
       border-radius: 2px;
       border: none;
       box-shadow: none;
+
+      &:hover {
+        background: #D9D9D9;
+      }
     }
 
   }

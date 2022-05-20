@@ -211,6 +211,10 @@ export default defineComponent({
         color: #082340;
         border: none;
         box-shadow: none;
+
+        &:hover {
+          background: #D9D9D9;
+        }
       }
     }
   }
