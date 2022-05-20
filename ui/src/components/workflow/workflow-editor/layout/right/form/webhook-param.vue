@@ -142,7 +142,7 @@ export default defineComponent({
 <style scoped lang="less">
 .webhook-param {
   font-size: 14px;
-  padding: 20px;
+  padding: 20px 20px 10px;
   position: relative;
   border-bottom: 1px solid #E6EBF2;
 
