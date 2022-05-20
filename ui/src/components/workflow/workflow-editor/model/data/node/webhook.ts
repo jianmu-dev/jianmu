@@ -129,7 +129,7 @@ export class Webhook extends BaseNode {
         return newParam;
       }),
       auth,
-      only,
+      only: only ? only : undefined,
     };
   }
 }
