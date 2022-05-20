@@ -48,7 +48,7 @@
       <jm-form-item label="脚本" class="script-container">
         <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script"/>
       </jm-form-item>
-      <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failure_mode"
+      <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failureMode"
                     v-if="failureVisible">
         <jm-radio-group v-model="form.failureMode">
           <jm-radio :label="'suspend'">挂起</jm-radio>

@@ -146,7 +146,7 @@ export class AsyncTask extends BaseNode {
         len: this.inputs.length,
         fields,
       },
-      failure_mode: [{ required: true }],
+      failureMode: [{ required: true }],
     };
   }
 
