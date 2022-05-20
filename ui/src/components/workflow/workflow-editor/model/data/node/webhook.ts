@@ -157,6 +157,24 @@ export class Webhook extends BaseNode {
       param: params.length === 0 ? undefined : params.map(param => {
         const newParam: any = { ...param };
         delete newParam.key;
+        if (!param.required) {
+          const defaultVal = param.default!;
+          switch (param.type) {
+            case ParamTypeEnum.BOOL:
+              switch (defaultVal) {
+                case 'true':
+                  newParam.default = true;
+                  break;
+                case 'false':
+                  newParam.default = false;
+                  break;
+              }
+              break;
+            case ParamTypeEnum.NUMBER:
+              newParam.default = parseFloat(defaultVal);
+              break;
+          }
+        }
         return newParam;
       }),
       auth,
