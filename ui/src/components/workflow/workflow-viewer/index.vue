@@ -140,7 +140,10 @@ export default defineComponent({
 
     // 保证整个视图都渲染完毕，才能确定图的宽高
     onMounted(() => proxy.$nextTick(() => refreshGraph()));
-    onUnmounted(() => workflowGraph?.destroy());
+    onUnmounted(() => {
+      graph.value = undefined;
+      workflowGraph?.destroy();
+    });
 
     return {
       TaskStatusEnum,
@@ -203,6 +206,10 @@ export default defineComponent({
         updateZoom();
       },
       handleFullscreen: (_: boolean) => {
+        if (!graph.value) {
+          return;
+        }
+
         if (container.value) {
           container.value.style.visibility = 'hidden';
         }
