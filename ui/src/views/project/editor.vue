@@ -219,7 +219,7 @@ export default defineComponent({
               // 关闭loading
               loading.value = false;
 
-              proxy.$success(editMode ? '编辑成功' : '新增成功');
+              proxy.$success(editMode ? '保存成功' : '新增成功');
 
               if (returnFlag) {
                 close();

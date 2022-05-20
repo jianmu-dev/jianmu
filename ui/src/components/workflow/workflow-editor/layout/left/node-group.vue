@@ -208,6 +208,14 @@ export default defineComponent({
   flex-direction: column;
   margin: 0 20px 10px;
 
+  &.trigger, &.inner {
+    .nodes {
+      .nodes-wrapper {
+        margin-bottom: -20px;
+      }
+    }
+  }
+
   .fold-switch {
     cursor: pointer;
     display: flex;

@@ -107,7 +107,7 @@ export default defineComponent({
             dslText: dsl,
             id: editMode ? props.id : '',
           });
-          proxy.$success(editMode ? '编辑成功' : '新增成功');
+          proxy.$success(editMode ? '保存成功' : '新增成功');
           if (!back) {
             // 新增项目，再次点击保存进入项目编辑模式
             if (!editMode) {
