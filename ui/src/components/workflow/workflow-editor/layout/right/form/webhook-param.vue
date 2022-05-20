@@ -131,7 +131,8 @@ export default defineComponent({
       },
       changeRequired: () => {
         emit('update:required', requiredVal.value);
-        defaultVal.value = requiredVal.value ? undefined : (props.default || '');
+        defaultVal.value = requiredVal.value ? undefined : '';
+        emit('update:default', defaultVal.value);
       },
       deleteParam: () => {
         emit('delete', props.index, props.name);
