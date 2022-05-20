@@ -48,6 +48,13 @@
       <jm-form-item label="脚本" class="script-container">
         <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script"/>
       </jm-form-item>
+      <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failureMode"
+                    v-if="failureVisible">
+        <jm-radio-group v-model="form.failureMode">
+          <jm-radio :label="'suspend'">挂起</jm-radio>
+          <jm-radio :label="'ignore'">忽略</jm-radio>
+        </jm-radio-group>
+      </jm-form-item>
     </jm-form>
   </div>
 </template>
@@ -70,12 +77,14 @@ export default defineComponent({
   setup(props, { emit }) {
     const formRef = ref();
     const form = ref<Shell>(props.nodeData);
+    const failureVisible = ref<boolean>(true);
 
     onMounted(() => emit('form-created', formRef.value));
 
     return {
       formRef,
       form,
+      failureVisible,
       // 添加环境变量
       addShellEnv: () => {
         form.value.envs.push({ key: uuidv4(), name: '', value: '' });

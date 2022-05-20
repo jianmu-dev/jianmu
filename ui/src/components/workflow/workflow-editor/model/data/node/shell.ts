@@ -72,6 +72,7 @@ export class Shell extends BaseNode {
         len: this.envs.length,
         fields: shellEnvFields,
       },
+      failureMode: [{ required: true }],
     };
   }
 
