@@ -5,6 +5,8 @@ import icon from '../../../svgs/shape/webhook.svg';
 import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 
+export const WEBHOOK_PARAM_SCOPE = 'trigger';
+
 export interface IWebhookParam {
   key: string;
   name: string;
@@ -42,7 +44,7 @@ export class Webhook extends BaseNode {
     }
 
     return {
-      value: 'trigger',
+      value: WEBHOOK_PARAM_SCOPE,
       label: super.getName(),
       children: this.params.filter(({ name }) => name)
         .map(({ name }) => {
