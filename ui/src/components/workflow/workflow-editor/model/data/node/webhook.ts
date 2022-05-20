@@ -123,7 +123,11 @@ export class Webhook extends BaseNode {
 
     return {
       type: NodeTypeEnum.WEBHOOK,
-      param: params.length === 0 ? undefined : params,
+      param: params.length === 0 ? undefined : params.map(param => {
+        const newParam: any = { ...param };
+        delete newParam.key;
+        return newParam;
+      }),
       auth,
       only,
     };

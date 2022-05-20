@@ -152,11 +152,13 @@ export class WorkflowTool {
       global: workflowData.global,
       trigger,
       pipeline,
-      'raw-data': workflowData.data,
     });
 
     idMap.forEach((value, key) =>
+      // TODO 待完善，优化成正则表达式提取方式
       (dsl = dsl.replaceAll('${' + key + '.', '${' + value + '.')));
+
+    dsl += '\n\n' + `raw-data: ${JSON.stringify(workflowData.data)}`;
 
     return dsl;
   }
