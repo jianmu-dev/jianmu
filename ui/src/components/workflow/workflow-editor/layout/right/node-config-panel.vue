@@ -3,7 +3,7 @@
     title="节点配置面板"
     :size="380"
     direction="rtl"
-    :modal="false"
+    :close-on-click-modal="false"
     destroy-on-close
   >
     <template #title>
@@ -25,7 +25,7 @@
       </jm-scrollbar>
       <div class="footer">
         <jm-button @click="cancel" class="cancel">取消</jm-button>
-        <jm-button type="primary" @click="save">保存</jm-button>
+        <jm-button type="primary" @click="save">确定</jm-button>
       </div>
     </div>
   </jm-drawer>
@@ -97,7 +97,7 @@ export default defineComponent({
           // 通过校验时，删除警告
           node.removeTool('button');
 
-          instance.$success('保存成功');
+          instance.$success('编辑成功');
         });
       },
     };
@@ -105,8 +105,7 @@ export default defineComponent({
   emits: ['update:model-value'],
 });
 </script>
-
-<style scoped lang="less">
+<style lang="less" scoped>
 .el-drawer {
   .jm-icon-button-help {
     display: inline-block;
@@ -149,6 +148,10 @@ export default defineComponent({
       border-radius: 2px;
       border: none;
       box-shadow: none;
+
+      &:hover {
+        background: #D9D9D9;
+      }
     }
 
   }

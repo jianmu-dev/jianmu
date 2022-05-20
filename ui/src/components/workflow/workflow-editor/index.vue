@@ -7,6 +7,7 @@
         v-model="nodeConfigPanelVisible"
         :node-id="selectedNodeId"
         :node-waring-clicked="nodeWaringClicked"
+        modal-class="node-config-panel-overlay"
         @closed="handleNodeConfigPanelClosed"/>
     </template>
     <div class="main">
@@ -105,6 +106,11 @@ export default defineComponent({
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
+
+  .node-config-panel-overlay {
+    background-color: transparent;
+    cursor: not-allowed;
+  }
 
   .main {
     position: relative;

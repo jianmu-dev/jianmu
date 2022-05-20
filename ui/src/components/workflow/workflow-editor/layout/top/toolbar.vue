@@ -46,6 +46,7 @@ import ProjectPanel from './project-panel.vue';
 import { IWorkflow } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import { cloneDeep } from 'lodash';
+import { compare } from '../../model/util/object';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -58,7 +59,7 @@ export default defineComponent({
   emits: ['back', 'save'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
-    const workflowBackUp = cloneDeep(props.workflowData);
+    let workflowBackUp = cloneDeep(props.workflowData);
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const projectPanelVisible = ref<boolean>(false);
     const getGraph = inject('getGraph') as () => Graph;
@@ -75,14 +76,16 @@ export default defineComponent({
       projectPanelVisible,
       zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
       goBack: async () => {
-        const obj = graph.toJSON();
-        const data = obj.cells.length === 0 ? '' : JSON.stringify(graph.toJSON());
-
+        const originData = workflowBackUp.data ? JSON.parse(workflowBackUp.data) : {};
+        let targetData = graph.toJSON();
+        if (targetData.cells.length === 0) {
+          delete targetData.cells;
+        }
         if (workflowBackUp.name !== workflowForm.value.name ||
           workflowBackUp.description !== workflowForm.value.description ||
           workflowBackUp.groupId !== workflowForm.value.groupId ||
-          workflowBackUp.data !== data ||
-          JSON.stringify(workflowBackUp.global) !== JSON.stringify(workflowForm.value.global)
+          !compare(originData, targetData) ||
+          !compare(JSON.stringify(workflowBackUp.global), JSON.stringify(workflowForm.value.global))
         ) {
           proxy.$confirm(' ', '保存此次修改', {
             confirmButtonText: '保存',
@@ -120,6 +123,7 @@ export default defineComponent({
 
           workflowForm.value.data = JSON.stringify(graph.toJSON());
           emit('save', back, workflowTool.toDsl(workflowForm.value));
+          workflowBackUp = cloneDeep(workflowForm.value);
         } catch ({ message }) {
           proxy.$error(message);
         }
@@ -211,6 +215,10 @@ export default defineComponent({
         color: #082340;
         border: none;
         box-shadow: none;
+
+        &:hover {
+          background: #D9D9D9;
+        }
       }
     }
   }
