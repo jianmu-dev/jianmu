@@ -49,7 +49,20 @@ export class CustomX6NodeProxy {
 
   getSelectableParams(graph: Graph): ISelectableParam[] {
     let graphNode = this.node;
+    let workflowNode = new CustomX6NodeProxy(graphNode).getData();
     const params: ISelectableParam[] = [];
+    if (workflowNode.getType() === NodeTypeEnum.CRON) {
+      return params;
+    }
+    if (workflowNode.getType() === NodeTypeEnum.WEBHOOK) {
+      const param = workflowNode.buildSelectableParam();
+      if (!param || !param.children || param.children.length === 0) {
+        return params;
+      }
+      params.push(param);
+      return params;
+    }
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const edges = graph.getIncomingEdges(graphNode);
@@ -57,7 +70,7 @@ export class CustomX6NodeProxy {
         break;
       }
       graphNode = edges[0].getSourceNode()!;
-      const workflowNode = new CustomX6NodeProxy(graphNode).getData();
+      workflowNode = new CustomX6NodeProxy(graphNode).getData();
       const param = workflowNode.buildSelectableParam();
       if (!param || !param.children || param.children.length === 0) {
         continue;
