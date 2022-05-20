@@ -55,7 +55,7 @@ export class CustomX6NodeProxy {
       return params;
     }
     if (workflowNode.getType() === NodeTypeEnum.WEBHOOK) {
-      const param = workflowNode.buildSelectableParam();
+      const param = workflowNode.buildSelectableParam(graphNode.id);
       if (!param || !param.children || param.children.length === 0) {
         return params;
       }
@@ -71,7 +71,7 @@ export class CustomX6NodeProxy {
       }
       graphNode = edges[0].getSourceNode()!;
       workflowNode = new CustomX6NodeProxy(graphNode).getData();
-      const param = workflowNode.buildSelectableParam();
+      const param = workflowNode.buildSelectableParam(graphNode.id);
       if (!param || !param.children || param.children.length === 0) {
         continue;
       }

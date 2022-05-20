@@ -64,7 +64,7 @@ export class AsyncTask extends BaseNode {
     return new AsyncTask(ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode, validateParam);
   }
 
-  buildSelectableParam(): ISelectableParam {
+  buildSelectableParam(nodeId: string): ISelectableParam {
     const children: ISelectableParam[] = this.outputs.map(({ ref, name }) => {
       return {
         value: ref,
@@ -92,7 +92,7 @@ export class AsyncTask extends BaseNode {
     });
 
     return {
-      value: super.getRef(),
+      value: nodeId,
       label: super.getName(),
       children,
     };
