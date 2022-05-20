@@ -105,16 +105,19 @@ export class WorkflowNodeToolbar {
       const zoom = this.graph.zoom();
       // 节点大小
       const { width: nodeW } = node.size();
+
+      // 与节点宽度保持一致
+      this.el.style.width = `${iconW}px`;
+      this.el.style.transform = `scale(${zoom},${zoom})`;
+
       // 节点工具栏大小
       const { offsetWidth: toolbarW, offsetHeight: toolbarH } = this.el;
+
       // 缩放导致的y轴偏移量
       const scaleYOffset = (zoom - 1) * toolbarH / 2;
       const left = x * zoom + tx + (nodeW * zoom - toolbarW) / 2;
       const top = y * zoom + ty - toolbarH - scaleYOffset;
 
-      // 与节点宽度保持一致
-      this.el.style.width = `${iconW}px`;
-      this.el.style.transform = `scale(${zoom},${zoom})`;
       this.el.style.left = `${left}px`;
       this.el.style.top = `${top - toolbarDistance * zoom}px`;
 
