@@ -36,7 +36,11 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
-  buildSelectableParam(nodeId: string = ''): ISelectableParam {
+  buildSelectableParam(nodeId: string = ''): ISelectableParam | undefined {
+    if (this.params.length === 0) {
+      return undefined;
+    }
+
     return {
       value: 'trigger',
       label: super.getName(),
@@ -75,7 +79,8 @@ export class Webhook extends BaseNode {
 
       const references = extractReferences(value);
       if (references.length > 0) {
-        const selectableParams = [this.buildSelectableParam()];
+        const param = this.buildSelectableParam();
+        const selectableParams = param ? [param] : [];
         for (const reference of references) {
           try {
             // 检查引用的触发器参数是否存在
