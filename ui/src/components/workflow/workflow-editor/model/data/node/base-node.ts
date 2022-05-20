@@ -39,7 +39,7 @@ export abstract class BaseNode implements IWorkflowNode {
     return this.docUrl;
   }
 
-  buildSelectableParam(): ISelectableParam | undefined {
+  buildSelectableParam(nodeId: string): ISelectableParam | undefined {
     return undefined;
   }
 
