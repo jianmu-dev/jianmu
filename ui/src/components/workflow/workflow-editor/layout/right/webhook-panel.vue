@@ -34,6 +34,7 @@
             :index="index"
             :rules="nodeData.getFormRules().params.fields[index].fields"
             @delete="deleteParam"
+            @update:name="refreshEditorParams"
           />
           <div class="add-param" @click="addParam">
             <i class="jm-icon-button-add"/>
@@ -72,7 +73,11 @@
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
               </template>
-              <expression-editor v-model="form.auth.token" :node-id="nodeId" placeholder="请输入token值"/>
+              <expression-editor
+                v-model="form.auth.token"
+                :node-id="nodeId"
+                placeholder="请输入token值"
+                @editor-created="handleEditorCreated"/>
             </jm-form-item>
             <jm-form-item prop="auth.value" :rules="nodeData.getFormRules().auth.fields.value">
               <template #label>
@@ -104,7 +109,11 @@
               </jm-tooltip>
             </template>
             <div class="only-content">
-              <jm-input type="textarea" placeholder="请输入匹配规则" v-model="form.only"/>
+              <expression-editor
+                v-model="form.only"
+                placeholder="请输入匹配规则"
+                :node-id="nodeId"
+                @editor-created="handleEditorCreated"/>
             </div>
           </jm-form-item>
         </div>
@@ -168,9 +177,11 @@ export default defineComponent({
       //  删除
       deleteParam: (index: number) => {
         form.value.params.splice(index, 1);
+        refreshEditorParams();
       },
       addParam: () => {
         form.value.params.push({ key: uuidv4(), name: '', exp: '', type: undefined, required: false });
+        refreshEditorParams();
       },
       foldParam: () => {
         foldParamFlag.value = !foldParamFlag.value;
@@ -183,6 +194,9 @@ export default defineComponent({
           token: '',
           value: '',
         } : undefined;
+        if (val) {
+          refreshEditorParams();
+        }
       },
     };
   },
@@ -293,7 +307,7 @@ export default defineComponent({
       }
 
       .rules-content {
-        padding: 20px;
+        padding: 20px 20px 10px;
         border-radius: 2px;
         border: 1px solid #E6EBF2;
         margin-top: 10px;
@@ -301,6 +315,12 @@ export default defineComponent({
 
       .only-container {
         margin-top: 20px;
+      }
+
+      .only-content {
+        ::v-deep(.container) {
+          height: 146px;
+        }
       }
     }
   }
