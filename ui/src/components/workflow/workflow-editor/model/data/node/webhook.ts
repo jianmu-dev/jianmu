@@ -36,7 +36,7 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
-  buildSelectableParam(): ISelectableParam {
+  buildSelectableParam(nodeId: string = ''): ISelectableParam {
     return {
       value: 'trigger',
       label: super.getName(),
