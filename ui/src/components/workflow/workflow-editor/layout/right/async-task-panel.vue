@@ -9,16 +9,19 @@
       <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
         <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
-      <jm-form-item label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
-        <jm-select
-          v-model="form.version"
-          placeholder="请选择节点版本"
-          @change="changeVersion"
-        >
-          <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
-        </jm-select>
+      <jm-form-item
+        label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
+        <div v-loading="versionLoading" class="version-container">
+          <jm-select
+            v-model="form.version"
+            placeholder="请选择节点版本"
+            @change="changeVersion"
+          >
+            <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
+          </jm-select>
+          <div class="version-description">{{ form.versionDescription }}</div>
+        </div>
       </jm-form-item>
-      <div class="version-description">{{ form.versionDescription }}</div>
       <div v-if="form.inputs">
         <jm-form-item
           v-for="(item,index) in form.inputs"
@@ -87,9 +90,11 @@ export default defineComponent({
     const nodeId = ref<string>('');
     const getNode = inject('getNode') as () => Node;
     nodeId.value = getNode().id;
+    const versionLoading = ref<boolean>(false);
 
     onMounted(async () => {
       emit('form-created', formRef.value);
+      versionLoading.value = true;
       // 获取versionList
       try {
         if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
@@ -99,6 +104,8 @@ export default defineComponent({
         }
       } catch (err) {
         proxy.$throw(err, proxy);
+      } finally {
+        versionLoading.value = false;
       }
     });
 
@@ -140,11 +147,13 @@ export default defineComponent({
       versionList,
       ParamTypeEnum,
       nodeId,
+      versionLoading,
       // 获取节点信息
       changeVersion: async () => {
         form.value.inputs.length = 0;
         form.value.outputs.length = 0;
         try {
+          versionLoading.value = true;
           if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
             const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
             const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
@@ -156,6 +165,8 @@ export default defineComponent({
           }
         } catch (err) {
           proxy.$throw(err, proxy);
+        } finally {
+          versionLoading.value = false;
         }
       },
     };
@@ -187,7 +198,7 @@ export default defineComponent({
     font-size: 12px;
     color: #7B8C9C;
     line-height: 18px;
-    margin-bottom: 10px;
+    margin-top: 10px;
   }
 }
 </style>
