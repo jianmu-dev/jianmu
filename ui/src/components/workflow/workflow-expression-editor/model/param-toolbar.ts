@@ -13,6 +13,11 @@ export class ParamToolbar {
     this.selectableParams = selectableParams;
   }
 
+  refreshSelectableParams(selectableParams: ISelectableParam[]): void {
+    this.selectableParams.length = 0;
+    this.selectableParams.push(...selectableParams);
+  }
+
   getParamRefEl(): HTMLInputElement | HTMLTextAreaElement | undefined {
     return this.paramRefEl;
   }

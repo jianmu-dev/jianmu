@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
+import { defineComponent, onMounted, onUnmounted, onUpdated, PropType, provide, ref } from 'vue';
 import { ISelectableParam } from './model/data';
 import { ExpressionEditor } from './model/expression-editor';
 import ParamToolbar from './param-toolbar.vue';
@@ -35,13 +35,22 @@ export default defineComponent({
   },
   emits: ['update:model-value', 'focus', 'blur', 'change'],
   setup(props, { emit }) {
+    const selectableParams = ref<ISelectableParam[]>(props.selectableParams);
     const paramToolbar = ref();
     const editorRef = ref<HTMLDivElement>();
     let expressionEditor: ExpressionEditor;
     provide('getExpressionEditor', (): ExpressionEditor => expressionEditor);
 
+    onUpdated(() => {
+      if (props.selectableParams === selectableParams.value) {
+        return;
+      }
+      selectableParams.value = props.selectableParams;
+      expressionEditor.toolbar.refreshSelectableParams(selectableParams.value);
+    });
+
     onMounted(() => (expressionEditor = new ExpressionEditor(paramToolbar.value.$el,
-      editorRef.value!, props.modelValue, props.selectableParams)));
+      editorRef.value!, props.modelValue, selectableParams.value)));
 
     onUnmounted(() => expressionEditor.destroy());
 
