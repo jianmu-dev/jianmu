@@ -46,20 +46,22 @@
         </div>
       </jm-form-item>
       <jm-form-item label="脚本" class="script-container">
-        <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script"/>
+        <expression-editor v-model="form.script" :node-id="nodeId" placeholder="请输入shell脚本"/>
       </jm-form-item>
     </jm-form>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { Shell } from '../../model/data/node/shell';
 import ShellEnv from './form/shell-env.vue';
 import { v4 as uuidv4 } from 'uuid';
+import ExpressionEditor from './form/expression-editor.vue';
+import { Node } from '@antv/x6';
 
 export default defineComponent({
-  components: { ShellEnv },
+  components: { ShellEnv, ExpressionEditor },
   props: {
     nodeData: {
       type: Object as PropType<Shell>,
@@ -70,12 +72,16 @@ export default defineComponent({
   setup(props, { emit }) {
     const formRef = ref();
     const form = ref<Shell>(props.nodeData);
+    const nodeId = ref<string>('');
+    const getNode = inject('getNode') as () => Node;
+    nodeId.value = getNode().id;
 
     onMounted(() => emit('form-created', formRef.value));
 
     return {
       formRef,
       form,
+      nodeId,
       // 添加环境变量
       addShellEnv: () => {
         form.value.envs.push({ key: uuidv4(), name: '', value: '' });
@@ -126,6 +132,10 @@ export default defineComponent({
 
   .script-container {
     padding-top: 10px;
+
+    ::v-deep(.container) {
+      height: 146px;
+    }
   }
 }
 </style>
