@@ -244,6 +244,12 @@ export default defineComponent({
     }
 
     .loading {
+      ::v-deep(.el-loading-spinner) {
+        top: 0;
+        left: 5px;
+        margin-top: -3px;
+      }
+
       width: 14px;
       height: 14px;
     }
