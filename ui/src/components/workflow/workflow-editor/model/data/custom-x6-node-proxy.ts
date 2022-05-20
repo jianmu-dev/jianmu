@@ -99,14 +99,17 @@ export class CustomX6NodeProxy {
             const nodeName = workflowNode.getName();
             throw new Error(`${reference.raw}参数不可用，${nodeName}节点参数不可引用`);
           }
-          throw new Error(`${reference.raw}参数不可用，对应的节点不存在`);
+          throw err;
         }
 
         if (err instanceof ParamError) {
-          const node = graph.getCellById(reference.nodeId) as Node;
-          const workflowNode = new CustomX6NodeProxy(node).getData();
-          const nodeName = workflowNode.getName();
-          throw new Error(`${reference.raw}参数不可用，${nodeName}节点不存在此参数`);
+          const cell = graph.getCellById(reference.nodeId);
+          if (cell) {
+            const workflowNode = new CustomX6NodeProxy(cell as Node).getData();
+            const nodeName = workflowNode.getName();
+            throw new Error(`${reference.raw}参数不可用，${nodeName}节点不存在此参数`);
+          }
+          throw err;
         }
 
         throw err;
