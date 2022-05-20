@@ -125,7 +125,6 @@ export default defineComponent({
     width: 0;
 
     .collapse-btn {
-      display: block;
       // 反转
       transform: scaleX(-1);
       border-radius: 50% 0 0 50%;
@@ -138,6 +137,9 @@ export default defineComponent({
   }
 
   .collapse-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-sizing: border-box;
     border: 1px solid #EBEEFB;
     z-index: 3;
