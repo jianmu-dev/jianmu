@@ -40,12 +40,13 @@ export class Webhook extends BaseNode {
     return {
       value: 'trigger',
       label: super.getName(),
-      children: this.params.map(({ name }) => {
-        return {
-          value: name,
-          label: name,
-        };
-      }),
+      children: this.params.filter(({ name }) => name)
+        .map(({ name }) => {
+          return {
+            value: name,
+            label: name,
+          };
+        }),
     };
   }
 
