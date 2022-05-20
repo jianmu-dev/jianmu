@@ -52,7 +52,7 @@
             :node-id="nodeId"
             :placeholder="item.description?item.description:'请输入'+item.name"/>
         </jm-form-item>
-        <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().on_failure"
+        <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failure_mode"
                       v-if="failureVisible">
           <jm-radio-group v-model="form.failureMode">
             <jm-radio :label="'suspend'">挂起</jm-radio>
