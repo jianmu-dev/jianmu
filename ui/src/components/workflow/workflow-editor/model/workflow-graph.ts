@@ -3,10 +3,11 @@ import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
 import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
 import { WorkflowNodeToolbar } from './workflow-node-toolbar';
-import { EDGE, PORT } from '../shape/gengral-config';
+import { EDGE, NODE, PORT, PORTS } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
+const { icon: { width, height } } = NODE;
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
 
@@ -217,26 +218,42 @@ export class WorkflowGraph {
   private registerShortcut() {
     // copy cut paste
     this.graph.bindKey(['meta+c', 'ctrl+c'], () => {
-      const cells = this.graph.getSelectedCells();
-      if (cells.length) {
-        this.graph.copy(cells);
+      const nodes = this.graph.getSelectedCells()
+        // 筛选节点，只能复制节点
+        .filter(cell => cell.isNode())
+        .map(cell => {
+          // 复制/粘贴时，连接桩id没有改变，通过创建新节点刷新连接桩id
+          const node = this.graph.createNode({
+            shape: 'vue-shape',
+            width,
+            height,
+            component: 'custom-vue-shape',
+            ports: { ...PORTS },
+            position: (cell as Node).getPosition(),
+          });
+          const cellProxy = new CustomX6NodeProxy(cell as Node);
+          const proxy = new CustomX6NodeProxy(node);
+          proxy.setData(cellProxy.getData());
+          return node;
+        });
+
+      if (nodes.length === 0) {
+        return;
       }
-      return false;
+      this.graph.copy(nodes);
     });
     // this.graph.bindKey(['meta+x', 'ctrl+x'], () => {
     //   const cells = this.graph.getSelectedCells();
     //   if (cells.length) {
     //     this.graph.cut(cells);
     //   }
-    //   return false;
     // });
     this.graph.bindKey(['meta+v', 'ctrl+v'], () => {
-      if (!this.graph.isClipboardEmpty()) {
-        const cells = this.graph.paste({ offset: 32 });
-        this.graph.cleanSelection();
-        this.graph.select(cells);
+      if (this.graph.isClipboardEmpty()) {
+        return;
       }
-      return false;
+      this.graph.paste({ offset: 32 });
+      this.graph.cleanSelection();
     });
 
     // select all
