@@ -77,7 +77,7 @@ export default defineComponent({
       zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
       goBack: async () => {
         const originData = workflowBackUp.data ? JSON.parse(workflowBackUp.data) : {};
-        let targetData = graph.toJSON();
+        let targetData: any = graph.toJSON();
         if (targetData.cells.length === 0) {
           delete targetData.cells;
         }

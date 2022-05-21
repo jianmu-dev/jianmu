@@ -11,15 +11,17 @@
       </jm-form-item>
       <jm-form-item
         label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
-        <div v-loading="versionLoading" class="version-container">
-          <jm-select
-            v-model="form.version"
-            placeholder="请选择节点版本"
-            @change="changeVersion"
-          >
-            <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
-          </jm-select>
-          <div class="version-description">{{ form.versionDescription }}</div>
+        <jm-select
+          v-loading="versionLoading"
+          :disabled="versionLoading"
+          v-model="form.version"
+          placeholder="请选择节点版本"
+          @change="changeVersion"
+        >
+          <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
+        </jm-select>
+        <div v-if="form.versionDescription?!versionLoading:false" class="version-description">
+          {{ form.versionDescription }}
         </div>
       </jm-form-item>
       <div v-if="form.inputs">
