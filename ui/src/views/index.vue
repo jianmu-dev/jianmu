@@ -26,7 +26,7 @@
           <router-link :to="{ name: 'node-library' }">
             <div class="btn-item">
               <button class="node-library"></button>
-              <span class="text">本地节点库</span>
+              <span class="text">本地节点</span>
             </div>
           </router-link>
           <router-link :to="{ name: 'project-group' }">
