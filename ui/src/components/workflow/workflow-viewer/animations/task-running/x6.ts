@@ -22,6 +22,8 @@ const toolItem = {
   },
 };
 
+const isSafari = navigator.userAgent.includes('Safari');
+
 /**
  * X6任务执行中动画
  */
@@ -30,34 +32,56 @@ export default class X6TaskRunning extends BaseTaskRunning {
   // private readonly keyShape: HTMLElement;
   // private keyShapeInterval: any;
   private readonly iconShape: HTMLElement;
+  private shapeInterval: any;
   private iconShapeInterval: any;
 
   constructor(view: CellView) {
     view.cell.addTools(toolItem);
-    super(Array.from(view.graph.container.querySelectorAll('.x6-cell-tool.x6-node-tool.x6-cell-tool-boundary'))
+    const graph = view.graph;
+    super(Array.from(graph.container.querySelectorAll('.x6-cell-tool.x6-node-tool.x6-cell-tool-boundary'))
       .filter(el => (el.getAttribute('data-cell-id') === view.cell.id)) as SVGElement[]);
 
     this.view = view;
 
-    const vueShape = Array.from(this.view.graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
+    const vueShape = Array.from(graph.container.querySelectorAll('.jm-workflow-x6-vue-shape'))
       .filter(el => (el.getAttribute('data-x6-node-id') === this.view.cell.id))[0];
     this.iconShape = vueShape.querySelector('.img')! as HTMLElement;
     this.iconShape.style.transition =
       `opacity ${Math.round(durations.iconShape.first / 1000)}s linear`;
+
+    if (isSafari) {
+      // 兼容safari
+      graph.container.querySelectorAll('.x6-cell-tool-boundary').forEach(el => {
+        console.log(el);
+        const delta = 15;
+        const factor = graph.zoom();
+        const x = Math.round(parseFloat(el.getAttribute('x')!));
+        const width = Math.round(parseFloat(el.getAttribute('width')!));
+
+        el.setAttribute('x', `${x + delta * factor}`);
+        el.setAttribute('width', `${width - delta * factor}`);
+      });
+    }
   }
 
   start(): void {
     const shape = super.getShapes()[0] as SVGElement;
     let reverse = false;
-    setInterval(() => {
+    this.shapeInterval = setInterval(() => {
       this.animateShape(shape, reverse);
       reverse = !reverse;
     }, durations.iconShape.first);
 
-    this.animateIconShape();
+    if (!isSafari) {
+      this.animateIconShape();
+    }
   }
 
   stop(): void {
+    if (this.shapeInterval) {
+      clearInterval(this.shapeInterval);
+      delete this.shapeInterval;
+    }
     this.view.cell.removeTool('boundary');
 
     if (this.iconShapeInterval) {
