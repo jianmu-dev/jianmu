@@ -48,6 +48,10 @@ jianmu:
     jwtSecret: Hahhahhhaahh
     jwtExpirationMs: 86400000
     adminPasswd: 123456
+  global:
+    record:
+      auto-clean: true
+      max: 100
 registry:
   version: @project.version@
   type: @project.build.finalName@
