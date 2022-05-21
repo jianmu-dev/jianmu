@@ -15,6 +15,7 @@ import './theme/icon/tabs/css/jm-icon-tab.css';
 import './theme/icon/link/css/jm-icon-link.css';
 import './theme/icon/menu/css/jm-icon-menu.css';
 import './theme/icon/input/css/jm-icon-input.css';
+import './theme/icon/workflow/css/jm-icon-workflow.css';
 
 import JmLoading from './notice/loading';
 import JmMessage from './notice/message';

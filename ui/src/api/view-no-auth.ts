@@ -7,10 +7,11 @@ import {
 } from '@/api/dto/workflow-execution-record';
 import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
-import { IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
+import { IHubNodePageVo, IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 import { IProjectGroupVo } from '@/api/dto/project-group';
+import { INodeDefinitionSearchingDto, INodeDefinitionVo } from '@/api/dto/node-definitions';
 
 export const baseUrl = {
   projectGroup: '/view/projects/groups',
@@ -35,7 +36,20 @@ export const baseUrl = {
 const hubUrl = import.meta.env.VITE_JIANMU_HUB_API_BASE_URL;
 const baseHubUrl = {
   processTemplate: '/hub/view/workflow_templates',
+  node_definitions: '/hub/view/node_definitions',
 };
+
+/**
+ * 获取官方节点
+ * @param dto
+ */
+export function getOfficialNodes(dto: INodeDefinitionSearchingDto): Promise<IHubNodePageVo<INodeDefinitionVo>> {
+  return restProxy({
+    url: `${hubUrl}${baseHubUrl.node_definitions}/search`,
+    method: 'get',
+    payload: dto,
+  });
+}
 
 /**
  * 查询项目组列表

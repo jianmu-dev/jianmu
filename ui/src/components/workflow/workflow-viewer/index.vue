@@ -3,24 +3,24 @@
     <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
       <task-state v-for="{status, count} in taskStates"
                   :key="status" :status="status" :count="count"
-                  @mouseenter="highlightNodeState(status, true, graph)"
-                  @mouseleave="highlightNodeState(status, false, graph)"
-                  @change="refreshNodeStateHighlight(status, graph)"/>
+                  @mouseenter="graph?.highlightNodeState(status, true)"
+                  @mouseleave="graph?.highlightNodeState(status, false)"/>
     </div>
-    <toolbar v-if="graph" :readonly="readonly" :dsl-type="dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
+    <toolbar v-if="graph" :readonly="readonly" :dsl-type="graph?.dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
              :fullscreen-el="fullscreenEl"
              @click-process-log="clickProcessLog"
              @on-zoom="handleZoom"
              @on-fullscreen="handleFullscreen"
              @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
+                  :graph-type="graphType"
                   :readonly="readonly"
                   :task-business-id="selectedTask?.businessId"
                   :task-status="selectedTask?.status"
                   :node-event="nodeEvent"
                   :zoom="zoom"
                   @node-click="clickNode"
-                  @mouseout="handleNodeBarMouseout"/>
+                  @mouseleave="destroyNodeToolbar"/>
     <div v-show="!dslMode" class="canvas" ref="container"/>
     <jm-dsl-editor v-if="dslMode" :value="dsl" readonly/>
   </div>
@@ -38,25 +38,20 @@ import {
   ref,
   SetupContext,
 } from 'vue';
-import G6, { Graph, NodeConfig } from '@antv/g6';
+import G6 from '@antv/g6';
 import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
-import {
-  configNodeAction,
-  fitCanvas,
-  fitView,
-  highlightNodeState,
-  init,
-  refreshNodeStateHighlight,
-  sortTasks,
-  updateNodeStates,
-} from './utils/graph';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import { parse } from './utils/dsl';
-import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
-import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/utils/model';
+import { GraphDirectionEnum, GraphTypeEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
+import { INodeMouseoverEvent } from './model/data/common';
+import { sortTasks } from './model/util';
+import { BaseGraph } from './model/base-graph';
+import { WorkflowGraph } from './model/workflow-graph';
+
+// 引入数组工具类
+import './utils/array.ts';
 
 // 注册自定义g6元素
 Object.values(import.meta.globEager('./shapes/**')).forEach(({ default: register }) => register(G6));
@@ -85,11 +80,13 @@ export default defineComponent({
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const container = ref<HTMLElement>();
-    const graph = ref<Graph>();
+    let workflowGraph: WorkflowGraph | undefined;
+    const graph = ref<BaseGraph>();
     const nodeActionConfigured = ref<boolean>(false);
     const dslMode = ref<boolean>(false);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
+      graph.value?.hideNodeToolbar(nodeEvent.value!.id);
       nodeEvent.value = undefined;
     };
     const mouseoverNode = (evt: INodeMouseoverEvent) => {
@@ -101,27 +98,6 @@ export default defineComponent({
       }
       nodeEvent.value = evt;
     };
-    const handleNodeBarMouseout = (evt: any) => {
-      let isOut = true;
-      let tempObj = evt.relatedTarget || evt.toElement;
-      // 10级以内可定位
-      for (let i = 0; i < 10; i++) {
-        if (!tempObj) {
-          break;
-        }
-
-        if (tempObj.className === 'jm-workflow-viewer-node-toolbar') {
-          isOut = false;
-          break;
-        }
-
-        tempObj = tempObj.parentElement;
-      }
-
-      if (isOut) {
-        destroyNodeToolbar();
-      }
-    };
     const zoom = ref<number>();
     const updateZoom = () => {
       setTimeout(() => {
@@ -129,25 +105,18 @@ export default defineComponent({
           return;
         }
 
-        zoom.value = Math.round(graph.value.getZoom() * 100);
+        zoom.value = Math.round(graph.value!.getZoom() * 100);
       });
     };
 
-    const allTaskNodes = computed<{
-      nodes: NodeConfig[];
-      dslType: DslTypeEnum;
-    }>(() => {
-      const { nodes, dslType } = parse(props.dsl, props.triggerType);
-
-      return {
-        nodes: nodes.filter(node => node.type === NodeTypeEnum.ASYNC_TASK),
-        dslType,
-      };
-    });
-
-    const refreshGraph = (rankdir: string = 'LR') => {
+    const refreshGraph = (direction: GraphDirectionEnum = GraphDirectionEnum.HORIZONTAL) => {
       if (!graph.value) {
-        graph.value = init(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, rankdir);
+        if (!props.dsl || !props.triggerType || !container.value) {
+          return;
+        }
+
+        workflowGraph = new WorkflowGraph(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, direction);
+        graph.value = workflowGraph.graph;
 
         updateZoom();
       }
@@ -155,48 +124,37 @@ export default defineComponent({
       if (!nodeActionConfigured.value) {
         // 禁止多次配置
         // 配置节点行为
-        nodeActionConfigured.value = configNodeAction(graph.value, mouseoverNode);
+        graph.value!.configNodeAction(mouseoverNode);
+        nodeActionConfigured.value = true;
       }
 
-      // 更新状态
-      updateNodeStates(props.tasks, graph.value);
+      setTimeout(() => {
+        // 保证渲染完成
+
+        // 更新状态
+        graph.value!.updateNodeStates(props.tasks);
+      }, 50);
     };
 
     onBeforeUpdate(() => refreshGraph());
 
-    let resizeObserver: ResizeObserver;
-
-    onMounted(() => {
-      const parentElement = container.value!.parentElement as HTMLElement;
-      resizeObserver = new ResizeObserver(() => {
-        if (!graph.value) {
-          return;
-        }
-        graph.value.changeSize(parentElement.clientWidth, parentElement.clientHeight);
-      });
-      // 监控容器大小变化
-      resizeObserver.observe(parentElement);
-
-      proxy.$nextTick(() => {
-        // 保证整个视图都渲染完毕，才能确定图的宽高
-        refreshGraph();
-      });
-    });
-
+    // 保证整个视图都渲染完毕，才能确定图的宽高
+    onMounted(() => proxy.$nextTick(() => refreshGraph()));
     onUnmounted(() => {
-      // 销毁监控容器大小变化
-      resizeObserver.disconnect();
-
-      // 销毁画布
-      graph.value?.destroy();
+      graph.value = undefined;
+      workflowGraph?.destroy();
     });
-
-    const dslType = computed<DslTypeEnum>(() => allTaskNodes.value.dslType);
 
     return {
       TaskStatusEnum,
       container,
       graph,
+      graphType: computed<GraphTypeEnum>(() => {
+        if (!graph.value) {
+          return GraphTypeEnum.G6;
+        }
+        return graph.value!.getGraphType();
+      }),
       selectedTask: computed<{
         businessId: string;
         status: TaskStatusEnum;
@@ -215,7 +173,6 @@ export default defineComponent({
           status: tasks[0].status,
         };
       }),
-      dslType,
       dslMode,
       nodeEvent,
       fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
@@ -233,32 +190,32 @@ export default defineComponent({
             emit('click-webhook-node', id, tabType);
         }
       },
-      highlightNodeState,
-      refreshNodeStateHighlight,
-      handleNodeBarMouseout,
+      destroyNodeToolbar,
       zoom,
       handleZoom: (val?: number) => {
         if (!graph.value) {
           return;
         }
 
-        const g = graph.value as Graph;
-
         if (val === undefined) {
-          fitView(g);
+          graph.value!.fitView();
         } else {
-          g.zoomTo(val / 100, g.getGraphCenterPoint());
+          graph.value!.zoomTo(val);
         }
 
         updateZoom();
       },
       handleFullscreen: (_: boolean) => {
+        if (!graph.value) {
+          return;
+        }
+
         if (container.value) {
           container.value.style.visibility = 'hidden';
         }
 
         setTimeout(() => {
-          fitCanvas(graph.value);
+          graph.value!.fitCanvas();
           updateZoom();
           if (container.value) {
             container.value.style.visibility = '';
@@ -266,22 +223,20 @@ export default defineComponent({
         }, 100);
       },
       handleRotation: () => {
-        if (!graph.value || dslType.value !== DslTypeEnum.WORKFLOW) {
+        if (!graph.value || graph.value?.dslType !== DslTypeEnum.WORKFLOW) {
           return;
         }
 
-        let rankdir = graph.value.get('layout').rankdir;
-        if (rankdir === 'TB') {
-          rankdir = undefined;
-        } else {
-          rankdir = 'TB';
-        }
+        const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ?
+          GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
 
-        graph.value?.destroy();
+        workflowGraph!.destroy();
+
+        workflowGraph = undefined;
         graph.value = undefined;
         nodeActionConfigured.value = false;
 
-        refreshGraph(rankdir);
+        refreshGraph(direction);
       },
       taskStates: computed(() => {
         const sArr: {
@@ -298,7 +253,7 @@ export default defineComponent({
 
         Object.keys(TaskStatusEnum).forEach(status => sArr.push({
           status,
-          count: status === TaskStatusEnum.INIT ? (allTaskNodes.value.nodes.length - taskMap.size) : 0,
+          count: status === TaskStatusEnum.INIT ? (graph.value?.getAsyncTaskNodeCount() - taskMap.size) : 0,
         }));
 
         taskMap.forEach(({ status }: ITaskExecutionRecordVo) => {
@@ -317,6 +272,14 @@ export default defineComponent({
 
 <style lang="less">
 .jm-workflow-viewer {
+  @import './theme/x6';
+
+  @keyframes x6-edge-running {
+    to {
+      stroke-dashoffset: -1000
+    }
+  }
+
   background-color: #FFFFFF;
   position: relative;
   height: 100%;

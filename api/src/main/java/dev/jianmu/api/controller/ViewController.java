@@ -1,7 +1,7 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.PageDto;
+import dev.jianmu.api.dto.NodeDefViewingDto;
 import dev.jianmu.api.dto.ProjectViewingDto;
 import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
@@ -12,7 +12,6 @@ import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -22,6 +21,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -124,10 +124,12 @@ public class ViewController {
 
     @GetMapping("/nodes")
     @Operation(summary = "分页查询节点定义列表", description = "分页查询节点定义列表")
-    public PageInfo<NodeDefVo> findNodeAll(PageDto dto) {
+    public PageInfo<NodeDefVo> findNodeAll(NodeDefViewingDto dto) {
         var page = this.hubApplication.findPage(
                 dto.getPageNum(),
-                dto.getPageSize()
+                dto.getPageSize(),
+                dto.getType(),
+                dto.getName()
         );
         var nodes = page.getList();
         List<NodeDefVo> nodeDefVos = nodes.stream().map(nodeDefinition -> {
@@ -178,6 +180,35 @@ public class ViewController {
                     .deprecated(nodeDefinition.getDeprecated())
                     .build();
         }).orElseThrow(() -> new DataNotFoundException("未找到该节点"));
+    }
+
+    @GetMapping("nodes/{ownerRef}/{ref}/versions")
+    @Operation(summary = "获取节点定义版本列表", description = "获取节点定义版本列表")
+    public NodeDefVersionListVo findNodeVersions(@PathVariable String ownerRef, @PathVariable String ref) {
+        return NodeDefVersionListVo.builder()
+                .versions(this.hubApplication.findByOwnerRefAndRef(ownerRef, ref).stream()
+                        .map(NodeDefinitionVersion::getVersion)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    @GetMapping("nodes/{ownerRef}/{ref}/versions/{version}")
+    @Operation(summary = "获取节点定义版本", description = "获取节点定义版本")
+    public NodeDefVersionVo findNodeVersions(@PathVariable String ownerRef, @PathVariable String ref, @PathVariable String version) {
+        return this.hubApplication.findByOwnerRefAndRefAndVersion(ownerRef, ref, version)
+                .map(nodeDefinitionVersion -> NodeDefVersionVo.builder()
+                        .ownerRef(nodeDefinitionVersion.getOwnerRef())
+                        .ref((nodeDefinitionVersion.getRef()))
+                        .creatorName(nodeDefinitionVersion.getCreatorName())
+                        .creatorRef(nodeDefinitionVersion.getCreatorRef())
+                        .version(nodeDefinitionVersion.getVersion())
+                        .description(nodeDefinitionVersion.getDescription())
+                        .inputParameters(nodeDefinitionVersion.getInputParameters())
+                        .outputParameters(nodeDefinitionVersion.getOutputParameters())
+                        .resultFile(nodeDefinitionVersion.getResultFile())
+                        .spec(nodeDefinitionVersion.getSpec())
+                        .build())
+                .orElseThrow(() -> new DataNotFoundException("未找到节点定义版本: " + ownerRef + "/" + ref + ":" + version));
     }
 
     @GetMapping("/projects")
@@ -297,7 +328,7 @@ public class ViewController {
     }
 
     @GetMapping("/logs/{logId}")
-    @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取")
+    @Operation(summary = "日志获取接口", description = "日志获取接口,可以使用Range方式分段获取", deprecated = true)
     public ResponseEntity<FileSystemResource> getLog(@PathVariable String logId) {
         var fileSystemResource = new FileSystemResource(this.storageService.logFile(logId));
         if (fileSystemResource.exists()) {
@@ -313,8 +344,14 @@ public class ViewController {
         }
     }
 
+    @GetMapping(path = "/logs/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "日志订阅接口", description = "日志订阅接口,可以使用SSE方式订阅最新日志")
+    public SseEmitter streamSseLog(@PathVariable String logId) {
+        return this.storageService.readLog(logId);
+    }
+
     @GetMapping("/logs/workflow/{logId}")
-    @Operation(summary = "流程日志获取接口", description = "流程日志获取接口,可以使用Range方式分段获取")
+    @Operation(summary = "流程日志获取接口", description = "流程日志获取接口,可以使用Range方式分段获取", deprecated = true)
     public ResponseEntity<FileSystemResource> getWorkflowLog(@PathVariable String logId) {
         var fileSystemResource = new FileSystemResource(this.storageService.workflowLogFile(logId));
         if (fileSystemResource.exists()) {

@@ -1,6 +1,6 @@
 import _G6, { INode, IShape } from '@antv/g6';
 import { IElement } from '@antv/g-base/lib/interfaces';
-import { NodeTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
+import { NodeTypeEnum } from '../model/data/enumeration';
 
 // lineDash array
 const lineDash = [4, 2, 1, 2];
@@ -29,8 +29,9 @@ export default function (G6: typeof _G6) {
         },
       },
       style: {
-        stroke: '#C7CFE3',
-        lineWidth: 2.5,
+        stroke: '#667085',
+        lineWidth: 1.5,
+        radius: 10,
       },
     },
     setState(name, value, item) {
@@ -75,9 +76,8 @@ export default function (G6: typeof _G6) {
       // 动态画箭头
       path.attr({
         endArrow: {
-          path: G6.Arrow.vee(18, 18, 1.4),
-          d: 2.6,
-          fill: '#C7CFE3',
+          path: G6.Arrow.triangle(12, 12, 0),
+          fill: '#667085',
           stroke: 'transparent',
         },
       });

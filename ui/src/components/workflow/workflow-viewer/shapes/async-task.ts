@@ -7,18 +7,17 @@ import FAILED from '../svgs/shape/async-task/FAILED.svg';
 import SUCCEEDED from '../svgs/shape/async-task/SUCCEEDED.svg';
 import SUSPENDED from '../svgs/shape/async-task/SUSPENDED.svg';
 import IGNORED from '../svgs/shape/async-task/IGNORED.svg';
-import { NodeTypeEnum } from '../utils/enumeration';
-import AsyncTaskRunningAnimation, { attrs } from '../animations/async-task-running-animation';
+import { NodeTypeEnum } from '../model/data/enumeration';
+import { attrs } from '../animations/base-task-running';
+import G6TaskRunning from '../animations/task-running/g6';
 import { IItemBaseConfig } from '@antv/g6-core/lib/interface/item';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
-import { SHELL_NODE_TYPE } from '../utils/model';
+import { SHELL_NODE_TYPE } from '../model/data/common';
+import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
 
-export const size = {
-  width: 80,
-  height: 80,
-};
+const { icon: { width: iconW, height: iconH } } = NODE;
 
-const imgs: {
+export const imgs: {
   [key: string]: any;
 } = {
   [TaskStatusEnum.INIT]: INIT,
@@ -31,18 +30,17 @@ const imgs: {
   [TaskStatusEnum.IGNORED]: IGNORED,
 };
 
-const states: {
+export const states: {
   [key: string]: {
     img: any;
-    style: ShapeStyle;
+    highlightStyle: ShapeStyle;
     indicatorStyle: ShapeStyle;
   };
 } = {
   [TaskStatusEnum.INIT]: {
     img: INIT,
-    style: {
-      fill: '#FFFFFF',
-      stroke: '#096DD9',
+    highlightStyle: {
+      shadowColor: '#096DD9',
     },
     indicatorStyle: {
       fill: 'transparent',
@@ -50,9 +48,8 @@ const states: {
   },
   [TaskStatusEnum.WAITING]: {
     img: WAITING,
-    style: {
-      fill: '#FEEFE3',
-      stroke: '#FF862B',
+    highlightStyle: {
+      shadowColor: '#FF862B',
     },
     indicatorStyle: {
       fill: '#FF862B',
@@ -60,9 +57,8 @@ const states: {
   },
   [TaskStatusEnum.RUNNING]: {
     img: RUNNING,
-    style: {
-      fill: '#E5FFFF',
-      stroke: '#11C2C2',
+    highlightStyle: {
+      shadowColor: '#11C2C2',
     },
     indicatorStyle: {
       fill: 'transparent',
@@ -70,9 +66,8 @@ const states: {
   },
   [TaskStatusEnum.SKIPPED]: {
     img: SKIPPED,
-    style: {
-      fill: '#EEEEEE',
-      stroke: '#979797',
+    highlightStyle: {
+      shadowColor: '#979797',
     },
     indicatorStyle: {
       fill: '#979797',
@@ -80,9 +75,8 @@ const states: {
   },
   [TaskStatusEnum.FAILED]: {
     img: FAILED,
-    style: {
-      fill: '#FFE5E5',
-      stroke: '#FF4D4F',
+    highlightStyle: {
+      shadowColor: '#FF4D4F',
     },
     indicatorStyle: {
       fill: '#FF4D4F',
@@ -90,9 +84,8 @@ const states: {
   },
   [TaskStatusEnum.SUCCEEDED]: {
     img: SUCCEEDED,
-    style: {
-      fill: '#ECFDE3',
-      stroke: '#51C41B',
+    highlightStyle: {
+      shadowColor: '#51C41B',
     },
     indicatorStyle: {
       fill: '#51C41B',
@@ -100,9 +93,8 @@ const states: {
   },
   [TaskStatusEnum.SUSPENDED]: {
     img: SUSPENDED,
-    style: {
-      fill: '#E2E7FF',
-      stroke: '#7986CB',
+    highlightStyle: {
+      shadowColor: '#7986CB',
     },
     indicatorStyle: {
       fill: '#7986CB',
@@ -110,9 +102,8 @@ const states: {
   },
   [TaskStatusEnum.IGNORED]: {
     img: IGNORED,
-    style: {
-      fill: '#F0E3FF',
-      stroke: '#9847FC',
+    highlightStyle: {
+      shadowColor: '#9847FC',
     },
     indicatorStyle: {
       fill: '#9847FC',
@@ -125,7 +116,7 @@ export default function (G6: typeof _G6) {
     NodeTypeEnum.ASYNC_TASK,
     {
       options: {
-        size: [size.width, size.height],
+        size: [iconW, iconH],
         anchorPoints: [
           [0.5, 0],
           [0.5, 1],
@@ -154,11 +145,8 @@ export default function (G6: typeof _G6) {
 
           const status = (item?.getStates().find(state => state.startsWith('status:')) as string).substring(7);
           // 更新样式
-          // 定义setState后，需手动设置stateStyles
-          const style = states[status].style;
           keyShape.attr({
-            ...style,
-            shadowColor: value ? style.stroke : attrs.keyShape.default.shadowColor,
+            shadowColor: value ? states[status].highlightStyle.shadowColor : attrs.keyShape.default.shadowColor,
             shadowBlur: value ? 35 : attrs.keyShape.default.shadowBlur,
           });
           return;
@@ -185,7 +173,7 @@ export default function (G6: typeof _G6) {
 
           if (status === TaskStatusEnum.RUNNING) {
             if (!cfg.runningAnimation) {
-              cfg.runningAnimation = new AsyncTaskRunningAnimation(item as Item);
+              cfg.runningAnimation = new G6TaskRunning(item as Item);
             }
 
             cfg.runningAnimation.start();
@@ -194,24 +182,17 @@ export default function (G6: typeof _G6) {
               cfg.runningAnimation.stop();
               delete cfg.runningAnimation;
             }
-
-            const keyShape = item?.get('keyShape') as IShape;
-            // 更新样式
-            // 定义setState后，需手动设置stateStyles
-            keyShape.attr(states[status].style);
           }
 
           return;
         }
       },
       afterDraw(cfg, group) {
-        const width = 82;
-        const height = 82;
+        const width = iconW;
+        const height = iconH;
         const { iconUrl, uniqueKey } = group?.cfg.item.getModel();
 
         if (!iconUrl) {
-          const width = 44;
-          const height = 44;
           group?.addShape('image', {
             attrs: {
               x: -width / 2,
@@ -236,36 +217,20 @@ export default function (G6: typeof _G6) {
           });
         }
 
-        const indicatorW = 6;
-        const indicatorH = 6;
+        const indicatorW = 8;
+        const indicatorH = 8;
         group?.addShape('rect', {
           attrs: {
             x: width / 2,
-            y: -height / 1.9,
+            y: -height / 2,
             width: indicatorW,
             height: indicatorH,
             fill: 'transparent',
-            radius: 3,
+            radius: 4,
           },
           // must be assigned in G6 3.3 and later versions. it can be any value you want
           name: 'async_task_state_indicator',
         });
-
-        // const width = 82;
-        // const height = 82;
-        // clipImageBorder(`https://jianmuhub.img.dghub.cn/node-definition/icon/FikR5g_gILRZjr-olpMqypjhfuj3?imageView2/2/w/${width}/h/${height}/interlace/1/q/100`,
-        //   width, height, 21.42, (base64: string) => {
-        //     group?.addShape('image', {
-        //       attrs: {
-        //         width: width,
-        //         height: height,
-        //         x: -width / 2,
-        //         y: -height / 2,
-        //         img: base64,
-        //       },
-        //       name: 'async_task_icon',
-        //     });
-        //   });
       },
     },
     'rect',

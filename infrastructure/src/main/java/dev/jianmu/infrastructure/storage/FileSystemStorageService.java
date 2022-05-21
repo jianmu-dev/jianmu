@@ -1,10 +1,12 @@
 package dev.jianmu.infrastructure.storage;
 
+import dev.jianmu.infrastructure.SseTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +14,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 /**
  * @author Ethan Liu
@@ -24,25 +27,38 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     private static final Logger logger = LoggerFactory.getLogger(FileSystemStorageService.class);
     private static final String LogfilePostfix = ".log";
     private static final String webhookFilePostfix = ".json";
-
+    private static final String taskFilepath = "task_log";
+    private static final String workflowFilepath = "workflow_log";
+    private static final String webhookFilepath = "webhook";
+    // For SSE
+    private final SseTemplate template;
+    private final Long sseTimeout;
+    private final MonitoringFileService monitoringFileService;
     private final Path rootLocation;
     private final Path webhookRootLocation;
+    private final Path workflowLocation;
 
-    public FileSystemStorageService(StorageProperties properties) {
-        this.rootLocation = Paths.get("ci", properties.getLogfilePath());
-        this.webhookRootLocation = Paths.get("ci", properties.getWebhookFilePath());
+    public FileSystemStorageService(SseTemplate template, MonitoringFileService monitoringFileService, StorageProperties properties) {
+        this.template = template;
+        this.sseTimeout = properties.getSseTimeout();
+        this.monitoringFileService = monitoringFileService;
+        this.rootLocation = Paths.get(properties.getFilepath(), taskFilepath);
+        this.webhookRootLocation = Paths.get(properties.getFilepath(), webhookFilepath);
+        this.workflowLocation = Paths.get(properties.getFilepath(), workflowFilepath);
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         this.init();
+        this.monitoringFileService.init(this.rootLocation, this.workflowLocation);
     }
 
     @Override
     public void init() {
         try {
-            Files.createDirectories(rootLocation);
-            Files.createDirectories(webhookRootLocation);
+            Files.createDirectories(this.rootLocation);
+            Files.createDirectories(this.webhookRootLocation);
+            Files.createDirectories(this.workflowLocation);
         } catch (FileAlreadyExistsException e) {
             logger.info("the directory already exits");
         } catch (IOException e) {
@@ -62,14 +78,36 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     @Override
-    public BufferedReader readLog(String LogFileName) {
-        try {
-            return new BufferedReader(
-                    new FileReader(this.rootLocation + File.separator + LogFileName + LogfilePostfix, StandardCharsets.UTF_8)
-            );
-        } catch (IOException e) {
-            throw new StorageFileNotFoundException("Could not find log file", e);
-        }
+    public SseEmitter readLog(String logFileName) {
+        var fullName = logFileName + LogfilePostfix;
+        String connectionId = String.join("/", fullName, UUID.randomUUID().toString().replace("-", ""));
+        this.monitoringFileService.listen(fullName, connectionId, ((file, counter) -> {
+            try (var stream = Files.lines(file)) {
+                stream.skip(counter.get())
+                        .forEach(line -> this.template.broadcast(connectionId, SseEmitter.event()
+                                .id(String.valueOf(counter.incrementAndGet()))
+                                .data(line)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+        var sseEmitter = this.template.newSseEmitter(connectionId, this.sseTimeout);
+        this.firstReadLog(fullName, connectionId);
+        return sseEmitter;
+    }
+
+    public void firstReadLog(String topic, String connectionId) {
+        var file = this.monitoringFileService.getPath(topic);
+        this.monitoringFileService.getConsumerVo(topic, connectionId).ifPresent(consumerVo -> {
+            try (var stream = Files.lines(file)) {
+                stream.skip(consumerVo.getCounter().get())
+                        .forEach(line -> this.template.broadcast(connectionId, SseEmitter.event()
+                                .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
+                                .data(line)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -79,7 +117,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     @Override
     public File workflowLogFile(String LogFileName) {
-        return new File("ci" + File.separator + "workflow_log" + File.separator + LogFileName + LogfilePostfix);
+        return new File(this.workflowLocation + File.separator + LogFileName + LogfilePostfix);
     }
 
     @Override

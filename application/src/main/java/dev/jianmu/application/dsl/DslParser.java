@@ -1,5 +1,6 @@
 package dev.jianmu.application.dsl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
@@ -49,6 +50,8 @@ public class DslParser {
     private boolean concurrent = false;
     private String name;
     private String description;
+    @JsonProperty("raw-data")
+    private String rawData;
     private Workflow.Type type;
     private final List<DslNode> dslNodes = new ArrayList<>();
     private final List<ShellNode> shellNodes = new ArrayList<>();

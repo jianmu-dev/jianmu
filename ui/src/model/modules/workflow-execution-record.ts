@@ -1,6 +1,6 @@
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
-import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/utils/enumeration';
+import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/model/data/enumeration';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 
 /**

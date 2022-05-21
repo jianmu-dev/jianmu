@@ -1,5 +1,7 @@
 <template>
-  <div class="project-editor" v-loading="loading">
+  <div class="project-editor">
+    <!-- loading时的加载页面 -->
+    <div class="loading-over" v-show="loading" v-loading="loading"></div>
     <div class="right-top-btn">
       <jm-button class="jm-icon-button-cancel" size="small" @click="close">取消</jm-button>
       <jm-button
@@ -66,6 +68,7 @@ import { IProjectGroupVo } from '@/api/dto/project-group';
 import { useStore } from 'vuex';
 import { IRootState } from '@/model';
 import { namespace } from '@/store/modules/session';
+import yaml from 'yaml';
 
 export default defineComponent({
   props: {
@@ -88,6 +91,9 @@ export default defineComponent({
     const form = ref<any>();
     const loading = ref<boolean>(false);
     const rootState = store.state as IRootState;
+    const checkDsl = (dslText: string): boolean => {
+      return !!yaml.parse(dslText)['raw-data'];
+    };
     onMounted(async () => {
       // 请求项目组列表
       projectGroupList.value = await listProjectGroup();
@@ -140,9 +146,29 @@ export default defineComponent({
 
     if (editMode) {
       loading.value = !loading.value;
-
       fetchProjectDetail(props.id)
-        .then(({ dslText, projectGroupId }) => {
+        .then(async ({ dslText, projectGroupId }) => {
+          if (checkDsl(dslText)) {
+            const rawData = yaml.parse(dslText)['raw-data'];
+            const { name, global } = yaml.parse(dslText);
+            const payload = {
+              name,
+              groupId: projectGroupId,
+              global: {
+                concurrent: global ? global.concurrent : false,
+              },
+              data: rawData,
+            };
+            await router.replace({
+              name: 'update-pipeline',
+              params: {
+                id: props.id,
+                payload: JSON.stringify(payload),
+              },
+            });
+            return;
+          }
+          // 判断dslText是否有raw-data后再回显数据
           editorForm.value.dslText = dslText;
           // 回显项目组
           editorForm.value.projectGroupId = projectGroupId;
@@ -193,7 +219,7 @@ export default defineComponent({
               // 关闭loading
               loading.value = false;
 
-              proxy.$success(editMode ? '编辑成功' : '新增成功');
+              proxy.$success(editMode ? '保存成功' : '新增成功');
 
               if (returnFlag) {
                 close();
@@ -227,6 +253,16 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
+
+  .loading-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    background-color: #FFFFFF;
+    width: 100vw;
+    height: 100vh;
+  }
 
   .form {
     padding: 24px;

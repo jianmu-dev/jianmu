@@ -80,6 +80,8 @@ export enum TriggerTypeEnum {
 export enum NodeTypeEnum {
   DOCKER = 'DOCKER',
   SHELL = 'SHELL',
+  LOCAL = 'LOCAL',
+  COMMUNITY = 'COMMUNITY'
 }
 
 /**
@@ -132,4 +134,13 @@ export enum SortTypeEnum {
 export enum FailureModeEnum {
   IGNORE = 'IGNORE',
   SUSPEND = 'SUSPEND',
+}
+
+/**
+ * 节点定义可见类型枚举
+ */
+export enum VisibleTypeEnum {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+  ORGANIZATION_VISIBLE = 'ORGANIZATION_VISIBLE',
 }

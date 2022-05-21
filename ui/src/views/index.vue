@@ -3,37 +3,48 @@
     <div class="main">
       <div class="menu-bar">
         <div class="left-area">
+          <router-link :to="{ name: 'create-pipeline' }">
+            <div class="btn-item">
+              <button class="graph"></button>
+              <span class="text">图形项目</span>
+            </div>
+          </router-link>
           <router-link :to="{ name: 'create-project' }">
-            <jm-tooltip content="新增项目" placement="top">
-              <button class="add"></button>
-            </jm-tooltip>
+            <div class="btn-item">
+              <button class="code"></button>
+              <span class="text">代码项目</span>
+            </div>
           </router-link>
           <router-link :to="{ name: 'import-project' }">
-            <jm-tooltip content="导入项目" placement="top">
+            <div class="btn-item">
               <button class="git"></button>
-            </jm-tooltip>
+              <span class="text">导入项目</span>
+            </div>
           </router-link>
         </div>
         <div class="right-area">
           <router-link :to="{ name: 'node-library' }">
-            <jm-tooltip content="本地节点库" placement="top">
+            <div class="btn-item">
               <button class="node-library"></button>
-            </jm-tooltip>
+              <span class="text">本地节点</span>
+            </div>
           </router-link>
           <router-link :to="{ name: 'project-group' }">
-            <jm-tooltip content="分组管理" placement="top">
+            <div class="btn-item">
               <button class="group"></button>
-            </jm-tooltip>
+              <span class="text">分组管理</span>
+            </div>
           </router-link>
           <router-link :to="{ name: 'secret-key' }">
-            <jm-tooltip content="密钥管理" placement="top">
+            <div class="btn-item secret-key">
               <button class="secret-key"></button>
-            </jm-tooltip>
+              <span class="text">密钥管理</span>
+            </div>
           </router-link>
         </div>
       </div>
       <!-- 全部项目 -->
-      <all-project v-if="searchResultFlag" />
+      <all-project v-if="searchResultFlag"/>
       <!-- 搜索结果 -->
       <search-project
         :searchName="searchName"
@@ -41,7 +52,7 @@
         v-else
       />
     </div>
-    <bottom-nav />
+    <bottom-nav/>
   </div>
 </template>
 
@@ -76,74 +87,76 @@ export default defineComponent({
     min-height: calc(100vh - 130px);
 
     .menu-bar {
-      padding: 40px 0;
+      margin-top: 20px;
+      background-color: #FFFFFF;
+      padding: 40px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
 
-      .left-area {
-        white-space: nowrap;
+      a {
+        margin-right: 60px;
 
-        button {
-          width: 186px;
-          height: 64px;
-          background-color: #ffffff;
-          box-shadow: 0px 6px 16px 4px #e6eef6;
-          border-radius: 4px;
-          border: 0;
-          background-position: center center;
-          background-repeat: no-repeat;
-          cursor: pointer;
-
-          &:active {
-            opacity: 0.8;
-          }
-
-          &.add {
-            background-image: url('@/assets/svgs/index/add-btn.svg');
-          }
-
-          &.git {
-            margin-left: 40px;
-            background-image: url('@/assets/svgs/index/git-btn.svg');
-          }
+        &:last-child {
+          margin-right: 0;
         }
       }
 
-      .right-area {
-        margin-right: 0.5%;
+      .btn-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        &:hover {
+          .text {
+            color: #096DD9;
+          }
+        }
 
         button {
-          width: 48px;
-          height: 48px;
-          background-color: transparent;
-          border: 0;
+          width: 56px;
+          height: 56px;
+          border: none;
+          background-color: #ffffff;
+          cursor: pointer;
           background-position: center center;
           background-repeat: no-repeat;
-          cursor: pointer;
 
-          &:active {
-            opacity: 0.8;
+          &.graph {
+            background-image: url("@/assets/svgs/index/graph-project-btn.svg");
           }
 
-          &.hub {
-            background-image: url('@/assets/svgs/index/hub-btn.svg');
+          &.code {
+            background-image: url("@/assets/svgs/index/code-project-btn.svg");
+          }
+
+          &.git {
+            background-image: url("@/assets/svgs/index/git-btn.svg");
           }
 
           &.node-library {
-            margin-left: 40px;
-            background-image: url('@/assets/svgs/index/node-library-btn.svg');
+            background-image: url("@/assets/svgs/index/node-library-btn.svg");
           }
+
           &.group {
-            margin-left: 40px;
-            background-image: url('@/assets/svgs/index/group-icon.svg');
+            background-image: url("@/assets/svgs/index/group-btn.svg");
           }
 
           &.secret-key {
-            margin-left: 40px;
-            background-image: url('@/assets/svgs/index/secret-key-btn.svg');
+            background-image: url("@/assets/svgs/index/secret-key-btn.svg");
           }
         }
+
+        .text {
+          font-size: 14px;
+          margin-top: 6px;
+          font-weight: 400;
+          color: #082340;
+        }
+      }
+
+      .left-area, .right-area {
+        display: flex;
       }
     }
   }

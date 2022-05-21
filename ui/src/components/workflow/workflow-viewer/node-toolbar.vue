@@ -83,13 +83,17 @@
 
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, onUpdated, PropType, ref, SetupContext } from 'vue';
-import { INodeMouseoverEvent } from './utils/model';
-import { MAX_LABEL_LENGTH } from './utils/dsl';
-import { NodeToolbarTabTypeEnum, NodeTypeEnum } from './utils/enumeration';
+import { INodeMouseoverEvent } from './model/data/common';
+import { MAX_LABEL_LENGTH } from './model/dsl/g6';
+import { GraphTypeEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   props: {
+    graphType: {
+      type: String as PropType<GraphTypeEnum>,
+      required: true,
+    },
     readonly: {
       type: Boolean,
       required: true,
@@ -123,14 +127,11 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      const z = props.zoom / 100;
-      const w = props.nodeEvent.width + 10;
-      const h = props.nodeEvent.height + 10;
-
-      toolbar.value.style.left = props.nodeEvent.x - w / 2 + 'px';
-      toolbar.value.style.top = (props.nodeEvent.y - h / 2) + 'px';
-      toolbar.value.style.width = w + 'px';
-      toolbar.value.style.height = (h + 23 * z) + 'px';
+      const { x, y, width, height } = props.nodeEvent;
+      toolbar.value.style.left = `${x}px`;
+      toolbar.value.style.top = `${y}px`;
+      toolbar.value.style.width = `${width}px`;
+      toolbar.value.style.height = `${height}px`;
     });
 
     return {
@@ -140,6 +141,9 @@ export default defineComponent({
       status,
       tips: computed<string>(() => {
         let str = '';
+        if (props.graphType === GraphTypeEnum.X6) {
+          return str;
+        }
 
         switch (props.nodeEvent.type) {
           case NodeTypeEnum.WEBHOOK:

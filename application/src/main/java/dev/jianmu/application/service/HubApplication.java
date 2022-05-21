@@ -118,6 +118,7 @@ public class HubApplication {
                 .ownerRef("local")
                 .ref(nodeDsl.getRef())
                 .version(nodeDsl.getVersion())
+                .description(nodeDsl.getDescription())
                 .resultFile(nodeDsl.getResultFile())
                 .inputParameters(inputParameters)
                 .outputParameters(outputParameters)
@@ -169,8 +170,8 @@ public class HubApplication {
         return this.nodeDefinitionRepository.findById(id);
     }
 
-    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize) {
-        return this.nodeDefinitionRepository.findPage(pageNum, pageSize);
+    public PageInfo<NodeDefinition> findPage(int pageNum, int pageSize, String ownerRef, String name) {
+        return this.nodeDefinitionRepository.findPage(pageNum, pageSize, ownerRef, name);
     }
 
     public List<NodeDefinitionVersion> findByOwnerRefAndRef(String ownerRef, String ref) {
@@ -261,6 +262,7 @@ public class HubApplication {
                 .creatorName(dto.getCreatorName())
                 .creatorRef(dto.getCreatorRef())
                 .version(dto.getVersion())
+                .description(dto.getDescription())
                 .resultFile(dto.getResultFile())
                 .inputParameters(inputParameters)
                 .outputParameters(outputParameters)
@@ -364,5 +366,9 @@ public class HubApplication {
     public List<NodeDef> findByTypes(Set<String> types) {
         return types.stream().map(this::findByType)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<NodeDefinitionVersion> findByOwnerRefAndRefAndVersion(String ownerRef, String ref, String version) {
+        return this.nodeDefinitionVersionRepository.findByOwnerRefAndRefAndVersion(ownerRef, ref, version);
     }
 }

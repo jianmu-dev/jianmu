@@ -1,5 +1,6 @@
 <template>
-  <el-empty :image="img"/>
+  <el-empty :description="description" :image="image">
+  </el-empty>
 </template>
 
 <script lang="ts">
@@ -9,11 +10,16 @@ import img from './svgs/no-data.svg';
 
 export default defineComponent({
   name: 'jm-empty',
-  components: { ElEmpty },
-  setup() {
-    return {
-      img,
-    };
+  props: {
+    description: {
+      type: String,
+      default: '暂无数据',
+    },
+    image: {
+      type: String,
+      default: img,
+    },
   },
+  components: { ElEmpty },
 });
 </script>

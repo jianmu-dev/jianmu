@@ -1,14 +1,13 @@
 <template>
   <div class="workflow-execution-record-detail" v-loading="loading">
-    <div class="right-top-btn">
-      <jm-button type="primary" class="jm-icon-button-cancel" size="small" @click="close">关闭</jm-button>
-    </div>
     <div class="basic-section">
       <jm-tooltip content="触发" placement="left">
         <button class="trigger-btn jm-icon-button-on" @click="execute" @keypress.enter.prevent></button>
       </jm-tooltip>
       <div class="info">
         <div class="name">
+          <i class="jm-icon-button-left back" @click="goBack"></i>
+          <span>{{ data.record?.name }}</span>
           <router-link
             :to="{
               path: `/project-group/detail/${data.project?.projectGroupId}`,
@@ -18,7 +17,6 @@
                 data.project?.projectGroupName
               }}</span>
           </router-link>
-          <span>{{ data.record?.name }}</span>
         </div>
         <div
           class="desc"
@@ -35,7 +33,7 @@
       <jm-scrollbar v-else ref="navScrollBar">
         <div class="instance-tabs">
           <div
-            v-for="(record, idx) of data.allRecords"
+            v-for="(record) of data.allRecords"
             :key="record.id"
             :class="{
               tab: true,
@@ -45,7 +43,7 @@
             @click="changeRecord(record)"
           >
             <div v-if="record.id === data.record.id" class="left-horn"/>
-            <div v-if="record.id === data.record.id && idx !== data.allRecords.length - 1" class="right-horn"/>
+            <div v-if="record.id === data.record.id" class="right-horn"/>
             <div class="label">{{ record.serialNo }}</div>
           </div>
         </div>
@@ -106,7 +104,7 @@
     </div>
 
     <div class="workflow-section">
-      <workflow v-if="!loading"/>
+      <workflow/>
     </div>
   </div>
 </template>
@@ -361,6 +359,10 @@ export default defineComponent({
           .catch(() => {
           });
       },
+      goBack() {
+        const { fullPath } = rootState.fromRoute;
+        router.push(fullPath);
+      },
     };
   },
 });
@@ -374,16 +376,6 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 20px;
-
-  .right-top-btn {
-    position: fixed;
-    right: 20px;
-    top: 78px;
-
-    .jm-icon-button-cancel::before {
-      font-weight: bold;
-    }
-  }
 
   .basic-section {
     position: relative;
@@ -403,6 +395,7 @@ export default defineComponent({
       background-color: transparent;
       color: #6b7b8d;
       cursor: pointer;
+      outline: none;
 
       &:active {
         background-color: #eff7ff;
@@ -421,9 +414,22 @@ export default defineComponent({
         align-items: center;
         margin-bottom: 8px;
 
+        .back {
+          cursor: pointer;
+          width: 20px;
+          height: 20px;
+          line-height: 20px;
+          color: #6B7B8D;
+          margin-right: 20px;
+
+          &::before {
+            margin: 0;
+          }
+        }
+
         .project-group-name {
           padding: 2px 20px;
-          margin-right: 10px;
+          margin-left: 10px;
           background: #f0f7ff;
           border-radius: 2px;
         }
@@ -626,6 +632,7 @@ export default defineComponent({
         background-color: transparent;
         color: #ffffff;
         cursor: pointer;
+        outline: none;
 
         &:active {
           &.running {
@@ -642,7 +649,7 @@ export default defineComponent({
 
   .workflow-section {
     > :first-child {
-      height: calc(100vh - 384px);
+      height: calc(100vh - 246px);
     }
   }
 }
