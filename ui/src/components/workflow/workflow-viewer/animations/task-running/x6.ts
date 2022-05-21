@@ -22,7 +22,8 @@ const toolItem = {
   },
 };
 
-const isSafari = navigator.userAgent.includes('Safari');
+const { userAgent: ua } = navigator;
+const isSafari = !ua.includes('Chrome') && ua.includes('Safari');
 
 /**
  * X6任务执行中动画
@@ -52,7 +53,6 @@ export default class X6TaskRunning extends BaseTaskRunning {
     if (isSafari) {
       // 兼容safari
       graph.container.querySelectorAll('.x6-cell-tool-boundary').forEach(el => {
-        console.log(el);
         const delta = 15;
         const factor = graph.zoom();
         const x = Math.round(parseFloat(el.getAttribute('x')!));
