@@ -3,10 +3,11 @@ import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
 import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
 import { WorkflowNodeToolbar } from './workflow-node-toolbar';
-import { EDGE, PORT } from '../shape/gengral-config';
+import { EDGE, NODE, PORT, PORTS } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
+const { icon: { width, height } } = NODE;
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
 
@@ -217,7 +218,24 @@ export class WorkflowGraph {
   private registerShortcut() {
     // copy cut paste
     this.graph.bindKey(['meta+c', 'ctrl+c'], () => {
-      const cells = this.graph.getSelectedCells();
+      const cells = this.graph.getSelectedCells()
+        // 筛选节点，只能复制节点
+        .filter(cell => cell.isNode())
+        .map(cell => {
+          const node = this.graph.createNode({
+            shape: 'vue-shape',
+            width,
+            height,
+            component: 'custom-vue-shape',
+            ports: { ...PORTS },
+            position: (cell as Node).getPosition(),
+          });
+          const cellProxy = new CustomX6NodeProxy(cell as Node);
+          const proxy = new CustomX6NodeProxy(node);
+          proxy.setData(cellProxy.getData());
+          return node;
+        });
+
       if (cells.length) {
         this.graph.copy(cells);
       }
