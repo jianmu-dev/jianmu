@@ -30,6 +30,7 @@ export default class X6TaskRunning extends BaseTaskRunning {
   // private readonly keyShape: HTMLElement;
   // private keyShapeInterval: any;
   private readonly iconShape: HTMLElement;
+  private shapeInterval: any;
   private iconShapeInterval: any;
 
   constructor(view: CellView) {
@@ -49,7 +50,7 @@ export default class X6TaskRunning extends BaseTaskRunning {
   start(): void {
     const shape = super.getShapes()[0] as SVGElement;
     let reverse = false;
-    setInterval(() => {
+    this.shapeInterval = setInterval(() => {
       this.animateShape(shape, reverse);
       reverse = !reverse;
     }, durations.iconShape.first);
@@ -58,6 +59,10 @@ export default class X6TaskRunning extends BaseTaskRunning {
   }
 
   stop(): void {
+    if (this.shapeInterval) {
+      clearInterval(this.shapeInterval);
+      delete this.shapeInterval;
+    }
     this.view.cell.removeTool('boundary');
 
     if (this.iconShapeInterval) {
