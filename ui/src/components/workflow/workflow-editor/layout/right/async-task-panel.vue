@@ -101,6 +101,9 @@ export default defineComponent({
     const failureVisible = ref<boolean>(false);
 
     onMounted(async () => {
+      if (form.value.version) {
+        failureVisible.value = true;
+      }
       emit('form-created', formRef.value);
       versionLoading.value = true;
       // 获取versionList
@@ -163,6 +166,7 @@ export default defineComponent({
         form.value.outputs.length = 0;
         try {
           versionLoading.value = true;
+          failureVisible.value = false;
           if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
             const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
             const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
