@@ -35,22 +35,15 @@ export default defineComponent({
   },
   emits: ['update:model-value', 'focus', 'blur', 'change'],
   setup(props, { emit }) {
-    const selectableParams = ref<ISelectableParam[]>(props.selectableParams);
     const paramToolbar = ref();
     const editorRef = ref<HTMLDivElement>();
     let expressionEditor: ExpressionEditor;
     provide('getExpressionEditor', (): ExpressionEditor => expressionEditor);
 
-    onUpdated(() => {
-      if (props.selectableParams === selectableParams.value) {
-        return;
-      }
-      selectableParams.value = props.selectableParams;
-      expressionEditor.toolbar.refreshSelectableParams(selectableParams.value);
-    });
+    onUpdated(() => expressionEditor.toolbar.refreshSelectableParams(props.selectableParams));
 
     onMounted(() => (expressionEditor = new ExpressionEditor(paramToolbar.value.$el,
-      editorRef.value!, props.modelValue, selectableParams.value)));
+      editorRef.value!, props.modelValue, props.selectableParams)));
 
     onUnmounted(() => expressionEditor.destroy());
 
