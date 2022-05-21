@@ -101,6 +101,8 @@ export default defineComponent({
     word-wrap: break-word;
     // 中文换行
     white-space: pre-wrap;
+    // 单词内换行
+    word-break: break-all;
   }
 
   .param-button {
@@ -139,6 +141,8 @@ export default defineComponent({
     word-wrap: break-word;
     // 中文换行
     white-space: pre-wrap;
+    // 单词内换行
+    word-break: break-all;
     outline: none;
 
     &:empty::before {
