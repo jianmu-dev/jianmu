@@ -81,6 +81,8 @@ export default defineComponent({
         if (targetData.cells.length === 0) {
           delete targetData.cells;
         }
+        workflowTool.slimGraphData(targetData);
+
         if (workflowBackUp.name !== workflowForm.value.name ||
           workflowBackUp.description !== workflowForm.value.description ||
           workflowBackUp.groupId !== workflowForm.value.groupId ||
@@ -99,7 +101,8 @@ export default defineComponent({
               proxy.$error(message);
               return;
             }
-            emit('save', true, workflowTool.toDsl(workflowForm.value, targetData));
+            workflowForm.value.data = JSON.stringify(targetData);
+            emit('save', true, workflowTool.toDsl(workflowForm.value));
           }).catch((action: string) => {
             if (action === 'cancel') {
               emit('back');
@@ -120,7 +123,10 @@ export default defineComponent({
         try {
           await workflowValidator.checkNodes();
 
-          emit('save', back, workflowTool.toDsl(workflowForm.value, graph.toJSON()));
+          const graphData = graph.toJSON();
+          workflowTool.slimGraphData(graphData);
+          workflowForm.value.data = JSON.stringify(graphData);
+          emit('save', back, workflowTool.toDsl(workflowForm.value));
           workflowBackUp = cloneDeep(workflowForm.value);
         } catch ({ message }) {
           proxy.$error(message);

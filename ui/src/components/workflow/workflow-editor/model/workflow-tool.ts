@@ -105,7 +105,19 @@ export class WorkflowTool {
       });
   }
 
-  toDsl(workflowData: IWorkflow, graphData: { cells: Cell.Properties[]; }): string {
+  slimGraphData({ cells }: { cells?: Cell.Properties[]; }): void {
+    if (!cells) {
+      return;
+    }
+
+    // 瘦身
+    cells.forEach(cell => {
+      // 移除所有工具
+      delete cell.tools;
+    });
+  }
+
+  toDsl(workflowData: IWorkflow): string {
     const idArr: string[] = [];
     const nodeDataArr: IWorkflowNode[] = [];
 
@@ -157,14 +169,6 @@ export class WorkflowTool {
     idMap.forEach((value, key) =>
       // TODO 待完善，优化成正则表达式提取方式
       (dsl = dsl.replaceAll('${' + key + '.', '${' + value + '.')));
-
-    const { cells } = graphData;
-    // 瘦身
-    cells.forEach(cell => {
-      // 移除所有工具
-      delete cell.tools;
-    });
-    workflowData.data = JSON.stringify(graphData);
 
     dsl += '\n\n' + `raw-data: ${JSON.stringify(workflowData.data)}`;
 
