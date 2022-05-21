@@ -21,7 +21,8 @@ export default defineComponent({
       required: true,
     },
   },
-  setup() {
+  emits: ['change'],
+  setup(_, { emit }) {
     const opened = ref<boolean>(false);
     const selectedVal = ref<string[]>();
     const getExpressionEditor = inject('getExpressionEditor') as () => ExpressionEditor;
@@ -51,6 +52,8 @@ export default defineComponent({
 
         // 更新参数后，需隐藏工具栏，否则有视觉延迟
         getExpressionEditor().toolbar.hide();
+
+        emit('change');
       },
     };
   },
