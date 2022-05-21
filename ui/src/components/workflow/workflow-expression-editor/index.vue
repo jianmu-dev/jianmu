@@ -1,7 +1,7 @@
 <template>
   <div class="jm-workflow-expression-editor">
     <param-button :selectableParams="selectableParams" @inserted="handleInserted"/>
-    <param-toolbar ref="paramToolbar" :selectable-params="selectableParams"/>
+    <param-toolbar ref="paramToolbar" :selectable-params="selectableParams" @change="handleBlur"/>
     <div class="container" ref="editorRef" contenteditable="true" :placeholder="placeholder"
          @cut="handleCut" @copy="handleCopy" @paste="handlePaste" @focus="handleFocus" @blur="handleBlur"
          @keyup="refreshLastRange" @mouseup="refreshLastRange"/>
@@ -67,7 +67,7 @@ export default defineComponent({
         }
 
         const plainText = expressionEditor.getPlainText(el);
-        
+
         emit('update:model-value', plainText);
         emit('blur', e);
         emit('change', plainText);

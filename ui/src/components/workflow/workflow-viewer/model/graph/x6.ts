@@ -120,12 +120,6 @@ export class X6Graph extends BaseGraph {
       (shapeEl.querySelector('.img')! as HTMLElement)
         .style.boxShadow = '0 0 8px 1px #C5D9FF';
 
-      const status = shapeEl.getAttribute('x6-task-status');
-      if (status === TaskStatusEnum.RUNNING) {
-        // 滑过动画相关shape时，忽略
-        return;
-      }
-
       const { id, description, type } = this.buildEvt(node);
       const { width, height, x, y } = shapeEl.getBoundingClientRect();
       mouseoverNode({ id, description, type, width, height: height - textMaxHeight, x, y });
