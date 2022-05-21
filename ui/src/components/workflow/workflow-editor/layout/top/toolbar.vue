@@ -99,8 +99,7 @@ export default defineComponent({
               proxy.$error(message);
               return;
             }
-            workflowForm.value.data = JSON.stringify(graph.toJSON());
-            emit('save', true, workflowTool.toDsl(workflowForm.value));
+            emit('save', true, workflowTool.toDsl(workflowForm.value, targetData));
           }).catch((action: string) => {
             if (action === 'cancel') {
               emit('back');
@@ -121,8 +120,7 @@ export default defineComponent({
         try {
           await workflowValidator.checkNodes();
 
-          workflowForm.value.data = JSON.stringify(graph.toJSON());
-          emit('save', back, workflowTool.toDsl(workflowForm.value));
+          emit('save', back, workflowTool.toDsl(workflowForm.value, graph.toJSON()));
           workflowBackUp = cloneDeep(workflowForm.value);
         } catch ({ message }) {
           proxy.$error(message);
