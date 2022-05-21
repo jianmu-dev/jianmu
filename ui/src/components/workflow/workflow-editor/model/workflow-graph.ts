@@ -218,10 +218,11 @@ export class WorkflowGraph {
   private registerShortcut() {
     // copy cut paste
     this.graph.bindKey(['meta+c', 'ctrl+c'], () => {
-      const cells = this.graph.getSelectedCells()
+      const nodes = this.graph.getSelectedCells()
         // 筛选节点，只能复制节点
         .filter(cell => cell.isNode())
         .map(cell => {
+          // 复制/粘贴时，连接桩id没有改变，通过创建新节点刷新连接桩id
           const node = this.graph.createNode({
             shape: 'vue-shape',
             width,
@@ -236,25 +237,23 @@ export class WorkflowGraph {
           return node;
         });
 
-      if (cells.length) {
-        this.graph.copy(cells);
+      if (nodes.length === 0) {
+        return;
       }
-      return false;
+      this.graph.copy(nodes);
     });
     // this.graph.bindKey(['meta+x', 'ctrl+x'], () => {
     //   const cells = this.graph.getSelectedCells();
     //   if (cells.length) {
     //     this.graph.cut(cells);
     //   }
-    //   return false;
     // });
     this.graph.bindKey(['meta+v', 'ctrl+v'], () => {
-      if (!this.graph.isClipboardEmpty()) {
-        const cells = this.graph.paste({ offset: 32 });
-        this.graph.cleanSelection();
-        this.graph.select(cells);
+      if (this.graph.isClipboardEmpty()) {
+        return;
       }
-      return false;
+      this.graph.paste({ offset: 32 });
+      this.graph.cleanSelection();
     });
 
     // select all
