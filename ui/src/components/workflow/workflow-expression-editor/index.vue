@@ -115,6 +115,12 @@ export default defineComponent({
     min-height: 36px;
     background-color: #FFFFFF;
 
+    // fix: Safari中无法输入
+    user-select: auto;
+    -moz-user-select: auto;
+    -webkit-user-select: auto;
+    -ms-user-select: auto;
+
     &:hover {
       border-color: @primary-color;
     }
