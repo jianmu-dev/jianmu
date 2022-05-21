@@ -13,7 +13,6 @@ import { defineComponent, onMounted, onUnmounted, onUpdated, PropType, provide, 
 import { ISelectableParam } from './model/data';
 import { ExpressionEditor } from './model/expression-editor';
 import ParamToolbar from './param-toolbar.vue';
-import { extractReferences } from './model/util';
 import ParamButton from './param-button.vue';
 
 export default defineComponent({
@@ -58,17 +57,17 @@ export default defineComponent({
       },
       handleBlur: (e: Event) => {
         const el = editorRef.value!.cloneNode(true) as HTMLDivElement;
-        const references = extractReferences(el.innerText);
-        const plainText = expressionEditor.getPlainText(el);
-
-        if (references.length > 0) {
+        if (expressionEditor.checkManualInput(el.innerText)) {
           // 表示手动输入了参数引用
+          const plainText = expressionEditor.getPlainText(el);
           expressionEditor.refresh(plainText);
 
           // 必须刷新，否则有误
           expressionEditor.refreshLastRange();
         }
 
+        const plainText = expressionEditor.getPlainText(el);
+        
         emit('update:model-value', plainText);
         emit('blur', e);
         emit('change', plainText);

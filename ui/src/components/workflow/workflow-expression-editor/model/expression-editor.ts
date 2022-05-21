@@ -5,6 +5,7 @@ import { ISelectableParam } from './data';
 import { ELEMENT_NODE_TYPE, NEW_LINE, RAW_ATTR_NAME, TEXT_NODE_TYPE } from './const';
 import { extractReferences, fromArray } from './util';
 import { ParamToolbar } from './param-toolbar';
+import { NodeError, ParamError } from './error';
 
 export class ExpressionEditor {
   readonly toolbar: ParamToolbar;
@@ -90,6 +91,24 @@ export class ExpressionEditor {
       tempEl.innerText = paramRefEl.innerText;
       tempEl.removeAttribute('id');
     }
+  }
+
+  checkManualInput(plainText: string): boolean {
+    const references = extractReferences(plainText);
+    for (const reference of references) {
+      try {
+        this.toolbar.getParam(reference);
+        // 可获取参数表示手动输入了参数引用
+        return true;
+      } catch (err) {
+        if (err instanceof NodeError || err instanceof ParamError) {
+          // 忽略日志，继续
+          continue;
+        }
+        throw err;
+      }
+    }
+    return false;
   }
 
   cut(e: ClipboardEvent): void {
