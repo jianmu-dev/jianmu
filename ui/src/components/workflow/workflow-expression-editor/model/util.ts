@@ -39,7 +39,8 @@ export function toContent(param: IParam): string {
  */
 export function extractReferences(plainText: string): IParamReference[] {
   // 格式：${xxx.[inner.]xxx}
-  const matches = plainText.match(/\$\{[0-9a-zA-Z_]+\.(inner\.)?[0-9a-zA-Z_]+\}/g);
+  // 节点id中存在-
+  const matches = plainText.match(/\$\{[0-9a-zA-Z_-]+\.(inner\.)?[0-9a-zA-Z_]+\}/g);
   if (!matches) {
     return [];
   }

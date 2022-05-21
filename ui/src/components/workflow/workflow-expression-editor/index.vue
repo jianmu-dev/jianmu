@@ -13,7 +13,6 @@ import { defineComponent, onMounted, onUnmounted, onUpdated, PropType, provide, 
 import { ISelectableParam } from './model/data';
 import { ExpressionEditor } from './model/expression-editor';
 import ParamToolbar from './param-toolbar.vue';
-import { extractReferences } from './model/util';
 import ParamButton from './param-button.vue';
 
 export default defineComponent({
@@ -35,22 +34,15 @@ export default defineComponent({
   },
   emits: ['update:model-value', 'focus', 'blur', 'change'],
   setup(props, { emit }) {
-    const selectableParams = ref<ISelectableParam[]>(props.selectableParams);
     const paramToolbar = ref();
     const editorRef = ref<HTMLDivElement>();
     let expressionEditor: ExpressionEditor;
     provide('getExpressionEditor', (): ExpressionEditor => expressionEditor);
 
-    onUpdated(() => {
-      if (props.selectableParams === selectableParams.value) {
-        return;
-      }
-      selectableParams.value = props.selectableParams;
-      expressionEditor.toolbar.refreshSelectableParams(selectableParams.value);
-    });
+    onUpdated(() => expressionEditor.toolbar.refreshSelectableParams(props.selectableParams));
 
     onMounted(() => (expressionEditor = new ExpressionEditor(paramToolbar.value.$el,
-      editorRef.value!, props.modelValue, selectableParams.value)));
+      editorRef.value!, props.modelValue, props.selectableParams)));
 
     onUnmounted(() => expressionEditor.destroy());
 
@@ -65,17 +57,17 @@ export default defineComponent({
       },
       handleBlur: (e: Event) => {
         const el = editorRef.value!.cloneNode(true) as HTMLDivElement;
-        const references = extractReferences(el.innerText);
-        const plainText = expressionEditor.getPlainText(el);
-
-        if (references.length > 0) {
+        if (expressionEditor.checkManualInput(el.innerText)) {
           // 表示手动输入了参数引用
+          const plainText = expressionEditor.getPlainText(el);
           expressionEditor.refresh(plainText);
 
           // 必须刷新，否则有误
           expressionEditor.refreshLastRange();
         }
 
+        const plainText = expressionEditor.getPlainText(el);
+        
         emit('update:model-value', plainText);
         emit('blur', e);
         emit('change', plainText);
@@ -121,6 +113,12 @@ export default defineComponent({
     line-height: 2em;
     min-height: 36px;
     background-color: #FFFFFF;
+
+    // fix: Safari中无法输入
+    user-select: auto;
+    -moz-user-select: auto;
+    -webkit-user-select: auto;
+    -ms-user-select: auto;
 
     &:hover {
       border-color: @primary-color;

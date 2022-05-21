@@ -104,8 +104,7 @@ export default defineComponent({
   background-color: #F0F2F5;
   user-select: none;
   -moz-user-select: none;
-  // 不能设置，否则Safari中无法输入
-  //-webkit-user-select: none;
+  -webkit-user-select: none;
   -ms-user-select: none;
 
   .node-config-panel-overlay {

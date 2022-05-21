@@ -14,6 +14,9 @@ export class ParamToolbar {
   }
 
   refreshSelectableParams(selectableParams: ISelectableParam[]): void {
+    if (this.selectableParams === selectableParams) {
+      return;
+    }
     this.selectableParams.length = 0;
     this.selectableParams.push(...selectableParams);
   }
