@@ -109,7 +109,7 @@ export default defineComponent({
 
   .node-config-panel-overlay {
     background-color: transparent;
-    cursor: not-allowed;
+    //cursor: not-allowed;
   }
 
   .main {
