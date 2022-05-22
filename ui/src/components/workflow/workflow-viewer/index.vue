@@ -22,7 +22,7 @@
                   @node-click="clickNode"
                   @mouseleave="destroyNodeToolbar"/>
     <div v-show="!dslMode" class="canvas" ref="container"/>
-    <jm-dsl-editor v-if="dslMode" :value="dsl" readonly/>
+    <jm-dsl-editor v-if="dslMode" :value="workflowGraph?.visibleDsl" readonly/>
   </div>
 </template>
 
@@ -80,7 +80,7 @@ export default defineComponent({
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const container = ref<HTMLElement>();
-    let workflowGraph: WorkflowGraph | undefined;
+    const workflowGraph = ref<WorkflowGraph>();
     const graph = ref<BaseGraph>();
     const nodeActionConfigured = ref<boolean>(false);
     const dslMode = ref<boolean>(false);
@@ -115,8 +115,8 @@ export default defineComponent({
           return;
         }
 
-        workflowGraph = new WorkflowGraph(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, direction);
-        graph.value = workflowGraph.graph;
+        workflowGraph.value = new WorkflowGraph(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, direction);
+        graph.value = workflowGraph.value!.graph;
 
         updateZoom();
       }
@@ -142,12 +142,13 @@ export default defineComponent({
     onMounted(() => proxy.$nextTick(() => refreshGraph()));
     onUnmounted(() => {
       graph.value = undefined;
-      workflowGraph?.destroy();
+      workflowGraph.value?.destroy();
     });
 
     return {
       TaskStatusEnum,
       container,
+      workflowGraph,
       graph,
       graphType: computed<GraphTypeEnum>(() => {
         if (!graph.value) {
@@ -232,7 +233,7 @@ export default defineComponent({
 
         workflowGraph!.destroy();
 
-        workflowGraph = undefined;
+        workflowGraph.value = undefined;
         graph.value = undefined;
         nodeActionConfigured.value = false;
 
