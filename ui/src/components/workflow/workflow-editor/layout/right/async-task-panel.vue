@@ -102,30 +102,11 @@ export default defineComponent({
     const versionLoading = ref<boolean>(false);
     const failureVisible = ref<boolean>(false);
 
-    onMounted(async () => {
-      if (form.value.version) {
-        failureVisible.value = true;
-      }
-      emit('form-created', formRef.value);
-      versionLoading.value = true;
-      // 获取versionList
-      try {
-        if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
-          versionList.value = await getLocalVersionList(form.value.getRef(), form.value.ownerRef);
-        } else {
-          versionList.value = await getOfficialVersionList(form.value.getRef(), form.value.ownerRef);
-        }
-      } catch (err) {
-        proxy.$throw(err, proxy);
-      } finally {
-        versionLoading.value = false;
-      }
-    });
-
     /**
      * push输入/输出参数
      * @param inputs
      * @param outputs
+     * @param versionDescription
      */
     const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
       form.value.versionDescription = versionDescription;
@@ -154,6 +135,55 @@ export default defineComponent({
         });
       }
     };
+
+    const changeVersion = async () => {
+      form.value.inputs.length = 0;
+      form.value.outputs.length = 0;
+      try {
+        versionLoading.value = true;
+        failureVisible.value = false;
+        if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
+          const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
+          const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
+          pushParams(inputs, outputs, versionDescription);
+        } else {
+          const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
+          const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
+          pushParams(inputs, outputs, versionDescription);
+        }
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      } finally {
+        versionLoading.value = false;
+        failureVisible.value = true;
+      }
+    };
+
+    onMounted(async () => {
+      if (form.value.version) {
+        failureVisible.value = true;
+      }
+      emit('form-created', formRef.value);
+      versionLoading.value = true;
+      // 获取versionList
+      try {
+        if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
+          versionList.value = await getLocalVersionList(form.value.getRef(), form.value.ownerRef);
+        } else {
+          versionList.value = await getOfficialVersionList(form.value.getRef(), form.value.ownerRef);
+        }
+
+        if (!form.value.version && versionList.value.versions.length > 0) {
+          form.value.version = versionList.value.versions[0];
+          await changeVersion();
+        }
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      } finally {
+        versionLoading.value = false;
+      }
+    });
+
     return {
       formRef,
       form,
@@ -163,28 +193,7 @@ export default defineComponent({
       versionLoading,
       failureVisible,
       // 获取节点信息
-      changeVersion: async () => {
-        form.value.inputs.length = 0;
-        form.value.outputs.length = 0;
-        try {
-          versionLoading.value = true;
-          failureVisible.value = false;
-          if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
-            const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
-            pushParams(inputs, outputs, versionDescription);
-          } else {
-            const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
-            const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
-            pushParams(inputs, outputs, versionDescription);
-          }
-        } catch (err) {
-          proxy.$throw(err, proxy);
-        } finally {
-          versionLoading.value = false;
-          failureVisible.value = true;
-        }
-      },
+      changeVersion,
     };
   },
 });
