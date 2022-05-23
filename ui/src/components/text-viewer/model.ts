@@ -7,6 +7,12 @@ export interface ICallbackEvent {
   contentMaxWidth: number;
 }
 
+export function getPlainText(html: string): string {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.innerText;
+}
+
 type Callback = (event: ICallbackEvent) => void;
 
 export class TextViewer {
@@ -88,7 +94,7 @@ export class TextViewer {
    * @return 传入文本在页面会占据的最大宽度
    */
   private async calculateContentMaxWidth(
-    value: string = this.value.value,
+    value: string = getPlainText(this.value.value),
   ): Promise<number> {
     this.temporaryContent.value = value;
     await nextTick();
@@ -289,7 +295,7 @@ export class TextViewer {
         Tip,
         {
           effect: 'dark',
-          content: value,
+          contentText: this.value.value,
           placement: this.tipPlacement,
           style: { cursor: 'default' },
           appendToBody: this.tipAppendToBody,
@@ -362,7 +368,7 @@ export class TextViewer {
       return;
     }
     let isOverFlow: boolean = false;
-    this.temporaryContent.value = this.value.value;
+    this.temporaryContent.value = getPlainText(this.value.value);
     await nextTick();
     isOverFlow =
       this.transitCalculator.value!.getBoundingClientRect().width >
@@ -447,7 +453,7 @@ export class TextViewer {
     await nextTick();
     await this.clear();
     await nextTick();
-    await this.init(this.value.value);
+    await this.init(getPlainText(this.value.value));
     const contentMaxWidth = await this.calculateContentMaxWidth();
     this.callback({ contentMaxWidth });
   }
