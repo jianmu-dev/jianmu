@@ -47,13 +47,25 @@ export default defineComponent({
         result += `${days}d `;
       }
       if (hours > 0) {
-        result += `${hours}h `;
+        if (hours < 24) {
+          result += `${hours}h `;
+        } else {
+          result += '0h ';
+        }
       }
       if (minutes > 0) {
-        result += `${minutes}m `;
+        if (minutes < 60) {
+          result += `${minutes}m `;
+        } else {
+          result += '0m ';
+        }
       }
       if (seconds >= 0) {
-        result += `${seconds}s`;
+        if (seconds < 60) {
+          result += `${seconds}s`;
+        } else {
+          result += '0s';
+        }
       }
       return result || '无';
     });

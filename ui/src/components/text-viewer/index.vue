@@ -19,7 +19,7 @@ export default defineComponent({
     // tooltip 显示方向
     tipPlacement: {
       type: String,
-      default: 'bottom',
+      default: 'bottom-end',
     },
     // 控制tooltip是否被放置到body元素上
     tipAppendToBody: {
