@@ -9,10 +9,18 @@ import { GraphDirectionEnum } from './data/enumeration';
 export class WorkflowGraph {
   readonly graph: BaseGraph
   private readonly resizeObserver: ResizeObserver;
+  readonly visibleDsl: string;
 
   constructor(dsl: string, triggerType: TriggerTypeEnum,
     nodeInfos: INodeDefVo[], container: HTMLElement, direction: GraphDirectionEnum) {
-    const { 'raw-data': rawData } = yaml.parse(dsl);
+    const obj = yaml.parse(dsl);
+    const { 'raw-data': rawData } = obj;
+    if (rawData) {
+      delete obj['raw-data'];
+      this.visibleDsl = yaml.stringify(obj);
+    } else {
+      this.visibleDsl = dsl;
+    }
 
     this.graph = rawData ? new X6Graph(dsl, triggerType, container) :
       new G6Graph(dsl, triggerType, nodeInfos, container, direction);
