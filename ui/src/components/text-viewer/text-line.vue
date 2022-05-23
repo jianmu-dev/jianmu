@@ -1,6 +1,5 @@
 <template>
-  <div class="text-line" v-html="valueCom">
-  </div>
+  <div v-html="valueCom" class="text-line"/>
 </template>
 
 <script lang='ts'>
