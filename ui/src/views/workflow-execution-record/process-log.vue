@@ -60,7 +60,7 @@ import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
+import { datetimeFormatter } from '@/utils/formatter';
 import { checkProcessLog, fetchProcessLog } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
@@ -81,10 +81,7 @@ export default defineComponent({
       triggerType: TriggerTypeEnum.MANUAL,
     }) as IWorkflowExecutionRecordVo);
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
-    const executionTime = computed<string>(() => executionTimeFormatter(process.value.startTime, process.value.endTime, executing.value));
     const isSuspended = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.SUSPENDED === (process.value.status as WorkflowExecutionRecordStatusEnum));
-    const suspendedTime = computed<string>(() =>
-      executionTimeFormatter(process.value.suspendedTime, undefined, true));
     const processLog = ref<string>('');
 
     let terminateLogLoad = false;
@@ -142,9 +139,7 @@ export default defineComponent({
       workflowName: state.recordDetail.record?.name,
       process,
       executing,
-      executionTime,
       isSuspended,
-      suspendedTime,
       datetimeFormatter,
       processLog,
     };

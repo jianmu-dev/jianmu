@@ -1,5 +1,8 @@
 <template>
   <jm-tooltip @update:modelValue="()=>{}" :model-value="v" :manual="true">
+    <template #content>
+      <div v-html="contentText" class="wrapper"></div>
+    </template>
     <span style="display: inline">...</span>
   </jm-tooltip>
 </template>
@@ -14,6 +17,10 @@ export default defineComponent({
       type: Object,
       default: () => ({}),
     },
+    contentText: {
+      type: String,
+      required: true,
+    },
   },
   setup(props) {
     // 控制tooltip的显示与隐藏
@@ -24,3 +31,14 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="less">
+.wrapper {
+  max-width: 60vw;
+  // 英文单词换行
+  word-wrap: break-word;
+  // 中文换行
+  white-space: pre-wrap;
+  // 单词内换行
+  word-break: break-all;
+}
+</style>
