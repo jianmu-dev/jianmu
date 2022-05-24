@@ -4,6 +4,8 @@
 
 > 建木持续集成平台基于建木自动化平台作为核心实现的持续集成平台，为开发者构建便捷的编译、测试、打包、发布、部署和通知等持续集成生命周期中的相关服务。
 
+![](https://jianmu-blog.assets.dghub.cn/jianmu-blog/1.29.0/assets/blog-source/%E7%AC%AC%E4%B8%80%E5%B1%8F%E5%9B%BE.png)
+
 [ci.jianmu.dev](https://ci.jianmu.dev)
 
 #### TL;DR
