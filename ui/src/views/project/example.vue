@@ -57,32 +57,33 @@ export default defineComponent({
   position: relative;
 
   ::v-deep(.jm-workflow-editor) {
-    .jm-icon-button-left {
-      cursor: not-allowed;
-      color: inherit;
-
-      &:hover {
-        background-color: inherit;
+    .jm-workflow-editor-toolbar {
+      .jm-icon-button-left {
+        cursor: not-allowed;
         color: inherit;
-      }
-    }
 
-    .el-button {
-      cursor: not-allowed;
-
-      &.save-return {
         &:hover {
-          background-color: #F5F5F5;
-          color: #082340;
+          background-color: inherit;
+          color: inherit;
         }
       }
 
-      &.el-button--primary {
-        background-color: #096DD9;
-        border-color: #096DD9;
+      .el-button {
+        cursor: not-allowed;
+
+        &.save-return {
+          &:hover {
+            background-color: #F5F5F5;
+            color: #082340;
+          }
+        }
+
+        &.el-button--primary {
+          background-color: #096DD9;
+          border-color: #096DD9;
+        }
       }
     }
-
   }
 }
 </style>
