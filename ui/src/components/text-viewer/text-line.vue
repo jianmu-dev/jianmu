@@ -4,7 +4,6 @@
 
 <script lang='ts'>
 import { computed, defineComponent } from 'vue';
-import { getPlainText } from '@/components/text-viewer/model';
 
 export default defineComponent({
   props: {
@@ -14,7 +13,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const valueCom = computed<string>(() => getPlainText(props.value).replace(/ /g, '&nbsp;'));
+    const valueCom = computed<string>(() => props.value.replace(/ /g, '&nbsp;'));
     return {
       valueCom,
     };
