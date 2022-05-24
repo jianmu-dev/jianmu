@@ -26,7 +26,6 @@
 import { computed, defineComponent, onUpdated, PropType, ref } from 'vue';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
-import { executionTimeFormatter } from '@/utils/formatter';
 
 export default defineComponent({
   props: {
@@ -57,7 +56,6 @@ export default defineComponent({
     });
     return {
       TaskStatusEnum,
-      executionTimeFormatter,
       changeTask,
       selectedIndex: computed<number>(() => {
         return props.tasks.findIndex(({ instanceId }) => instanceId === selectedTask.value?.instanceId);

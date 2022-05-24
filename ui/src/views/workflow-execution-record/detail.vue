@@ -114,7 +114,7 @@ import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount,
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
-import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
+import { datetimeFormatter } from '@/utils/formatter';
 import { TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import Workflow from '@/views/workflow-execution-record/workflow.vue';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
@@ -295,7 +295,6 @@ export default defineComponent({
         reloadMain();
       },
       datetimeFormatter,
-      executionTimeFormatter,
       execute: () => {
         const isWarning =
           data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;

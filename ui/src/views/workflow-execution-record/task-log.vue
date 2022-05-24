@@ -281,7 +281,7 @@ import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
 import TaskList from '@/views/workflow-execution-record/task-list.vue';
-import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
+import { datetimeFormatter } from '@/utils/formatter';
 import { checkTaskLog, fetchTaskLog, listTaskInstance, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
@@ -353,8 +353,6 @@ export default defineComponent({
       ].includes(task.value.status),
     );
     const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
-    const executionTime = computed<string>(() =>
-      executionTimeFormatter(task.value.startTime, task.value.endTime, isSuspended.value || executing.value));
     const tabActiveName = ref<string>(props.tabType);
     const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
@@ -513,7 +511,6 @@ export default defineComponent({
       task,
       tasks,
       executing,
-      executionTime,
       isSuspended,
       tabActiveName,
       taskLog,

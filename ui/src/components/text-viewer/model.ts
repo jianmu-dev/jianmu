@@ -7,7 +7,11 @@ export interface ICallbackEvent {
   contentMaxWidth: number;
 }
 
-export function getPlainText(html: string): string {
+/**
+ * 将带有html标签的字符串转换成纯文本
+ * @param html
+ */
+function getPlainText(html: string): string {
   const div = document.createElement('div');
   div.innerHTML = html;
   return div.innerText;
@@ -16,13 +20,19 @@ export function getPlainText(html: string): string {
 type Callback = (event: ICallbackEvent) => void;
 
 export class TextViewer {
+  // 传入value的原始值，可能包含html元素标签
   private readonly value: Ref<string>;
+  // 去除html标签后的字符串
+  private readonly plainText: string;
+  // tooltip组件显示的位置
   private readonly tipPlacement: string;
+  // 是否将tooltip放入body
   private readonly tipAppendToBody: boolean;
   // 控制tooltip的显示与隐藏
   private readonly tipVisible: Ref<boolean> = ref<boolean>(false);
   // 解决element组件未被注册的警告提示
   private readonly appContext: AppContext;
+  // 用于计算宽度的临时文本内容
   private readonly temporaryContent: Ref<string>;
   // 中转计算元素
   private readonly transitCalculator: Ref<HTMLElement | undefined>;
@@ -43,6 +53,7 @@ export class TextViewer {
     callback: Callback,
   ) {
     this.value = value;
+    this.plainText = getPlainText(this.value.value);
     this.temporaryContent = temporaryContent;
     this.transitCalculator = transitCalculator;
     this.appContext = appContext;
@@ -89,12 +100,12 @@ export class TextViewer {
   }
 
   /**
-   * 计算出入内容会占据的最大宽度
+   * 计算传入内容会占据的最大宽度
    * @param value
    * @return 传入文本在页面会占据的最大宽度
    */
   private async calculateContentMaxWidth(
-    value: string = getPlainText(this.value.value),
+    value: string = this.plainText,
   ): Promise<number> {
     this.temporaryContent.value = value;
     await nextTick();
@@ -104,12 +115,15 @@ export class TextViewer {
     ) {
       return 0;
     }
-    // 需要用getClientRects去获取元素的宽度精确到小数点后三位
+    // getClientRects获取元素的宽度能精确到小数点后三位
     const maxWidth = this.transitCalculator.value.getBoundingClientRect().width;
     this.temporaryContent.value = '';
     return Math.ceil(maxWidth);
   }
 
+  /**
+   * 计算...的宽度
+   */
   private async calculateEllipsisWidth(): Promise<number> {
     this.temporaryContent.value = '...';
     await nextTick();
@@ -245,7 +259,7 @@ export class TextViewer {
    */
   private async calculateLastLineMaxWidth(
     contentArr: string[],
-    value: string = this.value.value,
+    value: string = this.plainText,
   ): Promise<number> {
     // 将此时用于占据计算元素中的值当成临时变量保存。
     const temp = this.temporaryContent.value;
@@ -319,7 +333,7 @@ export class TextViewer {
       const contentLength = contentArr.reduce((pre, current) => {
         return pre + current.length;
       }, 0);
-      if (contentLength === this.value.value.length) {
+      if (contentLength === this.plainText.length) {
         vNodes.push(textLineVNode);
         continue;
       }
@@ -368,7 +382,7 @@ export class TextViewer {
       return;
     }
     let isOverFlow: boolean = false;
-    this.temporaryContent.value = getPlainText(this.value.value);
+    this.temporaryContent.value = this.plainText;
     await nextTick();
     isOverFlow =
       this.transitCalculator.value!.getBoundingClientRect().width >
@@ -396,19 +410,20 @@ export class TextViewer {
       console.warn('设置的宽度太小');
       return;
     }
+    // 计算行数
+    const rows = Math.floor(wrapperSize.height / lineHeight);
+    if (rows === 0) {
+      console.warn('指定的高度太低无法显示');
+      return;
+    }
     if (isOverFlow) {
       const element = document.createElement('div');
-      element.innerHTML = this.value.value;
+      element.innerHTML = this.plainText;
       this.transitCalculator.value.nextElementSibling!.appendChild(element);
       element.parentElement!.style.overflow = 'hidden';
       // 获取...占据的宽度
       this.ellipsisWidth = await this.calculateEllipsisWidth();
-      // 计算行数
-      const rows = Math.floor(wrapperSize.height / lineHeight);
-      if (rows === 0) {
-        console.warn('指定的高度太低无法显示');
-        return;
-      }
+
       const contentArr = await this.generateVNodesInnerText(
         wrapperSize,
         value,
@@ -432,11 +447,11 @@ export class TextViewer {
     } else {
       // 传入字符占据的宽度小于外层盒子的宽度，直接渲染
       const wrapperNode = await this.generateVNode(
-        [this.value.value],
+        [this.plainText],
         1,
         lineHeight,
         wrapperSize,
-        this.value.value,
+        this.plainText,
       );
       render(
         wrapperNode,
@@ -453,7 +468,7 @@ export class TextViewer {
     await nextTick();
     await this.clear();
     await nextTick();
-    await this.init(getPlainText(this.value.value));
+    await this.init(this.plainText);
     const contentMaxWidth = await this.calculateContentMaxWidth();
     this.callback({ contentMaxWidth });
   }

@@ -31,7 +31,7 @@ export default defineComponent({
     const transitCalculator = ref<HTMLElement>();
     // 临时字符串内容
     const temporaryContent = ref<string>('');
-    const text = ref<string>(props.value ? props.value.toString() : '');
+    const text = ref<string>(props.value ? props.value : '');
     const { appContext } = getCurrentInstance() as any;
     const temporaryContentComputed = computed<string>(() => {
       return temporaryContent.value.replace(/ /g, '&nbsp;');
@@ -51,10 +51,10 @@ export default defineComponent({
       await textViewer.reload();
     });
     onUpdated(async () => {
-      if (!props.value || text.value === props.value.toString()) {
+      if (!props.value || text.value === props.value) {
         return;
       }
-      text.value = props.value.toString();
+      text.value = props.value;
       const textViewer = new TextViewer(
         text,
         props.tipPlacement,
@@ -78,6 +78,8 @@ export default defineComponent({
 </script>
 <style lang="less">
 .jm-text-viewer {
+  height: inherit;
+
   .transit-calculator {
     opacity: 0;
     white-space: nowrap;
