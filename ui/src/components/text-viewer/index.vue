@@ -78,7 +78,7 @@ export default defineComponent({
 </script>
 <style lang="less">
 .jm-text-viewer {
-  height: 100%;
+  height: inherit;
 
   .transit-calculator {
     opacity: 0;
