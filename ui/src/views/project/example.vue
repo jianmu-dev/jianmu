@@ -6,12 +6,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, nextTick, onMounted, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
-import { useRouter } from 'vue-router';
 import yaml from 'yaml';
-import { namespace } from '@/store/modules/session';
-import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
