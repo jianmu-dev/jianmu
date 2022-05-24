@@ -43,30 +43,29 @@ export default defineComponent({
       const seconds = Math.round((millisecond % (1000 * 60)) / 1000);
 
       let result = '';
+
       if (days > 0) {
         result += `${days}d `;
       }
-      if (hours > 0) {
-        if (hours < 24) {
-          result += `${hours}h `;
-        } else {
-          result += '0h ';
-        }
+
+      if (hours > 0 && hours < 24) {
+        result += `${hours}h `;
+      } else if (hours === 24) {
+        result += '0h ';
       }
-      if (minutes > 0) {
-        if (minutes < 60) {
-          result += `${minutes}m `;
-        } else {
-          result += '0m ';
-        }
+
+      if (minutes > 0 && minutes < 60) {
+        result += `${minutes}m `;
+      } else if (minutes === 60) {
+        result += '0m ';
       }
-      if (seconds >= 0) {
-        if (seconds < 60) {
-          result += `${seconds}s`;
-        } else {
-          result += '0s';
-        }
+
+      if (seconds >= 0 && seconds < 60) {
+        result += `${seconds}s`;
+      } else if (seconds === 60) {
+        result += '0s';
       }
+
       return result || '无';
     });
     onBeforeUnmount(() => {
