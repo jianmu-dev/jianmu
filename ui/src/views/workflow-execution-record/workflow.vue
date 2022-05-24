@@ -50,7 +50,6 @@ import { computed, defineComponent, inject, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IOpenTaskLogForm, IOpenWebhookLogForm, IState } from '@/model/modules/workflow-execution-record';
-import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
 import TaskLog from '@/views/workflow-execution-record/task-log.vue';
 import ProcessLog from '@/views/workflow-execution-record/process-log.vue';
 import WebhookLog from '@/views/workflow-execution-record/webhook-log.vue';
@@ -101,8 +100,6 @@ export default defineComponent({
       close: () => {
         router.push(rootState.fromRoute.fullPath);
       },
-      datetimeFormatter,
-      executionTimeFormatter,
       openTaskLog: async (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         if ([NodeToolbarTabTypeEnum.RETRY, NodeToolbarTabTypeEnum.IGNORE].includes(tabType)) {
           const { nodeName } = data.value.taskRecords.find(({ businessId }) => businessId === nodeId)!;

@@ -175,7 +175,7 @@ import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '
 import { IProjectVo } from '@/api/dto/project';
 import { active, del, executeImmediately, synchronize } from '@/api/project';
 import router from '@/router';
-import { datetimeFormatter, executionTimeFormatter } from '@/utils/formatter';
+import { datetimeFormatter } from '@/utils/formatter';
 import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
 
@@ -222,7 +222,6 @@ export default defineComponent({
       ProjectStatusEnum,
       TriggerTypeEnum,
       datetimeFormatter,
-      executionTimeFormatter,
       executing,
       abling,
       synchronizing,
