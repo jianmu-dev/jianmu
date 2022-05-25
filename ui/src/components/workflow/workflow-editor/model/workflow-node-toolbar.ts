@@ -8,6 +8,45 @@ import { NODE, PORT } from '../shape/gengral-config';
 const { toolbarDistance, icon: { width: iconW, marginBottom: iconMarginBottom }, textMaxHeight } = NODE;
 const { fill: circleBgColor } = PORT;
 
+/**
+ * 显示连接桩
+ * @param node
+ * @param portId
+ */
+export function showPort(node: Node, portId: string): void {
+  node.portProp(portId, {
+    attrs: {
+      circle: {
+        r: PORT.r,
+        // 连接桩在连线交互时可以被连接
+        magnet: true,
+        fill: circleBgColor._default,
+      },
+    },
+  });
+}
+
+/**
+ * 显示连接桩
+ * @param graph
+ * @param node
+ * @param isTargetNode
+ */
+export function showPorts(graph: Graph, node: Node, isTargetNode: boolean): void {
+  const portIds = node.getPorts().map(metadata => metadata.id);
+  const allEdges = graph.getEdges();
+
+  if (allEdges.find(edge => {
+    const { port: portId } = (isTargetNode ? edge.getTarget() : edge.getSource()) as Edge.TerminalCellData;
+    return portIds.includes(portId);
+  })) {
+    // 表示当前节点存在出/入的边
+    return;
+  }
+
+  node.getPorts().forEach(port => showPort(node, port.id!));
+}
+
 export class WorkflowNodeToolbar {
   private readonly proxy: any;
   private readonly el: HTMLElement;
@@ -30,7 +69,7 @@ export class WorkflowNodeToolbar {
     this.node = node;
 
     // 显示连接桩
-    this.showPorts();
+    showPorts(this.graph, this.node, true);
 
     this.move();
   }
@@ -164,41 +203,6 @@ export class WorkflowNodeToolbar {
     }
 
     this.hide();
-  }
-
-  /**
-   * 显示连接桩
-   * @private
-   */
-  private showPorts() {
-    if (!this.node) {
-      return;
-    }
-
-    const currentNode = this.node;
-    const currentNodePortIds = currentNode.getPorts().map(metadata => metadata.id);
-    const allEdges = this.graph.getEdges();
-
-    if (allEdges.find(edge => {
-      const { port: sourcePortId } = edge.getSource() as Edge.TerminalCellData;
-      return currentNodePortIds.includes(sourcePortId);
-    })) {
-      // 表示当前节点存在出的边
-      return;
-    }
-
-    currentNode.getPorts().forEach(port => {
-      currentNode.portProp(port.id!, {
-        attrs: {
-          circle: {
-            r: PORT.r,
-            // 连接桩在连线交互时可以被连接
-            magnet: true,
-            fill: circleBgColor._default,
-          },
-        },
-      });
-    });
   }
 
   /**
