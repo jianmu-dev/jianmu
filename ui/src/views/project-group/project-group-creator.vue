@@ -22,7 +22,7 @@
         prop="isShow"
         class="is-show"
       >
-        <jm-switch v-model="createForm.isShow" active-color="#096DD9" />
+        <jm-switch v-model="createForm.isShow" active-color="#096DD9"/>
       </jm-form-item>
       <jm-form-item label="描述" label-position="top" prop="description">
         <jm-input
@@ -42,16 +42,14 @@
         <jm-button
           size="small"
           @click="dialogVisible = false"
-          icon="jm-icon-button-cancel"
-          >取消</jm-button
+        >取消</jm-button
         >
         <jm-button
           size="small"
           type="primary"
           @click="create"
           :loading="loading"
-          icon="jm-icon-button-preserve"
-          >确定</jm-button
+        >确定</jm-button
         >
       </span>
     </template>
@@ -119,12 +117,14 @@ export default defineComponent({
     margin-top: -10px;
   }
 }
+
 .creator-title {
   padding-left: 36px;
   background-image: url('@/assets/svgs/btn/edit.svg');
   background-repeat: no-repeat;
   background-position: left center;
 }
+
 .tips {
   color: #6b7b8d;
   margin-left: 15px;
