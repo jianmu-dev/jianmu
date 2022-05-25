@@ -20,9 +20,8 @@
     </jm-form>
     <template #footer>
         <span class="dialog-footer">
-          <jm-button size="small" @click="dialogVisible = false" icon="jm-icon-button-cancel">取消</jm-button>
-          <jm-button size="small" type="primary" @click="create" :loading="loading"
-                     icon="jm-icon-button-preserve">确定</jm-button>
+          <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
+          <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
         </span>
     </template>
   </jm-dialog>

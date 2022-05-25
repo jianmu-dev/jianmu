@@ -23,7 +23,7 @@
         prop="isShow"
         class="is-show"
       >
-        <jm-switch v-model="editorForm.isShow" active-color="#096DD9" />
+        <jm-switch v-model="editorForm.isShow" active-color="#096DD9"/>
       </jm-form-item>
       <jm-form-item label="描述" label-position="top" prop="description">
         <jm-input
@@ -43,16 +43,14 @@
         <jm-button
           size="small"
           @click="dialogVisible = false"
-          icon="jm-icon-button-cancel"
-          >取消</jm-button
+        >取消</jm-button
         >
         <jm-button
           size="small"
           type="primary"
           @click="save"
           :loading="loading"
-          icon="jm-icon-button-preserve"
-          >保存</jm-button
+        >保存</jm-button
         >
       </span>
     </template>
@@ -69,6 +67,7 @@ import {
 } from 'vue';
 import { IProjectGroupEditFrom } from '@/model/modules/project-group';
 import { editProjectGroup } from '@/api/project-group';
+
 export default defineComponent({
   emits: ['completed'],
   props: {
@@ -148,12 +147,14 @@ export default defineComponent({
     margin-top: -10px;
   }
 }
+
 .editor-title {
   padding-left: 36px;
   background-image: url('@/assets/svgs/btn/edit.svg');
   background-repeat: no-repeat;
   background-position: left center;
 }
+
 .tips {
   color: #6b7b8d;
   margin-left: 15px;
