@@ -69,7 +69,7 @@ export class WorkflowNodeToolbar {
     this.node = node;
 
     // 显示连接桩
-    showPorts(this.graph, this.node, true);
+    showPorts(this.graph, this.node, false);
 
     this.move();
   }
