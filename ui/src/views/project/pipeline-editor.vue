@@ -36,6 +36,7 @@ export default defineComponent({
     const workflow = ref<IWorkflow>({
       name: '未命名项目',
       groupId: '1',
+      description: '',
       global: {
         concurrent: false,
       },
@@ -73,10 +74,11 @@ export default defineComponent({
           loaded.value = true;
           const { dslText, projectGroupId } = await fetchProjectDetail(props.id as string);
           const rawData = yaml.parse(dslText)['raw-data'];
-          const { name, global } = yaml.parse(dslText);
+          const { name, global, description } = yaml.parse(dslText);
           workflow.value = {
             name,
             groupId: projectGroupId,
+            description,
             global: {
               concurrent: global ? global.concurrent : false,
             },

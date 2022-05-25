@@ -150,10 +150,11 @@ export default defineComponent({
         .then(async ({ dslText, projectGroupId }) => {
           if (checkDsl(dslText)) {
             const rawData = yaml.parse(dslText)['raw-data'];
-            const { name, global } = yaml.parse(dslText);
+            const { name, global, description } = yaml.parse(dslText);
             const payload = {
               name,
               groupId: projectGroupId,
+              description,
               global: {
                 concurrent: global ? global.concurrent : false,
               },
