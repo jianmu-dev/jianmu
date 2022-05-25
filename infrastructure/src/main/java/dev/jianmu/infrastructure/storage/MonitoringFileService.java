@@ -71,9 +71,10 @@ public class MonitoringFileService implements DisposableBean {
                     log.trace("monitor - key is no longer valid: " + key);
                     keyPathMap.remove(key);
                 }
-            } catch (Exception ex) {
-                log.warn("MonitoringFileService:", ex);
+            } catch (ClosedWatchServiceException ex) {
                 log.trace("");
+            } catch (Exception ex) {
+                log.trace("MonitoringFileService:", ex);
             }
         }
     }

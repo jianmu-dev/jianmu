@@ -2,7 +2,6 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.TaskInstanceAcceptingDto;
 import dev.jianmu.api.dto.TaskInstanceUpdatingDto;
-import dev.jianmu.api.dto.TaskInstanceWritingLogDto;
 import dev.jianmu.api.dto.WorkerJoiningDto;
 import dev.jianmu.api.vo.WorkerTaskVo;
 import dev.jianmu.infrastructure.docker.ContainerSpec;
@@ -17,7 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * @author Ethan Liu
@@ -60,17 +62,24 @@ public class WorkerController {
     })
     public DeferredResult<ResponseEntity<?>> pullTasks(@PathVariable String workerId) {
         var deferredResult = new DeferredResult<ResponseEntity<?>>(1000L * 10, null);
+        var env = new HashMap<String, String>();
+        env.put("JM_SHARE_DIR", "triggerId");
+        try {
+            Thread.sleep(1000L * 10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         deferredResult.setResult(ResponseEntity
                 .status(HttpStatus.OK)
                 .body(WorkerTaskVo.builder()
                         .type(WorkerTaskVo.Type.TASK)
-                        .taskInstanceId("1")
+                        .taskInstanceId("test1")
                         .pullStrategy(null)
                         .containerSpec(ContainerSpec.builder()
                                 .image("alpine:3.13.6")
                                 .working_dir("triggerId")
-                                .environment(new String[]{"JM_SHARE_DIR=triggerId"})
-                                .entrypoint(new String[]{"sh"})
+                                .environment(env)
+                                .entrypoint(new String[]{"/bin/sh"})
                                 .args(new String[]{"echo 1"})
                                 .build())
                         .resultFile("usr/local/result")
@@ -131,7 +140,16 @@ public class WorkerController {
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
-    public void writeTaskLog(@PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId, @Valid @RequestBody TaskInstanceWritingLogDto dto) {
-//        this.workerApplication.writeTaskLog(workerId, taskInstanceId, dto.getContent(), dto.getNumber(), dto.getTimestamp());
+    public void writeTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId,
+                             @PathVariable("taskInstanceId") String taskInstanceId) {
+        try {
+            var reader = request.getReader();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

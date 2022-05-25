@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 /**
  * @class ContainerSpec
  * @description 容器规格定义
@@ -17,14 +19,15 @@ public class ContainerSpec {
     private String image;
     private String network;
     private String[] networks;
-    private String[] labels;
+    private Map<String, String> labels;
     private String working_dir;
     private String user;
     private String host;
     private String sock;
-    private String[] environment;
+    private Map<String, String> environment;
     private String[] secrets;
     private String[] entrypoint;
+    // command
     private String[] args;
     private String[] volume_mounts;
     private Boolean privileged;
