@@ -151,12 +151,11 @@ export class WorkflowGraph {
               const data = new CustomX6NodeProxy(node).getData();
               if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(data.getType())) {
                 // 触发器节点只能出，不能入
-              } else {
-                showPorts(this.graph, node, isChangingTarget);
+                return !!targetMagnet;
               }
-            } else {
-              showPorts(this.graph, node, isChangingTarget);
             }
+
+            showPorts(this.graph, node, isChangingTarget);
           }
 
           return !!targetMagnet;
