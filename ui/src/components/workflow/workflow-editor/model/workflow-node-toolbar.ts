@@ -6,6 +6,7 @@ import { NodeTypeEnum } from './data/enumeration';
 import { NODE, PORT } from '../shape/gengral-config';
 
 const { toolbarDistance, icon: { width: iconW, marginBottom: iconMarginBottom }, textMaxHeight } = NODE;
+const { fill: circleBgColor } = PORT;
 
 export class WorkflowNodeToolbar {
   private readonly proxy: any;
@@ -193,6 +194,7 @@ export class WorkflowNodeToolbar {
             r: PORT.r,
             // 连接桩在连线交互时可以被连接
             magnet: true,
+            fill: circleBgColor._default,
           },
         },
       });
@@ -213,6 +215,16 @@ export class WorkflowNodeToolbar {
     currentNode.getPorts().forEach(port => {
       const portId = port.id!;
       if (portId === visiblePortId) {
+        currentNode.portProp(portId, {
+          attrs: {
+            circle: {
+              r: PORT.r,
+              // 连接桩在连线交互时可以被连接
+              magnet: true,
+              fill: circleBgColor.connectingSource,
+            },
+          },
+        });
         return;
       }
 
@@ -222,6 +234,7 @@ export class WorkflowNodeToolbar {
             r: 0,
             // 连接桩在连线交互时不可被连接
             magnet: false,
+            fill: circleBgColor._default,
           },
         },
       });

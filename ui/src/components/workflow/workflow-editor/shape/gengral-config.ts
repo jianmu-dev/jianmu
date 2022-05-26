@@ -25,6 +25,7 @@ export const PORT = {
     connectingSource: '#A7B0BB',
     connectingTarget: PRIMARY_COLOR,
   },
+  stroke: '#A7B0BB',
   r: 5,
 };
 
@@ -37,7 +38,7 @@ export const PORTS = {
           r: 0,
           // 连接桩在连线交互时不可被连接
           magnet: false,
-          stroke: '#A7B0BB',
+          stroke: PORT.stroke,
           'stroke-width': 1,
           fill: PORT.fill._default,
         },
@@ -50,7 +51,7 @@ export const PORTS = {
           r: 0,
           // 连接桩在连线交互时不可被连接
           magnet: false,
-          stroke: '#A7B0BB',
+          stroke: PORT.stroke,
           'stroke-width': 1,
           fill: PORT.fill._default,
         },
@@ -63,7 +64,7 @@ export const PORTS = {
           r: 0,
           // 连接桩在连线交互时不可被连接
           magnet: false,
-          stroke: '#A7B0BB',
+          stroke: PORT.stroke,
           'stroke-width': 1,
           fill: PORT.fill._default,
         },
@@ -76,7 +77,7 @@ export const PORTS = {
           r: 0,
           // 连接桩在连线交互时不可被连接
           magnet: false,
-          stroke: '#A7B0BB',
+          stroke: PORT.stroke,
           'stroke-width': 1,
           fill: PORT.fill._default,
         },

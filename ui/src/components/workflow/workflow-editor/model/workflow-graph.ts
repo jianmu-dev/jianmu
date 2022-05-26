@@ -74,11 +74,7 @@ export class WorkflowGraph {
         connectionPoint: 'anchor',
         // 禁止在相同的起始节点和终止之间创建多条边
         allowMulti: false,
-        allowBlank: ({ sourcePort }) => {
-          const sourceMagnet = Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-port-body'))
-            .find(port => sourcePort === port.getAttribute('port'))!;
-          sourceMagnet.setAttribute('fill', circleBgColor._default);
-
+        allowBlank: () => {
           // 隐藏所有连接桩
           this.hideAllPorts();
 
@@ -131,8 +127,7 @@ export class WorkflowGraph {
         validateConnection({ targetMagnet }) {
           return !!targetMagnet;
         },
-        validateMagnet: ({ e, magnet, view, cell }) => {
-          magnet.setAttribute('fill', circleBgColor.connectingSource);
+        validateMagnet: ({ magnet, cell }) => {
           // 隐藏节点工具栏，但显示连接桩
           this.workflowNodeToolbar.hide(magnet.getAttribute('port')!);
           // 显示可连接的连接桩
@@ -344,6 +339,7 @@ export class WorkflowGraph {
                 r: PORT.r,
                 // 连接桩在连线交互时可以被连接
                 magnet: true,
+                fill: circleBgColor._default,
               },
             },
           });
@@ -363,6 +359,7 @@ export class WorkflowGraph {
               r: 0,
               // 连接桩在连线交互时不可被连接
               magnet: false,
+              fill: circleBgColor._default,
             },
           },
         })));
