@@ -174,10 +174,10 @@ import { computed, defineComponent, getCurrentInstance, PropType, ref, SetupCont
 import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { IProjectVo } from '@/api/dto/project';
 import { active, del, executeImmediately, synchronize } from '@/api/project';
-import router from '@/router';
 import { datetimeFormatter } from '@/utils/formatter';
 import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   components: { ProjectPreviewDialog, WebhookDrawer },
@@ -205,6 +205,7 @@ export default defineComponent({
   emits: ['running', 'synchronized', 'deleted'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
+    const router=useRouter();
     const isMove = computed<boolean>(() => props.move);
     const isMoveMode = computed<boolean>(() => props.moveMode);
     const executing = ref<boolean>(false);
