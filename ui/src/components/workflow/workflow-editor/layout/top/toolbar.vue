@@ -81,8 +81,8 @@ export default defineComponent({
         if (targetData.cells.length === 0) {
           delete targetData.cells;
         }
+        workflowTool.slimGraphData(originData);
         workflowTool.slimGraphData(targetData);
-
         if (workflowBackUp.name !== workflowForm.value.name ||
           workflowBackUp.description !== workflowForm.value.description ||
           workflowBackUp.groupId !== workflowForm.value.groupId ||
