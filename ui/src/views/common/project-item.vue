@@ -310,7 +310,6 @@ export default defineComponent({
         });
       },
       edit: (id: string) => {
-        console.log(router);
         router.push({ name: 'update-project', params: { id } });
       },
       sync: (id: string) => {
