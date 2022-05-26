@@ -3,7 +3,7 @@ import { Cell, CellView, Edge, Graph, JQuery } from '@antv/x6';
 import listen from 'good-listener';
 import edgeRemoveIcon from '../svgs/edge-remove.svg';
 import edgeRemoveHoverIcon from '../svgs/edge-remove-hover.svg';
-import { EDGE } from '../shape/gengral-config';
+import { EDGE, PORT } from '../shape/gengral-config';
 
 const { stroke: lineColor } = EDGE;
 const EDGE_REMOVE_ICON_CLASS = 'jm-workflow-editor-edge-remove-icon';
@@ -135,6 +135,30 @@ export class WorkflowEdgeToolbar {
           },
         },
       },
+      {
+        // source箭头
+        name: 'source-arrowhead',
+        args: {
+          tagName: 'circle',
+          attrs: {
+            stroke: lineColor.hover,
+            'stroke-width': 1,
+            r: PORT.r,
+            fill: lineColor.hover,
+          },
+        },
+      },
+      {
+        // target箭头
+        name: 'target-arrowhead',
+        args: {
+          attrs: {
+            d: 'M -11.5 -7 2 0 -11.5 7 Z',
+            'stroke-width': 0,
+            fill: lineColor.hover,
+          },
+        },
+      },
     ]);
   }
 
@@ -149,5 +173,9 @@ export class WorkflowEdgeToolbar {
     this.edge.removeTool('segments');
     // 移除删除按钮
     this.edge.removeTool('button');
+    // 移除source箭头
+    this.edge.removeTool('source-arrowhead');
+    // 移除target箭头
+    this.edge.removeTool('target-arrowhead');
   }
 }
