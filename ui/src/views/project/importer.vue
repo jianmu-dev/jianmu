@@ -25,26 +25,17 @@ import { IGitVo } from '@/api/dto/project';
 import { IGitCloneForm } from '@/model/modules/project';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/session';
-import { useRouter } from 'vue-router';
+import dynamicRender from '@/utils/dynamic-render';
+import LoginVerify from '@/views/login/dialog.vue';
 
 export default defineComponent({
   components: { StepOne, StepTwo },
   setup() {
-    const { proxy } = getCurrentInstance() as any;
+    const { appContext } = getCurrentInstance() as any;
     const store = useStore();
-    const router = useRouter();
     const sessionState = { ...store.state[namespace] };
     if (!sessionState.session) {
-      proxy.$confirm('未登录，操作内容将会丢失。', '尚未登录', {
-        confirmButtonText: '登录',
-        cancelButtonText: '取消',
-        type: 'info',
-      }).then(async () => {
-        await router.push({
-          name: 'login',
-        });
-      }).catch(() => {
-      });
+      dynamicRender(LoginVerify, appContext);
     }
     const step = ref<number>(0);
     const stepTwoData = ref<{
