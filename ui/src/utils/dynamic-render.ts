@@ -29,7 +29,6 @@ export default (
   const vNode = createVNode(component, {
     ...props,
     onVnodeUnmounted: () => {
-      console.log('on vnode unmounted');
       destroy();
     },
   });

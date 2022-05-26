@@ -25,7 +25,6 @@ export default defineComponent({
   },
   setup(props) {
     const { proxy, appContext } = getCurrentInstance() as any;
-    console.log(getCurrentInstance());
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
