@@ -42,7 +42,7 @@ const router = createRouter({
       // 登录
       name: 'login',
       path: LOGIN_INDEX,
-      component: () => import('@/views/login.vue'),
+      component: () => import('@/views/login/page.vue'),
       props: ({ query: { redirectUrl } }: RouteLocationNormalizedLoaded) => ({ redirectUrl }),
     },
     // platform模块
