@@ -69,13 +69,15 @@ import { useStore } from 'vuex';
 import { IRootState } from '@/model';
 import { namespace } from '@/store/modules/session';
 import yaml from 'yaml';
+import dynamicRender from '@/utils/dynamic-render';
+import LoginVerify from '@/views/login/dialog.vue';
 
 export default defineComponent({
   props: {
     id: String,
   },
   setup(props: any) {
-    const { proxy } = getCurrentInstance() as any;
+    const { proxy, appContext } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
     const sessionState = { ...store.state[namespace] };
@@ -110,16 +112,7 @@ export default defineComponent({
     };
     // 没有登录时做的弹框判断
     if (!sessionState.session) {
-      proxy.$confirm('未登录，操作内容将会丢失。', '尚未登录', {
-        confirmButtonText: '登录',
-        cancelButtonText: '取消',
-        type: 'info',
-      }).then(async () => {
-        await router.push({
-          name: 'login',
-        });
-      }).catch(() => {
-      });
+      dynamicRender(LoginVerify, appContext);
     }
     if (route.query.templateId) {
       getProcessTemplate(route.query.templateId as unknown as number)

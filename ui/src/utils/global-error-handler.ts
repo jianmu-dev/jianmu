@@ -1,12 +1,12 @@
-import { ComponentPublicInstance } from 'vue';
+import { ComponentPublicInstance, AppContext } from 'vue';
 import { Router } from 'vue-router';
 import { Store } from 'vuex';
 import { IRootState } from '@/model';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IErrorMessageVo } from '@/api/dto/common';
-import { LOGIN_INDEX } from '@/router/path-def';
-import JmMessageBox from '@/components/notice/message-box';
+import dynamicRender from '@/utils/dynamic-render';
 import { namespace as sessionNs } from '@/store/modules/session';
+import LoginVerify from '@/views/login/dialog.vue';
 
 /**
  * 全局错误处理
@@ -34,26 +34,14 @@ export async function globalErrorHandler(
       case 400:
         proxy.$error((data as IErrorMessageVo).message);
         break;
-      case 401:
+      case 401: {
         // 清理token
         store.commit(`${sessionNs}/mutateDeletion`);
-
-        JmMessageBox.confirm('此操作需要登录, 是否继续？', '尚未登录', {
-          confirmButtonText: '登录',
-          cancelButtonText: '取消',
-          type: 'info',
-        }).then(async () => {
-          await router.push({
-            name: 'login',
-            query: {
-              redirectUrl:
-                router.currentRoute.value.path === LOGIN_INDEX ? undefined :
-                  router.currentRoute.value.fullPath,
-            },
-          });
-        }).catch(() => {
-        });
+        // 动态渲染登录验证弹窗
+        const appContext = instance?.$.appContext as AppContext;
+        dynamicRender(LoginVerify, appContext);
         break;
+      }
       case 404:
       case 500:
         await router.push({ name: 'http-status-error', params: { value: status } });
