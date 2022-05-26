@@ -145,13 +145,14 @@ import {
   ITemplatesCLickData,
   IProcessTemplatesForm,
 } from '@/model/modules/process-template';
-import router from '@/router';
+import { useRouter } from 'vue-router';
 export default defineComponent({
   name: 'process-template',
   props: {
     processTemplatesName: String,
   },
   setup() {
+    const router=useRouter();
     const categoriesList = reactive<ICategoriesVo[]>([]);
     const processTemplatesForm = reactive<IProcessTemplatesForm>({
       processTemplatesName: '',

@@ -3,7 +3,9 @@ import _store from '@/store';
 import { LOGIN_INDEX, PLATFORM_INDEX } from '@/router/path-def';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
-import JmMessageBox from '@/components/notice/message-box';
+import { AppContext } from 'vue';
+import dynamicRender from '@/utils/dynamic-render';
+import LoginVerify from '@/views/login/dialog.vue';
 
 /**
  * 加载业务模块路由
@@ -34,83 +36,71 @@ const loadModuleRoute = (
     },
   } as RouteRecordRaw;
 };
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    {
-      // 登录
-      name: 'login',
-      path: LOGIN_INDEX,
-      component: () => import('@/views/login/page.vue'),
-      props: ({ query: { redirectUrl } }: RouteLocationNormalizedLoaded) => ({ redirectUrl }),
-    },
-    // platform模块
-    loadModuleRoute(PLATFORM_INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
-    // full模块
-    loadModuleRoute('/full', undefined, false, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
-    // error模块
-    loadModuleRoute('/error', undefined, false, import('@/layout/error.vue'), import.meta.globEager('./modules/error.ts')),
-    {
-      // 默认
-      // path匹配规则：按照路由的定义顺序
-      path: '/:catchAll(.*)',
-      redirect: {
-        name: 'http-status-error',
-        params: {
-          value: 404,
+export default (appContext: AppContext) => {
+  const router = createRouter({
+    history: createWebHistory(),
+    routes: [
+      {
+        // 登录
+        name: 'login',
+        path: LOGIN_INDEX,
+        component: () => import('@/views/login/page.vue'),
+        props: ({ query: { redirectUrl } }: RouteLocationNormalizedLoaded) => ({ redirectUrl }),
+      },
+      // platform模块
+      loadModuleRoute(PLATFORM_INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
+      // full模块
+      loadModuleRoute('/full', undefined, false, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
+      // error模块
+      loadModuleRoute('/error', undefined, false, import('@/layout/error.vue'), import.meta.globEager('./modules/error.ts')),
+      {
+        // 默认
+        // path匹配规则：按照路由的定义顺序
+        path: '/:catchAll(.*)',
+        redirect: {
+          name: 'http-status-error',
+          params: {
+            value: 404,
+          },
         },
       },
-    },
-  ],
-});
+    ],
+  });
+  router.beforeEach((to, from, next) => {
+    const lastMatched = to.matched[to.matched.length - 1];
 
-router.beforeEach((to, from, next) => {
-  const lastMatched = to.matched[to.matched.length - 1];
+    if (lastMatched.meta.title) {
+      document.title = `建木CI - ${lastMatched.meta.title}`;
+    } else {
+      document.title = '建木CI';
+    }
 
-  if (lastMatched.meta.title) {
-    document.title = `建木CI - ${lastMatched.meta.title}`;
-  } else {
-    document.title = '建木CI';
-  }
+    const store = _store as any;
+    store.commit('mutateFromRoute', { to, from });
+    const { session } = store.state[sessionNs] as ISessionState;
 
-  const store = _store as any;
-  store.commit('mutateFromRoute', { to, from });
-  const { session } = store.state[sessionNs] as ISessionState;
+    for (const m of to.matched) {
+      if (m.meta.auth && !session) {
+        // 处理认证
+        next(false);
 
-  for (const m of to.matched) {
-    if (m.meta.auth && !session) {
-      // 处理认证
-      next(false);
-
-      if (from.matched.length === 0) {
-        router.push({
-          name: 'login',
-          query: {
-            redirectUrl: to.path === LOGIN_INDEX ? undefined : to.fullPath,
-          },
-        }).then(() => {
-        });
-      } else {
-        JmMessageBox.confirm('此操作需要登录, 是否继续？', '尚未登录', {
-          confirmButtonText: '登录',
-          cancelButtonText: '取消',
-          type: 'info',
-        }).then(async () => {
-          await router.push({
+        if (from.matched.length === 0) {
+          router.push({
             name: 'login',
             query: {
               redirectUrl: to.path === LOGIN_INDEX ? undefined : to.fullPath,
             },
+          }).then(() => {
           });
-        }).catch(() => {
-        });
+        } else {
+          // 登录弹框
+          dynamicRender(LoginVerify, appContext);
+        }
+        return;
       }
-      return;
     }
-  }
 
-  next();
-});
-
-export default router;
+    next();
+  });
+  return router;
+};
