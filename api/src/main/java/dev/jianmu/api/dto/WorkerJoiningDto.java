@@ -7,9 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 /**
  * @author Daihw
  * @class WorkerJoiningDto
@@ -22,10 +19,8 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Schema(description = "Worker连接Dto")
 public class WorkerJoiningDto {
-    @NotNull(message = "参数type不能为空")
     @Schema(required = true, description = "type")
-    private Worker.Type type;
-    @NotBlank(message = "参数name不能为空")
+    private Worker.Type type = Worker.Type.DOCKER;
     @Schema(required = true, description = "name")
     private String name;
 }
