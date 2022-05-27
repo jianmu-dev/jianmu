@@ -1,6 +1,6 @@
 package dev.jianmu.api.interceptor;
 
-import dev.jianmu.infrastructure.worker.WorkerProperties;
+import dev.jianmu.infrastructure.GlobalProperties;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,16 +17,16 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Component
 public class WorkerInterceptor implements HandlerInterceptor {
-    private final WorkerProperties workerProperties;
+    private final GlobalProperties globalProperties;
 
-    public WorkerInterceptor(WorkerProperties workerProperties) {
-        this.workerProperties = workerProperties;
+    public WorkerInterceptor(GlobalProperties globalProperties) {
+        this.globalProperties = globalProperties;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String token = request.getHeader("X-Jianmu-Token");
-        if (StringUtils.hasText(token) && token.equals(this.workerProperties.getSecret())) {
+        if (StringUtils.hasText(token) && token.equals(this.globalProperties.getWorker().getRpcSecret())) {
             return true;
         }
         response.setStatus(HttpStatus.SC_FORBIDDEN);
