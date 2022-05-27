@@ -1,6 +1,6 @@
 import { ComponentPublicInstance, createApp } from 'vue';
 import App from './app.vue';
-import router from './router';
+import createRouter from './router';
 import components from './components';
 // 设置全局样式
 import './global.less';
@@ -12,8 +12,9 @@ import './utils/baidu-tongji.ts';
 
 // 打印环境变量，用于调试
 console.debug(import.meta.env);
-
 const app = createApp(App);
+// 创建路由
+const router = createRouter(app._context);
 // 全局注册公共组件
 app.use(components);
 // 注册路由器

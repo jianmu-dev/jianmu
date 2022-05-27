@@ -114,6 +114,12 @@ export class WorkflowTool {
     cells.forEach(cell => {
       // 移除所有工具
       delete cell.tools;
+      if (cell.shape === 'edge') {
+        return;
+      }
+      cell.ports.items.forEach((item: any) => {
+        delete item.attrs.circle.fill;
+      });
     });
   }
 

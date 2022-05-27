@@ -14,6 +14,8 @@ import { fetchProjectDetail } from '@/api/view-no-auth';
 import yaml from 'yaml';
 import { namespace } from '@/store/modules/session';
 import { useStore } from 'vuex';
+import dynamicRender from '@/utils/dynamic-render';
+import LoginVerify from '@/views/login/dialog.vue';
 
 export default defineComponent({
   props: {
@@ -22,7 +24,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { proxy } = getCurrentInstance() as any;
+    const { proxy, appContext } = getCurrentInstance() as any;
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
@@ -36,6 +38,7 @@ export default defineComponent({
     const workflow = ref<IWorkflow>({
       name: '未命名项目',
       groupId: '1',
+      description: '',
       global: {
         concurrent: false,
       },
@@ -46,16 +49,7 @@ export default defineComponent({
       if (sessionState.session) {
         return;
       }
-      proxy.$confirm('未登录，操作内容将会丢失。', '尚未登录', {
-        confirmButtonText: '登录',
-        cancelButtonText: '取消',
-        type: 'info',
-      }).then(async () => {
-        await router.push({
-          name: 'login',
-        });
-      }).catch(() => {
-      });
+      dynamicRender(LoginVerify, appContext);
     };
     onMounted(async () => {
       // 如果路由中带有workflow的回显数据不在发送请求
@@ -73,10 +67,11 @@ export default defineComponent({
           loaded.value = true;
           const { dslText, projectGroupId } = await fetchProjectDetail(props.id as string);
           const rawData = yaml.parse(dslText)['raw-data'];
-          const { name, global } = yaml.parse(dslText);
+          const { name, global, description } = yaml.parse(dslText);
           workflow.value = {
             name,
             groupId: projectGroupId,
+            description,
             global: {
               concurrent: global ? global.concurrent : false,
             },

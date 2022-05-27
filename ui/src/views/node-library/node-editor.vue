@@ -27,9 +27,8 @@
     <div>注意事项：ref为xxx/xxx或xxx时，统一处理成local/xxx，在流程或管道dsl中以local/xxx:xxx方式引用。</div>
     <template #footer>
         <span class="dialog-footer">
-          <jm-button size="small" @click="dialogVisible = false" icon="jm-icon-button-cancel">取消</jm-button>
-          <jm-button size="small" type="primary" @click="create" :loading="loading"
-                     icon="jm-icon-button-preserve">确定</jm-button>
+          <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
+          <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
         </span>
     </template>
   </jm-dialog>

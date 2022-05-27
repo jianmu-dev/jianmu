@@ -3,7 +3,7 @@
     <div class="icon">
       <div class="img" :style="`background-image: url('${iconUrl}');`"></div>
     </div>
-    <jm-text-viewer :value="nameVal" class="name"/>
+    <jm-text-viewer :value="nameVal" class="name" tip-placement="bottom"/>
   </div>
 </template>
 

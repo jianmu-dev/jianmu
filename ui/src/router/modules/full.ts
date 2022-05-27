@@ -32,4 +32,8 @@ export default [
       title: '执行记录',
     },
   },
+  {
+    path: 'example',
+    component: () => import('@/views/project/example.vue'),
+  },
 ] as RouteRecordRaw[];

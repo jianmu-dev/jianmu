@@ -2,7 +2,7 @@ import { Cell, Edge, Graph, Node, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
 import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
-import { WorkflowNodeToolbar } from './workflow-node-toolbar';
+import { showPort, showPorts, WorkflowNodeToolbar } from './workflow-node-toolbar';
 import { EDGE, NODE, PORT, PORTS } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
@@ -70,15 +70,12 @@ export class WorkflowGraph {
       // 不绘制网格背景
       grid: false,
       connecting: {
+        // 通过高亮+允许多边机制，实现修改边的起点或终点时，确定可连接的连接桩
+        highlight: true,
+        allowMulti: true,
         anchor: 'center',
         connectionPoint: 'anchor',
-        // 禁止在相同的起始节点和终止之间创建多条边
-        allowMulti: false,
-        allowBlank: ({ sourcePort }) => {
-          const sourceMagnet = Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-port-body'))
-            .find(port => sourcePort === port.getAttribute('port'))!;
-          sourceMagnet.setAttribute('fill', circleBgColor._default);
-
+        allowBlank: () => {
           // 隐藏所有连接桩
           this.hideAllPorts();
 
@@ -128,11 +125,42 @@ export class WorkflowGraph {
 
           return true;
         },
-        validateConnection({ targetMagnet }) {
+        validateConnection: ({
+          type, edge, targetMagnet,
+          sourceCell, targetCell,
+          sourcePort, targetPort,
+        }) => {
+          const originalSourceNode = edge?.getSourceNode();
+          const originalTargetNode = edge?.getTargetNode();
+          if (!edge || !originalSourceNode || !originalTargetNode) {
+            return !!targetMagnet;
+          }
+
+          // 表示修改边
+          const sourceNode = sourceCell as Node;
+          const targetNode = targetCell as Node;
+          const isChangingTarget = type === 'target';
+
+          const originalNode = isChangingTarget ? originalTargetNode : originalSourceNode;
+          const node = isChangingTarget ? targetNode : sourceNode;
+          // 通过业务校验实现禁止在相同的起始节点和终止之间创建多条边
+          if (originalNode === node) {
+            showPort(node, (isChangingTarget ? targetPort : sourcePort)!);
+          } else {
+            if (isChangingTarget) {
+              const data = new CustomX6NodeProxy(node).getData();
+              if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(data.getType())) {
+                // 触发器节点只能出，不能入
+                return !!targetMagnet;
+              }
+            }
+
+            showPorts(this.graph, node, isChangingTarget);
+          }
+
           return !!targetMagnet;
         },
-        validateMagnet: ({ e, magnet, view, cell }) => {
-          magnet.setAttribute('fill', circleBgColor.connectingSource);
+        validateMagnet: ({ magnet, cell }) => {
           // 隐藏节点工具栏，但显示连接桩
           this.workflowNodeToolbar.hide(magnet.getAttribute('port')!);
           // 显示可连接的连接桩
@@ -344,6 +372,7 @@ export class WorkflowGraph {
                 r: PORT.r,
                 // 连接桩在连线交互时可以被连接
                 magnet: true,
+                fill: circleBgColor._default,
               },
             },
           });
@@ -363,6 +392,7 @@ export class WorkflowGraph {
               r: 0,
               // 连接桩在连线交互时不可被连接
               magnet: false,
+              fill: circleBgColor._default,
             },
           },
         })));
