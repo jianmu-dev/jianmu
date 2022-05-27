@@ -26,7 +26,7 @@ public class WorkerInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String token = request.getHeader("X-Jianmu-Token");
-        if (StringUtils.hasText(token) && token.equals(this.globalProperties.getWorker().getRpcSecret())) {
+        if (StringUtils.hasText(token) && token.equals(this.globalProperties.getWorker().getSecret())) {
             return true;
         }
         response.setStatus(HttpStatus.SC_FORBIDDEN);
