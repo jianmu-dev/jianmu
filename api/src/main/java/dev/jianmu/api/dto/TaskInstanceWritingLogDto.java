@@ -1,5 +1,7 @@
 package dev.jianmu.api.dto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,15 +23,17 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Schema(description = "写入任务日志Dto")
 public class TaskInstanceWritingLogDto {
-    @NotNull(message = "参数number不能为空")
-    @Schema(required = true, description = "行号")
     private Long number;
-
-    @NotBlank(message = "参数content不能为空")
-    @Schema(required = true, description = "内容")
     private String content;
-
-    @NotNull(message = "参数timestamp不能为空")
-    @Schema(required = true, description = "时间戳")
     private Long timestamp;
+
+    static ObjectMapper objectMapper = new ObjectMapper();
+
+    public static TaskInstanceWritingLogDto parseString(String json) {
+        try {
+            return objectMapper.readValue(json, TaskInstanceWritingLogDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("解析任务日志异常: " + e);
+        }
+    }
 }

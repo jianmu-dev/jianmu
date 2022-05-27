@@ -3,6 +3,9 @@ package dev.jianmu.application.service.internal;
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.exception.DBException;
+import dev.jianmu.task.aggregate.NodeInfo;
+import dev.jianmu.task.aggregate.TaskInstance;
+import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -10,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 /**
  * @author Ethan Liu
@@ -25,8 +30,7 @@ public class AsyncTaskInstanceInternalApplication {
 
     public AsyncTaskInstanceInternalApplication(
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
-            WorkflowInstanceRepository workflowInstanceRepository
-    ) {
+            WorkflowInstanceRepository workflowInstanceRepository) {
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
     }
@@ -120,7 +124,7 @@ public class AsyncTaskInstanceInternalApplication {
 
     // 任务已失败命令
     @Transactional
-    public void stop(String triggerId, String  asyncTaskInstanceId) {
+    public void stop(String triggerId, String asyncTaskInstanceId) {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + triggerId));
         MDC.put("triggerId", workflowInstance.getTriggerId());

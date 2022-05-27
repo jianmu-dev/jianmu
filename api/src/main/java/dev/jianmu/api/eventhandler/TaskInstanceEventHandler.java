@@ -1,16 +1,11 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.api.mapper.TaskResultMapper;
-import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
-import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
-import dev.jianmu.application.service.internal.WorkerApplication;
+import dev.jianmu.application.service.internal.*;
 import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
-import dev.jianmu.task.event.TaskInstanceCreatedEvent;
-import dev.jianmu.task.event.TaskInstanceFailedEvent;
-import dev.jianmu.task.event.TaskInstanceRunningEvent;
-import dev.jianmu.task.event.TaskInstanceSucceedEvent;
+import dev.jianmu.task.event.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -31,15 +26,19 @@ public class TaskInstanceEventHandler {
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
     private final AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication;
     private final WorkerApplication workerApplication;
+    private final WorkerInternalApplication workerInternalApplication;
+    private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
 
     public TaskInstanceEventHandler(
             TaskInstanceInternalApplication taskInstanceInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
-            WorkerApplication workerApplication
-    ) {
+            WorkerApplication workerApplication,
+            WorkerInternalApplication workerInternalApplication, WorkflowInstanceInternalApplication workflowInstanceInternalApplication) {
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
         this.workerApplication = workerApplication;
+        this.workerInternalApplication = workerInternalApplication;
+        this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
     }
 
     @EventListener
@@ -76,7 +75,7 @@ public class TaskInstanceEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTaskInstanceEvent(TaskInstanceCreatedEvent event) {
         // 任务上下文抛出事件通知Worker
-        this.workerApplication.dispatchTask(event, false);
+        this.workerInternalApplication.dispatchTask(event);
         logger.info("Task instance id: {}  ref: {} is running", event.getTaskInstanceId(), event.getAsyncTaskRef());
     }
 
@@ -99,5 +98,12 @@ public class TaskInstanceEventHandler {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceFailedEvent: {}", event);
         this.asyncTaskInstanceInternalApplication.stop(event.getTriggerId(), event.getBusinessId());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handleTaskInstanceDispatchFailedEvent(TaskInstanceDispatchFailedEvent event) {
+        // 任务上下文抛出事件通知流程上下文
+        logger.info("get TaskInstanceDispatchFailedEvent: {}", event);
+        this.workflowInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
     }
 }
