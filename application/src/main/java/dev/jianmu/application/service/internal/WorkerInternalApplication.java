@@ -358,20 +358,20 @@ public class WorkerInternalApplication {
     }
 
     @Transactional
-    public void updateTaskInstance(String workerId, String taskInstanceId, InstanceStatus status, String resultFile, String errorMsg, Integer exitCode) {
+    public void updateTaskInstance(String workerId, String taskInstanceId, String status, String resultFile, String errorMsg, Integer exitCode) {
         switch (status) {
-            case RUNNING:
+            case "RUNNING":
                 this.publisher.publishEvent(TaskRunningEvent.builder()
                         .taskId(taskInstanceId)
                         .build());
                 break;
-            case EXECUTION_FAILED:
+            case "FAILED":
                 this.publisher.publishEvent(TaskFailedEvent.builder()
                         .taskId(taskInstanceId)
                         .errorMsg(errorMsg)
                         .build());
                 break;
-            case EXECUTION_SUCCEEDED:
+            case "SUCCEED":
                 this.publisher.publishEvent(TaskFinishedEvent.builder()
                         .taskId(taskInstanceId)
                         .cmdStatusCode(exitCode)

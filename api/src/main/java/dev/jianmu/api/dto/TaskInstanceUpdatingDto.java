@@ -21,9 +21,15 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Schema(description = "更新任务Dto")
 public class TaskInstanceUpdatingDto {
+    public enum Status{
+        RUNNING,
+        SUCCEED,
+        FAILED
+    }
+
     @NotNull(message = "参数status不能为空")
     @Schema(required = true, description = "任务状态")
-    private InstanceStatus status;
+    private Status status;
 
     @Schema(description = "返回文件")
     private String resultFile;

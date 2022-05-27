@@ -156,7 +156,7 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void updateTaskInstance(@PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId, @Valid @RequestBody TaskInstanceUpdatingDto dto) {
-        this.workerApplication.updateTaskInstance(workerId, taskInstanceId, dto.getStatus(), dto.getResultFile(), dto.getErrorMsg(), dto.getExitCode());
+        this.workerApplication.updateTaskInstance(workerId, taskInstanceId, dto.getStatus().name(), dto.getResultFile(), dto.getErrorMsg(), dto.getExitCode());
     }
 
     @PostMapping("{workerId}/tasks/{taskInstanceId}/logs")
