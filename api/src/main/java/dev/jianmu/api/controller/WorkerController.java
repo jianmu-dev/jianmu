@@ -120,10 +120,34 @@ public class WorkerController {
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
-    public void acceptTask(HttpServletResponse response, @PathVariable("workerId") String workerId,
-                           @PathVariable("taskInstanceId") String taskInstanceId, @Valid @RequestBody TaskInstanceAcceptingDto dto) {
-        var status = this.workerApplication.acceptTask(workerId, taskInstanceId, dto.getVersion());
-        response.setStatus(status);
+    public WorkerTaskVo acceptTask(HttpServletResponse response, @PathVariable("workerId") String workerId,
+                                   @PathVariable("taskInstanceId") String taskInstanceId, @Valid @RequestBody TaskInstanceAcceptingDto dto) {
+        var taskInstance = this.workerApplication.acceptTask(response, workerId, taskInstanceId, dto.getVersion());
+        if (response.getStatus() != HttpStatus.OK.value()) {
+            return WorkerTaskVo.builder()
+                    .taskInstanceId(taskInstanceId)
+                    .build();
+        }
+        if (taskInstance.isVolume()) {
+            return WorkerTaskVo.builder()
+                    .type(WorkerTaskVo.Type.VOLUME)
+                    .taskInstanceId(taskInstance.getId())
+                    .volume(VolumeVo.builder()
+                            .name(taskInstance.getTriggerId())
+                            .type(taskInstance.isCreationVolume() ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
+                            .build())
+                    .version(taskInstance.getVersion() + 1)
+                    .build();
+        } else {
+            return WorkerTaskVo.builder()
+                    .type(WorkerTaskVo.Type.TASK)
+                    .taskInstanceId(taskInstance.getId())
+                    .pullStrategy(null)
+                    .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
+                    .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
+                    .version(taskInstance.getVersion() + 1)
+                    .build();
+        }
     }
 
     @PatchMapping("{workerId}/tasks/{taskInstanceId}")

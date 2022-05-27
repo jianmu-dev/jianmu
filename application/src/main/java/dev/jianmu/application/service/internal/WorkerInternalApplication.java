@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -336,22 +337,24 @@ public class WorkerInternalApplication {
     }
 
     @Transactional
-    public int acceptTask(String workerId, String taskInstanceId, int version) {
+    public TaskInstance acceptTask(HttpServletResponse response, String workerId, String taskInstanceId, int version) {
         var taskInstance = this.taskInstanceRepository.findByIdAndVersion(taskInstanceId, version)
                 .orElse(null);
         if (taskInstance == null) {
-            return HttpStatus.SC_CONFLICT;
+            response.setStatus(HttpStatus.SC_CONFLICT);
+            return null;
         }
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
                 .orElseThrow(() -> new RuntimeException("未找到流程实例"));
         if (!workflowInstance.isRunning()) {
-            return HttpStatus.SC_GONE;
+            response.setStatus(HttpStatus.SC_GONE);
+            return null;
         }
         taskInstance.acceptTask(version);
         if (!this.taskInstanceRepository.acceptTask(taskInstance)) {
-            return HttpStatus.SC_CONFLICT;
+            response.setStatus(HttpStatus.SC_CONFLICT);
         }
-        return HttpStatus.SC_OK;
+        return taskInstance;
     }
 
     @Transactional
