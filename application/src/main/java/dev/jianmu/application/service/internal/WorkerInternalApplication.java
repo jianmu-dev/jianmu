@@ -184,7 +184,7 @@ public class WorkerInternalApplication {
             String[] args = {"echo \"$JIANMU_SCRIPT\" | /bin/sh"};
             newSpec = ContainerSpec.builder()
                     .image(nodeDef.getImage())
-                    .working_dir(taskInstance.getTriggerId())
+                    .working_dir("/" + taskInstance.getTriggerId())
                     .environment(parameterMap)
                     .entrypoint(entrypoint)
                     .args(args)

@@ -106,7 +106,7 @@ public class WorkerController {
         return deferredResult;
     }
 
-    @GetMapping("{workerId}/tasks/{taskInstanceId}")
+    @PostMapping("{workerId}/tasks/{taskInstanceId}")
     @Operation(summary = "获取终止任务接口", description = "获取终止任务接口")
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
