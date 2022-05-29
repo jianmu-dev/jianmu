@@ -80,19 +80,14 @@ export class WorkflowValidator {
   }
 
   private checkTrigger(droppingNode: Node): boolean {
-    const proxy = new CustomX6NodeProxy(droppingNode);
-    const data = proxy.getData();
-
-    if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(data.getType())) {
+    if (!new CustomX6NodeProxy(droppingNode).isTrigger()) {
       // 非trigger时，忽略
       return true;
     }
 
     // 表示当前拖放的节点为trigger
-    const currentTrigger = this.graph.getNodes().find(node => {
-      const proxy = new CustomX6NodeProxy(node);
-      return [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(proxy.getData().getType());
-    });
+    const currentTrigger = this.graph.getNodes()
+      .find(node => new CustomX6NodeProxy(node).isTrigger());
 
     if (currentTrigger) {
       this.proxy.$warning('只能有一个触发器');

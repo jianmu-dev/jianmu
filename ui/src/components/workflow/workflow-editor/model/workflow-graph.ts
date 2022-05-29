@@ -1,7 +1,7 @@
 import { Cell, Edge, Graph, Node, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
-import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
+import { ZoomTypeEnum } from './data/enumeration';
 import { showPort, showPorts, WorkflowNodeToolbar } from './workflow-node-toolbar';
 import { EDGE, NODE, PORT, PORTS } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
@@ -148,8 +148,7 @@ export class WorkflowGraph {
             showPort(currentNode, (isChangingTarget ? targetPort : sourcePort)!);
           } else {
             if (isChangingTarget) {
-              const data = new CustomX6NodeProxy(currentNode).getData();
-              if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(data.getType())) {
+              if (new CustomX6NodeProxy(currentNode).isTrigger()) {
                 // 触发器节点只能出，不能入
                 return !!targetMagnet;
               }
@@ -372,8 +371,7 @@ export class WorkflowGraph {
         });
       })
       // 筛选非触发器节点
-      .filter(node =>
-        ![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(new CustomX6NodeProxy(node).getData().getType()))
+      .filter(node => !new CustomX6NodeProxy(node).isTrigger())
       .forEach(node =>
         node.getPorts().forEach(port => {
           node.portProp(port.id!, {
