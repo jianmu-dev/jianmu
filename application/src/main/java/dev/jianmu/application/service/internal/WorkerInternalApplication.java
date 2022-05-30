@@ -384,6 +384,9 @@ public class WorkerInternalApplication {
     }
 
     public void writeTaskLog(String workerId, String taskInstanceId, String content, Long number, Long timestamp) {
+        if (content == null) {
+            return;
+        }
         try (var logWriter = this.storageService.writeLog(taskInstanceId)) {
             logWriter.write(content);
             logWriter.newLine();
