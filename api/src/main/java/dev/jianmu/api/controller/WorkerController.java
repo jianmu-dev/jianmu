@@ -172,8 +172,10 @@ public class WorkerController {
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
             }
-            var dto = TaskInstanceWritingLogDto.parseString(stringBuilder.toString());
-            this.workerApplication.writeTaskLog(workerId, taskInstanceId, dto.getContent(), dto.getNumber(), dto.getTimestamp());
+            if (!"null".equals(stringBuilder.toString())) {
+                var list = TaskInstanceWritingLogDto.parseString(stringBuilder.toString());
+                list.forEach(dto -> this.workerApplication.writeTaskLog(workerId, taskInstanceId, dto.getContent(), dto.getNumber(), dto.getTimestamp()));
+            }
         } catch (IOException e) {
             throw new RuntimeException("任务日志写入失败： " + e);
         }
