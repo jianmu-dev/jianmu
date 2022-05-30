@@ -198,8 +198,8 @@ public class WorkerInternalApplication {
                 throw new RuntimeException("拉取任务失败");
             }
             newSpec = ContainerSpec.builder()
-                    .image(nodeDef.getImage())
-                    .working_dir(taskInstance.getTriggerId())
+                    .image(spec.getImage())
+                    .working_dir("/" + taskInstance.getTriggerId())
                     .user(spec.getUser())
                     .host(spec.getHostName())
                     .environment(parameterMap)
@@ -344,11 +344,13 @@ public class WorkerInternalApplication {
             response.setStatus(HttpStatus.SC_CONFLICT);
             return null;
         }
-        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
-                .orElseThrow(() -> new RuntimeException("未找到流程实例"));
-        if (!workflowInstance.isRunning()) {
-            response.setStatus(HttpStatus.SC_GONE);
-            return null;
+        if (!taskInstance.isDeletionVolume()) {
+            var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
+                    .orElseThrow(() -> new RuntimeException("未找到流程实例"));
+            if (!workflowInstance.isRunning()) {
+                response.setStatus(HttpStatus.SC_GONE);
+                return null;
+            }
         }
         taskInstance.acceptTask(version);
         if (!this.taskInstanceRepository.acceptTask(taskInstance)) {
@@ -382,6 +384,9 @@ public class WorkerInternalApplication {
     }
 
     public void writeTaskLog(String workerId, String taskInstanceId, String content, Long number, Long timestamp) {
+        if (content == null) {
+            return;
+        }
         try (var logWriter = this.storageService.writeLog(taskInstanceId)) {
             logWriter.write(content);
             logWriter.newLine();
