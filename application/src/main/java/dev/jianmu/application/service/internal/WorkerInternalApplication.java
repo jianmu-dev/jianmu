@@ -389,7 +389,6 @@ public class WorkerInternalApplication {
         }
         try (var logWriter = this.storageService.writeLog(taskInstanceId)) {
             logWriter.write(content);
-            logWriter.newLine();
             logWriter.flush();
         } catch (IOException e) {
             logger.error("任务日志写入失败：", e);
