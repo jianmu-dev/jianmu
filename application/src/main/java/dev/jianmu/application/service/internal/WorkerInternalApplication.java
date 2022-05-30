@@ -174,6 +174,10 @@ public class WorkerInternalApplication {
         var parameterMap = this.getParameterMap(instanceParameters);
         parameterMap.putAll(this.getEnvVariable(taskInstance, worker));
         this.addFeatureParam(parameterMap);
+        parameterMap = parameterMap.entrySet().stream()
+                .filter(entry -> entry.getKey() != null)
+                .map(entry -> Map.entry(entry.getKey(), entry.getValue() == null ? "" : entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         // 创建ContainerSpec
         ContainerSpec newSpec;
@@ -242,7 +246,10 @@ public class WorkerInternalApplication {
         this.handleSecretParameter(parameterMap, secretParameters);
         // 替换实际参数值
         this.parameterDomainService.createParameterMap(parameterMap, parameters);
-        return parameterMap;
+        return parameterMap.entrySet().stream()
+                .filter(entry -> entry.getKey() != null)
+                .map(entry -> Map.entry("JIANMU_" + entry.getKey().toUpperCase(), entry.getValue() == null ? "" : entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private void handleSecretParameter(Map<String, String> parameterMap, List<Parameter> secretParameters) {
