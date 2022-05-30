@@ -129,7 +129,7 @@ public interface TaskInstanceMapper {
             @Param("pageSize") int pageSize
     );
 
-    @Select("select * from task_instance where worker_id = #{workerId} and status = 'WAITING' order by _version limit 1")
+    @Select("select * from task_instance where worker_id = #{workerId} and status = 'WAITING' And _version = 0 limit 1")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
