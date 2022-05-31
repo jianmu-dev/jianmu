@@ -80,14 +80,6 @@ public class MonitoringFileService implements DisposableBean {
         }
     }
 
-    public String getFilePath(String topic) {
-        var path = this.monitoringTaskDirectory.resolve(topic);
-        if (!path.toFile().exists()) {
-            path = this.monitoringWorkflowDirectory.resolve(topic);
-        }
-        return path.toFile().getPath();
-    }
-
     public void clearTaskCallback(String topic) {
         this.callbackMap.remove(topic);
     }

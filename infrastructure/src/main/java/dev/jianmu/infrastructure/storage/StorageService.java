@@ -16,9 +16,9 @@ public interface StorageService {
 
     BufferedWriter writeLog(String LogFileName);
 
-    SseEmitter readLog(String logFileName, int size);
+    SseEmitter readLog(String logFileName, int size, boolean isTask);
 
-    SseEmitter randomReadLog(String logFileName, Integer line, Integer size);
+    SseEmitter randomReadLog(String logFileName, Integer line, Integer size, boolean isTask);
 
     File logFile(String LogFileName);
 

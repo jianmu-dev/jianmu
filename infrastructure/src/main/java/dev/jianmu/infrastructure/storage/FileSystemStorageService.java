@@ -76,10 +76,9 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     @Override
-    public SseEmitter readLog(String logFileName, int size) {
-        var fullName = logFileName + LogfilePostfix;
+    public SseEmitter readLog(String logFileName, int size, boolean isTask) {
         var sseEmitter = this.template.newSseEmitter();
-        var consumerVo = this.monitoringFileService.listen(fullName, ((file, counter) -> {
+        var consumerVo = this.monitoringFileService.listen(logFileName, ((file, counter) -> {
             var endLine = this.countFileLines(file.toFile().getPath());
             var cmd = "sed -n '" + counter.intValue() + ", " + endLine + "p' " + file.toFile().getPath();
             try (var reader = this.execCmd(cmd)) {
@@ -93,7 +92,8 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
                 throw new StorageException("Could not read log file", e);
             }
         }));
-        this.firstReadLog(fullName, consumerVo, sseEmitter, size);
+        String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
+        this.firstReadLog(filePath, consumerVo, sseEmitter, size);
         return sseEmitter;
     }
 
@@ -119,8 +119,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         }
     }
 
-    private void firstReadLog(String topic, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
-        var filePath = this.monitoringFileService.getFilePath(topic);
+    private void firstReadLog(String filePath, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
         var endLine = this.countFileLines(filePath);
         var startLine = endLine > size ? endLine - size : 1;
         var cmd = "sed -n '" + startLine + ", " + (endLine - 1) + "p' " + filePath;
@@ -138,8 +137,8 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     @Override
-    public SseEmitter randomReadLog(String logFileName, Integer line, Integer size) {
-        var filePath = this.monitoringFileService.getFilePath(logFileName + LogfilePostfix);
+    public SseEmitter randomReadLog(String logFileName, Integer line, Integer size, boolean isTask) {
+        var filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
         var sseEmitter = this.template.newSseEmitter();
         var cmd = "sed -n '" + line + ", " + (line + size - 1) + "p' " + filePath;
         try (var reader = this.execCmd(cmd)) {
