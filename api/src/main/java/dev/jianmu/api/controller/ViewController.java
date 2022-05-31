@@ -1,6 +1,8 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.dto.LogRandomSubscribingDto;
+import dev.jianmu.api.dto.LogSubscribingDto;
 import dev.jianmu.api.dto.NodeDefViewingDto;
 import dev.jianmu.api.dto.ProjectViewingDto;
 import dev.jianmu.api.mapper.*;
@@ -25,6 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -346,8 +350,33 @@ public class ViewController {
 
     @GetMapping(path = "/logs/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "日志订阅接口", description = "日志订阅接口,可以使用SSE方式订阅最新日志")
-    public SseEmitter streamSseLog(@PathVariable String logId) {
-        return this.storageService.readLog(logId);
+    public SseEmitter streamSseLog(@PathVariable String logId, @Valid LogSubscribingDto dto) {
+        return this.storageService.readLog(logId, dto.getSize());
+    }
+
+    @GetMapping(path = "/logs/random_subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "日志随机订阅接口", description = "日志随机订阅接口,可以使用SSE方式订阅最新日志")
+    public SseEmitter loadMoreStreamSseLog(@PathVariable String logId, @Valid LogRandomSubscribingDto dto) {
+        return this.storageService.randomReadLog(logId, dto.getLine(), dto.getSize());
+    }
+
+    @GetMapping(path = "/logs/download/{logId}")
+    @Operation(summary = "日志下载接口", description = "日志下载接口")
+    public void downloadFile(HttpServletResponse response, @PathVariable("logId") String logId) {
+        var file = this.storageService.logFile(logId);
+        if (!file.exists()) {
+            file = this.storageService.workflowLogFile(logId);
+        }
+        try (var bis = new BufferedInputStream(new FileInputStream(file));
+             var os = response.getOutputStream()) {
+            byte[] bytes = new byte[1024];
+            int len = -1;
+            while ((len = bis.read(bytes)) != -1) {
+                os.write(bytes, 0, len);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("未找到日志文件");
+        }
     }
 
     @GetMapping("/logs/workflow/{logId}")
