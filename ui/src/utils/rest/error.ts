@@ -4,9 +4,12 @@ import { AxiosResponse } from 'axios';
  * 超时错误
  */
 export class TimeoutError extends Error {
-  constructor(message?: string) {
+  response: AxiosResponse;
+
+  constructor(response: AxiosResponse, message?: string) {
     super(message);
     this.name = 'TimeoutError';
+    this.response = response;
   }
 }
 
