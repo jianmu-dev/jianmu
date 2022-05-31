@@ -1,7 +1,7 @@
 import { Cell, Edge, Graph, Node, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
-import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
+import { ZoomTypeEnum } from './data/enumeration';
 import { showPort, showPorts, WorkflowNodeToolbar } from './workflow-node-toolbar';
 import { EDGE, NODE, PORT, PORTS } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
@@ -126,13 +126,13 @@ export class WorkflowGraph {
           return true;
         },
         validateConnection: ({
-          type, edge, targetMagnet,
+          type, edge: currentEdge, targetMagnet,
           sourceCell, targetCell,
           sourcePort, targetPort,
         }) => {
-          const originalSourceNode = edge?.getSourceNode();
-          const originalTargetNode = edge?.getTargetNode();
-          if (!edge || !originalSourceNode || !originalTargetNode) {
+          const originalSourceNode = currentEdge?.getSourceNode();
+          const originalTargetNode = currentEdge?.getTargetNode();
+          if (!currentEdge || !originalSourceNode || !originalTargetNode) {
             return !!targetMagnet;
           }
 
@@ -142,20 +142,29 @@ export class WorkflowGraph {
           const isChangingTarget = type === 'target';
 
           const originalNode = isChangingTarget ? originalTargetNode : originalSourceNode;
-          const node = isChangingTarget ? targetNode : sourceNode;
+          const currentNode = isChangingTarget ? targetNode : sourceNode;
           // 通过业务校验实现禁止在相同的起始节点和终止之间创建多条边
-          if (originalNode === node) {
-            showPort(node, (isChangingTarget ? targetPort : sourcePort)!);
+          if (originalNode === currentNode) {
+            showPort(currentNode, (isChangingTarget ? targetPort : sourcePort)!);
           } else {
             if (isChangingTarget) {
-              const data = new CustomX6NodeProxy(node).getData();
-              if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(data.getType())) {
+              if (new CustomX6NodeProxy(currentNode).isTrigger()) {
                 // 触发器节点只能出，不能入
                 return !!targetMagnet;
               }
             }
 
-            showPorts(this.graph, node, isChangingTarget);
+            if (this.getNodesInLine(
+              isChangingTarget ? sourceNode : targetNode,
+              // 过滤当前在修改的边
+              this.graph.getEdges().filter(edge => edge !== currentEdge),
+              !isChangingTarget)
+              .find(node => node === currentNode)) {
+              // 表示当前节点在环路中，不能连
+              return !!targetMagnet;
+            }
+
+            showPorts(this.graph, currentNode, isChangingTarget);
           }
 
           return !!targetMagnet;
@@ -348,7 +357,7 @@ export class WorkflowGraph {
    */
   private showConnectablePorts(currentNode: Node): void {
     const allEdges = this.graph.getEdges();
-    const excludedNodes = this.getNodesInLine(currentNode, allEdges);
+    const excludedNodes = this.getNodesInLine(currentNode, [...allEdges], false);
 
     this.graph.getNodes()
       // 环路检测：排除以当前节点为终点的上游所有节点
@@ -362,8 +371,7 @@ export class WorkflowGraph {
         });
       })
       // 筛选非触发器节点
-      .filter(node =>
-        ![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(new CustomX6NodeProxy(node).getData().getType()))
+      .filter(node => !new CustomX6NodeProxy(node).isTrigger())
       .forEach(node =>
         node.getPorts().forEach(port => {
           node.portProp(port.id!, {
@@ -399,23 +407,25 @@ export class WorkflowGraph {
   }
 
   /**
-   * 获取以当前节点为终点的上游所有节点
-   * @param targetNode
+   * 获取以当前节点为终/起点的上/下游所有节点
+   * @param currentNode
    * @param edges
+   * @param forward true表示下游；false表示上游
    * @private
    */
-  private getNodesInLine(targetNode: Node, edges: Edge[]): Node[] {
-    const nodes: Node[] = [targetNode];
+  private getNodesInLine(currentNode: Node, edges: Edge[], forward: boolean): Node[] {
+    const nodes: Node[] = [currentNode];
 
-    const targetNodePortsIds = targetNode.getPorts().map(metadata => metadata.id);
-    const edge = edges.find(edge => {
-      const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
+    const targetNodePortsIds = currentNode.getPorts().map(metadata => metadata.id);
+    const index = edges.findIndex(edge => {
+      const { port: targetPortId } = (forward ? edge.getSource() : edge.getTarget()) as Edge.TerminalCellData;
 
       return targetNodePortsIds.includes(targetPortId);
     });
 
-    if (edge) {
-      nodes.push(...this.getNodesInLine(edge.getSourceNode()!, edges));
+    if (index >= 0) {
+      const edge = edges.splice(index, 1)[0];
+      nodes.push(...this.getNodesInLine((forward ? edge.getTargetNode() : edge.getSourceNode())!, edges, forward));
     }
 
     return nodes;

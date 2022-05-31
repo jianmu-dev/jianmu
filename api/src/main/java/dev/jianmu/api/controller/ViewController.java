@@ -1,6 +1,8 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.api.dto.LogRandomSubscribingDto;
+import dev.jianmu.api.dto.LogSubscribingDto;
 import dev.jianmu.api.dto.NodeDefViewingDto;
 import dev.jianmu.api.dto.ProjectViewingDto;
 import dev.jianmu.api.mapper.*;
@@ -25,6 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -344,10 +348,62 @@ public class ViewController {
         }
     }
 
-    @GetMapping(path = "/logs/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Operation(summary = "日志订阅接口", description = "日志订阅接口,可以使用SSE方式订阅最新日志")
-    public SseEmitter streamSseLog(@PathVariable String logId) {
-        return this.storageService.readLog(logId);
+    @GetMapping(path = "/logs/task/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "任务日志订阅接口", description = "任务日志订阅接口,可以使用SSE方式订阅最新日志")
+    public SseEmitter streamSseTaskLog(@PathVariable String logId, @Valid LogSubscribingDto dto) {
+        return this.storageService.readLog(logId, dto.getSize(), true);
+    }
+
+    @GetMapping(path = "/logs/workflow/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "流程日志订阅接口", description = "流程日志订阅接口,可以使用SSE方式订阅最新日志")
+    public SseEmitter streamSseWorkflowLog(@PathVariable String logId, @Valid LogSubscribingDto dto) {
+        return this.storageService.readLog(logId, dto.getSize(), false);
+    }
+
+    @GetMapping(path = "/logs/task/random_subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "任务日志随机订阅接口", description = "任务日志随机订阅接口,可以使用SSE方式订阅最新日志")
+    public SseEmitter loadMoreStreamSseTaskLog(@PathVariable String logId, @Valid LogRandomSubscribingDto dto) {
+        return this.storageService.randomReadLog(logId, dto.getLine(), dto.getSize(), true);
+    }
+
+    @GetMapping(path = "/logs/workflow/random_subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "流程日志随机订阅接口", description = "流程日志随机订阅接口,可以使用SSE方式订阅最新日志")
+    public SseEmitter loadMoreStreamSseWorkflowLog(@PathVariable String logId, @Valid LogRandomSubscribingDto dto) {
+        return this.storageService.randomReadLog(logId, dto.getLine(), dto.getSize(), false);
+    }
+
+    @GetMapping(path = "/logs/task/download/{logId}")
+    @Operation(summary = "任务日志下载接口", description = "任务日志下载接口")
+    public void downloadTaskFile(HttpServletResponse response, @PathVariable("logId") String logId) {
+        var file = this.storageService.logFile(logId);
+        try (var bis = new BufferedInputStream(new FileInputStream(file));
+             var os = response.getOutputStream()
+        ) {
+            byte[] bytes = new byte[1024];
+            int len = -1;
+            while ((len = bis.read(bytes)) != -1) {
+                os.write(bytes, 0, len);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("未找到日志文件");
+        }
+    }
+
+    @GetMapping(path = "/logs/workflow/download/{logId}")
+    @Operation(summary = "流程日志下载接口", description = "流程日志下载接口")
+    public void downloadWorkflowFile(HttpServletResponse response, @PathVariable("logId") String logId) {
+        var file = this.storageService.workflowLogFile(logId);
+        try (var bis = new BufferedInputStream(new FileInputStream(file));
+             var os = response.getOutputStream()
+        ) {
+            byte[] bytes = new byte[1024];
+            int len = -1;
+            while ((len = bis.read(bytes)) != -1) {
+                os.write(bytes, 0, len);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("未找到日志文件");
+        }
     }
 
     @GetMapping("/logs/workflow/{logId}")
