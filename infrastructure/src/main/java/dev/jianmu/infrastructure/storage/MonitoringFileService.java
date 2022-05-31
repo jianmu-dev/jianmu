@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +26,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 @Service
 @Slf4j
 public class MonitoringFileService implements DisposableBean {
-    private static Map<WatchKey, Path> keyPathMap = new ConcurrentHashMap<>();
+    private static final Map<WatchKey, Path> keyPathMap = new ConcurrentHashMap<>();
     private final Map<String, CopyOnWriteArrayList<ConsumerVo>> callbackMap = new ConcurrentHashMap<>();
     private WatchService watchService;
     private Path monitoringTaskDirectory;
@@ -45,9 +44,11 @@ public class MonitoringFileService implements DisposableBean {
         executorService.submit(this::monitor);
     }
 
-    public void listen(String topic, String connectionId, BiConsumer<Path, AtomicLong> consumer) {
+    public ConsumerVo listen(String topic, BiConsumer<Path, AtomicLong> consumer) {
         callbackMap.putIfAbsent(topic, new CopyOnWriteArrayList<>());
-        callbackMap.get(topic).add(new ConsumerVo(connectionId, consumer));
+        var consumerVo = new ConsumerVo(consumer);
+        callbackMap.get(topic).add(consumerVo);
+        return consumerVo;
     }
 
     void monitor() {
@@ -79,32 +80,8 @@ public class MonitoringFileService implements DisposableBean {
         }
     }
 
-    public Path getPath(String topic) {
-        var path = this.monitoringTaskDirectory.resolve(topic);
-        if (!path.toFile().exists()) {
-            path = this.monitoringWorkflowDirectory.resolve(topic);
-        }
-        return path;
-    }
-
-    public Optional<ConsumerVo> getConsumerVo(String topic, String connectionId) {
-        return this.callbackMap.get(topic).stream()
-                .filter(consumerVo -> consumerVo.getConnectionId().equals(connectionId))
-                .findFirst();
-    }
-
-    public void removeConsumer(String connectionId) {
-        String topic = connectionId.split("/")[0];
-        var list = this.callbackMap.get(topic);
-        if (list != null) {
-            list.stream()
-                    .filter(consumerVo -> consumerVo.getConnectionId().equals(connectionId))
-                    .findFirst()
-                    .ifPresent(list::remove);
-            if (list.isEmpty()) {
-                this.callbackMap.remove(topic);
-            }
-        }
+    public void clearTaskCallback(String topic) {
+        this.callbackMap.remove(topic);
     }
 
     @Override
