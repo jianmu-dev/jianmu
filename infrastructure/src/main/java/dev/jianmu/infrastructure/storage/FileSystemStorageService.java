@@ -77,8 +77,9 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     @Override
     public SseEmitter readLog(String logFileName, int size, boolean isTask) {
+        var fullName = logFileName + LogfilePostfix;
         var sseEmitter = this.template.newSseEmitter();
-        var consumerVo = this.monitoringFileService.listen(logFileName, ((file, counter) -> {
+        var consumerVo = this.monitoringFileService.listen(fullName, ((file, counter) -> {
             var endLine = this.countFileLines(file.toFile().getPath());
             var cmd = "sed -n '" + counter.intValue() + ", " + endLine + "p' " + file.toFile().getPath();
             try (var reader = this.execCmd(cmd)) {
@@ -92,7 +93,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
                 throw new StorageException("Could not read log file", e);
             }
         }));
-        String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
+        String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + fullName;
         this.firstReadLog(filePath, consumerVo, sseEmitter, size);
         return sseEmitter;
     }
