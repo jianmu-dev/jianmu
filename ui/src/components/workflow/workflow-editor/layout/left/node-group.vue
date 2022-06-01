@@ -256,7 +256,7 @@ export default defineComponent({
     }
 
     .group-name {
-      font-weight: 600;
+      font-weight: 550;
       margin-left: 5px;
     }
 
@@ -276,7 +276,7 @@ export default defineComponent({
   }
 
   .nodes {
-    margin: 24px 0 0 5px;
+    margin: 24px 0 0 0;
 
     .network-anomaly {
       margin-top: 10px;
@@ -307,6 +307,12 @@ export default defineComponent({
     }
 
     .nodes-wrapper {
+      margin-left: 15px;
+
+      .jm-workflow-x6-vue-shape:nth-child(3n) {
+        margin-right: 0;
+      }
+
       // 单独控制最后一行三个节点间距太大的问题
       .jm-workflow-x6-vue-shape:nth-last-child(1) {
         margin-bottom: 0;
@@ -345,7 +351,7 @@ export default defineComponent({
     }
 
     ::v-deep(.jm-workflow-x6-vue-shape) {
-      margin: 0 20px 16px 10px;
+      margin: 0 38px 16px 0;
       width: 64px;
 
       .icon {
