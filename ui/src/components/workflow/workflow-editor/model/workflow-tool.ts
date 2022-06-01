@@ -1,8 +1,8 @@
 import { Cell, Graph } from '@antv/x6';
 import yaml from 'yaml';
-import { NodeTypeEnum, ZoomTypeEnum } from './data/enumeration';
+import { ZoomTypeEnum } from './data/enumeration';
 import { NODE } from '../shape/gengral-config';
-import { IWorkflow, IWorkflowNode } from './data/common';
+import { IWorkflow } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { AsyncTask } from './data/node/async-task';
 
@@ -125,14 +125,14 @@ export class WorkflowTool {
 
   toDsl(workflowData: IWorkflow): string {
     const idArr: string[] = [];
-    const nodeDataArr: IWorkflowNode[] = [];
+    const nodeProxyArr: CustomX6NodeProxy[] = [];
 
     let node = this.graph.getRootNodes()[0];
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       idArr.push(node.id);
-      nodeDataArr.push(new CustomX6NodeProxy(node).getData());
+      nodeProxyArr.push(new CustomX6NodeProxy(node));
 
       const edges = this.graph.getOutgoingEdges(node);
       if (!edges) {
@@ -142,18 +142,19 @@ export class WorkflowTool {
     }
 
     let trigger;
-    if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(nodeDataArr[0].getType())) {
+    if (nodeProxyArr[0].isTrigger()) {
       idArr.splice(0, 1);
-      const nodeData = nodeDataArr.splice(0, 1)[0];
-      trigger = nodeData.toDsl();
+      const nodeProxy = nodeProxyArr.splice(0, 1)[0];
+      trigger = nodeProxy.getData().toDsl();
     }
     const pipeline: {
       [key: string]: object;
     } = {};
 
     const idMap = new Map<string, string>();
-    nodeDataArr.forEach((nodeData, index) => {
+    nodeProxyArr.forEach((nodeProxy, index) => {
       const ref = `node_${index}`;
+      const nodeData = nodeProxy.getData();
 
       if (nodeData instanceof AsyncTask &&
         (nodeData as AsyncTask).outputs.length > 0) {

@@ -8,6 +8,7 @@ import dev.jianmu.api.vo.VolumeVo;
 import dev.jianmu.api.vo.WorkerTaskVo;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.service.internal.WorkerInternalApplication;
+import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.worker.aggregate.Worker;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,11 +39,13 @@ public class WorkerController {
     private final WorkerInternalApplication workerApplication;
     private final DeferredResultService deferredResultService;
     private final NodeDefApi nodeDefApi;
+    private final StorageService storageService;
 
-    public WorkerController(WorkerInternalApplication workerApplication, DeferredResultService deferredResultService, NodeDefApi nodeDefApi) {
+    public WorkerController(WorkerInternalApplication workerApplication, DeferredResultService deferredResultService, NodeDefApi nodeDefApi, StorageService storageService) {
         this.workerApplication = workerApplication;
         this.deferredResultService = deferredResultService;
         this.nodeDefApi = nodeDefApi;
+        this.storageService = storageService;
     }
 
     @GetMapping("/types")
@@ -165,16 +168,26 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void writeTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
-        var stringBuilder = new StringBuilder();
-        try {
+
+    }
+
+    @PostMapping("{workerId}/tasks/{taskInstanceId}/logs/batch")
+    @Operation(summary = "实时写入任务日志接口", description = "实时写入任务日志接口")
+    @Parameters({
+            @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
+    })
+    public void batchWriteTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
+        try (var writer = this.storageService.writeLog(taskInstanceId)) {
             var reader = request.getReader();
             String line;
             while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            if (!"null".equals(stringBuilder.toString())) {
-                var list = TaskInstanceWritingLogDto.parseString(stringBuilder.toString());
-                list.forEach(dto -> this.workerApplication.writeTaskLog(workerId, taskInstanceId, dto.getContent(), dto.getNumber(), dto.getTimestamp()));
+                if ("null".equals(line)) {
+                    continue;
+                }
+                var list = TaskInstanceWritingLogDto.parseString(line);
+                list.stream()
+                        .filter(dto -> dto.getContent() != null)
+                        .forEach(dto -> this.workerApplication.writeTaskLog(writer, workerId, taskInstanceId, dto.getContent(), dto.getNumber(), dto.getTimestamp()));
             }
         } catch (IOException e) {
             throw new RuntimeException("任务日志写入失败： " + e);

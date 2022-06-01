@@ -11,7 +11,7 @@
           :dsl="dsl"
           readonly
           :node-infos="nodeDefs"
-          :trigger-type="TriggerTypeEnum.MANUAL"/>
+          :trigger-type="triggerType"/>
       </div>
     </jm-dialog>
   </div>
@@ -39,6 +39,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const dsl = ref<string>();
     const nodeDefs = ref<INodeDefVo[]>([]);
+    const triggerType = ref<TriggerTypeEnum>();
     const close = () => emit('close');
 
     const loadDsl = async () => {
@@ -49,8 +50,14 @@ export default defineComponent({
       try {
         loading.value = true;
 
-        const { workflowName, workflowRef, workflowVersion } = await fetchProjectDetail(props.projectId);
+        const {
+          workflowName,
+          workflowRef,
+          workflowVersion,
+          triggerType: _triggerType,
+        } = await fetchProjectDetail(props.projectId);
         title.value = workflowName;
+        triggerType.value = _triggerType;
 
         const { nodes, dslText } = await fetchWorkflow(workflowRef, workflowVersion);
         dsl.value = dslText;
@@ -75,6 +82,7 @@ export default defineComponent({
       loading,
       dsl,
       nodeDefs,
+      triggerType,
       close,
     };
   },

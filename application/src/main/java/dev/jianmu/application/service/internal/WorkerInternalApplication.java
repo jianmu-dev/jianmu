@@ -8,13 +8,12 @@ import dev.jianmu.infrastructure.docker.ContainerSpec;
 import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
-import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.infrastructure.worker.DispatchWorker;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
@@ -38,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,9 +45,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * @author Daihw
  * @class WorkerInternalApplication
  * @description WorkerInternalApplication
- * @author Daihw
  * @create 2022/5/27 10:46 上午
  */
 @Slf4j
@@ -69,7 +69,7 @@ public class WorkerInternalApplication {
     private final DeferredResultService deferredResultService;
     private final TaskInstanceRepository taskInstanceRepository;
     private final ObjectMapper objectMapper;
-    private final StorageService storageService;
+    private final MonitoringFileService monitoringFileService;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -81,7 +81,10 @@ public class WorkerInternalApplication {
             InstanceParameterRepository instanceParameterRepository,
             TriggerEventRepository triggerEventRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
-            DeferredResultService deferredResultService, TaskInstanceRepository taskInstanceRepository, ObjectMapper objectMapper, StorageService storageService) {
+            DeferredResultService deferredResultService,
+            TaskInstanceRepository taskInstanceRepository,
+            ObjectMapper objectMapper,
+            MonitoringFileService monitoringFileService) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
@@ -94,7 +97,7 @@ public class WorkerInternalApplication {
         this.deferredResultService = deferredResultService;
         this.taskInstanceRepository = taskInstanceRepository;
         this.objectMapper = objectMapper;
-        this.storageService = storageService;
+        this.monitoringFileService = monitoringFileService;
     }
 
     @Transactional
@@ -380,6 +383,7 @@ public class WorkerInternalApplication {
                         .taskId(taskInstanceId)
                         .errorMsg(errorMsg)
                         .build());
+                this.monitoringFileService.clearTaskCallback(taskInstanceId);
                 break;
             case "SUCCEED":
                 this.publisher.publishEvent(TaskFinishedEvent.builder()
@@ -387,20 +391,22 @@ public class WorkerInternalApplication {
                         .cmdStatusCode(exitCode)
                         .resultFile(resultFile)
                         .build());
+                this.monitoringFileService.clearTaskCallback(taskInstanceId);
                 break;
         }
     }
 
-    public void writeTaskLog(String workerId, String taskInstanceId, String content, Long number, Long timestamp) {
+    public void writeTaskLog(BufferedWriter logWriter, String workerId, String taskInstanceId, String content, Long number, Long timestamp) {
         if (content == null) {
             return;
         }
-        try (var logWriter = this.storageService.writeLog(taskInstanceId)) {
+        try {
             logWriter.write(content);
             logWriter.flush();
         } catch (IOException e) {
             logger.error("任务日志写入失败：", e);
         }
+        this.monitoringFileService.sendLog(taskInstanceId);
     }
 
     public void terminateTask(String workerId, String taskInstanceId) {

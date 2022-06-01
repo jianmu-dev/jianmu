@@ -213,8 +213,7 @@ export class X6Graph extends BaseGraph {
     let tempNode = this.graph.getRootNodes()[0];
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const tempWorkflowNode = new CustomX6NodeProxy(tempNode).getData();
-      if (![NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(tempWorkflowNode.getType())) {
+      if (!new CustomX6NodeProxy(tempNode).isTrigger()) {
         nodes.push(tempNode);
       }
 
@@ -305,8 +304,7 @@ export class X6Graph extends BaseGraph {
     let tempNode = this.graph.getRootNodes()[0];
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const tempWorkflowNode = new CustomX6NodeProxy(tempNode).getData();
-      if ([NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(tempWorkflowNode.getType())) {
+      if (new CustomX6NodeProxy(tempNode).isTrigger()) {
         tempNode = this.graph.getOutgoingEdges(tempNode)![0].getTargetNode()!;
         continue;
       }

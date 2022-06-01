@@ -59,8 +59,11 @@ export default defineComponent({
   ::v-deep(.jm-workflow-editor) {
     .jm-workflow-editor-toolbar {
       .right{
-        .el-button {
+        .operations{
           cursor: not-allowed;
+        }
+        .el-button {
+          pointer-events: none;
 
           &.save-return {
             &:hover {
