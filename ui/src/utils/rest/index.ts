@@ -1,4 +1,4 @@
-import axios, { AxiosTransformer, Method } from 'axios';
+import axios, { AxiosResponse, AxiosTransformer, Method } from 'axios';
 import qs from 'qs';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import _store from '@/store';
@@ -12,7 +12,13 @@ const instance = axios.create({
   // default is `0` (no timeout)
   // timeout: 10 * 1000,
 });
-
+instance.interceptors.request.use(config => {
+  // 发送请求时记录当前的路由地址
+  config.headers.locationHref = window.location.href;
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
 type PayloadType = 'form-data' | 'json' | 'file';
 
 export interface IRequest {
@@ -117,4 +123,13 @@ export default async function rest({
   }
 
   return res.data;
+}
+
+/**
+ * 控制调用接口后，响应出错过程中是否存在页面路由变化
+ * @param res 响应出错时的信息
+ * @return 如果未发生变化返回true
+ */
+export function checkLocation(res: AxiosResponse): boolean {
+  return window.location.href === res.config.headers.locationHref;
 }

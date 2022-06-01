@@ -7,6 +7,7 @@ import { IErrorMessageVo } from '@/api/dto/common';
 import dynamicRender from '@/utils/dynamic-render';
 import { namespace as sessionNs } from '@/store/modules/session';
 import LoginVerify from '@/views/login/dialog.vue';
+import { checkLocation } from '@/utils/rest';
 
 /**
  * 全局错误处理
@@ -22,6 +23,10 @@ export async function globalErrorHandler(
   const proxy = instance as any;
 
   if (error instanceof TimeoutError) {
+    // 如果发送请求时的路由地址发生变化不做路由跳转
+    if (!checkLocation(error.response)) {
+      return;
+    }
     await router.push({ name: 'network-error' });
     return;
   }
@@ -43,9 +48,14 @@ export async function globalErrorHandler(
         break;
       }
       case 404:
-      case 500:
+      case 500: {
+        // 如果发送请求时的路由地址发生变化不做路由跳转
+        if (!checkLocation(error.response)) {
+          break;
+        }
         await router.push({ name: 'http-status-error', params: { value: status } });
         break;
+      }
       // TODO 待扩展，处理其他错误码
     }
     return;

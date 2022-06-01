@@ -10,12 +10,10 @@ import java.util.function.BiConsumer;
 @Getter
 @Setter
 public class ConsumerVo {
-    private String connectionId;
     private BiConsumer<Path, AtomicLong> consumer;
-    private AtomicLong counter = new AtomicLong();
+    private AtomicLong counter = new AtomicLong(1);
 
-    public ConsumerVo(String connectionId, BiConsumer<Path, AtomicLong> consumer) {
-        this.connectionId = connectionId;
+    public ConsumerVo(BiConsumer<Path, AtomicLong> consumer) {
         this.consumer = consumer;
     }
 }

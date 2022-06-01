@@ -16,6 +16,4 @@ import org.springframework.stereotype.Component;
 public class StorageProperties {
     // 文件路径
     private String filepath = "ci";
-    // SSE超时时间，毫秒值
-    private Long sseTimeout = 1000L * 60;
 }

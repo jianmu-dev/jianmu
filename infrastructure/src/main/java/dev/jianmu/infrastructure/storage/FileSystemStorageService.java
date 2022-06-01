@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.storage;
 
 import dev.jianmu.infrastructure.SseTemplate;
+import dev.jianmu.infrastructure.storage.vo.ConsumerVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -14,7 +15,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 /**
  * @author Ethan Liu
@@ -32,7 +32,6 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     private static final String webhookFilepath = "webhook";
     // For SSE
     private final SseTemplate template;
-    private final Long sseTimeout;
     private final MonitoringFileService monitoringFileService;
     private final Path rootLocation;
     private final Path webhookRootLocation;
@@ -40,7 +39,6 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     public FileSystemStorageService(SseTemplate template, MonitoringFileService monitoringFileService, StorageProperties properties) {
         this.template = template;
-        this.sseTimeout = properties.getSseTimeout();
         this.monitoringFileService = monitoringFileService;
         this.rootLocation = Paths.get(properties.getFilepath(), taskFilepath);
         this.webhookRootLocation = Paths.get(properties.getFilepath(), webhookFilepath);
@@ -78,36 +76,82 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     @Override
-    public SseEmitter readLog(String logFileName) {
-        var fullName = logFileName + LogfilePostfix;
-        String connectionId = String.join("/", fullName, UUID.randomUUID().toString().replace("-", ""));
-        this.monitoringFileService.listen(fullName, connectionId, ((file, counter) -> {
-            try (var stream = Files.lines(file)) {
-                stream.skip(counter.get())
-                        .forEach(line -> this.template.broadcast(connectionId, SseEmitter.event()
-                                .id(String.valueOf(counter.incrementAndGet()))
-                                .data(line)));
+    public SseEmitter readLog(String logFileName, int size, boolean isTask) {
+        var sseEmitter = this.template.newSseEmitter();
+        var consumerVo = this.monitoringFileService.listen(logFileName, ((file, counter) -> {
+            var endLine = this.countFileLines(file.toFile().getPath());
+            var cmd = "sed -n '" + counter.intValue() + ", " + endLine + "p' " + file.toFile().getPath();
+            try (var reader = this.execCmd(cmd)) {
+                String str;
+                while ((str = reader.readLine()) != null) {
+                    this.template.sendMessage(SseEmitter.event()
+                            .id(String.valueOf(counter.incrementAndGet()))
+                            .data(str), sseEmitter);
+                }
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new StorageException("Could not read log file", e);
             }
         }));
-        var sseEmitter = this.template.newSseEmitter(connectionId, this.sseTimeout);
-        this.firstReadLog(fullName, connectionId);
+        String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
+        this.firstReadLog(filePath, consumerVo, sseEmitter, size);
         return sseEmitter;
     }
 
-    public void firstReadLog(String topic, String connectionId) {
-        var file = this.monitoringFileService.getPath(topic);
-        this.monitoringFileService.getConsumerVo(topic, connectionId).ifPresent(consumerVo -> {
-            try (var stream = Files.lines(file)) {
-                stream.skip(consumerVo.getCounter().get())
-                        .forEach(line -> this.template.broadcast(connectionId, SseEmitter.event()
-                                .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
-                                .data(line)));
-            } catch (IOException e) {
-                e.printStackTrace();
+    private int countFileLines(String filepath) {
+        var cmd = "wc -l " + filepath + " | awk '{print $1}'";
+        try (var reader = this.execCmd(cmd)) {
+            var result = reader.readLine();
+            if (result == null) {
+                throw new StorageException("Could not to get file lines: " + filepath);
             }
-        });
+            return Integer.parseInt(result);
+        } catch (IOException e) {
+            throw new StorageException("Could not to get execution result", e);
+        }
+    }
+
+    private BufferedReader execCmd(String cmd) {
+        try {
+            var process = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", cmd});
+            return new BufferedReader(new InputStreamReader(new BufferedInputStream(process.getInputStream())));
+        } catch (IOException e) {
+            throw new StorageException("Could not execution command", e);
+        }
+    }
+
+    private void firstReadLog(String filePath, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
+        var endLine = this.countFileLines(filePath);
+        var startLine = endLine > size ? endLine - size : 1;
+        var cmd = "sed -n '" + startLine + ", " + (endLine - 1) + "p' " + filePath;
+        try (var reader = this.execCmd(cmd)) {
+            String str;
+            while ((str = reader.readLine()) != null) {
+                this.template.sendMessage(SseEmitter.event()
+                        .id(String.valueOf(startLine++))
+                        .data(str), sseEmitter);
+            }
+            consumerVo.getCounter().set(endLine);
+        } catch (IOException e) {
+            throw new StorageException("Could not read log file", e);
+        }
+    }
+
+    @Override
+    public SseEmitter randomReadLog(String logFileName, Integer line, Integer size, boolean isTask) {
+        var filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
+        var sseEmitter = this.template.newSseEmitter();
+        var cmd = "sed -n '" + line + ", " + (line + size - 1) + "p' " + filePath;
+        try (var reader = this.execCmd(cmd)) {
+            String str;
+            while ((str = reader.readLine()) != null) {
+                sseEmitter.send(SseEmitter.event()
+                        .id(String.valueOf(line++))
+                        .data(str));
+            }
+        } catch (IOException e) {
+            throw new StorageException("Could not read log file", e);
+        }
+        return sseEmitter;
     }
 
     @Override
