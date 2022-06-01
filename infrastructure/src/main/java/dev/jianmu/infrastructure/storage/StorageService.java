@@ -1,9 +1,11 @@
 package dev.jianmu.infrastructure.storage;
 
+import dev.jianmu.infrastructure.storage.vo.LogVo;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.List;
 
 /**
  * @author Ethan Liu
@@ -18,7 +20,7 @@ public interface StorageService {
 
     SseEmitter readLog(String logFileName, int size, boolean isTask);
 
-    SseEmitter randomReadLog(String logFileName, Integer line, Integer size, boolean isTask);
+    List<LogVo> randomReadLog(String logFileName, Integer line, Integer size, boolean isTask);
 
     File logFile(String LogFileName);
 
