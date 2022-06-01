@@ -17,7 +17,7 @@
       direction="rtl"
       destroy-on-close
     >
-      <task-log :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType"/>
+      <task-log :dsl="dslSourceCode" :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType"/>
     </jm-drawer>
     <jm-drawer
       title="查看流程日志"
