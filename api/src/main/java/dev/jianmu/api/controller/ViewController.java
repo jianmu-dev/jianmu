@@ -10,6 +10,7 @@ import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.infrastructure.storage.vo.LogVo;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -360,15 +361,15 @@ public class ViewController {
         return this.storageService.readLog(logId, dto.getSize(), false);
     }
 
-    @GetMapping(path = "/logs/task/random_subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Operation(summary = "任务日志随机订阅接口", description = "任务日志随机订阅接口,可以使用SSE方式订阅最新日志")
-    public SseEmitter loadMoreStreamSseTaskLog(@PathVariable String logId, @Valid LogRandomSubscribingDto dto) {
+    @GetMapping(path = "/logs/task/random/{logId}")
+    @Operation(summary = "任务日志随机获取接口", description = "任务日志随机获取接口")
+    public List<LogVo> loadMoreTaskLog(@PathVariable String logId, @Valid LogRandomSubscribingDto dto) {
         return this.storageService.randomReadLog(logId, dto.getLine(), dto.getSize(), true);
     }
 
-    @GetMapping(path = "/logs/workflow/random_subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Operation(summary = "流程日志随机订阅接口", description = "流程日志随机订阅接口,可以使用SSE方式订阅最新日志")
-    public SseEmitter loadMoreStreamSseWorkflowLog(@PathVariable String logId, @Valid LogRandomSubscribingDto dto) {
+    @GetMapping(path = "/logs/workflow/random/{logId}")
+    @Operation(summary = "流程日志随机获取接口", description = "流程日志随机获取接口")
+    public List<LogVo> loadMoreWorkflowLog(@PathVariable String logId, @Valid LogRandomSubscribingDto dto) {
         return this.storageService.randomReadLog(logId, dto.getLine(), dto.getSize(), false);
     }
 
