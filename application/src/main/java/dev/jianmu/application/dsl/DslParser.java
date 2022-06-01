@@ -584,6 +584,7 @@ public class DslParser {
         // 如果为Shell Node，不校验type
         var image = node.get("image");
         if (image != null) {
+            this.checkShellNode(nodeName, node);
             return;
         }
         var type = node.get("type");
@@ -605,6 +606,7 @@ public class DslParser {
         // 如果为Shell Node，不校验type
         var image = node.get("image");
         if (image != null) {
+            this.checkShellNode(nodeName, node);
             return;
         }
         var type = node.get("type");
@@ -678,6 +680,16 @@ public class DslParser {
         var targets = node.get("targets");
         if (!(targets instanceof List)) {
             throw new DslException("开始节点targets未设置");
+        }
+    }
+
+    private void checkShellNode(String nodeName, Map<?, ?> node) {
+        var script = node.get("script");
+        if (script == null) {
+            return;
+        }
+        if (!(script instanceof List)) {
+            throw new DslException("节点 " + nodeName + " 的script参数必须为数组类型");
         }
     }
 
