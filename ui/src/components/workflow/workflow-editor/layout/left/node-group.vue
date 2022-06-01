@@ -206,17 +206,33 @@ export default defineComponent({
 .group {
   display: flex;
   flex-direction: column;
-  margin: 0 20px 10px;
+  margin: 0 20px 24px;
+  position: relative;
+
+  &::after {
+    position: absolute;
+    bottom: -24px;
+    content: '';
+    display: inline-block;
+    height: 1px;
+    width: 100%;
+    background-color: #EBEEFB;
+  }
 
   &.trigger, &.inner {
     .nodes {
       .nodes-wrapper {
         margin-bottom: -20px;
+
+        .jm-workflow-x6-vue-shape {
+          margin-bottom: 0;
+        }
       }
     }
   }
 
   .fold-switch {
+    margin-top: 24px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -240,6 +256,7 @@ export default defineComponent({
     }
 
     .group-name {
+      font-weight: 600;
       margin-left: 5px;
     }
 
@@ -259,7 +276,7 @@ export default defineComponent({
   }
 
   .nodes {
-    margin: 20px 0 0 5px;
+    margin: 24px 0 0 5px;
 
     .network-anomaly {
       margin-top: 10px;
@@ -290,6 +307,19 @@ export default defineComponent({
     }
 
     .nodes-wrapper {
+      // 单独控制最后一行三个节点间距太大的问题
+      .jm-workflow-x6-vue-shape:nth-last-child(1) {
+        margin-bottom: 0;
+      }
+
+      .jm-workflow-x6-vue-shape:nth-last-child(2) {
+        margin-bottom: 0;
+      }
+
+      .jm-workflow-x6-vue-shape:nth-last-child(3) {
+        margin-bottom: 0;
+      }
+
       display: flex;
       flex-wrap: wrap;
     }
@@ -299,11 +329,14 @@ export default defineComponent({
       justify-content: center;
 
       ::v-deep(.jm-load-more) {
+        margin-top: 16px;
+
         button {
           padding: 0;
+          min-height: 20px;
 
           .icon {
-            top: 15px;
+            top: 7px;
             right: -15px;
             border-width: 5px;
           }
@@ -312,7 +345,7 @@ export default defineComponent({
     }
 
     ::v-deep(.jm-workflow-x6-vue-shape) {
-      margin: 0 20px 10px 10px;
+      margin: 0 20px 16px 10px;
       width: 64px;
 
       .icon {

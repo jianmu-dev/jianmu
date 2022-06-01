@@ -144,7 +144,7 @@ export default defineComponent({
     border: 1px solid #EBEEFB;
     z-index: 3;
     position: absolute;
-    top: 58px;
+    top: 78px;
     right: calc(-@collapse-btn-width / 2);
 
     width: @collapse-btn-width;
@@ -166,14 +166,14 @@ export default defineComponent({
     position: absolute;
     top: 0;
     width: 100%;
-    padding: 20px 0 20px;
+    padding: 30px 0 30px;
     display: flex;
     justify-content: center;
     z-index: 2;
     background-color: #FFFFFF;
 
     ::v-deep(.el-input) {
-      width: calc(100% - 37px);
+      width: calc(100% - 40px);
     }
 
     border-bottom: 1px solid #EBEEFB;
