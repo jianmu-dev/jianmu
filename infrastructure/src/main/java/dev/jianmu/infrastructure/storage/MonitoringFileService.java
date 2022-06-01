@@ -26,7 +26,8 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 @Service
 @Slf4j
 public class MonitoringFileService implements DisposableBean {
-    private static final Map<WatchKey, Path> keyPathMap = new ConcurrentHashMap<>();
+    private static final String LogfilePostfix = ".log";
+
     private final Map<String, CopyOnWriteArrayList<ConsumerVo>> callbackMap = new ConcurrentHashMap<>();
     private WatchService watchService;
     private Path monitoringTaskDirectory;
@@ -36,10 +37,7 @@ public class MonitoringFileService implements DisposableBean {
         this.monitoringTaskDirectory = taskPath;
         this.monitoringWorkflowDirectory = workflowPath;
         this.watchService = FileSystems.getDefault().newWatchService();
-        var taskKey = this.monitoringTaskDirectory.register(this.watchService, ENTRY_MODIFY);
-        var workflowKey = this.monitoringWorkflowDirectory.register(this.watchService, ENTRY_MODIFY);
-        keyPathMap.put(taskKey, this.monitoringTaskDirectory);
-        keyPathMap.put(workflowKey, this.monitoringWorkflowDirectory);
+        this.monitoringWorkflowDirectory.register(this.watchService, ENTRY_MODIFY);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(this::monitor);
     }
@@ -56,8 +54,7 @@ public class MonitoringFileService implements DisposableBean {
             try {
                 var key = this.watchService.take();
                 for (final WatchEvent<?> event : key.pollEvents()) {
-                    var path = keyPathMap.get(key);
-                    final Path changed = path.resolve((Path) event.context());
+                    final Path changed = this.monitoringWorkflowDirectory.resolve((Path) event.context());
                     final String fileName = changed.getFileName().toString();
                     var set = this.callbackMap.get(fileName);
                     if (event.kind() == ENTRY_MODIFY && set != null) {
@@ -70,7 +67,6 @@ public class MonitoringFileService implements DisposableBean {
                 boolean isKeyStillValid = key.reset();
                 if (!isKeyStillValid) {
                     log.trace("monitor - key is no longer valid: " + key);
-                    keyPathMap.remove(key);
                 }
             } catch (ClosedWatchServiceException ex) {
                 log.trace("");
@@ -80,8 +76,21 @@ public class MonitoringFileService implements DisposableBean {
         }
     }
 
-    public void clearTaskCallback(String topic) {
+    public void clearTaskCallback(String logId) {
+        var topic = logId + LogfilePostfix;
         this.callbackMap.remove(topic);
+    }
+
+    public void sendLog(String logId) {
+        var topic = logId + LogfilePostfix;
+        var list = this.callbackMap.get(topic);
+        if (list == null) {
+            return;
+        }
+        list.forEach(consumerVo -> {
+            var path = this.monitoringTaskDirectory.resolve(topic);
+            consumerVo.getConsumer().accept(path, consumerVo.getCounter());
+        });
     }
 
     @Override
