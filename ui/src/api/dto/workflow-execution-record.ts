@@ -1,10 +1,4 @@
-import {
-  FailureModeEnum,
-  TaskParamTypeEnum,
-  TaskStatusEnum,
-  TriggerTypeEnum,
-  WorkflowExecutionRecordStatusEnum,
-} from '@/api/dto/enumeration';
+import { FailureModeEnum, TaskParamTypeEnum, TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 
 /**
  * 流程执行记录vo
@@ -68,5 +62,12 @@ export interface ITaskParamVo extends Readonly<{
   type: TaskParamTypeEnum;
   valueType: string;
   value: string;
+}> {
+}
+
+
+export interface ILogVo extends Readonly<{
+  lastEventId: string;
+  data: string;
 }> {
 }

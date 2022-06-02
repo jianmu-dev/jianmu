@@ -48,26 +48,32 @@
             加载中...
           </jm-button>
         </div>
-        <jm-log-viewer :filename="`${process.name}.txt`" :value="processLog"/>
+        <jm-log-viewer
+          :filename="`${process.name}.txt`"
+          :url="`/view/logs/workflow/subscribe/${process.triggerId}?size=`"
+          :load-more="loadMore"
+          :download="download"
+          v-model:more="moreLog"
+          v-if="process.triggerId"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
-import { checkProcessLog, fetchProcessLog } from '@/api/view-no-auth';
-import sleep from '@/utils/sleep';
 import { TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
-import { HttpError, TimeoutError } from '@/utils/rest/error';
+import { downloadWorkflowLogs, randomWorkflowLogs } from '@/api/workflow-execution-record';
 
 export default defineComponent({
   setup() {
+    const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
     const process = computed<IWorkflowExecutionRecordVo>(() => (state.recordDetail.record || {
       id: '',
@@ -83,58 +89,33 @@ export default defineComponent({
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
     const isSuspended = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.SUSPENDED === (process.value.status as WorkflowExecutionRecordStatusEnum));
     const processLog = ref<string>('');
+    const moreLog = ref<boolean>(false);
 
-    let terminateLogLoad = false;
-    const loadLog = async (retry: number) => {
-      if (terminateLogLoad) {
-        console.debug('组件已卸载，终止加载流程');
-        return;
-      }
-
+    // 下载日志
+    const download = async () => {
       try {
-        const headers: any = await checkProcessLog(process.value.triggerId);
-        const contentLength = +headers['content-length'] as number;
-
-        if (contentLength > processLog.value.length) {
-          // 存在更多日志
-          processLog.value = await fetchProcessLog(process.value.triggerId);
-        } else {
-          console.debug('暂无更多日志');
-        }
+        return await downloadWorkflowLogs(process.value.triggerId);
       } catch (err) {
-        if (err instanceof TimeoutError) {
-          // 忽略超时错误
-          console.warn(err.message);
-        } else if (err instanceof HttpError) {
-          const { response } = err as HttpError;
-
-          if (response && response.status !== 502) {
-            throw err;
-          }
-
-          // 忽略错误
-          console.warn(err.message);
-        }
+        proxy.$throw(err, proxy);
       }
-
-      if (!executing.value) {
-        console.debug('流程已完成，终止获取日志');
-
-        return;
+    };
+    // 加载更多/随机订阅日志
+    const loadMore = async (line: number, size: number) => {
+      if (line > size) {
+        line -= size;
+      } else {
+        size = size - (size - line);
+        line = 1;
+        moreLog.value = false;
       }
-
-      retry++;
-
-      console.debug(`3秒后重试第${retry}次`);
-      await sleep(3000);
-
-      await loadLog(retry);
+      try {
+        const data = await randomWorkflowLogs(process.value.triggerId, { line: line, size: size });
+        return { line, data };
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
     };
 
-    // 初始化
-    onBeforeMount(() => loadLog(0));
-
-    onBeforeUnmount(() => (terminateLogLoad = true));
     return {
       workflowName: state.recordDetail.record?.name,
       process,
@@ -142,6 +123,10 @@ export default defineComponent({
       isSuspended,
       datetimeFormatter,
       processLog,
+      WorkflowExecutionRecordStatusEnum,
+      download,
+      loadMore,
+      moreLog,
     };
   },
 });

@@ -90,9 +90,10 @@
               </div>
               <jm-log-viewer
                 :filename="`${task.nodeName}.txt`"
-                :value="taskLog"
-                :more="moreLog"
-                :fetch-log="fetchLog"
+                :url="currentInstanceId? `/view/logs/task/subscribe/${currentInstanceId}?size=` : ''"
+                v-model:more="moreLog"
+                :load-more="loadMore"
+                :download="download"
               />
             </div>
           </div>
@@ -251,7 +252,16 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, onUpdated, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  getCurrentInstance,
+  nextTick,
+  onBeforeMount,
+  onBeforeUnmount,
+  onUpdated,
+  ref,
+} from 'vue';
 import { useStore } from 'vuex';
 import yaml from 'yaml';
 import { namespace } from '@/store/modules/workflow-execution-record';
@@ -259,12 +269,13 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
 import TaskList from '@/views/workflow-execution-record/task-list.vue';
 import { datetimeFormatter } from '@/utils/formatter';
-import { checkTaskLog, fetchTaskLog, listTaskInstance, listTaskParam } from '@/api/view-no-auth';
+import { listTaskInstance, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/model/data/common';
 import { sortTasks } from '@/components/workflow/workflow-viewer/model/util';
+import { downloadNodeLogs, randomNodeLogs } from '@/api/workflow-execution-record';
 import ParamValue from '@/views/common/param-value.vue';
 
 export default defineComponent({
@@ -284,9 +295,11 @@ export default defineComponent({
     },
   },
   setup(props: any) {
+    const { proxy } = getCurrentInstance() as any;
     const { pipeline, workflow } = yaml.parse(props.dsl);
     const state = useStore().state[namespace] as IState;
     const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
+    const currentInstanceId = ref<string>('');
     const asyncTask = computed<ITaskExecutionRecordVo>(() => {
       const latestTaskInstanceId = taskInstances.value.length === 0 ? '' : taskInstances.value[0].instanceId;
       const at = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId) || {
@@ -337,10 +350,7 @@ export default defineComponent({
     );
     const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
     const tabActiveName = ref<string>(props.tabType);
-    const taskLog = ref<string>('');
     const taskParams = ref<ITaskParamVo[]>([]);
-    // 最大日志大小为1MB
-    const maxLogLength = 1024 * 1024;
     const moreLog = ref<boolean>(false);
     // 运行状态次数
     const statusParams = computed<{
@@ -417,24 +427,7 @@ export default defineComponent({
 
     const initialize = (id: string) => {
       taskInstanceId.value = id;
-
-      // 加载日志
-      let lastContentLength = 0;
-      loadData(async (id: string) => {
-        const headers: any = await checkTaskLog(id);
-        const contentLength = +headers['content-length'] as number;
-
-        if (contentLength === lastContentLength) {
-          console.debug('暂无更多日志');
-          return;
-        }
-
-        // 存在更多日志
-        lastContentLength = contentLength;
-
-        moreLog.value = contentLength > maxLogLength;
-        taskLog.value = await fetchTaskLog(id, contentLength - maxLogLength);
-      }, id);
+      currentInstanceId.value = id;
 
       // 加载参数
       loadData(async (id: string) => {
@@ -446,11 +439,13 @@ export default defineComponent({
       taskInstanceId.value = '';
     };
 
+
     // 初始化任务
     onBeforeMount(async () => {
       taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
       if (taskInstances.value.length > 0) {
         initialize(taskInstances.value[0].instanceId);
+        currentInstanceId.value = taskInstances.value[0].instanceId;
       }
     });
 
@@ -460,15 +455,12 @@ export default defineComponent({
     const maxWidthRecord = ref<Record<string, number>>({});
     const changeTask = (instanceId: string) => {
       if (taskInstanceId.value === instanceId) {
+        currentInstanceId.value = taskInstances.value[0].instanceId;
         return;
       }
-
-      // 销毁旧任务
-      destroy();
-      //  清空日志
-      taskLog.value = '';
-      // 初始化新任务
-      nextTick(() => initialize(instanceId));
+      nextTick(() => {
+        currentInstanceId.value = instanceId;
+      });
     };
 
     const asyncTaskStartTime = ref<string>('');
@@ -479,13 +471,28 @@ export default defineComponent({
       // 开始时间变化时，表示开始新任务
       if (asyncTaskStartTime.value) {
         taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
-
         if (!taskInstanceId.value && taskInstances.value.length > 0) {
           changeTask(taskInstances.value[0].instanceId);
         }
       }
       asyncTaskStartTime.value = asyncTask.value.startTime;
     });
+    // 下载日志
+    const download = async () => {
+      try {
+        return await downloadNodeLogs(task.value.instanceId);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
+    // 加载更多/随机订阅日志
+    const loadMore = async (line: number, size: number) => {
+      try {
+        return await randomNodeLogs(task.value.instanceId, { line: line, size: size });
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     return {
       ParamTypeEnum,
       maxWidthRecord,
@@ -496,12 +503,14 @@ export default defineComponent({
       executing,
       isSuspended,
       tabActiveName,
-      taskLog,
       moreLog,
       nodeName: computed<string>(() => {
         const { alias } = (pipeline || workflow)[task.value.nodeName];
         return alias || task.value.nodeName;
       }),
+      download,
+      loadMore,
+      currentInstanceId,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value
@@ -522,18 +531,6 @@ export default defineComponent({
       datetimeFormatter,
       getTotalWidth(width: number, ref: string) {
         maxWidthRecord.value[ref] = width;
-      },
-      fetchLog: async (isCopy: boolean) => {
-        if (isCopy) {
-          const headers: any = await checkTaskLog(taskInstanceId.value);
-          const contentLength = +headers['content-length'] as number;
-
-          if (contentLength > maxLogLength) {
-            throw Error('日志过大，请下载');
-          }
-        }
-
-        return await fetchTaskLog(taskInstanceId.value);
       },
       TaskStatusEnum,
       changeTask,

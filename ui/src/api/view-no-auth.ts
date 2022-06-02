@@ -1,10 +1,5 @@
 import { restProxy } from '@/api/index';
-import {
-  IAsyncTaskInstanceVo,
-  ITaskExecutionRecordVo,
-  ITaskParamVo,
-  IWorkflowExecutionRecordVo,
-} from '@/api/dto/workflow-execution-record';
+import { IAsyncTaskInstanceVo, ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IHubNodePageVo, IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
@@ -144,60 +139,6 @@ export function listTaskParam(taskId: string): Promise<ITaskParamVo[]> {
   return restProxy<ITaskParamVo[]>({
     url: `${baseUrl.task}/${taskId}/parameters`,
     method: 'get',
-  });
-}
-
-/**
- * 检查日志
- * @param taskExecutionRecordId
- */
-export function checkTaskLog(taskExecutionRecordId: string): Promise<object> {
-  return restProxy<object>({
-    url: `${baseUrl.log}/${taskExecutionRecordId}`,
-    method: 'head',
-  });
-}
-
-/**
- * 获取日志
- * @param taskExecutionRecordId
- * @param startRange
- */
-export function fetchTaskLog(taskExecutionRecordId: string, startRange?: number): Promise<string> {
-  return restProxy<string>({
-    url: `${baseUrl.log}/${taskExecutionRecordId}`,
-    method: 'get',
-    headers: startRange === undefined ? undefined : {
-      Range: `bytes=${startRange < 0 ? 0 : startRange}-`,
-    },
-    timeout: startRange === undefined ? 2 * 60 * 1000 : undefined,
-  });
-}
-
-/**
- * 检查流程日志
- * @param processExecutionRecordId
- */
-export function checkProcessLog(
-  processExecutionRecordId: string,
-): Promise<object> {
-  return restProxy<object>({
-    url: `${baseUrl.processLog}/${processExecutionRecordId}`,
-    method: 'head',
-  });
-}
-
-/**
- * 获取流程日志
- * @param processExecutionRecordId
- */
-export function fetchProcessLog(
-  processExecutionRecordId: string,
-): Promise<string> {
-  return restProxy<string>({
-    url: `${baseUrl.processLog}/${processExecutionRecordId}`,
-    method: 'get',
-    timeout: 20 * 1000,
   });
 }
 
