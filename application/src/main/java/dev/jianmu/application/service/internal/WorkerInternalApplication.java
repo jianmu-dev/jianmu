@@ -197,10 +197,6 @@ public class WorkerInternalApplication {
                     .args(args)
                     .build();
         } else {
-            parameterMap = parameterMap.entrySet().stream()
-                    .filter(entry -> entry.getKey() != null)
-                    .map(entry -> Map.entry("JIANMU_" + entry.getKey(), entry.getValue() == null ? "" : entry.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec spec;
             try {
                 spec = objectMapper.readValue(nodeDef.getSpec(), dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec.class);
@@ -253,6 +249,10 @@ public class WorkerInternalApplication {
         this.handleSecretParameter(parameterMap, secretParameters);
         // 替换实际参数值
         this.parameterDomainService.createParameterMap(parameterMap, parameters);
+        parameterMap = parameterMap.entrySet().stream()
+                .filter(entry -> entry.getKey() != null)
+                .map(entry -> Map.entry("JIANMU_" + entry.getKey(), entry.getValue() == null ? "" : entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return parameterMap;
     }
 
