@@ -169,6 +169,7 @@ import NodeEditor from './node-editor.vue';
 import { OwnerTypeEnum } from '@/api/dto/enumeration';
 import { StateEnum } from '@/components/load-more/enumeration';
 import { Mutable } from '@/utils/lib';
+import { START_PAGE_NUM } from '@/utils/constants';
 
 export default defineComponent({
   components: {
@@ -180,7 +181,7 @@ export default defineComponent({
       pageNum: number;
       pageSize: number;
     }>({
-      pageNum: 1,
+      pageNum: START_PAGE_NUM,
       pageSize: 12,
     });
     const nodeLibraryListData = reactive<Mutable<INode>[]>([]);

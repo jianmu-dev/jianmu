@@ -293,7 +293,7 @@ export default defineComponent({
       total: 0,
       pages: 0,
       list: [],
-      pageNum: 1,
+      pageNum: START_PAGE_NUM,
     });
     // 请求列表
     const webhookRequestList = ref<IWebRequestVo[]>([]);
