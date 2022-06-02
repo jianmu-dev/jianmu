@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ public class ContainerSpec {
     private String[] entrypoint;
     // command
     private String[] args;
-    private String[] volume_mounts;
+    private List<VolumeMount> volume_mounts;
     private Boolean privileged;
     private Integer shm_size;
     private String[] dns;
