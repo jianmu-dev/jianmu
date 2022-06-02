@@ -4,7 +4,7 @@
       <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'"
                   :placement="downloading? 'top-end': 'top'"
                   :append-to-body="false">
-        <div :class="{download: true, doing: downloading}" @click="download"></div>
+        <div :class="{download: true, doing: downloading}" @click="downloadLog"></div>
       </jm-tooltip>
       <div class="separator"></div>
       <jm-text-copy :async-value="() => getLog(true)"/>
@@ -13,11 +13,11 @@
          :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}"></div>
     <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
     <div class="content" ref="contentRef">
-      <div v-if="value && more" class="more-line">
+      <div v-if="moreLog" class="more-line">
         查看更多日志，请<span :class="{
           'download-txt': true,
           doing: downloading,
-        }" @click="download">{{ downloading ? '下载中，请稍后...' : '下载' }}</span>
+        }" @click="loadMoreLogs">{{ downloading ? '下载中，请稍后...' : '下载' }}</span>
       </div>
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
@@ -31,8 +31,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, PropType, ref, watch } from 'vue';
+import { defineComponent, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, watch } from 'vue';
+import { ILogVo } from '@/api/dto/workflow-execution-record';
 
+// const SIZE = 10;
+// const SIZE = 5000;
 export default defineComponent({
   name: 'jm-log-viewer',
   props: {
@@ -48,7 +51,12 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    fetchLog: Function as PropType<(isCopy: boolean) => Promise<string>>,
+    url: {
+      type: String,
+      required: true,
+    },
+    download: Function,
+    loadMore: Function,
   },
   setup(props) {
     const data = ref<string[]>([]);
@@ -56,6 +64,15 @@ export default defineComponent({
     const noWidth = ref<number>(0);
     const autoScroll = ref<boolean>(true);
     const downloading = ref<boolean>(false);
+    const lines = [] as string[];
+    let line = 0;
+    let size = 5000;
+    const currentLine = ref<number>();
+    const moreLog = ref<boolean>(props.more);
+    const urlVal = ref<string>(props.url);
+
+    let eventSource: any;
+    const eventUrl = ref<string>(props.url as string);
 
     const virtualNoDiv = document.createElement('div');
     virtualNoDiv.style.position = 'fixed';
@@ -67,6 +84,25 @@ export default defineComponent({
     virtualNoDiv.style.height = '0px';
     virtualNoDiv.style.visibility = 'hidden';
 
+    const getEventSource = () => {
+      eventSource = new EventSource(eventUrl.value + size, { withCredentials: true });
+      eventSource.onopen = () => {
+        data.value = [];
+      };
+      eventSource.onmessage = (e: any) => {
+        lines.push(e.lastEventId);
+        data.value.push(e.data);
+        // 放入数据后重新动态获取宽度，判断是否自动滚动
+        virtualNoDiv.innerHTML = data.value.length + '';
+        const tempNoWidth = virtualNoDiv.clientWidth + 25;
+        if (tempNoWidth > noWidth.value) {
+          noWidth.value = tempNoWidth;
+        }
+        if (autoScroll.value) {
+          nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
+        }
+      };
+    };
     const handleAutoScroll = (val: boolean) => {
       autoScroll.value = val;
 
@@ -90,20 +126,54 @@ export default defineComponent({
     };
 
     onMounted(() => {
+      // 追加元素必须放在外面，否则无效
       contentRef.value?.appendChild(virtualNoDiv);
       contentRef.value?.addEventListener('scroll', () =>
         handleAutoScroll(contentRef.value!.scrollHeight - contentRef.value!.scrollTop <= contentRef.value!.clientHeight));
+      if (props.url) {
+        getEventSource();
+      } else if (props.value) {
+        nextTick(() => setLog(props.value));
+      }
+    });
+    onUpdated(() => {
+      if (currentLine.value === Number(lines[0])) {
+        return;
+      }
+      currentLine.value = Number(lines[0]);
+      line = Number(lines[0]);
+      moreLog.value = line > 1;
+    });
+    onUpdated(() => {
+      if (urlVal.value === props.url) {
+        return;
+      }
+      urlVal.value = props.url;
+      // 关闭连接
+      if (eventSource) {
+        eventSource.close();
+      }
+      eventUrl.value = props.url as string;
+      getEventSource();
+    });
 
-      nextTick(() => setLog(props.value));
+    onBeforeUnmount(() => {
+      if (!props.url) {
+        // 排除webhook，否则会报错
+        return;
+      }
+      eventSource.close();
     });
 
     watch(() => props.value, (value: string) => setLog(value));
 
     const getLog = async (isCopy: boolean) => {
-      if (props.more && props.fetchLog) {
-        return await props.fetchLog(isCopy);
+      if (moreLog.value) {
+        return data.value.join('\n');
       }
-
+      if (props.url || props.download) {
+        return data.value.join('\n');
+      }
       return props.value;
     };
 
@@ -115,13 +185,14 @@ export default defineComponent({
       downloading,
       handleAutoScroll,
       getLog,
-      download: async () => {
+      moreLog,
+      downloadLog: async () => {
         if (downloading.value) {
           return;
         }
         downloading.value = true;
         try {
-          const log = await getLog(false);
+          const log = await props.download!();
           const blob = new Blob([log]);
 
           const url = window.URL.createObjectURL(blob);
@@ -138,6 +209,26 @@ export default defineComponent({
         } finally {
           downloading.value = false;
         }
+      },
+      loadMoreLogs: async () => {
+        autoScroll.value = false;
+        if (line <= 1) {
+          moreLog.value = false;
+          return;
+        }
+        if (line > size) {
+          line -= size;
+        } else {
+          size = size - (size - line);
+          line = 1;
+          moreLog.value = false;
+        }
+        await props.loadMore!(line, size).then((res: ILogVo[]) => {
+          moreLog.value = (line > 1);
+          res.reverse().forEach((item: ILogVo) => {
+            data.value = [item.data, ...data.value];
+          });
+        });
       },
     };
   },
