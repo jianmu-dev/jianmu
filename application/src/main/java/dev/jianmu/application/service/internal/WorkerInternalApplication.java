@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
-import dev.jianmu.infrastructure.docker.ContainerSpec;
-import dev.jianmu.infrastructure.docker.TaskFailedEvent;
-import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
-import dev.jianmu.infrastructure.docker.TaskRunningEvent;
+import dev.jianmu.infrastructure.docker.*;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.infrastructure.worker.DispatchWorker;
@@ -191,10 +188,18 @@ public class WorkerInternalApplication {
             String[] args = {"echo \"$JIANMU_SCRIPT\" | /bin/sh"};
             newSpec = ContainerSpec.builder()
                     .image(nodeDef.getImage())
-                    .working_dir("/" + taskInstance.getTriggerId())
+                    .working_dir("")
                     .environment(parameterMap)
                     .entrypoint(entrypoint)
                     .args(args)
+                    .volume_mounts(
+                            List.of(
+                                    VolumeMount.builder()
+                                            .source(taskInstance.getTriggerId())
+                                            .target("/" + taskInstance.getTriggerId())
+                                            .build()
+                            )
+                    )
                     .build();
         } else {
             dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec spec;
@@ -206,13 +211,20 @@ public class WorkerInternalApplication {
             }
             newSpec = ContainerSpec.builder()
                     .image(spec.getImage())
-                    .working_dir("/" + taskInstance.getTriggerId())
+                    .working_dir("")
                     .user(spec.getUser())
                     .host(spec.getHostName())
                     .environment(parameterMap)
                     .entrypoint(spec.getEntrypoint())
                     .args(spec.getCmd())
-                    .volume_mounts(spec.getHostConfig() == null || spec.getHostConfig().getMounts() == null ? null : (String[]) spec.getHostConfig().getMounts().toArray())
+                    .volume_mounts(
+                            List.of(
+                                    VolumeMount.builder()
+                                    .source(taskInstance.getTriggerId())
+                                    .target("/" + taskInstance.getTriggerId())
+                                    .build()
+                            )
+                    )
                     .build();
         }
         return newSpec;
