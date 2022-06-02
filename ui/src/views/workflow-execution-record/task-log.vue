@@ -17,7 +17,7 @@
         <div>
           <div class="param-key">节点名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="task.nodeName" :tip-append-to-body="false"/>
+            <jm-text-viewer :value="nodeName" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -253,6 +253,7 @@
 <script lang="ts">
 import { computed, defineComponent, nextTick, onBeforeMount, onBeforeUnmount, onUpdated, ref } from 'vue';
 import { useStore } from 'vuex';
+import yaml from 'yaml';
 import { namespace } from '@/store/modules/workflow-execution-record';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
@@ -269,6 +270,10 @@ import ParamValue from '@/views/common/param-value.vue';
 export default defineComponent({
   components: { TaskList, ParamValue },
   props: {
+    dsl: {
+      type: String,
+      required: true,
+    },
     businessId: {
       type: String,
       required: true,
@@ -279,6 +284,7 @@ export default defineComponent({
     },
   },
   setup(props: any) {
+    const { pipeline, workflow } = yaml.parse(props.dsl);
     const state = useStore().state[namespace] as IState;
     const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     const asyncTask = computed<ITaskExecutionRecordVo>(() => {
@@ -492,6 +498,10 @@ export default defineComponent({
       tabActiveName,
       taskLog,
       moreLog,
+      nodeName: computed<string>(() => {
+        const { alias } = (pipeline || workflow)[task.value.nodeName];
+        return alias || task.value.nodeName;
+      }),
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value

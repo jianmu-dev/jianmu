@@ -2,6 +2,7 @@ package dev.jianmu.infrastructure.storage;
 
 import dev.jianmu.infrastructure.SseTemplate;
 import dev.jianmu.infrastructure.storage.vo.ConsumerVo;
+import dev.jianmu.infrastructure.storage.vo.LogVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -15,6 +16,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Ethan Liu
@@ -138,21 +141,22 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     @Override
-    public SseEmitter randomReadLog(String logFileName, Integer line, Integer size, boolean isTask) {
+    public List<LogVo> randomReadLog(String logFileName, Integer line, Integer size, boolean isTask) {
         var filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
-        var sseEmitter = this.template.newSseEmitter();
         var cmd = "sed -n '" + line + ", " + (line + size - 1) + "p' " + filePath;
+        var list = new ArrayList<LogVo>();
         try (var reader = this.execCmd(cmd)) {
             String str;
             while ((str = reader.readLine()) != null) {
-                sseEmitter.send(SseEmitter.event()
-                        .id(String.valueOf(line++))
-                        .data(str));
+                list.add(LogVo.builder()
+                        .lastEventId(String.valueOf(line++))
+                        .data(str)
+                .build());
             }
         } catch (IOException e) {
             throw new StorageException("Could not read log file", e);
         }
-        return sseEmitter;
+        return list;
     }
 
     @Override
