@@ -10,6 +10,7 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.repository.InstanceParameterRepository;
@@ -20,9 +21,11 @@ import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.ParameterRepository;
+import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,8 +50,10 @@ public class TaskInstanceInternalApplication {
     private final TriggerEventRepository triggerEventRepository;
     private final InstanceParameterRepository instanceParameterRepository;
     private final WorkerApplication workerApplication;
+    private final WorkerInternalApplication workerInternalApplication;
     private final NodeDefApi nodeDefApi;
     private final ExpressionLanguage expressionLanguage;
+    private final WorkflowInstanceRepository workflowInstanceRepository;
 
     public TaskInstanceInternalApplication(
             TaskInstanceRepository taskInstanceRepository,
@@ -59,9 +64,9 @@ public class TaskInstanceInternalApplication {
             TriggerEventRepository triggerEventRepository,
             InstanceParameterRepository instanceParameterRepository,
             WorkerApplication workerApplication,
-            NodeDefApi nodeDefApi,
-            ExpressionLanguage expressionLanguage
-    ) {
+            WorkerInternalApplication workerInternalApplication, NodeDefApi nodeDefApi,
+            ExpressionLanguage expressionLanguage,
+            WorkflowInstanceRepository workflowInstanceRepository) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.workflowRepository = workflowRepository;
         this.instanceDomainService = instanceDomainService;
@@ -70,8 +75,10 @@ public class TaskInstanceInternalApplication {
         this.triggerEventRepository = triggerEventRepository;
         this.instanceParameterRepository = instanceParameterRepository;
         this.workerApplication = workerApplication;
+        this.workerInternalApplication = workerInternalApplication;
         this.nodeDefApi = nodeDefApi;
         this.expressionLanguage = expressionLanguage;
+        this.workflowInstanceRepository = workflowInstanceRepository;
     }
 
     public List<TaskInstance> findRunningTask() {
@@ -174,15 +181,28 @@ public class TaskInstanceInternalApplication {
     public void terminate(String asyncTaskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        this.workerApplication.terminateTask(taskInstance.getId());
+        this.workerInternalApplication.terminateTask(taskInstance.getWorkerId(), taskInstance.getId());
     }
 
     @Transactional
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        // start、end任务
+        if (taskInstance.isCreationVolume()) {
+            var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+            workflowInstance.start();
+            this.workflowInstanceRepository.save(workflowInstance);
+        }
+        if (taskInstance.isVolume()) {
+            taskInstance.executeSucceeded();
+            this.taskInstanceRepository.saveSucceeded(taskInstance);
+            return;
+        }
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
+        // 普通任务
         var nodeVersion = this.nodeDefApi.findByType(taskInstance.getDefKey());
         Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
         if (nodeVersion.getOutputParameters() != null &&
@@ -214,9 +234,25 @@ public class TaskInstanceInternalApplication {
     public void executeFailed(String taskInstanceId) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        MDC.put("triggerId", taskInstance.getTriggerId());
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + taskInstance.getWorkflowRef()));
         taskInstance.executeFailed();
+        // 开始结束任务
+        if (taskInstance.isVolume()) {
+            if (taskInstance.isCreationVolume()) {
+                log.error("创建Volume失败");
+                var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
+                        .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+                workflowInstance.terminateInStart();
+                this.workflowInstanceRepository.save(workflowInstance);
+            }else {
+                log.error("清除Volume失败");
+            }
+            this.taskInstanceRepository.updateStatus(taskInstance);
+            return;
+        }
+        // 普通任务
         var outputParameters =
                 this.createInnerOutputParameters(taskInstance, workflow.getType().name());
         this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
@@ -397,4 +433,27 @@ public class TaskInstanceInternalApplication {
         return Map.of();
     }
 
+    // 终止全部任务
+    @Transactional
+    public void terminateByTriggerId(String triggerId) {
+        var taskInstances = this.taskInstanceRepository.findByTriggerId(triggerId);
+        if (taskInstances.stream().noneMatch(taskInstance -> taskInstance.isDeletionVolume() || taskInstance.getStatus() == InstanceStatus.RUNNING)) {
+            this.workflowInstanceRepository.findByTriggerId(triggerId)
+                    .ifPresent(workflow -> this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
+                            .serialNo(1)
+                            .defKey("end")
+                            .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
+                            .asyncTaskRef("end")
+                            .workflowRef(workflow.getWorkflowRef())
+                            .workflowVersion(workflow.getWorkflowVersion())
+                            .businessId(UUID.randomUUID().toString().replace("-", ""))
+                            .triggerId(triggerId)
+                            .build()));
+        }
+        taskInstances.stream().filter(taskInstance -> !taskInstance.isDeletionVolume() && taskInstance.getStatus() == InstanceStatus.WAITING)
+                .forEach(taskInstance -> {
+                    taskInstance.executeFailed();
+                    this.taskInstanceRepository.terminate(taskInstance);
+                });
+    }
 }

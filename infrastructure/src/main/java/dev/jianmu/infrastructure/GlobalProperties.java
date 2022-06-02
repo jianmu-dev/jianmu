@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,6 +22,7 @@ public class GlobalProperties {
     @NotNull
     private Global global = new Global();
     private Boolean authMode = true;
+    private Worker worker = new Worker();
 
     @Data
     @Component
@@ -38,5 +40,13 @@ public class GlobalProperties {
             @NotNull
             private Boolean autoClean = false;
         }
+    }
+
+    @Data
+    @Component
+    @Validated
+    public static class Worker {
+        @NotBlank
+        private String rpcSecret;
     }
 }

@@ -12,9 +12,6 @@ spring:
       schema-locations: classpath:testdb/migration/schema.sql
 pagehelper:
   support-methods-arguments: true
-storage:
-  logfile-path: task_log
-  webhook-file-path: webhook
 embedded:
   docker-worker:
     docker-host: tcp://127.0.0.1:2375
@@ -23,3 +20,6 @@ registry:
   url: http://127.0.0.1:8000
 credential:
   type: local
+jianmu:
+  worker:
+    rpc-secret: secret

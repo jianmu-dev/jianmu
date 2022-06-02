@@ -15,7 +15,7 @@ import java.io.BufferedWriter;
  * @author Ethan Liu
  * @create 2021-04-16 14:12
 */
-@Service
+//@Service
 @Profile("test")
 public class TestDockerWorker implements DockerWorker {
     private static final Logger logger = LoggerFactory.getLogger(TestDockerWorker.class);
