@@ -20,7 +20,7 @@
           :autosize="{minRows: 3, maxRows: 3}"
           resize="none"/>
       </jm-form-item>
-      <jm-form-item label="DSL" label-position="top" prop="dsl">
+      <jm-form-item prop="dsl">
         <jm-dsl-editor class="dsl-editor" v-model:value="editorForm.dsl"/>
       </jm-form-item>
     </jm-form>
