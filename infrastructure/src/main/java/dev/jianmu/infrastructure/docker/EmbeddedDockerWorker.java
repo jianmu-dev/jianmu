@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Ethan Liu
  * @create 2021-04-13 10:59
 */
-@Service
+//@Service
 @Profile("!test")
 public class EmbeddedDockerWorker implements DockerWorker {
     private String dockerHost;
@@ -75,7 +75,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         this.sockFile = properties.getSockFile();
         this.mirror = properties.getMirror();
         this.publisher = publisher;
-//        this.connect();
+        this.connect();
     }
 
     private void connect() {
