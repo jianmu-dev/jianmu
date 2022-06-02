@@ -164,24 +164,12 @@
                     </jm-table-column>
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
-                        <div class="copy-container">
-                          <div
-                            :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
-                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value" :tip-append-to-body="false"
-                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
-                                            class="value"
-                            >
-                            </jm-text-viewer>
-                            <template v-else>
-                              {{ scope.row.value }}
-                            </template>
-                          </div>
-                          <div class="copy-btn"
-                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value)">
-                            <jm-text-copy :value="scope.row.value"/>
-                          </div>
-                        </div>
+                        <param-value
+                          v-if="scope.row.value"
+                          :value="scope.row.value"
+                          :tip-append-to-body="false"
+                          :type="scope.row.valueType"
+                        />
                       </template>
                     </jm-table-column>
                   </jm-table>
@@ -243,24 +231,12 @@
                     </jm-table-column>
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
-                        <div class="copy-container">
-                          <div
-                            :style="{maxWidth:maxWidthRecord[scope.row.value]? `${maxWidthRecord[scope.row.value]}px`: '100%'}">
-                            <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                            :value="scope.row.value" :tip-append-to-body="false"
-                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
-                                            class="value"
-                            >
-                            </jm-text-viewer>
-                            <template v-else>
-                              {{ scope.row.value }}
-                            </template>
-                          </div>
-                          <div class="copy-btn"
-                               v-if="(scope.row.valueType !== ParamTypeEnum.SECRET && scope.row.value)">
-                            <jm-text-copy :value="scope.row.value"/>
-                          </div>
-                        </div>
+                        <param-value
+                          v-if="scope.row.value"
+                          :value="scope.row.value"
+                          :tip-append-to-body="false"
+                          :type="scope.row.valueType"
+                        />
                       </template>
                     </jm-table-column>
                   </jm-table>
@@ -289,9 +265,10 @@ import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enum
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/model/data/common';
 import { sortTasks } from '@/components/workflow/workflow-viewer/model/util';
+import ParamValue from '@/views/common/param-value.vue';
 
 export default defineComponent({
-  components: { TaskList },
+  components: { TaskList, ParamValue },
   props: {
     dsl: {
       type: String,
@@ -813,29 +790,6 @@ export default defineComponent({
             th,
             td {
               color: #082340;
-            }
-
-            .copy-container {
-              & > div {
-                width: 100%;
-              }
-
-              display: flex;
-              align-items: center;
-
-              &:hover {
-                .copy-btn {
-                  visibility: visible;
-                }
-              }
-
-              .copy-btn {
-                margin-left: 10px;
-                flex-shrink: 0;
-                font-size: 1.25em;
-                width: 16px;
-                visibility: hidden;
-              }
             }
           }
         }

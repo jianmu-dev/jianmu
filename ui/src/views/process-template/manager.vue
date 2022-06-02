@@ -10,7 +10,8 @@
         type="primary"
         class="jm-icon-button-next"
         size="small"
-        >下一步</jm-button
+      >下一步
+      </jm-button
       >
     </div>
     <div class="process-template-flex">
@@ -31,7 +32,7 @@
                 :class="{ click: templatesClickData.classifyId === i.id }"
                 @click="classifyClick(i)"
               >
-                <img v-if="i.icon" :src="i.icon" />
+                <img v-if="i.icon" :src="i.icon"/>
                 <i v-else>{{ i.name[0].toUpperCase() }}</i>
                 <jm-text-viewer :value="i.name"/>
               </li>
@@ -75,7 +76,7 @@
           </div>
 
           <div class="ptf-r-b-b">
-            <jm-empty v-if="templatesList.length <= 0 && !templateLoading" />
+            <jm-empty v-if="templatesList.length <= 0 && !templateLoading"/>
             <template v-else>
               <p>选择流程模版</p>
               <ul v-loading="templateLoading">
@@ -146,19 +147,21 @@ import {
   IProcessTemplatesForm,
 } from '@/model/modules/process-template';
 import { useRouter } from 'vue-router';
+import { START_PAGE_NUM } from '@/utils/constants';
+
 export default defineComponent({
   name: 'process-template',
   props: {
     processTemplatesName: String,
   },
   setup() {
-    const router=useRouter();
+    const router = useRouter();
     const categoriesList = reactive<ICategoriesVo[]>([]);
     const processTemplatesForm = reactive<IProcessTemplatesForm>({
       processTemplatesName: '',
     });
     const workflowTemplates = reactive<IWorkflowTemplateViewingForm>({
-      pageNum: 1,
+      pageNum: START_PAGE_NUM,
       pageSize: 10,
       name: '',
       templateCategoryId: undefined,
@@ -298,7 +301,7 @@ export default defineComponent({
           // 和上一次不一样就说明修改过
           if (
             processTemplatesForm.processTemplatesName ===
-              templatesClickData.templateName ||
+            templatesClickData.templateName ||
             processTemplatesForm.processTemplatesName === ''
           ) {
             processTemplatesForm.processTemplatesName = item.name;
@@ -315,25 +318,32 @@ export default defineComponent({
 .process-template {
   padding: 16px 0px 25px 0px;
   height: calc(100vh - 170px);
+
   li {
     list-style: none;
   }
+
   .right-top-btn {
     position: fixed;
     right: 20px;
     top: 78px;
+
     .jm-icon-button-next {
       margin-left: 10px;
     }
+
     .jm-icon-button-next::before,
     .jm-icon-button-cancel::before {
       font-weight: bold;
     }
   }
+
   .process-template-flex {
     display: flex;
+
     .ptf-l {
       background-color: #fff;
+
       .ptf-l-t {
         display: flex;
         width: 264px;
@@ -341,6 +351,7 @@ export default defineComponent({
         padding-left: 20px;
         align-items: center;
         background-image: url('@/assets/images/process-template/bj.png');
+
         & > i {
           display: inline-block;
           width: 54px;
@@ -348,27 +359,33 @@ export default defineComponent({
           margin-right: 12px;
           background-image: url('@/assets/svgs/process-template/process-template.svg');
         }
+
         & > span {
           font-weight: 500;
           color: #012c53;
           font-size: 16px;
         }
       }
+
       .ptf-l-b {
         padding-left: 20px;
         font-size: 16px;
         padding-top: 30px;
         border-top: 1px solid #eff4f9;
+
         & > p {
           color: #6b7b8d;
           margin-bottom: 22px;
         }
+
         ul {
           padding-left: 15px;
+
           .click {
             color: #096dd9;
             cursor: pointer;
           }
+
           li {
             width: 100%;
             height: 24px;
@@ -376,11 +393,13 @@ export default defineComponent({
             margin-bottom: 7%;
             display: flex;
             align-items: center;
+
             & > img {
               margin-right: 14px;
               width: 24px;
               height: 24px;
             }
+
             & > i {
               display: flex;
               margin-right: 14px;
@@ -394,10 +413,12 @@ export default defineComponent({
               font-size: 13px;
               font-style: inherit;
             }
+
             & > span {
               max-width: 200px;
             }
           }
+
           li:hover {
             color: #096dd9;
             cursor: pointer;
@@ -408,17 +429,21 @@ export default defineComponent({
 
     .ptf-r {
       flex-grow: 1;
+
       .ptf-r-t {
         background-color: #fff;
         padding: 20px 30px 24px 30px;
         margin-bottom: 20px;
+
         ::v-deep(.el-form-item__label) {
           padding: 0;
         }
+
         ::v-deep(.el-form-item) {
           margin: 0;
         }
       }
+
       .ptf-r-b {
         .ptf-r-b-t {
           background-color: #f6fafe;
@@ -427,26 +452,32 @@ export default defineComponent({
           height: 66px;
           padding: 15px 30px 15px 30px;
           box-sizing: border-box;
+
           ::v-deep(.el-input__inner) {
             border: none;
           }
         }
+
         .ptf-r-b-b {
           padding: 20px 24px 20px 24px;
           background-color: #fff;
           min-height: 220px;
+
           & > p {
             font-size: 14px;
             color: #082340;
             margin-bottom: 20px;
           }
+
           ul {
             min-height: 220px;
             position: relative;
+
             .click {
               border: 1px solid #096dd9;
               box-shadow: 0px 0px 16px 4px #dce3ef;
             }
+
             li {
               border-radius: 4px;
               border: 1px solid #b9cfe6;
@@ -454,10 +485,12 @@ export default defineComponent({
               position: relative;
               margin-bottom: 20px;
               cursor: pointer;
+
               &:hover {
                 border: 1px solid #096dd9;
                 box-shadow: 0px 0px 16px 4px #dce3ef;
               }
+
               .template-tit {
                 position: absolute;
                 top: 20px;
@@ -466,6 +499,7 @@ export default defineComponent({
                 color: #3f536e;
                 display: flex;
                 align-items: center;
+
                 .template-tit-h3 {
                   border-radius: 50%;
                   width: 30px;
@@ -480,6 +514,7 @@ export default defineComponent({
               }
             }
           }
+
           .show-more {
             color: #7b8c9c;
             font-size: 14px;
@@ -487,17 +522,19 @@ export default defineComponent({
             align-items: center;
             justify-content: center;
             cursor: pointer;
+
             .btm-down {
               width: 16px;
               height: 16px;
               background-image: url('@/assets/svgs/node-library/drop-down.svg');
               margin-left: 6px;
             }
+
             .btm-down.btn-loading {
-              animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43)
-                infinite;
+              animation: rotate 1s cubic-bezier(0.58, -0.55, 0.38, 1.43) infinite;
               background-image: url('@/assets/svgs/node-library/loading.svg');
             }
+
             @keyframes rotate {
               0% {
                 transform: rotate(0deg);

@@ -125,6 +125,7 @@ import {
   computed,
 } from 'vue';
 import { addProject } from '@/api/project-group';
+import { START_PAGE_NUM } from '@/utils/constants';
 
 export default defineComponent({
   emits: ['completed'],
@@ -164,7 +165,7 @@ export default defineComponent({
     const selectChange = async (projectGroupId: string) => {
       projectList.value = await queryProject({
         projectGroupId,
-        pageNum: 1,
+        pageNum: START_PAGE_NUM,
         pageSize: 8,
       });
       selectedList.value = [];
@@ -184,7 +185,7 @@ export default defineComponent({
       }
       projectList.value = await queryProject({
         projectGroupId: createForm.value.projectGroupId,
-        pageNum: 1,
+        pageNum: START_PAGE_NUM,
         pageSize: 8,
         name: keyword.value,
       });

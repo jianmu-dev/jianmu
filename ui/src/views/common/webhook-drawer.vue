@@ -166,28 +166,13 @@
                         ></i>
                       </div>
                     </div>
-                    <div class="params-container" v-else>
-                      <template v-if="scope.row.value">
-                        <div class="param-value"
-                             :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
-                          <jm-text-viewer v-if="scope.row.valueType !== ParamTypeEnum.SECRET"
-                                          :value="scope.row.value"
-                                          @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
-                                          class="value"
-                          >
-                          </jm-text-viewer>
-                          <template v-else>
-                            {{ scope.row.value }}
-                          </template>
-                        </div>
-                        <div class="copy-btn">
-                          <jm-text-copy :value="scope.row.value"/>
-                        </div>
-                      </template>
-                      <template v-else>
-                        {{ scope.row.value }}
-                      </template>
-                    </div>
+                    <template v-else>
+                      <param-value
+                        v-if="scope.row.value"
+                        :value="scope.row.value"
+                        :type="scope.row.valueType"
+                      />
+                    </template>
                   </template>
                 </jm-table-column>
               </jm-table>
@@ -224,9 +209,10 @@ import { ElScrollbar } from 'element-plus';
 import { StateEnum } from '@/components/load-more/enumeration';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
 import JmTextViewer from '@/components/text-viewer/index.vue';
+import ParamValue from '@/views/common/param-value.vue';
 
 export default defineComponent({
-  components: { JmTextViewer },
+  components: { JmTextViewer, ParamValue },
   props: {
     webhookVisible: {
       type: Boolean,
@@ -307,6 +293,7 @@ export default defineComponent({
       total: 0,
       pages: 0,
       list: [],
+      pageNum: START_PAGE_NUM,
     });
     // 请求列表
     const webhookRequestList = ref<IWebRequestVo[]>([]);
@@ -864,28 +851,6 @@ export default defineComponent({
       }
 
       .trigger-table {
-        .params-container {
-          & > div {
-            width: 100%;
-          }
-
-          display: flex;
-          align-items: center;
-
-          &:hover {
-            .copy-btn {
-              visibility: visible;
-            }
-          }
-
-          .copy-btn {
-            margin-left: 10px;
-            flex-shrink: 0;
-            font-size: 1.25em;
-            width: 16px;
-            visibility: hidden;
-          }
-        }
 
         td:first-of-type,
         td:last-of-type {
