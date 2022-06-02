@@ -75,7 +75,7 @@ public class EmbeddedDockerWorker implements DockerWorker {
         this.sockFile = properties.getSockFile();
         this.mirror = properties.getMirror();
         this.publisher = publisher;
-        this.connect();
+//        this.connect();
     }
 
     private void connect() {
