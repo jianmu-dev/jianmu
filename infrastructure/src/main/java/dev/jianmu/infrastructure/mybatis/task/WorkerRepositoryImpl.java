@@ -5,6 +5,8 @@ import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.repository.WorkerRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -49,5 +51,10 @@ public class WorkerRepositoryImpl implements WorkerRepository {
                 .type(Worker.Type.EMBEDDED)
                 .status(Worker.Status.ONLINE)
                 .build();
+    }
+
+    @Override
+    public List<Worker>  findByTypeAndCreatedTimeLessThan(Worker.Type type, LocalDateTime createdTime) {
+        return this.workerMapper.findByTypeAndCreatedTimeLessThan(type, createdTime);
     }
 }

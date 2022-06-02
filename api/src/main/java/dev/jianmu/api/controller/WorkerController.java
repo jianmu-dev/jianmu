@@ -2,9 +2,14 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.TaskInstanceAcceptingDto;
 import dev.jianmu.api.dto.TaskInstanceUpdatingDto;
+import dev.jianmu.api.dto.TaskInstanceWritingLogDto;
 import dev.jianmu.api.dto.WorkerJoiningDto;
+import dev.jianmu.api.vo.VolumeVo;
 import dev.jianmu.api.vo.WorkerTaskVo;
-import dev.jianmu.infrastructure.docker.ContainerSpec;
+import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.application.service.internal.WorkerInternalApplication;
+import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.worker.aggregate.Worker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,9 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * @author Ethan Liu
@@ -31,6 +36,17 @@ import java.util.HashMap;
 @RequestMapping("workers")
 @Tag(name = "Worker API", description = "Worker API")
 public class WorkerController {
+    private final WorkerInternalApplication workerApplication;
+    private final DeferredResultService deferredResultService;
+    private final NodeDefApi nodeDefApi;
+    private final StorageService storageService;
+
+    public WorkerController(WorkerInternalApplication workerApplication, DeferredResultService deferredResultService, NodeDefApi nodeDefApi, StorageService storageService) {
+        this.workerApplication = workerApplication;
+        this.deferredResultService = deferredResultService;
+        this.nodeDefApi = nodeDefApi;
+        this.storageService = storageService;
+    }
 
     @GetMapping("/types")
     @Operation(summary = "Worker类型获取接口", description = "Worker类型获取接口")
@@ -44,7 +60,7 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void join(@PathVariable("workerId") String workerId, @RequestBody @Valid WorkerJoiningDto dto) {
-//        this.workerApplication.join(workerId, dto.getType(), dto.getName());
+        this.workerApplication.join(workerId, dto.getType(), dto.getName());
     }
 
     @GetMapping("{workerId}/ping")
@@ -61,60 +77,45 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public DeferredResult<ResponseEntity<?>> pullTasks(@PathVariable String workerId) {
-        var deferredResult = new DeferredResult<ResponseEntity<?>>(1000L * 10, null);
-        var env = new HashMap<String, String>();
-        env.put("JM_SHARE_DIR", "triggerId");
-        try {
-            Thread.sleep(1000L * 10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        deferredResult.setResult(ResponseEntity
-                .status(HttpStatus.OK)
-                .body(WorkerTaskVo.builder()
-                        .type(WorkerTaskVo.Type.TASK)
-                        .taskInstanceId("test1")
-                        .pullStrategy(null)
-                        .containerSpec(ContainerSpec.builder()
-                                .image("alpine:3.13.6")
-                                .working_dir("triggerId")
-                                .environment(env)
-                                .entrypoint(new String[]{"/bin/sh"})
-                                .args(new String[]{"echo 1"})
-                                .build())
-                        .resultFile("usr/local/result")
-                        .version(0)
-                        .build()
-                ));
-//        this.workerApplication.pullTasks(workerId).ifPresent(taskInstance -> {
-//            if (taskInstance.getDefKey().equals("start") || taskInstance.getDefKey().equals("end")) {
-//                deferredResult.setResult(ResponseEntity
-//                        .status(HttpStatus.OK)
-//                        .body(WorkerTaskVo.builder()
-//                                .type(WorkerTaskVo.Type.VOLUME)
-//                                .taskInstanceId(taskInstance.getId())
-//                                .volume(VolumeVo.builder()
-//                                        .name(taskInstance.getTriggerId())
-//                                        .type(taskInstance.getDefKey().equals("start") ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
-//                                        .build())
-//                                .version(taskInstance.getVersion())
-//                                .build()
-//                        ));
-//            } else {
-//                deferredResult.setResult(ResponseEntity
-//                        .status(HttpStatus.OK)
-//                        .body(WorkerTaskVo.builder()
-//                                .type(WorkerTaskVo.Type.TASK)
-//                                .taskInstanceId(taskInstance.getId())
-//                                .pullStrategy(null)
-//                                .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
-//                                .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
-//                                .version(taskInstance.getVersion())
-//                                .build()
-//                        ));
-//            }
-//        });
+        var deferredResult = this.deferredResultService.newPullDeferredResult(workerId);
+        this.workerApplication.pullTasks(workerId).ifPresent(taskInstance -> {
+            if (taskInstance.isVolume()) {
+                deferredResult.setResult(ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(WorkerTaskVo.builder()
+                                .type(WorkerTaskVo.Type.VOLUME)
+                                .taskInstanceId(taskInstance.getId())
+                                .volume(VolumeVo.builder()
+                                        .name(taskInstance.getTriggerId())
+                                        .type(taskInstance.isCreationVolume() ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
+                                        .build())
+                                .version(taskInstance.getVersion())
+                                .build()
+                        ));
+            } else {
+                deferredResult.setResult(ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(WorkerTaskVo.builder()
+                                .type(WorkerTaskVo.Type.TASK)
+                                .taskInstanceId(taskInstance.getId())
+                                .pullStrategy(null)
+                                .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
+                                .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
+                                .version(taskInstance.getVersion())
+                                .build()
+                        ));
+            }
+        });
         return deferredResult;
+    }
+
+    @PostMapping("{workerId}/tasks/{taskInstanceId}")
+    @Operation(summary = "获取终止任务接口", description = "获取终止任务接口")
+    @Parameters({
+            @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
+    })
+    public DeferredResult<ResponseEntity<?>> watchTasks(@PathVariable String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
+        return this.deferredResultService.newWatchDeferredResult(workerId, taskInstanceId);
     }
 
     @PatchMapping("{workerId}/tasks/{taskInstanceId}/accept")
@@ -122,8 +123,34 @@ public class WorkerController {
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
-    public void acceptTask(@PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId, @Valid @RequestBody TaskInstanceAcceptingDto dto) {
-//        this.workerApplication.acceptTask(workerId, taskInstanceId, dto.getVersion());
+    public WorkerTaskVo acceptTask(HttpServletResponse response, @PathVariable("workerId") String workerId,
+                                   @PathVariable("taskInstanceId") String taskInstanceId, @Valid @RequestBody TaskInstanceAcceptingDto dto) {
+        var taskInstance = this.workerApplication.acceptTask(response, workerId, taskInstanceId, dto.getVersion());
+        if (response.getStatus() != HttpStatus.OK.value()) {
+            return WorkerTaskVo.builder()
+                    .taskInstanceId(taskInstanceId)
+                    .build();
+        }
+        if (taskInstance.isVolume()) {
+            return WorkerTaskVo.builder()
+                    .type(WorkerTaskVo.Type.VOLUME)
+                    .taskInstanceId(taskInstance.getId())
+                    .volume(VolumeVo.builder()
+                            .name(taskInstance.getTriggerId())
+                            .type(taskInstance.isCreationVolume() ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
+                            .build())
+                    .version(taskInstance.getVersion() + 1)
+                    .build();
+        } else {
+            return WorkerTaskVo.builder()
+                    .type(WorkerTaskVo.Type.TASK)
+                    .taskInstanceId(taskInstance.getId())
+                    .pullStrategy(null)
+                    .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
+                    .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
+                    .version(taskInstance.getVersion() + 1)
+                    .build();
+        }
     }
 
     @PatchMapping("{workerId}/tasks/{taskInstanceId}")
@@ -132,7 +159,7 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void updateTaskInstance(@PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId, @Valid @RequestBody TaskInstanceUpdatingDto dto) {
-//        this.workerApplication.updateTaskInstance(workerId, taskInstanceId, dto.getStatus(), dto.getResultFile(), dto.getErrorMsg(), dto.getExitCode());
+        this.workerApplication.updateTaskInstance(workerId, taskInstanceId, dto.getStatus().name(), dto.getResultFile(), dto.getErrorMsg(), dto.getExitCode());
     }
 
     @PostMapping("{workerId}/tasks/{taskInstanceId}/logs")
@@ -140,16 +167,30 @@ public class WorkerController {
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
-    public void writeTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId,
-                             @PathVariable("taskInstanceId") String taskInstanceId) {
-        try {
+    public void writeTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
+
+    }
+
+    @PostMapping("{workerId}/tasks/{taskInstanceId}/logs/batch")
+    @Operation(summary = "实时写入任务日志接口", description = "实时写入任务日志接口")
+    @Parameters({
+            @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
+    })
+    public void batchWriteTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
+        try (var writer = this.storageService.writeLog(taskInstanceId)) {
             var reader = request.getReader();
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                if ("null".equals(line)) {
+                    continue;
+                }
+                var list = TaskInstanceWritingLogDto.parseString(line);
+                list.stream()
+                        .filter(dto -> dto.getContent() != null)
+                        .forEach(dto -> this.workerApplication.writeTaskLog(writer, workerId, taskInstanceId, dto.getContent(), dto.getNumber(), dto.getTimestamp()));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("任务日志写入失败： " + e);
         }
     }
 }
