@@ -12,7 +12,7 @@
               <div style="width:26px;">#{{ tasks.length - tasks.indexOf(item) }}</div>
               <jm-task-state :value="item.status"/>
               <div style="min-width: 100px">
-                <jm-timer :start-time="item.startTime" :end-time="item.endTime" :tip-append-to-body="false"></jm-timer>
+                <jm-timer :start-time="item.startTime" :end-time="item.endTime" :tip-append-to-body="false"/>
               </div>
             </div>
           </jm-dropdown-item>

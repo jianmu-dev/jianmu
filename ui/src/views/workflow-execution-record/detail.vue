@@ -67,13 +67,11 @@
           <div>完成时间</div>
         </div>
         <div class="item" v-if="data.record?.status === WorkflowExecutionRecordStatusEnum.SUSPENDED">
-          <jm-timer class="value" :start-time="data.record?.suspendedTime"></jm-timer>
+          <jm-timer class="value" :start-time="data.record?.suspendedTime"/>
           <div>挂起时长</div>
         </div>
         <div class="item" v-else>
-          <jm-timer class="value" v-if="data.record?.startTime" :start-time="data.record?.startTime"
-                    :end-time="data.record?.endTime">
-          </jm-timer>
+          <jm-timer class="value" :start-time="data.record?.startTime" :end-time="data.record?.endTime"/>
           <div>执行时长</div>
         </div>
         <div class="item">
@@ -82,7 +80,7 @@
           <div>流程实例ID</div>
         </div>
         <div class="item">
-          <jm-text-viewer :value="data.record?.workflowVersion" class="value"/>
+          <jm-text-viewer :value="data.record?.workflowVersion || '无'" class="value"/>
           <div>流程版本号</div>
         </div>
         <jm-tooltip
