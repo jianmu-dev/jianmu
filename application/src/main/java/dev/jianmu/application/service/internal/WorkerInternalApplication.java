@@ -172,6 +172,12 @@ public class WorkerInternalApplication {
         var instanceParameters = this.instanceParameterRepository
                 .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
         var parameterMap = this.getParameterMap(instanceParameters);
+        if (nodeDef.getImage() == null) {
+            parameterMap = parameterMap.entrySet().stream()
+                    .filter(entry -> entry.getKey() != null)
+                    .map(entry -> Map.entry("JIANMU_" + entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
         parameterMap.putAll(this.getEnvVariable(taskInstance, worker));
         this.addFeatureParam(parameterMap);
         parameterMap = parameterMap.entrySet().stream()
@@ -261,10 +267,6 @@ public class WorkerInternalApplication {
         this.handleSecretParameter(parameterMap, secretParameters);
         // 替换实际参数值
         this.parameterDomainService.createParameterMap(parameterMap, parameters);
-        parameterMap = parameterMap.entrySet().stream()
-                .filter(entry -> entry.getKey() != null)
-                .map(entry -> Map.entry("JIANMU_" + entry.getKey(), entry.getValue() == null ? "" : entry.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return parameterMap;
     }
 
