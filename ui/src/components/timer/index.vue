@@ -3,7 +3,7 @@
 </template>
 
 <script lang='ts'>
-import { computed, defineComponent, ref, onBeforeUnmount } from 'vue';
+import { computed, defineComponent, onBeforeUnmount, ref } from 'vue';
 
 export default defineComponent({
   name: 'jm-timer',
@@ -11,7 +11,6 @@ export default defineComponent({
     // 开始时间（格式：yyyy-MM-ddTHH:mm:ss）
     startTime: {
       type: String,
-      required: true,
     },
     // 结束时间（格式：yyyy-MM-ddTHH:mm:ss）
     endTime: {
@@ -29,6 +28,10 @@ export default defineComponent({
       now.value = new Date();
     }, 1000);
     const time = computed<string>(() => {
+      if (!props.startTime) {
+        return '无';
+      }
+
       const startTimeMillis = Date.parse(props.startTime);
       let endTimeMillis;
       if (!props.endTime) {
