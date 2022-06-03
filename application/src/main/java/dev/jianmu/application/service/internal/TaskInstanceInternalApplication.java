@@ -8,6 +8,7 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.InstanceStatus;
@@ -49,11 +50,11 @@ public class TaskInstanceInternalApplication {
     private final ParameterDomainService parameterDomainService;
     private final TriggerEventRepository triggerEventRepository;
     private final InstanceParameterRepository instanceParameterRepository;
-    private final WorkerApplication workerApplication;
     private final WorkerInternalApplication workerInternalApplication;
     private final NodeDefApi nodeDefApi;
     private final ExpressionLanguage expressionLanguage;
     private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final MonitoringFileService monitoringFileService;
 
     public TaskInstanceInternalApplication(
             TaskInstanceRepository taskInstanceRepository,
@@ -63,10 +64,12 @@ public class TaskInstanceInternalApplication {
             ParameterDomainService parameterDomainService,
             TriggerEventRepository triggerEventRepository,
             InstanceParameterRepository instanceParameterRepository,
-            WorkerApplication workerApplication,
-            WorkerInternalApplication workerInternalApplication, NodeDefApi nodeDefApi,
+            WorkerInternalApplication workerInternalApplication,
+            NodeDefApi nodeDefApi,
             ExpressionLanguage expressionLanguage,
-            WorkflowInstanceRepository workflowInstanceRepository) {
+            WorkflowInstanceRepository workflowInstanceRepository,
+            MonitoringFileService monitoringFileService
+    ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.workflowRepository = workflowRepository;
         this.instanceDomainService = instanceDomainService;
@@ -74,11 +77,11 @@ public class TaskInstanceInternalApplication {
         this.parameterDomainService = parameterDomainService;
         this.triggerEventRepository = triggerEventRepository;
         this.instanceParameterRepository = instanceParameterRepository;
-        this.workerApplication = workerApplication;
         this.workerInternalApplication = workerInternalApplication;
         this.nodeDefApi = nodeDefApi;
         this.expressionLanguage = expressionLanguage;
         this.workflowInstanceRepository = workflowInstanceRepository;
+        this.monitoringFileService = monitoringFileService;
     }
 
     public List<TaskInstance> findRunningTask() {
@@ -195,6 +198,9 @@ public class TaskInstanceInternalApplication {
             workflowInstance.start();
             this.workflowInstanceRepository.save(workflowInstance);
         }
+        if (taskInstance.isDeletionVolume()) {
+            this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
+        }
         if (taskInstance.isVolume()) {
             taskInstance.executeSucceeded();
             this.taskInstanceRepository.saveSucceeded(taskInstance);
@@ -247,6 +253,7 @@ public class TaskInstanceInternalApplication {
                 workflowInstance.terminateInStart();
                 this.workflowInstanceRepository.save(workflowInstance);
             }else {
+                this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
                 log.error("清除Volume失败");
             }
             this.taskInstanceRepository.updateStatus(taskInstance);

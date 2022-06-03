@@ -76,7 +76,7 @@ public class MonitoringFileService implements DisposableBean {
         }
     }
 
-    public void clearTaskCallback(String logId) {
+    public void clearCallbackByLogId(String logId) {
         var topic = logId + LogfilePostfix;
         this.callbackMap.remove(topic);
     }

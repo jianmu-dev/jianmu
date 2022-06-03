@@ -397,7 +397,7 @@ public class WorkerInternalApplication {
                         .taskId(taskInstanceId)
                         .errorMsg(errorMsg)
                         .build());
-                this.monitoringFileService.clearTaskCallback(taskInstanceId);
+                this.monitoringFileService.clearCallbackByLogId(taskInstanceId);
                 break;
             case "SUCCEED":
                 this.publisher.publishEvent(TaskFinishedEvent.builder()
@@ -405,7 +405,7 @@ public class WorkerInternalApplication {
                         .cmdStatusCode(exitCode)
                         .resultFile(resultFile)
                         .build());
-                this.monitoringFileService.clearTaskCallback(taskInstanceId);
+                this.monitoringFileService.clearCallbackByLogId(taskInstanceId);
                 break;
         }
     }
