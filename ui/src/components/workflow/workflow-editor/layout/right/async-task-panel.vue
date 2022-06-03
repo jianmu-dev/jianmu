@@ -87,8 +87,8 @@
                   :append-to-body="false"
                 >
                   <template #content>
-                    类型:{{ item.type }}<br>
-                    <span v-if="item.value">描述:{{ item.description }}</span>
+                    类型：{{ item.type }}<br>
+                    <span v-if="item.value">描述：{{ item.description }}</span>
                   </template>
                   <i class="jm-icon-button-help"></i>
                 </jm-tooltip>
