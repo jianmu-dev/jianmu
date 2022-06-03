@@ -17,7 +17,7 @@
         查看更多日志，请<span :class="{
           'download-txt': true,
           doing: downloading,
-        }" @click="loadMoreLogs">{{ downloading ? '下载中，请稍后...' : '下载' }}</span>
+        }" @click="loadMoreLogs">{{ downloading ? '下载中，请稍后...' : '加载' }}</span>
       </div>
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
@@ -34,8 +34,7 @@
 import { defineComponent, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, watch } from 'vue';
 import { ILogVo } from '@/api/dto/workflow-execution-record';
 
-// const SIZE = 10;
-// const SIZE = 5000;
+const MAX_SIZE = 1000;
 export default defineComponent({
   name: 'jm-log-viewer',
   props: {
@@ -66,7 +65,7 @@ export default defineComponent({
     const downloading = ref<boolean>(false);
     const lines = [] as string[];
     let line = 0;
-    let size = 5000;
+    // let size = 1000;
     const currentLine = ref<number>();
     const moreLog = ref<boolean>(props.more);
     const urlVal = ref<string>(props.url);
@@ -85,7 +84,7 @@ export default defineComponent({
     virtualNoDiv.style.visibility = 'hidden';
 
     const getEventSource = () => {
-      eventSource = new EventSource(eventUrl.value + size, { withCredentials: true });
+      eventSource = new EventSource(eventUrl.value + MAX_SIZE, { withCredentials: true });
       eventSource.onopen = () => {
         data.value = [];
       };
@@ -211,15 +210,20 @@ export default defineComponent({
         }
       },
       loadMoreLogs: async () => {
+        if (downloading.value) {
+          return;
+        }
         autoScroll.value = false;
         if (line <= 1) {
           moreLog.value = false;
           return;
         }
-        if (line > size) {
-          line -= size;
+        let size: number;
+        if (line > MAX_SIZE) {
+          line -= MAX_SIZE;
+          size = MAX_SIZE;
         } else {
-          size = size - (size - line);
+          size = line;
           line = 1;
           moreLog.value = false;
         }
