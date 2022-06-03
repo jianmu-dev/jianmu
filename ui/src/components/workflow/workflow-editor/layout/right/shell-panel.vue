@@ -104,6 +104,7 @@ export default defineComponent({
   color: @label-color;
   font-size: 14px;
   margin-bottom: 25px;
+  padding: 0 20px;
 
   .node-name {
     margin-top: 20px;

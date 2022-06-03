@@ -211,6 +211,7 @@ export default defineComponent({
   font-size: 14px;
   margin-bottom: 25px;
   margin-top: 20px;
+  padding: 0 20px;
 
   // 页面全局设置，所有折叠按钮生效
   .jm-icon-button-right::before {
