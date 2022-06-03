@@ -41,6 +41,8 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-editor-cron-panel {
+  padding: 0 20px;
+
   .schedule-item {
     margin-top: 20px;
   }

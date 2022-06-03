@@ -1,7 +1,7 @@
 <template>
   <jm-drawer
     title="节点配置面板"
-    :size="380"
+    :size="410"
     direction="rtl"
     destroy-on-close
   >
@@ -128,7 +128,6 @@ export default defineComponent({
 
     .panel-container {
       height: calc(100vh - 191px);
-      padding: 0 20px;
     }
 
     .footer {

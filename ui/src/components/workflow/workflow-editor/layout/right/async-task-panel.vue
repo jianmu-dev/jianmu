@@ -6,61 +6,108 @@
       ref="formRef"
       @submit.prevent
     >
-      <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
-        <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
-      </jm-form-item>
-      <jm-form-item
-        label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
-        <jm-select
-          v-loading="versionLoading"
-          :disabled="versionLoading"
-          v-model="form.version"
-          placeholder="请选择节点版本"
-          @change="changeVersion"
-        >
-          <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
-        </jm-select>
-        <div v-if="form.versionDescription?!versionLoading:false" class="version-description">
-          {{ form.versionDescription }}
-        </div>
-      </jm-form-item>
-      <div v-if="form.inputs">
+      <div class="set-padding">
+        <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
+          <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
+        </jm-form-item>
         <jm-form-item
-          v-for="(item,index) in form.inputs"
-          :key="item.ref"
-          :prop="`inputs.${index}.value`"
-          :rules="nodeData.getFormRules().inputs.fields[index].fields.value"
-          class="node-name"
-        >
-          <template #label>
-            {{ item.name }}
-            <jm-tooltip
-              placement="top"
-              v-if="item.description"
-              :append-to-body="false"
-              :content="item.description"
-            >
-              <i class="jm-icon-button-help"></i>
-            </jm-tooltip>
-          </template>
-          <secret-key-selector
-            v-if="item.type === ParamTypeEnum.SECRET"
-            v-model="item.value"
-            :placeholder="item.description?item.description:'请选择'+item.name"
-          />
-          <expression-editor
-            v-else
-            v-model="item.value"
-            :node-id="nodeId"
-            :placeholder="item.description?item.description:'请输入'+item.name"/>
+          label="节点版本" prop="version" :rules="nodeData.getFormRules().version" class="node-item">
+          <jm-select
+            v-loading="versionLoading"
+            :disabled="versionLoading"
+            v-model="form.version"
+            placeholder="请选择节点版本"
+            @change="changeVersion"
+          >
+            <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
+          </jm-select>
+          <div v-if="form.versionDescription?!versionLoading:false" class="version-description">
+            {{ form.versionDescription }}
+          </div>
         </jm-form-item>
-        <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failureMode"
-                      v-if="failureVisible">
-          <jm-radio-group v-model="form.failureMode">
-            <jm-radio :label="'suspend'">挂起</jm-radio>
-            <jm-radio :label="'ignore'">忽略</jm-radio>
-          </jm-radio-group>
-        </jm-form-item>
+      </div>
+      <div class="separate"></div>
+      <div v-if="form.version">
+        <div class="tab-container">
+          <div :class="{'input-tab':true,'selected-tab':tabFlag}" @click="tabFlag=true">
+            输入参数
+            <div class="checked-underline" v-if="tabFlag"></div>
+          </div>
+          <div :class="{'output-tab':true,'selected-tab':!tabFlag}" @click="tabFlag=false">
+            输出参数
+            <div class="checked-underline" v-if="!tabFlag"></div>
+          </div>
+        </div>
+        <div class="inputs-container set-padding" v-if="tabFlag">
+          <jm-form-item
+            v-for="(item,index) in form.inputs"
+            :key="item.ref"
+            :prop="`inputs.${index}.value`"
+            :rules="nodeData.getFormRules().inputs.fields[index].fields.value"
+            class="node-name"
+          >
+            <template #label>
+              {{ item.name }}
+              <jm-tooltip
+                placement="top"
+                v-if="item.description"
+                :append-to-body="false"
+                :content="item.description"
+              >
+                <i class="jm-icon-button-help"></i>
+              </jm-tooltip>
+            </template>
+            <secret-key-selector
+              v-if="item.type === ParamTypeEnum.SECRET"
+              v-model="item.value"
+              :placeholder="item.description?item.description:'请选择'+item.name"
+            />
+            <expression-editor
+              v-else
+              v-model="item.value"
+              :node-id="nodeId"
+              :placeholder="item.description?item.description:'请输入'+item.name"/>
+          </jm-form-item>
+          <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failureMode"
+                        v-if="failureVisible">
+            <jm-radio-group v-model="form.failureMode">
+              <jm-radio :label="'suspend'">挂起</jm-radio>
+              <jm-radio :label="'ignore'">忽略</jm-radio>
+            </jm-radio-group>
+          </jm-form-item>
+        </div>
+        <div class="outputs-container set-padding" v-else>
+          <div v-if="form.outputs">
+            <div v-for="item in form.outputs" :key="item.ref">
+              <div class="label">
+                <i class="required-icon" v-if="item.required"></i>
+                {{ item.name }}
+                <jm-tooltip
+                  placement="top"
+                  :append-to-body="false"
+                >
+                  <template #content>
+                    类型:{{ item.type }}<br>
+                    <span v-if="item.value">描述:{{ item.description }}</span>
+                  </template>
+                  <i class="jm-icon-button-help"></i>
+                </jm-tooltip>
+              </div>
+              <div class="content">
+                <template v-if="item.value">
+                  {{ item.value }}
+                </template>
+                <template v-else-if="item.description">
+                  {{ item.description }}
+                </template>
+                <template v-else>暂无描述</template>
+              </div>
+            </div>
+          </div>
+          <div v-if="!form.outputs[0]">
+            <jm-empty description="无输出参数" :image="noParamImage"></jm-empty>
+          </div>
+        </div>
       </div>
     </jm-form>
   </div>
@@ -80,6 +127,7 @@ import { INodeDefVersionListVo, INodeParameterVo } from '@/api/dto/node-definiti
 import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
 import { Node } from '@antv/x6';
+import noParamImage from '../../svgs/no-param.svg';
 
 export default defineComponent({
   components: { SecretKeySelector, ExpressionEditor },
@@ -101,6 +149,7 @@ export default defineComponent({
     nodeId.value = getNode().id;
     const versionLoading = ref<boolean>(false);
     const failureVisible = ref<boolean>(false);
+    const tabFlag = ref<boolean>(true);
 
     /**
      * push输入/输出参数
@@ -194,6 +243,8 @@ export default defineComponent({
       failureVisible,
       // 获取节点信息
       changeVersion,
+      tabFlag,
+      noParamImage,
     };
   },
 });
@@ -202,6 +253,10 @@ export default defineComponent({
 <style scoped lang="less">
 .jm-workflow-editor-async-task-panel {
   margin-bottom: 25px;
+
+  .set-padding {
+    padding: 0 20px;
+  }
 
   .name-item {
     margin-top: 20px;
@@ -224,6 +279,78 @@ export default defineComponent({
     color: #7B8C9C;
     line-height: 18px;
     margin-top: 10px;
+  }
+
+  .separate {
+    height: 6px;
+    background: #FAFBFC;
+    margin-top: 20px;
+  }
+
+  .tab-container {
+    display: flex;
+    font-size: 14px;
+    color: #7B8C9C;
+    height: 50px;
+    border-bottom: 1px solid #E6EBF2;
+    margin-bottom: 10px;
+    padding-left: 20px;
+
+    .input-tab,
+    .output-tab {
+      line-height: 50px;
+      width: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+
+      .checked-underline {
+        width: 37px;
+        border: 1px solid #096DD9;
+        position: relative;
+        top: -1px;
+      }
+    }
+
+    .input-tab {
+      margin-right: 40px;
+    }
+
+    .selected-tab {
+      color: #096DD9;
+    }
+  }
+
+  .outputs-container {
+    font-size: 14px;
+
+    .required-icon {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: url('../../svgs/required-icon.svg');
+      position: relative;
+      top: -5px;
+    }
+
+    .label {
+      color: #3F536E;
+      margin-bottom: 10px;
+      padding-top: 10px;
+    }
+
+    .content {
+      color: #082340;
+      background: #F6F8FB;
+      border-radius: 2px;
+      padding: 8px 17px 8px 14px;
+      margin-bottom: 10px;
+    }
+
+    .el-empty {
+      padding-top: 50px;
+    }
   }
 }
 </style>
