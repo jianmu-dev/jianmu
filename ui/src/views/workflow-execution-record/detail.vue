@@ -86,7 +86,7 @@
           <div>流程版本号</div>
         </div>
         <jm-tooltip
-          v-if="[WorkflowExecutionRecordStatusEnum.RUNNING, WorkflowExecutionRecordStatusEnum.SUSPENDED].includes(data.record?.status)"
+          v-if="checkWorkflowRunning(data.record?.status)"
           content="终止"
           placement="left"
         >
@@ -175,6 +175,20 @@ export default defineComponent({
     };
     provide('loadData', loadData);
 
+    const checkWorkflowRunning = (status: WorkflowExecutionRecordStatusEnum): boolean => {
+      return [WorkflowExecutionRecordStatusEnum.INIT,
+        WorkflowExecutionRecordStatusEnum.RUNNING,
+        WorkflowExecutionRecordStatusEnum.SUSPENDED,
+      ].includes(status);
+    };
+
+    const checkTaskRunning = (status: TaskStatusEnum): boolean => {
+      return [TaskStatusEnum.WAITING,
+        TaskStatusEnum.RUNNING,
+        TaskStatusEnum.SUSPENDED,
+      ].includes(status);
+    };
+
     const loadDetail = async (refreshing?: boolean) => {
       if (terminateLoad) {
         console.debug('组件已卸载，终止刷新');
@@ -194,9 +208,8 @@ export default defineComponent({
         const { status } = state.recordDetail
           .record as IWorkflowExecutionRecordVo;
 
-        if ([WorkflowExecutionRecordStatusEnum.RUNNING, WorkflowExecutionRecordStatusEnum.SUSPENDED].includes(status) ||
-          state.recordDetail.taskRecords.find(item =>
-            [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING, TaskStatusEnum.SUSPENDED].includes(item.status))) {
+        if (checkWorkflowRunning(status) ||
+          state.recordDetail.taskRecords.find(item => checkTaskRunning(item.status))) {
           console.debug('3秒后刷新');
           await sleep(3000);
           await loadDetail(true);
@@ -295,6 +308,7 @@ export default defineComponent({
         reloadMain();
       },
       datetimeFormatter,
+      checkWorkflowRunning,
       execute: () => {
         const isWarning =
           data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
