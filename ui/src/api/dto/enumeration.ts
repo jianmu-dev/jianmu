@@ -2,6 +2,7 @@
  * 流程执行记录状态枚举
  */
 export enum WorkflowExecutionRecordStatusEnum {
+  INIT = 'INIT',
   RUNNING = 'RUNNING',
   FINISHED = 'FINISHED',
   TERMINATED = 'TERMINATED',
