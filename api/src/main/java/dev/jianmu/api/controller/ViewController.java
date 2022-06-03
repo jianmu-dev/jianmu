@@ -21,8 +21,10 @@ import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -351,14 +353,22 @@ public class ViewController {
 
     @GetMapping(path = "/logs/task/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "任务日志订阅接口", description = "任务日志订阅接口,可以使用SSE方式订阅最新日志")
-    public SseEmitter streamSseTaskLog(@PathVariable String logId, @Valid LogSubscribingDto dto) {
-        return this.storageService.readLog(logId, dto.getSize(), true);
+    public ResponseEntity<SseEmitter> streamSseTaskLog(@PathVariable String logId, @Valid LogSubscribingDto dto) {
+        var headers = new HttpHeaders();
+        headers.add("X-Accel-Buffering", "no");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(this.storageService.readLog(logId, dto.getSize(), true));
     }
 
     @GetMapping(path = "/logs/workflow/subscribe/{logId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "流程日志订阅接口", description = "流程日志订阅接口,可以使用SSE方式订阅最新日志")
-    public SseEmitter streamSseWorkflowLog(@PathVariable String logId, @Valid LogSubscribingDto dto) {
-        return this.storageService.readLog(logId, dto.getSize(), false);
+    public ResponseEntity<SseEmitter> streamSseWorkflowLog(@PathVariable String logId, @Valid LogSubscribingDto dto) {
+        var headers = new HttpHeaders();
+        headers.add("X-Accel-Buffering", "no");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(this.storageService.readLog(logId, dto.getSize(), false));
     }
 
     @GetMapping(path = "/logs/task/random/{logId}")
