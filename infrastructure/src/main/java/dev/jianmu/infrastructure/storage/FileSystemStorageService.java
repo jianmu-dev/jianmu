@@ -125,8 +125,8 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     private void firstReadLog(String filePath, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
         var endLine = this.countFileLines(filePath);
-        var startLine = endLine > size ? endLine - size : 1;
-        var cmd = "sed -n '" + startLine + ", " + (endLine - 1) + "p' " + filePath;
+        var startLine = endLine > size ? (endLine - size + 1) : 1;
+        var cmd = "sed -n '" + startLine + ", " + endLine + "p' " + filePath;
         try (var reader = this.execCmd(cmd)) {
             String str;
             while ((str = reader.readLine()) != null) {
