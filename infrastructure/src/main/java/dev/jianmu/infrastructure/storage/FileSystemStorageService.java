@@ -120,7 +120,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
             for (int i = 0; i < size; i++) {
                 var line = reader.readLine();
                 if (line == null) {
-                    return;
+                    break;
                 }
                 lines.add(line);
             }
