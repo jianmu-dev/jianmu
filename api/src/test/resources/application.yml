@@ -20,6 +20,3 @@ registry:
   url: http://127.0.0.1:8000
 credential:
   type: local
-jianmu:
-  worker:
-    rpc-secret: secret

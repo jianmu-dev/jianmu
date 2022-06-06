@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @description EmbeddedWorkerApplication
  * @create 2021-09-12 22:23
  */
-//@Service
+@Service
 @Slf4j
 public class EmbeddedWorkerApplication {
     private final StorageService storageService;
