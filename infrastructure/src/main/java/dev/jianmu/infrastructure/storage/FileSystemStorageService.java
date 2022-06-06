@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 /**
  * @author Ethan Liu
@@ -116,16 +117,15 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         try (var reader = new ReversedLinesFileReader(path.toFile(), StandardCharsets.UTF_8)) {
             var countLine = Files.lines(path).count();
             consumerVo.getCounter().set(countLine - size);
-            var lines = new ArrayList<String>();
+            var lines = new String[size];
             for (int i = 0; i < size; i++) {
                 var line = reader.readLine();
                 if (line == null) {
                     break;
                 }
-                lines.add(line);
+                lines[size - 1 -i] = line;
             }
-            Collections.reverse(lines);
-            lines.forEach(line -> this.template.sendMessage(SseEmitter.event()
+            Stream.of(lines).forEach(line -> this.template.sendMessage(SseEmitter.event()
                     .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
                     .data(line), sseEmitter));
             consumerVo.getCounter().set(countLine);
