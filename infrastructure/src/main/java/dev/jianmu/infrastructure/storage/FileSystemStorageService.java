@@ -111,7 +111,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     private void firstReadLog(Path path, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
-        try (var reader = new ReversedLinesFileReader(path.toFile(), StandardCharsets.UTF_8)) {
+        try {
             var countLine = Files.lines(path).count();
             consumerVo.getCounter().set(countLine - size);
             Files.lines(path)
