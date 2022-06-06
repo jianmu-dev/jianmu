@@ -84,7 +84,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         var sseEmitter = this.template.newSseEmitter();
         var consumerVo = this.monitoringFileService.listen(fullName, ((file, counter) -> {
             var endLine = this.countFileLines(file.toFile().getPath());
-            var cmd = "sed -n '" + counter.intValue() + ", " + endLine + "p' " + file.toFile().getPath();
+            var cmd = "sed -n '" + (counter.intValue() + 1) + ", " + endLine + "p' " + file.toFile().getPath();
             try (var reader = this.execCmd(cmd)) {
                 String str;
                 while ((str = reader.readLine()) != null) {
@@ -93,7 +93,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
                             .data(str), sseEmitter);
                 }
             } catch (IOException e) {
-                throw new StorageException("Could not read log file", e);
+                logger.trace("Could not read log file", e);
             }
         }));
         String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + fullName;
@@ -106,11 +106,12 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         try (var reader = this.execCmd(cmd)) {
             var result = reader.readLine();
             if (result == null) {
-                throw new StorageException("Could not to get file lines: " + filepath);
+                logger.trace("Could not to get file lines: " + filepath);
             }
             return Integer.parseInt(result);
         } catch (IOException e) {
-            throw new StorageException("Could not to get execution result", e);
+            logger.trace("Could not to get execution result", e);
+            return 0;
         }
     }
 
@@ -136,7 +137,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
             }
             consumerVo.getCounter().set(endLine);
         } catch (IOException e) {
-            throw new StorageException("Could not read log file", e);
+            logger.trace("Could not read log file", e);
         }
     }
 
@@ -154,7 +155,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
                 .build());
             }
         } catch (IOException e) {
-            throw new StorageException("Could not read log file", e);
+            logger.trace("Could not read log file", e);
         }
         return list;
     }

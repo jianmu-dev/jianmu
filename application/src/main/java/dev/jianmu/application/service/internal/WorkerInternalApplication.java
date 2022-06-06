@@ -369,14 +369,6 @@ public class WorkerInternalApplication {
             response.setStatus(HttpStatus.SC_CONFLICT);
             return null;
         }
-        if (!taskInstance.isDeletionVolume()) {
-            var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
-                    .orElseThrow(() -> new RuntimeException("未找到流程实例"));
-            if (!workflowInstance.isRunning()) {
-                response.setStatus(HttpStatus.SC_GONE);
-                return null;
-            }
-        }
         taskInstance.acceptTask(version);
         if (!this.taskInstanceRepository.acceptTask(taskInstance)) {
             response.setStatus(HttpStatus.SC_CONFLICT);
