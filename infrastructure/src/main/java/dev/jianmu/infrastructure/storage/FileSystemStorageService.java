@@ -118,7 +118,11 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
             consumerVo.getCounter().set(countLine - size);
             var lines = new ArrayList<String>();
             for (int i = 0; i < size; i++) {
-                lines.add(reader.readLine());
+                var line = reader.readLine();
+                if (line == null) {
+                    return;
+                }
+                lines.add(line);
             }
             Collections.reverse(lines);
             lines.forEach(line -> this.template.sendMessage(SseEmitter.event()
