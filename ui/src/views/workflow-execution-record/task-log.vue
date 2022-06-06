@@ -53,7 +53,7 @@
         <div>
           <div class="param-key">执行时长</div>
           <div class="param-value">
-            <jm-timer :start-time="task.startTime" :end-time="task.endTime" :tip-append-to-body="false"></jm-timer>
+            <jm-timer :start-time="task.startTime" :end-time="task.endTime" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
