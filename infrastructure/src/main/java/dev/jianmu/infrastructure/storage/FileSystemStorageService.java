@@ -3,7 +3,6 @@ package dev.jianmu.infrastructure.storage;
 import dev.jianmu.infrastructure.SseTemplate;
 import dev.jianmu.infrastructure.storage.vo.ConsumerVo;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
-import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -18,10 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Stream;
 
 /**
  * @author Ethan Liu
@@ -114,20 +111,15 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     private void firstReadLog(Path path, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
-        try (var reader = new ReversedLinesFileReader(path.toFile(), StandardCharsets.UTF_8)) {
+        try {
             var countLine = Files.lines(path).count();
             consumerVo.getCounter().set(countLine - size);
-            var lines = new String[size];
-            for (int i = 0; i < size; i++) {
-                var line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                lines[size - 1 -i] = line;
-            }
-            Stream.of(lines).forEach(line -> this.template.sendMessage(SseEmitter.event()
-                    .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
-                    .data(line), sseEmitter));
+            Files.lines(path)
+                    .skip(countLine > size ? countLine - size -1 : 0)
+                    .forEach(line -> this.template.sendMessage(SseEmitter.event()
+                            .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
+                            .data(line), sseEmitter)
+                    );
             consumerVo.getCounter().set(countLine);
         } catch (IOException e) {
             logger.trace("Could not read log file", e);
