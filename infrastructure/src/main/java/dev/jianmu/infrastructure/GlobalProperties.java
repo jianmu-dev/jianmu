@@ -47,6 +47,6 @@ public class GlobalProperties {
     @Validated
     public static class Worker {
         @NotBlank
-        private String rpcSecret;
+        private String secret;
     }
 }

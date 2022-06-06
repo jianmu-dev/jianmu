@@ -107,6 +107,7 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
             var result = reader.readLine();
             if (result == null) {
                 logger.trace("Could not to get file lines: " + filepath);
+                return 0;
             }
             return Integer.parseInt(result);
         } catch (IOException e) {
