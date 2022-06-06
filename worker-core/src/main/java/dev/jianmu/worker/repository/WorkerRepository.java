@@ -2,8 +2,6 @@ package dev.jianmu.worker.repository;
 
 import dev.jianmu.worker.aggregate.Worker;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,6 +20,4 @@ public interface WorkerRepository {
     Optional<Worker> findById(String workerId);
 
     Worker findByType(Worker.Type type);
-
-    List<Worker> findByTypeAndCreatedTimeLessThan(Worker.Type type, LocalDateTime createdTime);
 }

@@ -82,7 +82,6 @@ public class WorkflowEventHandler {
                 .nodeRef(event.getNodeRef())
                 .sender(event.getSender())
                 .build();
-        this.workflowInstanceInternalApplication.statusCheck(event.getTriggerId());
         this.workflowInternalApplication.activateNode(cmd);
         log.info("handle NodeActivatingEvent end-----------------------------------------------------");
     }
@@ -101,6 +100,7 @@ public class WorkflowEventHandler {
                 .asyncTaskType(event.getNodeType())
                 .version(event.getVersion())
                 .build();
+        this.workflowInstanceInternalApplication.statusCheck(event.getTriggerId());
         this.asyncTaskInstanceInternalApplication.activate(cmd);
         log.info("handle AsyncTaskActivatingEvent end-----------------------------------------------------");
     }
