@@ -79,7 +79,7 @@ public interface WorkflowInstanceMapper {
     @Delete("delete from workflow_instance where id=#{id}")
     void deleteById(String id);
 
-    @Select("SELECT * FROM jianmu.workflow_instance where workflow_ref=#{workflowRef} and serial_no < ((select max(serial_no) from workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
+    @Select("SELECT * FROM workflow_instance where workflow_ref=#{workflowRef} and serial_no < ((select max(serial_no) from workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
