@@ -16,12 +16,6 @@ public interface TaskInstanceRepository {
 
     void updateStatus(TaskInstance taskInstance);
 
-    void updateWorkerId(TaskInstance taskInstance);
-
-    boolean acceptTask(TaskInstance taskInstance);
-
-    void terminate(TaskInstance taskInstance);
-
     void saveSucceeded(TaskInstance taskInstance);
 
     Optional<TaskInstance> findById(String instanceId);
@@ -39,8 +33,4 @@ public interface TaskInstanceRepository {
     void deleteByWorkflowRef(String workflowRef);
 
     void deleteByTriggerId(String triggerId);
-
-    Optional<TaskInstance> findByWorkerIdAndMinVersion(String workerId);
-
-    Optional<TaskInstance> findByIdAndVersion(String id, int version);
 }

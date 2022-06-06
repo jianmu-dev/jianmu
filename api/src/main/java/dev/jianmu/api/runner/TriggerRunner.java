@@ -36,7 +36,7 @@ public class TriggerRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         this.triggerApplication.startTriggers();
-//        this.resumeTasks();
+        this.resumeTasks();
     }
 
     @Async

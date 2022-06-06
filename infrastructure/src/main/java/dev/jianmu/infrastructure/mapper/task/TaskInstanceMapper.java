@@ -14,18 +14,12 @@ import java.util.Optional;
  * @create 2021-03-25 21:39
  */
 public interface TaskInstanceMapper {
-    @Insert("insert into task_instance(id, serial_no, def_key, node_info, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status, worker_id, _version) " +
-            "values(#{id}, #{serialNo}, #{defKey}, #{nodeInfo, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status}, #{workerId}, #{version})")
+    @Insert("insert into task_instance(id, serial_no, def_key, node_info, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status) " +
+            "values(#{id}, #{serialNo}, #{defKey}, #{nodeInfo, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status})")
     void add(TaskInstance taskInstance);
 
     @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void updateStatus(TaskInstance taskInstance);
-
-    @Update("update task_instance set worker_id = #{workerId}, end_time = #{endTime} where id = #{id}")
-    void updateWorkerId(TaskInstance taskInstance);
-
-    @Update("update task_instance set end_time = #{endTime}, _version = _version + 1 where id = #{id} and _version = #{version}")
-    boolean acceptTask(TaskInstance taskInstance);
 
     @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void saveSucceeded(TaskInstance taskInstance);
@@ -45,8 +39,6 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
     @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findById(String instanceId);
@@ -60,8 +52,6 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
     @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByBusinessId(String businessId);
@@ -75,8 +65,6 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
     @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findByBusinessIdAndMaxSerialNo(String businessId);
@@ -90,8 +78,6 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
     @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByTriggerId(String triggerId);
@@ -105,8 +91,6 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
     @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findRunningTask();
@@ -120,42 +104,10 @@ public interface TaskInstanceMapper {
     @Result(column = "workflow_version", property = "workflowVersion")
     @Result(column = "business_id", property = "businessId")
     @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findAll(
             @Param("pageNum") int pageNum,
             @Param("pageSize") int pageSize
     );
-
-    @Select("select * from task_instance where worker_id = #{workerId} and status = 'WAITING' And _version = 0 limit 1")
-    @Result(column = "serial_no", property = "serialNo")
-    @Result(column = "def_key", property = "defKey")
-    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
-    @Result(column = "async_task_ref", property = "asyncTaskRef")
-    @Result(column = "workflow_ref", property = "workflowRef")
-    @Result(column = "workflow_version", property = "workflowVersion")
-    @Result(column = "business_id", property = "businessId")
-    @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
-    @Result(column = "start_time", property = "startTime")
-    @Result(column = "end_time", property = "endTime")
-    Optional<TaskInstance> findByWorkerIdAndMinVersion(String workerId);
-
-    @Select("select * from task_instance where id = #{id} and _version = #{version}")
-    @Result(column = "serial_no", property = "serialNo")
-    @Result(column = "def_key", property = "defKey")
-    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
-    @Result(column = "async_task_ref", property = "asyncTaskRef")
-    @Result(column = "workflow_ref", property = "workflowRef")
-    @Result(column = "workflow_version", property = "workflowVersion")
-    @Result(column = "business_id", property = "businessId")
-    @Result(column = "trigger_id", property = "triggerId")
-    @Result(column = "worker_id", property = "workerId")
-    @Result(column = "_version", property = "version")
-    @Result(column = "start_time", property = "startTime")
-    @Result(column = "end_time", property = "endTime")
-    Optional<TaskInstance> findByIdAndVersion(@Param("id") String id, @Param("version") int version);
 }

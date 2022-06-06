@@ -3,6 +3,7 @@ package dev.jianmu.infrastructure.storage;
 import dev.jianmu.infrastructure.SseTemplate;
 import dev.jianmu.infrastructure.storage.vo.ConsumerVo;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
+import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -17,7 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Ethan Liu
@@ -83,36 +86,21 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         var fullName = logFileName + LogfilePostfix;
         var sseEmitter = this.template.newSseEmitter();
         var consumerVo = this.monitoringFileService.listen(fullName, ((file, counter) -> {
-            var endLine = this.countFileLines(file.toFile().getPath());
-            var cmd = "sed -n '" + (counter.intValue() + 1) + ", " + endLine + "p' " + file.toFile().getPath();
-            try (var reader = this.execCmd(cmd)) {
-                String str;
-                while ((str = reader.readLine()) != null) {
-                    this.template.sendMessage(SseEmitter.event()
-                            .id(String.valueOf(counter.incrementAndGet()))
-                            .data(str), sseEmitter);
-                }
+            try {
+                Files.lines(file).skip(counter.intValue() - 2)
+                        .forEach(line -> {
+                            this.template.sendMessage(SseEmitter.event()
+                                    .id(String.valueOf(counter.get()))
+                                    .data(line), sseEmitter);
+                            counter.incrementAndGet();
+                        });
             } catch (IOException e) {
                 logger.trace("Could not read log file", e);
             }
         }));
         String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + fullName;
-        this.firstReadLog(filePath, consumerVo, sseEmitter, size);
+        this.firstReadLog(Paths.get(filePath), consumerVo, sseEmitter, size);
         return sseEmitter;
-    }
-
-    private int countFileLines(String filepath) {
-        var cmd = "wc -l " + filepath + " | awk '{print $1}'";
-        try (var reader = this.execCmd(cmd)) {
-            var result = reader.readLine();
-            if (result == null) {
-                logger.trace("Could not to get file lines: " + filepath);
-            }
-            return Integer.parseInt(result);
-        } catch (IOException e) {
-            logger.trace("Could not to get execution result", e);
-            return 0;
-        }
     }
 
     private BufferedReader execCmd(String cmd) {
@@ -124,18 +112,23 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         }
     }
 
-    private void firstReadLog(String filePath, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
-        var endLine = this.countFileLines(filePath);
-        var startLine = endLine > size ? (endLine - size + 1) : 1;
-        var cmd = "sed -n '" + startLine + ", " + endLine + "p' " + filePath;
-        try (var reader = this.execCmd(cmd)) {
-            String str;
-            while ((str = reader.readLine()) != null) {
-                this.template.sendMessage(SseEmitter.event()
-                        .id(String.valueOf(startLine++))
-                        .data(str), sseEmitter);
+    private void firstReadLog(Path path, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
+        try (var reader = new ReversedLinesFileReader(path.toFile(), StandardCharsets.UTF_8)) {
+            var countLine = Files.lines(path).count();
+            consumerVo.getCounter().set(countLine - size);
+            var lines = new ArrayList<String>();
+            for (int i = 0; i < size; i++) {
+                var line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                lines.add(line);
             }
-            consumerVo.getCounter().set(endLine);
+            Collections.reverse(lines);
+            lines.forEach(line -> this.template.sendMessage(SseEmitter.event()
+                    .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
+                    .data(line), sseEmitter));
+            consumerVo.getCounter().set(countLine);
         } catch (IOException e) {
             logger.trace("Could not read log file", e);
         }
@@ -144,16 +137,17 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     @Override
     public List<LogVo> randomReadLog(String logFileName, Integer line, Integer size, boolean isTask) {
         var filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
-        var cmd = "sed -n '" + line + ", " + (line + size - 1) + "p' " + filePath;
         var list = new ArrayList<LogVo>();
-        try (var reader = this.execCmd(cmd)) {
-            String str;
-            while ((str = reader.readLine()) != null) {
-                list.add(LogVo.builder()
-                        .lastEventId(String.valueOf(line++))
-                        .data(str)
-                .build());
-            }
+        var lineNum = new AtomicLong(line - 1);
+        try {
+            Files.lines(Paths.get(filePath))
+                    .skip(line == 1 ? 0 : line - 2)
+                    .limit(size)
+                    .forEach(str -> list.add(LogVo.builder()
+                                    .lastEventId(String.valueOf(lineNum.incrementAndGet()))
+                                    .data(str)
+                                    .build())
+                    );
         } catch (IOException e) {
             logger.trace("Could not read log file", e);
         }

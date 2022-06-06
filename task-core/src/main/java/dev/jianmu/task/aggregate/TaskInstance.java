@@ -34,10 +34,6 @@ public class TaskInstance extends AggregateRoot {
     private LocalDateTime endTime;
     // 任务运行状态
     private InstanceStatus status = InstanceStatus.WAITING;
-    // workerId
-    private String workerId;
-    // version
-    private int version;
 
     private TaskInstance() {
     }
@@ -62,27 +58,6 @@ public class TaskInstance extends AggregateRoot {
     public void dispatchFailed() {
         this.status = InstanceStatus.DISPATCH_FAILED;
         this.endTime = LocalDateTime.now();
-    }
-
-    public void acceptTask(int version) {
-        this.version = version;
-        this.endTime = LocalDateTime.now();
-    }
-
-    public boolean isVolume() {
-        return this.defKey.equals("start") || this.defKey.equals("end");
-    }
-
-    public boolean isCreationVolume() {
-        return this.defKey.equals("start");
-    }
-
-    public boolean isDeletionVolume() {
-        return this.defKey.equals("end");
-    }
-
-    public void setWorkerId(String workerId) {
-        this.workerId = workerId;
     }
 
     public String getId() {
@@ -131,14 +106,6 @@ public class TaskInstance extends AggregateRoot {
 
     public InstanceStatus getStatus() {
         return status;
-    }
-
-    public String getWorkerId() {
-        return workerId;
-    }
-
-    public Integer getVersion() {
-        return version;
     }
 
     public static final class Builder {

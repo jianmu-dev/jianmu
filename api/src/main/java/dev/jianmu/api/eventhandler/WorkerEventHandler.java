@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @author Ethan Liu
  * @create 2021-09-12 22:18
 */
-//@Component
+@Component
 @Slf4j
 public class WorkerEventHandler {
     private final EmbeddedWorkerApplication embeddedWorkerApplication;

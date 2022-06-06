@@ -381,12 +381,11 @@ public class ViewController {
              var os = response.getOutputStream()
         ) {
             byte[] bytes = new byte[1024];
-            int len = -1;
+            int len;
             while ((len = bis.read(bytes)) != -1) {
                 os.write(bytes, 0, len);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("未找到日志文件");
+        } catch (IOException ignored) {
         }
     }
 
@@ -398,12 +397,11 @@ public class ViewController {
              var os = response.getOutputStream()
         ) {
             byte[] bytes = new byte[1024];
-            int len = -1;
+            int len;
             while ((len = bis.read(bytes)) != -1) {
                 os.write(bytes, 0, len);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("未找到日志文件");
+        } catch (IOException ignored) {
         }
     }
 
