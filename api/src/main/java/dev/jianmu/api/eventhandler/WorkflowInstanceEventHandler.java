@@ -4,6 +4,7 @@ import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.application.service.internal.WorkflowInternalApplication;
+import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.event.process.ProcessEndedEvent;
 import dev.jianmu.workflow.event.process.ProcessNotRunningEvent;
@@ -31,17 +32,19 @@ public class WorkflowInstanceEventHandler {
     private final AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication;
     private final WorkerApplication workerApplication;
     private final ApplicationEventPublisher publisher;
+    private final MonitoringFileService monitoringFileService;
 
     public WorkflowInstanceEventHandler(
             WorkflowInternalApplication workflowInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
             WorkerApplication workerApplication,
-            ApplicationEventPublisher publisher
-    ) {
+            ApplicationEventPublisher publisher,
+            MonitoringFileService monitoringFileService) {
         this.workflowInternalApplication = workflowInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
         this.workerApplication = workerApplication;
         this.publisher = publisher;
+        this.monitoringFileService = monitoringFileService;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -81,6 +84,7 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         this.asyncTaskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
         log.info("-----------------------------------------------------");
+        this.monitoringFileService.clearCallbackByLogId(event.getTriggerId());
     }
 
     @EventListener
@@ -90,6 +94,7 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         this.workerApplication.cleanupWorkspace(event.getTriggerId());
         log.info("-----------------------------------------------------");
+        this.monitoringFileService.clearCallbackByLogId(event.getTriggerId());
     }
 
     @EventListener
@@ -99,5 +104,6 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         this.workerApplication.cleanupWorkspace(event.getTriggerId());
         log.info("-----------------------------------------------------");
+        this.monitoringFileService.clearCallbackByLogId(event.getTriggerId());
     }
 }
