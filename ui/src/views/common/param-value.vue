@@ -2,14 +2,14 @@
   <div class="param-value">
     <div class="value" :style="{maxWidth:maxWidth}">
       <span v-if="type===ParamTypeEnum.SECRET">**********</span>
-      <a :href="value" target="_blank" download v-else-if="isLink">
-        <jm-text-viewer @loaded="({contentMaxWidth})=>getMaxWidth(contentMaxWidth)" :value="value"
+      <a :href="paramValue" target="_blank" download v-else-if="isLink">
+        <jm-text-viewer @loaded="({contentMaxWidth})=>getMaxWidth(contentMaxWidth)" :value="paramValue"
                         :tip-append-to-body="tipAppendToBody" :tip-placement="tipPlacement"/>
       </a>
-      <jm-text-viewer @loaded="({contentMaxWidth})=>getMaxWidth(contentMaxWidth)" :value="value"
+      <jm-text-viewer @loaded="({contentMaxWidth})=>getMaxWidth(contentMaxWidth)" :value="paramValue"
                       :tip-append-to-body="tipAppendToBody" :tip-placement="tipPlacement" v-else/>
     </div>
-    <jm-text-copy :value="value"
+    <jm-text-copy :value="paramValue"
                   v-if="type!==ParamTypeEnum.SECRET" class="copy-btn"/>
   </div>
 </template>
@@ -22,8 +22,8 @@ export default defineComponent({
   name: 'jm-param-value',
   props: {
     value: {
-      type: String,
-      required: true,
+      type: [String, Number, Boolean],
+      default: '',
     },
     type: {
       type: String as PropType<ParamTypeEnum>,
@@ -40,20 +40,21 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const paramValue = computed<string>(() => String(props.value));
     const maxWidth = ref<string>('');
     const getMaxWidth = (width: number) => {
       maxWidth.value += width + 'px';
     };
     const regExp = /((http|https):\/\/([\w\-]+\.)+[\w\-]+(\/[\w\u4e00-\u9fa5\-\.\/?\@\%\!\&=\+\~\:\#\;\,]*)?)/ig;
     const isLink = computed<boolean>(() => {
-      const paramValue = String(props.value);
-      if (paramValue.startsWith('http://') || paramValue.startsWith('https://')) {
-        return !!paramValue.match(regExp);
+      if (paramValue.value.startsWith('http://') || paramValue.value.startsWith('https://')) {
+        return !!paramValue.value.match(regExp);
       } else {
         return false;
       }
     });
     return {
+      paramValue,
       maxWidth,
       getMaxWidth,
       isLink,
