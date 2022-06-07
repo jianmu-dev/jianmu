@@ -100,16 +100,8 @@ export default defineComponent({
     };
     // 加载更多/随机订阅日志
     const loadMore = async (line: number, size: number) => {
-      if (line > size) {
-        line -= size;
-      } else {
-        size = size - (size - line);
-        line = 1;
-        moreLog.value = false;
-      }
       try {
-        const data = await randomWorkflowLogs(process.value.triggerId, { line: line, size: size });
-        return { line, data };
+        return await randomWorkflowLogs(process.value.triggerId, { line: line, size: size });
       } catch (err) {
         proxy.$throw(err, proxy);
       }

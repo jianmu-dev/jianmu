@@ -229,12 +229,12 @@ export default defineComponent({
             line -= MAX_SIZE;
             size = MAX_SIZE;
           } else {
-            size = line;
+            size = line - 1;
             line = 1;
             moreLog.value = false;
           }
           await props.loadMore!(line, size).then((res: ILogVo[]) => {
-            moreLog.value = (line > 1);
+            moreLog.value = line > 1;
             res.reverse().forEach((item: ILogVo) => {
               data.value = [item.data, ...data.value];
             });
