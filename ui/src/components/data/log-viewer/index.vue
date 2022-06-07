@@ -14,10 +14,11 @@
     <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
     <div class="content" ref="contentRef">
       <div v-if="moreLog" class="more-line">
-        查看更多日志，请<span :class="{
+        <i class="jm-icon-button-loading" v-if="loadLoading"></i>
+        <span :class="{
           'download-txt': true,
-          doing: downloading,
-        }" @click="loadMoreLogs">{{ downloading ? '下载中，请稍后...' : '加载' }}</span>
+          doing: loadLoading,
+        }" @click="loadMoreLogs">{{ loadLoading ? '加载中，请稍后...' : '加载更多日志' }}</span>
       </div>
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
@@ -31,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, watch } from 'vue';
+import { defineComponent, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, watch } from 'vue';
 import { ILogVo } from '@/api/dto/workflow-execution-record';
 
 const MAX_SIZE = 1000;
@@ -58,11 +59,13 @@ export default defineComponent({
     loadMore: Function,
   },
   setup(props) {
+    const { proxy } = getCurrentInstance() as any;
     const data = ref<string[]>([]);
     const contentRef = ref<HTMLDivElement>();
     const noWidth = ref<number>(0);
     const autoScroll = ref<boolean>(true);
     const downloading = ref<boolean>(false);
+    const loadLoading = ref<boolean>(false);
     const lines = [] as string[];
     let line = 0;
     // let size = 1000;
@@ -182,6 +185,7 @@ export default defineComponent({
       noWidth,
       autoScroll,
       downloading,
+      loadLoading,
       handleAutoScroll,
       getLog,
       moreLog,
@@ -210,29 +214,36 @@ export default defineComponent({
         }
       },
       loadMoreLogs: async () => {
-        if (downloading.value) {
+        if (loadLoading.value) {
           return;
         }
-        autoScroll.value = false;
-        if (line <= 1) {
-          moreLog.value = false;
-          return;
-        }
-        let size: number;
-        if (line > MAX_SIZE) {
-          line -= MAX_SIZE;
-          size = MAX_SIZE;
-        } else {
-          size = line - 1;
-          line = 1;
-          moreLog.value = false;
-        }
-        await props.loadMore!(line, size).then((res: ILogVo[]) => {
-          moreLog.value = (line > 1);
-          res.reverse().forEach((item: ILogVo) => {
-            data.value = [item.data, ...data.value];
+        loadLoading.value = true;
+        try {
+          autoScroll.value = false;
+          if (line <= 1) {
+            moreLog.value = false;
+            return;
+          }
+          let size: number;
+          if (line > MAX_SIZE) {
+            line -= MAX_SIZE;
+            size = MAX_SIZE;
+          } else {
+            size = line;
+            line = 1;
+            moreLog.value = false;
+          }
+          await props.loadMore!(line, size).then((res: ILogVo[]) => {
+            moreLog.value = (line > 1);
+            res.reverse().forEach((item: ILogVo) => {
+              data.value = [item.data, ...data.value];
+            });
           });
-        });
+        } catch (err) {
+          proxy.$throw(err, proxy);
+        } finally {
+          loadLoading.value = false;
+        }
       },
     };
   },
