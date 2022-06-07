@@ -46,8 +46,9 @@ export default defineComponent({
     };
     const regExp = /((http|https):\/\/([\w\-]+\.)+[\w\-]+(\/[\w\u4e00-\u9fa5\-\.\/?\@\%\!\&=\+\~\:\#\;\,]*)?)/ig;
     const isLink = computed<boolean>(() => {
-      if (props.value.startsWith('http://') || props.value.startsWith('https://')) {
-        return !!props.value.match(regExp);
+      const paramValue = String(props.value);
+      if (paramValue.startsWith('http://') || paramValue.startsWith('https://')) {
+        return !!paramValue.match(regExp);
       } else {
         return false;
       }
