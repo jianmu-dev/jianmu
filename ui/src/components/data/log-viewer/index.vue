@@ -53,7 +53,7 @@ export default defineComponent({
     },
     url: {
       type: String,
-      required: true,
+      default: '',
     },
     download: Function,
     loadMore: Function,
