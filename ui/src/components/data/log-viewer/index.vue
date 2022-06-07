@@ -74,7 +74,7 @@ export default defineComponent({
     const urlVal = ref<string>(props.url);
 
     let eventSource: any;
-    const eventUrl = ref<string>(props.url as string);
+    const eventUrl = ref<string>(props.url);
 
     const virtualNoDiv = document.createElement('div');
     virtualNoDiv.style.position = 'fixed';
