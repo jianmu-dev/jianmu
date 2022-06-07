@@ -7,6 +7,7 @@ import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.infrastructure.docker.TaskFailedEvent;
 import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
 import dev.jianmu.infrastructure.docker.TaskRunningEvent;
+import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.event.TaskInstanceFailedEvent;
 import dev.jianmu.task.event.TaskInstanceRunningEvent;
@@ -31,15 +32,17 @@ public class TaskInstanceEventHandler {
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
     private final AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication;
     private final WorkerApplication workerApplication;
+    private final MonitoringFileService monitoringFileService;
 
     public TaskInstanceEventHandler(
             TaskInstanceInternalApplication taskInstanceInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
-            WorkerApplication workerApplication
-    ) {
+            WorkerApplication workerApplication,
+            MonitoringFileService monitoringFileService) {
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
         this.workerApplication = workerApplication;
+        this.monitoringFileService = monitoringFileService;
     }
 
     @EventListener
@@ -55,6 +58,7 @@ public class TaskInstanceEventHandler {
         } else {
             this.taskInstanceInternalApplication.executeFailed(taskResultDto.getTaskInstanceId());
         }
+        this.monitoringFileService.clearCallbackByLogId(taskFinishedEvent.getTaskId());
     }
 
     @EventListener
@@ -71,6 +75,7 @@ public class TaskInstanceEventHandler {
         MDC.put("triggerId", taskFailedEvent.getTriggerId());
         logger.info("task {} is failed, due to: {}", taskFailedEvent.getTaskId(), taskFailedEvent.getErrorMsg());
         this.taskInstanceInternalApplication.executeFailed(taskFailedEvent.getTaskId());
+        this.monitoringFileService.clearCallbackByLogId(taskFailedEvent.getTaskId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
