@@ -53,7 +53,6 @@
                       align="center">
                       <template #default="scope">
                         <param-value
-                          v-if="scope.row.value"
                           :value="scope.row.value"
                           :tip-append-to-body="false"
                           :type="scope.row.valueType"
@@ -83,6 +82,7 @@ import { ParamTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import useClipboard from 'vue-clipboard3';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
+
 export default defineComponent({
   components: { JmTextViewer, ParamValue },
   props: {

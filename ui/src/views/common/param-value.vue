@@ -10,7 +10,7 @@
                       :tip-append-to-body="tipAppendToBody" :tip-placement="tipPlacement" v-else/>
     </div>
     <jm-text-copy :value="paramValue"
-                  v-if="type!==ParamTypeEnum.SECRET" class="copy-btn"/>
+                  v-if="type!==ParamTypeEnum.SECRET && paramValue" class="copy-btn"/>
   </div>
 </template>
 
