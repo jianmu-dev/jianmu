@@ -13,6 +13,10 @@ public class WebhookParameter {
     private Boolean required = false;
     private Object defaultValue;
 
+    public void setDefaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
     public boolean isRequired() {
         return required;
     }

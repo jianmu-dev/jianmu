@@ -684,6 +684,9 @@ public class TriggerApplication {
         }
         trigger.getParam().forEach(webhookParameter -> {
             var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+            var defaultParameter = Parameter.Type.getTypeByName(webhookParameter.getType()).newParameter(webhookParameter.getDefaultValue());
+            webhookParameter.setDefaultValue(defaultParameter.getValue());
+            webhookParameter.setValue(defaultParameter.getValue());
             if (value != null) {
                 webhookParameter.setValue(value);
             }
