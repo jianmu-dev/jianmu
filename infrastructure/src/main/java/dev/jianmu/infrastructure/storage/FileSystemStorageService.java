@@ -1,8 +1,11 @@
 package dev.jianmu.infrastructure.storage;
 
 import dev.jianmu.infrastructure.SseTemplate;
-import dev.jianmu.infrastructure.storage.vo.ConsumerVo;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
+import dev.jianmu.task.aggregate.InstanceStatus;
+import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -40,13 +43,22 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     private final Path rootLocation;
     private final Path webhookRootLocation;
     private final Path workflowLocation;
+    private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final TaskInstanceRepository taskInstanceRepository;
 
-    public FileSystemStorageService(SseTemplate template, MonitoringFileService monitoringFileService, StorageProperties properties) {
+    public FileSystemStorageService(SseTemplate template,
+                                    MonitoringFileService monitoringFileService,
+                                    StorageProperties properties,
+                                    WorkflowInstanceRepository workflowInstanceRepository,
+                                    TaskInstanceRepository taskInstanceRepository
+    ) {
         this.template = template;
         this.monitoringFileService = monitoringFileService;
         this.rootLocation = Paths.get(properties.getFilepath(), taskFilepath);
         this.webhookRootLocation = Paths.get(properties.getFilepath(), webhookFilepath);
         this.workflowLocation = Paths.get(properties.getFilepath(), workflowFilepath);
+        this.workflowInstanceRepository = workflowInstanceRepository;
+        this.taskInstanceRepository = taskInstanceRepository;
     }
 
     @Override
@@ -81,11 +93,25 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     @Override
     public SseEmitter readLog(String logFileName, int size, boolean isTask) {
+        boolean isComplete;
+        if (isTask) {
+            isComplete = this.taskInstanceRepository.findById(logFileName)
+                    .stream().noneMatch(taskInstance -> taskInstance.getStatus() == InstanceStatus.WAITING || taskInstance.getStatus() == InstanceStatus.RUNNING);
+        } else {
+            isComplete = this.workflowInstanceRepository.findByTriggerId(logFileName)
+                    .stream().noneMatch(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.RUNNING || workflowInstance.getStatus() == ProcessStatus.SUSPENDED);
+        }
         var fullName = logFileName + LogfilePostfix;
+        String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + fullName;
         var sseEmitter = this.template.newSseEmitter();
+        if (isComplete) {
+            this.firstReadLog(Paths.get(filePath), new AtomicLong(1), sseEmitter, size);
+            return sseEmitter;
+        }
+        // 订阅未完成日志
         var consumerVo = this.monitoringFileService.listen(fullName, ((file, counter) -> {
             try {
-                Files.lines(file).skip(counter.intValue() - 2)
+                Files.lines(file).skip(counter.intValue())
                         .forEach(line -> {
                             this.template.sendMessage(SseEmitter.event()
                                     .id(String.valueOf(counter.get()))
@@ -96,31 +122,21 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
                 logger.trace("Could not read log file", e);
             }
         }));
-        String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + fullName;
-        this.firstReadLog(Paths.get(filePath), consumerVo, sseEmitter, size);
+        this.firstReadLog(Paths.get(filePath), consumerVo.getCounter(), sseEmitter, size);
         return sseEmitter;
     }
 
-    private BufferedReader execCmd(String cmd) {
-        try {
-            var process = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", cmd});
-            return new BufferedReader(new InputStreamReader(new BufferedInputStream(process.getInputStream())));
-        } catch (IOException e) {
-            throw new StorageException("Could not execution command", e);
-        }
-    }
-
-    private void firstReadLog(Path path, ConsumerVo consumerVo, SseEmitter sseEmitter, int size) {
+    private void firstReadLog(Path path, AtomicLong counter, SseEmitter sseEmitter, int size) {
         try {
             var countLine = Files.lines(path).count();
-            consumerVo.getCounter().set(countLine - size);
+            counter.set(countLine - size);
             Files.lines(path)
-                    .skip(countLine > size ? countLine - size -1 : 0)
+                    .skip(countLine > size ? countLine - size : 0)
                     .forEach(line -> this.template.sendMessage(SseEmitter.event()
-                            .id(String.valueOf(consumerVo.getCounter().incrementAndGet()))
+                            .id(String.valueOf(counter.incrementAndGet()))
                             .data(line), sseEmitter)
                     );
-            consumerVo.getCounter().set(countLine);
+            counter.set(countLine);
         } catch (IOException e) {
             logger.trace("Could not read log file", e);
         }
@@ -133,12 +149,12 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         var lineNum = new AtomicLong(line - 1);
         try {
             Files.lines(Paths.get(filePath))
-                    .skip(line == 1 ? 0 : line - 2)
+                    .skip(line - 1)
                     .limit(size)
                     .forEach(str -> list.add(LogVo.builder()
-                                    .lastEventId(String.valueOf(lineNum.incrementAndGet()))
-                                    .data(str)
-                                    .build())
+                            .lastEventId(String.valueOf(lineNum.incrementAndGet()))
+                            .data(str)
+                            .build())
                     );
         } catch (IOException e) {
             logger.trace("Could not read log file", e);
