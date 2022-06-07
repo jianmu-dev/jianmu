@@ -168,7 +168,6 @@
                     </div>
                     <template v-else>
                       <param-value
-                        v-if="scope.row.value"
                         :value="scope.row.value"
                         :type="scope.row.valueType"
                       />

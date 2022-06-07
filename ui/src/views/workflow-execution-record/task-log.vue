@@ -166,7 +166,6 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <param-value
-                          v-if="scope.row.value"
                           :value="scope.row.value"
                           :tip-append-to-body="false"
                           :type="scope.row.valueType"
@@ -233,7 +232,6 @@
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
                         <param-value
-                          v-if="scope.row.value"
                           :value="scope.row.value"
                           :tip-append-to-body="false"
                           :type="scope.row.valueType"
