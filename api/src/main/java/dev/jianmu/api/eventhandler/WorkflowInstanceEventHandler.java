@@ -24,7 +24,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class WorkflowInstanceEventHandler {
     private final WorkflowInternalApplication workflowInternalApplication;
     private final AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication;
-    private final WorkerApplication workerApplication;
     private final ApplicationEventPublisher publisher;
     private final WorkerInternalApplication workerInternalApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
@@ -32,14 +31,12 @@ public class WorkflowInstanceEventHandler {
     public WorkflowInstanceEventHandler(
             WorkflowInternalApplication workflowInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
-            WorkerApplication workerApplication,
             ApplicationEventPublisher publisher,
             WorkerInternalApplication workerInternalApplication,
             TaskInstanceInternalApplication taskInstanceInternalApplication
     ) {
         this.workflowInternalApplication = workflowInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
-        this.workerApplication = workerApplication;
         this.publisher = publisher;
         this.workerInternalApplication = workerInternalApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
