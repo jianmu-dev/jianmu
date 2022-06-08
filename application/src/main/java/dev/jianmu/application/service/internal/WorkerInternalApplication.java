@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -285,7 +286,7 @@ public class WorkerInternalApplication {
                         var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
                         secretSet.add(WorkerSecret.builder()
                                 .env("JIANMU_" + instanceParameter.getRef().toUpperCase())
-                                .data(secretParameter.getStringValue())
+                                .data(Base64.getEncoder().encodeToString(secretParameter.getStringValue().getBytes(StandardCharsets.UTF_8)))
                                 .mask(true)
                                 .build());
                     });
