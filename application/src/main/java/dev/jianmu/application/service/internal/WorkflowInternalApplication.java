@@ -113,7 +113,7 @@ public class WorkflowInternalApplication {
     }
 
     @Transactional
-    public void start(WorkflowStartCmd cmd) {
+    public void init(WorkflowStartCmd cmd) {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(cmd.getTriggerId())
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         if (!workflowInstance.isRunning()) {
@@ -123,8 +123,6 @@ public class WorkflowInternalApplication {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
-        // 启动流程
-        workflow.start(cmd.getTriggerId());
         var asyncTaskInstances = workflow.getNodes().stream().map(node ->
                 AsyncTaskInstance.Builder
                         .anAsyncTaskInstance()
@@ -141,6 +139,16 @@ public class WorkflowInternalApplication {
         ).collect(Collectors.toList());
 
         this.asyncTaskInstanceRepository.addAll(asyncTaskInstances);
+        this.workflowRepository.commitEvents(workflow);
+    }
+
+    @Transactional
+    public void start(WorkflowStartCmd cmd) {
+        Workflow workflow = this.workflowRepository
+                .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        // 启动流程
+        workflow.start(cmd.getTriggerId());
         this.workflowRepository.commitEvents(workflow);
     }
 

@@ -63,7 +63,7 @@ public class WorkflowInstanceInternalApplication {
         if (!project.isConcurrent()) {
             // 检查是否存在运行中的流程
             int i = this.workflowInstanceRepository
-                    .findByRefAndVersionAndStatuses(workflow.getRef(), workflow.getVersion(), List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
+                    .findByRefAndVersionAndStatuses(workflow.getRef(), workflow.getVersion(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                     .size();
             if (i > 0) {
                 var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()
@@ -80,7 +80,7 @@ public class WorkflowInstanceInternalApplication {
                 .ifPresent(workflowInstance -> serialNo.set(workflowInstance.getSerialNo() + 1));
         // 创建新的流程实例
         WorkflowInstance workflowInstance = workflowInstanceDomainService.create(cmd.getTriggerId(), cmd.getTriggerType(), serialNo.get(), workflow);
-        workflowInstance.start();
+        workflowInstance.init();
         this.workflowInstanceRepository.add(workflowInstance);
     }
 
