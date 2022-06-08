@@ -7,6 +7,7 @@ package dev.jianmu.workflow.aggregate.process;
  * @create 2021-01-21 19:53
  */
 public enum ProcessStatus {
+    INIT,
     RUNNING,
     SUSPENDED,
     TERMINATED,

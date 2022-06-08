@@ -2,10 +2,7 @@ package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
 import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.event.TaskInstanceCreatedEvent;
-import dev.jianmu.task.event.TaskInstanceFailedEvent;
-import dev.jianmu.task.event.TaskInstanceRunningEvent;
-import dev.jianmu.task.event.TaskInstanceSucceedEvent;
+import dev.jianmu.task.event.*;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +79,15 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
                 );
                 break;
             case DISPATCH_FAILED:
+                this.applicationEventPublisher.publishEvent(
+                        TaskInstanceDispatchFailedEvent.Builder.aTaskInstanceDispatchFailedEvent()
+                                .defKey(taskInstance.getDefKey())
+                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                                .triggerId(taskInstance.getTriggerId())
+                                .businessId(taskInstance.getBusinessId())
+                                .taskInstanceId(taskInstance.getId())
+                                .build()
+                );
                 break;
             default:
                 logger.warn("任务实例未知状态");
@@ -99,6 +105,21 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     public void updateStatus(TaskInstance taskInstance) {
         this.taskInstanceMapper.updateStatus(taskInstance);
         this.publishEvent(taskInstance);
+    }
+
+    @Override
+    public void updateWorkerId(TaskInstance taskInstance) {
+        this.taskInstanceMapper.updateWorkerId(taskInstance);
+    }
+
+    @Override
+    public boolean acceptTask(TaskInstance taskInstance) {
+        return this.taskInstanceMapper.acceptTask(taskInstance);
+    }
+
+    @Override
+    public void terminate(TaskInstance taskInstance) {
+        this.taskInstanceMapper.updateStatus(taskInstance);
     }
 
     @Override
@@ -145,5 +166,15 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void deleteByTriggerId(String triggerId) {
         this.taskInstanceMapper.deleteByTriggerId(triggerId);
+    }
+
+    @Override
+    public Optional<TaskInstance> findByWorkerIdAndMinVersion(String workerId) {
+        return this.taskInstanceMapper.findByWorkerIdAndMinVersion(workerId);
+    }
+
+    @Override
+    public Optional<TaskInstance> findByIdAndVersion(String id, int version) {
+        return this.taskInstanceMapper.findByIdAndVersion(id, version);
     }
 }
