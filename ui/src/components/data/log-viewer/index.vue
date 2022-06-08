@@ -195,7 +195,12 @@ export default defineComponent({
         }
         downloading.value = true;
         try {
-          const log = await props.download!();
+          let log;
+          if (props.url) {
+            log = await props.download!();
+          } else {
+            log = props.value;
+          }
           const blob = new Blob([log]);
 
           const url = window.URL.createObjectURL(blob);
