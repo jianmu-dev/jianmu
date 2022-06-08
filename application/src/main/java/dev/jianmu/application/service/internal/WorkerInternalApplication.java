@@ -8,6 +8,7 @@ import dev.jianmu.infrastructure.docker.*;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.infrastructure.worker.DispatchWorker;
+import dev.jianmu.infrastructure.worker.WorkerSecret;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -171,7 +172,12 @@ public class WorkerInternalApplication {
                 .orElseThrow(() -> new RuntimeException("未找到worker：" + taskInstance.getWorkerId()));
         var instanceParameters = this.instanceParameterRepository
                 .findByInstanceIdAndType(taskInstance.getId(), InstanceParameter.Type.INPUT);
-        var parameterMap = this.getParameterMap(instanceParameters);
+        // 查询参数值
+        var parameters = this.parameterRepository.findByIds(instanceParameters.stream()
+                .map(InstanceParameter::getParameterId)
+                .collect(Collectors.toSet()));
+        var parameterMap = this.getParameterMap(instanceParameters, parameters);
+        var secretSet = this.getSecretParameterSet(instanceParameters, parameters);
         if (nodeDef.getImage() == null) {
             parameterMap = parameterMap.entrySet().stream()
                     .filter(entry -> entry.getKey() != null)
@@ -196,6 +202,7 @@ public class WorkerInternalApplication {
                     .image(nodeDef.getImage())
                     .working_dir("")
                     .environment(parameterMap)
+                    .secrets(secretSet)
                     .entrypoint(entrypoint)
                     .args(args)
                     .volume_mounts(
@@ -221,6 +228,7 @@ public class WorkerInternalApplication {
                     .user(spec.getUser())
                     .host(spec.getHostName())
                     .environment(parameterMap)
+                    .secrets(secretSet)
                     .entrypoint(spec.getEntrypoint())
                     .args(spec.getCmd())
                     .volume_mounts(
@@ -248,7 +256,7 @@ public class WorkerInternalApplication {
         return sb.toString();
     }
 
-    private Map<String, String> getParameterMap(List<InstanceParameter> instanceParameters) {
+    private Map<String, String> getParameterMap(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
         var parameterMap = instanceParameters.stream()
                 .map(instanceParameter -> Map.entry(
                         instanceParameter.getRef(),
@@ -256,33 +264,33 @@ public class WorkerInternalApplication {
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        // 查询参数值
-        var parameters = this.parameterRepository.findByIds(new HashSet<>(parameterMap.values()));
-        var secretParameters = parameters.stream()
-                .filter(parameter -> parameter instanceof SecretParameter)
-                // 过滤非正常语法
-                .filter(parameter -> parameter.getStringValue().split("\\.").length == 2)
-                .collect(Collectors.toList());
-        // 替换密钥参数值
-        this.handleSecretParameter(parameterMap, secretParameters);
         // 替换实际参数值
         this.parameterDomainService.createParameterMap(parameterMap, parameters);
         return parameterMap;
     }
 
-    private void handleSecretParameter(Map<String, String> parameterMap, List<Parameter> secretParameters) {
-        parameterMap.forEach((key, val) -> {
-            secretParameters.stream()
-                    .filter(parameter -> parameter.getId().equals(val))
-                    .findFirst()
-                    .ifPresent(parameter -> {
-                        var kvPairOptional = this.findSecret(parameter);
-                        kvPairOptional.ifPresent(kv -> {
-                            var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
-                            parameterMap.put(key, secretParameter.getStringValue());
-                        });
+    private HashSet<WorkerSecret> getSecretParameterSet(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
+        var secretParameters = parameters.stream()
+                .filter(parameter -> parameter instanceof SecretParameter)
+                // 过滤非正常语法
+                .filter(parameter -> parameter.getStringValue().split("\\.").length == 2)
+                .collect(Collectors.toList());
+        var secretSet = new HashSet<WorkerSecret>();
+        instanceParameters.forEach(instanceParameter -> secretParameters.stream()
+                .filter(parameter -> parameter.getId().equals(instanceParameter.getParameterId()))
+                .findFirst()
+                .ifPresent(parameter -> {
+                    var kvPairOptional = this.findSecret(parameter);
+                    kvPairOptional.ifPresent(kv -> {
+                        var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
+                        secretSet.add(WorkerSecret.builder()
+                                .env("JIANMU_" + instanceParameter.getRef().toUpperCase())
+                                .data(secretParameter.getStringValue())
+                                .mask(true)
+                                .build());
                     });
-        });
+                }));
+        return secretSet;
     }
 
     private Optional<KVPair> findSecret(Parameter<?> parameter) {
