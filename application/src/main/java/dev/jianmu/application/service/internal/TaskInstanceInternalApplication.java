@@ -191,6 +191,7 @@ public class TaskInstanceInternalApplication {
     public void executeSucceeded(String taskInstanceId, String resultFile) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        MDC.put("triggerId", taskInstance.getTriggerId());
         // start、end任务
         if (taskInstance.isCreationVolume()) {
             var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
