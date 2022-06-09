@@ -1,10 +1,8 @@
 <template>
-  <div class="jm-text-viewer">
-    <span ref="transitCalculator" class="transit-calculator" v-html="temporaryContentComputed"/>
-  </div>
+  <div class="jm-text-viewer" ref="wrapperElement"/>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, getCurrentInstance, onUpdated, computed } from 'vue';
+import { defineComponent, onMounted, ref, getCurrentInstance, onUpdated, onBeforeUnmount } from 'vue';
 import { ICallbackEvent, TextViewer } from './model';
 
 export default defineComponent({
@@ -28,50 +26,41 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const transitCalculator = ref<HTMLElement>();
-    // 临时字符串内容
-    const temporaryContent = ref<string>('');
+    const wrapperElement = ref<HTMLElement>();
     const text = ref<string>(props.value ? props.value : '');
     const { appContext } = getCurrentInstance() as any;
-    const temporaryContentComputed = computed<string>(() => {
-      return temporaryContent.value.replace(/ /g, '&nbsp;');
-    });
-    onMounted(async () => {
-      const textViewer = new TextViewer(
-        text,
+    let textViewer: TextViewer;
+    const init = async () => {
+      if (textViewer) {
+        textViewer.destroy();
+      }
+      textViewer = new TextViewer(
+        text.value,
         props.tipPlacement,
         props.tipAppendToBody,
-        temporaryContent,
-        transitCalculator,
+        wrapperElement.value!,
         appContext,
         (event: ICallbackEvent) => {
           emit('loaded', event);
         },
       );
       await textViewer.reload();
-    });
+    };
+    onMounted(init);
     onUpdated(async () => {
       if (!props.value || text.value === props.value) {
         return;
       }
       text.value = props.value;
-      const textViewer = new TextViewer(
-        text,
-        props.tipPlacement,
-        props.tipAppendToBody,
-        temporaryContent,
-        transitCalculator,
-        appContext,
-        (event: ICallbackEvent) => {
-          emit('loaded', event);
-        },
-      );
-      await textViewer.reload();
+      await init();
+    });
+    onBeforeUnmount(() => {
+      if (textViewer) {
+        textViewer.destroy();
+      }
     });
     return {
-      transitCalculator,
-      temporaryContent,
-      temporaryContentComputed,
+      wrapperElement,
     };
   },
 });
@@ -79,12 +68,6 @@ export default defineComponent({
 <style lang="less">
 .jm-text-viewer {
   height: inherit;
-
-  .transit-calculator {
-    opacity: 0;
-    white-space: nowrap;
-    display: inline;
-  }
 
   .content {
     height: 100%;
