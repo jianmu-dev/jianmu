@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @description EmbeddedWorkerApplication
  * @create 2021-09-12 22:23
  */
-@Service
+//@Service
 @Slf4j
 public class EmbeddedWorkerApplication {
     private final StorageService storageService;
@@ -85,7 +85,7 @@ public class EmbeddedWorkerApplication {
 
             var dockerTask = this.createDockerTask(workerTask, parameterMap);
             // 创建logWriter
-            var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId());
+            var logWriter = this.storageService.writeLog(workerTask.getTaskInstanceId(), true);
             if (workerTask.isResumed()) {
                 // 恢复任务执行
                 this.dockerWorker.resumeTask(dockerTask, logWriter);

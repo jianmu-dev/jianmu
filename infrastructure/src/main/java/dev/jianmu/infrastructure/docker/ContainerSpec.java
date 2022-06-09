@@ -1,11 +1,13 @@
 package dev.jianmu.infrastructure.docker;
 
+import dev.jianmu.infrastructure.worker.WorkerSecret;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @class ContainerSpec
@@ -26,7 +28,7 @@ public class ContainerSpec {
     private String host;
     private String sock;
     private Map<String, String> environment;
-    private String[] secrets;
+    private Set<WorkerSecret> secrets;
     private String[] entrypoint;
     // command
     private String[] args;

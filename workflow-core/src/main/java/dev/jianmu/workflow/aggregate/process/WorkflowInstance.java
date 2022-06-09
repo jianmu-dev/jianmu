@@ -28,7 +28,7 @@ public class WorkflowInstance extends AggregateRoot {
     // 运行模式
     private RunMode runMode = RunMode.AUTO;
     // 运行状态
-    private ProcessStatus status = ProcessStatus.RUNNING;
+    private ProcessStatus status = ProcessStatus.INIT;
     // 流程定义唯一引用名称
     private String workflowRef;
     // 流程定义版本
@@ -46,7 +46,7 @@ public class WorkflowInstance extends AggregateRoot {
     }
 
     public boolean isRunning() {
-        return (this.status == ProcessStatus.RUNNING || this.status == ProcessStatus.SUSPENDED);
+        return (this.status == ProcessStatus.INIT || this.status == ProcessStatus.RUNNING || this.status == ProcessStatus.SUSPENDED);
     }
 
     public void statusCheck() {
@@ -61,7 +61,24 @@ public class WorkflowInstance extends AggregateRoot {
         this.raiseEvent(processNotRunningEvent);
     }
 
-    // 启动流程实例
+    // 初始化流程实例
+    public void init() {
+        if (!this.isRunning()) {
+            throw new RuntimeException("流程实例已终止或结束，无法初始化");
+        }
+        this.status = ProcessStatus.INIT;
+        this.startTime = LocalDateTime.now();
+        // 发布流程实例初始化运行事件
+        var processStartedEvent = ProcessInitializedEvent.Builder.aProcessInitializedEvent()
+                .triggerId(triggerId)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
+                .build();
+        this.raiseEvent(processStartedEvent);
+    }
+
+    // 开始执行流程实例
     public void start() {
         if (!this.isRunning()) {
             throw new RuntimeException("流程实例已终止或结束，无法启动");
@@ -107,6 +124,12 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processRunningEvent);
+    }
+
+    // 在start任务中终止流程实例
+    public void terminateInStart() {
+        this.status = ProcessStatus.TERMINATED;
+        this.endTime = LocalDateTime.now();
     }
 
     // 终止流程实例
