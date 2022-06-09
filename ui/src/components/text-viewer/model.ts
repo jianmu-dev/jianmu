@@ -171,10 +171,10 @@ export class TextViewer {
    * @return 容器大小
    */
   private calculateContainerSize(lineHeight: number): Readonly<ISize> {
-    const { clientWidth, clientHeight } = this.wrapperElement;
+    const { width, height } = this.wrapperElement.getBoundingClientRect();
     return {
-      width: clientWidth,
-      height: clientHeight || lineHeight,
+      width: width,
+      height: height || lineHeight,
     };
   }
 
