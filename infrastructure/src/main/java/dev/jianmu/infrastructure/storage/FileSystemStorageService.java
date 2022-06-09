@@ -81,10 +81,10 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     @Override
-    public BufferedWriter writeLog(String LogFileName) {
+    public BufferedWriter writeLog(String LogFileName, boolean append) {
         try {
             return new BufferedWriter(
-                    new FileWriter(this.rootLocation + File.separator + LogFileName + LogfilePostfix, StandardCharsets.UTF_8, true)
+                    new FileWriter(this.rootLocation + File.separator + LogFileName + LogfilePostfix, StandardCharsets.UTF_8, append)
             );
         } catch (IOException e) {
             throw new StorageException("Could not create log file", e);
