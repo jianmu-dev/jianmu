@@ -48,5 +48,15 @@ public class GlobalProperties {
     public static class Worker {
         @NotBlank
         private String secret;
+        private Registry registry = new Registry();
+
+        @Data
+        @Component
+        @Validated
+        public class Registry{
+            private String address;
+            private String username;
+            private String password;
+        }
     }
 }
