@@ -98,6 +98,7 @@ public class WorkflowInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleProcessEndedEvent(ProcessEndedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
