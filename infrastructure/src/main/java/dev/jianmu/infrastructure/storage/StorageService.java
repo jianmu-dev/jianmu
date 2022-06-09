@@ -16,7 +16,7 @@ import java.util.List;
 public interface StorageService {
     void init();
 
-    BufferedWriter writeLog(String LogFileName);
+    BufferedWriter writeLog(String LogFileName, boolean append);
 
     SseEmitter readLog(String logFileName, int size, boolean isTask);
 

@@ -7,6 +7,7 @@ import dev.jianmu.api.dto.WorkerJoiningDto;
 import dev.jianmu.api.vo.VolumeVo;
 import dev.jianmu.api.vo.WorkerTaskVo;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.internal.WorkerInternalApplication;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
@@ -40,12 +41,14 @@ public class WorkerController {
     private final DeferredResultService deferredResultService;
     private final NodeDefApi nodeDefApi;
     private final StorageService storageService;
+    private final TaskInstanceApplication taskInstanceApplication;
 
-    public WorkerController(WorkerInternalApplication workerApplication, DeferredResultService deferredResultService, NodeDefApi nodeDefApi, StorageService storageService) {
+    public WorkerController(WorkerInternalApplication workerApplication, DeferredResultService deferredResultService, NodeDefApi nodeDefApi, StorageService storageService, TaskInstanceApplication taskInstanceApplication) {
         this.workerApplication = workerApplication;
         this.deferredResultService = deferredResultService;
         this.nodeDefApi = nodeDefApi;
         this.storageService = storageService;
+        this.taskInstanceApplication = taskInstanceApplication;
     }
 
     @GetMapping("/types")
@@ -109,6 +112,36 @@ public class WorkerController {
         return deferredResult;
     }
 
+    @GetMapping("{workerId}/tasks/{taskInstanceId}")
+    @Operation(summary = "获取任务详情接口", description = "获取任务详情接口")
+    @Parameters({
+            @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
+    })
+    public WorkerTaskVo findTaskById(@PathVariable String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
+        var taskInstance = this.taskInstanceApplication.findById(taskInstanceId)
+                .orElseThrow(() -> new RuntimeException("未找到任务:" + taskInstanceId));
+        if (taskInstance.isVolume()) {
+            return WorkerTaskVo.builder()
+                    .type(WorkerTaskVo.Type.VOLUME)
+                    .taskInstanceId(taskInstance.getId())
+                    .volume(VolumeVo.builder()
+                            .name(taskInstance.getTriggerId())
+                            .type(taskInstance.isCreationVolume() ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
+                            .build())
+                    .version(taskInstance.getVersion())
+                    .build();
+        } else {
+            return WorkerTaskVo.builder()
+                    .type(WorkerTaskVo.Type.TASK)
+                    .taskInstanceId(taskInstance.getId())
+                    .pullStrategy(null)
+                    .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
+                    .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
+                    .version(taskInstance.getVersion())
+                    .build();
+        }
+    }
+
     @PostMapping("{workerId}/tasks/{taskInstanceId}")
     @Operation(summary = "获取终止任务接口", description = "获取终止任务接口")
     @Parameters({
@@ -168,7 +201,18 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void writeTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
-
+        try (var writer = this.storageService.writeLog(taskInstanceId, false)) {
+            var reader = request.getReader();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                var list = TaskInstanceWritingLogDto.parseString(line);
+                list.stream()
+                        .filter(dto -> dto.getContent() != null)
+                        .forEach(dto -> this.workerApplication.writeTaskLog(writer, workerId, taskInstanceId, dto.getContent(), dto.getNumber(), dto.getTimestamp()));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("任务日志写入失败： " + e);
+        }
     }
 
     @PostMapping("{workerId}/tasks/{taskInstanceId}/logs/batch")
@@ -177,11 +221,11 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void batchWriteTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("taskInstanceId") String taskInstanceId) {
-        try (var writer = this.storageService.writeLog(taskInstanceId)) {
+        try (var writer = this.storageService.writeLog(taskInstanceId, true)) {
             var reader = request.getReader();
             String line;
             while ((line = reader.readLine()) != null) {
-                if ("null".equals(line)) {
+                if ("null" .equals(line)) {
                     continue;
                 }
                 var list = TaskInstanceWritingLogDto.parseString(line);
