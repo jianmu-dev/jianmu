@@ -4,11 +4,13 @@ import dev.jianmu.api.dto.TaskInstanceAcceptingDto;
 import dev.jianmu.api.dto.TaskInstanceUpdatingDto;
 import dev.jianmu.api.dto.TaskInstanceWritingLogDto;
 import dev.jianmu.api.dto.WorkerJoiningDto;
+import dev.jianmu.api.vo.Auth;
 import dev.jianmu.api.vo.VolumeVo;
 import dev.jianmu.api.vo.WorkerTaskVo;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.service.TaskInstanceApplication;
 import dev.jianmu.application.service.internal.WorkerInternalApplication;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.worker.aggregate.Worker;
@@ -42,13 +44,21 @@ public class WorkerController {
     private final NodeDefApi nodeDefApi;
     private final StorageService storageService;
     private final TaskInstanceApplication taskInstanceApplication;
+    private final GlobalProperties globalProperties;
 
-    public WorkerController(WorkerInternalApplication workerApplication, DeferredResultService deferredResultService, NodeDefApi nodeDefApi, StorageService storageService, TaskInstanceApplication taskInstanceApplication) {
+    public WorkerController(WorkerInternalApplication workerApplication,
+                            DeferredResultService deferredResultService,
+                            NodeDefApi nodeDefApi,
+                            StorageService storageService,
+                            TaskInstanceApplication taskInstanceApplication,
+                            GlobalProperties globalProperties
+    ) {
         this.workerApplication = workerApplication;
         this.deferredResultService = deferredResultService;
         this.nodeDefApi = nodeDefApi;
         this.storageService = storageService;
         this.taskInstanceApplication = taskInstanceApplication;
+        this.globalProperties = globalProperties;
     }
 
     @GetMapping("/types")
@@ -92,6 +102,7 @@ public class WorkerController {
                                         .name(taskInstance.getTriggerId())
                                         .type(taskInstance.isCreationVolume() ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
                                         .build())
+                                .auth(this.getTaskAuth())
                                 .version(taskInstance.getVersion())
                                 .build()
                         ));
@@ -104,6 +115,7 @@ public class WorkerController {
                                 .pullStrategy(null)
                                 .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
                                 .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
+                                .auth(this.getTaskAuth())
                                 .version(taskInstance.getVersion())
                                 .build()
                         ));
@@ -128,6 +140,7 @@ public class WorkerController {
                             .name(taskInstance.getTriggerId())
                             .type(taskInstance.isCreationVolume() ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
                             .build())
+                    .auth(this.getTaskAuth())
                     .version(taskInstance.getVersion())
                     .build();
         } else {
@@ -137,9 +150,19 @@ public class WorkerController {
                     .pullStrategy(null)
                     .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
                     .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
+                    .auth(this.getTaskAuth())
                     .version(taskInstance.getVersion())
                     .build();
         }
+    }
+
+    private Auth getTaskAuth() {
+        var registry = globalProperties.getWorker().getRegistry();
+        return  Auth.builder()
+                .address(registry.getAddress())
+                .username(registry.getUsername())
+                .password(registry.getPassword())
+                .build();
     }
 
     @PostMapping("{workerId}/tasks/{taskInstanceId}")
@@ -172,6 +195,7 @@ public class WorkerController {
                             .name(taskInstance.getTriggerId())
                             .type(taskInstance.isCreationVolume() ? VolumeVo.Type.CREATION : VolumeVo.Type.DELETION)
                             .build())
+                    .auth(this.getTaskAuth())
                     .version(taskInstance.getVersion() + 1)
                     .build();
         } else {
@@ -181,6 +205,7 @@ public class WorkerController {
                     .pullStrategy(null)
                     .containerSpec(this.workerApplication.getContainerSpec(taskInstance))
                     .resultFile(this.nodeDefApi.findByType(taskInstance.getDefKey()).getResultFile())
+                    .auth(this.getTaskAuth())
                     .version(taskInstance.getVersion() + 1)
                     .build();
         }

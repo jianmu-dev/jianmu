@@ -37,6 +37,9 @@ public class WorkerTaskVo {
     @Schema(description = "volume")
     private VolumeVo volume;
 
+    @Schema(description = "Auth")
+    private Auth auth;
+
     @Schema(description = "任务版本")
     private Integer version;
 
