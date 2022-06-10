@@ -49,9 +49,6 @@ export default class Sorter {
       // 让元素可拖拽
       item.setAttribute('draggable', 'true');
       item.setAttribute('data-index', String(index));
-      item.style.cursor = 'move';
-      item.style.position = 'relative';
-      item.style.transition = 'all 0.2s linear';
       // 注册拖拽相关事件
       item.ondragstart = (e: DragEvent) => {
         if (navigator.userAgent.indexOf('Chrome') > -1) {
