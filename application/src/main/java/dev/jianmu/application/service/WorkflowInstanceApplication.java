@@ -39,4 +39,8 @@ public class WorkflowInstanceApplication {
     public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {
         return this.workflowInstanceRepository.findByRefAndSerialNoMax(workflowRef);
     }
+
+    public Optional<WorkflowInstance> findByTriggerId(String triggerId) {
+        return this.workflowInstanceRepository.findByTriggerId(triggerId);
+    }
 }
