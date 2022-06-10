@@ -52,6 +52,8 @@ public class DslNode {
         var script = nodeMap.get("script");
         if (script instanceof List) {
             node.script = ((List<?>) script).stream().map(i -> (String) i).collect(Collectors.toList());
+        } else if (script instanceof String) {
+            node.script = List.of((String) script);
         } else {
             node.script = List.of();
         }

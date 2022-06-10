@@ -688,8 +688,8 @@ public class DslParser {
         if (script == null) {
             return;
         }
-        if (!(script instanceof List)) {
-            throw new DslException("节点 " + nodeName + " 的script参数必须为数组类型");
+        if (!(script instanceof List) && !(script instanceof String)) {
+            throw new DslException("节点 " + nodeName + " 的script参数必须为数组或字符串类型");
         }
     }
 
