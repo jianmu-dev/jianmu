@@ -4,15 +4,16 @@ import dev.jianmu.infrastructure.worker.WorkerSecret;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * @author Daihw
  * @class ContainerSpec
  * @description 容器规格定义
- * @author Daihw
  * @create 2022/5/19 4:21 下午
  */
 @Getter
@@ -46,4 +47,17 @@ public class ContainerSpec {
     private Integer mem_limit;
     private String[] devices;
     private Boolean detach;
+
+    public void setRegistryAddress(String registryAddress) {
+        if (ObjectUtils.isEmpty(registryAddress)) {
+            return;
+        }
+        var nameParts = this.image.split("/", 2);
+        if (nameParts.length == 1) {
+            this.image = String.join("/", registryAddress, "library", this.image);
+        }
+        if (!nameParts[0].contains(".") && !nameParts[0].contains(":") && !nameParts[0].equals("localhost")) {
+            this.image = String.join("/", registryAddress, this.image);
+        }
+    }
 }

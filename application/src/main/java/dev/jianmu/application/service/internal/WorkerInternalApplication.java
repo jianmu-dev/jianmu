@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.docker.*;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
@@ -69,6 +70,7 @@ public class WorkerInternalApplication {
     private final TaskInstanceRepository taskInstanceRepository;
     private final ObjectMapper objectMapper;
     private final MonitoringFileService monitoringFileService;
+    private final GlobalProperties globalProperties;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -83,7 +85,7 @@ public class WorkerInternalApplication {
             DeferredResultService deferredResultService,
             TaskInstanceRepository taskInstanceRepository,
             ObjectMapper objectMapper,
-            MonitoringFileService monitoringFileService) {
+            MonitoringFileService monitoringFileService, GlobalProperties globalProperties) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
@@ -97,6 +99,7 @@ public class WorkerInternalApplication {
         this.taskInstanceRepository = taskInstanceRepository;
         this.objectMapper = objectMapper;
         this.monitoringFileService = monitoringFileService;
+        this.globalProperties = globalProperties;
     }
 
     @Transactional
@@ -242,6 +245,8 @@ public class WorkerInternalApplication {
                     )
                     .build();
         }
+        // 添加RegistryAddress
+        newSpec.setRegistryAddress(globalProperties.getWorker().getRegistry().getAddress());
         return newSpec;
     }
 
