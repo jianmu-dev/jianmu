@@ -4,6 +4,8 @@ import dev.jianmu.workflow.aggregate.parameter.Parameter;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -36,10 +38,19 @@ public class AsyncTask extends BaseNode {
         return param.entrySet().stream().map(entry ->
                 TaskParameter.Builder.aTaskParameter()
                         .ref(entry.getKey())
-                        .type(Parameter.Type.STRING)
+                        .type(findEnvironmentType(entry.getValue()))
                         .expression(entry.getValue())
                         .build()
         ).collect(Collectors.toSet());
+    }
+
+    private static Parameter.Type findEnvironmentType(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(\\(([a-zA-Z0-9_-]+\\.*[a-zA-Z0-9_-]+)\\)\\)$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return Parameter.Type.SECRET;
+        }
+        return Parameter.Type.STRING;
     }
 
     public static final class Builder {
@@ -51,9 +62,9 @@ public class AsyncTask extends BaseNode {
         protected String description;
         // 类型
         protected String type;
-        private Set<TaskParameter> taskParameters;
         // 节点元数据快照
         protected String metadata;
+        private Set<TaskParameter> taskParameters;
 
         private Builder() {
         }
