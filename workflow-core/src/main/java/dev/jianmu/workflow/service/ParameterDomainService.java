@@ -2,7 +2,9 @@ package dev.jianmu.workflow.service;
 
 
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +30,16 @@ public class ParameterDomainService {
                     .findFirst()
                     .ifPresent(parameter -> parameterMap.put(key, parameter.getStringValue()));
         });
+    }
+
+    public Map<String, String> createNoSecParameterMap(Map<String, String> parameterMap, List<Parameter> parameters) {
+        var newParameterMap = new HashMap<String, String>();
+        parameterMap.forEach((key, val) -> parameters.stream()
+                .filter(parameter -> !(parameter instanceof SecretParameter))
+                .filter(parameter -> parameter.getId().equals(val))
+                .findFirst()
+                .ifPresent(parameter -> newParameterMap.put(key, parameter.getStringValue())));
+        return newParameterMap;
     }
 
     public Map<String, Parameter> matchParameters(Map<String, String> parameterMap, List<Parameter> parameters) {

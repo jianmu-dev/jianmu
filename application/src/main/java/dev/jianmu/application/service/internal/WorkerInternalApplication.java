@@ -171,6 +171,7 @@ public class WorkerInternalApplication {
         if (!nodeDef.getWorkerType().equals("DOCKER")) {
             throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
         }
+        var isShellNode = nodeDef.getImage() != null;
         // 环境变量
         var worker = this.workerRepository.findById(taskInstance.getWorkerId())
                 .orElseThrow(() -> new RuntimeException("未找到worker：" + taskInstance.getWorkerId()));
@@ -181,8 +182,8 @@ public class WorkerInternalApplication {
                 .map(InstanceParameter::getParameterId)
                 .collect(Collectors.toSet()));
         var parameterMap = this.getParameterMap(instanceParameters, parameters);
-        var secretSet = this.getSecretParameterSet(instanceParameters, parameters);
-        if (nodeDef.getImage() == null) {
+        var secretSet = this.getSecretParameterSet(isShellNode, instanceParameters, parameters);
+        if (!isShellNode) {
             parameterMap = parameterMap.entrySet().stream()
                     .filter(entry -> entry.getKey() != null)
                     .map(entry -> Map.entry("JIANMU_" + entry.getKey(), entry.getValue()))
@@ -197,7 +198,7 @@ public class WorkerInternalApplication {
 
         // 创建ContainerSpec
         ContainerSpec newSpec;
-        if (nodeDef.getImage() != null) {
+        if (isShellNode) {
             var script = this.createScript(nodeDef.getScript());
             parameterMap.put("JIANMU_SCRIPT", script);
             String[] entrypoint = {"/bin/sh", "-c"};
@@ -271,11 +272,10 @@ public class WorkerInternalApplication {
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         // 替换实际参数值
-        this.parameterDomainService.createParameterMap(parameterMap, parameters);
-        return parameterMap;
+        return this.parameterDomainService.createNoSecParameterMap(parameterMap, parameters);
     }
 
-    private HashSet<WorkerSecret> getSecretParameterSet(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
+    private HashSet<WorkerSecret> getSecretParameterSet(boolean isShellNode, List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
         var secretParameters = parameters.stream()
                 .filter(parameter -> parameter instanceof SecretParameter)
                 // 过滤非正常语法
@@ -290,7 +290,7 @@ public class WorkerInternalApplication {
                     kvPairOptional.ifPresent(kv -> {
                         var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
                         secretSet.add(WorkerSecret.builder()
-                                .env("JIANMU_" + instanceParameter.getRef().toUpperCase())
+                                .env(isShellNode ? instanceParameter.getRef().toUpperCase() : "JIANMU_" + instanceParameter.getRef().toUpperCase())
                                 .data(Base64.getEncoder().encodeToString(secretParameter.getStringValue().getBytes(StandardCharsets.UTF_8)))
                                 .mask(true)
                                 .build());
