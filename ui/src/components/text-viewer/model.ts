@@ -160,9 +160,7 @@ export class TextViewer {
     await nextTick();
     this.temporaryContent.value = '';
     // 火狐浏览器计算的offsetHeight精确到小数两位，会大1px
-    return Math.floor(
-      this.transitCalculator.getBoundingClientRect().height,
-    );
+    return this.transitCalculator.getBoundingClientRect().height;
   }
 
   /**
@@ -171,7 +169,7 @@ export class TextViewer {
    * @return 容器大小
    */
   private calculateContainerSize(lineHeight: number): Readonly<ISize> {
-    const { width, height } = this.wrapperElement.getBoundingClientRect();
+    const { width, height } = this.wrapperElement!.getBoundingClientRect();
     return {
       width: width,
       height: height || lineHeight,
@@ -387,7 +385,7 @@ export class TextViewer {
       return;
     }
     // 计算行数
-    const rows = Math.floor(this.wrapperSize.height / this.lineHeight);
+    const rows = Math.floor(Math.ceil(this.wrapperSize.height) / this.lineHeight);
     if (rows === 0) {
       console.warn('指定的高度太低无法显示');
       return;

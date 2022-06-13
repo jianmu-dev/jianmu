@@ -508,6 +508,10 @@ export default defineComponent({
           box-shadow: 0px 6px 16px 4px #e6eef6;
 
           .top {
+            a {
+              max-width: calc(100% - 59px);
+            }
+
             .operation {
               display: flex;
             }
