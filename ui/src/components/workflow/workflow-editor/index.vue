@@ -56,8 +56,6 @@ export default defineComponent({
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
     const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
-      selectedNodeId.value = '';
-      await nextTick();
       nodeConfigPanelVisible.value = true;
       selectedNodeId.value = nodeId;
       nodeWaringClicked.value = waringClicked;
