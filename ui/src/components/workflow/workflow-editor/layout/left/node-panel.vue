@@ -75,7 +75,7 @@ export default defineComponent({
         getGraph(),
         getWorkflowValidator(),
         container.value! as HTMLElement,
-        (nodeId: IWorkflowNode) => emit('node-selected', nodeId));
+        (nodeId: string) => emit('node-selected', nodeId));
     });
     return {
       submitIssue,
@@ -83,7 +83,6 @@ export default defineComponent({
       nodeCount,
       getNodeCount,
       NodeGroupEnum,
-      workflowDnd,
       collapsed,
       keyword,
       tempKeyword,

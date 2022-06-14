@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, PropType, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, nextTick, PropType, provide, ref } from 'vue';
 import { cloneDeep } from 'lodash';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
@@ -55,7 +55,11 @@ export default defineComponent({
 
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
-
+    const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
+      nodeConfigPanelVisible.value = true;
+      selectedNodeId.value = nodeId;
+      nodeWaringClicked.value = waringClicked;
+    };
     return {
       workflowData,
       graph,
@@ -75,12 +79,15 @@ export default defineComponent({
         workflowValidator = new WorkflowValidator(g, proxy);
         graph.value = g;
       },
-      handleNodeSelected: (nodeId: string, waringClicked: boolean) => {
-        nodeConfigPanelVisible.value = true;
-        selectedNodeId.value = nodeId;
-        nodeWaringClicked.value = waringClicked;
-      },
-      handleNodeConfigPanelClosed: () => {
+      handleNodeSelected,
+      handleNodeConfigPanelClosed: (valid: boolean) => {
+        if (valid) {
+          workflowValidator.removeWarning(selectedNodeId.value);
+        } else {
+          workflowValidator.addWarning(selectedNodeId.value, nodeId => {
+            handleNodeSelected(nodeId, true);
+          });
+        }
         // 取消选中
         graph.value!.unselect(selectedNodeId.value);
         selectedNodeId.value = '';
