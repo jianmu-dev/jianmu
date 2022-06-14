@@ -12,8 +12,7 @@
       <div class="param-expression">
         <div class="title">Cron表达式的7个部分从左到右代表的含义如下：</div>
         <p>秒 分 时 日 月 周 年（可选，留空）</p>
-        <div class="interval"></div>
-        <div>
+        <div class="expression-example">
           <div class="title">常见表达式例子：</div>
           <p>0 0 12 * * ? 每天中午12点触发</p>
           <p>0 15 10 * * ? 每天上午10:15触发</p>
@@ -69,8 +68,8 @@ export default defineComponent({
       font-weight: 560;
     }
 
-    .interval {
-      height: 15px;
+    .expression-example {
+      margin-top: 15px;
     }
   }
 }
