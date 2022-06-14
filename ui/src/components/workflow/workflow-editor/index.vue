@@ -3,7 +3,7 @@
     <template v-if="graph">
       <toolbar :workflow-data="workflowData" @back="handleBack" @save="handleSave"/>
       <node-config-panel
-        v-if="selectedNodeId && refreshNodeId"
+        v-if="selectedNodeId"
         v-model="nodeConfigPanelVisible"
         :node-id="selectedNodeId"
         :node-waring-clicked="nodeWaringClicked"
@@ -50,23 +50,19 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeId = ref<string>('');
-    // 点击其他node后，重新创建node的右侧抽屉
-    const refreshNodeId = ref<boolean>(true);
     const nodeWaringClicked = ref<boolean>(false);
     let workflowValidator: WorkflowValidator;
 
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
     const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
+      selectedNodeId.value = '';
+      await nextTick();
       nodeConfigPanelVisible.value = true;
       selectedNodeId.value = nodeId;
-      refreshNodeId.value = false;
-      await nextTick();
-      refreshNodeId.value = true;
       nodeWaringClicked.value = waringClicked;
     };
     return {
-      refreshNodeId,
       workflowData,
       graph,
       nodeConfigPanelVisible,
