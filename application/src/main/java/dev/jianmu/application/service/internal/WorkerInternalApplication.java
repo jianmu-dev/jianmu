@@ -56,6 +56,7 @@ public class WorkerInternalApplication {
     private static final Logger logger = LoggerFactory.getLogger(WorkerInternalApplication.class);
     private final String optionScript = "set -e";
     private final String traceScript = "\necho + %s\n%s";
+    private final String noTraceScript = "\n%s";
 
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
@@ -239,9 +240,9 @@ public class WorkerInternalApplication {
                     .volume_mounts(
                             List.of(
                                     VolumeMount.builder()
-                                    .source(taskInstance.getTriggerId())
-                                    .target("/" + taskInstance.getTriggerId())
-                                    .build()
+                                            .source(taskInstance.getTriggerId())
+                                            .target("/" + taskInstance.getTriggerId())
+                                            .build()
                             )
                     )
                     .build();
@@ -258,7 +259,11 @@ public class WorkerInternalApplication {
         commands.forEach(cmd -> {
             var escaped = String.format("%s", cmd);
             escaped = escaped.replace("$", "\\$");
-            formatter.format(traceScript, escaped, cmd);
+            if (globalProperties.getTrace()) {
+                formatter.format(traceScript, escaped, cmd);
+            } else {
+                formatter.format(noTraceScript, cmd);
+            }
         });
         return sb.toString();
     }
