@@ -63,7 +63,7 @@ export default defineComponent({
     color: #7B8C9C;
     font-size: 12px;
     line-height: 20px;
-    user-select: text;
+    -webkit-user-select: text;
 
     .title {
       font-weight: 560;
