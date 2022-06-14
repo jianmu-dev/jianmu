@@ -14,8 +14,15 @@ interface IDraggingListener {
   listener?: any;
 }
 
+type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
+
+function isWarning(node: Node): boolean {
+  return node.hasTool('button');
+}
+
 export class WorkflowDnd {
   private readonly graph: Graph;
+  private readonly clickNodeWarningCallback: ClickNodeWarningCallbackFnType;
   private readonly dnd: Addon.Dnd;
   private readonly draggingListener: IDraggingListener = {
     mousePosition: { x: -1, y: -1 },
@@ -24,8 +31,9 @@ export class WorkflowDnd {
   constructor(graph: Graph,
     workflowValidator: WorkflowValidator,
     nodeContainer: HTMLElement,
-    clickNodeWarningCallback: (nodeId: string) => void) {
+    clickNodeWarningCallback: ClickNodeWarningCallbackFnType) {
     this.graph = graph;
+    this.clickNodeWarningCallback = clickNodeWarningCallback;
     this.dnd = new Addon.Dnd({
       target: graph,
       animation: true,
@@ -48,33 +56,11 @@ export class WorkflowDnd {
           targetNode.setPosition(x, y - textMaxHeight / 2);
         });
 
-        const proxy = new CustomX6NodeProxy(targetNode);
-
-        proxy.getData().validate().catch(() => {
+        new CustomX6NodeProxy(targetNode)
+          .getData()
+          .validate()
           // 校验节点有误时，加警告
-          targetNode.addTools({
-            name: 'button',
-            args: {
-              markup: [
-                {
-                  tagName: 'image',
-                  attrs: {
-                    width: 24,
-                    height: 24,
-                    'xlink:href': nodeWarningIcon,
-                    cursor: 'pointer',
-                  },
-                },
-              ],
-              x: '100%',
-              y: 0,
-              offset: { x: -13, y: -11 },
-              onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-                clickNodeWarningCallback(id);
-              },
-            },
-          });
-        });
+          .catch(() => this.addWarning(targetNode));
 
         return targetNode;
       },
@@ -105,6 +91,42 @@ export class WorkflowDnd {
     proxy.setData(data);
 
     this.dnd.start(node, event);
+  }
+
+  addWarning(node: Node): void {
+    if (isWarning(node)) {
+      return;
+    }
+
+    node.addTools({
+      name: 'button',
+      args: {
+        markup: [
+          {
+            tagName: 'image',
+            attrs: {
+              width: 24,
+              height: 24,
+              'xlink:href': nodeWarningIcon,
+              cursor: 'pointer',
+            },
+          },
+        ],
+        x: '100%',
+        y: 0,
+        offset: { x: -13, y: -11 },
+        onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) =>
+          this.clickNodeWarningCallback(id),
+      },
+    });
+  }
+
+  removeWarning(node: Node): void {
+    if (!isWarning(node)) {
+      return;
+    }
+
+    node.removeTool('button');
   }
 
   private buildListener({ x, y }: MouseEvent) {
