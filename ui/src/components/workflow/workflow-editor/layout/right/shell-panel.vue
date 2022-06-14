@@ -11,11 +11,13 @@
       </jm-form-item>
       <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">
         <jm-select
+          ref="imageSelectRef"
+          @keyup.enter="enterSelect"
           v-model="form.image"
           filterable
           allow-create
           clearable
-          placeholder="请输入docker镜像"
+          placeholder="请选择或输入镜像"
         >
           <jm-option
             v-for="item in defaultImages"
@@ -88,6 +90,8 @@ export default defineComponent({
   },
   emits: ['form-created'],
   setup(props, { emit }) {
+    // 镜像选择框元素
+    const imageSelectRef = ref();
     const formRef = ref();
     const form = ref<Shell>(props.nodeData);
     const failureVisible = ref<boolean>(true);
@@ -114,9 +118,16 @@ export default defineComponent({
         imageName: 'golang:1.18.1-buster',
       },
     ]);
+    // 用户按下enter键选中镜像
+    const enterSelect = (e: any) => {
+      form.value.image = e.target.value;
+      imageSelectRef.value.blur();
+    };
     onMounted(() => emit('form-created', formRef.value));
 
     return {
+      imageSelectRef,
+      enterSelect,
       defaultImages,
       formRef,
       form,

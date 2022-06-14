@@ -65,7 +65,7 @@ export class Shell extends BaseNode {
 
     return {
       ...rules,
-      image: [{ required: true, message: '请输入docker镜像', trigger: 'blur' }],
+      image: [{ required: true, message: '请选择或输入镜像', trigger: 'change' }],
       envs: {
         type: 'array',
         required: false,
