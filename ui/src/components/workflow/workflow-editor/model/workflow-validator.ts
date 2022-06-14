@@ -18,7 +18,8 @@ export class WorkflowValidator {
     this.proxy = proxy;
   }
 
-  addWarning(node: Node, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): void {
+  addWarning(nodeId: string, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): void {
+    const node = this.graph.getCellById(nodeId) as Node;
     if (isWarning(node)) {
       return;
     }
@@ -46,7 +47,8 @@ export class WorkflowValidator {
     });
   }
 
-  removeWarning(node: Node): void {
+  removeWarning(nodeId: string): void {
+    const node = this.graph.getCellById(nodeId) as Node;
     if (!isWarning(node)) {
       return;
     }

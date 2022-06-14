@@ -51,7 +51,7 @@ export class WorkflowDnd {
           .getData()
           .validate()
           // 校验节点有误时，加警告
-          .catch(() => workflowValidator.addWarning(targetNode, clickNodeWarningCallback));
+          .catch(() => workflowValidator.addWarning(targetNode.id, clickNodeWarningCallback));
 
         return targetNode;
       },
