@@ -10,7 +10,20 @@
         <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
       <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">
-        <jm-input v-model="form.image" placeholder="请输入docker镜像"/>
+        <jm-select
+          v-model="form.image"
+          filterable
+          allow-create
+          clearable
+          placeholder="请输入docker镜像"
+        >
+          <jm-option
+            v-for="item in defaultImages"
+            :key="item.id"
+            :label="item.imageName"
+            :value="item.imageName"
+          />
+        </jm-select>
       </jm-form-item>
       <jm-form-item class="shell-env node-item">
         <template #label>
@@ -78,10 +91,33 @@ export default defineComponent({
     const formRef = ref();
     const form = ref<Shell>(props.nodeData);
     const failureVisible = ref<boolean>(true);
-
+    // 默认镜像
+    const defaultImages = ref<Array<{ id: number, imageName: string }>>([
+      {
+        id: 0,
+        imageName: 'ubuntu:22.10',
+      },
+      {
+        id: 1,
+        imageName: 'alpine:3.16.0',
+      },
+      {
+        id: 2,
+        imageName: 'node:18.3.0-alpine3.16',
+      },
+      {
+        id: 3,
+        imageName: 'maven:3-jdk-11',
+      },
+      {
+        id: 4,
+        imageName: 'golang:1.18.1-buster',
+      },
+    ]);
     onMounted(() => emit('form-created', formRef.value));
 
     return {
+      defaultImages,
       formRef,
       form,
       failureVisible,
