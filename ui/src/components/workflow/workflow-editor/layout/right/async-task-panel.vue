@@ -277,7 +277,7 @@ export default defineComponent({
   .version-description {
     font-size: 12px;
     color: #7B8C9C;
-    line-height: 18px;
+    line-height: 20px;
     margin-top: 10px;
   }
 
