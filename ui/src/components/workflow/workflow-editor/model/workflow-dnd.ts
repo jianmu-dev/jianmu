@@ -1,10 +1,9 @@
-import { Addon, Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
+import { Addon, Graph, Node, Point } from '@antv/x6';
 // @ts-ignore
 import listen from 'good-listener';
 import { IWorkflowNode } from './data/common';
 import { NODE, PORTS } from '../shape/gengral-config';
-import nodeWarningIcon from '../svgs/node-warning.svg';
-import { WorkflowValidator } from './workflow-validator';
+import { ClickNodeWarningCallbackFnType, WorkflowValidator } from './workflow-validator';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 const { icon: { width, height }, textMaxHeight } = NODE;
@@ -14,15 +13,8 @@ interface IDraggingListener {
   listener?: any;
 }
 
-type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
-
-function isWarning(node: Node): boolean {
-  return node.hasTool('button');
-}
-
 export class WorkflowDnd {
   private readonly graph: Graph;
-  private readonly clickNodeWarningCallback: ClickNodeWarningCallbackFnType;
   private readonly dnd: Addon.Dnd;
   private readonly draggingListener: IDraggingListener = {
     mousePosition: { x: -1, y: -1 },
@@ -33,7 +25,6 @@ export class WorkflowDnd {
     nodeContainer: HTMLElement,
     clickNodeWarningCallback: ClickNodeWarningCallbackFnType) {
     this.graph = graph;
-    this.clickNodeWarningCallback = clickNodeWarningCallback;
     this.dnd = new Addon.Dnd({
       target: graph,
       animation: true,
@@ -60,7 +51,7 @@ export class WorkflowDnd {
           .getData()
           .validate()
           // 校验节点有误时，加警告
-          .catch(() => this.addWarning(targetNode));
+          .catch(() => workflowValidator.addWarning(targetNode, clickNodeWarningCallback));
 
         return targetNode;
       },
@@ -91,42 +82,6 @@ export class WorkflowDnd {
     proxy.setData(data);
 
     this.dnd.start(node, event);
-  }
-
-  addWarning(node: Node): void {
-    if (isWarning(node)) {
-      return;
-    }
-
-    node.addTools({
-      name: 'button',
-      args: {
-        markup: [
-          {
-            tagName: 'image',
-            attrs: {
-              width: 24,
-              height: 24,
-              'xlink:href': nodeWarningIcon,
-              cursor: 'pointer',
-            },
-          },
-        ],
-        x: '100%',
-        y: 0,
-        offset: { x: -13, y: -11 },
-        onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) =>
-          this.clickNodeWarningCallback(id),
-      },
-    });
-  }
-
-  removeWarning(node: Node): void {
-    if (!isWarning(node)) {
-      return;
-    }
-
-    node.removeTool('button');
   }
 
   private buildListener({ x, y }: MouseEvent) {
