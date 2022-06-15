@@ -19,7 +19,11 @@ export class WorkflowValidator {
   }
 
   addWarning(nodeId: string, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): void {
-    const node = this.graph.getCellById(nodeId) as Node;
+    const node = this.graph.getCellById(nodeId) as Node | undefined;
+    if (!node) {
+      return;
+    }
+
     if (isWarning(node)) {
       return;
     }
@@ -48,7 +52,11 @@ export class WorkflowValidator {
   }
 
   removeWarning(nodeId: string): void {
-    const node = this.graph.getCellById(nodeId) as Node;
+    const node = this.graph.getCellById(nodeId) as Node | undefined;
+    if (!node) {
+      return;
+    }
+
     if (!isWarning(node)) {
       return;
     }
