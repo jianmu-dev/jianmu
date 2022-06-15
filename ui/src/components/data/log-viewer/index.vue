@@ -1,5 +1,5 @@
 <template>
-  <div class="jm-log-viewer">
+  <div class="jm-log-viewer" ref="logViewerRef">
     <div class="operation">
       <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'"
                   :placement="downloading? 'top-end': 'top'"
@@ -7,18 +7,18 @@
         <div :class="{download: true, doing: downloading}" @click="downloadLog"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-text-copy :async-value="() => getLog(true)"/>
+      <jm-text-copy :async-value="copy"/>
     </div>
     <div class="auto-scroll" @click="handleAutoScroll(true)"
          :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}"></div>
     <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
-    <div class="content" ref="contentRef">
+    <div class="content">
       <div v-if="moreLog" class="more-line">
         <i class="jm-icon-button-loading" v-if="loadLoading"></i>
         <span :class="{
           'download-txt': true,
           doing: loadLoading,
-        }" @click="loadMoreLogs">{{ loadLoading ? '加载中，请稍后...' : '加载更多日志' }}</span>
+        }" @click="loadMoreLog">{{ loadLoading ? '加载中，请稍后...' : '加载更多日志' }}</span>
       </div>
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
@@ -32,10 +32,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, onUpdated, ref, watch } from 'vue';
+import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
+import LogViewer, { CallBackFnType, DownloadFnType, LoadMoreFnType } from './model';
 import { ILogVo } from '@/api/dto/workflow-execution-record';
 
-const MAX_SIZE = 1000;
 export default defineComponent({
   name: 'jm-log-viewer',
   props: {
@@ -47,147 +47,79 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    more: {
-      type: Boolean,
-      default: false,
-    },
     url: {
       type: String,
       default: '',
     },
-    download: Function,
-    loadMore: Function,
+    download: Function as PropType<DownloadFnType>,
+    loadMore: Function as PropType<LoadMoreFnType>,
   },
   setup(props) {
-    const { proxy } = getCurrentInstance() as any;
     const data = ref<string[]>([]);
-    const contentRef = ref<HTMLDivElement>();
+    const logViewerRef = ref<HTMLDivElement>();
+    const contentRef = computed<HTMLDivElement | undefined>(() => {
+      const el = logViewerRef.value?.lastElementChild;
+      if (!el) {
+        return undefined;
+      }
+      return el as HTMLDivElement;
+    });
     const noWidth = ref<number>(0);
     const autoScroll = ref<boolean>(true);
     const downloading = ref<boolean>(false);
     const loadLoading = ref<boolean>(false);
-    const lines = [] as string[];
-    let line = 0;
-    // let size = 1000;
-    const currentLine = ref<number>();
-    const moreLog = ref<boolean>(props.more);
-    const urlVal = ref<string>(props.url);
+    const moreLog = ref<boolean>(false);
 
-    let eventSource: any;
-    const eventUrl = ref<string>(props.url);
+    let logViewer: LogViewer;
 
-    const virtualNoDiv = document.createElement('div');
-    virtualNoDiv.style.position = 'fixed';
-    virtualNoDiv.style.left = '-1000px';
-    virtualNoDiv.style.top = '-1000px';
-    virtualNoDiv.style.margin = '0px';
-    virtualNoDiv.style.padding = '0px';
-    virtualNoDiv.style.borderWidth = '0px';
-    virtualNoDiv.style.height = '0px';
-    virtualNoDiv.style.visibility = 'hidden';
-
-    const getEventSource = () => {
-      eventSource = new EventSource(eventUrl.value + MAX_SIZE, { withCredentials: true });
-      eventSource.onopen = () => {
-        data.value = [];
-      };
-      eventSource.onmessage = (e: any) => {
-        lines.push(e.lastEventId);
-        data.value.push(e.data);
-        // 放入数据后重新动态获取宽度，判断是否自动滚动
-        virtualNoDiv.innerHTML = data.value.length + '';
-        const tempNoWidth = virtualNoDiv.clientWidth + 25;
-        if (tempNoWidth > noWidth.value) {
-          noWidth.value = tempNoWidth;
-        }
-        if (autoScroll.value) {
-          nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
-        }
-      };
-    };
     const handleAutoScroll = (val: boolean) => {
       autoScroll.value = val;
-
-      if (val) {
-        nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
-      }
     };
 
-    const setLog = (value: string) => {
-      data.value = value.split(/\r?\n/);
+    const callback: CallBackFnType = async (logData, startLine) => {
+      data.value = logData;
+      moreLog.value = startLine === undefined ? false : startLine > 1;
 
-      virtualNoDiv.innerHTML = data.value.length + '';
-      const tempNoWidth = virtualNoDiv.clientWidth + 25;
-      if (tempNoWidth > noWidth.value) {
-        noWidth.value = tempNoWidth;
-      }
-
-      if (autoScroll.value) {
-        nextTick(() => (contentRef.value!.scrollTop = contentRef.value!.scrollHeight));
-      }
+      await nextTick();
+      const tempNoWidth = logViewer.calculateTempNoWidth(data.value.length);
+      noWidth.value = tempNoWidth > noWidth.value ? tempNoWidth : noWidth.value;
     };
 
     onMounted(() => {
-      // 追加元素必须放在外面，否则无效
-      contentRef.value?.appendChild(virtualNoDiv);
-      contentRef.value?.addEventListener('scroll', () =>
-        handleAutoScroll(contentRef.value!.scrollHeight - contentRef.value!.scrollTop <= contentRef.value!.clientHeight));
-      if (props.url) {
-        getEventSource();
-      } else if (props.value) {
-        nextTick(() => setLog(props.value));
-      }
+      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download, props.loadMore,
+        callback, () => autoScroll.value, handleAutoScroll);
+      logViewer.listen(data.value);
     });
+
+
     onUpdated(() => {
-      if (currentLine.value === Number(lines[0])) {
+      if (logViewer.checkValue(props.url, props.value)) {
         return;
       }
-      currentLine.value = Number(lines[0]);
-      line = Number(lines[0]);
-      moreLog.value = line > 1;
-    });
-    onUpdated(() => {
-      if (urlVal.value === props.url) {
-        return;
-      }
-      urlVal.value = props.url;
-      // 关闭连接
-      if (eventSource) {
-        eventSource.close();
-      }
-      eventUrl.value = props.url as string;
-      getEventSource();
+      logViewer.destroy(data.value, (val: string[]) => {
+        data.value = val;
+      });
+      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download, props.loadMore,
+        callback, () => autoScroll.value, handleAutoScroll);
+      logViewer.listen(data.value);
     });
 
-    onBeforeUnmount(() => {
-      if (!props.url) {
-        // 排除webhook，否则会报错
-        return;
-      }
-      eventSource.close();
-    });
-
-    watch(() => props.value, (value: string) => setLog(value));
-
-    const getLog = async (isCopy: boolean) => {
-      if (moreLog.value) {
-        return data.value.join('\n');
-      }
-      if (props.url || props.download) {
-        return data.value.join('\n');
-      }
-      return props.value;
-    };
+    onBeforeUnmount(() => logViewer.destroy(data.value, (val: string[]) => {
+      data.value = val;
+    }));
 
     return {
       data,
       contentRef,
+      logViewerRef,
       noWidth,
       autoScroll,
       downloading,
       loadLoading,
       handleAutoScroll,
-      getLog,
+      copy: () => {
+        return logViewer.copy(data.value, moreLog.value);
+      },
       moreLog,
       downloadLog: async () => {
         if (downloading.value) {
@@ -195,57 +127,28 @@ export default defineComponent({
         }
         downloading.value = true;
         try {
-          let log;
-          if (props.url) {
-            log = await props.download!();
-          } else {
-            log = props.value;
-          }
-          const blob = new Blob([log]);
-
-          const url = window.URL.createObjectURL(blob);
-
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = props.filename;
-          a.click();
-
-          // 释放url
-          window.URL.revokeObjectURL(url);
+          await logViewer.downLoad();
         } catch (err) {
           console.warn(err.message);
         } finally {
           downloading.value = false;
         }
       },
-      loadMoreLogs: async () => {
+      loadMoreLog: async () => {
+        handleAutoScroll(false);
+
         if (loadLoading.value) {
           return;
         }
         loadLoading.value = true;
         try {
-          autoScroll.value = false;
-          if (line <= 1) {
-            moreLog.value = false;
-            return;
-          }
-          let size: number;
-          if (line > MAX_SIZE) {
-            line -= MAX_SIZE;
-            size = MAX_SIZE;
-          } else {
-            size = line - 1;
-            line = 1;
-            moreLog.value = false;
-          }
-          await props.loadMore!(line, size).then((res: ILogVo[]) => {
-            moreLog.value = line > 1;
-            res.reverse().forEach((item: ILogVo) => {
-              data.value = [item.data, ...data.value];
-            });
+          const res = await logViewer.loadMore() as ILogVo[];
+          res.reverse().forEach((item: ILogVo) => {
+            data.value = [item.data, ...data.value];
           });
+          moreLog.value = logViewer.isMoreLog();
         } catch (err) {
-          proxy.$throw(err, proxy);
+          console.warn(err.message);
         } finally {
           loadLoading.value = false;
         }
