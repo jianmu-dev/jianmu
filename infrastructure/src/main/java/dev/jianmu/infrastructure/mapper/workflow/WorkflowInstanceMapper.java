@@ -18,10 +18,11 @@ public interface WorkflowInstanceMapper {
     @Select("<script>" +
             "SELECT * FROM workflow_instance " +
             "<where>" +
-            " workflow_ref = #{workflowRef} AND workflow_version = #{workflowVersion} AND status IN " +
+            " workflow_ref = #{workflowRef} AND status IN " +
             " <foreach collection='statuses' item='item' open='(' close=')' separator=','> #{item} " +
             " </foreach>" +
             "</where>" +
+            " order by serial_no" +
             "</script>")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
@@ -34,9 +35,20 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByRefAndVersionAndStatuses(
             @Param("workflowRef") String workflowRef,
-            @Param("workflowVersion") String workflowVersion,
             @Param("statuses") List<ProcessStatus> statuses
     );
+
+    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} and status = #{status} order by serial_no limit 1")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
+    @Result(column = "end_time", property = "endTime")
+    Optional<WorkflowInstance> findByRefAndStatusAndSerialNoMin(@Param("workflowRef") String workflowRef, @Param("status") ProcessStatus status);
 
     @Select("select * from workflow_instance where id = #{instanceId}")
     @Result(column = "serial_no", property = "serialNo")
@@ -68,7 +80,7 @@ public interface WorkflowInstanceMapper {
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
     @Update("update workflow_instance " +
-            "set run_mode=#{wk.runMode},status=#{wk.status}," +
+            "set run_mode=#{wk.runMode},status=#{wk.status},start_time=#{wk.startTime}," +
             "suspended_time=#{wk.suspendedTime},end_time=#{wk.endTime},_version= _version+1 " +
             "where id = #{wk.id}")
     void save(@Param("wk") WorkflowInstance workflowInstance);

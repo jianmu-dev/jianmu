@@ -23,6 +23,7 @@ public class GlobalProperties {
     private Global global = new Global();
     private Boolean authMode = true;
     private Worker worker = new Worker();
+    private TriggerQueue triggerQueue = new TriggerQueue();
 
     @Data
     @Component
@@ -62,4 +63,12 @@ public class GlobalProperties {
 
     @NotNull
     public Boolean trace = true;
+
+    @Data
+    @Component
+    @Validated
+    public static class TriggerQueue {
+        @NotNull
+        public Integer max = 5;
+    }
 }

@@ -23,6 +23,7 @@ import dev.jianmu.workflow.service.ParameterDomainService;
 import dev.jianmu.workflow.service.WorkflowDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,7 +139,12 @@ public class WorkflowInternalApplication {
                         .build()
         ).collect(Collectors.toList());
 
-        this.asyncTaskInstanceRepository.addAll(asyncTaskInstances);
+        try {
+            this.asyncTaskInstanceRepository.addAll(asyncTaskInstances);
+        } catch (DuplicateKeyException e) {
+            log.info("AsyncTaskInstance唯一索引重复");
+            return;
+        }
         this.workflowRepository.commitEvents(workflow);
     }
 

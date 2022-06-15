@@ -197,7 +197,7 @@ public class TaskInstanceInternalApplication {
             var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
                     .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
             workflowInstance.start();
-            this.workflowInstanceRepository.save(workflowInstance);
+            this.workflowInstanceRepository.commitEvents(workflowInstance);
         }
         if (taskInstance.isDeletionVolume()) {
             this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());

@@ -8,7 +8,9 @@ import java.util.Optional;
 
 public interface WorkflowInstanceRepository {
 
-    List<WorkflowInstance> findByRefAndVersionAndStatuses(String workflowRef, String workflowVersion, List<ProcessStatus> statuses);
+    List<WorkflowInstance> findByRefAndStatuses(String workflowRef, List<ProcessStatus> statuses);
+
+    Optional<WorkflowInstance> findByRefAndStatusAndSerialNoMin(String workflowRef, ProcessStatus status);
 
     List<WorkflowInstance> findByWorkflowRefLimit(String workflowRef, long offset);
 

@@ -27,19 +27,21 @@ public class WorkflowInstanceEventHandler {
     private final ApplicationEventPublisher publisher;
     private final WorkerInternalApplication workerInternalApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
+    private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
 
     public WorkflowInstanceEventHandler(
             WorkflowInternalApplication workflowInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
             ApplicationEventPublisher publisher,
             WorkerInternalApplication workerInternalApplication,
-            TaskInstanceInternalApplication taskInstanceInternalApplication
-    ) {
+            TaskInstanceInternalApplication taskInstanceInternalApplication,
+            WorkflowInstanceInternalApplication workflowInstanceInternalApplication) {
         this.workflowInternalApplication = workflowInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
         this.publisher = publisher;
         this.workerInternalApplication = workerInternalApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
+        this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -58,6 +60,17 @@ public class WorkflowInstanceEventHandler {
     public void handleProcessInitializedEvent(ProcessInitializedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessInitializedEvent here -------------------------");
+        log.info(event.toString());
+        // 执行流程实例
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
+        log.info("-----------------------------------------------------");
+    }
+
+    @Async
+    @EventListener
+    public void handleProcessVolumeCreatedEvent(ProcessVolumeCreatedEvent event) {
+        MDC.put("triggerId", event.getTriggerId());
+        log.info("Get ProcessVolumeCreatedEvent here -------------------------");
         log.info(event.toString());
         // 创建Workspace
         this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "start");
@@ -95,6 +108,8 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         this.asyncTaskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
         this.taskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
+        // 执行流程实例
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
         log.info("-----------------------------------------------------");
     }
 
@@ -105,6 +120,8 @@ public class WorkflowInstanceEventHandler {
         log.info("Get ProcessEndedEvent here -------------------------");
         log.info(event.toString());
         this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
+        // 执行流程实例
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
         log.info("-----------------------------------------------------");
     }
 
@@ -114,6 +131,8 @@ public class WorkflowInstanceEventHandler {
         log.info("Get ProcessNotRunningEvent here -------------------------");
         log.info(event.toString());
         this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
+        // 执行流程实例
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
         log.info("-----------------------------------------------------");
     }
 }

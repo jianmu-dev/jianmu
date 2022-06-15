@@ -67,7 +67,6 @@ public class WorkflowInstance extends AggregateRoot {
             throw new RuntimeException("流程实例已终止或结束，无法初始化");
         }
         this.status = ProcessStatus.INIT;
-        this.startTime = LocalDateTime.now();
         // 发布流程实例初始化运行事件
         var processStartedEvent = ProcessInitializedEvent.Builder.aProcessInitializedEvent()
                 .triggerId(triggerId)
@@ -78,13 +77,28 @@ public class WorkflowInstance extends AggregateRoot {
         this.raiseEvent(processStartedEvent);
     }
 
-    // 开始执行流程实例
-    public void start() {
+    // 执行流程Volume任务
+    public void createVolume() {
         if (!this.isRunning()) {
             throw new RuntimeException("流程实例已终止或结束，无法启动");
         }
         this.status = ProcessStatus.RUNNING;
         this.startTime = LocalDateTime.now();
+        // 发布流程实例Volume事件
+        var processPendedEvent = ProcessVolumeCreatedEvent.Builder.aProcessVolumeCreatedEvent()
+                .triggerId(triggerId)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.id)
+                .build();
+        this.raiseEvent(processPendedEvent);
+    }
+
+    // 开始执行流程实例
+    public void start() {
+        if (!this.isRunning()) {
+            throw new RuntimeException("流程实例已终止或结束，无法启动");
+        }
         // 发布流程实例开始运行事件
         var processStartedEvent = ProcessStartedEvent.Builder.aProcessStartedEvent()
                 .triggerId(triggerId)
