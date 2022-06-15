@@ -1,10 +1,9 @@
-import { Addon, Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
+import { Addon, Graph, Node, Point } from '@antv/x6';
 // @ts-ignore
 import listen from 'good-listener';
 import { IWorkflowNode } from './data/common';
 import { NODE, PORTS } from '../shape/gengral-config';
-import nodeWarningIcon from '../svgs/node-warning.svg';
-import { WorkflowValidator } from './workflow-validator';
+import { ClickNodeWarningCallbackFnType, WorkflowValidator } from './workflow-validator';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 
 const { icon: { width, height }, textMaxHeight } = NODE;
@@ -24,7 +23,7 @@ export class WorkflowDnd {
   constructor(graph: Graph,
     workflowValidator: WorkflowValidator,
     nodeContainer: HTMLElement,
-    clickNodeWarningCallback: (nodeId: string) => void) {
+    clickNodeWarningCallback: ClickNodeWarningCallbackFnType) {
     this.graph = graph;
     this.dnd = new Addon.Dnd({
       target: graph,
@@ -48,33 +47,11 @@ export class WorkflowDnd {
           targetNode.setPosition(x, y - textMaxHeight / 2);
         });
 
-        const proxy = new CustomX6NodeProxy(targetNode);
-
-        proxy.getData().validate().catch(() => {
+        new CustomX6NodeProxy(targetNode)
+          .getData()
+          .validate()
           // 校验节点有误时，加警告
-          targetNode.addTools({
-            name: 'button',
-            args: {
-              markup: [
-                {
-                  tagName: 'image',
-                  attrs: {
-                    width: 24,
-                    height: 24,
-                    'xlink:href': nodeWarningIcon,
-                    cursor: 'pointer',
-                  },
-                },
-              ],
-              x: '100%',
-              y: 0,
-              offset: { x: -13, y: -11 },
-              onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) => {
-                clickNodeWarningCallback(id);
-              },
-            },
-          });
-        });
+          .catch(() => workflowValidator.addWarning(targetNode.id, clickNodeWarningCallback));
 
         return targetNode;
       },

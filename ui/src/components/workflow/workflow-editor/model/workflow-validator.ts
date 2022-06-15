@@ -1,6 +1,13 @@
-import { Graph, Node, Point } from '@antv/x6';
+import { Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 import { NodeTypeEnum } from './data/enumeration';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import nodeWarningIcon from '../svgs/node-warning.svg';
+
+export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
+
+function isWarning(node: Node): boolean {
+  return node.hasTool('button');
+}
 
 export class WorkflowValidator {
   private readonly graph: Graph;
@@ -9,6 +16,52 @@ export class WorkflowValidator {
   constructor(graph: Graph, proxy: any) {
     this.graph = graph;
     this.proxy = proxy;
+  }
+
+  addWarning(nodeId: string, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): void {
+    const node = this.graph.getCellById(nodeId) as Node | undefined;
+    if (!node) {
+      return;
+    }
+
+    if (isWarning(node)) {
+      return;
+    }
+
+    node.addTools({
+      name: 'button',
+      args: {
+        markup: [
+          {
+            tagName: 'image',
+            attrs: {
+              width: 24,
+              height: 24,
+              'xlink:href': nodeWarningIcon,
+              cursor: 'pointer',
+            },
+          },
+        ],
+        x: '100%',
+        y: 0,
+        offset: { x: -13, y: -11 },
+        onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) =>
+          clickNodeWarningCallback(id),
+      },
+    });
+  }
+
+  removeWarning(nodeId: string): void {
+    const node = this.graph.getCellById(nodeId) as Node | undefined;
+    if (!node) {
+      return;
+    }
+
+    if (!isWarning(node)) {
+      return;
+    }
+
+    node.removeTool('button');
   }
 
   /**

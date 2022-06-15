@@ -4,6 +4,7 @@
     :size="410"
     direction="rtl"
     destroy-on-close
+    @closed="save"
   >
     <template #title>
       <div>
@@ -22,16 +23,12 @@
         <async-task-panel v-else-if="nodeData.getType() === NodeTypeEnum.ASYNC_TASK"
                           :node-data="nodeData" @form-created="handleFormCreated"/>
       </jm-scrollbar>
-      <div class="footer">
-        <jm-button @click="cancel" class="cancel">取消</jm-button>
-        <jm-button type="primary" @click="save">确定</jm-button>
-      </div>
     </div>
   </jm-drawer>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, inject, nextTick, provide, ref } from 'vue';
+import { defineComponent, inject, nextTick, provide, ref } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
@@ -53,7 +50,6 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const { proxy: instance } = getCurrentInstance() as any;
     const getGraph = inject('getGraph') as () => Graph;
     const graph = getGraph();
     const drawerOpening = ref<boolean>(false);
@@ -80,28 +76,15 @@ export default defineComponent({
         formRef.value.validate().catch(() => {
         });
       },
-      cancel: () => {
-        // 关闭抽屉
-        emit('update:model-value', false);
-      },
       save: () => {
         formRef.value.validate((valid: boolean) => {
-          if (!valid) {
-            return;
-          }
           proxy.setData(nodeData);
-          // 关闭抽屉
-          emit('update:model-value', false);
-
-          // 通过校验时，删除警告
-          node.removeTool('button');
-
-          instance.$success('编辑成功');
+          emit('closed', valid);
         });
       },
     };
   },
-  emits: ['update:model-value'],
+  emits: ['closed'],
 });
 </script>
 <style lang="less" scoped>
@@ -127,7 +110,7 @@ export default defineComponent({
     flex-direction: column;
 
     .panel-container {
-      height: calc(100vh - 191px);
+      height: calc(100vh - 131px);
     }
 
     .footer {

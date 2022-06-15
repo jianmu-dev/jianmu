@@ -209,8 +209,7 @@ export default defineComponent({
 .jm-workflow-editor-webhook-panel {
   color: @label-color;
   font-size: 14px;
-  margin-bottom: 25px;
-  margin-top: 20px;
+  margin: 20px 0;
   padding: 0 20px;
 
   // 页面全局设置，所有折叠按钮生效
@@ -315,7 +314,7 @@ export default defineComponent({
       }
 
       .only-container {
-        margin-top: 20px;
+        margin: 20px 0 0;
       }
 
       .only-content {

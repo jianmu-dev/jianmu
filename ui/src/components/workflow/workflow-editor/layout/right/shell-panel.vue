@@ -10,7 +10,22 @@
         <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
       <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">
-        <jm-input v-model="form.image" placeholder="请输入docker镜像"/>
+        <jm-select
+          ref="imageSelectRef"
+          @keyup.enter="enterSelect"
+          v-model="form.image"
+          filterable
+          allow-create
+          clearable
+          placeholder="请选择或输入镜像"
+        >
+          <jm-option
+            v-for="item in defaultImages"
+            :key="item.id"
+            :label="item.imageName"
+            :value="item.imageName"
+          />
+        </jm-select>
       </jm-form-item>
       <jm-form-item class="shell-env node-item">
         <template #label>
@@ -75,13 +90,45 @@ export default defineComponent({
   },
   emits: ['form-created'],
   setup(props, { emit }) {
+    // 镜像选择框元素
+    const imageSelectRef = ref();
     const formRef = ref();
     const form = ref<Shell>(props.nodeData);
     const failureVisible = ref<boolean>(true);
-
+    // 默认镜像
+    const defaultImages = ref<Array<{ id: number, imageName: string }>>([
+      {
+        id: 0,
+        imageName: 'ubuntu:22.10',
+      },
+      {
+        id: 1,
+        imageName: 'alpine:3.16.0',
+      },
+      {
+        id: 2,
+        imageName: 'node:18.3.0-alpine3.16',
+      },
+      {
+        id: 3,
+        imageName: 'maven:3-jdk-11',
+      },
+      {
+        id: 4,
+        imageName: 'golang:1.18.1-buster',
+      },
+    ]);
+    // 用户按下enter键选中镜像
+    const enterSelect = (e: any) => {
+      form.value.image = e.target.value;
+      imageSelectRef.value.blur();
+    };
     onMounted(() => emit('form-created', formRef.value));
 
     return {
+      imageSelectRef,
+      enterSelect,
+      defaultImages,
       formRef,
       form,
       failureVisible,
@@ -103,7 +150,6 @@ export default defineComponent({
 .jm-workflow-editor-shell-panel {
   color: @label-color;
   font-size: 14px;
-  margin-bottom: 25px;
   padding: 0 20px;
 
   .node-name {
@@ -112,6 +158,10 @@ export default defineComponent({
 
   .node-item {
     padding-top: 10px;
+
+    &:last-child {
+      margin-bottom: 20px;
+    }
   }
 
   .shell-env {

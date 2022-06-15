@@ -49,6 +49,12 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
 
+  & > [draggable=true] {
+    cursor: move;
+    position: relative;
+    transition: all 0.2s linear;
+  }
+
   .drag-target-insertion {
     position: absolute;
     z-index: 9999;

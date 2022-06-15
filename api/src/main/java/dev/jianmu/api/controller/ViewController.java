@@ -274,6 +274,14 @@ public class ViewController {
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
     }
 
+    @GetMapping("/workflow_instance/{triggerId}")
+    @Operation(summary = "根据triggerId查询流程实例", description = "根据triggerId查询流程实例")
+    public WorkflowInstanceVo findByTriggerId(@PathVariable String triggerId) {
+        var instance= this.instanceApplication.findByTriggerId(triggerId)
+                .orElseThrow(() -> new RuntimeException("未找到流程实例"));
+        return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVo(instance);
+    }
+
     @GetMapping("/workflow/{ref}/{version}")
     @Operation(summary = "获取流程定义", description = "获取流程定义")
     public WorkflowVo findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
