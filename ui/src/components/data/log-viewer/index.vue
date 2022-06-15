@@ -85,6 +85,10 @@ export default defineComponent({
       noWidth.value = tempNoWidth > noWidth.value ? tempNoWidth : noWidth.value;
     };
 
+    const initData = () => {
+      data.value = [];
+    };
+
     onMounted(() => {
       logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download, props.loadMore,
         callback, () => autoScroll.value, handleAutoScroll);
@@ -96,17 +100,17 @@ export default defineComponent({
       if (logViewer.checkValue(props.url, props.value)) {
         return;
       }
-      logViewer.destroy((val: string[]) => {
-        data.value = val;
-      });
+      logViewer.destroy();
+      initData();
       logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download, props.loadMore,
         callback, () => autoScroll.value, handleAutoScroll);
       logViewer.listen(data.value);
     });
 
-    onBeforeUnmount(() => logViewer.destroy((val: string[]) => {
-      data.value = val;
-    }));
+    onBeforeUnmount(() => {
+      logViewer.destroy();
+      initData();
+    });
 
     return {
       data,

@@ -8,7 +8,6 @@ export type LoadMoreFnType = (line: number, size: number) => Promise<ILogVo[]>;
 export type CallBackFnType = (data: string[], startLine?: number) => void;
 export type CheckAutoScrollFnType = () => boolean;
 export type HandleAutoScrollFnType = (scrollFlag: boolean) => void;
-export type DestroyCallBackFnType = (val: string[]) => void;
 
 export default class LogViewer {
   private readonly el: HTMLElement;
@@ -105,13 +104,12 @@ export default class LogViewer {
   /**
    * 销毁
    */
-  destroy(callBack: DestroyCallBackFnType): void {
+  destroy(): void {
     this.mutationObserver.disconnect();
     if (this.isSse) {
       this.eventSource.close();
     }
     this.listenScroll.destroy();
-    callBack([]);
   }
 
   /**
