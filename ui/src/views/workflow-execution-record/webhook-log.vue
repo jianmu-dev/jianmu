@@ -18,7 +18,7 @@
           </template>
           <div class="tab-content">
             <div class="log">
-              <jm-log-viewer :filename="`${nodeName}.txt`" :value="webhookLog"/>
+              <jm-log-viewer v-if="webhookLog" :filename="`${nodeName}.txt`" :value="webhookLog"/>
             </div>
           </div>
         </jm-tab-pane>
