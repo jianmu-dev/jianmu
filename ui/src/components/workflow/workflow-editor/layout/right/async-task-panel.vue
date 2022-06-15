@@ -252,7 +252,6 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-editor-async-task-panel {
-  margin-bottom: 25px;
 
   .set-padding {
     padding: 0 20px;

@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, nextTick, PropType, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, PropType, provide, ref } from 'vue';
 import { cloneDeep } from 'lodash';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
