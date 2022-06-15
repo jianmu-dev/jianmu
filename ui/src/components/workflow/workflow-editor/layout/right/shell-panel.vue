@@ -158,6 +158,10 @@ export default defineComponent({
 
   .node-item {
     padding-top: 10px;
+
+    &:last-child {
+      margin-bottom: 20px;
+    }
   }
 
   .shell-env {
