@@ -105,7 +105,7 @@ export default class LogViewer {
   /**
    * 销毁
    */
-  destroy(data: string[], callBack: DestroyCallBackFnType): void {
+  destroy(callBack: DestroyCallBackFnType): void {
     this.mutationObserver.disconnect();
     if (this.isSse) {
       this.eventSource.close();

@@ -96,7 +96,7 @@ export default defineComponent({
       if (logViewer.checkValue(props.url, props.value)) {
         return;
       }
-      logViewer.destroy(data.value, (val: string[]) => {
+      logViewer.destroy((val: string[]) => {
         data.value = val;
       });
       logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download, props.loadMore,
@@ -104,7 +104,7 @@ export default defineComponent({
       logViewer.listen(data.value);
     });
 
-    onBeforeUnmount(() => logViewer.destroy(data.value, (val: string[]) => {
+    onBeforeUnmount(() => logViewer.destroy((val: string[]) => {
       data.value = val;
     }));
 
