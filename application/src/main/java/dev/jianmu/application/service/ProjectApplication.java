@@ -356,7 +356,10 @@ public class ProjectApplication {
         }
         logger.info("执行记录自动清理已开启，将自动删除最新{}条之前的记录", this.globalProperties.getGlobal().getRecord().getMax());
         this.projectRepository.findAll().forEach(project -> {
-            this.workflowInstanceRepository.findByRefOffset(project.getWorkflowRef(), this.globalProperties.getGlobal().getRecord().getMax()).forEach(workflowInstance -> {
+            this.workflowInstanceRepository.findByRefOffset(project.getWorkflowRef(), this.globalProperties.getGlobal().getRecord().getMax())
+                    .stream()
+                    .filter(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.FINISHED || workflowInstance.getStatus() == ProcessStatus.TERMINATED)
+                    .forEach(workflowInstance -> {
                 this.workflowInstanceRepository.deleteById(workflowInstance.getId());
                 this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
                 this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());

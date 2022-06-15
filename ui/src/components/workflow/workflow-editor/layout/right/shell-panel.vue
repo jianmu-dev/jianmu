@@ -150,7 +150,6 @@ export default defineComponent({
 .jm-workflow-editor-shell-panel {
   color: @label-color;
   font-size: 14px;
-  margin-bottom: 25px;
   padding: 0 20px;
 
   .node-name {
@@ -159,6 +158,10 @@ export default defineComponent({
 
   .node-item {
     padding-top: 10px;
+
+    &:last-child {
+      margin-bottom: 20px;
+    }
   }
 
   .shell-env {

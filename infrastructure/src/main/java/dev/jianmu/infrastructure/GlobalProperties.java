@@ -59,4 +59,7 @@ public class GlobalProperties {
             private String password;
         }
     }
+
+    @NotNull
+    public Boolean trace = true;
 }

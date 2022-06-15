@@ -252,8 +252,6 @@ export default defineComponent({
 
 <style scoped lang="less">
 .jm-workflow-editor-async-task-panel {
-  margin-bottom: 25px;
-
   .set-padding {
     padding: 0 20px;
   }
@@ -264,6 +262,10 @@ export default defineComponent({
 
   .node-item {
     padding-top: 10px;
+
+    &:last-child {
+      margin-bottom: 20px;
+    }
   }
 
   .jm-icon-button-help::before {
