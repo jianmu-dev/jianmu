@@ -21,4 +21,6 @@ public interface ProjectRepository {
     Optional<Project> findById(String id);
 
     Optional<Project> findByName(String name);
+
+    Optional<Project> findByWorkflowRef(String workflowRef);
 }

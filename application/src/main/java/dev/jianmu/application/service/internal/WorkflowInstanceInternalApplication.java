@@ -2,6 +2,7 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.trigger.event.TriggerFailedEvent;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
@@ -36,6 +37,7 @@ public class WorkflowInstanceInternalApplication {
     private final WorkflowInstanceDomainService workflowInstanceDomainService;
     private final ApplicationEventPublisher publisher;
     private final ProjectRepository projectRepository;
+    private final GlobalProperties globalProperties;
 
     public WorkflowInstanceInternalApplication(
             WorkflowRepository workflowRepository,
@@ -43,35 +45,37 @@ public class WorkflowInstanceInternalApplication {
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             WorkflowInstanceDomainService workflowInstanceDomainService,
             ApplicationEventPublisher publisher,
-            ProjectRepository projectRepository) {
+            ProjectRepository projectRepository,
+            GlobalProperties globalProperties) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.workflowInstanceDomainService = workflowInstanceDomainService;
         this.publisher = publisher;
         this.projectRepository = projectRepository;
+        this.globalProperties = globalProperties;
     }
 
-    // 创建并启动流程
+    // 创建流程
     @Transactional
-    public void createAndStart(WorkflowStartCmd cmd, String projectId) {
+    public void create(WorkflowStartCmd cmd, String projectId) {
         Workflow workflow = this.workflowRepository
                 .findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目ID:" + projectId));
         if (!project.isConcurrent()) {
-            // 检查是否存在运行中的流程
+            // 查询待运行的流程数
             int i = this.workflowInstanceRepository
-                    .findByRefAndVersionAndStatuses(workflow.getRef(), workflow.getVersion(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
+                    .findByRefAndStatuses(workflow.getRef(), List.of(ProcessStatus.INIT))
                     .size();
-            if (i > 0) {
+            if (i >= this.globalProperties.getTriggerQueue().getMax()) {
                 var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()
                         .triggerId(cmd.getTriggerId())
                         .triggerType(cmd.getTriggerType())
                         .build();
                 this.publisher.publishEvent(triggerFailedEvent);
-                throw new RuntimeException("该流程运行中");
+                throw new RuntimeException("待执行流程数已超过最大值：" + this.globalProperties.getTriggerQueue().getMax());
             }
         }
         // 查询serialNo
@@ -82,6 +86,33 @@ public class WorkflowInstanceInternalApplication {
         WorkflowInstance workflowInstance = workflowInstanceDomainService.create(cmd.getTriggerId(), cmd.getTriggerType(), serialNo.get(), workflow);
         workflowInstance.init();
         this.workflowInstanceRepository.add(workflowInstance);
+    }
+
+    // 启动流程
+    @Transactional
+    public void start(String workflowRef) {
+        var project = this.projectRepository.findByWorkflowRef(workflowRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
+        if (project.isConcurrent()) {
+            this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
+                    .forEach(workflowInstance -> {
+                        workflowInstance.createVolume();
+                        this.workflowInstanceRepository.save(workflowInstance);
+                    });
+            return;
+        }
+        // 检查是否存在运行中的流程
+        int i = this.workflowInstanceRepository
+                .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
+                .size();
+        if (i > 0) {
+            return;
+        }
+        this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
+                .ifPresent(workflowInstance -> {
+                    workflowInstance.createVolume();
+                    this.workflowInstanceRepository.save(workflowInstance);
+                });
     }
 
     // 流程正常结束

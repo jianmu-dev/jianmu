@@ -28,6 +28,7 @@ import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -222,6 +223,7 @@ public class ProjectApplication {
         logger.info("开始同步Git仓库中的DSL");
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        var concurrent = project.isConcurrent();
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
@@ -246,6 +248,35 @@ public class ProjectApplication {
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.jgitService.cleanUp(gitRepo.getId());
+        if (!concurrent && project.isConcurrent()) {
+            this.concurrentWorkflowInstance(workflow.getRef());
+        }
+    }
+
+    // 并发流程实例
+    private void concurrentWorkflowInstance(String workflowRef) {
+        var project = this.projectRepository.findByWorkflowRef(workflowRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
+        if (project.isConcurrent()) {
+            this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
+                    .forEach(workflowInstance -> {
+                        workflowInstance.createVolume();
+                        this.workflowInstanceRepository.save(workflowInstance);
+                    });
+            return;
+        }
+        // 检查是否存在运行中的流程
+        int i = this.workflowInstanceRepository
+                .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
+                .size();
+        if (i > 0) {
+            return;
+        }
+        this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
+                .ifPresent(workflowInstance -> {
+                    workflowInstance.createVolume();
+                    this.workflowInstanceRepository.save(workflowInstance);
+                });
     }
 
     @Transactional
@@ -296,6 +327,7 @@ public class ProjectApplication {
     public void updateProject(String dslId, String dslText, String projectGroupId) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+        var concurrent = project.isConcurrent();
         if (project.getDslSource() == Project.DslSource.GIT) {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
         }
@@ -323,6 +355,9 @@ public class ProjectApplication {
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
+        if (!concurrent && project.isConcurrent()) {
+            this.concurrentWorkflowInstance(workflow.getRef());
+        }
     }
 
     @Transactional
@@ -330,7 +365,7 @@ public class ProjectApplication {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var running = this.workflowInstanceRepository
-                .findByRefAndVersionAndStatuses(project.getWorkflowRef(), project.getWorkflowVersion(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
+                .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
         if (running > 0) {
             throw new RuntimeException("仍有流程执行中，不能删除");

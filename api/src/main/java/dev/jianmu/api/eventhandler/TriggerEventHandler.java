@@ -10,6 +10,7 @@ import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.event.TriggerFailedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -39,6 +40,7 @@ public class TriggerEventHandler {
         this.triggerApplication.trigger(cronTriggerEvent.getTriggerId());
     }
 
+    @Async
     @EventListener
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 触发项目模块
@@ -64,6 +66,7 @@ public class TriggerEventHandler {
         this.triggerApplication.deleteByProjectId(manualEvent.getProjectId());
     }
 
+    @Async
     @EventListener
     public void handleTriggerFailedEvent(TriggerFailedEvent triggerFailedEvent) {
         // 修改Webhook状态

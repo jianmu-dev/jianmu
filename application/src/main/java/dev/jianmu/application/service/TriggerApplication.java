@@ -704,7 +704,7 @@ public class TriggerApplication {
         var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
-        webRequest.setErrorMsg("该流程运行中");
+        webRequest.setErrorMsg("待执行流程数已超过最大值" );
         this.webRequestRepositoryImpl.update(webRequest);
     }
 

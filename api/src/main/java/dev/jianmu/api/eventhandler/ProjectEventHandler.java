@@ -47,7 +47,6 @@ public class ProjectEventHandler {
         this.projectGroupApplication = projectGroupApplication;
     }
 
-    @Async
     @EventListener
     public void handleTriggerEvent(TriggerEvent triggerEvent) {
         // 使用project id与WorkflowVersion作为triggerId,用于参数引用查询，参见WorkerApplication#getEnvironmentMap
@@ -62,7 +61,7 @@ public class ProjectEventHandler {
         Lock lock = PROJECT_LOCK_MAP.get(triggerEvent.getProjectId());
         lock.lock();
         try {
-            this.workflowInstanceInternalApplication.createAndStart(cmd, triggerEvent.getProjectId());
+            this.workflowInstanceInternalApplication.create(cmd, triggerEvent.getProjectId());
         } finally {
             lock.unlock();
         }

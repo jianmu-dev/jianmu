@@ -13,3 +13,6 @@ ALTER TABLE `worker`
     add `arch`          varchar(45)  DEFAULT NULL COMMENT 'Worker ID'   AFTER `os`;
 ALTER TABLE `worker`
     add `created_time`  datetime     DEFAULT NULL COMMENT '创建时间'      AFTER `status`;
+
+ALTER TABLE `async_task_instance`
+    add UNIQUE INDEX trigger_id_and_task_ref(`trigger_id`, `async_task_ref`);

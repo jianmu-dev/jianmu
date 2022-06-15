@@ -57,6 +57,22 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     Optional<Project> findByName(String name);
 
+    @Select("select * from jianmu_project where workflow_ref = #{workflowRef}")
+    @Result(column = "workflow_name", property = "workflowName")
+    @Result(column = "workflow_description", property = "workflowDescription")
+    @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
+    @Result(column = "event_bridge_id", property = "eventBridgeId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "git_repo_id", property = "gitRepoId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    Optional<Project> findByWorkflowRef(String workflowRef);
+
     @Select("<script>" +
             "SELECT * FROM `jianmu_project` " +
             "<if test='name != null'> WHERE `workflow_name` like concat('%', #{workflowName}, '%')</if>" +
