@@ -118,7 +118,7 @@
         </div>
         <!-- 查看payload -->
         <div class="payload-content" v-if="!payloadTab">
-          <jm-log-viewer filename="webhook.txt" :value="webhookLog"/>
+          <jm-log-viewer v-if="webhookLog" filename="webhook.txt" :value="webhookLog"/>
         </div>
         <!-- 触发器 -->
         <div v-else class="trigger-content">

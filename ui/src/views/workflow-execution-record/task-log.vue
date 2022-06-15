@@ -89,8 +89,9 @@
                 </jm-button>
               </div>
               <jm-log-viewer
+                v-if="currentInstanceId"
                 :filename="`${task.nodeName}.txt`"
-                :url="currentInstanceId? `/view/logs/task/subscribe/${currentInstanceId}?size=` : ''"
+                :url="`/view/logs/task/subscribe/${currentInstanceId}?size=`"
                 v-model:more="moreLog"
                 :load-more="loadMore"
                 :download="download"
