@@ -110,7 +110,7 @@ export default defineComponent({
     flex-direction: column;
 
     .panel-container {
-      height: calc(100vh - 191px);
+      height: calc(100vh - 109px);
     }
 
     .footer {
