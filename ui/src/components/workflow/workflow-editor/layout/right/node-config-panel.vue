@@ -67,6 +67,9 @@ export default defineComponent({
       drawerOpening,
       nodeData,
       handleFormCreated: (ref: any) => {
+        if (!ref) {
+          return;
+        }
         formRef.value = ref;
 
         if (!props.nodeWaringClicked) {
@@ -77,7 +80,7 @@ export default defineComponent({
         });
       },
       save: () => {
-        formRef.value.validate((valid: boolean) => {
+        formRef.value?.validate((valid: boolean) => {
           proxy.setData(nodeData);
           emit('closed', valid);
         });
