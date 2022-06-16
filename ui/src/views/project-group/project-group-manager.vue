@@ -50,7 +50,7 @@
               <div class="top">
                 <router-link :to="{ path: `/project-group/detail/${i.id}` }">
                   <div class="name">
-                    <jm-text-viewer :value="i.name"/>
+                    <jm-text-viewer :value="i.name" :threshold="10"/>
                   </div>
                 </router-link>
               </div>
@@ -75,7 +75,7 @@
             <div class="top">
               <router-link :to="{ path: `/project-group/detail/${i.id}` }">
                 <div class="name">
-                  <jm-text-viewer :value="i.name"/>
+                  <jm-text-viewer :value="i.name" :threshold="10"/>
                 </div>
               </router-link>
               <div class="operation">
