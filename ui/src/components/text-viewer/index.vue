@@ -24,6 +24,11 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    // 默认组件在外层元素大小在指定时间内重新计算（截流阀值）
+    threshold: {
+      type: Number,
+      default: 800,
+    },
   },
   setup(props, { emit }) {
     const wrapperElement = ref<HTMLElement>();
@@ -43,6 +48,7 @@ export default defineComponent({
         (event: ICallbackEvent) => {
           emit('loaded', event);
         },
+        props.threshold,
       );
       await textViewer.reload();
     };

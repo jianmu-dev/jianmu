@@ -27,6 +27,8 @@ function getPlainText(html: string): string {
 type Callback = (event: ICallbackEvent) => void;
 
 export class TextViewer {
+  // 截流的阀值
+  private readonly threshold: number;
   // 传入value的原始值，可能包含html元素标签
   private readonly value: string;
   // 去除html标签后的字符串
@@ -65,6 +67,7 @@ export class TextViewer {
     wrapperElement: HTMLElement,
     appContext: AppContext,
     callback: Callback,
+    threshold: number,
   ) {
     this.value = value;
     this.plainText = getPlainText(this.value);
@@ -72,6 +75,7 @@ export class TextViewer {
     this.tipPlacement = tipPlacement;
     this.tipAppendToBody = tipAppendToBody;
     this.wrapperElement = wrapperElement;
+    this.threshold = threshold;
     this.id = uuidv4();
     // 创建用于临时中转计算的元素
     const TransitWrapper = document.createElement('div');
@@ -88,7 +92,7 @@ export class TextViewer {
     this.resizeObserver = new ResizeObserver(
       _throttle(async () => {
         await this.reload();
-      }, 800),
+      }, this.threshold),
     );
     this.resizeObserver.observe(
       this.wrapperElement!.parentElement as Element,
