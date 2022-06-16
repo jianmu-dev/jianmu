@@ -81,10 +81,11 @@ export default defineComponent({
       },
       handleNodeSelected,
       handleNodeConfigPanelClosed: (valid: boolean) => {
+        const selectedNode = graph.value!.getCellById(selectedNodeId.value);
         if (valid) {
-          workflowValidator.removeWarning(selectedNodeId.value);
+          workflowValidator.removeWarning(selectedNode);
         } else {
-          workflowValidator.addWarning(selectedNodeId.value, nodeId => {
+          workflowValidator.addWarning(selectedNode, nodeId => {
             handleNodeSelected(nodeId, true);
           });
         }
