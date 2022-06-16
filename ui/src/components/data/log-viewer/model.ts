@@ -127,6 +127,9 @@ export default class LogViewer {
         }
         this.callbackFn(data, this.line);
       };
+      this.eventSource.onerror = () => {
+        this.eventSource.close();
+      };
       return;
     }
     data = this.value.split(/\r?\n/);
