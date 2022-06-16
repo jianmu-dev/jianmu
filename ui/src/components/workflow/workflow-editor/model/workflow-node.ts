@@ -5,12 +5,49 @@ import { Shell } from './data/node/shell';
 import { AsyncTask } from './data/node/async-task';
 import { fetchNodeLibraryList, getOfficialNodes } from '@/api/view-no-auth';
 import { NodeTypeEnum } from '@/api/dto/enumeration';
+import { INodeParameterVo } from '@/api/dto/node-definitions';
+import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 
 interface IPageInfo {
   pageNum: number;
   totalPages: number;
   content: IWorkflowNode[];
 }
+
+/**
+ * push输入/输出参数
+ * @param data 原数据
+ * @param inputs
+ * @param outputs
+ * @param versionDescription
+ */
+export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
+  data.versionDescription = versionDescription;
+  if (inputs) {
+    inputs.forEach(item => {
+      data.inputs.push({
+        ref: item.ref,
+        name: item.name,
+        type: item.type as ParamTypeEnum,
+        value: (item.value || '').toString(),
+        required: item.required,
+        description: item.description,
+      });
+    });
+  }
+  if (outputs) {
+    outputs.forEach(item => {
+      data.outputs.push({
+        ref: item.ref,
+        name: item.name,
+        type: item.type as ParamTypeEnum,
+        value: (item.value || '').toString(),
+        required: item.required,
+        description: item.description,
+      });
+    });
+  }
+};
 
 export class WorkflowNode {
 

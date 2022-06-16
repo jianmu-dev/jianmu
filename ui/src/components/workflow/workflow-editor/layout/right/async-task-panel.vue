@@ -123,11 +123,12 @@ import {
   getOfficialNodeParams,
   getOfficialVersionList,
 } from '@/api/node-library';
-import { INodeDefVersionListVo, INodeParameterVo } from '@/api/dto/node-definitions';
+import { INodeDefVersionListVo } from '@/api/dto/node-definitions';
 import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
 import { Node } from '@antv/x6';
 import noParamImage from '../../svgs/no-param.svg';
+import { pushParams } from '../../model/workflow-node';
 
 export default defineComponent({
   components: { SecretKeySelector, ExpressionEditor },
@@ -150,41 +151,6 @@ export default defineComponent({
     const versionLoading = ref<boolean>(false);
     const failureVisible = ref<boolean>(false);
     const tabFlag = ref<boolean>(true);
-
-    /**
-     * push输入/输出参数
-     * @param inputs
-     * @param outputs
-     * @param versionDescription
-     */
-    const pushParams = (inputs: INodeParameterVo[], outputs: INodeParameterVo[], versionDescription: string) => {
-      form.value.versionDescription = versionDescription;
-      if (inputs) {
-        inputs.forEach(item => {
-          form.value.inputs.push({
-            ref: item.ref,
-            name: item.name,
-            type: item.type as ParamTypeEnum,
-            value: (item.value || '').toString(),
-            required: item.required,
-            description: item.description,
-          });
-        });
-      }
-      if (outputs) {
-        outputs.forEach(item => {
-          form.value.outputs.push({
-            ref: item.ref,
-            name: item.name,
-            type: item.type as ParamTypeEnum,
-            value: (item.value || '').toString(),
-            required: item.required,
-            description: item.description,
-          });
-        });
-      }
-    };
-
     const changeVersion = async () => {
       form.value.inputs.length = 0;
       form.value.outputs.length = 0;
@@ -194,11 +160,11 @@ export default defineComponent({
         if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
           const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
           const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
-          pushParams(inputs, outputs, versionDescription);
+          pushParams(form.value as AsyncTask, inputs, outputs, versionDescription);
         } else {
           const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
           const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
-          pushParams(inputs, outputs, versionDescription);
+          pushParams(form.value as AsyncTask, inputs, outputs, versionDescription);
         }
       } catch (err) {
         proxy.$throw(err, proxy);
@@ -212,7 +178,6 @@ export default defineComponent({
       if (form.value.version) {
         failureVisible.value = true;
       }
-      emit('form-created', formRef.value);
       versionLoading.value = true;
       // 获取versionList
       try {
@@ -230,6 +195,8 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       } finally {
         versionLoading.value = false;
+        // 等待异步数据请求结束才代码form创建成功（解决第一次点击警告按钮打开drawer没有表单验证）
+        emit('form-created', formRef.value);
       }
     });
 

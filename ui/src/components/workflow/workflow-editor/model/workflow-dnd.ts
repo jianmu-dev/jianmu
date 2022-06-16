@@ -5,6 +5,15 @@ import { IWorkflowNode } from './data/common';
 import { NODE, PORTS } from '../shape/gengral-config';
 import { ClickNodeWarningCallbackFnType, WorkflowValidator } from './workflow-validator';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import { NodeGroupEnum, NodeTypeEnum } from './data/enumeration';
+import {
+  getLocalNodeParams,
+  getLocalVersionList,
+  getOfficialNodeParams,
+  getOfficialVersionList,
+} from '@/api/node-library';
+import { AsyncTask } from './data/node/async-task';
+import { pushParams } from './workflow-node';
 
 const { icon: { width, height }, textMaxHeight } = NODE;
 
@@ -31,7 +40,6 @@ export class WorkflowDnd {
       getDragNode: (sourceNode: Node) => {
         const { width, height } = sourceNode.getSize();
         sourceNode.resize(width, height + textMaxHeight);
-
         // 开始拖拽时初始化的节点，直接使用，无需克隆
         return sourceNode;
       },
@@ -46,23 +54,52 @@ export class WorkflowDnd {
           const { x, y } = targetNode.getPosition();
           targetNode.setPosition(x, y - textMaxHeight / 2);
         });
-
-        new CustomX6NodeProxy(targetNode)
-          .getData()
-          .validate()
-          // 校验节点有误时，加警告
-          .catch(() => workflowValidator.addWarning(targetNode, clickNodeWarningCallback));
-
         return targetNode;
       },
-      validateNode: (droppingNode: Node) => {
+      validateNode: async (droppingNode: Node) => {
         const { mousePosition } = this.draggingListener;
         // 销毁监听器，必须先获取鼠标位置后销毁
         this.destroyListener();
 
         const nodePanelRect = nodeContainer.getBoundingClientRect();
-
-        return workflowValidator.checkDroppingNode(droppingNode, mousePosition, nodePanelRect);
+        // 验证节点是否有效放置在画布中，true代表成功
+        const flag = workflowValidator.checkDroppingNode(droppingNode, mousePosition, nodePanelRect);
+        const proxy = new CustomX6NodeProxy(droppingNode);
+        const _data = proxy.getData();
+        if (!flag) {
+          return false;
+        }
+        if (_data.getType() !== NodeTypeEnum.ASYNC_TASK) {
+          _data
+            .validate()
+            // 校验节点有误时，加警告
+            .catch(() => workflowValidator.addWarning(droppingNode, clickNodeWarningCallback));
+          return true;
+        }
+        const data = _data as AsyncTask;
+        const isOwnerRef = data.ownerRef === NodeGroupEnum.LOCAL;
+        const res = await (isOwnerRef ? getLocalVersionList : getOfficialVersionList)(data.getRef(), data.ownerRef);
+        data.version = res.versions.length > 0 ? res.versions[0] : '';
+        if (isOwnerRef) {
+          const {
+            inputParameters: inputs,
+            outputParameters: outputs,
+            description: versionDescription,
+          } = await getLocalNodeParams(data.getRef(), data.ownerRef, data.version);
+          pushParams(data, inputs, outputs, versionDescription);
+        } else {
+          const {
+            inputParams: inputs,
+            outputParams: outputs,
+            description: versionDescription,
+          } = await getOfficialNodeParams(data.getRef(), data.ownerRef, data.version);
+          pushParams(data, inputs, outputs, versionDescription);
+        }
+        data
+          .validate()
+          // 校验节点有误时，加警告
+          .catch(() => workflowValidator.addWarning(droppingNode, clickNodeWarningCallback));
+        return true;
       },
     });
   }
