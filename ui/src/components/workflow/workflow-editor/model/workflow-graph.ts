@@ -197,7 +197,8 @@ export class WorkflowGraph {
         // 是否框选
         rubberband: true,
         // safari存在选中节点时，虚线框的宽度有偏差，用resizing代替
-        // showNodeSelectionBox: true,
+        // fix: #I5CK8M
+        showNodeSelectionBox: true,
       },
       snapline: true,
       keyboard: true,
