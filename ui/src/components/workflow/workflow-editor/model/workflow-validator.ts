@@ -18,12 +18,7 @@ export class WorkflowValidator {
     this.proxy = proxy;
   }
 
-  addWarning(nodeId: string, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): void {
-    const node = this.graph.getCellById(nodeId) as Node | undefined;
-    if (!node) {
-      return;
-    }
-
+  addWarning(node: Node, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): void {
     if (isWarning(node)) {
       return;
     }
@@ -51,12 +46,7 @@ export class WorkflowValidator {
     });
   }
 
-  removeWarning(nodeId: string): void {
-    const node = this.graph.getCellById(nodeId) as Node | undefined;
-    if (!node) {
-      return;
-    }
-
+  removeWarning(node: Node): void {
     if (!isWarning(node)) {
       return;
     }
