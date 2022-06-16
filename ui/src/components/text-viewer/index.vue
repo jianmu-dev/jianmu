@@ -24,7 +24,7 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
-    // 默认组件在外层元素大小在指定时间内重新计算（截流阀值）
+    // 默认组件在外层元素大小在指定时间内重新计算（截流阈值）
     threshold: {
       type: Number,
       default: 800,

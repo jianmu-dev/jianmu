@@ -27,7 +27,7 @@ function getPlainText(html: string): string {
 type Callback = (event: ICallbackEvent) => void;
 
 export class TextViewer {
-  // 截流的阀值
+  // 截流的阈值
   private readonly threshold: number;
   // 传入value的原始值，可能包含html元素标签
   private readonly value: string;
