@@ -127,8 +127,13 @@ export default class LogViewer {
         }
         this.callbackFn(data, this.line);
       };
-      this.eventSource.onerror = () => {
-        this.eventSource.close();
+      this.eventSource.onerror = (e: any) => {
+        if (e.currentTarget.readyState === 0) {
+          console.log('服务端已断开连接，禁止尝试重连');
+          this.eventSource.close();
+          return;
+        }
+        console.error(e);
       };
       return;
     }
