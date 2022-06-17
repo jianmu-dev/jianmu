@@ -1,5 +1,7 @@
 package dev.jianmu.infrastructure.mybatis.workflow;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowInstanceMapper;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
@@ -94,5 +96,10 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     @Override
     public List<WorkflowInstance> findByWorkflowRefLimit(String workflowRef, long offset) {
         return this.workflowInstanceMapper.findByWorkflowRef(workflowRef, offset);
+    }
+
+    public PageInfo<WorkflowInstance> findPageByWorkflowRef(int pageNum, int pageSize, String workflowRef) {
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> this.workflowInstanceMapper.findPageByWorkflowRef(workflowRef));
     }
 }
