@@ -1,10 +1,7 @@
 package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.api.dto.LogRandomSubscribingDto;
-import dev.jianmu.api.dto.LogSubscribingDto;
-import dev.jianmu.api.dto.NodeDefViewingDto;
-import dev.jianmu.api.dto.ProjectViewingDto;
+import dev.jianmu.api.dto.*;
 import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
@@ -274,10 +271,22 @@ public class ViewController {
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVoList(instances);
     }
 
+    @GetMapping("/workflow_instances/pages/{workflowRef}")
+    @Operation(summary = "根据workflowRef分页查询流程实例列表", description = "根据workflowRef分页查询流程实例列表")
+    public PageInfo<WorkflowInstanceVo> findPageByWorkflowRef(@PathVariable String workflowRef, PageDto pageDto) {
+        var pages = this.instanceApplication.findPageByWorkflowRef(pageDto.getPageNum(), pageDto.getPageSize(), workflowRef);
+        var workflowInstanceVos = pages.getList().stream()
+                .map(WorkflowInstanceMapper.INSTANCE::toWorkflowInstanceVo)
+                .collect(Collectors.toList());
+        PageInfo<WorkflowInstanceVo> pageInfo = PageUtils.pageInfo2PageInfoVo(pages);
+        pageInfo.setList(workflowInstanceVos);
+        return pageInfo;
+    }
+
     @GetMapping("/workflow_instance/{triggerId}")
     @Operation(summary = "根据triggerId查询流程实例", description = "根据triggerId查询流程实例")
     public WorkflowInstanceVo findByTriggerId(@PathVariable String triggerId) {
-        var instance= this.instanceApplication.findByTriggerId(triggerId)
+        var instance = this.instanceApplication.findByTriggerId(triggerId)
                 .orElseThrow(() -> new RuntimeException("未找到流程实例"));
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVo(instance);
     }

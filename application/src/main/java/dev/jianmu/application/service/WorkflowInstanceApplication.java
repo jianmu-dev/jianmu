@@ -1,9 +1,9 @@
 package dev.jianmu.application.service;
 
+import com.github.pagehelper.PageInfo;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.workflow.WorkflowInstanceRepositoryImpl;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
-import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.Optional;
  */
 @Service
 public class WorkflowInstanceApplication {
-    private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final WorkflowInstanceRepositoryImpl workflowInstanceRepository;
     private final GlobalProperties globalProperties;
 
     public WorkflowInstanceApplication(
@@ -34,6 +34,10 @@ public class WorkflowInstanceApplication {
 
     public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
         return this.workflowInstanceRepository.findByWorkflowRefLimit(workflowRef, globalProperties.getGlobal().getRecord().getMax());
+    }
+
+    public PageInfo<WorkflowInstance> findPageByWorkflowRef(Integer pageNum, Integer pageSize, String workflowRef) {
+        return this.workflowInstanceRepository.findPageByWorkflowRef(pageNum, pageSize, workflowRef);
     }
 
     public Optional<WorkflowInstance> findByRefAndSerialNoMax(String workflowRef) {
