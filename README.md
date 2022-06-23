@@ -46,6 +46,7 @@ registry:
 ```
 
 **配置Worker：**
+> 注意：该配置从版本v2.5.0开始支持
 
 ```yaml
 jianmu:
