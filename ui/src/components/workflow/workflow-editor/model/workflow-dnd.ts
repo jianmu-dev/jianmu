@@ -95,7 +95,7 @@ export class WorkflowDnd {
           } = await getOfficialNodeParams(data.getRef(), data.ownerRef, data.version);
           pushParams(data, inputs, outputs, versionDescription);
         }
-        // 上面动态将节点数据改完后，需要将最新的数据重新调用seData保存，否则后续调用node getData的值还是默认值
+        // fix: #I5DXPM
         proxy.setData(data);
         data
           .validate()
