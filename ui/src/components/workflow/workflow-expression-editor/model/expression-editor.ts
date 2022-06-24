@@ -18,10 +18,7 @@ export class ExpressionEditor {
     value: string, selectableParams: ISelectableParam[]) {
     this.toolbar = new ParamToolbar(paramToolbarEl, selectableParams);
     this.editorEl = editorEl;
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = value;
-    // 因确定不了外部传进来的数据格式，强制转成纯文本
-    this.refresh(tempDiv.innerText);
+    this.refresh(value);
 
     this.observer = new MutationObserver(() => {
       const paramRefEl = this.toolbar.getParamRefEl();
@@ -163,6 +160,12 @@ export class ExpressionEditor {
       return '';
     }
 
+    let tempDiv = document.createElement('div');
+    tempDiv.innerText = plainText;
+    // escape html
+    plainText = tempDiv.innerHTML;
+    console.log(plainText);
+
     const children = plainText.split(NEW_LINE).map((pText => {
       const child = document.createElement('div');
       child.innerHTML = this.parse(pText);
@@ -170,7 +173,7 @@ export class ExpressionEditor {
       return child;
     }));
 
-    const tempDiv = document.createElement('div');
+    tempDiv = document.createElement('div');
     tempDiv.append(...children);
 
     return tempDiv.innerHTML;
