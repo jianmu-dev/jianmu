@@ -95,6 +95,8 @@ export class WorkflowDnd {
           } = await getOfficialNodeParams(data.getRef(), data.ownerRef, data.version);
           pushParams(data, inputs, outputs, versionDescription);
         }
+        // fix: #I5DXPM
+        proxy.setData(data);
         data
           .validate()
           // 校验节点有误时，加警告
