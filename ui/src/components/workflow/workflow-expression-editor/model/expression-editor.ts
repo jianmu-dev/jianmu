@@ -164,7 +164,6 @@ export class ExpressionEditor {
     tempDiv.innerText = plainText;
     // escape html
     plainText = tempDiv.innerHTML;
-    console.log(plainText);
 
     const children = plainText.split(NEW_LINE).map((pText => {
       const child = document.createElement('div');
