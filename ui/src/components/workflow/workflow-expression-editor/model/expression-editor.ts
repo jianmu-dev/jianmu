@@ -161,11 +161,11 @@ export class ExpressionEditor {
     }
 
     let tempDiv = document.createElement('div');
-    tempDiv.innerText = plainText;
-    // escape html
-    plainText = tempDiv.innerHTML;
-
     const children = plainText.split(NEW_LINE).map((pText => {
+      tempDiv.innerText = pText;
+      // escape html
+      pText = tempDiv.innerHTML;
+
       const child = document.createElement('div');
       child.innerHTML = this.parse(pText);
 
