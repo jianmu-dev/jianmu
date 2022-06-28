@@ -231,7 +231,8 @@ export default defineComponent({
         const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ?
           GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
 
-        workflowGraph!.destroy();
+        // fix: #I5EH4G
+        workflowGraph.value!.destroy();
 
         workflowGraph.value = undefined;
         graph.value = undefined;
