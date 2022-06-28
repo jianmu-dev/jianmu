@@ -27,7 +27,7 @@ import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
 import { IWorkflow } from './model/data/common';
-import { Graph } from '@antv/x6';
+import { Graph, Node } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
 
@@ -81,7 +81,7 @@ export default defineComponent({
       },
       handleNodeSelected,
       handleNodeConfigPanelClosed: (valid: boolean) => {
-        const selectedNode = graph.value!.getCellById(selectedNodeId.value);
+        const selectedNode = graph.value!.getCellById(selectedNodeId.value) as Node;
         if (valid) {
           workflowValidator.removeWarning(selectedNode);
         } else {
