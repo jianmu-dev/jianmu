@@ -3,6 +3,7 @@ package dev.jianmu.application.service.internal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.docker.*;
@@ -10,9 +11,11 @@ import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.infrastructure.worker.DispatchWorker;
 import dev.jianmu.infrastructure.worker.WorkerSecret;
+import dev.jianmu.infrastructure.worker.unit.*;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
@@ -21,11 +24,16 @@ import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.repository.WorkerRepository;
+import dev.jianmu.workflow.aggregate.definition.Node;
+import dev.jianmu.workflow.aggregate.definition.TaskParameter;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
+import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
+import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
+import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -42,6 +50,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -72,6 +82,8 @@ public class WorkerInternalApplication {
     private final ObjectMapper objectMapper;
     private final MonitoringFileService monitoringFileService;
     private final GlobalProperties globalProperties;
+    private final WorkflowRepository workflowRepository;
+    private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -86,7 +98,11 @@ public class WorkerInternalApplication {
             DeferredResultService deferredResultService,
             TaskInstanceRepository taskInstanceRepository,
             ObjectMapper objectMapper,
-            MonitoringFileService monitoringFileService, GlobalProperties globalProperties) {
+            MonitoringFileService monitoringFileService,
+            GlobalProperties globalProperties,
+            WorkflowRepository workflowRepository,
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository
+    ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
@@ -101,6 +117,8 @@ public class WorkerInternalApplication {
         this.objectMapper = objectMapper;
         this.monitoringFileService = monitoringFileService;
         this.globalProperties = globalProperties;
+        this.workflowRepository = workflowRepository;
+        this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
     }
 
     @Transactional
@@ -130,9 +148,9 @@ public class WorkerInternalApplication {
             this.workflowInstanceRepository.findByTriggerId(event.getTriggerId())
                     .ifPresent(workflowInstance -> {
                         // 分发worker
-                        var workers = this.workerRepository.findByTypeAndCreatedTimeLessThan(Worker.Type.DOCKER, workflowInstance.getStartTime());
+                        var workers = this.workerRepository.findByTypeInAndCreatedTimeLessThan(List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES), workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
-                            throw new RuntimeException("worker数量为0，类型：" + Worker.Type.DOCKER);
+                            throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
                         var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers);
                         taskInstance.setWorkerId(worker.getId());
@@ -163,7 +181,11 @@ public class WorkerInternalApplication {
     }
 
     public Optional<TaskInstance> pullTasks(String workerId) {
-        return this.taskInstanceRepository.findByWorkerIdAndMinVersion(workerId);
+        return this.taskInstanceRepository.findByWorkerIdAndTriggerIdLimit(workerId, null);
+    }
+
+    public Optional<TaskInstance> pullKubeTasks(String workerId, String triggerId) {
+        return this.taskInstanceRepository.findByWorkerIdAndTriggerIdLimit(workerId, triggerId);
     }
 
     public ContainerSpec getContainerSpec(TaskInstance taskInstance) {
@@ -305,7 +327,6 @@ public class WorkerInternalApplication {
     }
 
     private Optional<KVPair> findSecret(Parameter<?> parameter) {
-        Parameter<?> secretParameter;
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = parameter.getStringValue().split("\\.");
         return this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1]);
@@ -381,8 +402,8 @@ public class WorkerInternalApplication {
     }
 
     @Transactional
-    public TaskInstance acceptTask(HttpServletResponse response, String workerId, String taskInstanceId, int version) {
-        var taskInstance = this.taskInstanceRepository.findByIdAndVersion(taskInstanceId, version)
+    public TaskInstance acceptTask(HttpServletResponse response, String workerId, String businessId, int version) {
+        var taskInstance = this.taskInstanceRepository.findByBusinessIdAndVersion(businessId, version)
                 .orElse(null);
         if (taskInstance == null) {
             response.setStatus(HttpStatus.SC_CONFLICT);
@@ -396,22 +417,26 @@ public class WorkerInternalApplication {
     }
 
     @Transactional
-    public void updateTaskInstance(String workerId, String taskInstanceId, String status, String resultFile, String errorMsg, Integer exitCode) {
+    public void updateTaskInstance(String workerId, String businessId, String status, String resultFile, String errorMsg, Integer exitCode) {
+        var taskInstance = this.taskInstanceRepository.findByBusinessId(businessId).stream()
+                .filter(t -> t.getStatus() == InstanceStatus.WAITING || t.getStatus() == InstanceStatus.RUNNING)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("同一任务重复运行, businessId：" + businessId));
         switch (status) {
             case "RUNNING":
                 this.publisher.publishEvent(TaskRunningEvent.builder()
-                        .taskId(taskInstanceId)
+                        .taskId(taskInstance.getId())
                         .build());
                 break;
             case "FAILED":
                 this.publisher.publishEvent(TaskFailedEvent.builder()
-                        .taskId(taskInstanceId)
+                        .taskId(taskInstance.getId())
                         .errorMsg(errorMsg)
                         .build());
                 break;
             case "SUCCEED":
                 this.publisher.publishEvent(TaskFinishedEvent.builder()
-                        .taskId(taskInstanceId)
+                        .taskId(taskInstance.getId())
                         .cmdStatusCode(exitCode)
                         .resultFile(resultFile)
                         .build());
@@ -434,5 +459,213 @@ public class WorkerInternalApplication {
 
     public void terminateTask(String workerId, String taskInstanceId) {
         this.deferredResultService.terminateDeferredResult(workerId, taskInstanceId);
+    }
+
+    // 获取k8s Unit
+    public Unit findUnit(TaskInstance taskInstance) {
+        if (taskInstance.isCreationVolume()) {
+            return this.findCreateUnit(taskInstance);
+        } else if (taskInstance.isDeletionVolume()) {
+            return Unit.builder()
+                    .type(Unit.Type.DELETE)
+                    .podSpec(PodSpec.builder()
+                            .name(taskInstance.getTriggerId())
+                            .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
+                            .build())
+                    .build();
+        } else {
+            return Unit.builder()
+                    .type(Unit.Type.RUN)
+                    .podSpec(PodSpec.builder()
+                            .name(taskInstance.getTriggerId())
+                            .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
+                            .build())
+                    .pullSecret(this.findPullSecret())
+                    .runners(List.of(this.findUnitRunner(taskInstance)))
+                    .build();
+        }
+    }
+
+    private WorkerSecret findPullSecret() {
+        var auths = new HashMap<String, Map<String, String>>();
+        var auth = new HashMap<String, String>();
+        auth.put("username", this.globalProperties.getWorker().getRegistry().getUsername());
+        auth.put("password", this.globalProperties.getWorker().getRegistry().getPassword());
+        auths.put(this.globalProperties.getWorker().getRegistry().getAddress(), auth);
+        String data = null;
+        try {
+            data = objectMapper.writeValueAsString(Map.entry("auths", auths));
+        } catch (JsonProcessingException e) {
+            log.error("pullSecret序列化失败，" + e);
+        }
+        return WorkerSecret.builder()
+                .env("PULLSECRET")
+                .data(data)
+                .mask(true)
+                .build();
+    }
+
+    private Unit findCreateUnit(TaskInstance taskInstance) {
+        var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(taskInstance.getTriggerId());
+        var unitSecrets = new ArrayList<WorkerSecret>();
+        var runners = new ArrayList<Runner>();
+        workflow.findTasks().forEach(node -> {
+            var nodeDef = this.nodeDefApi.getByType(node.getType());
+            var isShellNode = nodeDef.getImage() != null;
+            var runnerSecrets = new ArrayList<SecretVar>();
+            var runnerEnvs = new HashMap<String, String>();
+            node.getTaskParameters().forEach(taskParameter -> {
+                if (taskParameter.getType() == Parameter.Type.SECRET) {
+                    this.findUnitSecret(taskParameter, nodeDef).ifPresent(workerSecret -> {
+                        unitSecrets.add(workerSecret);
+                        runnerSecrets.add(SecretVar.builder()
+                                .env(workerSecret.getEnv())
+                                .name(workerSecret.getEnv())
+                                .build());
+                    });
+                } else {
+                    runnerEnvs.put((isShellNode ? "" : "JIANMU_") + taskParameter.getRef().toUpperCase(), taskParameter.getExpression());
+                }
+            });
+            runners.add(this.findUnitInternalRunner(asyncTaskInstances, nodeDef, node, runnerSecrets, runnerEnvs));
+        });
+        var startRunner = Runner.builder()
+                .id(taskInstance.getBusinessId())
+                .version(taskInstance.getVersion())
+                .volumes(List.of(
+                        VolumeMount.builder()
+                                .source(taskInstance.getTriggerId())
+                                .target("/" + taskInstance.getTriggerId())
+                                .build()
+                ))
+                .build();
+        return Unit.builder()
+                .type(Unit.Type.CREATE)
+                .podSpec(PodSpec.builder()
+                        .name(taskInstance.getTriggerId())
+                        .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
+                        .build())
+                .volume(Volume.builder()
+                        .volumeEmptyDir(VolumeEmptyDir.builder()
+                                .name(taskInstance.getTriggerId())
+                                .build())
+                        .build())
+                .secrets(unitSecrets)
+                .pullSecret(this.findPullSecret())
+                .internal(runners)
+                .runners(List.of(startRunner))
+                .build();
+    }
+
+    private Optional<WorkerSecret> findUnitSecret(TaskParameter taskParameter, NodeDef nodeDef) {
+        var parameter = Parameter.Type.SECRET.newParameter(this.findSecretByExpression(taskParameter.getExpression()));
+        if (parameter.getStringValue().split("\\.").length == 2) {
+            var kvPairOptional = this.findSecret(parameter);
+            return kvPairOptional.map(kv -> {
+                var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
+                return Optional.of(WorkerSecret.builder()
+                        .env(nodeDef.getImage() != null ? taskParameter.getRef().toUpperCase() : "JIANMU_" + taskParameter.getRef().toUpperCase())
+                        .data(Base64.getEncoder().encodeToString(secretParameter.getStringValue().getBytes(StandardCharsets.UTF_8)))
+                        .mask(true)
+                        .build());
+            }).orElse(Optional.empty());
+        }
+        return Optional.empty();
+    }
+
+    private String findSecretByExpression(String paramValue) {
+        Pattern pattern = Pattern.compile("^\\(\\(([a-zA-Z0-9_-]+\\.*[a-zA-Z0-9_-]+)\\)\\)$");
+        Matcher matcher = pattern.matcher(paramValue);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private Runner findUnitInternalRunner(List<AsyncTaskInstance> asyncTaskInstances, NodeDef nodeDef, Node node, List<SecretVar> secretVars, Map<String, String> envs) {
+        Runner runner;
+        var asyncTaskInstance = asyncTaskInstances.stream()
+                .filter(t -> t.getAsyncTaskRef().equals(node.getRef()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("未找到对应的异步任务实例："));
+        if (nodeDef.getImage() != null) {
+            envs.put("JIANMU_SCRIPT", "JIANMU_SCRIPT");
+            String[] entrypoint = {"/bin/sh", "-c"};
+            String[] command = {"echo \"$JIANMU_SCRIPT\" | /bin/sh"};
+            runner = Runner.builder()
+                    .id(asyncTaskInstance.getId())
+                    .version(0)
+                    .command(command)
+                    .entrypoint(entrypoint)
+                    .envs(envs)
+                    .image(nodeDef.getImage())
+                    .name(node.getRef())
+                    .placeholder(this.globalProperties.getWorker().getK8s().getPlaceholder())
+                    .secrets(secretVars)
+                    .volumes(List.of(
+                            VolumeMount.builder()
+                                    .source(asyncTaskInstance.getTriggerId())
+                                    .target("/" + asyncTaskInstance.getTriggerId())
+                                    .build()
+                    ))
+                    .build();
+        } else {
+            dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec spec;
+            try {
+                spec = objectMapper.readValue(nodeDef.getSpec(), dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec.class);
+            } catch (JsonProcessingException e) {
+                log.error("拉取任务失败：", e);
+                throw new RuntimeException("拉取任务失败");
+            }
+            runner = Runner.builder()
+                    .id(asyncTaskInstance.getId())
+                    .version(0)
+                    .command(spec.getCmd())
+                    .entrypoint(spec.getEntrypoint())
+                    .envs(envs)
+                    .image(spec.getImage())
+                    .name(node.getRef())
+                    .placeholder(this.globalProperties.getWorker().getK8s().getPlaceholder())
+                    .secrets(secretVars)
+                    .volumes(List.of(
+                            VolumeMount.builder()
+                                    .source(asyncTaskInstance.getTriggerId())
+                                    .target("/" + asyncTaskInstance.getTriggerId())
+                                    .build()
+                    ))
+                    .build();
+        }
+        runner.setRegistryAddress(globalProperties.getWorker().getRegistry().getAddress());
+        return runner;
+
+    }
+
+    private Runner findUnitRunner(TaskInstance taskInstance) {
+        var containerSpec = this.getContainerSpec(taskInstance);
+        var secrets = containerSpec.getSecrets().stream()
+                .map(workerSecret -> SecretVar.builder()
+                        .name(workerSecret.getEnv())
+                        .env(workerSecret.getData())
+                        .build())
+                .collect(Collectors.toList());
+        return Runner.builder()
+                .id(taskInstance.getBusinessId())
+                .version(taskInstance.getVersion())
+                .command(containerSpec.getArgs())
+                .entrypoint(containerSpec.getEntrypoint())
+                .envs(containerSpec.getEnvironment())
+                .image(containerSpec.getImage())
+                .name(taskInstance.getAsyncTaskRef())
+                .placeholder(this.globalProperties.getWorker().getK8s().getPlaceholder())
+                .secrets(secrets)
+                .volumes(List.of(
+                        VolumeMount.builder()
+                                .source(taskInstance.getTriggerId())
+                                .target("/" + taskInstance.getTriggerId())
+                                .build()
+                ))
+                .build();
     }
 }

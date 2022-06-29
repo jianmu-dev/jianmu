@@ -129,7 +129,14 @@ public interface TaskInstanceMapper {
             @Param("pageSize") int pageSize
     );
 
-    @Select("select * from task_instance where worker_id = #{workerId} and status = 'WAITING' And _version = 0 limit 1")
+    @Select("<script>" +
+            "select * from task_instance " +
+            "<where> " +
+            "worker_id = #{workerId} and status = 'WAITING' And _version = 0 " +
+            "<if test='triggerId != null'> AND `trigger_id` = #{triggerId} </if>" +
+            "</where>" +
+            "limit 1" +
+            "</script>")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -142,9 +149,9 @@ public interface TaskInstanceMapper {
     @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
-    Optional<TaskInstance> findByWorkerIdAndMinVersion(String workerId);
+    Optional<TaskInstance> findByWorkerIdAndTriggerIdLimit(@Param("workerId") String workerId, @Param("triggerId") String triggerId);
 
-    @Select("select * from task_instance where id = #{id} and _version = #{version}")
+    @Select("select * from task_instance where business_id = #{businessId} and status = 'WAITING' and _version = #{version}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -157,5 +164,5 @@ public interface TaskInstanceMapper {
     @Result(column = "_version", property = "version")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
-    Optional<TaskInstance> findByIdAndVersion(@Param("id") String id, @Param("version") int version);
+    Optional<TaskInstance> findByBusinessIdAndVersion(@Param("businessId") String businessId, @Param("version") int version);
 }

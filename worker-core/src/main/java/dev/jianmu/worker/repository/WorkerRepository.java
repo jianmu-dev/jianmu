@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class WorkerRepository
  * @description Worker仓储接口
- * @author Ethan Liu
  * @create 2021-04-02 12:28
-*/
+ */
 public interface WorkerRepository {
     void add(Worker worker);
 
@@ -23,5 +23,5 @@ public interface WorkerRepository {
 
     Worker findByType(Worker.Type type);
 
-    List<Worker> findByTypeAndCreatedTimeLessThan(Worker.Type type, LocalDateTime createdTime);
+    List<Worker> findByTypeInAndCreatedTimeLessThan(List<Worker.Type> types, LocalDateTime createdTime);
 }

@@ -169,12 +169,12 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     }
 
     @Override
-    public Optional<TaskInstance> findByWorkerIdAndMinVersion(String workerId) {
-        return this.taskInstanceMapper.findByWorkerIdAndMinVersion(workerId);
+    public Optional<TaskInstance> findByWorkerIdAndTriggerIdLimit(String workerId, String triggerId) {
+        return this.taskInstanceMapper.findByWorkerIdAndTriggerIdLimit(workerId, triggerId);
     }
 
     @Override
-    public Optional<TaskInstance> findByIdAndVersion(String id, int version) {
-        return this.taskInstanceMapper.findByIdAndVersion(id, version);
+    public Optional<TaskInstance> findByBusinessIdAndVersion(String businessId, int version) {
+        return this.taskInstanceMapper.findByBusinessIdAndVersion(businessId, version);
     }
 }
