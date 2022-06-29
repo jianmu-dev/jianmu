@@ -470,7 +470,6 @@ public class WorkerInternalApplication {
                     .type(Unit.Type.DELETE)
                     .podSpec(PodSpec.builder()
                             .name(taskInstance.getTriggerId())
-                            .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
                             .build())
                     .build();
         } else {
@@ -478,7 +477,6 @@ public class WorkerInternalApplication {
                     .type(Unit.Type.RUN)
                     .podSpec(PodSpec.builder()
                             .name(taskInstance.getTriggerId())
-                            .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
                             .build())
                     .pullSecret(this.findPullSecret())
                     .current(this.findCurrentRunner(taskInstance))
@@ -487,6 +485,9 @@ public class WorkerInternalApplication {
     }
 
     private WorkerSecret findPullSecret() {
+        if (this.globalProperties.getWorker().getRegistry().getAddress() == null) {
+            return null;
+        }
         var auths = new HashMap<String, Map<String, String>>();
         var auth = new HashMap<String, String>();
         auth.put("username", this.globalProperties.getWorker().getRegistry().getUsername());
@@ -545,7 +546,6 @@ public class WorkerInternalApplication {
                 .type(Unit.Type.CREATE)
                 .podSpec(PodSpec.builder()
                         .name(taskInstance.getTriggerId())
-                        .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
                         .build())
                 .volume(Volume.builder()
                         .volumeEmptyDir(VolumeEmptyDir.builder()
