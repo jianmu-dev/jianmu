@@ -17,6 +17,7 @@ public class Worker {
     public enum Type {
         EMBEDDED,
         DOCKER,
+        KUBERNETES,
         SHELL
     }
 

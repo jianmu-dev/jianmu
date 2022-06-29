@@ -40,7 +40,7 @@ public interface TaskInstanceRepository {
 
     void deleteByTriggerId(String triggerId);
 
-    Optional<TaskInstance> findByWorkerIdAndMinVersion(String workerId);
+    Optional<TaskInstance> findByWorkerIdAndTriggerIdLimit(String workerId, String triggerId);
 
-    Optional<TaskInstance> findByIdAndVersion(String id, int version);
+    Optional<TaskInstance> findByBusinessIdAndVersion(String businessId, int version);
 }
