@@ -470,7 +470,6 @@ public class WorkerInternalApplication {
                     .type(Unit.Type.DELETE)
                     .podSpec(PodSpec.builder()
                             .name(taskInstance.getTriggerId())
-                            .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
                             .build())
                     .build();
         } else {
@@ -478,7 +477,6 @@ public class WorkerInternalApplication {
                     .type(Unit.Type.RUN)
                     .podSpec(PodSpec.builder()
                             .name(taskInstance.getTriggerId())
-                            .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
                             .build())
                     .pullSecret(this.findPullSecret())
                     .current(this.findCurrentRunner(taskInstance))
@@ -548,7 +546,6 @@ public class WorkerInternalApplication {
                 .type(Unit.Type.CREATE)
                 .podSpec(PodSpec.builder()
                         .name(taskInstance.getTriggerId())
-                        .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
                         .build())
                 .volume(Volume.builder()
                         .volumeEmptyDir(VolumeEmptyDir.builder()
