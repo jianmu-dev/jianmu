@@ -487,6 +487,9 @@ public class WorkerInternalApplication {
     }
 
     private WorkerSecret findPullSecret() {
+        if (this.globalProperties.getWorker().getRegistry().getAddress() == null) {
+            return null;
+        }
         var auths = new HashMap<String, Map<String, String>>();
         var auth = new HashMap<String, String>();
         auth.put("username", this.globalProperties.getWorker().getRegistry().getUsername());
