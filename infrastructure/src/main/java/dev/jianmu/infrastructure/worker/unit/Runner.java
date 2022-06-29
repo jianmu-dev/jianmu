@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.worker.unit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.jianmu.infrastructure.docker.VolumeMount;
 import dev.jianmu.infrastructure.worker.WorkerSecret;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ public class Runner {
     private Integer version;
     private String[] command;
     private Boolean detach;
+    @JsonProperty("depends_on")
     private String[] dependsOn;
     private String[] entrypoint;
     private Map<String, String> envs;
@@ -29,10 +31,12 @@ public class Runner {
     private Boolean privileged;
     private String pull;
     private List<SecretVar> secrets;
+    @JsonProperty("spec_secrets")
     private List<WorkerSecret> specSecrets;
     private Integer user;
     private Integer group;
     private List<VolumeMount> volumes;
+    @JsonProperty("working_dir")
     private String workingDir;
 
     public void setRegistryAddress(String registryAddress) {

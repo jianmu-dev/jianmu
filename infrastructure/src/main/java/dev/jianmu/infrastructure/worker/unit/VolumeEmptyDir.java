@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.worker.unit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class VolumeEmptyDir {
     private String id;
     private String name;
     private String medium;
+    @JsonProperty("size_limit")
     private Integer sizeLimit;
 }
