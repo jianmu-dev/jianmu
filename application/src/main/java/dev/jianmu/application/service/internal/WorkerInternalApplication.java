@@ -481,7 +481,7 @@ public class WorkerInternalApplication {
                             .namespace(this.globalProperties.getWorker().getK8s().getNamespace())
                             .build())
                     .pullSecret(this.findPullSecret())
-                    .runners(List.of(this.findUnitRunner(taskInstance)))
+                    .current(this.findCurrentRunner(taskInstance))
                     .build();
         }
     }
@@ -529,7 +529,7 @@ public class WorkerInternalApplication {
                     runnerEnvs.put((isShellNode ? "" : "JIANMU_") + taskParameter.getRef().toUpperCase(), taskParameter.getExpression());
                 }
             });
-            runners.add(this.findUnitInternalRunner(asyncTaskInstances, nodeDef, node, runnerSecrets, runnerEnvs));
+            runners.add(this.findUnitRunner(asyncTaskInstances, nodeDef, node, runnerSecrets, runnerEnvs));
         });
         var startRunner = Runner.builder()
                 .id(taskInstance.getBusinessId())
@@ -554,8 +554,8 @@ public class WorkerInternalApplication {
                         .build())
                 .secrets(unitSecrets)
                 .pullSecret(this.findPullSecret())
-                .internal(runners)
-                .runners(List.of(startRunner))
+                .current(startRunner)
+                .runners(runners)
                 .build();
     }
 
@@ -584,7 +584,7 @@ public class WorkerInternalApplication {
         return null;
     }
 
-    private Runner findUnitInternalRunner(List<AsyncTaskInstance> asyncTaskInstances, NodeDef nodeDef, Node node, List<SecretVar> secretVars, Map<String, String> envs) {
+    private Runner findUnitRunner(List<AsyncTaskInstance> asyncTaskInstances, NodeDef nodeDef, Node node, List<SecretVar> secretVars, Map<String, String> envs) {
         Runner runner;
         var asyncTaskInstance = asyncTaskInstances.stream()
                 .filter(t -> t.getAsyncTaskRef().equals(node.getRef()))
@@ -642,7 +642,7 @@ public class WorkerInternalApplication {
 
     }
 
-    private Runner findUnitRunner(TaskInstance taskInstance) {
+    private Runner findCurrentRunner(TaskInstance taskInstance) {
         var containerSpec = this.getContainerSpec(taskInstance);
         var secrets = containerSpec.getSecrets().stream()
                 .map(workerSecret -> SecretVar.builder()

@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.worker.unit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.jianmu.infrastructure.worker.WorkerSecret;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,11 +21,13 @@ import java.util.List;
 @NoArgsConstructor
 public class Unit {
     private Type type;
+    @JsonProperty("pod_spec")
     private PodSpec podSpec;
     private Volume volume;
     private List<WorkerSecret> secrets;
+    @JsonProperty("pull_secrets")
     private WorkerSecret pullSecret;
-    private List<Runner> internal;
+    private Runner current;
     private List<Runner> runners;
 
     public enum Type {
