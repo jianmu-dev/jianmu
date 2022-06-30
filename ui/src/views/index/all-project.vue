@@ -21,13 +21,18 @@
     <div class="divider-line"></div>
     <div class="project">
       <template v-if="initialized && groupListRefresh">
-        <project-group
-          v-for="projectGroup in projectGroups"
-          :key="projectGroup.id"
-          :sortType="sortType"
-          :project-group="projectGroup"
-          :pageable="false"
-        />
+        <template v-if="projectGroups.length>0">
+          <project-group
+            v-for="projectGroup in projectGroups"
+            :key="projectGroup.id"
+            :sortType="sortType"
+            :project-group="projectGroup"
+            :pageable="false"
+          />
+        </template>
+        <div class="project-empty" v-else>
+          <jm-empty description="暂无项目" :image-size="98"/>
+        </div>
       </template>
     </div>
   </div>
@@ -205,6 +210,12 @@ export default defineComponent({
 
   .project {
     padding: 0 20px 30px;
+
+    .project-empty {
+      .el-empty {
+        padding-top: 120px;
+      }
+    }
   }
 }
 </style>
