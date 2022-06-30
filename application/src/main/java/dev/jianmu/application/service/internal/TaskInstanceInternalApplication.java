@@ -9,6 +9,7 @@ import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
+import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.InstanceStatus;
@@ -50,11 +51,11 @@ public class TaskInstanceInternalApplication {
     private final ParameterDomainService parameterDomainService;
     private final TriggerEventRepository triggerEventRepository;
     private final InstanceParameterRepository instanceParameterRepository;
-    private final WorkerInternalApplication workerInternalApplication;
     private final NodeDefApi nodeDefApi;
     private final ExpressionLanguage expressionLanguage;
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final MonitoringFileService monitoringFileService;
+    private final DeferredResultService deferredResultService;
 
     public TaskInstanceInternalApplication(
             TaskInstanceRepository taskInstanceRepository,
@@ -64,12 +65,11 @@ public class TaskInstanceInternalApplication {
             ParameterDomainService parameterDomainService,
             TriggerEventRepository triggerEventRepository,
             InstanceParameterRepository instanceParameterRepository,
-            WorkerInternalApplication workerInternalApplication,
             NodeDefApi nodeDefApi,
             ExpressionLanguage expressionLanguage,
             WorkflowInstanceRepository workflowInstanceRepository,
-            MonitoringFileService monitoringFileService
-    ) {
+            MonitoringFileService monitoringFileService,
+            DeferredResultService deferredResultService) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.workflowRepository = workflowRepository;
         this.instanceDomainService = instanceDomainService;
@@ -77,11 +77,11 @@ public class TaskInstanceInternalApplication {
         this.parameterDomainService = parameterDomainService;
         this.triggerEventRepository = triggerEventRepository;
         this.instanceParameterRepository = instanceParameterRepository;
-        this.workerInternalApplication = workerInternalApplication;
         this.nodeDefApi = nodeDefApi;
         this.expressionLanguage = expressionLanguage;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.monitoringFileService = monitoringFileService;
+        this.deferredResultService = deferredResultService;
     }
 
     public List<TaskInstance> findRunningTask() {
@@ -184,7 +184,7 @@ public class TaskInstanceInternalApplication {
     public void terminate(String asyncTaskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        this.workerInternalApplication.terminateTask(taskInstance.getWorkerId(), taskInstance.getId());
+        this.deferredResultService.terminateDeferredResult(taskInstance.getWorkerId(), taskInstance.getBusinessId());
     }
 
     @Transactional

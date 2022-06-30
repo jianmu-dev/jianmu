@@ -243,10 +243,8 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void writeTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("businessId") String businessId) {
-        var taskInstance = this.taskInstanceApplication.findByBusinessId(businessId).stream()
-                .filter(t -> t.getStatus() == InstanceStatus.WAITING || t.getStatus() == InstanceStatus.RUNNING)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("同一任务重复运行, businessId：" + businessId));
+        var taskInstance = this.taskInstanceApplication.findByBusinessIdAndMaxSerialNo(businessId)
+                .orElseThrow(() -> new RuntimeException("未找到任务实例, businessId：" + businessId));
         try (var writer = this.storageService.writeLog(taskInstance.getId(), false)) {
             var reader = request.getReader();
             String line;
@@ -267,10 +265,8 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void batchWriteTaskLog(HttpServletRequest request, @PathVariable("workerId") String workerId, @PathVariable("businessId") String businessId) {
-        var taskInstance = this.taskInstanceApplication.findByBusinessId(businessId).stream()
-                .filter(t -> t.getStatus() == InstanceStatus.WAITING || t.getStatus() == InstanceStatus.RUNNING)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("同一任务重复运行, businessId：" + businessId));
+        var taskInstance = this.taskInstanceApplication.findByBusinessIdAndMaxSerialNo(businessId)
+                .orElseThrow(() -> new RuntimeException("未找到任务实例, businessId：" + businessId));
         try (var writer = this.storageService.writeLog(taskInstance.getId(), true)) {
             var reader = request.getReader();
             String line;

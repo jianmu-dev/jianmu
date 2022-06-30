@@ -418,10 +418,8 @@ public class WorkerInternalApplication {
 
     @Transactional
     public void updateTaskInstance(String workerId, String businessId, String status, String resultFile, String errorMsg, Integer exitCode) {
-        var taskInstance = this.taskInstanceRepository.findByBusinessId(businessId).stream()
-                .filter(t -> t.getStatus() == InstanceStatus.WAITING || t.getStatus() == InstanceStatus.RUNNING)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("同一任务重复运行, businessId：" + businessId));
+        var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(businessId)
+                .orElseThrow(() -> new RuntimeException("未找到任务实例, businessId：" + businessId));
         switch (status) {
             case "RUNNING":
                 this.publisher.publishEvent(TaskRunningEvent.builder()
@@ -457,10 +455,6 @@ public class WorkerInternalApplication {
         this.monitoringFileService.sendLog(taskInstanceId);
     }
 
-    public void terminateTask(String workerId, String taskInstanceId) {
-        this.deferredResultService.terminateDeferredResult(workerId, taskInstanceId);
-    }
-
     // 获取k8s Unit
     public Unit findUnit(TaskInstance taskInstance) {
         if (taskInstance.isCreationVolume()) {
@@ -470,6 +464,10 @@ public class WorkerInternalApplication {
                     .type(Unit.Type.DELETE)
                     .podSpec(PodSpec.builder()
                             .name(taskInstance.getTriggerId())
+                            .build())
+                    .current(Runner.builder()
+                            .id(taskInstance.getBusinessId())
+                            .version(taskInstance.getVersion())
                             .build())
                     .build();
         } else {
