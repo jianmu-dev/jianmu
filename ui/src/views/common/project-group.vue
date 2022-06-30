@@ -4,7 +4,7 @@
       <template #prefix v-if="!pageable">
         <span class="prefix-wrapper">
           <i :class="['jm-icon-button-right','prefix',toggle?'rotate':'']"
-             :disabled="projectPage.total===0"
+             :disabled="saveFoldStatus(true,projectGroup.id)||projectPage.total===0"
              @click="saveFoldStatus(toggle,projectGroup.id)"/>
         </span>
       </template>
@@ -29,7 +29,8 @@
       <template #default>
         <div>
           <div class="projects" ref="projectsRef">
-            <jm-empty v-if="projects.length === 0 && pageable"/>
+            <jm-empty :image="noDataImg" description="没有搜到相关结果" :image-size="98"
+                      v-if="projects.length === 0 && pageable"/>
             <jm-sorter
               v-else-if="moveListener"
               class="list"
@@ -105,6 +106,7 @@ import Folding from '@/views/common/folding.vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/project-group';
 import JmSorter from '@/components/sorter/index.vue';
+import noDataImg from '@/assets/svgs/index/no-data.svg';
 import sleep from '@/utils/sleep';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
@@ -336,6 +338,7 @@ export default defineComponent({
       scrollableEl,
     };
     return {
+      noDataImg,
       projectsRef,
       spacing,
       ...mapMutations({
@@ -483,6 +486,10 @@ export default defineComponent({
   .projects {
     display: flex;
     flex-wrap: wrap;
+
+    .el-empty {
+      padding-top: 102px;
+    }
 
     ::v-deep(.jm-sorter) {
       .drag-target-insertion {
