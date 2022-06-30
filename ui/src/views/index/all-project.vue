@@ -31,7 +31,7 @@
           />
         </template>
         <div class="project-empty" v-else>
-          <jm-empty description="暂无项目" :image="noDataImage" :image-size="98"/>
+          <jm-empty description="暂无项目" :image-size="98"/>
         </div>
       </template>
     </div>
@@ -47,7 +47,6 @@ import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/project';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { SortTypeEnum } from '@/api/dto/enumeration';
-import noDataImage from '@/assets/svgs/index/no-data.svg';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -116,7 +115,6 @@ export default defineComponent({
     });
 
     return {
-      noDataImage,
       projectGroups,
       projectName,
       searchProject,
