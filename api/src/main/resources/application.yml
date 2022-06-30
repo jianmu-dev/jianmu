@@ -25,6 +25,7 @@ spring:
   jackson:
     parser:
       ALLOW_UNQUOTED_CONTROL_CHARS: true
+    default-property-inclusion: non_null
   main:
     banner-mode: off
 

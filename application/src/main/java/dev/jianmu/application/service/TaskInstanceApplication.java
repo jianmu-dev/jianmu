@@ -36,6 +36,10 @@ public class TaskInstanceApplication {
         return this.taskInstanceRepository.findByBusinessId(businessId);
     }
 
+    public Optional<TaskInstance> findByBusinessIdAndMaxSerialNo(String businessId) {
+        return this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(businessId);
+    }
+
     public Optional<TaskInstance> findById(String instanceId) {
         return this.taskInstanceRepository.findById(instanceId);
     }

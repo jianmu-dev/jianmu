@@ -55,29 +55,29 @@ public class DeferredResultService {
      * 创建获取终止任务的DeferredResult
      *
      * @param workerId
-     * @param taskInstanceId
+     * @param businessId
      * @return
      */
-    public DeferredResult<ResponseEntity<?>> newWatchDeferredResult(String workerId, String taskInstanceId) {
+    public DeferredResult<ResponseEntity<?>> newWatchDeferredResult(String workerId, String businessId) {
         var deferredResult = new DeferredResult<ResponseEntity<?>>(watchTimeout, null);
         this.watchDeferredResults.putIfAbsent(workerId, new ConcurrentHashMap<>());
-        this.watchDeferredResults.get(workerId).putIfAbsent(taskInstanceId, deferredResult);
+        this.watchDeferredResults.get(workerId).putIfAbsent(businessId, deferredResult);
 
         deferredResult.onError(Throwable -> deferredResult.setResult(ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("error")));
         deferredResult.onTimeout(() -> deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body("timeout")));
-        deferredResult.onCompletion(() -> this.watchDeferredResults.get(workerId).remove(taskInstanceId));
+        deferredResult.onCompletion(() -> this.watchDeferredResults.get(workerId).remove(businessId));
         return deferredResult;
     }
 
-    public void terminateDeferredResult(String workerId, String taskInstanceId) {
+    public void terminateDeferredResult(String workerId, String businessId) {
         var map = this.watchDeferredResults.get(workerId);
         if (map == null) {
             return;
         }
-        var deferredResult = map.get(taskInstanceId);
+        var deferredResult = map.get(businessId);
         if (deferredResult != null) {
-            deferredResult.setResult(ResponseEntity.status(HttpStatus.OK).body(taskInstanceId));
-            map.remove(taskInstanceId);
+            deferredResult.setResult(ResponseEntity.status(HttpStatus.OK).body(businessId));
+            map.remove(businessId);
         }
     }
 }
