@@ -4,7 +4,7 @@
       <template #prefix v-if="!pageable">
         <span class="prefix-wrapper">
           <i :class="['jm-icon-button-right','prefix',toggle?'rotate':'']"
-             :disabled="saveFoldStatus(true,projectGroup.id)||projectPage.total===0"
+             :disabled="projectPage.total===0"
              @click="saveFoldStatus(toggle,projectGroup.id)"/>
         </span>
       </template>
@@ -178,6 +178,16 @@ export default defineComponent({
     const loadingMore = ref<boolean>(false);
     console.log('开启自动刷新项目列表');
     let autoRefreshingInterval: any;
+    // 保存单个项目组的展开折叠状态
+    const saveFoldStatus = (status: boolean, id: string) => {
+      // 改变状态
+      const toggle = !status;
+      // 调用vuex的mutations更改对应项目组的状态
+      proxy.mutate({
+        id,
+        status: toggle,
+      });
+    };
     const refreshHandler = () => {
       autoRefreshingInterval = setInterval(async () => {
         if (loadingMore.value === true) {
@@ -222,6 +232,10 @@ export default defineComponent({
         // 不分页加载项目列表数据
         if (!props.pageable) {
           projectPage.value = await queryProject({ ...queryForm.value });
+          // 项目组中项目为空，将其自动折叠
+          if (projectPage.value.total === 0) {
+            saveFoldStatus(true, props.projectGroup?.id);
+          }
           return;
         }
         loadState.value = StateEnum.LOADING;
@@ -296,16 +310,6 @@ export default defineComponent({
     );
     const currentItem = ref<string>('');
     let setCurrentItemTimer: any;
-    // 保存单个项目组的展开折叠状态
-    const saveFoldStatus = (status: boolean, id: string) => {
-      // 改变状态
-      const toggle = !status;
-      // 调用vuex的mutations更改对应项目组的状态
-      proxy.mutate({
-        id,
-        status: toggle,
-      });
-    };
     const sortList = async (e: any) => {
       isSorting.value = true;
       const { oldElement, newElement, originArr } = e;
