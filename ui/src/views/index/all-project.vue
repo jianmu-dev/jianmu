@@ -21,13 +21,18 @@
     <div class="divider-line"></div>
     <div class="project">
       <template v-if="initialized && groupListRefresh">
-        <project-group
-          v-for="projectGroup in projectGroups"
-          :key="projectGroup.id"
-          :sortType="sortType"
-          :project-group="projectGroup"
-          :pageable="false"
-        />
+        <template v-if="projectGroups.length>0">
+          <project-group
+            v-for="projectGroup in projectGroups"
+            :key="projectGroup.id"
+            :sortType="sortType"
+            :project-group="projectGroup"
+            :pageable="false"
+          />
+        </template>
+        <div class="project-empty" v-else>
+          <jm-empty description="暂无项目" :image="noDataImage" :image-size="98"/>
+        </div>
       </template>
     </div>
   </div>
@@ -42,6 +47,7 @@ import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/project';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { SortTypeEnum } from '@/api/dto/enumeration';
+import noDataImage from '@/assets/svgs/index/no-data.svg';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -110,6 +116,7 @@ export default defineComponent({
     });
 
     return {
+      noDataImage,
       projectGroups,
       projectName,
       searchProject,
@@ -205,6 +212,12 @@ export default defineComponent({
 
   .project {
     padding: 0 20px 30px;
+
+    .project-empty {
+      .el-empty {
+        padding-top: 120px;
+      }
+    }
   }
 }
 </style>

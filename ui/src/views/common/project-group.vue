@@ -2,8 +2,11 @@
   <div class="project-group" v-loading="loading">
     <folding :status="toggle" :page-able="pageable">
       <template #prefix v-if="!pageable">
-        <i :class="['jm-icon-button-right','prefix',toggle?'rotate':'']"
-           @click="saveFoldStatus(toggle,projectGroup.id)"/>
+        <span class="prefix-wrapper">
+          <i :class="['jm-icon-button-right','prefix',toggle?'rotate':'']"
+             :disabled="projectPage.total===0"
+             @click="saveFoldStatus(toggle,projectGroup.id)"/>
+        </span>
       </template>
       <template #title>
         <div v-if="!pageable" class="name">
@@ -13,7 +16,7 @@
             >{{ projectGroup?.name }}
             </router-link
             >
-            <span class="desc">（共有 {{ projectPage.total }} 个项目）</span>
+            <span class="desc">（共有 {{ projectPage.total < 0 ? 0 : projectPage.total }} 个项目）</span>
           </div>
           <div class="more-container" v-if="!pageable && projectPage.total>10">
             <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }">
@@ -153,9 +156,10 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const scrollableEl = inject('scrollableEl');
     const projectPage = ref<Mutable<IPageVo<IProjectVo>>>({
-      total: 0,
+      total: -1,
       pages: 0,
       list: [],
+      pageNum: START_PAGE_NUM,
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
     // 显示更多
@@ -390,10 +394,22 @@ export default defineComponent({
 .project-group {
   margin-top: 20px;
 
+  .prefix-wrapper {
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+  }
+
   .prefix {
     cursor: pointer;
     font-size: 12px;
     transition: all .1s linear;
+    color: #6B7B8D;
+
+    &[disabled=true] {
+      pointer-events: none;
+      color: #A7B0BB;
+    }
 
     &.rotate {
       transform: rotate(90deg);
