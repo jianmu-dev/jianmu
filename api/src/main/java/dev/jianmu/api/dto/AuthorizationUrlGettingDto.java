@@ -1,0 +1,41 @@
+package dev.jianmu.api.dto;
+
+import dev.jianmu.api.oauth2_api.enumeration.ThirdPartyTypeEnum;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+/**
+ * @author huangxi
+ * @class AuthorizationUrlGettingDto
+ * @description 返回授权url的dto
+ * @create 2021-06-30 14:08
+ */
+@Getter
+@Setter
+public class AuthorizationUrlGettingDto {
+    /**
+     * 第三方平台类型
+     */
+    @NotNull
+    private String thirdPartyType;
+
+    /**
+     * 回调地址
+     */
+    @NotBlank(message = "回调地址不能为空")
+    @Pattern(regexp = "^$|(https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]", message = "请输入正确的地址")
+    private String redirectUri;
+
+    /**
+     * 转换type为枚举类型
+     *
+     * @return
+     */
+    public ThirdPartyTypeEnum thirdPartyType() {
+        return ThirdPartyTypeEnum.valueOf(this.thirdPartyType);
+    }
+}
