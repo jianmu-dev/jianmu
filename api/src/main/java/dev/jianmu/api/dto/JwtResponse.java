@@ -6,22 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
+ * @author Ethan Liu
  * @class JwtResponse
  * @description JwtResponse
- * @author Ethan Liu
  * @create 2021-05-18 09:48
-*/
+ */
 @Getter
 @NoArgsConstructor
 @Builder
 @Schema(description = "JwtResponse")
 public class JwtResponse {
-    private String token;
     private final String type = "Bearer";
-    private Long id;
+    private String token;
+    private String id;
     private String username;
 
-    public JwtResponse(String token, Long id, String username) {
+    public JwtResponse(String token, String id, String username) {
         this.token = token;
         this.id = id;
         this.username = username;

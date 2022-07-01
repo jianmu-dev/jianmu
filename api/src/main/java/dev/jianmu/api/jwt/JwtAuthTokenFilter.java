@@ -1,8 +1,11 @@
 package dev.jianmu.api.jwt;
 
+import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
+import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.infrastructure.jwt.JwtProperties;
+import dev.jianmu.user.aggregate.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -15,19 +18,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * @author Ethan Liu
  * @class JwtAuthTokenFilter
  * @description JwtAuthTokenFilter
- * @author Ethan Liu
  * @create 2021-05-17 20:48
-*/
+ */
 @Component
 public class JwtAuthTokenFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
-    private final JwtUserDetailsService userDetailsService;
+    private final OAuth2Properties oAuth2Properties;
+    private final JwtProperties jwtProperties;
 
-    public JwtAuthTokenFilter(JwtProvider jwtProvider, JwtUserDetailsService userDetailsService) {
+    public JwtAuthTokenFilter(JwtProvider jwtProvider, OAuth2Properties oAuth2Properties, JwtProperties jwtProperties) {
         this.jwtProvider = jwtProvider;
-        this.userDetailsService = userDetailsService;
+        this.oAuth2Properties = oAuth2Properties;
+        this.jwtProperties = jwtProperties;
     }
 
     @Override
@@ -35,17 +40,16 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtProvider.validateJwtToken(jwt)) {
-                String username = jwtProvider.getUsernameFromToken(jwt);
-
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (jwt != null && this.jwtProvider.validateJwtToken(jwt)) {
+                String userJson = this.jwtProvider.getUsernameFromToken(jwt);
+                JwtUserDetails userDetails = new JwtUserDetails(JsonUtil.stringToJson(userJson, User.class),
+                        this.jwtProperties.getEncryptedPassword(this.oAuth2Properties.getClientSecret()));
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                String newJwt = jwtProvider.generateJwtToken(authentication);
-                response.setHeader("X-Authorization-token", newJwt);
+                String newJwt = this.jwtProvider.generateJwtToken(authentication);
+                response.setHeader("X-Authorization-Token", newJwt);
             }
         } catch (RuntimeException e) {
             logger.error("Cannot set user authentication: {}", e);

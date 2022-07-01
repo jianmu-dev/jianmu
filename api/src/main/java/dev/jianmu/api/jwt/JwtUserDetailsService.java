@@ -1,30 +1,33 @@
 package dev.jianmu.api.jwt;
 
-import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.user.UserRepository;
+import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
+import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.infrastructure.jwt.JwtProperties;
+import dev.jianmu.user.aggregate.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
+ * @author huangxi
  * @class JwtUserDetailsService
  * @description JwtUserDetailsService
- * @author Ethan Liu
- * @create 2021-05-17 21:10
-*/
+ * @create 2022-06-30 15:06
+ */
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
+    private final OAuth2Properties oAuth2Properties;
+    private final JwtProperties jwtProperties;
 
-    public JwtUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public JwtUserDetailsService(OAuth2Properties oAuth2Properties, JwtProperties jwtProperties) {
+        this.oAuth2Properties = oAuth2Properties;
+        this.jwtProperties = jwtProperties;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = this.userRepository.findByUsername(username)
-                .orElseThrow(() -> new DataNotFoundException("未找到该用户名"));
-        return JwtUserDetails.build(user);
+    public UserDetails loadUserByUsername(String userJson) throws UsernameNotFoundException {
+        User user = JsonUtil.stringToJson(userJson, User.class);
+        return JwtUserDetails.build(user, this.jwtProperties.getEncryptedPassword(this.oAuth2Properties.getClientSecret()));
     }
 }

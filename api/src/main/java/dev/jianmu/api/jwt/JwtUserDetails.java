@@ -1,50 +1,42 @@
 package dev.jianmu.api.jwt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.jianmu.user.User;
+import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.user.aggregate.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
 /**
+ * @author Ethan Liu
  * @class JwtUserDetails
  * @description JwtUserDetails
- * @author Ethan Liu
  * @create 2021-05-17 22:06
-*/
+ */
 public class JwtUserDetails implements UserDetails {
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-
-    private String username;
+    private User user;
 
     @JsonIgnore
     private String password;
 
-    public JwtUserDetails(Long id, String username, String password) {
-        this.id = id;
-        this.username = username;
+    public JwtUserDetails(User user, String password) {
+        this.user = user;
         this.password = password;
     }
 
-    public static JwtUserDetails build(User user) {
-
+    public static JwtUserDetails build(User user, String password) {
         return new JwtUserDetails(
-                user.getId(),
-                user.getUsername(),
-                user.getPassword()
+                user,
+                password
         );
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     @Override
@@ -54,7 +46,7 @@ public class JwtUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return JsonUtil.jsonToString(user);
     }
 
     @Override
@@ -77,5 +69,8 @@ public class JwtUserDetails implements UserDetails {
         return true;
     }
 
+    public String getId() {
+        return user.getId();
+    }
 
 }
