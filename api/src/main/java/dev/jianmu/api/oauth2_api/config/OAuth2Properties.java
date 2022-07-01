@@ -1,13 +1,19 @@
 package dev.jianmu.api.oauth2_api.config;
 
 import dev.jianmu.api.oauth2_api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.application.exception.OAuth2MustHaveOneException;
 import dev.jianmu.application.exception.OAuth2OnlyHaveOneException;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * @author huangxi
@@ -19,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Component
 @ConfigurationProperties(prefix = "jianmu.oauth2")
-public class OAuth2Properties implements InitializingBean {
+public class OAuth2Properties implements InitializingBean, EnvironmentAware {
     private boolean allowRegistration = true;
     private GiteeConfigProperties gitee;
     private GitlinkConfigProperties gitlink;
@@ -35,7 +41,7 @@ public class OAuth2Properties implements InitializingBean {
         return null;
     }
 
-    public String getThirdPartyPlatform() {
+    public String getThirdPartyType() {
         if (gitlink != null) {
             return ThirdPartyTypeEnum.GITLINK.name();
         }
@@ -46,7 +52,13 @@ public class OAuth2Properties implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
+        // 当配置有OAuth2时，必须存在一个
+        if (Objects.equals(environment.getProperty("jianmu.oauth2"), "")) {
+            throw new OAuth2MustHaveOneException("oauth2配置必须存在一个");
+        }
+
+        // oauth2不可以同时配置两个及以上
         int total = 0;
         if (this.gitee != null) {
             total++;
@@ -57,5 +69,10 @@ public class OAuth2Properties implements InitializingBean {
         if (total > 1) {
             throw new OAuth2OnlyHaveOneException("oauth2不可以同时配置两个及以上");
         }
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

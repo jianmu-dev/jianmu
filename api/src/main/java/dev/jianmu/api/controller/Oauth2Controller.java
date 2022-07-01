@@ -12,7 +12,7 @@ import dev.jianmu.api.oauth2_api.impl.OAuth2ApiProxy;
 import dev.jianmu.api.oauth2_api.vo.UserInfoVo;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
-import dev.jianmu.api.vo.ThirdPartyPlatformVo;
+import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.NotAllowRegistrationException;
 import dev.jianmu.application.exception.NotAllowThisPlatformLogInException;
 import dev.jianmu.application.exception.OAuth2IsNotConfiguredException;
@@ -120,10 +120,10 @@ public class Oauth2Controller {
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername()));
     }
 
-    @GetMapping("third_party_platform")
-    public ThirdPartyPlatformVo getThirdPartyPlatform() {
-        return ThirdPartyPlatformVo.builder()
-                .thirdPartyPlatform(this.oAuth2Properties.getThirdPartyPlatform())
+    @GetMapping("third_party_type")
+    public ThirdPartyTypeVo getThirdPartyType() {
+        return ThirdPartyTypeVo.builder()
+                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
                 .build();
     }
 

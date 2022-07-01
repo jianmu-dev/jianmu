@@ -14,10 +14,10 @@ import lombok.Setter;
 @Getter
 @Builder
 @Setter
-public class ThirdPartyPlatformVo {
+public class ThirdPartyTypeVo {
     /**
      * 第三方平台
      */
     @Schema(required = true)
-    private String thirdPartyPlatform;
+    private String thirdPartyType;
 }
