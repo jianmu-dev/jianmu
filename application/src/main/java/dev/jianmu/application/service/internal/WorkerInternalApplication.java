@@ -511,7 +511,7 @@ public class WorkerInternalApplication {
         var unitSecrets = new ArrayList<WorkerSecret>();
         var runners = new ArrayList<Runner>();
         workflow.findTasks().forEach(node -> {
-            var nodeDef = this.nodeDefApi.getByType(node.getType());
+            var nodeDef = this.nodeDefApi.findByType(node.getType());
             var isShellNode = nodeDef.getImage() != null;
             var runnerSecrets = new ArrayList<SecretVar>();
             var runnerEnvs = new HashMap<String, String>();
