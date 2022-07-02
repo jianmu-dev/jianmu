@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class WorkerRepositoryImpl
  * @description Worker仓储接口实现
- * @author Ethan Liu
  * @create 2021-04-02 12:37
-*/
+ */
 @Repository
 public class WorkerRepositoryImpl implements WorkerRepository {
     private final WorkerMapper workerMapper;
@@ -54,7 +54,7 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     }
 
     @Override
-    public List<Worker>  findByTypeAndCreatedTimeLessThan(Worker.Type type, LocalDateTime createdTime) {
-        return this.workerMapper.findByTypeAndCreatedTimeLessThan(type, createdTime);
+    public List<Worker> findByTypeInAndCreatedTimeLessThan(List<Worker.Type> types, LocalDateTime createdTime) {
+        return this.workerMapper.findByTypeInAndCreatedTimeLessThan(types, createdTime);
     }
 }

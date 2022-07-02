@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class WorkerMapper
  * @description WorkerMapper
- * @author Ethan Liu
  * @create 2021-04-02 12:39
-*/
+ */
 public interface WorkerMapper {
     @Insert("insert into worker(id, name, tags, capacity, os, arch, status, type, created_time) " +
             "values(#{id}, #{name}, #{tags}, #{capacity}, #{os}, #{arch}, #{status}, #{type}, #{createdTime})")
@@ -28,7 +28,14 @@ public interface WorkerMapper {
     @Result(column = "created_time", property = "createdTime")
     Optional<Worker> findById(String workerId);
 
-    @Select("select * from worker where type = #{type} and created_time < #{createdTime}")
+    @Select("<script> " +
+            "select * from worker" +
+            "<where>" +
+            " type IN " +
+            " <foreach collection='types' item='item' open='(' close=')' separator=','> #{item} " +
+            " </foreach>" +
+            "</where>" +
+            "</script>")
     @Result(column = "created_time", property = "createdTime")
-    List<Worker>  findByTypeAndCreatedTimeLessThan(@Param("type") Worker.Type type, @Param("createdTime") LocalDateTime createdTime);
+    List<Worker> findByTypeInAndCreatedTimeLessThan(@Param("types") List<Worker.Type> types, @Param("createdTime") LocalDateTime createdTime);
 }
