@@ -15,7 +15,7 @@ public class User {
     /**
      * 头像
      */
-    private String headUrl;
+    private String avatarUrl;
 
     /**
      * 昵称
@@ -36,9 +36,9 @@ public class User {
     }
 
 
-    public User(String id, String headUrl, String nickname, String data, String username) {
+    public User(String id, String avatarUrl, String nickname, String data, String username) {
         this.id = id;
-        this.headUrl = headUrl;
+        this.avatarUrl = avatarUrl;
         this.nickname = nickname;
         this.data = data;
         this.username = username;
@@ -52,12 +52,12 @@ public class User {
         this.id = id;
     }
 
-    public String getHeadUrl() {
-        return headUrl;
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
-    public void setHeadUrl(String headUrl) {
-        this.headUrl = headUrl;
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getNickname() {
@@ -86,7 +86,7 @@ public class User {
 
     public static class Builder {
         private String id;
-        private String headUrl;
+        private String avatarUrl;
         private String nickname;
         private String data;
         private String username;
@@ -103,8 +103,8 @@ public class User {
             return this;
         }
 
-        public Builder headUrl(String headUrl) {
-            this.headUrl = headUrl;
+        public Builder avatarUrl(String avatarUrl) {
+            this.avatarUrl = avatarUrl;
             return this;
         }
 
@@ -126,7 +126,7 @@ public class User {
         public User build() {
             var user = new User();
             user.id = this.id;
-            user.headUrl = this.headUrl;
+            user.avatarUrl = this.avatarUrl;
             user.nickname = this.nickname;
             user.data = this.data;
             user.username = this.username;

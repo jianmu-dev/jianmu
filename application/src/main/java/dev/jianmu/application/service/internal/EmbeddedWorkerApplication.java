@@ -14,7 +14,6 @@ import dev.jianmu.node.definition.event.NodeDeletedEvent;
 import dev.jianmu.node.definition.event.NodeUpdatedEvent;
 import dev.jianmu.worker.aggregate.WorkerTask;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.Formatter;
 import java.util.List;
@@ -130,12 +129,13 @@ public class EmbeddedWorkerApplication {
     private String createScript(List<String> commands) {
         var sb = new StringBuilder();
         sb.append(optionScript);
-        var formatter = new Formatter(sb, Locale.ROOT);
-        commands.forEach(cmd -> {
-            var escaped = String.format("%s", cmd);
-            escaped = escaped.replace("$", "\\$");
-            formatter.format(traceScript, escaped, cmd);
-        });
+        try (var formatter = new Formatter(sb, Locale.ROOT)) {
+            commands.forEach(cmd -> {
+                var escaped = String.format("%s", cmd);
+                escaped = escaped.replace("$", "\\$");
+                formatter.format(traceScript, escaped, cmd);
+            });
+        }
         return sb.toString();
     }
 

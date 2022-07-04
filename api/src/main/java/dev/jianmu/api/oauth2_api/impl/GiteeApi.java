@@ -113,7 +113,7 @@ public class GiteeApi implements OAuth2Api {
 
         return UserInfoVo.builder()
                 .id(giteeUserInfoVo.getId().toString())
-                .headUrl(giteeUserInfoVo.getAvatar_url())
+                .avatarUrl(giteeUserInfoVo.getAvatar_url())
                 .nickname(giteeUserInfoVo.getName())
                 .username(giteeUserInfoVo.getLogin())
                 .data(userInfo)

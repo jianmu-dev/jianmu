@@ -20,7 +20,7 @@ public class UserInfoVo {
     /**
      * 头像
      */
-    private String headUrl;
+    private String avatarUrl;
 
     /**
      * 昵称

@@ -62,35 +62,35 @@ public class Oauth2Controller {
      */
     @GetMapping("url")
     @Operation(summary = "获取授权url", description = "获取授权url")
-    public AuthorizationUrlVo getAuthorizationUrl(@Valid AuthorizationUrlGettingDto dto) {
+    public AuthorizationUrlVo getAuthorizationUrl(@Valid AuthorizationUrlGettingDto authorizationUrlGettingDto) {
         this.beforeAuthenticate();
-        this.allowThisPlatformLogIn(dto.getThirdPartyType());
+        this.allowThisPlatformLogIn(authorizationUrlGettingDto.getThirdPartyType());
 
         OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(dto.thirdPartyType())
+                .thirdPartyType(authorizationUrlGettingDto.thirdPartyType())
                 .build();
         return AuthorizationUrlVo.builder()
-                .authorizationUrl(oAuth2Api.getAuthUrl(dto.getRedirectUri()))
+                .authorizationUrl(oAuth2Api.getAuthUrl(authorizationUrlGettingDto.getRedirectUri()))
                 .build();
     }
 
     /**
      * 获取jwt
      *
-     * @param dto
+     * @param oauth2LoggingDto
      * @return
      */
     @GetMapping("/login")
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid Oauth2LoggingDto dto) {
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid Oauth2LoggingDto oauth2LoggingDto) {
         this.beforeAuthenticate();
         this.allowOrNotRegistration();
-        this.allowThisPlatformLogIn(dto.getThirdPartyType());
+        this.allowThisPlatformLogIn(oauth2LoggingDto.getThirdPartyType());
 
         OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(dto.thirdPartyType())
+                .thirdPartyType(oauth2LoggingDto.thirdPartyType())
                 .build();
 
-        String accessToken = oAuth2Api.getAccessToken(dto.getCode(), dto.getRedirectUri());
+        String accessToken = oAuth2Api.getAccessToken(oauth2LoggingDto.getCode(), oauth2LoggingDto.getRedirectUri());
         UserInfoVo userInfoVo = oAuth2Api.getUserInfoVo(accessToken);
 
         Optional<User> userOptional = this.userRepository.findById(userInfoVo.getId());
@@ -99,7 +99,7 @@ public class Oauth2Controller {
             user = User.Builder.aReference()
                     .data(userInfoVo.getData())
                     .id(userInfoVo.getId())
-                    .headUrl(userInfoVo.getHeadUrl())
+                    .avatarUrl(userInfoVo.getAvatarUrl())
                     .username(userInfoVo.getUsername())
                     .nickname(userInfoVo.getNickname())
                     .build();
@@ -117,7 +117,12 @@ public class Oauth2Controller {
 
         JwtUserDetails userDetails = (JwtUserDetails) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername()));
+        return ResponseEntity.ok(JwtResponse.builder()
+                .token(jwt)
+                .id(userDetails.getId())
+                .username(userDetails.getUsername())
+                .avatarUrl(user.getAvatarUrl())
+                .build());
     }
 
     @GetMapping("third_party_type")
