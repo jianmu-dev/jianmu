@@ -127,11 +127,11 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
     }
 
     private void firstReadLog(Path path, AtomicLong counter, SseEmitter sseEmitter, int size) {
-        try {
-            var countLine = Files.lines(path).count();
+        try (var linesCount = Files.lines(path);
+             var lines = Files.lines(path)) {
+            var countLine = linesCount.count();
             counter.set(countLine - size);
-            Files.lines(path)
-                    .skip(countLine > size ? countLine - size : 0)
+            lines.skip(countLine > size ? countLine - size : 0)
                     .forEach(line -> this.template.sendMessage(SseEmitter.event()
                             .id(String.valueOf(counter.incrementAndGet()))
                             .data(line), sseEmitter)
@@ -147,9 +147,8 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         var filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + logFileName + LogfilePostfix;
         var list = new ArrayList<LogVo>();
         var lineNum = new AtomicLong(line - 1);
-        try {
-            Files.lines(Paths.get(filePath))
-                    .skip(line - 1)
+        try (var lines = Files.lines(Paths.get(filePath))) {
+            lines.skip(line - 1)
                     .limit(size)
                     .forEach(str -> list.add(LogVo.builder()
                             .lastEventId(String.valueOf(lineNum.incrementAndGet()))
@@ -185,8 +184,8 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
 
     @Override
     public String readWebhook(String webhookFileName) {
-        try {
-            var bufferedReader = new BufferedReader(new FileReader(this.webhookRootLocation + File.separator + webhookFileName + webhookFilePostfix, StandardCharsets.UTF_8));
+        var filename = this.webhookRootLocation + File.separator + webhookFileName + webhookFilePostfix;
+        try (var bufferedReader = new BufferedReader(new FileReader(filename, StandardCharsets.UTF_8))) {
             var stringBuilder = new StringBuilder();
             String line;
             while ((line = bufferedReader.readLine()) != null) {

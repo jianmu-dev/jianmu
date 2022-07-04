@@ -15,7 +15,6 @@ import dev.jianmu.infrastructure.worker.unit.*;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
@@ -277,16 +276,17 @@ public class WorkerInternalApplication {
     private String createScript(List<String> commands) {
         var sb = new StringBuilder();
         sb.append(optionScript);
-        var formatter = new Formatter(sb, Locale.ROOT);
-        commands.forEach(cmd -> {
-            var escaped = String.format("%s", cmd);
-            escaped = escaped.replace("$", "\\$");
-            if (globalProperties.getTrace()) {
-                formatter.format(traceScript, escaped, cmd);
-            } else {
-                formatter.format(noTraceScript, cmd);
-            }
-        });
+        try (var formatter = new Formatter(sb, Locale.ROOT)) {
+            commands.forEach(cmd -> {
+                var escaped = String.format("%s", cmd);
+                escaped = escaped.replace("$", "\\$");
+                if (globalProperties.getTrace()) {
+                    formatter.format(traceScript, escaped, cmd);
+                } else {
+                    formatter.format(noTraceScript, cmd);
+                }
+            });
+        }
         return sb.toString();
     }
 
