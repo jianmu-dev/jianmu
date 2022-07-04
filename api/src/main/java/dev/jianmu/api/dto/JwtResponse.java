@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
  * @create 2021-05-18 09:48
  */
 @Getter
-@NoArgsConstructor
 @Builder
 @Schema(description = "JwtResponse")
 public class JwtResponse {
@@ -20,10 +19,5 @@ public class JwtResponse {
     private String token;
     private String id;
     private String username;
-
-    public JwtResponse(String token, String id, String username) {
-        this.token = token;
-        this.id = id;
-        this.username = username;
-    }
+    private String avatarUrl;
 }

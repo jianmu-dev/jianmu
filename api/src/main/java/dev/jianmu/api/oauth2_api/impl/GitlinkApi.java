@@ -91,7 +91,7 @@ public class GitlinkApi implements OAuth2Api {
 
         return UserInfoVo.builder()
                 .id(String.valueOf(gitlinkUserInfoVo.getUser_id()))
-                .headUrl(this.oAuth2Properties.getGitlink().getBaseUrl() + gitlinkUserInfoVo.getImage_url())
+                .avatarUrl(this.oAuth2Properties.getGitlink().getBaseUrl() + gitlinkUserInfoVo.getImage_url())
                 .nickname(gitlinkUserInfoVo.getUsername())
                 .username(gitlinkUserInfoVo.getLogin())
                 .data(userInfo)
