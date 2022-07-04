@@ -16,13 +16,13 @@ import java.util.Optional;
 public interface UserMapper {
     @Select("SELECT * FROM `user` WHERE id = #{id}")
     @Result(column = "id", property = "id")
-    @Result(column = "head_url", property = "headUrl")
+    @Result(column = "avatar_url", property = "avatarUrl")
     @Result(column = "nickname", property = "nickname")
     @Result(column = "data", property = "data")
     @Result(column = "username", property = "username")
     Optional<User> findById(String id);
 
-    @Insert("insert into user(id, head_url, nickname, data, username) " +
-            "values(#{id}, #{headUrl}, #{nickname}, #{data}, #{username})")
+    @Insert("insert into user(id, avatar_url, nickname, data, username) " +
+            "values(#{id}, #{avatarUrl}, #{nickname}, #{data}, #{username})")
     void add(User user);
 }
