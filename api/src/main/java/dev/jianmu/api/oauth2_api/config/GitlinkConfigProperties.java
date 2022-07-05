@@ -22,4 +22,5 @@ public class GitlinkConfigProperties {
     private String baseUrl;
     private String username;
     private String password;
+    private String responseType;
 }
