@@ -2,7 +2,7 @@ package dev.jianmu.application.dsl.webhook;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class WebhookParameter extends dev.jianmu.trigger.aggregate.WebhookParameter {
+public class DslWebhookParameter extends dev.jianmu.trigger.aggregate.WebhookParameter {
     private Object value;
 
     @JsonProperty("value")
