@@ -121,12 +121,10 @@ public class Oauth2Controller {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = this.jwtProvider.generateJwtToken(authentication);
 
-        JwtUserDetails userDetails = (JwtUserDetails) authentication.getPrincipal();
-
         return ResponseEntity.ok(JwtResponse.builder()
                 .token(jwt)
-                .id(userDetails.getId())
-                .username(userDetails.getUsername())
+                .id(user.getId())
+                .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
                 .build());
     }
