@@ -1,6 +1,6 @@
 package dev.jianmu.api.vo;
 
-import dev.jianmu.application.dsl.webhook.WebhookParameter;
+import dev.jianmu.application.dsl.webhook.DslWebhookParameter;
 import dev.jianmu.trigger.aggregate.WebhookAuth;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 public class WebhookParamVo {
     @Schema(description = "参数")
-    private List<WebhookParameter> param;
+    private List<DslWebhookParameter> param;
     @Schema(description = "auth")
     private WebhookAuth auth;
     @Schema(description = "only")

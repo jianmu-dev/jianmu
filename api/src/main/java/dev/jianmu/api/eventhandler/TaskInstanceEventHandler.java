@@ -2,9 +2,9 @@ package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.api.mapper.TaskResultMapper;
 import dev.jianmu.application.service.internal.*;
-import dev.jianmu.infrastructure.docker.TaskFailedEvent;
-import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
-import dev.jianmu.infrastructure.docker.TaskRunningEvent;
+import dev.jianmu.infrastructure.worker.event.TaskFailedEvent;
+import dev.jianmu.infrastructure.worker.event.TaskFinishedEvent;
+import dev.jianmu.infrastructure.worker.event.TaskRunningEvent;
 import dev.jianmu.task.event.*;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
