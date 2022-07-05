@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.LoginDto;
 import dev.jianmu.api.jwt.JwtProvider;
+import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NotAllowAuthSignInException;
@@ -49,8 +50,11 @@ public class AuthController {
         var user = this.userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new DataNotFoundException("未找到该用户名"));
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(user), loginDto.getPassword()));
+        Authentication authentication = this.authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .build()), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtProvider.generateJwtToken(authentication);
