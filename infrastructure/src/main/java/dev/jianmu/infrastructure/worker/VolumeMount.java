@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.docker;
+package dev.jianmu.infrastructure.worker;
 
 import lombok.Builder;
 import lombok.Getter;

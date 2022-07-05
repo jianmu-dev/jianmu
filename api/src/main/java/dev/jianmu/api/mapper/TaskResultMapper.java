@@ -1,7 +1,7 @@
 package dev.jianmu.api.mapper;
 
 import dev.jianmu.api.dto.TaskResultDto;
-import dev.jianmu.infrastructure.docker.TaskFinishedEvent;
+import dev.jianmu.infrastructure.worker.event.TaskFinishedEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

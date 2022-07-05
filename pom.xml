@@ -22,6 +22,7 @@
         <module>worker-core</module>
         <module>workflow-core</module>
         <module>el</module>
+        <module>git-repo-core</module>
     </modules>
 
     <properties>
