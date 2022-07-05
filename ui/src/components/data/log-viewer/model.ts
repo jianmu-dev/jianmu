@@ -22,7 +22,8 @@ export default class LogViewer {
   private readonly mutationObserver: MutationObserver;
   private readonly handleAutoScrollFn: HandleAutoScrollFnType;
   private readonly listenScroll: any;
-  private logInterval: any;
+  private readonly logInterval: any;
+  private readonly allData: string[];
 
   constructor(el: HTMLElement, filename: string, value: string, url: string, downloadFn: DownloadFnType | undefined,
     callbackFn: CallBackFnType, checkAutoScrollFn: CheckAutoScrollFnType, handleAutoScrollFn: HandleAutoScrollFnType) {
@@ -76,6 +77,12 @@ export default class LogViewer {
     this.listenScroll = _listen(this.el.lastElementChild, 'scroll', () => {
       this.handleAutoScrollFn(this.el.lastElementChild!.scrollHeight - this.el.lastElementChild!.scrollTop <= this.el.lastElementChild!.clientHeight);
     });
+
+    this.allData = [];
+
+    this.logInterval = setInterval(() => {
+      this.callbackFn(this.allData, this.line);
+    }, 500);
   }
 
   /**
@@ -126,9 +133,6 @@ export default class LogViewer {
         }
         console.error(e);
       };
-      this.logInterval = setInterval(() => {
-        this.callbackFn(allData, this.line);
-      }, 500);
       return;
     }
     data = this.value.split(/\r?\n/);
