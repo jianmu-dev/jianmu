@@ -1,10 +1,8 @@
-import { ILogVo } from '@/api/dto/workflow-execution-record';
 // @ts-ignore
 import _listen from 'good-listener';
 
-export const MAX_SIZE = 1000;
+export const MAX_SIZE = 30000;
 export type DownloadFnType = () => Promise<string>;
-export type LoadMoreFnType = (line: number, size: number) => Promise<ILogVo[]>;
 export type CallBackFnType = (data: string[], startLine?: number) => void;
 export type CheckAutoScrollFnType = () => boolean;
 export type HandleAutoScrollFnType = (scrollFlag: boolean) => void;
@@ -15,7 +13,6 @@ export default class LogViewer {
   private readonly value: string;
   private readonly isSse: boolean;
   private readonly downloadFn?: DownloadFnType;
-  private readonly loadMoreFn?: LoadMoreFnType;
   private readonly virtualNoDiv: HTMLDivElement;
   private line: number;
   private readonly lines: number[];
@@ -25,15 +22,15 @@ export default class LogViewer {
   private readonly mutationObserver: MutationObserver;
   private readonly handleAutoScrollFn: HandleAutoScrollFnType;
   private readonly listenScroll: any;
+  private logInterval: any;
 
-  constructor(el: HTMLElement, filename: string, value: string, url: string, downloadFn: DownloadFnType | undefined, loadMoreFn: LoadMoreFnType | undefined,
+  constructor(el: HTMLElement, filename: string, value: string, url: string, downloadFn: DownloadFnType | undefined,
     callbackFn: CallBackFnType, checkAutoScrollFn: CheckAutoScrollFnType, handleAutoScrollFn: HandleAutoScrollFnType) {
     this.el = el;
     this.filename = filename;
     this.value = url || value;
     this.isSse = !!url;
     this.downloadFn = downloadFn;
-    this.loadMoreFn = loadMoreFn;
 
     this.virtualNoDiv = document.createElement('div');
     this.virtualNoDiv.style.position = 'fixed';
@@ -103,6 +100,7 @@ export default class LogViewer {
       this.eventSource.close();
     }
     this.listenScroll.destroy();
+    clearInterval(this.logInterval);
   }
 
   /**
@@ -112,13 +110,13 @@ export default class LogViewer {
   listen(data: string[]): void {
     this.el.lastElementChild?.appendChild(this.virtualNoDiv);
     if (this.isSse) {
+      const allData: string[] = [];
       this.eventSource.onmessage = async (e: any) => {
         this.lines.push(Number(e.lastEventId));
-        data.push(e.data);
+        allData.push(e.data);
         if (this.line === 0) {
           this.line = this.lines[0];
         }
-        this.callbackFn(data, this.line);
       };
       this.eventSource.onerror = (e: any) => {
         if (e.currentTarget.readyState === 0) {
@@ -128,6 +126,9 @@ export default class LogViewer {
         }
         console.error(e);
       };
+      this.logInterval = setInterval(() => {
+        this.callbackFn(allData, this.line);
+      }, 500);
       return;
     }
     data = this.value.split(/\r?\n/);
