@@ -95,13 +95,6 @@ export default class LogViewer {
   }
 
   /**
-   * 判断是否显示加载更多
-   */
-  isMoreLog(): boolean {
-    return this.line > 1;
-  }
-
-  /**
    * 销毁
    */
   destroy(): void {
@@ -149,28 +142,6 @@ export default class LogViewer {
     this.virtualNoDiv.innerHTML = logLines + '';
 
     return this.virtualNoDiv.clientWidth + 25;
-  }
-
-  /**
-   * 加载
-   */
-  async loadMore(): Promise<ILogVo[] | undefined> {
-    if (!this.loadMoreFn) {
-      return;
-    }
-    try {
-      let size: number;
-      if (this.line > MAX_SIZE) {
-        this.line -= MAX_SIZE;
-        size = MAX_SIZE;
-      } else {
-        size = this.line - 1;
-        this.line = 1;
-      }
-      return await this.loadMoreFn(this.line, size);
-    } catch (err) {
-      console.warn(err.message);
-    }
   }
 
   /**

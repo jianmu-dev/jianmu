@@ -64,12 +64,3 @@ export interface ITaskParamVo extends Readonly<{
   value: string;
 }> {
 }
-
-/**
- * 流程日志随机获取vo
- */
-export interface ILogVo extends Readonly<{
-  lastEventId: string;
-  data: string;
-}> {
-}
