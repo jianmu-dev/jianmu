@@ -14,11 +14,7 @@
     <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
     <div class="content">
       <div v-if="moreLog" class="more-line">
-        <i class="jm-icon-button-loading" v-if="loadLoading"></i>
-        <span :class="{
-          'download-txt': true,
-          doing: loadLoading,
-        }" @click="loadMoreLog">{{ loadLoading ? '加载中，请稍后...' : '加载更多日志' }}</span>
+        日志过大，更多日志请下载查看
       </div>
       <div class="line" v-for="(txt, idx) in data" :key="idx"
            :style="{marginLeft: `${noWidth}px`}">
@@ -33,8 +29,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
-import LogViewer, { CallBackFnType, DownloadFnType, LoadMoreFnType } from './model';
-import { ILogVo } from '@/api/dto/workflow-execution-record';
+import LogViewer, { CallBackFnType, DownloadFnType } from './model';
 
 export default defineComponent({
   name: 'jm-log-viewer',
@@ -52,7 +47,6 @@ export default defineComponent({
       default: '',
     },
     download: Function as PropType<DownloadFnType>,
-    loadMore: Function as PropType<LoadMoreFnType>,
   },
   setup(props) {
     const data = ref<string[]>([]);
@@ -67,7 +61,6 @@ export default defineComponent({
     const noWidth = ref<number>(0);
     const autoScroll = ref<boolean>(true);
     const downloading = ref<boolean>(false);
-    const loadLoading = ref<boolean>(false);
     const moreLog = ref<boolean>(false);
 
     let logViewer: LogViewer;
@@ -90,7 +83,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download, props.loadMore,
+      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download,
         callback, () => autoScroll.value, handleAutoScroll);
       logViewer.listen(data.value);
     });
@@ -102,7 +95,7 @@ export default defineComponent({
       }
       logViewer.destroy();
       initData();
-      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download, props.loadMore,
+      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download,
         callback, () => autoScroll.value, handleAutoScroll);
       logViewer.listen(data.value);
     });
@@ -119,7 +112,6 @@ export default defineComponent({
       noWidth,
       autoScroll,
       downloading,
-      loadLoading,
       handleAutoScroll,
       copy: () => {
         return logViewer.copy(data.value, moreLog.value);
@@ -136,25 +128,6 @@ export default defineComponent({
           console.warn(err.message);
         } finally {
           downloading.value = false;
-        }
-      },
-      loadMoreLog: async () => {
-        handleAutoScroll(false);
-
-        if (loadLoading.value) {
-          return;
-        }
-        loadLoading.value = true;
-        try {
-          const res = await logViewer.loadMore() as ILogVo[];
-          res.reverse().forEach((item: ILogVo) => {
-            data.value = [item.data, ...data.value];
-          });
-          moreLog.value = logViewer.isMoreLog();
-        } catch (err) {
-          console.warn(err.message);
-        } finally {
-          loadLoading.value = false;
         }
       },
     };
@@ -189,16 +162,6 @@ export default defineComponent({
       text-align: center;
       color: #FFFFFF;
       padding-bottom: 10px;
-
-      .download-txt {
-        color: #8193B2;
-        cursor: pointer;
-
-        &.doing {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-      }
     }
 
     .line {
