@@ -26,8 +26,8 @@ public class JwtUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String userJson) throws UsernameNotFoundException {
-        User user = JsonUtil.stringToJson(userJson, User.class);
-        return JwtUserDetails.build(user, this.jwtProperties.getEncryptedPassword(this.oAuth2Properties.getClientSecret()));
+    public UserDetails loadUserByUsername(String jwtSession) throws UsernameNotFoundException {
+        JwtSession session = JsonUtil.stringToJson(jwtSession, JwtSession.class);
+        return JwtUserDetails.build(session, this.jwtProperties.getEncryptedPassword(this.oAuth2Properties.getClientSecret()));
     }
 }

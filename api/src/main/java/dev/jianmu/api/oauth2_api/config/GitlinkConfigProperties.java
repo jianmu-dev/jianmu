@@ -20,4 +20,6 @@ public class GitlinkConfigProperties {
     private String userInfoUrl;
     private String grantType;
     private String baseUrl;
+    private String username;
+    private String password;
 }

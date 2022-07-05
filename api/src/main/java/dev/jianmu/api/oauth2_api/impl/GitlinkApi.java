@@ -44,8 +44,8 @@ public class GitlinkApi implements OAuth2Api {
         map.add("grant_type", this.oAuth2Properties.getGitlink().getGrantType());
         map.add("client_id", this.oAuth2Properties.getGitlink().getClientId());
         map.add("client_secret", this.oAuth2Properties.getGitlink().getClientSecret());
-        map.add("username", "innov");
-        map.add("password", "12345678");
+        map.add("username", this.oAuth2Properties.getGitlink().getUsername());
+        map.add("password", this.oAuth2Properties.getGitlink().getPassword());
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<MultiValueMap<String, Object>> param = new HttpEntity<>(map, headers);
 
