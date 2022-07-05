@@ -118,10 +118,9 @@ export default class LogViewer {
   listen(data: string[]): void {
     this.el.lastElementChild?.appendChild(this.virtualNoDiv);
     if (this.isSse) {
-      const allData: string[] = [];
       this.eventSource.onmessage = async (e: any) => {
         this.lines.push(Number(e.lastEventId));
-        allData.push(e.data);
+        this.allData.push(e.data);
         if (this.line === 0) {
           this.line = this.lines[0];
         }
