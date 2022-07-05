@@ -50,7 +50,6 @@
         <jm-log-viewer
           :filename="`${process.name}.txt`"
           :url="`/view/logs/workflow/subscribe/${process.triggerId}?size=`"
-          :load-more="loadMore"
           :download="download"
           v-model:more="moreLog"
           v-if="process.triggerId"
@@ -98,14 +97,6 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     };
-    // 加载更多/随机订阅日志
-    const loadMore = async (line: number, size: number) => {
-      try {
-        return await randomWorkflowLogs(process.value.triggerId, { line: line, size: size });
-      } catch (err) {
-        proxy.$throw(err, proxy);
-      }
-    };
 
     return {
       workflowName: state.recordDetail.record?.name,
@@ -116,7 +107,6 @@ export default defineComponent({
       processLog,
       WorkflowExecutionRecordStatusEnum,
       download,
-      loadMore,
       moreLog,
     };
   },
