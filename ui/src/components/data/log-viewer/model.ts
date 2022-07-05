@@ -69,20 +69,21 @@ export default class LogViewer {
       subtree: true,
     });
 
-    // sse
-    this.eventSource = this.isSse ? new EventSource(this.value + MAX_SIZE, { withCredentials: true }) : undefined;
-
     this.handleAutoScrollFn = handleAutoScrollFn;
 
     this.listenScroll = _listen(this.el.lastElementChild, 'scroll', () => {
       this.handleAutoScrollFn(this.el.lastElementChild!.scrollHeight - this.el.lastElementChild!.scrollTop <= this.el.lastElementChild!.clientHeight);
     });
 
-    this.allData = [];
+    if (this.isSse) {
+      // sse
+      this.eventSource = new EventSource(this.value + MAX_SIZE, { withCredentials: true });
+      this.logInterval = setInterval(() => {
+        this.callbackFn(this.allData, this.line);
+      }, 500);
+    }
 
-    this.logInterval = setInterval(() => {
-      this.callbackFn(this.allData, this.line);
-    }, 500);
+    this.allData = [];
   }
 
   /**
@@ -105,9 +106,9 @@ export default class LogViewer {
     this.mutationObserver.disconnect();
     if (this.isSse) {
       this.eventSource.close();
+      clearInterval(this.logInterval);
     }
     this.listenScroll.destroy();
-    clearInterval(this.logInterval);
   }
 
   /**
