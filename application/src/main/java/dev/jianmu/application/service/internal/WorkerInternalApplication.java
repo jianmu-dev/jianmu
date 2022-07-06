@@ -343,6 +343,7 @@ public class WorkerInternalApplication {
     private HashMap<String, String> getEnvVariable(TaskInstance taskInstance, Worker worker) {
 
         HashMap<String, String> env = new HashMap<>();
+        env.put("JM_RESULT_FILE", "/" + taskInstance.getTriggerId() + "/" + taskInstance.getBusinessId());
         env.put("JIANMU_SHARE_DIR", "/" + taskInstance.getTriggerId());
         env.put("JM_SHARE_DIR", "/" + taskInstance.getTriggerId());
 
@@ -590,6 +591,7 @@ public class WorkerInternalApplication {
                 .filter(t -> t.getAsyncTaskRef().equals(node.getRef()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("未找到对应的异步任务实例："));
+        envs.put("JM_RESULT_FILE", "/" + asyncTaskInstance.getTriggerId() + "/" + asyncTaskInstance.getId());
         if (nodeDef.getImage() != null) {
             envs.put("JIANMU_SCRIPT", "JIANMU_SCRIPT");
             String[] entrypoint = {"/bin/sh", "-c"};
@@ -666,6 +668,7 @@ public class WorkerInternalApplication {
                                 .target("/" + taskInstance.getTriggerId())
                                 .build()
                 ))
+                .resultFile("/" + taskInstance.getTriggerId() + "/" + taskInstance.getBusinessId())
                 .build();
     }
 
