@@ -15,6 +15,7 @@ import dev.jianmu.infrastructure.worker.unit.*;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
@@ -465,6 +466,7 @@ public class WorkerInternalApplication {
                     .podSpec(PodSpec.builder()
                             .name(taskInstance.getTriggerId())
                             .build())
+                    .pullSecret(this.findPullSecret())
                     .current(Runner.builder()
                             .id(taskInstance.getBusinessId())
                             .version(taskInstance.getVersion())
@@ -664,6 +666,27 @@ public class WorkerInternalApplication {
                                 .target("/" + taskInstance.getTriggerId())
                                 .build()
                 ))
+                .build();
+    }
+
+    public Unit findRunningTaskByTriggerId(String workerId, String triggerId) {
+        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到流程实例：" + triggerId));
+        List<Runner> runners;
+        if (workflowInstance.isRunning()) {
+            runners = this.taskInstanceRepository.findByTriggerIdAndStatus(triggerId, InstanceStatus.RUNNING).stream()
+                    .map(this::findCurrentRunner)
+                    .collect(Collectors.toList());
+        } else {
+            runners = List.of();
+        }
+        return Unit.builder()
+                .type(Unit.Type.RUN)
+                .podSpec(PodSpec.builder()
+                        .name(triggerId)
+                        .build())
+                .pullSecret(this.findPullSecret())
+                .runners(runners)
                 .build();
     }
 }

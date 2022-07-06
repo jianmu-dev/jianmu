@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
 import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.*;
 import dev.jianmu.task.repository.TaskInstanceRepository;
@@ -176,5 +177,10 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public Optional<TaskInstance> findByBusinessIdAndVersion(String businessId, int version) {
         return this.taskInstanceMapper.findByBusinessIdAndVersion(businessId, version);
+    }
+
+    @Override
+    public List<TaskInstance> findByTriggerIdAndStatus(String triggerId, InstanceStatus status) {
+        return this.taskInstanceMapper.findByTriggerIdAndStatus(triggerId, status);
     }
 }

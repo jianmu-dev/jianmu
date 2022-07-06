@@ -2,7 +2,6 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.*;
 import dev.jianmu.api.vo.Auth;
-import dev.jianmu.infrastructure.worker.unit.Unit;
 import dev.jianmu.api.vo.VolumeVo;
 import dev.jianmu.api.vo.WorkerTaskVo;
 import dev.jianmu.application.query.NodeDefApi;
@@ -11,11 +10,7 @@ import dev.jianmu.application.service.internal.WorkerInternalApplication;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
-import dev.jianmu.infrastructure.worker.WorkerSecret;
-import dev.jianmu.infrastructure.worker.unit.PodSpec;
-import dev.jianmu.infrastructure.worker.unit.Volume;
-import dev.jianmu.infrastructure.worker.unit.VolumeEmptyDir;
-import dev.jianmu.task.aggregate.InstanceStatus;
+import dev.jianmu.infrastructure.worker.unit.Unit;
 import dev.jianmu.worker.aggregate.Worker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -147,7 +142,7 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public WorkerTaskVo findTaskById(@PathVariable String workerId, @PathVariable("businessId") String businessId) {
-        var taskInstance = this.taskInstanceApplication.findById(businessId)
+        var taskInstance = this.taskInstanceApplication.findByBusinessIdAndMaxSerialNo(businessId)
                 .orElseThrow(() -> new RuntimeException("未找到任务:" + businessId));
         if (taskInstance.isVolume()) {
             return WorkerTaskVo.builder()
@@ -282,5 +277,14 @@ public class WorkerController {
         } catch (IOException e) {
             throw new RuntimeException("任务日志写入失败： " + e);
         }
+    }
+
+    @PostMapping("/workers/kubernetes/{workerId}/tasks/{triggerId}")
+    @Operation(summary = "获取k8s运行中任务", description = "获取k8s运行中任务")
+    @Parameters({
+            @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
+    })
+    public Unit findRunningTaskByTriggerId(@PathVariable("workerId") String workerId, @PathVariable("triggerId") String triggerId) {
+        return this.workerApplication.findRunningTaskByTriggerId(workerId, triggerId);
     }
 }
