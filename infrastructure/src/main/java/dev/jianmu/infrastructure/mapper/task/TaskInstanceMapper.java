@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.mapper.task;
 
 import dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 import org.apache.ibatis.annotations.*;
 
@@ -165,4 +166,19 @@ public interface TaskInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findByBusinessIdAndVersion(@Param("businessId") String businessId, @Param("version") int version);
+
+    @Select("select * from task_instance where trigger_id = #{triggerId} and status = #{status}")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "def_key", property = "defKey")
+    @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
+    @Result(column = "async_task_ref", property = "asyncTaskRef")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "business_id", property = "businessId")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "worker_id", property = "workerId")
+    @Result(column = "_version", property = "version")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "end_time", property = "endTime")
+    List<TaskInstance> findByTriggerIdAndStatus(@Param("triggerId") String triggerId, @Param("status") InstanceStatus status);
 }
