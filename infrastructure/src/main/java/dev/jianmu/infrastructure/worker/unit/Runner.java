@@ -1,7 +1,7 @@
 package dev.jianmu.infrastructure.worker.unit;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.jianmu.infrastructure.docker.VolumeMount;
+import dev.jianmu.infrastructure.worker.VolumeMount;
 import dev.jianmu.infrastructure.worker.WorkerSecret;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

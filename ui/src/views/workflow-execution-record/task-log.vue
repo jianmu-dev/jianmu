@@ -93,7 +93,6 @@
                 :filename="`${task.nodeName}.txt`"
                 :url="`/view/logs/task/subscribe/${currentInstanceId}?size=`"
                 v-model:more="moreLog"
-                :load-more="loadMore"
                 :download="download"
               />
             </div>
@@ -484,14 +483,6 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     };
-    // 加载更多/随机订阅日志
-    const loadMore = async (line: number, size: number) => {
-      try {
-        return await randomNodeLogs(task.value.instanceId, { line: line, size: size });
-      } catch (err) {
-        proxy.$throw(err, proxy);
-      }
-    };
     return {
       ParamTypeEnum,
       maxWidthRecord,
@@ -508,7 +499,6 @@ export default defineComponent({
         return alias || task.value.nodeName;
       }),
       download,
-      loadMore,
       currentInstanceId,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>

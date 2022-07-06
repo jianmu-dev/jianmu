@@ -4,6 +4,7 @@ import dev.jianmu.api.dto.AuthorizationUrlGettingDto;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.Oauth2LoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
+import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.jwt.JwtUserDetails;
 import dev.jianmu.api.oauth2_api.OAuth2Api;
 import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
@@ -109,18 +110,21 @@ public class Oauth2Controller {
         }
 
         Authentication authentication = this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(user),
+                new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
+                        .avatarUrl(user.getAvatarUrl())
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .nickname(user.getNickname())
+                        .build()),
                         this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = this.jwtProvider.generateJwtToken(authentication);
 
-        JwtUserDetails userDetails = (JwtUserDetails) authentication.getPrincipal();
-
         return ResponseEntity.ok(JwtResponse.builder()
                 .token(jwt)
-                .id(userDetails.getId())
-                .username(userDetails.getUsername())
+                .id(user.getId())
+                .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
                 .build());
     }

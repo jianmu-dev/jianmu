@@ -1,7 +1,9 @@
 package dev.jianmu.task.repository;
 
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,4 +45,6 @@ public interface TaskInstanceRepository {
     Optional<TaskInstance> findByWorkerIdAndTriggerIdLimit(String workerId, String triggerId);
 
     Optional<TaskInstance> findByBusinessIdAndVersion(String businessId, int version);
+
+    List<TaskInstance> findByTriggerIdAndStatus(String triggerId, InstanceStatus status);
 }

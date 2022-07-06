@@ -1,4 +1,4 @@
-package dev.jianmu.infrastructure.docker;
+package dev.jianmu.infrastructure.worker.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,17 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class TaskFailedEvent
- * @description TaskFailedEvent
+ * @class TaskResult
+ * @description 任务执行结果
  * @author Ethan Liu
- * @create 2021-05-06 09:19
+ * @create 2021-04-16 12:31
 */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TaskFailedEvent {
+public class TaskFinishedEvent {
     private String triggerId;
     private String taskId;
-    private String errorMsg;
+    private int cmdStatusCode;
+    private String resultFile;
 }

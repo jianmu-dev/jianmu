@@ -17,19 +17,19 @@ import java.util.Collection;
 public class JwtUserDetails implements UserDetails {
     private static final long serialVersionUID = 1L;
 
-    private User user;
+    private final JwtSession jwtSession;
 
     @JsonIgnore
-    private String password;
+    private final String password;
 
-    public JwtUserDetails(User user, String password) {
-        this.user = user;
+    public JwtUserDetails(JwtSession jwtSession, String password) {
+        this.jwtSession = jwtSession;
         this.password = password;
     }
 
-    public static JwtUserDetails build(User user, String password) {
+    public static JwtUserDetails build(JwtSession jwtSession, String password) {
         return new JwtUserDetails(
-                user,
+                jwtSession,
                 password
         );
     }
@@ -46,7 +46,7 @@ public class JwtUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return JsonUtil.jsonToString(user);
+        return JsonUtil.jsonToString(jwtSession);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class JwtUserDetails implements UserDetails {
     }
 
     public String getId() {
-        return user.getId();
+        return jwtSession.getId();
     }
 
 }

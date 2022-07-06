@@ -1,6 +1,6 @@
 package dev.jianmu.api.vo;
 
-import dev.jianmu.infrastructure.docker.ContainerSpec;
+import dev.jianmu.infrastructure.worker.ContainerSpec;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

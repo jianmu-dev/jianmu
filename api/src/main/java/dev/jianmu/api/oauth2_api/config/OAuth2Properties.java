@@ -48,7 +48,7 @@ public class OAuth2Properties implements InitializingBean, EnvironmentAware {
         if (gitee != null) {
             return ThirdPartyTypeEnum.GITEE.name();
         }
-        return null;
+        return "";
     }
 
     @Override
