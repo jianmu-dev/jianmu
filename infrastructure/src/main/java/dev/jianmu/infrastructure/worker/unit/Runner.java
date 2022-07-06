@@ -38,6 +38,7 @@ public class Runner {
     private List<VolumeMount> volumes;
     @JsonProperty("working_dir")
     private String workingDir;
+    private String resultFile;
 
     public void setRegistryAddress(String registryAddress) {
         if (ObjectUtils.isEmpty(registryAddress)) {
