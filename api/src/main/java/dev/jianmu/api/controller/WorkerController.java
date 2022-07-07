@@ -279,7 +279,7 @@ public class WorkerController {
         }
     }
 
-    @GetMapping("/workers/kubernetes/{workerId}/tasks/{triggerId}")
+    @GetMapping("/kubernetes/{workerId}/tasks/{triggerId}")
     @Operation(summary = "获取k8s运行中任务", description = "获取k8s运行中任务")
     @Parameters({
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
