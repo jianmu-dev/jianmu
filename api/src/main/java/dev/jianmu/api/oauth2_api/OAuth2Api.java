@@ -1,5 +1,6 @@
 package dev.jianmu.api.oauth2_api;
 
+import dev.jianmu.api.oauth2_api.vo.IBranchesVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoMemberVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoVo;
 import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
@@ -69,4 +70,14 @@ public interface OAuth2Api {
      * @return
      */
     List<? extends IRepoMemberVo> getRepoMembers(String accessToken, String gitRepo, String gitRepoOwner);
+
+    /**
+     * 获取仓库所有分支
+     *
+     * @param accessToken
+     * @param gitRepo
+     * @param gitRepoOwner
+     * @return
+     */
+    IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner);
 }

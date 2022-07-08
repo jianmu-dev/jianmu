@@ -69,7 +69,7 @@ public class RepoVo implements IRepoVo {
     @JsonProperty("clone_url")
     private String cloneUrl;
     @JsonProperty("default_branch")
-    private String defaultBranch;
+    private String _defaultBranch;
     private boolean empty;
     @JsonProperty("full_name")
     private String fullName;
@@ -90,6 +90,11 @@ public class RepoVo implements IRepoVo {
     @Override
     public String getRepo() {
         return this.fullName.split("/")[1];
+    }
+
+    @Override
+    public String getDefaultBranch() {
+        return this._defaultBranch;
     }
 
     @Setter

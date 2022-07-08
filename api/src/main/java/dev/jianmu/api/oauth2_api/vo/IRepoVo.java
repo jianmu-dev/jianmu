@@ -12,4 +12,6 @@ public interface IRepoVo {
     String getOwner();
 
     String getRepo();
+
+    String getDefaultBranch();
 }
