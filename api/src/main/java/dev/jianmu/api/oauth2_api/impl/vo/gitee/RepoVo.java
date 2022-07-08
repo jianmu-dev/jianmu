@@ -25,4 +25,9 @@ public class RepoVo implements IRepoVo {
     public String getRepo() {
         return null;
     }
+
+    @Override
+    public String getDefaultBranch() {
+        return null;
+    }
 }

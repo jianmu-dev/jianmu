@@ -10,6 +10,7 @@ import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
 import dev.jianmu.api.oauth2_api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.api.oauth2_api.exception.NoPermissionException;
 import dev.jianmu.api.oauth2_api.impl.OAuth2ApiProxy;
+import dev.jianmu.api.oauth2_api.vo.IBranchesVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoMemberVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoVo;
 import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,14 +48,14 @@ import java.util.Optional;
 @RestController
 @RequestMapping("auth/oauth2")
 @Tag(name = "oauth2控制器", description = "oauth2控制器")
-public class Oauth2Controller {
+public class OAuth2Controller {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final OAuth2Properties oAuth2Properties;
 
-    public Oauth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
@@ -102,7 +104,7 @@ public class Oauth2Controller {
         try {
             if (this.oAuth2Properties.isEntry()) {
                 repo = this.checkEntry(accessToken, oauth2LoggingDto.getGitRepo(), oauth2LoggingDto.getGitRepoOwner(), oAuth2Api);
-                role = this.mappingPermissions(oAuth2Api, userInfoVo, accessToken, oauth2LoggingDto.getGitRepo(), oauth2LoggingDto.getGitRepoOwner(), oauth2LoggingDto.getThirdPartyType());
+                role = this.mappingPermissions(oAuth2Api, userInfoVo, accessToken, oauth2LoggingDto.getGitRepo(), oauth2LoggingDto.getGitRepoOwner());
             }
         } catch (OAuth2IsNotAuthorizedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(JwtResponse.builder()
@@ -203,6 +205,12 @@ public class Oauth2Controller {
 
     /**
      * 准入配置是否正确
+     *
+     * @param accessToken
+     * @param gitRepo
+     * @param gitRepoOwner
+     * @param oAuth2Api
+     * @return
      */
     private IRepoVo checkEntry(String accessToken, String gitRepo, String gitRepoOwner, OAuth2Api oAuth2Api) {
         if (StringUtils.hasLength(gitRepo) && StringUtils.hasLength(gitRepoOwner)) {
@@ -212,7 +220,7 @@ public class Oauth2Controller {
                 if (repo != null) {
                     return repo;
                 }
-            }catch (NoPermissionException e){
+            } catch (NoPermissionException e) {
                 throw new OAuth2IsNotAuthorizedException(e.getMessage());
             }
             throw new OAuth2EntryException("不存在此仓库");
@@ -227,8 +235,13 @@ public class Oauth2Controller {
      * @param userInfoVo
      * @return
      */
-    private JwtSession.Role mappingPermissions(OAuth2Api oAuth2Api, IUserInfoVo userInfoVo, String accessToken, String gitRepo, String gitRepoOwner, String thirdPartyType) {
-        List<? extends IRepoMemberVo> repoMembers = oAuth2Api.getRepoMembers(accessToken, gitRepo, gitRepoOwner);
+    private JwtSession.Role mappingPermissions(OAuth2Api oAuth2Api, IUserInfoVo userInfoVo, String accessToken, String gitRepo, String gitRepoOwner) {
+        List<? extends IRepoMemberVo> repoMembers;
+        try {
+            repoMembers = oAuth2Api.getRepoMembers(accessToken, gitRepo, gitRepoOwner);
+        } catch (NoPermissionException e) {
+            throw new OAuth2IsNotAuthorizedException(e.getMessage());
+        }
         for (IRepoMemberVo member : repoMembers) {
             if (member.getUsername().equals(userInfoVo.getUsername())) {
                 if (member.isOwner()) {

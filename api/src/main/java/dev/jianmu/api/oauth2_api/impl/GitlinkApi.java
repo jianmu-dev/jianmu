@@ -1,15 +1,14 @@
 package dev.jianmu.api.oauth2_api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.api.oauth2_api.OAuth2Api;
 import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
 import dev.jianmu.api.oauth2_api.exception.*;
 import dev.jianmu.api.oauth2_api.impl.dto.gitlink.LoggingDto;
-import dev.jianmu.api.oauth2_api.impl.vo.gitlink.RepoMembersVo;
-import dev.jianmu.api.oauth2_api.impl.vo.gitlink.RepoVo;
-import dev.jianmu.api.oauth2_api.impl.vo.gitlink.TokenVo;
-import dev.jianmu.api.oauth2_api.impl.vo.gitlink.UserInfoVo;
+import dev.jianmu.api.oauth2_api.impl.vo.gitlink.*;
+import dev.jianmu.api.oauth2_api.vo.IBranchesVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoMemberVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoVo;
 import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
@@ -23,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author huangxi
@@ -130,6 +128,7 @@ public class GitlinkApi implements OAuth2Api {
     @Override
     public IRepoVo getRepo(String accessToken, String gitRepo, String gitRepoOwner) {
         HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -200,5 +199,49 @@ public class GitlinkApi implements OAuth2Api {
             throw new JsonParseException();
         }
         return gitlinkRepoMemberVo.getMembers();
+    }
+
+    @Override
+    public IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> responseEntity;
+        try {
+            responseEntity = this.restTemplate.exchange(
+                    this.oAuth2Properties.getGitlink().getBaseUrl() +
+                            "api/" + gitRepoOwner + "/" + gitRepo +
+                            "/branches.json",
+                    HttpMethod.GET,
+                    entity,
+                    String.class);
+        } catch (HttpClientErrorException clientErrorExceptione) {
+            throw new HttpClientException();
+        } catch (HttpServerErrorException serverErrorException) {
+            throw new HttpServerException();
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        List<BranchesVo.Branch> branches = null;
+        try {
+            BranchesVo branchesVo = mapper.readValue(responseEntity.getBody(), BranchesVo.class);
+            if (branchesVo.getStatus() != null) {
+                if (branchesVo.getStatus() == HttpStatus.FORBIDDEN.value()) {
+                    throw new NoPermissionException(branchesVo.getMessage());
+                }
+                throw new UnKnownException(branchesVo.getMessage());
+            }
+        } catch (JsonProcessingException e) {
+            try {
+                branches = mapper.readValue(responseEntity.getBody(), new TypeReference<>() {
+                });
+            } catch (JsonProcessingException ex) {
+                throw new JsonParseException();
+            }
+        }
+        return BranchesVo.builder()
+                .branches(branches).build();
     }
 }

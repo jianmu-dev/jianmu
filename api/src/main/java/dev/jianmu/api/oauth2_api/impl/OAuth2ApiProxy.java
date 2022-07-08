@@ -4,6 +4,7 @@ import dev.jianmu.api.oauth2_api.OAuth2Api;
 import dev.jianmu.api.oauth2_api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.api.oauth2_api.exception.NotSupportedThirdPartPlatformException;
 import dev.jianmu.api.oauth2_api.utils.ApplicationContextUtils;
+import dev.jianmu.api.oauth2_api.vo.IBranchesVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoMemberVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoVo;
 import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
@@ -55,6 +56,11 @@ public class OAuth2ApiProxy implements OAuth2Api {
     @Override
     public List<? extends IRepoMemberVo> getRepoMembers(String accessToken, String gitRepo, String gitRepoOwner) {
         return this.getApi().getRepoMembers(accessToken, gitRepo, gitRepoOwner);
+    }
+
+    @Override
+    public IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner) {
+        return this.getApi().getBranches(accessToken, gitRepo, gitRepoOwner);
     }
 
 }

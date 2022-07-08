@@ -45,14 +45,4 @@ public class UserInfoVo implements IUserInfoVo {
     public String getUsername() {
         return this.login;
     }
-
-    @Override
-    public String getData() {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new JsonParseException();
-        }
-    }
 }
