@@ -1,4 +1,4 @@
-package dev.jianmu.api.oauth2_api.impl.vo;
+package dev.jianmu.api.oauth2_api.impl.dto.gitee;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,14 +6,14 @@ import lombok.Setter;
 
 /**
  * @author huangxi
- * @class GitlinkLoginVo
+ * @class GiteeLoginVo
  * @description gitee登录vo
- * @create 2021-07-05 17:37
+ * @create 2021-06-30 14:08
  */
 @Builder
 @Getter
 @Setter
-public class GitlinkLoginVo {
+public class LoggingDto {
     private String grant_type;
     private String code;
     private String client_id;

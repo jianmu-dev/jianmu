@@ -26,6 +26,7 @@ import java.util.Objects;
 @Component
 @ConfigurationProperties(prefix = "jianmu.oauth2")
 public class OAuth2Properties implements InitializingBean, EnvironmentAware {
+    private boolean entry = false;
     private boolean allowRegistration = true;
     private GiteeConfigProperties gitee;
     private GitlinkConfigProperties gitlink;

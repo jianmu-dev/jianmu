@@ -7,10 +7,12 @@ import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
 import dev.jianmu.api.oauth2_api.exception.AccessTokenDoesNotExistException;
 import dev.jianmu.api.oauth2_api.exception.GetTokenRequestParameterErrorException;
 import dev.jianmu.api.oauth2_api.exception.JsonParseException;
-import dev.jianmu.api.oauth2_api.impl.vo.GiteeLoginVo;
-import dev.jianmu.api.oauth2_api.impl.vo.GiteeTokenVo;
-import dev.jianmu.api.oauth2_api.impl.vo.GiteeUserInfoVo;
-import dev.jianmu.api.oauth2_api.vo.UserInfoVo;
+import dev.jianmu.api.oauth2_api.impl.dto.gitee.LoggingDto;
+import dev.jianmu.api.oauth2_api.impl.vo.gitee.TokenVo;
+import dev.jianmu.api.oauth2_api.impl.vo.gitee.UserInfoVo;
+import dev.jianmu.api.oauth2_api.vo.IRepoMemberVo;
+import dev.jianmu.api.oauth2_api.vo.IRepoVo;
+import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -18,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * @author huangxi
@@ -51,7 +54,7 @@ public class GiteeApi implements OAuth2Api {
     @Override
     public String getAccessToken(String code, String redirectUri) {
         // 封装请求条件
-        GiteeLoginVo giteeLoginVo = GiteeLoginVo.builder()
+        LoggingDto giteeLoginVo = LoggingDto.builder()
                 .client_id(this.oAuth2Properties.getGitee().getClientId())
                 .client_secret(this.oAuth2Properties.getGitee().getClientSecret())
                 .code(code)
@@ -79,9 +82,9 @@ public class GiteeApi implements OAuth2Api {
             throw new GetTokenRequestParameterErrorException();
         }
 
-        GiteeTokenVo giteeTokenVo;
+        TokenVo giteeTokenVo;
         try {
-            giteeTokenVo = mapper.readValue(tokenEntity.getBody(), GiteeTokenVo.class);
+            giteeTokenVo = mapper.readValue(tokenEntity.getBody(), TokenVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -89,7 +92,7 @@ public class GiteeApi implements OAuth2Api {
     }
 
     @Override
-    public UserInfoVo getUserInfoVo(String token) {
+    public IUserInfoVo getUserInfo(String token) {
         String userTokenInfoUrl = this.oAuth2Properties.getGitee().getUserInfoUrl() + "?access_token=" + token;
         ResponseEntity<String> userInfoEntity;
         try {
@@ -103,20 +106,24 @@ public class GiteeApi implements OAuth2Api {
         }
 
         String userInfo = userInfoEntity.getBody();
-        GiteeUserInfoVo giteeUserInfoVo;
+        UserInfoVo giteeUserInfoVo;
         ObjectMapper mapper = new ObjectMapper();
         try {
-            giteeUserInfoVo = mapper.readValue(userInfo, GiteeUserInfoVo.class);
+            giteeUserInfoVo = mapper.readValue(userInfo, UserInfoVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
 
-        return UserInfoVo.builder()
-                .id(giteeUserInfoVo.getId().toString())
-                .avatarUrl(giteeUserInfoVo.getAvatar_url())
-                .nickname(giteeUserInfoVo.getName())
-                .username(giteeUserInfoVo.getLogin())
-                .data(userInfo)
-                .build();
+        return giteeUserInfoVo;
+    }
+
+    @Override
+    public IRepoVo getRepo(String accessToken, String gitRepo, String gitRepoOwner) {
+        return null;
+    }
+
+    @Override
+    public List<? extends IRepoMemberVo> getRepoMembers(String accessToken, String gitRepo, String gitRepoOwner) {
+        return null;
     }
 }
