@@ -37,6 +37,7 @@
       <div class="group-list-wrapper">
         <project-group
           v-if="initialized"
+          :is-detail="true"
           :project-group="projectGroupDetail"
           :pageable="true"
           :move="isActive"
