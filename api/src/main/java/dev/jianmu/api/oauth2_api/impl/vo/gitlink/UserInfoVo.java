@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
 import dev.jianmu.api.oauth2_api.exception.JsonParseException;
+import dev.jianmu.api.oauth2_api.utils.ApplicationContextUtils;
 import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +34,7 @@ public class UserInfoVo implements IUserInfoVo {
 
     @Override
     public String getAvatarUrl() {
-        return this.image_url;
+        return ApplicationContextUtils.getBean(OAuth2Properties.class).getGitlink().getBaseUrl() + this.image_url;
     }
 
     @Override
