@@ -2,8 +2,9 @@ import { ActionContext, Module } from 'vuex';
 import { ILoginForm, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
 import { create } from '@/api/session';
-import { ISessionVo } from '@/api/dto/session';
+import { ISessionVo, IOauth2LoggingDto } from '@/api/dto/session';
 import { getStorage, setStorage } from '@/utils/storage';
+import { authLogin } from '@/api/session';
 
 /**
  * 命名空间
@@ -76,6 +77,12 @@ export default {
       saveState(state);
     },
 
+    oauthMutate(state: IState, session: ISessionVo) {
+      state.session = session;
+      state.username = session.username;
+      saveState(state);
+    },
+
     mutateToken(state: IState, token: string) {
       (state.session as any).token = token;
 
@@ -83,8 +90,8 @@ export default {
     },
 
     mutateDeletion(state: IState) {
-      state.session = DEFAULT_STATE.session;
-
+      // 直接将session重置，避免出现调用方法后session值还在的情况
+      state.session = undefined;
       saveState(state);
     },
   },
@@ -96,6 +103,20 @@ export default {
       });
 
       commit('mutate', { session, loginForm });
+    },
+    async oauthLogin({ commit }: ActionContext<IState, IRootState>, payload: IOauth2LoggingDto): Promise<void> {
+      const session = (payload.gitRepo && payload.gitRepoOwner) ? await authLogin({
+        code: payload.code,
+        thirdPartyType: payload.thirdPartyType,
+        redirectUri: payload.redirectUri,
+        gitRepo: payload.gitRepo,
+        gitRepoOwner: payload.gitRepoOwner,
+      }) : await authLogin({
+        code: payload.code,
+        thirdPartyType: payload.thirdPartyType,
+        redirectUri: payload.redirectUri,
+      });
+      commit('oauthMutate', session);
     },
   },
 } as Module<IState, IRootState>;

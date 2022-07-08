@@ -47,13 +47,18 @@ export async function globalErrorHandler(
         dynamicRender(LoginVerify, appContext);
         break;
       }
+      case 403:
       case 404:
       case 500: {
         // 如果发送请求时的路由地址发生变化不做路由跳转
         if (!checkLocation(error.response)) {
           break;
         }
-        await router.push({ name: 'http-status-error', params: { value: status } });
+        await router.push({
+          name: 'http-status-error',
+          params: { value: status },
+          query: { errMessage: error.response.data.message },
+        });
         break;
       }
       // TODO 待扩展，处理其他错误码

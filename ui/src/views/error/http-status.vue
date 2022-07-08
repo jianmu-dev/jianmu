@@ -17,14 +17,6 @@
 import { defineComponent } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
 
-const messages: {
-  [key: number]: string;
-} = {
-  404: '找不到页面',
-  500: '服务器出错',
-  // TODO 待完善其他错误码
-};
-
 export default defineComponent({
   components: { BottomNav },
   props: {
@@ -32,9 +24,21 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    errMessage: {
+      type: String,
+      default: '没有权限访问该页面',
+    },
   },
   setup(props) {
     let status = +props.value;
+    const messages: {
+      [key: number]: string;
+    } = {
+      404: '找不到页面',
+      500: '服务器出错',
+      403: props.errMessage,
+      // TODO 待完善其他错误码
+    };
     if (isNaN(status)) {
       status = 404;
     }
@@ -51,6 +55,13 @@ export default defineComponent({
 .http-status-error {
   margin-top: 18vh;
   text-align: center;
+
+  &._403 {
+    padding-top: 245px;
+    background-image: url('@/assets/svgs/error/403.svg');
+    background-repeat: no-repeat;
+    background-position: center top;
+  }
 
   &._404 {
     padding-top: 245px;

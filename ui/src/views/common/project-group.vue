@@ -29,8 +29,10 @@
       <template #default>
         <div>
           <div class="projects" ref="projectsRef">
+            <jm-empty description="暂无项目" :image-size="98"
+                      v-if="projects.length === 0 && pageable && isDetail"/>
             <jm-empty :image="noDataImg" description="没有搜到相关结果" :image-size="98"
-                      v-if="projects.length === 0 && pageable"/>
+                      v-else-if="projects.length === 0 && pageable"/>
             <jm-sorter
               v-else-if="moveListener"
               class="list"
@@ -114,6 +116,10 @@ const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 export default defineComponent({
   components: { JmSorter, ProjectItem, Folding },
   props: {
+    isDetail: {
+      type: Boolean,
+      default: false,
+    },
     // 项目组
     projectGroup: {
       type: Object as PropType<IProjectGroupVo>,

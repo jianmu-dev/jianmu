@@ -10,7 +10,7 @@
       <!--        <div class="subtitle">Automation Integration Platform</div>-->
       <!--      </div>-->
     </div>
-    <login/>
+    <login :code="code" :error_description="error_description" :gitRepo="gitRepo" :gitRepoOwner="gitRepoOwner"/>
     <bottom-nav/>
   </div>
 </template>
@@ -22,6 +22,12 @@ import Login from '@/views/common/login.vue';
 
 export default defineComponent({
   components: { BottomNav, Login },
+  props: {
+    gitRepo: String,
+    gitRepoOwner: String,
+    code: String,
+    error_description: String,
+  },
 });
 </script>
 
@@ -75,6 +81,7 @@ export default defineComponent({
     border-radius: 4px;
     padding: 30px;
     width: 350px;
+    min-height: 344px;
   }
 }
 </style>
