@@ -13,7 +13,7 @@ export default [
     name: 'http-status-error',
     path: 'http-status/:value',
     component: () => import('@/views/error/http-status.vue'),
-    props: ({ params: { value } }: RouteLocationNormalizedLoaded) => ({ value }),
+    props: ({ params: { value }, query: { errMessage } }: RouteLocationNormalizedLoaded) => ({ value, errMessage }),
     meta: {
       title: '请求错误',
     },
