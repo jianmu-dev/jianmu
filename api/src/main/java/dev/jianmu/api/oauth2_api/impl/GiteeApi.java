@@ -10,6 +10,7 @@ import dev.jianmu.api.oauth2_api.exception.JsonParseException;
 import dev.jianmu.api.oauth2_api.impl.dto.gitee.LoggingDto;
 import dev.jianmu.api.oauth2_api.impl.vo.gitee.TokenVo;
 import dev.jianmu.api.oauth2_api.impl.vo.gitee.UserInfoVo;
+import dev.jianmu.api.oauth2_api.vo.IBranchesVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoMemberVo;
 import dev.jianmu.api.oauth2_api.vo.IRepoVo;
 import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
@@ -124,6 +125,11 @@ public class GiteeApi implements OAuth2Api {
 
     @Override
     public List<? extends IRepoMemberVo> getRepoMembers(String accessToken, String gitRepo, String gitRepoOwner) {
+        return null;
+    }
+
+    @Override
+    public IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner) {
         return null;
     }
 }
