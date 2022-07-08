@@ -1,18 +1,18 @@
 
-package dev.jianmu.api.oauth2_api.impl.vo;
+package dev.jianmu.api.oauth2_api.impl.vo.gitee;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * @author huangxi
- * @class GitlinkTokenVo
- * @description 请求gitlink的token的vo
- * @create 2021-07-05 18:11
+ * @class GiteeTokenVo
+ * @description 请求gitee的token的vo
+ * @create 2021-06-30 14:08
  */
 @Getter
 @Setter
-public class GitlinkTokenVo {
+public class TokenVo {
     private String access_token;
     private String token_type;
     private long expires_in;
