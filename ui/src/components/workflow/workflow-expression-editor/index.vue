@@ -35,9 +35,8 @@ export default defineComponent({
 
     onMounted(() => {
       const textareaEl = textareaRef.value!;
-      textareaEl.value = props.modelValue;
 
-      expressionEditor = new ExpressionEditor(textareaEl, props.placeholder,
+      expressionEditor = new ExpressionEditor(textareaEl, props.modelValue, props.placeholder,
         e => emit('focus', e),
         e => {
           const val = textareaEl.value;
