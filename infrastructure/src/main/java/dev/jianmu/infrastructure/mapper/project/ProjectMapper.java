@@ -141,4 +141,39 @@ public interface ProjectMapper {
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")
     List<ProjectVo> findAllByGroupId(@Param("projectGroupId") String projectGroupId, @Param("workflowName") String workflowName, @Param("sortType") String sortType);
+
+    @Select("<script>" +
+            "SELECT jp.*, `wi`.`end_time`, `wi`.`status`, `wi`.`start_time`, `wi`.`suspended_time` FROM `jianmu_project` `jp` " +
+            "LEFT JOIN (select  `t1`.`workflow_ref`, `t1`.`end_time`, `t1`.`start_time`, `t1`.`suspended_time`, `t1`.`status`,  if(`end_time` is null, now(), `end_time`) `sort_end_time` " +
+            "           FROM `workflow_instance` `t1`, (select `workflow_ref`,max(`serial_no`) `serial_no` from `workflow_instance` GROUP BY `workflow_ref`) t2 " +
+            "           WHERE `t1`.`workflow_ref` = `t2`.`workflow_ref` and `t1`.`serial_no` = `t2`.`serial_no`) `wi` " +
+            "ON `wi`.`workflow_ref` = `jp`.`workflow_ref` COLLATE utf8mb4_unicode_ci " +
+            "<where>" +
+            "   `jp`.`id` IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
+            "   </foreach>" +
+            "   <if test='status != null and status != \"INIT\"'> AND `wi`.`status` = #{status} </if>" +
+            "   <if test='status == \"INIT\"'> AND `wi`.`workflow_ref` is null </if>" +
+            "   <if test='workflowName != null'> AND (`jp`.`workflow_name` like concat('%', #{workflowName}, '%') OR `jp`.`workflow_description` like concat('%', #{workflowName}, '%'))</if>" +
+            "</where>" +
+            "<if test='sortType == \"LAST_MODIFIED_TIME\"'> ORDER BY `jp`.`last_modified_time` desc</if>" +
+            "<if test='sortType == \"LAST_EXECUTION_TIME\"'> ORDER BY `wi`.`sort_end_time` desc</if>" +
+            "</script>")
+    @Result(column = "workflow_name", property = "workflowName")
+    @Result(column = "workflow_description", property = "workflowDescription")
+    @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
+    @Result(column = "event_bridge_id", property = "eventBridgeId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "git_repo_id", property = "gitRepoId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
+    @Result(column = "end_time", property = "latestTime")
+    List<ProjectVo> findByIdIn(@Param("ids") List<String> ids, @Param("workflowName") String workflowName, @Param("sortType") String sortType, @Param("status") String status);
 }

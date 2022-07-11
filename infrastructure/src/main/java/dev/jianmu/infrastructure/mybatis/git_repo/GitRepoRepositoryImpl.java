@@ -1,8 +1,8 @@
-package dev.jianmu.infrastructure.mybatis.project;
+package dev.jianmu.infrastructure.mybatis.git_repo;
 
-import dev.jianmu.infrastructure.mapper.project.GitRepoMapper;
-import dev.jianmu.project.aggregate.GitRepo;
-import dev.jianmu.project.repository.GitRepoRepository;
+import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
+import dev.jianmu.infrastructure.mapper.git_repo.GitRepoMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -10,9 +10,9 @@ import java.util.Optional;
 /**
  * @class GitRepoRepositoryImpl
  * @description GitRepoRepositoryImpl
- * @author Ethan Liu
- * @create 2021-05-14 15:21
-*/
+ * @author Daihw
+ * @create 2022/7/5 9:51 上午
+ */
 @Repository
 public class GitRepoRepositoryImpl implements GitRepoRepository {
     private final GitRepoMapper gitRepoMapper;
@@ -22,13 +22,8 @@ public class GitRepoRepositoryImpl implements GitRepoRepository {
     }
 
     @Override
-    public void add(GitRepo gitRepo) {
-        this.gitRepoMapper.add(gitRepo);
-    }
-
-    @Override
-    public void deleteById(String id) {
-        this.gitRepoMapper.deleteById(id);
+    public void saveOrUpdate(GitRepo gitRepo) {
+        this.gitRepoMapper.saveOrUpdate(gitRepo);
     }
 
     @Override

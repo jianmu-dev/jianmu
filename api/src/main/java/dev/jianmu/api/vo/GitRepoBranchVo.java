@@ -7,18 +7,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @class GitRepoVo
- * @description GitRepoVo
- * @author Ethan Liu
- * @create 2021-05-13 19:46
-*/
+ * @class GitRepoBranchVo
+ * @description GitRepoBranchVo
+ * @author Daihw
+ * @create 2022/7/8 2:25 下午
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "Git仓库Vo")
-public class GitRepoVo {
-    private String id;
-    private String uri;
-    private String branch;
+@Schema(description = "Git仓库分支Vo")
+public class GitRepoBranchVo {
+    private String branchName;
+    private Boolean isDefault;
 }
