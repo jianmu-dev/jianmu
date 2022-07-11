@@ -36,12 +36,12 @@
                  @error="loadedError"
                  v-if="session.avatarUrl!=='https://gitee.com/assets/no_portrait.png'&&loaded">
             <span class="username" v-else>{{
-                session.username.charAt(0).toUpperCase()
+                session.username?.charAt(0).toUpperCase()
               }}</span>
           </jm-tooltip>
           <jm-tooltip :content="session.username" placement="left" v-else>
             <span class="username">{{
-                session.username.charAt(0).toUpperCase()
+                session.username?.charAt(0).toUpperCase()
               }}</span>
           </jm-tooltip>
           <i class="el-icon-arrow-down el-icon--right"></i>
