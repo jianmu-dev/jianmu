@@ -1,6 +1,7 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.GitRepoFlowViewingDto;
+import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.mapper.ProjectVoMapper;
 import dev.jianmu.api.vo.GitRepoBranchVo;
 import dev.jianmu.api.vo.ProjectVo;
@@ -32,16 +33,18 @@ import java.util.stream.Collectors;
 public class GitRepoController {
     private final GitRepoApplication gitRepoApplication;
     private final TriggerApplication triggerApplication;
+    private final UserContextHolder userContextHolder;
 
-    public GitRepoController(GitRepoApplication gitRepoApplication, TriggerApplication triggerApplication) {
+    public GitRepoController(GitRepoApplication gitRepoApplication, TriggerApplication triggerApplication, UserContextHolder userContextHolder) {
         this.gitRepoApplication = gitRepoApplication;
         this.triggerApplication = triggerApplication;
+        this.userContextHolder = userContextHolder;
     }
 
-    @GetMapping("/{id}/branches")
+    @GetMapping("/branches")
     @Operation(summary = "查询分支列表", description = "查询分支列表")
-    public List<GitRepoBranchVo> findBranches(@PathVariable String id) {
-        return this.gitRepoApplication.findBranches(id).stream()
+    public List<GitRepoBranchVo> findBranches() {
+        return this.gitRepoApplication.findBranches(this.userContextHolder.getSession().getGitRepoId()).stream()
                 .map(branch -> GitRepoBranchVo.builder()
                         .branchName(branch.getName())
                         .isDefault(branch.getIsDefault())
@@ -49,10 +52,14 @@ public class GitRepoController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/{id}/flows")
+    @GetMapping("/flows")
     @Operation(summary = "查询流水线列表", description = "查询流水线列表")
-    public List<ProjectVo> findFlows(@PathVariable("id") String id, GitRepoFlowViewingDto dto) {
-        var gitRepo = this.gitRepoApplication.findById(id);
+    public List<ProjectVo> findFlows(GitRepoFlowViewingDto dto) {
+        var gitRepo = this.gitRepoApplication.findById(this.userContextHolder.getSession().getGitRepoId());
+        if (this.gitRepoApplication.findBranches(gitRepo.getId()).stream()
+                .noneMatch(branch -> branch.getName().equals(dto.getBranch()))) {
+            throw new RuntimeException("请选择正确的仓库分支");
+        }
         return this.gitRepoApplication.findFlows(gitRepo, dto.getName(), dto.getStatus(), dto.getBranch(), dto.getSortTypeName())
                 .stream()
                 .map(project -> {
