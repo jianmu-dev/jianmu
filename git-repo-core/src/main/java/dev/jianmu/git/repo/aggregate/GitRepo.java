@@ -1,6 +1,8 @@
 package dev.jianmu.git.repo.aggregate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author laoji
@@ -20,12 +22,19 @@ public class GitRepo {
     /**
      * 所有分支
      */
-    private List<Branch> branches;
+    private List<Branch> branches = List.of();
 
     /**
      * 所有流水线
      */
-    private List<Flow> flows;
+    private List<Flow> flows = new ArrayList<>();
+
+    public GitRepo() {
+    }
+
+    public GitRepo(String id) {
+        this.id = id;
+    }
 
     /**
      * 同步分支
@@ -33,7 +42,49 @@ public class GitRepo {
      * @param branches
      */
     public void syncBranches(List<Branch> branches) {
-        // TODO 同步git平台仓库的分支
-        // TODO 同步流水线中的分支数据，若流水线的分支不存在时，把该流水线挪到默认分支中
+        this.branches = branches;
+        var defaultBranch = this.findDefaultBranch();
+        this.flows.forEach(flow -> {
+            if (this.branches.stream().anyMatch(branch -> flow.getBranchName().equals(branch.getName()))) {
+                return;
+            }
+            flow.setBranchName(defaultBranch.getName());
+        });
+    }
+
+    private Branch findDefaultBranch() {
+        return this.branches.stream()
+                .filter(Branch::getIsDefault)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("未找到默认分支：" + this.id));
+    }
+
+    public void addFlow(Flow flow) {
+        this.flows.add(flow);
+    }
+
+    public void removeFlow(String projectId) {
+        this.flows.stream()
+                .filter(flow -> flow.getProjectId().equals(projectId))
+                .findFirst()
+                .ifPresent(this.flows::remove);
+    }
+
+    public Optional<Flow> findFlowByProjectId(String projectId) {
+        return this.flows.stream()
+                .filter(flow -> flow.getProjectId().equals(projectId))
+                .findFirst();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public List<Branch> getBranches() {
+        return branches;
+    }
+
+    public List<Flow> getFlows() {
+        return flows;
     }
 }

@@ -17,14 +17,14 @@ import java.util.Set;
 */
 public interface InstanceParameterMapper {
     @Insert("<script>" +
-            "insert into task_instance_parameter(instance_id, serial_no, def_key, async_task_ref, business_id, trigger_id, ref, `type`, workflow_type, parameter_id, required) values" +
+            "insert into jm_task_instance_parameter(instance_id, serial_no, def_key, async_task_ref, business_id, trigger_id, ref, `type`, workflow_type, parameter_id, required) values" +
             "<foreach collection='instanceParameters' item='i' index='key' separator=','>" +
             "(#{i.instanceId}, #{i.serialNo}, #{i.defKey}, #{i.asyncTaskRef}, #{i.businessId}, #{i.triggerId}, #{i.ref}, #{i.type}, #{i.workflowType}, #{i.parameterId}, #{i.required})" +
             "</foreach>" +
             " </script>")
     void addAll(@Param("instanceParameters") Set<InstanceParameter> instanceParameters);
 
-    @Select("select * from task_instance_parameter where instance_id = #{instanceId}")
+    @Select("select * from jm_task_instance_parameter where instance_id = #{instanceId}")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
@@ -35,7 +35,7 @@ public interface InstanceParameterMapper {
     @Result(column = "workflow_type", property = "workflowType")
     List<InstanceParameter> findByInstanceId(@Param("instanceId") String instanceId);
 
-    @Select("select * from task_instance_parameter where instance_id = #{instanceId} and type = #{type}")
+    @Select("select * from jm_task_instance_parameter where instance_id = #{instanceId} and type = #{type}")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
@@ -46,9 +46,9 @@ public interface InstanceParameterMapper {
     @Result(column = "workflow_type", property = "workflowType")
     List<InstanceParameter> findByInstanceIdAndType(@Param("instanceId") String instanceId, @Param("type") InstanceParameter.Type type);
 
-    @Select("SELECT T.* FROM task_instance_parameter as T," +
+    @Select("SELECT T.* FROM jm_task_instance_parameter as T," +
             "(" +
-            "SELECT max(serial_no) as max_no, async_task_ref, ref FROM task_instance_parameter " +
+            "SELECT max(serial_no) as max_no, async_task_ref, ref FROM jm_task_instance_parameter " +
             "    WHERE trigger_id=#{triggerId} " +
             "    AND type='OUTPUT'" +
             "    GROUP BY  async_task_ref, ref" +

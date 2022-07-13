@@ -54,4 +54,6 @@ public class ProjectDetailVo {
     private String projectGroupId;
     // 项目组名称
     private String projectGroupName;
+    // 分支
+    private String branch;
 }
