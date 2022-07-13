@@ -1,24 +1,28 @@
 <template>
-  <div class="page">
-    <div class="logo">
-      <router-link :to="{ name: 'index' }">
-        <div class="icon"></div>
-      </router-link>
-      <!--      <div class="separator"></div>-->
-      <!--      <div class="desc">-->
-      <!--        <div class="title">自动化集成平台</div>-->
-      <!--        <div class="subtitle">Automation Integration Platform</div>-->
-      <!--      </div>-->
+  <div class="page" v-loading="isAuthorize">
+    <div v-show="!isAuthorize">
+      <div class="logo">
+        <router-link :to="{ name: 'index' }">
+          <div class="icon"></div>
+        </router-link>
+        <!--      <div class="separator"></div>-->
+        <!--      <div class="desc">-->
+        <!--        <div class="title">自动化集成平台</div>-->
+        <!--        <div class="subtitle">Automation Integration Platform</div>-->
+        <!--      </div>-->
+      </div>
+      <login :code="code" :error_description="error_description" :gitRepo="gitRepo" :gitRepoOwner="gitRepoOwner"/>
+      <bottom-nav/>
     </div>
-    <login :code="code" :error_description="error_description" :gitRepo="gitRepo" :gitRepoOwner="gitRepoOwner"/>
-    <bottom-nav/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
 import Login from '@/views/common/login.vue';
+import { useRoute } from 'vue-router';
+import { AUTHORIZE_INDEX } from '@/router/path-def';
 
 export default defineComponent({
   components: { BottomNav, Login },
@@ -27,6 +31,13 @@ export default defineComponent({
     gitRepoOwner: String,
     code: String,
     error_description: String,
+  },
+  setup() {
+    const route = useRoute();
+    const isAuthorize = ref<boolean>(route.path === AUTHORIZE_INDEX);
+    return {
+      isAuthorize,
+    };
   },
 });
 </script>

@@ -16,4 +16,24 @@ public class Flow {
      * 分支名
      */
     private String branchName;
+
+    public Flow() {
+    }
+
+    public Flow(String projectId, String branchName) {
+        this.projectId = projectId;
+        this.branchName = branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
 }

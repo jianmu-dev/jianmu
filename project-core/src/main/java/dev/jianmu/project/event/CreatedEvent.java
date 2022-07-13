@@ -8,12 +8,18 @@ package dev.jianmu.project.event;
 */
 public class CreatedEvent {
     private final String projectId;
+    private final String branch;
 
-    public CreatedEvent(String projectId) {
+    public CreatedEvent(String projectId, String branch) {
         this.projectId = projectId;
+        this.branch = branch;
     }
 
     public String getProjectId() {
         return projectId;
+    }
+
+    public String getBranch() {
+        return branch;
     }
 }
