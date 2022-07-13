@@ -29,7 +29,8 @@ public class UserContextHolder {
     public JwtSession getSession() {
         String jwt = (((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes()))
                 .getRequest())
-                .getHeader("Authorization");
+                .getHeader("Authorization")
+                .substring(7);
         String userJson = Jwts.parser().setSigningKey(this.jwtProperties.getJwtSecret()).parseClaimsJws(jwt).getBody().getSubject();
         try {
             return mapper.readValue(userJson, JwtSession.class);
