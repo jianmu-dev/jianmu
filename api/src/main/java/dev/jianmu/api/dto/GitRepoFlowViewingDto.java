@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "查询Git仓库流水线Dto")
 public class GitRepoFlowViewingDto {
     private String name;
-    private ProcessStatus status;
+    private StatusType status;
     private String branch;
     private ProjectViewingDto.SortType sortType;
 
@@ -30,8 +30,30 @@ public class GitRepoFlowViewingDto {
         return this.sortType.name();
     }
 
+    public ProcessStatus getStatus() {
+        if (status == null) {
+            return null;
+        }
+        switch (status) {
+            case FAILED:
+                return ProcessStatus.TERMINATED;
+            case SUCCEEDED:
+                return ProcessStatus.FINISHED;
+            default:
+                return ProcessStatus.valueOf(status.name());
+        }
+    }
+
     private enum SortType {
         LAST_MODIFIED_TIME,
         LAST_EXECUTION_TIME
+    }
+
+    private enum StatusType{
+        INIT,
+        RUNNING,
+        SUSPENDED,
+        FAILED,
+        SUCCEEDED
     }
 }
