@@ -13,20 +13,20 @@ import java.util.Optional;
  * @create 2021-04-20 13:32
 */
 public interface NamespaceMapper {
-    @Insert("insert into secret_namespace(name, description, created_time, last_modified_time) " +
+    @Insert("insert into jm_secret_namespace(name, description, created_time, last_modified_time) " +
             "values(#{name}, #{description}, #{createdTime}, #{lastModifiedTime})")
     void add(Namespace namespace);
 
-    @Delete("delete from secret_namespace where name = #{name}")
+    @Delete("delete from jm_secret_namespace where name = #{name}")
     void delete(String name);
 
-    @Select("select * from secret_namespace where name = #{name}")
+    @Select("select * from jm_secret_namespace where name = #{name}")
     Optional<Namespace> findByName(String name);
 
-    @Update("update secret_namespace set last_modified_time = #{lastModifiedTime} where name = #{name}")
+    @Update("update jm_secret_namespace set last_modified_time = #{lastModifiedTime} where name = #{name}")
     void updateLastModifiedTime(Namespace namespace);
 
-    @Select("SELECT * FROM `secret_namespace`")
+    @Select("SELECT * FROM `jm_secret_namespace`")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Namespace> findAll();

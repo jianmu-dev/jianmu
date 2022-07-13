@@ -15,7 +15,7 @@ import java.util.Set;
 */
 public interface ParameterMapper {
     @Insert("<script>" +
-            "insert into parameter(id, type, value) values" +
+            "insert into jm_parameter(id, type, value) values" +
             "<foreach collection='parameters' item='i' index='index' separator=','>" +
             "(#{i.id}, #{i.type}, convert(#{i.value}, BINARY))" +
             "</foreach>" +
@@ -23,7 +23,7 @@ public interface ParameterMapper {
     void addAll(@Param("parameters") List<Parameter> parameters);
 
     @Select("<script>" +
-            "SELECT * FROM `parameter` WHERE `id` IN" +
+            "SELECT * FROM `jm_parameter` WHERE `id` IN" +
             "<foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
             "</foreach>" +
             "</script>")

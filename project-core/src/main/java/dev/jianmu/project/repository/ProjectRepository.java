@@ -2,7 +2,9 @@ package dev.jianmu.project.repository;
 
 
 import dev.jianmu.project.aggregate.Project;
+import dev.jianmu.project.query.ProjectVo;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,4 +25,6 @@ public interface ProjectRepository {
     Optional<Project> findByName(String name);
 
     Optional<Project> findByWorkflowRef(String workflowRef);
+
+    List<ProjectVo> findByIdIn(List<String> ids, String workflowName, String sortType, String status);
 }

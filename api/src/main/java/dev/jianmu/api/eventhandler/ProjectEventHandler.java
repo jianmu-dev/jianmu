@@ -1,7 +1,8 @@
 package dev.jianmu.api.eventhandler;
 
+import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.application.command.WorkflowStartCmd;
-import dev.jianmu.application.service.ProjectApplication;
+import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
@@ -11,7 +12,6 @@ import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -31,20 +31,23 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ProjectEventHandler {
     private static final Map<String, Lock> PROJECT_LOCK_MAP = new ConcurrentHashMap<>();
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
-    private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
     private final ProjectGroupApplication projectGroupApplication;
+    private final GitRepoApplication gitRepoApplication;
+    private final UserContextHolder userContextHolder;
 
     public ProjectEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
-            ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
-            ProjectGroupApplication projectGroupApplication
+            ProjectGroupApplication projectGroupApplication,
+            GitRepoApplication gitRepoApplication,
+            UserContextHolder userContextHolder
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
-        this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.projectGroupApplication = projectGroupApplication;
+        this.gitRepoApplication = gitRepoApplication;
+        this.userContextHolder = userContextHolder;
     }
 
     @EventListener
@@ -68,20 +71,18 @@ public class ProjectEventHandler {
     }
 
     @EventListener
-    // TODO 不要直接用基本类型传递事件
-    public void handleGitRepoSyncEvent(String projectId) {
-        this.projectApplication.syncProject(projectId);
-    }
-
-    @EventListener
     // 项目创建事件
     public void handleProjectCreate(CreatedEvent createdEvent) {
+        // 添加gitRepo中的flow
+        this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), this.userContextHolder.getSession().getGitRepoId());
     }
 
     @EventListener
     public void handleProjectDelete(DeletedEvent deletedEvent) {
         // 项目删除事件, 删除相关的Trigger
         this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId());
+        // 移除gitRepo中flow
+        this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), this.userContextHolder.getSession().getGitRepoId());
     }
 
     @TransactionalEventListener
