@@ -59,6 +59,12 @@
             <artifactId>mapstruct</artifactId>
             <version>${org.mapstruct.version}</version>
         </dependency>
+        <!--oauth2依赖-->
+        <dependency>
+            <groupId>dev.jianmu</groupId>
+            <artifactId>oauth2</artifactId>
+            <version>2.5.1</version>
+        </dependency>
     </dependencies>
 
     <build>

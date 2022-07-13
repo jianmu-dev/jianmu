@@ -1,9 +1,8 @@
 package dev.jianmu.api.jwt;
 
-import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
-import dev.jianmu.user.aggregate.User;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
