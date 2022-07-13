@@ -5,20 +5,19 @@ import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.Oauth2LoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
-import dev.jianmu.api.oauth2_api.OAuth2Api;
-import dev.jianmu.api.oauth2_api.config.OAuth2Properties;
-import dev.jianmu.api.oauth2_api.enumeration.ThirdPartyTypeEnum;
-import dev.jianmu.api.oauth2_api.exception.NoPermissionException;
-import dev.jianmu.api.oauth2_api.impl.OAuth2ApiProxy;
-import dev.jianmu.api.oauth2_api.vo.IBranchesVo;
-import dev.jianmu.api.oauth2_api.vo.IRepoMemberVo;
-import dev.jianmu.api.oauth2_api.vo.IRepoVo;
-import dev.jianmu.api.oauth2_api.vo.IUserInfoVo;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.*;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
+import dev.jianmu.oauth2.api.OAuth2Api;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.oauth2.api.exception.NoPermissionException;
+import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
+import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
+import dev.jianmu.oauth2.api.vo.IRepoVo;
+import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.user.aggregate.User;
 import dev.jianmu.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,19 +111,19 @@ public class OAuth2Controller {
             );
         }
 
-        Optional<User> userOptional = this.userRepository.findById(userInfoVo.getId());
-        User user;
+        String userId = userInfoVo.getId();
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        User user = User.Builder.aReference()
+                .data(userInfoVo.getData())
+                .id(userId)
+                .avatarUrl(userInfoVo.getAvatarUrl())
+                .username(userInfoVo.getUsername())
+                .nickname(userInfoVo.getNickname())
+                .build();
         if (userOptional.isEmpty()) {
-            user = User.Builder.aReference()
-                    .data(userInfoVo.getData())
-                    .id(userInfoVo.getId())
-                    .avatarUrl(userInfoVo.getAvatarUrl())
-                    .username(userInfoVo.getUsername())
-                    .nickname(userInfoVo.getNickname())
-                    .build();
             this.userRepository.add(user);
         } else {
-            user = userOptional.get();
+            this.userRepository.update(user);
         }
 
         Authentication authentication = this.authenticationManager.authenticate(
@@ -166,6 +164,7 @@ public class OAuth2Controller {
     public ThirdPartyTypeVo getThirdPartyType() {
         return ThirdPartyTypeVo.builder()
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                .entry(this.oAuth2Properties.isEntry())
                 .build();
     }
 

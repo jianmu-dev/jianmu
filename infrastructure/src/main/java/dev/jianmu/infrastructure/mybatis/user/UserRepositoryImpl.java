@@ -34,6 +34,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void update(User user) {
+        this.userMapper.update(user);
+    }
+
+    @Override
     public Optional<User> findByUsername(String username) {
         if (!username.equals(this.jwtProperties.getAdminUser())) {
             return Optional.empty();

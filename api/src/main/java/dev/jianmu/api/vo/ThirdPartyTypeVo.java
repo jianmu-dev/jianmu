@@ -20,4 +20,10 @@ public class ThirdPartyTypeVo {
      */
     @Schema(required = true)
     private String thirdPartyType;
+
+    /**
+     * gitRepoEntry
+     */
+    @Schema(required = true)
+    private boolean entry;
 }

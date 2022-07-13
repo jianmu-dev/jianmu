@@ -4,6 +4,7 @@ import dev.jianmu.user.aggregate.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.Optional;
 
@@ -25,4 +26,7 @@ public interface UserMapper {
     @Insert("insert into user(id, avatar_url, nickname, data, username) " +
             "values(#{id}, #{avatarUrl}, #{nickname}, #{data}, #{username})")
     void add(User user);
+
+    @Update("update user set avatar_url = #{avatarUrl}, nickname = #{nickname}, data = #{data}, username = #{username} where id = #{id}")
+    void update(User user);
 }
