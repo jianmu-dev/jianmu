@@ -56,7 +56,7 @@ public class GitRepoController {
     @Operation(summary = "查询流水线列表", description = "查询流水线列表")
     public List<ProjectVo> findFlows(GitRepoFlowViewingDto dto) {
         var gitRepo = this.gitRepoApplication.findById(this.userContextHolder.getSession().getGitRepoId());
-        if (this.gitRepoApplication.findBranches(gitRepo.getId()).stream()
+        if (dto.getBranch() != null && this.gitRepoApplication.findBranches(gitRepo.getId()).stream()
                 .noneMatch(branch -> branch.getName().equals(dto.getBranch()))) {
             throw new RuntimeException("请选择正确的仓库分支");
         }
