@@ -9,6 +9,7 @@ import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.*;
+import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
@@ -52,13 +53,15 @@ public class OAuth2Controller {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final OAuth2Properties oAuth2Properties;
+    private final GitRepoApplication gitRepoApplication;
 
-    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, GitRepoApplication gitRepoApplication) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
         this.jwtProperties = jwtProperties;
         this.oAuth2Properties = oAuth2Properties;
+        this.gitRepoApplication = gitRepoApplication;
     }
 
     /**
@@ -141,6 +144,10 @@ public class OAuth2Controller {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = this.jwtProvider.generateJwtToken(authentication);
+
+        // 同步仓库
+        var branchNames = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
+        this.gitRepoApplication.syncBranches(repo.getId(), repo.getDefaultBranch(), branchNames);
 
         return ResponseEntity.ok(JwtResponse.builder()
                 .type("Bearer")
