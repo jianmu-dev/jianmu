@@ -37,6 +37,16 @@ public class Oauth2LoggingDto {
     private String redirectUri;
 
     /**
+     * 仓库名
+     */
+    private String gitRepo;
+
+    /**
+     * 仓库所有者
+     */
+    private String gitRepoOwner;
+
+    /**
      * 转换type为枚举类型
      *
      * @return

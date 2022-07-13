@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
 import _store from '@/store';
-import { LOGIN_INDEX, PLATFORM_INDEX } from '@/router/path-def';
+import { AUTHORIZE_INDEX, LOGIN_INDEX, PLATFORM_INDEX } from '@/router/path-def';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
 import { AppContext } from 'vue';
@@ -41,11 +41,28 @@ export default (appContext: AppContext) => {
     history: createWebHistory(),
     routes: [
       {
+        // 静默登录
+        name: 'authorize',
+        path: AUTHORIZE_INDEX,
+        component: () => import('@/views/login/page.vue'),
+        props: ({ query: { gitRepo, gitRepoOwner, code, error_description } }: RouteLocationNormalizedLoaded) => ({
+          gitRepo,
+          gitRepoOwner,
+          code,
+          error_description,
+        }),
+      },
+      {
         // 登录
         name: 'login',
         path: LOGIN_INDEX,
         component: () => import('@/views/login/page.vue'),
-        props: ({ query: { redirectUrl } }: RouteLocationNormalizedLoaded) => ({ redirectUrl }),
+        props: ({ query: { gitRepo, gitRepoOwner, code, error_description } }: RouteLocationNormalizedLoaded) => ({
+          gitRepo,
+          gitRepoOwner,
+          code,
+          error_description,
+        }),
       },
       // platform模块
       loadModuleRoute(PLATFORM_INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),

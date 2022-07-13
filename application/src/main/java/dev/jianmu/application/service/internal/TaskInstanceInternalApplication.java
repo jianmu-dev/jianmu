@@ -214,16 +214,10 @@ public class TaskInstanceInternalApplication {
         Map<InstanceParameter, Parameter<?>> outputParameters = new HashMap<>();
         if (nodeVersion.getOutputParameters() != null &&
                 !nodeVersion.getOutputParameters().isEmpty()) {
-            if (nodeVersion.getResultFile() != null) {
-                outputParameters = this.handleOutputParameter(
-                        resultFile, nodeVersion, workflow.getType().name(), taskInstance
-                );
-                if (outputParameters.isEmpty()) {
-                    this.executeFailed(taskInstanceId);
-                    return;
-                }
-            } else {
-                log.warn("输出参数存在，但是未定义ResultFile");
+            outputParameters = this.handleOutputParameter(
+                    resultFile, nodeVersion, workflow.getType().name(), taskInstance
+            );
+            if (outputParameters.isEmpty()) {
                 this.executeFailed(taskInstanceId);
                 return;
             }

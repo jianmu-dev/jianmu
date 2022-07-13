@@ -13,7 +13,11 @@ public abstract class BaseBusinessException extends RuntimeException {
     private ErrorCodeEnum errorCode;
 
     protected BaseBusinessException(ErrorCodeEnum errorCode) {
-        super(errorCode.getMessage());
+        this(errorCode, null);
+    }
+
+    protected BaseBusinessException(ErrorCodeEnum errorCode, String msg) {
+        super(msg == null ? errorCode.getMessage() : msg);
         this.errorCode = errorCode;
     }
 

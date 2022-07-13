@@ -1,7 +1,7 @@
 <template>
   <div class="dialog">
     <jm-dialog :model-value="show" :width="350" top="calc((100vh - 344px) / 2)">
-      <login @logged="logged">
+      <login @logined="logined" type="dialog" @cancel="show=false">
         <template #tip>
           未登录状态下，操作内容将会丢失
         </template>
@@ -22,7 +22,7 @@ export default defineComponent({
     const show = ref<boolean>(true);
     return {
       show,
-      logged() {
+      logined() {
         show.value = false;
       },
     };
@@ -48,6 +48,10 @@ export default defineComponent({
 
     .el-dialog__body {
       padding: 0 30px 30px;
+
+      .login {
+        min-height: 284px;
+      }
     }
   }
 }

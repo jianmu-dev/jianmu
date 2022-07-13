@@ -3,6 +3,8 @@ import { IRootState, IScrollOffset } from '@/model';
 import { IVersionVo } from '@/api/dto/common';
 import { fetchVersion } from '@/api/view-no-auth';
 import { RouteLocationNormalized } from 'vue-router';
+import { IThirdPartyTypeVo } from '@/api/dto/session';
+import { fetchThirdPartyType } from '@/api/session';
 
 const store = createStore<IRootState>({
   // 开发环境开启严格模式，在严格模式下，无论何时发生了状态变更且不是由 mutation 函数引起的，将会抛出错误
@@ -10,6 +12,7 @@ const store = createStore<IRootState>({
   // 根状态
   state: {
     versions: [],
+    thirdPartyType: '',
     workerTypes: [],
     parameterTypes: [],
     fromRoute: {
@@ -23,7 +26,9 @@ const store = createStore<IRootState>({
     mutateVersions(state: IRootState, payload: IVersionVo[]): void {
       state.versions = payload;
     },
-
+    mutateThirdPartyType(state: IRootState, payload: IThirdPartyTypeVo): void {
+      state.thirdPartyType = payload.thirdPartyType;
+    },
     mutateWorkerTypes(state: IRootState, payload: string[]): void {
       state.workerTypes = payload;
     },
@@ -67,6 +72,13 @@ const store = createStore<IRootState>({
         } catch (err) {
           console.debug('fetch version failed', err.message);
         }
+      }
+
+      // 初始化平台登录方式
+      try {
+        commit('mutateThirdPartyType', await fetchThirdPartyType());
+      } catch (err) {
+        console.log('fetch third party type failed', err.message);
       }
 
       // if (state.workerTypes.length === 0) {

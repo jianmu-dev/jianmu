@@ -50,7 +50,6 @@ export default defineComponent({
         },
         props.threshold,
       );
-      await textViewer.reload();
     };
     onMounted(init);
     onUpdated(async () => {

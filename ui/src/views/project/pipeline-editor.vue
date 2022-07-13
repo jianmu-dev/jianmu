@@ -6,17 +6,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, inject, nextTick, onMounted, ref } from 'vue';
+import { defineComponent, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
 import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import yaml from 'yaml';
 import { namespace } from '@/store/modules/session';
-import { useStore } from 'vuex';
+import { createNamespacedHelpers, useStore } from 'vuex';
 import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
+import { ISessionVo } from '@/api/dto/session';
 
+const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
   props: {
     id: {
@@ -44,6 +46,15 @@ export default defineComponent({
       },
       data: '',
     });
+    const defaultSession = ref<ISessionVo>();
+    const refreshState = (e: any) => {
+      if (e.key !== 'session') {
+        return;
+      }
+      defaultSession.value = JSON.parse(e.newValue)['_default'].session;
+      // 将新tab中的session值，保存在vuex中
+      proxy.mutateSession(defaultSession.value);
+    };
     // 验证用户是否登录
     const authLogin = () => {
       if (sessionState.session) {
@@ -52,6 +63,7 @@ export default defineComponent({
       dynamicRender(LoginVerify, appContext);
     };
     onMounted(async () => {
+      window.addEventListener('storage', refreshState);
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
         workflow.value = JSON.parse(payload as string);
@@ -87,6 +99,9 @@ export default defineComponent({
         authLogin();
       }
     });
+    onBeforeUnmount(() => {
+      window.removeEventListener('storage', refreshState);
+    });
     const close = async () => {
       await router.push({ name: 'index' });
     };
@@ -117,6 +132,9 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         }
       },
+      ...mapMutations({
+        mutateSession: 'oauthMutate',
+      }),
     };
   },
 });
