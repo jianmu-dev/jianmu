@@ -1,4 +1,4 @@
-CREATE TABLE `jianmu_project`
+CREATE TABLE `jm_project`
 (
     `id`                 varchar(45)  NOT NULL COMMENT 'ID',
     `dsl_source`         varchar(45) DEFAULT NULL COMMENT 'DSL来源',
@@ -24,7 +24,7 @@ CREATE TABLE `jianmu_project`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='DSL表';
 
-CREATE TABLE `jianmu_trigger`
+CREATE TABLE `jm_trigger`
 (
     `id`         varchar(45) NOT NULL COMMENT 'ID',
     `project_id` varchar(45) NOT NULL COMMENT '项目ID',
@@ -36,7 +36,7 @@ CREATE TABLE `jianmu_trigger`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='建木触发器表';
 
-CREATE TABLE `jianmu_web_request`
+CREATE TABLE `jm_web_request`
 (
     `id`               varchar(45) NOT NULL COMMENT 'ID',
     `project_id`       varchar(45) DEFAULT NULL COMMENT '项目ID',
@@ -54,7 +54,7 @@ CREATE TABLE `jianmu_web_request`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='Web请求表';
 
-CREATE TABLE `jianmu_trigger_event`
+CREATE TABLE `jm_trigger_event`
 (
     `id`             varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '事件ID',
     `project_id`     varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '项目ID',
@@ -68,7 +68,7 @@ CREATE TABLE `jianmu_trigger_event`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='触发器事件表';
 
-CREATE TABLE `jianmu_trigger_event_parameter`
+CREATE TABLE `jm_trigger_event_parameter`
 (
     `trigger_event_id` varchar(45) NOT NULL COMMENT '触发器事件ID',
     `name`             varchar(45) NOT NULL COMMENT '参数名',
@@ -79,7 +79,7 @@ CREATE TABLE `jianmu_trigger_event_parameter`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='事件参数表';
 
-CREATE TABLE `workflow`
+CREATE TABLE `jm_workflow`
 (
     `ref_version`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流程定义标识，主键',
     `ref`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '唯一引用名称',
@@ -96,7 +96,7 @@ CREATE TABLE `workflow`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='流程定义表';
 
-CREATE TABLE `task_instance`
+CREATE TABLE `jm_task_instance`
 (
     `id`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '主键',
     `serial_no`        int                                                          DEFAULT NULL COMMENT '执行序号',
@@ -117,7 +117,7 @@ CREATE TABLE `task_instance`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='任务实例表';
 
-CREATE TABLE `task_instance_parameter`
+CREATE TABLE `jm_task_instance_parameter`
 (
     `instance_id`    varchar(45)  NOT NULL COMMENT '任务实例ID',
     `serial_no`      int          NOT NULL COMMENT '执行序号',
@@ -134,7 +134,7 @@ CREATE TABLE `task_instance_parameter`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务实例参数表';
 
-CREATE TABLE `workflow_instance`
+CREATE TABLE `jm_workflow_instance`
 (
     `id`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '唯一ID主键',
     `serial_no`        int                                                           NOT NULL COMMENT '执行顺序',
@@ -157,7 +157,7 @@ CREATE TABLE `workflow_instance`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='流程实例表';
 
-CREATE TABLE `parameter`
+CREATE TABLE `jm_parameter`
 (
     `id`    varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数ID',
     `type`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数类型',
@@ -167,7 +167,7 @@ CREATE TABLE `parameter`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='参数存储表';
 
-CREATE TABLE `worker`
+CREATE TABLE `jm_worker`
 (
     `id`     varchar(45) NOT NULL COMMENT 'ID',
     `name`   varchar(45) DEFAULT NULL COMMENT '名称',
@@ -183,7 +183,7 @@ CREATE TABLE `worker`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='任务执行器';
 
-CREATE TABLE `secret_namespace`
+CREATE TABLE `jm_secret_namespace`
 (
     `name`               varchar(100) NOT NULL COMMENT '名称',
     `description`        varchar(255) DEFAULT NULL COMMENT '描述',
@@ -194,7 +194,7 @@ CREATE TABLE `secret_namespace`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥命名空间表';
 
-CREATE TABLE `secret_kv_pair`
+CREATE TABLE `jm_secret_kv_pair`
 (
     `namespace_name` varchar(100) NOT NULL COMMENT '命名空间名称',
     `kv_key`         varchar(45)  NOT NULL COMMENT '参数key',
@@ -203,7 +203,7 @@ CREATE TABLE `secret_kv_pair`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥键值对表';
 
-CREATE TABLE `hub_node_definition`
+CREATE TABLE `jm_hub_node_definition`
 (
     `id`            varchar(45) NOT NULL COMMENT 'ID',
     `icon`          varchar(255) DEFAULT NULL COMMENT '图标地址',
@@ -224,7 +224,7 @@ CREATE TABLE `hub_node_definition`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='节点定义表';
 
-CREATE TABLE `hub_node_definition_version`
+CREATE TABLE `jm_hub_node_definition_version`
 (
     `id`                varchar(45) NOT NULL COMMENT 'ID',
     `owner_ref`         varchar(45) DEFAULT NULL COMMENT '所有者唯一引用',
@@ -243,7 +243,7 @@ CREATE TABLE `hub_node_definition_version`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='节点定义版本表';
 
-CREATE TABLE `shell_node_def`
+CREATE TABLE `jm_shell_node_def`
 (
     `id`         varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
     `shell_node` text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '序列化对象',
@@ -252,7 +252,7 @@ CREATE TABLE `shell_node_def`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='Shell节点定义表';
 
-CREATE TABLE `git_repo`
+CREATE TABLE `jm_git_repo`
 (
     `id`          varchar(45) NOT NULL COMMENT 'ID',
     `branches`    blob        NOT NULL COMMENT '分支',
@@ -262,7 +262,7 @@ CREATE TABLE `git_repo`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='git仓库';
 
-CREATE TABLE `project_group`
+CREATE TABLE `jm_project_group`
 (
     `id`                 varchar(45) NOT NULL COMMENT 'ID',
     `name`               varchar(45) NOT NULL COMMENT '名称',
@@ -279,10 +279,10 @@ CREATE TABLE `project_group`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目组表';
 
-INSERT INTO `project_group`(`id`, `name`, `description`, `sort`, `is_show`, `project_count`, `created_time`, `last_modified_time`)
+INSERT INTO `jm_project_group`(`id`, `name`, `description`, `sort`, `is_show`, `project_count`, `created_time`, `last_modified_time`)
 VALUES ('1', '默认分组', '默认分组', 0, 1, 0, now(), now());
 
-CREATE TABLE `project_link_group`
+CREATE TABLE `jm_project_link_group`
 (
     `id`               varchar(45) NOT NULL COMMENT 'ID',
     `project_id`       varchar(45) NOT NULL COMMENT '项目ID',
@@ -296,7 +296,7 @@ CREATE TABLE `project_link_group`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目-项目组中间表';
 
-CREATE TABLE IF NOT EXISTS `async_task_instance`
+CREATE TABLE IF NOT EXISTS `jm_async_task_instance`
 (
     `id`                   varchar(45)  NOT NULL,
     `trigger_id`           varchar(45)  NOT NULL COMMENT 'Trigger ID',
@@ -319,7 +319,7 @@ CREATE TABLE IF NOT EXISTS `async_task_instance`
     UNIQUE INDEX trigger_id_and_task_ref(`trigger_id`, `async_task_ref`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='异步任务实例表';
 
-CREATE TABLE `user`
+CREATE TABLE `jm_user`
 (
     `id`       varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
     `avatar_url`  varchar(1024) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '头像地址',

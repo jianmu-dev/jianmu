@@ -16,7 +16,7 @@ import java.util.Optional;
  * @create 2022/7/5 9:55 上午
  */
 public interface GitRepoMapper {
-    @Insert("INSERT INTO git_repo(id, branches, flows) values(#{id}, " +
+    @Insert("INSERT INTO jm_git_repo(id, branches, flows) values(#{id}, " +
             "#{branches, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.BranchListTypeHandler}, " +
             "#{flows, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.FlowListTypeHandler}) " +
             "ON DUPLICATE KEY UPDATE " +
@@ -24,7 +24,7 @@ public interface GitRepoMapper {
             "flows = #{flows, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.FlowListTypeHandler}")
     void saveOrUpdate(GitRepo gitRepo);
 
-    @Select("SELECT * FROM git_repo WHERE id = #{id}")
+    @Select("SELECT * FROM jm_git_repo WHERE id = #{id}")
     @Result(column = "branches", property = "branches", typeHandler = BranchListTypeHandler.class)
     @Result(column = "flows", property = "flows", typeHandler = FlowListTypeHandler.class)
     Optional<GitRepo> findById(String id);

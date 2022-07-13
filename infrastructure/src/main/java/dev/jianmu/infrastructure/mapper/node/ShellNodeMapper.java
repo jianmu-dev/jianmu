@@ -15,10 +15,10 @@ import java.util.Optional;
  */
 public interface ShellNodeMapper {
 
-    @Insert("insert into shell_node_def(id, shell_node) values(#{id}, #{shellNode})")
+    @Insert("insert into jm_shell_node_def(id, shell_node) values(#{id}, #{shellNode})")
     void add(@Param("id") String id, @Param("shellNode") String shellNode);
 
-    @Select("select shell_node from shell_node_def where id = #{id}")
+    @Select("select shell_node from jm_shell_node_def where id = #{id}")
     @Result(column = "shell_node", property = "shellNode")
     Optional<String> findById(String id);
 }

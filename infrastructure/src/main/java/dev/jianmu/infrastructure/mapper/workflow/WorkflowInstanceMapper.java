@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface WorkflowInstanceMapper {
 
     @Select("<script>" +
-            "SELECT * FROM workflow_instance " +
+            "SELECT * FROM jm_workflow_instance " +
             "<where>" +
             " workflow_ref = #{workflowRef} AND status IN " +
             " <foreach collection='statuses' item='item' open='(' close=')' separator=','> #{item} " +
@@ -38,7 +38,7 @@ public interface WorkflowInstanceMapper {
             @Param("statuses") List<ProcessStatus> statuses
     );
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} and status = #{status} order by serial_no limit 1")
+    @Select("select * from jm_workflow_instance where workflow_ref = #{workflowRef} and status = #{status} order by serial_no limit 1")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -50,7 +50,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findByRefAndStatusAndSerialNoMin(@Param("workflowRef") String workflowRef, @Param("status") ProcessStatus status);
 
-    @Select("select * from workflow_instance where id = #{instanceId}")
+    @Select("select * from jm_workflow_instance where id = #{instanceId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -62,7 +62,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findById(String instanceId);
 
-    @Select("select * from workflow_instance where trigger_id = #{triggerId}")
+    @Select("select * from jm_workflow_instance where trigger_id = #{triggerId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -74,24 +74,24 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
 
-    @Insert("insert into workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
+    @Insert("insert into jm_workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
             "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
             "#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
-    @Update("update workflow_instance " +
+    @Update("update jm_workflow_instance " +
             "set run_mode=#{wk.runMode},status=#{wk.status},start_time=#{wk.startTime}," +
             "suspended_time=#{wk.suspendedTime},end_time=#{wk.endTime},_version= _version+1 " +
             "where id = #{wk.id}")
     void save(@Param("wk") WorkflowInstance workflowInstance);
 
-    @Delete("delete from workflow_instance where workflow_ref=#{workflowRef}")
+    @Delete("delete from jm_workflow_instance where workflow_ref=#{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
-    @Delete("delete from workflow_instance where id=#{id}")
+    @Delete("delete from jm_workflow_instance where id=#{id}")
     void deleteById(String id);
 
-    @Select("SELECT * FROM workflow_instance where workflow_ref=#{workflowRef} and serial_no < ((select max(serial_no) from workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
+    @Select("SELECT * FROM jm_workflow_instance where workflow_ref=#{workflowRef} and serial_no < ((select max(serial_no) from jm_workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -103,7 +103,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByRefOffset(@Param("workflowRef") String workflowRef, @Param("offset") long offset);
 
-    @Select("select * from workflow_instance")
+    @Select("select * from jm_workflow_instance")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -119,7 +119,7 @@ public interface WorkflowInstanceMapper {
     );
 
     @Select("<script>" +
-            "SELECT * FROM `workflow_instance` " +
+            "SELECT * FROM `jm_workflow_instance` " +
             "<where>" +
             "<if test='status != null'>status = #{status}</if>" +
             "<if test='!id.isBlank()'> AND `id` like concat('%', #{id}, '%')</if>" +
@@ -144,7 +144,7 @@ public interface WorkflowInstanceMapper {
             @Param("status") ProcessStatus status
     );
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit #{offset}")
+    @Select("select * from jm_workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit #{offset}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -156,7 +156,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findByWorkflowRef(@Param("workflowRef") String workflowRef, @Param("offset") long offset);
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit 1")
+    @Select("select * from jm_workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc limit 1")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -168,7 +168,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<WorkflowInstance> findByRefAndSerialNoMax(@Param("workflowRef") String workflowRef);
 
-    @Select("select * from workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc")
+    @Select("select * from jm_workflow_instance where workflow_ref = #{workflowRef} order by serial_no desc")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
