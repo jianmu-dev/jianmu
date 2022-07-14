@@ -80,8 +80,7 @@ public class ViewController {
             GitRepoApplication gitRepoApplication,
             UserContextHolder userContextHolder,
             ExternalParameterApplication externalParameterApplication,
-            ExternalParameterLabelApplication externalParameterLabelApplication) {
-            UserContextHolder userContextHolder,
+            ExternalParameterLabelApplication externalParameterLabelApplication,
             AssociationUtil associationUtil
     ) {
         this.projectApplication = projectApplication;
@@ -96,6 +95,8 @@ public class ViewController {
         this.projectGroupApplication = projectGroupApplication;
         this.gitRepoApplication = gitRepoApplication;
         this.userContextHolder = userContextHolder;
+        this.externalParameterApplication = externalParameterApplication;
+        this.externalParameterLabelApplication = externalParameterLabelApplication;
         this.associationUtil = associationUtil;
     }
 

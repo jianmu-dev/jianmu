@@ -1,22 +1,24 @@
 CREATE TABLE `jm_project`
 (
     `id`                   varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_source`           varchar(45)  DEFAULT NULL COMMENT 'DSL来源',
-    `dsl_type`             varchar(45)  DEFAULT NULL COMMENT 'DSL 类型',
-    `trigger_type`         varchar(45)  DEFAULT NULL COMMENT '触发类型',
+    `dsl_source`           varchar(45)           DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_type`             varchar(45)           DEFAULT NULL COMMENT 'DSL 类型',
+    `trigger_type`         varchar(45)           DEFAULT NULL COMMENT '触发类型',
     `git_repo_id`          varchar(150) NOT NULL COMMENT 'Git仓库ID',
     `workflow_name`        varchar(45)  NOT NULL COMMENT '流程定义显示名称',
-    `workflow_description` varchar(255) DEFAULT NULL COMMENT '描述',
+    `workflow_description` varchar(255)          DEFAULT NULL COMMENT '描述',
     `workflow_ref`         varchar(45)  NOT NULL COMMENT '流程定义Ref',
     `workflow_version`     varchar(45)  NOT NULL COMMENT '流程定义版本',
     `steps`                int          NOT NULL COMMENT '步骤数量',
-    `enabled`              tinyint(1)   DEFAULT NULL COMMENT '项目是否可触发',
-    `mutable`              tinyint(1)   DEFAULT NULL COMMENT '项目状态是否可变',
-    `concurrent`           bit          DEFAULT 0 COMMENT '可否并发执行',
+    `enabled`              tinyint(1) DEFAULT NULL COMMENT '项目是否可触发',
+    `mutable`              tinyint(1) DEFAULT NULL COMMENT '项目状态是否可变',
+    `concurrent`           bit                   DEFAULT 0 COMMENT '可否并发执行',
     `dsl_text`             longtext     NOT NULL COMMENT 'DSL内容文本',
-    `created_time`         datetime     DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`     varchar(45)  DEFAULT NULL COMMENT '最后修改人',
+    `created_time`         datetime              DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`     varchar(45)           DEFAULT NULL COMMENT '最后修改人',
     `last_modified_time`   datetime     NOT NULL COMMENT '最后修改时间',
+    `association_id`       varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`     varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
     PRIMARY KEY (`id`),
     UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`),
     UNIQUE KEY `workflow_name_UNIQUE` (`workflow_name`)
@@ -49,7 +51,7 @@ CREATE TABLE `jm_web_request`
     `error_msg`        text COMMENT '错误信息',
     `request_time`     datetime    NOT NULL COMMENT '请求时间',
     PRIMARY KEY (`id`),
-    INDEX request_time (`request_time` desc)
+    INDEX              request_time (`request_time` desc)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='Web请求表';
@@ -185,20 +187,25 @@ CREATE TABLE `jm_worker`
 
 CREATE TABLE `jm_secret_namespace`
 (
+    `association_id`     varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`   varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
     `name`               varchar(100) NOT NULL COMMENT '名称',
-    `description`        varchar(255) DEFAULT NULL COMMENT '描述',
+    `description`        varchar(255)          DEFAULT NULL COMMENT '描述',
     `created_time`       datetime     NOT NULL COMMENT '创建时间',
     `last_modified_time` datetime     NOT NULL COMMENT '修改时间',
-    PRIMARY KEY (`name`)
+    UNIQUE INDEX id_type_name (`association_id`, `association_type`, `name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥命名空间表';
 
 CREATE TABLE `jm_secret_kv_pair`
 (
-    `namespace_name` varchar(100) NOT NULL COMMENT '命名空间名称',
-    `kv_key`         varchar(45)  NOT NULL COMMENT '参数key',
-    `kv_value`       text         NOT NULL COMMENT '参数值'
+    `association_id`   varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type` varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
+    `namespace_name`   varchar(100) NOT NULL COMMENT '命名空间名称',
+    `kv_key`           varchar(45)  NOT NULL COMMENT '参数key',
+    `kv_value`         text         NOT NULL COMMENT '参数值',
+    UNIQUE INDEX id_type_name_key (`association_id`, `association_type`, `namespace_name`, `kv_key`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥键值对表';
@@ -299,28 +306,71 @@ CREATE TABLE `jm_project_link_group`
 
 CREATE TABLE IF NOT EXISTS `jm_async_task_instance`
 (
-    `id`                   varchar(45)  NOT NULL,
-    `trigger_id`           varchar(45)  NOT NULL COMMENT 'Trigger ID',
-    `workflow_ref`         varchar(45)  NOT NULL COMMENT '流程Ref',
-    `workflow_version`     varchar(45)  NOT NULL COMMENT '流程版本',
-    `workflow_instance_id` varchar(45)  NOT NULL COMMENT '流程实例ID',
-    `name`                 varchar(45)  NOT NULL COMMENT '名称',
-    `description`          varchar(255) NOT NULL COMMENT '描述',
-    `status`               varchar(45)  NOT NULL COMMENT '状态',
-    `failure_mode`         varchar(45) DEFAULT 'SUSPEND' COMMENT '错误处理模式',
-    `async_task_ref`       varchar(45)  NOT NULL COMMENT '任务定义Ref',
-    `async_task_type`      varchar(45)  NOT NULL COMMENT '任务定义类型',
-    `serial_no`            integer     DEFAULT 0 COMMENT '完成次数累计',
-    `next_target`          varchar(45) DEFAULT NULL COMMENT '下一个要触发的节点',
-    `activating_time`      datetime     NOT NULL COMMENT '激活时间',
-    `start_time`           datetime    DEFAULT NULL COMMENT '开始时间',
-    `end_time`             datetime    DEFAULT NULL COMMENT '结束时间',
-    `_version`             integer     DEFAULT 0 COMMENT '乐观锁版本字段',
-    PRIMARY KEY (`id`),
-    UNIQUE INDEX trigger_id_and_task_ref (`trigger_id`, `async_task_ref`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='异步任务实例表';
+    `id` varchar
+(
+    45
+) NOT NULL,
+    `trigger_id` varchar
+(
+    45
+) NOT NULL COMMENT 'Trigger ID',
+    `workflow_ref` varchar
+(
+    45
+) NOT NULL COMMENT '流程Ref',
+    `workflow_version` varchar
+(
+    45
+) NOT NULL COMMENT '流程版本',
+    `workflow_instance_id` varchar
+(
+    45
+) NOT NULL COMMENT '流程实例ID',
+    `name` varchar
+(
+    45
+) NOT NULL COMMENT '名称',
+    `description` varchar
+(
+    255
+) NOT NULL COMMENT '描述',
+    `status` varchar
+(
+    45
+) NOT NULL COMMENT '状态',
+    `failure_mode` varchar
+(
+    45
+) DEFAULT 'SUSPEND' COMMENT '错误处理模式',
+    `async_task_ref` varchar
+(
+    45
+) NOT NULL COMMENT '任务定义Ref',
+    `async_task_type` varchar
+(
+    45
+) NOT NULL COMMENT '任务定义类型',
+    `serial_no` integer DEFAULT 0 COMMENT '完成次数累计',
+    `next_target` varchar
+(
+    45
+) DEFAULT NULL COMMENT '下一个要触发的节点',
+    `activating_time` datetime NOT NULL COMMENT '激活时间',
+    `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+    `end_time` datetime DEFAULT NULL COMMENT '结束时间',
+    `_version` integer DEFAULT 0 COMMENT '乐观锁版本字段',
+    PRIMARY KEY
+(
+    `id`
+),
+    UNIQUE INDEX trigger_id_and_task_ref
+(
+    `trigger_id`,
+    `async_task_ref`
+)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_0900_ai_ci COMMENT ='异步任务实例表';
 
 CREATE TABLE `jm_user`
 (
@@ -333,6 +383,7 @@ CREATE TABLE `jm_user`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='用户表';
+
 
 CREATE TABLE `jm_external_parameter`
 (
