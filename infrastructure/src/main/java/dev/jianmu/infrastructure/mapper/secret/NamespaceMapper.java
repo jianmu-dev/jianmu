@@ -1,6 +1,5 @@
 package dev.jianmu.infrastructure.mapper.secret;
 
-import dev.jianmu.secret.aggregate.BaseAssociation;
 import dev.jianmu.secret.aggregate.Namespace;
 import org.apache.ibatis.annotations.*;
 

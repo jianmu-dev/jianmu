@@ -8,6 +8,8 @@ import dev.jianmu.api.util.AssociationUtil;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
+import dev.jianmu.external_parameter.aggregate.ExternalParameter;
+import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
@@ -31,6 +33,7 @@ import javax.validation.Valid;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,6 +61,9 @@ public class ViewController {
     private final ProjectGroupApplication projectGroupApplication;
     private final GitRepoApplication gitRepoApplication;
     private final UserContextHolder userContextHolder;
+    private final ExternalParameterApplication externalParameterApplication;
+    private final ExternalParameterLabelApplication externalParameterLabelApplication;
+
     private final AssociationUtil associationUtil;
 
     public ViewController(
@@ -73,6 +79,8 @@ public class ViewController {
             ProjectGroupApplication projectGroupApplication,
             GitRepoApplication gitRepoApplication,
             UserContextHolder userContextHolder,
+            ExternalParameterApplication externalParameterApplication,
+            ExternalParameterLabelApplication externalParameterLabelApplication,
             AssociationUtil associationUtil
     ) {
         this.projectApplication = projectApplication;
@@ -87,6 +95,8 @@ public class ViewController {
         this.projectGroupApplication = projectGroupApplication;
         this.gitRepoApplication = gitRepoApplication;
         this.userContextHolder = userContextHolder;
+        this.externalParameterApplication = externalParameterApplication;
+        this.externalParameterLabelApplication = externalParameterLabelApplication;
         this.associationUtil = associationUtil;
     }
 
@@ -529,5 +539,59 @@ public class ViewController {
                 .lastModifiedTime(projectGroup.getLastModifiedTime())
                 .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
                 .build();
+    }
+
+
+    @GetMapping("/external_parameters/labels")
+    @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
+    public List<ExternalParameterLabelVo> findAllLabels() {
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var type = this.associationUtil.getAssociationType();
+        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(repoId, type);
+        ArrayList<ExternalParameterLabelVo> externalParameterLabelVos = new ArrayList<>();
+        externalParameterLabels.forEach(e -> externalParameterLabelVos.add(
+                ExternalParameterLabelVo.builder()
+                        .id(e.getId())
+                        .value(e.getValue())
+                        .createdTime(e.getCreatedTime())
+                        .lastModifiedTime(e.getLastModifiedTime())
+                        .build()));
+        return externalParameterLabelVos;
+    }
+
+    @GetMapping("/external_parameters/{id}")
+    @Operation(summary = "获取外部参数", description = "获取外部参数")
+    public ExternalParameterVo findExternalParameters(@PathVariable("id") String id) {
+        ExternalParameter externalParameter = this.externalParameterApplication.get(id);
+        return ExternalParameterVo.builder()
+                .id(externalParameter.getId())
+                .label(externalParameter.getLabel())
+                .ref(externalParameter.getRef())
+                .type(externalParameter.getType())
+                .name(externalParameter.getName())
+                .value(externalParameter.getValue())
+                .createdTime(externalParameter.getCreatedTime())
+                .lastModifiedTime(externalParameter.getLastModifiedTime())
+                .build();
+    }
+
+    @GetMapping("/external_parameters")
+    @Operation(summary = "获取外部参数列表", description = "获取外部参数列表")
+    public List<ExternalParameterVo> findAllExternalParameters() {
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var type = this.associationUtil.getAssociationType();
+        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(repoId, type);
+        ArrayList<ExternalParameterVo> externalParameterVos = new ArrayList<>();
+        externalParameters.forEach(externalParameter -> externalParameterVos.add(ExternalParameterVo.builder()
+                .id(externalParameter.getId())
+                .label(externalParameter.getLabel())
+                .ref(externalParameter.getRef())
+                .type(externalParameter.getType())
+                .name(externalParameter.getName())
+                .value(externalParameter.getValue())
+                .createdTime(externalParameter.getCreatedTime())
+                .lastModifiedTime(externalParameter.getLastModifiedTime())
+                .build()));
+        return externalParameterVos;
     }
 }
