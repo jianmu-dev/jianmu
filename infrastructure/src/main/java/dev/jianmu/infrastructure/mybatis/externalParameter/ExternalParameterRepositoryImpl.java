@@ -39,8 +39,8 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
     }
 
     @Override
-    public Optional<ExternalParameter> findById(String id, String associationId, String associationType) {
-        return this.externalParameterMapper.findById(id, associationId, associationType);
+    public Optional<ExternalParameter> findById(String id) {
+        return this.externalParameterMapper.findById(id);
     }
 
     @Override

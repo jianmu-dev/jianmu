@@ -26,8 +26,6 @@ public interface ExternalParameterMapper {
     @Select("<script>" +
             "SELECT * FROM `jm_external_parameter`" +
             "<where> id = #{id}" +
-            " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
-            " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
             "</where>" +
             "</script>")
     @Result(column = "id", property = "id")
@@ -38,9 +36,9 @@ public interface ExternalParameterMapper {
     @Result(column = "value", property = "value")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
-    Optional<ExternalParameter> findById(@Param("id") String id,
-                                         @Param("associationId") String associationId,
-                                         @Param("associationType") String associationType);
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "created_time", property = "createdTime")
+    Optional<ExternalParameter> findById(@Param("id") String id);
 
     @Select("<script>" +
             "SELECT * FROM `jm_external_parameter`" +
@@ -57,6 +55,8 @@ public interface ExternalParameterMapper {
     @Result(column = "value", property = "value")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "created_time", property = "createdTime")
     List<ExternalParameter> findAll(@Param("associationId") String associationId,
                                     @Param("associationType") String associationType);
 }

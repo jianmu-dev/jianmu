@@ -553,6 +553,8 @@ public class ViewController {
                 ExternalParameterLabelVo.builder()
                         .id(e.getId())
                         .value(e.getValue())
+                        .createdTime(e.getCreatedTime())
+                        .lastModifiedTime(e.getLastModifiedTime())
                         .build()));
         return externalParameterLabelVos;
     }
@@ -560,9 +562,7 @@ public class ViewController {
     @GetMapping("/external_parameters/{id}")
     @Operation(summary = "获取外部参数", description = "获取外部参数")
     public ExternalParameterVo findExternalParameters(@PathVariable("id") String id) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
-        var type = this.associationUtil.getAssociationType();
-        ExternalParameter externalParameter = this.externalParameterApplication.get(id, repoId, type);
+        ExternalParameter externalParameter = this.externalParameterApplication.get(id);
         return ExternalParameterVo.builder()
                 .id(externalParameter.getId())
                 .label(externalParameter.getLabel())
@@ -570,6 +570,8 @@ public class ViewController {
                 .type(externalParameter.getType())
                 .name(externalParameter.getName())
                 .value(externalParameter.getValue())
+                .createdTime(externalParameter.getCreatedTime())
+                .lastModifiedTime(externalParameter.getLastModifiedTime())
                 .build();
     }
 
@@ -587,6 +589,8 @@ public class ViewController {
                 .type(externalParameter.getType())
                 .name(externalParameter.getName())
                 .value(externalParameter.getValue())
+                .createdTime(externalParameter.getCreatedTime())
+                .lastModifiedTime(externalParameter.getLastModifiedTime())
                 .build()));
         return externalParameterVos;
     }

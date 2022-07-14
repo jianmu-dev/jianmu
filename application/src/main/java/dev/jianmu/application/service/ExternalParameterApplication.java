@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -49,7 +48,7 @@ public class ExternalParameterApplication {
 
     @Transactional
     public void delete(String id, String associationId, String associationType) {
-        var externalParameter = this.externalParameterRepository.findById(id, associationId, associationType)
+        var externalParameter = this.externalParameterRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该外部参数"));
         if (associationId != null && associationType != null &&
                 (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
@@ -61,7 +60,8 @@ public class ExternalParameterApplication {
 
     @Transactional
     public void update(String id, String value, String name, String label, ExternalParameter.Type type, String associationId, String associationType) {
-        ExternalParameter externalParameter = this.externalParameterRepository.findById(id, associationId, associationType).orElseThrow(() -> new ExternalParameterNotFoundException("未找到外部参数：" + "\"" + name + "\""));
+        ExternalParameter externalParameter = this.externalParameterRepository.findById(id)
+                .orElseThrow(() -> new ExternalParameterNotFoundException("未找到外部参数：" + "\"" + name + "\""));
         if (associationId != null && associationType != null &&
                 (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
             throw new NoPermissionException();
@@ -79,8 +79,8 @@ public class ExternalParameterApplication {
     }
 
     @Transactional
-    public ExternalParameter get(String id, String associationId, String associationType) {
-        return this.externalParameterRepository.findById(id, associationId, associationType).orElseThrow(() -> new ExternalParameterNotFoundException("未找到该外部参数"));
+    public ExternalParameter get(String id) {
+        return this.externalParameterRepository.findById(id).orElseThrow(() -> new ExternalParameterNotFoundException("未找到该外部参数"));
     }
 
     @Transactional

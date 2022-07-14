@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @author huangxi
  * @class ExternalParameterLabelVo
@@ -20,4 +22,6 @@ import lombok.NoArgsConstructor;
 public class ExternalParameterLabelVo {
     private String id;
     private String value;
+    private LocalDateTime createdTime;
+    private LocalDateTime lastModifiedTime;
 }

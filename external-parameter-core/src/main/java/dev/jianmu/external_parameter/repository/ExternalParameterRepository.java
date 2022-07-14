@@ -18,7 +18,7 @@ public interface ExternalParameterRepository {
 
     void updateById(ExternalParameter externalParameter);
 
-    Optional<ExternalParameter> findById(String id,String associationId, String associationType);
+    Optional<ExternalParameter> findById(String id);
 
     List<ExternalParameter> findAll(String id, String type);
 }
