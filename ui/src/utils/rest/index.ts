@@ -77,7 +77,7 @@ export default async function rest({
   const store = _store as any;
   const { session } = store.state[sessionNs] as ISessionState;
 
-  if (auth && session) {
+  if (session) {
     // 统一注入Authorization
     headers['Authorization'] = `${session.type} ${session.token}`;
   }
