@@ -23,7 +23,8 @@ public class DslTextDto {
     @Schema(required = true)
     @NotBlank(message = "Dsl内容不能为空")
     private String dslText;
-    @NotBlank(message = "项目组ID不能为空")
     @Schema(description = "项目组ID")
     private String projectGroupId;
+    @Schema(description = "流水线分支")
+    private String branch;
 }

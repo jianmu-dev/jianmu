@@ -14,22 +14,22 @@ import java.util.Optional;
  * @create 2021-04-02 12:39
  */
 public interface WorkerMapper {
-    @Insert("insert into worker(id, name, tags, capacity, os, arch, status, type, created_time) " +
+    @Insert("insert into jm_worker(id, name, tags, capacity, os, arch, status, type, created_time) " +
             "values(#{id}, #{name}, #{tags}, #{capacity}, #{os}, #{arch}, #{status}, #{type}, #{createdTime})")
     void add(Worker worker);
 
-    @Delete("delete from worker where id = #{id}")
+    @Delete("delete from jm_worker where id = #{id}")
     void delete(Worker worker);
 
-    @Update("update worker set status = #{status} where id = #{id}")
+    @Update("update jm_worker set status = #{status} where id = #{id}")
     void updateStatus(Worker worker);
 
-    @Select("select * from worker where id = #{workerId}")
+    @Select("select * from jm_worker where id = #{workerId}")
     @Result(column = "created_time", property = "createdTime")
     Optional<Worker> findById(String workerId);
 
     @Select("<script> " +
-            "select * from worker" +
+            "select * from jm_worker" +
             "<where>" +
             " type IN " +
             " <foreach collection='types' item='item' open='(' close=')' separator=','> #{item} " +

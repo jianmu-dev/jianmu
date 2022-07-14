@@ -16,4 +16,20 @@ public class Branch {
      * 是否默认分支
      */
     private Boolean isDefault;
+
+    public Branch() {
+    }
+
+    public Branch(String name, Boolean isDefault) {
+        this.name = name;
+        this.isDefault = isDefault;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Boolean getIsDefault() {
+        return isDefault;
+    }
 }
