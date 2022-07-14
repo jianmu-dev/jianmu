@@ -2,10 +2,9 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.NoPermissionException;
 import dev.jianmu.infrastructure.exception.DBException;
-import dev.jianmu.task.aggregate.NodeInfo;
-import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -13,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 /**
  * @author Ethan Liu
@@ -27,12 +24,14 @@ import java.util.UUID;
 public class AsyncTaskInstanceInternalApplication {
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final ProjectRepository projectRepository;
 
     public AsyncTaskInstanceInternalApplication(
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
-            WorkflowInstanceRepository workflowInstanceRepository) {
+            WorkflowInstanceRepository workflowInstanceRepository, ProjectRepository projectRepository) {
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
+        this.projectRepository = projectRepository;
     }
 
     @Transactional
@@ -100,9 +99,10 @@ public class AsyncTaskInstanceInternalApplication {
 
     // 任务重试
     @Transactional
-    public void retry(String instanceId, String taskRef) {
+    public void retry(String instanceId, String taskRef, String associationId, String associationType) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
+        this.checkProjectPermission(associationId, associationType, workflowInstance.getWorkflowRef());
         MDC.put("triggerId", workflowInstance.getTriggerId());
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
@@ -110,11 +110,24 @@ public class AsyncTaskInstanceInternalApplication {
         this.asyncTaskInstanceRepository.retryById(asyncTaskInstance);
     }
 
+    // 校验项目增删改查权限
+    private void checkProjectPermission(String associationId, String associationType, String workflowRef) {
+        if (associationId == null || associationType == null) {
+            return;
+        }
+        var project = this.projectRepository.findByWorkflowRef(workflowRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowRef));
+        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType())) {
+            throw new NoPermissionException();
+        }
+    }
+
     // 任务忽略
     @Transactional
-    public void ignore(String instanceId, String taskRef) {
+    public void ignore(String instanceId, String taskRef, String associationId, String associationType) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
+        this.checkProjectPermission(associationId, associationType, workflowInstance.getWorkflowRef());
         MDC.put("triggerId", workflowInstance.getTriggerId());
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
