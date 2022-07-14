@@ -2,12 +2,14 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.*;
+import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.externalParameter.aggregate.ExternalParameter;
 import dev.jianmu.externalParameter.aggregate.ExternalParameterLabel;
+import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
@@ -48,7 +50,6 @@ import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PRO
 public class ViewController {
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
-    private final WorkflowInstanceApplication workflowInstanceApplication;
     private final AsyncTaskInstanceApplication asyncTaskInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
@@ -57,6 +58,8 @@ public class ViewController {
     private final ParameterApplication parameterApplication;
     private final StorageService storageService;
     private final ProjectGroupApplication projectGroupApplication;
+    private final GitRepoApplication gitRepoApplication;
+    private final UserContextHolder userContextHolder;
     private final ExternalParameterApplication externalParameterApplication;
     private final ExternalParameterLabelApplication externalParameterLabelApplication;
 
@@ -64,7 +67,6 @@ public class ViewController {
     public ViewController(
             ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
-            WorkflowInstanceApplication workflowInstanceApplication,
             AsyncTaskInstanceApplication asyncTaskInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
@@ -73,11 +75,12 @@ public class ViewController {
             ParameterApplication parameterApplication,
             StorageService storageService,
             ProjectGroupApplication projectGroupApplication,
+            GitRepoApplication gitRepoApplication,
+            UserContextHolder userContextHolder,
             ExternalParameterApplication externalParameterApplication,
             ExternalParameterLabelApplication externalParameterLabelApplication) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
-        this.workflowInstanceApplication = workflowInstanceApplication;
         this.asyncTaskInstanceApplication = asyncTaskInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
@@ -86,6 +89,8 @@ public class ViewController {
         this.parameterApplication = parameterApplication;
         this.storageService = storageService;
         this.projectGroupApplication = projectGroupApplication;
+        this.gitRepoApplication = gitRepoApplication;
+        this.userContextHolder = userContextHolder;
         this.externalParameterApplication = externalParameterApplication;
         this.externalParameterLabelApplication = externalParameterLabelApplication;
     }
@@ -265,13 +270,14 @@ public class ViewController {
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
         projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
         projectVo.setProjectGroupName(this.projectGroupApplication.findById(projectLinkGroup.getProjectGroupId()).getName());
+        String gitRepoId;
+        try {
+            gitRepoId = this.userContextHolder.getSession().getGitRepoId();
+        } catch (Exception e) {
+            gitRepoId = null;
+        }
+        projectVo.setBranch(this.gitRepoApplication.findFlowByProjectId(projectId, gitRepoId).map(Flow::getBranchName).orElse(null));
         return projectVo;
-    }
-
-    @GetMapping("/repo/{gitRepoId}")
-    public void gotoRepo(@PathVariable String gitRepoId, HttpServletResponse response) throws IOException {
-        var repo = this.projectApplication.findGitRepoById(gitRepoId);
-        response.sendRedirect(repo.getUri());
     }
 
     @GetMapping("/workflow_instances/{workflowRef}")
@@ -515,6 +521,7 @@ public class ViewController {
                 .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
                 .build();
     }
+
 
     @GetMapping("/external_parameters/labels")
     @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
