@@ -243,9 +243,8 @@ public class ProjectApplication {
     public void updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-        if (username != null && associationId != null && associationType != null &&
-                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
-            throw new NoPermissionException();
+        if (username != null) {
+            this.checkProjectPermission(associationId, associationType, project);
         }
         var concurrent = project.isConcurrent();
         if (project.getDslSource() == Project.DslSource.GIT) {
@@ -283,14 +282,19 @@ public class ProjectApplication {
         }
     }
 
-    @Transactional
-    public void deleteById(String id, String associationId, String associationType) {
-        Project project = this.projectRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+    // 校验项目增删改查权限
+    private void checkProjectPermission(String associationId, String associationType, Project project) {
         if (associationId != null && associationType != null &&
                 (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
             throw new NoPermissionException();
         }
+    }
+
+    @Transactional
+    public void deleteById(String id, String associationId, String associationType) {
+        Project project = this.projectRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        this.checkProjectPermission(associationId, associationType, project);
         var running = this.workflowInstanceRepository
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
@@ -365,14 +369,11 @@ public class ProjectApplication {
     }
 
     public Optional<Project> findById(String dslId, String associationId, String associationType) {
-        var projectOptional =  this.projectRepository.findById(dslId);
+        var projectOptional = this.projectRepository.findById(dslId);
         if (projectOptional.isEmpty()) {
             return projectOptional;
         }
-        if (associationId != null && associationType != null &&
-                (!associationId.equals(projectOptional.get().getAssociationId()) || !associationType.equals(projectOptional.get().getAssociationType()))) {
-            throw new NoPermissionException();
-        }
+        this.checkProjectPermission(associationId, associationType, projectOptional.get());
         return projectOptional;
     }
 
@@ -383,5 +384,9 @@ public class ProjectApplication {
 
     public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType, String associationId, String associationType) {
         return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType, associationId, associationType);
+    }
+
+    public Optional<Project> findByWorkflowRef(String workflowRef) {
+        return this.projectRepository.findByWorkflowRef(workflowRef);
     }
 }
