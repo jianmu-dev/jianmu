@@ -151,6 +151,7 @@ public class WorkflowInstanceInternalApplication {
     }
 
     // 终止流程
+    @Async
     @Transactional
     public void terminate(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
