@@ -2,7 +2,6 @@ package dev.jianmu.api.runner;
 
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
-import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -21,16 +20,13 @@ import org.springframework.stereotype.Component;
 public class TriggerRunner implements ApplicationRunner {
     private final TriggerApplication triggerApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
-    private final WorkerApplication workerApplication;
 
     public TriggerRunner(
             TriggerApplication triggerApplication,
-            TaskInstanceInternalApplication taskInstanceInternalApplication,
-            WorkerApplication workerApplication
+            TaskInstanceInternalApplication taskInstanceInternalApplication
     ) {
         this.triggerApplication = triggerApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
-        this.workerApplication = workerApplication;
     }
 
     @Override
@@ -52,7 +48,7 @@ public class TriggerRunner implements ApplicationRunner {
                         .businessId(taskInstance.getBusinessId())
                         .taskInstanceId(taskInstance.getId())
                         .build();
-                this.workerApplication.dispatchTask(event, true);
+//                this.workerApplication.dispatchTask(event, true);
                 log.info("Task instance id: {}  ref: {} is resumed", taskInstance.getId(), taskInstance.getAsyncTaskRef());
             } catch (Exception e) {
                 log.warn("Task instance id: {}  ref: {} is resume failed, due to: {}", taskInstance.getId(), taskInstance.getAsyncTaskRef(), e.getMessage());

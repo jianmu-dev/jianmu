@@ -381,7 +381,7 @@ public class TriggerApplication {
         if (webhook.getAuth() != null) {
             var auth = webhook.getAuth();
             var authToken = this.calculateExp(auth.getToken(), context);
-            var authValue = this.findSecret(auth.getValue());
+            var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType());
             if (authToken.getType() != Parameter.Type.STRING) {
                 log.warn("Auth Token表达式计算错误");
                 newWebRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
@@ -475,7 +475,7 @@ public class TriggerApplication {
         if (webhook.getAuth() != null) {
             var auth = webhook.getAuth();
             var authToken = this.calculateExp(auth.getToken(), context);
-            var authValue = this.findSecret(auth.getValue());
+            var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType());
             if (authToken.getType() != Parameter.Type.STRING) {
                 log.warn("Auth Token表达式计算错误");
                 webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
@@ -515,14 +515,14 @@ public class TriggerApplication {
         }
     }
 
-    private String findSecret(String secretExp) {
+    private String findSecret(String secretExp, String associationId, String associationType) {
         var secret = this.isSecret(secretExp);
         if (secret == null) {
             throw new IllegalArgumentException("密钥参数格式错误：" + secretExp);
         }
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = secret.split("\\.");
-        var kv = this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1])
+        var kv = this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1], associationId, associationType)
                 .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
         return kv.getValue();
     }

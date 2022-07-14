@@ -7,31 +7,65 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class KVPairMapper
  * @description 键值对Mapper
- * @author Ethan Liu
  * @create 2021-04-20 13:31
-*/
+ */
 public interface KVPairMapper {
-    @Insert("insert into jm_secret_kv_pair(namespace_name, kv_key, kv_value) " +
-            "values(#{namespaceName}, #{key}, #{value})")
+    @Insert("insert into jm_secret_kv_pair(association_id, association_type, namespace_name, kv_key, kv_value) " +
+            "values(#{associationId}, #{associationType}, #{namespaceName}, #{key}, #{value})")
     void add(KVPair kvPair);
 
-    @Delete("delete from jm_secret_kv_pair where namespace_name = #{namespaceName} and kv_key = #{key}")
-    void deleteByNameAndKey(@Param("namespaceName") String namespaceName, @Param("key") String key);
+    @Delete("<script>" +
+            "delete from jm_secret_kv_pair " +
+            "<where> namespace_name = #{namespaceName} and kv_key = #{key}" +
+            " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
+            " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            "</where>" +
+            "</script>")
+    void deleteByNameAndKey(@Param("associationId") String associationId,
+                            @Param("associationType") String associationType,
+                            @Param("namespaceName") String namespaceName,
+                            @Param("key") String key);
 
-    @Delete("delete from jm_secret_kv_pair where namespace_name = #{namespaceName}")
-    void deleteByName(@Param("namespaceName") String namespaceName);
+    @Delete("<script>" +
+            "delete from jm_secret_kv_pair " +
+            "<where> namespace_name = #{namespaceName}" +
+            " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
+            " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            "</where>" +
+            "</script>")
+    void deleteByName(@Param("associationId") String associationId,
+                      @Param("associationType") String associationType,
+                      @Param("namespaceName") String namespaceName);
 
-    @Select("select * from jm_secret_kv_pair where namespace_name = #{namespaceName} and kv_key = #{key}")
+    @Select("<script>" +
+            "select * from jm_secret_kv_pair " +
+            "<where> namespace_name = #{namespaceName} and kv_key = #{key}" +
+            " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
+            " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            "</where>" +
+            "</script>")
     @Result(column = "namespace_name", property = "namespaceName")
     @Result(column = "kv_key", property = "key")
     @Result(column = "kv_value", property = "value")
-    Optional<KVPair> findByNamespaceNameAndKey(@Param("namespaceName") String namespaceName, @Param("key") String key);
+    Optional<KVPair> findByNamespaceNameAndKey(@Param("associationId") String associationId,
+                                               @Param("associationType") String associationType,
+                                               @Param("namespaceName") String namespaceName,
+                                               @Param("key") String key);
 
-    @Select("select * from jm_secret_kv_pair where namespace_name = #{namespaceName}")
+    @Select("<script>" +
+            "select * from jm_secret_kv_pair " +
+            "<where> namespace_name = #{namespaceName}" +
+            " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
+            " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            "</where>" +
+            "</script>")
     @Result(column = "namespace_name", property = "namespaceName")
     @Result(column = "kv_key", property = "key")
     @Result(column = "kv_value", property = "value")
-    List<KVPair> findByNamespaceName(@Param("namespaceName") String namespaceName);
+    List<KVPair> findByNamespaceName(@Param("associationId") String associationId,
+                                     @Param("associationType") String associationType,
+                                     @Param("namespaceName") String namespaceName);
 }
