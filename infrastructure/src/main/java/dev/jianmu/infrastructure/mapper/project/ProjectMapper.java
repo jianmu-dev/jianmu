@@ -14,8 +14,8 @@ import java.util.Optional;
  * @create 2021-04-23 11:39
  */
 public interface ProjectMapper {
-    @Insert("insert into jm_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time, concurrent) " +
-            "values(#{id}, #{dslSource}, #{dslType}, #{enabled}, #{mutable}, #{triggerType}, #{gitRepoId}, #{workflowName}, #{workflowDescription}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime}, #{concurrent})")
+    @Insert("insert into jm_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time, concurrent, association_id, association_type) " +
+            "values(#{id}, #{dslSource}, #{dslType}, #{enabled}, #{mutable}, #{triggerType}, #{gitRepoId}, #{workflowName}, #{workflowDescription}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime}, #{concurrent}, #{associationId}, #{associationType})")
     void add(Project project);
 
     @Delete("delete from jm_project where workflow_ref = #{workflowRef}")
@@ -39,6 +39,8 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "association_id", property = "associationId")
+    @Result(column = "association_type", property = "associationType")
     Optional<Project> findById(String id);
 
     @Select("select * from jm_project where workflow_name = #{name}")
@@ -55,6 +57,8 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "association_id", property = "associationId")
+    @Result(column = "association_type", property = "associationType")
     Optional<Project> findByName(String name);
 
     @Select("select * from jm_project where workflow_ref = #{workflowRef}")
@@ -71,6 +75,8 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "association_id", property = "associationId")
+    @Result(column = "association_type", property = "associationType")
     Optional<Project> findByWorkflowRef(String workflowRef);
 
     @Select("<script>" +
@@ -116,6 +122,8 @@ public interface ProjectMapper {
             "           WHERE `t1`.`workflow_ref` = `t2`.`workflow_ref` and `t1`.`serial_no` = `t2`.`serial_no`) `wi` " +
             "ON `wi`.`workflow_ref` = `jp`.`workflow_ref` COLLATE utf8mb4_unicode_ci " +
             "<where>" +
+            "   <if test='associationId != null'> AND `jp`.`association_id` = #{associationId} </if>" +
+            "   <if test='associationType != null'> AND `jp`.`association_type` = #{associationType} </if>" +
             "   <if test='projectGroupId != null'> AND `plp`.`project_group_id` = #{projectGroupId} </if>" +
             "   <if test='workflowName != null'> AND (`jp`.`workflow_name` like concat('%', #{workflowName}, '%') OR `jp`.`workflow_description` like concat('%', #{workflowName}, '%'))</if>" +
             "</where>" +
@@ -140,7 +148,11 @@ public interface ProjectMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")
-    List<ProjectVo> findAllByGroupId(@Param("projectGroupId") String projectGroupId, @Param("workflowName") String workflowName, @Param("sortType") String sortType);
+    List<ProjectVo> findAllByGroupId(@Param("projectGroupId") String projectGroupId,
+                                     @Param("workflowName") String workflowName,
+                                     @Param("sortType") String sortType,
+                                     @Param("associationId") String associationId,
+                                     @Param("associationType") String associationType);
 
     @Select("<script>" +
             "SELECT jp.*, `wi`.`end_time`, `wi`.`status`, `wi`.`start_time`, `wi`.`suspended_time` FROM `jm_project` `jp` " +
@@ -175,5 +187,7 @@ public interface ProjectMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")
+    @Result(column = "association_id", property = "associationId")
+    @Result(column = "association_type", property = "associationType")
     List<ProjectVo> findByIdIn(@Param("ids") List<String> ids, @Param("workflowName") String workflowName, @Param("sortType") String sortType, @Param("status") String status);
 }

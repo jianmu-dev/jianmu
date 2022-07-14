@@ -3,12 +3,12 @@ package dev.jianmu.secret.aggregate;
 import java.time.LocalDateTime;
 
 /**
+ * @author Ethan Liu
  * @class Namespace
  * @description 命名空间
- * @author Ethan Liu
  * @create 2021-04-20 12:36
-*/
-public class Namespace {
+ */
+public class Namespace extends BaseAssociation {
     private String name;
     private String description;
     private LocalDateTime createdTime = LocalDateTime.now();
@@ -18,12 +18,12 @@ public class Namespace {
         return name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public void setDescription(String description) {
@@ -46,6 +46,8 @@ public class Namespace {
     public static final class Builder {
         private String name;
         private String description;
+        private String associationId;
+        private String associationType;
 
         private Builder() {
         }
@@ -64,10 +66,22 @@ public class Namespace {
             return this;
         }
 
+        public Builder associationId(String associationId) {
+            this.associationId = associationId;
+            return this;
+        }
+
+        public Builder associationType(String associationType) {
+            this.associationType = associationType;
+            return this;
+        }
+
         public Namespace build() {
             Namespace namespace = new Namespace();
             namespace.setName(name);
             namespace.setDescription(description);
+            namespace.setAssociationId(associationId);
+            namespace.setAssociationType(associationType);
             return namespace;
         }
     }

@@ -6,6 +6,7 @@ import dev.jianmu.application.event.CronEvent;
 import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.NoPermissionException;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
@@ -110,9 +111,13 @@ public class ProjectApplication {
         this.publisher.publishEvent(triggerEvent);
     }
 
-    public void triggerByManual(String projectId) {
+    public void triggerByManual(String projectId, String associationId, String associationType) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        if (associationId != null && associationType != null &&
+                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
+            throw new NoPermissionException();
+        }
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
@@ -185,7 +190,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId, String branch) {
+    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -202,11 +207,13 @@ public class ProjectApplication {
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
                 .concurrent(parser.isConcurrent())
-                .lastModifiedBy("admin")
+                .lastModifiedBy(username)
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
                 .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
+                .associationId(associationId)
+                .associationType(associationType)
                 .build();
         // 添加分组
         if (projectGroupId == null) {
@@ -233,9 +240,13 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void updateProject(String dslId, String dslText, String projectGroupId) {
+    public void updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+        if (username != null && associationId != null && associationType != null &&
+                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
+            throw new NoPermissionException();
+        }
         var concurrent = project.isConcurrent();
         if (project.getDslSource() == Project.DslSource.GIT) {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
@@ -251,7 +262,6 @@ public class ProjectApplication {
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(parser.getTriggerType());
-        project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
@@ -260,6 +270,10 @@ public class ProjectApplication {
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
+        if (username != null) {
+            project.setLastModifiedBy(username);
+
+        }
 
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
@@ -270,9 +284,13 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void deleteById(String id) {
+    public void deleteById(String id, String associationId, String associationType) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        if (associationId != null && associationType != null &&
+                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
+            throw new NoPermissionException();
+        }
         var running = this.workflowInstanceRepository
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
@@ -346,8 +364,16 @@ public class ProjectApplication {
         return this.projectRepository.findAll();
     }
 
-    public Optional<Project> findById(String dslId) {
-        return this.projectRepository.findById(dslId);
+    public Optional<Project> findById(String dslId, String associationId, String associationType) {
+        var projectOptional =  this.projectRepository.findById(dslId);
+        if (projectOptional.isEmpty()) {
+            return projectOptional;
+        }
+        if (associationId != null && associationType != null &&
+                (!associationId.equals(projectOptional.get().getAssociationId()) || !associationType.equals(projectOptional.get().getAssociationType()))) {
+            throw new NoPermissionException();
+        }
+        return projectOptional;
     }
 
     public Workflow findByRefAndVersion(String ref, String version) {
@@ -355,7 +381,7 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
     }
 
-    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType) {
-        return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType);
+    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType, String associationId, String associationType) {
+        return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType, associationId, associationType);
     }
 }

@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * @author Ethan Liu
  * @class LocalCredentialManager
  * @description LocalCredentialManager
- * @author Ethan Liu
  * @create 2021-11-02 06:35
-*/
+ */
 @Component
 @ConditionalOnProperty(prefix = "credential", name = "type", havingValue = "local", matchIfMissing = true)
 public class LocalCredentialManager implements CredentialManager {
@@ -36,24 +36,33 @@ public class LocalCredentialManager implements CredentialManager {
     @Override
     public void createNamespace(Namespace namespace) {
         namespace.setLastModifiedTime();
+        if (namespace.getAssociationId() == null || namespace.getAssociationType() == null) {
+            namespace.setAssociationId("");
+            namespace.setAssociationType("");
+        }
         this.namespaceMapper.add(namespace);
     }
 
     @Override
-    public void deleteNamespace(String name) {
-        this.namespaceMapper.delete(name);
-        this.kvPairMapper.deleteByName(name);
+    public void deleteNamespace(String associationId, String associationType, String name) {
+        this.namespaceMapper.delete(associationId, associationType, name);
+        this.kvPairMapper.deleteByName(associationId, associationType, name);
     }
 
     @Override
     public void createKVPair(KVPair kvPair) {
-        var namespace = this.namespaceMapper.findByName(kvPair.getNamespaceName())
+        var namespace = this.namespaceMapper.findByName(kvPair.getAssociationId(), kvPair.getAssociationType(), kvPair.getNamespaceName())
                 .orElseThrow(() -> new RuntimeException("未找到对应的命名空间"));
         namespace.setLastModifiedTime();
 
-        var existedKvPair = this.kvPairMapper.findByNamespaceNameAndKey(kvPair.getNamespaceName(), kvPair.getKey());
+        var existedKvPair = this.kvPairMapper.findByNamespaceNameAndKey(kvPair.getAssociationId(), kvPair.getAssociationType(), kvPair.getNamespaceName(), kvPair.getKey());
         if (existedKvPair.isPresent()) {
             throw new RuntimeException("秘钥名称在该命名空间下已存在");
+        }
+
+        if (kvPair.getAssociationId() == null || kvPair.getAssociationType() == null) {
+            kvPair.setAssociationId("");
+            kvPair.setAssociationType("");
         }
 
         this.namespaceMapper.updateLastModifiedTime(namespace);
@@ -61,31 +70,31 @@ public class LocalCredentialManager implements CredentialManager {
     }
 
     @Override
-    public void deleteKVPair(String namespaceName, String key) {
-        var namespace = this.namespaceMapper.findByName(namespaceName)
+    public void deleteKVPair(String associationId, String associationType, String namespaceName, String key) {
+        var namespace = this.namespaceMapper.findByName(associationId, associationType, namespaceName)
                 .orElseThrow(() -> new RuntimeException("未找到对应的命名空间"));
         namespace.setLastModifiedTime();
         this.namespaceMapper.updateLastModifiedTime(namespace);
-        this.kvPairMapper.deleteByNameAndKey(namespaceName, key);
+        this.kvPairMapper.deleteByNameAndKey(associationId, associationType, namespaceName, key);
     }
 
     @Override
-    public Optional<Namespace> findNamespaceByName(String name) {
-        return this.namespaceMapper.findByName(name);
+    public Optional<Namespace> findNamespaceByName(String associationId, String associationType, String name) {
+        return this.namespaceMapper.findByName(associationId, associationType, name);
     }
 
     @Override
-    public List<KVPair> findAllKVByNamespaceName(String namespaceName) {
-        return this.kvPairMapper.findByNamespaceName(namespaceName);
+    public List<KVPair> findAllKVByNamespaceName(String associationId, String associationType, String namespaceName) {
+        return this.kvPairMapper.findByNamespaceName(associationId, associationType, namespaceName);
     }
 
     @Override
-    public List<Namespace> findAllNamespace() {
-        return this.namespaceMapper.findAll();
+    public List<Namespace> findAllNamespace(String associationId, String associationType) {
+        return this.namespaceMapper.findAll(associationId, associationType);
     }
 
     @Override
-    public Optional<KVPair> findByNamespaceNameAndKey(String namespaceName, String key) {
-        return this.kvPairMapper.findByNamespaceNameAndKey(namespaceName, key);
+    public Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String namespaceName, String key) {
+        return this.kvPairMapper.findByNamespaceNameAndKey(associationId, associationType, namespaceName, key);
     }
 }

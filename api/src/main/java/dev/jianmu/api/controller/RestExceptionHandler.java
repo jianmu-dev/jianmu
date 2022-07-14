@@ -2,6 +2,7 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.vo.ErrorMessage;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.NoPermissionException;
 import dev.jianmu.infrastructure.exception.DBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,18 @@ import java.util.List;
 @RestControllerAdvice
 public class RestExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
+
+    @ExceptionHandler(NoPermissionException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage validationBodyException(NoPermissionException ex, WebRequest request) {
+        logger.error("没有权限: ", ex);
+        return ErrorMessage.builder()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .timestamp(LocalDateTime.now())
+                .message("没有权限")
+                .description(request.getDescription(false))
+                .build();
+    }
 
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
