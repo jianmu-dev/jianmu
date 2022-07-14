@@ -393,6 +393,11 @@ CREATE TABLE `jm_external_parameter`
     `label` varchar(32) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '参数标签',
     `type`  varchar(64) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '参数类型',
     `value` varchar(512) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数值',
+    `created_time`         datetime              DEFAULT NULL COMMENT '创建时间',
+    `last_modified_time`   datetime     NOT NULL COMMENT '最后修改时间',
+    `association_id`       varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`     varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
+    UNIQUE INDEX association_id_ref (`association_id`, `ref`),
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -402,6 +407,11 @@ CREATE TABLE `jm_external_parameter_label`
 (
     `id`    varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
     `value` varchar(32) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '参数标签值',
+    `created_time`         datetime              DEFAULT NULL COMMENT '创建时间',
+    `last_modified_time`   datetime     NOT NULL COMMENT '最后修改时间',
+    `association_id`       varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`     varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
+    UNIQUE INDEX association_id_id (`association_id`, `id`),
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

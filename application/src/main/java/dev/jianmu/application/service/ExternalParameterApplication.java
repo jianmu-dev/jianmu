@@ -1,15 +1,18 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.ExternalParameterNotFoundException;
 import dev.jianmu.application.exception.IncorrectParameterTypeException;
-import dev.jianmu.externalParameter.aggregate.ExternalParameter;
-import dev.jianmu.externalParameter.aggregate.ExternalParameterLabel;
-import dev.jianmu.externalParameter.repository.ExternalParameterLabelRepository;
-import dev.jianmu.externalParameter.repository.ExternalParameterRepository;
+import dev.jianmu.application.exception.NoPermissionException;
+import dev.jianmu.external_parameter.aggregate.ExternalParameter;
+import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
+import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
+import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,7 +32,7 @@ public class ExternalParameterApplication {
     }
 
     @Transactional
-    public void create(String name, ExternalParameter.Type type, String ref, String label, String value) {
+    public void create(String name, ExternalParameter.Type type, String ref, String label, String value, String associationId, String associationType) {
         this.checkParameterType(type, value);
         this.externalParameterRepository.add(
                 ExternalParameter.Builder.aReference()
@@ -38,45 +41,61 @@ public class ExternalParameterApplication {
                         .ref(ref)
                         .type(type)
                         .value(value)
+                        .associationId(associationId)
+                        .associationType(associationType)
                         .build());
-        this.saveLabel(label);
+        this.saveLabel(associationId, associationType, label);
     }
 
     @Transactional
-    public void delete(String id) {
+    public void delete(String id, String associationId, String associationType) {
+        var externalParameter = this.externalParameterRepository.findById(id, associationId, associationType)
+                .orElseThrow(() -> new DataNotFoundException("未找到该外部参数"));
+        if (associationId != null && associationType != null &&
+                (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
+            throw new NoPermissionException();
+        }
+
         this.externalParameterRepository.deleteById(id);
     }
 
     @Transactional
-    public void update(String id, String value, String name, String label, ExternalParameter.Type type) {
-        this.checkParameterType(type, value);
+    public void update(String id, String value, String name, String label, ExternalParameter.Type type, String associationId, String associationType) {
+        ExternalParameter externalParameter = this.externalParameterRepository.findById(id, associationId, associationType).orElseThrow(() -> new ExternalParameterNotFoundException("未找到外部参数：" + "\"" + name + "\""));
+        if (associationId != null && associationType != null &&
+                (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
+            throw new NoPermissionException();
+        }
 
-        ExternalParameter externalParameter = this.externalParameterRepository.findById(id).orElseThrow(() -> new ExternalParameterNotFoundException("未找到外部参数：" + "\"" + name + "\""));
+        this.checkParameterType(type, value);
         externalParameter.setLabel(label);
         externalParameter.setName(name);
         externalParameter.setType(type);
         externalParameter.setValue(value);
+        externalParameter.setLastModifiedTime();
 
         this.externalParameterRepository.updateById(externalParameter);
-        this.saveLabel(label);
+        this.saveLabel(associationId, associationType, label);
     }
 
     @Transactional
-    public ExternalParameter get(String id) {
-        return this.externalParameterRepository.findById(id).orElseThrow(() -> new ExternalParameterNotFoundException("未找到该外部参数"));
+    public ExternalParameter get(String id, String associationId, String associationType) {
+        return this.externalParameterRepository.findById(id, associationId, associationType).orElseThrow(() -> new ExternalParameterNotFoundException("未找到该外部参数"));
     }
 
     @Transactional
-    public List<ExternalParameter> findAll() {
-        return this.externalParameterRepository.findAll();
+    public List<ExternalParameter> findAll(String id, String type) {
+        return this.externalParameterRepository.findAll(id, type);
     }
 
-    private void saveLabel(String label) {
-        if (this.externalParameterLabelRepository.findByValue(label).isPresent()) {
+    private void saveLabel(String associationId, String associationType, String label) {
+        if (this.externalParameterLabelRepository.findByValue(associationId, associationType, label).isPresent()) {
             return;
         }
         this.externalParameterLabelRepository.add(
                 ExternalParameterLabel.Builder.aReference()
+                        .associationId(associationId)
+                        .associationType(associationType)
                         .value(label)
                         .build());
     }

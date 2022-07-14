@@ -8,8 +8,8 @@ import dev.jianmu.api.util.AssociationUtil;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
-import dev.jianmu.externalParameter.aggregate.ExternalParameter;
-import dev.jianmu.externalParameter.aggregate.ExternalParameterLabel;
+import dev.jianmu.external_parameter.aggregate.ExternalParameter;
+import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
@@ -545,7 +545,9 @@ public class ViewController {
     @GetMapping("/external_parameters/labels")
     @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
     public List<ExternalParameterLabelVo> findAllLabels() {
-        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll();
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var type = this.associationUtil.getAssociationType();
+        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(repoId, type);
         ArrayList<ExternalParameterLabelVo> externalParameterLabelVos = new ArrayList<>();
         externalParameterLabels.forEach(e -> externalParameterLabelVos.add(
                 ExternalParameterLabelVo.builder()
@@ -558,7 +560,9 @@ public class ViewController {
     @GetMapping("/external_parameters/{id}")
     @Operation(summary = "获取外部参数", description = "获取外部参数")
     public ExternalParameterVo findExternalParameters(@PathVariable("id") String id) {
-        ExternalParameter externalParameter = this.externalParameterApplication.get(id);
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var type = this.associationUtil.getAssociationType();
+        ExternalParameter externalParameter = this.externalParameterApplication.get(id, repoId, type);
         return ExternalParameterVo.builder()
                 .id(externalParameter.getId())
                 .label(externalParameter.getLabel())
@@ -572,7 +576,9 @@ public class ViewController {
     @GetMapping("/external_parameters")
     @Operation(summary = "获取外部参数列表", description = "获取外部参数列表")
     public List<ExternalParameterVo> findAllExternalParameters() {
-        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll();
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var type = this.associationUtil.getAssociationType();
+        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(repoId, type);
         ArrayList<ExternalParameterVo> externalParameterVos = new ArrayList<>();
         externalParameters.forEach(externalParameter -> externalParameterVos.add(ExternalParameterVo.builder()
                 .id(externalParameter.getId())

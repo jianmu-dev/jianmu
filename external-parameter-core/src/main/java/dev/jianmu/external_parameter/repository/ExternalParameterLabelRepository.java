@@ -1,6 +1,6 @@
-package dev.jianmu.externalParameter.repository;
+package dev.jianmu.external_parameter.repository;
 
-import dev.jianmu.externalParameter.aggregate.ExternalParameterLabel;
+import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +15,7 @@ public interface ExternalParameterLabelRepository {
 
     void add(ExternalParameterLabel externalParameterLabel);
 
-    List<ExternalParameterLabel> findAll();
+    List<ExternalParameterLabel> findAll(String id, String type);
 
-    Optional<ExternalParameterLabel> findByValue(String value);
+    Optional<ExternalParameterLabel> findByValue(String id, String type, String value);
 }

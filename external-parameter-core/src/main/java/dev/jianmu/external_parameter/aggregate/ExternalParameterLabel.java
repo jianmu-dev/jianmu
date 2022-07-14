@@ -1,4 +1,4 @@
-package dev.jianmu.externalParameter.aggregate;
+package dev.jianmu.external_parameter.aggregate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import java.util.UUID;
  * @description ParameterLabel
  * @create 2022-07-13 11:40
  */
-public class ExternalParameterLabel {
+public class ExternalParameterLabel extends BaseAssociation{
     /**
      * ID
      */
@@ -30,6 +30,20 @@ public class ExternalParameterLabel {
      */
     private LocalDateTime lastModifiedTime;
 
+
+
+    public void setLastModifiedTime() {
+        this.lastModifiedTime = LocalDateTime.now();
+    }
+
+    public LocalDateTime getLastModifiedTime() {
+        return lastModifiedTime;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
     public String getId() {
         return id;
     }
@@ -44,6 +58,8 @@ public class ExternalParameterLabel {
 
     public static class Builder {
         private String value;
+        private String associationId;
+        private String associationType;
 
         public Builder() {
         }
@@ -57,10 +73,23 @@ public class ExternalParameterLabel {
             return this;
         }
 
+        public ExternalParameterLabel.Builder associationId(String associationId) {
+            this.associationId = associationId;
+            return this;
+        }
+
+        public ExternalParameterLabel.Builder associationType(String associationType) {
+            this.associationType = associationType;
+            return this;
+        }
+
         public ExternalParameterLabel build() {
             var parameterLabel = new ExternalParameterLabel();
             parameterLabel.id = UUID.randomUUID().toString().replace("-", "");
             parameterLabel.value = this.value;
+            parameterLabel.lastModifiedTime = LocalDateTime.now();
+            parameterLabel.setAssociationId(this.associationId);
+            parameterLabel.setAssociationType(this.associationType);
             return parameterLabel;
         }
     }

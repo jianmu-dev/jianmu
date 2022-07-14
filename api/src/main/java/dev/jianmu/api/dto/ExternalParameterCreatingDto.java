@@ -1,6 +1,6 @@
 package dev.jianmu.api.dto;
 
-import dev.jianmu.externalParameter.aggregate.ExternalParameter;
+import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

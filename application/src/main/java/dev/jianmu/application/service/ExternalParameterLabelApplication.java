@@ -1,7 +1,7 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.externalParameter.aggregate.ExternalParameterLabel;
-import dev.jianmu.externalParameter.repository.ExternalParameterLabelRepository;
+import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
+import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,7 @@ public class ExternalParameterLabelApplication {
     }
 
     @Transactional
-    public List<ExternalParameterLabel> findAll() {
-        return this.externalParameterLabelRepository.findAll();
+    public List<ExternalParameterLabel> findAll(String id, String type) {
+        return this.externalParameterLabelRepository.findAll(id, type);
     }
 }

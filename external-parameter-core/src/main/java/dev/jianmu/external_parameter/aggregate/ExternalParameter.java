@@ -1,4 +1,4 @@
-package dev.jianmu.externalParameter.aggregate;
+package dev.jianmu.external_parameter.aggregate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import java.util.UUID;
  * @description Parameter
  * @create 2022-07-13 10:48
  */
-public class ExternalParameter {
+public class ExternalParameter extends BaseAssociation{
     /**
      * 参数类型
      */
@@ -50,6 +50,17 @@ public class ExternalParameter {
     private LocalDateTime lastModifiedTime;
 
 
+    public void setLastModifiedTime() {
+        this.lastModifiedTime = LocalDateTime.now();
+    }
+
+    public LocalDateTime getLastModifiedTime() {
+        return lastModifiedTime;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
 
     public String getId() {
         return id;
@@ -101,6 +112,8 @@ public class ExternalParameter {
         private Type type;
         private String value;
         private String label;
+        private String associationId;
+        private String associationType;
 
         public Builder() {
         }
@@ -134,6 +147,16 @@ public class ExternalParameter {
             return this;
         }
 
+        public Builder associationId(String associationId) {
+            this.associationId = associationId;
+            return this;
+        }
+
+        public Builder associationType(String associationType) {
+            this.associationType = associationType;
+            return this;
+        }
+
         public ExternalParameter build() {
             var parameter = new ExternalParameter();
             parameter.id = UUID.randomUUID().toString().replace("-", "");
@@ -142,6 +165,9 @@ public class ExternalParameter {
             parameter.ref = this.ref;
             parameter.type = this.type;
             parameter.label = this.label;
+            parameter.lastModifiedTime = LocalDateTime.now();
+            parameter.setAssociationId(this.associationId);
+            parameter.setAssociationType(this.associationType);
             return parameter;
         }
     }

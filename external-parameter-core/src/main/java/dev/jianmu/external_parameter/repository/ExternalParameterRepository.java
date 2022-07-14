@@ -1,6 +1,6 @@
-package dev.jianmu.externalParameter.repository;
+package dev.jianmu.external_parameter.repository;
 
-import dev.jianmu.externalParameter.aggregate.ExternalParameter;
+import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +18,7 @@ public interface ExternalParameterRepository {
 
     void updateById(ExternalParameter externalParameter);
 
-    Optional<ExternalParameter> findById(String id);
+    Optional<ExternalParameter> findById(String id,String associationId, String associationType);
 
-    List<ExternalParameter> findAll();
+    List<ExternalParameter> findAll(String id, String type);
 }

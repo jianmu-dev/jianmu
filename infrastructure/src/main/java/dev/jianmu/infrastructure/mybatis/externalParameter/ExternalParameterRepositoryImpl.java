@@ -1,8 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.externalParameter;
 
-import dev.jianmu.externalParameter.aggregate.ExternalParameter;
-import dev.jianmu.externalParameter.repository.ExternalParameterRepository;
-import dev.jianmu.infrastructure.mapper.externalParameter.ExternalParameterMapper;
+import dev.jianmu.external_parameter.aggregate.ExternalParameter;
+import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
+import dev.jianmu.infrastructure.mapper.external_parameter.ExternalParameterMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -39,12 +39,12 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
     }
 
     @Override
-    public Optional<ExternalParameter> findById(String id) {
-        return this.externalParameterMapper.findById(id);
+    public Optional<ExternalParameter> findById(String id, String associationId, String associationType) {
+        return this.externalParameterMapper.findById(id, associationId, associationType);
     }
 
     @Override
-    public List<ExternalParameter> findAll() {
-        return this.externalParameterMapper.findAll();
+    public List<ExternalParameter> findAll(String id, String type) {
+        return this.externalParameterMapper.findAll(id, type);
     }
 }

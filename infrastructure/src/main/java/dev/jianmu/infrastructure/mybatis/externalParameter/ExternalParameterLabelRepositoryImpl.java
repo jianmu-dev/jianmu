@@ -1,8 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.externalParameter;
 
-import dev.jianmu.externalParameter.aggregate.ExternalParameterLabel;
-import dev.jianmu.externalParameter.repository.ExternalParameterLabelRepository;
-import dev.jianmu.infrastructure.mapper.externalParameter.ExternalParameterLabelMapper;
+import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
+import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
+import dev.jianmu.infrastructure.mapper.external_parameter.ExternalParameterLabelMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,12 +29,12 @@ public class ExternalParameterLabelRepositoryImpl implements ExternalParameterLa
     }
 
     @Override
-    public List<ExternalParameterLabel> findAll() {
-        return this.externalParameterLabelMapper.findAll();
+    public List<ExternalParameterLabel> findAll(String id, String type) {
+        return this.externalParameterLabelMapper.findAll(id, type);
     }
 
     @Override
-    public Optional<ExternalParameterLabel> findByValue(String value) {
-        return this.externalParameterLabelMapper.findByValue(value);
+    public Optional<ExternalParameterLabel> findByValue(String id, String type, String value) {
+        return this.externalParameterLabelMapper.findByValue(id, type, value);
     }
 }
