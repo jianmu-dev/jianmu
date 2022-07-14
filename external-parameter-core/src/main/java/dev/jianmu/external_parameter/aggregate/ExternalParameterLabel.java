@@ -9,27 +9,23 @@ import java.util.UUID;
  * @description ParameterLabel
  * @create 2022-07-13 11:40
  */
-public class ExternalParameterLabel extends BaseAssociation{
-    /**
-     * ID
-     */
-    private String id;
-
-    /**
-     * 标签值
-     */
-    private String value;
-
+public class ExternalParameterLabel extends BaseAssociation {
     /**
      * 创建时间
      */
     private final LocalDateTime createdTime = LocalDateTime.now();
-
+    /**
+     * ID
+     */
+    private String id;
+    /**
+     * 标签值
+     */
+    private String value;
     /**
      * 最后修改时间
      */
     private LocalDateTime lastModifiedTime;
-
 
 
     public void setLastModifiedTime() {

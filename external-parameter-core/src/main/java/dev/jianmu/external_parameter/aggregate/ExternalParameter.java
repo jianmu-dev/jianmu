@@ -9,13 +9,11 @@ import java.util.UUID;
  * @description Parameter
  * @create 2022-07-13 10:48
  */
-public class ExternalParameter extends BaseAssociation{
+public class ExternalParameter extends BaseAssociation {
     /**
-     * 参数类型
+     * 创建时间
      */
-    public enum Type{
-        BOOL, STRING, NUMBER
-    }
+    private final LocalDateTime createdTime = LocalDateTime.now();
     /**
      * ID
      */
@@ -41,14 +39,9 @@ public class ExternalParameter extends BaseAssociation{
      */
     private String label;
     /**
-     * 创建时间
-     */
-    private final LocalDateTime createdTime = LocalDateTime.now();
-    /**
      * 最后修改时间
      */
     private LocalDateTime lastModifiedTime;
-
 
     public void setLastModifiedTime() {
         this.lastModifiedTime = LocalDateTime.now();
@@ -104,6 +97,13 @@ public class ExternalParameter extends BaseAssociation{
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    /**
+     * 参数类型
+     */
+    public enum Type {
+        BOOL, STRING, NUMBER
     }
 
     public static class Builder {

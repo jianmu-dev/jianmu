@@ -32,7 +32,7 @@ public class ExternalParameterUpdatingDto {
     /**
      * 名称
      */
-    @Size(min = 1, max = 45,message = "参数名称不能超过45个字符")
+    @Size(min = 1, max = 45, message = "参数名称不能超过45个字符")
     private String name;
 
     /**

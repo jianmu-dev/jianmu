@@ -5,7 +5,6 @@ import dev.jianmu.api.dto.ExternalParameterUpdatingDto;
 import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.util.AssociationUtil;
 import dev.jianmu.application.service.ExternalParameterApplication;
-import dev.jianmu.application.service.ProjectApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
