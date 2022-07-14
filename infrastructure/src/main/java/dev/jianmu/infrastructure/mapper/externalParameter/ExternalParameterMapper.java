@@ -13,17 +13,17 @@ import java.util.Optional;
  * @create 2022-07-13 15:22
  */
 public interface ExternalParameterMapper {
-    @Insert("insert into external_parameter(id, ref, name, type, value, label) " +
+    @Insert("insert into jm_external_parameter(id, ref, name, type, value, label) " +
             "values(#{id}, #{ref}, #{name}, #{type}, #{value}, #{label})")
     void add(ExternalParameter externalParameter);
 
-    @Delete("delete from external_parameter where id = #{id}")
+    @Delete("delete from jm_external_parameter where id = #{id}")
     void deleteById(String id);
 
-    @Update("update external_parameter set name = #{name}, value = #{value}, label = #{label}, type = #{type} where id = #{id}")
+    @Update("update jm_external_parameter set name = #{name}, value = #{value}, label = #{label}, type = #{type} where id = #{id}")
     void updateById(ExternalParameter externalParameter);
 
-    @Select("SELECT * FROM `external_parameter` WHERE id = #{id}")
+    @Select("SELECT * FROM `jm_external_parameter` WHERE id = #{id}")
     @Result(column = "id", property = "id")
     @Result(column = "ref", property = "ref")
     @Result(column = "name", property = "name")
@@ -32,7 +32,7 @@ public interface ExternalParameterMapper {
     @Result(column = "value", property = "value")
     Optional<ExternalParameter> findById(String id);
 
-    @Select("SELECT * FROM `external_parameter`")
+    @Select("SELECT * FROM `jm_external_parameter`")
     @Result(column = "id", property = "id")
     @Result(column = "ref", property = "ref")
     @Result(column = "name", property = "name")

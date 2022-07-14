@@ -333,3 +333,25 @@ CREATE TABLE `jm_user`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='用户表';
+
+CREATE TABLE `jm_external_parameter`
+(
+    `id`       varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `ref`  varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数唯一标识',
+    `name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数名',
+    `label` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数标签',
+    `type` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数类型',
+    `value` varchar(512) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数值',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='外部参数表';
+
+CREATE TABLE `jm_external_parameter_label`
+(
+    `id`       varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `value` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数标签值',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='外部参数标签表';
