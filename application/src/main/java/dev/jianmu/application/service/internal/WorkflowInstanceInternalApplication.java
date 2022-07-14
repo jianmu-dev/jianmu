@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -150,7 +151,6 @@ public class WorkflowInstanceInternalApplication {
     }
 
     // 终止流程
-    @Async
     @Transactional
     public void terminate(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
@@ -179,5 +179,9 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         workflowInstance.statusCheck();
         this.workflowInstanceRepository.commitEvents(workflowInstance);
+    }
+
+    public Optional<WorkflowInstance> findById(String instanceId) {
+        return this.workflowInstanceRepository.findById(instanceId);
     }
 }

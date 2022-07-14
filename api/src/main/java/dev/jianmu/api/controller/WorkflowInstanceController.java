@@ -1,5 +1,10 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.api.jwt.UserContextHolder;
+import dev.jianmu.api.util.AssociationUtil;
+import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.NoPermissionException;
+import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,10 +29,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkflowInstanceController {
     private final WorkflowInstanceInternalApplication instanceApplication;
     private final AsyncTaskInstanceInternalApplication taskInstanceInternalApplication;
+    private final UserContextHolder userContextHolder;
+    private final AssociationUtil associationUtil;
+    private final ProjectApplication projectApplication;
 
-    public WorkflowInstanceController(WorkflowInstanceInternalApplication instanceApplication, AsyncTaskInstanceInternalApplication taskInstanceInternalApplication) {
+    public WorkflowInstanceController(WorkflowInstanceInternalApplication instanceApplication, AsyncTaskInstanceInternalApplication taskInstanceInternalApplication, UserContextHolder userContextHolder, AssociationUtil associationUtil, ProjectApplication projectApplication) {
         this.instanceApplication = instanceApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
+        this.userContextHolder = userContextHolder;
+        this.associationUtil = associationUtil;
+        this.projectApplication = projectApplication;
     }
 
     @PutMapping("/stop/{instanceId}")
@@ -35,18 +46,39 @@ public class WorkflowInstanceController {
     public void terminate(
             @Parameter(description = "流程实例ID") @PathVariable String instanceId
     ) {
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var associationType = this.associationUtil.getAssociationType();
+        this.checkProjectPermission(repoId, associationType, instanceId);
         this.instanceApplication.terminate(instanceId);
+    }
+
+    // 校验项目增删改查权限
+    private void checkProjectPermission(String associationId, String associationType, String instanceId) {
+        if (associationId == null || associationType == null) {
+            return;
+        }
+        var workflowInstance = this.instanceApplication.findById(instanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var project = this.projectApplication.findByWorkflowRef(workflowInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowInstance.getWorkflowRef()));
+        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType())) {
+            throw new NoPermissionException();
+        }
     }
 
     @PutMapping("/retry/{instanceId}/{taskRef}")
     @Operation(summary = "流程实例任务重试接口", description = "流程实例任务重试接口")
     public void retry(@PathVariable String instanceId, @PathVariable String taskRef) {
-        this.taskInstanceInternalApplication.retry(instanceId, taskRef);
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var associationType = this.associationUtil.getAssociationType();
+        this.taskInstanceInternalApplication.retry(instanceId, taskRef, repoId, associationType);
     }
 
     @PutMapping("/ignore/{instanceId}/{taskRef}")
     @Operation(summary = "流程实例任务忽略接口", description = "流程实例任务忽略接口")
     public void ignore(@PathVariable String instanceId, @PathVariable String taskRef) {
-        this.taskInstanceInternalApplication.ignore(instanceId, taskRef);
+        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var associationType = this.associationUtil.getAssociationType();
+        this.taskInstanceInternalApplication.ignore(instanceId, taskRef, repoId, associationType);
     }
 }
