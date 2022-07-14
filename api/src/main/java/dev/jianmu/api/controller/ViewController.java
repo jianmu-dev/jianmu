@@ -6,6 +6,8 @@ import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
+import dev.jianmu.externalParameter.aggregate.ExternalParameter;
+import dev.jianmu.externalParameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
@@ -28,6 +30,7 @@ import javax.validation.Valid;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +57,9 @@ public class ViewController {
     private final ParameterApplication parameterApplication;
     private final StorageService storageService;
     private final ProjectGroupApplication projectGroupApplication;
+    private final ExternalParameterApplication externalParameterApplication;
+    private final ExternalParameterLabelApplication externalParameterLabelApplication;
+
 
     public ViewController(
             ProjectApplication projectApplication,
@@ -66,7 +72,9 @@ public class ViewController {
             TaskInstanceApplication taskInstanceApplication,
             ParameterApplication parameterApplication,
             StorageService storageService,
-            ProjectGroupApplication projectGroupApplication) {
+            ProjectGroupApplication projectGroupApplication,
+            ExternalParameterApplication externalParameterApplication,
+            ExternalParameterLabelApplication externalParameterLabelApplication) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.workflowInstanceApplication = workflowInstanceApplication;
@@ -78,6 +86,8 @@ public class ViewController {
         this.parameterApplication = parameterApplication;
         this.storageService = storageService;
         this.projectGroupApplication = projectGroupApplication;
+        this.externalParameterApplication = externalParameterApplication;
+        this.externalParameterLabelApplication = externalParameterLabelApplication;
     }
 
     @GetMapping("/parameters/types")
@@ -504,5 +514,48 @@ public class ViewController {
                 .lastModifiedTime(projectGroup.getLastModifiedTime())
                 .isDefaultGroup(DEFAULT_PROJECT_GROUP_NAME.equals(projectGroup.getName()))
                 .build();
+    }
+
+    @GetMapping("/external_parameters/labels")
+    @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
+    public List<ExternalParameterLabelVo> findAllLabels() {
+        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll();
+        ArrayList<ExternalParameterLabelVo> externalParameterLabelVos = new ArrayList<>();
+        externalParameterLabels.forEach(e -> externalParameterLabelVos.add(
+                ExternalParameterLabelVo.builder()
+                        .id(e.getId())
+                        .value(e.getValue())
+                        .build()));
+        return externalParameterLabelVos;
+    }
+
+    @GetMapping("/external_parameters/{id}")
+    @Operation(summary = "获取外部参数", description = "获取外部参数")
+    public ExternalParameterVo findExternalParameters(@PathVariable("id") String id) {
+        ExternalParameter externalParameter = this.externalParameterApplication.get(id);
+        return ExternalParameterVo.builder()
+                .id(externalParameter.getId())
+                .label(externalParameter.getLabel())
+                .ref(externalParameter.getRef())
+                .type(externalParameter.getType())
+                .name(externalParameter.getName())
+                .value(externalParameter.getValue())
+                .build();
+    }
+
+    @GetMapping("/external_parameters")
+    @Operation(summary = "获取外部参数列表", description = "获取外部参数列表")
+    public List<ExternalParameterVo> findAllExternalParameters() {
+        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll();
+        ArrayList<ExternalParameterVo> externalParameterVos = new ArrayList<>();
+        externalParameters.forEach(externalParameter -> externalParameterVos.add(ExternalParameterVo.builder()
+                .id(externalParameter.getId())
+                .label(externalParameter.getLabel())
+                .ref(externalParameter.getRef())
+                .type(externalParameter.getType())
+                .name(externalParameter.getName())
+                .value(externalParameter.getValue())
+                .build()));
+        return externalParameterVos;
     }
 }

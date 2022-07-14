@@ -32,6 +32,7 @@ import java.util.List;
 public class GiteeApi implements OAuth2Api {
     private final RestTemplate restTemplate;
     private final OAuth2Properties oAuth2Properties;
+    private final static ObjectMapper MAPPER = new ObjectMapper();
 
     public GiteeApi(RestTemplate restTemplate, OAuth2Properties oAuth2Properties) {
         this.restTemplate = restTemplate;
@@ -62,10 +63,10 @@ public class GiteeApi implements OAuth2Api {
                 .redirect_uri(redirectUri)
                 .build();
 
-        ObjectMapper mapper = new ObjectMapper();
+
         String giteeLoginJson;
         try {
-            giteeLoginJson = mapper.writeValueAsString(giteeLoginVo);
+            giteeLoginJson = MAPPER.writeValueAsString(giteeLoginVo);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -86,7 +87,7 @@ public class GiteeApi implements OAuth2Api {
 
         TokenVo giteeTokenVo;
         try {
-            giteeTokenVo = mapper.readValue(tokenEntity.getBody(), TokenVo.class);
+            giteeTokenVo = MAPPER.readValue(tokenEntity.getBody(), TokenVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -111,9 +112,8 @@ public class GiteeApi implements OAuth2Api {
 
         String userInfo = userInfoEntity.getBody();
         UserInfoVo giteeUserInfoVo;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            giteeUserInfoVo = mapper.readValue(userInfo, UserInfoVo.class);
+            giteeUserInfoVo = MAPPER.readValue(userInfo, UserInfoVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -143,9 +143,8 @@ public class GiteeApi implements OAuth2Api {
         }
 
         RepoVo repoVo;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            repoVo = mapper.readValue(entity.getBody(), RepoVo.class);
+            repoVo = MAPPER.readValue(entity.getBody(), RepoVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -175,9 +174,8 @@ public class GiteeApi implements OAuth2Api {
             throw new HttpServerException(e.getMessage());
         }
         List<RepoMembersVo> repoMembersVos;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            repoMembersVos = mapper.readValue(entity.getBody(), new TypeReference<>() {
+            repoMembersVos = MAPPER.readValue(entity.getBody(), new TypeReference<>() {
             });
             repoMembersVos.forEach(m -> {
                 m.setOwner(gitRepoOwner);
@@ -211,9 +209,8 @@ public class GiteeApi implements OAuth2Api {
         }
 
         List<BranchesVo.Branch> branches;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            branches = mapper.readValue(entity.getBody(), new TypeReference<>() {
+            branches = MAPPER.readValue(entity.getBody(), new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
