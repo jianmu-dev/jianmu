@@ -59,4 +59,21 @@ public interface ExternalParameterMapper {
     @Result(column = "created_time", property = "createdTime")
     List<ExternalParameter> findAll(@Param("associationId") String associationId,
                                     @Param("associationType") String associationType);
+
+    @Select("<script>" +
+            "SELECT * FROM `jm_external_parameter`" +
+            "<where> ref = #{ref}" +
+            "</where>" +
+            "</script>")
+    @Result(column = "id", property = "id")
+    @Result(column = "ref", property = "ref")
+    @Result(column = "name", property = "name")
+    @Result(column = "label", property = "label")
+    @Result(column = "type", property = "type")
+    @Result(column = "value", property = "value")
+    @Result(column = "association_id", property = "associationId")
+    @Result(column = "association_type", property = "associationType")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "created_time", property = "createdTime")
+    Optional<ExternalParameter> findByRef(String ref);
 }

@@ -47,4 +47,9 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
     public List<ExternalParameter> findAll(String id, String type) {
         return this.externalParameterMapper.findAll(id, type);
     }
+
+    @Override
+    public Optional<ExternalParameter> findByRef(String ref) {
+        return this.externalParameterMapper.findByRef(ref);
+    }
 }

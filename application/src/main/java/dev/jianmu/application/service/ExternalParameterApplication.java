@@ -1,9 +1,6 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.exception.ExternalParameterNotFoundException;
-import dev.jianmu.application.exception.IncorrectParameterTypeException;
-import dev.jianmu.application.exception.NoPermissionException;
+import dev.jianmu.application.exception.*;
 import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
@@ -32,6 +29,10 @@ public class ExternalParameterApplication {
 
     @Transactional
     public void create(String name, ExternalParameter.Type type, String ref, String label, String value, String associationId, String associationType) {
+        if (this.externalParameterRepository.findByRef(ref).isPresent()) {
+            throw new ExternalParameterRepeatException("外部参数唯一标识重复");
+        }
+
         this.checkParameterType(type, value);
         this.externalParameterRepository.add(
                 ExternalParameter.Builder.aReference()

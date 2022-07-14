@@ -21,4 +21,6 @@ public interface ExternalParameterRepository {
     Optional<ExternalParameter> findById(String id);
 
     List<ExternalParameter> findAll(String id, String type);
+
+    Optional<ExternalParameter> findByRef(String ref);
 }
