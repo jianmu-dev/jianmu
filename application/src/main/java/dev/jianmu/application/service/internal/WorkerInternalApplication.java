@@ -294,8 +294,8 @@ public class WorkerInternalApplication {
     private Map<String, String> getParameterMap(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
         var parameterMap = instanceParameters.stream()
                 .map(instanceParameter -> Map.entry(
-                        instanceParameter.getRef(),
-                        instanceParameter.getParameterId()
+                                instanceParameter.getRef(),
+                                instanceParameter.getParameterId()
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -537,9 +537,9 @@ public class WorkerInternalApplication {
                 .id(taskInstance.getBusinessId())
                 .version(taskInstance.getVersion())
                 .volumes(List.of(
-                        VolumeMount.builder()
-                                .source(taskInstance.getTriggerId())
-                                .target("/" + taskInstance.getTriggerId())
+                        K8sVolumeMount.builder()
+                                .name(taskInstance.getTriggerId())
+                                .path("/" + taskInstance.getTriggerId())
                                 .build()
                 ))
                 .build();
@@ -548,11 +548,24 @@ public class WorkerInternalApplication {
                 .podSpec(PodSpec.builder()
                         .name(taskInstance.getTriggerId())
                         .build())
-                .volume(Volume.builder()
-                        .volumeEmptyDir(VolumeEmptyDir.builder()
-                                .name(taskInstance.getTriggerId())
-                                .build())
-                        .build())
+                .volumes(List.of(
+                        Volume.builder()
+                                .volumeHostPath(VolumeHostPath.builder()
+                                        .id("tempdir")
+                                        .name("tempdir")
+                                        .path("/tmp/" + taskInstance.getTriggerId())
+                                        .type("dir")
+                                        .build())
+                                .build(),
+                        Volume.builder()
+                                .volumeHostPath(VolumeHostPath.builder()
+                                        .id(taskInstance.getTriggerId())
+                                        .name(taskInstance.getTriggerId())
+                                        .path("/tmp/" + taskInstance.getTriggerId() + "/resultFile")
+                                        .type("file")
+                                        .build())
+                                .build()
+                ))
                 .secrets(unitSecrets)
                 .pullSecret(this.findPullSecret())
                 .current(startRunner)
@@ -607,9 +620,9 @@ public class WorkerInternalApplication {
                     .placeholder(this.globalProperties.getWorker().getK8s().getPlaceholder())
                     .secrets(secretVars)
                     .volumes(List.of(
-                            VolumeMount.builder()
-                                    .source(asyncTaskInstance.getTriggerId())
-                                    .target("/" + asyncTaskInstance.getTriggerId())
+                            K8sVolumeMount.builder()
+                                    .name("tempdir")
+                                    .path("/" + asyncTaskInstance.getTriggerId())
                                     .build()
                     ))
                     .build();
@@ -621,7 +634,7 @@ public class WorkerInternalApplication {
                 log.error("拉取任务失败：", e);
                 throw new RuntimeException("拉取任务失败");
             }
-            runner = Runner.builder()
+            var builder = Runner.builder()
                     .id(asyncTaskInstance.getId())
                     .version(0)
                     .command(spec.getCmd())
@@ -632,12 +645,35 @@ public class WorkerInternalApplication {
                     .placeholder(this.globalProperties.getWorker().getK8s().getPlaceholder())
                     .secrets(secretVars)
                     .volumes(List.of(
-                            VolumeMount.builder()
-                                    .source(asyncTaskInstance.getTriggerId())
-                                    .target("/" + asyncTaskInstance.getTriggerId())
+                            K8sVolumeMount.builder()
+                                    .name("tempdir")
+                                    .path("/" + asyncTaskInstance.getTriggerId())
+                                    .build(),
+                            K8sVolumeMount.builder()
+                                    .name(asyncTaskInstance.getTriggerId())
+                                    .path(nodeDef.getResultFile())
                                     .build()
-                    ))
-                    .build();
+                    ));
+            if (nodeDef.getResultFile() == null || nodeDef.getResultFile().isBlank()) {
+                builder.volumes(List.of(
+                        K8sVolumeMount.builder()
+                                .name("tempdir")
+                                .path("/" + asyncTaskInstance.getTriggerId())
+                                .build()
+                ));
+            } else {
+                builder.volumes(List.of(
+                        K8sVolumeMount.builder()
+                                .name("tempdir")
+                                .path("/" + asyncTaskInstance.getTriggerId())
+                                .build(),
+                        K8sVolumeMount.builder()
+                                .name(asyncTaskInstance.getTriggerId())
+                                .path(nodeDef.getResultFile())
+                                .build()
+                ));
+            }
+            runner = builder.build();
         }
         runner.setRegistryAddress(globalProperties.getWorker().getRegistry().getAddress());
         return runner;
@@ -662,13 +698,7 @@ public class WorkerInternalApplication {
                 .name(taskInstance.getAsyncTaskRef())
                 .placeholder(this.globalProperties.getWorker().getK8s().getPlaceholder())
                 .secrets(secrets)
-                .volumes(List.of(
-                        VolumeMount.builder()
-                                .source(taskInstance.getTriggerId())
-                                .target("/" + taskInstance.getTriggerId())
-                                .build()
-                ))
-                .resultFile("/" + taskInstance.getTriggerId() + "/" + taskInstance.getBusinessId())
+                .resultFile("/" + taskInstance.getTriggerId() + "/resultFile")
                 .build();
     }
 
