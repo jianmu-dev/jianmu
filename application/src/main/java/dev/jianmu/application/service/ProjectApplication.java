@@ -68,6 +68,7 @@ public class ProjectApplication {
     private final ProjectGroupRepository projectGroupRepository;
     private final GlobalProperties globalProperties;
     private final TriggerEventRepository triggerEventRepository;
+
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
             GitRepoRepository gitRepoRepository,
@@ -185,6 +186,7 @@ public class ProjectApplication {
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
                 .concurrent(parser.isConcurrent())
+                .tag(parser.getTag())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
                 .triggerType(parser.getTriggerType())
@@ -238,6 +240,7 @@ public class ProjectApplication {
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
         project.setConcurrent(parser.isConcurrent());
+        project.setTag(parser.getTag());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -297,6 +300,7 @@ public class ProjectApplication {
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
                 .concurrent(parser.isConcurrent())
+                .tag(parser.getTag())
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
@@ -347,6 +351,7 @@ public class ProjectApplication {
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
         project.setConcurrent(parser.isConcurrent());
+        project.setTag(parser.getTag());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -395,10 +400,10 @@ public class ProjectApplication {
                     .stream()
                     .filter(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.FINISHED || workflowInstance.getStatus() == ProcessStatus.TERMINATED)
                     .forEach(workflowInstance -> {
-                this.workflowInstanceRepository.deleteById(workflowInstance.getId());
-                this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
-                this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
-            });
+                        this.workflowInstanceRepository.deleteById(workflowInstance.getId());
+                        this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
+                        this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+                    });
         });
 
     }

@@ -48,6 +48,7 @@ public class DslParser {
     private boolean enabled = true;
     private boolean mutable = false;
     private boolean concurrent = false;
+    private String tag = "";
     private String name;
     private String description;
     @JsonProperty("raw-data")
@@ -285,6 +286,10 @@ public class DslParser {
         var concurrent = this.global.get("concurrent");
         if (concurrent instanceof Boolean) {
             this.concurrent = (Boolean) concurrent;
+        }
+        var tag = this.global.get("tag");
+        if (tag instanceof String){
+            this.tag = (String) tag;
         }
     }
 
@@ -787,5 +792,9 @@ public class DslParser {
 
     public Set<GlobalParameter> getGlobalParameters() {
         return globalParameters;
+    }
+
+    public String getTag() {
+        return tag;
     }
 }
