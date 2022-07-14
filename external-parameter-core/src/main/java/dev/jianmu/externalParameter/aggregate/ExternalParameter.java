@@ -1,5 +1,6 @@
 package dev.jianmu.externalParameter.aggregate;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -39,6 +40,16 @@ public class ExternalParameter {
      * 标签
      */
     private String label;
+    /**
+     * 创建时间
+     */
+    private final LocalDateTime createdTime = LocalDateTime.now();
+    /**
+     * 最后修改时间
+     */
+    private LocalDateTime lastModifiedTime;
+
+
 
     public String getId() {
         return id;

@@ -72,12 +72,13 @@ public class ExternalParameterApplication {
     }
 
     private void saveLabel(String label) {
-        if (this.externalParameterLabelRepository.findByValue(label).isEmpty()){
-            this.externalParameterLabelRepository.add(
-                    ExternalParameterLabel.Builder.aReference()
-                            .value(label)
-                            .build());
+        if (this.externalParameterLabelRepository.findByValue(label).isPresent()) {
+            return;
         }
+        this.externalParameterLabelRepository.add(
+                ExternalParameterLabel.Builder.aReference()
+                        .value(label)
+                        .build());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
