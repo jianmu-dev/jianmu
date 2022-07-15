@@ -28,7 +28,6 @@ import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
-import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -160,6 +159,7 @@ public class ProjectApplication {
         return Workflow.Builder.aWorkflow()
                 .ref(ref)
                 .type(parser.getType())
+                .tag(parser.getTag())
                 .name(parser.getName())
                 .description(parser.getDescription())
                 .nodes(nodes)
@@ -186,7 +186,6 @@ public class ProjectApplication {
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
                 .concurrent(parser.isConcurrent())
-                .tag(parser.getTag())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
                 .triggerType(parser.getTriggerType())
@@ -240,7 +239,6 @@ public class ProjectApplication {
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
         project.setConcurrent(parser.isConcurrent());
-        project.setTag(parser.getTag());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -300,7 +298,6 @@ public class ProjectApplication {
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
                 .concurrent(parser.isConcurrent())
-                .tag(parser.getTag())
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
@@ -351,7 +348,6 @@ public class ProjectApplication {
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
         project.setConcurrent(parser.isConcurrent());
-        project.setTag(parser.getTag());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();

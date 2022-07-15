@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
+ * @author Ethan Liu
  * @class Project
  * @description 建木项目
- * @author Ethan Liu
  * @create 2021-04-23 10:55
-*/
+ */
 public class Project {
 
     public enum DslSource {
@@ -54,7 +54,6 @@ public class Project {
     private boolean mutable = false;
     // 可否并发执行
     private boolean concurrent = false;
-    private String tag = "";
     // 原始DSL文本
     private String dslText;
     // 创建时间
@@ -81,10 +80,6 @@ public class Project {
 
     public void setConcurrent(boolean concurrent) {
         this.concurrent = concurrent;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
     }
 
     public void setWorkflowName(String workflowName) {
@@ -171,10 +166,6 @@ public class Project {
         return mutable;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
     public boolean isConcurrent() {
         return concurrent;
     }
@@ -220,7 +211,6 @@ public class Project {
         private boolean mutable;
         // 可否并发执行
         private boolean concurrent = false;
-        private String tag = "";
         // 原始DSL文本
         private String dslText;
         // 最后修改者
@@ -293,11 +283,6 @@ public class Project {
             return this;
         }
 
-        public Builder tag(String tag){
-            this.tag = tag;
-            return this;
-        }
-
         public Builder dslText(String dslText) {
             this.dslText = dslText;
             return this;
@@ -325,7 +310,6 @@ public class Project {
             project.enabled = this.enabled;
             project.mutable = this.mutable;
             project.concurrent = this.concurrent;
-            project.tag = this.tag;
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;
             project.lastModifiedBy = this.lastModifiedBy;

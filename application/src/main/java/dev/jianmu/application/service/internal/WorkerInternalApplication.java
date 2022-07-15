@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.el.ElContext;
 import dev.jianmu.el.PlaceholderResolver;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
@@ -13,8 +14,6 @@ import dev.jianmu.infrastructure.worker.event.TaskFailedEvent;
 import dev.jianmu.infrastructure.worker.event.TaskFinishedEvent;
 import dev.jianmu.infrastructure.worker.event.TaskRunningEvent;
 import dev.jianmu.infrastructure.worker.unit.*;
-import dev.jianmu.project.aggregate.Project;
-import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -24,11 +23,9 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
-import dev.jianmu.trigger.event.TriggerEventParameter;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.repository.WorkerRepository;
-import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.aggregate.definition.Node;
 import dev.jianmu.workflow.aggregate.definition.TaskParameter;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
@@ -89,7 +86,6 @@ public class WorkerInternalApplication {
     private final MonitoringFileService monitoringFileService;
     private final GlobalProperties globalProperties;
     private final WorkflowRepository workflowRepository;
-    private final ProjectRepository projectRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
 
     public WorkerInternalApplication(
@@ -108,7 +104,7 @@ public class WorkerInternalApplication {
             MonitoringFileService monitoringFileService,
             GlobalProperties globalProperties,
             WorkflowRepository workflowRepository,
-            ProjectRepository projectRepository, AsyncTaskInstanceRepository asyncTaskInstanceRepository
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository
     ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
@@ -125,7 +121,6 @@ public class WorkerInternalApplication {
         this.monitoringFileService = monitoringFileService;
         this.globalProperties = globalProperties;
         this.workflowRepository = workflowRepository;
-        this.projectRepository = projectRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
     }
 
@@ -161,7 +156,10 @@ public class WorkerInternalApplication {
                         if (!StringUtils.hasText(workerTag)) {
                             throw new RuntimeException("未找到该流程的tag");
                         }
-                        var workers = this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES), workerTag, workflowInstance.getStartTime());
+                        var workers = this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
+                                List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                workerTag,
+                                workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
                             throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
@@ -179,27 +177,27 @@ public class WorkerInternalApplication {
     }
 
     private String getWorkerTag(WorkflowInstance workflowInstance) {
-        String workerTag = "";
+        var context = new ElContext();
         PlaceholderResolver placeholderResolver = PlaceholderResolver.getDefaultResolver();
-        Map<String, String> map = new HashMap<>();
-        var optionalTriggerEvent = this.triggerEventRepository.findById(workflowInstance.getTriggerId());
-        if (optionalTriggerEvent.isPresent()) {
-            for (TriggerEventParameter parameter : optionalTriggerEvent.get().getParameters()) {
-                map.put("trigger." + parameter.getName(), parameter.getValue());
-            }
-        }
-        var optionalWorkflow = this.workflowRepository
-                .findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion());
-        if (optionalWorkflow.isPresent()) {
-            Project project = this.projectRepository.findByWorkflowRef(optionalWorkflow.get().getRef())
-                    .orElseThrow(() -> new RuntimeException("该流程对应的DSL无法找到"));
-            workerTag = project.getTag();
-            for (GlobalParameter parameter : optionalWorkflow.get().getGlobalParameters()) {
-                map.put("global." + parameter.getName(), String.valueOf(parameter.getValue()));
-            }
-        }
+        var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
+        workflow.getGlobalParameters()
+                .forEach(globalParameter -> context.add(
+                        "global",
+                        globalParameter.getName(),
+                        Parameter
+                                .Type.getTypeByName(globalParameter.getType())
+                                .newParameter(globalParameter.getValue())));
 
-        return placeholderResolver.resolveByRule(workerTag, map::get);
+        this.triggerEventRepository.findById(workflowInstance.getTriggerId())
+                .ifPresent(triggerEvent -> triggerEvent.getParameters()
+                        .forEach(triggerEventParameter -> context.add(
+                                "trigger",
+                                triggerEventParameter.getName(),
+                                Parameter
+                                        .Type.getTypeByName(triggerEventParameter.getType())
+                                        .newParameter(triggerEventParameter.getValue()))));
+        return placeholderResolver.resolveByContext(workflow.getTag(), context);
     }
 
     @Transactional
