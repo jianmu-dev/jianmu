@@ -62,7 +62,7 @@ export function checkDuplicate(globalParams: GlobalParam[]): void {
     return obj;
   }, {});
   for (const i in countObj) {
-    if (countObj[i] > 1) {
+    if (countObj[i] > 1 && i !== '') {
       throw new Error(`唯一标识 "${i}" 重复`);
     }
   }
