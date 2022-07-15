@@ -4,7 +4,7 @@ import icon from '../../../svgs/shape/start.svg';
 
 export class Start extends BaseNode {
   constructor() {
-    super(NodeRefEnum.START, '开始', NodeTypeEnum.START, icon);
+    super(NodeRefEnum.START, '开始', NodeTypeEnum.START, icon, '');
   }
 
   static build(): Start {

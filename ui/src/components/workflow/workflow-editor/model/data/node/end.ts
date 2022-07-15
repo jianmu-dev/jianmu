@@ -4,7 +4,7 @@ import icon from '../../../svgs/shape/end.svg';
 
 export class End extends BaseNode {
   constructor() {
-    super(NodeRefEnum.END, '结束', NodeTypeEnum.END, icon);
+    super(NodeRefEnum.END, '结束', NodeTypeEnum.END, icon, '');
   }
 
   static build(): End {
