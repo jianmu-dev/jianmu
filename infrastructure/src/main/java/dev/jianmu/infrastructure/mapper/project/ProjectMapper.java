@@ -111,8 +111,8 @@ public interface ProjectMapper {
 
     @Select("<script>" +
             "SELECT jp.*, `wi`.`end_time`, `wi`.`status`, `wi`.`start_time`, `wi`.`suspended_time` FROM `jianmu_project` `jp` INNER JOIN `project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
-            "LEFT JOIN (select  `t1`.`workflow_ref`, `t1`.`end_time`, `t1`.`start_time`, `t1`.`suspended_time`, `t1`.`status`,  if(`end_time` is null, now(), `end_time`) `sort_end_time` " +
-            "           FROM `workflow_instance` `t1`, (select `workflow_ref`,max(`serial_no`) `serial_no` from `workflow_instance` GROUP BY `workflow_ref`) t2 " +
+            "LEFT JOIN (select  `t1`.`workflow_ref`, `t1`.`end_time`, `t1`.`start_time`, `t1`.`suspended_time`, `t1`.`status`,  if(`end_time` is null, `start_time`, `end_time`) `sort_end_time` " +
+            "           FROM `workflow_instance` `t1`, (select `workflow_ref`,max(`serial_no`) `serial_no` from `workflow_instance` WHERE `status` != 'INIT' GROUP BY `workflow_ref`) t2 " +
             "           WHERE `t1`.`workflow_ref` = `t2`.`workflow_ref` and `t1`.`serial_no` = `t2`.`serial_no`) `wi` " +
             "ON `wi`.`workflow_ref` = `jp`.`workflow_ref` COLLATE utf8mb4_unicode_ci " +
             "<where>" +
