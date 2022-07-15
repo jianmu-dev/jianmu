@@ -44,7 +44,7 @@ public interface WorkerMapper {
             " type IN " +
             " <foreach collection='types' item='item' open='(' close=')' separator=','> #{item} " +
             " </foreach>" +
-            " and tag = #{tag}" +
+            " and tags = #{tag}" +
             "</where>" +
             "</script>")
     @Result(column = "created_time", property = "createdTime")
