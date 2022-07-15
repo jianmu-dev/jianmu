@@ -4,7 +4,9 @@
 export enum NodeRefEnum {
   CRON = 'cron',
   WEBHOOK = 'webhook',
-  SHELL= 'shell'
+  SHELL = 'shell',
+  START = 'start',
+  END = 'end',
 }
 
 /**
@@ -28,6 +30,8 @@ export enum NodeTypeEnum {
   // CONDITION = 'condition',
   SHELL = 'shell',
   ASYNC_TASK = 'async-task',
+  START = 'start',
+  END = 'end',
 }
 
 /**

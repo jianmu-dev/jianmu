@@ -105,8 +105,10 @@ export class WorkflowNodeToolbar {
     msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${nodeData.getName()}</div>`;
     let title = '删除';
     switch (nodeData.getType()) {
-      case NodeTypeEnum.ASYNC_TASK:
       case NodeTypeEnum.SHELL:
+      case NodeTypeEnum.ASYNC_TASK:
+      case NodeTypeEnum.START:
+      case NodeTypeEnum.END:
         title += '节点';
         break;
       case NodeTypeEnum.CRON:

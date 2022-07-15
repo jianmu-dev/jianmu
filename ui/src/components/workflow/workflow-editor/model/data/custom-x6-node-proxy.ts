@@ -6,12 +6,28 @@ import { Webhook } from './node/webhook';
 import { Shell } from './node/shell';
 import { AsyncTask } from './node/async-task';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
+import { Start } from './node/start';
+import { End } from './node/end';
 
 export class CustomX6NodeProxy {
   private readonly node: Node;
 
   constructor(node: Node) {
     this.node = node;
+  }
+
+  isSingle(): boolean {
+    return this.isStart() || this.isEnd() || this.isTrigger();
+  }
+
+  isStart(): boolean {
+    const { type } = JSON.parse(this.node.getData<string>());
+    return [NodeTypeEnum.START].includes(type);
+  }
+
+  isEnd(): boolean {
+    const { type } = JSON.parse(this.node.getData<string>());
+    return [NodeTypeEnum.END].includes(type);
   }
 
   isTrigger(): boolean {
@@ -35,6 +51,12 @@ export class CustomX6NodeProxy {
         break;
       case NodeTypeEnum.ASYNC_TASK:
         nodeData = AsyncTask.build(obj);
+        break;
+      case NodeTypeEnum.START:
+        nodeData = Start.build();
+        break;
+      case NodeTypeEnum.END:
+        nodeData = End.build();
         break;
     }
 

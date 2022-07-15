@@ -333,6 +333,13 @@ export class WorkflowGraph {
         return;
       }
 
+      const proxy = new CustomX6NodeProxy(node);
+
+      if (proxy.isStart() || proxy.isEnd()) {
+        // 表示开始/结束节点，忽略
+        return;
+      }
+
       this.clickNodeCallback(node.id);
     });
     this.graph.on('node:mouseenter', ({ node }) => {

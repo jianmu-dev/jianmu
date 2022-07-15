@@ -8,11 +8,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { Node } from '@antv/x6';
 import { IWorkflowNode } from '../model/data/common';
 import { CustomX6NodeProxy } from '../model/data/custom-x6-node-proxy';
 import JmTextViewer from '@/components/text-viewer/index.vue';
+import { NodeTypeEnum } from '../model/data/enumeration';
 
 export default defineComponent({
   components: { JmTextViewer },
@@ -23,10 +24,12 @@ export default defineComponent({
     const shape = ref<HTMLElement>();
     const iconUrl = ref<string>('');
     const nameVal = ref<string>('');
+    const type = ref<NodeTypeEnum>();
 
     const refresh = (data: IWorkflowNode) => {
       iconUrl.value = data.getIcon();
       nameVal.value = data.getName();
+      type.value = data.getType();
     };
 
     onMounted(() => {
@@ -49,7 +52,10 @@ export default defineComponent({
 
     return {
       shape,
-      clickable: !props.nodeData,
+      clickable: computed<boolean>(() => {
+        const dataX6NodeId = shape.value?.getAttribute('data-x6-node-id');
+        return !!(dataX6NodeId && type.value && ![NodeTypeEnum.START, NodeTypeEnum.END].includes(type.value));
+      }),
       iconUrl,
       nameVal,
     };

@@ -100,7 +100,7 @@ export class WorkflowValidator {
       return false;
     }
 
-    if (!this.checkTrigger(node)) {
+    if (!this.checkSingle(node)) {
       return false;
     }
 
@@ -122,18 +122,21 @@ export class WorkflowValidator {
     return true;
   }
 
-  private checkTrigger(droppingNode: Node): boolean {
-    if (!new CustomX6NodeProxy(droppingNode).isTrigger()) {
-      // 非trigger时，忽略
+  private checkSingle(droppingNode: Node): boolean {
+    const droppingNodeProxy = new CustomX6NodeProxy(droppingNode);
+    if (!droppingNodeProxy.isSingle()) {
+      // 非必须单个节点时，忽略
       return true;
     }
+    // 表示当前拖放的节点为trigger或单个节点
+    const isTrigger = droppingNodeProxy.isTrigger();
+    const currentSingleNodeProxy = this.graph.getNodes()
+      .map(node => new CustomX6NodeProxy(node))
+      .find(proxy => isTrigger ? proxy.isTrigger() : (droppingNodeProxy.getData().getType() === proxy.getData().getType()));
 
-    // 表示当前拖放的节点为trigger
-    const currentTrigger = this.graph.getNodes()
-      .find(node => new CustomX6NodeProxy(node).isTrigger());
-
-    if (currentTrigger) {
-      this.proxy.$warning('只能有一个触发器');
+    if (currentSingleNodeProxy) {
+      const nodeName = isTrigger ? '触发器' : currentSingleNodeProxy.getData().getName();
+      this.proxy.$warning(`只能有一个${nodeName}节点`);
       return false;
     }
 
