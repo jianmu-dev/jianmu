@@ -334,7 +334,6 @@ export class WorkflowGraph {
       }
 
       const proxy = new CustomX6NodeProxy(node);
-
       if (proxy.isStart() || proxy.isEnd()) {
         // 表示开始/结束节点，忽略
         return;
