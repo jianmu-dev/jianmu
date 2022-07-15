@@ -60,8 +60,8 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     @Override
-    public List<ProjectVo> findByIdIn(List<String> ids, String workflowName, String sortType, String status) {
-        return this.projectMapper.findByIdIn(ids, workflowName, sortType, status);
+    public List<ProjectVo> findByIdIn(List<String> ids) {
+        return this.projectMapper.findByIdIn(ids);
     }
 
     public PageInfo<Project> findAllPage(String workflowName, int pageNum, int pageSize) {

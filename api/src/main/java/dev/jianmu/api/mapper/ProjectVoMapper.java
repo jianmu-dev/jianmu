@@ -19,5 +19,6 @@ public interface ProjectVoMapper {
     @Mapping(target = "name", source = "workflowName")
     @Mapping(target = "description", source = "workflowDescription")
     @Mapping(target = "status", expression = "java(\"INIT\")")
+    @Mapping(target = "lastModifiedTime", source = "lastModifiedTime")
     dev.jianmu.api.vo.ProjectVo toProjectVo(ProjectVo projectVo);
 }
