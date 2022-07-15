@@ -6,5 +6,5 @@ export const LOGIN_INDEX = '/login';
 // 平台首页
 export const PLATFORM_INDEX = '/';
 
-// 404
-export const ERROR_404 = '/error/http-status-error/404';
+// 授权
+export const AUTHORIZE_INDEX = '/oauth2/authorize';

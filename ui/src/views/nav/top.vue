@@ -31,9 +31,17 @@
       </router-link>
       <jm-dropdown v-else trigger="click">
         <span class="el-dropdown-link">
-          <jm-tooltip :content="session.username" placement="left">
+          <jm-tooltip :content="session.username" placement="left" v-if="loginType">
+            <img :src="session.avatarUrl" class="avatar"
+                 @error="loadedError"
+                 v-if="session.avatarUrl!=='https://gitee.com/assets/no_portrait.png'&&loaded">
+            <span class="username" v-else>{{
+                session.username?.charAt(0).toUpperCase()
+              }}</span>
+          </jm-tooltip>
+          <jm-tooltip :content="session.username" placement="left" v-else>
             <span class="username">{{
-                session.username.charAt(0).toUpperCase()
+                session.username?.charAt(0).toUpperCase()
               }}</span>
           </jm-tooltip>
           <i class="el-icon-arrow-down el-icon--right"></i>
@@ -49,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/session';
@@ -68,7 +76,28 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const rootState = store.state as IRootState;
-    const state = store.state[namespace] as IState;
+    // 头像图片正常显示
+    const loaded = ref<boolean>(true);
+    const loginType = computed<string>(() => rootState.thirdPartyType);
+    const defaultSession = ref<ISessionVo>();
+    let state = store.state[namespace] as IState;
+    const session = computed<ISessionVo | undefined>(() => {
+      return defaultSession.value ? defaultSession.value : state.session;
+    });
+    const refreshState = (e: any) => {
+      if (e.key !== 'session') {
+        return;
+      }
+      defaultSession.value = JSON.parse(e.newValue)['_default'].session;
+      // 将新tab中的session值，保存在vuex中
+      proxy.mutateSession(defaultSession.value);
+    };
+    onMounted(() => {
+      window.addEventListener('storage', refreshState);
+    });
+    onBeforeUnmount(() => {
+      window.removeEventListener('storage', refreshState);
+    });
     const currentVersion = `v${v}`;
     const newVersion = computed<IVersionVo | undefined>(() => {
       if (
@@ -82,11 +111,14 @@ export default defineComponent({
     });
 
     return {
+      loaded,
+      loginType,
       currentVersion,
       newVersion,
-      session: computed<ISessionVo | undefined>(() => state.session),
+      session,
       ...mapMutations({
         deleteSession: 'mutateDeletion',
+        mutateSession: 'oauthMutate',
       }),
       view: () => {
         if (!newVersion.value) {
@@ -105,6 +137,10 @@ export default defineComponent({
         } catch (err) {
           proxy.$throw(err, proxy);
         }
+      },
+      // 头像加载失败
+      loadedError() {
+        loaded.value = false;
       },
     };
   },
@@ -184,6 +220,13 @@ export default defineComponent({
       margin-left: 10px;
       color: #333333;
       cursor: pointer;
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+        overflow: hidden;
+        border-radius: 50%;
+      }
 
       .username {
         display: inline-block;

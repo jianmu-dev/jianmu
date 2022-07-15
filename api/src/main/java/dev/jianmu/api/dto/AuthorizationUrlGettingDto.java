@@ -1,6 +1,6 @@
 package dev.jianmu.api.dto;
 
-import dev.jianmu.api.oauth2_api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 

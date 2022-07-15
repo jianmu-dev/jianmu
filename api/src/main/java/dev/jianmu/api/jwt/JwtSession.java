@@ -21,24 +21,36 @@ public class JwtSession {
      * 第三方平台用户id
      */
     private String id;
-
     /**
      * 头像
      */
     private String avatarUrl;
-
     /**
      * 昵称
      */
     private String nickname;
-
     /**
      * 用户名
      */
     private String username;
-
     /**
      * git仓库id
      */
     private String gitRepoId;
+    /**
+     * 仓库名
+     */
+    private String gitRepo;
+    /**
+     * 仓库所有者
+     */
+    private String gitRepoOwner;
+    /**
+     * 仓库角色
+     */
+    private Role gitRepoRole;
+
+    public enum Role {
+        ADMIN, OWNER, MEMBER
+    }
 }
