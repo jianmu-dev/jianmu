@@ -146,8 +146,10 @@ public class OAuth2Controller {
         String jwt = this.jwtProvider.generateJwtToken(authentication);
 
         // 同步仓库
-        var branchNames = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
-        this.gitRepoApplication.syncBranches(repo.getId(), repo.getDefaultBranch(), branchNames);
+        if (repo != null) {
+            var branchNames = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
+            this.gitRepoApplication.syncBranches(repo.getId(), repo.getDefaultBranch(), branchNames);
+        }
 
         return ResponseEntity.ok(JwtResponse.builder()
                 .type("Bearer")

@@ -9,7 +9,7 @@ import java.util.UUID;
  * @author Ethan Liu
  * @create 2021-04-23 10:55
 */
-public class Project {
+public class Project extends BaseAssociation {
     public enum DslSource {
         GIT,
         LOCAL
@@ -214,6 +214,10 @@ public class Project {
         private String dslText;
         // 最后修改者
         private String lastModifiedBy;
+        // 联合ID
+        private String associationId;
+        // 联合类型
+        private String associationType;
 
         private Builder() {
         }
@@ -292,6 +296,16 @@ public class Project {
             return this;
         }
 
+        public Builder associationId(String associationId) {
+            this.associationId = associationId;
+            return this;
+        }
+
+        public Builder associationType(String associationType) {
+            this.associationType = associationType;
+            return this;
+        }
+
         public Project build() {
             if (!this.mutable && !this.enabled) {
                 throw new RuntimeException("mutable与enabled同时为false时，项目将永不可用");
@@ -313,6 +327,8 @@ public class Project {
             project.dslText = this.dslText;
             project.lastModifiedBy = this.lastModifiedBy;
             project.lastModifiedTime = LocalDateTime.now();
+            project.setAssociationId(this.associationId);
+            project.setAssociationType(this.associationType);
             return project;
         }
     }

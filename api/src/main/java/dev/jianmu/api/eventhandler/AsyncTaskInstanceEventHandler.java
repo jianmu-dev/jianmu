@@ -3,7 +3,6 @@ package dev.jianmu.api.eventhandler;
 import dev.jianmu.application.command.NextNodeCmd;
 import dev.jianmu.application.command.TaskActivatingCmd;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
-import dev.jianmu.application.service.internal.WorkerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
@@ -29,20 +28,17 @@ public class AsyncTaskInstanceEventHandler {
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final WorkflowInternalApplication workflowInternalApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
-    private final WorkerApplication workerApplication;
     private final ApplicationEventPublisher publisher;
 
     public AsyncTaskInstanceEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             WorkflowInternalApplication workflowInternalApplication,
             TaskInstanceInternalApplication taskInstanceInternalApplication,
-            WorkerApplication workerApplication,
             ApplicationEventPublisher publisher
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.workflowInternalApplication = workflowInternalApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
-        this.workerApplication = workerApplication;
         this.publisher = publisher;
     }
 

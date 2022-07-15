@@ -74,20 +74,14 @@ public class GitRepoApplication {
         this.gitRepoRepository.saveOrUpdate(gitRepo);
     }
 
-    public List<ProjectVo> findFlows(GitRepo gitRepo, String name, ProcessStatus status, String branch, String sortType) {
+    public List<ProjectVo> findFlows(GitRepo gitRepo) {
         var projectIds = gitRepo.getFlows().stream()
-                .filter(flow -> {
-                    if (branch == null) {
-                        return true;
-                    }
-                    return branch.equals(flow.getBranchName());
-                })
                 .map(Flow::getProjectId)
                 .collect(Collectors.toList());
         if (projectIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return this.projectRepository.findByIdIn(projectIds, name, sortType, status == null ? null : status.name());
+        return this.projectRepository.findByIdIn(projectIds);
     }
 
     public Optional<Flow> findFlowByProjectId(String projectId, String gitRepoId) {

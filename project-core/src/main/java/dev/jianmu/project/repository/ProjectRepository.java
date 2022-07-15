@@ -26,5 +26,5 @@ public interface ProjectRepository {
 
     Optional<Project> findByWorkflowRef(String workflowRef);
 
-    List<ProjectVo> findByIdIn(List<String> ids, String workflowName, String sortType, String status);
+    List<ProjectVo> findByIdIn(List<String> ids);
 }

@@ -1,22 +1,24 @@
 CREATE TABLE `jm_project`
 (
     `id`                   varchar(45)  NOT NULL COMMENT 'ID',
-    `dsl_source`           varchar(45)  DEFAULT NULL COMMENT 'DSL来源',
-    `dsl_type`             varchar(45)  DEFAULT NULL COMMENT 'DSL 类型',
-    `trigger_type`         varchar(45)  DEFAULT NULL COMMENT '触发类型',
+    `dsl_source`           varchar(45)           DEFAULT NULL COMMENT 'DSL来源',
+    `dsl_type`             varchar(45)           DEFAULT NULL COMMENT 'DSL 类型',
+    `trigger_type`         varchar(45)           DEFAULT NULL COMMENT '触发类型',
     `git_repo_id`          varchar(150) NOT NULL COMMENT 'Git仓库ID',
     `workflow_name`        varchar(45)  NOT NULL COMMENT '流程定义显示名称',
-    `workflow_description` varchar(255) DEFAULT NULL COMMENT '描述',
+    `workflow_description` varchar(255)          DEFAULT NULL COMMENT '描述',
     `workflow_ref`         varchar(45)  NOT NULL COMMENT '流程定义Ref',
     `workflow_version`     varchar(45)  NOT NULL COMMENT '流程定义版本',
     `steps`                int          NOT NULL COMMENT '步骤数量',
-    `enabled`              tinyint(1)   DEFAULT NULL COMMENT '项目是否可触发',
-    `mutable`              tinyint(1)   DEFAULT NULL COMMENT '项目状态是否可变',
-    `concurrent`           bit          DEFAULT 0 COMMENT '可否并发执行',
+    `enabled`              tinyint(1)            DEFAULT NULL COMMENT '项目是否可触发',
+    `mutable`              tinyint(1)            DEFAULT NULL COMMENT '项目状态是否可变',
+    `concurrent`           bit                   DEFAULT 0 COMMENT '可否并发执行',
     `dsl_text`             longtext     NOT NULL COMMENT 'DSL内容文本',
-    `created_time`         datetime     DEFAULT NULL COMMENT '创建时间',
-    `last_modified_by`     varchar(45)  DEFAULT NULL COMMENT '最后修改人',
+    `created_time`         datetime              DEFAULT NULL COMMENT '创建时间',
+    `last_modified_by`     varchar(45)           DEFAULT NULL COMMENT '最后修改人',
     `last_modified_time`   datetime     NOT NULL COMMENT '最后修改时间',
+    `association_id`       varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`     varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
     PRIMARY KEY (`id`),
     UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`),
     UNIQUE KEY `workflow_name_UNIQUE` (`workflow_name`)
@@ -185,20 +187,25 @@ CREATE TABLE `jm_worker`
 
 CREATE TABLE `jm_secret_namespace`
 (
+    `association_id`     varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`   varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
     `name`               varchar(100) NOT NULL COMMENT '名称',
-    `description`        varchar(255) DEFAULT NULL COMMENT '描述',
+    `description`        varchar(255)          DEFAULT NULL COMMENT '描述',
     `created_time`       datetime     NOT NULL COMMENT '创建时间',
     `last_modified_time` datetime     NOT NULL COMMENT '修改时间',
-    PRIMARY KEY (`name`)
+    UNIQUE INDEX id_type_name (`association_id`, `association_type`, `name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥命名空间表';
 
 CREATE TABLE `jm_secret_kv_pair`
 (
-    `namespace_name` varchar(100) NOT NULL COMMENT '命名空间名称',
-    `kv_key`         varchar(45)  NOT NULL COMMENT '参数key',
-    `kv_value`       text         NOT NULL COMMENT '参数值'
+    `association_id`   varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type` varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
+    `namespace_name`   varchar(100) NOT NULL COMMENT '命名空间名称',
+    `kv_key`           varchar(45)  NOT NULL COMMENT '参数key',
+    `kv_value`         text         NOT NULL COMMENT '参数值',
+    UNIQUE INDEX id_type_name_key (`association_id`, `association_type`, `namespace_name`, `kv_key`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='密钥键值对表';
@@ -333,3 +340,36 @@ CREATE TABLE `jm_user`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='用户表';
+
+
+CREATE TABLE `jm_external_parameter`
+(
+    `id`                 varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `ref`                varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数唯一标识',
+    `name`               varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数名',
+    `label`              varchar(32) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '参数标签',
+    `type`               varchar(64) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '参数类型',
+    `value`              varchar(512) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '参数值',
+    `created_time`       datetime                                         DEFAULT NULL COMMENT '创建时间',
+    `last_modified_time` datetime                                NOT NULL COMMENT '最后修改时间',
+    `association_id`     varchar(45)                             NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`   varchar(16)                             NOT NULL DEFAULT '' COMMENT '关联类型',
+    UNIQUE INDEX association_id_type_ref (`association_id`, `association_type`, `ref`),
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='外部参数表';
+
+CREATE TABLE `jm_external_parameter_label`
+(
+    `id`                 varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'ID',
+    `value`              varchar(32) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '参数标签值',
+    `created_time`       datetime                                         DEFAULT NULL COMMENT '创建时间',
+    `last_modified_time` datetime                                NOT NULL COMMENT '最后修改时间',
+    `association_id`     varchar(45)                             NOT NULL DEFAULT '' COMMENT '关联ID',
+    `association_type`   varchar(16)                             NOT NULL DEFAULT '' COMMENT '关联类型',
+    UNIQUE INDEX association_id_type_value (`association_id`, `association_type`, `value`),
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='外部参数标签表';

@@ -12,6 +12,7 @@ import dev.jianmu.infrastructure.worker.event.TaskFailedEvent;
 import dev.jianmu.infrastructure.worker.event.TaskFinishedEvent;
 import dev.jianmu.infrastructure.worker.event.TaskRunningEvent;
 import dev.jianmu.infrastructure.worker.unit.*;
+import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -84,6 +85,7 @@ public class WorkerInternalApplication {
     private final GlobalProperties globalProperties;
     private final WorkflowRepository workflowRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
+    private final ProjectRepository projectRepository;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -101,8 +103,8 @@ public class WorkerInternalApplication {
             MonitoringFileService monitoringFileService,
             GlobalProperties globalProperties,
             WorkflowRepository workflowRepository,
-            AsyncTaskInstanceRepository asyncTaskInstanceRepository
-    ) {
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository,
+            ProjectRepository projectRepository) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
@@ -119,6 +121,7 @@ public class WorkerInternalApplication {
         this.globalProperties = globalProperties;
         this.workflowRepository = workflowRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
+        this.projectRepository = projectRepository;
     }
 
     @Transactional
@@ -205,7 +208,10 @@ public class WorkerInternalApplication {
                 .map(InstanceParameter::getParameterId)
                 .collect(Collectors.toSet()));
         var parameterMap = this.getParameterMap(instanceParameters, parameters);
-        var secretSet = this.getSecretParameterSet(isShellNode, instanceParameters, parameters);
+        // 查询项目
+        var project = this.projectRepository.findByWorkflowRef(taskInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + taskInstance.getWorkflowRef()));
+        var secretSet = this.getSecretParameterSet(isShellNode, instanceParameters, parameters, project.getAssociationId(), project.getAssociationType());
         if (!isShellNode) {
             parameterMap = parameterMap.entrySet().stream()
                     .filter(entry -> entry.getKey() != null)
@@ -303,7 +309,7 @@ public class WorkerInternalApplication {
         return this.parameterDomainService.createNoSecParameterMap(parameterMap, parameters);
     }
 
-    private HashSet<WorkerSecret> getSecretParameterSet(boolean isShellNode, List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
+    private HashSet<WorkerSecret> getSecretParameterSet(boolean isShellNode, List<InstanceParameter> instanceParameters, List<Parameter> parameters, String associationId, String associationType) {
         var secretParameters = parameters.stream()
                 .filter(parameter -> parameter instanceof SecretParameter)
                 // 过滤非正常语法
@@ -314,7 +320,7 @@ public class WorkerInternalApplication {
                 .filter(parameter -> parameter.getId().equals(instanceParameter.getParameterId()))
                 .findFirst()
                 .ifPresent(parameter -> {
-                    var kvPairOptional = this.findSecret(parameter);
+                    var kvPairOptional = this.findSecret(parameter, associationId, associationType);
                     kvPairOptional.ifPresent(kv -> {
                         var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
                         secretSet.add(WorkerSecret.builder()
@@ -327,10 +333,10 @@ public class WorkerInternalApplication {
         return secretSet;
     }
 
-    private Optional<KVPair> findSecret(Parameter<?> parameter) {
+    private Optional<KVPair> findSecret(Parameter<?> parameter, String associationId, String associationType) {
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = parameter.getStringValue().split("\\.");
-        return this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1]);
+        return this.credentialManager.findByNamespaceNameAndKey(associationId, associationType, strings[0], strings[1]);
     }
 
     /**
@@ -508,6 +514,8 @@ public class WorkerInternalApplication {
     }
 
     private Unit findCreateUnit(TaskInstance taskInstance) {
+        var project = this.projectRepository.findByWorkflowRef(taskInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + taskInstance.getWorkflowRef()));
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(taskInstance.getTriggerId());
@@ -520,7 +528,7 @@ public class WorkerInternalApplication {
             var runnerEnvs = new HashMap<String, String>();
             node.getTaskParameters().forEach(taskParameter -> {
                 if (taskParameter.getType() == Parameter.Type.SECRET) {
-                    this.findUnitSecret(taskParameter, nodeDef).ifPresent(workerSecret -> {
+                    this.findUnitSecret(taskParameter, nodeDef, project.getAssociationId(), project.getAssociationType()).ifPresent(workerSecret -> {
                         unitSecrets.add(workerSecret);
                         runnerSecrets.add(SecretVar.builder()
                                 .env(workerSecret.getEnv())
@@ -560,10 +568,10 @@ public class WorkerInternalApplication {
                 .build();
     }
 
-    private Optional<WorkerSecret> findUnitSecret(TaskParameter taskParameter, NodeDef nodeDef) {
+    private Optional<WorkerSecret> findUnitSecret(TaskParameter taskParameter, NodeDef nodeDef, String associationId, String associationType) {
         var parameter = Parameter.Type.SECRET.newParameter(this.findSecretByExpression(taskParameter.getExpression()));
         if (parameter.getStringValue().split("\\.").length == 2) {
-            var kvPairOptional = this.findSecret(parameter);
+            var kvPairOptional = this.findSecret(parameter, associationId, associationType);
             return kvPairOptional.map(kv -> {
                 var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
                 return Optional.of(WorkerSecret.builder()
