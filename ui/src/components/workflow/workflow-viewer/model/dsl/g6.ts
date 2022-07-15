@@ -161,6 +161,7 @@ function confirmFlowNodes(nodes: NodeConfig[], edges: EdgeConfig[]) {
 function parseWorkflow(workflow: any): {
   nodes: NodeConfig[];
   edges: EdgeConfig[];
+  isWorkflow: boolean;
 } {
   const nodes: NodeConfig[] = [];
   const edges: EdgeConfig[] = [];
@@ -258,7 +259,7 @@ function parseWorkflow(workflow: any): {
   // ====================================================================================================
   confirmFlowNodes(nodes, edges);
 
-  return { nodes, edges };
+  return { nodes, edges, isWorkflow: true };
 }
 
 /**
@@ -268,6 +269,7 @@ function parseWorkflow(workflow: any): {
 function parsePipeline(pipeline: any): {
   nodes: NodeConfig[];
   edges: EdgeConfig[];
+  isWorkflow: boolean;
 } {
   const nodes: NodeConfig[] = [];
   const edges: EdgeConfig[] = [];
@@ -289,21 +291,31 @@ function parsePipeline(pipeline: any): {
     });
   });
 
-  if (keys.find(key => typeof pipeline[key] === 'object' && pipeline[key].needs)) {
-    const startId = uuidv4();
-    nodes.push({
-      id: startId,
-      label: '开始',
-      type: NodeTypeEnum.START,
-      uniqueKey: NodeTypeEnum.START,
-    });
+  const startNode = {
+    id: uuidv4(),
+    label: '开始',
+    type: NodeTypeEnum.START,
+    uniqueKey: NodeTypeEnum.START,
+  };
+  const endNode = {
+    id: uuidv4(),
+    label: '结束',
+    type: NodeTypeEnum.END,
+    uniqueKey: NodeTypeEnum.END,
+  };
 
+  let isWorkflow: boolean;
+
+  if (keys.find(key => typeof pipeline[key] === 'object' && pipeline[key].needs)) {
     // 有needs场景
+    isWorkflow = true;
+    nodes.push(startNode);
+
     keys.forEach(key => {
       const { needs } = pipeline[key];
       if (!needs) {
         edges.push({
-          source: startId,
+          source: startNode.id,
           target: key,
           type: 'flow',
         });
@@ -319,13 +331,7 @@ function parsePipeline(pipeline: any): {
       }
     });
 
-    const endId = uuidv4();
-    nodes.push({
-      id: endId,
-      label: '结束',
-      type: NodeTypeEnum.END,
-      uniqueKey: NodeTypeEnum.END,
-    });
+    nodes.push(endNode);
 
     new Set(edges.map(({ target }) => target)).forEach(source => {
       if (edges.find(edge => edge.source === source)) {
@@ -334,7 +340,7 @@ function parsePipeline(pipeline: any): {
 
       edges.push({
         source,
-        target: endId,
+        target: endNode.id,
         type: 'flow',
       });
     });
@@ -343,6 +349,10 @@ function parsePipeline(pipeline: any): {
     confirmFlowNodes(nodes, edges);
   } else {
     // 无needs场景
+    isWorkflow = false;
+    nodes.unshift(startNode);
+    keys.unshift(startNode.id);
+
     keys.forEach((key, index) => {
       if (index === 0) {
         return;
@@ -354,9 +364,17 @@ function parsePipeline(pipeline: any): {
         type: 'flow',
       });
     });
+
+    nodes.push(endNode);
+
+    edges.push({
+      source: nodes[nodes.length - 2].id,
+      target: endNode.id,
+      type: 'flow',
+    });
   }
 
-  return { nodes, edges };
+  return { nodes, edges, isWorkflow };
 }
 
 /**
@@ -377,8 +395,7 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
   const { trigger, workflow, pipeline } = yaml.parse(dsl);
 
   // 解析workflow节点
-  const { nodes, edges } = workflow ? parseWorkflow(workflow) : parsePipeline(pipeline);
-  const isWorkflow = !!nodes.find(item => item.type === NodeTypeEnum.START);
+  const { nodes, edges, isWorkflow } = workflow ? parseWorkflow(workflow) : parsePipeline(pipeline);
 
   switch (triggerType) {
     case TriggerTypeEnum.CRON:
