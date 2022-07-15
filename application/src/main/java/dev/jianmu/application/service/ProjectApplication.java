@@ -396,10 +396,10 @@ public class ProjectApplication {
                     .stream()
                     .filter(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.FINISHED || workflowInstance.getStatus() == ProcessStatus.TERMINATED)
                     .forEach(workflowInstance -> {
-                        this.workflowInstanceRepository.deleteById(workflowInstance.getId());
-                        this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
-                        this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
-                    });
+                this.workflowInstanceRepository.deleteById(workflowInstance.getId());
+                this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
+                this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+            });
         });
 
     }

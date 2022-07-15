@@ -4,13 +4,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * @author Ethan Liu
  * @class Project
  * @description 建木项目
+ * @author Ethan Liu
  * @create 2021-04-23 10:55
- */
+*/
 public class Project {
-
     public enum DslSource {
         GIT,
         LOCAL
