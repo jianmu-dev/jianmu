@@ -18,6 +18,11 @@
           <button class="jm-icon-workflow-zoom-center" @click="zoom(ZoomTypeEnum.CENTER)"></button>
         </jm-tooltip>
       </div>
+      <div class="global-param" @click="openGlobalDrawer">
+        <i class="jm-icon-workflow-param"/>
+        全局参数
+        <i v-if="globalTip" class="global-icon" @click="openGlobalDrawer"/>
+      </div>
       <div class="configs">
         <div>并发执行</div>
         <div>
@@ -47,6 +52,7 @@ import { IWorkflow } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import { cloneDeep } from 'lodash';
 import { compare } from '../../model/util/object';
+import { checkDuplicate } from '@/components/workflow/workflow-editor/model/data/global-param';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -56,7 +62,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['back', 'save'],
+  emits: ['back', 'save', 'open-global-drawer'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     let workflowBackUp = cloneDeep(props.workflowData);
@@ -67,13 +73,43 @@ export default defineComponent({
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     const workflowValidator = getWorkflowValidator();
     const zoomVal = ref<number>(graph.zoom());
+    const globalTip = ref<boolean>(false);
+    const checkGlobalParams = async (): Promise<void> => {
+      // 表单验证
+      for (const param of workflowForm.value.global.params) {
+        try {
+          await param.validate();
+        } catch (err) {
+          globalTip.value = true;
+          return;
+        }
+      }
+      // 检查是否重复
+      try {
+        checkDuplicate(workflowForm.value.global.params);
+      } catch (err) {
+        globalTip.value = true;
+        return;
+      }
+      globalTip.value = false;
+    };
 
     const workflowTool = new WorkflowTool(graph);
+
+    // 检查param重复，出报错信息
+    const checkParamDuplicate = () => {
+      try {
+        checkDuplicate(workflowForm.value.global.params);
+      } catch (err) {
+        proxy.$error(err.message);
+      }
+    };
 
     return {
       ZoomTypeEnum,
       workflowForm,
       projectPanelVisible,
+      globalTip,
       zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
       goBack: async () => {
         const originData = workflowBackUp.data ? JSON.parse(workflowBackUp.data) : {};
@@ -83,6 +119,7 @@ export default defineComponent({
         }
         workflowTool.slimGraphData(originData);
         workflowTool.slimGraphData(targetData);
+        workflowForm.value.global.params = workflowForm.value.global.params.length !== 0 ? workflowForm.value.global.params : undefined;
         if (workflowBackUp.name !== workflowForm.value.name ||
           workflowBackUp.description !== workflowForm.value.description ||
           workflowBackUp.groupId !== workflowForm.value.groupId ||
@@ -96,7 +133,7 @@ export default defineComponent({
             type: 'info',
           }).then(async () => {
             try {
-              await workflowValidator.checkNodes();
+              await workflowValidator.check();
             } catch ({ message }) {
               proxy.$error(message);
               return;
@@ -121,7 +158,7 @@ export default defineComponent({
       },
       save: async (back: boolean) => {
         try {
-          await workflowValidator.checkNodes();
+          await workflowValidator.check();
 
           const graphData = graph.toJSON();
           workflowTool.slimGraphData(graphData);
@@ -130,6 +167,12 @@ export default defineComponent({
           workflowBackUp = cloneDeep(workflowForm.value);
         } catch ({ message }) {
           proxy.$error(message);
+        }
+      },
+      openGlobalDrawer: () => {
+        emit('open-global-drawer', true, checkGlobalParams);
+        if (globalTip.value) {
+          checkParamDuplicate();
         }
       },
     };
@@ -202,10 +245,48 @@ export default defineComponent({
       }
     }
 
+    .global-param {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 60px;
+      font-size: 14px;
+      padding: 0 8px 0 6px;
+      border-radius: 2px;
+
+      position: relative;
+
+      .jm-icon-workflow-param {
+        display: flex;
+        width: 20px;
+        height: 20px;
+        align-items: center;
+        justify-content: center;
+        margin-right: 2px;
+        font-size: 18px;
+      }
+
+      .global-icon {
+        position: absolute;
+        top: -2px;
+        right: -6px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: url('../../svgs/global-param-warning.svg');
+      }
+
+      &:hover {
+        background: #EFF7FF;
+        color: #096DD9;
+        cursor: pointer;
+      }
+    }
+
     .configs {
       display: flex;
       align-items: center;
-      margin: 0 50px;
+      margin: 0 60px 0 44px;
 
       > div + div {
         margin-left: 10px;
