@@ -205,6 +205,8 @@ public class WorkerInternalApplication {
         EvaluationResult result = this.expressionLanguage.evaluateExpression(el, context);
         if (result.isFailure()) {
             throw new RuntimeException("解析执行器标签的el表达式解析失败: " + result.getFailureMessage());
+        } else if (!Parameter.Type.STRING.equals(result.getValue().getType())) {
+            throw new RuntimeException("解析执行器标签的el表达式解析失败: 解析结果类型不正确");
         }
         return result.getValue().getStringValue();
     }
