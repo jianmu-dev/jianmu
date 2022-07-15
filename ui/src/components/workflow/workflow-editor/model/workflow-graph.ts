@@ -6,14 +6,29 @@ import { showPort, showPorts, WorkflowNodeToolbar } from './workflow-node-toolba
 import { EDGE, NODE, PORT, PORTS } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import { Start } from './data/node/start';
 
 const { icon: { width, height } } = NODE;
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
 
 export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
+  let propertiesArr: Cell.Properties[];
   if (!data) {
-    return;
+    const node = graph.createNode({
+      shape: 'vue-shape',
+      width,
+      height,
+      component: 'custom-vue-shape',
+      ports: { ...PORTS },
+    });
+    const proxy = new CustomX6NodeProxy(node);
+    proxy.setData(new Start());
+
+    // 初始化开始节点
+    propertiesArr = [node.toJSON()];
+  } else {
+    propertiesArr = JSON.parse(data).cells;
   }
 
   // 启用异步渲染的画布
@@ -37,7 +52,6 @@ export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
   // 处于冻结状态的画布不会立即响应画布中节点和边的变更，直到调用 unfreeze(...) 方法来解除冻结并重新渲染画布
   graph.freeze();
 
-  const propertiesArr: Cell.Properties[] = JSON.parse(data).cells;
   graph.resetCells(propertiesArr.map(properties => {
     if (properties.shape === 'edge') {
       return graph.createEdge(properties);
