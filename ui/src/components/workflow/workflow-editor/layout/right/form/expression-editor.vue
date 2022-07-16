@@ -8,12 +8,13 @@ import { ElFormItemContext, elFormItemKey } from 'element-plus/es/el-form';
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../../model/data/custom-x6-node-proxy';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
+import { NodeTypeEnum } from '../../../model/data/enumeration';
 
 export default defineComponent({
   props: {
     nodeId: {
       type: String,
-      required: true,
+      default: '',
     },
   },
   emits: ['editor-created'],
@@ -21,11 +22,25 @@ export default defineComponent({
     const elFormItem = inject(elFormItemKey, {} as ElFormItemContext);
     // 获取此时进行编辑的节点信息
     const getGraph = inject('getGraph') as () => Graph;
+    const buildSelectableGlobalParam = inject('buildSelectableGlobalParam') as () => ISelectableParam;
     const graph = getGraph();
-    const graphNode = graph.getCellById(props.nodeId) as Node;
-    const proxy = new CustomX6NodeProxy(graphNode);
-    // 级联选择器选项
-    const selectableParams = ref<ISelectableParam[]>(proxy.getSelectableParams(graph));
+    const selectableParams = ref<ISelectableParam[]>([]);
+    if (props.nodeId) {
+      const graphNode = graph.getCellById(props.nodeId) as Node;
+      const proxy = new CustomX6NodeProxy(graphNode);
+      // 级联选择器选项
+      selectableParams.value.push(...proxy.getSelectableParams(graph));
+      const buildGlobalParam = buildSelectableGlobalParam();
+      if (buildGlobalParam) {
+        selectableParams.value.push(buildGlobalParam);
+      }
+    } else {
+      const webhookNode = graph.getNodes().find(node =>
+        new CustomX6NodeProxy(node).getData().getType() === NodeTypeEnum.WEBHOOK);
+      if (webhookNode) {
+        selectableParams.value.push(...new CustomX6NodeProxy(webhookNode).getSelectableParams(graph));
+      }
+    }
     onMounted(() => {
       emit('editor-created', (params: ISelectableParam[]) => {
         selectableParams.value = params;

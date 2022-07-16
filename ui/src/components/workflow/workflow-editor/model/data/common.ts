@@ -1,6 +1,7 @@
 import { RuleItem } from 'async-validator';
 import { NodeTypeEnum } from './enumeration';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
+import { GlobalParam } from './global-param';
 
 type TriggerValue = 'blur' | 'change';
 
@@ -39,6 +40,7 @@ export interface IWorkflowNode {
 
 export interface IGlobal {
   concurrent: boolean;
+  params: GlobalParam[];
 }
 
 /**

@@ -2,6 +2,8 @@ import { Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 import { NodeTypeEnum } from './data/enumeration';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import nodeWarningIcon from '../svgs/node-warning.svg';
+import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
+import { checkDuplicate } from '@/components/workflow/workflow-editor/model/data/global-param';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -10,10 +12,12 @@ function isWarning(node: Node): boolean {
 }
 
 export class WorkflowValidator {
+  private readonly workflowData: IWorkflow;
   private readonly graph: Graph;
   private readonly proxy: any;
 
-  constructor(graph: Graph, proxy: any) {
+  constructor(workflowData: IWorkflow, graph: Graph, proxy: any) {
+    this.workflowData = workflowData;
     this.graph = graph;
     this.proxy = proxy;
   }
@@ -54,11 +58,29 @@ export class WorkflowValidator {
     node.removeTool('button');
   }
 
+  async check(): Promise<void> {
+    await this.checkGlobalParams();
+    await this.checkNodes();
+  }
+  // 验证global参数
+  private async checkGlobalParams(): Promise<void> {
+    // 验证参数
+    for (const globalParam of this.workflowData.global.params) {
+      try {
+        await globalParam.validate();
+      } catch ({ errors }) {
+        throw new Error(`全局参数${globalParam.name||globalParam.ref}：${errors[0].message}`);
+      }
+    }
+    // 验证ref是否重复
+    checkDuplicate(this.workflowData.global.params);
+  }
+
   /**
    * 校验所有节点
    * @throws 尚未通过校验时，抛异常
    */
-  async checkNodes(): Promise<void> {
+  private async checkNodes(): Promise<void> {
     const nodes = this.graph.getNodes();
 
     if (nodes.length === 0) {
