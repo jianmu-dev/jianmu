@@ -10,7 +10,7 @@ import { Start } from './node/start';
 import { End } from './node/end';
 
 export class CustomX6NodeProxy {
-  private readonly node: Node;
+  readonly node: Node;
 
   constructor(node: Node) {
     this.node = node;
