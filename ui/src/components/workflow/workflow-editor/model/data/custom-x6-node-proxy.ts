@@ -35,6 +35,11 @@ export class CustomX6NodeProxy {
     return [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(type);
   }
 
+  isTask(): boolean {
+    const { type } = JSON.parse(this.node.getData<string>());
+    return [NodeTypeEnum.ASYNC_TASK, NodeTypeEnum.SHELL].includes(type);
+  }
+
   getData(graph?: Graph): IWorkflowNode {
     const obj = JSON.parse(this.node.getData<string>());
     let nodeData: IWorkflowNode;
