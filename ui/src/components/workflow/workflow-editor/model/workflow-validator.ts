@@ -62,6 +62,7 @@ export class WorkflowValidator {
     await this.checkGlobalParams();
     await this.checkNodes();
   }
+
   // 验证global参数
   private async checkGlobalParams(): Promise<void> {
     // 验证参数
@@ -69,7 +70,7 @@ export class WorkflowValidator {
       try {
         await globalParam.validate();
       } catch ({ errors }) {
-        throw new Error(`全局参数${globalParam.name||globalParam.ref}：${errors[0].message}`);
+        throw new Error(`全局参数${globalParam.name || globalParam.ref}：${errors[0].message}`);
       }
     }
     // 验证ref是否重复
@@ -122,11 +123,7 @@ export class WorkflowValidator {
       return false;
     }
 
-    if (!this.checkSingle(node)) {
-      return false;
-    }
-
-    return true;
+    return this.checkSingle(node);
   }
 
   private checkDroppingPosition(mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
