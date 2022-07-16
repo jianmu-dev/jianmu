@@ -4,7 +4,6 @@ import { ZoomTypeEnum } from './data/enumeration';
 import { NODE } from '../shape/gengral-config';
 import { IWorkflow } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
-import { AsyncTask } from './data/node/async-task';
 
 const { selectedBorderWidth } = NODE;
 
@@ -124,45 +123,32 @@ export class WorkflowTool {
   }
 
   toDsl(workflowData: IWorkflow): string {
-    const idArr: string[] = [];
-    const nodeProxyArr: CustomX6NodeProxy[] = [];
+    const triggerNodeProxies: CustomX6NodeProxy[] = [];
+    const taskNodeProxies: CustomX6NodeProxy[] = [];
 
-    let node = this.graph.getRootNodes()[0];
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      idArr.push(node.id);
-      nodeProxyArr.push(new CustomX6NodeProxy(node));
-
-      const edges = this.graph.getOutgoingEdges(node);
-      if (!edges) {
-        break;
+    this.graph.getNodes().forEach(node => {
+      const nodeProxy = new CustomX6NodeProxy(node);
+      if (nodeProxy.isTrigger()) {
+        triggerNodeProxies.push(nodeProxy);
+        return;
       }
-      node = edges[0].getTargetNode()!;
-    }
+      if (nodeProxy.isTask()) {
+        taskNodeProxies.push(nodeProxy);
+        return;
+      }
+    });
 
     let trigger;
-    if (nodeProxyArr[0].isTrigger()) {
-      idArr.splice(0, 1);
-      const nodeProxy = nodeProxyArr.splice(0, 1)[0];
-      trigger = nodeProxy.getData().toDsl();
+    if (triggerNodeProxies.length > 0) {
+      // TODO 待扩展多个触发器
+      trigger = triggerNodeProxies[0].toDsl(this.graph);
     }
     const pipeline: {
       [key: string]: object;
     } = {};
-
-    const idMap = new Map<string, string>();
-    nodeProxyArr.forEach((nodeProxy, index) => {
-      const ref = `node_${index}`;
+    taskNodeProxies.forEach(nodeProxy => {
       const nodeData = nodeProxy.getData();
-
-      if (nodeData instanceof AsyncTask &&
-        (nodeData as AsyncTask).outputs.length > 0) {
-        // 只有在异步任务节点有输出参数时，才有可能被下游节点引用
-        idMap.set(idArr[index], ref);
-      }
-
-      pipeline[ref] = nodeData.toDsl();
+      pipeline[nodeData.getRef()] = nodeProxy.toDsl(this.graph);
     });
 
     let dsl = yaml.stringify({
@@ -172,10 +158,6 @@ export class WorkflowTool {
       trigger,
       pipeline,
     });
-
-    idMap.forEach((value, key) =>
-      // TODO 待完善，优化成正则表达式提取方式
-      (dsl = dsl.replaceAll('${' + key + '.', '${' + value + '.')));
 
     dsl += '\n\n' + `raw-data: ${JSON.stringify(workflowData.data)}`;
 

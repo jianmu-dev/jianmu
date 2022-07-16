@@ -109,4 +109,33 @@ export class CustomX6NodeProxy {
     }
     return params;
   }
+
+  toDsl(graph: Graph): object {
+    if (this.isTrigger()) {
+      return this.getData().toDsl();
+    }
+
+    if (this.isTask()) {
+      const needs: string[] = [];
+      graph.getIncomingEdges(this.node)!.forEach(edge => {
+        const sourceNode = edge.getSourceNode();
+        if (!sourceNode) {
+          return;
+        }
+        const sourceNodeProxy = new CustomX6NodeProxy(sourceNode);
+        if (!sourceNodeProxy.isTask()) {
+          return;
+        }
+
+        needs.push(sourceNodeProxy.getData().getRef());
+      });
+
+      return {
+        ...this.getData().toDsl(),
+        needs: needs.length > 0 ? needs : undefined,
+      };
+    }
+
+    return {};
+  }
 }
