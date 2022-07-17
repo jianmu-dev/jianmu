@@ -65,7 +65,14 @@ export default defineComponent({
       window.addEventListener('storage', refreshState);
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
-        workflow.value = JSON.parse(payload as string);
+        const { name, global, description, data, groupId } = JSON.parse(payload as string);
+        workflow.value = {
+          name,
+          groupId,
+          description,
+          global: new Global(global?.concurrent, global?.params),
+          data,
+        };
         loaded.value = true;
         await nextTick();
         loaded.value = false;
@@ -77,8 +84,9 @@ export default defineComponent({
           loading.value = true;
           loaded.value = true;
           const { dslText, projectGroupId } = await fetchProjectDetail(props.id as string);
-          const rawData = yaml.parse(dslText)['raw-data'];
-          const { name, global, description } = yaml.parse(dslText);
+          const dsl = yaml.parse(dslText);
+          const rawData = dsl['raw-data'];
+          const { name, global, description } = dsl;
           workflow.value = {
             name,
             groupId: projectGroupId,
