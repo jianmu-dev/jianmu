@@ -75,7 +75,7 @@ export default defineComponent({
     const zoomVal = ref<number>(graph.zoom());
     const globalTip = ref<boolean>(false);
     const paramRefs = computed<string[]>(
-      () => workflowForm.value.global.params?.map(({ ref }) => ref));
+      () => workflowForm.value.global.params.map(({ ref }) => ref));
     const checkGlobalParams = async (): Promise<void> => {
       // 表单验证
       for (const param of workflowForm.value.global.params) {
@@ -121,7 +121,6 @@ export default defineComponent({
         }
         workflowTool.slimGraphData(originData);
         workflowTool.slimGraphData(targetData);
-        workflowForm.value.global.params = workflowForm.value.global.params.length !== 0 ? workflowForm.value.global.params : undefined;
         if (workflowBackUp.name !== workflowForm.value.name ||
           workflowBackUp.description !== workflowForm.value.description ||
           workflowBackUp.groupId !== workflowForm.value.groupId ||

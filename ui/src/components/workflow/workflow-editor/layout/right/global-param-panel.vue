@@ -69,12 +69,11 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const visible = ref<boolean>(props.modelValue);
     const workflowForm = ref<IWorkflow>(props.workflowData);
-    workflowForm.value.global.params = workflowForm.value.global.params ? workflowForm.value.global.params : [];
     const paramKeys = ref<string[]>([]);
     workflowForm.value.global.params.forEach(() => paramKeys.value.push(uuidv4()));
     const globalFormRef = ref<HTMLFormElement>();
     const paramRefs = computed<string[]>(
-      () => workflowForm.value.global.params?.map(({ ref }) => ref));
+      () => workflowForm.value.global.params.map(({ ref }) => ref));
 
     onUpdated(async () => {
       if (visible.value === props.modelValue) {
