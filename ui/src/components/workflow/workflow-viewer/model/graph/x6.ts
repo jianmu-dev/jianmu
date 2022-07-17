@@ -160,7 +160,12 @@ export class X6Graph extends BaseGraph {
     const runningNodes: Node[] = [];
 
     tasks.forEach(({ nodeName, status }) => {
-      const { node } = proxies.find(proxy => proxy.getData().getRef() === nodeName)!;
+      const proxy = proxies.find(proxy => proxy.getData().getRef() === nodeName)!;
+      if (!proxy.isTask()) {
+        return;
+      }
+
+      const { node } = proxy;
       this.refreshIndicator(node, status);
 
       const shapeEl = this.getShapeEl(node.id);
