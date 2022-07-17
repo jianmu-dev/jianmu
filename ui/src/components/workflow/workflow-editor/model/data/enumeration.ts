@@ -4,7 +4,9 @@
 export enum NodeRefEnum {
   CRON = 'cron',
   WEBHOOK = 'webhook',
-  SHELL= 'shell'
+  SHELL = 'shell',
+  START = 'start',
+  END = 'end',
 }
 
 /**
@@ -23,11 +25,11 @@ export enum ParamTypeEnum {
 export enum NodeTypeEnum {
   CRON = 'cron',
   WEBHOOK = 'webhook',
-  // START = 'start',
-  // END = 'end',
   // CONDITION = 'condition',
   SHELL = 'shell',
   ASYNC_TASK = 'async-task',
+  START = 'start',
+  END = 'end',
 }
 
 /**
@@ -58,4 +60,15 @@ export enum NodeGroupEnum {
   LOCAL = 'local',
   OFFICIAL = 'official',
   COMMUNITY = 'community'
+}
+
+/**
+ * 唯一标识类型枚举
+ */
+export enum RefTypeEnum {
+  TRIGGER_PARAM = '触发器参数',
+  GLOBAL_PARAM = '全局参数',
+  NODE = '节点',
+  SHELL_ENV = 'Shell节点环境变量',
+  SHELL_OUTPUT = 'Shell节点输出参数',
 }

@@ -45,14 +45,14 @@
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, inject, PropType, ref } from 'vue';
 import { Graph } from '@antv/x6';
-import { ZoomTypeEnum } from '../../model/data/enumeration';
+import { RefTypeEnum, ZoomTypeEnum } from '../../model/data/enumeration';
 import { WorkflowTool } from '../../model/workflow-tool';
 import ProjectPanel from './project-panel.vue';
 import { IWorkflow } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import { cloneDeep } from 'lodash';
 import { compare } from '../../model/util/object';
-import { checkDuplicate } from '@/components/workflow/workflow-editor/model/data/global-param';
+import { checkDuplicate } from '../../model/util/reference';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -74,6 +74,8 @@ export default defineComponent({
     const workflowValidator = getWorkflowValidator();
     const zoomVal = ref<number>(graph.zoom());
     const globalTip = ref<boolean>(false);
+    const paramRefs = computed<string[]>(
+      () => workflowForm.value.global.params.map(({ ref }) => ref));
     const checkGlobalParams = async (): Promise<void> => {
       // 表单验证
       for (const param of workflowForm.value.global.params) {
@@ -86,7 +88,7 @@ export default defineComponent({
       }
       // 检查是否重复
       try {
-        checkDuplicate(workflowForm.value.global.params);
+        checkDuplicate(paramRefs.value, RefTypeEnum.GLOBAL_PARAM);
       } catch (err) {
         globalTip.value = true;
         return;
@@ -99,7 +101,7 @@ export default defineComponent({
     // 检查param重复，出报错信息
     const checkParamDuplicate = () => {
       try {
-        checkDuplicate(workflowForm.value.global.params);
+        checkDuplicate(paramRefs.value, RefTypeEnum.GLOBAL_PARAM);
       } catch (err) {
         proxy.$error(err.message);
       }
@@ -119,7 +121,6 @@ export default defineComponent({
         }
         workflowTool.slimGraphData(originData);
         workflowTool.slimGraphData(targetData);
-        workflowForm.value.global.params = workflowForm.value.global.params.length !== 0 ? workflowForm.value.global.params : undefined;
         if (workflowBackUp.name !== workflowForm.value.name ||
           workflowBackUp.description !== workflowForm.value.description ||
           workflowBackUp.groupId !== workflowForm.value.groupId ||

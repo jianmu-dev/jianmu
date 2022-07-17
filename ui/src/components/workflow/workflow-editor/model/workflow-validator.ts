@@ -1,9 +1,9 @@
 import { Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
-import { NodeTypeEnum } from './data/enumeration';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import nodeWarningIcon from '../svgs/node-warning.svg';
-import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
-import { checkDuplicate } from '@/components/workflow/workflow-editor/model/data/global-param';
+import { IWorkflow } from './data/common';
+import { checkDuplicate } from './util/reference';
+import { RefTypeEnum } from './data/enumeration';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -62,18 +62,23 @@ export class WorkflowValidator {
     await this.checkGlobalParams();
     await this.checkNodes();
   }
+
   // 验证global参数
   private async checkGlobalParams(): Promise<void> {
+    const refs: string[] = [];
+
     // 验证参数
     for (const globalParam of this.workflowData.global.params) {
+      refs.push(globalParam.ref);
+
       try {
         await globalParam.validate();
       } catch ({ errors }) {
-        throw new Error(`全局参数${globalParam.name||globalParam.ref}：${errors[0].message}`);
+        throw new Error(`全局参数${globalParam.name || globalParam.ref}：${errors[0].message}`);
       }
     }
     // 验证ref是否重复
-    checkDuplicate(this.workflowData.global.params);
+    checkDuplicate(refs, RefTypeEnum.GLOBAL_PARAM);
   }
 
   /**
@@ -81,40 +86,62 @@ export class WorkflowValidator {
    * @throws 尚未通过校验时，抛异常
    */
   private async checkNodes(): Promise<void> {
-    const nodes = this.graph.getNodes();
+    const proxies = this.graph.getNodes().map(node => new CustomX6NodeProxy(node));
 
-    if (nodes.length === 0) {
-      throw new Error('未存在任何节点');
-    }
-
-    if (!nodes.find(node => [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK]
-      .includes(new CustomX6NodeProxy(node).getData().getType()))) {
+    if (!proxies.find(proxy => proxy.isTask())) {
       throw new Error('至少有一个shell或任务节点');
     }
 
-    if (nodes.length > 1) {
-      const nodeSet = new Set<Node>();
-      this.graph.getEdges().forEach(edge => {
-        nodeSet.add(edge.getSourceNode()!);
-        nodeSet.add(edge.getTargetNode()!);
-      });
-      const connectedNodes = Array.from(nodeSet);
-      const unconnectedNodes = nodes.filter(node => !connectedNodes.includes(node));
-      if (unconnectedNodes.length > 0) {
-        const nodeName = new CustomX6NodeProxy(unconnectedNodes[0]).getData().getName();
-        // 存在未连接的节点
-        throw new Error(`${nodeName}节点：尚未连接任何其他节点`);
+    if (!proxies.find(proxy => proxy.isStart())) {
+      throw new Error('必须有一个开始节点');
+    }
+
+    if (!proxies.find(proxy => proxy.isEnd())) {
+      throw new Error('必须有一个结束节点');
+    }
+
+    const refs: string[] = [];
+
+    for (const proxy of proxies) {
+      const data = proxy.getData(this.graph);
+      refs.push(data.getRef());
+
+      if (proxy.isTrigger()) {
+        // 触发器：只能连到开始
+        if (!this.graph.getOutgoingEdges(proxy.node)) {
+          throw new Error(`${data.getName()}节点：必须连接到开始节点`);
+        }
+
+        try {
+          await data.validate();
+        } catch ({ errors }) {
+          throw new Error(`${data.getName()}节点：${errors[0].message}`);
+        }
+
+        continue;
+      }
+
+      if (proxy.isTask()) {
+        // 任务节点：可连接任何任务节点和结束
+        if (!this.graph.getIncomingEdges(proxy.node)) {
+          throw new Error(`${data.getName()}节点：不存在上游节点`);
+        }
+
+        if (!this.graph.getOutgoingEdges(proxy.node)) {
+          throw new Error(`${data.getName()}节点：不存在下游节点`);
+        }
+
+        try {
+          await data.validate();
+        } catch ({ errors }) {
+          throw new Error(`${data.getName()}节点：${errors[0].message}`);
+        }
+
+        continue;
       }
     }
 
-    const workflowNodes = nodes.map(node => new CustomX6NodeProxy(node).getData(this.graph));
-    for (const workflowNode of workflowNodes) {
-      try {
-        await workflowNode.validate();
-      } catch ({ errors }) {
-        throw new Error(`${workflowNode.getName()}节点：${errors[0].message}`);
-      }
-    }
+    checkDuplicate(refs, RefTypeEnum.NODE);
   }
 
   checkDroppingNode(node: Node, mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
@@ -122,11 +149,7 @@ export class WorkflowValidator {
       return false;
     }
 
-    if (!this.checkTrigger(node)) {
-      return false;
-    }
-
-    return true;
+    return this.checkSingle(node);
   }
 
   private checkDroppingPosition(mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
@@ -144,18 +167,21 @@ export class WorkflowValidator {
     return true;
   }
 
-  private checkTrigger(droppingNode: Node): boolean {
-    if (!new CustomX6NodeProxy(droppingNode).isTrigger()) {
-      // 非trigger时，忽略
+  private checkSingle(droppingNode: Node): boolean {
+    const droppingNodeProxy = new CustomX6NodeProxy(droppingNode);
+    if (!droppingNodeProxy.isSingle()) {
+      // 非必须单个节点时，忽略
       return true;
     }
+    // 表示当前拖放的节点为trigger或单个节点
+    const isTrigger = droppingNodeProxy.isTrigger();
+    const currentSingleNodeProxy = this.graph.getNodes()
+      .map(node => new CustomX6NodeProxy(node))
+      .find(proxy => isTrigger ? proxy.isTrigger() : (droppingNodeProxy.getData().getType() === proxy.getData().getType()));
 
-    // 表示当前拖放的节点为trigger
-    const currentTrigger = this.graph.getNodes()
-      .find(node => new CustomX6NodeProxy(node).isTrigger());
-
-    if (currentTrigger) {
-      this.proxy.$warning('只能有一个触发器');
+    if (currentSingleNodeProxy) {
+      const nodeName = isTrigger ? '触发器' : currentSingleNodeProxy.getData().getName();
+      this.proxy.$warning(`只能有一个${nodeName}节点`);
       return false;
     }
 

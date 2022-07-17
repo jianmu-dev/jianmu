@@ -48,6 +48,7 @@ export abstract class BaseNode implements IWorkflowNode {
       name: [
         {
           required: true,
+          // TODO 可为空，ref不能为空
           message: '节点名称不能为空',
           trigger: 'blur',
         },

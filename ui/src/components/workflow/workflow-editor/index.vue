@@ -69,7 +69,7 @@ export default defineComponent({
 
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
-    provide('buildSelectableGlobalParam', (): ISelectableParam => buildSelectableGlobalParam(workflowData.value.global.params));
+    provide('buildSelectableGlobalParam', (): ISelectableParam | undefined => buildSelectableGlobalParam(workflowData.value.global.params));
     const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
       nodeConfigPanelVisible.value = true;
       selectedNodeId.value = nodeId;
@@ -111,7 +111,6 @@ export default defineComponent({
       },
       // 全局参数显隐
       handleGlobalParamPanelClosed: async (visible: boolean, _checkGlobalParams: () => Promise<void>) => {
-        console.log(visible);
         globalDrawerVisible.value = visible;
         // 是否是关闭
         if (!visible) {

@@ -17,6 +17,7 @@ import { createNamespacedHelpers, useStore } from 'vuex';
 import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { ISessionVo } from '@/api/dto/session';
+import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -41,9 +42,7 @@ export default defineComponent({
       name: '未命名项目',
       groupId: '1',
       description: '',
-      global: {
-        concurrent: false,
-      },
+      global: new Global(),
       data: '',
     });
     const defaultSession = ref<ISessionVo>();
@@ -84,9 +83,7 @@ export default defineComponent({
             name,
             groupId: projectGroupId,
             description,
-            global: {
-              concurrent: global ? global.concurrent : false,
-            },
+            global: new Global(global?.concurrent, global?.params),
             data: rawData,
           };
         } catch (err) {

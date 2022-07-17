@@ -7,6 +7,8 @@ import { fetchNodeLibraryList, getOfficialNodes } from '@/api/view-no-auth';
 import { NodeTypeEnum } from '@/api/dto/enumeration';
 import { INodeParameterVo } from '@/api/dto/node-definitions';
 import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { Start } from './data/node/start';
+import { End } from './data/node/end';
 
 interface IPageInfo {
   pageNum: number;
@@ -61,7 +63,7 @@ export class WorkflowNode {
   }
 
   loadInnerNodes(keyword?: string): IWorkflowNode[] {
-    const arr: IWorkflowNode[] = [new Shell()];
+    const arr: IWorkflowNode[] = [new Shell(), new Start(), new End()];
 
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
 

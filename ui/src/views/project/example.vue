@@ -9,6 +9,7 @@
 import { defineComponent, nextTick, onMounted, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
 import yaml from 'yaml';
+import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 
 export default defineComponent({
   props: {
@@ -22,9 +23,7 @@ export default defineComponent({
     const workflow = ref<IWorkflow>({
       name: '未命名项目',
       groupId: '1',
-      global: {
-        concurrent: false,
-      },
+      global: new Global(),
       data: '',
     });
     onMounted(async () => {
@@ -35,9 +34,7 @@ export default defineComponent({
       workflow.value = {
         name,
         groupId: '1',
-        global: {
-          concurrent: global ? global.concurrent : false,
-        },
+        global: new Global(global?.concurrent, global?.params),
         data: rawData,
       };
       await nextTick();
@@ -58,10 +55,11 @@ export default defineComponent({
 
   ::v-deep(.jm-workflow-editor) {
     .jm-workflow-editor-toolbar {
-      .right{
-        .operations{
+      .right {
+        .operations {
           cursor: not-allowed;
         }
+
         .el-button {
           pointer-events: none;
 
@@ -78,6 +76,7 @@ export default defineComponent({
           }
         }
       }
+
       .jm-icon-button-left {
         cursor: not-allowed;
         color: inherit;
