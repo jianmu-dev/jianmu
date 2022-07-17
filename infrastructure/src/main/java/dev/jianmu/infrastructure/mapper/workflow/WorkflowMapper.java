@@ -34,8 +34,8 @@ public interface WorkflowMapper {
     @Result(column = "created_time", property = "createdTime")
     List<Workflow> findByRef(String ref);
 
-    @Insert("insert into workflow(ref_version, ref, version, type, tag, name, description, nodes, global_parameters, dsl_text, created_time)" +
-            "values('${ref + version}', #{ref}, #{version}, #{type}, #{tag}, #{name}, #{description}, " +
+    @Insert("insert into workflow(ref_version, ref, version, type, name, description, nodes, global_parameters, dsl_text, created_time)" +
+            "values('${ref + version}', #{ref}, #{version}, #{type}, #{name}, #{description}, " +
             "#{nodes, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeSetTypeHandler}, " +
             "#{globalParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.ParameterSetTypeHandler}, " +
             "#{dslText}, #{createdTime})")
