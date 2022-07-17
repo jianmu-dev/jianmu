@@ -160,10 +160,13 @@ public class WorkerInternalApplication {
                         if (!StringUtils.hasText(workerTag)) {
                             throw new RuntimeException("未找到该流程的tag");
                         }
-                        var workers = this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
-                                List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                workerTag,
-                                workflowInstance.getStartTime());
+                        var workers = this.checkWorkflowTag(workflowInstance) ?
+                                this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workerTag, workflowInstance.getStartTime()) :
+                                this.workerRepository.findByTypeInAndCreatedTimeLessThan(
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
                             throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
@@ -178,6 +181,12 @@ public class WorkerInternalApplication {
             taskInstance.dispatchFailed();
             this.taskInstanceRepository.updateStatus(taskInstance);
         }
+    }
+
+    private Boolean checkWorkflowTag(WorkflowInstance workflowInstance){
+        var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
+        return "null".equals(workflow.getTag());
     }
 
     private String getWorkerTag(WorkflowInstance workflowInstance) {
