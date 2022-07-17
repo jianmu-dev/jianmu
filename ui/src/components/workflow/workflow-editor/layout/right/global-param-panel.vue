@@ -85,7 +85,7 @@ export default defineComponent({
       // 抽屉打开并且params有值的时候触发表单校验
       if (visible.value && workflowForm.value.global.params.length > 0) {
         await nextTick();
-        globalFormRef.value.validate().catch(() => {
+        globalFormRef.value!.validate().catch(() => {
         });
       }
     });

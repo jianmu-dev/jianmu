@@ -111,7 +111,6 @@ export default defineComponent({
       },
       // 全局参数显隐
       handleGlobalParamPanelClosed: async (visible: boolean, _checkGlobalParams: () => Promise<void>) => {
-        console.log(visible);
         globalDrawerVisible.value = visible;
         // 是否是关闭
         if (!visible) {
