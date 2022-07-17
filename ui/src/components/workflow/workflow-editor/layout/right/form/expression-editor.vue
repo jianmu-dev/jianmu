@@ -22,7 +22,7 @@ export default defineComponent({
     const elFormItem = inject(elFormItemKey, {} as ElFormItemContext);
     // 获取此时进行编辑的节点信息
     const getGraph = inject('getGraph') as () => Graph;
-    const buildSelectableGlobalParam = inject('buildSelectableGlobalParam') as () => ISelectableParam;
+    const buildSelectableGlobalParam = inject('buildSelectableGlobalParam') as () => ISelectableParam | undefined;
     const graph = getGraph();
     const selectableParams = ref<ISelectableParam[]>([]);
     if (props.nodeId) {

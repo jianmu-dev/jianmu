@@ -51,7 +51,7 @@ export class GlobalParam {
  * globalParam参数选择/级联选择
  * @param globalParams
  */
-export function buildSelectableGlobalParam(globalParams: GlobalParam[]): ISelectableParam | undefined {
+export function buildSelectableGlobalParam(globalParams?: GlobalParam[]): ISelectableParam | undefined {
   if (!globalParams || globalParams.length === 0) {
     return undefined;
   }

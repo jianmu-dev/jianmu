@@ -69,7 +69,7 @@ export default defineComponent({
 
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
-    provide('buildSelectableGlobalParam', (): ISelectableParam => buildSelectableGlobalParam(workflowData.value.global.params));
+    provide('buildSelectableGlobalParam', (): ISelectableParam | undefined => buildSelectableGlobalParam(workflowData.value.global.params));
     const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
       nodeConfigPanelVisible.value = true;
       selectedNodeId.value = nodeId;
