@@ -5,14 +5,13 @@ import { NodeTypeEnum } from '@/components/workflow/workflow-editor/model/data/e
 
 export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | undefined): {
   dslType: DslTypeEnum;
-  asyncTaskRefs: string[];
   data: string;
 } {
   if (!dsl || !triggerType) {
-    return { dslType: DslTypeEnum.PIPELINE, asyncTaskRefs: [], data: '' };
+    return { dslType: DslTypeEnum.PIPELINE, data: '' };
   }
 
-  const { trigger, workflow, pipeline, 'raw-data': rawData } = yaml.parse(dsl);
+  const { trigger, workflow, 'raw-data': rawData } = yaml.parse(dsl);
 
   let data: string;
   if (triggerType === TriggerTypeEnum.MANUAL && trigger) {
@@ -44,7 +43,6 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
 
   return {
     dslType: workflow ? DslTypeEnum.WORKFLOW : DslTypeEnum.PIPELINE,
-    asyncTaskRefs: Object.keys(workflow || pipeline),
     data,
   };
 }
