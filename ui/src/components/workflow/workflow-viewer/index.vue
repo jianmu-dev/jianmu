@@ -130,9 +130,11 @@ export default defineComponent({
 
       setTimeout(() => {
         // 保证渲染完成
-
+        if (!graph.value) {
+          return;
+        }
         // 更新状态
-        graph.value!.updateNodeStates(props.tasks);
+        graph.value.updateNodeStates(props.tasks);
       }, 50);
     };
 
