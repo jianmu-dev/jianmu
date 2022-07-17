@@ -1,8 +1,9 @@
 import { Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import nodeWarningIcon from '../svgs/node-warning.svg';
-import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
-import { checkDuplicate } from '@/components/workflow/workflow-editor/model/data/global-param';
+import { IWorkflow } from './data/common';
+import { checkDuplicate } from './util/reference';
+import { RefTypeEnum } from './data/enumeration';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -64,8 +65,12 @@ export class WorkflowValidator {
 
   // 验证global参数
   private async checkGlobalParams(): Promise<void> {
+    const refs: string[] = [];
+
     // 验证参数
     for (const globalParam of this.workflowData.global.params) {
+      refs.push(globalParam.ref);
+
       try {
         await globalParam.validate();
       } catch ({ errors }) {
@@ -73,7 +78,7 @@ export class WorkflowValidator {
       }
     }
     // 验证ref是否重复
-    checkDuplicate(this.workflowData.global.params);
+    checkDuplicate(refs, RefTypeEnum.GLOBAL_PARAM);
   }
 
   /**
@@ -95,8 +100,11 @@ export class WorkflowValidator {
       throw new Error('必须有一个结束节点');
     }
 
+    const refs: string[] = [];
+
     for (const proxy of proxies) {
       const data = proxy.getData(this.graph);
+      refs.push(data.getRef());
 
       if (proxy.isTrigger()) {
         // 触发器：只能连到开始
@@ -132,6 +140,8 @@ export class WorkflowValidator {
         continue;
       }
     }
+
+    checkDuplicate(refs, RefTypeEnum.NODE);
   }
 
   checkDroppingNode(node: Node, mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
