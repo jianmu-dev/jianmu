@@ -25,7 +25,7 @@ export class ExpressionEditor {
 
   constructor(textareaEl: HTMLTextAreaElement, placeholder: string,
     focusCallbackFn: EventCallbackFnType, blurCallbackFn: EventCallbackFnType) {
-
+    console.log('=====', textareaEl.value);
     this.instance = codemirror.fromTextArea(textareaEl, {
       placeholder,
       // 模式

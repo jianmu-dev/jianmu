@@ -154,7 +154,7 @@ export class WorkflowTool {
     let dsl = yaml.stringify({
       name: workflowData.name,
       description: workflowData.description,
-      global: workflowData.global,
+      global: workflowData.global.toDsl(),
       trigger,
       pipeline,
     });
