@@ -23,9 +23,8 @@ type EventCallbackFnType = (e: Event) => void;
 export class ExpressionEditor {
   private readonly instance: EditorFromTextArea;
 
-  constructor(textareaEl: HTMLTextAreaElement, value: string, placeholder: string,
+  constructor(textareaEl: HTMLTextAreaElement, placeholder: string,
     focusCallbackFn: EventCallbackFnType, blurCallbackFn: EventCallbackFnType) {
-    textareaEl.value = value;
 
     this.instance = codemirror.fromTextArea(textareaEl, {
       placeholder,

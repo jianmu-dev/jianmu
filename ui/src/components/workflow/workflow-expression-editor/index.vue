@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, nextTick, onMounted, PropType, ref } from 'vue';
 import { ExpressionEditor } from './model/expression-editor';
 import { ISelectableParam } from './model/data';
 import ParamButton from './param-button.vue';
@@ -33,10 +33,14 @@ export default defineComponent({
     const textareaRef = ref<HTMLTextAreaElement>();
     let expressionEditor: ExpressionEditor;
 
-    onMounted(() => {
+    onMounted(async () => {
       const textareaEl = textareaRef.value!;
+      textareaEl.value = props.modelValue;
 
-      expressionEditor = new ExpressionEditor(textareaEl, props.modelValue, props.placeholder,
+      // 保证textarea值正确渲染
+      await nextTick();
+
+      expressionEditor = new ExpressionEditor(textareaEl, props.placeholder,
         e => emit('focus', e),
         e => {
           const val = textareaEl.value;
