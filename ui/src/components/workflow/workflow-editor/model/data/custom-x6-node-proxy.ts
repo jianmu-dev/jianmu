@@ -78,8 +78,8 @@ export class CustomX6NodeProxy {
   }
 
   getSelectableParams(graph: Graph): ISelectableParam[] {
-    let graphNode = this.node;
-    let workflowNode = new CustomX6NodeProxy(graphNode).getData();
+    const graphNode = this.node;
+    const workflowNode = new CustomX6NodeProxy(graphNode).getData();
     const params: ISelectableParam[] = [];
     if (workflowNode.getType() === NodeTypeEnum.CRON) {
       return params;
@@ -92,22 +92,28 @@ export class CustomX6NodeProxy {
       params.push(param);
       return params;
     }
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const edges = graph.getIncomingEdges(graphNode);
-      if (!edges) {
-        break;
-      }
-      graphNode = edges[0].getSourceNode()!;
-      workflowNode = new CustomX6NodeProxy(graphNode).getData();
-      const param = workflowNode.buildSelectableParam(graphNode.id);
-      if (!param || !param.children || param.children.length === 0) {
-        continue;
-      }
-      params.push(param);
-    }
+    this.buildSelectableParams(graph, graphNode, params);
     return params;
+  }
+
+  private buildSelectableParams(graph: Graph, node: Node, params: ISelectableParam[]): void {
+    const edges = graph.getIncomingEdges(node);
+    if (!edges) {
+      // 标识根节点
+      return;
+    }
+
+    for (const edge of edges) {
+      const sourceNode = edge.getSourceNode()!;
+      const param = new CustomX6NodeProxy(sourceNode).getData().buildSelectableParam(sourceNode.id);
+
+      if (param && param.children && param.children.length > 0 &&
+        // 去重上游可选重复节点参数
+        !params.find(({ value }) => value === param.value)) {
+        params.push(param);
+      }
+      this.buildSelectableParams(graph, edge.getSourceNode()!, params);
+    }
   }
 
   toDsl(graph: Graph): object {

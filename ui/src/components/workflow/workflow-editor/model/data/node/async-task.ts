@@ -96,7 +96,7 @@ export class AsyncTask extends BaseNode {
     });
 
     return {
-      value: nodeId,
+      value: super.getRef(),
       label: super.getName(),
       children,
     };
