@@ -12,6 +12,7 @@ export class Global {
   toDsl(): object {
     const params: Record<string, object> = {};
     this.params.forEach(({ ref, type, value }) =>
+      // TODO 适配新版dsl
       (params[ref] = { type, value }));
 
     return {

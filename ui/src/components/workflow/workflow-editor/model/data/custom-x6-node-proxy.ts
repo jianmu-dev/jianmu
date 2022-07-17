@@ -132,6 +132,7 @@ export class CustomX6NodeProxy {
 
       return {
         ...this.getData().toDsl(),
+        // TODO 无分支时，可省略needs
         needs: needs.length > 0 ? needs : undefined,
       };
     }
