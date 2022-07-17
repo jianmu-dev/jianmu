@@ -44,12 +44,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, nextTick, onMounted, onUpdated, PropType, ref } from 'vue';
-import { ParamTypeEnum } from '../../model/data/enumeration';
+import { computed, defineComponent, getCurrentInstance, nextTick, onMounted, onUpdated, PropType, ref } from 'vue';
+import { ParamTypeEnum, RefTypeEnum } from '../../model/data/enumeration';
 import GlobalParam from './form/global-param.vue';
-import { checkDuplicate, GlobalParam as _GlobalParam } from '../../model/data/global-param';
+import { GlobalParam as _GlobalParam } from '../../model/data/global-param';
 import { IWorkflow } from '../../model/data/common';
 import { v4 as uuidv4 } from 'uuid';
+import { checkDuplicate } from '../../model/util/reference';
 
 export default defineComponent({
   components: { GlobalParam },
@@ -72,6 +73,8 @@ export default defineComponent({
     const paramKeys = ref<string[]>([]);
     workflowForm.value.global.params.forEach(() => paramKeys.value.push(uuidv4()));
     const globalFormRef = ref<HTMLFormElement>();
+    const paramRefs = computed<string[]>(
+      () => workflowForm.value.global.params?.map(({ ref }) => ref));
 
     onUpdated(async () => {
       if (visible.value === props.modelValue) {
@@ -107,7 +110,7 @@ export default defineComponent({
       },
       updateInfo: () => {
         try {
-          checkDuplicate(workflowForm.value.global.params);
+          checkDuplicate(paramRefs.value, RefTypeEnum.GLOBAL_PARAM);
         } catch (err) {
           proxy.$error(err.message);
         }

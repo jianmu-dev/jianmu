@@ -48,27 +48,6 @@ export class GlobalParam {
 }
 
 /**
- * 检查唯一标识是否重复
- * @param globalParams
- */
-export function checkDuplicate(globalParams: GlobalParam[]): void {
-  const refArr: string[] = globalParams.map(({ ref }) => ref);
-  const countObj = refArr.reduce<Record<string, number>>((obj, name) => {
-    if (name in obj) {
-      obj[name]++;
-    } else {
-      obj[name] = 1;
-    }
-    return obj;
-  }, {});
-  for (const i in countObj) {
-    if (countObj[i] > 1 && i !== '') {
-      throw new Error(`唯一标识 "${i}" 重复`);
-    }
-  }
-}
-
-/**
  * globalParam参数选择/级联选择
  * @param globalParams
  */
