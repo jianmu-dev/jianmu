@@ -160,7 +160,7 @@ public class WorkerInternalApplication {
                         if (!StringUtils.hasText(workerTag)) {
                             throw new RuntimeException("未找到该流程的tag");
                         }
-                        var workers = this.checkWorkflowTag(workflowInstance) ?
+                        var workers = this.checkOldVersionOfWorkflowTag(workflowInstance) ?
                                 this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
                                         List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
                                         workerTag, workflowInstance.getStartTime()) :
@@ -183,10 +183,10 @@ public class WorkerInternalApplication {
         }
     }
 
-    private Boolean checkWorkflowTag(WorkflowInstance workflowInstance){
+    private Boolean checkOldVersionOfWorkflowTag(WorkflowInstance workflowInstance) {
         var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
                 .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
-        return "null".equals(workflow.getTag());
+        return workflow.getTag() == null;
     }
 
     private String getWorkerTag(WorkflowInstance workflowInstance) {
