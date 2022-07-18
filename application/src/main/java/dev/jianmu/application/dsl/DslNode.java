@@ -18,8 +18,9 @@ public class DslNode {
     private String name;
     private String type;
     private String onFailure;
-    private List<String> sources;
-    private List<String> targets;
+    //    private List<String> sources;
+//    private List<String> targets;
+    private List<String> needs;
     private Map<String, String> param;
     private String expression;
     private List<Branch> branches;
@@ -108,17 +109,23 @@ public class DslNode {
     }
 
     private static void setRelation(Map<?, ?> node, DslNode dslNode) {
-        var s = node.get("sources");
-        if (s instanceof List) {
-            dslNode.sources = ((List<?>) s).stream().map(i -> (String) i).collect(Collectors.toList());
+//        var s = node.get("sources");
+//        if (s instanceof List) {
+//            dslNode.sources = ((List<?>) s).stream().map(i -> (String) i).collect(Collectors.toList());
+//        } else {
+//            dslNode.sources = List.of();
+//        }
+//        var t = node.get("targets");
+//        if (t instanceof List) {
+//            dslNode.targets = ((List<?>) t).stream().map(i -> (String) i).collect(Collectors.toList());
+//        } else {
+//            dslNode.targets = List.of();
+//        }
+        var n = node.get("needs");
+        if (n instanceof List) {
+            dslNode.needs = ((List<?>) n).stream().map(i -> (String) i).collect(Collectors.toList());
         } else {
-            dslNode.sources = List.of();
-        }
-        var t = node.get("targets");
-        if (t instanceof List) {
-            dslNode.targets = ((List<?>) t).stream().map(i -> (String) i).collect(Collectors.toList());
-        } else {
-            dslNode.targets = List.of();
+            dslNode.needs = List.of();
         }
     }
 
