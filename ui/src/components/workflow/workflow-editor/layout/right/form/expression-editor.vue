@@ -30,9 +30,11 @@ export default defineComponent({
       const proxy = new CustomX6NodeProxy(graphNode);
       // 级联选择器选项
       selectableParams.value.push(...proxy.getSelectableParams(graph));
-      const buildGlobalParam = buildSelectableGlobalParam();
-      if (buildGlobalParam) {
-        selectableParams.value.push(buildGlobalParam);
+      if (proxy.getData().getType() !== NodeTypeEnum.WEBHOOK) {
+        const buildGlobalParam = buildSelectableGlobalParam();
+        if (buildGlobalParam) {
+          selectableParams.value.push(buildGlobalParam);
+        }
       }
     } else {
       const webhookNode = graph.getNodes().find(node =>
