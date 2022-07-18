@@ -16,10 +16,10 @@ export class Shell extends BaseNode {
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
 
-  constructor(name: string = 'shell', image: string = '',
-    envs: IShellEnv[] = [], script: string = '',
-    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
-    super(NodeRefEnum.SHELL, name, NodeTypeEnum.SHELL, icon, 'https://docs.jianmu.dev/guide/shell-node.html');
+  constructor(ref: string = NodeRefEnum.SHELL, name: string = 'shell', image: string = '',
+              envs: IShellEnv[] = [], script: string = '',
+              failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
+    super(ref, name, NodeTypeEnum.SHELL, icon, 'https://docs.jianmu.dev/guide/shell-node.html');
     this.image = image;
     this.envs = envs;
     this.script = script;
@@ -27,9 +27,9 @@ export class Shell extends BaseNode {
     this.validateParam = validateParam;
   }
 
-  static build({ name, image, envs, script, failureMode }: any,
-    validateParam?: ValidateParamFn): Shell {
-    return new Shell(name, image, envs, script, failureMode, validateParam);
+  static build({ref, name, image, envs, script, failureMode}: any,
+               validateParam?: ValidateParamFn): Shell {
+    return new Shell(ref, name, image, envs, script, failureMode, validateParam);
   }
 
   getFormRules(): Record<string, CustomRule> {

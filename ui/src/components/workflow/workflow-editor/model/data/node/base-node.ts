@@ -4,7 +4,7 @@ import { NodeTypeEnum } from '../enumeration';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 
 export abstract class BaseNode implements IWorkflowNode {
-  private readonly ref: string;
+  ref: string;
   name: string;
   private readonly type: NodeTypeEnum;
   private readonly icon: string;
@@ -45,11 +45,10 @@ export abstract class BaseNode implements IWorkflowNode {
 
   getFormRules(): Record<string, CustomRule> {
     return {
-      name: [
+      ref: [
         {
           required: true,
-          // TODO 可为空，ref不能为空
-          message: '节点名称不能为空',
+          message: '节点唯一标识不能为空',
           trigger: 'blur',
         },
       ],
