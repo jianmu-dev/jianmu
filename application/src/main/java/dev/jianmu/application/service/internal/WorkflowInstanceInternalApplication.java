@@ -3,6 +3,7 @@ package dev.jianmu.application.service.internal;
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.GlobalProperties;
+import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.trigger.event.TriggerFailedEvent;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
@@ -39,6 +40,7 @@ public class WorkflowInstanceInternalApplication {
     private final ApplicationEventPublisher publisher;
     private final ProjectRepository projectRepository;
     private final GlobalProperties globalProperties;
+    private final ProjectLastExecutionRepository projectLastExecutionRepository;
 
     public WorkflowInstanceInternalApplication(
             WorkflowRepository workflowRepository,
@@ -47,7 +49,8 @@ public class WorkflowInstanceInternalApplication {
             WorkflowInstanceDomainService workflowInstanceDomainService,
             ApplicationEventPublisher publisher,
             ProjectRepository projectRepository,
-            GlobalProperties globalProperties) {
+            GlobalProperties globalProperties, ProjectLastExecutionRepository projectLastExecutionRepository
+    ) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
@@ -55,6 +58,7 @@ public class WorkflowInstanceInternalApplication {
         this.publisher = publisher;
         this.projectRepository = projectRepository;
         this.globalProperties = globalProperties;
+        this.projectLastExecutionRepository = projectLastExecutionRepository;
     }
 
     // 创建流程
@@ -94,11 +98,15 @@ public class WorkflowInstanceInternalApplication {
     public void start(String workflowRef) {
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         if (project.isConcurrent()) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
                     .forEach(workflowInstance -> {
                         workflowInstance.createVolume();
+                        projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                         this.workflowInstanceRepository.save(workflowInstance);
+                        this.projectLastExecutionRepository.update(projectLastExecution);
                     });
             return;
         }
@@ -112,7 +120,9 @@ public class WorkflowInstanceInternalApplication {
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
                 .ifPresent(workflowInstance -> {
                     workflowInstance.createVolume();
+                    projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                     this.workflowInstanceRepository.save(workflowInstance);
+                    this.projectLastExecutionRepository.update(projectLastExecution);
                 });
     }
 
@@ -121,8 +131,12 @@ public class WorkflowInstanceInternalApplication {
     public void end(String triggerId) {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         workflowInstance.end();
+        projectLastExecution.end(workflowInstance.getStatus().name(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
+        this.projectLastExecutionRepository.update(projectLastExecution);
     }
 
     // 停止流程
@@ -131,10 +145,14 @@ public class WorkflowInstanceInternalApplication {
     public void suspend(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.suspend();
+        projectLastExecution.suspend(workflowInstance.getStatus().name(), workflowInstance.getSuspendedTime());
         this.workflowInstanceRepository.save(workflowInstance);
+        this.projectLastExecutionRepository.update(projectLastExecution);
     }
 
     @Transactional
@@ -156,10 +174,14 @@ public class WorkflowInstanceInternalApplication {
     public void terminate(String instanceId) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
+        projectLastExecution.end(workflowInstance.getStatus().name(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
+        this.projectLastExecutionRepository.update(projectLastExecution);
     }
 
     // 终止流程
@@ -168,10 +190,14 @@ public class WorkflowInstanceInternalApplication {
     public void terminateByTriggerId(String triggerId) {
         var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
+        projectLastExecution.end(workflowInstance.getStatus().name(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
+        this.projectLastExecutionRepository.update(projectLastExecution);
     }
 
     @Transactional
