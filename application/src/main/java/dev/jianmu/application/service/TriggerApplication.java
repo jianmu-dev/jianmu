@@ -2,10 +2,8 @@ package dev.jianmu.application.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.PathNotFoundException;
+import dev.jianmu.application.dsl.webhook.DslWebhookParameter;
+import dev.jianmu.application.service.vo.WebhookPayload;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
@@ -17,15 +15,13 @@ import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.WebRequest;
 import dev.jianmu.trigger.aggregate.Webhook;
+import dev.jianmu.trigger.aggregate.WebhookParameter;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.event.TriggerEventParameter;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.repository.TriggerRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
-import dev.jianmu.workflow.el.EvaluationContext;
-import dev.jianmu.workflow.el.EvaluationResult;
-import dev.jianmu.workflow.el.Expression;
-import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.el.*;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -355,17 +351,20 @@ public class TriggerApplication {
         List<TriggerEventParameter> eventParameters = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
-            webhook.getParam().forEach(webhookParameter -> {
-                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+            for (WebhookParameter webhookParameter : webhook.getParam()){
+                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
                 if (value == null && webhookParameter.isRequired()) {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     newWebRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
                     this.webRequestRepositoryImpl.add(newWebRequest);
                     throw new IllegalArgumentException("项目：" + project.getWorkflowName() + " 触发器参数" + webhookParameter.getName() + "的值为null");
                 }
+                if (value == null) {
+                    continue;
+                }
                 Parameter<?> parameter = Parameter.Type
                         .getTypeByName(webhookParameter.getType())
-                        .newParameter(value == null ? webhookParameter.getDefaultValue() : value);
+                        .newParameter(value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
@@ -375,12 +374,12 @@ public class TriggerApplication {
                 parameters.add(parameter);
                 eventParameters.add(eventParameter);
                 context.add("trigger", eventParameter.getName(), parameter);
-            });
+            }
         }
         // 验证Auth
         if (webhook.getAuth() != null) {
             var auth = webhook.getAuth();
-            var authToken = this.calculateExp(auth.getToken(), context);
+            var authToken = this.calculateExp(auth.getToken(), ResultType.STRING, context);
             var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType());
             if (authToken.getType() != Parameter.Type.STRING) {
                 log.warn("Auth Token表达式计算错误");
@@ -399,7 +398,7 @@ public class TriggerApplication {
         }
         // 验证Matcher
         if (webhook.getOnly() != null) {
-            var res = this.calculateExp(webhook.getOnly(), context);
+            var res = this.calculateExp(webhook.getOnly(), ResultType.BOOL, context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
                 log.warn("Only计算不匹配，计算结果为：{}", res.getStringValue());
                 newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
@@ -449,17 +448,20 @@ public class TriggerApplication {
         List<TriggerEventParameter> eventParameters = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
-            webhook.getParam().forEach(webhookParameter -> {
-                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+            for (WebhookParameter webhookParameter : webhook.getParam()){
+                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
                 if (value == null && webhookParameter.isRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
                     this.webRequestRepositoryImpl.add(webRequest);
                     throw new IllegalArgumentException("项目：" + project.getWorkflowName() + " 触发器参数" + webhookParameter.getName() + "的值为null");
                 }
+                if (value == null) {
+                    continue;
+                }
                 Parameter<?> parameter = Parameter.Type
                         .getTypeByName(webhookParameter.getType())
-                        .newParameter(value == null ? webhookParameter.getDefaultValue() : value);
+                        .newParameter(value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
@@ -469,12 +471,12 @@ public class TriggerApplication {
                 parameters.add(parameter);
                 eventParameters.add(eventParameter);
                 context.add("trigger", eventParameter.getName(), parameter);
-            });
+            }
         }
         // 验证Auth
         if (webhook.getAuth() != null) {
             var auth = webhook.getAuth();
-            var authToken = this.calculateExp(auth.getToken(), context);
+            var authToken = this.calculateExp(auth.getToken(), ResultType.STRING, context);
             var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType());
             if (authToken.getType() != Parameter.Type.STRING) {
                 log.warn("Auth Token表达式计算错误");
@@ -493,7 +495,7 @@ public class TriggerApplication {
         }
         // 验证Matcher
         if (webhook.getOnly() != null) {
-            var res = this.calculateExp(webhook.getOnly(), context);
+            var res = this.calculateExp(webhook.getOnly(), ResultType.BOOL, context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
                 log.warn("Only计算不匹配，计算结果为：{}", res.getStringValue());
                 webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
@@ -536,20 +538,14 @@ public class TriggerApplication {
         return null;
     }
 
-    private Parameter<?> calculateExp(String exp, EvaluationContext context) {
+    private Parameter<?> calculateExp(String exp, ResultType resultType, EvaluationContext context) {
         // 密钥类型单独处理
         var secret = this.isSecret(exp);
         if (secret != null) {
             return Parameter.Type.SECRET.newParameter(secret);
         }
-        String el;
-        if (isEl(exp)) {
-            el = exp;
-        } else {
-            el = "`" + exp + "`";
-        }
         // 计算参数表达式
-        Expression expression = expressionLanguage.parseExpression(el);
+        Expression expression = expressionLanguage.parseExpression(exp, resultType);
         EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
         if (evaluationResult.isFailure()) {
             var errorMsg = "表达式：" + exp +
@@ -559,31 +555,23 @@ public class TriggerApplication {
         return evaluationResult.getValue();
     }
 
-    private boolean isEl(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\(");
-        Matcher matcher = pattern.matcher(paramValue);
-        return matcher.lookingAt();
-    }
-
-    private Object extractParameter(String payload, String exp, String webhookType) {
-        if (exp.startsWith("$.header.")) {
-            exp = exp.toLowerCase(Locale.ROOT);
-        }
-        Object document = Configuration.defaultConfiguration()
-                .jsonProvider().parse(payload);
+    private Object extractParameter(String payload, String name, String exp, String webhookType) {
         try {
-            var conf = Configuration.defaultConfiguration()
-                    .addOptions(Option.ALWAYS_RETURN_LIST, Option.DEFAULT_PATH_LEAF_TO_NULL);
-            List<?> vars = JsonPath.using(conf).parse(document).read(exp);
-            if (vars.isEmpty()) {
+            var webhookPayload = this.objectMapper.readValue(payload, WebhookPayload.class);
+            // 创建表达式上下文
+            var context = new ElContext();
+            context.add("header", webhookPayload.getHeader());
+            context.add("body", webhookPayload.getBody());
+            context.add("query", webhookPayload.getQuery());
+            var type = Parameter.Type.getTypeByName(webhookType);
+            var expression = this.expressionLanguage.parseExpression(exp, ResultType.valueOf(webhookType));
+            var result = this.expressionLanguage.evaluateExpression(expression, context);
+            if (result.isFailure()) {
+                log.warn("全局参数: {} 表达式: {} 计算错误: {}", name, expression.getExpression(), result.getFailureMessage());
                 return null;
             }
-            var type = Parameter.Type.getTypeByName(webhookType);
-            if (type == Parameter.Type.SECRET || type == Parameter.Type.STRING) {
-                return vars.get(0) == null ? null : vars.get(0).toString().trim();
-            }
-            return vars.get(0);
-        } catch (PathNotFoundException e) {
+            return result.getValue().getValue();
+        } catch (Exception e) {
             return null;
         }
     }
@@ -682,15 +670,15 @@ public class TriggerApplication {
         if (ObjectUtils.isEmpty(webRequest.getPayload())) {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
-        trigger.getParam().forEach(webhookParameter -> {
-            var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
-            var defaultParameter = Parameter.Type.getTypeByName(webhookParameter.getType()).newParameter(webhookParameter.getDefaultValue());
-            webhookParameter.setDefaultValue(defaultParameter.getValue());
-            webhookParameter.setValue(defaultParameter.getValue());
+        var parameters = new ArrayList<DslWebhookParameter>();
+        for (DslWebhookParameter webhookParameter : trigger.getParam()) {
+            var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
+            webhookParameter.setValue(value);
             if (value != null) {
-                webhookParameter.setValue(value);
+                parameters.add(webhookParameter);
             }
-        });
+        }
+        trigger.setParam(parameters);
         return trigger;
     }
 
@@ -704,7 +692,7 @@ public class TriggerApplication {
         var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
-        webRequest.setErrorMsg("待执行流程数已超过最大值" );
+        webRequest.setErrorMsg("待执行流程数已超过最大值");
         this.webRequestRepositoryImpl.update(webRequest);
     }
 

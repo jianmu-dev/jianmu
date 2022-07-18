@@ -2,7 +2,6 @@ package dev.jianmu.infrastructure.elimpl;
 
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.EvaluationResult;
-import dev.jianmu.workflow.el.ResultType;
 
 /**
  * @class EvaluationFailure

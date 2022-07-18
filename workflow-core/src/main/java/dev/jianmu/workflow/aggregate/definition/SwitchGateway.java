@@ -1,10 +1,7 @@
 package dev.jianmu.workflow.aggregate.definition;
 
 import dev.jianmu.workflow.aggregate.parameter.StringParameter;
-import dev.jianmu.workflow.el.EvaluationContext;
-import dev.jianmu.workflow.el.EvaluationResult;
-import dev.jianmu.workflow.el.Expression;
-import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.el.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,7 +31,7 @@ public class SwitchGateway extends BaseNode implements Gateway {
     private Branch getNext() {
         // TODO expression 表达式求值返回String类型的Case，应支持number类型
         String expResult = "";
-        Expression expression = this.expressionLanguage.parseExpression(this.expression);
+        Expression expression = this.expressionLanguage.parseExpression(this.expression, ResultType.STRING);
         EvaluationResult evaluationResult = this.expressionLanguage.evaluateExpression(expression, context);
         if (!evaluationResult.isFailure() && evaluationResult.getValue() instanceof StringParameter) {
             expResult = ((StringParameter) evaluationResult.getValue()).getValue();

@@ -247,13 +247,13 @@ public class DslParser {
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> {
                         String type = null;
-                        Object value = null;
+                        String value = null;
                         if (entry.getValue() instanceof String) {
                             value = entry.getValue().toString();
                             type = "STRING";
                         }
                         if (entry.getValue() instanceof Map) {
-                            value = ((Map<?, ?>) entry.getValue()).get("value");
+                            value = (String) ((Map<?, ?>) entry.getValue()).get("value");
                             type = ((Map<String, String>) entry.getValue()).get("type");
                         }
                         return GlobalParameter.Builder.aGlobalParameter()
@@ -531,9 +531,6 @@ public class DslParser {
             var only = this.trigger.get("only");
             var webhookBuilder = Webhook.builder();
             if (only instanceof String) {
-                if (!this.isEl((String) only)) {
-                    throw new IllegalArgumentException("only表达式格式错误");
-                }
                 webhookBuilder.only((String) only);
             }
             if (auth instanceof Map) {
@@ -562,7 +559,6 @@ public class DslParser {
                             var type = p.get("type");
                             var exp = p.get("exp");
                             var required = p.get("required");
-                            var defaultValue = p.get("default");
                             if (!(name instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数名配置错误");
                             }
@@ -575,13 +571,12 @@ public class DslParser {
                             if (required != null && !(required instanceof Boolean)) {
                                 throw new IllegalArgumentException("Webhook参数是否必填配置错误");
                             }
-                            Parameter.Type.getTypeByName((String) type).newParameter(defaultValue);
+                            Parameter.Type.getTypeByName((String) type);
                             return WebhookParameter.Builder.aWebhookParameter()
                                     .name((String) name)
                                     .type((String) type)
                                     .exp((String) exp)
                                     .required(required != null && (Boolean) required)
-                                    .defaultVault(defaultValue)
                                     .build();
                         }).collect(Collectors.toList());
                 webhookBuilder.param(ps);
@@ -597,9 +592,8 @@ public class DslParser {
             ((Map<String, Object>) globalParam).forEach((k, v) -> {
                 if (v instanceof Map) {
                     var type = ((Map<String, String>) v).get("type");
-                    var value = ((Map<?, ?>) v).get("value");
-                    var p = Parameter.Type.getTypeByName(type).newParameter(value);
-                    if (Parameter.Type.SECRET == p.getType()) {
+                    var p = Parameter.Type.getTypeByName(type);
+                    if (Parameter.Type.SECRET == p) {
                         throw new DslException("全局参数不支持使用SECRET类型");
                     }
                 }
@@ -737,12 +731,6 @@ public class DslParser {
         if (!(script instanceof List) && !(script instanceof String)) {
             throw new DslException("节点 " + nodeName + " 的script参数必须为数组或字符串类型");
         }
-    }
-
-    private boolean isEl(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\(.*\\)$");
-        Matcher matcher = pattern.matcher(paramValue);
-        return matcher.lookingAt();
     }
 
     private String isSecret(String paramValue) {

@@ -2,10 +2,7 @@ package dev.jianmu.workflow.aggregate.definition;
 
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
-import dev.jianmu.workflow.el.EvaluationContext;
-import dev.jianmu.workflow.el.EvaluationResult;
-import dev.jianmu.workflow.el.Expression;
-import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.el.*;
 import dev.jianmu.workflow.event.definition.*;
 
 import java.time.LocalDateTime;
@@ -259,15 +256,9 @@ public class Workflow extends AggregateRoot {
                 return Parameter.Type.SECRET.newParameter(secret);
             }
         }
-        // 表达式计算
-        String el;
-        if (isEl(taskParameter.getExpression())) {
-            el = taskParameter.getExpression();
-        } else {
-            el = "`" + taskParameter.getExpression() + "`";
-        }
         // 计算参数表达式
-        Expression expression = expressionLanguage.parseExpression(el);
+        var resultType = taskParameter.getType() == Parameter.Type.SECRET ? ResultType.STRING : ResultType.valueOf(taskParameter.getType().name());
+        Expression expression = expressionLanguage.parseExpression(taskParameter.getExpression(), resultType);
         EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
         if (evaluationResult.isFailure()) {
             var errorMsg = "参数：" + taskParameter.getRef() +
@@ -284,15 +275,9 @@ public class Workflow extends AggregateRoot {
             return Parameter.Type.SECRET.newParameter(evaluationResult.getValue().getStringValue());
         }
         if (taskParameter.getType() != evaluationResult.getValue().getType()) {
-            throw new IllegalArgumentException("表达式:" + el + " 计算结果类型为" + evaluationResult.getValue().getType() + "与节点定义参数" + taskParameter.getRef() + "类型不匹配");
+            throw new IllegalArgumentException("表达式:" + taskParameter.getExpression() + " 计算结果类型为" + evaluationResult.getValue().getType() + "与节点定义参数" + taskParameter.getRef() + "类型不匹配");
         }
         return evaluationResult.getValue();
-    }
-
-    private boolean isEl(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\(");
-        Matcher matcher = pattern.matcher(paramValue);
-        return matcher.lookingAt();
     }
 
     private String findSecret(String paramValue) {
