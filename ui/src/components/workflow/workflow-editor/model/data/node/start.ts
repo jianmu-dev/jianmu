@@ -10,4 +10,11 @@ export class Start extends BaseNode {
   static build(): Start {
     return new Start();
   }
+
+  toDsl(): object {
+    return {
+      alias: super.getName(),
+      type: super.getType(),
+    };
+  }
 }

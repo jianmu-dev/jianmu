@@ -10,4 +10,11 @@ export class End extends BaseNode {
   static build(): End {
     return new End();
   }
+
+  toDsl(): object {
+    return {
+      alias: super.getName(),
+      type: super.getType(),
+    };
+  }
 }

@@ -121,28 +121,23 @@ export class CustomX6NodeProxy {
       return this.getData().toDsl();
     }
 
-    if (this.isTask()) {
-      const needs: string[] = [];
-      graph.getIncomingEdges(this.node)!.forEach(edge => {
-        const sourceNode = edge.getSourceNode();
-        if (!sourceNode) {
-          return;
-        }
-        const sourceNodeProxy = new CustomX6NodeProxy(sourceNode);
-        if (!sourceNodeProxy.isTask()) {
-          return;
-        }
+    const needs: string[] = [];
+    graph.getIncomingEdges(this.node)!.forEach(edge => {
+      const sourceNode = edge.getSourceNode();
+      if (!sourceNode) {
+        return;
+      }
+      const sourceNodeProxy = new CustomX6NodeProxy(sourceNode);
+      if (sourceNodeProxy.isTrigger()) {
+        return;
+      }
 
-        needs.push(sourceNodeProxy.getData().getRef());
-      });
+      needs.push(sourceNodeProxy.getData().getRef());
+    });
 
-      return {
-        ...this.getData().toDsl(),
-        // TODO 无分支时，可省略needs
-        needs: needs.length > 0 ? needs : undefined,
-      };
-    }
-
-    return {};
+    return {
+      ...this.getData().toDsl(),
+      needs: needs.length > 0 ? needs : undefined,
+    };
   }
 }
