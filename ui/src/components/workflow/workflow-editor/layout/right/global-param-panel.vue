@@ -31,11 +31,9 @@
               @change="updateInfo"
             />
           </jm-form>
-          <div class="add-param">
-            <span class="add-link" @click="addParam">
-              <i class="jm-icon-button-add"/>
-              全局参数
-            </span>
+          <div class="add-param" @click="addParam">
+            <i class="jm-icon-button-add"/>
+            全局参数
           </div>
         </div>
       </jm-scrollbar>
@@ -147,10 +145,7 @@ export default defineComponent({
           padding: 10px 20px;
           color: #306bd2;
           font-size: 14px;
-
-          .add-link {
-            cursor: pointer;
-          }
+          cursor: pointer;
 
           .jm-icon-button-add::before {
             font-weight: 700;
