@@ -31,7 +31,7 @@ export default defineComponent({
       // 级联选择器选项
       selectableParams.value.push(...proxy.getSelectableParams(graph));
       const buildGlobalParam = buildSelectableGlobalParam();
-      if (buildGlobalParam) {
+      if (buildGlobalParam && proxy.getData().getRef() !== 'webhook') {
         selectableParams.value.push(buildGlobalParam);
       }
     } else {
