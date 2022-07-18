@@ -122,7 +122,7 @@ export class CustomX6NodeProxy {
     }
 
     const needs: string[] = [];
-    graph.getIncomingEdges(this.node)!.forEach(edge => {
+    graph.getIncomingEdges(this.node)?.forEach(edge => {
       const sourceNode = edge.getSourceNode();
       if (!sourceNode) {
         return;
