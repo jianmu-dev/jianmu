@@ -12,6 +12,7 @@ import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.aggregate.ProjectGroup;
+import dev.jianmu.project.aggregate.ProjectLastExecution;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
@@ -19,6 +20,7 @@ import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.query.ProjectVo;
 import dev.jianmu.project.repository.ProjectGroupRepository;
+import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -63,6 +65,7 @@ public class ProjectApplication {
     private final ProjectGroupRepository projectGroupRepository;
     private final GlobalProperties globalProperties;
     private final TriggerEventRepository triggerEventRepository;
+    private final ProjectLastExecutionRepository projectLastExecutionRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -75,7 +78,8 @@ public class ProjectApplication {
             ProjectLinkGroupRepository projectLinkGroupRepository,
             ProjectGroupRepository projectGroupRepository,
             GlobalProperties globalProperties,
-            TriggerEventRepository triggerEventRepository
+            TriggerEventRepository triggerEventRepository,
+            ProjectLastExecutionRepository projectLastExecutionRepository
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -88,6 +92,7 @@ public class ProjectApplication {
         this.projectGroupRepository = projectGroupRepository;
         this.globalProperties = globalProperties;
         this.triggerEventRepository = triggerEventRepository;
+        this.projectLastExecutionRepository = projectLastExecutionRepository;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -167,11 +172,15 @@ public class ProjectApplication {
     private void concurrentWorkflowInstance(String workflowRef) {
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         if (project.isConcurrent()) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
                     .forEach(workflowInstance -> {
                         workflowInstance.createVolume();
+                        projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                         this.workflowInstanceRepository.save(workflowInstance);
+                        this.projectLastExecutionRepository.update(projectLastExecution);
                     });
             return;
         }
@@ -185,7 +194,9 @@ public class ProjectApplication {
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
                 .ifPresent(workflowInstance -> {
                     workflowInstance.createVolume();
+                    projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                     this.workflowInstanceRepository.save(workflowInstance);
+                    this.projectLastExecutionRepository.update(projectLastExecution);
                 });
     }
 
@@ -232,6 +243,7 @@ public class ProjectApplication {
 
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
+        this.projectLastExecutionRepository.add(new ProjectLastExecution(project.getWorkflowRef()));
         this.projectLinkGroupRepository.add(projectLinkGroup);
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
@@ -306,6 +318,7 @@ public class ProjectApplication {
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
