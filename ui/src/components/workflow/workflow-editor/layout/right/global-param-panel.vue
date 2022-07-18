@@ -63,8 +63,8 @@ export default defineComponent({
     },
   },
   emits: ['closed'],
-  setup(props, { emit }) {
-    const { proxy } = getCurrentInstance() as any;
+  setup(props, {emit}) {
+    const {proxy} = getCurrentInstance() as any;
     const visible = ref<boolean>(props.modelValue);
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const paramKeys = ref<string[]>([]);
@@ -93,6 +93,11 @@ export default defineComponent({
       paramKeys,
       globalFormRef,
       close: () => {
+        workflowForm.value.global.params.forEach(param => {
+          if (!param.name) {
+            param.name = param.ref;
+          }
+        });
         visible.value = false;
         emit('closed', visible.value);
       },
