@@ -267,7 +267,7 @@ public class WorkerInternalApplication {
                     .map(entry -> Map.entry("JIANMU_" + entry.getKey(), entry.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
-        parameterMap.putAll(this.getEnvVariable(taskInstance, worker));
+        parameterMap.putAll(this.getEnvVariable(worker, taskInstance.getTriggerId(), taskInstance.getBusinessId(), taskInstance.getDefKey()));
         this.addFeatureParam(parameterMap);
         parameterMap = parameterMap.entrySet().stream()
                 .filter(entry -> entry.getKey() != null)
@@ -391,24 +391,23 @@ public class WorkerInternalApplication {
     /**
      * 设置一些通用参数到环境变量,方便在DSL中使用
      *
-     * @param taskInstance
      * @param worker
      * @return
      */
-    private HashMap<String, String> getEnvVariable(TaskInstance taskInstance, Worker worker) {
+    private HashMap<String, String> getEnvVariable(Worker worker, String triggerId, String businessId, String defKey) {
 
         HashMap<String, String> env = new HashMap<>();
-        env.put("JM_RESULT_FILE", "/" + taskInstance.getTriggerId() + "/" + taskInstance.getBusinessId());
-        env.put("JIANMU_SHARE_DIR", "/" + taskInstance.getTriggerId());
-        env.put("JM_SHARE_DIR", "/" + taskInstance.getTriggerId());
+        env.put("JM_RESULT_FILE", "/" + triggerId + "/" + businessId);
+        env.put("JIANMU_SHARE_DIR", "/" + triggerId);
+        env.put("JM_SHARE_DIR", "/" + triggerId);
 
         env.put("JM_WORKER_ID", worker.getId());
         env.put("JM_WORKER_TYPE", worker.getType().name());
-        env.put("JM_BUSINESS_ID", taskInstance.getBusinessId());
-        env.put("JM_TRIGGER_ID", taskInstance.getTriggerId());
-        env.put("JM_DEF_KEY", taskInstance.getDefKey());
+        env.put("JM_BUSINESS_ID", businessId);
+        env.put("JM_TRIGGER_ID", triggerId);
+        env.put("JM_DEF_KEY", defKey);
 
-        var triggerEvent = this.triggerEventRepository.findById(taskInstance.getTriggerId())
+        var triggerEvent = this.triggerEventRepository.findById(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该触发事件"));
         env.put("JM_PROJECT_ID", triggerEvent.getProjectId());
         env.put("JM_WEB_REQUEST_ID", triggerEvent.getWebRequestId());
@@ -417,7 +416,7 @@ public class WorkerInternalApplication {
 
         // workflow instance 相关参数
         WorkflowInstance workflowInstance = workflowInstanceRepository
-                .findByTriggerId(taskInstance.getTriggerId())
+                .findByTriggerId(triggerId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该workflow instance"));
 
         env.put("JM_INSTANCE_ID", workflowInstance.getId());
@@ -563,6 +562,8 @@ public class WorkerInternalApplication {
     }
 
     private Unit findCreateUnit(TaskInstance taskInstance) {
+        var worker = this.workerRepository.findById(taskInstance.getWorkerId())
+                .orElseThrow(() -> new RuntimeException("未找到worker：" + taskInstance.getWorkerId()));
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(taskInstance.getTriggerId());
@@ -586,7 +587,7 @@ public class WorkerInternalApplication {
                     runnerEnvs.put((isShellNode ? "" : "JIANMU_") + taskParameter.getRef().toUpperCase(), taskParameter.getExpression());
                 }
             });
-            runners.add(this.findUnitRunner(asyncTaskInstances, nodeDef, node, runnerSecrets, runnerEnvs));
+            runners.add(this.findUnitRunner(asyncTaskInstances, nodeDef, node, runnerSecrets, runnerEnvs, worker));
         });
         var startRunner = Runner.builder()
                 .id(taskInstance.getBusinessId())
@@ -653,13 +654,15 @@ public class WorkerInternalApplication {
         return null;
     }
 
-    private Runner findUnitRunner(List<AsyncTaskInstance> asyncTaskInstances, NodeDef nodeDef, Node node, List<SecretVar> secretVars, Map<String, String> envs) {
+    private Runner findUnitRunner(List<AsyncTaskInstance> asyncTaskInstances, NodeDef nodeDef, Node node, List<SecretVar> secretVars, Map<String, String> envs, Worker worker) {
         Runner runner;
         var asyncTaskInstance = asyncTaskInstances.stream()
                 .filter(t -> t.getAsyncTaskRef().equals(node.getRef()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("未找到对应的异步任务实例："));
         envs.put("JM_RESULT_FILE", "/" + asyncTaskInstance.getTriggerId() + "/" + asyncTaskInstance.getId());
+        var map = this.getEnvVariable(worker, asyncTaskInstance.getTriggerId(), asyncTaskInstance.getId(), asyncTaskInstance.getAsyncTaskType());
+        envs.putAll(map);
         if (nodeDef.getImage() != null) {
             envs.put("JIANMU_SCRIPT", "JIANMU_SCRIPT");
             String[] entrypoint = {"/bin/sh", "-c"};
