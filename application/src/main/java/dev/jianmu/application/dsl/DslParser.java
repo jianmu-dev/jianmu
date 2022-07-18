@@ -485,9 +485,6 @@ public class DslParser {
             var only = this.trigger.get("only");
             var webhookBuilder = Webhook.builder();
             if (only instanceof String) {
-                if (!this.isEl((String) only)) {
-                    throw new IllegalArgumentException("only表达式格式错误");
-                }
                 webhookBuilder.only((String) only);
             }
             if (auth instanceof Map) {
@@ -535,7 +532,6 @@ public class DslParser {
                                     .type((String) type)
                                     .exp((String) exp)
                                     .required(required != null && (Boolean) required)
-                                    .defaultVault(defaultValue)
                                     .build();
                         }).collect(Collectors.toList());
                 webhookBuilder.param(ps);
@@ -691,12 +687,6 @@ public class DslParser {
         if (!(script instanceof List) && !(script instanceof String)) {
             throw new DslException("节点 " + nodeName + " 的script参数必须为数组或字符串类型");
         }
-    }
-
-    private boolean isEl(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\(.*\\)$");
-        Matcher matcher = pattern.matcher(paramValue);
-        return matcher.lookingAt();
     }
 
     private String isSecret(String paramValue) {

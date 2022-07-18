@@ -1,10 +1,7 @@
 package dev.jianmu.workflow.aggregate.definition;
 
 import dev.jianmu.workflow.aggregate.parameter.BoolParameter;
-import dev.jianmu.workflow.el.EvaluationContext;
-import dev.jianmu.workflow.el.EvaluationResult;
-import dev.jianmu.workflow.el.Expression;
-import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.el.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +56,7 @@ public class Condition extends BaseNode implements Gateway {
 
     private Branch getNext() {
         Boolean expResult;
-        Expression expression = this.expressionLanguage.parseExpression(this.expression);
+        Expression expression = this.expressionLanguage.parseExpression(this.expression, ResultType.BOOLEAN);
         EvaluationResult evaluationResult = this.expressionLanguage.evaluateExpression(expression, context);
         if (!evaluationResult.isFailure() && evaluationResult.getValue() instanceof BoolParameter) {
             expResult = ((BoolParameter) evaluationResult.getValue()).getValue();
