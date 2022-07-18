@@ -77,7 +77,7 @@ import { AUTHORIZE_INDEX, PLATFORM_INDEX } from '@/router/path-def';
 import { fetchAuthUrl } from '@/api/session';
 import { getRedirectUri } from '@/utils/redirect-uri';
 
-const { mapActions: mapSessionActions } = createNamespacedHelpers(namespace);
+const { mapActions: mapSessionActions, mapMutations } = createNamespacedHelpers(namespace);
 
 export default defineComponent({
   emits: ['logined', 'cancel'],
@@ -111,8 +111,6 @@ export default defineComponent({
     // 获取三方登录授权地址
     const fetchThirdAuthUrl = async () => {
       authError.value = false;
-      // 每次进行三方登录时，将localstorage清空
-      localStorage.clear();
       localStorage.setItem('temp-login-mode', props.type);
       // 弹框登录方式获取授权地址时显示登录中
       localStorage.getItem('temp-login-mode') !== 'index' && (loading.value = true);
@@ -130,6 +128,8 @@ export default defineComponent({
     const refreshState = (e: any) => {
       if (e.key === 'session') {
         proxy.$success('登录成功');
+        const newSession = JSON.parse(e.newValue)['_default'].session;
+        proxy.mutateSession(newSession);
         // 登录成功
         loading.value = false;
         authError.value = false;
@@ -235,6 +235,9 @@ export default defineComponent({
       ...mapSessionActions({
         createSession: 'create',
         createOAuthSession: 'oauthLogin',
+      }),
+      ...mapMutations({
+        mutateSession: 'oauthMutate',
       }),
     };
   },

@@ -1,6 +1,7 @@
 import { RuleItem } from 'async-validator';
 import { NodeTypeEnum } from './enumeration';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
+import { Global } from './global';
 
 type TriggerValue = 'blur' | 'change';
 
@@ -37,10 +38,6 @@ export interface IWorkflowNode {
   toDsl(): object;
 }
 
-export interface IGlobal {
-  concurrent: boolean;
-}
-
 /**
  * 工作流数据
  */
@@ -48,7 +45,7 @@ export interface IWorkflow {
   name: string;
   description?: string;
   groupId: string;
-  global: IGlobal;
+  global: Global;
   data: string;
 }
 

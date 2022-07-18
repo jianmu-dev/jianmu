@@ -291,12 +291,6 @@ public class DslParser {
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
-        // 添加开始节点
-        var start = Start.Builder.aStart().name("Start").ref("Start").build();
-        symbolTable.put("Start", start);
-        // 添加结束节点
-        var end = End.Builder.anEnd().name("End").ref("End").build();
-        symbolTable.put("End", end);
         dslNodes.forEach(dslNode -> {
             AsyncTask task;
             if (dslNode.getImage() != null) {
@@ -312,30 +306,82 @@ public class DslParser {
             }
             symbolTable.put(dslNode.getName(), task);
         });
-        // 添加节点引用关系
-        dslNodes.forEach(withCounter((i, dslNode) -> {
-            var n = symbolTable.get(dslNode.getName());
-            if (null != n && i == 0) {
-                var startNode = symbolTable.get("Start");
-                n.addSource(startNode.getRef());
-                startNode.addTarget(n.getRef());
-            }
-            if (null != n && i == (dslNodes.size() - 1)) {
-                var endNode = symbolTable.get("End");
-                n.addTarget(endNode.getRef());
-                endNode.addSource(n.getRef());
-            }
-            if (null != n && i > 0) {
-                var sourceNode = dslNodes.get(i - 1);
-                var source = symbolTable.get(sourceNode.getName());
-                n.addSource(source.getRef());
-            }
-            if (null != n && i < (dslNodes.size() - 1)) {
-                var targetNode = dslNodes.get(i + 1);
-                var target = symbolTable.get(targetNode.getName());
-                n.addTarget(target.getRef());
-            }
-        }));
+
+        // 添加开始节点
+        var start = Start.Builder.aStart().name("Start").ref("start").build();
+        // 添加结束节点
+        var end = End.Builder.anEnd().name("End").ref("end").build();
+
+        if (dslNodes.stream().anyMatch(dslNode -> !dslNode.getNeeds().isEmpty())) {
+            // 添加节点引用关系：存在needs场景
+            dslNodes.forEach(dslNode -> {
+                var n = symbolTable.get(dslNode.getName());
+                if (n == null) {
+                    return;
+                }
+
+                dslNode.getNeeds().forEach(need -> {
+                    n.addSource(need);
+                    //确定target
+                    var needNode = symbolTable.get(need);
+                    if (needNode == null) {
+                        throw new DslException("节点" + n.getName() + "配置的needs对应节点不存在: " + need);
+                    }
+                    needNode.addTarget(n.getRef());
+                });
+            });
+
+            // 顶端
+            symbolTable.values()
+                    .stream()
+                    .filter(node -> node.getSources().isEmpty())
+                    .forEach(node -> {
+                        start.addTarget(node.getRef());
+                        node.addSource(start.getRef());
+                    });
+            // 末端
+            symbolTable.values()
+                    .stream()
+                    .filter(node -> node.getTargets().isEmpty())
+                    .forEach(node -> {
+                        end.addSource(node.getRef());
+                        node.addTarget(end.getRef());
+                    });
+
+            symbolTable.put(start.getRef(), start);
+            symbolTable.put(end.getRef(), end);
+
+            // TODO 环路检测
+
+        } else {
+            symbolTable.put(start.getRef(), start);
+            symbolTable.put(end.getRef(), end);
+
+            // 添加节点引用关系：不存在needs场景
+            dslNodes.forEach(withCounter((i, dslNode) -> {
+                var n = symbolTable.get(dslNode.getName());
+                if (null != n && i == 0) {
+                    var startNode = symbolTable.get("start");
+                    n.addSource(startNode.getRef());
+                    startNode.addTarget(n.getRef());
+                }
+                if (null != n && i == (dslNodes.size() - 1)) {
+                    var endNode = symbolTable.get("end");
+                    n.addTarget(endNode.getRef());
+                    endNode.addSource(n.getRef());
+                }
+                if (null != n && i > 0) {
+                    var sourceNode = dslNodes.get(i - 1);
+                    var source = symbolTable.get(sourceNode.getName());
+                    n.addSource(source.getRef());
+                }
+                if (null != n && i < (dslNodes.size() - 1)) {
+                    var targetNode = dslNodes.get(i + 1);
+                    var target = symbolTable.get(targetNode.getName());
+                    n.addTarget(target.getRef());
+                }
+            }));
+        }
         return new HashSet<>(symbolTable.values());
     }
 

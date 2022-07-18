@@ -17,6 +17,7 @@ import { createNamespacedHelpers, useStore } from 'vuex';
 import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { ISessionVo } from '@/api/dto/session';
+import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -41,9 +42,7 @@ export default defineComponent({
       name: '未命名项目',
       groupId: '1',
       description: '',
-      global: {
-        concurrent: false,
-      },
+      global: new Global(),
       data: '',
     });
     const defaultSession = ref<ISessionVo>();
@@ -66,7 +65,14 @@ export default defineComponent({
       window.addEventListener('storage', refreshState);
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
-        workflow.value = JSON.parse(payload as string);
+        const { name, global, description, data, groupId } = JSON.parse(payload as string);
+        workflow.value = {
+          name,
+          groupId,
+          description,
+          global: new Global(global?.concurrent, global?.params),
+          data,
+        };
         loaded.value = true;
         await nextTick();
         loaded.value = false;
@@ -78,15 +84,14 @@ export default defineComponent({
           loading.value = true;
           loaded.value = true;
           const { dslText, projectGroupId } = await fetchProjectDetail(props.id as string);
-          const rawData = yaml.parse(dslText)['raw-data'];
-          const { name, global, description } = yaml.parse(dslText);
+          const dsl = yaml.parse(dslText);
+          const rawData = dsl['raw-data'];
+          const { name, global, description } = dsl;
           workflow.value = {
             name,
             groupId: projectGroupId,
             description,
-            global: {
-              concurrent: global ? global.concurrent : false,
-            },
+            global: new Global(global?.concurrent, global?.params),
             data: rawData,
           };
         } catch (err) {

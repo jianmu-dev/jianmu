@@ -6,19 +6,38 @@ import { Webhook } from './node/webhook';
 import { Shell } from './node/shell';
 import { AsyncTask } from './node/async-task';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
-import { extractReferences, getParam } from '../../../workflow-expression-editor/model/util';
-import { NodeError, ParamError } from '../../../workflow-expression-editor/model/error';
+import { Start } from './node/start';
+import { End } from './node/end';
 
 export class CustomX6NodeProxy {
-  private readonly node: Node;
+  readonly node: Node;
 
   constructor(node: Node) {
     this.node = node;
   }
 
+  isSingle(): boolean {
+    return this.isStart() || this.isEnd() || this.isTrigger();
+  }
+
+  isStart(): boolean {
+    const { type } = JSON.parse(this.node.getData<string>());
+    return [NodeTypeEnum.START].includes(type);
+  }
+
+  isEnd(): boolean {
+    const { type } = JSON.parse(this.node.getData<string>());
+    return [NodeTypeEnum.END].includes(type);
+  }
+
   isTrigger(): boolean {
     const { type } = JSON.parse(this.node.getData<string>());
     return [NodeTypeEnum.CRON, NodeTypeEnum.WEBHOOK].includes(type);
+  }
+
+  isTask(): boolean {
+    const { type } = JSON.parse(this.node.getData<string>());
+    return [NodeTypeEnum.ASYNC_TASK, NodeTypeEnum.SHELL].includes(type);
   }
 
   getData(graph?: Graph): IWorkflowNode {
@@ -33,10 +52,16 @@ export class CustomX6NodeProxy {
         nodeData = Webhook.build(obj);
         break;
       case NodeTypeEnum.SHELL:
-        nodeData = Shell.build(obj, graph ? (value: string) => this.validateParam(graph, value) : undefined);
+        nodeData = Shell.build(obj);
         break;
       case NodeTypeEnum.ASYNC_TASK:
-        nodeData = AsyncTask.build(obj, graph ? (value: string) => this.validateParam(graph, value) : undefined);
+        nodeData = AsyncTask.build(obj);
+        break;
+      case NodeTypeEnum.START:
+        nodeData = Start.build();
+        break;
+      case NodeTypeEnum.END:
+        nodeData = End.build();
         break;
     }
 
@@ -53,8 +78,8 @@ export class CustomX6NodeProxy {
   }
 
   getSelectableParams(graph: Graph): ISelectableParam[] {
-    let graphNode = this.node;
-    let workflowNode = new CustomX6NodeProxy(graphNode).getData();
+    const graphNode = this.node;
+    const workflowNode = new CustomX6NodeProxy(graphNode).getData();
     const params: ISelectableParam[] = [];
     if (workflowNode.getType() === NodeTypeEnum.CRON) {
       return params;
@@ -67,58 +92,57 @@ export class CustomX6NodeProxy {
       params.push(param);
       return params;
     }
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const edges = graph.getIncomingEdges(graphNode);
-      if (!edges) {
-        break;
-      }
-      graphNode = edges[0].getSourceNode()!;
-      workflowNode = new CustomX6NodeProxy(graphNode).getData();
-      const param = workflowNode.buildSelectableParam(graphNode.id);
-      if (!param || !param.children || param.children.length === 0) {
-        continue;
-      }
-      params.push(param);
-    }
+    this.buildSelectableParams(graph, graphNode, params);
     return params;
   }
 
-  private validateParam(graph: Graph, value: string) {
-    const references = extractReferences(value);
-    if (references.length === 0) {
+  private buildSelectableParams(graph: Graph, node: Node, params: ISelectableParam[]): void {
+    const edges = graph.getIncomingEdges(node);
+    if (!edges) {
+      // 标识根节点
       return;
     }
 
-    const selectableParams = this.getSelectableParams(graph);
-    for (const reference of references) {
-      try {
-        // 检查参数引用对应的节点或参数是否存在
-        getParam(reference, selectableParams);
-      } catch (err) {
-        if (err instanceof NodeError) {
-          const cell = graph.getCellById(reference.nodeId);
-          if (cell) {
-            const workflowNode = new CustomX6NodeProxy(cell as Node).getData();
-            const nodeName = workflowNode.getName();
-            throw new Error(`${reference.raw}参数不可用，${nodeName}节点参数不可引用`);
-          }
-          throw err;
-        }
+    for (const edge of edges) {
+      const sourceNode = edge.getSourceNode()!;
+      const param = new CustomX6NodeProxy(sourceNode).getData().buildSelectableParam(sourceNode.id);
 
-        if (err instanceof ParamError) {
-          const cell = graph.getCellById(reference.nodeId);
-          if (cell) {
-            const workflowNode = new CustomX6NodeProxy(cell as Node).getData();
-            const nodeName = workflowNode.getName();
-            throw new Error(`${reference.raw}参数不可用，${nodeName}节点不存在此参数`);
-          }
-          throw err;
-        }
-
-        throw err;
+      if (param && param.children && param.children.length > 0 &&
+        // 去重上游可选重复节点参数
+        !params.find(({ value }) => value === param.value)) {
+        params.push(param);
       }
+      this.buildSelectableParams(graph, edge.getSourceNode()!, params);
     }
+  }
+
+  toDsl(graph: Graph): object {
+    if (this.isTrigger()) {
+      return this.getData().toDsl();
+    }
+
+    if (this.isTask()) {
+      const needs: string[] = [];
+      graph.getIncomingEdges(this.node)!.forEach(edge => {
+        const sourceNode = edge.getSourceNode();
+        if (!sourceNode) {
+          return;
+        }
+        const sourceNodeProxy = new CustomX6NodeProxy(sourceNode);
+        if (!sourceNodeProxy.isTask()) {
+          return;
+        }
+
+        needs.push(sourceNodeProxy.getData().getRef());
+      });
+
+      return {
+        ...this.getData().toDsl(),
+        // TODO 无分支时，可省略needs
+        needs: needs.length > 0 ? needs : undefined,
+      };
+    }
+
+    return {};
   }
 }
