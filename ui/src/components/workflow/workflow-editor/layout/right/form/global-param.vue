@@ -1,6 +1,6 @@
 <template>
   <div :class="['global-param',switchFlag?'switch-bgc':'']">
-    <jm-form-item label="唯一标识" :prop="`${index}.ref`" :rules="rules.ref">
+    <jm-form-item label="唯一标识" :prop="`${index}.ref`" :rules="rules.ref" class="param-item">
       <jm-input
         v-model="referenceVal"
         placeholder="请输入唯一标识"
@@ -11,7 +11,7 @@
         @blur="switchFlag = false"
       />
     </jm-form-item>
-    <jm-form-item label="名称">
+    <jm-form-item label="名称"  class="param-item">
       <jm-input
         v-model="nameVal"
         placeholder="请输入参数名称"
@@ -22,20 +22,20 @@
         @blur="switchFlag = false"
       />
     </jm-form-item>
-    <jm-form-item label="类型" :prop="`${index}.type`" :rules="rules.type">
+    <jm-form-item label="类型" :prop="`${index}.type`" :rules="rules.type"  class="param-item">
       <jm-radio-group v-model="typeVal" @change="changeType">
         <jm-radio :label="ParamTypeEnum.STRING">字符串</jm-radio>
         <jm-radio :label="ParamTypeEnum.NUMBER">数字</jm-radio>
         <jm-radio :label="ParamTypeEnum.BOOL">布尔</jm-radio>
       </jm-radio-group>
     </jm-form-item>
-    <jm-form-item label="是否必填" @change="changeRequired" :prop="`${index}.required`" :rules="rules.required">
+    <jm-form-item label="是否必填" @change="changeRequired" :prop="`${index}.required`" :rules="rules.required"  class="param-item">
       <jm-radio-group v-model="requiredVal">
         <jm-radio :label="false">否</jm-radio>
         <jm-radio :label="true">是</jm-radio>
       </jm-radio-group>
     </jm-form-item>
-    <jm-form-item label="值" :prop="`${index}.value`" :rules="rules.value">
+    <jm-form-item label="值" :prop="`${index}.value`" :rules="rules.value"  class="param-item">
       <expression-editor
         v-model="valueVal"
         placeholder="请输入参数值"
@@ -135,7 +135,7 @@ export default defineComponent({
 <style scoped lang="less">
 .global-param {
   border-bottom: 1px solid #E6EBF2;
-  padding: 20px 20px 10px;
+  padding: 10px 20px 10px;
   position: relative;
 
   &:hover {
@@ -148,6 +148,9 @@ export default defineComponent({
     &:hover {
       background: #EFF7FF;
     }
+  }
+  .param-item{
+    padding-top:10px;
   }
 
   // 删除
