@@ -9,7 +9,7 @@ package dev.jianmu.workflow.aggregate.definition;
 public class GlobalParameter {
     private String name;
     private String type;
-    private Object value;
+    private String value;
 
     public String getName() {
         return name;
@@ -19,14 +19,14 @@ public class GlobalParameter {
         return type;
     }
 
-    public Object getValue() {
+    public String getValue() {
         return value;
     }
 
     public static final class Builder {
         private String name;
         private String type;
-        private Object value;
+        private String value;
 
         private Builder() {
         }
@@ -45,7 +45,7 @@ public class GlobalParameter {
             return this;
         }
 
-        public Builder value(Object value) {
+        public Builder value(String value) {
             this.value = value;
             return this;
         }

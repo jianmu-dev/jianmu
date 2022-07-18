@@ -10,4 +10,8 @@ public class Webhook {
     private List<DslWebhookParameter> param;
     private WebhookAuth auth;
     private String only;
+
+    public void setParam(List<DslWebhookParameter> param) {
+        this.param = param;
+    }
 }

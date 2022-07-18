@@ -352,7 +352,7 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
                 if (value == null && webhookParameter.isRequired()) {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     newWebRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
@@ -398,7 +398,7 @@ public class TriggerApplication {
         }
         // 验证Matcher
         if (webhook.getOnly() != null) {
-            var res = this.calculateExp(webhook.getOnly(), ResultType.STRING, context);
+            var res = this.calculateExp(webhook.getOnly(), ResultType.BOOL, context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
                 log.warn("Only计算不匹配，计算结果为：{}", res.getStringValue());
                 newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
@@ -449,7 +449,7 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
                 if (value == null && webhookParameter.isRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
@@ -495,7 +495,7 @@ public class TriggerApplication {
         }
         // 验证Matcher
         if (webhook.getOnly() != null) {
-            var res = this.calculateExp(webhook.getOnly(), ResultType.STRING, context);
+            var res = this.calculateExp(webhook.getOnly(), ResultType.BOOL, context);
             if (res.getType() != Parameter.Type.BOOL || !((Boolean) res.getValue())) {
                 log.warn("Only计算不匹配，计算结果为：{}", res.getStringValue());
                 webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
@@ -555,7 +555,7 @@ public class TriggerApplication {
         return evaluationResult.getValue();
     }
 
-    private Object extractParameter(String payload, String exp, String webhookType) {
+    private Object extractParameter(String payload, String name, String exp, String webhookType) {
         try {
             var webhookPayload = this.objectMapper.readValue(payload, WebhookPayload.class);
             // 创建表达式上下文
@@ -564,9 +564,12 @@ public class TriggerApplication {
             context.add("body", webhookPayload.getBody());
             context.add("query", webhookPayload.getQuery());
             var type = Parameter.Type.getTypeByName(webhookType);
-            var resultType = type == Parameter.Type.SECRET ? ResultType.STRING : ResultType.valueOf(webhookType);
-            var expression = this.expressionLanguage.parseExpression(exp, resultType);
+            var expression = this.expressionLanguage.parseExpression(exp, ResultType.valueOf(webhookType));
             var result = this.expressionLanguage.evaluateExpression(expression, context);
+            if (result.isFailure()) {
+                log.warn("全局参数: {} 表达式: {} 计算错误: {}", name, expression.getExpression(), result.getFailureMessage());
+                return null;
+            }
             return result.getValue().getValue();
         } catch (Exception e) {
             return null;
@@ -667,13 +670,15 @@ public class TriggerApplication {
         if (ObjectUtils.isEmpty(webRequest.getPayload())) {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
+        var parameters = new ArrayList<DslWebhookParameter>();
         for (DslWebhookParameter webhookParameter : trigger.getParam()) {
-            var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
+            var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
             webhookParameter.setValue(value);
             if (value != null) {
-                webhookParameter.setValue(value);
+                parameters.add(webhookParameter);
             }
         }
+        trigger.setParam(parameters);
         return trigger;
     }
 

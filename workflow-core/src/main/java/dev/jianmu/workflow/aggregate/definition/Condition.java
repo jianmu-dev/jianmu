@@ -56,7 +56,7 @@ public class Condition extends BaseNode implements Gateway {
 
     private Branch getNext() {
         Boolean expResult;
-        Expression expression = this.expressionLanguage.parseExpression(this.expression, ResultType.BOOLEAN);
+        Expression expression = this.expressionLanguage.parseExpression(this.expression, ResultType.BOOL);
         EvaluationResult evaluationResult = this.expressionLanguage.evaluateExpression(expression, context);
         if (!evaluationResult.isFailure() && evaluationResult.getValue() instanceof BoolParameter) {
             expResult = ((BoolParameter) evaluationResult.getValue()).getValue();

@@ -8,6 +8,6 @@ package dev.jianmu.workflow.el;
 */
 public enum ResultType {
     STRING,
-    BOOLEAN,
+    BOOL,
     NUMBER
 }

@@ -45,6 +45,10 @@ public class ExpressionLanguageWarp implements ExpressionLanguage {
     public EvaluationResult evaluateExpression(Expression expression, EvaluationContext context) {
         try {
             var result = this.eval(expression, (ElContext) context);
+            if (result == null) {
+                log.warn("表达式执行错误：{}", "返回结果为null");
+                return new EvaluationFailure(expression.getExpression(), "返回结果为null");
+            }
             return new ElResult(expression.getExpression(), result);
         } catch (HttpClientErrorException e1) {
             String message = e1.getResponseBodyAsString();
