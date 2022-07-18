@@ -2,7 +2,6 @@ import { BaseNode } from './base-node';
 import { CustomRule } from '../common';
 import { NodeRefEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
-import { extractReferences, getParam } from '../../../../workflow-expression-editor/model/util';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 
 export const WEBHOOK_PARAM_SCOPE = 'trigger';
@@ -102,30 +101,6 @@ export class Webhook extends BaseNode {
       };
     });
 
-    const validator = (rule: any, value: any, callback: any) => {
-      if (!value) {
-        callback();
-        return;
-      }
-
-      const references = extractReferences(value);
-      if (references.length > 0) {
-        const param = this.buildSelectableParam();
-        const selectableParams = param ? [param] : [];
-        for (const reference of references) {
-          try {
-            // 检查引用的触发器参数是否存在
-            getParam(reference, selectableParams);
-          } catch ({ message }) {
-            callback(new Error(`${reference.raw}触发器参数不存在`));
-            return;
-          }
-        }
-      }
-
-      callback();
-    };
-
     return {
       ...rules,
       params: {
@@ -140,12 +115,10 @@ export class Webhook extends BaseNode {
         fields: {
           token: [
             { required: true, message: '请输入token值', trigger: 'blur' },
-            { validator, trigger: 'blur' },
           ],
           value: [{ required: true, message: '请选择密钥', trigger: 'change' }],
         } as Record<string, CustomRule>,
       },
-      only: [{ validator, trigger: 'blur' }],
     };
   }
 

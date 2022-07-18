@@ -15,11 +15,11 @@ import java.util.List;
  * @create 2021-11-11 09:45
  */
 public interface TriggerEventParameterMapper {
-    @Select("SELECT * FROM `jianmu_trigger_event_parameter` WHERE trigger_event_id = #{triggerEventId}")
+    @Select("SELECT * FROM `jm_trigger_event_parameter` WHERE trigger_event_id = #{triggerEventId}")
     @Result(column = "parameter_id", property = "parameterId")
     List<TriggerEventParameter> findById(String triggerEventId);
 
-    @Insert("insert into jianmu_trigger_event_parameter(trigger_event_id, name, type, value, parameter_id) " +
+    @Insert("insert into jm_trigger_event_parameter(trigger_event_id, name, type, value, parameter_id) " +
             "values(#{triggerEventId}, #{ep.name}, #{ep.type}, #{ep.value}, #{ep.parameterId})")
     void save(@Param("triggerEventId") String triggerEventId, @Param("ep") TriggerEventParameter triggerEventParameter);
 }

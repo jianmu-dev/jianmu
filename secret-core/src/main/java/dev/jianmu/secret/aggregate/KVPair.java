@@ -1,12 +1,12 @@
 package dev.jianmu.secret.aggregate;
 
 /**
+ * @author Ethan Liu
  * @class KVPair
  * @description 键值对
- * @author Ethan Liu
  * @create 2021-04-20 12:40
-*/
-public class KVPair {
+ */
+public class KVPair extends BaseAssociation {
     private String namespaceName;
     private String key;
     private String value;
@@ -39,6 +39,8 @@ public class KVPair {
         private String namespaceName;
         private String key;
         private String value;
+        private String associationId;
+        private String associationType;
 
         private Builder() {
         }
@@ -62,11 +64,23 @@ public class KVPair {
             return this;
         }
 
+        public Builder associationId(String associationId) {
+            this.associationId = associationId;
+            return this;
+        }
+
+        public Builder associationType(String associationType) {
+            this.associationType = associationType;
+            return this;
+        }
+
         public KVPair build() {
             KVPair kVPair = new KVPair();
             kVPair.setNamespaceName(namespaceName);
             kVPair.setKey(key);
             kVPair.setValue(value);
+            kVPair.setAssociationId(associationId);
+            kVPair.setAssociationType(associationType);
             return kVPair;
         }
     }

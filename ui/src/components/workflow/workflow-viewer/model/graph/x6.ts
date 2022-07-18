@@ -5,7 +5,7 @@ import { TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { WorkflowTool } from '@/components/workflow/workflow-editor/model/workflow-tool';
 import { render } from '@/components/workflow/workflow-editor/model/workflow-graph';
 import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
-import { NodeRefEnum, NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { NodeTypeEnum, ZoomTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { INodeMouseoverEvent } from '@/components/workflow/workflow-viewer/model/data/common';
 import { NodeTypeEnum as G6NodeTypeEnum } from '../data/enumeration';
 import { Cron } from '@/components/workflow/workflow-editor/model/data/node/cron';
@@ -19,15 +19,13 @@ import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config
 const { textMaxHeight } = NODE;
 
 export class X6Graph extends BaseGraph {
-  private readonly asyncTaskRefs: string[];
   private readonly graph: Graph;
   private readonly workflowTool: WorkflowTool;
   private readonly runningAnimations: Record<string, BaseTaskRunning>;
 
   constructor(dsl: string, triggerType: TriggerTypeEnum, container: HTMLElement) {
-    const { dslType, asyncTaskRefs, data } = parse(dsl, triggerType);
+    const { dslType, data } = parse(dsl, triggerType);
     super(dslType);
-    this.asyncTaskRefs = asyncTaskRefs;
 
     const containerParentEl = container.parentElement as HTMLElement;
     const { clientWidth: width, clientHeight: height } = containerParentEl;
@@ -100,7 +98,7 @@ export class X6Graph extends BaseGraph {
   }
 
   hideNodeToolbar(nodeRef: string): void {
-    const node = this.getNodeByRef(nodeRef);
+    const { node } = this.getNodeProxies().find(proxy => proxy.getData().getRef() === nodeRef)!;
     const imgEl = this.getShapeEl(node.id).querySelector('.img')! as HTMLElement;
     imgEl.style.boxShadow = '';
   }
@@ -157,17 +155,17 @@ export class X6Graph extends BaseGraph {
   }
 
   updateNodeStates(tasks: ITaskExecutionRecordVo[]): void {
-    const nodes = this.getTaskNodes();
+    const proxies = this.getNodeProxies();
     const completeNodes: Node[] = [];
     const runningNodes: Node[] = [];
 
     tasks.forEach(({ nodeName, status }) => {
-      const index = this.asyncTaskRefs.indexOf(nodeName);
-      if (index === -1) {
+      const proxy = proxies.find(proxy => proxy.getData().getRef() === nodeName)!;
+      if (!proxy.isTask()) {
         return;
       }
 
-      const node = nodes[index];
+      const { node } = proxy;
       this.refreshIndicator(node, status);
 
       const shapeEl = this.getShapeEl(node.id);
@@ -208,32 +206,9 @@ export class X6Graph extends BaseGraph {
     this.graph.resizeGraph(width, height);
   }
 
-  private getTaskNodes(): Node[] {
-    const nodes: Node[] = [];
-    let tempNode = this.graph.getRootNodes()[0];
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      if (!new CustomX6NodeProxy(tempNode).isTrigger()) {
-        nodes.push(tempNode);
-      }
-
-      const edges = this.graph.getOutgoingEdges(tempNode);
-      if (!edges) {
-        break;
-      }
-
-      tempNode = edges[0].getTargetNode()!;
-    }
-
-    return nodes;
-  }
-
-  private getNodeByRef(nodeRef: string): Node {
-    if ([NodeRefEnum.WEBHOOK, NodeRefEnum.CRON].includes(nodeRef as NodeRefEnum)) {
-      return this.graph.getRootNodes()[0];
-    }
-
-    return this.getTaskNodes()[this.asyncTaskRefs.indexOf(nodeRef)];
+  private getNodeProxies(): CustomX6NodeProxy[] {
+    return this.graph.getNodes()
+      .map(node => new CustomX6NodeProxy(node));
   }
 
   private getShapeEl(nodeId: string): HTMLElement {
@@ -296,29 +271,9 @@ export class X6Graph extends BaseGraph {
         type,
       };
     }
-    if (workflowNode.getType() === NodeTypeEnum.WEBHOOK) {
-      return { id: workflowNode.getRef(), description, type };
-    }
-
-    let index = 0;
-    let tempNode = this.graph.getRootNodes()[0];
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      if (new CustomX6NodeProxy(tempNode).isTrigger()) {
-        tempNode = this.graph.getOutgoingEdges(tempNode)![0].getTargetNode()!;
-        continue;
-      }
-
-      if (tempNode.id === node.id) {
-        break;
-      }
-
-      tempNode = this.graph.getOutgoingEdges(tempNode)![0].getTargetNode()!;
-      index++;
-    }
 
     return {
-      id: this.asyncTaskRefs[index],
+      id: workflowNode.getRef(),
       description,
       type,
     };

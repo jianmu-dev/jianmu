@@ -2,18 +2,33 @@ import { Cell, Edge, Graph, Node, Shape } from '@antv/x6';
 import normalizeWheel from 'normalize-wheel';
 import { WorkflowTool } from './workflow-tool';
 import { ZoomTypeEnum } from './data/enumeration';
-import { showPort, showPorts, WorkflowNodeToolbar } from './workflow-node-toolbar';
+import { hidePort, showPort, WorkflowNodeToolbar } from './workflow-node-toolbar';
 import { EDGE, NODE, PORT, PORTS } from '../shape/gengral-config';
 import { WorkflowEdgeToolbar } from './workflow-edge-toolbar';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import { Start } from './data/node/start';
 
 const { icon: { width, height } } = NODE;
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
 
 export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
+  let propertiesArr: Cell.Properties[];
   if (!data) {
-    return;
+    const node = graph.createNode({
+      shape: 'vue-shape',
+      width,
+      height,
+      component: 'custom-vue-shape',
+      ports: { ...PORTS },
+    });
+    const proxy = new CustomX6NodeProxy(node);
+    proxy.setData(new Start());
+
+    // 初始化开始节点
+    propertiesArr = [node.toJSON()];
+  } else {
+    propertiesArr = JSON.parse(data).cells;
   }
 
   // 启用异步渲染的画布
@@ -37,7 +52,6 @@ export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
   // 处于冻结状态的画布不会立即响应画布中节点和边的变更，直到调用 unfreeze(...) 方法来解除冻结并重新渲染画布
   graph.freeze();
 
-  const propertiesArr: Cell.Properties[] = JSON.parse(data).cells;
   graph.resetCells(propertiesArr.map(properties => {
     if (properties.shape === 'edge') {
       return graph.createEdge(properties);
@@ -147,9 +161,52 @@ export class WorkflowGraph {
           if (originalNode === currentNode) {
             showPort(currentNode, (isChangingTarget ? targetPort : sourcePort)!);
           } else {
+            const sourceNodeProxy = new CustomX6NodeProxy(sourceNode);
+            const targetNodeProxy = new CustomX6NodeProxy(targetNode);
             if (isChangingTarget) {
-              if (new CustomX6NodeProxy(currentNode).isTrigger()) {
-                // 触发器节点只能出，不能入
+              if (sourceNodeProxy.isStart()) {
+                // 开始：只能连接无上游节点的任务节点
+                if (!targetNodeProxy.isTask() || this.graph.getIncomingEdges(targetNode)) {
+                  return !!targetMagnet;
+                }
+              } else if (sourceNodeProxy.isTrigger()) {
+                // 触发器：只能连到开始
+                if (!targetNodeProxy.isStart()) {
+                  return !!targetMagnet;
+                }
+              } else if (sourceNodeProxy.isTask()) {
+                // 任务节点：可连接任何任务节点和结束
+                if (!targetNodeProxy.isTask() && !targetNodeProxy.isEnd()) {
+                  return !!targetMagnet;
+                }
+              }
+
+              // 检查是否已存在边
+              const edges = this.graph.getOutgoingEdges(sourceNode);
+              if (edges && edges.find(edge => edge.getTargetNode() === targetNode)) {
+                return !!targetMagnet;
+              }
+            } else {
+              if (targetNodeProxy.isStart()) {
+                // 开始：只能从触发器连接
+                if (!sourceNodeProxy.isTrigger()) {
+                  return !!targetMagnet;
+                }
+              } else if (targetNodeProxy.isEnd()) {
+                // 结束：只能冲任何任务节点连接
+                if (!sourceNodeProxy.isTask()) {
+                  return !!targetMagnet;
+                }
+              } else if (targetNodeProxy.isTask()) {
+                // 任务节点：可从开始或任何任务节点连接
+                if (!sourceNodeProxy.isStart() && !targetNodeProxy.isTask()) {
+                  return !!targetMagnet;
+                }
+              }
+
+              // 检查是否已存在边
+              const edges = this.graph.getIncomingEdges(targetNode);
+              if (edges && edges.find(edge => edge.getSourceNode() === sourceNode)) {
                 return !!targetMagnet;
               }
             }
@@ -164,7 +221,7 @@ export class WorkflowGraph {
               return !!targetMagnet;
             }
 
-            showPorts(this.graph, currentNode, isChangingTarget);
+            showPort(currentNode, (isChangingTarget ? targetPort : sourcePort)!);
           }
 
           return !!targetMagnet;
@@ -333,6 +390,12 @@ export class WorkflowGraph {
         return;
       }
 
+      const proxy = new CustomX6NodeProxy(node);
+      if (proxy.isStart() || proxy.isEnd()) {
+        // 表示开始/结束节点，忽略
+        return;
+      }
+
       this.clickNodeCallback(node.id);
     });
     this.graph.on('node:mouseenter', ({ node }) => {
@@ -357,35 +420,58 @@ export class WorkflowGraph {
    * @private
    */
   private showConnectablePorts(currentNode: Node): void {
+    const allNodes = this.graph.getNodes();
+    const currentNodeProxy = new CustomX6NodeProxy(currentNode);
+    if (currentNodeProxy.isEnd()) {
+      // 结束：不能连到任何节点
+      return;
+    }
+
+    if (currentNodeProxy.isTrigger()) {
+      // 触发器：只能连到开始
+      const startNode = allNodes.find(node => new CustomX6NodeProxy(node).isStart());
+      if (startNode) {
+        this.showPorts(startNode);
+      }
+      return;
+    }
+
+    if (currentNodeProxy.isStart()) {
+      // 开始：只能连接无上游节点的任务节点
+      this.graph.getRootNodes()
+        .filter(node => new CustomX6NodeProxy(node).isTask())
+        .forEach(node => this.showPorts(node));
+      return;
+    }
+
+    // 任务节点：可连接任何任务节点和结束
     const allEdges = this.graph.getEdges();
     const excludedNodes = this.getNodesInLine(currentNode, [...allEdges], false);
 
-    this.graph.getNodes()
+    allNodes
       // 环路检测：排除以当前节点为终点的上游所有节点
       .filter(node => !excludedNodes.includes(node))
-      // 筛选不存在入边的所有节点
-      .filter(node => {
-        const nodePortIds = node.getPorts().map(metadata => metadata.id);
-        return !allEdges.find(edge => {
-          const { port: targetPortId } = edge.getTarget() as Edge.TerminalCellData;
-          return nodePortIds.includes(targetPortId);
-        });
-      })
-      // 筛选非触发器节点
-      .filter(node => !new CustomX6NodeProxy(node).isTrigger())
-      .forEach(node =>
-        node.getPorts().forEach(port => {
-          node.portProp(port.id!, {
-            attrs: {
-              circle: {
-                r: PORT.r,
-                // 连接桩在连线交互时可以被连接
-                magnet: true,
-                fill: circleBgColor._default,
-              },
-            },
-          });
-        }));
+      // 筛选非触发器和开始节点
+      .filter(node => !new CustomX6NodeProxy(node).isTrigger() && !new CustomX6NodeProxy(node).isStart())
+      .forEach(node => this.showPorts(node));
+  }
+
+  /**
+   * 显示连接桩
+   * @param node
+   * @private
+   */
+  private showPorts(node: Node): void {
+    node.getPorts().forEach(port => showPort(node, port.id!));
+  }
+
+  /**
+   * 隐藏连接桩
+   * @param node
+   * @private
+   */
+  private hidePorts(node: Node): void {
+    node.getPorts().forEach(port => hidePort(node, port.id!));
   }
 
   /**
@@ -393,18 +479,7 @@ export class WorkflowGraph {
    * @private
    */
   private hideAllPorts() {
-    this.graph.getNodes().forEach(node =>
-      node.getPorts().forEach(port =>
-        node.portProp(port.id!, {
-          attrs: {
-            circle: {
-              r: 0,
-              // 连接桩在连线交互时不可被连接
-              magnet: false,
-              fill: circleBgColor._default,
-            },
-          },
-        })));
+    this.graph.getNodes().forEach(node => this.hidePorts(node));
   }
 
   /**

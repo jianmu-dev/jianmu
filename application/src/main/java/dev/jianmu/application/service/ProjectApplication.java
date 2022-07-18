@@ -6,11 +6,10 @@ import dev.jianmu.application.event.CronEvent;
 import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.NoPermissionException;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.GlobalProperties;
-import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
-import dev.jianmu.project.aggregate.GitRepo;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
@@ -19,7 +18,6 @@ import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.query.ProjectVo;
-import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
@@ -28,7 +26,6 @@ import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
-import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -56,42 +53,37 @@ public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
 
     private final ProjectRepositoryImpl projectRepository;
-    private final GitRepoRepository gitRepoRepository;
     private final WorkflowRepository workflowRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final TaskInstanceRepository taskInstanceRepository;
     private final NodeDefApi nodeDefApi;
     private final ApplicationEventPublisher publisher;
-    private final JgitService jgitService;
     private final ProjectLinkGroupRepository projectLinkGroupRepository;
     private final ProjectGroupRepository projectGroupRepository;
     private final GlobalProperties globalProperties;
     private final TriggerEventRepository triggerEventRepository;
+
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
-            GitRepoRepository gitRepoRepository,
             WorkflowRepository workflowRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             TaskInstanceRepository taskInstanceRepository,
             NodeDefApi nodeDefApi,
             ApplicationEventPublisher publisher,
-            JgitService jgitService,
             ProjectLinkGroupRepository projectLinkGroupRepository,
             ProjectGroupRepository projectGroupRepository,
             GlobalProperties globalProperties,
             TriggerEventRepository triggerEventRepository
     ) {
         this.projectRepository = projectRepository;
-        this.gitRepoRepository = gitRepoRepository;
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.taskInstanceRepository = taskInstanceRepository;
         this.nodeDefApi = nodeDefApi;
         this.publisher = publisher;
-        this.jgitService = jgitService;
         this.projectLinkGroupRepository = projectLinkGroupRepository;
         this.projectGroupRepository = projectGroupRepository;
         this.globalProperties = globalProperties;
@@ -119,9 +111,13 @@ public class ProjectApplication {
         this.publisher.publishEvent(triggerEvent);
     }
 
-    public void triggerByManual(String projectId) {
+    public void triggerByManual(String projectId, String associationId, String associationType) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        if (associationId != null && associationType != null &&
+                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
+            throw new NoPermissionException();
+        }
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
@@ -167,92 +163,6 @@ public class ProjectApplication {
                 .build();
     }
 
-    @Transactional
-    public void importProject(GitRepo gitRepo, String projectGroupId) {
-        var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
-        // 解析DSL,语法检查
-        var parser = DslParser.parse(dslText);
-        // 生成流程Ref
-        var ref = UUID.randomUUID().toString().replace("-", "");
-        var workflow = this.createWorkflow(parser, dslText, ref);
-        var project = Project.Builder.aReference()
-                .workflowName(parser.getName())
-                .workflowDescription(parser.getDescription())
-                .workflowRef(workflow.getRef())
-                .workflowVersion(workflow.getVersion())
-                .dslText(dslText)
-                .steps(parser.getSteps())
-                .enabled(parser.isEnabled())
-                .mutable(parser.isMutable())
-                .concurrent(parser.isConcurrent())
-                .gitRepoId(gitRepo.getId())
-                .dslSource(Project.DslSource.GIT)
-                .triggerType(parser.getTriggerType())
-                .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
-                .lastModifiedBy("admin")
-                .build();
-        // 添加到默认分组
-        String groupId;
-        if (projectGroupId != null) {
-            this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
-            groupId = projectGroupId;
-        } else {
-            groupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
-                    .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
-        }
-        var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(groupId)
-                .map(ProjectLinkGroup::getSort)
-                .orElse(-1);
-        var projectLinkGroup = ProjectLinkGroup.Builder.aReference()
-                .projectGroupId(groupId)
-                .projectId(project.getId())
-                .sort(++sort)
-                .build();
-        this.pubTriggerEvent(parser, project);
-        this.projectRepository.add(project);
-        this.projectLinkGroupRepository.add(projectLinkGroup);
-        this.projectGroupRepository.addProjectCountById(groupId, 1);
-        this.gitRepoRepository.add(gitRepo);
-        this.jgitService.cleanUp(gitRepo.getId());
-        this.workflowRepository.add(workflow);
-        this.publisher.publishEvent(new CreatedEvent(project.getId()));
-    }
-
-    @Transactional
-    public void syncProject(String projectId) {
-        logger.info("开始同步Git仓库中的DSL");
-        var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        var concurrent = project.isConcurrent();
-        var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
-                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
-        var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
-        // 解析DSL,语法检查
-        var parser = DslParser.parse(dslText);
-        var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
-        project.setDslText(dslText);
-        project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
-        project.setTriggerType(Project.TriggerType.MANUAL);
-        project.setLastModifiedBy("admin");
-        project.setSteps(parser.getSteps());
-        project.setEnabled(parser.isEnabled());
-        project.setMutable(parser.isMutable());
-        project.setConcurrent(parser.isConcurrent());
-        project.setWorkflowName(parser.getName());
-        project.setWorkflowDescription(parser.getDescription());
-        project.setLastModifiedTime();
-        project.setWorkflowVersion(workflow.getVersion());
-        project.setTriggerType(parser.getTriggerType());
-
-        this.pubTriggerEvent(parser, project);
-        this.projectRepository.updateByWorkflowRef(project);
-        this.workflowRepository.add(workflow);
-        this.jgitService.cleanUp(gitRepo.getId());
-        if (!concurrent && project.isConcurrent()) {
-            this.concurrentWorkflowInstance(workflow.getRef());
-        }
-    }
-
     // 并发流程实例
     private void concurrentWorkflowInstance(String workflowRef) {
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
@@ -280,7 +190,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId) {
+    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -297,13 +207,19 @@ public class ProjectApplication {
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
                 .concurrent(parser.isConcurrent())
-                .lastModifiedBy("admin")
+                .lastModifiedBy(username)
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
                 .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
+                .associationId(associationId)
+                .associationType(associationType)
                 .build();
         // 添加分组
+        if (projectGroupId == null) {
+            projectGroupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
+                    .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
+        }
         this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(projectGroupId)
                 .map(ProjectLinkGroup::getSort)
@@ -319,14 +235,17 @@ public class ProjectApplication {
         this.projectLinkGroupRepository.add(projectLinkGroup);
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
-        this.publisher.publishEvent(new CreatedEvent(project.getId()));
+        this.publisher.publishEvent(new CreatedEvent(project.getId(), branch));
         return project;
     }
 
     @Transactional
-    public void updateProject(String dslId, String dslText, String projectGroupId) {
+    public void updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+        if (username != null) {
+            this.checkProjectPermission(associationId, associationType, project);
+        }
         var concurrent = project.isConcurrent();
         if (project.getDslSource() == Project.DslSource.GIT) {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
@@ -342,7 +261,6 @@ public class ProjectApplication {
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(parser.getTriggerType());
-        project.setLastModifiedBy("admin");
         project.setSteps(parser.getSteps());
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
@@ -351,6 +269,10 @@ public class ProjectApplication {
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
+        if (username != null) {
+            project.setLastModifiedBy(username);
+
+        }
 
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
@@ -360,10 +282,19 @@ public class ProjectApplication {
         }
     }
 
+    // 校验项目增删改查权限
+    private void checkProjectPermission(String associationId, String associationType, Project project) {
+        if (associationId != null && associationType != null &&
+                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
+            throw new NoPermissionException();
+        }
+    }
+
     @Transactional
-    public void deleteById(String id) {
+    public void deleteById(String id, String associationId, String associationType) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        this.checkProjectPermission(associationId, associationType, project);
         var running = this.workflowInstanceRepository
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
@@ -379,7 +310,6 @@ public class ProjectApplication {
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.gitRepoRepository.deleteById(project.getGitRepoId());
         this.publisher.publishEvent(new DeletedEvent(project.getId()));
     }
 
@@ -395,10 +325,10 @@ public class ProjectApplication {
                     .stream()
                     .filter(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.FINISHED || workflowInstance.getStatus() == ProcessStatus.TERMINATED)
                     .forEach(workflowInstance -> {
-                this.workflowInstanceRepository.deleteById(workflowInstance.getId());
-                this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
-                this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
-            });
+                        this.workflowInstanceRepository.deleteById(workflowInstance.getId());
+                        this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
+                        this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+                    });
         });
 
     }
@@ -438,8 +368,13 @@ public class ProjectApplication {
         return this.projectRepository.findAll();
     }
 
-    public Optional<Project> findById(String dslId) {
-        return this.projectRepository.findById(dslId);
+    public Optional<Project> findById(String dslId, String associationId, String associationType) {
+        var projectOptional = this.projectRepository.findById(dslId);
+        if (projectOptional.isEmpty()) {
+            return projectOptional;
+        }
+        this.checkProjectPermission(associationId, associationType, projectOptional.get());
+        return projectOptional;
     }
 
     public Workflow findByRefAndVersion(String ref, String version) {
@@ -447,11 +382,11 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
     }
 
-    public GitRepo findGitRepoById(String gitRepoId) {
-        return this.gitRepoRepository.findById(gitRepoId).orElseThrow(() -> new DataNotFoundException("未找到该Git库"));
+    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType, String associationId, String associationType) {
+        return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType, associationId, associationType);
     }
 
-    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType) {
-        return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType);
+    public Optional<Project> findByWorkflowRef(String workflowRef) {
+        return this.projectRepository.findByWorkflowRef(workflowRef);
     }
 }

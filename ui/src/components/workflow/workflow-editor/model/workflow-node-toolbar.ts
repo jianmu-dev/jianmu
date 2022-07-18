@@ -27,24 +27,21 @@ export function showPort(node: Node, portId: string): void {
 }
 
 /**
- * 显示连接桩
- * @param graph
+ * 隐藏连接桩
  * @param node
- * @param isTargetNode
+ * @param portId
  */
-export function showPorts(graph: Graph, node: Node, isTargetNode: boolean): void {
-  const portIds = node.getPorts().map(metadata => metadata.id);
-  const allEdges = graph.getEdges();
-
-  if (allEdges.find(edge => {
-    const { port: portId } = (isTargetNode ? edge.getTarget() : edge.getSource()) as Edge.TerminalCellData;
-    return portIds.includes(portId);
-  })) {
-    // 表示当前节点存在出/入的边
-    return;
-  }
-
-  node.getPorts().forEach(port => showPort(node, port.id!));
+export function hidePort(node: Node, portId: string): void {
+  node.portProp(portId, {
+    attrs: {
+      circle: {
+        r: 0,
+        // 连接桩在连线交互时不可被连接
+        magnet: false,
+        fill: circleBgColor._default,
+      },
+    },
+  });
 }
 
 export class WorkflowNodeToolbar {
@@ -69,7 +66,7 @@ export class WorkflowNodeToolbar {
     this.node = node;
 
     // 显示连接桩
-    showPorts(this.graph, this.node, false);
+    this.showPorts();
 
     this.move();
   }
@@ -79,6 +76,39 @@ export class WorkflowNodeToolbar {
     this.hidePorts(visiblePortId);
 
     this.deleteNode();
+  }
+
+  /**
+   * 显示连接桩
+   * @private
+   */
+  private showPorts(): void {
+    const node = this.node!;
+    const proxy = new CustomX6NodeProxy(node);
+    if (proxy.isEnd()) {
+      // 结束：不能连到任何节点
+      return;
+    } else if (proxy.isStart()) {
+      // 开始：只能连接无上游节点的任务节点
+      if (!this.graph.getRootNodes().find(node => new CustomX6NodeProxy(node).isTask())) {
+        return;
+      }
+    } else if (proxy.isTrigger()) {
+      // 触发器：只能连到开始
+      const portIds = node.getPorts().map(metadata => metadata.id);
+      const allEdges = this.graph.getEdges();
+
+      if (allEdges.find(edge => {
+        const { port: portId } = edge.getSource() as Edge.TerminalCellData;
+        return portIds.includes(portId);
+      })) {
+        // 表示存在出的边
+        return;
+      }
+    }
+
+    // 任务节点：可连接任何任务节点和结束
+    node.getPorts().forEach(port => showPort(node, port.id!));
   }
 
   private deleteNode() {
@@ -105,8 +135,10 @@ export class WorkflowNodeToolbar {
     msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${nodeData.getName()}</div>`;
     let title = '删除';
     switch (nodeData.getType()) {
-      case NodeTypeEnum.ASYNC_TASK:
       case NodeTypeEnum.SHELL:
+      case NodeTypeEnum.ASYNC_TASK:
+      case NodeTypeEnum.START:
+      case NodeTypeEnum.END:
         title += '节点';
         break;
       case NodeTypeEnum.CRON:
@@ -232,16 +264,7 @@ export class WorkflowNodeToolbar {
         return;
       }
 
-      currentNode.portProp(portId, {
-        attrs: {
-          circle: {
-            r: 0,
-            // 连接桩在连线交互时不可被连接
-            magnet: false,
-            fill: circleBgColor._default,
-          },
-        },
-      });
+      hidePort(currentNode, portId);
     });
   }
 }

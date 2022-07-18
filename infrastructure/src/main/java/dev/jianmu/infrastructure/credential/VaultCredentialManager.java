@@ -25,11 +25,10 @@ import java.util.stream.Collectors;
 @Component
 @ConditionalOnProperty(prefix = "credential", name = "type", havingValue = "vault")
 public class VaultCredentialManager implements CredentialManager {
-    private final VaultOperations vaultOperations;
-    private final CredentialProperties credentialProperties;
-
     private final static String EXAMPLE_KEY = "JIANMU_EXAMPLE_KEY";
     private final static String EXAMPLE_VALUE = "JIANMU_EXAMPLE_VALUE";
+    private final VaultOperations vaultOperations;
+    private final CredentialProperties credentialProperties;
 
     public VaultCredentialManager(VaultOperations vaultOperations, CredentialProperties credentialProperties) {
         this.vaultOperations = vaultOperations;
@@ -43,29 +42,31 @@ public class VaultCredentialManager implements CredentialManager {
 
     @Override
     public void createNamespace(Namespace namespace) {
+        var name = this.getNamespace(namespace.getAssociationId(), namespace.getAssociationType(), namespace.getName());
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .get(namespace.getName());
+                .get(name);
         if (res != null && res.getData() != null) {
             throw new RuntimeException("该命名空间已存在");
         }
         var map = Map.of(EXAMPLE_KEY, EXAMPLE_VALUE);
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .put(namespace.getName(), map);
+                .put(name, map);
     }
 
     @Override
-    public void deleteNamespace(String name) {
+    public void deleteNamespace(String associationId, String associationType, String name) {
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .delete(name);
+                .delete(this.getNamespace(associationId, associationType, name));
     }
 
     @Override
     public void createKVPair(KVPair kvPair) {
+        var namespace = this.getNamespace(kvPair.getAssociationId(), kvPair.getAssociationType(), kvPair.getNamespaceName());
         if (kvPair.getKey().equals(EXAMPLE_KEY)) {
             throw new RuntimeException("该密钥名称为内置密钥名称，不可添加");
         }
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .get(kvPair.getNamespaceName());
+                .get(namespace);
         if (res == null || res.getData() == null) {
             throw new RuntimeException("未找到对应的命名空间");
         }
@@ -74,16 +75,17 @@ public class VaultCredentialManager implements CredentialManager {
         }
         res.getData().put(kvPair.getKey(), kvPair.getValue());
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .put(kvPair.getNamespaceName(), res.getData());
+                .put(namespace, res.getData());
     }
 
     @Override
-    public void deleteKVPair(String namespaceName, String key) {
+    public void deleteKVPair(String associationId, String associationType, String namespaceName, String key) {
+        var namespace = this.getNamespace(associationId, associationType, namespaceName);
         if (key.equals(EXAMPLE_KEY)) {
             throw new RuntimeException("该密钥名称为内置密钥名称，不可删除");
         }
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .get(namespaceName);
+                .get(namespace);
         if (res == null || res.getData() == null) {
             throw new RuntimeException("未找到对应的命名空间");
         }
@@ -92,50 +94,64 @@ public class VaultCredentialManager implements CredentialManager {
             res.getData().put(EXAMPLE_KEY, EXAMPLE_VALUE);
         }
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .put(namespaceName, res.getData());
+                .put(namespace, res.getData());
     }
 
     @Override
-    public Optional<Namespace> findNamespaceByName(String name) {
+    public Optional<Namespace> findNamespaceByName(String associationId, String associationType, String name) {
+        var namespace = this.getNamespace(associationId, associationType, name);
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .get(name);
+                .get(namespace);
         if (res == null) {
             return Optional.empty();
         }
-        return Optional.of(Namespace.Builder.aNamespace().name(name).build());
+        return Optional.of(Namespace.Builder.aNamespace().name(namespace).build());
     }
 
     @Override
-    public List<KVPair> findAllKVByNamespaceName(String namespaceName) {
+    public List<KVPair> findAllKVByNamespaceName(String associationId, String associationType, String namespaceName) {
+        var namespace = this.getNamespace(associationId, associationType, namespaceName);
         List<KVPair> kvPairs = new ArrayList<>();
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .get(namespaceName);
+                .get(namespace);
         if (res != null && res.getData() != null) {
             kvPairs = res.getData().entrySet().stream()
                     .filter(entry -> !entry.getKey().equals(EXAMPLE_KEY))
-                    .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespaceName).key(entry.getKey()).value(entry.getValue().toString()).build())
+                    .map(entry -> KVPair.Builder.aKVPair().namespaceName(namespace).key(entry.getKey()).value(entry.getValue().toString()).build())
                     .collect(Collectors.toList());
         }
         return kvPairs;
     }
 
     @Override
-    public List<Namespace> findAllNamespace() {
-        var list = vaultOperations.list(this.credentialProperties.getVault().getVaultEngineName());
+    public List<Namespace> findAllNamespace(String associationId, String associationType) {
+        var path = this.credentialProperties.getVault().getVaultEngineName();
+        if (associationId != null && associationType != null) {
+            path = path + "/" + associationType + "/" + associationId + "/";
+        }
+        var list = vaultOperations.list(path);
         if (list == null) {
             return List.of();
         }
         return list.stream()
+                .filter(name -> {
+                    if (associationId != null && associationType != null) {
+                        return true;
+                    }
+                    return !name.endsWith("/");
+                })
                 .map(name -> Namespace.Builder.aNamespace().name(name).build())
                 .collect(Collectors.toList());
+
     }
 
     @Override
-    public Optional<KVPair> findByNamespaceNameAndKey(String namespaceName, String key) {
+    public Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String namespaceName, String key) {
+        var namespace = this.getNamespace(associationId, associationType, namespaceName);
         List<KVPair> kvPairs = new ArrayList<>();
         try {
             var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                    .get(namespaceName);
+                    .get(namespace);
             if (res != null && res.getData() != null) {
                 return res.getData().entrySet().stream()
                         .filter(entry -> entry.getKey().equals(key) && !entry.getKey().equals(EXAMPLE_KEY))
@@ -146,5 +162,12 @@ public class VaultCredentialManager implements CredentialManager {
             log.warn("vault exception: {}", e.getMessage());
         }
         return Optional.empty();
+    }
+
+    private String getNamespace(String associationId, String associationType, String namespaceName) {
+        if (associationId != null && associationType != null) {
+            return associationType + "/" + associationId + "/" + namespaceName;
+        }
+        return namespaceName;
     }
 }

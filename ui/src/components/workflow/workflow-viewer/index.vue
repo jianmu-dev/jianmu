@@ -110,6 +110,15 @@ export default defineComponent({
     };
 
     const refreshGraph = (direction: GraphDirectionEnum = GraphDirectionEnum.HORIZONTAL) => {
+      setTimeout(() => {
+        // 保证渲染完成
+        if (!graph.value) {
+          return;
+        }
+        // 更新状态
+        graph.value.updateNodeStates(props.tasks);
+      }, 50);
+
       if (!graph.value) {
         if (!props.dsl || !props.triggerType || !container.value) {
           return;
@@ -127,13 +136,6 @@ export default defineComponent({
         graph.value!.configNodeAction(mouseoverNode);
         nodeActionConfigured.value = true;
       }
-
-      setTimeout(() => {
-        // 保证渲染完成
-
-        // 更新状态
-        graph.value!.updateNodeStates(props.tasks);
-      }, 50);
     };
 
     onBeforeUpdate(() => refreshGraph());

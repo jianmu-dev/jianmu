@@ -1,5 +1,6 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.secret.aggregate.BaseAssociation;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -26,28 +27,28 @@ public class SecretApplication {
         this.credentialManager.createNamespace(namespace);
     }
 
-    public void deleteNamespace(String name) {
-        this.credentialManager.deleteNamespace(name);
+    public void deleteNamespace(String associationId, String associationType, String name) {
+        this.credentialManager.deleteNamespace(associationId, associationType, name);
     }
 
     public void createKVPair(KVPair kvPair) {
         this.credentialManager.createKVPair(kvPair);
     }
 
-    public void deleteKVPair(String namespaceName, String key) {
-        this.credentialManager.deleteKVPair(namespaceName, key);
+    public void deleteKVPair(String associationId, String associationType, String namespaceName, String key) {
+        this.credentialManager.deleteKVPair(associationId, associationType, namespaceName, key);
     }
 
-    public Optional<Namespace> findByName(String name) {
-        return this.credentialManager.findNamespaceByName(name);
+    public Optional<Namespace> findByName(String associationId, String associationType, String name) {
+        return this.credentialManager.findNamespaceByName(associationId, associationType, name);
     }
 
-    public List<KVPair> findAllByNamespaceName(String namespaceName) {
-        return this.credentialManager.findAllKVByNamespaceName(namespaceName);
+    public List<KVPair> findAllByNamespaceName(String associationId, String associationType, String namespaceName) {
+        return this.credentialManager.findAllKVByNamespaceName(associationId, associationType, namespaceName);
     }
 
-    public List<Namespace> findAll() {
-        return this.credentialManager.findAllNamespace();
+    public List<Namespace> findAll(String associationId, String associationType) {
+        return this.credentialManager.findAllNamespace(associationId, associationType);
     }
 
     public String getCredentialManagerType() {

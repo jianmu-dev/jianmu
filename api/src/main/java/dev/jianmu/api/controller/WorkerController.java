@@ -272,7 +272,7 @@ public class WorkerController {
                 var list = TaskInstanceWritingLogDto.parseString(line);
                 list.stream()
                         .filter(dto -> dto.getContent() != null)
-                        .forEach(dto -> this.workerApplication.writeTaskLog(writer, workerId, taskInstance.getBusinessId(), dto.getContent(), dto.getNumber(), dto.getTimestamp()));
+                        .forEach(dto -> this.workerApplication.writeTaskLog(writer, workerId, taskInstance.getId(), dto.getContent(), dto.getNumber(), dto.getTimestamp()));
             }
         } catch (IOException e) {
             throw new RuntimeException("任务日志写入失败： " + e);

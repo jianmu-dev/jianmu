@@ -23,6 +23,8 @@
         <module>workflow-core</module>
         <module>el</module>
         <module>git-repo-core</module>
+        <module>oauth2</module>
+        <module>external-parameter-core</module>
     </modules>
 
     <properties>

@@ -15,29 +15,29 @@ import java.util.Optional;
  * @create 2021-03-25 21:39
  */
 public interface TaskInstanceMapper {
-    @Insert("insert into task_instance(id, serial_no, def_key, node_info, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status, worker_id, _version) " +
+    @Insert("insert into jm_task_instance(id, serial_no, def_key, node_info, async_task_ref, workflow_ref, workflow_version, business_id, trigger_id, start_time, end_time, status, worker_id, _version) " +
             "values(#{id}, #{serialNo}, #{defKey}, #{nodeInfo, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.NodeInfoTypeHandler}, #{asyncTaskRef}, #{workflowRef}, #{workflowVersion}, #{businessId}, #{triggerId}, #{startTime}, #{endTime}, #{status}, #{workerId}, #{version})")
     void add(TaskInstance taskInstance);
 
-    @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
+    @Update("update jm_task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void updateStatus(TaskInstance taskInstance);
 
-    @Update("update task_instance set worker_id = #{workerId}, end_time = #{endTime} where id = #{id}")
+    @Update("update jm_task_instance set worker_id = #{workerId}, end_time = #{endTime} where id = #{id}")
     void updateWorkerId(TaskInstance taskInstance);
 
-    @Update("update task_instance set end_time = #{endTime}, _version = _version + 1 where id = #{id} and _version = #{version}")
+    @Update("update jm_task_instance set end_time = #{endTime}, _version = _version + 1 where id = #{id} and _version = #{version}")
     boolean acceptTask(TaskInstance taskInstance);
 
-    @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
+    @Update("update jm_task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void saveSucceeded(TaskInstance taskInstance);
 
-    @Delete("delete from task_instance where workflow_ref = #{workflowRef}")
+    @Delete("delete from jm_task_instance where workflow_ref = #{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
-    @Delete("delete from task_instance where trigger_id = #{triggerId}")
+    @Delete("delete from jm_task_instance where trigger_id = #{triggerId}")
     void deleteByTriggerId(String triggerId);
 
-    @Select("select * from task_instance where id = #{instanceId}")
+    @Select("select * from jm_task_instance where id = #{instanceId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -52,7 +52,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findById(String instanceId);
 
-    @Select("select * from task_instance where business_id = #{businessId}")
+    @Select("select * from jm_task_instance where business_id = #{businessId}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -67,7 +67,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByBusinessId(String businessId);
 
-    @Select("select * from task_instance where business_id = #{businessId} order by serial_no desc limit 1")
+    @Select("select * from jm_task_instance where business_id = #{businessId} order by serial_no desc limit 1")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -82,7 +82,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findByBusinessIdAndMaxSerialNo(String businessId);
 
-    @Select("select * from task_instance where trigger_id = #{triggerId} order by start_time asc")
+    @Select("select * from jm_task_instance where trigger_id = #{triggerId} order by start_time asc")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -97,7 +97,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findByTriggerId(String triggerId);
 
-    @Select("select * from task_instance where status = 'RUNNING'")
+    @Select("select * from jm_task_instance where status = 'RUNNING'")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -112,7 +112,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<TaskInstance> findRunningTask();
 
-    @Select("select * from task_instance")
+    @Select("select * from jm_task_instance")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -131,7 +131,7 @@ public interface TaskInstanceMapper {
     );
 
     @Select("<script>" +
-            "select * from task_instance " +
+            "select * from jm_task_instance " +
             "<where> " +
             "worker_id = #{workerId} and status = 'WAITING' And _version = 0 " +
             "<if test='triggerId != null'> AND `trigger_id` = #{triggerId} </if>" +
@@ -152,7 +152,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findByWorkerIdAndTriggerIdLimit(@Param("workerId") String workerId, @Param("triggerId") String triggerId);
 
-    @Select("select * from task_instance where business_id = #{businessId} and status = 'WAITING' and _version = #{version}")
+    @Select("select * from jm_task_instance where business_id = #{businessId} and status = 'WAITING' and _version = #{version}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)
@@ -167,7 +167,7 @@ public interface TaskInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     Optional<TaskInstance> findByBusinessIdAndVersion(@Param("businessId") String businessId, @Param("version") int version);
 
-    @Select("select * from task_instance where trigger_id = #{triggerId} and status = #{status}")
+    @Select("select * from jm_task_instance where trigger_id = #{triggerId} and status = #{status}")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
     @Result(column = "node_info", property = "nodeInfo", typeHandler = NodeInfoTypeHandler.class)

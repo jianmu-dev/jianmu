@@ -20,6 +20,7 @@ public class DslNode {
     private String onFailure;
     private List<String> sources;
     private List<String> targets;
+    private List<String> needs;
     private Map<String, String> param;
     private String expression;
     private List<Branch> branches;
@@ -119,6 +120,12 @@ public class DslNode {
             dslNode.targets = ((List<?>) t).stream().map(i -> (String) i).collect(Collectors.toList());
         } else {
             dslNode.targets = List.of();
+        }
+        var n = node.get("needs");
+        if (n instanceof List) {
+            dslNode.needs = ((List<?>) n).stream().map(i -> (String) i).collect(Collectors.toList());
+        } else {
+            dslNode.needs = List.of();
         }
     }
 

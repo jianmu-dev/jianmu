@@ -60,6 +60,10 @@ public class ProjectVo {
     private LocalDateTime latestTime;
     @Schema(description = "下次执行时间")
     private LocalDateTime nextTime;
+    @Schema(description = "最后修改时间")
+    private LocalDateTime lastModifiedTime;
     @Schema(description = "最后一次执行状态")
     private String status;
+    @Schema(description = "分支")
+    private String branch;
 }
