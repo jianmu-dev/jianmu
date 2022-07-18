@@ -132,33 +132,43 @@ function parseWorkflow(workflow: any): {
       uniqueKey,
     });
 
-    const { sources, targets } = workflow[key];
+    const { needs } = workflow[key];
 
-    sources?.forEach((source: string) => {
-      if (edges.find(item => item.source === source && item.target === key)) {
-        // 已存在时，忽略
-        return;
-      }
-
+    needs?.forEach((need: string) => {
       edges.push({
-        source,
+        source: need,
         target: key,
         type: 'flow',
       });
     });
 
-    targets?.forEach((target: string) => {
-      if (edges.find(item => item.source === key && item.target === target)) {
-        // 已存在时，忽略
-        return;
-      }
-
-      edges.push({
-        source: key,
-        target,
-        type: 'flow',
-      });
-    });
+    // const { sources, targets } = workflow[key];
+    //
+    // sources?.forEach((source: string) => {
+    //   if (edges.find(item => item.source === source && item.target === key)) {
+    //     // 已存在时，忽略
+    //     return;
+    //   }
+    //
+    //   edges.push({
+    //     source,
+    //     target: key,
+    //     type: 'flow',
+    //   });
+    // });
+    //
+    // targets?.forEach((target: string) => {
+    //   if (edges.find(item => item.source === key && item.target === target)) {
+    //     // 已存在时，忽略
+    //     return;
+    //   }
+    //
+    //   edges.push({
+    //     source: key,
+    //     target,
+    //     type: 'flow',
+    //   });
+    // });
   });
 
   edges.forEach((edge, index, self) => {
