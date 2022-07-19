@@ -280,8 +280,6 @@ public class DslParser {
         lines.add(lineNodeMap);
 
         this.checkWorkflowCircle(endNode, lineNodeMap, lines);
-
-        System.out.println();
     }
 
     /**
@@ -305,6 +303,8 @@ public class DslParser {
                     var targets = tempNode.getTargets().stream()
                             .filter(lineNodeMap::containsKey)
                             .map(lineNodeMap::get)
+                            // 过滤掉结束节点
+                            .filter(n -> !n.getType().equals(End.class.getSimpleName()))
                             .collect(Collectors.toList());
 
                     if (targets.contains(node)) {
