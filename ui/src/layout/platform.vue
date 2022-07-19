@@ -37,7 +37,7 @@
 import { computed, defineComponent, getCurrentInstance, provide, reactive, Ref, ref } from 'vue';
 import { onBeforeRouteUpdate, RouteLocationNormalized, RouteLocationNormalizedLoaded, useRoute } from 'vue-router';
 import TopNav from '@/views/nav/top.vue';
-import { PLATFORM_INDEX } from '@/router/path-def';
+import { INDEX, PLATFORM_PROJECT_EDITOR } from '@/router/path-def';
 import { ElScrollbar } from 'element-plus';
 import { mapMutations, useStore } from 'vuex';
 import { IRootState } from '@/model';
@@ -78,7 +78,7 @@ export default defineComponent({
     const bufferList = reactive<string[]>([]);
     const pathNavs = ref<IPathNav[]>([]);
     const loadMain = ref<boolean>(true);
-    const pathNavsDisplay = computed<boolean>(() => route.path !== PLATFORM_INDEX);
+    const pathNavsDisplay = computed<boolean>(() => (route.path !== INDEX && route.path !== PLATFORM_PROJECT_EDITOR));
     const mainClass = ref<string>(pathNavsDisplay.value ? 'main' : 'main2');
     const mainScrollbarRef = ref<InstanceType<typeof ElScrollbar>>();
     buildPathNav(pathNavs, useRoute());
@@ -93,7 +93,7 @@ export default defineComponent({
       if (to.name === 'index') {
         bufferList.length = 0;
       }
-      mainClass.value = to.path !== PLATFORM_INDEX ? 'main' : 'main2';
+      mainClass.value = to.path !== INDEX ? 'main' : 'main2';
 
       buildPathNav(pathNavs, to);
     });

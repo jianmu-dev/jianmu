@@ -135,7 +135,7 @@
             </span>
             <template #dropdown>
               <jm-dropdown-menu>
-                <jm-dropdown-item :disabled="abling" @click="able(project.id)">
+                <jm-dropdown-item :disabled="abling" @click="able(project.id)" v-if="!noDisable">
                   <a
                     href="javascript: void(0)"
                     :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
@@ -198,6 +198,11 @@ export default defineComponent({
     },
     // 控制项目是否展示可并发
     concurrent: {
+      type: Boolean,
+      default: false,
+    },
+    // 控制下拉框禁用按钮的显隐,默认显示
+    noDisable: {
       type: Boolean,
       default: false,
     },

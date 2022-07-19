@@ -1,4 +1,5 @@
 import { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
+import { PLATFORM_PROJECT_EDITOR } from '@/router/path-def';
 
 export default [
   // 首页
@@ -86,11 +87,12 @@ export default [
   },
   {
     name: 'create-project',
-    path: 'project/editor',
+    path: PLATFORM_PROJECT_EDITOR,
     component: () => import('@/views/project/editor.vue'),
     meta: {
       title: '新增项目',
     },
+    props: ({ query: { branch } }: RouteLocationNormalizedLoaded) => ({ branch }),
   },
   {
     name: 'process-template',

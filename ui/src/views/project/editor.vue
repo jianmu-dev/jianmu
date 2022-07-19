@@ -2,38 +2,15 @@
   <div class="project-editor">
     <!-- loading时的加载页面 -->
     <div class="loading-over" v-show="loading" v-loading="loading"></div>
-    <div class="right-top-btn">
-      <jm-button class="jm-icon-button-cancel" size="small" @click="close">取消</jm-button>
-      <jm-button
-        v-if="source === 'processTemplates'"
-        type="primary"
-        class="jm-icon-button-previous"
-        size="small"
-        @click="previousStep"
-      >上一步
-      </jm-button>
-      <jm-button
-        class="jm-icon-button-preserve"
-        size="small"
-        @click="save(true)"
-        :loading="loading"
-      >保存并返回
-      </jm-button>
-      <jm-button
-        type="primary"
-        class="jm-icon-button-preserve"
-        size="small"
-        @click="save(false)"
-        :loading="loading"
-      >保存
-      </jm-button>
-    </div>
-    <div class="form">
-      <jm-form :model="editorForm" :rules="rules" ref="form">
-        <jm-form-item label="选择项目组" prop="projectGroupId">
+    <div class="top">
+      <div class="left-top-param">
+        <router-link :to="{name:'index'}">
+          <i class="jm-icon-button-left back"></i>
+        </router-link>
+        <div class="project-name">{{ projectName || '未命名项目' }}</div>
+        <div class="selector" v-if="!isShowGrouping">
           <jm-select
             v-model="editorForm.projectGroupId"
-            placeholder="请选择项目组"
           >
             <jm-option
               v-for="item in projectGroupList"
@@ -43,22 +20,37 @@
             >
             </jm-option>
           </jm-select>
-        </jm-form-item>
-      </jm-form>
-    </div>
-    <jm-tabs v-model="activatedTab" class="tabs">
-      <jm-tab-pane name="dsl" lazy>
-        <template #label><i class="jm-icon-tab-dsl"></i> DSL模式</template>
-        <div class="dsl-editor">
-          <jm-dsl-editor v-model:value="editorForm.dslText"/>
         </div>
-      </jm-tab-pane>
-    </jm-tabs>
+        <div class="branch" v-else>
+          <img src="~@/assets/svgs/index/branch.svg" alt="">
+          {{ currentBranch }}
+        </div>
+      </div>
+      <div class="right-top-btn">
+        <jm-button
+          size="small"
+          class="save-return"
+          @click="save(true)"
+          :loading="loading"
+        >保存并返回
+        </jm-button>
+        <jm-button
+          type="primary"
+          size="small"
+          @click="save(false)"
+          :loading="loading"
+        >保存
+        </jm-button>
+      </div>
+    </div>
+    <div class="dsl-editor">
+      <jm-dsl-editor v-model:value="editorForm.dslText"/>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, inject, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { save } from '@/api/project';
 import { ISaveForm } from '@/model/modules/project';
@@ -71,23 +63,45 @@ import { namespace } from '@/store/modules/session';
 import yaml from 'yaml';
 import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
+import { IGitRepoBranchVo } from '@/api/dto/git-repo';
+import { getBranches } from '@/api/git-repo';
 
 export default defineComponent({
   props: {
     id: String,
+    branch: String,
   },
   setup(props: any) {
     const { proxy, appContext } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
+    const currentBranch = ref<string>(props.branch);
+    // 是否展示分组
+    const isShowGrouping = computed<boolean>(() => store.state.entry);
     const sessionState = { ...store.state[namespace] };
     const reloadMain = inject('reloadMain') as () => void;
     const route = useRoute();
+    // 项目分支信息
+    const branches = ref<IGitRepoBranchVo[]>([]);
     const editMode = !!props.id;
     const editorForm = ref<ISaveForm>({
       id: props.id,
+      branch: props.branch,
       dslText: '',
       projectGroupId: '',
+    });
+    let tempString: string;
+    const projectName = computed<string>(() => {
+      try {
+        if (!editorForm.value.dslText.trim()) {
+          return;
+        }
+        const name = yaml.parse(editorForm.value.dslText)['name'];
+        tempString = name;
+        return name;
+      } catch (err) {
+        return tempString;
+      }
     });
     const projectGroupList = ref<IProjectGroupVo[]>([]);
     const form = ref<any>();
@@ -97,6 +111,17 @@ export default defineComponent({
       return !!yaml.parse(dslText)['raw-data'];
     };
     onMounted(async () => {
+      // 获取分支信息（如果entry为true时，有必要获取分支信息）
+      if (isShowGrouping.value) {
+        branches.value = await getBranches();
+        const flag = branches.value.some(item => {
+          return item.branchName === currentBranch.value;
+        });
+        if (!flag) {
+          currentBranch.value = branches.value.find(item => item.isDefault).branchName;
+        }
+        return;
+      }
       // 请求项目组列表
       projectGroupList.value = await listProjectGroup();
       if (editMode) {
@@ -105,11 +130,6 @@ export default defineComponent({
       const defaultGroup = projectGroupList.value.find(item => item.isDefaultGroup);
       editorForm.value.projectGroupId = defaultGroup!.id;
     });
-    const rules = {
-      projectGroupId: [
-        { required: true, message: '请选择项目组', trigger: 'change' },
-      ],
-    };
     // 没有登录时做的弹框判断
     if (!sessionState.session) {
       dynamicRender(LoginVerify, appContext);
@@ -140,7 +160,8 @@ export default defineComponent({
     if (editMode) {
       loading.value = !loading.value;
       fetchProjectDetail(props.id)
-        .then(async ({ dslText, projectGroupId }) => {
+        .then(async ({ dslText, projectGroupId, branch }) => {
+          currentBranch.value = branch;
           if (checkDsl(dslText)) {
             const rawData = yaml.parse(dslText)['raw-data'];
             const { name, global, description } = yaml.parse(dslText);
@@ -184,9 +205,11 @@ export default defineComponent({
     };
 
     return {
+      currentBranch,
+      projectName,
+      isShowGrouping,
       projectGroupList,
       form,
-      rules,
       editorForm,
       loading,
       activatedTab: ref<string>('dsl'),
@@ -197,48 +220,48 @@ export default defineComponent({
         });
       },
       save: (returnFlag: boolean) => {
-        form.value.validate((valid: boolean) => {
-          if (!valid) {
-            return false;
-          }
-          if (editorForm.value.dslText === '') {
-            proxy.$error('DSL不能为空');
-            return;
-          }
-          // 开启loading
-          loading.value = true;
+        if (editorForm.value.dslText === '') {
+          proxy.$error('DSL不能为空');
+          return;
+        }
+        // 开启loading
+        loading.value = true;
+        const payload = { ...editorForm.value };
+        if (!payload.projectGroupId) {
+          // 如果没有设置项目组id，调用接口时不用传递，后端处理。
+          Reflect.deleteProperty(payload, 'projectGroupId');
+        }
+        save(payload)
+          .then(async ({ id }: IProjectIdVo) => {
+            // 关闭loading
+            loading.value = false;
 
-          save({ ...editorForm.value })
-            .then(async ({ id }: IProjectIdVo) => {
-              // 关闭loading
-              loading.value = false;
+            proxy.$success(editMode ? '保存成功' : '新增成功');
 
-              proxy.$success(editMode ? '保存成功' : '新增成功');
+            if (returnFlag) {
+              close();
 
-              if (returnFlag) {
-                close();
+              return;
+            }
 
-                return;
-              }
+            if (!editMode) {
+              await router.push({ name: 'update-project', params: { id } });
+              reloadMain();
 
-              if (!editMode) {
-                await router.push({ name: 'update-project', params: { id } });
-                reloadMain();
+              return;
+            }
+          })
+          .catch((err: Error) => {
+            // 关闭loading
+            loading.value = false;
 
-                return;
-              }
-            })
-            .catch((err: Error) => {
-              // 关闭loading
-              loading.value = false;
-
-              proxy.$throw(err, proxy);
-            });
-        });
+            proxy.$throw(err, proxy);
+          });
       },
       close,
     };
-  },
+  }
+  ,
 });
 </script>
 
@@ -258,59 +281,122 @@ export default defineComponent({
     height: 100vh;
   }
 
-  .form {
-    padding: 24px;
-    padding-top: 10px;
-    background-color: #fff;
-    margin-bottom: 20px;
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: transparent;
+    padding: 20px 0;
 
-    .el-form-item {
-      &.is-required {
+    .left-top-param {
+      color: #082340;
+      font-weight: 400;
+      display: flex;
+      font-size: 16px;
+      align-items: center;
+
+      .back {
+        margin-right: 15px;
+        color: #6B7B8D;
+
+        &:hover {
+          background-color: #EFF7FF;
+          color: #096DD9;
+        }
+      }
+
+      .selector, .branch {
+        position: relative;
         display: flex;
-        flex-direction: column;
+        align-items: center;
 
-        ::v-deep(.el-form-item__label) {
-          text-align: left;
+        &:before {
+          content: '';
+          display: inline-block;
+          margin: 0 20px;
+          width: 2px;
+          height: 16px;
+          background-color: #CDD1E3;
+        }
+
+        ::v-deep(.el-select) {
+          .select-trigger {
+            .el-input {
+              width: 96px;
+
+              .el-input__inner {
+                border: none;
+                padding: 0;
+                color: #082340;
+                font-weight: 400;
+                font-size: 16px;
+                background-color: transparent;
+              }
+
+              .el-select__caret {
+                color: #666666;
+              }
+            }
+          }
         }
       }
 
-      margin-bottom: 0px;
+      .branch {
+        img {
+          width: 16px;
+          height: 16px;
+          margin-right: 6px;
+        }
+      }
+    }
 
-      .el-form-item__content {
-        .el-select {
-          width: 50%;
+    .right-top-btn {
+      display: flex;
+
+      .el-button {
+        margin: 0;
+
+        &:nth-child(1) {
+          margin-right: 20px;
+        }
+
+        &:nth-child(2) {
+          &:hover {
+            background-color: #3293FD;
+          }
+        }
+
+        &.el-button--small {
+          min-height: 36px;
+          padding: 8px 24px;
+          box-shadow: none;
+        }
+
+        &.save-return {
+          background: #F5F5F5;
+          border-radius: 2px;
+          color: #082340;
+          border: none;
+          box-shadow: none;
+
+          &:hover {
+            background-color: #EFF7FF;
+            color: #096DD9;
+          }
         }
       }
     }
   }
 
-  .right-top-btn {
-    position: fixed;
-    right: 20px;
-    top: 78px;
+  .dsl-editor {
+    height: calc(100vh - 224px);
+    padding: 20px;
+    border-radius: 2px;
+    border: 1px solid #EAEEF2;
+    background-color: #fff;
 
-    .jm-icon-button-back::before,
-    .jm-icon-button-cancel::before,
-    .jm-icon-button-preserve::before {
-      font-weight: bold;
-    }
-
-    a {
-      margin-right: 10px;
-    }
-  }
-
-  .tabs {
-    background-color: #ffffff;
-    border-radius: 4px 4px 0 0;
-
-    .dsl-editor {
-      // height: calc(100vh - 215px);
-      height: calc(100vh - 350px);
-
-      > div {
-        z-index: 1;
-      }
+    > div {
+      z-index: 1;
     }
   }
 }
