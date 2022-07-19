@@ -11,3 +11,22 @@
     background-color: #EBF4FF;
   }
 }
+
+// gitlink select下拉框组件样式，应用样式需要在jm-selector添加 popper-class='no-arrow'
+.el-select__popper.no-arrow {
+  .el-select-dropdown .el-scrollbar .el-select-dropdown__wrap {
+    .el-select-dropdown__item {
+      &:hover {
+        background-color: #F3F4F6;
+      }
+
+      &.selected {
+        color: #466AFF;
+      }
+    }
+  }
+
+  .el-popper__arrow::before {
+    display: none;
+  }
+}

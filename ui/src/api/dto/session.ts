@@ -17,9 +17,6 @@ export interface ISessionVo extends Readonly<{
   username: string;
   thirdPartyType: string;
   avatarUrl: string;
-  gitRepo?: string,
-  gitRepoOwner?: string,
-  gitRepoId?: string,
 }> {
 }
 
@@ -44,7 +41,8 @@ export interface IAuthorizationUrlVo extends Readonly<{
  * 获取三方登录方式 vo
  */
 export interface IThirdPartyTypeVo extends Readonly<{
-  thirdPartyType: string
+  thirdPartyType: string,
+  entry: boolean,
 }> {
 }
 

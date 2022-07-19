@@ -1,11 +1,12 @@
-import { createRouter, createWebHistory, RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory, RouteLocationNormalizedLoaded, Router, RouteRecordRaw } from 'vue-router';
 import _store from '@/store';
-import { AUTHORIZE_INDEX, LOGIN_INDEX, PLATFORM_INDEX } from '@/router/path-def';
+import { AUTHORIZE_INDEX, LOGIN_INDEX, INDEX } from '@/router/path-def';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
 import { AppContext } from 'vue';
 import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
+import { fetchThirdPartyType } from '@/api/session';
 
 /**
  * 加载业务模块路由
@@ -36,7 +37,14 @@ const loadModuleRoute = (
     },
   } as RouteRecordRaw;
 };
-export default (appContext: AppContext) => {
+export default async (appContext: AppContext): Promise<Router> => {
+  try {
+    const payload = await fetchThirdPartyType();
+    _store.commit('mutateThirdPartyType', payload);
+  } catch (err) {
+    console.log('fetch third party type failed', err.message);
+  }
+  const entry = _store.state.entry;
   const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -65,7 +73,7 @@ export default (appContext: AppContext) => {
         }),
       },
       // platform模块
-      loadModuleRoute(PLATFORM_INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
+      entry ? loadModuleRoute(INDEX, '首页', false, import('@/layout/integration.vue'), import.meta.globEager('./modules/integration.ts')) : loadModuleRoute(INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
       // full模块
       loadModuleRoute('/full', undefined, false, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
       // error模块

@@ -303,7 +303,8 @@ export default defineComponent({
         box-shadow: none;
 
         &:hover {
-          background: #D9D9D9;
+          background-color: #EFF7FF;
+          color: #096DD9;
         }
       }
     }

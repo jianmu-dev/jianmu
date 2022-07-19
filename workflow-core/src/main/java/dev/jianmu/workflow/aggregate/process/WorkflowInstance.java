@@ -1,9 +1,11 @@
 package dev.jianmu.workflow.aggregate.process;
 
 import dev.jianmu.workflow.aggregate.AggregateRoot;
+import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.event.process.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -33,6 +35,8 @@ public class WorkflowInstance extends AggregateRoot {
     private String workflowRef;
     // 流程定义版本
     private String workflowVersion;
+    // 全局参数
+    private Set<GlobalParameter> globalParameters = Set.of();
     // 创建时间
     private final LocalDateTime createTime = LocalDateTime.now();
     // 开始时间
@@ -179,6 +183,10 @@ public class WorkflowInstance extends AggregateRoot {
         this.raiseEvent(processEndedEvent);
     }
 
+    public void setGlobalParameters(Set<GlobalParameter> globalParameters) {
+        this.globalParameters = globalParameters;
+    }
+
     public String getId() {
         return id;
     }
@@ -217,6 +225,10 @@ public class WorkflowInstance extends AggregateRoot {
 
     public String getWorkflowVersion() {
         return workflowVersion;
+    }
+
+    public Set<GlobalParameter> getGlobalParameters() {
+        return globalParameters;
     }
 
     public LocalDateTime getCreateTime() {
