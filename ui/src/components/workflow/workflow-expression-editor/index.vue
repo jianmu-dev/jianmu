@@ -1,6 +1,7 @@
 <template>
   <div class="jm-workflow-exp-editor">
     <param-button :selectableParams="selectableParams" @inserted="handleInserted"/>
+    <div class="editor-lang">{{ lang }}</div>
     <textarea ref="textareaRef"></textarea>
   </div>
 </template>
@@ -18,6 +19,10 @@ export default defineComponent({
     modelValue: {
       type: String,
       default: '',
+    },
+    lang: {
+      type: String,
+      default: 'js/ts',
     },
     placeholder: {
       type: String,
@@ -77,12 +82,38 @@ export default defineComponent({
     right: 0;
   }
 
+  .editor-lang {
+    box-sizing: border-box;
+    width: calc(100% - 2px);
+    padding-left: 14px;
+    height: 24px;
+    line-height: 24px;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    z-index: 1;
+    background-color: #ECF2F8;
+    border-radius: 1px 1px 0 0;
+    color: #7B8C9C;
+    font-size: 12px;
+  }
+
   ::v-deep(.CodeMirror) {
     height: inherit;
 
     * {
       // 字体设为等宽
       font-family: Menlo, Monaco, 'Courier New', monospace;
+    }
+
+    .CodeMirror-gutters {
+      background-color: transparent;
+      border-right-color: transparent;
+    }
+
+    .CodeMirror-linenumber {
+      font-size: 12px;
+      color: #8193B2;
     }
 
     .CodeMirror-lines {
@@ -115,7 +146,8 @@ export default defineComponent({
     color: #333333;
     border-radius: 2px;
     border: 1px solid #D0E0ED;
-    padding: 4px 15px;
+    padding-right: 15px;
+    padding-top: 24px;
     box-sizing: border-box;
   }
 }
