@@ -570,12 +570,15 @@ public class DslParser {
                 .forEach(paramObj -> {
                     var map = (Map<String, Object>) paramObj;
                     var ref = map.get("ref");
-                    var type = map.get("type");
+                    var typeObj = map.get("type");
                     if (ref == null) {
                         throw new DslException("全局参数未定义ref");
                     }
-                    if (type != null && type.toString().equals(Parameter.Type.SECRET.name())) {
-                        throw new DslException("全局参数不支持使用SECRET类型");
+                    if (typeObj != null) {
+                        var type = Parameter.Type.getTypeByName(typeObj.toString());
+                        if (type == Parameter.Type.SECRET) {
+                            throw new DslException("全局参数不支持使用SECRET类型");
+                        }
                     }
                     if (map.get("value") == null) {
                         throw new DslException("全局参数 " + ref + " 未定义value");
