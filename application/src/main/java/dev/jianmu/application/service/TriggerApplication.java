@@ -567,7 +567,7 @@ public class TriggerApplication {
             var expression = this.expressionLanguage.parseExpression(exp, ResultType.valueOf(webhookType));
             var result = this.expressionLanguage.evaluateExpression(expression, context);
             if (result.isFailure()) {
-                log.warn("全局参数: {} 表达式: {} 计算错误: {}", name, expression.getExpression(), result.getFailureMessage());
+                log.warn("触发器参数: {} 表达式: {} 计算错误: {}", name, expression.getExpression(), result.getFailureMessage());
                 return null;
             }
             return result.getValue().getValue();
