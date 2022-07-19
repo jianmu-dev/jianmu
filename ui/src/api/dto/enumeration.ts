@@ -145,3 +145,12 @@ export enum VisibleTypeEnum {
   PRIVATE = 'PRIVATE',
   ORGANIZATION_VISIBLE = 'ORGANIZATION_VISIBLE',
 }
+
+/**
+ * gitRepo流水线执行分类类型枚举
+ */
+
+export enum GitRepoEnum {
+  LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME',
+  LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME'
+}

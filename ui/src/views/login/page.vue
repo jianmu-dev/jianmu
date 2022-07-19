@@ -93,6 +93,7 @@ export default defineComponent({
     padding: 30px;
     width: 350px;
     min-height: 344px;
+    box-shadow: 0 6px 16px 4px #E6EEF6;
   }
 }
 </style>
