@@ -136,17 +136,17 @@ public class DslParser {
                 symbolTable.put(dslNode.getName(), end);
                 return;
             }
-            if (dslNode.getType().equals("condition")) {
-                var branches = dslNode.getBranches();
-                var condition = Condition.Builder.aCondition()
-                        .name(dslNode.getName())
-                        .ref(dslNode.getName())
-                        .expression(dslNode.getExpression())
-                        .branches(branches)
-                        .build();
-                symbolTable.put(dslNode.getName(), condition);
-                return;
-            }
+//            if (dslNode.getType().equals("condition")) {
+//                var branches = dslNode.getBranches();
+//                var condition = Condition.Builder.aCondition()
+//                        .name(dslNode.getName())
+//                        .ref(dslNode.getName())
+//                        .expression(dslNode.getExpression())
+//                        .branches(branches)
+//                        .build();
+//                symbolTable.put(dslNode.getName(), condition);
+//                return;
+//            }
             AsyncTask task;
             if (dslNode.getImage() != null) {
                 // 创建Shell Node类型的任务节点
@@ -179,7 +179,8 @@ public class DslParser {
             });
         });
 
-        // TODO 环路检测
+        // 环路检测
+        this.checkWorkflowCircle();
 
         return new HashSet<>(symbolTable.values());
 
@@ -261,6 +262,72 @@ public class DslParser {
 //            });
 //        });
 //        return nodes;
+    }
+
+    /**
+     * 初始化环路检测
+     */
+    private void checkWorkflowCircle() {
+        var endNodeOptional = symbolTable.values().stream()
+                .filter(node -> node.getType().equals(End.class.getSimpleName())).findFirst();
+        if (endNodeOptional.isEmpty()) {
+            return;
+        }
+        var endNode = endNodeOptional.get();
+        var lineNodeMap = new HashMap<String, Node>();
+        lineNodeMap.put(endNode.getRef(), endNode);
+        var lines = new ArrayList<Map<String, Node>>();
+        lines.add(lineNodeMap);
+
+        this.checkWorkflowCircle(endNode, lineNodeMap, lines);
+
+        System.out.println();
+    }
+
+    /**
+     * 环路检测
+     */
+    private void checkWorkflowCircle(Node node, Map<String, Node> lineNodeMap, List<Map<String, Node>> lines) {
+        var sources = node.getSources();
+        if (sources.isEmpty()) {
+            return;
+        }
+        // 移除的目的是基于sources个数复制多个
+        lines.remove(lineNodeMap);
+
+        for (var source : node.getSources()) {
+            if (lineNodeMap.containsKey(source)) {
+                List<Node> circleNodes = new ArrayList<>();
+                circleNodes.add(node);
+
+                var tempNode = node;
+                while (true) {
+                    var targets = tempNode.getTargets().stream()
+                            .filter(lineNodeMap::containsKey)
+                            .map(lineNodeMap::get)
+                            .collect(Collectors.toList());
+
+                    if (targets.contains(node)) {
+                        break;
+                    }
+
+                    tempNode = targets.get(0);
+                    circleNodes.add(tempNode);
+                }
+
+                // 表示环路，报错
+                throw new RuntimeException("不允许环路编排：" + circleNodes
+                        .stream()
+                        .map(Node::getRef)
+                        .collect(Collectors.toList()));
+            }
+            var sourceNode = symbolTable.get(source);
+            var sourceLineNodeMap = new HashMap<>(lineNodeMap);
+            sourceLineNodeMap.put(sourceNode.getRef(), sourceNode);
+            lines.add(sourceLineNodeMap);
+
+            this.checkWorkflowCircle(sourceNode, sourceLineNodeMap, lines);
+        }
     }
 
     private void createGlobalParameters(Object globalParam) {
@@ -643,10 +710,10 @@ public class DslParser {
             this.checkEnd(node);
             return;
         }
-        if (type.equals("condition")) {
-            this.checkCondition(node);
-            return;
-        }
+//        if (type.equals("condition")) {
+//            this.checkCondition(node);
+//            return;
+//        }
         // 验证保留关键字
         if (nodeName.equals("event")) {
             throw new DslException("节点名称不能使用event");
@@ -737,7 +804,7 @@ public class DslParser {
                 .map(DslNode::getType)
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
-                .filter(type -> !type.equals("condition"))
+//                .filter(type -> !type.equals("condition"))
                 .filter(type -> !type.startsWith("shell:"))
                 .map(type -> {
                     String[] strings = type.split(":");
