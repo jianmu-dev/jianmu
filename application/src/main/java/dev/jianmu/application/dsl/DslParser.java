@@ -136,17 +136,17 @@ public class DslParser {
                 symbolTable.put(dslNode.getName(), end);
                 return;
             }
-            if (dslNode.getType().equals("condition")) {
-                var branches = dslNode.getBranches();
-                var condition = Condition.Builder.aCondition()
-                        .name(dslNode.getName())
-                        .ref(dslNode.getName())
-                        .expression(dslNode.getExpression())
-                        .branches(branches)
-                        .build();
-                symbolTable.put(dslNode.getName(), condition);
-                return;
-            }
+//            if (dslNode.getType().equals("condition")) {
+//                var branches = dslNode.getBranches();
+//                var condition = Condition.Builder.aCondition()
+//                        .name(dslNode.getName())
+//                        .ref(dslNode.getName())
+//                        .expression(dslNode.getExpression())
+//                        .branches(branches)
+//                        .build();
+//                symbolTable.put(dslNode.getName(), condition);
+//                return;
+//            }
             AsyncTask task;
             if (dslNode.getImage() != null) {
                 // 创建Shell Node类型的任务节点
@@ -637,10 +637,10 @@ public class DslParser {
             this.checkEnd(node);
             return;
         }
-        if (type.equals("condition")) {
-            this.checkCondition(node);
-            return;
-        }
+//        if (type.equals("condition")) {
+//            this.checkCondition(node);
+//            return;
+//        }
         // 验证保留关键字
         if (nodeName.equals("event")) {
             throw new DslException("节点名称不能使用event");
@@ -731,7 +731,7 @@ public class DslParser {
                 .map(DslNode::getType)
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
-                .filter(type -> !type.equals("condition"))
+//                .filter(type -> !type.equals("condition"))
                 .filter(type -> !type.startsWith("shell:"))
                 .map(type -> {
                     String[] strings = type.split(":");
