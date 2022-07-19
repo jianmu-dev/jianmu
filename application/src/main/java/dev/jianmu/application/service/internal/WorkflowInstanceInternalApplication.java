@@ -2,16 +2,25 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.GlobalProperties;
+import dev.jianmu.project.aggregate.ProjectLastExecution;
 import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectRepository;
+import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.event.TriggerFailedEvent;
+import dev.jianmu.trigger.repository.TriggerEventRepository;
+import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
+import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.el.ResultType;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
+import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
+import dev.jianmu.workflow.service.ParameterDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -20,9 +29,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author Ethan Liu
@@ -41,6 +50,11 @@ public class WorkflowInstanceInternalApplication {
     private final ProjectRepository projectRepository;
     private final GlobalProperties globalProperties;
     private final ProjectLastExecutionRepository projectLastExecutionRepository;
+    private final ExpressionLanguage expressionLanguage;
+    private final TriggerEventRepository triggerEventRepository;
+    private final ParameterRepository parameterRepository;
+    private final ParameterDomainService parameterDomainService;
+
 
     public WorkflowInstanceInternalApplication(
             WorkflowRepository workflowRepository,
@@ -49,7 +63,12 @@ public class WorkflowInstanceInternalApplication {
             WorkflowInstanceDomainService workflowInstanceDomainService,
             ApplicationEventPublisher publisher,
             ProjectRepository projectRepository,
-            GlobalProperties globalProperties, ProjectLastExecutionRepository projectLastExecutionRepository
+            GlobalProperties globalProperties,
+            ProjectLastExecutionRepository projectLastExecutionRepository,
+            ExpressionLanguage expressionLanguage,
+            TriggerEventRepository triggerEventRepository,
+            ParameterRepository parameterRepository,
+            ParameterDomainService parameterDomainService
     ) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
@@ -59,6 +78,10 @@ public class WorkflowInstanceInternalApplication {
         this.projectRepository = projectRepository;
         this.globalProperties = globalProperties;
         this.projectLastExecutionRepository = projectLastExecutionRepository;
+        this.expressionLanguage = expressionLanguage;
+        this.triggerEventRepository = triggerEventRepository;
+        this.parameterRepository = parameterRepository;
+        this.parameterDomainService = parameterDomainService;
     }
 
     // 创建流程
@@ -93,6 +116,47 @@ public class WorkflowInstanceInternalApplication {
         this.workflowInstanceRepository.add(workflowInstance);
     }
 
+    private Set<GlobalParameter> findGlobalParameters(String triggerId, String workflowRef, String version) {
+        var workflow = this.workflowRepository.findByRefAndVersion(workflowRef, version)
+                .orElseThrow(() -> new DataNotFoundException("未找到流程"));
+        // 查询参数源
+        var eventParameters = this.triggerEventRepository.findById(triggerId)
+                .map(TriggerEvent::getParameters)
+                .orElseGet(List::of);
+        // 创建表达式上下文
+        var context = new ElContext();
+        // 事件参数加入上下文
+        var eventParams = eventParameters.stream()
+                .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
+        var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
+        // 事件参数scope为event
+        eventMap.forEach((key, val) -> context.add("trigger", key, val));
+        var globalParameters = new HashSet<GlobalParameter>();
+        workflow.getGlobalParameters()
+                .forEach(globalParameter -> {
+                            var expression = expressionLanguage.parseExpression(globalParameter.getValue().toString(), ResultType.valueOf(globalParameter.getType()));
+                            var result = this.expressionLanguage.evaluateExpression(expression, context);
+                            if (result.isFailure()) {
+                                if (globalParameter.getRequired()) {
+                                    throw new RuntimeException("全局参数: " + globalParameter.getRef() + " required: true 表达式: " + expression.getExpression() + " 计算错误: " + result.getFailureMessage());
+                                }
+                                log.warn("全局参数: {} 表达式: {} 计算错误: {}", globalParameter.getName(), expression.getExpression(), result.getFailureMessage());
+                            } else {
+                                globalParameters.add(GlobalParameter.Builder.aGlobalParameter()
+                                        .ref(globalParameter.getRef())
+                                        .name(globalParameter.getName())
+                                        .type(globalParameter.getType())
+                                        .value(result.getValue().getValue())
+                                        .required(globalParameter.getRequired())
+                                        .build());
+                            }
+                        }
+                );
+        return globalParameters;
+    }
+
     // 启动流程
     @Transactional
     public void start(String workflowRef) {
@@ -102,12 +166,7 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         if (project.isConcurrent()) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
-                    .forEach(workflowInstance -> {
-                        workflowInstance.createVolume();
-                        projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
-                        this.workflowInstanceRepository.save(workflowInstance);
-                        this.projectLastExecutionRepository.update(projectLastExecution);
-                    });
+                    .forEach(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution));
             return;
         }
         // 检查是否存在运行中的流程
@@ -118,12 +177,26 @@ public class WorkflowInstanceInternalApplication {
             return;
         }
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
-                .ifPresent(workflowInstance -> {
-                    workflowInstance.createVolume();
-                    projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
-                    this.workflowInstanceRepository.save(workflowInstance);
-                    this.projectLastExecutionRepository.update(projectLastExecution);
-                });
+                .ifPresent(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution));
+    }
+
+    // 流程实例创建Volume
+    private void createVolume(WorkflowInstance workflowInstance, ProjectLastExecution projectLastExecution) {
+        MDC.put("triggerId", workflowInstance.getTriggerId());
+        workflowInstance.createVolume();
+        // 添加全局参数
+        try {
+            var globalParameters = this.findGlobalParameters(workflowInstance.getTriggerId(), workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion());
+            workflowInstance.setGlobalParameters(globalParameters);
+        } catch (Exception e) {
+            log.error("流程实例启动失败：", e);
+            workflowInstance.terminate();
+        }
+        // 修改项目最后执行状态
+        projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
+
+        this.workflowInstanceRepository.save(workflowInstance);
+        this.projectLastExecutionRepository.update(projectLastExecution);
     }
 
     // 流程正常结束

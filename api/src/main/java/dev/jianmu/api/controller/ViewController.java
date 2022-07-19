@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
@@ -329,6 +330,16 @@ public class ViewController {
     public WorkflowVo findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
         var workflow = this.projectApplication.findByRefAndVersion(ref, version);
         return WorkflowMapper.INSTANCE.toWorkflowVo(workflow);
+    }
+
+    @GetMapping("/workflow_instance/{triggerId}/globalParameters")
+    @Operation(summary = "获取流程实例全局参数", description = "获取流程实例全局参数")
+    public Set<GlobalParameterVo> findByRefAndVersion(@PathVariable String triggerId) {
+        var workflowInstance = this.instanceApplication.findByTriggerId(triggerId)
+                .orElseThrow(() -> new RuntimeException("未找到流程实例"));
+        return workflowInstance.getGlobalParameters().stream()
+                .map(GlobalParameterMapper.INSTANCE::toGlobalParameterVo)
+                .collect(Collectors.toSet());
     }
 
     @GetMapping("/async_task_instances/{triggerId}")
