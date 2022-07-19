@@ -4,10 +4,10 @@
       <span v-if="type===ParamTypeEnum.SECRET">**********</span>
       <a :href="paramValue" target="_blank" download v-else-if="isLink">
         <jm-text-viewer @loaded="({contentMaxWidth})=>getMaxWidth(contentMaxWidth)" :value="paramValue"
-                        :tip-append-to-body="tipAppendToBody" :tip-placement="tipPlacement"/>
+                        :tip-append-to-body="tipAppendToBody" :tip-placement="tipPlacement" :threshold="0"/>
       </a>
       <jm-text-viewer @loaded="({contentMaxWidth})=>getMaxWidth(contentMaxWidth)" :value="paramValue"
-                      :tip-append-to-body="tipAppendToBody" :tip-placement="tipPlacement" v-else/>
+                      :tip-append-to-body="tipAppendToBody" :tip-placement="tipPlacement" :threshold="0" v-else/>
     </div>
     <jm-text-copy :value="paramValue"
                   v-if="type!==ParamTypeEnum.SECRET && paramValue" class="copy-btn"/>

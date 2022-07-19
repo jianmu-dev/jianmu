@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.worker.unit;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.jianmu.infrastructure.worker.K8sVolumeMount;
 import dev.jianmu.infrastructure.worker.VolumeMount;
 import dev.jianmu.infrastructure.worker.WorkerSecret;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ public class Runner {
     private List<WorkerSecret> specSecrets;
     private Integer user;
     private Integer group;
-    private List<VolumeMount> volumes;
+    private List<K8sVolumeMount> volumes;
     @JsonProperty("working_dir")
     private String workingDir;
     private String resultFile;

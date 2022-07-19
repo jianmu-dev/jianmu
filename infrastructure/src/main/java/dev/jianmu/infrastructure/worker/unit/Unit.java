@@ -23,7 +23,7 @@ public class Unit {
     private Type type;
     @JsonProperty("pod_spec")
     private PodSpec podSpec;
-    private Volume volume;
+    private List<Volume> volumes;
     private List<WorkerSecret> secrets;
     @JsonProperty("pull_secrets")
     private WorkerSecret pullSecret;
