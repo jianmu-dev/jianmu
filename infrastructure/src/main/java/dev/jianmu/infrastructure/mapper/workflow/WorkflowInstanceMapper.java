@@ -1,5 +1,6 @@
 package dev.jianmu.infrastructure.mapper.workflow;
 
+import dev.jianmu.infrastructure.typehandler.ParameterSetTypeHandler;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import org.apache.ibatis.annotations.*;
@@ -72,6 +73,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
+    @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
 
     @Insert("insert into jm_workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
@@ -81,6 +83,7 @@ public interface WorkflowInstanceMapper {
 
     @Update("update jm_workflow_instance " +
             "set run_mode=#{wk.runMode},status=#{wk.status},start_time=#{wk.startTime}," +
+            "global_parameters = #{wk.globalParameters, jdbcType=BLOB,typeHandler=dev.jianmu.infrastructure.typehandler.ParameterSetTypeHandler}," +
             "suspended_time=#{wk.suspendedTime},end_time=#{wk.endTime},_version= _version+1 " +
             "where id = #{wk.id}")
     void save(@Param("wk") WorkflowInstance workflowInstance);

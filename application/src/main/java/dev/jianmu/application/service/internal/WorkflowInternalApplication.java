@@ -10,10 +10,10 @@ import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
+import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
-import dev.jianmu.workflow.el.ResultType;
 import dev.jianmu.workflow.event.definition.WorkflowErrorEvent;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -93,17 +93,12 @@ public class WorkflowInternalApplication {
         // 事件参数scope为event
         eventMap.forEach((key, val) -> context.add("trigger", key, val));
         // 全局参数加入上下文
-        workflow.getGlobalParameters()
-                .forEach(globalParameter -> {
-                            var expression = expressionLanguage.parseExpression(globalParameter.getValue(), ResultType.valueOf(globalParameter.getType()));
-                            var result = this.expressionLanguage.evaluateExpression(expression, context);
-                            if (result.isFailure()) {
-                                log.warn("全局参数: {} 表达式: {} 计算错误: {}", globalParameter.getName(), expression.getExpression(), result.getFailureMessage());
-                            } else {
-                                context.add("global", globalParameter.getName(), result.getValue());
-                            }
-                        }
-                );
+        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到流程实例，triggerId：" + triggerId));
+        workflowInstance.getGlobalParameters().forEach(globalParameter -> {
+            var p = Parameter.Type.getTypeByName(globalParameter.getType()).newParameter(globalParameter.getValue());
+            context.add("global", globalParameter.getRef(), p);
+        });
         // 任务输出参数加入上下文
         Map<String, String> outParams = new HashMap<>();
         instanceParameters.forEach(instanceParameter -> {

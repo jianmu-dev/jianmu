@@ -4,8 +4,10 @@ import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.util.AssociationUtil;
 import dev.jianmu.api.vo.ProjectIdVo;
+import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.ProjectApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,17 +31,20 @@ public class ProjectController {
     private final GitRepoApplication gitRepoApplication;
     private final UserContextHolder userContextHolder;
     private final AssociationUtil associationUtil;
+    private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
 
     public ProjectController(
             ProjectApplication projectApplication,
             GitRepoApplication gitRepoApplication,
             UserContextHolder userContextHolder,
-            AssociationUtil associationUtil
+            AssociationUtil associationUtil,
+            WorkflowInstanceInternalApplication workflowInstanceInternalApplication
     ) {
         this.projectApplication = projectApplication;
         this.gitRepoApplication = gitRepoApplication;
         this.userContextHolder = userContextHolder;
         this.associationUtil = associationUtil;
+        this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
     }
 
     @PutMapping("/enable/{projectId}")
@@ -84,7 +89,13 @@ public class ProjectController {
     public void updateProject(@PathVariable String projectId, @RequestBody @Valid DslTextDto dslTextDto) {
         var session = this.userContextHolder.getSession();
         var type = this.associationUtil.getAssociationType();
-        this.projectApplication.updateProject(projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getGitRepoId(), type);
+        var concurrent = this.projectApplication.updateProject(projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getGitRepoId(), type);
+        // 并发执行正在排队的流程实例
+        if (concurrent) {
+            var project = this.projectApplication.findById(projectId, session.getGitRepoId(), type)
+                    .orElseThrow(() -> new DataNotFoundException("未找到的项目"));
+            this.workflowInstanceInternalApplication.start(project.getWorkflowRef());
+        }
     }
 
     @DeleteMapping("/{projectId}")

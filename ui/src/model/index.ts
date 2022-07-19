@@ -13,6 +13,7 @@ export interface IScrollOffset {
  */
 export interface IRootState {
   versions: IVersionVo[];
+  entry: boolean;
   thirdPartyType: string;
   workerTypes: string[];
   parameterTypes: string[];

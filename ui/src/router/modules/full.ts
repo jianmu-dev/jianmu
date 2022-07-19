@@ -8,6 +8,7 @@ export default [
     meta: {
       title: '创建管道项目',
     },
+    props: ({ query: { branch } }: RouteLocationNormalizedLoaded) => ({ branch }),
   },
   {
     name: 'update-pipeline',
