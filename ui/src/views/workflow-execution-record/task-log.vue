@@ -273,7 +273,7 @@ import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enum
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/model/data/common';
 import { sortTasks } from '@/components/workflow/workflow-viewer/model/util';
-import { downloadNodeLogs, randomNodeLogs } from '@/api/workflow-execution-record';
+import { downloadNodeLogs } from '@/api/workflow-execution-record';
 import ParamValue from '@/views/common/param-value.vue';
 
 export default defineComponent({
@@ -451,14 +451,10 @@ export default defineComponent({
     onBeforeUnmount(destroy);
 
     const maxWidthRecord = ref<Record<string, number>>({});
-    const changeTask = (instanceId: string) => {
-      if (taskInstanceId.value === instanceId) {
-        currentInstanceId.value = taskInstances.value[0].instanceId;
-        return;
-      }
-      nextTick(() => {
-        currentInstanceId.value = instanceId;
-      });
+    const changeTask = async(instanceId: string) => {
+      taskParams.value = await listTaskParam(instanceId);
+      await nextTick();
+      currentInstanceId.value = instanceId;
     };
 
     const asyncTaskStartTime = ref<string>('');
@@ -470,7 +466,7 @@ export default defineComponent({
       if (asyncTaskStartTime.value) {
         taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
         if (!taskInstanceId.value && taskInstances.value.length > 0) {
-          changeTask(taskInstances.value[0].instanceId);
+          await changeTask(taskInstances.value[0].instanceId);
         }
       }
       asyncTaskStartTime.value = asyncTask.value.startTime;
