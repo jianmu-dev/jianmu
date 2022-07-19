@@ -81,7 +81,9 @@
       <template #footer>
         <span class="dialog-footer">
           <jm-button size="small" @click="close">取消</jm-button>
-          <jm-button size="small" type="primary" :loading="loading" @click="submit">确定</jm-button>
+          <!-- 选择了分支后，确认按钮可点 -->
+          <jm-button size="small" type="primary" :loading="loading" @click="submit"
+                     :disabled="!selectBranch">确定</jm-button>
         </span>
       </template>
     </jm-dialog>
@@ -136,7 +138,7 @@ export default defineComponent({
     // 所有分支
     const branches = ref<IGitRepoBranchVo[]>([]);
     // 弹窗选择的分支
-    const selectBranch = ref<string>('master');
+    const selectBranch = ref<string>('');
     // 项目排序类型
     const sortType = ref<string>(GitRepoEnum.LAST_EXECUTION_TIME);
     const filteredProjects = computed<IProjectVo[]>(() => {
