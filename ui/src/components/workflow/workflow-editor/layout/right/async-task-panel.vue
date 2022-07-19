@@ -7,7 +7,10 @@
       @submit.prevent
     >
       <div class="set-padding">
-        <jm-form-item label="节点名称" prop="name" class="name-item" :rules="nodeData.getFormRules().name">
+        <jm-form-item label="节点唯一标识" prop="ref" class="name-item" :rules="nodeData.getFormRules().ref">
+          <jm-input v-model="form.ref" show-word-limit :maxlength="30"/>
+        </jm-form-item>
+        <jm-form-item label="节点名称" prop="name" class="name-item">
           <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
         </jm-form-item>
         <jm-form-item

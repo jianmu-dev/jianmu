@@ -31,11 +31,9 @@
               @change="updateInfo"
             />
           </jm-form>
-          <div class="add-param">
-            <span class="add-link" @click="addParam">
-              <i class="jm-icon-button-add"/>
-              全局参数
-            </span>
+          <div class="add-param" @click="addParam">
+            <i class="jm-icon-button-add"/>
+            全局参数
           </div>
         </div>
       </jm-scrollbar>
@@ -65,8 +63,8 @@ export default defineComponent({
     },
   },
   emits: ['closed'],
-  setup(props, { emit }) {
-    const { proxy } = getCurrentInstance() as any;
+  setup(props, {emit}) {
+    const {proxy} = getCurrentInstance() as any;
     const visible = ref<boolean>(props.modelValue);
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const paramKeys = ref<string[]>([]);
@@ -95,6 +93,11 @@ export default defineComponent({
       paramKeys,
       globalFormRef,
       close: () => {
+        workflowForm.value.global.params.forEach(param => {
+          if (!param.name) {
+            param.name = param.ref;
+          }
+        });
         visible.value = false;
         emit('closed', visible.value);
       },
@@ -147,10 +150,7 @@ export default defineComponent({
           padding: 10px 20px;
           color: #306bd2;
           font-size: 14px;
-
-          .add-link {
-            cursor: pointer;
-          }
+          cursor: pointer;
 
           .jm-icon-button-add::before {
             font-weight: 700;

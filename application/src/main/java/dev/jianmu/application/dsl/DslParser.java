@@ -164,81 +164,103 @@ public class DslParser {
         // 添加节点引用关系
         dslNodes.forEach(dslNode -> {
             var n = symbolTable.get(dslNode.getName());
-            if (n instanceof Condition) {
-                for (Branch branch : dslNode.getBranches()) {
-                    var target = symbolTable.get(branch.getTarget());
-                    if (target == null) {
-                        throw new DslException("条件网关" + dslNode.getName() + "指定的case目标: " + branch.getTarget() + "不存在");
-                    } else {
-                        n.addTarget(target.getRef());
-                    }
-                }
+            if (n == null) {
+                return;
             }
-            if (null != n) {
-                dslNode.getTargets().forEach(nodeName -> {
-                    var target = symbolTable.get(nodeName);
-                    if (null != target) {
-                        n.addTarget(target.getRef());
-                    } else {
-                        throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
-                    }
-                });
-                dslNode.getSources().forEach(nodeName -> {
-                    var source = symbolTable.get(nodeName);
-                    if (null != source) {
-                        n.addSource(source.getRef());
-                    } else {
-                        throw new DslException("节点" + dslNode.getName() + "指定的source: " + nodeName + "不存在");
-                    }
-                });
-            }
-        });
-        // 校验并发网关上游下游语法
-        symbolTable.values().forEach(node -> {
-            node.getTargets().forEach(nodeName -> {
-                var target = symbolTable.get(nodeName);
-                if (!target.getSources().contains(node.getRef())) {
-                    throw new DslException("节点" + nodeName + "未指定source: " + node.getRef());
+
+            dslNode.getNeeds().forEach(need -> {
+                n.addSource(need);
+                //确定target
+                var needNode = symbolTable.get(need);
+                if (needNode == null) {
+                    throw new DslException("节点" + n.getName() + "配置的needs对应节点不存在: " + need);
                 }
-            });
-            node.getSources().forEach(nodeName -> {
-                var source = symbolTable.get(nodeName);
-                if (!source.getTargets().contains(node.getRef())) {
-                    throw new DslException("节点" + nodeName + "未指定target: " + node.getRef());
-                }
+                needNode.addTarget(n.getRef());
             });
         });
-        // 环路计算
-        var nodes = new HashSet<>(symbolTable.values());
-        var cycles = this.findCycles(nodes);
-        cycles.forEach(cycle -> {
-            cycle.forEach(nodeRef -> {
-                var node = symbolTable.get(nodeRef);
-                var sources = new HashSet<>(node.getSources());
-                sources.retainAll(cycle);
-                var targets = new HashSet<>(node.getTargets());
-                targets.retainAll(cycle);
-                if (sources.isEmpty() || targets.isEmpty()) {
-                    log.warn("环路节点与节点上下游不匹配");
-                    return;
-                }
-                node.addLoopPair(
-                        LoopPair.Builder.aLoopPair()
-                                .source(sources.iterator().next())
-                                .target(targets.iterator().next())
-                                .build()
-                );
-                // 网关分支是否为循环
-                if (node instanceof Condition) {
-                    for (Branch branch : ((Condition) node).getBranches()) {
-                        if (cycle.contains(branch.getTarget())) {
-                            branch.setLoop(true);
-                        }
-                    }
-                }
-            });
-        });
-        return nodes;
+
+        // TODO 环路检测
+
+        return new HashSet<>(symbolTable.values());
+
+//        // 添加节点引用关系
+//        dslNodes.forEach(dslNode -> {
+//            var n = symbolTable.get(dslNode.getName());
+//            if (n instanceof Condition) {
+//                for (Branch branch : dslNode.getBranches()) {
+//                    var target = symbolTable.get(branch.getTarget());
+//                    if (target == null) {
+//                        throw new DslException("条件网关" + dslNode.getName() + "指定的case目标: " + branch.getTarget() + "不存在");
+//                    } else {
+//                        n.addTarget(target.getRef());
+//                    }
+//                }
+//            }
+//            if (null != n) {
+//                dslNode.getTargets().forEach(nodeName -> {
+//                    var target = symbolTable.get(nodeName);
+//                    if (null != target) {
+//                        n.addTarget(target.getRef());
+//                    } else {
+//                        throw new DslException("节点" + dslNode.getName() + "指定的target: " + nodeName + "不存在");
+//                    }
+//                });
+//                dslNode.getSources().forEach(nodeName -> {
+//                    var source = symbolTable.get(nodeName);
+//                    if (null != source) {
+//                        n.addSource(source.getRef());
+//                    } else {
+//                        throw new DslException("节点" + dslNode.getName() + "指定的source: " + nodeName + "不存在");
+//                    }
+//                });
+//            }
+//        });
+//        // 校验并发网关上游下游语法
+//        symbolTable.values().forEach(node -> {
+//            node.getTargets().forEach(nodeName -> {
+//                var target = symbolTable.get(nodeName);
+//                if (!target.getSources().contains(node.getRef())) {
+//                    throw new DslException("节点" + nodeName + "未指定source: " + node.getRef());
+//                }
+//            });
+//            node.getSources().forEach(nodeName -> {
+//                var source = symbolTable.get(nodeName);
+//                if (!source.getTargets().contains(node.getRef())) {
+//                    throw new DslException("节点" + nodeName + "未指定target: " + node.getRef());
+//                }
+//            });
+//        });
+//        // 环路计算
+//        var nodes = new HashSet<>(symbolTable.values());
+//        var cycles = this.findCycles(nodes);
+//        cycles.forEach(cycle -> {
+//            cycle.forEach(nodeRef -> {
+//                var node = symbolTable.get(nodeRef);
+//                var sources = new HashSet<>(node.getSources());
+//                sources.retainAll(cycle);
+//                var targets = new HashSet<>(node.getTargets());
+//                targets.retainAll(cycle);
+//                if (sources.isEmpty() || targets.isEmpty()) {
+//                    log.warn("环路节点与节点上下游不匹配");
+//                    return;
+//                }
+//                node.addLoopPair(
+//                        LoopPair.Builder.aLoopPair()
+//                                .source(sources.iterator().next())
+//                                .target(targets.iterator().next())
+//                                .build()
+//                );
+//                // 网关分支是否为循环
+//                if (node instanceof Condition) {
+//                    for (Branch branch : ((Condition) node).getBranches()) {
+//                        if (cycle.contains(branch.getTarget())) {
+//                            branch.setLoop(true);
+//                        }
+//                    }
+//                }
+//            });
+//        });
+//        return nodes;
     }
 
     private void createGlobalParameters(Object globalParam) {
@@ -247,13 +269,13 @@ public class DslParser {
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> {
                         String type = null;
-                        Object value = null;
+                        String value = null;
                         if (entry.getValue() instanceof String) {
                             value = entry.getValue().toString();
                             type = "STRING";
                         }
                         if (entry.getValue() instanceof Map) {
-                            value = ((Map<?, ?>) entry.getValue()).get("value");
+                            value = (String) ((Map<?, ?>) entry.getValue()).get("value");
                             type = ((Map<String, String>) entry.getValue()).get("type");
                         }
                         return GlobalParameter.Builder.aGlobalParameter()
@@ -291,6 +313,12 @@ public class DslParser {
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
+        // 添加开始节点
+        var start = Start.Builder.aStart().name("Start").ref("Start").build();
+        symbolTable.put("Start", start);
+        // 添加结束节点
+        var end = End.Builder.anEnd().name("End").ref("End").build();
+        symbolTable.put("End", end);
         dslNodes.forEach(dslNode -> {
             AsyncTask task;
             if (dslNode.getImage() != null) {
@@ -306,82 +334,30 @@ public class DslParser {
             }
             symbolTable.put(dslNode.getName(), task);
         });
-
-        // 添加开始节点
-        var start = Start.Builder.aStart().name("Start").ref("start").build();
-        // 添加结束节点
-        var end = End.Builder.anEnd().name("End").ref("end").build();
-
-        if (dslNodes.stream().anyMatch(dslNode -> !dslNode.getNeeds().isEmpty())) {
-            // 添加节点引用关系：存在needs场景
-            dslNodes.forEach(dslNode -> {
-                var n = symbolTable.get(dslNode.getName());
-                if (n == null) {
-                    return;
-                }
-
-                dslNode.getNeeds().forEach(need -> {
-                    n.addSource(need);
-                    //确定target
-                    var needNode = symbolTable.get(need);
-                    if (needNode == null) {
-                        throw new DslException("节点" + n.getName() + "配置的needs对应节点不存在: " + need);
-                    }
-                    needNode.addTarget(n.getRef());
-                });
-            });
-
-            // 顶端
-            symbolTable.values()
-                    .stream()
-                    .filter(node -> node.getSources().isEmpty())
-                    .forEach(node -> {
-                        start.addTarget(node.getRef());
-                        node.addSource(start.getRef());
-                    });
-            // 末端
-            symbolTable.values()
-                    .stream()
-                    .filter(node -> node.getTargets().isEmpty())
-                    .forEach(node -> {
-                        end.addSource(node.getRef());
-                        node.addTarget(end.getRef());
-                    });
-
-            symbolTable.put(start.getRef(), start);
-            symbolTable.put(end.getRef(), end);
-
-            // TODO 环路检测
-
-        } else {
-            symbolTable.put(start.getRef(), start);
-            symbolTable.put(end.getRef(), end);
-
-            // 添加节点引用关系：不存在needs场景
-            dslNodes.forEach(withCounter((i, dslNode) -> {
-                var n = symbolTable.get(dslNode.getName());
-                if (null != n && i == 0) {
-                    var startNode = symbolTable.get("start");
-                    n.addSource(startNode.getRef());
-                    startNode.addTarget(n.getRef());
-                }
-                if (null != n && i == (dslNodes.size() - 1)) {
-                    var endNode = symbolTable.get("end");
-                    n.addTarget(endNode.getRef());
-                    endNode.addSource(n.getRef());
-                }
-                if (null != n && i > 0) {
-                    var sourceNode = dslNodes.get(i - 1);
-                    var source = symbolTable.get(sourceNode.getName());
-                    n.addSource(source.getRef());
-                }
-                if (null != n && i < (dslNodes.size() - 1)) {
-                    var targetNode = dslNodes.get(i + 1);
-                    var target = symbolTable.get(targetNode.getName());
-                    n.addTarget(target.getRef());
-                }
-            }));
-        }
+        // 添加节点引用关系
+        dslNodes.forEach(withCounter((i, dslNode) -> {
+            var n = symbolTable.get(dslNode.getName());
+            if (null != n && i == 0) {
+                var startNode = symbolTable.get("Start");
+                n.addSource(startNode.getRef());
+                startNode.addTarget(n.getRef());
+            }
+            if (null != n && i == (dslNodes.size() - 1)) {
+                var endNode = symbolTable.get("End");
+                n.addTarget(endNode.getRef());
+                endNode.addSource(n.getRef());
+            }
+            if (null != n && i > 0) {
+                var sourceNode = dslNodes.get(i - 1);
+                var source = symbolTable.get(sourceNode.getName());
+                n.addSource(source.getRef());
+            }
+            if (null != n && i < (dslNodes.size() - 1)) {
+                var targetNode = dslNodes.get(i + 1);
+                var target = symbolTable.get(targetNode.getName());
+                n.addTarget(target.getRef());
+            }
+        }));
         return new HashSet<>(symbolTable.values());
     }
 
@@ -531,9 +507,6 @@ public class DslParser {
             var only = this.trigger.get("only");
             var webhookBuilder = Webhook.builder();
             if (only instanceof String) {
-                if (!this.isEl((String) only)) {
-                    throw new IllegalArgumentException("only表达式格式错误");
-                }
                 webhookBuilder.only((String) only);
             }
             if (auth instanceof Map) {
@@ -562,7 +535,6 @@ public class DslParser {
                             var type = p.get("type");
                             var exp = p.get("exp");
                             var required = p.get("required");
-                            var defaultValue = p.get("default");
                             if (!(name instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数名配置错误");
                             }
@@ -575,13 +547,12 @@ public class DslParser {
                             if (required != null && !(required instanceof Boolean)) {
                                 throw new IllegalArgumentException("Webhook参数是否必填配置错误");
                             }
-                            Parameter.Type.getTypeByName((String) type).newParameter(defaultValue);
+                            Parameter.Type.getTypeByName((String) type);
                             return WebhookParameter.Builder.aWebhookParameter()
                                     .name((String) name)
                                     .type((String) type)
                                     .exp((String) exp)
                                     .required(required != null && (Boolean) required)
-                                    .defaultVault(defaultValue)
                                     .build();
                         }).collect(Collectors.toList());
                 webhookBuilder.param(ps);
@@ -597,9 +568,8 @@ public class DslParser {
             ((Map<String, Object>) globalParam).forEach((k, v) -> {
                 if (v instanceof Map) {
                     var type = ((Map<String, String>) v).get("type");
-                    var value = ((Map<?, ?>) v).get("value");
-                    var p = Parameter.Type.getTypeByName(type).newParameter(value);
-                    if (Parameter.Type.SECRET == p.getType()) {
+                    var p = Parameter.Type.getTypeByName(type);
+                    if (Parameter.Type.SECRET == p) {
                         throw new DslException("全局参数不支持使用SECRET类型");
                     }
                 }
@@ -682,13 +652,17 @@ public class DslParser {
     }
 
     private void checkTask(String nodeName, Map<?, ?> node) {
-        var sources = node.get("sources");
-        var targets = node.get("targets");
-        if (!(sources instanceof List) || ((List<?>) sources).isEmpty()) {
-            throw new DslException("任务节点" + nodeName + "：sources未设置");
-        }
-        if (!(targets instanceof List) || ((List<?>) targets).isEmpty()) {
-            throw new DslException("任务节点" + nodeName + "：targets未设置");
+//        var sources = node.get("sources");
+//        var targets = node.get("targets");
+//        if (!(sources instanceof List) || ((List<?>) sources).isEmpty()) {
+//            throw new DslException("任务节点" + nodeName + "：sources未设置");
+//        }
+//        if (!(targets instanceof List) || ((List<?>) targets).isEmpty()) {
+//            throw new DslException("任务节点" + nodeName + "：targets未设置");
+//        }
+        var needs = node.get("needs");
+        if (!(needs instanceof List) || ((List<?>) needs).isEmpty()) {
+            throw new DslException("任务节点" + nodeName + "：needs未设置");
         }
     }
 
@@ -716,17 +690,21 @@ public class DslParser {
     }
 
     private void checkEnd(Map<?, ?> node) {
-        var sources = node.get("sources");
-        if (!(sources instanceof List)) {
-            throw new DslException("结束节点sources未设置");
+//        var sources = node.get("sources");
+//        if (!(sources instanceof List)) {
+//            throw new DslException("结束节点sources未设置");
+//        }
+        var needs = node.get("needs");
+        if (!(needs instanceof List)) {
+            throw new DslException("结束节点needs未设置");
         }
     }
 
     private void checkStart(Map<?, ?> node) {
-        var targets = node.get("targets");
-        if (!(targets instanceof List)) {
-            throw new DslException("开始节点targets未设置");
-        }
+//        var targets = node.get("targets");
+//        if (!(targets instanceof List)) {
+//            throw new DslException("开始节点targets未设置");
+//        }
     }
 
     private void checkShellNode(String nodeName, Map<?, ?> node) {
@@ -737,12 +715,6 @@ public class DslParser {
         if (!(script instanceof List) && !(script instanceof String)) {
             throw new DslException("节点 " + nodeName + " 的script参数必须为数组或字符串类型");
         }
-    }
-
-    private boolean isEl(String paramValue) {
-        Pattern pattern = Pattern.compile("^\\(.*\\)$");
-        Matcher matcher = pattern.matcher(paramValue);
-        return matcher.lookingAt();
     }
 
     private String isSecret(String paramValue) {

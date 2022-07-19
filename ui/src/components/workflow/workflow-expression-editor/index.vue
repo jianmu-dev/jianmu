@@ -33,6 +33,12 @@ export default defineComponent({
     const textareaRef = ref<HTMLTextAreaElement>();
     let expressionEditor: ExpressionEditor;
 
+    const syncValue = () => {
+      const val = textareaRef.value!.value;
+      emit('update:model-value', val);
+      emit('change', val);
+    };
+
     onMounted(async () => {
       const textareaEl = textareaRef.value!;
       textareaEl.value = props.modelValue;
@@ -43,16 +49,17 @@ export default defineComponent({
       expressionEditor = new ExpressionEditor(textareaEl, props.placeholder,
         e => emit('focus', e),
         e => {
-          const val = textareaEl.value;
-          emit('update:model-value', val);
+          syncValue();
           emit('blur', e);
-          emit('change', val);
         });
     });
 
     return {
       textareaRef,
-      handleInserted: (arr: string[]) => expressionEditor.insertParam(arr),
+      handleInserted: (arr: string[]) => {
+        expressionEditor.insertParam(arr);
+        syncValue();
+      },
     };
   },
 });

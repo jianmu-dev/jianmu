@@ -373,3 +373,15 @@ CREATE TABLE `jm_external_parameter_label`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='外部参数标签表';
+
+CREATE TABLE `jm_project_last_execution`
+(
+    `workflow_ref`   varchar(45) NOT NULL COMMENT 'ID',
+    `status`         varchar(45) DEFAULT NULL COMMENT '运行状态',
+    `start_time`     datetime    DEFAULT NULL COMMENT '开始时间',
+    `suspended_time` datetime    DEFAULT NULL COMMENT '挂起时间',
+    `end_time`       datetime    DEFAULT NULL COMMENT '结束时间',
+    PRIMARY KEY (`workflow_ref`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目最后执行记录';

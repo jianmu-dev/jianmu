@@ -14,7 +14,7 @@ public interface ExpressionLanguage {
      * @param expression the (raw) expression as string
      * @return the parsed expression, or the failure message if the expression is not valid
      */
-    Expression parseExpression(String expression);
+    Expression parseExpression(String expression, ResultType resultType);
 
     /**
      * Evaluate the given expression with the given context variables.

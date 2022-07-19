@@ -15,6 +15,11 @@ public interface Expression {
     String getExpression();
 
     /**
+     * @return the type returned by expression parsing
+     */
+    ResultType getResultType();
+
+    /**
      * @return optional of the name of the variable if expression is a single variable or a property
      * of a single variable, otherwise empty
      */

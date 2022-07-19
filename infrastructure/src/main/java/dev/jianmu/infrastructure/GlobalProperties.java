@@ -25,6 +25,7 @@ public class GlobalProperties {
     private Boolean authMode = true;
     private Worker worker = new Worker();
     private TriggerQueue triggerQueue = new TriggerQueue();
+    private El el = new El();
 
     @Data
     @Component
@@ -83,5 +84,13 @@ public class GlobalProperties {
     public static class TriggerQueue {
         @NotNull
         public Integer max = 5;
+    }
+
+    @Data
+    @Component
+    @Validated
+    public static class El{
+        @NotBlank
+        public String server;
     }
 }

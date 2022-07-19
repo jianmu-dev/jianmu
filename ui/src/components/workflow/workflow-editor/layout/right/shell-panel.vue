@@ -6,7 +6,10 @@
       label-position="top"
       @submit.prevent
     >
-      <jm-form-item label="节点名称" prop="name" :rules="nodeData.getFormRules().name" class="node-name">
+      <jm-form-item label="节点唯一标识" prop="ref" class="node-name" :rules="nodeData.getFormRules().ref">
+        <jm-input v-model="form.ref" show-word-limit :maxlength="30"/>
+      </jm-form-item>
+      <jm-form-item label="节点名称" prop="name" class="node-item">
         <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
       </jm-form-item>
       <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">

@@ -19,4 +19,6 @@ import lombok.NoArgsConstructor;
 public class Volume {
     @JsonProperty("temp")
     private VolumeEmptyDir volumeEmptyDir;
+    @JsonProperty("host")
+    private VolumeHostPath volumeHostPath;
 }

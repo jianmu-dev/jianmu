@@ -125,7 +125,7 @@ export class WorkflowTool {
   toDsl(workflowData: IWorkflow): string {
     // TODO 适配新版dsl
     const triggerNodeProxies: CustomX6NodeProxy[] = [];
-    const taskNodeProxies: CustomX6NodeProxy[] = [];
+    const nodeProxies: CustomX6NodeProxy[] = [];
 
     this.graph.getNodes().forEach(node => {
       const nodeProxy = new CustomX6NodeProxy(node);
@@ -133,10 +133,7 @@ export class WorkflowTool {
         triggerNodeProxies.push(nodeProxy);
         return;
       }
-      if (nodeProxy.isTask()) {
-        taskNodeProxies.push(nodeProxy);
-        return;
-      }
+      nodeProxies.push(nodeProxy);
     });
 
     let trigger;
@@ -144,12 +141,12 @@ export class WorkflowTool {
       // TODO 待扩展多个触发器
       trigger = triggerNodeProxies[0].toDsl(this.graph);
     }
-    const pipeline: {
+    const workflow: {
       [key: string]: object;
     } = {};
-    taskNodeProxies.forEach(nodeProxy => {
+    nodeProxies.forEach(nodeProxy => {
       const nodeData = nodeProxy.getData();
-      pipeline[nodeData.getRef()] = nodeProxy.toDsl(this.graph);
+      workflow[nodeData.getRef()] = nodeProxy.toDsl(this.graph);
     });
 
     let dsl = yaml.stringify({
@@ -157,7 +154,7 @@ export class WorkflowTool {
       description: workflowData.description,
       global: workflowData.global.toDsl(),
       trigger,
-      pipeline,
+      workflow,
     });
 
     dsl += '\n\n' + `raw-data: ${JSON.stringify(workflowData.data)}`;

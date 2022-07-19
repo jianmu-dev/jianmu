@@ -10,10 +10,10 @@ import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
-import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.el.EvaluationContext;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.el.ResultType;
 import dev.jianmu.workflow.event.definition.WorkflowErrorEvent;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -84,13 +84,6 @@ public class WorkflowInternalApplication {
                 .findLastOutputParamByTriggerId(triggerId);
         // 创建表达式上下文
         var context = new ElContext();
-        // 全局参数加入上下文
-        workflow.getGlobalParameters()
-                .forEach(globalParameter -> context.add(
-                        "global",
-                        globalParameter.getName(),
-                        Parameter.Type.getTypeByName(globalParameter.getType()).newParameter(globalParameter.getValue()))
-                );
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
                 .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))
@@ -99,6 +92,18 @@ public class WorkflowInternalApplication {
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
         // 事件参数scope为event
         eventMap.forEach((key, val) -> context.add("trigger", key, val));
+        // 全局参数加入上下文
+        workflow.getGlobalParameters()
+                .forEach(globalParameter -> {
+                            var expression = expressionLanguage.parseExpression(globalParameter.getValue(), ResultType.valueOf(globalParameter.getType()));
+                            var result = this.expressionLanguage.evaluateExpression(expression, context);
+                            if (result.isFailure()) {
+                                log.warn("全局参数: {} 表达式: {} 计算错误: {}", globalParameter.getName(), expression.getExpression(), result.getFailureMessage());
+                            } else {
+                                context.add("global", globalParameter.getName(), result.getValue());
+                            }
+                        }
+                );
         // 任务输出参数加入上下文
         Map<String, String> outParams = new HashMap<>();
         instanceParameters.forEach(instanceParameter -> {
