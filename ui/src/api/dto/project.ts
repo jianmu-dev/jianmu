@@ -14,8 +14,9 @@ import {
 export interface IProjectSavingDto
   extends Readonly<{
     id?: string;
+    branch: string;
     dslText: string;
-    projectGroupId: string;
+    projectGroupId?: string;
   }> {
 }
 
@@ -98,6 +99,8 @@ export interface IProjectVo
     mutable: boolean;
     description?: string;
     concurrent: boolean;
+    branch: string;
+    lastModifiedTime: string;
   }> {
 }
 
@@ -119,6 +122,7 @@ export interface IProjectDetailVo
     triggerType: TriggerTypeEnum;
     projectGroupId: string;
     projectGroupName: string;
+    branch: string;
   }> {
 }
 

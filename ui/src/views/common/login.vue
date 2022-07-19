@@ -73,7 +73,7 @@ import { createNamespacedHelpers, mapActions, useStore } from 'vuex';
 import { ILoginForm, IState } from '@/model/modules/session';
 import { namespace } from '@/store/modules/session';
 import { useRoute, useRouter } from 'vue-router';
-import { AUTHORIZE_INDEX, PLATFORM_INDEX } from '@/router/path-def';
+import { AUTHORIZE_INDEX, INDEX } from '@/router/path-def';
 import { fetchAuthUrl } from '@/api/session';
 import { getRedirectUri } from '@/utils/redirect-uri';
 
@@ -169,7 +169,7 @@ export default defineComponent({
             gitRepo: props.gitRepo,
             gitRepoOwner: props.gitRepoOwner,
           });
-          dialogLogin ? window.close() : await router.push(PLATFORM_INDEX);
+          dialogLogin ? window.close() : await router.push(INDEX);
         } catch (err) {
           proxy.$throw(err, proxy);
           localStorage.setItem('temp-login-error-message', err.message);
@@ -220,7 +220,7 @@ export default defineComponent({
             await proxy.createSession({ ...loginForm.value });
             await proxy.initialize();
             if (route.name === 'login') {
-              await router.push(PLATFORM_INDEX);
+              await router.push(INDEX);
             }
           } catch (err) {
             proxy.$throw(err, proxy);
