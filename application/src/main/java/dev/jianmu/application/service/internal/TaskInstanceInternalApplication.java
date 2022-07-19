@@ -140,17 +140,12 @@ public class TaskInstanceInternalApplication {
         // 事件参数scope为event
         eventMap.forEach((key, val) -> context.add("trigger", key, val));
         // 全局参数加入上下文
-        workflow.getGlobalParameters()
-                .forEach(globalParameter -> {
-                            var expression = expressionLanguage.parseExpression(globalParameter.getValue(), ResultType.valueOf(globalParameter.getType()));
-                            var result = this.expressionLanguage.evaluateExpression(expression, context);
-                            if (result.isFailure()) {
-                                log.warn("全局参数: {} 表达式: {} 计算错误: {}", globalParameter.getName(), expression.getExpression(), result.getFailureMessage());
-                            }else{
-                                context.add("global", globalParameter.getName(), result.getValue());
-                            }
-                        }
-                );
+        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程实例，triggerId：" + taskInstance.getTriggerId()));
+        workflowInstance.getGlobalParameters().forEach(globalParameter -> {
+            var p = Parameter.Type.getTypeByName(globalParameter.getType()).newParameter(globalParameter.getValue());
+            context.add("global", globalParameter.getRef(), p);
+        });
         // 任务输出参数加入上下文
         Map<String, String> outParams = new HashMap<>();
         instanceParameters.forEach(instanceParameter -> {

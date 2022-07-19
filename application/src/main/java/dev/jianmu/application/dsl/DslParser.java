@@ -136,17 +136,17 @@ public class DslParser {
                 symbolTable.put(dslNode.getName(), end);
                 return;
             }
-            if (dslNode.getType().equals("condition")) {
-                var branches = dslNode.getBranches();
-                var condition = Condition.Builder.aCondition()
-                        .name(dslNode.getName())
-                        .ref(dslNode.getName())
-                        .expression(dslNode.getExpression())
-                        .branches(branches)
-                        .build();
-                symbolTable.put(dslNode.getName(), condition);
-                return;
-            }
+//            if (dslNode.getType().equals("condition")) {
+//                var branches = dslNode.getBranches();
+//                var condition = Condition.Builder.aCondition()
+//                        .name(dslNode.getName())
+//                        .ref(dslNode.getName())
+//                        .expression(dslNode.getExpression())
+//                        .branches(branches)
+//                        .build();
+//                symbolTable.put(dslNode.getName(), condition);
+//                return;
+//            }
             AsyncTask task;
             if (dslNode.getImage() != null) {
                 // 创建Shell Node类型的任务节点
@@ -179,7 +179,8 @@ public class DslParser {
             });
         });
 
-        // TODO 环路检测
+        // 环路检测
+        this.checkWorkflowCircle();
 
         return new HashSet<>(symbolTable.values());
 
@@ -263,28 +264,92 @@ public class DslParser {
 //        return nodes;
     }
 
-    private void createGlobalParameters(Object globalParam) {
-        if (globalParam instanceof Map) {
-            this.globalParameters = ((Map<String, Object>) globalParam).entrySet().stream()
-                    .filter(entry -> entry.getValue() != null)
-                    .map(entry -> {
-                        String type = null;
-                        String value = null;
-                        if (entry.getValue() instanceof String) {
-                            value = entry.getValue().toString();
-                            type = "STRING";
-                        }
-                        if (entry.getValue() instanceof Map) {
-                            value = (String) ((Map<?, ?>) entry.getValue()).get("value");
-                            type = ((Map<String, String>) entry.getValue()).get("type");
-                        }
-                        return GlobalParameter.Builder.aGlobalParameter()
-                                .name(entry.getKey())
-                                .type(type)
-                                .value(value)
-                                .build();
-                    }).collect(Collectors.toSet());
+    /**
+     * 初始化环路检测
+     */
+    private void checkWorkflowCircle() {
+        var endNodeOptional = symbolTable.values().stream()
+                .filter(node -> node.getType().equals(End.class.getSimpleName())).findFirst();
+        if (endNodeOptional.isEmpty()) {
+            return;
         }
+        var endNode = endNodeOptional.get();
+        var lineNodeMap = new HashMap<String, Node>();
+        lineNodeMap.put(endNode.getRef(), endNode);
+        var lines = new ArrayList<Map<String, Node>>();
+        lines.add(lineNodeMap);
+
+        this.checkWorkflowCircle(endNode, lineNodeMap, lines);
+    }
+
+    /**
+     * 环路检测
+     */
+    private void checkWorkflowCircle(Node node, Map<String, Node> lineNodeMap, List<Map<String, Node>> lines) {
+        var sources = node.getSources();
+        if (sources.isEmpty()) {
+            return;
+        }
+        // 移除的目的是基于sources个数复制多个
+        lines.remove(lineNodeMap);
+
+        for (var source : node.getSources()) {
+            if (lineNodeMap.containsKey(source)) {
+                List<Node> circleNodes = new ArrayList<>();
+                circleNodes.add(node);
+
+                var tempNode = node;
+                while (true) {
+                    var targets = tempNode.getTargets().stream()
+                            .filter(lineNodeMap::containsKey)
+                            .map(lineNodeMap::get)
+                            // 过滤掉结束节点
+                            .filter(n -> !n.getType().equals(End.class.getSimpleName()))
+                            .collect(Collectors.toList());
+
+                    if (targets.contains(node)) {
+                        break;
+                    }
+
+                    tempNode = targets.get(0);
+                    circleNodes.add(tempNode);
+                }
+
+                // 表示环路，报错
+                throw new RuntimeException("不允许环路编排：" + circleNodes
+                        .stream()
+                        .map(Node::getRef)
+                        .collect(Collectors.toList()));
+            }
+            var sourceNode = symbolTable.get(source);
+            var sourceLineNodeMap = new HashMap<>(lineNodeMap);
+            sourceLineNodeMap.put(sourceNode.getRef(), sourceNode);
+            lines.add(sourceLineNodeMap);
+
+            this.checkWorkflowCircle(sourceNode, sourceLineNodeMap, lines);
+        }
+    }
+
+    private void createGlobalParameters(Object globalParam) {
+        if (!(globalParam instanceof List)) {
+            return;
+        }
+        this.globalParameters = ((List<Object>) globalParam).stream()
+                .filter(paramObj -> paramObj instanceof Map)
+                .map(paramObj -> {
+                    var map = (Map<String, Object>) paramObj;
+                    var ref = map.get("ref").toString();
+                    var name = map.get("name");
+                    var type = map.get("type");
+                    var required = (Boolean) map.get("required");
+                    return GlobalParameter.Builder.aGlobalParameter()
+                            .ref(ref)
+                            .name(name == null ? ref : name.toString())
+                            .type(type == null ? Parameter.Type.STRING.name() : type.toString())
+                            .value(map.get("value"))
+                            .required(required != null && required)
+                            .build();
+                }).collect(Collectors.toSet());
     }
 
     private void createGlobal() {
@@ -564,17 +629,28 @@ public class DslParser {
 
     private void globalParamSyntaxCheck() {
         var globalParam = this.global.get("param");
-        if (globalParam instanceof Map) {
-            ((Map<String, Object>) globalParam).forEach((k, v) -> {
-                if (v instanceof Map) {
-                    var type = ((Map<String, String>) v).get("type");
-                    var p = Parameter.Type.getTypeByName(type);
-                    if (Parameter.Type.SECRET == p) {
-                        throw new DslException("全局参数不支持使用SECRET类型");
-                    }
-                }
-            });
+        if (!(globalParam instanceof List)) {
+            return;
         }
+        ((List<Object>) globalParam).stream()
+                .filter(paramObj -> paramObj instanceof Map)
+                .forEach(paramObj -> {
+                    var map = (Map<String, Object>) paramObj;
+                    var ref = map.get("ref");
+                    var typeObj = map.get("type");
+                    if (ref == null) {
+                        throw new DslException("全局参数未定义ref");
+                    }
+                    if (typeObj != null) {
+                        var type = Parameter.Type.getTypeByName(typeObj.toString());
+                        if (type == Parameter.Type.SECRET) {
+                            throw new DslException("全局参数不支持使用SECRET类型");
+                        }
+                    }
+                    if (map.get("value") == null) {
+                        throw new DslException("全局参数 " + ref + " 未定义value");
+                    }
+                });
     }
 
     private void pipelineSyntaxCheck() {
@@ -637,10 +713,10 @@ public class DslParser {
             this.checkEnd(node);
             return;
         }
-        if (type.equals("condition")) {
-            this.checkCondition(node);
-            return;
-        }
+//        if (type.equals("condition")) {
+//            this.checkCondition(node);
+//            return;
+//        }
         // 验证保留关键字
         if (nodeName.equals("event")) {
             throw new DslException("节点名称不能使用event");
@@ -731,7 +807,7 @@ public class DslParser {
                 .map(DslNode::getType)
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
-                .filter(type -> !type.equals("condition"))
+//                .filter(type -> !type.equals("condition"))
                 .filter(type -> !type.startsWith("shell:"))
                 .map(type -> {
                     String[] strings = type.split(":");

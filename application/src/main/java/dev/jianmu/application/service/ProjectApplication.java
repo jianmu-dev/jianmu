@@ -168,38 +168,6 @@ public class ProjectApplication {
                 .build();
     }
 
-    // 并发流程实例
-    private void concurrentWorkflowInstance(String workflowRef) {
-        var project = this.projectRepository.findByWorkflowRef(workflowRef)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
-        var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
-                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
-        if (project.isConcurrent()) {
-            this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
-                    .forEach(workflowInstance -> {
-                        workflowInstance.createVolume();
-                        projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
-                        this.workflowInstanceRepository.save(workflowInstance);
-                        this.projectLastExecutionRepository.update(projectLastExecution);
-                    });
-            return;
-        }
-        // 检查是否存在运行中的流程
-        int i = this.workflowInstanceRepository
-                .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
-                .size();
-        if (i > 0) {
-            return;
-        }
-        this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
-                .ifPresent(workflowInstance -> {
-                    workflowInstance.createVolume();
-                    projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
-                    this.workflowInstanceRepository.save(workflowInstance);
-                    this.projectLastExecutionRepository.update(projectLastExecution);
-                });
-    }
-
     @Transactional
     public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch) {
         // 解析DSL,语法检查
@@ -252,7 +220,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType) {
+    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         if (username != null) {
@@ -268,7 +236,7 @@ public class ProjectApplication {
         var parser = DslParser.parse(dslText);
         var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
         if (project.getDslText().equals(dslText)) {
-            return;
+            return false;
         }
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
@@ -289,9 +257,8 @@ public class ProjectApplication {
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
-        if (!concurrent && project.isConcurrent()) {
-            this.concurrentWorkflowInstance(workflow.getRef());
-        }
+        // 返回是否并发执行流程实例
+        return !concurrent && project.isConcurrent();
     }
 
     // 校验项目增删改查权限

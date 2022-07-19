@@ -7,9 +7,11 @@ package dev.jianmu.workflow.aggregate.definition;
  * @create 2021-09-04 16:43
 */
 public class GlobalParameter {
+    private String ref;
     private String name;
     private String type;
-    private String value;
+    private Object value;
+    private Boolean required;
 
     public String getName() {
         return name;
@@ -19,20 +21,35 @@ public class GlobalParameter {
         return type;
     }
 
-    public String getValue() {
+    public String getRef() {
+        return ref;
+    }
+
+    public Object getValue() {
         return value;
     }
 
+    public Boolean getRequired() {
+        return required;
+    }
+
     public static final class Builder {
+        private String ref;
         private String name;
         private String type;
-        private String value;
+        private Object value;
+        private Boolean required;
 
         private Builder() {
         }
 
         public static Builder aGlobalParameter() {
             return new Builder();
+        }
+
+        public Builder ref(String ref) {
+            this.ref = ref;
+            return this;
         }
 
         public Builder name(String name) {
@@ -45,16 +62,23 @@ public class GlobalParameter {
             return this;
         }
 
-        public Builder value(String value) {
+        public Builder value(Object value) {
             this.value = value;
+            return this;
+        }
+
+        public Builder required(Boolean required) {
+            this.required = required;
             return this;
         }
 
         public GlobalParameter build() {
             GlobalParameter globalParameter = new GlobalParameter();
+            globalParameter.ref = this.ref;
             globalParameter.value = this.value;
             globalParameter.type = this.type;
             globalParameter.name = this.name;
+            globalParameter.required = this.required;
             return globalParameter;
         }
     }
