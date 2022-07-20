@@ -5,7 +5,7 @@
         <router-link :to="{name:'index'}" @click="currentTab=0" class="tab-item">
           流水线
         </router-link>
-        <router-link :to="{name:'login'}" @click="currentTab=1" class="tab-item">
+        <router-link :to="{name:'ext-param'}" @click="currentTab=1" class="tab-item">
           外部参数
         </router-link>
         <router-link :to="{name:'secret-key'}" @click="currentTab=2" class="tab-item">
@@ -26,7 +26,7 @@
     </div>
     <div class="content">
       <router-view v-slot="{ Component }">
-        <jm-scrollbar :max-height="'calc(100vh - 98px)'" ref="scrollBarRef">
+        <jm-scrollbar :max-height="'calc(100vh - 96px)'" ref="scrollBarRef">
           <component :is="Component" :keyword="key" v-model="flag" v-model:create-type="creatType"/>
         </jm-scrollbar>
       </router-view>
@@ -138,6 +138,7 @@ export default defineComponent({
 
         ::v-deep(.el-input__inner) {
           border-color: #D0D0D0;
+          border-radius: 4px;
         }
       }
 
@@ -154,7 +155,11 @@ export default defineComponent({
           width: 97px;
           height: 32px;
           color: #333333;
-          border: 1px solid #D0D0D0;
+          border: 1px solid transparent;
+          border-radius: 4px;
+          &:nth-child(1){
+            border: 1px solid #D0D0D0;
+          }
 
           &.jm-icon-button-add::before {
             font-size: 8px;

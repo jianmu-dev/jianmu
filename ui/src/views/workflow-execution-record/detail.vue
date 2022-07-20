@@ -111,6 +111,7 @@
 import { computed, defineComponent, getCurrentInstance, inject, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/workflow-execution-record';
+import { namespace as sessionNs } from '@/store/modules/session';
 import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { TaskStatusEnum, TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
@@ -139,6 +140,8 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
+    const entry=store.state.entry;
+    const entryUrl=store.state[sessionNs].session.entryUrl;
     const rootState = store.state as IRootState;
     const state = store.state[namespace] as IState;
     const loading = ref<boolean>(false);
@@ -371,8 +374,12 @@ export default defineComponent({
           });
       },
       goBack() {
-        const { fullPath } = rootState.fromRoute;
-        router.push(fullPath);
+        if(!entry){
+          const { fullPath } = rootState.fromRoute;
+          router.push(fullPath);
+          return;
+        }
+        window.location.href=entryUrl;
       },
     };
   },
