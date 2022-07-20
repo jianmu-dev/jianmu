@@ -41,7 +41,7 @@ import { Graph, Node } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
 import { ISelectableParam } from '../workflow-expression-editor/model/data';
-import { buildSelectableGlobalParam } from './model/data/global-param';
+import { buildSelectableExtParam, buildSelectableGlobalParam } from './model/data/global-param';
 
 // 注册自定义x6元素
 registerCustomVueShape();
@@ -70,6 +70,7 @@ export default defineComponent({
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
     provide('buildSelectableGlobalParam', (): ISelectableParam | undefined => buildSelectableGlobalParam(workflowData.value.global.params));
+    provide('buildSelectableExtParam', (): Promise<ISelectableParam | undefined> => buildSelectableExtParam());
     const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
       nodeConfigPanelVisible.value = true;
       selectedNodeId.value = nodeId;
