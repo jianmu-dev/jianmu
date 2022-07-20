@@ -39,10 +39,11 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
+    const entry = store.state.entry;
     const { session: { gitRepo, gitRepoOwner } } = store.state[namespace] as IState;
     // 如果页面嵌入在iframe里面，localstorage中session存在直接进入首页，condition防止参数被串改
     const condition =
-      (window.top !== window) && (store.state[namespace].session)
+      entry && (store.state[namespace].session)
       && (gitRepo === props.gitRepo && gitRepoOwner === props.gitRepoOwner);
     if (condition) {
       router.push({ name: 'index' });
