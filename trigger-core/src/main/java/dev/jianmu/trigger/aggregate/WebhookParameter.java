@@ -13,6 +13,10 @@ public class WebhookParameter {
     private Object value;
     private Boolean required = false;
 
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
     public Boolean getRequired() {
         return required;
     }

@@ -5,6 +5,7 @@ import dev.jianmu.application.command.NextNodeCmd;
 import dev.jianmu.application.command.SkipNodeCmd;
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.project.repository.ProjectRepository;
@@ -96,7 +97,7 @@ public class WorkflowInternalApplication {
         var context = new ElContext();
         // 外部参数加入上下文
         this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
-                .forEach(extParam -> context.add("ext", extParam.getRef(), Parameter.Type.getTypeByName(extParam.getType().name()).newParameter(extParam.getValue())));
+                .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
                 .map(eventParameter -> Map.entry(eventParameter.getRef(), eventParameter.getParameterId()))

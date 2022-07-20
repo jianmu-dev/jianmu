@@ -2,6 +2,7 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.infrastructure.GlobalProperties;
@@ -13,7 +14,6 @@ import dev.jianmu.trigger.event.TriggerFailedEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
-import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.el.ExpressionLanguage;
@@ -131,7 +131,7 @@ public class WorkflowInstanceInternalApplication {
         var context = new ElContext();
         // 外部参数加入上下文
         this.externalParameterRepository.findAll(associationId, associationTYpe)
-                .forEach(extParam -> context.add("ext", extParam.getRef(), Parameter.Type.getTypeByName(extParam.getType().name()).newParameter(extParam.getValue())));
+                .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
                 .map(eventParameter -> Map.entry(eventParameter.getRef(), eventParameter.getParameterId()))
