@@ -105,6 +105,7 @@ export default {
       commit('mutate', { session, loginForm });
     },
     async oauthLogin({ commit }: ActionContext<IState, IRootState>, payload: IOauth2LoggingDto): Promise<void> {
+      commit('mutateDeletion');
       const session = (payload.gitRepo && payload.gitRepoOwner) ? await authLogin({
         code: payload.code,
         thirdPartyType: payload.thirdPartyType,

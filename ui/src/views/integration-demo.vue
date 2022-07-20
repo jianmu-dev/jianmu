@@ -13,10 +13,12 @@
       <div>
         <jm-form ref="formRef" :inline="true" :model="form" :rules="rules" @submit.prevent>
           <jm-form-item label="owner:" prop="owner">
-            <jm-input v-model="form.owner" size="small" clearable placeholder="如，jianmu-dev"/>
+            <jm-input v-model="form.owner" @focus="iframeVisible=false" size="small" clearable
+                      placeholder="如，jianmu-dev"/>
           </jm-form-item>
           <jm-form-item label="repo:" prop="repo">
-            <jm-input v-model="form.repo" size="small" clearable placeholder="如，jianmu-ci-server"/>
+            <jm-input v-model="form.repo" @focus="iframeVisible=false" size="small" clearable
+                      placeholder="如，jianmu-ci-server"/>
           </jm-form-item>
           <jm-form-item>
             <jm-button type="primary" size="small" @click="confirm">确定</jm-button>
