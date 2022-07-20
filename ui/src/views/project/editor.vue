@@ -396,7 +396,7 @@ export default defineComponent({
   }
 
   .dsl-editor {
-    height: calc(100vh - 224px);
+    height: calc(100vh - 118px);
     padding: 20px;
     border-radius: 2px;
     border: 1px solid #EAEEF2;
