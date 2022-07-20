@@ -22,5 +22,5 @@ public interface ExternalParameterRepository {
 
     List<ExternalParameter> findAll(String id, String type);
 
-    Optional<ExternalParameter> findByRef(String ref);
+    Optional<ExternalParameter> findByRef(String ref, String associationId, String associationType);
 }

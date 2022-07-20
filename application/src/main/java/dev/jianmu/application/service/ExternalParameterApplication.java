@@ -29,7 +29,7 @@ public class ExternalParameterApplication {
 
     @Transactional
     public void create(String name, ExternalParameter.Type type, String ref, String label, String value, String associationId, String associationType) {
-        if (this.externalParameterRepository.findByRef(ref).isPresent()) {
+        if (this.externalParameterRepository.findByRef(ref, associationId, associationType).isPresent()) {
             throw new ExternalParameterRepeatException("外部参数唯一标识重复");
         }
 
