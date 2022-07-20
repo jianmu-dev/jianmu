@@ -6,6 +6,8 @@ import dev.jianmu.application.command.SkipNodeCmd;
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
+import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
@@ -52,6 +54,9 @@ public class WorkflowInternalApplication {
     private final TriggerEventRepository triggerEventRepository;
     private final ParameterRepository parameterRepository;
     private final WorkflowDomainService workflowDomainService = new WorkflowDomainService();
+    private final ExternalParameterRepository externalParameterRepository;
+    private final ProjectRepository projectRepository;
+
     @Resource
     private ApplicationEventPublisher publisher;
 
@@ -63,8 +68,9 @@ public class WorkflowInternalApplication {
             InstanceParameterRepository instanceParameterRepository,
             ParameterDomainService parameterDomainService,
             TriggerEventRepository triggerEventRepository,
-            ParameterRepository parameterRepository
-    ) {
+            ParameterRepository parameterRepository,
+            ExternalParameterRepository externalParameterRepository,
+            ProjectRepository projectRepository) {
         this.workflowRepository = workflowRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
@@ -73,9 +79,13 @@ public class WorkflowInternalApplication {
         this.parameterDomainService = parameterDomainService;
         this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
+        this.externalParameterRepository = externalParameterRepository;
+        this.projectRepository = projectRepository;
     }
 
     private EvaluationContext findContext(Workflow workflow, String triggerId) {
+        var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：ref" + workflow.getRef()));
         // 查询参数源
         var eventParameters = this.triggerEventRepository.findById(triggerId)
                 .map(TriggerEvent::getParameters)
@@ -84,6 +94,9 @@ public class WorkflowInternalApplication {
                 .findLastOutputParamByTriggerId(triggerId);
         // 创建表达式上下文
         var context = new ElContext();
+        // 外部参数加入上下文
+        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
+                .forEach(extParam -> context.add("ext", extParam.getRef(), Parameter.Type.getTypeByName(extParam.getType().name()).newParameter(extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
                 .map(eventParameter -> Map.entry(eventParameter.getRef(), eventParameter.getParameterId()))

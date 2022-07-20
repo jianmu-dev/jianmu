@@ -8,9 +8,11 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
+import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.NodeInfo;
@@ -22,7 +24,6 @@ import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
-import dev.jianmu.workflow.el.ResultType;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -57,6 +58,9 @@ public class TaskInstanceInternalApplication {
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final MonitoringFileService monitoringFileService;
     private final DeferredResultService deferredResultService;
+    private final ExternalParameterRepository externalParameterRepository;
+    private final ProjectRepository projectRepository;
+
 
     public TaskInstanceInternalApplication(
             TaskInstanceRepository taskInstanceRepository,
@@ -70,7 +74,9 @@ public class TaskInstanceInternalApplication {
             ExpressionLanguage expressionLanguage,
             WorkflowInstanceRepository workflowInstanceRepository,
             MonitoringFileService monitoringFileService,
-            DeferredResultService deferredResultService) {
+            DeferredResultService deferredResultService,
+            ExternalParameterRepository externalParameterRepository,
+            ProjectRepository projectRepository) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.workflowRepository = workflowRepository;
         this.instanceDomainService = instanceDomainService;
@@ -83,6 +89,8 @@ public class TaskInstanceInternalApplication {
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.monitoringFileService = monitoringFileService;
         this.deferredResultService = deferredResultService;
+        this.externalParameterRepository = externalParameterRepository;
+        this.projectRepository = projectRepository;
     }
 
     public List<TaskInstance> findRunningTask() {
@@ -93,6 +101,8 @@ public class TaskInstanceInternalApplication {
     public void create(TaskActivatingCmd cmd) {
         var workflow = this.workflowRepository.findByRefAndVersion(cmd.getWorkflowRef(), cmd.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义: " + cmd.getWorkflowRef()));
+        var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：ref" + workflow.getRef()));
         var asyncTask = workflow.findNode(cmd.getNodeRef());
         var nodeDef = this.nodeDefApi.getByType(asyncTask.getType());
         // 创建任务实例
@@ -131,6 +141,9 @@ public class TaskInstanceInternalApplication {
                 .findLastOutputParamByTriggerId(cmd.getTriggerId());
         // 创建表达式上下文
         var context = new ElContext();
+        // 外部参数加入上下文
+        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
+                .forEach(extParam -> context.add("ext", extParam.getRef(), Parameter.Type.getTypeByName(extParam.getType().name()).newParameter(extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
                 .map(eventParameter -> Map.entry(eventParameter.getRef(), eventParameter.getParameterId()))
