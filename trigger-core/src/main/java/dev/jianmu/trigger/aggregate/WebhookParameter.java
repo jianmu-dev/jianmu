@@ -7,12 +7,13 @@ package dev.jianmu.trigger.aggregate;
  * @create 2021-11-10 11:26
  */
 public class WebhookParameter {
+    private String ref;
     private String name;
     private String type;
-    private String exp;
+    private Object value;
     private Boolean required = false;
 
-    public boolean isRequired() {
+    public Boolean getRequired() {
         return required;
     }
 
@@ -24,14 +25,19 @@ public class WebhookParameter {
         return type;
     }
 
-    public String getExp() {
-        return exp;
+    public String getRef() {
+        return ref;
+    }
+
+    public Object getValue() {
+        return value;
     }
 
     public static final class Builder {
+        private String ref;
         private String name;
         private String type;
-        private String exp;
+        private Object value;
         private Boolean required;
 
         private Builder() {
@@ -39,6 +45,11 @@ public class WebhookParameter {
 
         public static Builder aWebhookParameter() {
             return new Builder();
+        }
+
+        public Builder ref(String ref) {
+            this.ref = ref;
+            return this;
         }
 
         public Builder name(String name) {
@@ -51,8 +62,8 @@ public class WebhookParameter {
             return this;
         }
 
-        public Builder exp(String exp) {
-            this.exp = exp;
+        public Builder value(Object value) {
+            this.value = value;
             return this;
         }
 
@@ -63,9 +74,10 @@ public class WebhookParameter {
 
         public WebhookParameter build() {
             WebhookParameter webhookParameter = new WebhookParameter();
+            webhookParameter.ref = this.ref;
             webhookParameter.type = this.type;
             webhookParameter.name = this.name;
-            webhookParameter.exp = this.exp;
+            webhookParameter.value = this.value;
             webhookParameter.required = this.required;
             return webhookParameter;
         }
@@ -74,9 +86,10 @@ public class WebhookParameter {
     @Override
     public String toString() {
         return "WebhookParameter{" +
-                "name='" + name + '\'' +
+                "ref='" + ref + '\'' +
+                ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
-                ", exp='" + exp + '\'' +
+                ", value='" + value + '\'' +
                 ", required=" + required +
                 '}';
     }

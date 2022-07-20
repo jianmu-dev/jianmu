@@ -2,7 +2,6 @@ package dev.jianmu.application.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.application.dsl.webhook.DslWebhookParameter;
 import dev.jianmu.application.service.vo.WebhookPayload;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
@@ -352,8 +351,8 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
-                if (value == null && webhookParameter.isRequired()) {
+                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getName(), webhookParameter.getValue().toString(), webhookParameter.getType());
+                if (value == null && webhookParameter.getRequired()) {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     newWebRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
                     this.webRequestRepositoryImpl.add(newWebRequest);
@@ -366,9 +365,11 @@ public class TriggerApplication {
                         .getTypeByName(webhookParameter.getType())
                         .newParameter(value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                        .ref(webhookParameter.getRef())
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
                         .value(parameter.getStringValue())
+                        .required(webhookParameter.getRequired())
                         .parameterId(parameter.getId())
                         .build();
                 parameters.add(parameter);
@@ -449,8 +450,8 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
-                if (value == null && webhookParameter.isRequired()) {
+                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getValue().toString(), webhookParameter.getType());
+                if (value == null && webhookParameter.getRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
                     this.webRequestRepositoryImpl.add(webRequest);
@@ -463,9 +464,11 @@ public class TriggerApplication {
                         .getTypeByName(webhookParameter.getType())
                         .newParameter(value);
                 var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                        .ref(webhookParameter.getRef())
                         .name(webhookParameter.getName())
                         .type(webhookParameter.getType())
                         .value(parameter.getStringValue())
+                        .required(webhookParameter.getRequired())
                         .parameterId(parameter.getId())
                         .build();
                 parameters.add(parameter);
@@ -670,12 +673,20 @@ public class TriggerApplication {
         if (ObjectUtils.isEmpty(webRequest.getPayload())) {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
-        var parameters = new ArrayList<DslWebhookParameter>();
-        for (DslWebhookParameter webhookParameter : trigger.getParam()) {
-            var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getExp(), webhookParameter.getType());
-            webhookParameter.setValue(value);
+        var parameters = new ArrayList<WebhookParameter>();
+        for (WebhookParameter webhookParameter : trigger.getParam()) {
+            var name = webhookParameter.getName() == null ? webhookParameter.getRef() : webhookParameter.getName();
+            var type = webhookParameter.getType() == null ? Parameter.Type.STRING.name() : webhookParameter.getType();
+            var value = this.extractParameter(webRequest.getPayload(), name, webhookParameter.getValue().toString(), type);
+            var newParam = WebhookParameter.Builder.aWebhookParameter()
+                    .ref(webhookParameter.getRef())
+                    .name(name)
+                    .value(value)
+                    .type(type)
+                    .required(webhookParameter.getRequired() != null && webhookParameter.getRequired())
+                    .build();
             if (value != null) {
-                parameters.add(webhookParameter);
+                parameters.add(newParam);
             }
         }
         trigger.setParam(parameters);

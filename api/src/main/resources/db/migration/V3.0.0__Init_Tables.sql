@@ -73,9 +73,11 @@ CREATE TABLE `jm_trigger_event`
 CREATE TABLE `jm_trigger_event_parameter`
 (
     `trigger_event_id` varchar(45) NOT NULL COMMENT '触发器事件ID',
+    `ref`              varchar(45) NOT NULL COMMENT '唯一引用名称',
     `name`             varchar(45) NOT NULL COMMENT '参数名',
     `type`             varchar(45) NOT NULL COMMENT '参数类型',
     `value`            text        NOT NULL COMMENT '参数值',
+    `required`         bit         NOT NULL COMMENT '是否必填',
     `parameter_id`     varchar(45) NOT NULL COMMENT '参数引用ID'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
@@ -148,7 +150,7 @@ CREATE TABLE `jm_workflow_instance`
     `status`            varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '运行状态',
     `workflow_ref`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义唯一引用名称',
     `workflow_version`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义版本',
-    `global_parameters` blob                                                                   COMMENT '全局参数列表',
+    `global_parameters` blob COMMENT '全局参数列表',
     `start_time`        datetime                                                      DEFAULT NULL COMMENT '开始时间',
     `suspended_time`    datetime                                                      DEFAULT NULL COMMENT '挂起时间',
     `end_time`          datetime                                                      DEFAULT NULL COMMENT '结束时间',

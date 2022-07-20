@@ -127,7 +127,7 @@ public class WorkflowInstanceInternalApplication {
         var context = new ElContext();
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
-                .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))
+                .map(eventParameter -> Map.entry(eventParameter.getRef(), eventParameter.getParameterId()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
