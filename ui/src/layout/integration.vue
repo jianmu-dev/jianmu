@@ -125,7 +125,8 @@ export default defineComponent({
         margin-right: 40px;
 
         &.router-link-exact-active, &:hover {
-          color: #466AFF;
+          //color: #466AFF;
+          color: #096DD9;
         }
       }
     }
@@ -177,7 +178,8 @@ export default defineComponent({
 
         .graph-assembly-line {
           color: #FFFFFF;
-          background-color: #466AFF;
+          //background-color: #466AFF;
+          background-color: #096DD9;
         }
       }
     }
@@ -218,8 +220,9 @@ export default defineComponent({
     ::v-deep(.project-editor) {
       margin-bottom: 0;
     }
+
     // 外部参数页面
-    ::v-deep(.ext-param){
+    ::v-deep(.ext-param) {
       padding: 20px 0;
     }
   }
