@@ -556,7 +556,7 @@ public class ViewController {
     @GetMapping("/external_parameters/labels")
     @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
     public List<ExternalParameterLabelVo> findAllLabels() {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var repoId = this.getRepoId();
         var type = this.associationUtil.getAssociationType();
         List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(repoId, type);
         ArrayList<ExternalParameterLabelVo> externalParameterLabelVos = new ArrayList<>();
@@ -589,7 +589,7 @@ public class ViewController {
     @GetMapping("/external_parameters")
     @Operation(summary = "获取外部参数列表", description = "获取外部参数列表")
     public List<ExternalParameterVo> findAllExternalParameters() {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var repoId = this.getRepoId();
         var type = this.associationUtil.getAssociationType();
         List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(repoId, type);
         ArrayList<ExternalParameterVo> externalParameterVos = new ArrayList<>();
