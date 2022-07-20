@@ -7,6 +7,7 @@ import dev.jianmu.application.command.TaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
@@ -143,7 +144,7 @@ public class TaskInstanceInternalApplication {
         var context = new ElContext();
         // 外部参数加入上下文
         this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
-                .forEach(extParam -> context.add("ext", extParam.getRef(), Parameter.Type.getTypeByName(extParam.getType().name()).newParameter(extParam.getValue())));
+                .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
                 .map(eventParameter -> Map.entry(eventParameter.getRef(), eventParameter.getParameterId()))

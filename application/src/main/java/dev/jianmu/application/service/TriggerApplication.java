@@ -5,10 +5,13 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.service.vo.WebhookPayload;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
 import dev.jianmu.infrastructure.quartz.PublishJob;
 import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -71,6 +74,7 @@ public class TriggerApplication {
     // 表达式计算服务
     private final ExpressionLanguage expressionLanguage;
     private final StorageService storageService;
+    private final ExternalParameterRepository externalParameterRepository;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -84,7 +88,8 @@ public class TriggerApplication {
             ApplicationEventPublisher publisher,
             ObjectMapper objectMapper,
             ExpressionLanguage expressionLanguage,
-            StorageService storageService) {
+            StorageService storageService,
+            ExternalParameterRepository externalParameterRepository) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
@@ -97,6 +102,7 @@ public class TriggerApplication {
         this.objectMapper = objectMapper;
         this.expressionLanguage = expressionLanguage;
         this.storageService = storageService;
+        this.externalParameterRepository = externalParameterRepository;
     }
 
     private static String decode(final String encoded) {
@@ -351,7 +357,7 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter.getName(), webhookParameter.getValue().toString(), webhookParameter.getType());
+                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter, project);
                 if (value == null && webhookParameter.getRequired()) {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     newWebRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
@@ -450,7 +456,7 @@ public class TriggerApplication {
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
             for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getName(), webhookParameter.getValue().toString(), webhookParameter.getType());
+                var value = this.extractParameter(webRequest.getPayload(), webhookParameter, project);
                 if (value == null && webhookParameter.getRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
@@ -558,19 +564,21 @@ public class TriggerApplication {
         return evaluationResult.getValue();
     }
 
-    private Object extractParameter(String payload, String name, String exp, String webhookType) {
+    private Object extractParameter(String payload, WebhookParameter webhookParameter, Project project) {
         try {
             var webhookPayload = this.objectMapper.readValue(payload, WebhookPayload.class);
             // 创建表达式上下文
             var context = new ElContext();
+            // 外部参数加入上下文
+            this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
+                    .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
             context.add("header", webhookPayload.getHeader());
             context.add("body", webhookPayload.getBody());
             context.add("query", webhookPayload.getQuery());
-            var type = Parameter.Type.getTypeByName(webhookType);
-            var expression = this.expressionLanguage.parseExpression(exp, ResultType.valueOf(webhookType));
+            var expression = this.expressionLanguage.parseExpression(webhookParameter.getValue().toString(), ResultType.valueOf(webhookParameter.getType()));
             var result = this.expressionLanguage.evaluateExpression(expression, context);
             if (result.isFailure()) {
-                log.warn("触发器参数: {} 表达式: {} 计算错误: {}", name, expression.getExpression(), result.getFailureMessage());
+                log.warn("触发器参数: {} 表达式: {} 计算错误: {}", webhookParameter.getRef(), expression.getExpression(), result.getFailureMessage());
                 return null;
             }
             return result.getValue().getValue();
@@ -666,6 +674,8 @@ public class TriggerApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(), webRequest.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         dev.jianmu.application.dsl.webhook.Webhook trigger = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
         if (trigger.getParam() == null) {
             return trigger;
@@ -677,15 +687,16 @@ public class TriggerApplication {
         for (WebhookParameter webhookParameter : trigger.getParam()) {
             var name = webhookParameter.getName() == null ? webhookParameter.getRef() : webhookParameter.getName();
             var type = webhookParameter.getType() == null ? Parameter.Type.STRING.name() : webhookParameter.getType();
-            var value = this.extractParameter(webRequest.getPayload(), name, webhookParameter.getValue().toString(), type);
             var newParam = WebhookParameter.Builder.aWebhookParameter()
                     .ref(webhookParameter.getRef())
                     .name(name)
-                    .value(value)
+                    .value(webhookParameter.getValue())
                     .type(type)
                     .required(webhookParameter.getRequired() != null && webhookParameter.getRequired())
                     .build();
+            var value = this.extractParameter(webRequest.getPayload(), newParam, project);
             if (value != null) {
+                newParam.setValue(value);
                 parameters.add(newParam);
             }
         }
