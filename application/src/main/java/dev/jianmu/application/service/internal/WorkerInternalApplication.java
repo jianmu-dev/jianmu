@@ -161,12 +161,12 @@ public class WorkerInternalApplication {
                             throw new RuntimeException("未找到该流程的tag");
                         }
                         var workers = this.checkOldVersionOfWorkflowTag(workflowInstance) ?
-                                this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
-                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                        workerTag, workflowInstance.getStartTime()) :
                                 this.workerRepository.findByTypeInAndCreatedTimeLessThan(
                                         List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                        workflowInstance.getStartTime());
+                                        workflowInstance.getStartTime())  :
+                                this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workerTag, workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
                             throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
