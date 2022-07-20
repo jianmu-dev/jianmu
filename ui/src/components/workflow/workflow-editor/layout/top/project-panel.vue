@@ -14,7 +14,7 @@
         <jm-form-item label="项目名称" prop="name" class="name-item">
           <jm-input v-model="projectInfoForm.name" :maxlength="45" placeholder="请输入项目名称" :show-word-limit="true"/>
         </jm-form-item>
-        <jm-form-item label="项目分组" class="group-item" prop="groupId">
+        <jm-form-item label="项目分组" class="group-item" prop="groupId" v-if="isShowGrouping">
           <jm-select v-model="projectInfoForm.groupId" placeholder="请选择项目分组" v-loading="loading">
             <jm-option
               v-for="item in projectGroupList"
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
 import { IWorkflow } from '../../model/data/common';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
@@ -63,6 +63,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const loading = ref<boolean>(true);
     const workflowForm = ref<IWorkflow>(props.workflowData);
+    const isShowGrouping = computed<boolean>(() => !props.workflowData.association.entry);
     const projectInfoForm = ref<IProjectInfo>({
       name: props.workflowData.name,
       description: props.workflowData.description || '',
@@ -79,6 +80,7 @@ export default defineComponent({
     });
 
     return {
+      isShowGrouping,
       editProjectInfoRef,
       projectGroupList,
       projectInfoForm,

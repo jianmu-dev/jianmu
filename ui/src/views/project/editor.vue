@@ -83,9 +83,11 @@ export default defineComponent({
     const route = useRoute();
     // 项目分支信息
     const branches = ref<IGitRepoBranchVo[]>([]);
-    const editMode = !!props.id;
+    const editMode = computed<boolean>(() => !!props.id);
+    // 项目id
+    const projectId = computed<string>(() => props.id);
     const editorForm = ref<ISaveForm>({
-      id: props.id,
+      id: projectId,
       branch: props.branch,
       dslText: '',
       projectGroupId: '',
@@ -124,7 +126,7 @@ export default defineComponent({
       }
       // 请求项目组列表
       projectGroupList.value = await listProjectGroup();
-      if (editMode) {
+      if (editMode.value) {
         return;
       }
       const defaultGroup = projectGroupList.value.find(item => item.isDefaultGroup);
@@ -157,7 +159,7 @@ export default defineComponent({
       }"\n\nworkflow:\n`;
     }
 
-    if (editMode) {
+    if (editMode.value) {
       loading.value = !loading.value;
       fetchProjectDetail(props.id)
         .then(async ({ dslText, projectGroupId, branch }) => {
@@ -167,6 +169,7 @@ export default defineComponent({
             const { name, global, description } = yaml.parse(dslText);
             const payload = {
               name,
+              branch,
               groupId: projectGroupId,
               description,
               global: {
@@ -236,7 +239,7 @@ export default defineComponent({
             // 关闭loading
             loading.value = false;
 
-            proxy.$success(editMode ? '保存成功' : '新增成功');
+            proxy.$success(editMode.value ? '保存成功' : '新增成功');
 
             if (returnFlag) {
               close();
@@ -244,7 +247,7 @@ export default defineComponent({
               return;
             }
 
-            if (!editMode) {
+            if (!editMode.value) {
               await router.push({ name: 'update-project', params: { id } });
               reloadMain();
 

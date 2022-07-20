@@ -14,7 +14,7 @@ import {
 export interface IProjectSavingDto
   extends Readonly<{
     id?: string;
-    branch: string;
+    branch?: string;
     dslText: string;
     projectGroupId?: string;
   }> {

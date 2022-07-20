@@ -6,7 +6,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  getCurrentInstance,
+  inject,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  ref,
+} from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
 import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
@@ -18,11 +28,16 @@ import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { ISessionVo } from '@/api/dto/session';
 import { Global } from '@/components/workflow/workflow-editor/model/data/global';
+import { IGitRepoBranchVo } from '@/api/dto/git-repo';
+import { getBranches } from '@/api/git-repo';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
   props: {
     id: {
+      type: String,
+    },
+    branch: {
       type: String,
     },
   },
@@ -31,6 +46,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    const entry = computed<boolean>(() => store.state.entry);
     const sessionState = { ...store.state[namespace] };
     const { payload } = route.params;
     const loading = ref<boolean>(false);
@@ -38,14 +54,22 @@ export default defineComponent({
     const loaded = ref<boolean>(false);
     const reloadMain = inject('reloadMain') as () => void;
     const editMode = !!props.id;
+    const currentBranch = ref<string>(props.branch);
+    provide('branch', currentBranch);
     const workflow = ref<IWorkflow>({
       name: '未命名项目',
       groupId: '1',
       description: '',
+      association: {
+        entry: entry.value,
+        branch: currentBranch.value,
+      },
       global: new Global(),
       data: '',
     });
     const defaultSession = ref<ISessionVo>();
+    // 项目分支信息
+    const branches = ref<IGitRepoBranchVo[]>([]);
     const refreshState = (e: any) => {
       if (e.key !== 'session') {
         return;
@@ -63,13 +87,29 @@ export default defineComponent({
     };
     onMounted(async () => {
       window.addEventListener('storage', refreshState);
+      // 获取分支信息（如果entry为true时，有必要获取分支信息）
+      if (entry.value) {
+        branches.value = await getBranches();
+        const flag = branches.value.some(item => {
+          return item.branchName === currentBranch.value;
+        });
+        if (!flag) {
+          currentBranch.value = branches.value.find(item => item.isDefault).branchName;
+        }
+      }
+
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
-        const { name, global, description, data, groupId } = JSON.parse(payload as string);
+        const { name, global, description, data, groupId, branch } = JSON.parse(payload as string);
+        currentBranch.value = branch;
         workflow.value = {
           name,
           groupId,
           description,
+          association: {
+            entry: entry.value,
+            branch,
+          },
           global: new Global(global?.concurrent, global?.params),
           data,
         };
@@ -83,14 +123,19 @@ export default defineComponent({
         try {
           loading.value = true;
           loaded.value = true;
-          const { dslText, projectGroupId } = await fetchProjectDetail(props.id as string);
+          const { dslText, projectGroupId, branch } = await fetchProjectDetail(props.id as string);
           const dsl = yaml.parse(dslText);
           const rawData = dsl['raw-data'];
           const { name, global, description } = dsl;
+          currentBranch.value = branch;
           workflow.value = {
             name,
             groupId: projectGroupId,
             description,
+            association: {
+              entry: entry.value,
+              branch,
+            },
             global: new Global(global?.concurrent, global?.params),
             data: rawData,
           };
@@ -111,17 +156,21 @@ export default defineComponent({
       await router.push({ name: 'index' });
     };
     return {
+      currentBranch,
       loaded,
       loading,
       workflow,
       close,
       save: async (back: boolean, dsl: string) => {
         try {
-          const { id } = await saveProject({
+          const payload = {
             projectGroupId: workflow.value.groupId,
             dslText: dsl,
             id: editMode ? props.id : '',
-          });
+            branch: currentBranch.value,
+          };
+          entry.value ? Reflect.deleteProperty(payload, 'projectGroupId') : Reflect.deleteProperty(payload, 'branch');
+          const { id } = await saveProject(payload);
           proxy.$success(editMode ? '保存成功' : '新增成功');
           if (!back) {
             // 新增项目，再次点击保存进入项目编辑模式

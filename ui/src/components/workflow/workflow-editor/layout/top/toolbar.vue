@@ -2,8 +2,14 @@
   <div class="jm-workflow-editor-toolbar">
     <div class="left">
       <button class="jm-icon-button-left" @click="goBack"></button>
-      <div class="title">{{ workflowData.name }}</div>
-      <button class="jm-icon-workflow-edit" @click="edit"></button>
+      <div class="group">
+        <div class="title">{{ workflowData.name }}</div>
+        <button class="jm-icon-workflow-edit" @click="edit"></button>
+      </div>
+      <div class="branch" v-if="workflowData.association.entry">
+        <img src="~@/assets/svgs/index/branch.svg" alt="">
+        {{ branch }}
+      </div>
     </div>
     <div class="right">
       <div class="tools">
@@ -69,6 +75,7 @@ export default defineComponent({
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const projectPanelVisible = ref<boolean>(false);
     const getGraph = inject('getGraph') as () => Graph;
+    const branch = inject('branch');
     const graph = getGraph();
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     const workflowValidator = getWorkflowValidator();
@@ -97,7 +104,6 @@ export default defineComponent({
     };
 
     const workflowTool = new WorkflowTool(graph);
-
     // 检查param重复，出报错信息
     const checkParamDuplicate = () => {
       try {
@@ -108,6 +114,7 @@ export default defineComponent({
     };
 
     return {
+      branch,
       ZoomTypeEnum,
       workflowForm,
       projectPanelVisible,
@@ -219,11 +226,35 @@ export default defineComponent({
 
   .left {
     display: flex;
-    align-items: center;
 
-    .title {
-      margin-left: 20px;
-      margin-right: 10px;
+    .group {
+      display: flex;
+      align-items: center;
+
+      .title {
+        margin-left: 20px;
+        margin-right: 10px;
+      }
+    }
+
+    .branch {
+      img {
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+      }
+
+      display: flex;
+      align-items: center;
+
+      &:before {
+        content: '';
+        display: inline-block;
+        margin: 0 20px;
+        width: 2px;
+        height: 16px;
+        background-color: #CDD1E3;
+      }
     }
   }
 
