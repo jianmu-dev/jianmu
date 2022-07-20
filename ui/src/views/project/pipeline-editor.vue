@@ -1,7 +1,7 @@
 <template>
   <div class="pipeline" v-loading="loading">
     <jm-workflow-editor v-model="workflow" @back="close" @save="save"
-                        v-if="!loaded"/>
+                        v-if="loaded"/>
   </div>
 </template>
 
@@ -14,7 +14,6 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
-  provide,
   ref,
 } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
@@ -54,19 +53,7 @@ export default defineComponent({
     const loaded = ref<boolean>(false);
     const reloadMain = inject('reloadMain') as () => void;
     const editMode = !!props.id;
-    const currentBranch = ref<string>(props.branch);
-    provide('branch', currentBranch);
-    const workflow = ref<IWorkflow>({
-      name: '未命名项目',
-      groupId: '1',
-      description: '',
-      association: {
-        entry: entry.value,
-        branch: currentBranch.value,
-      },
-      global: new Global(),
-      data: '',
-    });
+    const workflow = ref<IWorkflow>();
     const defaultSession = ref<ISessionVo>();
     // 项目分支信息
     const branches = ref<IGitRepoBranchVo[]>([]);
@@ -87,21 +74,9 @@ export default defineComponent({
     };
     onMounted(async () => {
       window.addEventListener('storage', refreshState);
-      // 获取分支信息（如果entry为true时，有必要获取分支信息）
-      if (entry.value) {
-        branches.value = await getBranches();
-        const flag = branches.value.some(item => {
-          return item.branchName === currentBranch.value;
-        });
-        if (!flag) {
-          currentBranch.value = branches.value.find(item => item.isDefault).branchName;
-        }
-      }
-
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
         const { name, global, description, data, groupId, branch } = JSON.parse(payload as string);
-        currentBranch.value = branch;
         workflow.value = {
           name,
           groupId,
@@ -113,21 +88,20 @@ export default defineComponent({
           global: new Global(global?.concurrent, global?.params),
           data,
         };
-        loaded.value = true;
-        await nextTick();
         loaded.value = false;
+        await nextTick();
+        loaded.value = true;
         return;
       }
       if (editMode) {
         authLogin();
         try {
           loading.value = true;
-          loaded.value = true;
+          loaded.value = false;
           const { dslText, projectGroupId, branch } = await fetchProjectDetail(props.id as string);
           const dsl = yaml.parse(dslText);
           const rawData = dsl['raw-data'];
           const { name, global, description } = dsl;
-          currentBranch.value = branch;
           workflow.value = {
             name,
             groupId: projectGroupId,
@@ -143,10 +117,33 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         } finally {
           loading.value = false;
-          loaded.value = false;
+          loaded.value = true;
         }
       } else {
         authLogin();
+        let branch = props.branch;
+        // 获取分支信息（如果entry为true时，有必要获取分支信息）
+        if (entry.value) {
+          branches.value = await getBranches();
+          const flag = branches.value.some(item => {
+            return item.branchName === branch;
+          });
+          if (!flag) {
+            branch = branches.value.find(item => item.isDefault).branchName;
+          }
+        }
+        workflow.value = {
+          name: '未命名项目',
+          groupId: '1',
+          description: '',
+          association: {
+            entry: entry.value,
+            branch,
+          },
+          global: new Global(),
+          data: '',
+        };
+        loaded.value = true;
       }
     });
     onBeforeUnmount(() => {
@@ -156,7 +153,6 @@ export default defineComponent({
       await router.push({ name: 'index' });
     };
     return {
-      currentBranch,
       loaded,
       loading,
       workflow,
@@ -164,10 +160,10 @@ export default defineComponent({
       save: async (back: boolean, dsl: string) => {
         try {
           const payload = {
-            projectGroupId: workflow.value.groupId,
+            projectGroupId: workflow.value!.groupId,
             dslText: dsl,
             id: editMode ? props.id : '',
-            branch: currentBranch.value,
+            branch: workflow.value!.association.branch,
           };
           entry.value ? Reflect.deleteProperty(payload, 'projectGroupId') : Reflect.deleteProperty(payload, 'branch');
           const { id } = await saveProject(payload);

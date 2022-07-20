@@ -8,7 +8,7 @@
       </div>
       <div class="branch" v-if="workflowData.association.entry">
         <img src="~@/assets/svgs/index/branch.svg" alt="">
-        {{ branch }}
+        {{ workflowData.association.branch }}
       </div>
     </div>
     <div class="right">
@@ -75,7 +75,6 @@ export default defineComponent({
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const projectPanelVisible = ref<boolean>(false);
     const getGraph = inject('getGraph') as () => Graph;
-    const branch = inject('branch');
     const graph = getGraph();
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     const workflowValidator = getWorkflowValidator();
@@ -114,7 +113,6 @@ export default defineComponent({
     };
 
     return {
-      branch,
       ZoomTypeEnum,
       workflowForm,
       projectPanelVisible,
