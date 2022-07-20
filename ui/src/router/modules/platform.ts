@@ -54,7 +54,14 @@ export default [
       },
     ],
   },
-
+  {
+    name: 'ext-param',
+    path: 'ext-param',
+    component: () => import('@/views/ext-param/ext-param.vue'),
+    meta: {
+      title: '外部参数',
+    },
+  },
   {
     // 密钥管理路由
     name: 'secret-key',
