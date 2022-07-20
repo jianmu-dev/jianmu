@@ -24,6 +24,9 @@ public interface WorkerMapper {
     @Update("update worker set status = #{status} where id = #{id}")
     void updateStatus(Worker worker);
 
+    @Update("update worker set tags = #{tags} where id = #{id}")
+    void updateTag(Worker worker);
+
     @Select("select * from worker where id = #{workerId}")
     @Result(column = "created_time", property = "createdTime")
     Optional<Worker> findById(String workerId);

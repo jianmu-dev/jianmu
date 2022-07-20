@@ -131,6 +131,10 @@ public class WorkerInternalApplication {
     @Transactional
     public void join(String workerId, Worker.Type type, String name, String tag) {
         if (this.workerRepository.findById(workerId).isPresent()) {
+            this.workerRepository.updateTag(Worker.Builder.aWorker()
+                    .id(workerId)
+                    .tags(tag)
+                    .build());
             return;
         }
         this.workerRepository.add(Worker.Builder.aWorker()

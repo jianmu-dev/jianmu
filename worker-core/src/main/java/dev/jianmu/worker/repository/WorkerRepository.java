@@ -19,6 +19,8 @@ public interface WorkerRepository {
 
     void updateStatus(Worker worker);
 
+    void updateTag(Worker worker);
+
     Optional<Worker> findById(String workerId);
 
     Worker findByType(Worker.Type type);

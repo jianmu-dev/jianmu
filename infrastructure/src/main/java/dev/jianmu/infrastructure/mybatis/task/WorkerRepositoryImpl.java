@@ -39,6 +39,11 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     }
 
     @Override
+    public void updateTag(Worker worker) {
+        this.workerMapper.updateTag(worker);
+    }
+
+    @Override
     public Optional<Worker> findById(String workerId) {
         return this.workerMapper.findById(workerId);
     }
