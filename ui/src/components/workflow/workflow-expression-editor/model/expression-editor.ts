@@ -37,7 +37,7 @@ export class ExpressionEditor {
       // 强制换行
       lineWrapping: true,
       // 显示行号
-      lineNumbers: false,
+      lineNumbers: true,
       // 是否只读
       readOnly: false,
       // 快捷键

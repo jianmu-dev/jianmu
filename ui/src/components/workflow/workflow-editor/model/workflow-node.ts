@@ -27,11 +27,16 @@ export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs:
   data.versionDescription = versionDescription;
   if (inputs) {
     inputs.forEach(item => {
+      const type = item.type as ParamTypeEnum;
+      let value = (item.value || '').toString();
+      if (type === ParamTypeEnum.STRING) {
+        value = JSON.stringify(value);
+      }
       data.inputs.push({
         ref: item.ref,
         name: item.name,
-        type: item.type as ParamTypeEnum,
-        value: (item.value || '').toString(),
+        type,
+        value,
         required: item.required,
         description: item.description,
       });
