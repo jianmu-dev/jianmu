@@ -596,27 +596,35 @@ public class DslParser {
                         .filter(p -> p instanceof Map)
                         .map(p -> (Map<String, Object>) p)
                         .map(p -> {
+                            var ref = p.get("ref");
                             var name = p.get("name");
                             var type = p.get("type");
-                            var exp = p.get("exp");
+                            var value = p.get("value");
                             var required = p.get("required");
-                            if (!(name instanceof String)) {
-                                throw new IllegalArgumentException("Webhook参数名配置错误");
+                            if (!(ref instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数ref配置错误");
                             }
-                            if (!(type instanceof String)) {
-                                throw new IllegalArgumentException("Webhook参数类型配置错误");
+                            if (name != null && !(name instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数" + ref + "名称配置错误");
                             }
-                            if (!(exp instanceof String)) {
-                                throw new IllegalArgumentException("Webhook参数表达式配置错误");
+                            if (type != null && !(type instanceof String)) {
+                                throw new IllegalArgumentException("Webhook参数" + ref + "类型配置错误");
+                            }
+                            if (type != null) {
+                                // TODO 去掉SECRET类型
+                                Parameter.Type.getTypeByName((String) type);
+                            }
+                            if (value instanceof Map || value instanceof List) {
+                                throw new IllegalArgumentException("全局参数" + ref + "表达式配置错误");
                             }
                             if (required != null && !(required instanceof Boolean)) {
-                                throw new IllegalArgumentException("Webhook参数是否必填配置错误");
+                                throw new IllegalArgumentException("Webhook参数" + ref + "是否必填配置错误");
                             }
-                            Parameter.Type.getTypeByName((String) type);
                             return WebhookParameter.Builder.aWebhookParameter()
-                                    .name((String) name)
-                                    .type((String) type)
-                                    .exp((String) exp)
+                                    .ref((String) ref)
+                                    .name(name == null ? (String) ref : (String) name)
+                                    .type(type == null ? Parameter.Type.STRING.name() : (String) type)
+                                    .value(value)
                                     .required(required != null && (Boolean) required)
                                     .build();
                         }).collect(Collectors.toList());
@@ -637,18 +645,30 @@ public class DslParser {
                 .forEach(paramObj -> {
                     var map = (Map<String, Object>) paramObj;
                     var ref = map.get("ref");
-                    var typeObj = map.get("type");
-                    if (ref == null) {
-                        throw new DslException("全局参数未定义ref");
+                    var name = map.get("name");
+                    var type = map.get("type");
+                    var value = map.get("value");
+                    var required = map.get("required");
+                    if (!(ref instanceof String)) {
+                        throw new IllegalArgumentException("全局参数ref配置错误");
                     }
-                    if (typeObj != null) {
-                        var type = Parameter.Type.getTypeByName(typeObj.toString());
-                        if (type == Parameter.Type.SECRET) {
+                    if (name != null && !(name instanceof String)) {
+                        throw new IllegalArgumentException("全局参数" + ref + "名称配置错误");
+                    }
+                    if (type != null && !(type instanceof String)) {
+                        throw new IllegalArgumentException("全局参数" + ref + "类型配置错误");
+                    }
+                    if (value instanceof Map || value instanceof List) {
+                        throw new IllegalArgumentException("全局参数" + ref + "表达式配置错误");
+                    }
+                    if (required != null && !(required instanceof Boolean)) {
+                        throw new IllegalArgumentException("全局参数" + ref + "是否必填配置错误");
+                    }
+                    if (type != null) {
+                        var p = Parameter.Type.getTypeByName((String) type);
+                        if (p == Parameter.Type.SECRET) {
                             throw new DslException("全局参数不支持使用SECRET类型");
                         }
-                    }
-                    if (map.get("value") == null) {
-                        throw new DslException("全局参数 " + ref + " 未定义value");
                     }
                 });
     }
