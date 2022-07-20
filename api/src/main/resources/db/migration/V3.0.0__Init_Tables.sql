@@ -20,7 +20,8 @@ CREATE TABLE `jm_project`
     `association_id`       varchar(45)  NOT NULL DEFAULT '' COMMENT '关联ID',
     `association_type`     varchar(16)  NOT NULL DEFAULT '' COMMENT '关联类型',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`)
+    UNIQUE KEY `workflow_ref_UNIQUE` (`workflow_ref`),
+    UNIQUE INDEX `id_type_workflow_name_UNIQUE` (`association_id`, `association_type`, `workflow_name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='DSL表';
