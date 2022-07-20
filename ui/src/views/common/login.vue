@@ -159,9 +159,8 @@ export default defineComponent({
       const isIframeLogin = localStorage.getItem('temp-login-mode') === 'iframe';
       if (props.error_description) {
         proxy.$error(props.error_description);
-        // dialogLogin ? proxy.$error(props.error_description + '，页面即将关闭') : proxy.$error(props.error_description);
         localStorage.setItem('temp-login-error-message', props.error_description);
-        dialogLogin && setTimeout(() => {
+        (dialogLogin || isIframeLogin) && setTimeout(() => {
           window.close();
         }, 2000);
         return;
@@ -182,7 +181,7 @@ export default defineComponent({
         } catch (err) {
           proxy.$throw(err, proxy);
           localStorage.setItem('temp-login-error-message', err.message);
-          dialogLogin && setTimeout(() => {
+          (dialogLogin || isIframeLogin) && setTimeout(() => {
             window.close();
           }, 2000);
         } finally {
