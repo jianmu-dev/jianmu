@@ -21,8 +21,11 @@
 import { defineComponent, ref } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
 import Login from '@/views/common/login.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { AUTHORIZE_INDEX } from '@/router/path-def';
+import { namespace } from '@/store/modules/session';
+import { useStore } from 'vuex';
+import { IState } from '@/model/modules/session';
 
 export default defineComponent({
   components: { BottomNav, Login },
@@ -32,8 +35,18 @@ export default defineComponent({
     code: String,
     error_description: String,
   },
-  setup() {
+  setup(props) {
     const route = useRoute();
+    const router = useRouter();
+    const store = useStore();
+    const { session: { gitRepo, gitRepoOwner } } = store.state[namespace] as IState;
+    // 如果页面嵌入在iframe里面，localstorage中session存在直接进入首页，condition防止参数被串改
+    const condition =
+      (window.top !== window) && (store.state[namespace].session)
+      && (gitRepo === props.gitRepo && gitRepoOwner === props.gitRepoOwner);
+    if (condition) {
+      router.push({ name: 'index' });
+    }
     const isAuthorize = ref<boolean>(route.path === AUTHORIZE_INDEX);
     return {
       isAuthorize,
