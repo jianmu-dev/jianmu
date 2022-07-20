@@ -64,7 +64,7 @@ export class Webhook extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          ref: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
+          ref: [{ required: true, message: '请输入参数唯一标识', trigger: 'blur' }],
           name: [{ required: false, message: '请输入参数名称', trigger: 'blur' }],
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           value: [{ required: true, message: '请输入参数值', trigger: 'blur' }],

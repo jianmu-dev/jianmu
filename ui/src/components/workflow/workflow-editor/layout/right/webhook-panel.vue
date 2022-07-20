@@ -25,7 +25,7 @@
           <webhook-param
             v-for="(param,index) in form.params"
             :key="param.key"
-            v-model:referenc="param.ref"
+            v-model:reference="param.ref"
             v-model:name="param.name"
             v-model:value="param.value"
             v-model:type="param.type"
