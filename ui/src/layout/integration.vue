@@ -26,7 +26,7 @@
     </div>
     <div class="content">
       <router-view v-slot="{ Component }">
-        <jm-scrollbar :max-height="'calc(100vh - 96px)'" ref="scrollBarRef">
+        <jm-scrollbar :max-height="maxScrollHeight" ref="scrollBarRef">
           <component :is="Component" :keyword="key" v-model="flag" v-model:create-type="creatType"/>
         </jm-scrollbar>
       </router-view>
@@ -57,8 +57,9 @@ export default defineComponent({
     const currentTab = ref<number>(0);
     const route = useRoute();
     // 是否展示顶部导航
-    const isShowTop = computed<boolean>(() => {
-      return !((route.name === 'create-project') || (route.name === 'update-project'));
+    const isShowTop = computed<boolean>(() => !((route.name === 'create-project') || (route.name === 'update-project')));
+    const maxScrollHeight = computed<string>(() => {
+      return !((route.name === 'create-project') || (route.name === 'update-project')) ? 'calc(100vh - 96px)' : 'calc(100vh)';
     });
     const keyWord = ref<string>('');
     const key = ref<string>('');
@@ -73,6 +74,7 @@ export default defineComponent({
     };
     return {
       isShowTop,
+      maxScrollHeight,
       scrollBarRef,
       flag,
       creatType,
