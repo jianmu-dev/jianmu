@@ -25,6 +25,9 @@ export default defineComponent({
       groupId: '1',
       global: new Global(),
       data: '',
+      association: {
+        entry: false,
+      },
     });
     onMounted(async () => {
       loaded.value = true;
@@ -34,8 +37,11 @@ export default defineComponent({
       workflow.value = {
         name,
         groupId: '1',
-        global: new Global(global?.concurrent, global?.params),
+        global: new Global(global?.concurrent, global?.param),
         data: rawData,
+        association: {
+          entry: false,
+        },
       };
       await nextTick();
       loaded.value = false;

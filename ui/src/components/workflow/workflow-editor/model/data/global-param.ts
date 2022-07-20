@@ -22,6 +22,10 @@ export class GlobalParam {
     this.value = value;
   }
 
+  static build({ ref, name, type, required, value }: any): GlobalParam {
+    return new GlobalParam(ref, name, type, required, value);
+  }
+
   /**
    * 表单校验规则
    */
