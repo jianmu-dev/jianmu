@@ -28,6 +28,7 @@ import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -67,7 +68,6 @@ public class ProjectApplication {
     private final ProjectGroupRepository projectGroupRepository;
     private final GlobalProperties globalProperties;
     private final TriggerEventRepository triggerEventRepository;
-
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
             GitRepoRepository gitRepoRepository,
@@ -159,7 +159,6 @@ public class ProjectApplication {
         return Workflow.Builder.aWorkflow()
                 .ref(ref)
                 .type(parser.getType())
-                .tag(parser.getTag())
                 .name(parser.getName())
                 .description(parser.getDescription())
                 .nodes(nodes)
