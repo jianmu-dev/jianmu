@@ -117,7 +117,10 @@ export enum WebhookRequstStateEnum {
  * 参数类型枚举
  */
 export enum ParamTypeEnum {
-  SECRET = 'SECRET'
+  SECRET = 'SECRET',
+  STRING = 'STRING',
+  NUMBER = 'NUMBER',
+  BOOL = 'BOOL',
 }
 
 /**
