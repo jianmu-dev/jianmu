@@ -49,4 +49,12 @@ export default [
       title: '编辑项目',
     },
   },
+  {
+    name: 'ext-param',
+    path: 'ext-param',
+    component: () => import('@/views/ext-param/ext-param.vue'),
+    meta: {
+      title: '外部参数',
+    },
+  },
 ] as RouteRecordRaw[];
