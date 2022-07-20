@@ -47,7 +47,7 @@ export default defineComponent({
     const store = useStore();
     const entry = computed<boolean>(() => store.state.entry);
     const sessionState = { ...store.state[namespace] };
-    const entryUrl=sessionState.session.entryUrl;
+    const entryUrl = sessionState.session.entryUrl;
     const { payload } = route.params;
     const loading = ref<boolean>(false);
     // workflow数据是否加载完成
@@ -151,11 +151,11 @@ export default defineComponent({
       window.removeEventListener('storage', refreshState);
     });
     const close = async () => {
-      if(!entry.value){
+      if (!entry.value) {
         await router.push({ name: 'index' });
         return;
       }
-      window.location.href=entryUrl;
+      window.location.href = entryUrl;
     };
     return {
       loaded,

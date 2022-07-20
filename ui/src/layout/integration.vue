@@ -157,7 +157,8 @@ export default defineComponent({
           color: #333333;
           border: 1px solid transparent;
           border-radius: 4px;
-          &:nth-child(1){
+
+          &:nth-child(1) {
             border: 1px solid #D0D0D0;
           }
 

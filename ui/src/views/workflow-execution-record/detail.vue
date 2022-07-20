@@ -140,8 +140,8 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
-    const entry=store.state.entry;
-    const entryUrl=store.state[sessionNs].session.entryUrl;
+    const entry = store.state.entry;
+    const entryUrl = store.state[sessionNs].session.entryUrl;
     const rootState = store.state as IRootState;
     const state = store.state[namespace] as IState;
     const loading = ref<boolean>(false);
@@ -374,12 +374,12 @@ export default defineComponent({
           });
       },
       goBack() {
-        if(!entry){
+        if (!entry) {
           const { fullPath } = rootState.fromRoute;
           router.push(fullPath);
           return;
         }
-        window.location.href=entryUrl;
+        window.location.href = entryUrl;
       },
     };
   },
