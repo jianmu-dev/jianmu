@@ -41,6 +41,7 @@ export interface IWorkflowNode {
 export interface IAssociation {
   branch?: string;
   entry: boolean;
+  entryUrl?: string;
 }
 
 /**
