@@ -49,6 +49,8 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
         //   // 发送请求头中，host会设置成target
         //   changeOrigin: true,
         // },
+        // 外部参数
+        '/external_parameters': { target, changeOrigin },
       },
     },
   };

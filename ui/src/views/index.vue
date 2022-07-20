@@ -35,6 +35,12 @@
               <span class="text">分组管理</span>
             </div>
           </router-link>
+          <router-link :to="{ name: 'ext-param' }">
+            <div class="btn-item">
+              <button class="external"></button>
+              <span class="text">外部参数</span>
+            </div>
+          </router-link>
           <router-link :to="{ name: 'secret-key' }">
             <div class="btn-item secret-key">
               <button class="secret-key"></button>
@@ -140,6 +146,10 @@ export default defineComponent({
 
           &.group {
             background-image: url("@/assets/svgs/index/group-btn.svg");
+          }
+
+          &.external{
+            background-image: url("@/assets/svgs/index/ext-param-btn.svg");
           }
 
           &.secret-key {
