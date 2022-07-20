@@ -46,6 +46,7 @@ export default defineComponent({
       // 如果页面嵌入在iframe里面，localstorage中session存在直接进入首页，condition防止参数被串改
       // session可能被清空
       if (!session) {
+        isShow.value=true;
         return;
       }
       const condition =
