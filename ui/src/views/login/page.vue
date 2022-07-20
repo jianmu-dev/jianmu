@@ -1,6 +1,6 @@
 <template>
   <div class="page" v-loading="isAuthorize">
-    <div v-show="!isAuthorize">
+    <div v-show="!isAuthorize && isShow">
       <div class="logo">
         <router-link :to="{ name: 'index' }">
           <div class="icon"></div>
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
 import Login from '@/views/common/login.vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -40,16 +40,27 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const entry = store.state.entry;
-    const { session: { gitRepo, gitRepoOwner } } = store.state[namespace] as IState;
-    // 如果页面嵌入在iframe里面，localstorage中session存在直接进入首页，condition防止参数被串改
-    const condition =
-      entry && (store.state[namespace].session)
-      && (gitRepo === props.gitRepo && gitRepoOwner === props.gitRepoOwner);
-    if (condition) {
-      router.push({ name: 'index' });
-    }
+    const isShow = ref<boolean>(false);
+    const { session } = store.state[namespace] as IState;
+    onMounted(async () => {
+      // 如果页面嵌入在iframe里面，localstorage中session存在直接进入首页，condition防止参数被串改
+      // session可能被清空
+      if (!session) {
+        isShow.value=true;
+        return;
+      }
+      const condition =
+        entry && (store.state[namespace].session)
+        && (session?.gitRepo === props.gitRepo && session?.gitRepoOwner === props.gitRepoOwner);
+      if (condition) {
+        await router.push({ name: 'index' });
+        return;
+      }
+      isShow.value = true;
+    });
     const isAuthorize = ref<boolean>(route.path === AUTHORIZE_INDEX);
     return {
+      isShow,
       isAuthorize,
     };
   },

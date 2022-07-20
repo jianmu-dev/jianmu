@@ -38,6 +38,7 @@ export function checkDefaultIcon(icon: string) {
 
 export class AsyncTask extends BaseNode {
   readonly ownerRef: string;
+  readonly nodeRef: string;
   version: string;
   versionDescription: string;
   readonly inputs: IAsyncTaskParam[];
@@ -45,12 +46,13 @@ export class AsyncTask extends BaseNode {
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
 
-  constructor(ownerRef: string, ref: string, name: string, icon: string = '', version: string = '',
+  constructor(ownerRef: string, nodeRef: string, ref: string, name: string, icon: string = '', version: string = '',
     versionDescription: string = '', inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
     super(ref, name, NodeTypeEnum.ASYNC_TASK, checkDefaultIcon(icon) ? defaultIcon : icon,
       `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
     this.ownerRef = ownerRef;
+    this.nodeRef = nodeRef;
     this.version = version;
     this.versionDescription = versionDescription;
     this.inputs = inputs;
@@ -59,9 +61,9 @@ export class AsyncTask extends BaseNode {
     this.validateParam = validateParam;
   }
 
-  static build({ ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode }: any,
+  static build({ ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode }: any,
     validateParam?: ValidateParamFn): AsyncTask {
-    return new AsyncTask(ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode, validateParam);
+    return new AsyncTask(ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode, validateParam);
   }
 
   buildSelectableParam(nodeId: string): ISelectableParam | undefined {
@@ -190,7 +192,7 @@ export class AsyncTask extends BaseNode {
     return {
       alias: name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
-      type: `${this.ownerRef}/${super.getRef()}:${version}`,
+      type: `${this.ownerRef}/${this.nodeRef}:${version}`,
       param: inputs.length === 0 ? undefined : param,
     };
   }

@@ -286,8 +286,8 @@ export default defineComponent({
         emit('update:model-value', false);
       },
       async submit() {
-        if(window.top!==window&&createProjectType.value){
-          window.top.location.href=`/full/project/pipeline-editor?branch=${selectBranch.value}`;
+        if (window.top !== window && createProjectType.value) {
+          window.top.location.href = `/full/project/pipeline-editor?branch=${selectBranch.value}`;
           return;
         }
         await router.push({
@@ -332,7 +332,8 @@ export default defineComponent({
     }
 
     .classification-tabs {
-      color: #666666;
+      //color: #666666;
+      color: #082340;
 
       .tab-item {
         cursor: pointer;
@@ -343,7 +344,8 @@ export default defineComponent({
           font-weight: bold;
           background-color: #EBF4FF;
           border-radius: 15px;
-          color: #466AFF;
+          //color: #466AFF;
+          color: #096DD9;
         }
       }
     }
@@ -451,7 +453,8 @@ export default defineComponent({
           }
 
           &:hover {
-            color: #466AFF;
+            //color: #466AFF;
+            color: #096DD9;
           }
         }
       }
@@ -479,16 +482,21 @@ export default defineComponent({
           background-color: #F5F5F5;
 
           &:hover {
-            background-color: #EBEFFF;
-            color: #466AFF;
+            //background-color: #EBEFFF;
+            background-color: #EFF7FF;
+
+            //color: #466AFF;
+            color: #096DD9;
           }
         }
 
         &.el-button--primary {
-          background-color: #466AFF;
+          //background-color: #466AFF;
+          background-color: #096DD9;
 
           &:hover {
-            background-color: #8199FE;
+            //background-color: #8199FE;
+            background-color: #3293FD;
             color: #FFFFFF;
           }
         }
