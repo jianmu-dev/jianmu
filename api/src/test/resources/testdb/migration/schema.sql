@@ -107,6 +107,7 @@ CREATE TABLE `workflow`
     `ref`               varchar(45)  NOT NULL COMMENT '唯一引用名称',
     `version`           varchar(45)  NOT NULL COMMENT '版本',
     `type`              varchar(45)  NOT NULL COMMENT 'DSL 类型',
+    `tag`               varchar(45)  NOT NULL COMMENT '执行器标签',
     `name`              varchar(255) DEFAULT NULL COMMENT '显示名称',
     `description`       varchar(255) DEFAULT NULL COMMENT '描述',
     `nodes`             longblob COMMENT 'Node列表',
