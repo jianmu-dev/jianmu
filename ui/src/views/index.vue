@@ -15,12 +15,12 @@
               <span class="text">代码项目</span>
             </div>
           </router-link>
-          <router-link :to="{ name: 'import-project' }">
-            <div class="btn-item">
-              <button class="git"></button>
-              <span class="text">导入项目</span>
-            </div>
-          </router-link>
+          <!--          <router-link :to="{ name: 'import-project' }">-->
+          <!--            <div class="btn-item">-->
+          <!--              <button class="git"></button>-->
+          <!--              <span class="text">导入项目</span>-->
+          <!--            </div>-->
+          <!--          </router-link>-->
         </div>
         <div class="right-area">
           <router-link :to="{ name: 'node-library' }">
@@ -148,7 +148,7 @@ export default defineComponent({
             background-image: url("@/assets/svgs/index/group-btn.svg");
           }
 
-          &.external{
+          &.external {
             background-image: url("@/assets/svgs/index/ext-param-btn.svg");
           }
 
