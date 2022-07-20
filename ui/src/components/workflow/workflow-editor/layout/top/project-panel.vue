@@ -14,7 +14,7 @@
         <jm-form-item label="项目名称" prop="name" class="name-item">
           <jm-input v-model="projectInfoForm.name" :maxlength="45" placeholder="请输入项目名称" :show-word-limit="true"/>
         </jm-form-item>
-        <jm-form-item label="项目分组" class="group-item" prop="groupId">
+        <jm-form-item label="项目分组" class="group-item" prop="groupId" v-if="!workflowData.association.entry">
           <jm-select v-model="projectInfoForm.groupId" placeholder="请选择项目分组" v-loading="loading">
             <jm-option
               v-for="item in projectGroupList"
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
 import { IWorkflow } from '../../model/data/common';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';

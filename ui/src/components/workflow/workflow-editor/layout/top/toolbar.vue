@@ -2,8 +2,14 @@
   <div class="jm-workflow-editor-toolbar">
     <div class="left">
       <button class="jm-icon-button-left" @click="goBack"></button>
-      <div class="title">{{ workflowData.name }}</div>
-      <button class="jm-icon-workflow-edit" @click="edit"></button>
+      <div class="group">
+        <div class="title">{{ workflowData.name }}</div>
+        <button class="jm-icon-workflow-edit" @click="edit"></button>
+      </div>
+      <div class="branch" v-if="workflowData.association.entry">
+        <img src="~@/assets/svgs/index/branch.svg" alt="">
+        {{ workflowData.association.branch }}
+      </div>
     </div>
     <div class="right">
       <div class="tools">
@@ -97,7 +103,6 @@ export default defineComponent({
     };
 
     const workflowTool = new WorkflowTool(graph);
-
     // 检查param重复，出报错信息
     const checkParamDuplicate = () => {
       try {
@@ -219,11 +224,35 @@ export default defineComponent({
 
   .left {
     display: flex;
-    align-items: center;
 
-    .title {
-      margin-left: 20px;
-      margin-right: 10px;
+    .group {
+      display: flex;
+      align-items: center;
+
+      .title {
+        margin-left: 20px;
+        margin-right: 10px;
+      }
+    }
+
+    .branch {
+      img {
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+      }
+
+      display: flex;
+      align-items: center;
+
+      &:before {
+        content: '';
+        display: inline-block;
+        margin: 0 20px;
+        width: 2px;
+        height: 16px;
+        background-color: #CDD1E3;
+      }
     }
   }
 

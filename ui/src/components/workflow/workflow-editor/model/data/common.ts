@@ -38,6 +38,11 @@ export interface IWorkflowNode {
   toDsl(): object;
 }
 
+export interface IAssociation {
+  branch?: string;
+  entry: boolean;
+}
+
 /**
  * 工作流数据
  */
@@ -45,6 +50,7 @@ export interface IWorkflow {
   name: string;
   description?: string;
   groupId: string;
+  association: IAssociation;
   global: Global;
   data: string;
 }
