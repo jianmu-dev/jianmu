@@ -63,6 +63,8 @@ public interface ExternalParameterMapper {
     @Select("<script>" +
             "SELECT * FROM `jm_external_parameter`" +
             "<where> ref = #{ref}" +
+            " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
+            " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
             "</where>" +
             "</script>")
     @Result(column = "id", property = "id")
@@ -75,5 +77,7 @@ public interface ExternalParameterMapper {
     @Result(column = "association_type", property = "associationType")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "created_time", property = "createdTime")
-    Optional<ExternalParameter> findByRef(String ref);
+    Optional<ExternalParameter> findByRef(@Param("ref") String ref,
+                                          @Param("associationId") String associationId,
+                                          @Param("associationType") String associationType);
 }

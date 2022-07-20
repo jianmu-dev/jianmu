@@ -240,4 +240,9 @@ public class GitlinkApi implements OAuth2Api {
         return BranchesVo.builder()
                 .branches(branches).build();
     }
+
+    @Override
+    public String getEntryUrl(String gitRepo, String gitRepoOwner) {
+        return oAuth2Properties.getGitlink().getBaseUrl() + gitRepoOwner + "/" + gitRepo + "/devops";
+    }
 }

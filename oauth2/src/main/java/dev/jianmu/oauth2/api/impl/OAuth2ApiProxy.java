@@ -63,4 +63,8 @@ public class OAuth2ApiProxy implements OAuth2Api {
         return this.getApi().getBranches(accessToken, gitRepo, gitRepoOwner);
     }
 
+    @Override
+    public String getEntryUrl(String gitRepo, String gitRepoOwner) {
+        return this.getApi().getEntryUrl(gitRepo, gitRepoOwner);
+    }
 }
