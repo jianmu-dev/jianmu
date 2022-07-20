@@ -35,6 +35,11 @@
                     border>
                     <jm-table-column label="参数唯一标识" align="center">
                       <template #default="scope">
+                        <jm-text-viewer :value="scope.row.ref" :tip-append-to-body="false" class="params-name"/>
+                      </template>
+                    </jm-table-column>
+                    <jm-table-column label="参数名称" align="center">
+                      <template #default="scope">
                         <jm-text-viewer :value="scope.row.name" :tip-append-to-body="false" class="params-name"/>
                       </template>
                     </jm-table-column>
@@ -79,7 +84,6 @@ import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
 import { ParamTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import useClipboard from 'vue-clipboard3';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
 
@@ -103,7 +107,6 @@ export default defineComponent({
     const tabActiveName = ref<string>(props.tabType);
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
-    const { toClipboard } = useClipboard();
     const maxWidthRecord = ref<Record<string, number>>({});
 
     onMounted(async () => {

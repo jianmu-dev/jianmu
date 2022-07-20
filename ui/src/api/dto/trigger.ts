@@ -1,15 +1,16 @@
-import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { TriggerTypeEnum, WebhookRequstStateEnum } from '@/api/dto/enumeration';
 import { IPageDto } from '@/api/dto/common';
-import { WebhookRequstStateEnum } from '@/api/dto/enumeration';
 
 /**
  * 事件参数vo
  */
 export interface IEventParameterVo {
   parameterId: string;
+  ref: string;
   name: string;
   type: string;
-  value: string;
+  value: object;
+  required: boolean;
 }
 
 /**
@@ -66,10 +67,11 @@ export interface IWebRequestVo
  */
 export interface IWebhookParameterVo
   extends Readonly<{
+    ref: string;
     name: string;
     type: string;
-    exp: string;
     value: object;
+    required: boolean;
   }> {
 }
 

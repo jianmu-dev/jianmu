@@ -129,6 +129,11 @@
               <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
                 <jm-table-column label="参数唯一标识">
                   <template #default="scope">
+                    <jm-text-viewer :value="scope.row.ref"/>
+                  </template>
+                </jm-table-column>
+                <jm-table-column label="参数名称">
+                  <template #default="scope">
                     <jm-text-viewer :value="scope.row.name"/>
                   </template>
                 </jm-table-column>
