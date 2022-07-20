@@ -117,7 +117,7 @@ export class WorkflowTool {
         return;
       }
       cell.ports.items.forEach((item: any) => {
-        delete item.attrs.circle.fill;
+        delete item.attrs?.circle?.fill;
       });
     });
   }
