@@ -6,16 +6,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  getCurrentInstance,
-  inject,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-} from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
 import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
@@ -77,17 +68,20 @@ export default defineComponent({
       window.addEventListener('storage', refreshState);
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
-        const { name, global, description, data, groupId, branch } = JSON.parse(payload as string);
+        const { projectGroupId, branch, dslText } = JSON.parse(payload as string);
+        const dsl = yaml.parse(dslText);
+        const rawData = dsl['raw-data'];
+        const { name, global, description } = dsl;
         workflow.value = {
           name,
-          groupId,
+          groupId: projectGroupId,
           description,
           association: {
             entry: entry.value,
             branch,
           },
-          global: new Global(global?.concurrent, global?.params),
-          data,
+          global: new Global(global?.concurrent, global?.param),
+          data: rawData,
         };
         loaded.value = false;
         await nextTick();
@@ -111,7 +105,7 @@ export default defineComponent({
               entry: entry.value,
               branch,
             },
-            global: new Global(global?.concurrent, global?.params),
+            global: new Global(global?.concurrent, global?.param),
             data: rawData,
           };
         } catch (err) {

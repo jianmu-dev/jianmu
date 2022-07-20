@@ -169,17 +169,10 @@ export default defineComponent({
               window.top.location.href = `/full/project/pipeline-editor/${props.id}`;
               return;
             }
-            const rawData = yaml.parse(dslText)['raw-data'];
-            const { name, global, description } = yaml.parse(dslText);
             const payload = {
-              name,
+              projectGroupId,
               branch,
-              groupId: projectGroupId,
-              description,
-              global: {
-                concurrent: global ? global.concurrent : false,
-              },
-              data: rawData,
+              dslText,
             };
             await router.replace({
               name: 'update-pipeline',
