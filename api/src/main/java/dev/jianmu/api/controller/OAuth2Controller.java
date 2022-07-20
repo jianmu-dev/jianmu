@@ -161,6 +161,7 @@ public class OAuth2Controller {
                 .gitRepoOwner(repo != null ? repo.getOwner() : null)
                 .gitRepoId(repo != null ? repo.getId() : null)
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                .entryUrl(oAuth2Api.getEntryUrl(oauth2LoggingDto.getGitRepo(), oauth2LoggingDto.getGitRepoOwner()))
                 .build());
     }
 

@@ -24,4 +24,5 @@ public class JwtResponse {
     private String gitRepoOwner;
     private String gitRepoId;
     private String thirdPartyType;
+    private String entryUrl;
 }
