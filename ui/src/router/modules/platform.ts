@@ -84,14 +84,14 @@ export default [
       },
     ],
   },
-  {
-    name: 'import-project',
-    path: 'project/importer',
-    component: () => import('@/views/project/importer.vue'),
-    meta: {
-      title: '导入项目',
-    },
-  },
+  // {
+  //   name: 'import-project',
+  //   path: 'project/importer',
+  //   component: () => import('@/views/project/importer.vue'),
+  //   meta: {
+  //     title: '导入项目',
+  //   },
+  // },
   {
     name: 'create-project',
     path: PLATFORM_PROJECT_EDITOR,

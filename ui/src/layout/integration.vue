@@ -218,6 +218,10 @@ export default defineComponent({
     ::v-deep(.project-editor) {
       margin-bottom: 0;
     }
+    // 外部参数页面
+    ::v-deep(.ext-param){
+      padding: 20px 0;
+    }
   }
 }
 </style>
