@@ -112,24 +112,32 @@ export default defineComponent({
     const fetchThirdAuthUrl = async () => {
       authError.value = false;
       localStorage.setItem('temp-login-mode', props.type);
+      // 如果从iframe中登录，记录登录状态
+      (window.top !== window) && (localStorage.setItem('temp-login-mode', 'iframe'));
       // 弹框登录方式获取授权地址时显示登录中
-      localStorage.getItem('temp-login-mode') !== 'index' && (loading.value = true);
+      const tempLoginMode = localStorage.getItem('temp-login-mode');
+      // 如果弹窗以及iframe形式登录有loading效果
+      (tempLoginMode === 'dialog' || tempLoginMode === 'iframe') && (loading.value = true);
       try {
         const { authorizationUrl } = await fetchAuthUrl({
           thirdPartyType: loginType.value,
           redirectUri: getRedirectUri(props.gitRepo, props.gitRepoOwner),
         });
         // 登录模式（login页面登录/弹窗登录）
-        window.open(authorizationUrl, localStorage.getItem('temp-login-mode') !== 'index' ? '_blank' : '_self');
+        window.open(authorizationUrl, (tempLoginMode === 'dialog' || tempLoginMode === 'iframe') ? '_blank' : '_self');
       } catch (err) {
         proxy.$throw(err, proxy);
       }
     };
-    const refreshState = (e: any) => {
+    const refreshState = async (e: any) => {
       if (e.key === 'session') {
         proxy.$success('登录成功');
         const newSession = JSON.parse(e.newValue)['_default'].session;
         proxy.mutateSession(newSession);
+        // 如果嵌入在iframe里面登录成功后，直接进首页
+        if (window.top !== window) {
+          await router.push(INDEX);
+        }
         // 登录成功
         loading.value = false;
         authError.value = false;
@@ -138,9 +146,8 @@ export default defineComponent({
         }, 500);
       }
       if (e.key === 'temp-login-error-message') {
-        console.log(localStorage.getItem('temp-login-mode') !== 'index');
         // 只有是弹窗登录授权失败才展示重新登录
-        localStorage.getItem('temp-login-mode') !== 'index' && (authError.value = true);
+        localStorage.getItem('temp-login-mode') === 'dialog' && (authError.value = true);
         // 登录失败
         loading.value = false;
       }
@@ -148,7 +155,8 @@ export default defineComponent({
     onMounted(async () => {
       window.onstorage = refreshState;
       // 判断是否为弹窗方式登录
-      const dialogLogin = localStorage.getItem('temp-login-mode') !== 'index';
+      const dialogLogin = localStorage.getItem('temp-login-mode') === 'dialog';
+      const isIframeLogin = localStorage.getItem('temp-login-mode') === 'iframe';
       if (props.error_description) {
         proxy.$error(props.error_description);
         // dialogLogin ? proxy.$error(props.error_description + '，页面即将关闭') : proxy.$error(props.error_description);
@@ -169,7 +177,8 @@ export default defineComponent({
             gitRepo: props.gitRepo,
             gitRepoOwner: props.gitRepoOwner,
           });
-          dialogLogin ? window.close() : await router.push(INDEX);
+          // 弹窗、以及iframe形式登录后自动关闭页面
+          (dialogLogin || isIframeLogin) ? window.close() : await router.push(INDEX);
         } catch (err) {
           proxy.$throw(err, proxy);
           localStorage.setItem('temp-login-error-message', err.message);
