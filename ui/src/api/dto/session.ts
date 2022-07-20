@@ -17,6 +17,9 @@ export interface ISessionVo extends Readonly<{
   username: string;
   thirdPartyType: string;
   avatarUrl: string;
+  entryUrl?: string;
+  gitRepo?: string;
+  gitRepoOwner?: string;
 }> {
 }
 

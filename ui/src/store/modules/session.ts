@@ -116,6 +116,8 @@ export default {
         thirdPartyType: payload.thirdPartyType,
         redirectUri: payload.redirectUri,
       });
+      // TODO 测试
+      session.entryUrl = `/full/demo?owner=${session.gitRepoOwner}&repo=${session.gitRepo}`;
       commit('oauthMutate', session);
     },
   },
