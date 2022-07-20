@@ -2,6 +2,14 @@ import { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
 
 export default [
   {
+    name: 'demo',
+    path: 'demo',
+    component: () => import('@/views/integration-demo.vue'),
+    meta: {
+      title: '首页',
+    },
+  },
+  {
     name: 'create-pipeline',
     path: 'project/pipeline-editor',
     component: () => import('@/views/project/pipeline-editor.vue'),
