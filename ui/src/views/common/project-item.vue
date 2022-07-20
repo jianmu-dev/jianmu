@@ -9,14 +9,9 @@
     <div class="content">
       <div class="content-top">
         <span class="concurrent" v-if="concurrent">可并发</span>
-        <router-link
-          :to="{
-          name: 'workflow-execution-record-detail',
-          query: { projectId: project.id },
-        }"
-        >
-          <jm-text-viewer :value="project.name" class="title"/>
-        </router-link>
+        <span class="project-name">
+          <jm-text-viewer :value="project.name" class="title" @click="clickProject(project.id)"/>
+        </span>
       </div>
       <div class="time">
         <div class="running" v-if="project.status === ProjectStatusEnum.RUNNING">
@@ -49,14 +44,10 @@
     <div class="content">
       <div class="content-top">
         <span class="concurrent" v-if="concurrent">可并发</span>
-        <router-link
-          :to="{
-          name: 'workflow-execution-record-detail',
-          query: { projectId: project.id },
-        }"
-        >
-          <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}"/>
-        </router-link>
+        <span class="project-name">
+          <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}"
+                          @click="clickProject(project.id)"/>
+        </span>
       </div>
       <div :class="{
         time: true,
@@ -220,6 +211,18 @@ export default defineComponent({
     const enabled = ref<boolean>(props.project.enabled);
     const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
+    const clickProject = (projectId: string) => {
+      if (window.top !== window) {
+        window.top.location.href = `/full/workflow-execution-record/detail?projectId=${projectId}`;
+        return;
+      }
+      router.push(
+        {
+          name: 'workflow-execution-record-detail',
+          query: { projectId },
+        },
+      );
+    };
     return {
       isMoveMode,
       isMove,
@@ -235,6 +238,7 @@ export default defineComponent({
       enabled,
       dslDialogFlag,
       webhookDrawerFlag,
+      clickProject,
       execute: (id: string) => {
         if (!enabled.value || executing.value) {
           return;
@@ -495,7 +499,8 @@ export default defineComponent({
       display: flex;
       align-items: center;
 
-      a {
+      .project-name {
+        cursor: pointer;
         flex: 1;
       }
 

@@ -286,6 +286,10 @@ export default defineComponent({
         emit('update:model-value', false);
       },
       async submit() {
+        if(window.top!==window&&createProjectType.value){
+          window.top.location.href=`/full/project/pipeline-editor?branch=${selectBranch.value}`;
+          return;
+        }
         await router.push({
           name: createProjectType.value ? 'create-pipeline' : 'create-project',
           query: {

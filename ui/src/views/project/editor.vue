@@ -165,6 +165,10 @@ export default defineComponent({
         .then(async ({ dslText, projectGroupId, branch }) => {
           currentBranch.value = branch;
           if (checkDsl(dslText)) {
+            if (window.top !== window) {
+              window.top.location.href = `/full/project/pipeline-editor/${props.id}`;
+              return;
+            }
             const rawData = yaml.parse(dslText)['raw-data'];
             const { name, global, description } = yaml.parse(dslText);
             const payload = {
