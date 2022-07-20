@@ -117,11 +117,11 @@
           <div :class="{ active: !payloadTab }" @click="toTrigger">Payload</div>
         </div>
         <!-- 查看payload -->
-        <div class="payload-content" v-if="!payloadTab">
+        <div class="payload-content" v-if="!payloadTab" v-loading="payloadLoading">
           <jm-log-viewer v-if="webhookLog" filename="webhook.txt" :value="webhookLog"/>
         </div>
         <!-- 触发器 -->
-        <div v-else class="trigger-content">
+        <div v-else class="trigger-content" v-loading="triggerParamsLoading">
           <jm-scrollbar>
             <div style="padding:20px;">
               <!-- 参数列表 -->
@@ -248,6 +248,8 @@ export default defineComponent({
     // 刷新表格
     const refreshVisible = ref<boolean>(true);
     const refreshFlag = ref<boolean>(false);
+    const triggerParamsLoading = ref<boolean>(false);
+    const payloadLoading = ref<boolean>(false);
     // webhook请求列表滚动
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
@@ -423,6 +425,7 @@ export default defineComponent({
     // 获取触发器参数
     const getTriggerParam = async () => {
       try {
+        triggerParamsLoading.value = true;
         webhookParamsDetail.value = await getWebhookParams(webhookListId.value);
         // 清空数组
         webhookAuth.value = [];
@@ -432,6 +435,8 @@ export default defineComponent({
           : webhookAuth.value;
       } catch (err) {
         proxy.$throw(err, proxy);
+      } finally {
+        triggerParamsLoading.value = false;
       }
     };
     // 查看payload
@@ -458,10 +463,13 @@ export default defineComponent({
     const toTrigger = async () => {
       payloadTab.value = false;
       try {
+        payloadLoading.value = true;
         const payloadContent = await getPayloadParams(webhookListId.value);
         webhookLog.value = JSON.stringify(JSON.parse(payloadContent.payload), null, 2);
       } catch (err) {
         proxy.$throw(err, proxy);
+      } finally {
+        payloadLoading.value = false;
       }
     };
     // 触发器
@@ -547,6 +555,8 @@ export default defineComponent({
       refresh,
       refreshVisible,
       refreshFlag,
+      triggerParamsLoading,
+      payloadLoading,
     };
   },
 });
