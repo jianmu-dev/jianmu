@@ -41,12 +41,16 @@ export default defineComponent({
     const store = useStore();
     const entry = store.state.entry;
     const isShow = ref<boolean>(false);
-    const { session: { gitRepo, gitRepoOwner } } = store.state[namespace] as IState;
+    const { session } = store.state[namespace] as IState;
     onMounted(async () => {
       // 如果页面嵌入在iframe里面，localstorage中session存在直接进入首页，condition防止参数被串改
+      // session可能被清空
+      if (!session) {
+        return;
+      }
       const condition =
         entry && (store.state[namespace].session)
-        && (gitRepo === props.gitRepo && gitRepoOwner === props.gitRepoOwner);
+        && (session?.gitRepo === props.gitRepo && session?.gitRepoOwner === props.gitRepoOwner);
       if (condition) {
         await router.push({ name: 'index' });
         return;
