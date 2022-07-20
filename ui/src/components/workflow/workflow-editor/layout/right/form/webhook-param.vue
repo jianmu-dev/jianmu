@@ -40,12 +40,12 @@
           <i class="jm-icon-button-help"></i>
         </jm-tooltip>
       </template>
-      <jm-input
+      <expression-editor
         v-model="valueVal"
         placeholder="请输入参数值"
         @change="changeValue"
-        @focus="switchBackgroundFlag = true;"
-        @blur="switchBackgroundFlag = false;"
+        @focus="switchBackgroundFlag=true"
+        @blur="switchBackgroundFlag=false"
       />
     </jm-form-item>
     <!--  是否必填  -->
@@ -63,8 +63,10 @@
 import { defineComponent, PropType, ref } from 'vue';
 import { ParamTypeEnum } from '../../../model/data/enumeration';
 import { CustomRule } from '../../../model/data/common';
+import ExpressionEditor from '../form/expression-editor.vue';
 
 export default defineComponent({
+  components: { ExpressionEditor },
   props: {
     reference: {
       type: String,
