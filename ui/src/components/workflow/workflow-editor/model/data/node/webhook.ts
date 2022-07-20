@@ -46,9 +46,9 @@ export class Webhook extends BaseNode {
       value: WEBHOOK_PARAM_SCOPE,
       label: super.getName(),
       children: this.params.filter(({ name }) => name)
-        .map(({ name }) => {
+        .map(({ ref, name }) => {
           return {
-            value: name,
+            value: ref,
             label: name,
           };
         }),
