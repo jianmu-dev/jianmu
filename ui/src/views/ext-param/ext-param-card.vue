@@ -106,10 +106,10 @@ export default defineComponent({
   position: relative;
 
   &:hover {
-    //cursor: pointer;
     background: #FFFFFF;
     box-shadow: 0 0 12px 4px #EDF1F8;
     border-radius: 4px;
+    border: 1px solid transparent;
   }
 
   &:hover .editor-btn {
@@ -150,7 +150,7 @@ export default defineComponent({
     line-height: 18px;
 
     .value {
-      width: 80%;
+      width: 75%;
     }
 
     .name-value {
