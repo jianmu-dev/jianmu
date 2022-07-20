@@ -32,17 +32,30 @@
 
 <script lang="ts">
 import { computed, defineComponent, nextTick, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 export default defineComponent({
-  setup() {
+  props: {
+    owner: {
+      type: String,
+      default: '',
+    },
+    repo: {
+      type: String,
+      default: '',
+    },
+  },
+  setup(props) {
+    const router = useRouter();
+    const route = useRoute();
     const formRef = ref<HTMLFormElement>();
     const form = ref({
-      owner: '',
-      repo: '',
+      owner: props.owner,
+      repo: props.repo,
     });
     const iframeSrc = computed<string>(() =>
       `/login?gitRepoOwner=${encodeURIComponent(form.value.owner)}&gitRepo=${encodeURIComponent(form.value.repo)}`);
-    const iframeVisible = ref<boolean>(false);
+    const iframeVisible = ref<boolean>(!!(props.owner && props.repo));
 
     return {
       formRef,
@@ -58,6 +71,8 @@ export default defineComponent({
           if (!valid) {
             return false;
           }
+          // 同步地址栏参数
+          await router.push(`${route.path}?owner=${encodeURIComponent(form.value.owner)}&repo=${encodeURIComponent(form.value.repo)}`);
 
           iframeVisible.value = false;
           await nextTick();
