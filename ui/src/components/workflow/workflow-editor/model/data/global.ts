@@ -6,7 +6,7 @@ export class Global {
 
   constructor(concurrent: boolean = false, params: GlobalParam[] = []) {
     this.concurrent = concurrent;
-    this.params = params;
+    this.params = params.map(param => GlobalParam.build(param));
   }
 
   toDsl(): object {
