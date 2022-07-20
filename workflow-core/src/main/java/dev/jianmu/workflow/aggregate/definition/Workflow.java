@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * @create 2021-01-21 14:10
  */
 public class Workflow extends AggregateRoot {
+
     public enum Type {
         WORKFLOW,
         PIPELINE
@@ -35,6 +36,8 @@ public class Workflow extends AggregateRoot {
     private String ref;
     // 类型
     private Type type;
+    // 对应执行器标签
+    private String tag;
     // 描述
     private String description;
     // 版本
@@ -374,6 +377,10 @@ public class Workflow extends AggregateRoot {
         return type;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -405,6 +412,8 @@ public class Workflow extends AggregateRoot {
         private String ref;
         // 类型
         private Type type;
+        // 标签
+        private String tag;
         // 描述
         private String description;
         // Node列表
@@ -433,6 +442,11 @@ public class Workflow extends AggregateRoot {
 
         public Builder ref(String ref) {
             this.ref = ref;
+            return this;
+        }
+
+        public Builder tag(String tag) {
+            this.tag = tag;
             return this;
         }
 
@@ -484,6 +498,7 @@ public class Workflow extends AggregateRoot {
             workflow.nodes = Set.copyOf(this.nodes);
             workflow.globalParameters = Set.copyOf(this.globalParameters);
             workflow.ref = this.ref;
+            workflow.tag = this.tag;
             workflow.dslText = this.dslText;
             workflow.type = this.type;
             workflow.name = this.name;

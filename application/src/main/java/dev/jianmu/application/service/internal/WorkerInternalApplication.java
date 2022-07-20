@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.el.ElContext;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.*;
@@ -30,6 +31,9 @@ import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
+import dev.jianmu.workflow.el.EvaluationResult;
+import dev.jianmu.workflow.el.Expression;
+import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -42,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
@@ -84,6 +89,7 @@ public class WorkerInternalApplication {
     private final GlobalProperties globalProperties;
     private final WorkflowRepository workflowRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
+    private final ExpressionLanguage expressionLanguage;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -101,8 +107,8 @@ public class WorkerInternalApplication {
             MonitoringFileService monitoringFileService,
             GlobalProperties globalProperties,
             WorkflowRepository workflowRepository,
-            AsyncTaskInstanceRepository asyncTaskInstanceRepository
-    ) {
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository,
+            ExpressionLanguage expressionLanguage) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
@@ -119,10 +125,11 @@ public class WorkerInternalApplication {
         this.globalProperties = globalProperties;
         this.workflowRepository = workflowRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
+        this.expressionLanguage = expressionLanguage;
     }
 
     @Transactional
-    public void join(String workerId, Worker.Type type, String name) {
+    public void join(String workerId, Worker.Type type, String name, String tag) {
         if (this.workerRepository.findById(workerId).isPresent()) {
             return;
         }
@@ -130,6 +137,7 @@ public class WorkerInternalApplication {
                 .id(workerId)
                 .name(name)
                 .type(type)
+                .tags(tag)
                 .status(Worker.Status.ONLINE)
                 .build());
     }
@@ -148,7 +156,17 @@ public class WorkerInternalApplication {
             this.workflowInstanceRepository.findByTriggerId(event.getTriggerId())
                     .ifPresent(workflowInstance -> {
                         // 分发worker
-                        var workers = this.workerRepository.findByTypeInAndCreatedTimeLessThan(List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES), workflowInstance.getStartTime());
+                        String workerTag = this.getWorkerTag(workflowInstance);
+                        if (!StringUtils.hasText(workerTag)) {
+                            throw new RuntimeException("未找到该流程的tag");
+                        }
+                        var workers = this.checkOldVersionOfWorkflowTag(workflowInstance) ?
+                                this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workerTag, workflowInstance.getStartTime()) :
+                                this.workerRepository.findByTypeInAndCreatedTimeLessThan(
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
                             throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
@@ -163,6 +181,43 @@ public class WorkerInternalApplication {
             taskInstance.dispatchFailed();
             this.taskInstanceRepository.updateStatus(taskInstance);
         }
+    }
+
+    private Boolean checkOldVersionOfWorkflowTag(WorkflowInstance workflowInstance) {
+        var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
+        return workflow.getTag() == null;
+    }
+
+    private String getWorkerTag(WorkflowInstance workflowInstance) {
+        // 因为trigger参数与workflow的全局参数并不一致，该方法无法在workflow实体中进行处理
+        var context = new ElContext();
+        var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
+        Expression el = this.expressionLanguage.parseExpression("`" + workflow.getTag() + "`");
+        workflow.getGlobalParameters()
+                .forEach(globalParameter -> context.add(
+                        "global",
+                        globalParameter.getName(),
+                        Parameter
+                                .Type.getTypeByName(globalParameter.getType())
+                                .newParameter(globalParameter.getValue())));
+
+        this.triggerEventRepository.findById(workflowInstance.getTriggerId())
+                .ifPresent(triggerEvent -> triggerEvent.getParameters()
+                        .forEach(triggerEventParameter -> context.add(
+                                "trigger",
+                                triggerEventParameter.getName(),
+                                Parameter
+                                        .Type.getTypeByName(triggerEventParameter.getType())
+                                        .newParameter(triggerEventParameter.getValue()))));
+        EvaluationResult result = this.expressionLanguage.evaluateExpression(el, context);
+        if (result.isFailure()) {
+            throw new RuntimeException("解析执行器标签的el表达式解析失败: " + result.getFailureMessage());
+        } else if (!Parameter.Type.STRING.equals(result.getValue().getType())) {
+            throw new RuntimeException("解析执行器标签的el表达式解析失败: 解析结果类型不正确");
+        }
+        return result.getValue().getStringValue();
     }
 
     @Transactional
