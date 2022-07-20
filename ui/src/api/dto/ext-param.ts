@@ -1,8 +1,4 @@
-enum ParamType {
-  STRING = 'STRING',
-  BOOL = 'BOOL',
-  NUMBER = 'NUMBER',
-}
+import { ParamTypeEnum } from './enumeration';
 
 /**
  * 查询外部参数
@@ -11,7 +7,7 @@ export interface IExternalParameterVo {
   id: string;
   ref: string;
   name: string;
-  type: ParamType;
+  type: ParamTypeEnum;
   value: string;
   label: string;
   createdTime: string;
@@ -24,7 +20,7 @@ export interface IExternalParameterVo {
 export interface IExternalParameterCreatingDto {
   ref: string;
   name?: string;
-  type: ParamType;
+  type: ParamTypeEnum;
   value: string;
   label: string;
 }
@@ -35,7 +31,7 @@ export interface IExternalParameterCreatingDto {
 export interface IExternalParameterUpdatingDto {
   id: string;
   name?: string;
-  type: ParamType;
+  type: ParamTypeEnum;
   value: string;
   label: string;
 }

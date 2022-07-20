@@ -47,11 +47,12 @@
             <jm-radio :label="ParamTypeEnum.BOOL">布尔</jm-radio>
           </jm-radio-group>
         </jm-form-item>
-        <jm-form-item label="值" prop="value" :rules="rules.value">
+        <jm-form-item v-if="valueVisible" label="值" prop="value" :rules="rules.value">
           <jm-input v-if="addParam.type === ParamTypeEnum.STRING" v-model="addParam.value" type="textarea"
                     :maxlength="512"
                     placeholder="请输入参数值"/>
-          <jm-input v-else-if="addParam.type === ParamTypeEnum.NUMBER" v-model="addParam.value" placeholder="请输入参数值"
+          <jm-input v-else-if="addParam.type === ParamTypeEnum.NUMBER" v-model="addParam.value" type="number"
+                    placeholder="请输入参数值"
                     :maxlength="512"/>
           <jm-radio-group v-else-if="addParam.type === ParamTypeEnum.BOOL" v-model="addParam.value">
             <jm-radio :label="'true'">true</jm-radio>
@@ -69,7 +70,7 @@
             placeholder="请选择或创建参数标签"
           >
             <jm-option
-              v-for="item in options"
+              v-for="item in labelOption"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -89,16 +90,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, nextTick, ref } from 'vue';
 import { addExtParam, deleteExtParam, editorExtParam, getExtParamLabelList, getExtParamList } from '@/api/ext-param';
 import { IExternalParameterLabelVo, IExternalParameterVo } from '@/api/dto/ext-param';
 import ExtParamCard from './ext-param-card.vue';
-
-enum ParamTypeEnum {
-  STRING = 'STRING',
-  NUMBER = 'NUMBER',
-  BOOL = 'BOOL',
-}
+import { ParamTypeEnum } from '@/api/dto/enumeration';
 
 interface addParamType {
   ref: string;
@@ -119,20 +115,44 @@ export default defineComponent({
     // 获取label列表
     const extLabelList = ref<IExternalParameterLabelVo[]>();
     const currentTab = ref<number>(0);
+    const valueVisible = ref<boolean>(true);
     // 存储修改-区分新增/修改，使用同一个弹窗
     const editorExtParams = ref<{ flag: boolean, id: string }>({
       flag: false,
       id: '',
     });
+    // label默认值
+    const labelOption = ref<{ label: string, value: string }[]>([
+      {
+        value: '默认',
+        label: '默认',
+      },
+    ]);
     const addParam = ref<addParamType>({ ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: '' });
 
+    const labelList: string[] = [];
     const init = async () => {
       extParams.value = await getExtParamList();
       extLabelList.value = await getExtParamLabelList();
       extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
+      //  判断是否已经有默认
+      extLabelList.value?.forEach(item => {
+        labelList.push(item.value);
+      });
+      if (labelList.indexOf('默认') === -1) {
+        extLabelList.value?.splice(1, 0, { id: '', value: '默认', createdTime: '', lastModifiedTime: '' });
+      }
+
+      // 构建label列表
+      extLabelList.value?.forEach(item => {
+        if (item.value !== '全部' && item.value !== '默认') {
+          labelOption.value.push({ label: item.value, value: item.value });
+        }
+      });
     };
     init();
 
+    // 构建tab参数
     const data = computed<{ label: string, projects: IExternalParameterVo[], counter: number }>(() => {
       const info: any = [];
       extLabelList.value?.forEach(labels => {
@@ -154,6 +174,8 @@ export default defineComponent({
       currentTab,
       labelSelectRef,
       data,
+      labelOption,
+      valueVisible,
       rules: {
         ref: [
           { required: true, message: '请输入唯一标识', trigger: 'blur' },
@@ -167,12 +189,6 @@ export default defineComponent({
           { required: true, message: '请选择或创建参数标签', trigger: 'change' },
         ],
       },
-      options: [
-        {
-          value: '默认',
-          label: '默认',
-        },
-      ],
       // 新增-保存
       sure: () => {
         addParamRef.value?.validate(async (valid: boolean) => {
@@ -258,11 +274,14 @@ export default defineComponent({
           })
           .catch();
       },
-      changeType: (e: ParamTypeEnum) => {
+      changeType: async (e: ParamTypeEnum) => {
         addParam.value.value = '';
         if (e === ParamTypeEnum.BOOL) {
           addParam.value.value = 'true';
         }
+        valueVisible.value = false;
+        await nextTick();
+        valueVisible.value = true;
       },
       // enter选中label
       enterSelect: (e: any) => {
@@ -339,26 +358,29 @@ export default defineComponent({
     padding: 0 25px 0 0;
   }
 
-  ::v-deep(.el-button){
+  ::v-deep(.el-button) {
     width: 76px;
     height: 36px;
     box-shadow: none;
-    border:none;
+    border: none;
   }
+
   ::v-deep(.el-button--default) {
     background: #F5F5F5;
     border-radius: 2px;
-    &:hover{
+
+    &:hover {
 
       background: #EFF7FF;
       border-radius: 2px;
     }
   }
 
-  ::v-deep(.el-button--primary){
+  ::v-deep(.el-button--primary) {
     background: #096DD9;
     border-radius: 2px;
-    &:hover{
+
+    &:hover {
       background: #3293FD;
       border-radius: 2px;
     }

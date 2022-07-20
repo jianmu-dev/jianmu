@@ -1,14 +1,12 @@
 <template>
   <div class="ext-param-card">
     <div class="ext-ref">
-      <!--      {{ reference }}-->
-      <!--      <jm-text-viewer class="value" :value="reference" :tip-append-to-body="false"/>-->
-      <div class="ref-value">
-        <jm-text-viewer :value="reference" :tip-append-to-body="false"/>
-      </div>
       <jm-tooltip content="唯一标识" placement="top">
         <i class="ref-icon"></i>
       </jm-tooltip>
+      <div class="ref-value">
+        <jm-text-viewer :value="reference" :tip-append-to-body="false"/>
+      </div>
     </div>
     <div class="ext-name">
       <div class="label">名称：</div>
@@ -47,12 +45,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
+import { ParamTypeEnum } from '@/api/dto/enumeration';
 
-enum ParamTypeEnum {
-  STRING = 'STRING',
-  NUMBER = 'NUMBER',
-  BOOL = 'BOOL',
-}
 
 export default defineComponent({
   props: {
@@ -142,10 +136,7 @@ export default defineComponent({
     }
 
     .ref-value {
-      //display: inline-block;
-      //flex:1;
-      //width:80%;
-      width: calc(100% - 26px);
+      width: 90%;
     }
   }
 
@@ -220,6 +211,7 @@ export default defineComponent({
       height: 26px;
       line-height: 26px;
       font-size: 18px;
+      color: #6B7B8D;
       border-radius: 2px;
       background: rgba(255, 255, 255, .9);
     }
