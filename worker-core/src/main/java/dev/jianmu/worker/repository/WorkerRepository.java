@@ -27,5 +27,5 @@ public interface WorkerRepository {
 
     List<Worker> findByTypeInAndCreatedTimeLessThan(List<Worker.Type> types, LocalDateTime createdTime);
 
-    List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(List<Worker.Type> types, String tag, LocalDateTime createdTime);
+    List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(List<Worker.Type> types, List<String> tags, LocalDateTime createdTime);
 }

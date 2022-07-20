@@ -160,17 +160,14 @@ public class WorkerInternalApplication {
             this.workflowInstanceRepository.findByTriggerId(event.getTriggerId())
                     .ifPresent(workflowInstance -> {
                         // 分发worker
-                        String workerTag = this.getWorkerTag(workflowInstance);
-                        if (!StringUtils.hasText(workerTag)) {
-                            throw new RuntimeException("未找到该流程的tag");
-                        }
-                        var workers = this.checkOldVersionOfWorkflowTag(workflowInstance) ?
+                        List<String> workerTags = this.getWorkerTag(workflowInstance);
+                        var workers = workerTags.isEmpty() ?
                                 this.workerRepository.findByTypeInAndCreatedTimeLessThan(
                                         List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                        workflowInstance.getStartTime())  :
+                                        workflowInstance.getStartTime()) :
                                 this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
-                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                        workerTag, workflowInstance.getStartTime());
+                                List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                workerTags, workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
                             throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
@@ -187,18 +184,12 @@ public class WorkerInternalApplication {
         }
     }
 
-    private Boolean checkOldVersionOfWorkflowTag(WorkflowInstance workflowInstance) {
-        var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
-                .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
-        return workflow.getTag() == null;
-    }
-
-    private String getWorkerTag(WorkflowInstance workflowInstance) {
+    private List<String> getWorkerTag(WorkflowInstance workflowInstance) {
         // 因为trigger参数与workflow的全局参数并不一致，该方法无法在workflow实体中进行处理
         var context = new ElContext();
         var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
                 .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
-        Expression el = this.expressionLanguage.parseExpression("`" + workflow.getTag() + "`");
+        List<String> tags = workflow.getTags();
         workflow.getGlobalParameters()
                 .forEach(globalParameter -> context.add(
                         "global",
@@ -215,13 +206,16 @@ public class WorkerInternalApplication {
                                 Parameter
                                         .Type.getTypeByName(triggerEventParameter.getType())
                                         .newParameter(triggerEventParameter.getValue()))));
-        EvaluationResult result = this.expressionLanguage.evaluateExpression(el, context);
-        if (result.isFailure()) {
-            throw new RuntimeException("解析执行器标签的el表达式解析失败: " + result.getFailureMessage());
-        } else if (!Parameter.Type.STRING.equals(result.getValue().getType())) {
-            throw new RuntimeException("解析执行器标签的el表达式解析失败: 解析结果类型不正确");
-        }
-        return result.getValue().getStringValue();
+        return workflow.getTags().stream().filter(StringUtils::hasText).map(tag -> {
+            Expression el = this.expressionLanguage.parseExpression("`" + tag + "`");
+            EvaluationResult result = this.expressionLanguage.evaluateExpression(el, context);
+            if (result.isFailure()) {
+                throw new RuntimeException("解析执行器标签的el表达式解析失败: " + result.getFailureMessage());
+            } else if (!Parameter.Type.STRING.equals(result.getValue().getType())) {
+                throw new RuntimeException("解析执行器标签的el表达式解析失败: 解析结果类型不正确");
+            }
+            return result.getValue().getStringValue();
+        }).collect(Collectors.toList());
     }
 
     @Transactional

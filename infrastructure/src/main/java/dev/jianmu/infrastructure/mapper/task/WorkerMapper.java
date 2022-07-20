@@ -47,10 +47,13 @@ public interface WorkerMapper {
             " type IN " +
             " <foreach collection='types' item='item' open='(' close=')' separator=','> #{item} " +
             " </foreach>" +
-            " and tags = #{tag}" +
+            " and " +
+            " tags IN " +
+            " <foreach collection='tags' item='tag' open='(' close=')' separator=','> #{tag} " +
+            " </foreach>" +
             "</where>" +
             "</script>")
     @Result(column = "created_time", property = "createdTime")
-    List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(@Param("types") List<Worker.Type> types, @Param("tag") String tag, @Param("createdTime") LocalDateTime createdTime);
+    List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(@Param("types") List<Worker.Type> types, @Param("tags") List<String> tags, @Param("createdTime") LocalDateTime createdTime);
 
 }

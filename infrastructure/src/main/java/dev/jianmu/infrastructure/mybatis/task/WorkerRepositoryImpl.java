@@ -64,7 +64,7 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     }
 
     @Override
-    public List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(List<Worker.Type> types, String tag, LocalDateTime createdTime) {
-        return this.workerMapper.findByTypeInAndTagAndCreatedTimeLessThan(types, tag, createdTime);
+    public List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(List<Worker.Type> types, List<String> tags, LocalDateTime createdTime) {
+        return this.workerMapper.findByTypeInAndTagAndCreatedTimeLessThan(types, tags, createdTime);
     }
 }

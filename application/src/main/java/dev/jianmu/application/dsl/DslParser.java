@@ -288,8 +288,11 @@ public class DslParser {
             this.concurrent = (Boolean) concurrent;
         }
         var tag = this.global.get("tag");
-        if (tag instanceof String){
+        if (tag instanceof String) {
             this.tag = (String) tag;
+        } else if (tag instanceof List) {
+            List<Object> tags = (List<Object>) tag;
+            this.tag = tags.stream().map(Object::toString).collect(Collectors.joining(","));
         }
     }
 

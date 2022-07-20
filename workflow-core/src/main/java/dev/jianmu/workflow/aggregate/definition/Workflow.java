@@ -9,10 +9,7 @@ import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.event.definition.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -378,7 +375,11 @@ public class Workflow extends AggregateRoot {
     }
 
     public String getTag() {
-        return tag;
+        return this.tag;
+    }
+
+    public List<String> getTags() {
+        return Arrays.asList(this.tag.split(","));
     }
 
     public String getDescription() {
