@@ -23,27 +23,34 @@ export default defineComponent({
     // 获取此时进行编辑的节点信息
     const getGraph = inject('getGraph') as () => Graph;
     const buildSelectableGlobalParam = inject('buildSelectableGlobalParam') as () => ISelectableParam | undefined;
+    const buildSelectableExtParam = inject('buildSelectableExtParam') as () => Promise<ISelectableParam | undefined>;
     const graph = getGraph();
     const selectableParams = ref<ISelectableParam[]>([]);
-    if (props.nodeId) {
-      const graphNode = graph.getCellById(props.nodeId) as Node;
-      const proxy = new CustomX6NodeProxy(graphNode);
-      // 级联选择器选项
-      selectableParams.value.push(...proxy.getSelectableParams(graph));
-      if (proxy.getData().getType() !== NodeTypeEnum.WEBHOOK) {
-        const buildGlobalParam = buildSelectableGlobalParam();
-        if (buildGlobalParam) {
-          selectableParams.value.push(buildGlobalParam);
+
+    onMounted(async () => {
+      // 外部参数
+      const buildExtParam = await buildSelectableExtParam();
+      if (buildExtParam) {
+        selectableParams.value.push(buildExtParam);
+      }
+      if (props.nodeId) {
+        const graphNode = graph.getCellById(props.nodeId) as Node;
+        const proxy = new CustomX6NodeProxy(graphNode);
+        // 级联选择器选项
+        selectableParams.value.push(...proxy.getSelectableParams(graph));
+        if (proxy.getData().getType() !== NodeTypeEnum.WEBHOOK) {
+          const buildGlobalParam = buildSelectableGlobalParam();
+          if (buildGlobalParam) {
+            selectableParams.value.push(buildGlobalParam);
+          }
+        }
+      } else {
+        const webhookNode = graph.getNodes().find(node =>
+          new CustomX6NodeProxy(node).getData().getType() === NodeTypeEnum.WEBHOOK);
+        if (webhookNode) {
+          selectableParams.value.push(...new CustomX6NodeProxy(webhookNode).getSelectableParams(graph));
         }
       }
-    } else {
-      const webhookNode = graph.getNodes().find(node =>
-        new CustomX6NodeProxy(node).getData().getType() === NodeTypeEnum.WEBHOOK);
-      if (webhookNode) {
-        selectableParams.value.push(...new CustomX6NodeProxy(webhookNode).getSelectableParams(graph));
-      }
-    }
-    onMounted(() => {
       emit('editor-created', (params: ISelectableParam[]) => {
         selectableParams.value = params;
       });

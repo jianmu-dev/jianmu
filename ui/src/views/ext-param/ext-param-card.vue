@@ -95,7 +95,7 @@ export default defineComponent({
 <style scoped lang="less">
 .ext-param-card {
   width: 19.2%;
-  margin: .8% .77% 0 0;
+  margin: .8% .385% 0 .385%;
   box-sizing: border-box;
   padding: 20px;
   font-size: 14px;

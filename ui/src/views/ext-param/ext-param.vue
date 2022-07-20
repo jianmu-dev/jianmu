@@ -305,17 +305,20 @@ export default defineComponent({
     font-size: 14px;
 
     .classification-tabs {
-      margin-bottom: 20px;
+      margin: 0 0 20px 0.385%;
       color: #082340;
 
       .tab-item {
         cursor: pointer;
         box-sizing: border-box;
-        padding: 5px 30px 5px 0px;
+        padding: 5px 15px;
+        margin-right: 30px;
 
         &.is-active {
           font-weight: 500;
           color: #096DD9;
+          background-color: #EBF4FF;
+          border-radius: 15px;
         }
       }
     }
@@ -334,7 +337,7 @@ export default defineComponent({
       flex-direction: column;
       width: 19.2%;
       height: 180px;
-      margin: .8% .77% 0 0;
+      margin: .8% .385% 0 0.385%;
       border-radius: 4px;
       box-sizing: border-box;
       border: 1px solid #E7ECF1;
