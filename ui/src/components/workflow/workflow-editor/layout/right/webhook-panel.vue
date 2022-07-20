@@ -25,11 +25,11 @@
           <webhook-param
             v-for="(param,index) in form.params"
             :key="param.key"
+            v-model:referenc="param.ref"
             v-model:name="param.name"
-            v-model:exp="param.exp"
+            v-model:value="param.value"
             v-model:type="param.type"
             v-model:required="param.required"
-            v-model:default="param.default"
             :form-model-name="'params'"
             :index="index"
             :rules="nodeData.getFormRules().params.fields[index].fields"
@@ -180,7 +180,7 @@ export default defineComponent({
         refreshEditorParams();
       },
       addParam: () => {
-        form.value.params.push({ key: uuidv4(), name: '', exp: '', type: undefined, required: false });
+        form.value.params.push({ key: uuidv4(), ref: '', name: '', value: '', type: undefined, required: false });
         refreshEditorParams();
       },
       foldParam: () => {
