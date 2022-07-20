@@ -14,7 +14,7 @@
         <jm-form-item label="项目名称" prop="name" class="name-item">
           <jm-input v-model="projectInfoForm.name" :maxlength="45" placeholder="请输入项目名称" :show-word-limit="true"/>
         </jm-form-item>
-        <jm-form-item label="项目分组" class="group-item" prop="groupId" v-if="isShowGrouping">
+        <jm-form-item label="项目分组" class="group-item" prop="groupId" v-if="!workflowData.association.entry">
           <jm-select v-model="projectInfoForm.groupId" placeholder="请选择项目分组" v-loading="loading">
             <jm-option
               v-for="item in projectGroupList"
@@ -63,7 +63,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const loading = ref<boolean>(true);
     const workflowForm = ref<IWorkflow>(props.workflowData);
-    const isShowGrouping = computed<boolean>(() => !props.workflowData.association.entry);
     const projectInfoForm = ref<IProjectInfo>({
       name: props.workflowData.name,
       description: props.workflowData.description || '',
@@ -80,7 +79,6 @@ export default defineComponent({
     });
 
     return {
-      isShowGrouping,
       editProjectInfoRef,
       projectGroupList,
       projectInfoForm,
