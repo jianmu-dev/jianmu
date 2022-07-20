@@ -15,6 +15,7 @@
       <expression-editor
         v-model="envVal"
         :node-id="nodeId"
+        :param-type="ParamTypeEnum.STRING"
         @change="changeVal"
         class="shell-env-val"
         placeholder="请输入变量值"
@@ -30,6 +31,7 @@ import { defineComponent, inject, PropType, ref } from 'vue';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from './expression-editor.vue';
 import { Node } from '@antv/x6';
+import { ParamTypeEnum } from '../../../model/data/enumeration';
 
 export default defineComponent({
   components: { ExpressionEditor },
@@ -67,6 +69,7 @@ export default defineComponent({
 
 
     return {
+      ParamTypeEnum,
       envName,
       envVal,
       switchBackgroundFlag,

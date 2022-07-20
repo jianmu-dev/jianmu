@@ -42,6 +42,7 @@
       </template>
       <expression-editor
         v-model="valueVal"
+        :param-type="typeVal"
         placeholder="请输入参数值"
         @change="changeValue"
         @focus="switchBackgroundFlag=true"

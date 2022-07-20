@@ -76,6 +76,7 @@
               <expression-editor
                 v-model="form.auth.token"
                 :node-id="nodeId"
+                :param-type="ParamTypeEnum.STRING"
                 placeholder="请输入token值"
                 @editor-created="handleEditorCreated"/>
             </jm-form-item>
@@ -113,6 +114,7 @@
                 v-model="form.only"
                 placeholder="请输入匹配规则"
                 :node-id="nodeId"
+                :param-type="ParamTypeEnum.BOOL"
                 @editor-created="handleEditorCreated"/>
             </div>
           </jm-form-item>
@@ -128,10 +130,10 @@ import { Webhook } from '../../model/data/node/webhook';
 import WebhookParam from './form/webhook-param.vue';
 import SecretKeySelector from './form/secret-key-selector.vue';
 import ExpressionEditor from './form/expression-editor.vue';
-
 import { v4 as uuidv4 } from 'uuid';
 import { Node } from '@antv/x6';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
+import { ParamTypeEnum } from '../../model/data/enumeration';
 
 export default defineComponent({
   components: { WebhookParam, SecretKeySelector, ExpressionEditor },
@@ -166,6 +168,7 @@ export default defineComponent({
     const authSwitch = ref<boolean>(!!props.nodeData.auth);
 
     return {
+      ParamTypeEnum,
       refreshEditorParams,
       handleEditorCreated,
       formRef,
