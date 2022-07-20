@@ -81,7 +81,7 @@ export class WorkflowNode {
       type: NodeTypeEnum.LOCAL,
       name: keyword,
     });
-    const arr: IWorkflowNode[] = list.map(item => new AsyncTask(item.ownerRef, item.ref, item.name, item.icon));
+    const arr: IWorkflowNode[] = list.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
     return {
       pageNum: currentPageNum,
       totalPages,
@@ -95,7 +95,7 @@ export class WorkflowNode {
       pageSize,
       name: keyword,
     });
-    const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.name, item.icon));
+    const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
     return {
       pageNum: currentPageNum,
       totalPages,
@@ -110,7 +110,7 @@ export class WorkflowNode {
       name: keyword,
       type: NodeTypeEnum.COMMUNITY,
     });
-    const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.name, item.icon));
+    const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
     return {
       pageNum: currentPageNum,
       totalPages,
