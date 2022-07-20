@@ -2,8 +2,10 @@ import { ParamTypeEnum } from './enumeration';
 import { CustomRule } from '@/components/workflow/workflow-editor/model/data/common';
 import Schema, { Value } from 'async-validator';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
+import { getExtParamList } from '@/api/ext-param';
 
 export const GLOBAL_PARAM_SCOPE = 'global';
+export const EXT_PARAM_SCOPE = 'ext';
 
 export class GlobalParam {
   ref: string;
@@ -59,6 +61,20 @@ export function buildSelectableGlobalParam(globalParams?: GlobalParam[]): ISelec
     value: GLOBAL_PARAM_SCOPE,
     label: '全局参数',
     children: globalParams.filter(({ ref }) => ref).map(({ ref, name }) => {
+      return {
+        value: ref,
+        label: name || ref,
+      };
+    }),
+  };
+}
+
+export async function buildSelectableExtParam(): Promise<ISelectableParam | undefined> {
+  const extParams = await getExtParamList();
+  return {
+    value: EXT_PARAM_SCOPE,
+    label: '外部参数',
+    children: extParams.filter(({ ref }) => ref).map(({ ref, name }) => {
       return {
         value: ref,
         label: name || ref,
