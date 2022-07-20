@@ -1,16 +1,20 @@
 <template>
-  <div class="jm-workflow-exp-editor">
+  <div class="jm-workflow-expression-editor">
     <param-button :selectableParams="selectableParams" @inserted="handleInserted"/>
-    <div class="editor-lang">{{ lang }}</div>
+    <div class="top">
+      <div class="exp-lang">{{ expLang }}</div>
+      <div class="param-type">{{ paramTypeTxt }}</div>
+    </div>
     <textarea ref="textareaRef"></textarea>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, nextTick, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, PropType, ref } from 'vue';
 import { ExpressionEditor } from './model/expression-editor';
 import { ISelectableParam } from './model/data';
 import ParamButton from './param-button.vue';
+import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 
 export default defineComponent({
   name: 'jm-workflow-expression-editor',
@@ -20,9 +24,13 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    lang: {
+    expLang: {
       type: String,
       default: 'js/ts',
+    },
+    paramType: {
+      type: String as PropType<ParamTypeEnum>,
+      required: true,
     },
     placeholder: {
       type: String,
@@ -61,6 +69,24 @@ export default defineComponent({
 
     return {
       textareaRef,
+      paramTypeTxt: computed<string>(() => {
+        let str = '参数类型：';
+        switch (props.paramType) {
+          case ParamTypeEnum.STRING:
+            str += '字符串';
+            break;
+          case ParamTypeEnum.NUMBER:
+            str += '数字';
+            break;
+          case ParamTypeEnum.BOOL:
+            str += '布尔';
+            break;
+          default:
+            str += '未知';
+            break;
+        }
+        return str;
+      }),
       handleInserted: (arr: string[]) => {
         expressionEditor.insertParam(arr);
         syncValue();
@@ -73,7 +99,7 @@ export default defineComponent({
 <style scoped lang="less">
 @import "../workflow-editor/vars";
 
-.jm-workflow-exp-editor {
+.jm-workflow-expression-editor {
   position: relative;
 
   .param-button {
@@ -82,12 +108,11 @@ export default defineComponent({
     right: 0;
   }
 
-  .editor-lang {
+  .top {
     box-sizing: border-box;
     width: calc(100% - 2px);
-    padding-left: 14px;
+    padding: 0 14px;
     height: 24px;
-    line-height: 24px;
     position: absolute;
     top: 1px;
     left: 1px;
@@ -96,6 +121,17 @@ export default defineComponent({
     border-radius: 1px 1px 0 0;
     color: #7B8C9C;
     font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .exp-lang {
+
+    }
+
+    .param-type {
+
+    }
   }
 
   ::v-deep(.CodeMirror) {

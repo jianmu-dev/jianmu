@@ -69,6 +69,7 @@
               v-else
               v-model="item.value"
               :node-id="nodeId"
+              :param-type="item.type"
               :placeholder="item.description?item.description:'请输入'+item.name"/>
           </jm-form-item>
           <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failureMode"
