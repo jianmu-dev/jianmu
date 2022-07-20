@@ -13,7 +13,7 @@ export class Global {
     const { concurrent, params } = this;
     return {
       concurrent,
-      params: params.length === 0 ? undefined : params,
+      param: params.length === 0 ? undefined : params,
     };
   }
 }

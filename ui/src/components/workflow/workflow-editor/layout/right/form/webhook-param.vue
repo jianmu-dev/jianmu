@@ -1,6 +1,15 @@
 <template>
   <div :class="{'webhook-param':true,'switch-bgc':switchBackgroundFlag}">
     <i class="jm-icon-button-delete" @click="deleteParam"/>
+    <jm-form-item label="唯一标识" :prop="`${formModelName}.${index}.ref`" :rules="rules.ref">
+      <jm-input
+        v-model="refVal"
+        placeholder="请输入参数唯一表示"
+        @change="changeReference"
+        @focus="switchBackgroundFlag = true;"
+        @blur="switchBackgroundFlag = false;"
+      />
+    </jm-form-item>
     <jm-form-item label="名称" :prop="`${formModelName}.${index}.name`" :rules="rules.name">
       <jm-input
         v-model="nameVal"
@@ -19,9 +28,8 @@
         <jm-option v-for="(item,index) in ParamTypeEnum" :key="index" :label="item" :value="item"/>
       </jm-select>
     </jm-form-item>
-    <jm-form-item :prop="`${formModelName}.${index}.exp`" :rules="rules.exp">
-      <template #label>
-        表达式
+    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
+      <template #label>值
         <jm-tooltip placement="top">
           <template #content>
             详见<a
@@ -33,9 +41,9 @@
         </jm-tooltip>
       </template>
       <jm-input
-        v-model="expVal"
-        placeholder="请输入参数表达式"
-        @change="changeExp" class="exp"
+        v-model="valueVal"
+        placeholder="请输入参数值"
+        @change="changeValue"
         @focus="switchBackgroundFlag = true;"
         @blur="switchBackgroundFlag = false;"
       />
@@ -48,12 +56,6 @@
         <jm-radio :label="true">是</jm-radio>
       </jm-radio-group>
     </jm-form-item>
-    <jm-form-item v-if="!requiredVal"
-                  :prop="`${formModelName}.${index}.default`" :rules="rules.default"
-                  label="默认值">
-      <jm-input v-model="defaultVal" @change="changeDefault" placeholder="请输入默认值" @focus="switchBackgroundFlag = true;"
-                @blur="switchBackgroundFlag = false;"/>
-    </jm-form-item>
   </div>
 </template>
 
@@ -64,6 +66,10 @@ import { CustomRule } from '../../../model/data/common';
 
 export default defineComponent({
   props: {
+    reference: {
+      type: String,
+      default: '',
+    },
     name: {
       type: String,
       default: '',
@@ -72,17 +78,13 @@ export default defineComponent({
       type: String as PropType<ParamTypeEnum>,
       default: '',
     },
-    exp: {
+    value: {
       type: String,
       default: '',
     },
     required: {
       type: Boolean,
       default: false,
-    },
-    default: {
-      type: String,
-      default: '',
     },
     index: {
       type: Number,
@@ -97,42 +99,47 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:name', 'update:type', 'update:exp', 'update:required', 'update:default', 'delete'],
+  emits: [
+    'update:reference',
+    'update:name',
+    'update:type',
+    'update:value',
+    'update:required',
+    'delete',
+  ],
   setup(props, { emit }) {
+    const refVal = ref<string>(props.reference);
     const nameVal = ref<string>(props.name);
     const typeVal = ref<ParamTypeEnum>(props.type);
-    const expVal = ref<string>(props.exp);
+    const valueVal = ref<string>(props.value);
     const requiredVal = ref<boolean>(props.required);
-    const defaultVal = ref<string>(props.default || '');
     const switchBackgroundFlag = ref<boolean>(false);
 
     // 初始化required的值
     emit('update:required', requiredVal.value);
 
     return {
+      refVal,
       nameVal,
       typeVal,
-      expVal,
+      valueVal,
       requiredVal,
-      defaultVal,
       ParamTypeEnum,
       switchBackgroundFlag,
+      changeReference: () => {
+        emit('update:reference', refVal.value);
+      },
       changeName: () => {
         emit('update:name', nameVal.value);
       },
       changeType: () => {
         emit('update:type', typeVal.value);
       },
-      changeExp: () => {
-        emit('update:exp', expVal.value);
-      },
-      changeDefault: () => {
-        emit('update:default', defaultVal.value);
+      changeValue: () => {
+        emit('update:value', valueVal.value);
       },
       changeRequired: () => {
         emit('update:required', requiredVal.value);
-        defaultVal.value = requiredVal.value ? undefined : '';
-        emit('update:default', defaultVal.value);
       },
       deleteParam: () => {
         emit('delete', props.index, props.name);
