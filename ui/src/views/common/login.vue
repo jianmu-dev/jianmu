@@ -110,6 +110,8 @@ export default defineComponent({
     const authError = ref<boolean>(false);
     // 获取三方登录授权地址
     const fetchThirdAuthUrl = async () => {
+      // 每次重新点击登录时，删除原有session
+      store.commit(`${namespace}/mutateDeletion`);
       authError.value = false;
       localStorage.setItem('temp-login-mode', props.type);
       // 如果从iframe中登录，记录登录状态
@@ -117,7 +119,7 @@ export default defineComponent({
       // 弹框登录方式获取授权地址时显示登录中
       const tempLoginMode = localStorage.getItem('temp-login-mode');
       // 如果弹窗以及iframe形式登录有loading效果
-      (tempLoginMode === 'dialog' || tempLoginMode === 'iframe') && (loading.value = true);
+      tempLoginMode === 'dialog' && (loading.value = true);
       try {
         const { authorizationUrl } = await fetchAuthUrl({
           thirdPartyType: loginType.value,
