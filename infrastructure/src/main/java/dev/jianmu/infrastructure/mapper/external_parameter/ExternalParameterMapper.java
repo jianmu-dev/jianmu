@@ -27,6 +27,7 @@ public interface ExternalParameterMapper {
             "SELECT * FROM `jm_external_parameter`" +
             "<where> id = #{id}" +
             "</where>" +
+            " order by last_modified_time desc" +
             "</script>")
     @Result(column = "id", property = "id")
     @Result(column = "ref", property = "ref")
