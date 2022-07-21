@@ -78,7 +78,7 @@ CREATE TABLE `jm_trigger_event_parameter`
     `type`             varchar(45) NOT NULL COMMENT '参数类型',
     `value`            text        NOT NULL COMMENT '参数值',
     `required`         bit         NOT NULL COMMENT '是否必填',
-    `hidden`           bit         NOT NULL COMMENT '是否隐藏',
+    `hidden`           bit         NOT NULL DEFAULT 0 COMMENT '是否隐藏',
     `parameter_id`     varchar(45) NOT NULL COMMENT '参数引用ID'
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
