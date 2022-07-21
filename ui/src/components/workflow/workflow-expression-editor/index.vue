@@ -3,7 +3,7 @@
     <param-button :selectableParams="selectableParams" @inserted="handleInserted"/>
     <div class="top">
       <div class="exp-lang">{{ expLang }}</div>
-      <div class="param-type">{{ paramTypeTxt }}</div>
+      <div class="param-type" v-show="paramTypeVisible">{{ paramTypeTxt }}</div>
     </div>
     <textarea ref="textareaRef"></textarea>
   </div>
@@ -14,7 +14,7 @@ import { computed, defineComponent, nextTick, onMounted, PropType, ref } from 'v
 import { ExpressionEditor } from './model/expression-editor';
 import { ISelectableParam } from './model/data';
 import ParamButton from './param-button.vue';
-import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { ParamTypeEnum } from '../workflow-editor/model/data/enumeration';
 
 export default defineComponent({
   name: 'jm-workflow-expression-editor',
@@ -44,6 +44,7 @@ export default defineComponent({
   emits: ['update:model-value', 'focus', 'blur', 'change'],
   setup(props, { emit }) {
     const textareaRef = ref<HTMLTextAreaElement>();
+    const paramTypeVisible = ref<boolean>(false);
     let expressionEditor: ExpressionEditor;
 
     const syncValue = () => {
@@ -60,15 +61,19 @@ export default defineComponent({
       await nextTick();
 
       expressionEditor = new ExpressionEditor(textareaEl, props.placeholder,
-        e => emit('focus', e),
         e => {
+          paramTypeVisible.value = true;
+          emit('focus', e);
+        }, e => {
           syncValue();
+          paramTypeVisible.value = false;
           emit('blur', e);
         });
     });
 
     return {
       textareaRef,
+      paramTypeVisible,
       paramTypeTxt: computed<string>(() => {
         let str = '参数类型：';
         switch (props.paramType) {
