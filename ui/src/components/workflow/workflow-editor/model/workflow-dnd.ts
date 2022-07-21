@@ -78,21 +78,21 @@ export class WorkflowDnd {
         }
         const data = _data as AsyncTask;
         const isOwnerRef = data.ownerRef === NodeGroupEnum.LOCAL;
-        const res = await (isOwnerRef ? getLocalVersionList : getOfficialVersionList)(data.getRef(), data.ownerRef);
+        const res = await (isOwnerRef ? getLocalVersionList : getOfficialVersionList)(data.nodeRef, data.ownerRef);
         data.version = res.versions.length > 0 ? res.versions[0] : '';
         if (isOwnerRef) {
           const {
             inputParameters: inputs,
             outputParameters: outputs,
             description: versionDescription,
-          } = await getLocalNodeParams(data.getRef(), data.ownerRef, data.version);
+          } = await getLocalNodeParams(data.nodeRef, data.ownerRef, data.version);
           pushParams(data, inputs, outputs, versionDescription);
         } else {
           const {
             inputParams: inputs,
             outputParams: outputs,
             description: versionDescription,
-          } = await getOfficialNodeParams(data.getRef(), data.ownerRef, data.version);
+          } = await getOfficialNodeParams(data.nodeRef, data.ownerRef, data.version);
           pushParams(data, inputs, outputs, versionDescription);
         }
         // fix: #I5DXPM

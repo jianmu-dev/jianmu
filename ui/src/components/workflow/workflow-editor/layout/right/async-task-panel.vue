@@ -162,11 +162,11 @@ export default defineComponent({
         versionLoading.value = true;
         failureVisible.value = false;
         if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
-          const list = await getLocalNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
+          const list = await getLocalNodeParams(form.value.nodeRef, form.value.ownerRef, form.value.version);
           const { inputParameters: inputs, outputParameters: outputs, description: versionDescription } = list;
           pushParams(form.value as AsyncTask, inputs, outputs, versionDescription);
         } else {
-          const list = await getOfficialNodeParams(form.value.getRef(), form.value.ownerRef, form.value.version);
+          const list = await getOfficialNodeParams(form.value.nodeRef, form.value.ownerRef, form.value.version);
           const { inputParams: inputs, outputParams: outputs, description: versionDescription } = list;
           pushParams(form.value as AsyncTask, inputs, outputs, versionDescription);
         }
@@ -186,9 +186,9 @@ export default defineComponent({
       // 获取versionList
       try {
         if (props.nodeData.ownerRef === NodeGroupEnum.LOCAL) {
-          versionList.value = await getLocalVersionList(form.value.getRef(), form.value.ownerRef);
+          versionList.value = await getLocalVersionList(form.value.nodeRef, form.value.ownerRef);
         } else {
-          versionList.value = await getOfficialVersionList(form.value.getRef(), form.value.ownerRef);
+          versionList.value = await getOfficialVersionList(form.value.nodeRef, form.value.ownerRef);
         }
 
         if (!form.value.version && versionList.value.versions.length > 0) {
