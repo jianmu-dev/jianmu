@@ -3,7 +3,7 @@
     <jm-dialog
       :title="title"
       v-model="dialogVisible"
-      width="1200px"
+      :width="dialogWidth"
       @close="close"
     >
       <div class="content" v-loading="loading">
@@ -18,10 +18,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
 import { TriggerTypeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail, fetchWorkflow } from '@/api/view-no-auth';
 import { INodeDefVo } from '@/api/dto/project';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
@@ -34,7 +35,10 @@ export default defineComponent({
   emits: ['close'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
+    const store = useStore();
+    const entry = store.state.entry;
     const dialogVisible = ref<boolean>(true);
+    const dialogWidth = computed<string>(() => entry ? '1000px' : '1200px');
     const title = ref<string>('');
     const loading = ref<boolean>(false);
     const dsl = ref<string>();
@@ -76,6 +80,7 @@ export default defineComponent({
     onBeforeMount(() => loadDsl());
 
     return {
+      dialogWidth,
       TriggerTypeEnum,
       dialogVisible,
       title,
