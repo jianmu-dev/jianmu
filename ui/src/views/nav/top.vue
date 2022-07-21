@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { namespace } from '@/store/modules/session';
@@ -83,20 +83,6 @@ export default defineComponent({
     let state = store.state[namespace] as IState;
     const session = computed<ISessionVo | undefined>(() => {
       return defaultSession.value ? defaultSession.value : state.session;
-    });
-    const refreshState = (e: any) => {
-      if (e.key !== 'session') {
-        return;
-      }
-      defaultSession.value = JSON.parse(e.newValue)['_default'].session;
-      // 将新tab中的session值，保存在vuex中
-      proxy.mutateSession(defaultSession.value);
-    };
-    onMounted(() => {
-      window.addEventListener('storage', refreshState);
-    });
-    onBeforeUnmount(() => {
-      window.removeEventListener('storage', refreshState);
     });
     const currentVersion = `v${v}`;
     const newVersion = computed<IVersionVo | undefined>(() => {
@@ -131,6 +117,8 @@ export default defineComponent({
         try {
           // 清理token
           proxy.deleteSession();
+          // 退出登录时，将临时登录模式内容清空
+          localStorage.removeItem('temp-login-mode');
           proxy.$success('退出成功');
 
           router.push(LOGIN_INDEX);
