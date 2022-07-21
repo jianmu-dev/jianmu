@@ -145,7 +145,8 @@ export default defineComponent({
       let result = [...initProjects.value].sort((pre, next) => {
         if (sortType.value === GitRepoEnum.LAST_EXECUTION_TIME) {
           // 根据时间戳降序排列
-          return Date.parse(next.startTime as string) - Date.parse(pre.startTime as string);
+          return next.latestTime ? Date.parse(next.latestTime) : 0 -
+            pre.latestTime ? Date.parse(pre.latestTime) : 0;
         } else {
           return Date.parse(next.lastModifiedTime as string) - Date.parse(pre.lastModifiedTime as string);
         }

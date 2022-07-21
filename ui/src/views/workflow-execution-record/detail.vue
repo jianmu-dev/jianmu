@@ -8,7 +8,12 @@
         <div class="name">
           <i class="jm-icon-button-left back" @click="goBack"></i>
           <span>{{ data.record?.name }}</span>
+          <div class="branch" v-if='entry'>
+            <img src="~@/assets/svgs/index/branch.svg" alt="">
+            {{ data.project?.branch }}
+          </div>
           <router-link
+            v-else
             :to="{
               path: `/project-group/detail/${data.project?.projectGroupId}`,
             }"
@@ -275,6 +280,7 @@ export default defineComponent({
     }>(() => state.recordDetail);
 
     return {
+      entry,
       navScrollBar,
       WorkflowExecutionRecordStatusEnum,
       data,
@@ -426,7 +432,7 @@ export default defineComponent({
 
       .name {
         font-size: 20px;
-        font-weight: bold;
+        font-weight: 400;
         color: #082340;
         display: flex;
         align-items: center;
@@ -440,8 +446,35 @@ export default defineComponent({
           color: #6B7B8D;
           margin-right: 20px;
 
+          &:hover {
+            background-color: #EFF7FF;
+            color: #096DD9;
+          }
+
           &::before {
             margin: 0;
+          }
+        }
+
+        .branch {
+          position: relative;
+          display: flex;
+          align-items: center;
+          color: #6B7B8D;
+
+          img {
+            height: 16px;
+            width: 16px;
+            margin-right: 6px;
+          }
+
+          &::before {
+            content: '';
+            display: inline-block;
+            background-color: #CDD1E3;
+            width: 1px;
+            height: 16px;
+            margin: 0 20px;
           }
         }
 
