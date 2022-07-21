@@ -1,7 +1,7 @@
 <template>
   <div :class="{'http-status-error': true, [`_${status}`]: true}">
     <div class="desc">{{ message }}</div>
-    <div class="back">
+    <div class="back" v-if="!entry || entryUrl">
       <jm-button type="primary" class="jm-icon-button-back" size="small" @click="back">返回首页</jm-button>
     </div>
     <bottom-nav/>
@@ -34,7 +34,7 @@ export default defineComponent({
     let status = +props.value;
     const store = useStore();
     const router = useRouter();
-    const entryUrl = store.state[namespace].session.entryUrl;
+    const entryUrl = store.state[namespace].session?.entryUrl;
     const entry = store.state.entry;
     const back = async () => {
       if (!entry) {
@@ -55,6 +55,8 @@ export default defineComponent({
       status = 404;
     }
     return {
+      entry,
+      entryUrl,
       status,
       message: messages[status],
       back,
