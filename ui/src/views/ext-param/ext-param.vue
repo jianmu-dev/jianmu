@@ -95,6 +95,7 @@ import { addExtParam, deleteExtParam, editorExtParam, getExtParamLabelList, getE
 import { IExternalParameterLabelVo, IExternalParameterVo } from '@/api/dto/ext-param';
 import ExtParamCard from './ext-param-card.vue';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
+import { useStore } from 'vuex';
 
 interface addParamType {
   ref: string;
@@ -108,6 +109,8 @@ export default defineComponent({
   components: { ExtParamCard },
   setup() {
     const { proxy } = getCurrentInstance() as any;
+    const store = useStore();
+    const entry = store.state.entry;
     const labelSelectRef = ref<HTMLElement>();
     const extParams = ref<IExternalParameterVo[]>();
     const addExtParamVisible = ref<boolean>(false);
@@ -252,12 +255,13 @@ export default defineComponent({
       },
       // 删除
       del: (id: string, name: string) => {
+        let title = entry ? '流水线' : '项目';
         let msg = '<div>确定要删除参数吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">名称：${name}</div>`;
-        msg += '<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的项目将会报错</div>';
+        msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的${title}将会报错</div>`;
 
         proxy
-          .$confirm(msg, '删除项目', {
+          .$confirm(msg, '删除参数', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
