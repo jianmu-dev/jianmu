@@ -70,7 +70,7 @@ export default defineComponent({
     };
 
     const callback: CallBackFnType = async (logData, startLine) => {
-      data.value = logData;
+      data.value.push(...logData);
       moreLog.value = startLine === undefined ? false : startLine > 1;
 
       await nextTick();
