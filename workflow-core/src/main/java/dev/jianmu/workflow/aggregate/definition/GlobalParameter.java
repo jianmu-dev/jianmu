@@ -5,13 +5,14 @@ package dev.jianmu.workflow.aggregate.definition;
  * @description 全局参数
  * @author Ethan Liu
  * @create 2021-09-04 16:43
-*/
+ */
 public class GlobalParameter {
     private String ref;
     private String name;
     private String type;
     private Object value;
     private Boolean required;
+    private Boolean hidden;
 
     public String getName() {
         return name;
@@ -33,12 +34,17 @@ public class GlobalParameter {
         return required;
     }
 
+    public Boolean getHidden() {
+        return hidden;
+    }
+
     public static final class Builder {
         private String ref;
         private String name;
         private String type;
         private Object value;
         private Boolean required;
+        private Boolean hidden;
 
         private Builder() {
         }
@@ -72,6 +78,11 @@ public class GlobalParameter {
             return this;
         }
 
+        public Builder hidden(Boolean hidden) {
+            this.hidden = hidden;
+            return this;
+        }
+
         public GlobalParameter build() {
             GlobalParameter globalParameter = new GlobalParameter();
             globalParameter.ref = this.ref;
@@ -79,6 +90,7 @@ public class GlobalParameter {
             globalParameter.type = this.type;
             globalParameter.name = this.name;
             globalParameter.required = this.required;
+            globalParameter.hidden = this.hidden;
             return globalParameter;
         }
     }

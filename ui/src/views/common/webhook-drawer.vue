@@ -445,10 +445,10 @@ export default defineComponent({
       }
     };
     // 查看payload
-    const seePayload = (id: string) => {
+    const seePayload = async (id: string) => {
       webhookListId.value = id;
+      await getTriggerParam();
       payloadDialogVisible.value = true;
-      getTriggerParam();
     };
     // 显示更多
     const btnDown = () => {

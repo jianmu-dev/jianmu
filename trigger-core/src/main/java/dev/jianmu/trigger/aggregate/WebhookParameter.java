@@ -12,6 +12,7 @@ public class WebhookParameter {
     private String type;
     private Object value;
     private Boolean required = false;
+    private Boolean hidden;
 
     public void setValue(Object value) {
         this.value = value;
@@ -37,12 +38,17 @@ public class WebhookParameter {
         return value;
     }
 
+    public Boolean getHidden() {
+        return hidden;
+    }
+
     public static final class Builder {
         private String ref;
         private String name;
         private String type;
         private Object value;
         private Boolean required;
+        private Boolean hidden;
 
         private Builder() {
         }
@@ -76,6 +82,11 @@ public class WebhookParameter {
             return this;
         }
 
+        public Builder hidden(Boolean hidden) {
+            this.hidden = hidden;
+            return this;
+        }
+
         public WebhookParameter build() {
             WebhookParameter webhookParameter = new WebhookParameter();
             webhookParameter.ref = this.ref;
@@ -83,6 +94,7 @@ public class WebhookParameter {
             webhookParameter.name = this.name;
             webhookParameter.value = this.value;
             webhookParameter.required = this.required;
+            webhookParameter.hidden = this.hidden;
             return webhookParameter;
         }
     }
@@ -95,6 +107,7 @@ public class WebhookParameter {
                 ", type='" + type + '\'' +
                 ", value='" + value + '\'' +
                 ", required=" + required +
+                ", hidden=" + hidden +
                 '}';
     }
 }
