@@ -23,7 +23,7 @@ export default class LogViewer {
   private readonly handleAutoScrollFn: HandleAutoScrollFnType;
   private readonly listenScroll: any;
   private readonly logInterval: any;
-  private readonly allData: string[];
+  private allData: string[];
 
   constructor(el: HTMLElement, filename: string, value: string, url: string, downloadFn: DownloadFnType | undefined,
     callbackFn: CallBackFnType, checkAutoScrollFn: CheckAutoScrollFnType, handleAutoScrollFn: HandleAutoScrollFnType) {
@@ -80,6 +80,7 @@ export default class LogViewer {
       this.eventSource = new EventSource(this.value + MAX_SIZE, { withCredentials: true });
       this.logInterval = setInterval(() => {
         this.callbackFn(this.allData, this.line);
+        this.allData = [];
       }, 500);
     }
 
