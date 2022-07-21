@@ -157,6 +157,7 @@ public class WorkflowInstanceInternalApplication {
                                         .type(globalParameter.getType())
                                         .value(result.getValue().getValue())
                                         .required(globalParameter.getRequired())
+                                        .hidden(globalParameter.getHidden())
                                         .build());
                             }
                         }
