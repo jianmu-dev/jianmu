@@ -376,6 +376,7 @@ public class TriggerApplication {
                         .type(webhookParameter.getType())
                         .value(parameter.getStringValue())
                         .required(webhookParameter.getRequired())
+                        .hidden(webhookParameter.getHidden())
                         .parameterId(parameter.getId())
                         .build();
                 parameters.add(parameter);
@@ -475,6 +476,7 @@ public class TriggerApplication {
                         .type(webhookParameter.getType())
                         .value(parameter.getStringValue())
                         .required(webhookParameter.getRequired())
+                        .hidden(webhookParameter.getHidden())
                         .parameterId(parameter.getId())
                         .build();
                 parameters.add(parameter);
@@ -685,18 +687,17 @@ public class TriggerApplication {
         }
         var parameters = new ArrayList<WebhookParameter>();
         for (WebhookParameter webhookParameter : trigger.getParam()) {
-            var name = webhookParameter.getName() == null ? webhookParameter.getRef() : webhookParameter.getName();
-            var type = webhookParameter.getType() == null ? Parameter.Type.STRING.name() : webhookParameter.getType();
             var newParam = WebhookParameter.Builder.aWebhookParameter()
                     .ref(webhookParameter.getRef())
-                    .name(name)
+                    .name(webhookParameter.getName() == null ? webhookParameter.getRef() : webhookParameter.getName())
                     .value(webhookParameter.getValue())
-                    .type(type)
+                    .type(webhookParameter.getType() == null ? Parameter.Type.STRING.name() : webhookParameter.getType())
                     .required(webhookParameter.getRequired() != null && webhookParameter.getRequired())
+                    .hidden(webhookParameter.getHidden() != null && webhookParameter.getHidden())
                     .build();
             var value = this.extractParameter(webRequest.getPayload(), newParam, project);
             if (value != null) {
-                newParam.setValue(value);
+                newParam.setValue(newParam.getHidden() ? "**********" : value);
                 parameters.add(newParam);
             }
         }

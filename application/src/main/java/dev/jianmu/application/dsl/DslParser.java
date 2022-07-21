@@ -342,12 +342,14 @@ public class DslParser {
                     var name = map.get("name");
                     var type = map.get("type");
                     var required = (Boolean) map.get("required");
+                    var hidden = (Boolean) map.get("required");
                     return GlobalParameter.Builder.aGlobalParameter()
                             .ref(ref)
                             .name(name == null ? ref : name.toString())
                             .type(type == null ? Parameter.Type.STRING.name() : type.toString())
                             .value(map.get("value"))
                             .required(required != null && required)
+                            .hidden(hidden != null && hidden)
                             .build();
                 }).collect(Collectors.toSet());
     }
@@ -601,6 +603,7 @@ public class DslParser {
                             var type = p.get("type");
                             var value = p.get("value");
                             var required = p.get("required");
+                            var hidden = p.get("hidden");
                             if (!(ref instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数ref配置错误");
                             }
@@ -620,12 +623,16 @@ public class DslParser {
                             if (required != null && !(required instanceof Boolean)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "是否必填配置错误");
                             }
+                            if (hidden != null && !(hidden instanceof Boolean)) {
+                                throw new IllegalArgumentException("Webhook参数" + ref + "是否隐藏配置错误");
+                            }
                             return WebhookParameter.Builder.aWebhookParameter()
                                     .ref((String) ref)
                                     .name(name == null ? (String) ref : (String) name)
                                     .type(type == null ? Parameter.Type.STRING.name() : (String) type)
                                     .value(value)
                                     .required(required != null && (Boolean) required)
+                                    .hidden(hidden != null && (Boolean) hidden)
                                     .build();
                         }).collect(Collectors.toList());
                 webhookBuilder.param(ps);
@@ -649,6 +656,7 @@ public class DslParser {
                     var type = map.get("type");
                     var value = map.get("value");
                     var required = map.get("required");
+                    var hidden = map.get("hidden");
                     if (!(ref instanceof String)) {
                         throw new IllegalArgumentException("全局参数ref配置错误");
                     }
@@ -663,6 +671,9 @@ public class DslParser {
                     }
                     if (required != null && !(required instanceof Boolean)) {
                         throw new IllegalArgumentException("全局参数" + ref + "是否必填配置错误");
+                    }
+                    if (hidden != null && !(hidden instanceof Boolean)) {
+                        throw new IllegalArgumentException("Webhook参数" + ref + "是否隐藏配置错误");
                     }
                     if (type != null) {
                         var p = Parameter.Type.getTypeByName((String) type);

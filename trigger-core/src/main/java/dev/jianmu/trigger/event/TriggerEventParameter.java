@@ -12,7 +12,12 @@ public class TriggerEventParameter {
     private String type;
     private String value;
     private Boolean required;
+    private Boolean hidden;
     private String parameterId;
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 
     public String getRef() {
         return ref;
@@ -34,6 +39,10 @@ public class TriggerEventParameter {
         return value;
     }
 
+    public Boolean getHidden() {
+        return hidden;
+    }
+
     public String getParameterId() {
         return parameterId;
     }
@@ -44,6 +53,7 @@ public class TriggerEventParameter {
         private String type;
         private String value;
         private Boolean required;
+        private Boolean hidden;
         private String parameterId;
 
         private Builder() {
@@ -78,6 +88,11 @@ public class TriggerEventParameter {
             return this;
         }
 
+        public Builder hidden(Boolean hidden) {
+            this.hidden = hidden;
+            return this;
+        }
+
         public Builder parameterId(String parameterId) {
             this.parameterId = parameterId;
             return this;
@@ -91,6 +106,7 @@ public class TriggerEventParameter {
             triggerEventParameter.type = this.type;
             triggerEventParameter.name = this.name;
             triggerEventParameter.required = this.required;
+            triggerEventParameter.hidden = this.hidden;
             return triggerEventParameter;
         }
     }

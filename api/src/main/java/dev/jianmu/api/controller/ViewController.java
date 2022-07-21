@@ -118,7 +118,13 @@ public class ViewController {
     @GetMapping("/trigger_events/{triggerId}")
     @Operation(summary = "查询触发事件", description = "查询触发事件")
     public TriggerEvent findTriggerEvent(@PathVariable String triggerId) {
-        return this.triggerApplication.findTriggerEvent(triggerId);
+        var triggerEvent = this.triggerApplication.findTriggerEvent(triggerId);
+        triggerEvent.getParameters().forEach(triggerEventParameter -> {
+            if (triggerEventParameter.getHidden()) {
+                triggerEventParameter.setValue("**********");
+            }
+        });
+        return triggerEvent;
     }
 
     @GetMapping("/namespaces")

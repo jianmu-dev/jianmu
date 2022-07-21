@@ -19,7 +19,7 @@ public interface TriggerEventParameterMapper {
     @Result(column = "parameter_id", property = "parameterId")
     List<TriggerEventParameter> findById(String triggerEventId);
 
-    @Insert("insert into jm_trigger_event_parameter(trigger_event_id, ref, name, type, value, required, parameter_id) " +
-            "values(#{triggerEventId}, #{ep.ref}, #{ep.name}, #{ep.type}, #{ep.value}, #{ep.required}, #{ep.parameterId})")
+    @Insert("insert into jm_trigger_event_parameter(trigger_event_id, ref, name, type, value, required, parameter_id, hidden) " +
+            "values(#{triggerEventId}, #{ep.ref}, #{ep.name}, #{ep.type}, #{ep.value}, #{ep.required}, #{ep.parameterId}, #{ep.hidden})")
     void save(@Param("triggerEventId") String triggerEventId, @Param("ep") TriggerEventParameter triggerEventParameter);
 }

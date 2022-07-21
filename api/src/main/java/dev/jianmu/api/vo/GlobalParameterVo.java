@@ -21,4 +21,5 @@ public class GlobalParameterVo {
     private String type;
     private Object value;
     private Boolean required;
+    private Boolean hidden;
 }
