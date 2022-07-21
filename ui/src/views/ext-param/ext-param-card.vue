@@ -1,12 +1,25 @@
 <template>
-  <div class="ext-param-card">
+  <div class="ext-param-card" @mouseover="over" @mouseout="leave">
     <div class="ext-ref">
-      <jm-tooltip content="唯一标识" placement="top">
-        <i class="ref-icon"></i>
-      </jm-tooltip>
-      <div class="ref-value">
-        <jm-text-viewer :value="reference" :tip-append-to-body="false"/>
+      <div :style="{width:wrapperWidth}" class="wrapper">
+        <div class="ref-value" :style="{maxWidth:`${width}`}">
+          <jm-text-viewer :value="reference" :tip-append-to-body="false"
+                          :threshold="0"
+                          @loaded="({contentMaxWidth})=>getMaxWidth(contentMaxWidth)"/>
+        </div>
+        <jm-tooltip content="唯一标识" placement="top">
+          <i class="ref-icon"></i>
+        </jm-tooltip>
       </div>
+      <!--  删除/编辑   -->
+      <span class="editor-btn">
+          <jm-tooltip content="编辑" placement="top">
+            <i class="jm-icon-workflow-edit" @click="editor"></i>
+          </jm-tooltip>
+          <jm-tooltip content="删除" placement="top">
+          <i class="jm-icon-button-delete" @click="del"></i>
+          </jm-tooltip>
+        </span>
     </div>
     <div class="ext-name">
       <div class="label">名称：</div>
@@ -31,20 +44,11 @@
           </span>
       <span class="tag default-tag">{{ label }}</span>
     </div>
-    <!--  删除/编辑   -->
-    <span class="editor-btn">
-          <jm-tooltip content="编辑" placement="top">
-            <i class="jm-icon-workflow-edit" @click="editor"></i>
-          </jm-tooltip>
-          <jm-tooltip content="删除" placement="top">
-          <i class="jm-icon-button-delete" @click="del"></i>
-          </jm-tooltip>
-        </span>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
 
 
@@ -79,7 +83,14 @@ export default defineComponent({
     } else if (props.type === ParamTypeEnum.STRING) {
       typeTxt = '字符串';
     }
+    const width = ref<string>('10px');
+    const getMaxWidth = (w: number) => {
+      width.value = w + 'px';
+    };
+    const wrapperWidth = ref<string>('100%');
     return {
+      wrapperWidth,
+      width,
       typeTxt,
       ParamTypeEnum,
       editor: () => {
@@ -87,6 +98,13 @@ export default defineComponent({
       },
       del: () => {
         emit('delete', props.id, props.name);
+      },
+      getMaxWidth,
+      over() {
+        wrapperWidth.value = 'calc(100% - 60px)';
+      },
+      leave() {
+        wrapperWidth.value = '100%';
       },
     };
   },
@@ -112,8 +130,8 @@ export default defineComponent({
     border: 1px solid transparent;
   }
 
-  &:hover .editor-btn {
-    display: block;
+  &:hover .ext-ref .editor-btn {
+    display: flex;
   }
 
   .ext-ref {
@@ -127,16 +145,43 @@ export default defineComponent({
     display: flex;
     align-items: center;
 
-    .ref-icon {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      margin-right: 4px;
-      background-image: url("@/assets/svgs/ext-param/ref-icon.svg");
+    .wrapper {
+      display: flex;
+      align-items: center;
+
+      .ref-icon {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-image: url("@/assets/svgs/ext-param/ref-icon.svg");
+      }
+
+      .ref-value {
+        width: 90%;
+      }
     }
 
-    .ref-value {
-      width: 90%;
+    .editor-btn {
+      display: none;
+
+      .jm-icon-workflow-edit::before,
+      .jm-icon-button-delete::before {
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        font-size: 18px;
+        color: #6B7B8D;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, .9);
+      }
+
+      .jm-icon-workflow-edit:hover,
+      .jm-icon-button-delete:hover {
+        &::before {
+          background: #EFF7FF;
+          cursor: pointer;
+        }
+      }
     }
   }
 
@@ -196,32 +241,6 @@ export default defineComponent({
     .boolean {
       background: #F2EEFF;
       color: #6236FF;
-    }
-  }
-
-  .editor-btn {
-    display: none;
-    position: absolute;
-    right: 20px;
-    top: 20px;
-
-    .jm-icon-workflow-edit::before,
-    .jm-icon-button-delete::before {
-      width: 26px;
-      height: 26px;
-      line-height: 26px;
-      font-size: 18px;
-      color: #6B7B8D;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, .9);
-    }
-
-    .jm-icon-workflow-edit:hover,
-    .jm-icon-button-delete:hover {
-      &::before {
-        background: #EFF7FF;
-        cursor: pointer;
-      }
     }
   }
 }
