@@ -126,7 +126,7 @@
             </span>
             <template #dropdown>
               <jm-dropdown-menu>
-                <jm-dropdown-item :disabled="abling" @click="able(project.id)" v-if="!noDisable">
+                <jm-dropdown-item :disabled="abling" @click="able(project.id)" v-if="!entry">
                   <a
                     href="javascript: void(0)"
                     :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
@@ -169,6 +169,7 @@ import { datetimeFormatter } from '@/utils/formatter';
 import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   components: { ProjectPreviewDialog, WebhookDrawer },
@@ -192,16 +193,13 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    // 控制下拉框禁用按钮的显隐,默认显示
-    noDisable: {
-      type: Boolean,
-      default: false,
-    },
   },
   emits: ['running', 'synchronized', 'deleted'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
+    const store = useStore();
+    const entry = store.state.entry;
     const isMove = computed<boolean>(() => props.move);
     const isMoveMode = computed<boolean>(() => props.moveMode);
     const executing = ref<boolean>(false);
@@ -224,6 +222,7 @@ export default defineComponent({
       );
     };
     return {
+      entry,
       isMoveMode,
       isMove,
       DslSourceEnum,
