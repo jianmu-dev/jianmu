@@ -18,6 +18,7 @@ import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.workflow.aggregate.parameter.NodeOutputDefinitionEnum;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -336,6 +338,18 @@ public class ViewController {
     public WorkflowVo findByRefAndVersion(@PathVariable String ref, @PathVariable String version) {
         var workflow = this.projectApplication.findByRefAndVersion(ref, version);
         return WorkflowMapper.INSTANCE.toWorkflowVo(workflow);
+    }
+
+    @GetMapping("/workflow/node_output_defs")
+    @Operation(summary = "查询节点内置输出参数定义列表", description = "查询节点内置输出参数定义列表")
+    public List<NodeOutputDefinitionVo> findNodeOutPutDefs() {
+        return Arrays.stream(NodeOutputDefinitionEnum.values())
+                .map(nodeOutputEnum -> NodeOutputDefinitionVo.builder()
+                        .ref(nodeOutputEnum.getRef())
+                        .name(nodeOutputEnum.getName())
+                        .type(nodeOutputEnum.getType().name())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/workflow_instance/{triggerId}/globalParameters")
