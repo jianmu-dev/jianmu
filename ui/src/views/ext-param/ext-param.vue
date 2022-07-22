@@ -1,12 +1,14 @@
 <template>
-  <div class="ext-param">
+  <div class="ext-param" v-loading="pageLoading">
     <!--  tab  -->
     <div class="tab-container">
-      <div class="classification-tabs">
-        <span :class="['tab-item',currentTab===index?'is-active':'']" v-for="(item,index) in data" :key="index"
-              @click="currentTab=index">{{ item.label }}・{{ item.counter }}
-        </span>
-      </div>
+      <jm-scrollbar>
+        <div class="classification-tabs">
+            <span :class="['tab-item',currentTab===index?'is-active':'']" v-for="(item,index) in data" :key="index"
+                  @click="currentTab=index">{{ item.label }}・{{ item.counter }}
+            </span>
+        </div>
+      </jm-scrollbar>
     </div>
     <!--  内容  -->
     <div class="ext-content">
@@ -63,6 +65,7 @@
           <jm-select
             ref="labelSelectRef"
             @keyup.enter="enterSelect"
+            @visible-change="checkSize"
             v-model="addParam.label"
             filterable
             allow-create
@@ -108,6 +111,7 @@ export default defineComponent({
   components: { ExtParamCard },
   setup() {
     const { proxy } = getCurrentInstance() as any;
+    const pageLoading = ref<boolean>(false);
     const labelSelectRef = ref<HTMLElement>();
     const extParams = ref<IExternalParameterVo[]>();
     const addExtParamVisible = ref<boolean>(false);
@@ -122,36 +126,37 @@ export default defineComponent({
       id: '',
     });
     // label默认值
-    const labelOption = ref<{ label: string, value: string }[]>([
-      {
-        value: '默认',
-        label: '默认',
-      },
-    ]);
+    const labelOption = ref<{ label: string, value: string }[]>();
+    const labelList = ref<string[]>();
     const addParam = ref<addParamType>({ ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: '' });
 
-    const labelList: string[] = [];
     const init = async () => {
-      extParams.value = await getExtParamList();
-      extLabelList.value = await getExtParamLabelList();
-      extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
-      //  判断是否已经有默认
-      extLabelList.value?.forEach(item => {
-        labelList.push(item.value);
-      });
-      if (labelList.indexOf('默认') === -1) {
-        extLabelList.value?.splice(1, 0, { id: '', value: '默认', createdTime: '', lastModifiedTime: '' });
+      try {
+        pageLoading.value = true;
+        extParams.value = await getExtParamList();
+        extLabelList.value = await getExtParamLabelList();
+        extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
+        //  判断是否已经有默认
+        extLabelList.value?.forEach(item => {
+          labelList.value?.push(item.value);
+        });
+        if (labelList.value?.indexOf('默认') === -1) {
+          extLabelList.value?.splice(1, 0, { id: '', value: '默认', createdTime: '', lastModifiedTime: '' });
+        }
+      } finally {
+        pageLoading.value = false;
       }
 
-      // 构建label列表
-      extLabelList.value?.forEach(item => {
-        if (item.value !== '全部' && item.value !== '默认') {
-          labelOption.value.push({ label: item.value, value: item.value });
-        }
-      });
     };
     init();
 
+    const getLabelList = () => {
+      // 初始化
+      labelOption.value = [];
+      extLabelList.value?.slice(1).forEach(item => {
+        labelOption.value?.push({ label: item.value, value: item.value });
+      });
+    };
     // 构建tab参数
     const data = computed<{ label: string, projects: IExternalParameterVo[], counter: number }>(() => {
       const info: any = [];
@@ -162,9 +167,18 @@ export default defineComponent({
           counter: extParams.value?.filter(({ label }) => labels.value === '全部' ? label !== labels.value : label === labels.value).length,
         });
       });
+
+      for (let i = 0; i < info.length; i++) {
+        if (info[i].label === '默认') {
+          let single = info[i];
+          info.splice(i, 1);
+          info.splice(1, 0, single);
+        }
+      }
       return info;
     });
     return {
+      pageLoading,
       addExtParamVisible,
       extParams,
       addParam,
@@ -216,15 +230,21 @@ export default defineComponent({
       },
       // 新增
       add: () => {
+        getLabelList();
         addExtParamVisible.value = true;
-        // 除全部分组外，其他分组自动填充label
-        let label: string;
-        label = extLabelList.value && currentTab.value !== 0 ? extLabelList.value[currentTab.value].value : '';
-        addParam.value = { ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: label };
+        const list = [];
+        data.value.forEach(item => {
+          list.push(item.label);
+        });
+        addParam.value = {
+          ref: '', name: '', type: ParamTypeEnum.STRING, value: '',
+          label: list.length > 0 && currentTab.value !== 0 ? list[currentTab.value] : '',
+        };
         editorExtParams.value.flag = false;
       },
       // 编辑
       editor: (id: string) => {
+        getLabelList();
         const { ref, name, type, value, label } = extParams.value?.find(item => item.id === id);
         addParam.value = { ref, name, type, value, label };
         addExtParamVisible.value = true;
@@ -257,7 +277,7 @@ export default defineComponent({
         msg += '<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的项目将会报错</div>';
 
         proxy
-          .$confirm(msg, '删除项目', {
+          .$confirm(msg, '删除参数', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
@@ -287,6 +307,17 @@ export default defineComponent({
       enterSelect: (e: any) => {
         addParam.value.label = e.target.value;
         labelSelectRef.value?.blur();
+        if (addParam.value.label.length <= 15) {
+          return;
+        }
+        addParam.value.label = addParam.value.label.substr(0, 15);
+      },
+      // 选择后检查
+      checkSize: () => {
+        if (addParam.value.label.length <= 15) {
+          return;
+        }
+        addParam.value.label = addParam.value.label.substr(0, 15);
       },
     };
   },
@@ -300,19 +331,30 @@ export default defineComponent({
   min-height: calc(100vh - 185px);
   // tab
   .tab-container {
-    display: flex;
     align-items: center;
     font-size: 14px;
 
     .classification-tabs {
+      width: 100%;
       margin: 0 0 20px 0.385%;
+      height: 30px;
+      line-height: 22px;
       color: #082340;
+      display: flex;
+      flex-wrap: nowrap;
 
       .tab-item {
         cursor: pointer;
         box-sizing: border-box;
         padding: 5px 15px;
-        margin-right: 30px;
+        display: flex;
+        white-space: nowrap;
+
+        // 取消双击选中
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
 
         &.is-active {
           font-weight: 500;

@@ -34,15 +34,15 @@
       </div>
     </div>
     <div class="ext-label">
-          <span
-            :class="{
+      <div
+        :class="{
             'tag':true,
             'string':type === ParamTypeEnum.STRING,
             'number':type === ParamTypeEnum.NUMBER,
             'boolean':type === ParamTypeEnum.BOOL}">
-            {{ typeTxt }}
-          </span>
-      <span class="tag default-tag">{{ label }}</span>
+        {{ typeTxt }}
+      </div>
+      <div class="custom-tag">{{ label }}</div>
     </div>
   </div>
 </template>
@@ -216,16 +216,28 @@ export default defineComponent({
   // 不同类型不同色块
   .ext-label {
     font-size: 12px;
+    display: flex;
+    height: 20px;
+    line-height: 15px;
 
-    .tag {
+    .tag,
+    .custom-tag{
       padding: 4px;
+      box-sizing: border-box;
+    }
+    .tag {
       background: #E6F7FF;
       border-radius: 2px;
+      width: 44px;
+      text-align: center;
     }
 
-    .default-tag {
+    .custom-tag {
+      max-width: 70%;
       margin-left: 10px;
+      background: #E6F7FF;
       color: #096DD9;
+      overflow: hidden;
     }
 
     .string {

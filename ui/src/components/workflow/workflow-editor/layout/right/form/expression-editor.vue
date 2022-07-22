@@ -3,7 +3,7 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, inject, nextTick, onMounted, PropType, ref } from 'vue';
+import { defineComponent, inject, nextTick, PropType, ref } from 'vue';
 import { ElFormItemContext, elFormItemKey } from 'element-plus/es/el-form';
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../../model/data/custom-x6-node-proxy';
@@ -31,33 +31,31 @@ export default defineComponent({
     const graph = getGraph();
     const selectableParams = ref<ISelectableParam[]>([]);
 
-    onMounted(async () => {
-      // 外部参数
-      const buildExtParam = await buildSelectableExtParam();
-      if (buildExtParam) {
-        selectableParams.value.push(buildExtParam);
-      }
-      if (props.nodeId) {
-        const graphNode = graph.getCellById(props.nodeId) as Node;
-        const proxy = new CustomX6NodeProxy(graphNode);
-        // 级联选择器选项
-        selectableParams.value.push(...proxy.getSelectableParams(graph));
-        if (proxy.getData().getType() !== NodeTypeEnum.WEBHOOK) {
-          const buildGlobalParam = buildSelectableGlobalParam();
-          if (buildGlobalParam) {
-            selectableParams.value.push(buildGlobalParam);
-          }
-        }
-      } else {
-        const webhookNode = graph.getNodes().find(node =>
-          new CustomX6NodeProxy(node).getData().getType() === NodeTypeEnum.WEBHOOK);
-        if (webhookNode) {
-          selectableParams.value.push(...new CustomX6NodeProxy(webhookNode).getSelectableParams(graph));
+    // 外部参数
+    const buildExtParam = buildSelectableExtParam();
+    if (buildExtParam) {
+      selectableParams.value.push(buildExtParam);
+    }
+    if (props.nodeId) {
+      const graphNode = graph.getCellById(props.nodeId) as Node;
+      const proxy = new CustomX6NodeProxy(graphNode);
+      // 级联选择器选项
+      selectableParams.value.push(...proxy.getSelectableParams(graph));
+      if (proxy.getData().getType() !== NodeTypeEnum.WEBHOOK) {
+        const buildGlobalParam = buildSelectableGlobalParam();
+        if (buildGlobalParam) {
+          selectableParams.value.push(buildGlobalParam);
         }
       }
-      emit('editor-created', (params: ISelectableParam[]) => {
-        selectableParams.value = params;
-      });
+    } else {
+      const webhookNode = graph.getNodes().find(node =>
+        new CustomX6NodeProxy(node).getData().getType() === NodeTypeEnum.WEBHOOK);
+      if (webhookNode) {
+        selectableParams.value.push(...new CustomX6NodeProxy(webhookNode).getSelectableParams(graph));
+      }
+    }
+    emit('editor-created', (params: ISelectableParam[]) => {
+      selectableParams.value = params;
     });
     return {
       selectableParams,
