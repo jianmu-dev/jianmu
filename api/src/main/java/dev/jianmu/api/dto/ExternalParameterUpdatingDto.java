@@ -52,6 +52,6 @@ public class ExternalParameterUpdatingDto {
      * 标签
      */
     @NotBlank(message = "请选择或创建参数标签")
-    @Size(max = 30, message = "参数标签不能超过30个字符")
+    @Size(max = 15, message = "参数标签不能超过15个字符")
     private String label;
 }
