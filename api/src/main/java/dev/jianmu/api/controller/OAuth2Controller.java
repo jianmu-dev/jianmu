@@ -148,7 +148,7 @@ public class OAuth2Controller {
         // 同步仓库
         if (repo != null) {
             var branchNames = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
-            this.gitRepoApplication.syncBranches(repo.getId(), repo.getDefaultBranch(), branchNames);
+            this.gitRepoApplication.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branchNames);
         }
 
         return ResponseEntity.ok(JwtResponse.builder()
