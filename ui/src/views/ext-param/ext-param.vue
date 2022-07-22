@@ -1,12 +1,14 @@
 <template>
-  <div class="ext-param">
+  <div class="ext-param" v-loading="pageLoading">
     <!--  tab  -->
     <div class="tab-container">
-      <div class="classification-tabs">
-        <span :class="['tab-item',currentTab===index?'is-active':'']" v-for="(item,index) in data" :key="index"
-              @click="currentTab=index">{{ item.label }}・{{ item.counter }}
-        </span>
-      </div>
+      <jm-scrollbar>
+        <div class="classification-tabs">
+            <span :class="['tab-item',currentTab===index?'is-active':'']" v-for="(item,index) in data" :key="index"
+                  @click="currentTab=index">{{ item.label }}・{{ item.counter }}
+            </span>
+        </div>
+      </jm-scrollbar>
     </div>
     <!--  内容  -->
     <div class="ext-content">
@@ -63,6 +65,7 @@
           <jm-select
             ref="labelSelectRef"
             @keyup.enter="enterSelect"
+            @visible-change="checkSize"
             v-model="addParam.label"
             filterable
             allow-create
@@ -95,7 +98,6 @@ import { addExtParam, deleteExtParam, editorExtParam, getExtParamLabelList, getE
 import { IExternalParameterLabelVo, IExternalParameterVo } from '@/api/dto/ext-param';
 import ExtParamCard from './ext-param-card.vue';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
-import { useStore } from 'vuex';
 
 interface addParamType {
   ref: string;
@@ -109,8 +111,7 @@ export default defineComponent({
   components: { ExtParamCard },
   setup() {
     const { proxy } = getCurrentInstance() as any;
-    const store = useStore();
-    const entry = store.state.entry;
+    const pageLoading = ref<boolean>(false);
     const labelSelectRef = ref<HTMLElement>();
     const extParams = ref<IExternalParameterVo[]>();
     const addExtParamVisible = ref<boolean>(false);
@@ -130,16 +131,22 @@ export default defineComponent({
     const addParam = ref<addParamType>({ ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: '' });
 
     const init = async () => {
-      extParams.value = await getExtParamList();
-      extLabelList.value = await getExtParamLabelList();
-      extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
-      //  判断是否已经有默认
-      extLabelList.value?.forEach(item => {
-        labelList.value?.push(item.value);
-      });
-      if (labelList.value?.indexOf('默认') === -1) {
-        extLabelList.value?.splice(1, 0, { id: '', value: '默认', createdTime: '', lastModifiedTime: '' });
+      try {
+        pageLoading.value = true;
+        extParams.value = await getExtParamList();
+        extLabelList.value = await getExtParamLabelList();
+        extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
+        //  判断是否已经有默认
+        extLabelList.value?.forEach(item => {
+          labelList.value?.push(item.value);
+        });
+        if (labelList.value?.indexOf('默认') === -1) {
+          extLabelList.value?.splice(1, 0, { id: '', value: '默认', createdTime: '', lastModifiedTime: '' });
+        }
+      } finally {
+        pageLoading.value = false;
       }
+
     };
     init();
 
@@ -171,6 +178,7 @@ export default defineComponent({
       return info;
     });
     return {
+      pageLoading,
       addExtParamVisible,
       extParams,
       addParam,
@@ -264,10 +272,9 @@ export default defineComponent({
       },
       // 删除
       del: (id: string, name: string) => {
-        let title = entry ? '流水线' : '项目';
         let msg = '<div>确定要删除参数吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">名称：${name}</div>`;
-        msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的${title}将会报错</div>`;
+        msg += '<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的项目将会报错</div>';
 
         proxy
           .$confirm(msg, '删除参数', {
@@ -300,6 +307,17 @@ export default defineComponent({
       enterSelect: (e: any) => {
         addParam.value.label = e.target.value;
         labelSelectRef.value?.blur();
+        if (addParam.value.label.length <= 15) {
+          return;
+        }
+        addParam.value.label = addParam.value.label.substr(0, 15);
+      },
+      // 选择后检查
+      checkSize: () => {
+        if (addParam.value.label.length <= 15) {
+          return;
+        }
+        addParam.value.label = addParam.value.label.substr(0, 15);
       },
     };
   },
@@ -313,18 +331,30 @@ export default defineComponent({
   min-height: calc(100vh - 185px);
   // tab
   .tab-container {
-    display: flex;
     align-items: center;
     font-size: 14px;
 
     .classification-tabs {
-      margin:0 0 20px 0.385%;
+      width: 100%;
+      margin: 0 0 20px 0.385%;
+      height: 30px;
+      line-height: 22px;
       color: #082340;
+      display: flex;
+      flex-wrap: nowrap;
 
       .tab-item {
         cursor: pointer;
         box-sizing: border-box;
         padding: 5px 15px;
+        display: flex;
+        white-space: nowrap;
+
+        // 取消双击选中
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
 
         &.is-active {
           font-weight: 500;
