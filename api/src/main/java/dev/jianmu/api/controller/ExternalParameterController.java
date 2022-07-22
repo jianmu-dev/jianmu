@@ -34,24 +34,24 @@ public class ExternalParameterController {
     @PostMapping
     @Operation(summary = "创建外部参数", description = "创建外部参数")
     public void create(@RequestBody @Valid ExternalParameterCreatingDto dto) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
-        var type = this.associationUtil.getAssociationType();
-        this.externalParameterApplication.create(dto.getName(), dto.getType(), dto.getRef(), dto.getLabel(), dto.getValue(), repoId, type);
+        var associationId = this.userContextHolder.getSession().getAssociationId();
+        var associationType = this.associationUtil.getAssociationType();
+        this.externalParameterApplication.create(dto.getName(), dto.getType(), dto.getRef(), dto.getLabel(), dto.getValue(), associationId, associationType);
     }
 
     @DeleteMapping("{id}")
     @Operation(summary = "删除外部参数", description = "删除外部参数")
     public void delete(@PathVariable("id") String id) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
-        var type = this.associationUtil.getAssociationType();
-        this.externalParameterApplication.delete(id, repoId, type);
+        var associationId = this.userContextHolder.getSession().getAssociationId();
+        var associationType = this.associationUtil.getAssociationType();
+        this.externalParameterApplication.delete(id, associationId, associationType);
     }
 
     @PutMapping
     @Operation(summary = "修改外部参数", description = "修改外部参数")
     public void update(@RequestBody @Valid ExternalParameterUpdatingDto dto) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
-        var type = this.associationUtil.getAssociationType();
-        this.externalParameterApplication.update(dto.getId(), dto.getValue(), dto.getName(), dto.getLabel(), dto.getType(), repoId, type);
+        var associationId = this.userContextHolder.getSession().getAssociationId();
+        var associationType = this.associationUtil.getAssociationType();
+        this.externalParameterApplication.update(dto.getId(), dto.getValue(), dto.getName(), dto.getLabel(), dto.getType(), associationId, associationType);
     }
 }
