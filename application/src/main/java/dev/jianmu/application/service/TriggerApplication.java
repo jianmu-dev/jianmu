@@ -1,17 +1,17 @@
 package dev.jianmu.application.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
-import dev.jianmu.application.service.vo.WebhookPayload;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.service.vo.WebhookPayload;
 import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
 import dev.jianmu.infrastructure.quartz.PublishJob;
 import dev.jianmu.infrastructure.storage.StorageService;
-import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -136,10 +136,6 @@ public class TriggerApplication {
             List<Parameter> parameters,
             WebRequest webRequest
     ) {
-        // 过滤SECRET类型参数不保存
-        var eventParametersClean = eventParameters.stream()
-                .filter(triggerEventParameter -> !triggerEventParameter.getType().equals("SECRET"))
-                .collect(Collectors.toList());
         var parametersClean = parameters.stream()
                 .filter(parameter -> !(parameter.getType() == Parameter.Type.SECRET))
                 .collect(Collectors.toList());
@@ -148,7 +144,7 @@ public class TriggerApplication {
                 .projectId(webRequest.getProjectId())
                 .webRequestId(webRequest.getId())
                 .payload(webRequest.getPayload())
-                .parameters(eventParametersClean)
+                .parameters(eventParameters)
                 .triggerType(Trigger.Type.WEBHOOK.name())
                 .build();
         this.parameterRepository.addAll(parametersClean);
@@ -313,6 +309,24 @@ public class TriggerApplication {
         return "/webhook/" + URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
     }
 
+    // 获取trigger的context
+    private ElContext findTriggerContext(String payload, String associationId, String associationTYpe) {
+        // 创建表达式上下文
+        var context = new ElContext();
+        // 外部参数加入上下文
+        this.externalParameterRepository.findAll(associationId, associationTYpe)
+                .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
+        try {
+            var webhookPayload = this.objectMapper.readValue(payload, WebhookPayload.class);
+            context.add("header", webhookPayload.getHeader());
+            context.add("body", webhookPayload.getBody());
+            context.add("query", webhookPayload.getQuery());
+        } catch (JsonProcessingException e) {
+            log.warn("序列化Webhook payload失败");
+        }
+        return context;
+    }
+
     public void retryHttpEvent(String webRequestId) {
         var webRequest = this.webRequestRepositoryImpl.findById(webRequestId)
                 .orElseThrow(() -> new DataNotFoundException("未找到可重试的记录"));
@@ -350,14 +364,14 @@ public class TriggerApplication {
             throw new IllegalArgumentException("项目：" + project.getWorkflowName() + "触发器类型错误");
         }
         // 创建表达式上下文
-        var context = new ElContext();
+        var context = this.findTriggerContext(newWebRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
         // 提取参数
         var webhook = trigger.getWebhook();
         List<TriggerEventParameter> eventParameters = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
-            for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(newWebRequest.getPayload(), webhookParameter, project);
+            for (WebhookParameter webhookParameter : webhook.getParam()) {
+                var value = this.extractParameter(context, webhookParameter);
                 if (value == null && webhookParameter.getRequired()) {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     newWebRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
@@ -450,14 +464,14 @@ public class TriggerApplication {
             throw new IllegalArgumentException("项目：" + projectName + "触发器类型错误");
         }
         // 创建表达式上下文
-        var context = new ElContext();
+        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
         // 提取参数
         var webhook = trigger.getWebhook();
         List<TriggerEventParameter> eventParameters = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
         if (webhook.getParam() != null) {
-            for (WebhookParameter webhookParameter : webhook.getParam()){
-                var value = this.extractParameter(webRequest.getPayload(), webhookParameter, project);
+            for (WebhookParameter webhookParameter : webhook.getParam()) {
+                var value = this.extractParameter(context, webhookParameter);
                 if (value == null && webhookParameter.getRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
                     webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
@@ -566,17 +580,8 @@ public class TriggerApplication {
         return evaluationResult.getValue();
     }
 
-    private Object extractParameter(String payload, WebhookParameter webhookParameter, Project project) {
+    private Object extractParameter(ElContext context, WebhookParameter webhookParameter) {
         try {
-            var webhookPayload = this.objectMapper.readValue(payload, WebhookPayload.class);
-            // 创建表达式上下文
-            var context = new ElContext();
-            // 外部参数加入上下文
-            this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
-                    .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
-            context.add("header", webhookPayload.getHeader());
-            context.add("body", webhookPayload.getBody());
-            context.add("query", webhookPayload.getQuery());
             var expression = this.expressionLanguage.parseExpression(webhookParameter.getValue().toString(), ResultType.valueOf(webhookParameter.getType()));
             var result = this.expressionLanguage.evaluateExpression(expression, context);
             if (result.isFailure()) {
@@ -685,6 +690,7 @@ public class TriggerApplication {
         if (ObjectUtils.isEmpty(webRequest.getPayload())) {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
+        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
         var parameters = new ArrayList<WebhookParameter>();
         for (WebhookParameter webhookParameter : trigger.getParam()) {
             var newParam = WebhookParameter.Builder.aWebhookParameter()
@@ -695,7 +701,7 @@ public class TriggerApplication {
                     .required(webhookParameter.getRequired() != null && webhookParameter.getRequired())
                     .hidden(webhookParameter.getHidden() != null && webhookParameter.getHidden())
                     .build();
-            var value = this.extractParameter(webRequest.getPayload(), newParam, project);
+            var value = this.extractParameter(context, newParam);
             if (value != null) {
                 newParam.setValue(newParam.getHidden() ? "**********" : value);
                 parameters.add(newParam);

@@ -23,6 +23,7 @@ import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
+import dev.jianmu.workflow.aggregate.parameter.NodeOutputDefinitionEnum;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -364,7 +365,7 @@ public class TaskInstanceInternalApplication {
                 .defKey(taskInstance.getDefKey())
                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                 .businessId(taskInstance.getBusinessId())
-                .ref("inner.execution_status")
+                .ref("inner." + NodeOutputDefinitionEnum.EXECUTION_STATUS.getRef())
                 .serialNo(taskInstance.getSerialNo())
                 .parameterId(executionStatusValue.getId())
                 .required(true)
@@ -381,7 +382,7 @@ public class TaskInstanceInternalApplication {
                 .defKey(taskInstance.getDefKey())
                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                 .businessId(taskInstance.getBusinessId())
-                .ref("inner.start_time")
+                .ref("inner." + NodeOutputDefinitionEnum.START_TIME.getRef())
                 .serialNo(taskInstance.getSerialNo())
                 .parameterId(startTimeValue.getId())
                 .required(true)
@@ -398,7 +399,7 @@ public class TaskInstanceInternalApplication {
                 .defKey(taskInstance.getDefKey())
                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                 .businessId(taskInstance.getBusinessId())
-                .ref("inner.end_time")
+                .ref("inner." + NodeOutputDefinitionEnum.END_TIME.getRef())
                 .serialNo(taskInstance.getSerialNo())
                 .parameterId(endTimeValue.getId())
                 .required(true)
