@@ -598,8 +598,10 @@ public class DslParser {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "类型配置错误");
                             }
                             if (type != null) {
-                                // TODO 去掉SECRET类型
-                                Parameter.Type.getTypeByName((String) type);
+                                var paramType = Parameter.Type.getTypeByName((String) type);
+                                if (paramType == Parameter.Type.SECRET) {
+                                    throw new DslException("Webhook参数不支持使用SECRET类型");
+                                }
                             }
                             if (value instanceof Map || value instanceof List) {
                                 throw new IllegalArgumentException("全局参数" + ref + "表达式配置错误");
