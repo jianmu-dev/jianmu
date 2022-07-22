@@ -336,7 +336,9 @@ export default defineComponent({
 
     .classification-tabs {
       width: 100%;
-      margin: 0 0 20px 0.385%;
+      padding-left: 0.385%;
+      box-sizing: border-box;
+      margin-bottom: 20px;
       height: 30px;
       line-height: 22px;
       color: #082340;

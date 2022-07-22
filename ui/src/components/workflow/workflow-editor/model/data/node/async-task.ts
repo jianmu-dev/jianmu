@@ -71,9 +71,10 @@ export class AsyncTask extends BaseNode {
       return undefined;
     }
 
-    const children: ISelectableParam[] = this.outputs.map(({ ref, name }) => {
+    const children: ISelectableParam[] = this.outputs.map(({ ref, type, name }) => {
       return {
         value: ref,
+        type,
         label: name,
       };
     });
@@ -84,14 +85,17 @@ export class AsyncTask extends BaseNode {
       children: [
         {
           value: 'execution_status',
+          type:ParamTypeEnum.STRING,
           label: '节点任务执行状态',
         },
         {
           value: 'start_time',
+          type:ParamTypeEnum.STRING,
           label: '节点任务开始时间',
         },
         {
           value: 'end_time',
+          type:ParamTypeEnum.STRING,
           label: '节点任务结束时间',
         },
       ],
