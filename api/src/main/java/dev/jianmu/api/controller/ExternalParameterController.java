@@ -3,7 +3,7 @@ package dev.jianmu.api.controller;
 import dev.jianmu.api.dto.ExternalParameterCreatingDto;
 import dev.jianmu.api.dto.ExternalParameterUpdatingDto;
 import dev.jianmu.api.jwt.UserContextHolder;
-import dev.jianmu.api.util.AssociationUtil;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.application.service.ExternalParameterApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -4,7 +4,7 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.*;
 import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.mapper.*;
-import dev.jianmu.api.util.AssociationUtil;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
