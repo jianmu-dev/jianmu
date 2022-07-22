@@ -1,4 +1,5 @@
 import { OwnerTypeEnum, VisibleTypeEnum } from './enumeration';
+import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 
 /**
  *  查看公开节点定义dto
@@ -96,3 +97,13 @@ export interface INodeDefinitionVersionExampleVo
     createTime: string;
   }> {
 }
+
+/**
+ * 查询节点内置输出参数定义列表
+ */
+export interface INodeOutputDefinitionVo
+  extends Readonly<{
+    ref:string;
+    name:string;
+    type:ParamTypeEnum;
+}>{}
