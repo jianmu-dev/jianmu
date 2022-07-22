@@ -1,9 +1,6 @@
 package dev.jianmu.oauth2.api;
 
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
+import dev.jianmu.oauth2.api.vo.*;
 
 import java.util.List;
 
@@ -28,7 +25,7 @@ public interface OAuth2Api {
      * @param code
      * @return
      */
-     String getAccessToken(String code, String redirectUri);
+    ITokenVo getAccessToken(String code, String redirectUri);
 
     /**
      * 获取用户信息
@@ -68,7 +65,7 @@ public interface OAuth2Api {
      */
     IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner);
 
-    default String getEntryUrl(String gitRepo, String gitRepoOwner){
+    default String getEntryUrl(String gitRepo, String gitRepoOwner) {
         return null;
     }
 }

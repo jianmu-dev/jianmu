@@ -5,13 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.exception.*;
 import dev.jianmu.oauth2.api.impl.dto.gitee.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitee.*;
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
-import dev.jianmu.oauth2.api.exception.*;
+import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -30,9 +27,9 @@ import java.util.List;
  */
 @Component
 public class GiteeApi implements OAuth2Api {
+    private final static ObjectMapper MAPPER = new ObjectMapper();
     private final RestTemplate restTemplate;
     private final OAuth2Properties oAuth2Properties;
-    private final static ObjectMapper MAPPER = new ObjectMapper();
 
     public GiteeApi(RestTemplate restTemplate, OAuth2Properties oAuth2Properties) {
         this.restTemplate = restTemplate;
@@ -53,7 +50,7 @@ public class GiteeApi implements OAuth2Api {
     }
 
     @Override
-    public String getAccessToken(String code, String redirectUri) {
+    public ITokenVo getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto giteeLoginVo = LoggingDto.builder()
                 .client_id(this.oAuth2Properties.getGitee().getClientId())
@@ -91,7 +88,7 @@ public class GiteeApi implements OAuth2Api {
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
-        return giteeTokenVo.getAccess_token();
+        return giteeTokenVo;
     }
 
     @Override

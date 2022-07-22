@@ -5,13 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.exception.*;
 import dev.jianmu.oauth2.api.impl.dto.gitlink.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitlink.*;
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
-import dev.jianmu.oauth2.api.exception.*;
+import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -31,14 +28,15 @@ import java.util.List;
  */
 @Component
 public class GitlinkApi implements OAuth2Api {
+    private final static ObjectMapper MAPPER = new ObjectMapper();
     private final RestTemplate restTemplate;
     private final OAuth2Properties oAuth2Properties;
-    private final static ObjectMapper MAPPER = new ObjectMapper();
 
     public GitlinkApi(RestTemplate restTemplate, OAuth2Properties oAuth2Properties) {
         this.restTemplate = restTemplate;
         this.oAuth2Properties = oAuth2Properties;
     }
+
 
     @Override
     public String getAuthUrl(String redirectUri) {
@@ -52,7 +50,7 @@ public class GitlinkApi implements OAuth2Api {
     }
 
     @Override
-    public String getAccessToken(String code, String redirectUri) {
+    public ITokenVo getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto gitlinkLoginVo = LoggingDto.builder()
                 .client_id(this.oAuth2Properties.getGitlink().getClientId())
@@ -89,7 +87,7 @@ public class GitlinkApi implements OAuth2Api {
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
-        return gitlinkTokenVo.getAccess_token();
+        return gitlinkTokenVo;
     }
 
     @Override
@@ -152,7 +150,7 @@ public class GitlinkApi implements OAuth2Api {
                 throw new NoPermissionException(gitlinkRepoVo.getMessage());
             }
             if (gitlinkRepoVo.getStatus() != 1) {
-                throw new UnKnownException(gitlinkRepoVo.getMessage());
+                throw new UnknownException(gitlinkRepoVo.getMessage());
             }
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
@@ -190,7 +188,7 @@ public class GitlinkApi implements OAuth2Api {
                 if (gitlinkRepoMemberVo.getStatus() == HttpStatus.FORBIDDEN.value()) {
                     throw new NoPermissionException(gitlinkRepoMemberVo.getMessage());
                 }
-                throw new UnKnownException(gitlinkRepoMemberVo.getMessage());
+                throw new UnknownException(gitlinkRepoMemberVo.getMessage());
             }
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
@@ -227,7 +225,7 @@ public class GitlinkApi implements OAuth2Api {
                 if (branchesVo.getStatus() == HttpStatus.FORBIDDEN.value()) {
                     throw new NoPermissionException(branchesVo.getMessage());
                 }
-                throw new UnKnownException(branchesVo.getMessage());
+                throw new UnknownException(branchesVo.getMessage());
             }
         } catch (JsonProcessingException e) {
             try {
