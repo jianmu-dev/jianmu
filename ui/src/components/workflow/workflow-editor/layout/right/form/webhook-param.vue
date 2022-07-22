@@ -4,7 +4,7 @@
     <jm-form-item label="唯一标识" :prop="`${formModelName}.${index}.ref`" :rules="rules.ref">
       <jm-input
         v-model="refVal"
-        placeholder="请输入参数唯一表示"
+        placeholder="请输入参数唯一标识"
         @change="changeReference"
         @focus="switchBackgroundFlag = true;"
         @blur="switchBackgroundFlag = false;"
