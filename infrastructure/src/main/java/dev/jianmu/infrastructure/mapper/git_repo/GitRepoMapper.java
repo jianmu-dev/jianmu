@@ -16,7 +16,7 @@ import java.util.Optional;
  * @create 2022/7/5 9:55 上午
  */
 public interface GitRepoMapper {
-    @Insert("INSERT INTO jm_git_repo(id, branches, flows) values(#{id}, " +
+    @Insert("INSERT INTO jm_git_repo(id, ref, owner, branches, flows) values(#{id}, #{ref}, #{owner}," +
             "#{branches, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.BranchListTypeHandler}, " +
             "#{flows, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.FlowListTypeHandler}) " +
             "ON DUPLICATE KEY UPDATE " +
