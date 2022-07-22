@@ -37,7 +37,7 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
-  buildSelectableParam(nodeId: string = ''): ISelectableParam | undefined {
+  async buildSelectableParam(nodeId: string = ''): Promise<ISelectableParam | undefined> {
     if (this.params.length === 0) {
       return undefined;
     }

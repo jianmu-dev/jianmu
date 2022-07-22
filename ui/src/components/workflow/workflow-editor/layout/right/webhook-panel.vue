@@ -153,7 +153,7 @@ export default defineComponent({
     const form = ref<Webhook>(props.nodeData);
     const refreshEditorParams = async () => {
       await nextTick();
-      const param = form.value.buildSelectableParam();
+      const param = await form.value.buildSelectableParam();
       refreshParamsFns.forEach(fn => fn(param ? [param] : []));
     };
     const nodeId = ref<string>('');
