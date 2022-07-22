@@ -40,7 +40,7 @@ public class DslNode {
         node.image = (String) nodeMap.get("image");
         node.onFailure = (String) nodeMap.get("on-failure");
 
-        var environment = nodeMap.get("environment");
+        var environment = nodeMap.get("env");
         if (environment instanceof Map) {
             node.environment = ((Map<?, ?>) environment)
                     .entrySet().stream()
@@ -64,11 +64,11 @@ public class DslNode {
     private static DslNode normalNode(String nodeName, Map<?, ?> node) {
         var dslNode = new DslNode();
         dslNode.name = nodeName;
-        dslNode.type = (String) node.get("type");
+        dslNode.type = (String) node.get("task");
         dslNode.onFailure = (String) node.get("on-failure");
         setRelation(node, dslNode);
 
-        var p = node.get("param");
+        var p = node.get("input");
         if (p instanceof Map) {
             dslNode.param = ((Map<?, ?>) p)
                     .entrySet().stream()
@@ -129,12 +129,13 @@ public class DslNode {
         }
     }
 
-    public static DslNode of(String nodeName, Map<?, ?> nodeMap) {
+    public static DslNode of(Map<?, ?> nodeMap) {
+        var ref = (String) nodeMap.get("ref");
         var image = (String) nodeMap.get("image");
         if (image != null) {
-            return DslNode.shellNode(nodeName, nodeMap);
+            return DslNode.shellNode(ref, nodeMap);
         } else {
-            return DslNode.normalNode(nodeName, nodeMap);
+            return DslNode.normalNode(ref, nodeMap);
         }
     }
 
