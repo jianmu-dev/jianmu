@@ -245,9 +245,7 @@ public class Workflow extends AggregateRoot {
         // 密钥类型单独处理
         if (taskParameter.getType() == Parameter.Type.SECRET) {
             var secret = this.findSecret(taskParameter.getExpression());
-            if (secret != null) {
-                return Parameter.Type.SECRET.newParameter(secret);
-            }
+            return Parameter.Type.SECRET.newParameter(secret);
         }
         // TODO 适配代码，3.x版本需要删除
         if (taskParameter.getType() == null) {
@@ -257,7 +255,7 @@ public class Workflow extends AggregateRoot {
             }
         }
         // 计算参数表达式
-        var resultType = taskParameter.getType() == Parameter.Type.SECRET ? ResultType.STRING : ResultType.valueOf(taskParameter.getType().name());
+        var resultType = ResultType.valueOf(taskParameter.getType().name());
         Expression expression = expressionLanguage.parseExpression(taskParameter.getExpression(), resultType);
         EvaluationResult evaluationResult = expressionLanguage.evaluateExpression(expression, context);
         if (evaluationResult.isFailure()) {

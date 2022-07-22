@@ -45,8 +45,6 @@ public class DslParser {
     private final Map<String, Object> global = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
-    private boolean enabled = true;
-    private boolean mutable = false;
     private boolean concurrent = false;
     private String name;
     private String description;
@@ -342,12 +340,14 @@ public class DslParser {
                     var name = map.get("name");
                     var type = map.get("type");
                     var required = (Boolean) map.get("required");
+                    var hidden = (Boolean) map.get("required");
                     return GlobalParameter.Builder.aGlobalParameter()
                             .ref(ref)
                             .name(name == null ? ref : name.toString())
                             .type(type == null ? Parameter.Type.STRING.name() : type.toString())
                             .value(map.get("value"))
                             .required(required != null && required)
+                            .hidden(hidden != null && hidden)
                             .build();
                 }).collect(Collectors.toSet());
     }
@@ -355,20 +355,6 @@ public class DslParser {
     private void createGlobal() {
         var globalParam = this.global.get("param");
         this.createGlobalParameters(globalParam);
-        var enabled = this.global.get("enabled");
-        if (enabled instanceof Boolean) {
-            this.enabled = (Boolean) enabled;
-        }
-        if (enabled instanceof Map) {
-            var value = ((Map<String, Object>) enabled).get("value");
-            if (value instanceof Boolean) {
-                this.enabled = (Boolean) value;
-            }
-            var mutable = ((Map<String, Object>) enabled).get("mutable");
-            if (mutable instanceof Boolean) {
-                this.mutable = (Boolean) mutable;
-            }
-        }
         var concurrent = this.global.get("concurrent");
         if (concurrent instanceof Boolean) {
             this.concurrent = (Boolean) concurrent;
@@ -601,6 +587,7 @@ public class DslParser {
                             var type = p.get("type");
                             var value = p.get("value");
                             var required = p.get("required");
+                            var hidden = p.get("hidden");
                             if (!(ref instanceof String)) {
                                 throw new IllegalArgumentException("Webhook参数ref配置错误");
                             }
@@ -620,12 +607,16 @@ public class DslParser {
                             if (required != null && !(required instanceof Boolean)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "是否必填配置错误");
                             }
+                            if (hidden != null && !(hidden instanceof Boolean)) {
+                                throw new IllegalArgumentException("Webhook参数" + ref + "是否隐藏配置错误");
+                            }
                             return WebhookParameter.Builder.aWebhookParameter()
                                     .ref((String) ref)
                                     .name(name == null ? (String) ref : (String) name)
                                     .type(type == null ? Parameter.Type.STRING.name() : (String) type)
                                     .value(value)
                                     .required(required != null && (Boolean) required)
+                                    .hidden(hidden != null && (Boolean) hidden)
                                     .build();
                         }).collect(Collectors.toList());
                 webhookBuilder.param(ps);
@@ -649,6 +640,7 @@ public class DslParser {
                     var type = map.get("type");
                     var value = map.get("value");
                     var required = map.get("required");
+                    var hidden = map.get("hidden");
                     if (!(ref instanceof String)) {
                         throw new IllegalArgumentException("全局参数ref配置错误");
                     }
@@ -663,6 +655,9 @@ public class DslParser {
                     }
                     if (required != null && !(required instanceof Boolean)) {
                         throw new IllegalArgumentException("全局参数" + ref + "是否必填配置错误");
+                    }
+                    if (hidden != null && !(hidden instanceof Boolean)) {
+                        throw new IllegalArgumentException("Webhook参数" + ref + "是否隐藏配置错误");
                     }
                     if (type != null) {
                         var p = Parameter.Type.getTypeByName((String) type);
@@ -865,14 +860,6 @@ public class DslParser {
 
     public Map<String, Object> getPipeline() {
         return pipeline;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public boolean isMutable() {
-        return mutable;
     }
 
     public boolean isConcurrent() {

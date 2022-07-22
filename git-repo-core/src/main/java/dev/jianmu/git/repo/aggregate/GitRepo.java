@@ -20,6 +20,16 @@ public class GitRepo {
     private String id;
 
     /**
+     * 唯一标识
+     */
+    private String ref;
+
+    /**
+     * 拥有者
+     */
+    private String owner;
+
+    /**
      * 所有分支
      */
     private List<Branch> branches = List.of();
@@ -41,7 +51,9 @@ public class GitRepo {
      *
      * @param branches
      */
-    public void syncBranches(List<Branch> branches) {
+    public void syncBranches(String ref, String owner, List<Branch> branches) {
+        this.ref = ref;
+        this.owner = owner;
         this.branches = branches;
         var defaultBranch = this.findDefaultBranch();
         this.flows.forEach(flow -> {
@@ -78,6 +90,14 @@ public class GitRepo {
 
     public String getId() {
         return id;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public String getOwner() {
+        return owner;
     }
 
     public List<Branch> getBranches() {
