@@ -84,18 +84,26 @@
           <div v-if="form.outputs">
             <div v-for="item in form.outputs" :key="item.ref">
               <div class="label">
-                <i class="required-icon" v-if="item.required"></i>
-                {{ item.name }}
-                <jm-tooltip
-                  placement="top"
-                  :append-to-body="false"
-                >
-                  <template #content>
-                    类型：{{ item.type }}<br>
-                    <span v-if="item.value">描述：{{ item.description }}</span>
-                  </template>
-                  <i class="jm-icon-button-help"></i>
-                </jm-tooltip>
+                <div class="left-label">
+                  <i class="required-icon" v-if="item.required"></i>
+                  {{ item.name }}
+                  <jm-tooltip
+                    placement="top"
+                    :append-to-body="false"
+                    v-if="item.value"
+                  >
+                    <template #content>
+                      <span v-if="item.value">描述：{{ item.description }}</span>
+                    </template>
+                    <i class="jm-icon-button-help"></i>
+                  </jm-tooltip>
+                </div>
+                <div class="right-type">
+                  <span v-if="item.type === ParamTypeEnum.STRING">字符串</span>
+                  <span v-else-if="item.type === ParamTypeEnum.NUMBER">数字</span>
+                  <span v-else-if="item.type === ParamTypeEnum.BOOL">布尔</span>
+                  <span v-else-if="item.type === ParamTypeEnum.SECRET">密钥</span>
+                </div>
               </div>
               <div class="content">
                 <template v-if="item.value">
@@ -311,6 +319,13 @@ export default defineComponent({
       color: #3F536E;
       margin-bottom: 10px;
       padding-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .right-type{
+        font-size: 12px;
+        color: #7B8C9C;
+      }
     }
 
     .content {
