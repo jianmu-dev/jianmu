@@ -1,9 +1,8 @@
-import { BaseNode } from './base-node';
+import { BaseNode, buildSelectableInnerOutputParam } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
-import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
 export interface IAsyncTaskParam {
@@ -13,6 +12,7 @@ export interface IAsyncTaskParam {
   readonly required: boolean;
   value: string;
   readonly description?: string;
+  readonly inner?: boolean;
 }
 
 /**
@@ -66,40 +66,19 @@ export class AsyncTask extends BaseNode {
     return new AsyncTask(ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode, validateParam);
   }
 
-  buildSelectableParam(nodeId: string): ISelectableParam | undefined {
-    if (this.outputs.length === 0) {
-      return undefined;
+  async buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined> {
+    const children: ISelectableParam[] = [];
+    if (this.outputs.length > 0) {
+      children.push(...this.outputs.map(({ ref, type, name }) => {
+        return {
+          value: ref,
+          type,
+          label: name,
+        };
+      }));
     }
 
-    const children: ISelectableParam[] = this.outputs.map(({ ref, type, name }) => {
-      return {
-        value: ref,
-        type,
-        label: name,
-      };
-    });
-    children.push({
-      // 文档：https://docs.jianmu.dev/guide/custom-node.html#_4-%E5%86%85%E7%BD%AE%E8%BE%93%E5%87%BA%E5%8F%82%E6%95%B0
-      value: INNER_PARAM_TAG,
-      label: INNER_PARAM_LABEL,
-      children: [
-        {
-          value: 'execution_status',
-          type:ParamTypeEnum.STRING,
-          label: '节点任务执行状态',
-        },
-        {
-          value: 'start_time',
-          type:ParamTypeEnum.STRING,
-          label: '节点任务开始时间',
-        },
-        {
-          value: 'end_time',
-          type:ParamTypeEnum.STRING,
-          label: '节点任务结束时间',
-        },
-      ],
-    });
+    children.push(await buildSelectableInnerOutputParam());
 
     return {
       value: super.getRef(),

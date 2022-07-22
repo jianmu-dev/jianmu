@@ -1,9 +1,10 @@
 import { restProxy } from '@/api';
 import { INodeCreatingDto } from '@/api/dto/node-library';
-import { INodeDefinitionVersionExampleVo, INodeDefVersionListVo, INodeDefVersionVo } from '@/api/dto/node-definitions';
+import { INodeDefinitionVersionExampleVo, INodeDefVersionListVo, INodeDefVersionVo, INodeOutputDefinitionVo } from '@/api/dto/node-definitions';
 
 export const baseUrl = '/library';
 const localVersionUrl = '/view/nodes';
+const nodeOutputDefsUrl = '/view/workflow/node_output_defs';
 
 const hubUrl = import.meta.env.VITE_JIANMU_HUB_API_BASE_URL;
 const officialVersionUrl = 'hub/view/node_definitions';
@@ -94,6 +95,16 @@ export function getOfficialVersionList(ref: string, ownerRef: string): Promise<I
 export function getOfficialNodeParams(ref: string, ownerRef: string, version: string): Promise<INodeDefinitionVersionExampleVo> {
   return restProxy<INodeDefinitionVersionExampleVo>({
     url: `${hubUrl}/${officialVersionUrl}/${ownerRef}/${ref}/versions/${version}`,
+    method: 'get',
+  });
+}
+
+/**
+ * 查询节点内置输出参数定义列表
+ */
+export function getNodeOutputDefinitions(): Promise<INodeOutputDefinitionVo[]> {
+  return restProxy({
+    url: `${nodeOutputDefsUrl}`,
     method: 'get',
   });
 }
