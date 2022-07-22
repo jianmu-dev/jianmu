@@ -183,8 +183,6 @@ public class ProjectApplication {
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
                 .steps(parser.getSteps())
-                .enabled(parser.isEnabled())
-                .mutable(parser.isMutable())
                 .concurrent(parser.isConcurrent())
                 .lastModifiedBy(username)
                 .gitRepoId("")
@@ -242,8 +240,6 @@ public class ProjectApplication {
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(parser.getTriggerType());
         project.setSteps(parser.getSteps());
-        project.setEnabled(parser.isEnabled());
-        project.setMutable(parser.isMutable());
         project.setConcurrent(parser.isConcurrent());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());

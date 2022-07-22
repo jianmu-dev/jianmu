@@ -50,7 +50,7 @@ public class Project extends BaseAssociation {
     // 项目状态
     private boolean enabled = true;
     // 状态是否可变
-    private boolean mutable = false;
+    private boolean mutable = true;
     // 可否并发执行
     private boolean concurrent = false;
     // 原始DSL文本
@@ -307,9 +307,6 @@ public class Project extends BaseAssociation {
         }
 
         public Project build() {
-            if (!this.mutable && !this.enabled) {
-                throw new RuntimeException("mutable与enabled同时为false时，项目将永不可用");
-            }
             Project project = new Project();
             project.id = UUID.randomUUID().toString().replace("-", "");
             project.workflowVersion = this.workflowVersion;
@@ -320,8 +317,6 @@ public class Project extends BaseAssociation {
             project.triggerType = this.triggerType;
             project.gitRepoId = this.gitRepoId;
             project.steps = this.steps;
-            project.enabled = this.enabled;
-            project.mutable = this.mutable;
             project.concurrent = this.concurrent;
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;

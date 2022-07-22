@@ -45,8 +45,6 @@ public class DslParser {
     private final Map<String, Object> global = new HashMap<>();
     private Map<String, Object> workflow;
     private Map<String, Object> pipeline;
-    private boolean enabled = true;
-    private boolean mutable = false;
     private boolean concurrent = false;
     private String name;
     private String description;
@@ -357,20 +355,6 @@ public class DslParser {
     private void createGlobal() {
         var globalParam = this.global.get("param");
         this.createGlobalParameters(globalParam);
-        var enabled = this.global.get("enabled");
-        if (enabled instanceof Boolean) {
-            this.enabled = (Boolean) enabled;
-        }
-        if (enabled instanceof Map) {
-            var value = ((Map<String, Object>) enabled).get("value");
-            if (value instanceof Boolean) {
-                this.enabled = (Boolean) value;
-            }
-            var mutable = ((Map<String, Object>) enabled).get("mutable");
-            if (mutable instanceof Boolean) {
-                this.mutable = (Boolean) mutable;
-            }
-        }
         var concurrent = this.global.get("concurrent");
         if (concurrent instanceof Boolean) {
             this.concurrent = (Boolean) concurrent;
@@ -876,14 +860,6 @@ public class DslParser {
 
     public Map<String, Object> getPipeline() {
         return pipeline;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public boolean isMutable() {
-        return mutable;
     }
 
     public boolean isConcurrent() {
