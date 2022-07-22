@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, PropType, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, PropType, provide, ref } from 'vue';
 import { cloneDeep } from 'lodash';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
@@ -42,6 +42,8 @@ import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
 import { ISelectableParam } from '../workflow-expression-editor/model/data';
 import { buildSelectableExtParam, buildSelectableGlobalParam } from './model/data/global-param';
+import { getExtParamList } from '@/api/ext-param';
+import { IExternalParameterVo } from '@/api/dto/ext-param';
 
 // 注册自定义x6元素
 registerCustomVueShape();
@@ -66,11 +68,13 @@ export default defineComponent({
     const globalDrawerVisible = ref<boolean>(false);
     let workflowValidator: WorkflowValidator;
     let checkGlobalParams: () => Promise<void>;
+    let extParams: IExternalParameterVo[];
 
     provide('getGraph', (): Graph => graph.value!);
     provide('getWorkflowValidator', (): WorkflowValidator => workflowValidator!);
     provide('buildSelectableGlobalParam', (): ISelectableParam | undefined => buildSelectableGlobalParam(workflowData.value.global.params));
-    provide('buildSelectableExtParam', (): Promise<ISelectableParam | undefined> => buildSelectableExtParam());
+    provide('buildSelectableExtParam', (): ISelectableParam | undefined => buildSelectableExtParam(extParams!));
+    onMounted(async () => (extParams = await getExtParamList()));
     const handleNodeSelected = async (nodeId: string, waringClicked: boolean) => {
       nodeConfigPanelVisible.value = true;
       selectedNodeId.value = nodeId;

@@ -2,7 +2,7 @@ import { ParamTypeEnum } from './enumeration';
 import { CustomRule } from '@/components/workflow/workflow-editor/model/data/common';
 import Schema, { Value } from 'async-validator';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
-import { getExtParamList } from '@/api/ext-param';
+import { IExternalParameterVo } from '@/api/dto/ext-param';
 
 export const GLOBAL_PARAM_SCOPE = 'global';
 export const EXT_PARAM_SCOPE = 'ext';
@@ -73,8 +73,7 @@ export function buildSelectableGlobalParam(globalParams?: GlobalParam[]): ISelec
   };
 }
 
-export async function buildSelectableExtParam(): Promise<ISelectableParam | undefined> {
-  const extParams = await getExtParamList();
+export function buildSelectableExtParam(extParams: IExternalParameterVo[]): ISelectableParam | undefined {
   return {
     value: EXT_PARAM_SCOPE,
     label: '外部参数',
