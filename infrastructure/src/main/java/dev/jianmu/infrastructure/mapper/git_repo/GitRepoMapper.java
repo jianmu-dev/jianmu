@@ -20,6 +20,7 @@ public interface GitRepoMapper {
             "#{branches, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.BranchListTypeHandler}, " +
             "#{flows, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.FlowListTypeHandler}) " +
             "ON DUPLICATE KEY UPDATE " +
+            "ref = #{ref}, owner = #{owner}," +
             "branches = #{branches, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.BranchListTypeHandler}, " +
             "flows = #{flows, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.FlowListTypeHandler}")
     void saveOrUpdate(GitRepo gitRepo);
