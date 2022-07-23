@@ -186,8 +186,10 @@ function parseWorkflow(workflow: any): {
     if (edges.length === 1) {
       return;
     }
-    const flowNodeId = edges.map(edge => edge.source!).join('_');
-
+    const flowNodeId = edges
+      .map(edge => edge.source!)
+      .sort((s1, s2) => s1.localeCompare(s2))
+      .join('_');
     let list = flowNodeMap[flowNodeId];
     if (!list) {
       list = [];

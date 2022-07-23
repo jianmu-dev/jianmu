@@ -123,7 +123,6 @@ export class WorkflowTool {
   }
 
   toDsl(workflowData: IWorkflow): string {
-    // TODO 适配新版dsl
     const triggerNodeProxies: CustomX6NodeProxy[] = [];
     const nodeProxies: CustomX6NodeProxy[] = [];
 

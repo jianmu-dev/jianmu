@@ -8,7 +8,7 @@
   >
     <template #title>
       <div>
-        <span>{{ nodeData.getName() }}</span>
+        <span>{{ nodeData.getDisplayName() }}</span>
         <a :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help"/>
       </div>
     </template>

@@ -44,13 +44,14 @@ export class Webhook extends BaseNode {
 
     return {
       value: WEBHOOK_PARAM_SCOPE,
-      label: super.getName(),
-      children: this.params.filter(({ name }) => name)
+      label: '触发器参数',
+      children: this.params
+        .filter(({ ref }) => ref)
         .map(({ ref, type, name }) => {
           return {
             value: ref,
             type,
-            label: name,
+            label: name || ref,
           };
         }),
     };

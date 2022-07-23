@@ -25,6 +25,7 @@
           <webhook-param
             v-for="(param,index) in form.params"
             :key="param.key"
+            :node-id="nodeId"
             v-model:reference="param.ref"
             v-model:name="param.name"
             v-model:value="param.value"
@@ -34,7 +35,9 @@
             :index="index"
             :rules="nodeData.getFormRules().params.fields[index].fields"
             @delete="deleteParam"
+            @update:reference="refreshEditorParams"
             @update:name="refreshEditorParams"
+            @update:type="refreshEditorParams"
           />
           <div class="add-param" @click="addParam">
             <i class="jm-icon-button-add"/>
@@ -75,6 +78,7 @@
               </template>
               <expression-editor
                 v-model="form.auth.token"
+                :type="ExpressionTypeEnum.WEBHOOK_TOKEN"
                 :node-id="nodeId"
                 :param-type="ParamTypeEnum.STRING"
                 placeholder="请输入token值"
@@ -112,6 +116,7 @@
             <div class="only-content">
               <expression-editor
                 v-model="form.only"
+                :type="ExpressionTypeEnum.WEBHOOK_ONLY"
                 placeholder="请输入匹配规则"
                 :node-id="nodeId"
                 :param-type="ParamTypeEnum.BOOL"
@@ -133,7 +138,7 @@ import ExpressionEditor from './form/expression-editor.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { Node } from '@antv/x6';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
-import { ParamTypeEnum } from '../../model/data/enumeration';
+import { ExpressionTypeEnum, ParamTypeEnum } from '../../model/data/enumeration';
 
 export default defineComponent({
   components: { WebhookParam, SecretKeySelector, ExpressionEditor },
@@ -146,9 +151,8 @@ export default defineComponent({
   emits: ['form-created'],
   setup(props, { emit }) {
     const refreshParamsFns: ((params: ISelectableParam[]) => void)[] = [];
-    const handleEditorCreated = (refreshParams: (params: ISelectableParam[]) => void) => {
+    const handleEditorCreated = (refreshParams: (params: ISelectableParam[]) => void) =>
       refreshParamsFns.push(refreshParams);
-    };
     const formRef = ref();
     const form = ref<Webhook>(props.nodeData);
     const refreshEditorParams = async () => {
@@ -169,6 +173,7 @@ export default defineComponent({
 
     return {
       ParamTypeEnum,
+      ExpressionTypeEnum,
       refreshEditorParams,
       handleEditorCreated,
       formRef,

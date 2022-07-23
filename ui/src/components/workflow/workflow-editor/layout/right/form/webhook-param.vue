@@ -42,6 +42,8 @@
       </template>
       <expression-editor
         v-model="valueVal"
+        :type="ExpressionTypeEnum.WEBHOOK_PARAM"
+        :node-id="nodeId"
         :param-type="typeVal"
         placeholder="请输入参数值"
         @change="changeValue"
@@ -62,13 +64,17 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { ParamTypeEnum } from '../../../model/data/enumeration';
+import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from '../form/expression-editor.vue';
 
 export default defineComponent({
   components: { ExpressionEditor },
   props: {
+    nodeId: {
+      type: String,
+      required: true,
+    },
     reference: {
       type: String,
       default: '',
@@ -128,6 +134,7 @@ export default defineComponent({
       valueVal,
       requiredVal,
       ParamTypeEnum,
+      ExpressionTypeEnum,
       switchBackgroundFlag,
       changeReference: () => {
         emit('update:reference', refVal.value);

@@ -9,7 +9,7 @@
     >
       <template #default="{ data }">
         <span class="param-label">{{ data.label }}</span>
-        <jm-tooltip :content="`参数类型：${getType(data?.type)}`" placement="top" v-if="!data.children">
+        <jm-tooltip :content="`参数类型：${getType(data?.type)}`" placement="top" v-if="data?.type">
           <i class="jm-icon-workflow-param-type"></i>
         </jm-tooltip>
       </template>

@@ -34,9 +34,10 @@ export class Shell extends BaseNode {
   }
 
   async buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined> {
+    const { ref, name } = this;
     return {
-      value: super.getRef(),
-      label: super.getName(),
+      value: ref,
+      label: name || ref,
       children: [await buildSelectableInnerOutputParam()],
     };
   }
