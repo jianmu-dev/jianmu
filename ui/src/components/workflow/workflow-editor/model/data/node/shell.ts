@@ -88,7 +88,7 @@ export class Shell extends BaseNode {
       name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
       image,
-      environment: envs.length === 0 ? undefined : environment,
+      env: envs.length === 0 ? undefined : environment,
       script: script ? script.split('\n') : undefined,
     };
   }
