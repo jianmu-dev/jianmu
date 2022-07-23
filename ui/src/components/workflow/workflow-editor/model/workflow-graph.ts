@@ -356,7 +356,7 @@ export class WorkflowGraph {
       this.graph.cleanSelection();
 
       cells.forEach(cell => {
-        if (!this.graph.isNode(cell)) {
+        if (!cell.isNode()) {
           return;
         }
 
