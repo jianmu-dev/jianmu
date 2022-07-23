@@ -113,9 +113,9 @@ function parseWorkflow(workflow: any): {
       case NodeTypeEnum.START:
       case NodeTypeEnum.END:
         break;
-      case NodeTypeEnum.CONDITION:
-        description += `<br/>${workflow[key].expression}`;
-        break;
+      // case NodeTypeEnum.CONDITION:
+      //   description += `<br/>${expression}`;
+      //   break;
       default: {
         type = NodeTypeEnum.ASYNC_TASK;
         const { image } = workflow[key];
@@ -142,59 +142,30 @@ function parseWorkflow(workflow: any): {
       });
     });
 
-    // const { sources, targets } = workflow[key];
-    //
-    // sources?.forEach((source: string) => {
-    //   if (edges.find(item => item.source === source && item.target === key)) {
-    //     // 已存在时，忽略
-    //     return;
-    //   }
-    //
-    //   edges.push({
-    //     source,
-    //     target: key,
-    //     type: 'flow',
-    //   });
-    // });
-    //
-    // targets?.forEach((target: string) => {
-    //   if (edges.find(item => item.source === key && item.target === target)) {
-    //     // 已存在时，忽略
-    //     return;
-    //   }
-    //
-    //   edges.push({
-    //     source: key,
-    //     target,
-    //     type: 'flow',
-    //   });
-    // });
-  });
-
-  edges.forEach((edge, index, self) => {
-    const { type, cases } = workflow[edge.source as string];
-    // TODO 待扩展switch
-    if (type !== NodeTypeEnum.CONDITION) {
-      return;
-    }
-
-    const kArr = Object.keys(cases);
-    // 设置从条件网关出来的边内容
-    for (const k of kArr) {
-      const v = cases[k];
-      // TODO 待扩展并发场景
-      if (v === edge.target) {
-        if (self.filter(({ source }) => source === edge.source).length === 1) {
-          // 表示网关两条分支都连接到统一节点
-          edge.label = kArr.join(' | ');
-        } else {
-          edge.label = k;
-        }
-
-        break;
-      }
-    }
-  });
+  // edges.forEach((edge, index, self) => {
+  //   const { type, cases } = workflow.find(({ ref }: any) => ref === edge.source)!;
+  //   // TODO 待扩展switch
+  //   if (type !== NodeTypeEnum.CONDITION) {
+  //     return;
+  //   }
+  //
+  //   const kArr = Object.keys(cases);
+  //   // 设置从条件网关出来的边内容
+  //   for (const k of kArr) {
+  //     const v = cases[k];
+  //     // TODO 待扩展并发场景
+  //     if (v === edge.target) {
+  //       if (self.filter(({ source }) => source === edge.source).length === 1) {
+  //         // 表示网关两条分支都连接到统一节点
+  //         edge.label = kArr.join(' | ');
+  //       } else {
+  //         edge.label = k;
+  //       }
+  //
+  //       break;
+  //     }
+  //   }
+  // });
 
   // ====================================================================================================
 
