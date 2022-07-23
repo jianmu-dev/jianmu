@@ -58,8 +58,8 @@ export class WorkflowDnd {
         if (!flag) {
           return false;
         }
-        
-        await workflowValidator.checkInitializingNode(droppingNode, clickNodeWarningCallback);
+
+        await workflowValidator.checkInitializingNode(droppingNode, false, clickNodeWarningCallback);
         return true;
       },
     });

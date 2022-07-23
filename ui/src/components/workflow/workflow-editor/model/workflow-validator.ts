@@ -66,10 +66,10 @@ export class WorkflowValidator {
     node.removeTool('button');
   }
 
-  async checkInitializingNode(node: Node, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): Promise<void> {
+  async checkInitializingNode(node: Node, copied: boolean, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): Promise<void> {
     const proxy = new CustomX6NodeProxy(node);
     const _data = proxy.getData();
-    if (_data.getType() !== NodeTypeEnum.ASYNC_TASK) {
+    if (_data.getType() !== NodeTypeEnum.ASYNC_TASK || copied) {
       _data
         .validate()
         // 校验节点有误时，加警告

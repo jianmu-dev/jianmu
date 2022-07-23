@@ -35,7 +35,9 @@ export default defineComponent({
     onMounted(() => {
       // 初始化画布
       workflowGraph = new WorkflowGraph(proxy, container.value!,
-        (node: Node) => getWorkflowValidator().checkInitializingNode(node, nodeId => emit('node-selected', nodeId, true)),
+        (node: Node) =>
+          getWorkflowValidator().checkInitializingNode(node, true,
+            nodeId => emit('node-selected', nodeId, true)),
         (nodeId: string) => emit('node-selected', nodeId, false));
 
       emit('graph-created', workflowGraph.x6Graph);
