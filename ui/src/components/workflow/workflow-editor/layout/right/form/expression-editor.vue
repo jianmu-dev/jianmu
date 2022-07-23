@@ -33,7 +33,7 @@ export default defineComponent({
 
     onMounted(async () => {
       // 外部参数
-      const buildExtParam = buildSelectableExtParam();
+      const buildExtParam = await buildSelectableExtParam();
       if (buildExtParam) {
         selectableParams.value.push(buildExtParam);
       }
