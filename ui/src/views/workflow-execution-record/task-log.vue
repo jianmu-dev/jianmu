@@ -496,7 +496,7 @@ export default defineComponent({
       }),
       download,
       currentInstanceId,
-      nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
+      nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}@`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value
           .filter(item => item.type === TaskParamTypeEnum.INPUT)
