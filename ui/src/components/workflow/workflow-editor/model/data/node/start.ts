@@ -15,7 +15,7 @@ export class Start extends BaseNode {
     return {
       ref: super.getRef(),
       name: super.getName(),
-      type: super.getType(),
+      task: super.getType(),
     };
   }
 }
