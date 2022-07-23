@@ -179,7 +179,7 @@ public class HubApplication {
     }
 
     private String getOwnerRef(String type) {
-        var ref = type.split(":")[0];
+        var ref = type.split("@")[0];
         var strings = ref.split("/");
         if (strings.length == 1) {
             return "_";
@@ -188,7 +188,7 @@ public class HubApplication {
     }
 
     private String getRef(String type) {
-        var ref = type.split(":")[0];
+        var ref = type.split("@")[0];
         var strings = ref.split("/");
         if (strings.length == 1) {
             return ref;
@@ -197,7 +197,7 @@ public class HubApplication {
     }
 
     private String getVersion(String type) {
-        return type.split(":")[1];
+        return type.split("@")[1];
     }
 
     private NodeDefinition downloadNodeDef(String type) {
@@ -295,7 +295,7 @@ public class HubApplication {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public NodeDef getByType(String type) {
-        if (type.startsWith("shell:")) {
+        if (type.startsWith("shell@")) {
             return this.findShellNodeDef(type);
         }
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))
@@ -334,7 +334,7 @@ public class HubApplication {
     }
 
     public NodeDef findByType(String type) {
-        if (type.startsWith("shell:")) {
+        if (type.startsWith("shell@")) {
             return this.findShellNodeDef(type);
         }
         var node = this.nodeDefinitionRepository.findById(getOwnerRef(type) + "/" + getRef(type))

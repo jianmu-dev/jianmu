@@ -43,8 +43,8 @@ public class DslParser {
     private Webhook webhook;
     private String cron;
     private final Map<String, Object> global = new HashMap<>();
-    private Map<String, Object> workflow;
-    private Map<String, Object> pipeline;
+    private List<Object> workflow;
+    private List<Object> pipeline;
     private boolean concurrent = false;
     private String name;
     private String description;
@@ -496,16 +496,16 @@ public class DslParser {
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
-            this.workflow.forEach((key, val) -> {
-                if (val instanceof Map) {
-                    var dslNode = DslNode.of(key, (Map<?, ?>) val);
+            this.workflow.forEach(node -> {
+                if (node instanceof Map) {
+                    var dslNode = DslNode.of((Map<?, ?>) node);
                     if (dslNode.getImage() != null) {
                         var shellNode = ShellNode.Builder.aShellNode()
                                 .image(dslNode.getImage())
                                 .environment(dslNode.getEnvironment())
                                 .script(dslNode.getScript())
                                 .build();
-                        dslNode.setType("shell:" + shellNode.getId());
+                        dslNode.setType("shell@" + shellNode.getId());
                         shellNodes.add(shellNode);
                     }
                     dslNodes.add(dslNode);
@@ -516,16 +516,16 @@ public class DslParser {
         if (null != this.pipeline) {
             this.pipelineSyntaxCheck();
             this.type = Workflow.Type.PIPELINE;
-            this.pipeline.forEach((key, val) -> {
-                if (val instanceof Map) {
-                    var dslNode = DslNode.of(key, (Map<?, ?>) val);
+            this.pipeline.forEach(node -> {
+                if (node instanceof Map) {
+                    var dslNode = DslNode.of((Map<?, ?>) node);
                     if (dslNode.getImage() != null) {
                         var shellNode = ShellNode.Builder.aShellNode()
                                 .image(dslNode.getImage())
                                 .environment(dslNode.getEnvironment())
                                 .script(dslNode.getScript())
                                 .build();
-                        dslNode.setType("shell:" + shellNode.getId());
+                        dslNode.setType("shell@" + shellNode.getId());
                         shellNodes.add(shellNode);
                     }
                     dslNodes.add(dslNode);
@@ -672,23 +672,28 @@ public class DslParser {
 
     private void pipelineSyntaxCheck() {
         var pipe = this.pipeline;
-        pipe.forEach((key, val) -> {
-            if (val == null) {
-                throw new DslException(key + "节点不能为空");
+        pipe.forEach(node -> {
+            if (node == null) {
+                throw new DslException("节点不能为空");
             }
-            if (val instanceof Map) {
-                this.checkPipeNode(key, (Map<?, ?>) val);
+            if (node instanceof Map) {
+                this.checkPipeNode((Map<?, ?>) node);
             }
         });
     }
 
-    private void checkPipeNode(String nodeName, Map<?, ?> node) {
+    private void checkPipeNode(Map<?, ?> node) {
+        var ref = node.get("ref");
+        if (!(ref instanceof String)) {
+            throw new IllegalArgumentException("节点ref未设置");
+        }
+        var nodeName = (String) ref;
         // 验证保留关键字
         if (nodeName.equals("event")) {
-            throw new DslException("节点名称不能使用event");
+            throw new DslException("节点ref不能使用event");
         }
         if (nodeName.equals("global")) {
-            throw new DslException("节点名称不能使用global");
+            throw new DslException("节点ref不能使用global");
         }
         // 如果为Shell Node，不校验type
         var image = node.get("image");
@@ -696,37 +701,42 @@ public class DslParser {
             this.checkShellNode(nodeName, node);
             return;
         }
-        var type = node.get("type");
-        if (null == type) {
-            throw new DslException("Node type未设置");
+        var task = node.get("task");
+        if (null == task) {
+            throw new DslException("Node task未设置");
         }
     }
 
     private void workflowSyntaxCheck() {
         var flow = this.workflow;
-        flow.forEach((key, val) -> {
-            if (val instanceof Map) {
-                this.checkNode(key, (Map<?, ?>) val);
+        flow.forEach(node -> {
+            if (node instanceof Map) {
+                this.checkNode((Map<?, ?>) node);
             }
         });
     }
 
-    private void checkNode(String nodeName, Map<?, ?> node) {
+    private void checkNode(Map<?, ?> node) {
         // 如果为Shell Node，不校验type
+        var ref = node.get("ref");
+        if (!(ref instanceof String)) {
+            throw new IllegalArgumentException("节点ref未设置");
+        }
+        var nodeName = (String) ref;
         var image = node.get("image");
         if (image != null) {
             this.checkShellNode(nodeName, node);
             return;
         }
-        var type = node.get("type");
-        if (null == type) {
-            throw new DslException("Node type未设置");
+        var task = node.get("task");
+        if (null == task) {
+            throw new DslException("Node task未设置");
         }
-        if (type.equals("start")) {
+        if (task.equals("start")) {
             this.checkStart(node);
             return;
         }
-        if (type.equals("end")) {
+        if (task.equals("end")) {
             this.checkEnd(node);
             return;
         }
@@ -736,10 +746,10 @@ public class DslParser {
 //        }
         // 验证保留关键字
         if (nodeName.equals("event")) {
-            throw new DslException("节点名称不能使用event");
+            throw new DslException("节点ref不能使用event");
         }
         if (nodeName.equals("global")) {
-            throw new DslException("节点名称不能使用global");
+            throw new DslException("节点ref不能使用global");
         }
         this.checkTask(nodeName, node);
     }
@@ -825,11 +835,11 @@ public class DslParser {
                 .filter(type -> !type.equals("start"))
                 .filter(type -> !type.equals("end"))
 //                .filter(type -> !type.equals("condition"))
-                .filter(type -> !type.startsWith("shell:"))
+                .filter(type -> !type.startsWith("shell@"))
                 .map(type -> {
-                    String[] strings = type.split(":");
+                    String[] strings = type.split("@");
                     if (strings.length == 1) {
-                        return type + ":latest";
+                        return type + "@latest";
                     }
                     return type;
                 })
@@ -856,11 +866,11 @@ public class DslParser {
         return global;
     }
 
-    public Map<String, Object> getWorkflow() {
+    public List<Object> getWorkflow() {
         return workflow;
     }
 
-    public Map<String, Object> getPipeline() {
+    public List<Object> getPipeline() {
         return pipeline;
     }
 
