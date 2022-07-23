@@ -200,7 +200,7 @@ export class AsyncTask extends BaseNode {
       name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
       task: `${ownerRef === OFFICIAL_NODE_OWNER_REF ? '' : `${ownerRef}/`}${nodeRef}@${version}`,
-      param: inputs.length === 0 ? undefined : param,
+      input: inputs.length === 0 ? undefined : param,
     };
   }
 }
