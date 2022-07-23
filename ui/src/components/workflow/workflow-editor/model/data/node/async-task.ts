@@ -75,16 +75,17 @@ export class AsyncTask extends BaseNode {
         return {
           value: ref,
           type,
-          label: name,
+          label: name || ref,
         };
       }));
     }
 
     children.push(await buildSelectableInnerOutputParam());
 
+    const { ref, name } = this;
     return {
-      value: super.getRef(),
-      label: super.getName(),
+      value: ref,
+      label: name || ref,
       children,
     };
   }
