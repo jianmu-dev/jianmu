@@ -63,7 +63,10 @@ export class WorkflowValidator {
     await this.checkNodes();
   }
 
-  // 验证global参数
+  /**
+   * 校验全局参数
+   * @private
+   */
   private async checkGlobalParams(): Promise<void> {
     const refs: string[] = [];
 
