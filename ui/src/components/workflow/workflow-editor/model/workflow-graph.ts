@@ -320,7 +320,12 @@ export class WorkflowGraph {
     this.graph.bindKey(['meta+c', 'ctrl+c'], () => {
       const nodes = this.graph.getSelectedCells()
         // 筛选节点，只能复制节点
-        .filter(cell => cell.isNode())
+        .filter(cell => {
+          if (!cell.isNode()) {
+            return false;
+          }
+          return !new CustomX6NodeProxy(cell).isSingle();
+        })
         .map(cell => {
           // 复制/粘贴时，连接桩id没有改变，通过创建新节点刷新连接桩id
           const node = this.graph.createNode({
