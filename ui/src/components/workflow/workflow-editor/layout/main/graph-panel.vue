@@ -6,11 +6,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
+import { defineComponent, getCurrentInstance, inject, onMounted, onUnmounted, PropType, provide, ref } from 'vue';
+import { Node } from '@antv/x6';
 import { WorkflowGraph } from '../../model/workflow-graph';
 import { IWorkflow } from '../../model/data/common';
 import NodeToolbar from './node-toolbar.vue';
 import { WorkflowNodeToolbar } from '../../model/workflow-node-toolbar';
+import { WorkflowValidator } from '../../model/workflow-validator';
 
 export default defineComponent({
   components: { NodeToolbar },
@@ -25,6 +27,7 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const nodeToolbar = ref();
     const container = ref<HTMLElement>();
+    const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     let workflowGraph: WorkflowGraph;
 
     provide('getWorkflowNodeToolbar', (): WorkflowNodeToolbar => workflowGraph!.workflowNodeToolbar);
@@ -32,7 +35,8 @@ export default defineComponent({
     onMounted(() => {
       // 初始化画布
       workflowGraph = new WorkflowGraph(proxy, container.value!,
-        (nodeId: string) => emit('node-selected', nodeId));
+        (node: Node) => getWorkflowValidator().checkInitializingNode(node, nodeId => emit('node-selected', nodeId, true)),
+        (nodeId: string) => emit('node-selected', nodeId, false));
 
       emit('graph-created', workflowGraph.x6Graph);
       // 渲染画布，回显

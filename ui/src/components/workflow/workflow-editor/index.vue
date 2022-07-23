@@ -23,7 +23,7 @@
       <node-panel v-if="graph" @node-selected="nodeId => handleNodeSelected(nodeId, true)"/>
       <graph-panel :workflow-data="workflowData"
                    @graph-created="handleGraphCreated"
-                   @node-selected="nodeId => handleNodeSelected(nodeId, false)"/>
+                   @node-selected="(nodeId, waringClicked) => handleNodeSelected(nodeId, waringClicked)"/>
     </div>
   </div>
 </template>

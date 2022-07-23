@@ -12,6 +12,9 @@ const { icon: { width, height } } = NODE;
 const { stroke: lineColor } = EDGE;
 const { fill: circleBgColor } = PORT;
 
+type PasteNodeCallbackFnType = (node: Node) => void;
+type ClickNodeCallbackFnType = (nodeId: string) => void;
+
 export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
   let propertiesArr: Cell.Properties[];
   if (!data) {
@@ -65,15 +68,17 @@ export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
 
 export class WorkflowGraph {
   private readonly graph: Graph;
-  private readonly clickNodeCallback: (nodeId: string) => void;
+  private readonly pasteNodeCallback: PasteNodeCallbackFnType;
+  private readonly clickNodeCallback: ClickNodeCallbackFnType;
   private readonly workflowTool: WorkflowTool;
   readonly workflowNodeToolbar: WorkflowNodeToolbar;
   private readonly workflowEdgeToolbar: WorkflowEdgeToolbar;
   private readonly resizeObserver: ResizeObserver;
 
-  constructor(proxy: any, container: HTMLElement, clickNodeCallback: (nodeId: string) => void) {
+  constructor(proxy: any, container: HTMLElement, pasteNodeCallback: PasteNodeCallbackFnType, clickNodeCallback: ClickNodeCallbackFnType) {
     const containerParentEl = container.parentElement!;
     const { clientWidth: width, clientHeight: height } = containerParentEl;
+    this.pasteNodeCallback = pasteNodeCallback;
     this.clickNodeCallback = clickNodeCallback;
 
     // #region 初始化画布
@@ -347,8 +352,16 @@ export class WorkflowGraph {
       if (this.graph.isClipboardEmpty()) {
         return;
       }
-      this.graph.paste({ offset: 32 });
+      const cells = this.graph.paste({ offset: 32 });
       this.graph.cleanSelection();
+
+      cells.forEach(cell => {
+        if (!this.graph.isNode(cell)) {
+          return;
+        }
+
+        this.pasteNodeCallback(cell);
+      });
     });
 
     // select all
