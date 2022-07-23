@@ -6,6 +6,8 @@ import { ISelectableParam } from '../../../../workflow-expression-editor/model/d
 import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
+const OFFICIAL_NODE_OWNER_REF = '_';
+
 export interface IAsyncTaskParam {
   readonly ref: string;
   readonly name: string;
@@ -197,7 +199,7 @@ export class AsyncTask extends BaseNode {
       ref,
       name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
-      type: `${this.ownerRef}/${this.nodeRef}:${version}`,
+      task: `${ownerRef === OFFICIAL_NODE_OWNER_REF ? '' : `${ownerRef}/`}${nodeRef}@${version}`,
       param: inputs.length === 0 ? undefined : param,
     };
   }
