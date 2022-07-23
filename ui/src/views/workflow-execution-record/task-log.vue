@@ -451,7 +451,7 @@ export default defineComponent({
     onBeforeUnmount(destroy);
 
     const maxWidthRecord = ref<Record<string, number>>({});
-    const changeTask = async(instanceId: string) => {
+    const changeTask = async (instanceId: string) => {
       taskParams.value = await listTaskParam(instanceId);
       await nextTick();
       currentInstanceId.value = instanceId;
@@ -491,8 +491,8 @@ export default defineComponent({
       tabActiveName,
       moreLog,
       nodeName: computed<string>(() => {
-        const { alias } = (pipeline || workflow)[task.value.nodeName];
-        return alias || task.value.nodeName;
+        const { ref, name } = (pipeline || workflow).find(({ ref }: any) => ref === task.value.nodeName)!;
+        return name || ref;
       }),
       download,
       currentInstanceId,
