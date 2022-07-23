@@ -68,6 +68,7 @@
             <expression-editor
               v-else
               v-model="item.value"
+              :type="ExpressionTypeEnum.NODE_INPUT"
               :node-id="nodeId"
               :param-type="item.type"
               :placeholder="item.description?item.description:'请输入'+item.name"/>
@@ -128,7 +129,7 @@
 <script lang="ts">
 import { defineComponent, getCurrentInstance, inject, onMounted, PropType, ref } from 'vue';
 import { AsyncTask } from '../../model/data/node/async-task';
-import { NodeGroupEnum, ParamTypeEnum } from '../../model/data/enumeration';
+import { ExpressionTypeEnum, NodeGroupEnum, ParamTypeEnum } from '../../model/data/enumeration';
 import {
   getLocalNodeParams,
   getLocalVersionList,
@@ -217,6 +218,7 @@ export default defineComponent({
       form,
       versionList,
       ParamTypeEnum,
+      ExpressionTypeEnum,
       nodeId,
       versionLoading,
       failureVisible,
@@ -322,7 +324,8 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: space-between;
-      .right-type{
+
+      .right-type {
         font-size: 12px;
         color: #7B8C9C;
       }

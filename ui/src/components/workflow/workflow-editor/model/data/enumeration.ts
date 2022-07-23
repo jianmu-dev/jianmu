@@ -72,3 +72,15 @@ export enum RefTypeEnum {
   SHELL_ENV = 'Shell节点环境变量',
   SHELL_OUTPUT = 'Shell节点输出参数',
 }
+
+/**
+ * 表达式类型
+ */
+export enum ExpressionTypeEnum {
+  GLOBAL_PARAM = 'GLOBAL_PARAM',
+  WEBHOOK_PARAM = 'WEBHOOK_PARAM',
+  WEBHOOK_TOKEN = 'WEBHOOK_TOKEN',
+  WEBHOOK_ONLY = 'WEBHOOK_ONLY',
+  NODE_INPUT = 'NODE_INPUT',
+  SHELL_ENV = 'SHELL_ENV',
+}

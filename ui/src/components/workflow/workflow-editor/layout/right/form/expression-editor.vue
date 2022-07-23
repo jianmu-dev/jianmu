@@ -8,10 +8,14 @@ import { ElFormItemContext, elFormItemKey } from 'element-plus/es/el-form';
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../../model/data/custom-x6-node-proxy';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
-import { NodeTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
+import { ExpressionTypeEnum, NodeTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 
 export default defineComponent({
   props: {
+    type: {
+      type: String as PropType<ExpressionTypeEnum>,
+      required: true,
+    },
     nodeId: {
       type: String,
       default: '',
@@ -26,38 +30,41 @@ export default defineComponent({
     const elFormItem = inject(elFormItemKey, {} as ElFormItemContext);
     // 获取此时进行编辑的节点信息
     const getGraph = inject('getGraph') as () => Graph;
-    const buildSelectableGlobalParam = inject('buildSelectableGlobalParam') as () => ISelectableParam | undefined;
     const buildSelectableExtParam = inject('buildSelectableExtParam') as () => Promise<ISelectableParam | undefined>;
+    const buildSelectableGlobalParam = inject('buildSelectableGlobalParam') as () => ISelectableParam | undefined;
     const graph = getGraph();
+    let extParam: ISelectableParam | undefined;
     const selectableParams = ref<ISelectableParam[]>([]);
 
     onMounted(async () => {
       // 外部参数
-      const buildExtParam = await buildSelectableExtParam();
-      if (buildExtParam) {
-        selectableParams.value.push(buildExtParam);
+      extParam = await buildSelectableExtParam();
+      if (extParam && extParam.children && extParam.children.length > 0) {
+        selectableParams.value.push(extParam);
       }
-      if (props.nodeId) {
-        const graphNode = graph.getCellById(props.nodeId) as Node;
-        const proxy = new CustomX6NodeProxy(graphNode);
-        // 级联选择器选项
-        selectableParams.value.push(...await proxy.getSelectableParams(graph));
-        if (proxy.getData().getType() !== NodeTypeEnum.WEBHOOK) {
-          const buildGlobalParam = buildSelectableGlobalParam();
-          if (buildGlobalParam) {
-            selectableParams.value.push(buildGlobalParam);
-          }
-        }
+
+      let proxy: CustomX6NodeProxy | undefined;
+      if (props.type === ExpressionTypeEnum.GLOBAL_PARAM) {
+        proxy = graph.getNodes()
+          .map(node => new CustomX6NodeProxy(node))
+          .find(proxy => proxy.getData().getType() === NodeTypeEnum.WEBHOOK);
       } else {
-        const webhookNode = graph.getNodes().find(node =>
-          new CustomX6NodeProxy(node).getData().getType() === NodeTypeEnum.WEBHOOK);
-        if (webhookNode) {
-          selectableParams.value.push(...await new CustomX6NodeProxy(webhookNode).getSelectableParams(graph));
-        }
+        proxy = new CustomX6NodeProxy(graph.getCellById(props.nodeId) as Node);
       }
+
+      if (!proxy) {
+        return;
+      }
+      // 级联选择器选项
+      selectableParams.value.push(...await proxy.getSelectableParams(graph, props.type, buildSelectableGlobalParam));
     });
     emit('editor-created', (params: ISelectableParam[]) => {
-      selectableParams.value = params;
+      selectableParams.value = [];
+      // 外部参数
+      if (extParam && extParam.children && extParam.children.length > 0) {
+        selectableParams.value.push(extParam);
+      }
+      selectableParams.value.push(...params);
     });
     return {
       selectableParams,
