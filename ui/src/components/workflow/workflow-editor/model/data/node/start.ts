@@ -13,7 +13,8 @@ export class Start extends BaseNode {
 
   toDsl(): object {
     return {
-      alias: super.getName(),
+      ref: super.getRef(),
+      name: super.getName(),
       type: super.getType(),
     };
   }

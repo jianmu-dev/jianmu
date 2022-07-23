@@ -157,7 +157,7 @@ export class AsyncTask extends BaseNode {
   }
 
   toDsl(): object {
-    const { name, version, inputs, failureMode } = this;
+    const { ownerRef, nodeRef, ref, name, version, inputs, failureMode } = this;
     const param: {
       [key: string]: string | number | boolean;
     } = {};
@@ -194,7 +194,8 @@ export class AsyncTask extends BaseNode {
     });
 
     return {
-      alias: name,
+      ref,
+      name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
       type: `${this.ownerRef}/${this.nodeRef}:${version}`,
       param: inputs.length === 0 ? undefined : param,
