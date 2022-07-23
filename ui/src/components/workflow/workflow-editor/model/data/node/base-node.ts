@@ -30,6 +30,10 @@ export abstract class BaseNode implements IWorkflowNode {
     return this.name;
   }
 
+  getDisplayName(): string {
+    return this.name || this.ref;
+  }
+
   getType(): NodeTypeEnum {
     return this.type;
   }

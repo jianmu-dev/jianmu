@@ -19,6 +19,8 @@ export interface IWorkflowNode {
 
   getName(): string;
 
+  getDisplayName(): string;
+
   getType(): NodeTypeEnum;
 
   getIcon(): string;
