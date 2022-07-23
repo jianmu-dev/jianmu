@@ -5,6 +5,8 @@ import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
+const OFFICIAL_NODE_OWNER_REF = '_';
+
 export interface IAsyncTaskParam {
   readonly ref: string;
   readonly name: string;
@@ -136,7 +138,7 @@ export class AsyncTask extends BaseNode {
   }
 
   toDsl(): object {
-    const { name, version, inputs, failureMode } = this;
+    const { ownerRef, nodeRef, ref, name, version, inputs, failureMode } = this;
     const param: {
       [key: string]: string | number | boolean;
     } = {};
@@ -173,10 +175,11 @@ export class AsyncTask extends BaseNode {
     });
 
     return {
-      alias: name,
+      ref,
+      name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
-      type: `${this.ownerRef}/${this.nodeRef}:${version}`,
-      param: inputs.length === 0 ? undefined : param,
+      task: `${ownerRef === OFFICIAL_NODE_OWNER_REF ? '' : `${ownerRef}/`}${nodeRef}@${version}`,
+      input: inputs.length === 0 ? undefined : param,
     };
   }
 }

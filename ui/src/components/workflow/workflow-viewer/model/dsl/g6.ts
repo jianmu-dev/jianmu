@@ -96,105 +96,68 @@ function parseWorkflow(workflow: any): {
   const nodes: NodeConfig[] = [];
   const edges: EdgeConfig[] = [];
 
-  Object.keys(workflow).forEach(key => {
-    if (typeof workflow[key] !== 'object') {
-      // 非对象表示非节点，忽略
-      return;
-    }
+  workflow.forEach(({ ref, name, task, image, needs }: any) => {
 
-    const { type: nodeType, alias } = workflow[key];
-
-    let label = alias || key;
+    let label = name || ref;
     label = label.length > MAX_LABEL_LENGTH ? `${label.substr(0, MAX_LABEL_LENGTH)}...` : label;
-    let description = alias || key;
-    let type = nodeType;
+    const description = name || ref;
+    let type = task;
     let uniqueKey;
-    switch (nodeType) {
+    switch (task) {
       case NodeTypeEnum.START:
       case NodeTypeEnum.END:
         break;
-      case NodeTypeEnum.CONDITION:
-        description += `<br/>${workflow[key].expression}`;
-        break;
+      // case NodeTypeEnum.CONDITION:
+      //   description += `<br/>${expression}`;
+      //   break;
       default: {
         type = NodeTypeEnum.ASYNC_TASK;
-        const { image } = workflow[key];
-        uniqueKey = image ? SHELL_NODE_TYPE : workflow[key].type;
+        uniqueKey = image ? SHELL_NODE_TYPE : task;
         break;
       }
     }
 
     nodes.push({
-      id: key,
+      id: ref,
       label,
       description,
       type,
       uniqueKey,
     });
 
-    const { needs } = workflow[key];
-
     needs?.forEach((need: string) => {
       edges.push({
         source: need,
-        target: key,
+        target: ref,
         type: 'flow',
       });
     });
-
-    // const { sources, targets } = workflow[key];
-    //
-    // sources?.forEach((source: string) => {
-    //   if (edges.find(item => item.source === source && item.target === key)) {
-    //     // 已存在时，忽略
-    //     return;
-    //   }
-    //
-    //   edges.push({
-    //     source,
-    //     target: key,
-    //     type: 'flow',
-    //   });
-    // });
-    //
-    // targets?.forEach((target: string) => {
-    //   if (edges.find(item => item.source === key && item.target === target)) {
-    //     // 已存在时，忽略
-    //     return;
-    //   }
-    //
-    //   edges.push({
-    //     source: key,
-    //     target,
-    //     type: 'flow',
-    //   });
-    // });
   });
 
-  edges.forEach((edge, index, self) => {
-    const { type, cases } = workflow[edge.source as string];
-    // TODO 待扩展switch
-    if (type !== NodeTypeEnum.CONDITION) {
-      return;
-    }
-
-    const kArr = Object.keys(cases);
-    // 设置从条件网关出来的边内容
-    for (const k of kArr) {
-      const v = cases[k];
-      // TODO 待扩展并发场景
-      if (v === edge.target) {
-        if (self.filter(({ source }) => source === edge.source).length === 1) {
-          // 表示网关两条分支都连接到统一节点
-          edge.label = kArr.join(' | ');
-        } else {
-          edge.label = k;
-        }
-
-        break;
-      }
-    }
-  });
+  // edges.forEach((edge, index, self) => {
+  //   const { type, cases } = workflow.find(({ ref }: any) => ref === edge.source)!;
+  //   // TODO 待扩展switch
+  //   if (type !== NodeTypeEnum.CONDITION) {
+  //     return;
+  //   }
+  //
+  //   const kArr = Object.keys(cases);
+  //   // 设置从条件网关出来的边内容
+  //   for (const k of kArr) {
+  //     const v = cases[k];
+  //     // TODO 待扩展并发场景
+  //     if (v === edge.target) {
+  //       if (self.filter(({ source }) => source === edge.source).length === 1) {
+  //         // 表示网关两条分支都连接到统一节点
+  //         edge.label = kArr.join(' | ');
+  //       } else {
+  //         edge.label = k;
+  //       }
+  //
+  //       break;
+  //     }
+  //   }
+  // });
 
   // ====================================================================================================
 
@@ -284,31 +247,24 @@ function parsePipeline(pipeline: any): {
   const nodes: NodeConfig[] = [];
   const edges: EdgeConfig[] = [];
 
-  Object.keys(pipeline).forEach(key => {
-    if (typeof pipeline[key] !== 'object') {
-      // 非对象表示非节点，忽略
-      return;
-    }
-
+  pipeline.forEach(({ ref, name, task, image }: any) => {
     if (nodes.length > 0) {
       edges.push({
         source: nodes[nodes.length - 1].id,
-        target: key,
+        target: ref,
         type: 'flow',
       });
     }
 
-    const { image, type, alias } = pipeline[key];
-
-    let label = alias || key;
+    let label = name || ref;
     label = label.length > MAX_LABEL_LENGTH ? `${label.substr(0, MAX_LABEL_LENGTH)}...` : label;
 
     nodes.push({
-      id: key,
+      id: ref,
       label,
-      description: alias || key,
+      description: name || ref,
       type: NodeTypeEnum.ASYNC_TASK,
-      uniqueKey: image ? SHELL_NODE_TYPE : type,
+      uniqueKey: image ? SHELL_NODE_TYPE : task,
     });
   });
 
