@@ -3,7 +3,15 @@ import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import nodeWarningIcon from '../svgs/node-warning.svg';
 import { IWorkflow } from './data/common';
 import { checkDuplicate } from './util/reference';
-import { RefTypeEnum } from './data/enumeration';
+import { NodeGroupEnum, NodeTypeEnum, RefTypeEnum } from './data/enumeration';
+import { AsyncTask } from './data/node/async-task';
+import {
+  getLocalNodeParams,
+  getLocalVersionList,
+  getOfficialNodeParams,
+  getOfficialVersionList,
+} from '@/api/node-library';
+import { pushParams } from './workflow-node';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -56,6 +64,43 @@ export class WorkflowValidator {
     }
 
     node.removeTool('button');
+  }
+
+  async checkInitializingNode(node: Node, copied: boolean, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): Promise<void> {
+    const proxy = new CustomX6NodeProxy(node);
+    const _data = proxy.getData();
+    if (_data.getType() !== NodeTypeEnum.ASYNC_TASK || copied) {
+      _data
+        .validate()
+        // 校验节点有误时，加警告
+        .catch(() => this.addWarning(node, clickNodeWarningCallback));
+      return;
+    }
+    const data = _data as AsyncTask;
+    const isOwnerRef = data.ownerRef === NodeGroupEnum.LOCAL;
+    const res = await (isOwnerRef ? getLocalVersionList : getOfficialVersionList)(data.nodeRef, data.ownerRef);
+    data.version = res.versions.length > 0 ? res.versions[0] : '';
+    if (isOwnerRef) {
+      const {
+        inputParameters: inputs,
+        outputParameters: outputs,
+        description: versionDescription,
+      } = await getLocalNodeParams(data.nodeRef, data.ownerRef, data.version);
+      pushParams(data, inputs, outputs, versionDescription);
+    } else {
+      const {
+        inputParams: inputs,
+        outputParams: outputs,
+        description: versionDescription,
+      } = await getOfficialNodeParams(data.nodeRef, data.ownerRef, data.version);
+      pushParams(data, inputs, outputs, versionDescription);
+    }
+    // fix: #I5DXPM
+    proxy.setData(data);
+    data
+      .validate()
+      // 校验节点有误时，加警告
+      .catch(() => this.addWarning(node, clickNodeWarningCallback));
   }
 
   async check(): Promise<void> {
