@@ -146,7 +146,7 @@ public class ViewController {
     // 获取仓库ID
     private String getRepoId() {
         try {
-            return this.userContextHolder.getSession().getGitRepoId();
+            return this.userContextHolder.getSession().getAssociationId();
         } catch (Exception e) {
             return null;
         }

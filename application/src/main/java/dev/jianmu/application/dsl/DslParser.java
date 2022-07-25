@@ -340,7 +340,7 @@ public class DslParser {
                     var name = map.get("name");
                     var type = map.get("type");
                     var required = (Boolean) map.get("required");
-                    var hidden = (Boolean) map.get("required");
+                    var hidden = (Boolean) map.get("hidden");
                     return GlobalParameter.Builder.aGlobalParameter()
                             .ref(ref)
                             .name(name == null ? ref : name.toString())

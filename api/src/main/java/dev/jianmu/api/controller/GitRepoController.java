@@ -42,7 +42,7 @@ public class GitRepoController {
     @GetMapping("/branches")
     @Operation(summary = "查询分支列表", description = "查询分支列表")
     public List<GitRepoBranchVo> findBranches() {
-        return this.gitRepoApplication.findBranches(this.userContextHolder.getSession().getGitRepoId()).stream()
+        return this.gitRepoApplication.findBranches(this.userContextHolder.getSession().getAssociationId()).stream()
                 .map(branch -> GitRepoBranchVo.builder()
                         .branchName(branch.getName())
                         .isDefault(branch.getIsDefault())
@@ -53,7 +53,7 @@ public class GitRepoController {
     @GetMapping("/flows")
     @Operation(summary = "查询流水线列表", description = "查询流水线列表")
     public List<ProjectVo> findFlows() {
-        var gitRepo = this.gitRepoApplication.findById(this.userContextHolder.getSession().getGitRepoId());
+        var gitRepo = this.gitRepoApplication.findById(this.userContextHolder.getSession().getAssociationId());
         return this.gitRepoApplication.findFlows(gitRepo)
                 .stream()
                 .map(project -> {
