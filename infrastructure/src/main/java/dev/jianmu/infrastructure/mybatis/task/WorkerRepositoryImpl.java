@@ -39,6 +39,11 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     }
 
     @Override
+    public void updateTag(Worker worker) {
+        this.workerMapper.updateTag(worker);
+    }
+
+    @Override
     public Optional<Worker> findById(String workerId) {
         return this.workerMapper.findById(workerId);
     }
@@ -56,5 +61,10 @@ public class WorkerRepositoryImpl implements WorkerRepository {
     @Override
     public List<Worker> findByTypeInAndCreatedTimeLessThan(List<Worker.Type> types, LocalDateTime createdTime) {
         return this.workerMapper.findByTypeInAndCreatedTimeLessThan(types, createdTime);
+    }
+
+    @Override
+    public List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(List<Worker.Type> types, List<String> tags, LocalDateTime createdTime) {
+        return this.workerMapper.findByTypeInAndTagAndCreatedTimeLessThan(types, tags, createdTime);
     }
 }

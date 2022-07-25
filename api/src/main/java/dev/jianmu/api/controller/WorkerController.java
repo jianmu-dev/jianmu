@@ -71,7 +71,7 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public void join(@PathVariable("workerId") String workerId, @RequestBody @Valid WorkerJoiningDto dto) {
-        this.workerApplication.join(workerId, dto.getType(), dto.getName());
+        this.workerApplication.join(workerId, dto.getType(), dto.getName(), dto.getTag());
     }
 
     @GetMapping("{workerId}/ping")
