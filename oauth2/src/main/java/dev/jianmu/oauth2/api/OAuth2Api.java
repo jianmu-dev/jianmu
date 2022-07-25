@@ -65,7 +65,7 @@ public interface OAuth2Api {
      */
     IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner);
 
-    default String getEntryUrl(String gitRepo, String gitRepoOwner) {
+    default String getEntryUrl(String owner, String ref) {
         return null;
     }
 }

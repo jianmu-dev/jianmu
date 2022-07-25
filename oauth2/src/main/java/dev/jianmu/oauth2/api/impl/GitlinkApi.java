@@ -240,7 +240,7 @@ public class GitlinkApi implements OAuth2Api {
     }
 
     @Override
-    public String getEntryUrl(String gitRepo, String gitRepoOwner) {
-        return oAuth2Properties.getGitlink().getBaseUrl() + gitRepoOwner + "/" + gitRepo + "/devops";
+    public String getEntryUrl(String owner, String ref) {
+        return oAuth2Properties.getGitlink().getBaseUrl() + owner + "/" + ref + "/devops";
     }
 }

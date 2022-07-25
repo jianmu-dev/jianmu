@@ -61,7 +61,7 @@ public class OAuth2ApiProxy implements OAuth2Api {
     }
 
     @Override
-    public String getEntryUrl(String gitRepo, String gitRepoOwner) {
-        return this.getApi().getEntryUrl(gitRepo, gitRepoOwner);
+    public String getEntryUrl(String owner, String ref) {
+        return this.getApi().getEntryUrl(owner, ref);
     }
 }
