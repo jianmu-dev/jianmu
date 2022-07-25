@@ -127,7 +127,6 @@ export default defineComponent({
     });
     // label默认值
     const labelOption = ref<{ label: string, value: string }[]>();
-    const labelList = ref<string[]>();
     const addParam = ref<addParamType>({ ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: '' });
 
     const init = async () => {
@@ -136,11 +135,12 @@ export default defineComponent({
         extParams.value = await getExtParamList();
         extLabelList.value = await getExtParamLabelList();
         extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
+        const list = [];
         //  判断是否已经有默认
         extLabelList.value?.forEach(item => {
-          labelList.value?.push(item.value);
+          list.push(item.value);
         });
-        if (labelList.value?.indexOf('默认') === -1) {
+        if (list.indexOf('默认') === -1) {
           extLabelList.value?.splice(1, 0, { id: '', value: '默认', createdTime: '', lastModifiedTime: '' });
         }
       } finally {
@@ -159,7 +159,21 @@ export default defineComponent({
     };
     // 构建tab参数
     const data = computed<{ label: string, projects: IExternalParameterVo[], counter: number }>(() => {
-      const info: any = [];
+      let info: any = [];
+
+      // label去重
+      let labelList = [];
+      let newArr = [];
+      extLabelList.value?.forEach((ext, index)=>{
+        if(labelList.includes(ext.value)){
+          return;
+        }
+        labelList.push(ext.value);
+        newArr.push(JSON.parse(JSON.stringify(ext)));
+      });
+      extLabelList.value = newArr;
+
+      // 计数/构建数据结构
       extLabelList.value?.forEach(labels => {
         info.push({
           label: labels.value,
@@ -168,6 +182,7 @@ export default defineComponent({
         });
       });
 
+      // 固定"默认"位置
       for (let i = 0; i < info.length; i++) {
         if (info[i].label === '默认') {
           let single = info[i];
