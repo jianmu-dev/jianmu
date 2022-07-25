@@ -35,13 +35,6 @@ public class JwtSession {
      */
     private String username;
 
-//*****************************//
-    /**
-     * git仓库id
-     */
-    private String gitRepoId;
-//*****************************//
-
     private String associationId;
 
     private String associationType;

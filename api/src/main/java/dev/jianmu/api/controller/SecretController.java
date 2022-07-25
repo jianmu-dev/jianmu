@@ -39,7 +39,7 @@ public class SecretController {
     @Operation(summary = "创建命名空间", description = "创建命名空间")
     public void createNamespace(@RequestBody @Valid NamespaceDto namespaceDto) {
         var namespace = NamespaceDtoMapper.INSTANCE.toNamespace(namespaceDto);
-        namespace.setAssociationId(this.userContextHolder.getSession().getGitRepoId());
+        namespace.setAssociationId(this.userContextHolder.getSession().getAssociationId());
         namespace.setAssociationType(this.associationUtil.getAssociationType());
         this.secretApplication.createNamespace(namespace);
     }
@@ -47,7 +47,7 @@ public class SecretController {
     @DeleteMapping("/namespaces/{name}")
     @Operation(summary = "删除命名空间", description = "删除命名空间")
     public void deleteNamespace(@PathVariable String name) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var repoId = this.userContextHolder.getSession().getAssociationId();
         var type = this.associationUtil.getAssociationType();
         this.secretApplication.deleteNamespace(repoId, type, name);
     }
@@ -57,7 +57,7 @@ public class SecretController {
     public void createKVPair(@PathVariable String name, @RequestBody @Valid KVPairDto kvPairDto) {
         var kv = KVPairDtoMapper.INSTANCE.toKVPair(kvPairDto);
         kv.setNamespaceName(name);
-        kv.setAssociationId(this.userContextHolder.getSession().getGitRepoId());
+        kv.setAssociationId(this.userContextHolder.getSession().getAssociationId());
         kv.setAssociationType(this.associationUtil.getAssociationType());
         this.secretApplication.createKVPair(kv);
     }
@@ -65,7 +65,7 @@ public class SecretController {
     @DeleteMapping("/namespaces/{name}/{key}")
     @Operation(summary = "删除键值对", description = "删除键值对")
     public void deleteKVPair(@PathVariable String name, @PathVariable String key) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var repoId = this.userContextHolder.getSession().getAssociationId();
         var type = this.associationUtil.getAssociationType();
         this.secretApplication.deleteKVPair(repoId, type, name, key);
     }

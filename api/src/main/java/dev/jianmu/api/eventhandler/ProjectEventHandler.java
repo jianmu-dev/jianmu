@@ -74,7 +74,7 @@ public class ProjectEventHandler {
     // 项目创建事件
     public void handleProjectCreate(CreatedEvent createdEvent) {
         // 添加gitRepo中的flow
-        this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), this.userContextHolder.getSession().getGitRepoId());
+        this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), this.userContextHolder.getSession().getAssociationId());
     }
 
     @EventListener
@@ -82,7 +82,7 @@ public class ProjectEventHandler {
         // 项目删除事件, 删除相关的Trigger
         this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId());
         // 移除gitRepo中flow
-        this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), this.userContextHolder.getSession().getGitRepoId());
+        this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), this.userContextHolder.getSession().getAssociationId());
     }
 
     @TransactionalEventListener
