@@ -20,9 +20,8 @@ public class JwtResponse {
     private String id;
     private String username;
     private String avatarUrl;
-    private String gitRepo;
-    private String gitRepoOwner;
-    private String gitRepoId;
+    private String associationId;
+    private String associationType;
     private String thirdPartyType;
     private String entryUrl;
 }

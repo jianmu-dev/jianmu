@@ -12,23 +12,18 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
+ * @author Ethan Liu
  * @class WebSecurityConfig
  * @description WebSecurityConfig
- * @author Ethan Liu
  * @create 2021-05-18 08:53
-*/
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @ConditionalOnProperty(prefix = "jianmu", name = "auth-mode", havingValue = "true", matchIfMissing = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtUserDetailsService jwtUserDetailsService;
-    private final JwtAuthEntryPoint jwtAuthEntryPoint;
-    private final JwtAuthTokenFilter jwtAuthTokenFilter;
-
     private static final String[] AUTH_WHITELIST = {
             // -- swagger ui
             "/swagger-ui.html",
@@ -41,11 +36,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/webjars/**",
             "/workers/**"
     };
+    private final JwtUserDetailsService jwtUserDetailsService;
+    private final JwtAuthEntryPoint jwtAuthEntryPoint;
 
-    public WebSecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint, JwtAuthTokenFilter jwtAuthTokenFilter) {
+    public WebSecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint) {
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
-        this.jwtAuthTokenFilter = jwtAuthTokenFilter;
     }
 
     public PasswordEncoder passwordEncoder() {
@@ -71,6 +67,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers("/auth/**").permitAll()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated();
-        http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        // 防止上游平台token和jwt过期时间不一致，不刷新jwt过期时间
+        // http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

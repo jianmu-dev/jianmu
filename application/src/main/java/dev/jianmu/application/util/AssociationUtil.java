@@ -1,4 +1,4 @@
-package dev.jianmu.api.util;
+package dev.jianmu.application.util;
 
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import org.springframework.stereotype.Component;

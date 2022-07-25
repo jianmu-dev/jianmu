@@ -16,7 +16,7 @@ import javax.validation.constraints.Pattern;
  */
 @Getter
 @Setter
-public class Oauth2LoggingDto {
+public abstract class Oauth2LoggingDto {
     /**
      * code值
      */
@@ -35,16 +35,6 @@ public class Oauth2LoggingDto {
     @NotBlank(message = "回调地址不能为空")
     @Pattern(regexp = "^$|(https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]", message = "请输入正确的地址")
     private String redirectUri;
-
-    /**
-     * 仓库名
-     */
-    private String gitRepo;
-
-    /**
-     * 仓库所有者
-     */
-    private String gitRepoOwner;
 
     /**
      * 转换type为枚举类型

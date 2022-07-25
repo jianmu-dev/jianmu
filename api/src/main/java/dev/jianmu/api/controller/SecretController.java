@@ -5,7 +5,7 @@ import dev.jianmu.api.dto.NamespaceDto;
 import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.mapper.KVPairDtoMapper;
 import dev.jianmu.api.mapper.NamespaceDtoMapper;
-import dev.jianmu.api.util.AssociationUtil;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.application.service.SecretApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

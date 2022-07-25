@@ -2,7 +2,7 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.jwt.UserContextHolder;
-import dev.jianmu.api.util.AssociationUtil;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.api.vo.ProjectIdVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitRepoApplication;

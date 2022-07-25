@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
+ * @author Ethan Liu
  * @class JwtProvider
  * @description JwtProvider
- * @author Ethan Liu
  * @create 2021-05-17 21:02
-*/
+ */
 @Component
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
@@ -24,14 +24,18 @@ public class JwtProvider {
         this.jwtProperties = jwtProperties;
     }
 
-    public String generateJwtToken(Authentication authentication) {
+    public String generateJwtToken(Authentication authentication, long expireInMs) {
         JwtUserDetails userPrincipal = (JwtUserDetails) authentication.getPrincipal();
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtProperties.getJwtExpirationMs()))
+                .setExpiration(new Date((new Date()).getTime() + Math.min(expireInMs, jwtProperties.getJwtExpirationMs())))
                 .signWith(SignatureAlgorithm.HS512, jwtProperties.getJwtSecret())
                 .compact();
+    }
+
+    public String generateJwtToken(Authentication authentication) {
+        return this.generateJwtToken(authentication, jwtProperties.getJwtExpirationMs());
     }
 
     public boolean validateJwtToken(String token) {

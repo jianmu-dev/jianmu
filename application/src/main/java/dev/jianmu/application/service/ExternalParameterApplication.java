@@ -5,6 +5,8 @@ import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
+import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +23,12 @@ import java.util.List;
 public class ExternalParameterApplication {
     private final ExternalParameterRepository externalParameterRepository;
     private final ExternalParameterLabelRepository externalParameterLabelRepository;
+    private final GitRepoRepository gitRepoRepository;
 
-    public ExternalParameterApplication(ExternalParameterRepository externalParameterRepository, ExternalParameterLabelRepository externalParameterLabelRepository) {
+    public ExternalParameterApplication(ExternalParameterRepository externalParameterRepository, ExternalParameterLabelRepository externalParameterLabelRepository, GitRepoRepository gitRepoRepository) {
         this.externalParameterRepository = externalParameterRepository;
         this.externalParameterLabelRepository = externalParameterLabelRepository;
+        this.gitRepoRepository = gitRepoRepository;
     }
 
     @Transactional
@@ -49,11 +53,15 @@ public class ExternalParameterApplication {
 
     @Transactional
     public void delete(String id, String associationId, String associationType) {
-        var externalParameter = this.externalParameterRepository.findById(id)
+        ExternalParameter externalParameter = this.externalParameterRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该外部参数"));
+
+        GitRepo gitRepo = this.gitRepoRepository.findById(associationId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
+
         if (associationId != null && associationType != null &&
                 (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
-            throw new NoPermissionException();
+            throw new NoAssociatedPermissionException("无此仓库权限" ,externalParameter.getAssociationId(), externalParameter.getAssociationType(), gitRepo.getRef(), gitRepo.getOwner());
         }
 
         this.externalParameterRepository.deleteById(id);
@@ -62,10 +70,14 @@ public class ExternalParameterApplication {
     @Transactional
     public void update(String id, String value, String name, String label, ExternalParameter.Type type, String associationId, String associationType) {
         ExternalParameter externalParameter = this.externalParameterRepository.findById(id)
-                .orElseThrow(() -> new ExternalParameterNotFoundException("未找到外部参数：" + "\"" + name + "\""));
+                .orElseThrow(() -> new DataNotFoundException("未找到外部参数：" + "\"" + name + "\""));
+
+        GitRepo gitRepo = this.gitRepoRepository.findById(associationId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
+
         if (associationId != null && associationType != null &&
                 (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
-            throw new NoPermissionException();
+            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType, gitRepo.getRef(), gitRepo.getOwner());
         }
 
         this.checkParameterType(type, value);
@@ -81,7 +93,8 @@ public class ExternalParameterApplication {
 
     @Transactional
     public ExternalParameter get(String id) {
-        return this.externalParameterRepository.findById(id).orElseThrow(() -> new ExternalParameterNotFoundException("未找到该外部参数"));
+        return this.externalParameterRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("未找到该外部参数"));
     }
 
     @Transactional
