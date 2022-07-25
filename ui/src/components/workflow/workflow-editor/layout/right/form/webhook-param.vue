@@ -20,13 +20,11 @@
       />
     </jm-form-item>
     <jm-form-item label="类型" :prop="`${formModelName}.${index}.type`" :rules="rules.type">
-      <jm-select
-        v-model="typeVal" @change="changeType"
-        placeholder="请选择参数类型"
-        @focus="switchBackgroundFlag = true;"
-        @blur="switchBackgroundFlag = false;">
-        <jm-option v-for="(item,index) in ParamTypeEnum" :key="index" :label="item" :value="item"/>
-      </jm-select>
+      <jm-radio-group v-model="typeVal" @change="changeType">
+        <jm-radio :label="ParamTypeEnum.STRING">字符串</jm-radio>
+        <jm-radio :label="ParamTypeEnum.NUMBER">数字</jm-radio>
+        <jm-radio :label="ParamTypeEnum.BOOL">布尔</jm-radio>
+      </jm-radio-group>
     </jm-form-item>
     <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
       <template #label>值
@@ -59,6 +57,21 @@
         <jm-radio :label="true">是</jm-radio>
       </jm-radio-group>
     </jm-form-item>
+    <jm-form-item  :prop="`${formModelName}.${index}.hidden`" :rules="rules.hidden">
+      <template #label>
+        脱敏显示
+        <jm-tooltip placement="top">
+          <template #content>
+            脱敏后参数值将以******的形式显示
+          </template>
+          <i class="jm-icon-button-help"></i>
+        </jm-tooltip>
+      </template>
+      <jm-radio-group v-model="hiddenVal" @change="changeHidden">
+        <jm-radio :label="false">否</jm-radio>
+        <jm-radio :label="true">是</jm-radio>
+      </jm-radio-group>
+    </jm-form-item>
   </div>
 </template>
 
@@ -85,13 +98,17 @@ export default defineComponent({
     },
     type: {
       type: String as PropType<ParamTypeEnum>,
-      default: '',
+      default: ParamTypeEnum.STRING,
     },
     value: {
       type: String,
       default: '',
     },
     required: {
+      type: Boolean,
+      default: false,
+    },
+    hidden: {
       type: Boolean,
       default: false,
     },
@@ -114,6 +131,7 @@ export default defineComponent({
     'update:type',
     'update:value',
     'update:required',
+    'update:hidden',
     'delete',
   ],
   setup(props, { emit }) {
@@ -122,6 +140,7 @@ export default defineComponent({
     const typeVal = ref<ParamTypeEnum>(props.type);
     const valueVal = ref<string>(props.value);
     const requiredVal = ref<boolean>(props.required);
+    const hiddenVal = ref<boolean>(props.hidden);
     const switchBackgroundFlag = ref<boolean>(false);
 
     // 初始化required的值
@@ -133,6 +152,7 @@ export default defineComponent({
       typeVal,
       valueVal,
       requiredVal,
+      hiddenVal,
       ParamTypeEnum,
       ExpressionTypeEnum,
       switchBackgroundFlag,
@@ -150,6 +170,9 @@ export default defineComponent({
       },
       changeRequired: () => {
         emit('update:required', requiredVal.value);
+      },
+      changeHidden:()=>{
+        emit('update:hidden', hiddenVal.value);
       },
       deleteParam: () => {
         emit('delete', props.index, props.name);

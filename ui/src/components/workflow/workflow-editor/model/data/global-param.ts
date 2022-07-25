@@ -13,17 +13,19 @@ export class GlobalParam {
   type: ParamTypeEnum;
   required: boolean;
   value: string;
+  hidden: boolean;
 
-  constructor(ref: string, name: string, type: ParamTypeEnum, required: boolean, value: string) {
+  constructor(ref: string, name: string, type: ParamTypeEnum, required: boolean, value: string, hidden: boolean) {
     this.ref = ref;
     this.name = name;
     this.type = type;
     this.required = required;
     this.value = value;
+    this.hidden = hidden;
   }
 
-  static build({ ref, name, type, required, value }: any): GlobalParam {
-    return new GlobalParam(ref, name, type, required, value);
+  static build({ ref, name, type, required, value, hidden }: any): GlobalParam {
+    return new GlobalParam(ref, name, type, required, value, hidden);
   }
 
   /**
@@ -38,6 +40,7 @@ export class GlobalParam {
       type: [{ required: true, trigger: 'change' }],
       required: [{ required: true, trigger: 'change', type: 'boolean' }],
       value: [{ required: true, message: '请输入值', trigger: 'blur' }],
+      hidden: [{ required: true, trigger: 'change', type: 'boolean' }],
     };
   }
 

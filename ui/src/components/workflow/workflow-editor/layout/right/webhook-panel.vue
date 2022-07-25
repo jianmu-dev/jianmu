@@ -31,6 +31,7 @@
             v-model:value="param.value"
             v-model:type="param.type"
             v-model:required="param.required"
+            v-model:hidden="param.hidden"
             :form-model-name="'params'"
             :index="index"
             :rules="nodeData.getFormRules().params.fields[index].fields"
@@ -188,7 +189,15 @@ export default defineComponent({
         refreshEditorParams();
       },
       addParam: () => {
-        form.value.params.push({ key: uuidv4(), ref: '', name: '', value: '', type: undefined, required: false });
+        form.value.params.push({
+          key: uuidv4(),
+          ref: '',
+          name: '',
+          value: '',
+          type: ParamTypeEnum.STRING,
+          required: false,
+          hidden: false,
+        });
         refreshEditorParams();
       },
       foldParam: () => {
