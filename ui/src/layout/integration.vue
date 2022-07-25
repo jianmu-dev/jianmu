@@ -224,6 +224,12 @@ export default defineComponent({
     // 外部参数页面
     ::v-deep(.ext-param) {
       padding: 20px 0;
+
+      .ext-content {
+        .add-param, .ext-param-card {
+          min-width: 288px;
+        }
+      }
     }
   }
 }
