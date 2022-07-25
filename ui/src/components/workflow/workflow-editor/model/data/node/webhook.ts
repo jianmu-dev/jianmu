@@ -13,6 +13,7 @@ export interface IWebhookParam {
   type: ParamTypeEnum | undefined;
   value: string;
   required: boolean;
+  hidden: boolean;
 }
 
 export interface IWebhookAuth {
@@ -71,6 +72,7 @@ export class Webhook extends BaseNode {
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           value: [{ required: true, message: '请输入参数值', trigger: 'blur' }],
           required: [{ required: true, type: 'boolean' }],
+          hidden: [{ required: true, type: 'boolean' }],
         } as Record<string, CustomRule>,
       };
     });

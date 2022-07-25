@@ -25,6 +25,7 @@
               v-model:type="param.type"
               v-model:required="param.required"
               v-model:value="param.value"
+              v-model:hidden="param.hidden"
               :index="index"
               :rules="workflowForm.global.params[index].getFormRules()"
               @delete="deleteParam"
@@ -106,7 +107,7 @@ export default defineComponent({
         paramKeys.value.splice(index, 1);
       },
       addParam: () => {
-        const globalParam = new _GlobalParam('', '', ParamTypeEnum.STRING, false, '');
+        const globalParam = new _GlobalParam('', '', ParamTypeEnum.STRING, false, '', false);
         workflowForm.value.global.params.push(globalParam);
         paramKeys.value.push(uuidv4());
       },
