@@ -15,7 +15,7 @@ export class GlobalParam {
   value: string;
   hidden: boolean;
 
-  constructor(ref: string, name: string, type: ParamTypeEnum, required: boolean, value: string, hidden: boolean) {
+  constructor(ref: string, name: string, type: ParamTypeEnum, required: boolean, value: string, hidden: boolean = false) {
     this.ref = ref;
     this.name = name;
     this.type = type;
