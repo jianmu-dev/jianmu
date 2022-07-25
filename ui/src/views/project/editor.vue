@@ -43,7 +43,7 @@
         </jm-button>
       </div>
     </div>
-    <div class="dsl-editor">
+    <div :class="[entry?'dsl-editor-entry':'dsl-editor']">
       <jm-dsl-editor v-model:value="editorForm.dslText"/>
     </div>
   </div>
@@ -76,6 +76,7 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const currentBranch = ref<string>(props.branch);
+    const entry = store.state.entry;
     // 是否展示分组
     const isShowGrouping = computed<boolean>(() => store.state.entry);
     const sessionState = { ...store.state[namespace] };
@@ -205,6 +206,7 @@ export default defineComponent({
     };
 
     return {
+      entry,
       currentBranch,
       projectName,
       isShowGrouping,
@@ -388,16 +390,24 @@ export default defineComponent({
     }
   }
 
-  .dsl-editor {
-    height: calc(100vh - 118px);
+  .dsl-editor, .dsl-editor2 {
     padding: 20px;
     border-radius: 2px;
     border: 1px solid #EAEEF2;
     background-color: #fff;
+    box-sizing: border-box;
 
     > div {
       z-index: 1;
     }
+  }
+
+  .dsl-editor {
+    height: calc(100vh - 170px);
+  }
+
+  .dsl-editor-entry {
+    height: calc(100vh - 100px);
   }
 }
 </style>
