@@ -14,6 +14,7 @@
     <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value" label="变量值">
       <expression-editor
         v-model="envVal"
+        :type="ExpressionTypeEnum.SHELL_ENV"
         :node-id="nodeId"
         :param-type="ParamTypeEnum.STRING"
         @change="changeVal"
@@ -31,7 +32,7 @@ import { defineComponent, inject, PropType, ref } from 'vue';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from './expression-editor.vue';
 import { Node } from '@antv/x6';
-import { ParamTypeEnum } from '../../../model/data/enumeration';
+import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 
 export default defineComponent({
   components: { ExpressionEditor },
@@ -70,6 +71,7 @@ export default defineComponent({
 
     return {
       ParamTypeEnum,
+      ExpressionTypeEnum,
       envName,
       envVal,
       switchBackgroundFlag,

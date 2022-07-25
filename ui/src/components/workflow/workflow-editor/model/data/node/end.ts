@@ -13,8 +13,9 @@ export class End extends BaseNode {
 
   toDsl(): object {
     return {
-      alias: super.getName(),
-      type: super.getType(),
+      ref: super.getRef(),
+      name: super.getName(),
+      task: super.getType(),
     };
   }
 }

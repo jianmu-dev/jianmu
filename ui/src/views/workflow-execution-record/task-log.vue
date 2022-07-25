@@ -451,7 +451,7 @@ export default defineComponent({
     onBeforeUnmount(destroy);
 
     const maxWidthRecord = ref<Record<string, number>>({});
-    const changeTask = async(instanceId: string) => {
+    const changeTask = async (instanceId: string) => {
       taskParams.value = await listTaskParam(instanceId);
       await nextTick();
       currentInstanceId.value = instanceId;
@@ -491,12 +491,12 @@ export default defineComponent({
       tabActiveName,
       moreLog,
       nodeName: computed<string>(() => {
-        const { alias } = (pipeline || workflow)[task.value.nodeName];
-        return alias || task.value.nodeName;
+        const { ref, name } = (pipeline || workflow).find(({ ref }: any) => ref === task.value.nodeName)!;
+        return name || ref;
       }),
       download,
       currentInstanceId,
-      nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
+      nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}@`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value
           .filter(item => item.type === TaskParamTypeEnum.INPUT)

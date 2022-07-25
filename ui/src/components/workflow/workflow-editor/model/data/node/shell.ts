@@ -1,7 +1,8 @@
-import { BaseNode } from './base-node';
+import { BaseNode, buildSelectableInnerOutputParam } from './base-node';
 import { FailureModeEnum, NodeRefEnum, NodeTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/shell.svg';
 import { CustomRule, ValidateParamFn } from '../common';
+import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
 
 export interface IShellEnv {
   key: string;
@@ -17,8 +18,8 @@ export class Shell extends BaseNode {
   private readonly validateParam?: ValidateParamFn;
 
   constructor(ref: string = NodeRefEnum.SHELL, name: string = 'shell', image: string = '',
-              envs: IShellEnv[] = [], script: string = '',
-              failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
+    envs: IShellEnv[] = [], script: string = '',
+    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
     super(ref, name, NodeTypeEnum.SHELL, icon, 'https://docs.jianmu.dev/guide/shell-node.html');
     this.image = image;
     this.envs = envs;
@@ -27,9 +28,18 @@ export class Shell extends BaseNode {
     this.validateParam = validateParam;
   }
 
-  static build({ref, name, image, envs, script, failureMode}: any,
-               validateParam?: ValidateParamFn): Shell {
+  static build({ ref, name, image, envs, script, failureMode }: any,
+    validateParam?: ValidateParamFn): Shell {
     return new Shell(ref, name, image, envs, script, failureMode, validateParam);
+  }
+
+  async buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined> {
+    const { ref, name } = this;
+    return {
+      value: ref,
+      label: name || ref,
+      children: [await buildSelectableInnerOutputParam()],
+    };
   }
 
   getFormRules(): Record<string, CustomRule> {
@@ -77,17 +87,18 @@ export class Shell extends BaseNode {
   }
 
   toDsl(): object {
-    const { name, image, envs, script, failureMode } = this;
+    const { ref, name, image, envs, script, failureMode } = this;
     const environment: {
       [key: string]: string;
     } = {};
     envs.forEach(({ name, value }) => (environment[name] = value));
 
     return {
-      alias: name,
+      ref,
+      name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
       image,
-      environment: envs.length === 0 ? undefined : environment,
+      env: envs.length === 0 ? undefined : environment,
       script: script ? script.split('\n') : undefined,
     };
   }

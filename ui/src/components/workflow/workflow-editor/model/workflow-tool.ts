@@ -117,13 +117,13 @@ export class WorkflowTool {
         return;
       }
       cell.ports.items.forEach((item: any) => {
-        delete item.attrs?.circle?.fill;
+        // 移除连接桩属性
+        delete item.attrs;
       });
     });
   }
 
   toDsl(workflowData: IWorkflow): string {
-    // TODO 适配新版dsl
     const triggerNodeProxies: CustomX6NodeProxy[] = [];
     const nodeProxies: CustomX6NodeProxy[] = [];
 
@@ -141,13 +141,9 @@ export class WorkflowTool {
       // TODO 待扩展多个触发器
       trigger = triggerNodeProxies[0].toDsl(this.graph);
     }
-    const workflow: {
-      [key: string]: object;
-    } = {};
-    nodeProxies.forEach(nodeProxy => {
-      const nodeData = nodeProxy.getData();
-      workflow[nodeData.getRef()] = nodeProxy.toDsl(this.graph);
-    });
+    const workflow: object[] = [];
+    // TODO 优化顺序
+    nodeProxies.forEach(nodeProxy => workflow.push(nodeProxy.toDsl(this.graph)));
 
     let dsl = yaml.stringify({
       name: workflowData.name,

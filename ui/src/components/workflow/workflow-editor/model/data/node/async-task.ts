@@ -1,10 +1,11 @@
-import { BaseNode } from './base-node';
+import { BaseNode, buildSelectableInnerOutputParam } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
-import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
+
+const OFFICIAL_NODE_OWNER_REF = '_';
 
 export interface IAsyncTaskParam {
   readonly ref: string;
@@ -13,6 +14,7 @@ export interface IAsyncTaskParam {
   readonly required: boolean;
   value: string;
   readonly description?: string;
+  readonly inner?: boolean;
 }
 
 /**
@@ -66,44 +68,24 @@ export class AsyncTask extends BaseNode {
     return new AsyncTask(ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode, validateParam);
   }
 
-  buildSelectableParam(nodeId: string): ISelectableParam | undefined {
-    if (this.outputs.length === 0) {
-      return undefined;
+  async buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined> {
+    const children: ISelectableParam[] = [];
+    if (this.outputs.length > 0) {
+      children.push(...this.outputs.map(({ ref, type, name }) => {
+        return {
+          value: ref,
+          type,
+          label: name || ref,
+        };
+      }));
     }
 
-    const children: ISelectableParam[] = this.outputs.map(({ ref, type, name }) => {
-      return {
-        value: ref,
-        type,
-        label: name,
-      };
-    });
-    children.push({
-      // 文档：https://docs.jianmu.dev/guide/custom-node.html#_4-%E5%86%85%E7%BD%AE%E8%BE%93%E5%87%BA%E5%8F%82%E6%95%B0
-      value: INNER_PARAM_TAG,
-      label: INNER_PARAM_LABEL,
-      children: [
-        {
-          value: 'execution_status',
-          type:ParamTypeEnum.STRING,
-          label: '节点任务执行状态',
-        },
-        {
-          value: 'start_time',
-          type:ParamTypeEnum.STRING,
-          label: '节点任务开始时间',
-        },
-        {
-          value: 'end_time',
-          type:ParamTypeEnum.STRING,
-          label: '节点任务结束时间',
-        },
-      ],
-    });
+    children.push(await buildSelectableInnerOutputParam());
 
+    const { ref, name } = this;
     return {
-      value: super.getRef(),
-      label: super.getName(),
+      value: ref,
+      label: name || ref,
       children,
     };
   }
@@ -157,7 +139,7 @@ export class AsyncTask extends BaseNode {
   }
 
   toDsl(): object {
-    const { name, version, inputs, failureMode } = this;
+    const { ownerRef, nodeRef, ref, name, version, inputs, failureMode } = this;
     const param: {
       [key: string]: string | number | boolean;
     } = {};
@@ -194,10 +176,11 @@ export class AsyncTask extends BaseNode {
     });
 
     return {
-      alias: name,
+      ref,
+      name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
-      type: `${this.ownerRef}/${this.nodeRef}:${version}`,
-      param: inputs.length === 0 ? undefined : param,
+      task: `${ownerRef === OFFICIAL_NODE_OWNER_REF ? '' : `${ownerRef}/`}${nodeRef}@${version}`,
+      input: inputs.length === 0 ? undefined : param,
     };
   }
 }

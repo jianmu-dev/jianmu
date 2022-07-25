@@ -2,7 +2,7 @@
   <div class="jm-workflow-expression-editor">
     <param-button :selectableParams="selectableParams" @inserted="handleInserted"/>
     <div class="top">
-      <div class="exp-lang">{{ expLang }}</div>
+      <div class="exp-lang">语法：{{ expLang }}</div>
       <div class="param-type" v-show="paramTypeVisible">{{ paramTypeTxt }}</div>
     </div>
     <textarea ref="textareaRef"></textarea>
