@@ -37,19 +37,21 @@ export class Webhook extends BaseNode {
     return new Webhook(name, params, auth, only);
   }
 
-  buildSelectableParam(nodeId: string = ''): ISelectableParam | undefined {
+  async buildSelectableParam(nodeId: string = ''): Promise<ISelectableParam | undefined> {
     if (this.params.length === 0) {
       return undefined;
     }
 
     return {
       value: WEBHOOK_PARAM_SCOPE,
-      label: super.getName(),
-      children: this.params.filter(({ name }) => name)
-        .map(({ ref, name }) => {
+      label: '触发器参数',
+      children: this.params
+        .filter(({ ref }) => ref)
+        .map(({ ref, type, name }) => {
           return {
             value: ref,
-            label: name,
+            type,
+            label: name || ref,
           };
         }),
     };

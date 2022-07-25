@@ -64,24 +64,33 @@ export function buildSelectableGlobalParam(globalParams?: GlobalParam[]): ISelec
   return {
     value: GLOBAL_PARAM_SCOPE,
     label: '全局参数',
-    children: globalParams.filter(({ ref }) => ref).map(({ ref, name }) => {
-      return {
-        value: ref,
-        label: name || ref,
-      };
-    }),
+    children: globalParams
+      .filter(({ ref }) => ref)
+      .map(({ ref, type, name }) => {
+        return {
+          value: ref,
+          type,
+          label: name || ref,
+        };
+      }),
   };
 }
 
 export function buildSelectableExtParam(extParams: IExternalParameterVo[]): ISelectableParam | undefined {
+  if (!extParams || extParams.length === 0) {
+    return undefined;
+  }
   return {
     value: EXT_PARAM_SCOPE,
     label: '外部参数',
-    children: extParams.filter(({ ref }) => ref).map(({ ref, name }) => {
-      return {
-        value: ref,
-        label: name || ref,
-      };
-    }),
+    children: extParams
+      .filter(({ ref }) => ref)
+      .map(({ ref, type, name }) => {
+        return {
+          value: ref,
+          type,
+          label: name || ref,
+        };
+      }),
   };
 }

@@ -19,13 +19,15 @@ export interface IWorkflowNode {
 
   getName(): string;
 
+  getDisplayName(): string;
+
   getType(): NodeTypeEnum;
 
   getIcon(): string;
 
   getDocUrl(): string;
 
-  buildSelectableParam(nodeId: string): ISelectableParam | undefined;
+  buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined>;
 
   getFormRules(): Record<string, CustomRule>;
 

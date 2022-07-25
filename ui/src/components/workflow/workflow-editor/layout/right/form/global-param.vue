@@ -39,6 +39,7 @@
     <jm-form-item label="值" :prop="`${index}.value`" :rules="rules.value" class="param-item">
       <expression-editor
         v-model="valueVal"
+        :type="ExpressionTypeEnum.GLOBAL_PARAM"
         :param-type="typeVal"
         placeholder="请输入参数值"
         @change="changeValue"
@@ -52,7 +53,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { ParamTypeEnum } from '../../../model/data/enumeration';
+import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from '../form/expression-editor.vue';
 
@@ -106,6 +107,7 @@ export default defineComponent({
       valueVal,
       switchFlag,
       ParamTypeEnum,
+      ExpressionTypeEnum,
       changeRef: () => {
         emit('update:reference', referenceVal.value);
         emit('change');
