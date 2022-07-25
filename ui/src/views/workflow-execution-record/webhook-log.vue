@@ -57,16 +57,11 @@
                       label="参数值"
                       align="center">
                       <template #default="scope">
-                        <span v-if="scope.row.hidden">
-                          {{scope.row.value}}
-                        </span>
-                        <span v-else>
-                          <param-value
-                            :value="scope.row.value"
-                            :tip-append-to-body="false"
-                            :type="scope.row.valueType"
-                          />
-                        </span>
+                        <param-value
+                          :value="scope.row.value"
+                          :tip-append-to-body="false"
+                          :type="scope.row.hidden?ParamTypeEnum.SECRET:scope.row.valueType"
+                        />
                       </template>
                     </jm-table-column>
                   </jm-table>
