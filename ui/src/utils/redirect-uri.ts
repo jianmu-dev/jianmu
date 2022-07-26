@@ -1,7 +1,7 @@
 // 动态构建redirectUri
-export function getRedirectUri(gitRepo?: string, gitRepoOwner?: string) {
-  if(gitRepo&&gitRepoOwner){
-    return `${location.protocol}//${location.host}/login?gitRepo=${encodeURIComponent(gitRepo)}&gitRepoOwner=${encodeURIComponent(gitRepoOwner)}`;
+export function getRedirectUri(ref?: string, owner?: string) {
+  if (ref && owner) {
+    return `${location.protocol}//${location.host}/login?ref=${encodeURIComponent(ref)}&owner=${encodeURIComponent(owner)}`;
   }
   return `${location.protocol}//${location.host}/login`;
 }

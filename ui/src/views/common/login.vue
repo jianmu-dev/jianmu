@@ -127,7 +127,7 @@ export default defineComponent({
       try {
         const { authorizationUrl } = await fetchAuthUrl({
           thirdPartyType: loginType.value,
-          redirectUri: getRedirectUri(props.gitRepo, props.gitRepoOwner),
+          redirectUri: getRedirectUri(props.reference, props.owner),
         });
         // 登录模式（login页面登录/弹窗登录）
         window.open(authorizationUrl, (tempLoginMode === 'dialog' || tempLoginMode === 'iframe') ? '_blank' : '_self');
@@ -162,8 +162,8 @@ export default defineComponent({
         loading.value = false;
       }
     }, 1000, {
-      leading:true,
-      trailing:false,
+      leading: true,
+      trailing: false,
     });
     onMounted(async () => {
       window.onstorage = refreshState;
@@ -189,7 +189,7 @@ export default defineComponent({
               payload = {
                 code: props.code,
                 thirdPartyType: loginType.value,
-                redirectUri: getRedirectUri(props.gitRepo, props.gitRepoOwner),
+                redirectUri: getRedirectUri(props.reference, props.owner),
                 ref: store.state[namespace].associationData?.ref,
                 owner: store.state[namespace].associationData?.owner,
               } as IGitRepoLoggingDto;
