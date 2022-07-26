@@ -9,6 +9,14 @@ export default [
       title: '首页',
     },
   },
+  // 组件库路由
+  {
+    path: 'component-lib',
+    component: () => import('@/views/component-lib/index.vue'),
+    meta: {
+      title: '组件库',
+    },
+  },
   {
     // 密钥管理路由
     name: 'secret-key',

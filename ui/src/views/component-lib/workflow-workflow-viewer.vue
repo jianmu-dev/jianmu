@@ -14,115 +14,75 @@ export default defineComponent({
   setup() {
     return {
       TriggerTypeEnum,
-      workflow: 'cron: \'* 5/* * * * ? *\'\n' +
-        '\n' +
-        'event:\n' +
-        '  push_event:\n' +
-        '    branch: ${branch_name} # dev, master\n' +
-        '  tag_event:\n' +
-        '    tag: ${branch_name} # tag_name\n' +
-        '\n' +
-        'param:\n' +
-        '  branch_name: master\n' +
-        '  git_site: gitee.com\n' +
-        '\n' +
+      workflow: 'name: W_D_重构DSL语法\n' +
+        'description: ""\n' +
+        'global:\n' +
+        '  concurrent: false\n' +
         'workflow:\n' +
-        '  name: 测试流程1\n' +
-        '  ref: flow_1\n' +
-        '  description: 测试流程1的描述1\n' +
-        '  Start_1:\n' +
-        '    type: start\n' +
-        '    targets:\n' +
-        '      - Git_1\n' +
-        '  Git_1:\n' +
-        '    type: git_clone0.4\n' +
-        '    sources:\n' +
-        '      - Start_1\n' +
-        '    targets:\n' +
-        '      - Build_1\n' +
-        '    param:\n' +
-        '      commit_branch: ${branch_name}\n' +
-        '      remote_url: https://gitee.com/jianmu-dev/jianmu-workflow-core.git\n' +
-        '      netrc_machine: ${git_site}\n' +
-        '      netrc_username: ((gitee.user))\n' +
-        '      netrc_password: ((gitee.pass))\n' +
-        '  Build_1:\n' +
-        '    type: maven13\n' +
-        '    sources:\n' +
-        '      - Git_1\n' +
-        '    targets:\n' +
-        '      - Condition_1\n' +
-        '    param:\n' +
-        '      cmd: mvn install\n' +
-        '  Condition_1:\n' +
-        '    type: condition\n' +
-        '    sources:\n' +
-        '      - Build_1\n' +
-        '    expression: Git_1["commit_branch"] == "dev"\n' +
-        '    cases:\n' +
-        '      false: Notice_1\n' +
-        '      true: Notice_2\n' +
-        '  Notice_1:\n' +
-        '    type: maven11\n' +
-        '    param:\n' +
-        '      text: \'"Build error, msg is: " + ${Build_1.build_error_message}\'\n' +
-        '    sources:\n' +
-        '      - Condition_1\n' +
-        '    targets:\n' +
-        '      - End_1\n' +
-        '  Notice_2:\n' +
-        '    type: maven12\n' +
-        '    param:\n' +
-        '      text: ${Build_1.build_info}\n' +
-        '    sources:\n' +
-        '      - Condition_1\n' +
-        '    targets:\n' +
-        '      - End_1\n' +
-        '  End_1:\n' +
-        '    type: end\n' +
-        '    sources:\n' +
-        '      - Notice_1\n' +
-        '      - Notice_2\n',
-      pipeline: 'cron: \'* 5/* * * * ? *\'\n' +
-        'event:\n' +
-        '  push_event:\n' +
-        '    branch: ${branch_name} # dev, master\n' +
-        '  tag_event:\n' +
-        '    tag: ${branch_name} # tag_name\n' +
-        '\n' +
-        'param:\n' +
-        '  branch_name: master\n' +
-        '  git_site: gitee.com\n' +
-        '\n' +
+        '  - ref: start\n' +
+        '    name: 开始\n' +
+        '    task: start\n' +
+        '  - ref: shell0\n' +
+        '    name: shell_0\n' +
+        '    image: ubuntu:22.10\n' +
+        '    script: sleep 10s\n' +
+        '    needs:\n' +
+        '      - start\n' +
+        '  - ref: sleep0\n' +
+        '    name: 延迟执行_0\n' +
+        '    task: sleep@1.0.0\n' +
+        '    input:\n' +
+        '      unit: \'"s"\'\n' +
+        '      interval: 5\n' +
+        '    needs:\n' +
+        '      - start\n' +
+        '  - ref: sleep1\n' +
+        '    name: 延迟执行_1\n' +
+        '    task: sleep@1.0.0\n' +
+        '    input:\n' +
+        '      unit: \'"s"\'\n' +
+        '      interval: 5\n' +
+        '    needs:\n' +
+        '      - shell0\n' +
+        '      - sleep0\n' +
+        '  - ref: shell1\n' +
+        '    name: shell_1\n' +
+        '    image: ubuntu:22.10\n' +
+        '    script: sleep 10s\n' +
+        '    needs:\n' +
+        '      - sleep0\n' +
+        '      - shell0\n' +
+        '  - ref: end\n' +
+        '    name: 结束\n' +
+        '    task: end\n' +
+        '    needs:\n' +
+        '      - sleep1\n' +
+        '      - shell1',
+      pipeline: 'name: P_D_重构DSL语法\n' +
+        'description: ""\n' +
+        'global:\n' +
+        '  concurrent: false\n' +
         'pipeline:\n' +
-        '  name: 建木-前端CI&CD流程\n' +
-        '  ref: jianmu_ui_ci_cd\n' +
-        '  description: 建木-前端CI&CD流程\n' +
-        '  Git_1:\n' +
-        '    type: git_clone0.3\n' +
-        '    param:\n' +
-        '      workspace: jianmu-ci-ui\n' +
-        '      commit_branch: ${branch_name}\n' +
-        '      remote_url: https://gitee.com/jianmu-dev/jianmu-ci-server.git\n' +
-        '      netrc_machine: ${git_site}\n' +
-        '      netrc_username: ((gitee.user))\n' +
-        '      netrc_password: ((gitee.pass))\n' +
-        '  Build_1:\n' +
-        '    type: node14.2\n' +
-        '    param:\n' +
-        '      workspace: jianmu-ci-ui\n' +
-        '  Upload_1:\n' +
-        '    type: file_upload0.3\n' +
-        '    param:\n' +
-        '      minio_host: http://192.168.1.24:9000\n' +
-        '      minio_access_key: ((minio.access_key))\n' +
-        '      minio_secret_key: ((minio.secret_key))\n' +
-        '      file_source: "jianmu-ci-ui/dist"\n' +
-        '  SSH_1:\n' +
-        '    type: ssh0.4\n' +
-        '    param:\n' +
-        '      ssh_host: ethan@192.168.1.24\n' +
-        '      ssh_private_key: ((ssh.private_key))\n',
+        '  - ref: shell0\n' +
+        '    name: shell_0\n' +
+        '    image: ubuntu:22.10\n' +
+        '    script: sleep 10s\n' +
+        '  - ref: sleep0\n' +
+        '    name: 延迟执行_0\n' +
+        '    task: sleep@1.0.0\n' +
+        '    input:\n' +
+        '      unit: \'"s"\'\n' +
+        '      interval: 5\n' +
+        '  - ref: sleep1\n' +
+        '    name: 延迟执行_1\n' +
+        '    task: sleep@1.0.0\n' +
+        '    input:\n' +
+        '      unit: \'"s"\'\n' +
+        '      interval: 5\n' +
+        '  - ref: shell1\n' +
+        '    name: shell_1\n' +
+        '    image: ubuntu:22.10\n' +
+        '    script: sleep 10s',
     };
   },
 });
