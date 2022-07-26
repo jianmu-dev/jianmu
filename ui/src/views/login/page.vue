@@ -18,15 +18,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, ref } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
 import Login from '@/views/common/login.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { AUTHORIZE_INDEX } from '@/router/path-def';
 import { namespace } from '@/store/modules/session';
-import { useStore } from 'vuex';
+import { createNamespacedHelpers, useStore } from 'vuex';
 import { IState } from '@/model/modules/session';
+import { IGitRepoTokenRefreshingDto } from '@/api/dto/session';
 
+const { mapActions: mapSessionActions } = createNamespacedHelpers(namespace);
 export default defineComponent({
   components: { BottomNav, Login },
   props: {
@@ -41,6 +43,7 @@ export default defineComponent({
     const store = useStore();
     const entry = store.state.entry;
     const isShow = ref<boolean>(false);
+    const { proxy } = getCurrentInstance() as any;
     const { session, associationData } = store.state[namespace] as IState;
     onMounted(async () => {
       // 如果页面嵌入在iframe里面，localstorage中session存在，直接进入首页，condition防止参数被串改
@@ -49,10 +52,21 @@ export default defineComponent({
         isShow.value = true;
         return;
       }
-      const condition =
-        entry && associationData
-        && (associationData.ref === props.reference && associationData.owner === props.owner);
-      if (condition) {
+      if (entry && associationData) {
+        console.log(associationData, props.reference, props.owner);
+        if ((associationData.ref !== props.reference || associationData.owner !== props.owner)) {
+          try {
+            // 调用refreshApi
+            await proxy.oauthRefresh({
+              ref: props.reference,
+              owner: props.owner,
+            } as IGitRepoTokenRefreshingDto);
+          } catch (err) {
+            isShow.value = true;
+            proxy.$error(err.message);
+            return;
+          }
+        }
         await router.push({ name: 'index' });
         return;
       }
@@ -62,6 +76,9 @@ export default defineComponent({
     return {
       isShow,
       isAuthorize,
+      ...mapSessionActions({
+        oauthRefresh: 'oauthRefresh',
+      }),
     };
   },
 });
