@@ -60,7 +60,7 @@
                         <param-value
                           :value="scope.row.value"
                           :tip-append-to-body="false"
-                          :type="scope.row.valueType"
+                          :type="scope.row.hidden?ParamTypeEnum.SECRET:scope.row.valueType"
                         />
                       </template>
                     </jm-table-column>

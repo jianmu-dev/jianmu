@@ -78,8 +78,8 @@ export default defineComponent({
     const bufferList = reactive<string[]>([]);
     const pathNavs = ref<IPathNav[]>([]);
     const loadMain = ref<boolean>(true);
-    const pathNavsDisplay = computed<boolean>(() => (route.path !== INDEX && route.path !== PLATFORM_PROJECT_EDITOR));
-    const mainClass = ref<string>(pathNavsDisplay.value ? 'main' : 'main2');
+    const pathNavsDisplay = computed<boolean>(() => (route.path !== INDEX && route.path !== PLATFORM_PROJECT_EDITOR && route.name !== 'update-project'));
+    const mainClass = computed<string>(() => pathNavsDisplay.value ? 'main' : 'main2');
     const mainScrollbarRef = ref<InstanceType<typeof ElScrollbar>>();
     buildPathNav(pathNavs, useRoute());
     // 直接访问要被缓冲的路由地址时，添加缓冲
@@ -93,7 +93,6 @@ export default defineComponent({
       if (to.name === 'index') {
         bufferList.length = 0;
       }
-      mainClass.value = to.path !== INDEX ? 'main' : 'main2';
 
       buildPathNav(pathNavs, to);
     });

@@ -29,13 +29,6 @@
         <jm-radio :label="ParamTypeEnum.BOOL">布尔</jm-radio>
       </jm-radio-group>
     </jm-form-item>
-    <jm-form-item label="是否必填" @change="changeRequired" :prop="`${index}.required`" :rules="rules.required"
-                  class="param-item">
-      <jm-radio-group v-model="requiredVal">
-        <jm-radio :label="false">否</jm-radio>
-        <jm-radio :label="true">是</jm-radio>
-      </jm-radio-group>
-    </jm-form-item>
     <jm-form-item label="值" :prop="`${index}.value`" :rules="rules.value" class="param-item">
       <expression-editor
         v-model="valueVal"
@@ -46,6 +39,29 @@
         @focus="switchFlag=true"
         @blur="switchFlag=false"
       />
+    </jm-form-item>
+    <jm-form-item label="是否必填" @change="changeRequired" :prop="`${index}.required`" :rules="rules.required"
+                  class="param-item">
+      <jm-radio-group v-model="requiredVal">
+        <jm-radio :label="false">否</jm-radio>
+        <jm-radio :label="true">是</jm-radio>
+      </jm-radio-group>
+    </jm-form-item>
+    <jm-form-item @change="changeHidden" :prop="`${index}.hidden`" :rules="rules.hidden"
+                  class="param-item">
+      <template #label>
+        脱敏显示
+        <jm-tooltip placement="top">
+          <template #content>
+            脱敏后参数值将以******的形式显示
+          </template>
+          <i class="jm-icon-button-help"></i>
+        </jm-tooltip>
+      </template>
+      <jm-radio-group v-model="hiddenVal">
+        <jm-radio :label="false">否</jm-radio>
+        <jm-radio :label="true">是</jm-radio>
+      </jm-radio-group>
     </jm-form-item>
     <i class="jm-icon-button-delete" @click="deleteParam"/>
   </div>
@@ -80,6 +96,10 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    hidden: {
+      type: Boolean,
+      default: false,
+    },
     index: {
       type: Number,
       required: true,
@@ -89,13 +109,14 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:reference', 'update:name', 'update:type', 'update:required', 'update:value', 'delete', 'change'],
+  emits: ['update:reference', 'update:name', 'update:type', 'update:required', 'update:value', 'update:hidden', 'delete', 'change'],
   setup(props, { emit }) {
     const referenceVal = ref<string>(props.reference);
     const nameVal = ref<string>(props.name);
     const typeVal = ref<ParamTypeEnum>(props.type);
     const requiredVal = ref<boolean>(props.required);
     const valueVal = ref<string>(props.value);
+    const hiddenVal = ref<boolean>(props.hidden);
     // 切换背景
     const switchFlag = ref<boolean>(false);
 
@@ -105,6 +126,7 @@ export default defineComponent({
       typeVal,
       requiredVal,
       valueVal,
+      hiddenVal,
       switchFlag,
       ParamTypeEnum,
       ExpressionTypeEnum,
@@ -126,6 +148,10 @@ export default defineComponent({
       },
       changeValue: () => {
         emit('update:value', valueVal.value);
+        emit('change');
+      },
+      changeHidden: () => {
+        emit('update:hidden', hiddenVal.value);
         emit('change');
       },
       deleteParam: () => {
