@@ -103,7 +103,7 @@ public class OAuth2Controller {
      */
     @GetMapping("/login/git_repo")
     @Transactional
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody GitRepoLoggingDto gitRepoLoggingDto) {
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid GitRepoLoggingDto gitRepoLoggingDto) {
         this.beforeAuthenticate();
         this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(gitRepoLoggingDto.getThirdPartyType());
@@ -173,7 +173,7 @@ public class OAuth2Controller {
     }
 
     @PutMapping("/refresh/git_repo")
-    public ResponseEntity<JwtResponse> refreshToken(@Valid GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
+    public ResponseEntity<JwtResponse> refreshToken(@Valid @RequestBody GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
