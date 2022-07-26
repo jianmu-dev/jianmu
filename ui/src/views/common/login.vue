@@ -138,7 +138,11 @@ export default defineComponent({
       if (e.key === 'session') {
         proxy.$success('登录成功');
         const newSession = JSON.parse(e.newValue)['_default'].session;
-        proxy.mutateSession(newSession);
+        const newAssociationData = JSON.parse(e.newValue)['_default'].associationData;
+        proxy.mutateSession({
+          session: newSession,
+          associationData: newAssociationData,
+        });
         // 如果嵌入在iframe里面登录成功后，直接进首页
         if (window.top !== window) {
           await router.push(INDEX);
