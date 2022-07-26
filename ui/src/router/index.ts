@@ -53,9 +53,9 @@ export default async (appContext: AppContext): Promise<Router> => {
         name: 'authorize',
         path: AUTHORIZE_INDEX,
         component: () => import('@/views/login/page.vue'),
-        props: ({ query: { gitRepo, gitRepoOwner, code, error_description } }: RouteLocationNormalizedLoaded) => ({
-          gitRepo,
-          gitRepoOwner,
+        props: ({ query: { ref: reference, owner, code, error_description } }: RouteLocationNormalizedLoaded) => ({
+          reference,
+          owner,
           code,
           error_description,
         }),
@@ -65,9 +65,9 @@ export default async (appContext: AppContext): Promise<Router> => {
         name: 'login',
         path: LOGIN_INDEX,
         component: () => import('@/views/login/page.vue'),
-        props: ({ query: { gitRepo, gitRepoOwner, code, error_description } }: RouteLocationNormalizedLoaded) => ({
-          gitRepo,
-          gitRepoOwner,
+        props: ({ query: { ref: reference, owner, code, error_description } }: RouteLocationNormalizedLoaded) => ({
+          reference,
+          owner,
           code,
           error_description,
         }),

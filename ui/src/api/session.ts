@@ -6,6 +6,7 @@ import {
   IThirdPartyTypeVo,
 } from '@/api/dto/session';
 import { restProxy } from '@/api/index';
+import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 export const baseUrl = '/auth';
 
@@ -45,9 +46,9 @@ export function fetchAuthUrl(dto: IAuthorizationUrlGettingDto) {
 /**
  * oauth三方登录
  */
-export function authLogin(dto: IOauth2LoggingDto) {
+export function authLogin(associationType: AssociationTypeEnum, dto: IOauth2LoggingDto) {
   return restProxy<ISessionVo>({
-    url: `${baseUrl}/oauth2/login`,
+    url: `${baseUrl}/oauth2/login/${associationType.toLowerCase()}`,
     method: 'get',
     payload: dto,
   });

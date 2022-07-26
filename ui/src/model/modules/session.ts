@@ -7,6 +7,11 @@ import { ISessionCreatingDto, ISessionVo } from '@/api/dto/session';
 export interface IUserSettings {
 }
 
+export interface IAssociationData {
+  ref: string;
+  owner: string;
+}
+
 /**
  * vuex状态
  */
@@ -15,6 +20,7 @@ export interface IState {
   remember: boolean;
   userSettings: IUserSettings;
   session?: ISessionVo;
+  associationData?: IAssociationData;
 }
 
 /**

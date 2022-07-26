@@ -1,3 +1,5 @@
+import { AssociationTypeEnum } from '@/api/dto/enumeration';
+
 /**
  * 创建会话dto
  */
@@ -11,15 +13,16 @@ export interface ISessionCreatingDto extends Readonly<{
  * 会话值对象
  */
 export interface ISessionVo extends Readonly<{
-  token: string;
   type: string;
+  message?: string;
+  token: string;
   id: number;
   username: string;
-  thirdPartyType: string;
   avatarUrl: string;
+  associationId?: string;
+  associationType?: string;
+  thirdPartyType: string;
   entryUrl?: string;
-  gitRepo?: string;
-  gitRepoOwner?: string;
 }> {
 }
 
@@ -45,7 +48,7 @@ export interface IAuthorizationUrlVo extends Readonly<{
  */
 export interface IThirdPartyTypeVo extends Readonly<{
   thirdPartyType: string,
-  entry: boolean,
+  associationType?: AssociationTypeEnum,
 }> {
 }
 
@@ -55,9 +58,12 @@ export interface IThirdPartyTypeVo extends Readonly<{
 export interface IOauth2LoggingDto extends Readonly<{
   code: string,
   thirdPartyType: string,
-  redirectUri: string,
-  gitRepo?: string,
-  gitRepoOwner?: string
+  redirectUri: string
 }> {
 }
 
+export interface IGitRepoLoggingDto extends Readonly<IOauth2LoggingDto & {
+  ref?: string,
+  owner?: string
+}> {
+}
