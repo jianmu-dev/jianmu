@@ -46,9 +46,11 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                // 访问系统内部接口必须要有认证信息
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                String newJwt = this.jwtProvider.generateJwtToken(authentication);
-                response.setHeader("X-Authorization-Token", newJwt);
+                // 防止上游平台token和jwt过期时间不一致，不刷新jwt过期时间
+                // String newJwt = this.jwtProvider.generateJwtToken(authentication);
+                // response.setHeader("X-Authorization-Token", newJwt);
             }
         } catch (RuntimeException e) {
             logger.error("Cannot set user authentication: {}", e);

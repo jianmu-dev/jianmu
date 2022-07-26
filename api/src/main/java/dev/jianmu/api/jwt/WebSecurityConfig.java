@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * @author Ethan Liu
@@ -38,10 +39,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     };
     private final JwtUserDetailsService jwtUserDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
+    private final JwtAuthTokenFilter jwtAuthTokenFilter;
 
-    public WebSecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint) {
+    public WebSecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint, JwtAuthTokenFilter jwtAuthTokenFilter) {
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
+        this.jwtAuthTokenFilter = jwtAuthTokenFilter;
     }
 
     public PasswordEncoder passwordEncoder() {
@@ -67,7 +70,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers("/auth/**").permitAll()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated();
-        // 防止上游平台token和jwt过期时间不一致，不刷新jwt过期时间
-        // http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
+         http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }
