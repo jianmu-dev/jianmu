@@ -23,12 +23,10 @@ import java.util.List;
 public class ExternalParameterApplication {
     private final ExternalParameterRepository externalParameterRepository;
     private final ExternalParameterLabelRepository externalParameterLabelRepository;
-    private final GitRepoRepository gitRepoRepository;
 
     public ExternalParameterApplication(ExternalParameterRepository externalParameterRepository, ExternalParameterLabelRepository externalParameterLabelRepository, GitRepoRepository gitRepoRepository) {
         this.externalParameterRepository = externalParameterRepository;
         this.externalParameterLabelRepository = externalParameterLabelRepository;
-        this.gitRepoRepository = gitRepoRepository;
     }
 
     @Transactional
