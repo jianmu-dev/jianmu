@@ -194,6 +194,7 @@ public class OAuth2Controller {
 
         GitRepo gitRepo = this.gitRepoRepository.findByRefAndOwner(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner())
                 .orElseThrow(() -> new DataNotFoundException("未找到此仓库"));
+        long expireTimestamp = session.getExpireTimestamp() - System.currentTimeMillis();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
                         .avatarUrl(userInfo.getAvatarUrl())
@@ -204,12 +205,12 @@ public class OAuth2Controller {
                         .associationId(gitRepo.getId())
                         .associationType(this.associationUtil.getAssociationType())
                         .encryptedToken(encryptedToken)
+                        .expireTimestamp(expireTimestamp)
                         .build()),
                         this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String newJwt = this.jwtProvider.generateJwtToken(authentication, session.getExpireTimestamp() - System.currentTimeMillis());
-
+        String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
         return ResponseEntity.ok(JwtResponse.builder()
                 .type("Bearer")
                 .token(newJwt)

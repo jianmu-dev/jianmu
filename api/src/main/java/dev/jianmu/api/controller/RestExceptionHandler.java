@@ -109,6 +109,7 @@ public class RestExceptionHandler {
             logger.error("没有权限，错误信息：", e);
             throw ex;
         }
+        long expireTimestamp = session.getExpireTimestamp() - System.currentTimeMillis();
 
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
@@ -120,11 +121,12 @@ public class RestExceptionHandler {
                         .associationId(ex.getAssociationId())
                         .associationType(ex.getAssociationType())
                         .encryptedToken(encryptedToken)
+                        .expireTimestamp(expireTimestamp)
                         .build()),
                         this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String newJwt = this.jwtProvider.generateJwtToken(authentication, session.getExpireTimestamp() - System.currentTimeMillis());
+        String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
 
         return ResponseEntity.status(HttpStatus.RESET_CONTENT).header("X-Authorization-Token", newJwt).build();
     }
