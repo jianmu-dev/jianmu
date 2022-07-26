@@ -30,4 +30,9 @@ public class GitRepoRepositoryImpl implements GitRepoRepository {
     public Optional<GitRepo> findById(String id) {
         return this.gitRepoMapper.findById(id);
     }
+
+    @Override
+    public Optional<GitRepo> findByRefAndOwner(String ref, String owner) {
+        return this.gitRepoMapper.findByRefAndOwner(ref, owner);
+    }
 }

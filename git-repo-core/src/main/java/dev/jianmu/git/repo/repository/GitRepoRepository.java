@@ -14,4 +14,6 @@ public interface GitRepoRepository {
     void saveOrUpdate(GitRepo gitRepo);
 
     Optional<GitRepo> findById(String id);
+
+    Optional<GitRepo> findByRefAndOwner(String ref, String owner);
 }
