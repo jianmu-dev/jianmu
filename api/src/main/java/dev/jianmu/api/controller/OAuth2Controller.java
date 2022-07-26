@@ -29,7 +29,6 @@ import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.user.aggregate.User;
 import dev.jianmu.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,10 +37,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -103,7 +99,7 @@ public class OAuth2Controller {
      */
     @GetMapping("/login/git_repo")
     @Transactional
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody GitRepoLoggingDto gitRepoLoggingDto) {
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid GitRepoLoggingDto gitRepoLoggingDto) {
         this.beforeAuthenticate();
         this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(gitRepoLoggingDto.getThirdPartyType());
@@ -173,7 +169,7 @@ public class OAuth2Controller {
     }
 
     @PutMapping("/refresh/git_repo")
-    public ResponseEntity<JwtResponse> refreshToken(@Valid GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
+    public ResponseEntity<JwtResponse> refreshToken(@Valid @RequestBody GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
