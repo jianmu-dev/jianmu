@@ -194,7 +194,7 @@ public class OAuth2Controller {
 
         GitRepo gitRepo = this.gitRepoRepository.findByRefAndOwner(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner())
                 .orElseThrow(() -> new DataNotFoundException("未找到此仓库"));
-        long expireTimestamp = session.getExpireTimestamp() - System.currentTimeMillis();
+        long expireTimestamp = session.getExpireTimestamp();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
                         .avatarUrl(userInfo.getAvatarUrl())
