@@ -10,6 +10,8 @@ import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.exception.NoPermissionException;
 import dev.jianmu.application.service.OAuth2Application;
 import dev.jianmu.application.service.vo.AssociationData;
+import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
@@ -58,14 +60,16 @@ public class RestExceptionHandler {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final OAuth2Application oAuth2Application;
+    private final GitRepoRepository gitRepoRepository;
 
-    public RestExceptionHandler(UserContextHolder userContextHolder, OAuth2Properties oAuth2Properties, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Application oAuth2Application) {
+    public RestExceptionHandler(UserContextHolder userContextHolder, OAuth2Properties oAuth2Properties, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Application oAuth2Application, GitRepoRepository gitRepoRepository) {
         this.userContextHolder = userContextHolder;
         this.oAuth2Properties = oAuth2Properties;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.jwtProperties = jwtProperties;
         this.oAuth2Application = oAuth2Application;
+        this.gitRepoRepository = gitRepoRepository;
     }
 
     @ExceptionHandler(NoPermissionException.class)
@@ -109,8 +113,11 @@ public class RestExceptionHandler {
             encryptedToken = session.getEncryptedToken();
             accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             userInfo = oAuth2Api.getUserInfo(accessToken);
+            GitRepo gitRepo = this.gitRepoRepository.findById(ex.getAssociationId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
+
             role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
-                    AssociationData.buildGitRepo(ex.getGitRepo(), ex.getGitRepoOwner())).getRole();
+                    AssociationData.buildGitRepo(gitRepo.getRef(), gitRepo.getOwner())).getRole();
         } catch (Exception e) {
             logger.error("没有权限，错误信息：", e);
             throw ex;
