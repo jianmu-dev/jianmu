@@ -1,5 +1,6 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.jwt.UserContextHolder;
@@ -84,7 +85,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(NoAssociatedPermissionException.class)
-    public ResponseEntity<?> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
+    public ResponseEntity<JwtResponse> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
@@ -96,11 +97,12 @@ public class RestExceptionHandler {
         String accessToken;
         String encryptedToken;
         RoleEnum role;
+        GitRepo gitRepo;
         try {
             encryptedToken = session.getEncryptedToken();
             accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             userInfo = oAuth2Api.getUserInfo(accessToken);
-            GitRepo gitRepo = this.gitRepoRepository.findById(ex.getAssociationId())
+            gitRepo = this.gitRepoRepository.findById(ex.getAssociationId())
                     .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
 
             role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
@@ -128,7 +130,15 @@ public class RestExceptionHandler {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
 
-        return ResponseEntity.status(HttpStatus.RESET_CONTENT).header("X-Authorization-Token", newJwt).build();
+        return ResponseEntity.status(HttpStatus.RESET_CONTENT).body(JwtResponse.builder()
+                .type("Bearer")
+                .token(newJwt)
+                .id(session.getId())
+                .username(session.getUsername())
+                .avatarUrl(session.getAvatarUrl())
+                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                .entryUrl(oAuth2Api.getEntryUrl(gitRepo.getOwner(), gitRepo.getRef()))
+                .build());
     }
 
     @ExceptionHandler({BadSqlGrammarException.class, SQLException.class})
