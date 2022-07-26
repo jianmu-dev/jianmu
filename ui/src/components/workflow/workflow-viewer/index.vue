@@ -6,12 +6,18 @@
                   @mouseenter="graph?.highlightNodeState(status, true)"
                   @mouseleave="graph?.highlightNodeState(status, false)"/>
     </div>
-    <toolbar v-if="graph" :readonly="readonly" :dsl-type="graph?.dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
-             :fullscreen-el="fullscreenEl"
-             @click-process-log="clickProcessLog"
-             @on-zoom="handleZoom"
-             @on-fullscreen="handleFullscreen"
-             @rotate="handleRotation"/>
+    <toolbar v-if="graph"
+      :readonly="readonly"
+      :dsl-type="graph?.dslType"
+      :dslMode="dslMode"
+      :zoom-value="zoom"
+      :is-x6="workflowGraph?.isX6()"
+      :fullscreen-el="fullscreenEl"
+      @change-view-mode="(viewMode)=>$emit('change-view-mode', viewMode)"
+      @click-process-log="clickProcessLog"
+      @on-zoom="handleZoom"
+      @on-fullscreen="handleFullscreen"
+      @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :graph-type="graphType"
                   :readonly="readonly"
@@ -21,8 +27,26 @@
                   :zoom="zoom"
                   @node-click="clickNode"
                   @mouseleave="destroyNodeToolbar"/>
-    <div v-show="!dslMode" class="canvas" ref="container"/>
-    <jm-dsl-editor v-if="dslMode" :value="workflowGraph?.visibleDsl" readonly/>
+    <!-- 文档流占位 -->
+    <div class="canvas-container">
+      <div class="view-mode">
+        <div class="float-view-mode">
+          <div class="tab" :class="{select: !dslMode}" @click="changeViewMode(ViewModeEnum.GRAPHIC)">图示</div>
+          <div class="tab" :class="{select: dslMode}" @click="changeViewMode(ViewModeEnum.YAML)">yaml</div>
+        </div>
+        <div class="float-param-log" v-show="!dslMode && !readonly">
+          <jm-tooltip content="全局参数" placement="bottom" :appendToBody="false">
+            <div class="jm-icon-workflow-param" @click="clickParamLog"></div>
+          </jm-tooltip>
+          <div class="btn" @click="clickProcessLog">{{graph?.dslType===DslTypeEnum.PIPELINE?'管道':'流程'}}日志</div>
+        </div>
+      </div>
+      <!-- <div v-show="!dslMode" class="canvas" ref="container"/> -->
+      <div class="canvas" ref="container"/>
+      <div class="dsl-editor-container" v-if="dslMode">
+        <jm-dsl-editor :value="workflowGraph?.visibleDsl || ''" readonly/>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,7 +67,7 @@ import TaskState from './task-state.vue';
 import Toolbar from './toolbar.vue';
 import NodeToolbar from './node-toolbar.vue';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { DslTypeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
+import { DslTypeEnum, ViewModeEnum, TaskStatusEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
 import { GraphDirectionEnum, GraphTypeEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
 import { INodeMouseoverEvent } from './model/data/common';
 import { sortTasks } from './model/util';
@@ -65,6 +89,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    viewMode: {
+      type: String as PropType<ViewModeEnum>,
+      default: ViewModeEnum.GRAPHIC,
+    },
     triggerType: String as PropType<TriggerTypeEnum>,
     nodeInfos: {
       type: Array,
@@ -76,14 +104,14 @@ export default defineComponent({
     },
     fullscreenRef: HTMLElement,
   },
-  emits: ['click-task-node', 'click-webhook-node', 'click-process-log'],
+  emits: ['click-task-node', 'click-webhook-node', 'click-process-log', 'click-param-log', 'change-view-mode'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const container = ref<HTMLElement>();
     const workflowGraph = ref<WorkflowGraph>();
     const graph = ref<BaseGraph>();
     const nodeActionConfigured = ref<boolean>(false);
-    const dslMode = ref<boolean>(false);
+    const dslMode = ref<boolean>(props.viewMode===ViewModeEnum.YAML);
     const nodeEvent = ref<INodeMouseoverEvent>();
     const destroyNodeToolbar = () => {
       graph.value?.hideNodeToolbar(nodeEvent.value!.id);
@@ -139,19 +167,35 @@ export default defineComponent({
     };
 
     onBeforeUpdate(() => refreshGraph());
-
+    const destroy = ()=>{
+      // fix: #I5EH4G
+      workflowGraph.value!.destroy();
+      workflowGraph.value = undefined;
+      graph.value = undefined;
+      nodeActionConfigured.value = false;
+    };
     // 保证整个视图都渲染完毕，才能确定图的宽高
     onMounted(() => proxy.$nextTick(() => refreshGraph()));
     onUnmounted(() => {
-      graph.value = undefined;
-      workflowGraph.value?.destroy();
+      destroy();
     });
+    
+    const handleRotation = async () => {
+      if (!graph.value || graph.value?.dslType !== DslTypeEnum.WORKFLOW) {
+        return;
+      }
 
+      const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ? GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
+      destroy();
+      refreshGraph(direction);
+    };
     return {
       TaskStatusEnum,
       container,
       workflowGraph,
       graph,
+      DslTypeEnum,
+      ViewModeEnum,
       graphType: computed<GraphTypeEnum>(() => {
         if (!graph.value) {
           return GraphTypeEnum.G6;
@@ -181,6 +225,9 @@ export default defineComponent({
       fullscreenEl: computed<HTMLElement>(() => props.fullscreenRef || container.value?.parentElement),
       clickProcessLog: () => {
         emit('click-process-log');
+      },
+      clickParamLog: () => {
+        emit('click-param-log');
       },
       clickNode: (id: string, nodeType: NodeTypeEnum, tabType: NodeToolbarTabTypeEnum) => {
         switch (nodeType) {
@@ -225,23 +272,7 @@ export default defineComponent({
           }
         }, 100);
       },
-      handleRotation: () => {
-        if (!graph.value || graph.value?.dslType !== DslTypeEnum.WORKFLOW) {
-          return;
-        }
-
-        const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ?
-          GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
-
-        // fix: #I5EH4G
-        workflowGraph.value!.destroy();
-
-        workflowGraph.value = undefined;
-        graph.value = undefined;
-        nodeActionConfigured.value = false;
-
-        refreshGraph(direction);
-      },
+      handleRotation,
       taskStates: computed(() => {
         const sArr: {
           status: string;
@@ -269,6 +300,10 @@ export default defineComponent({
 
         return sArr;
       }),
+      async changeViewMode(mode: ViewModeEnum) {
+        dslMode.value = mode === ViewModeEnum.YAML;
+        emit('change-view-mode', mode);
+      },
     };
   },
 });
@@ -286,6 +321,7 @@ export default defineComponent({
 
   background-color: #FFFFFF;
   position: relative;
+  // height: calc(100% - 60px);
   height: 100%;
 
   .task-states {
@@ -300,20 +336,101 @@ export default defineComponent({
     }
   }
 
-  .canvas {
+  .canvas-container {
     position: relative;
-    min-height: 300px;
-
-    .g6-tooltip {
-      padding: 5px;
-      font-size: 14px;
-      font-weight: 400;
-      color: #FFFFFF;
-      line-height: 22px;
-
-      background-color: rgba(51, 51, 51, 0.75);
-      box-shadow: 0 9px 28px 8px rgba(51, 51, 51, 0.06), 0 6px 16px 0 rgba(51, 51, 51, 0.08);
-      border-radius: 2px;
+    // height: calc(100% - 60px);
+    height: 100%;
+    background-color: #ffffff;
+    .view-mode {
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 0 30px;
+      height: 60px;
+      width: 100%;
+      box-sizing: border-box;
+      border-bottom: 1px solid #E6EBF2;
+      .float-view-mode {
+        position: absolute;
+        display: flex;
+        z-index: 100;
+        top: 0;
+        left: 30px;
+        height: 60px;
+        .tab {
+          text-align: center;
+          width: 40px;
+          line-height: 59px;
+          font-size: 16px;
+          margin-right: 55px;
+          cursor: pointer;
+          &.select {
+            color: #096DD9;
+            border-bottom: 2px solid #096DD9;
+          }
+          &:hover {
+            color: #096DD9;
+          }
+        }
+      }
+      .float-param-log {
+        position: absolute;
+        display: flex;
+        z-index: 100;
+        top: 0;
+        right: 30px;
+        height: 60px;
+        .jm-icon-workflow-param {
+          margin-top: 12px;
+          margin-right: 20px;
+          width: 34px;
+          height: 34px;
+          background-color: #fff;
+          border: 1px solid #CAD6EE;
+          border-radius: 2px;
+          font-size: 24px;
+          cursor: pointer;
+          &:hover {
+            color: #096DD9;
+          }
+        }
+        .btn {
+          color: #096DD9;
+          width: 96px;
+          height: 36px;
+          line-height: 36px;
+          margin-top: 12px;
+          text-align: center;
+          border: 1px solid #CAD6EE;
+          border-radius: 2px;
+          margin-left: 20px;
+          cursor: pointer;
+        }
+      }
+    }
+    .canvas {
+      position: relative;
+      min-height: 300px;
+  
+      .g6-tooltip {
+        padding: 5px;
+        font-size: 14px;
+        font-weight: 400;
+        color: #FFFFFF;
+        line-height: 22px;
+  
+        background-color: rgba(51, 51, 51, 0.75);
+        box-shadow: 0 9px 28px 8px rgba(51, 51, 51, 0.06), 0 6px 16px 0 rgba(51, 51, 51, 0.08);
+        border-radius: 2px;
+      }
+    }
+    .dsl-editor-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(100% - 60px);
+      padding: 80px 30px 30px;
+      height: calc(100% - 110px);
     }
   }
 }

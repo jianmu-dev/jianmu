@@ -61,13 +61,13 @@ export default {
     },
   },
   actions: {
-    async fetchDetail({ commit }: ActionContext<IState, IRootState>, { projectId, workflowExecutionRecordId }: {
+    async fetchDetail({ commit }: ActionContext<IState, IRootState>, { projectId, triggerId }: {
       projectId: string;
-      workflowExecutionRecordId?: string;
+      triggerId?: string;
     }): Promise<void> {
       const project = await fetchProjectDetail(projectId);
       const allRecords = await listWorkflowExecutionRecord(project.workflowRef);
-      let record = allRecords.length === 0 ? undefined : (workflowExecutionRecordId ? allRecords.find(item => item.id === workflowExecutionRecordId) : allRecords[0]);
+      let record = allRecords.length === 0 ? undefined : (triggerId ? allRecords.find(item => item.triggerId === triggerId) : allRecords[0]);
       const { dslText, nodes } = await fetchWorkflow(
         record ? record.workflowRef : project.workflowRef,
         record ? record.workflowVersion : project.workflowVersion);

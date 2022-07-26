@@ -14,7 +14,7 @@
       <jm-tooltip v-else content="适屏" placement="top" :appendToBody="false">
         <div class="normal-icon" @click="fitViewer"></div>
       </jm-tooltip>
-      <template v-if="isWorkflow">
+      <template v-if="isWorkflow && !isX6">
         <div class="separator"></div>
         <jm-tooltip content="旋转" placement="top" :appendToBody="false">
           <div class="rotate-icon" @click="rotate"></div>
@@ -32,13 +32,13 @@
              @click="changeZoom(true)"></div>
       </jm-tooltip>
     </div>
-    <div class="group" v-if="!readonly && !dslMode">
+    <!-- <div class="group" v-if="!readonly && !dslMode">
       <jm-tooltip content="流程日志" placement="top" :appendToBody="false">
         <div class="process-log-icon"
              @click="processLog"></div>
       </jm-tooltip>
-    </div>
-    <div :class="{group: true, dsl: dslMode}">
+    </div> -->
+    <!-- <div :class="{group: true, dsl: dslMode}">
       <jm-tooltip content="查看DSL" placement="top" :appendToBody="false" v-if="!dslMode">
         <div class="dsl-icon"
              @click="viewDsl(true)"></div>
@@ -50,7 +50,7 @@
         <div :class="isWorkflow ? 'workflow-icon' : 'pipeline-icon'"
              @click="viewDsl(false)"></div>
       </jm-tooltip>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -74,6 +74,10 @@ export default defineComponent({
       type: String as PropType<DslTypeEnum>,
       required: true,
     },
+    isX6: {
+      type: Boolean,
+      default: false,
+    },
     dslMode: {
       type: Boolean,
       required: true,
@@ -84,7 +88,7 @@ export default defineComponent({
     },
     fullscreenEl: HTMLElement,
   },
-  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode', 'on-fullscreen', 'rotate'],
+  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode', 'on-fullscreen', 'rotate', 'change-view-mode'],
   setup(props, { emit }: SetupContext) {
     const zoom = ref<number>(props.zoomValue);
     const fullscreenEnabled = ref<boolean>(screenfull.isEnabled);
@@ -111,9 +115,6 @@ export default defineComponent({
       isWorkflow: computed<boolean>(() => props.dslType === DslTypeEnum.WORKFLOW),
       processLog: () => {
         emit('click-process-log');
-      },
-      viewDsl: (mode: boolean) => {
-        emit('update:dsl-mode', mode);
       },
       handleFullScreen: (val: boolean) => {
         if (val) {
@@ -156,8 +157,8 @@ export default defineComponent({
 .jm-workflow-viewer-toolbar {
   position: absolute;
   z-index: 1;
-  top: 20px;
-  right: 20px;
+  bottom: 20px;
+  right: 30px;
   display: flex;
   justify-content: flex-end;
   align-items: center;

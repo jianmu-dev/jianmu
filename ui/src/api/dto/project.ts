@@ -113,6 +113,7 @@ export interface IProjectDetailVo
     dslSource: DslSourceEnum;
     dslType: DslTypeEnum;
     gitRepoId?: string;
+    workflowDescription: string;
     workflowName: string;
     workflowRef: string;
     workflowVersion: string;
@@ -202,6 +203,19 @@ export interface IGlobalParameterVo
     name: string;
     type: string;
     value: string | number | boolean;
+  }> {
+}
+
+/**
+ * project全局参数vo
+ */
+export interface IGlobalParamseterVo
+  extends Readonly<{
+    ref: string;
+    name: string;
+    type: string;
+    value: string | number | boolean | object;
+    required: boolean;
   }> {
 }
 

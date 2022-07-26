@@ -34,6 +34,9 @@ export class WorkflowGraph {
     this.resizeObserver.observe(containerParentEl);
   }
 
+  isX6():boolean {
+    return this.graph instanceof X6Graph;
+  }
   destroy() {
     // 销毁监控容器大小变化
     this.resizeObserver.disconnect();
