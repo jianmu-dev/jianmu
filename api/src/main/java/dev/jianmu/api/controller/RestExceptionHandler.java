@@ -109,8 +109,8 @@ public class RestExceptionHandler {
             logger.error("没有权限，错误信息：", e);
             throw ex;
         }
-        long expireTimestamp = session.getExpireTimestamp() - System.currentTimeMillis();
 
+        long expireTimestamp = session.getExpireTimestamp();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
                         .avatarUrl(userInfo.getAvatarUrl())
