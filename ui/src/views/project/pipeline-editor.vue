@@ -20,6 +20,7 @@ import { ISessionVo } from '@/api/dto/session';
 import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
+import _debounce from 'lodash/debounce';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -49,7 +50,7 @@ export default defineComponent({
     const defaultSession = ref<ISessionVo>();
     // 项目分支信息
     const branches = ref<IGitRepoBranchVo[]>([]);
-    const refreshState = (e: any) => {
+    const refreshState = _debounce((e: any) => {
       if (e.key !== 'session') {
         return;
       }
@@ -60,7 +61,10 @@ export default defineComponent({
         session: defaultSession.value,
         associationData: newAssociationData,
       });
-    };
+    }, 1000, {
+      leading: true,
+      trailing: false,
+    });
     // 验证用户是否登录
     const authLogin = () => {
       if (sessionState.session) {

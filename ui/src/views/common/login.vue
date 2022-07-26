@@ -78,6 +78,7 @@ import { fetchAuthUrl } from '@/api/session';
 import { getRedirectUri } from '@/utils/redirect-uri';
 import { IGitRepoLoggingDto, IOauth2LoggingDto } from '@/api/dto/session';
 import { AssociationTypeEnum } from '@/api/dto/enumeration';
+import _debounce from 'lodash/debounce';
 
 const { mapActions: mapSessionActions, mapMutations } = createNamespacedHelpers(namespace);
 
@@ -134,7 +135,7 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     };
-    const refreshState = async (e: any) => {
+    const refreshState = _debounce(async (e: any) => {
       if (e.key === 'session') {
         proxy.$success('登录成功');
         const newSession = JSON.parse(e.newValue)['_default'].session;
@@ -160,7 +161,10 @@ export default defineComponent({
         // 登录失败
         loading.value = false;
       }
-    };
+    }, 1000, {
+      leading:true,
+      trailing:false,
+    });
     onMounted(async () => {
       window.onstorage = refreshState;
       // 判断是否为弹窗方式登录
