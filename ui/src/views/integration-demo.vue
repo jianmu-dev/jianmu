@@ -54,7 +54,7 @@ export default defineComponent({
       ref: props.reference,
     });
     const iframeSrc = computed<string>(() =>
-      '/');
+      `/login?owner=${encodeURIComponent(form.value.owner)}&ref=${encodeURIComponent(form.value.ref)}`);
     const iframeVisible = ref<boolean>(!!(props.owner && props.reference));
 
     return {
