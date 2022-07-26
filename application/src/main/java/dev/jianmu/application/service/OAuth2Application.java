@@ -47,7 +47,7 @@ public class OAuth2Application {
     @Transactional
     public Association getAssociation(ThirdPartyTypeEnum thirdPartyType, String accessToken, IUserInfoVo userInfo, AssociationData associationData) {
         String associationType = this.associationUtil.getAssociationType();
-        if (!this.oAuth2Properties.isEntry()) {
+        if (this.associationUtil.getAssociationType() == null) {
             return Association.builder()
                     .role(null)
                     .id(null)

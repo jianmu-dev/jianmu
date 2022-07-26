@@ -8,10 +8,7 @@ import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
-import dev.jianmu.application.exception.NotAllowRegistrationException;
-import dev.jianmu.application.exception.NotAllowThisPlatformLogInException;
-import dev.jianmu.application.exception.OAuth2IsNotAuthorizedException;
-import dev.jianmu.application.exception.OAuth2IsNotConfiguredException;
+import dev.jianmu.application.exception.*;
 import dev.jianmu.application.service.OAuth2Application;
 import dev.jianmu.application.service.vo.Association;
 import dev.jianmu.application.service.vo.AssociationData;
@@ -174,7 +171,7 @@ public class OAuth2Controller {
     public ThirdPartyTypeVo getThirdPartyType() {
         return ThirdPartyTypeVo.builder()
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
-                .entry(this.oAuth2Properties.isEntry())
+                .associationType(this.associationUtil.getAssociationType())
                 .build();
     }
 

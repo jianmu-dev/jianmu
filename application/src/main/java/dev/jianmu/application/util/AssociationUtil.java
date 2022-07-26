@@ -2,6 +2,7 @@ package dev.jianmu.application.util;
 
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class AssociationUtil {
@@ -12,10 +13,10 @@ public class AssociationUtil {
     }
 
     public String getAssociationType() {
-        if (this.oAuth2Properties.isEntry()) {
-            return AssociationType.GIT_REPO.name();
+        if (!StringUtils.hasLength(this.oAuth2Properties.getType())) {
+            return null;
         }
-        return null;
+        return AssociationType.valueOf(this.oAuth2Properties.getType().toUpperCase()).name();
     }
 
     public enum AssociationType {
