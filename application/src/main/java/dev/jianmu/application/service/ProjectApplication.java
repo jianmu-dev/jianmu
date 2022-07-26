@@ -6,7 +6,7 @@ import dev.jianmu.application.event.CronEvent;
 import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.exception.NoPermissionException;
+import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
@@ -121,7 +121,7 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         if (associationId != null && associationType != null &&
                 (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
-            throw new NoPermissionException();
+            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
         }
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
@@ -261,7 +261,7 @@ public class ProjectApplication {
     private void checkProjectPermission(String associationId, String associationType, Project project) {
         if (associationId != null && associationType != null &&
                 (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
-            throw new NoPermissionException();
+            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
         }
     }
 
