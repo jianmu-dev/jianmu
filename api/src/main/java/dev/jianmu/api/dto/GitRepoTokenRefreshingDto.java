@@ -1,6 +1,5 @@
-package dev.jianmu.api.dto.impl;
+package dev.jianmu.api.dto;
 
-import dev.jianmu.api.dto.Oauth2LoggingDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,13 +7,13 @@ import javax.validation.constraints.NotBlank;
 
 /**
  * @author huangxi
- * @class GitRepoLoggingDto
- * @description GitRepoLoggingDto
- * @create 2022-07-22 17:27
+ * @class GitRepoTokenRefreshingDto
+ * @description GitRepoTokenRefreshingDto
+ * @create 2022-07-26 14:54
  */
 @Getter
 @Setter
-public class GitRepoLoggingDto extends Oauth2LoggingDto {
+public class GitRepoTokenRefreshingDto {
     /**
      * 仓库名
      */
