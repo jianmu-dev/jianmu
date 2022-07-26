@@ -38,7 +38,7 @@
           <jm-tooltip content="全局参数" placement="bottom" :appendToBody="false">
             <div class="jm-icon-workflow-param" @click="clickParamLog"></div>
           </jm-tooltip>
-          <div class="btn" @click="clickProcessLog">{{graph?.dslType===DslTypeEnum.PIPELINE?'管道':'流程'}}日志</div>
+          <div class="btn" @click="clickProcessLog">{{entry? '流水线':graph?.dslType===DslTypeEnum.PIPELINE?'管道':'流程'}}日志</div>
         </div>
       </div>
       <!-- <div v-show="!dslMode" class="canvas" ref="container"/> -->
@@ -84,6 +84,10 @@ export default defineComponent({
   name: 'jm-workflow-viewer',
   components: { TaskState, Toolbar, NodeToolbar },
   props: {
+    entry: {
+      type: Boolean,
+      default: false,
+    },
     dsl: String,
     readonly: {
       type: Boolean,

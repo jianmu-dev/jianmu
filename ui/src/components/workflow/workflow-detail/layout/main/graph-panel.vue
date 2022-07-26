@@ -6,6 +6,7 @@
       :node-infos="nodeInfos"
       :tasks="taskRecords"
       :fullscreenRef="workflowRef"
+      :entry="entry"
       @click-process-log="openProcessLog"
       @click-task-node="openTaskLog"
       @click-webhook-node="openWebhookLog"
@@ -83,6 +84,10 @@ export default defineComponent({
     currentRecordStatus: {
       type: String,
       default: '',
+    },
+    entry: {
+      type: Boolean,
+      default: false,
     },
     viewMode: {
       type: String as PropType<ViewModeEnum>,

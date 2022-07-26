@@ -24,6 +24,7 @@
     <graph-panel
       ref="graphPanel"
       v-if="recordDetail.record"
+      :entry="modelValue.entry"
       :record="recordDetail.record"
       :currentRecordStatus="recordList.currentRecordStatus"
       :viewMode="modelValue.viewMode"
