@@ -1,5 +1,6 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.jwt.UserContextHolder;
@@ -7,9 +8,10 @@ import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.ErrorMessage;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
-import dev.jianmu.application.exception.NoPermissionException;
 import dev.jianmu.application.service.OAuth2Application;
 import dev.jianmu.application.service.vo.AssociationData;
+import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
@@ -58,26 +60,16 @@ public class RestExceptionHandler {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final OAuth2Application oAuth2Application;
+    private final GitRepoRepository gitRepoRepository;
 
-    public RestExceptionHandler(UserContextHolder userContextHolder, OAuth2Properties oAuth2Properties, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Application oAuth2Application) {
+    public RestExceptionHandler(UserContextHolder userContextHolder, OAuth2Properties oAuth2Properties, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Application oAuth2Application, GitRepoRepository gitRepoRepository) {
         this.userContextHolder = userContextHolder;
         this.oAuth2Properties = oAuth2Properties;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.jwtProperties = jwtProperties;
         this.oAuth2Application = oAuth2Application;
-    }
-
-    @ExceptionHandler(NoPermissionException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorMessage validationBodyException(NoPermissionException ex, WebRequest request) {
-        logger.error("没有权限: ", ex);
-        return ErrorMessage.builder()
-                .statusCode(HttpStatus.FORBIDDEN.value())
-                .timestamp(LocalDateTime.now())
-                .message("没有权限")
-                .description(request.getDescription(false))
-                .build();
+        this.gitRepoRepository = gitRepoRepository;
     }
 
     @ExceptionHandler(BindException.class)
@@ -93,7 +85,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(NoAssociatedPermissionException.class)
-    public ResponseEntity<?> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
+    public ResponseEntity<JwtResponse> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
@@ -105,17 +97,22 @@ public class RestExceptionHandler {
         String accessToken;
         String encryptedToken;
         RoleEnum role;
+        GitRepo gitRepo;
         try {
             encryptedToken = session.getEncryptedToken();
             accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             userInfo = oAuth2Api.getUserInfo(accessToken);
+            gitRepo = this.gitRepoRepository.findById(ex.getAssociationId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
+
             role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
-                    AssociationData.buildGitRepo(ex.getGitRepo(), ex.getGitRepoOwner())).getRole();
+                    AssociationData.buildGitRepo(gitRepo.getRef(), gitRepo.getOwner())).getRole();
         } catch (Exception e) {
             logger.error("没有权限，错误信息：", e);
             throw ex;
         }
 
+        long expireTimestamp = session.getExpireTimestamp();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
                         .avatarUrl(userInfo.getAvatarUrl())
@@ -126,13 +123,22 @@ public class RestExceptionHandler {
                         .associationId(ex.getAssociationId())
                         .associationType(ex.getAssociationType())
                         .encryptedToken(encryptedToken)
+                        .expireTimestamp(expireTimestamp)
                         .build()),
                         this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String newJwt = this.jwtProvider.generateJwtToken(authentication, session.getExpireTimestamp() - System.currentTimeMillis());
+        String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
 
-        return ResponseEntity.status(HttpStatus.RESET_CONTENT).header("X-Authorization-Token", newJwt).build();
+        return ResponseEntity.status(HttpStatus.RESET_CONTENT).body(JwtResponse.builder()
+                .type("Bearer")
+                .token(newJwt)
+                .id(session.getId())
+                .username(session.getUsername())
+                .avatarUrl(session.getAvatarUrl())
+                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                .entryUrl(oAuth2Api.getEntryUrl(gitRepo.getOwner(), gitRepo.getRef()))
+                .build());
     }
 
     @ExceptionHandler({BadSqlGrammarException.class, SQLException.class})

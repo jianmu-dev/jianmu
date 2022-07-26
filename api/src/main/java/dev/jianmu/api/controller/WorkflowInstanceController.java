@@ -1,12 +1,12 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.jwt.UserContextHolder;
-import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.exception.NoPermissionException;
+import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
+import dev.jianmu.application.util.AssociationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -62,7 +62,7 @@ public class WorkflowInstanceController {
         var project = this.projectApplication.findByWorkflowRef(workflowInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowInstance.getWorkflowRef()));
         if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType())) {
-            throw new NoPermissionException();
+            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
         }
     }
 

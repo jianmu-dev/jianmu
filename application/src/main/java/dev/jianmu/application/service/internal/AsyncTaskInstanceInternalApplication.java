@@ -2,7 +2,7 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.exception.NoPermissionException;
+import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
@@ -118,7 +118,7 @@ public class AsyncTaskInstanceInternalApplication {
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowRef));
         if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType())) {
-            throw new NoPermissionException();
+            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
         }
     }
 

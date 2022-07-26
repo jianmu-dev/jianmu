@@ -1,10 +1,12 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.AuthorizationUrlGettingDto;
+import dev.jianmu.api.dto.GitRepoTokenRefreshingDto;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.impl.GitRepoLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
+import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
@@ -13,11 +15,15 @@ import dev.jianmu.application.service.OAuth2Application;
 import dev.jianmu.application.service.vo.Association;
 import dev.jianmu.application.service.vo.AssociationData;
 import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
+import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.oauth2.api.vo.ITokenVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.user.aggregate.User;
@@ -31,9 +37,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -55,8 +59,10 @@ public class OAuth2Controller {
     private final OAuth2Properties oAuth2Properties;
     private final AssociationUtil associationUtil;
     private final OAuth2Application oAuth2Application;
+    private final UserContextHolder userContextHolder;
+    private final GitRepoRepository gitRepoRepository;
 
-    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, AssociationUtil associationUtil, OAuth2Application oAuth2Application) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, AssociationUtil associationUtil, OAuth2Application oAuth2Application, UserContextHolder userContextHolder, GitRepoRepository gitRepoRepository) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
@@ -64,6 +70,8 @@ public class OAuth2Controller {
         this.oAuth2Properties = oAuth2Properties;
         this.associationUtil = associationUtil;
         this.oAuth2Application = oAuth2Application;
+        this.userContextHolder = userContextHolder;
+        this.gitRepoRepository = gitRepoRepository;
     }
 
     /**
@@ -155,10 +163,62 @@ public class OAuth2Controller {
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
-                .associationId(association.getId())
-                .associationType(association.getType())
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
                 .entryUrl(oAuth2Api.getEntryUrl(gitRepoLoggingDto.getOwner(), gitRepoLoggingDto.getRef()))
+                .build());
+    }
+
+    @PutMapping("/refresh/git_repo")
+    public ResponseEntity<JwtResponse> refreshToken(@Valid @RequestBody GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
+        JwtSession session = this.userContextHolder.getSession();
+
+        String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
+        OAuth2ApiProxy oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(thirdPartyType))
+                .build();
+
+        IUserInfoVo userInfo;
+        String accessToken;
+        String encryptedToken;
+        RoleEnum role;
+        try {
+            encryptedToken = session.getEncryptedToken();
+            accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            userInfo = oAuth2Api.getUserInfo(accessToken);
+            role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
+                    AssociationData.buildGitRepo(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner())).getRole();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
+        }
+
+        GitRepo gitRepo = this.gitRepoRepository.findByRefAndOwner(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner())
+                .orElseThrow(() -> new DataNotFoundException("未找到此仓库"));
+        long expireTimestamp = session.getExpireTimestamp();
+        Authentication authentication = this.authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
+                        .avatarUrl(userInfo.getAvatarUrl())
+                        .id(userInfo.getId())
+                        .username(userInfo.getUsername())
+                        .nickname(userInfo.getNickname())
+                        .role(role)
+                        .associationId(gitRepo.getId())
+                        .associationType(this.associationUtil.getAssociationType())
+                        .encryptedToken(encryptedToken)
+                        .expireTimestamp(expireTimestamp)
+                        .build()),
+                        this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
+        return ResponseEntity.ok(JwtResponse.builder()
+                .type("Bearer")
+                .token(newJwt)
+                .id(session.getId())
+                .username(session.getUsername())
+                .avatarUrl(session.getAvatarUrl())
+                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                .entryUrl(oAuth2Api.getEntryUrl(gitRepoTokenRefreshingDto.getOwner(), gitRepoTokenRefreshingDto.getRef()))
                 .build());
     }
 

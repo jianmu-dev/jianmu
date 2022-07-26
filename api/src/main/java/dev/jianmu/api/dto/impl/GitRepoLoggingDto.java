@@ -18,12 +18,12 @@ public class GitRepoLoggingDto extends Oauth2LoggingDto {
     /**
      * 仓库名
      */
-    @NotBlank
+    @NotBlank(message = "仓库唯一标识不能为空")
     private String ref;
 
     /**
      * 仓库所有者
      */
-    @NotBlank
+    @NotBlank(message = "仓库所有者不能为空")
     private String owner;
 }
