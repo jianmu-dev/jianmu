@@ -1,4 +1,5 @@
 import { IVersionVo } from '@/api/dto/common';
+import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 滚动偏移量
@@ -14,6 +15,7 @@ export interface IScrollOffset {
 export interface IRootState {
   versions: IVersionVo[];
   entry: boolean;
+  associationType?: AssociationTypeEnum;
   thirdPartyType: string;
   workerTypes: string[];
   parameterTypes: string[];

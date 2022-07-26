@@ -11,7 +11,7 @@
         <!--        <div class="subtitle">Automation Integration Platform</div>-->
         <!--      </div>-->
       </div>
-      <login :code="code" :error_description="error_description" :gitRepo="gitRepo" :gitRepoOwner="gitRepoOwner"/>
+      <login :code="code" :error_description="error_description" :reference="reference" :owner="owner"/>
       <bottom-nav/>
     </div>
   </div>
@@ -30,8 +30,8 @@ import { IState } from '@/model/modules/session';
 export default defineComponent({
   components: { BottomNav, Login },
   props: {
-    gitRepo: String,
-    gitRepoOwner: String,
+    reference: String,
+    owner: String,
     code: String,
     error_description: String,
   },
@@ -41,17 +41,17 @@ export default defineComponent({
     const store = useStore();
     const entry = store.state.entry;
     const isShow = ref<boolean>(false);
-    const { session } = store.state[namespace] as IState;
+    const { session, associationData } = store.state[namespace] as IState;
     onMounted(async () => {
-      // 如果页面嵌入在iframe里面，localstorage中session存在直接进入首页，condition防止参数被串改
+      // 如果页面嵌入在iframe里面，localstorage中session存在，直接进入首页，condition防止参数被串改
       // session可能被清空
       if (!session) {
-        isShow.value=true;
+        isShow.value = true;
         return;
       }
       const condition =
-        entry && (store.state[namespace].session)
-        && (session?.gitRepo === props.gitRepo && session?.gitRepoOwner === props.gitRepoOwner);
+        entry && associationData
+        && (associationData.ref === props.reference && associationData.owner === props.owner);
       if (condition) {
         await router.push({ name: 'index' });
         return;

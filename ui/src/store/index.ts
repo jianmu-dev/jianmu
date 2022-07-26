@@ -29,7 +29,8 @@ const store = createStore<IRootState>({
     },
     mutateThirdPartyType(state: IRootState, payload: IThirdPartyTypeVo): void {
       state.thirdPartyType = payload.thirdPartyType;
-      state.entry = payload.entry;
+      state.associationType = payload.associationType;
+      state.entry = !!payload.associationType;
     },
     mutateWorkerTypes(state: IRootState, payload: string[]): void {
       state.workerTypes = payload;

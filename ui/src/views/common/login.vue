@@ -76,6 +76,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { AUTHORIZE_INDEX, INDEX } from '@/router/path-def';
 import { fetchAuthUrl } from '@/api/session';
 import { getRedirectUri } from '@/utils/redirect-uri';
+import { IGitRepoLoggingDto, IOauth2LoggingDto } from '@/api/dto/session';
+import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 const { mapActions: mapSessionActions, mapMutations } = createNamespacedHelpers(namespace);
 
@@ -84,8 +86,8 @@ export default defineComponent({
   props: {
     code: String,
     error_description: String,
-    gitRepo: String,
-    gitRepoOwner: String,
+    reference: String,
+    owner: String,
     type: {
       type: String,
       default: 'index',
@@ -96,6 +98,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
+    const entry = store.state.entry;
     // 系统初始化后，自动决定登录方式（密码/第三方平台登录）
     const loginType = ref<string>(store.state.thirdPartyType);
     const { username, remember } = store.state[namespace] as IState;
@@ -171,13 +174,26 @@ export default defineComponent({
       if (props.code) {
         loading.value = true;
         try {
-          await proxy.createOAuthSession({
-            code: props.code,
-            thirdPartyType: loginType.value,
-            redirectUri: getRedirectUri(props.gitRepo, props.gitRepoOwner),
-            gitRepo: props.gitRepo,
-            gitRepoOwner: props.gitRepoOwner,
-          });
+          let payload: IOauth2LoggingDto;
+          const associationType = store.state.associationType;
+          switch (associationType) {
+            case AssociationTypeEnum.GIT_REPO:
+              payload = {
+                code: props.code,
+                thirdPartyType: loginType.value,
+                redirectUri: getRedirectUri(props.gitRepo, props.gitRepoOwner),
+                ref: store.state[namespace].associationData?.ref,
+                owner: store.state[namespace].associationData?.owner,
+              } as IGitRepoLoggingDto;
+              break;
+            case AssociationTypeEnum.USER:
+              // TODO 待完善其他登录
+              break;
+            case AssociationTypeEnum.ORG:
+              // TODO 待完善其他登录
+              break;
+          }
+          await proxy.createOAuthSession(payload!);
           // 弹窗、以及iframe形式登录后自动关闭页面
           (dialogLogin || isIframeLogin) ? window.close() : await router.push(INDEX);
         } catch (err) {
@@ -195,6 +211,12 @@ export default defineComponent({
 
       if (route.path === AUTHORIZE_INDEX) {
         await fetchThirdAuthUrl();
+      }
+      if (entry && props.type === 'index') {
+        proxy.mutateAssociationData({
+          ref: props.reference,
+          owner: props.owner,
+        });
       }
     });
     onBeforeUnmount(() => {
@@ -248,6 +270,7 @@ export default defineComponent({
       }),
       ...mapMutations({
         mutateSession: 'oauthMutate',
+        mutateAssociationData: 'mutateAssociationData',
       }),
     };
   },

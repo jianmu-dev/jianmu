@@ -8,7 +8,7 @@ export default [
     meta: {
       title: '首页',
     },
-    props: ({ query: { owner, repo } }: RouteLocationNormalizedLoaded) => ({ owner, repo }),
+    props: ({ query: { owner, ref: reference } }: RouteLocationNormalizedLoaded) => ({ owner, reference }),
   },
   {
     name: 'create-pipeline',

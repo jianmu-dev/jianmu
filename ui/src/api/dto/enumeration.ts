@@ -157,3 +157,13 @@ export enum GitRepoEnum {
   LAST_MODIFIED_TIME = 'LAST_MODIFIED_TIME',
   LAST_EXECUTION_TIME = 'LAST_EXECUTION_TIME'
 }
+
+/**
+ * 第三方协会类型枚举
+ */
+
+export enum AssociationTypeEnum {
+  GIT_REPO = 'GIT_REPO',
+  USER = 'USER',
+  ORG = 'ORG'
+}

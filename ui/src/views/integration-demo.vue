@@ -2,7 +2,7 @@
   <div class="integration-demo">
     <div class="top">
       <div class="desc">
-        <p>从仓库url中获取Owner和Repo，格式：https://testforgeplus.trustie.net/${owner}/${repo}</p>
+        <p>从仓库url中获取Owner和Repo，格式：https://testforgeplus.trustie.net/${owner}/${ref}</p>
         <p>Git平台：<a href="https://testforgeplus.trustie.net/" target="_blank">https://testforgeplus.trustie.net/</a>
         </p>
         <p>新建仓库：<a href="https://testforgeplus.trustie.net/projects/deposit/new" target="_blank">https://testforgeplus.trustie.net/projects/deposit/new</a>
@@ -16,8 +16,8 @@
             <jm-input v-model="form.owner" size="small" clearable placeholder="如，jianmu-dev"
                       @focus="iframeVisible=false" @keyup.enter="confirm"/>
           </jm-form-item>
-          <jm-form-item label="repo:" prop="repo">
-            <jm-input v-model="form.repo" size="small" clearable placeholder="如，jianmu-ci-server"
+          <jm-form-item label="ref:" prop="ref">
+            <jm-input v-model="form.ref" size="small" clearable placeholder="如，jianmu-ci-server"
                       @focus="iframeVisible=false" @keyup.enter="confirm"/>
           </jm-form-item>
           <jm-form-item>
@@ -40,7 +40,7 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    repo: {
+    reference: {
       type: String,
       default: '',
     },
@@ -51,18 +51,18 @@ export default defineComponent({
     const formRef = ref<HTMLFormElement>();
     const form = ref({
       owner: props.owner,
-      repo: props.repo,
+      ref: props.reference,
     });
     const iframeSrc = computed<string>(() =>
-      `/login?gitRepoOwner=${encodeURIComponent(form.value.owner)}&gitRepo=${encodeURIComponent(form.value.repo)}`);
-    const iframeVisible = ref<boolean>(!!(props.owner && props.repo));
+      '/');
+    const iframeVisible = ref<boolean>(!!(props.owner && props.reference));
 
     return {
       formRef,
       form,
       rules: {
         owner: [{ required: true, trigger: 'blur' }],
-        repo: [{ required: true, trigger: 'blur' }],
+        ref: [{ required: true, trigger: 'blur' }],
       },
       iframeVisible,
       iframeSrc,
@@ -74,7 +74,7 @@ export default defineComponent({
             return false;
           }
           // 同步地址栏参数
-          await router.push(`${route.path}?owner=${encodeURIComponent(form.value.owner)}&repo=${encodeURIComponent(form.value.repo)}`);
+          await router.push(`${route.path}?owner=${encodeURIComponent(form.value.owner)}&ref=${encodeURIComponent(form.value.ref)}`);
 
           iframeVisible.value = false;
           await nextTick();

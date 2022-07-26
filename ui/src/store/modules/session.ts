@@ -1,10 +1,11 @@
 import { ActionContext, Module } from 'vuex';
-import { ILoginForm, IState } from '@/model/modules/session';
+import { IAssociationData, ILoginForm, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
 import { create } from '@/api/session';
-import { ISessionVo, IOauth2LoggingDto } from '@/api/dto/session';
+import { ISessionVo, IOauth2LoggingDto, IGitRepoLoggingDto } from '@/api/dto/session';
 import { getStorage, setStorage } from '@/utils/storage';
 import { authLogin } from '@/api/session';
+import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 命名空间
@@ -18,6 +19,7 @@ const DEFAULT_STATE: IState = {
   remember: false,
   userSettings: {},
   session: undefined,
+  associationData: undefined,
 };
 
 /**
@@ -73,13 +75,21 @@ export default {
         state.userSettings = DEFAULT_STATE.userSettings;
       }
       state.session = session;
-
       saveState(state);
     },
 
-    oauthMutate(state: IState, session: ISessionVo) {
+    oauthMutate(state: IState, { session, associationData }: {
+      session: ISessionVo,
+      associationData?: IAssociationData
+    }) {
       state.session = session;
+      state.associationData = associationData;
       state.username = session.username;
+      saveState(state);
+    },
+
+    mutateAssociationData(state: IState, payload: IAssociationData) {
+      state.associationData = payload;
       saveState(state);
     },
 
@@ -104,21 +114,34 @@ export default {
 
       commit('mutate', { session, loginForm });
     },
-    async oauthLogin({ commit }: ActionContext<IState, IRootState>, payload: IOauth2LoggingDto): Promise<void> {
-      const session = (payload.gitRepo && payload.gitRepoOwner) ? await authLogin({
-        code: payload.code,
-        thirdPartyType: payload.thirdPartyType,
-        redirectUri: payload.redirectUri,
-        gitRepo: payload.gitRepo,
-        gitRepoOwner: payload.gitRepoOwner,
-      }) : await authLogin({
-        code: payload.code,
-        thirdPartyType: payload.thirdPartyType,
-        redirectUri: payload.redirectUri,
-      });
+    async oauthLogin({
+      commit,
+      rootState,
+    }: ActionContext<IState, IRootState>, payload: IOauth2LoggingDto): Promise<void> {
+      const session = await authLogin(rootState.associationType!, payload);
+      let associationData: IAssociationData | undefined;
+      switch (rootState.associationType) {
+        case AssociationTypeEnum.GIT_REPO: {
+          const { ref, owner } = payload as IGitRepoLoggingDto;
+          associationData = {
+            ref: ref!,
+            owner: owner!,
+          };
+          break;
+        }
+        case AssociationTypeEnum.USER:
+          // TODO 待完善其他登录
+          break;
+        case AssociationTypeEnum.ORG:
+          // TODO 待完善其他登录
+          break;
+      }
       // TODO 测试
-      session.entryUrl = `/full/demo?owner=${session.gitRepoOwner}&repo=${session.gitRepo}`;
-      commit('oauthMutate', session);
+      session.entryUrl = `/full/demo?owner=${payload.owner}&repo=${payload.ref}`;
+      commit('oauthMutate', {
+        session,
+        associationData,
+      });
     },
   },
 } as Module<IState, IRootState>;
