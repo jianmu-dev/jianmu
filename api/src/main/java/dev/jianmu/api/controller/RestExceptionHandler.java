@@ -7,7 +7,6 @@ import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.ErrorMessage;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
-import dev.jianmu.application.exception.NoPermissionException;
 import dev.jianmu.application.service.OAuth2Application;
 import dev.jianmu.application.service.vo.AssociationData;
 import dev.jianmu.git.repo.aggregate.GitRepo;
@@ -70,18 +69,6 @@ public class RestExceptionHandler {
         this.jwtProperties = jwtProperties;
         this.oAuth2Application = oAuth2Application;
         this.gitRepoRepository = gitRepoRepository;
-    }
-
-    @ExceptionHandler(NoPermissionException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorMessage validationBodyException(NoPermissionException ex, WebRequest request) {
-        logger.error("没有权限: ", ex);
-        return ErrorMessage.builder()
-                .statusCode(HttpStatus.FORBIDDEN.value())
-                .timestamp(LocalDateTime.now())
-                .message("没有权限")
-                .description(request.getDescription(false))
-                .build();
     }
 
     @ExceptionHandler(BindException.class)
