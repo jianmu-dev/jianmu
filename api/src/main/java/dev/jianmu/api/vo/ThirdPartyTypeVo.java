@@ -22,8 +22,8 @@ public class ThirdPartyTypeVo {
     private String thirdPartyType;
 
     /**
-     * gitRepoEntry
+     * associationType
      */
     @Schema(required = true)
-    private boolean entry;
+    private String associationType;
 }

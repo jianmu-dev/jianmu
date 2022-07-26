@@ -2,7 +2,7 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.jwt.UserContextHolder;
-import dev.jianmu.api.util.AssociationUtil;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.api.vo.ProjectIdVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitRepoApplication;
@@ -62,7 +62,7 @@ public class ProjectController {
     @PostMapping("/trigger/{projectId}")
     @Operation(summary = "触发项目", description = "触发项目启动")
     public void trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var repoId = this.userContextHolder.getSession().getAssociationId();
         this.projectApplication.triggerByManual(projectId, repoId, this.associationUtil.getAssociationType());
     }
 
@@ -70,17 +70,17 @@ public class ProjectController {
     @Operation(summary = "创建项目", description = "上传DSL并创建项目")
     public ProjectIdVo createProject(@RequestBody @Valid DslTextDto dslTextDto) {
         var session = this.userContextHolder.getSession();
-        if (session.getGitRepoId() != null) {
+        if (session.getAssociationId() != null) {
             if (dslTextDto.getBranch() == null) {
                 throw new RuntimeException("请选择正确的分支");
             }
-            if (this.gitRepoApplication.findBranches(session.getGitRepoId()).stream()
+            if (this.gitRepoApplication.findBranches(session.getAssociationId()).stream()
                     .noneMatch(branch -> branch.getName().equals(dslTextDto.getBranch()))) {
                 throw new RuntimeException("请选择正确的分支");
             }
         }
         var associationType = this.associationUtil.getAssociationType();
-        var project = this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getGitRepoId(), associationType, dslTextDto.getBranch());
+        var project = this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getAssociationId(), associationType, dslTextDto.getBranch());
         return ProjectIdVo.builder().id(project.getId()).build();
     }
 
@@ -89,10 +89,10 @@ public class ProjectController {
     public void updateProject(@PathVariable String projectId, @RequestBody @Valid DslTextDto dslTextDto) {
         var session = this.userContextHolder.getSession();
         var type = this.associationUtil.getAssociationType();
-        var concurrent = this.projectApplication.updateProject(projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getGitRepoId(), type);
+        var concurrent = this.projectApplication.updateProject(projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getAssociationId(), type);
         // 并发执行正在排队的流程实例
         if (concurrent) {
-            var project = this.projectApplication.findById(projectId, session.getGitRepoId(), type)
+            var project = this.projectApplication.findById(projectId, session.getAssociationId(), type)
                     .orElseThrow(() -> new DataNotFoundException("未找到的项目"));
             this.workflowInstanceInternalApplication.start(project.getWorkflowRef());
         }
@@ -101,7 +101,7 @@ public class ProjectController {
     @DeleteMapping("/{projectId}")
     @Operation(summary = "删除项目", description = "删除项目")
     public void deleteById(@PathVariable String projectId) {
-        var repoId = this.userContextHolder.getSession().getGitRepoId();
+        var repoId = this.userContextHolder.getSession().getAssociationId();
         this.projectApplication.deleteById(projectId, repoId, this.associationUtil.getAssociationType());
     }
 }

@@ -1,5 +1,6 @@
 package dev.jianmu.api.jwt;
 
+import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,24 +34,14 @@ public class JwtSession {
      * 用户名
      */
     private String username;
-    /**
-     * git仓库id
-     */
-    private String gitRepoId;
-    /**
-     * 仓库名
-     */
-    private String gitRepo;
-    /**
-     * 仓库所有者
-     */
-    private String gitRepoOwner;
-    /**
-     * 仓库角色
-     */
-    private Role gitRepoRole;
 
-    public enum Role {
-        ADMIN, OWNER, MEMBER
-    }
+    private String associationId;
+
+    private String associationType;
+
+    private RoleEnum role;
+
+    private String encryptedToken;
+
+    private long expireTimestamp;
 }

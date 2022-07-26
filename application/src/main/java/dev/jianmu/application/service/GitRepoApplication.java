@@ -41,18 +41,6 @@ public class GitRepoApplication {
     }
 
     @Transactional
-    public void syncBranches(String id, String ref, String owner, String defaultBranch, List<String> branchesString) {
-        var branches = branchesString.stream()
-                .map(name -> new Branch(name, name.equals(defaultBranch)))
-                .collect(Collectors.toList());
-        var gitRepo = this.gitRepoRepository.findById(id)
-                .orElse(new GitRepo(id));
-        // 同步分支
-        gitRepo.syncBranches(ref, owner, branches);
-        this.gitRepoRepository.saveOrUpdate(gitRepo);
-    }
-
-    @Transactional
     public void addFlow(String projectId, String branch, String gitRepoId) {
         if (gitRepoId == null) {
             return;

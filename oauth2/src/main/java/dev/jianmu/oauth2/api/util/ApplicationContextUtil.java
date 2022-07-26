@@ -1,4 +1,4 @@
-package dev.jianmu.oauth2.api.utils;
+package dev.jianmu.oauth2.api.util;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * @create 2021-06-30 14:08
  */
 @Component
-public class ApplicationContextUtils implements ApplicationContextAware {
+public class ApplicationContextUtil implements ApplicationContextAware {
 
     /**
      * 保留下来工厂
@@ -41,6 +41,6 @@ public class ApplicationContextUtils implements ApplicationContextAware {
      */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        ApplicationContextUtils.applicationContext = applicationContext;
+        ApplicationContextUtil.applicationContext = applicationContext;
     }
 }

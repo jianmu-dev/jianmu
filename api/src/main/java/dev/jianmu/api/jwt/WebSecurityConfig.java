@@ -15,20 +15,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
+ * @author Ethan Liu
  * @class WebSecurityConfig
  * @description WebSecurityConfig
- * @author Ethan Liu
  * @create 2021-05-18 08:53
-*/
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @ConditionalOnProperty(prefix = "jianmu", name = "auth-mode", havingValue = "true", matchIfMissing = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtUserDetailsService jwtUserDetailsService;
-    private final JwtAuthEntryPoint jwtAuthEntryPoint;
-    private final JwtAuthTokenFilter jwtAuthTokenFilter;
-
     private static final String[] AUTH_WHITELIST = {
             // -- swagger ui
             "/swagger-ui.html",
@@ -41,6 +37,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/webjars/**",
             "/workers/**"
     };
+    private final JwtUserDetailsService jwtUserDetailsService;
+    private final JwtAuthEntryPoint jwtAuthEntryPoint;
+    private final JwtAuthTokenFilter jwtAuthTokenFilter;
 
     public WebSecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint, JwtAuthTokenFilter jwtAuthTokenFilter) {
         this.jwtUserDetailsService = jwtUserDetailsService;
@@ -71,6 +70,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers("/auth/**").permitAll()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated();
-        http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
+         http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

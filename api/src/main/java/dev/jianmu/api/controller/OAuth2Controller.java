@@ -2,22 +2,23 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.AuthorizationUrlGettingDto;
 import dev.jianmu.api.dto.JwtResponse;
-import dev.jianmu.api.dto.Oauth2LoggingDto;
+import dev.jianmu.api.dto.impl.GitRepoLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.*;
-import dev.jianmu.application.service.GitRepoApplication;
+import dev.jianmu.application.service.OAuth2Application;
+import dev.jianmu.application.service.vo.Association;
+import dev.jianmu.application.service.vo.AssociationData;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
-import dev.jianmu.oauth2.api.exception.NoPermissionException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
+import dev.jianmu.oauth2.api.vo.ITokenVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.user.aggregate.User;
 import dev.jianmu.user.repository.UserRepository;
@@ -29,13 +30,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -53,15 +53,17 @@ public class OAuth2Controller {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final OAuth2Properties oAuth2Properties;
-    private final GitRepoApplication gitRepoApplication;
+    private final AssociationUtil associationUtil;
+    private final OAuth2Application oAuth2Application;
 
-    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, GitRepoApplication gitRepoApplication) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, AssociationUtil associationUtil, OAuth2Application oAuth2Application) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
         this.jwtProperties = jwtProperties;
         this.oAuth2Properties = oAuth2Properties;
-        this.gitRepoApplication = gitRepoApplication;
+        this.associationUtil = associationUtil;
+        this.oAuth2Application = oAuth2Application;
     }
 
     /**
@@ -84,29 +86,31 @@ public class OAuth2Controller {
     /**
      * 获取jwt
      *
-     * @param oauth2LoggingDto
+     * @param gitRepoLoggingDto
      * @return
      */
-    @GetMapping("/login")
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid Oauth2LoggingDto oauth2LoggingDto) {
+    @GetMapping("/login/git_repo")
+    @Transactional
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid GitRepoLoggingDto gitRepoLoggingDto) {
         this.beforeAuthenticate();
         this.allowOrNotRegistration();
-        this.allowThisPlatformLogIn(oauth2LoggingDto.getThirdPartyType());
+        this.allowThisPlatformLogIn(gitRepoLoggingDto.getThirdPartyType());
 
         OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(oauth2LoggingDto.thirdPartyType())
+                .thirdPartyType(gitRepoLoggingDto.thirdPartyType())
                 .build();
 
-        String accessToken = oAuth2Api.getAccessToken(oauth2LoggingDto.getCode(), oauth2LoggingDto.getRedirectUri());
+        ITokenVo tokenVo = oAuth2Api.getAccessToken(gitRepoLoggingDto.getCode(), gitRepoLoggingDto.getRedirectUri());
+        String accessToken = tokenVo.getAccessToken();
+        String encryptedToken = tokenVo.getEncryptedAccessToken();
+        long expireInMs = tokenVo.getExpireInMs();
+
         IUserInfoVo userInfoVo = oAuth2Api.getUserInfo(accessToken);
 
-        JwtSession.Role role = null;
-        IRepoVo repo = null;
+        Association association;
         try {
-            if (this.oAuth2Properties.isEntry()) {
-                repo = this.checkEntry(accessToken, oauth2LoggingDto.getGitRepo(), oauth2LoggingDto.getGitRepoOwner(), oAuth2Api);
-                role = this.mappingPermissions(oAuth2Api, userInfoVo, accessToken, oauth2LoggingDto.getGitRepo(), oauth2LoggingDto.getGitRepoOwner());
-            }
+            association = this.oAuth2Application.getAssociation(gitRepoLoggingDto.thirdPartyType(), accessToken, userInfoVo,
+                    AssociationData.buildGitRepo(gitRepoLoggingDto.getRef(), gitRepoLoggingDto.getOwner()));
         } catch (OAuth2IsNotAuthorizedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(JwtResponse.builder()
                     .message(e.getMessage())
@@ -135,21 +139,15 @@ public class OAuth2Controller {
                         .id(user.getId())
                         .username(user.getUsername())
                         .nickname(user.getNickname())
-                        .gitRepoRole(role)
-                        .gitRepo(repo != null ? repo.getRepo() : null)
-                        .gitRepoOwner(repo != null ? repo.getOwner() : null)
-                        .gitRepoId(repo != null ? repo.getId() : null)
+                        .role(association.getRole())
+                        .associationId(association.getId())
+                        .associationType(association.getType())
+                        .encryptedToken(encryptedToken)
+                        .expireTimestamp(System.currentTimeMillis() + expireInMs)
                         .build()),
                         this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = this.jwtProvider.generateJwtToken(authentication);
-
-        // 同步仓库
-        if (repo != null) {
-            var branchNames = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
-            this.gitRepoApplication.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branchNames);
-        }
+        String jwt = this.jwtProvider.generateJwtToken(authentication, expireInMs);
 
         return ResponseEntity.ok(JwtResponse.builder()
                 .type("Bearer")
@@ -157,11 +155,10 @@ public class OAuth2Controller {
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
-                .gitRepo(repo != null ? repo.getRepo() : null)
-                .gitRepoOwner(repo != null ? repo.getOwner() : null)
-                .gitRepoId(repo != null ? repo.getId() : null)
+                .associationId(association.getId())
+                .associationType(association.getType())
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
-                .entryUrl(oAuth2Api.getEntryUrl(oauth2LoggingDto.getGitRepo(), oauth2LoggingDto.getGitRepoOwner()))
+                .entryUrl(oAuth2Api.getEntryUrl(gitRepoLoggingDto.getOwner(), gitRepoLoggingDto.getRef()))
                 .build());
     }
 
@@ -174,7 +171,7 @@ public class OAuth2Controller {
     public ThirdPartyTypeVo getThirdPartyType() {
         return ThirdPartyTypeVo.builder()
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
-                .entry(this.oAuth2Properties.isEntry())
+                .associationType(this.associationUtil.getAssociationType())
                 .build();
     }
 
@@ -210,58 +207,5 @@ public class OAuth2Controller {
             return;
         }
         throw new NotAllowThisPlatformLogInException("不允许" + thirdPartyType + "平台登录，请与管理员联系");
-    }
-
-    /**
-     * 准入配置是否正确
-     *
-     * @param accessToken
-     * @param gitRepo
-     * @param gitRepoOwner
-     * @param oAuth2Api
-     * @return
-     */
-    private IRepoVo checkEntry(String accessToken, String gitRepo, String gitRepoOwner, OAuth2Api oAuth2Api) {
-        if (StringUtils.hasLength(gitRepo) && StringUtils.hasLength(gitRepoOwner)) {
-            IRepoVo repo;
-            try {
-                repo = oAuth2Api.getRepo(accessToken, gitRepo, gitRepoOwner);
-                if (repo != null) {
-                    return repo;
-                }
-            } catch (NoPermissionException e) {
-                throw new OAuth2IsNotAuthorizedException(e.getMessage());
-            }
-            throw new OAuth2EntryException("不存在此仓库");
-        }
-        throw new OAuth2EntryException("缺少仓库名或仓库所有者信息");
-    }
-
-    /**
-     * 将其他平台的权限映射成内部的权限
-     *
-     * @param oAuth2Api
-     * @param userInfoVo
-     * @return
-     */
-    private JwtSession.Role mappingPermissions(OAuth2Api oAuth2Api, IUserInfoVo userInfoVo, String accessToken, String gitRepo, String gitRepoOwner) {
-        List<? extends IRepoMemberVo> repoMembers;
-        try {
-            repoMembers = oAuth2Api.getRepoMembers(accessToken, gitRepo, gitRepoOwner);
-        } catch (NoPermissionException e) {
-            throw new OAuth2IsNotAuthorizedException(e.getMessage());
-        }
-        for (IRepoMemberVo member : repoMembers) {
-            if (member.getUsername().equals(userInfoVo.getUsername())) {
-                if (member.isOwner()) {
-                    return JwtSession.Role.OWNER;
-                } else if (member.isAdmin()) {
-                    return JwtSession.Role.ADMIN;
-                } else {
-                    return JwtSession.Role.MEMBER;
-                }
-            }
-        }
-        throw new OAuth2IsNotAuthorizedException("没有权限操作此仓库");
     }
 }
