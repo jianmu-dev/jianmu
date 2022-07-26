@@ -56,12 +56,9 @@ public class ExternalParameterApplication {
         ExternalParameter externalParameter = this.externalParameterRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该外部参数"));
 
-        GitRepo gitRepo = this.gitRepoRepository.findById(associationId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
-
         if (associationId != null && associationType != null &&
                 (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限" ,externalParameter.getAssociationId(), externalParameter.getAssociationType(), gitRepo.getRef(), gitRepo.getOwner());
+            throw new NoAssociatedPermissionException("无此仓库权限" ,externalParameter.getAssociationId(), externalParameter.getAssociationType());
         }
 
         this.externalParameterRepository.deleteById(id);
@@ -72,12 +69,9 @@ public class ExternalParameterApplication {
         ExternalParameter externalParameter = this.externalParameterRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到外部参数：" + "\"" + name + "\""));
 
-        GitRepo gitRepo = this.gitRepoRepository.findById(associationId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
-
         if (associationId != null && associationType != null &&
                 (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType, gitRepo.getRef(), gitRepo.getOwner());
+            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
         }
 
         this.checkParameterType(type, value);

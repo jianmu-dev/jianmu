@@ -172,7 +172,7 @@ public class OAuth2Controller {
     }
 
     @PutMapping("/refresh/git_repo")
-    public ResponseEntity<Void> refreshToken(@Valid GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
+    public ResponseEntity<JwtResponse> refreshToken(@Valid GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
@@ -213,7 +213,15 @@ public class OAuth2Controller {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String newJwt = this.jwtProvider.generateJwtToken(authentication, session.getExpireTimestamp() - System.currentTimeMillis());
 
-        return ResponseEntity.status(HttpStatus.OK).header("X-Authorization-Token", newJwt).build();
+        return ResponseEntity.ok(JwtResponse.builder()
+                .type("Bearer")
+                .token(newJwt)
+                .id(session.getId())
+                .username(session.getUsername())
+                .avatarUrl(session.getAvatarUrl())
+                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                .entryUrl(oAuth2Api.getEntryUrl(gitRepoTokenRefreshingDto.getOwner(), gitRepoTokenRefreshingDto.getRef()))
+                .build());
     }
 
     /**
