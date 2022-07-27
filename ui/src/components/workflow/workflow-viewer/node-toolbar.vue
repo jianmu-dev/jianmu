@@ -10,24 +10,24 @@
         </jm-tooltip>
       </div>
     </template>
-    <jm-popover v-else-if="popoverVisible"
-                :append-to-body="false"
-                :offset="0"
-                trigger="hover"
-                width="auto"
-                placement="top">
-      <template #reference>
-        <div class="mask">
-          <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
-            <template #content>
-              <div style="white-space: nowrap" v-html="tips"/>
-            </template>
-            <div class="tooltip-section"></div>
-          </jm-tooltip>
-        </div>
-      </template>
-      <div class="operation">
-        <template v-if="status === TaskStatusEnum.SUSPENDED">
+    <template v-else-if="status === TaskStatusEnum.SUSPENDED">
+      <jm-popover v-if="popoverVisible"
+                  :append-to-body="false"
+                  :offset="0"
+                  trigger="hover"
+                  width="auto"
+                  placement="top">
+        <template #reference>
+          <div class="mask clickable" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
+            <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
+              <template #content>
+                <div style="white-space: nowrap" v-html="tips"/>
+              </template>
+              <div class="tooltip-section"></div>
+            </jm-tooltip>
+          </div>
+        </template>
+        <div class="operation">
           <jm-popconfirm
             title="确定要重试吗？"
             icon="jm-icon-warning"
@@ -65,19 +65,17 @@
               </div>
             </template>
           </jm-popconfirm>
-          <div class="separator"></div>
+        </div>
+      </jm-popover>
+    </template>
+    <div v-else class="mask clickable" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
+      <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
+        <template #content>
+          <div style="white-space: nowrap" v-html="tips"/>
         </template>
-        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
-          <div class="icon view-log"/>
-          <div class="txt">日志</div>
-        </div>
-        <div class="separator"></div>
-        <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)">
-          <div class="icon view-params"/>
-          <div class="txt">参数</div>
-        </div>
-      </div>
-    </jm-popover>
+        <div class="tooltip-section"></div>
+      </jm-tooltip>
+    </div>
   </div>
 </template>
 
@@ -128,10 +126,10 @@ export default defineComponent({
 
     onMounted(() => {
       const { x, y, width, height } = props.nodeEvent;
-      toolbar.value.style.left = `${x}px`;
-      toolbar.value.style.top = `${y}px`;
-      toolbar.value.style.width = `${width}px`;
-      toolbar.value.style.height = `${height}px`;
+      toolbar.value!.style.left = `${x}px`;
+      toolbar.value!.style.top = `${y}px`;
+      toolbar.value!.style.width = `${width}px`;
+      toolbar.value!.style.height = `${height}px`;
     });
 
     return {
@@ -202,6 +200,10 @@ export default defineComponent({
     width: 100%;
     height: calc(100% + 10px);
 
+    &.clickable {
+      cursor: pointer;
+    }
+
     .tooltip-section {
       position: absolute;
       left: 0;
@@ -241,14 +243,6 @@ export default defineComponent({
 
         &.ignore {
           background-image: url('./svgs/task-tool/ignore.svg');
-        }
-
-        &.view-log {
-          background-image: url('./svgs/task-tool/view-log.svg');
-        }
-
-        &.view-params {
-          background-image: url('./svgs/task-tool/view-params.svg');
         }
       }
 
