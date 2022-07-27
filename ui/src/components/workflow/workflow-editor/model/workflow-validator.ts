@@ -12,6 +12,7 @@ import {
   getOfficialVersionList,
 } from '@/api/node-library';
 import { pushParams } from './workflow-node';
+import { RefDuplicateError } from './data/error';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -189,7 +190,18 @@ export class WorkflowValidator {
       }
     }
 
-    checkDuplicate(refs, RefTypeEnum.NODE);
+    try{
+      checkDuplicate(refs, RefTypeEnum.NODE);
+    }catch(err){
+      console.log(err);
+      if(err instanceof RefDuplicateError){
+        const names = proxies
+          .filter(proxy=>proxy.getData().getRef() === err.ref)
+          .map(proxy=>proxy.getData().getName());
+        throw new Error(`${err.message}，节点：${names.join('、')}`);
+      }
+      throw err;
+    }
   }
 
   checkDroppingNode(node: Node, mousePosition: Point.PointLike, nodePanelRect: DOMRect): boolean {
