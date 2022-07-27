@@ -1,6 +1,6 @@
 import {
   IAuthorizationUrlGettingDto,
-  IAuthorizationUrlVo, IOauth2LoggingDto,
+  IAuthorizationUrlVo, IOauth2LoggingDto, IOauth2RefreshingDto,
   ISessionCreatingDto,
   ISessionVo,
   IThirdPartyTypeVo,
@@ -44,12 +44,28 @@ export function fetchAuthUrl(dto: IAuthorizationUrlGettingDto) {
 }
 
 /**
- * oauth三方登录
+ * oauth 三方登录
+ * @param associationType
+ * @param dto
  */
 export function authLogin(associationType: AssociationTypeEnum, dto: IOauth2LoggingDto) {
   return restProxy<ISessionVo>({
     url: `${baseUrl}/oauth2/login/${associationType.toLowerCase()}`,
     method: 'get',
     payload: dto,
+  });
+}
+
+/**
+ * oauth 刷新token
+ * @param associationType
+ * @param dto
+ */
+export function oauthRefreshToken(associationType: AssociationTypeEnum, dto: IOauth2RefreshingDto) {
+  return restProxy<ISessionVo>({
+    url: `${baseUrl}/oauth2/refresh/${associationType.toLowerCase()}`,
+    method: 'put',
+    payload: dto,
+    auth:true,
   });
 }

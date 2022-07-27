@@ -65,7 +65,59 @@ public interface OAuth2Api {
      */
     IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner);
 
+    /**
+     * 获取git仓库的流水线的准入url
+     *
+     * @param owner
+     * @param ref
+     * @return
+     */
     default String getEntryUrl(String owner, String ref) {
         return null;
     }
+
+    /**
+     * 创建webhook
+     *
+     * @param accessToken
+     * @param gitRepoOwner
+     * @param gitRepo
+     * @param url
+     * @param active
+     * @return
+     */
+    IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active);
+
+    /**
+     * 删除webhook
+     *
+     * @param accessToken
+     * @param gitRepoOwner
+     * @param gitRepo
+     * @param id
+     */
+    void deleteWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id);
+
+    /**
+     * 更新webhook
+     *
+     * @param accessToken
+     * @param gitRepoOwner
+     * @param gitRepo
+     * @param url
+     * @param active
+     * @param id
+     */
+    void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id);
+
+    /**
+     * 获取webhook
+     *
+     * @param accessToken
+     * @param gitRepoOwner
+     * @param gitRepo
+     * @param id
+     * @return
+     */
+    IWebhookVo getWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id);
 }

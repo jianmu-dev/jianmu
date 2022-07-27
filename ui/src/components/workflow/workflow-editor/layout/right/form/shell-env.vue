@@ -11,8 +11,15 @@
         @blur="switchBackgroundFlag=false"/>
     </jm-form-item>
 
-    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value" label="变量值">
+    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
+      <template #label>变量值
+        <jm-tooltip placement="top" :content="switchValueType?'切换至选择密钥模式':'切换至输入参数模式'">
+          <i class="jm-icon-workflow-select-mode" v-if="switchValueType" @click="switchEnvMode(false)"/>
+          <i class="jm-icon-workflow-edit-mode" v-else @click="switchEnvMode(true)"/>
+        </jm-tooltip>
+      </template>
       <expression-editor
+        v-if="switchValueType"
         v-model="envVal"
         :type="ExpressionTypeEnum.SHELL_ENV"
         :node-id="nodeId"
@@ -22,20 +29,27 @@
         placeholder="请输入变量值"
         @focus="switchBackgroundFlag=true"
         @blur="switchBackgroundFlag=false"/>
+      <secret-key-selector
+        v-else
+        v-model="envVal"
+        placeholder="请选择变量值"
+        @update:model-value="updateEnvVal"
+      />
     </jm-form-item>
     <i class="jm-icon-button-delete" @click="remove"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, PropType, ref } from 'vue';
+import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from './expression-editor.vue';
+import SecretKeySelector from './secret-key-selector.vue';
 import { Node } from '@antv/x6';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 
 export default defineComponent({
-  components: { ExpressionEditor },
+  components: { ExpressionEditor, SecretKeySelector },
   props: {
     name: {
       type: String,
@@ -44,6 +58,10 @@ export default defineComponent({
     value: {
       type: String,
       default: '',
+    },
+    type: {
+      type: String as PropType<ParamTypeEnum>,
+      default: ParamTypeEnum.STRING,
     },
     index: {
       type: Number,
@@ -58,16 +76,20 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:name', 'update:value', 'delete'],
+  emits: ['update:name', 'update:value', 'update:type', 'delete'],
   setup(props, { emit }) {
     const envName = ref<string>(props.name);
     const envVal = ref<string>(props.value);
     const switchBackgroundFlag = ref<boolean>(false);
+    const switchValueType = ref<boolean>(true);
     const envValRef = ref<HTMLElement>();
     const nodeId = ref<string>('');
     const getNode = inject('getNode') as () => Node;
     nodeId.value = getNode().id;
 
+    onMounted(() => {
+      switchValueType.value = props.type === ParamTypeEnum.STRING;
+    });
 
     return {
       ParamTypeEnum,
@@ -77,6 +99,7 @@ export default defineComponent({
       switchBackgroundFlag,
       envValRef,
       nodeId,
+      switchValueType,
       upperCase: () => {
         envName.value = envName.value.toUpperCase();
       },
@@ -88,6 +111,16 @@ export default defineComponent({
       },
       remove: () => {
         emit('delete', props.index);
+      },
+      // 带参数区分tab
+      switchEnvMode: (flag: boolean) => {
+        switchValueType.value = flag;
+        emit('update:type', flag ? ParamTypeEnum.STRING : ParamTypeEnum.SECRET);
+      },
+      // 密钥组件更新值
+      updateEnvVal: (val: string) => {
+        envVal.value = val;
+        emit('update:value', val);
       },
     };
   },
@@ -110,6 +143,19 @@ export default defineComponent({
 
     &:hover {
       background: #EFF7FF;
+    }
+  }
+
+  // 输入
+  .jm-icon-workflow-select-mode,
+  .jm-icon-workflow-edit-mode {
+    width: 20px;
+    height: 20px;
+    color: #6B7B8D;
+
+    &:hover {
+      cursor: pointer;
+      color: #096DD9;
     }
   }
 

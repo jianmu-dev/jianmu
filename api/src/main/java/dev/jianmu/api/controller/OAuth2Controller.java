@@ -37,10 +37,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -172,7 +169,7 @@ public class OAuth2Controller {
     }
 
     @PutMapping("/refresh/git_repo")
-    public ResponseEntity<JwtResponse> refreshToken(@Valid GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
+    public ResponseEntity<JwtResponse> refreshToken(@Valid @RequestBody GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
@@ -197,6 +194,7 @@ public class OAuth2Controller {
 
         GitRepo gitRepo = this.gitRepoRepository.findByRefAndOwner(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner())
                 .orElseThrow(() -> new DataNotFoundException("未找到此仓库"));
+        long expireTimestamp = session.getExpireTimestamp();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
                         .avatarUrl(userInfo.getAvatarUrl())
@@ -207,12 +205,12 @@ public class OAuth2Controller {
                         .associationId(gitRepo.getId())
                         .associationType(this.associationUtil.getAssociationType())
                         .encryptedToken(encryptedToken)
+                        .expireTimestamp(expireTimestamp)
                         .build()),
                         this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String newJwt = this.jwtProvider.generateJwtToken(authentication, session.getExpireTimestamp() - System.currentTimeMillis());
-
+        String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
         return ResponseEntity.ok(JwtResponse.builder()
                 .type("Bearer")
                 .token(newJwt)

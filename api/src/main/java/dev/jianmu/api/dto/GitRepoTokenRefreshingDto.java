@@ -1,7 +1,7 @@
 package dev.jianmu.api.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 
@@ -11,8 +11,11 @@ import javax.validation.constraints.NotBlank;
  * @description GitRepoTokenRefreshingDto
  * @create 2022-07-26 14:54
  */
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Schema(description = "Git Repo Token刷新Dto")
 public class GitRepoTokenRefreshingDto {
     /**
      * 仓库名

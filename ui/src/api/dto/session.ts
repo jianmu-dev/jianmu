@@ -19,8 +19,8 @@ export interface ISessionVo extends Readonly<{
   id: number;
   username: string;
   avatarUrl: string;
-  associationId?: string;
-  associationType?: string;
+  // associationId?: string;
+  // associationType?: string;
   thirdPartyType: string;
   entryUrl?: string;
 }> {
@@ -65,5 +65,18 @@ export interface IOauth2LoggingDto extends Readonly<{
 export interface IGitRepoLoggingDto extends Readonly<IOauth2LoggingDto & {
   ref?: string,
   owner?: string
+}> {
+}
+
+
+/**
+ * oauth refresh session dto
+ */
+export interface IOauth2RefreshingDto extends Readonly<{}> {
+}
+
+export interface IGitRepoTokenRefreshingDto extends Readonly<IOauth2LoggingDto & {
+  ref: string,
+  owner: string
 }> {
 }

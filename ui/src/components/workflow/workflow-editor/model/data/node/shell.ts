@@ -1,5 +1,5 @@
 import { BaseNode, buildSelectableInnerOutputParam } from './base-node';
-import { FailureModeEnum, NodeRefEnum, NodeTypeEnum } from '../enumeration';
+import { FailureModeEnum, NodeRefEnum, NodeTypeEnum, ParamTypeEnum, RefTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/shell.svg';
 import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
@@ -7,6 +7,7 @@ import { ISelectableParam } from '@/components/workflow/workflow-expression-edit
 export interface IShellEnv {
   key: string;
   name: string;
+  type: ParamTypeEnum.SECRET | ParamTypeEnum.STRING;
   value: string;
 }
 
@@ -88,17 +89,24 @@ export class Shell extends BaseNode {
 
   toDsl(): object {
     const { ref, name, image, envs, script, failureMode } = this;
-    const environment: {
+    const env: {
       [key: string]: string;
     } = {};
-    envs.forEach(({ name, value }) => (environment[name] = value));
+    envs.forEach(({ name, type, value }) => {
+      // 区分string和secret类型
+      if (type === ParamTypeEnum.STRING) {
+        env[name] = value;
+        return;
+      }
+      env[name] = value;
+    });
 
     return {
       ref,
       name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
       image,
-      env: envs.length === 0 ? undefined : environment,
+      env: envs.length === 0 ? undefined : env,
       script: script ? script.split('\n') : undefined,
     };
   }

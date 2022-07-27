@@ -164,8 +164,8 @@ export default defineComponent({
       // label去重
       let labelList = [];
       let newArr = [];
-      extLabelList.value?.forEach((ext, index)=>{
-        if(labelList.includes(ext.value)){
+      extLabelList.value?.forEach((ext, index) => {
+        if (labelList.includes(ext.value)) {
           return;
         }
         labelList.push(ext.value);

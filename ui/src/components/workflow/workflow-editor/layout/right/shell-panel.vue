@@ -52,6 +52,7 @@
             :key="shell.key"
             v-model:name="shell.name"
             v-model:value="shell.value"
+            v-model:type="shell.type"
             :form-model-name="'envs'"
             :index="index"
             :rules="nodeData.getFormRules().envs.fields[index].fields"
@@ -82,6 +83,7 @@ import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { Shell } from '../../model/data/node/shell';
 import ShellEnv from './form/shell-env.vue';
 import { v4 as uuidv4 } from 'uuid';
+import { ParamTypeEnum } from '../../model/data/enumeration';
 
 export default defineComponent({
   components: { ShellEnv },
@@ -137,7 +139,7 @@ export default defineComponent({
       failureVisible,
       // 添加环境变量
       addShellEnv: () => {
-        form.value.envs.push({ key: uuidv4(), name: '', value: '' });
+        form.value.envs.push({ key: uuidv4(), name: '', value: '', type: ParamTypeEnum.STRING });
       },
       deleteShellEnv: (index: number) => {
         form.value.envs.splice(index, 1);

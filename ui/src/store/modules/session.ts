@@ -1,10 +1,9 @@
 import { ActionContext, Module } from 'vuex';
 import { IAssociationData, ILoginForm, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
-import { create } from '@/api/session';
-import { ISessionVo, IOauth2LoggingDto, IGitRepoLoggingDto } from '@/api/dto/session';
+import { authLogin, create, oauthRefreshToken } from '@/api/session';
+import { IGitRepoLoggingDto, IOauth2LoggingDto, IOauth2RefreshingDto, ISessionVo } from '@/api/dto/session';
 import { getStorage, setStorage } from '@/utils/storage';
-import { authLogin } from '@/api/session';
 import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 /**
@@ -137,7 +136,36 @@ export default {
           break;
       }
       // TODO 测试
-      session.entryUrl = `/full/demo?owner=${payload.owner}&repo=${payload.ref}`;
+      session.entryUrl = `/full/demo?owner=${payload.owner}&ref=${payload.ref}`;
+      commit('oauthMutate', {
+        session,
+        associationData,
+      });
+    },
+    async oauthRefresh({
+      commit,
+      rootState,
+    }: ActionContext<IState, IRootState>, payload: IOauth2RefreshingDto): Promise<void> {
+      const session = await oauthRefreshToken(rootState.associationType!, payload);
+      let associationData: IAssociationData | undefined;
+      switch (rootState.associationType) {
+        case AssociationTypeEnum.GIT_REPO: {
+          const { ref, owner } = payload as IGitRepoLoggingDto;
+          associationData = {
+            ref: ref!,
+            owner: owner!,
+          };
+          break;
+        }
+        case AssociationTypeEnum.USER:
+          // TODO 待完善其他登录
+          break;
+        case AssociationTypeEnum.ORG:
+          // TODO 待完善其他登录
+          break;
+      }
+      // TODO 测试
+      session.entryUrl = `/full/demo?owner=${payload.owner}&ref=${payload.ref}`;
       commit('oauthMutate', {
         session,
         associationData,
