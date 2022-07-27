@@ -65,7 +65,7 @@ public class GiteeApi implements OAuth2Api {
         try {
             giteeLoginJson = MAPPER.writeValueAsString(giteeLoginVo);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -86,7 +86,7 @@ public class GiteeApi implements OAuth2Api {
         try {
             giteeTokenVo = MAPPER.readValue(tokenEntity.getBody(), TokenVo.class);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
         return giteeTokenVo;
     }
@@ -112,7 +112,7 @@ public class GiteeApi implements OAuth2Api {
         try {
             giteeUserInfoVo = MAPPER.readValue(userInfo, UserInfoVo.class);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
 
         return giteeUserInfoVo;
@@ -143,7 +143,7 @@ public class GiteeApi implements OAuth2Api {
         try {
             repoVo = MAPPER.readValue(entity.getBody(), RepoVo.class);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
 
         return repoVo;
@@ -174,11 +174,9 @@ public class GiteeApi implements OAuth2Api {
         try {
             repoMembersVos = MAPPER.readValue(entity.getBody(), new TypeReference<>() {
             });
-            repoMembersVos.forEach(m -> {
-                m.setOwner(gitRepoOwner);
-            });
+            repoMembersVos.forEach(m -> m.setOwner(gitRepoOwner));
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
 
         return repoMembersVos;
@@ -210,10 +208,31 @@ public class GiteeApi implements OAuth2Api {
             branches = MAPPER.readValue(entity.getBody(), new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
         return BranchesVo.builder()
                 .branches(branches)
                 .build();
     }
+
+    @Override
+    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active) {
+        return null;
+    }
+
+    @Override
+    public void deleteWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
+
+    }
+
+    @Override
+    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id) {
+
+    }
+
+    @Override
+    public IWebhookVo getWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
+        return null;
+    }
+
 }

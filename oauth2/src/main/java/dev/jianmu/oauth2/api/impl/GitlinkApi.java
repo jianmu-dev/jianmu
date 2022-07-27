@@ -7,6 +7,8 @@ import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.exception.*;
 import dev.jianmu.oauth2.api.impl.dto.gitlink.LoggingDto;
+import dev.jianmu.oauth2.api.impl.dto.gitlink.WebhookCreatingDto;
+import dev.jianmu.oauth2.api.impl.dto.gitlink.WebhookUpdatingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitlink.*;
 import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
@@ -19,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author huangxi
@@ -64,7 +67,7 @@ public class GitlinkApi implements OAuth2Api {
         try {
             gitlinkLoginJson = MAPPER.writeValueAsString(gitlinkLoginVo);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -85,7 +88,7 @@ public class GitlinkApi implements OAuth2Api {
         try {
             gitlinkTokenVo = MAPPER.readValue(tokenEntity.getBody(), TokenVo.class);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
         return gitlinkTokenVo;
     }
@@ -116,7 +119,7 @@ public class GitlinkApi implements OAuth2Api {
         try {
             gitlinkUserInfoVo = MAPPER.readValue(userInfo, UserInfoVo.class);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
 
         return gitlinkUserInfoVo;
@@ -153,7 +156,7 @@ public class GitlinkApi implements OAuth2Api {
                 throw new UnknownException(gitlinkRepoVo.getMessage());
             }
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
         return gitlinkRepoVo;
     }
@@ -191,7 +194,7 @@ public class GitlinkApi implements OAuth2Api {
                 throw new UnknownException(gitlinkRepoMemberVo.getMessage());
             }
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
         return gitlinkRepoMemberVo.getMembers();
     }
@@ -232,7 +235,7 @@ public class GitlinkApi implements OAuth2Api {
                 branches = MAPPER.readValue(responseEntity.getBody(), new TypeReference<>() {
                 });
             } catch (JsonProcessingException ex) {
-                throw new JsonParseException();
+                throw new JsonParseException(e.getMessage());
             }
         }
         return BranchesVo.builder()
@@ -242,5 +245,159 @@ public class GitlinkApi implements OAuth2Api {
     @Override
     public String getEntryUrl(String owner, String ref) {
         return oAuth2Properties.getGitlink().getBaseUrl() + owner + "/" + ref + "/devops";
+    }
+
+    @Override
+    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active) {
+        String createWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + "v1/" + gitRepoOwner + "/" + gitRepo +
+                "/webhooks.json";
+
+        WebhookCreatingDto webhookCreatingDto = WebhookCreatingDto.builder()
+                .active(active)
+                .url(url)
+                .build();
+
+        String webhookCreatingJson;
+        try {
+            webhookCreatingJson = MAPPER.writeValueAsString(webhookCreatingDto);
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(webhookCreatingJson, headers);
+
+        // 发送请求, 创建webhook
+        ResponseEntity<String> webhookEntity;
+        try {
+            webhookEntity = this.restTemplate.exchange(createWebhookUrl, HttpMethod.POST, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+
+        WebhookVo webhookVo;
+        try {
+            webhookVo = MAPPER.readValue(webhookEntity.getBody(), WebhookVo.class);
+            if (webhookVo.getStatus() != null) {
+                throw new UnknownException(webhookVo.getMessage());
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+        return webhookVo;
+    }
+
+    @Override
+    public void deleteWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
+        String deleteWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + "v1/" + gitRepoOwner + "/" + gitRepo +
+                "/webhooks/" + id + ".json";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        // 发送请求, 删除webhook
+        ResponseEntity<String> webhookEntity;
+        try {
+            webhookEntity = this.restTemplate.exchange(deleteWebhookUrl, HttpMethod.DELETE, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+
+        try {
+            Map<String, Object> deleteWebhookMap = MAPPER.readValue(webhookEntity.getBody(), Map.class);
+            if (deleteWebhookMap != null && (Integer) deleteWebhookMap.get("status") != 0) {
+                throw new UnknownException((String) deleteWebhookMap.get("message"));
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id) {
+        String updateWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + "v1/" + gitRepoOwner + "/" + gitRepo +
+                "/webhooks/" + id + ".json";
+
+        WebhookUpdatingDto webhookUpdatingDto = WebhookUpdatingDto.builder()
+                .active(active)
+                .url(url)
+                .build();
+
+        String webhookUpdatingJson;
+        try {
+            webhookUpdatingJson = MAPPER.writeValueAsString(webhookUpdatingDto);
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(webhookUpdatingJson, headers);
+
+        // 发送请求, 更新webhook
+        ResponseEntity<String> webhookEntity;
+        try {
+            webhookEntity = this.restTemplate.exchange(updateWebhookUrl, HttpMethod.PATCH, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+
+        try {
+            Map<String, Object> deleteWebhookMap = MAPPER.readValue(webhookEntity.getBody(), Map.class);
+            if (deleteWebhookMap != null && deleteWebhookMap.get("status") != null) {
+                throw new UnknownException((String) deleteWebhookMap.get("message"));
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public IWebhookVo getWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
+        String getWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + "v1/" + gitRepoOwner + "/" + gitRepo +
+                "/webhooks/" + id + ".json";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        // 发送请求, 创建webhook
+        ResponseEntity<String> webhookEntity;
+        try {
+            webhookEntity = this.restTemplate.exchange(getWebhookUrl, HttpMethod.GET, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+
+        WebhookVo webhookVo;
+        try {
+            webhookVo = MAPPER.readValue(webhookEntity.getBody(), WebhookVo.class);
+            if (webhookVo.getStatus() != null) {
+                throw new UnknownException(webhookVo.getMessage());
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+        return webhookVo;
     }
 }
