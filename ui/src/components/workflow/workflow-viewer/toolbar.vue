@@ -144,16 +144,10 @@ export default defineComponent({
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  border-radius: 2px;
-  border: 1px solid #CAD6EE;
-  box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
-  padding: 0px 20px;
-
-  // .group + .group {
-  //   margin-left: 20px;
-  // }
+  box-shadow: 0px 0px 4px 0px rgb(194 194 194 / 50%);
 
   .group {
+    opacity: 1;
     padding: 10px 0px;
     // box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     // border-radius: 2px;
@@ -270,17 +264,32 @@ export default defineComponent({
       text-align: center;
     }
   }
+  .leftbar {
+    padding-left: 20px;
+  }
   .rightbar {
-    padding-left: 0px;
+    padding-right: 20px;
     .jm-icon-workflow-zoom-in {
       font-size: 24px;
       line-height: 24px;
       color: #748394;
+      &::before {
+        margin: 0;
+      }
+      &:hover {
+        color: #096DD9;
+      }
     }
     .jm-icon-workflow-zoom-out {
       font-size: 24px;
       line-height: 24px;
       color: #748394;
+      &:hover {
+        color: #096DD9;
+      }
+      &::before {
+        margin: 0;
+      }
     }
   }
 }

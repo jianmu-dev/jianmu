@@ -70,7 +70,7 @@ export class RecordList {
         // 捕获异常
         console.warn(e.message, e);
       }
-    }, 3000);
+    }, 5000);
   }
   /**
    * TODO -> SSE

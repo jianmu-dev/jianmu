@@ -23,13 +23,15 @@ export class GraphPanel {
     this.dslCallbackFn = dslCallbackFn;
     this.taskCallbackFn = taskCallbackFn;
     this.globalParamsCallbackFn = globalParamsCallbackFn;
-    this.getDslAndNodeinfos();
-    this.getTaskRecords();
+    (async () => {
+      await this.getDslAndNodeinfos();
+      await this.getTaskRecords();
+    })();
     this.getGlobalParams();
   }
   async getGlobalParams() {
-    if (!this.currentRecord.triggerId) {
-      console.log('triggerId 缺失');
+    if (!this.currentRecord.triggerId || this.currentRecord.status==='INIT') {
+      console.log('triggerId 缺失', this.currentRecord.status);
       return;
     }
     const params:IGlobalParamseterVo[] = await getGlobalParameters(this.currentRecord.triggerId);
@@ -106,7 +108,7 @@ export class GraphPanel {
         // 捕获异常
         console.warn(e.message, e);
       }
-    }, 3000);
+    }, 5000);
   }
   refreshSuspended() {
     // 打开挂起刷新开关

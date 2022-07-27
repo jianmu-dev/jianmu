@@ -6,18 +6,6 @@
                   @mouseenter="graph?.highlightNodeState(status, true)"
                   @mouseleave="graph?.highlightNodeState(status, false)"/>
     </div>
-    <toolbar v-if="graph"
-      :readonly="readonly"
-      :dsl-type="graph?.dslType"
-      :dslMode="dslMode"
-      :zoom-value="zoom"
-      :is-x6="workflowGraph?.isX6()"
-      :fullscreen-el="fullscreenEl"
-      @change-view-mode="(viewMode)=>$emit('change-view-mode', viewMode)"
-      @click-process-log="clickProcessLog"
-      @on-zoom="handleZoom"
-      @on-fullscreen="handleFullscreen"
-      @rotate="handleRotation"/>
     <node-toolbar v-if="!dslMode && nodeEvent"
                   :graph-type="graphType"
                   :readonly="readonly"
@@ -41,6 +29,18 @@
           <div class="btn" @click="clickProcessLog">{{entry? '流水线':graph?.dslType===DslTypeEnum.PIPELINE?'管道':'流程'}}日志</div>
         </div>
       </div>
+      <toolbar v-if="graph"
+        :readonly="readonly"
+        :dsl-type="graph?.dslType"
+        :dslMode="dslMode"
+        :zoom-value="zoom"
+        :is-x6="workflowGraph?.isX6()"
+        :fullscreen-el="fullscreenEl"
+        @change-view-mode="(viewMode)=>$emit('change-view-mode', viewMode)"
+        @click-process-log="clickProcessLog"
+        @on-zoom="handleZoom"
+        @on-fullscreen="handleFullscreen"
+        @rotate="handleRotation"/>
       <!-- <div v-show="!dslMode" class="canvas" ref="container"/> -->
       <div class="canvas" ref="container"/>
       <div class="dsl-editor-container" v-if="dslMode">
@@ -351,18 +351,18 @@ export default defineComponent({
     .view-mode {
       position: absolute;
       top: 0;
-      left: 0;
+      left: 30px;
       padding: 0 30px;
       height: 60px;
-      width: 100%;
       box-sizing: border-box;
+      width: calc(100% - 60px);
 
       .float-view-mode {
         position: absolute;
         display: flex;
         z-index: 100;
         top: 0;
-        left: 30px;
+        left: 0;
         height: 60px;
         .tab {
           text-align: center;
@@ -385,33 +385,34 @@ export default defineComponent({
         display: flex;
         z-index: 100;
         top: 0;
-        right: 30px;
+        right: 0;
         height: 60px;
+        align-items: center;
         .jm-icon-workflow-param {
-          margin-top: 12px;
-          margin-right: 20px;
-          width: 34px;
-          height: 34px;
+          margin-right: 60px;
+          padding: 0 6px;
           background-color: #fff;
-          border: 1px solid #CAD6EE;
           border-radius: 2px;
+          border: 1px solid rgba(202, 214, 238, 0.54);
           font-size: 24px;
           cursor: pointer;
           &:hover {
             color: #096DD9;
           }
+          &::before {
+            color: #52657a;
+          }
         }
         .btn {
+          font-size: 14px;
           color: #096DD9;
           width: 96px;
-          height: 36px;
           line-height: 36px;
-          margin-top: 12px;
           text-align: center;
-          border: 1px solid #CAD6EE;
-          border-radius: 2px;
-          margin-left: 20px;
           cursor: pointer;
+          box-shadow: 0px 0px 4px 0px rgba(194,194,194,0.5000);
+          border-radius: 2px;
+          border: 1px solid rgb(202 214 238 / 54%);
         }
       }
     }
@@ -436,8 +437,8 @@ export default defineComponent({
       top: 0;
       left: 0;
       width: calc(100% - 60px);
-      padding: 80px 30px 30px;
-      height: calc(100% - 110px);
+      padding: 60px 30px 0;
+      height: calc(100% - 60px);
     }
   }
 }
