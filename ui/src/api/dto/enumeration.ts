@@ -2,6 +2,7 @@
  * 流程执行记录状态枚举
  */
 export enum WorkflowExecutionRecordStatusEnum {
+  '' = '',
   INIT = 'INIT',
   RUNNING = 'RUNNING',
   FINISHED = 'FINISHED',
@@ -48,6 +49,14 @@ export enum ProjectImporterTypeEnum {
 export enum DslSourceEnum {
   GIT = 'GIT',
   LOCAL = 'LOCAL',
+}
+
+/**
+ * 视图查看方式枚举 图示 YAML
+ */
+export enum ViewModeEnum {
+  GRAPHIC = 'GRAPHIC',
+  YAML = 'YAML',
 }
 
 /**

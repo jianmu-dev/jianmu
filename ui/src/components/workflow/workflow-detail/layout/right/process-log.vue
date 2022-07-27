@@ -4,38 +4,38 @@
       <div class="item">
         <div class="param-key">流程名称</div>
         <div class="param-value">
-          <jm-text-viewer :value="workflowName" :tip-append-to-body="false"/>
+          <jm-text-viewer :value="record.name" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key">启动时间</div>
         <div class="param-value">
-          <jm-text-viewer :value="datetimeFormatter(process.startTime)" :tip-append-to-body="false"/>
+          <jm-text-viewer :value="datetimeFormatter(record.startTime)" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key">最后完成时间</div>
         <div class="param-value">
-          <jm-text-viewer :value="datetimeFormatter(process.endTime)" :tip-append-to-body="false"/>
+          <jm-text-viewer :value="datetimeFormatter(record.endTime)" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key ">{{ isSuspended ? '挂起时长' : '执行时长' }}</div>
         <div class="param-value">
-          <jm-timer v-if="isSuspended" :start-time="process.suspendedTime" :tip-append-to-body="false"/>
-          <jm-timer v-else :start-time="process.startTime" :end-time="process.endTime" :tip-append-to-body="false"/>
+          <jm-timer v-if="isSuspended" :start-time="record.suspendedTime" :tip-append-to-body="false"/>
+          <jm-timer v-else :start-time="record.startTime" :end-time="record.endTime" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key">流程实例ID</div>
         <div class="param-value">
-          <jm-text-viewer :value="process.id" :tip-append-to-body="false"/>
+          <jm-text-viewer :value="record.id" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key">流程版本号</div>
         <div class="param-value">
-          <jm-text-viewer :value="process.workflowVersion" :tip-append-to-body="false"/>
+          <jm-text-viewer :value="record.workflowVersion" :tip-append-to-body="false"/>
         </div>
       </div>
     </div>
@@ -48,11 +48,11 @@
           </jm-button>
         </div>
         <jm-log-viewer
-          :filename="`${process.name}.txt`"
-          :url="`/view/logs/workflow/subscribe/${process.triggerId}?size=`"
+          :filename="`${record.name}.txt`"
+          :url="`/view/logs/workflow/subscribe/${record.triggerId}?size=`"
           :download="download"
           v-model:more="moreLog"
-          v-if="process.triggerId"
+          v-if="record.triggerId"
         />
       </div>
     </div>
@@ -60,46 +60,37 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
-import { useStore } from 'vuex';
-import { namespace } from '@/store/modules/workflow-execution-record';
-import { IState } from '@/model/modules/workflow-execution-record';
+import { computed, defineComponent, getCurrentInstance, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
-import { TriggerTypeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
-import { downloadWorkflowLogs, randomWorkflowLogs } from '@/api/workflow-execution-record';
+import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
+import { downloadWorkflowLogs } from '@/api/workflow-execution-record';
 
 export default defineComponent({
-  setup() {
+  props: {
+    record: {
+      type: Object as PropType<IWorkflowExecutionRecordVo>,
+      required: true,
+    },
+  },
+  setup(props) {
     const { proxy } = getCurrentInstance() as any;
-    const state = useStore().state[namespace] as IState;
-    const process = computed<IWorkflowExecutionRecordVo>(() => (state.recordDetail.record || {
-      id: '',
-      serialNo: '',
-      name: '',
-      workflowRef: '',
-      workflowVersion: '',
-      startTime: '',
-      status: '',
-      triggerId: '',
-      triggerType: TriggerTypeEnum.MANUAL,
-    }) as IWorkflowExecutionRecordVo);
-    const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (process.value.status as WorkflowExecutionRecordStatusEnum));
-    const isSuspended = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.SUSPENDED === (process.value.status as WorkflowExecutionRecordStatusEnum));
+    const process = computed<IWorkflowExecutionRecordVo>(() => props.record as IWorkflowExecutionRecordVo);
+    const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (props.record.status as WorkflowExecutionRecordStatusEnum));
+    const isSuspended = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.SUSPENDED === (props.record.status as WorkflowExecutionRecordStatusEnum));
     const processLog = ref<string>('');
     const moreLog = ref<boolean>(false);
 
     // 下载日志
     const download = async () => {
       try {
-        return await downloadWorkflowLogs(process.value.triggerId);
+        return await downloadWorkflowLogs(props.record.triggerId);
       } catch (err) {
         proxy.$throw(err, proxy);
       }
     };
 
     return {
-      workflowName: state.recordDetail.record?.name,
       process,
       executing,
       isSuspended,
@@ -122,7 +113,6 @@ export default defineComponent({
 
   .basic-section {
     margin: 20px;
-    //padding: 16px 20px 0;
     padding: 16px 0 0 20px;
     display: flex;
     justify-content: space-between;
