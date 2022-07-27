@@ -1,75 +1,53 @@
 <template>
   <router-view v-if="childRoute"/>
-  <div v-else class="secret-key-ns-manager">
-    <div class="right-top-btn">
-      <router-link :to="{ name: 'index' }">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-        >关闭
-        </jm-button
-        >
-      </router-link>
+  <div v-else class="secret-key-ns-manager" v-loading="loading">
+    <div class="title">
+      <span>命名空间</span>
+      <span class="desc">（{{ namespaces.length }}）</span>
     </div>
-    <div class="menu-bar">
+    <div class="content">
       <button class="add" @click="add">
         <div class="label">新增命名空间</div>
       </button>
-    </div>
-    <div class="title">
-      <span>命名空间</span>
-      <span class="desc">（共有 {{ namespaces.length }} 个命名空间）</span>
-    </div>
-    <div class="content" v-loading="loading">
-      <jm-empty v-if="namespaces.length === 0"/>
-      <div v-else class="item">
-        <!-- local-item -->
-        <template v-if="credentialManagerType === CredentialManagerTypeEnum.LOCAL">
-          <div class="local-item" v-for="ns of namespaces" :key="ns.name">
-            <div class="wrapper">
-              <router-link
-                :to="{ name: 'manage-secret-key', params: { namespace: ns.name } }"
-              >
-                <div class="name">
-                  <jm-text-viewer :value="ns.name"/>
-                </div>
-              </router-link>
-              <div class="description">
-                <jm-text-viewer :value="(ns.description || '无')" class="text-viewer"/>
-              </div>
-              <div class="time">
-                最后修改时间：{{ datetimeFormatter(ns.lastModifiedTime) }}
-              </div>
+      <template v-if="credentialManagerType === CredentialManagerTypeEnum.LOCAL">
+        <div class="vault-item" v-for="ns of namespaces" :key="ns.name" @click="toNs(ns.name)">
+          <div class="wrapper">
+            <div class="vault-icon"></div>
+            <div class="vault-name">
+              <jm-text-viewer :value="ns.name"/>
             </div>
+          </div>
+          <jm-tooltip content="删除" placement="top">
             <div class="operation">
               <button
                 :class="{ del: true, doing: deletings[ns.name] }"
-                @click="del(ns.name)"
-                @keypress.enter.prevent
+                @click.stop="del(ns.name)"
               ></button>
             </div>
-          </div>
-        </template>
-        <!-- vault-item-->
-        <template v-else>
-          <div class="vault-item" v-for="ns of namespaces" :key="ns.name">
-            <div class="wrapper">
-              <router-link :to="{name:'manage-secret-key',params:{namespace:ns.name}}">
-                <div class="vault-icon"></div>
-              </router-link>
-              <router-link :to="{name:'manage-secret-key',params:{namespace:ns.name}}">
-                <div class="vault-name">
-                  <jm-text-viewer :value="ns.name"/>
-                </div>
-              </router-link>
+          </jm-tooltip>
+        </div>
+      </template>
+      <template v-else>
+        <button class="add" @click="add">
+          <div class="label">新增命名空间</div>
+        </button>
+        <div class="vault-item" v-for="ns of namespaces" :key="ns.name" @click="toNs(ns.name)">
+          <div class="wrapper">
+            <div class="vault-icon"></div>
+            <div class="vault-name">
+              <jm-text-viewer :value="ns.name"/>
             </div>
+          </div>
+          <jm-tooltip content="删除" placement="top">
             <div class="operation">
               <button
                 :class="{ del: true, doing: deletings[ns.name] }"
-                @click="del(ns.name)"
+                @click.stop="del(ns.name)"
               ></button>
             </div>
-          </div>
-        </template>
-      </div>
+          </jm-tooltip>
+        </div>
+      </template>
     </div>
     <ns-editor
       v-if="creationActivated"
@@ -96,7 +74,7 @@ import {
   onBeforeRouteUpdate,
   RouteLocationNormalized,
   RouteLocationNormalizedLoaded,
-  useRoute,
+  useRoute, useRouter,
 } from 'vue-router';
 import { deleteNamespace } from '@/api/secret-key';
 import NsEditor from './ns-editor.vue';
@@ -119,6 +97,7 @@ export default defineComponent({
   setup() {
     const { proxy } = getCurrentInstance() as any;
     const state = useStore().state[namespace] as IState;
+    const router = useRouter();
     const loading = ref<boolean>(false);
     const creationActivated = ref<boolean>(false);
     const deletings = ref<{ [name: string]: boolean }>({});
@@ -195,6 +174,9 @@ export default defineComponent({
           .catch(() => {
           });
       },
+      toNs: async namespace => {
+        await router.push({ name: 'manage-secret-key', params: { namespace } });
+      },
     };
   },
 });
@@ -202,63 +184,23 @@ export default defineComponent({
 
 <style scoped lang="less">
 .secret-key-ns-manager {
-  padding: 15px;
+  box-sizing: border-box;
+  padding-top: 30px;
   background-color: #ffffff;
+  height: calc(100vh - 145px);
   margin-bottom: 20px;
 
-  .right-top-btn {
-    position: fixed;
-    right: 20px;
-    top: 78px;
-
-    .jm-icon-button-cancel::before {
-      font-weight: bold;
-    }
-  }
-
-  .menu-bar {
-    button {
-      position: relative;
-
-      .label {
-        position: absolute;
-        left: 0;
-        bottom: 40px;
-        width: 100%;
-        text-align: center;
-        font-size: 18px;
-        color: #b5bdc6;
-      }
-
-      &.add {
-        margin: 0.5%;
-        width: 19%;
-        min-width: 260px;
-        height: 170px;
-        background-color: #ffffff;
-        border: 1px dashed #b5bdc6;
-        background-image: url('@/assets/svgs/btn/add.svg');
-        background-position: center 45px;
-        background-repeat: no-repeat;
-        cursor: pointer;
-      }
-    }
-  }
-
   .title {
-    margin-top: 30px;
+    margin-bottom: 10px;
     margin-left: 0.5%;
-    margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 16px;
+    font-weight: 500;
     color: #082340;
 
     .desc {
-      font-weight: normal;
-      margin-left: 12px;
+      font-weight: 400;
       font-size: 14px;
-      color: #082340;
-      opacity: 0.46;
+      color: #8E9AA7;
     }
   }
 
@@ -266,153 +208,160 @@ export default defineComponent({
     display: flex;
     flex-wrap: wrap;
 
-    .item {
-      width: 100%;
-      display: flex;
-      flex-wrap: wrap;
+    button {
+      position: relative;
 
-      .local-item,
-      .vault-item {
-        position: relative;
+      .label {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 14px;
+        color: #096DD9;
+        margin-top: 10px;
+      }
+
+      &.add {
         margin: 0.5%;
         width: 19%;
         min-width: 260px;
-        height: 170px;
+        height: 180px;
         background-color: #ffffff;
-        box-shadow: 0px 0px 8px 4px #eff4f9;
-
-        &:hover {
-          box-shadow: 0px 6px 16px 4px #e6eef6;
-
-          .operation {
-            display: block;
-          }
-        }
-
-        .wrapper {
-          padding: 15px;
-          border: 1px solid transparent;
-          height: 138px;
-
-          &:hover {
-            border-color: #096dd9;
-          }
-
-          .name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #082340;
-
-            &:hover {
-              color: #096dd9;
-            }
-          }
-
-          .description {
-            font-size: 13px;
-            color: #6b7b8d;
-
-            .text-viewer {
-              height: 90px;
-            }
-          }
-        }
-
-        .time {
-          position: absolute;
-          left: 15px;
-          bottom: 15px;
-          font-size: 13px;
-          color: #6b7b8d;
-        }
-
-        .operation {
-          display: none;
-          position: absolute;
-          right: 6px;
-          top: 8px;
-
-          button {
-            width: 22px;
-            height: 22px;
-            background-color: #ffffff;
-            border: 0;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: contain;
-            cursor: pointer;
-
-            &:active {
-              background-color: #eff7ff;
-              border-radius: 4px;
-            }
-
-            &.del {
-              background-image: url('@/assets/svgs/btn/del.svg');
-            }
-
-            &.doing {
-              opacity: 0.5;
-              cursor: not-allowed;
-
-              &:active {
-                background-color: transparent;
-              }
-            }
-          }
-        }
+        border: 1px solid #E7ECF1;
+        background-image: url('@/assets/svgs/btn/add.svg');
+        background-position: center 56px;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        border-radius: 4px;
       }
+    }
 
-      .vault-item {
-        .wrapper {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+    .vault-item {
+      cursor: pointer;
+      position: relative;
+      margin: 0.5%;
+      width: 19%;
+      min-width: 260px;
+      height: 180px;
+      background-color: #ffffff;
+      border: 1px solid #E7ECF1;
+      border-radius: 4px;
+      box-sizing: border-box;
 
-          .vault-icon {
-            width: 64px;
-            height: 64px;
-            margin: 20px 0px;
-            background: url('@/assets/svgs/secret-key/key-title-icon.svg');
-          }
+      .wrapper {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
 
-          a {
-            &:nth-child(2) {
-              align-self: stretch;
-            }
-          }
+        .vault-icon {
+          width: 64px;
+          height: 64px;
+          margin: 35px 0 15px;
+          background: url('@/assets/svgs/secret-key/key-title-icon.svg');
+        }
 
-          .vault-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #082340;
-            cursor: pointer;
+        .vault-name {
+          width: 90%;
+          font-size: 16px;
+          font-weight: 400;
+          color: #082340;
+          cursor: pointer;
 
-            ::v-deep(.jm-text-viewer) {
-              width: 100%;
+          ::v-deep(.jm-text-viewer) {
+            width: 100%;
 
-              .content {
-                .text-line {
-                  &:last-child {
-                    text-align: center;
+            .content {
+              .text-line {
+                &:last-child {
+                  text-align: center;
 
-                    &::after {
-                      display: none;
-                    }
+                  &::after {
+                    display: none;
                   }
                 }
               }
             }
+          }
+        }
+      }
 
-            &:hover {
-              color: #096dd9;
-            }
+      &:hover {
+        box-shadow: 0 0 12px 4px #EDF1F8;
+        border: 1px solid transparent;
+
+        .wrapper {
+          .vault-icon {
+            background: url('@/assets/svgs/secret-key/key-title-icon-active.svg');
           }
         }
 
+        .operation {
+          display: block;
+        }
+      }
+
+      .operation {
+        display: none;
+        position: absolute;
+        right: 6px;
+        top: 8px;
+
+        button {
+          width: 22px;
+          height: 22px;
+          background-color: #ffffff;
+          border: 0;
+          background-position: center center;
+          background-repeat: no-repeat;
+          background-size: contain;
+          cursor: pointer;
+
+          &:hover {
+            background-color: #eff7ff;
+            border-radius: 2px;
+          }
+
+          &.del {
+            background-image: url('@/assets/svgs/btn/del.svg');
+          }
+
+          &.doing {
+            opacity: 0.5;
+            cursor: not-allowed;
+
+            &:active {
+              background-color: transparent;
+            }
+          }
+        }
       }
     }
 
+  }
+
+  ::v-deep(.el-dialog__footer) {
+    background-color: #fff;
+
+    .el-button {
+      border: none;
+      padding: 8px 24px;
+      border-radius: 2px;
+
+      &:nth-child(2) {
+        margin: 0 10px 0 20px;
+      }
+    }
+
+    .el-button--default {
+      background-color: #F5F5F5;
+      color: #082340;
+
+      &:hover {
+        background-color: #EFF7FF;
+        color: #0091FF;
+      }
+    }
   }
 }
 </style>

@@ -1,44 +1,31 @@
 <template>
-  <div class="secret-key-sk-manager">
-    <div class="right-top-btn">
-      <router-link :to="{ name: 'secret-key' }">
-        <jm-button type="primary" class="jm-icon-button-cancel" size="small"
-        >关闭
-        </jm-button
-        >
-      </router-link>
-    </div>
+  <div class="secret-key-sk-manager" v-loading="loading">
     <div class="namespace">
-      <div class="key-title-icon"></div>
-      <div class="info">
-        <div class="name">{{ ns }}</div>
-        <div class="desc" v-html="description"></div>
-      </div>
+      <span class="key-title-icon"></span>
+      <span class="name">{{ ns }}</span>
+      <span class="divider"></span>
+      <span>密钥列表</span>
+      <span class="desc">（{{ keys.length }}）</span>
     </div>
     <div class="keys">
-      <div class="title">
-        <span>密钥列表</span>
-        <span class="desc">（共有 {{ keys.length }} 个密钥）</span>
-      </div>
-      <div class="menu-bar">
+      <div class="content">
         <button class="add" @click="add">
           <div class="label">新增密钥</div>
         </button>
-      </div>
-      <div class="content" v-loading="loading">
-        <jm-empty v-if="keys.length === 0"/>
-        <div v-else class="item" v-for="{ id, name } of keys" :key="id">
+        <div class="item" v-for="{ id, name } of keys" :key="id">
           <div class="wrapper">
             <div class="name">
               <jm-text-viewer :value="name"/>
             </div>
           </div>
           <div class="operation">
-            <button
-              :class="{ del: true, doing: deletings[name] }"
-              @click="del(name)"
-              @keypress.enter.prevent
-            ></button>
+            <jm-tooltip content="删除" placement="top">
+              <button
+                :class="{ del: true, doing: deletings[name] }"
+                @click="del(name)"
+                @keypress.enter.prevent
+              ></button>
+            </jm-tooltip>
           </div>
         </div>
       </div>
@@ -58,9 +45,6 @@ import SkEditor from './sk-editor.vue';
 import { deleteSecretKey } from '@/api/secret-key';
 import { fetchNamespaceDetail, listSecretKey } from '@/api/view-no-auth';
 import { v4 as uuidv4 } from 'uuid';
-import { useStore } from 'vuex';
-import { namespace } from '@/store/modules/secret-key';
-import { IState } from '@/model/modules/secret-key';
 
 interface IKeyType {
   id: string;
@@ -79,7 +63,6 @@ export default defineComponent({
   },
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
-    const state = useStore().state[namespace] as IState;
     const description = ref<string>('无');
     const keys = ref<IKeyType[]>([]);
     const loading = ref<boolean>(false);
@@ -162,71 +145,45 @@ export default defineComponent({
 .secret-key-sk-manager {
   font-size: 14px;
   color: #333333;
-  margin-bottom: 25px;
-
-  .right-top-btn {
-    position: fixed;
-    right: 20px;
-    top: 78px;
-
-    .jm-icon-button-cancel::before {
-      font-weight: bold;
-    }
-  }
+  margin-bottom: 20px;
 
   .namespace {
-    margin-bottom: 20px;
-    padding: 30px 0 30px 30px;
-    min-height: 64px;
+    padding: 30px 0 10px 0.5%;
     background-color: #ffffff;
-    box-shadow: 0 0 8px 0 #9eb1c5;
     display: flex;
     align-items: center;
+    font-size: 16px;
+    color: #082340;
+    font-weight: 400;
 
     .key-title-icon {
-      width: 64px;
-      height: 64px;
-      background: url('@/assets/svgs/secret-key/key-title-icon.svg');
-      margin-right: 15px;
+      width: 20px;
+      height: 20px;
+      background: url('@/assets/svgs/secret-key/secret-key-icon.svg') no-repeat;
+      margin-right: 5px;
     }
 
-    .info {
-      .name {
-        font-size: 24px;
-        font-weight: bold;
-        color: #082340;
-        margin-bottom: 5px;
-      }
+    .divider {
+      width: 1px;
+      height: 16px;
+      background-color: #8E9AA7;
+      margin: 0 10px;
+    }
 
-      .desc {
-        font-size: 14px;
-        color: #6b7b8d;
-      }
+    .desc {
+      font-weight: normal;
+      color: #8E9AA7;
     }
   }
 
   .keys {
-    padding: 15px;
     background-color: #ffffff;
+    box-sizing: border-box;
+    height: calc(100vh - 208px);
 
-    .title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #082340;
-      margin-left: 0.5%;
-      margin-bottom: 25px;
-
-      .desc {
-        font-weight: normal;
-        margin-left: 12px;
-        font-size: 14px;
-        color: #082340;
-        opacity: 0.46;
-      }
-    }
-
-    .menu-bar {
-      margin-bottom: 25px;
+    .content {
+      display: flex;
+      flex-wrap: wrap;
 
       button {
         position: relative;
@@ -234,46 +191,46 @@ export default defineComponent({
         .label {
           position: absolute;
           left: 0;
-          bottom: 40px;
           width: 100%;
           text-align: center;
-          font-size: 18px;
-          color: #b5bdc6;
+          font-size: 14px;
+          color: #096DD9;
+          margin-top: 10px;
         }
 
         &.add {
           margin: 0.5%;
           width: 19%;
           min-width: 260px;
-          height: 170px;
+          height: 180px;
           background-color: #ffffff;
-          border: 1px dashed #b5bdc6;
+          border: 1px solid #E7ECF1;
           background-image: url('@/assets/svgs/btn/add.svg');
-          background-position: center 45px;
+          background-position: center 56px;
           background-repeat: no-repeat;
           cursor: pointer;
+          border-radius: 4px;
         }
       }
-    }
-
-    .content {
-      display: flex;
-      flex-wrap: wrap;
 
       .item {
+        box-sizing: border-box;
         position: relative;
         margin: 0.5%;
         width: 19%;
         min-width: 260px;
-        height: 170px;
+        height: 180px;
+        border: 1px solid #E7ECF1;
         background-image: url('@/assets/svgs/secret-key/key-icon.svg');
         background-repeat: no-repeat;
         background-position: center 40px;
         background-color: #ffffff;
-        box-shadow: 0 0 8px 0 #9eb1c5;
+        border-radius: 4px;
 
         &:hover {
-          box-shadow: 0 0 12px 0 #9eb1c5;
+          box-shadow: 0 0 12px 4px #EDF1F8;
+          border: 1px solid transparent;
+          background-image: url('@/assets/svgs/secret-key/key-icon-active.svg');
 
           .operation {
             display: block;
@@ -285,16 +242,12 @@ export default defineComponent({
           border: 1px solid transparent;
           height: 138px;
 
-          &:hover {
-            border-color: #096dd9;
-          }
-
           .name {
             margin-top: 100px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #082340;
+            font-size: 16px;
             text-align: center;
+            font-weight: 400;
+            color: #082340;
           }
 
           ::v-deep(.jm-text-viewer) {
@@ -328,9 +281,9 @@ export default defineComponent({
             background-size: contain;
             cursor: pointer;
 
-            &:active {
+            &:hover {
               background-color: #eff7ff;
-              border-radius: 4px;
+              border-radius: 2px;
             }
 
             &.del {
@@ -347,6 +300,30 @@ export default defineComponent({
             }
           }
         }
+      }
+    }
+  }
+
+  ::v-deep(.el-dialog__footer) {
+    background-color: #fff;
+
+    .el-button {
+      border: none;
+      padding: 8px 24px;
+      border-radius: 2px;
+
+      &:nth-child(2) {
+        margin: 0 10px 0 20px;
+      }
+    }
+
+    .el-button--default {
+      background-color: #F5F5F5;
+      color: #082340;
+
+      &:hover {
+        background-color: #EFF7FF;
+        color: #0091FF;
       }
     }
   }
