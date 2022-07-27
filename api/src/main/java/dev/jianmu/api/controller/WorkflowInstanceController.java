@@ -62,7 +62,7 @@ public class WorkflowInstanceController {
         var project = this.projectApplication.findByWorkflowRef(workflowInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowInstance.getWorkflowRef()));
         if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType())) {
-            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
+            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType());
         }
     }
 
