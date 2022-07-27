@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.vo.WebhookPayload;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
@@ -185,18 +186,17 @@ public class TriggerApplication {
             return;
         }
         // 创建webhook
-        if (!ObjectUtils.isEmpty(project.getAssociationType()) && !ObjectUtils.isEmpty(project.getAssociationId())) {
+        if (AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
             var oAuth2Api = OAuth2ApiProxy.builder()
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
                     .build();
             // 创建Git webhook
             var gitRepo = this.gitRepoRepository.findById(project.getAssociationId())
                     .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + project.getAssociationId()));
-            var prefix = "https://ci-v3.test.jianmuhub.com/" + "webhook/";
             try {
                 var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
-                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), prefix + ref, false).getId();
-                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), prefix + ref, true, ref);
+                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false).getId();
+                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref);
             } catch (Exception e) {
                 throw new RuntimeException("创建webhook失败：", e);
             }
