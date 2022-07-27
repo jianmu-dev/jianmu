@@ -29,7 +29,7 @@
                   @mouseleave="destroyNodeToolbar"/>
     <!-- 文档流占位 -->
     <div class="canvas-container">
-      <div class="view-mode">
+      <div class="view-mode" :class="{borderBottom: !readonly}">
         <div class="float-view-mode">
           <div class="tab" :class="{select: !dslMode}" @click="changeViewMode(ViewModeEnum.GRAPHIC)">图示</div>
           <div class="tab" :class="{select: dslMode}" @click="changeViewMode(ViewModeEnum.YAML)">yaml</div>
@@ -345,6 +345,9 @@ export default defineComponent({
     // height: calc(100% - 60px);
     height: 100%;
     background-color: #ffffff;
+    .borderBottom {
+      border-bottom: 1px solid #E6EBF2;
+    }
     .view-mode {
       position: absolute;
       top: 0;
@@ -353,7 +356,7 @@ export default defineComponent({
       height: 60px;
       width: 100%;
       box-sizing: border-box;
-      border-bottom: 1px solid #E6EBF2;
+
       .float-view-mode {
         position: absolute;
         display: flex;

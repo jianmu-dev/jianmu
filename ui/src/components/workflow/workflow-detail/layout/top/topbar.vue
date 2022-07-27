@@ -158,9 +158,13 @@ export default defineComponent({
           line-height: 20px;
           cursor: pointer;
         }
+        .jm-icon-workflow-branch:before {
+          vertical-align: middle;
+        }
         .branch {
           font-size: 16px;
           line-height: 20px;
+          margin-left: -5px;
         }
       }
       .second-row {
