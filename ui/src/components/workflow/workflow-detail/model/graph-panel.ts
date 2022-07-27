@@ -117,7 +117,7 @@ export class GraphPanel {
     this.ignoreTime = 0;
     this.ignoreSuspended = true;
   }
-  reflushGparam(record: IWorkflowExecutionRecordVo) {
+  refreshGparam(record: IWorkflowExecutionRecordVo) {
     this.currentRecord = record;
   }
   /**

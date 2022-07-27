@@ -72,16 +72,14 @@
 
 <script lang="ts">
 import { defineComponent, getCurrentInstance, onMounted, PropType, ref } from 'vue';
-import { useStore } from 'vuex';
-import { namespace } from '@/store/modules/workflow-execution-record';
-import { IState } from '@/model/modules/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { fetchTriggerEvent } from '@/api/view-no-auth';
 import { IEventParameterVo } from '@/api/dto/trigger';
 import { ParamTypeEnum, TriggerTypeEnum } from '@/api/dto/enumeration';
-import useClipboard from 'vue-clipboard3';
+// import useClipboard from 'vue-clipboard3';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
+import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 
 export default defineComponent({
   components: { JmTextViewer, ParamValue },
@@ -96,14 +94,17 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    record: {
+      type: Object as PropType<IWorkflowExecutionRecordVo>,
+      required: true,
+    },
   },
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
-    const state = useStore().state[namespace] as IState;
     const tabActiveName = ref<string>(props.tabType);
     const webhookLog = ref<string>('');
     const webhookParams = ref<IEventParameterVo[]>([]);
-    const { toClipboard } = useClipboard();
+    // const { toClipboard } = useClipboard();
     const maxWidthRecord = ref<Record<string, number>>({});
 
     onMounted(async () => {
@@ -124,8 +125,8 @@ export default defineComponent({
       }
     });
     return {
-      workflowName: state.recordDetail.record?.name,
-      startTime: datetimeFormatter(state.recordDetail.record?.startTime),
+      workflowName: props.record.name,
+      startTime: datetimeFormatter(props.record.startTime),
       tabActiveName,
       webhookLog,
       webhookParams,

@@ -3,6 +3,7 @@
     <jm-workflow-detail
       v-model="workflowDetail"
       :session="session"
+      @jump="handleJump"
       @back="handleBack"
       @logout="handleLogout"
       @trigger="handleTrigger"
@@ -65,6 +66,12 @@ export default defineComponent({
           return;
         }
         window.location.href = entryUrl;
+      },
+      handleJump(projectGroupId: string) {
+        if (!projectGroupId) {
+          return;
+        }
+        router.push({ path: `/project-group/detail/${projectGroupId}` });
       },
       handleLogout() {
         console.log('退出登录事件');

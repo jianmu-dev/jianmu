@@ -3,11 +3,9 @@ import { executeImmediately } from "@/api/project";
 type TriggerCallbackFnType = (error?: Error)=>void;
 
 export class DeatilTopbar {
-  private readonly proxy: any;
   private readonly projectId: string;
   private readonly triggerCallbackFn: TriggerCallbackFnType;
-  constructor(proxy: any, projectId: string, triggerCallbackFn: TriggerCallbackFnType) {
-    this.proxy = proxy;
+  constructor(projectId: string, triggerCallbackFn: TriggerCallbackFnType) {
     this.projectId = projectId;
     this.triggerCallbackFn = triggerCallbackFn;
   }

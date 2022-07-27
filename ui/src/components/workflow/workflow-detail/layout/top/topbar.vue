@@ -6,19 +6,9 @@
         <div class="first-row">
           <div class="title">{{ project.workflowName }}</div>
           <div class="vertical-divider"></div>
-          <div class="branch" v-show="entry">
-            <img src="~@/assets/svgs/index/branch.svg" alt="">
-            {{ project.branch || 'master' }}
-          </div>
+          <div v-show="entry" class="jm-icon-workflow-branch branch">{{ project.branch || 'master' }}</div>
           <div v-show="!entry" class="jm-icon-workflow-group" style="color: #096DD9"></div>
-          <router-link
-            v-show="!entry"
-            :to="{
-              path: `/project-group/detail/${project?.projectGroupId}`,
-            }"
-          >
-            <div class="project-group-name">{{ project.projectGroupName }}</div>
-          </router-link>
+          <div v-show="!entry" class="project-group-name" @click="$emit('jump', project?.projectGroupId)">{{ project.projectGroupName }}</div>
         </div>
         <div class="second-row" v-if="project.workflowDescription">{{ project.workflowDescription }}</div>
       </div>
@@ -67,12 +57,13 @@ export default defineComponent({
     },
     session: Object as PropType<ISessionVo>,
   },
-  emits: [ 'back', 'trigger', 'logout'],
+  emits: [ 'back', 'trigger', 'logout', 'jump'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
-    const detailTopbar = new DeatilTopbar(proxy, props.project.id, (error?: Error):void=> {
+    const detailTopbar = new DeatilTopbar(props.project.id, (error?: Error):void=> {
       emit('trigger', error? error.message : undefined);
     });
+    // 字体 emit
     return {
       trigger(){
         const isWarning = props.project?.triggerType === TriggerTypeEnum.WEBHOOK;
@@ -165,9 +156,11 @@ export default defineComponent({
           font-weight: 400;
           color: #096DD9;
           line-height: 20px;
+          cursor: pointer;
         }
-        .branch img {
-          vertical-align: middle;
+        .branch {
+          font-size: 16px;
+          line-height: 20px;
         }
       }
       .second-row {

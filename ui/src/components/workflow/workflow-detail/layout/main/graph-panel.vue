@@ -45,6 +45,7 @@
         :trigger-id="webhookLogForm.triggerId"
         :trigger-type="webhookLogForm.triggerType"
         :tab-type="webhookLogForm.tabType"
+        :record="record"
       />
     </jm-drawer>
     <jm-drawer
@@ -110,13 +111,13 @@ export default defineComponent({
     onUpdated(()=>{
       if (recordStatus.value !== props.record.status) {
         recordStatus.value = props.record.status;
-        graphPanel.reflushGparam(props.record);
+        graphPanel.refreshGparam(props.record);
       }
       if (triggerId.value === props.record.triggerId) {
         return;
       }
       triggerId.value = props.record.triggerId;
-      graphPanel.reflushGparam(props.record);
+      graphPanel.refreshGparam(props.record);
       graphPanel.resetSuspended();
       graphPanel.getDslAndNodeinfos();
       graphPanel.getTaskRecords();

@@ -3,7 +3,7 @@ import { IProjectDetailVo } from '@/api/dto/project';
 import { ViewModeEnum } from '@/api/dto/enumeration';
 
 /**
- * 详情页面 地址栏参数 entry 适配gitLink(true)
+ * 详情页面 地址栏参数
  */
 export interface IWorkflowDetailParam {
   entry: boolean;

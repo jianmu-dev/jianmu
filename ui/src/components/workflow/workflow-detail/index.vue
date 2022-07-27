@@ -5,6 +5,7 @@
       :project="recordDetail.project"
       :session="session"
       :entry="modelValue.entry"
+      @jump="groupId=>$emit('jump', groupId)"
       @back="$emit('back')"
       @logout="$emit('logout')"
       @trigger="trigger"
@@ -57,19 +58,18 @@ export default defineComponent({
     },
     session: Object as PropType<ISessionVo>,
   },
-  emits: ['back', 'update:model-value', 'logout', 'trigger'],
+  emits: ['back', 'jump', 'update:model-value', 'logout', 'trigger'],
   setup(props, { emit }) {
-    const recordDetail = ref<IRecordDetail>({
-      // project: undefined,
-      // record: undefined,
-    });
+    const recordDetail = ref<IRecordDetail>({});
     // list组件需要的参数
     const param =  computed(():IRecordListParam => ({
       workflowRef: recordDetail.value.project?.workflowRef || '',
       triggerId: props.modelValue.triggerId,
     }));
-    const recordList = ref();
-    const graphPanel = ref();
+    // record-list.vue组件
+    const recordList = ref<any>();
+    // graph-panel.vue组件
+    const graphPanel = ref<any>();
     onMounted(async ()=>{
       // 获取项目详情
       recordDetail.value.project = await fetchProjectDetail(props.modelValue.projectId);
@@ -95,6 +95,7 @@ export default defineComponent({
         // record-list 同步modelValue数据/地址栏
         emit('update:model-value', { ...props.modelValue, triggerId });
       },
+      // ui/src/components/workflow/workflow-detail
       handleChangeDslMode(viewMode: ViewModeEnum) {
         // graph-panel 同步modelValue数据/地址栏
         emit('update:model-value', { ...props.modelValue, viewMode });
