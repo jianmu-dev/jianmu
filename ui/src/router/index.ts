@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteLocationNormalizedLoaded, Router, RouteRecordRaw } from 'vue-router';
 import _store from '@/store';
-import { AUTHORIZE_INDEX, LOGIN_INDEX, INDEX } from '@/router/path-def';
+import { AUTHORIZE_INDEX, INDEX, LOGIN_INDEX } from '@/router/path-def';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
 import { AppContext } from 'vue';
@@ -15,6 +15,7 @@ import { fetchThirdPartyType } from '@/api/session';
  * @param auth
  * @param layout
  * @param record
+ * @param alias
  */
 const loadModuleRoute = (
   path: string,
@@ -22,6 +23,7 @@ const loadModuleRoute = (
   auth: boolean,
   layout: Promise<any>,
   record: Record<string, { [key: string]: any }>,
+  alias?: string,
 ) => {
   const children: RouteRecordRaw[] = [];
   // 加载业务模块中的所有路由
@@ -34,6 +36,7 @@ const loadModuleRoute = (
     meta: {
       title,
       auth,
+      alias,
     },
   } as RouteRecordRaw;
 };
@@ -73,7 +76,8 @@ export default async (appContext: AppContext): Promise<Router> => {
         }),
       },
       // platform模块
-      entry ? loadModuleRoute(INDEX, '首页', false, import('@/layout/integration.vue'), import.meta.globEager('./modules/integration.ts')) : loadModuleRoute(INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
+      entry ? loadModuleRoute(INDEX, '首页', false, import('@/layout/integration.vue'), import.meta.globEager('./modules/integration.ts'), 'integration') :
+        loadModuleRoute(INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
       // full模块
       loadModuleRoute('/full', undefined, false, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
       // error模块
@@ -102,7 +106,19 @@ export default async (appContext: AppContext): Promise<Router> => {
 
     const store = _store as any;
     store.commit('mutateFromRoute', { to, from });
+    const entry = store.state.entry;
     const { session } = store.state[sessionNs] as ISessionState;
+
+    if (entry &&
+      // 表示integration布局
+      to.matched.find(({ meta: { alias } }) => alias === 'integration') &&
+      // 表示非子页面
+      window.top === window &&
+      session) {
+      // 强制跳转到entryUrl
+      window.top.location.href = session.entryUrl!;
+      return;
+    }
 
     for (const m of to.matched) {
       if (m.meta.auth && !session) {
