@@ -83,7 +83,7 @@ import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { Shell } from '../../model/data/node/shell';
 import ShellEnv from './form/shell-env.vue';
 import { v4 as uuidv4 } from 'uuid';
-import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
+import { ParamTypeEnum } from '../../model/data/enumeration';
 
 export default defineComponent({
   components: { ShellEnv },
