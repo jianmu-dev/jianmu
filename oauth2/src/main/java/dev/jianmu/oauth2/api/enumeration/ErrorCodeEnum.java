@@ -16,7 +16,8 @@ public enum ErrorCodeEnum {
     HTTP_CLIENT_ERROR("客户端请求错误"),
     HTTP_SERVER_ERROR("服务器段请求错误"),
     NO_PERMISSION("没有权限"),
-    UNKNOWN_ERROR("未知错误");
+    UNKNOWN_ERROR("未知错误"),
+    REPO_NOT_EXISTED("仓库不存在");
 
     @Getter
     private String message;

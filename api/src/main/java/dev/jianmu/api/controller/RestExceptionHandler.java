@@ -8,6 +8,8 @@ import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.ErrorMessage;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
+import dev.jianmu.application.exception.OAuth2EntryException;
+import dev.jianmu.application.exception.OAuth2IsNotAuthorizedException;
 import dev.jianmu.application.service.OAuth2Application;
 import dev.jianmu.application.service.vo.AssociationData;
 import dev.jianmu.git.repo.aggregate.GitRepo;
@@ -17,6 +19,7 @@ import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.oauth2.api.exception.RepoExistedException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
 import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
@@ -43,6 +46,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Ethan Liu
@@ -85,7 +89,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(NoAssociatedPermissionException.class)
-    public ResponseEntity<JwtResponse> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
+    public ResponseEntity<?> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
@@ -98,18 +102,28 @@ public class RestExceptionHandler {
         String encryptedToken;
         RoleEnum role;
         GitRepo gitRepo;
+        AssociationData associationData;
         try {
             encryptedToken = session.getEncryptedToken();
             accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             userInfo = oAuth2Api.getUserInfo(accessToken);
-            gitRepo = this.gitRepoRepository.findById(ex.getAssociationId())
-                    .orElseThrow(() -> new DataNotFoundException("未找到该仓库"));
-
+            Optional<GitRepo> gitRepoOptional = this.gitRepoRepository.findById(ex.getAssociationId());
+            if (gitRepoOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            gitRepo = gitRepoOptional.get();
+            associationData = AssociationData.buildGitRepo(gitRepo.getRef(), gitRepo.getOwner());
             role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
-                    AssociationData.buildGitRepo(gitRepo.getRef(), gitRepo.getOwner())).getRole();
+                    associationData).getRole();
+        } catch (OAuth2IsNotAuthorizedException e) {
+            logger.warn(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (OAuth2EntryException | RepoExistedException e) {
+            logger.warn(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
-            logger.error("没有权限，错误信息：", e);
-            throw ex;
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e);
         }
 
         long expireTimestamp = session.getExpireTimestamp();
@@ -130,7 +144,7 @@ public class RestExceptionHandler {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
 
-        return ResponseEntity.status(HttpStatus.RESET_CONTENT).body(JwtResponse.builder()
+        return ResponseEntity.status(HttpStatus.CREATED).body(JwtResponse.builder()
                 .type("Bearer")
                 .token(newJwt)
                 .id(session.getId())
@@ -138,6 +152,7 @@ public class RestExceptionHandler {
                 .avatarUrl(session.getAvatarUrl())
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
                 .entryUrl(oAuth2Api.getEntryUrl(gitRepo.getOwner(), gitRepo.getRef()))
+                .associationData(associationData)
                 .build());
     }
 

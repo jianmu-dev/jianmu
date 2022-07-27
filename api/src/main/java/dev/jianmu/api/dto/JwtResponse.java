@@ -1,5 +1,6 @@
 package dev.jianmu.api.dto;
 
+import dev.jianmu.application.service.vo.AssociationData;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,8 +21,7 @@ public class JwtResponse {
     private String id;
     private String username;
     private String avatarUrl;
-//    private String associationId;
-//    private String associationType;
+    private AssociationData associationData;
     private String thirdPartyType;
     private String entryUrl;
 }
