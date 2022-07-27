@@ -24,7 +24,7 @@ public interface IUserInfoVo {
         try {
             return mapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            throw new JsonParseException();
+            throw new JsonParseException(e.getMessage());
         }
     }
 }

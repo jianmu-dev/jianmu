@@ -152,6 +152,9 @@ public class GitlinkApi implements OAuth2Api {
             if (gitlinkRepoVo.getStatus() == HttpStatus.FORBIDDEN.value()) {
                 throw new NoPermissionException(gitlinkRepoVo.getMessage());
             }
+            if (gitlinkRepoVo.getStatus() == 404) {
+                throw new RepoExistedException(gitlinkRepoVo.getMessage());
+            }
             if (gitlinkRepoVo.getStatus() != 1) {
                 throw new UnknownException(gitlinkRepoVo.getMessage());
             }
