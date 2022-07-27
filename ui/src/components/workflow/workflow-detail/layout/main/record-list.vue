@@ -47,7 +47,7 @@ export default defineComponent({
     let recordList:RecordList;
     // 更改当前record
     const handleChange = (record: IWorkflowExecutionRecordVo) => {
-      console.log('选择record', record.triggerId);
+      // console.log('选择record', record.triggerId);
       emit('change-record', record);
       recordList.resetSuspended();
     };
@@ -111,7 +111,7 @@ export default defineComponent({
     position: relative;
     min-width: 50px;
     padding: 0 6px 0 4px;
-    height: 50px;
+    height: 48px;
     border-radius: 4px 4px 0px 0px;
     margin-right: 2px;
     color: #ffffff;
@@ -209,7 +209,7 @@ export default defineComponent({
       .label {
         padding-left: 4px;
         line-height: 52px;
-        font-size: 36px;
+        font-size: 30px;
         text-align: center;
 
         &::before {
@@ -229,7 +229,7 @@ export default defineComponent({
 }
 
 .record-list-bottom-line {
-  height: 4px;
+  height: 5px;
   width: 100%;
   &.init {
     background-color: #979797;

@@ -126,7 +126,7 @@ export default defineComponent({
     height: 36px;
     background: @default-background-color;
     border-radius: 2px;
-    border: 1px solid #CAD6EE;
+    border: 1px solid rgb(202 214 238 / 54%);
     font-size: 14px;
     color: #116ed2;
     cursor: pointer;

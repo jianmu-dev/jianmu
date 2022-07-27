@@ -1,6 +1,7 @@
 <template>
-  <div class="jm-workflow-detail-graph-panel" ref="workflowRef">
+  <div class="jm-workflow-detail-graph-panel" ref="workflowRef" v-loading="!reloadViewer">
     <jm-workflow-viewer
+      v-if="reloadViewer"
       :dsl="dslSourceCode"
       :trigger-type="record.triggerType"
       :node-infos="nodeInfos"
@@ -64,7 +65,7 @@ import { IGlobalParamseterVo, INodeDefVo } from '@/api/dto/project';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/model/data/enumeration';
 import { IOpenTaskLogForm, IOpenWebhookLogForm } from '@/model/modules/workflow-execution-record';
-import { computed, defineComponent, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
+import { nextTick, computed, defineComponent, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
 import { GraphPanel } from '../../model/graph-panel';
 import ProcessLog from '../right/process-log.vue';
 import TaskLog from '../right/task-log.vue';
@@ -105,32 +106,42 @@ export default defineComponent({
     }));
     const triggerId = ref(props.record.triggerId);
     const recordStatus = ref(props.record.status);
+    const reloadViewer = ref<boolean>(false);
     let graphPanel:GraphPanel;
     // record 页面变化引起数据变化 函数执行
-    onUpdated(()=>{
+    onUpdated(async ()=>{
       if (recordStatus.value !== props.record.status) {
+        // console.log('------>>>> 111');
         recordStatus.value = props.record.status;
         graphPanel.refreshGparam(props.record);
       }
       if (triggerId.value === props.record.triggerId) {
+        // console.log('------>>>> 222');
         return;
       }
       triggerId.value = props.record.triggerId;
       graphPanel.refreshGparam(props.record);
       graphPanel.resetSuspended();
-      graphPanel.getDslAndNodeinfos();
-      graphPanel.getTaskRecords();
+      (async () => {
+        await graphPanel.getDslAndNodeinfos();
+        await graphPanel.getTaskRecords();
+      })();
       graphPanel.getGlobalParams();
     });
     onMounted(async ()=>{
       // 赋值 dslSourceCode nodeInfos
-      const dslCallbackFn = (dsl: string, node: INodeDefVo[]) => {
+      const dslCallbackFn = (dsl: string, nodes: INodeDefVo[]) => {
+      
         dslSourceCode.value = dsl;
-        nodeInfos.value = node;
+        nodeInfos.value = nodes;
       };
       // 赋值 taskRecords
       const taskCallbackFn = (tasks: ITaskExecutionRecordVo[]) => {
+        reloadViewer.value = false;
         taskRecords.value = tasks;
+        nextTick(()=>{
+          reloadViewer.value = true;
+        });
       };
       // 赋值 globalParams
       const globalParamsCallbackFn = (globalParam: IGlobalParamseterVo[]) => {
@@ -138,6 +149,9 @@ export default defineComponent({
       };
       graphPanel = await new GraphPanel(gparam.value, dslCallbackFn, taskCallbackFn, globalParamsCallbackFn);
       graphPanel.listen();
+      if (props.record.status === '') {
+        reloadViewer.value = true;
+      }
     });
     onBeforeUnmount(()=>{
       graphPanel.destroy();
@@ -164,6 +178,7 @@ export default defineComponent({
       paramLogDrawer,
       taskLogForm,
       webhookLogForm,
+      reloadViewer,
       openTaskLog: async (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         if ([NodeToolbarTabTypeEnum.RETRY, NodeToolbarTabTypeEnum.IGNORE].includes(tabType)) {
           const nodeData = taskRecords.value&&taskRecords.value.find(({ businessId }) => businessId === nodeId)!;
@@ -194,8 +209,8 @@ export default defineComponent({
       },
       async refreshGraphPanel() {
         console.log('刷新GraphPanel');
-        graphPanel.getDslAndNodeinfos();
-        graphPanel.getTaskRecords();
+        await graphPanel.getDslAndNodeinfos();
+        await graphPanel.getTaskRecords();
       },
     };
   },

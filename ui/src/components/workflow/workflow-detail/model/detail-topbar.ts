@@ -17,9 +17,13 @@ export class DeatilTopbar {
       console.log('触发新流程', this.projectId);
       await executeImmediately(this.projectId);
       this.triggerCallbackFn();
-    } catch (error) {
-      console.log('触发新流程 error');
-      this.triggerCallbackFn(error as Error);
+    } catch (error: any) {
+      if (error.response.status === 400) {
+        console.log('触发新流程 error', error.response.data.message);
+        this.triggerCallbackFn(error);
+      } else {
+        this.triggerCallbackFn(error);
+      }
     }
   }
 }

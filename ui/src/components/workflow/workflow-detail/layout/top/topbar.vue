@@ -61,9 +61,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const detailTopbar = new DeatilTopbar(props.project.id, (error?: Error):void=> {
-      emit('trigger', error? error.message : undefined);
+      emit('trigger', error? error : undefined);
     });
-    // 字体 emit
+
     return {
       trigger(){
         const isWarning = props.project?.triggerType === TriggerTypeEnum.WEBHOOK;

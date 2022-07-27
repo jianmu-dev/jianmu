@@ -104,6 +104,7 @@ export default defineComponent({
         emit('trigger', msg);
         // undefined 触发成功之后刷新record列表 msg -> undefined为成功
         if(!msg) {
+          emit('update:model-value', { ...props.modelValue, triggerId: '' });
           recordList.value.refreshRecordList();
           graphPanel.value.refreshGraphPanel();
         }
@@ -129,7 +130,6 @@ export default defineComponent({
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #F0F2F5;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
