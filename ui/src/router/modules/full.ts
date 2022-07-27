@@ -33,10 +33,11 @@ export default [
     path: 'workflow-execution-record/detail',
     component: () => import('@/views/workflow-execution-record/detail.vue'),
     props: ({
-      query: { projectId, workflowExecutionRecordId },
+      query: { projectId, viewMode, triggerId },
     }: RouteLocationNormalizedLoaded) => ({
       projectId,
-      workflowExecutionRecordId,
+      viewMode,
+      triggerId,
     }),
     meta: {
       title: '执行记录',

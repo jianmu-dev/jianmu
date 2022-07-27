@@ -1,10 +1,9 @@
 import { ActionContext, Module } from 'vuex';
 import { IAssociationData, ILoginForm, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
-import { create, oauthRefreshToken } from '@/api/session';
-import { ISessionVo, IOauth2LoggingDto, IGitRepoLoggingDto, IOauth2RefreshingDto } from '@/api/dto/session';
+import { authLogin, create, oauthRefreshToken } from '@/api/session';
+import { IGitRepoLoggingDto, IOauth2LoggingDto, IOauth2RefreshingDto, ISessionVo } from '@/api/dto/session';
 import { getStorage, setStorage } from '@/utils/storage';
-import { authLogin } from '@/api/session';
 import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 /**
@@ -137,7 +136,7 @@ export default {
           break;
       }
       // TODO 测试
-      session.entryUrl = `/full/demo?owner=${payload.owner}&repo=${payload.ref}`;
+      session.entryUrl = `/full/demo?owner=${payload.owner}&ref=${payload.ref}`;
       commit('oauthMutate', {
         session,
         associationData,

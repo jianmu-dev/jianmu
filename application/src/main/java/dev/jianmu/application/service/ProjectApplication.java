@@ -119,10 +119,7 @@ public class ProjectApplication {
     public void triggerByManual(String projectId, String associationId, String associationType) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        if (associationId != null && associationType != null &&
-                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
-        }
+        this.checkProjectPermission(associationId, associationType, project);
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
@@ -261,7 +258,7 @@ public class ProjectApplication {
     private void checkProjectPermission(String associationId, String associationType, Project project) {
         if (associationId != null && associationType != null &&
                 (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
+            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType());
         }
     }
 
