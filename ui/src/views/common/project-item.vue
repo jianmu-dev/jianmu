@@ -214,12 +214,10 @@ export default defineComponent({
         window.top.location.href = `/full/workflow-execution-record/detail?projectId=${projectId}`;
         return;
       }
-      router.push(
-        {
-          name: 'workflow-execution-record-detail',
-          query: { projectId },
-        },
-      );
+      router.push({
+        name: 'workflow-execution-record-detail',
+        query: { projectId },
+      });
     };
     return {
       entry,

@@ -6,12 +6,19 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.vo.WebhookPayload;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
 import dev.jianmu.infrastructure.quartz.PublishJob;
 import dev.jianmu.infrastructure.storage.StorageService;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.oauth2.api.exception.UnknownException;
+import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
+import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -75,6 +82,8 @@ public class TriggerApplication {
     private final ExpressionLanguage expressionLanguage;
     private final StorageService storageService;
     private final ExternalParameterRepository externalParameterRepository;
+    private final OAuth2Properties oAuth2Properties;
+    private final GitRepoRepository gitRepoRepository;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -89,7 +98,10 @@ public class TriggerApplication {
             ObjectMapper objectMapper,
             ExpressionLanguage expressionLanguage,
             StorageService storageService,
-            ExternalParameterRepository externalParameterRepository) {
+            ExternalParameterRepository externalParameterRepository,
+            OAuth2Properties oAuth2Properties,
+            GitRepoRepository gitRepoRepository
+    ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
         this.parameterRepository = parameterRepository;
@@ -103,6 +115,8 @@ public class TriggerApplication {
         this.expressionLanguage = expressionLanguage;
         this.storageService = storageService;
         this.externalParameterRepository = externalParameterRepository;
+        this.oAuth2Properties = oAuth2Properties;
+        this.gitRepoRepository = gitRepoRepository;
     }
 
     private static String decode(final String encoded) {
@@ -153,30 +167,60 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void saveOrUpdate(String projectId, Webhook webhook) {
-        this.triggerRepository.findByProjectId(projectId)
-                .ifPresentOrElse(trigger -> {
-                    trigger.setType(Trigger.Type.WEBHOOK);
-                    trigger.setWebhook(webhook);
-                    this.triggerRepository.updateById(trigger);
-                }, () -> {
-                    var trigger = Trigger.Builder.aTrigger()
-                            .projectId(projectId)
-                            .type(Trigger.Type.WEBHOOK)
-                            .webhook(webhook)
-                            .build();
-                    this.triggerRepository.add(trigger);
-                });
+    public void saveOrUpdate(String projectId, Webhook webhook, String encryptedToken) {
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
+        String ref = URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
+        var optionalTrigger = this.triggerRepository.findByProjectId(projectId);
+        // 修改webhook
+        if (optionalTrigger.isPresent()) {
+            String finalRef = ref;
+            optionalTrigger.ifPresent(trigger -> {
+                trigger.setType(Trigger.Type.WEBHOOK);
+                trigger.setWebhook(webhook);
+                if (ObjectUtils.isEmpty(project.getAssociationType()) || ObjectUtils.isEmpty(project.getAssociationId())) {
+                    trigger.setRef(finalRef);
+                }
+                this.triggerRepository.updateById(trigger);
+            });
+            return;
+        }
+        // 创建webhook
+        if (AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
+            var oAuth2Api = OAuth2ApiProxy.builder()
+                    .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                    .build();
+            // 创建Git webhook
+            var gitRepo = this.gitRepoRepository.findById(project.getAssociationId())
+                    .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + project.getAssociationId()));
+            try {
+                var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false).getId();
+                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref);
+            } catch (Exception e) {
+                throw new RuntimeException("创建webhook失败：", e);
+            }
+        }
+        var trigger = Trigger.Builder.aTrigger()
+                .ref(ref)
+                .projectId(projectId)
+                .type(Trigger.Type.WEBHOOK)
+                .webhook(webhook)
+                .build();
+        this.triggerRepository.add(trigger);
     }
 
     @Transactional
     public void saveOrUpdate(String projectId, String schedule) {
+        var project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
         this.triggerRepository.findByProjectId(projectId)
                 .ifPresentOrElse(trigger -> {
                     try {
                         // 更新schedule
                         trigger.setSchedule(schedule);
                         trigger.setType(Trigger.Type.CRON);
+                        trigger.setRef(URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8));
                         // 停止触发器
                         this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
                         // 卸载任务
@@ -194,6 +238,7 @@ public class TriggerApplication {
                 }, () -> {
                     var trigger = Trigger.Builder.aTrigger()
                             .projectId(projectId)
+                            .ref(URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8))
                             .type(Trigger.Type.CRON)
                             .schedule(schedule)
                             .build();
@@ -210,7 +255,7 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void deleteByProjectId(String projectId) {
+    public void deleteByProjectId(String projectId, String encryptedToken, String associationId, String associationType) {
         // 删除Cron触发器
         this.triggerRepository.findByProjectId(projectId)
                 .ifPresent(trigger -> {
@@ -228,7 +273,29 @@ public class TriggerApplication {
                         }
                     }
                     this.triggerRepository.deleteById(trigger.getId());
+                    this.deleteGitWebhook(associationId, associationType, trigger.getRef(), encryptedToken);
                 });
+    }
+
+    // 删除GitWebhook
+    private void deleteGitWebhook(String associationId, String associationType, String ref, String encryptedToken) {
+        if (ObjectUtils.isEmpty(associationId) || ObjectUtils.isEmpty(associationType)) {
+            return;
+        }
+        var oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .build();
+        var gitRepo = this.gitRepoRepository.findById(associationId)
+                .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
+        try {
+            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
+            oAuth2Api.deleteWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
+        } catch (UnknownException e) {
+            log.info("删除webhook失败，未找到git webhook: " + ref);
+        } catch (Exception e) {
+            throw new RuntimeException("删除webhook失败：", e);
+        }
     }
 
     public LocalDateTime getNextFireTime(String projectId) {
@@ -304,9 +371,9 @@ public class TriggerApplication {
     }
 
     public String getWebhookUrl(String projectId) {
-        var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        return "/webhook/" + URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
+        var trigger = this.triggerRepository.findByProjectId(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目触发器"));
+        return "/webhook/" + trigger.getRef();
     }
 
     // 获取trigger的context
@@ -433,36 +500,31 @@ public class TriggerApplication {
         this.trigger(eventParameters, parameters, newWebRequest);
     }
 
-    public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
+    public void receiveHttpEvent(String ref, HttpServletRequest request, String contentType) {
         var webRequest = this.createWebRequest(request, contentType);
         this.writeWebhook(webRequest.getId(), webRequest.getPayload());
-        var project = this.projectRepository.findByName(projectName)
+        var trigger = this.triggerRepository.findByRef(ref)
                 .orElseThrow(() -> {
                     webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
-                    webRequest.setErrorMsg("未找到项目: " + projectName);
+                    webRequest.setErrorMsg("未找到触发器");
                     this.webRequestRepositoryImpl.add(webRequest);
-                    return new DataNotFoundException("未找到项目: " + projectName);
+                    return new DataNotFoundException("未找到触发器");
                 });
+        if (trigger.getType() != Trigger.Type.WEBHOOK) {
+            webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+            webRequest.setErrorMsg("未找到触发器");
+            this.webRequestRepositoryImpl.add(webRequest);
+            throw new IllegalArgumentException("触发器类型错误");
+        }
+        var project = this.projectRepository.findById(trigger.getProjectId())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目"));
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
         webRequest.setProjectId(project.getId());
         webRequest.setWorkflowRef(project.getWorkflowRef());
         webRequest.setWorkflowVersion(project.getWorkflowVersion());
-        var trigger = this.triggerRepository.findByProjectId(project.getId())
-                .orElseThrow(() -> {
-                    webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
-                    webRequest.setErrorMsg("项目：" + projectName + " 未找到触发器");
-                    this.webRequestRepositoryImpl.add(webRequest);
-                    return new DataNotFoundException("项目：" + projectName + " 未找到触发器");
-                });
         webRequest.setTriggerId(trigger.getId());
-        if (trigger.getType() != Trigger.Type.WEBHOOK) {
-            webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
-            webRequest.setErrorMsg("项目：" + projectName + " 未找到触发器");
-            this.webRequestRepositoryImpl.add(webRequest);
-            throw new IllegalArgumentException("项目：" + projectName + "触发器类型错误");
-        }
         // 创建表达式上下文
         var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
         // 提取参数

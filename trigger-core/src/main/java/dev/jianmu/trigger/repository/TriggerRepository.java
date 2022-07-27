@@ -23,4 +23,6 @@ public interface TriggerRepository {
     Optional<Trigger> findByTriggerId(String triggerId);
 
     List<Trigger> findCronTriggerAll();
+
+    Optional<Trigger> findByRef(String ref);
 }

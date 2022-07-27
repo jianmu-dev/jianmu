@@ -14,11 +14,11 @@ import java.util.Optional;
  * @create 2021-05-25 15:29
 */
 public interface TriggerMapper {
-    @Insert("insert into jm_trigger(id, project_id, type, schedule, webhook) " +
-            "values(#{id}, #{projectId}, #{type}, #{schedule}, #{webhook, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.WebhookTypeHandler})")
+    @Insert("insert into jm_trigger(id, ref, project_id, type, schedule, webhook) " +
+            "values(#{id}, #{ref}, #{projectId}, #{type}, #{schedule}, #{webhook, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.WebhookTypeHandler})")
     void add(Trigger trigger);
 
-    @Update("update jm_trigger set project_id = #{projectId}, type = #{type}, schedule = #{schedule}, webhook = #{webhook, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.WebhookTypeHandler} where id = #{id}")
+    @Update("update jm_trigger set ref = #{ref}, project_id = #{projectId}, type = #{type}, schedule = #{schedule}, webhook = #{webhook, jdbcType=BLOB, typeHandler=dev.jianmu.infrastructure.typehandler.WebhookTypeHandler} where id = #{id}")
     void updateById(Trigger trigger);
 
     @Delete("delete from jm_trigger where id = #{id}")
@@ -38,4 +38,9 @@ public interface TriggerMapper {
     @Result(column = "project_id", property = "projectId")
     @Result(column = "webhook", property = "webhook", typeHandler = WebhookTypeHandler.class)
     List<Trigger> findAllByType(Trigger.Type type);
+
+    @Select("SELECT * FROM `jm_trigger` WHERE ref = #{ref}")
+    @Result(column = "project_id", property = "projectId")
+    @Result(column = "webhook", property = "webhook", typeHandler = WebhookTypeHandler.class)
+    Optional<Trigger> findByRef(String ref);
 }

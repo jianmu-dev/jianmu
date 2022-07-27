@@ -28,12 +28,14 @@ CREATE TABLE `jm_project`
 
 CREATE TABLE `jm_trigger`
 (
-    `id`         varchar(45) NOT NULL COMMENT 'ID',
-    `project_id` varchar(45) NOT NULL COMMENT '项目ID',
-    `type`       varchar(45) NOT NULL COMMENT '触发器类型',
+    `id`         varchar(45)  NOT NULL COMMENT 'ID',
+    `ref`        varchar(512) NOT NULL COMMENT 'ref',
+    `project_id` varchar(45)  NOT NULL COMMENT '项目ID',
+    `type`       varchar(45)  NOT NULL COMMENT '触发器类型',
     `schedule`   varchar(45) DEFAULT NULL COMMENT 'Cron表达式',
     `webhook`    blob COMMENT 'webhook对象',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `ref` (`ref`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='建木触发器表';

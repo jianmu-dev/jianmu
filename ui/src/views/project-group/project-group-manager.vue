@@ -12,6 +12,7 @@
       </div>
       <div class="menu-bar">
         <button class="add" @click="add">
+          <i class="jm-icon-button-add"></i>
           <div class="label">新建分组</div>
         </button>
       </div>
@@ -366,29 +367,33 @@ export default defineComponent({
 
   .menu-bar {
     button {
-      position: relative;
+      color: #096DD9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
 
       .label {
-        position: absolute;
-        left: 0;
-        bottom: 40px;
         width: 100%;
         text-align: center;
-        font-size: 18px;
-        color: #b5bdc6;
+        font-size: 14px;
       }
 
       &.add {
-        margin: 0.5%;
+        font-size: 36px;
         width: 19%;
         min-width: 260px;
         height: 170px;
         background-color: #ffffff;
-        border: 1px dashed #b5bdc6;
-        background-image: url('@/assets/svgs/btn/add.svg');
-        background-position: center 45px;
-        background-repeat: no-repeat;
+        border: 1px solid #E7ECF1;
         cursor: pointer;
+        border-radius: 4px;
+
+        i {
+          &::before {
+            font-weight: bold;
+          }
+        }
       }
     }
   }

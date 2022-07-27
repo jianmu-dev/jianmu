@@ -2,13 +2,13 @@
   <jm-dialog
     custom-class="center"
     v-model="dialogVisible"
-    width="500px">
+    width="700px">
     <template v-slot:title>
       <div class="editor-title">新增密钥</div>
     </template>
     <jm-form :model="editorForm" :rules="editorRule" ref="editorFormRef" @submit.prevent>
-      <jm-form-item label="名称" label-position="top" prop="key">
-        <jm-input v-model="editorForm.key" clearable placeholder="请输入名称"/>
+      <jm-form-item label="唯一标识" label-position="top" prop="key">
+        <jm-input v-model="editorForm.key" clearable placeholder="请输入唯一标识"/>
       </jm-form-item>
       <jm-form-item label="值" label-position="top" prop="value">
         <jm-input
@@ -100,12 +100,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped lang="less">
-.editor-title {
-  padding-left: 36px;
-  background-image: url('@/assets/svgs/btn/edit.svg');
-  background-repeat: no-repeat;
-  background-position: left center;
-}
-</style>

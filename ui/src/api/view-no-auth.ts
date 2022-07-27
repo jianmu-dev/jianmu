@@ -1,6 +1,6 @@
 import { restProxy } from '@/api/index';
 import { IAsyncTaskInstanceVo, ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
+import { IGlobalParamseterVo, IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IHubNodePageVo, IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
@@ -16,6 +16,7 @@ export const baseUrl = {
   workflow: '/view/workflow_instances',
   asyncTasks: '/view/async_task_instances',
   // tasks: '/view/task_instances',
+  workflow_instance: '/view/workflow_instance',
   tasksV2: '/view/v2/task_instances',
   task: '/view/task_instance',
   log: '/view/logs',
@@ -138,6 +139,16 @@ export function listTaskInstance(
 export function listTaskParam(taskId: string): Promise<ITaskParamVo[]> {
   return restProxy<ITaskParamVo[]>({
     url: `${baseUrl.task}/${taskId}/parameters`,
+    method: 'get',
+  });
+}
+/**
+ * 获取实例全局参数列表
+ * @param triggerId
+ */
+export function getGlobalParameters(triggerId: string): Promise<IGlobalParamseterVo[]> {
+  return restProxy<IGlobalParamseterVo[]>({
+    url: `${baseUrl.workflow_instance}/${triggerId}/globalParameters`,
     method: 'get',
   });
 }

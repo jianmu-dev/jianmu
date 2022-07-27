@@ -5,7 +5,7 @@
         <div>
           <div class="param-key">流程名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="workflowName" :tip-append-to-body="false"/>
+            <jm-text-viewer :value="record.name" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -258,14 +258,12 @@ import {
   onBeforeMount,
   onBeforeUnmount,
   onUpdated,
+  PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import yaml from 'yaml';
-import { namespace } from '@/store/modules/workflow-execution-record';
-import { IState } from '@/model/modules/workflow-execution-record';
-import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
-import TaskList from '@/views/workflow-execution-record/task-list.vue';
+import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import TaskList from '@/components/workflow/workflow-detail/layout/right/task-list.vue';
 import { datetimeFormatter } from '@/utils/formatter';
 import { listTaskInstance, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
@@ -291,16 +289,28 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    record: {
+      type: Object as PropType<IWorkflowExecutionRecordVo>,
+      required: true,
+    },
+    taskRecords: {
+      // type: Array as PropType<IWorkflowExecutionRecordVo[]>,
+      type: Array,
+      default: ()=>([]),
+    },
   },
   setup(props: any) {
     const { proxy } = getCurrentInstance() as any;
     const { pipeline, workflow } = yaml.parse(props.dsl);
-    const state = useStore().state[namespace] as IState;
+    // 同步任务列表
     const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
+    // 当前实例id
     const currentInstanceId = ref<string>('');
+    // 异步任务 根据点击的businessId筛选出
     const asyncTask = computed<ITaskExecutionRecordVo>(() => {
-      const latestTaskInstanceId = taskInstances.value.length === 0 ? '' : taskInstances.value[0].instanceId;
-      const at = state.recordDetail.taskRecords.find(item => item.businessId === props.businessId) || {
+      // const latestTaskInstanceId = taskInstances.value.find(e=>e.businessId===props.businessId)?.instanceId || '';
+      const latestTaskInstanceId = taskInstances.value[0]?.instanceId || '';
+      const at = props.taskRecords.find((item:any) => item.businessId === props.businessId) || {
         instanceId: '',
         businessId: '',
         nodeName: '',
@@ -346,6 +356,7 @@ export default defineComponent({
         TaskStatusEnum.RUNNING,
       ].includes(task.value.status),
     );
+    // 是否为挂起状态
     const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
     const tabActiveName = ref<string>(props.tabType);
     const taskParams = ref<ITaskParamVo[]>([]);
@@ -386,6 +397,7 @@ export default defineComponent({
       return statusNum;
     });
 
+    // 递归加载输入输出参数
     const loadData = async (func: (id: string) => Promise<void>, id: string, retry: number = 0) => {
       if (!taskInstanceId.value || taskInstanceId.value !== id) {
         console.debug('组件已卸载，终止加载任务');
@@ -394,6 +406,7 @@ export default defineComponent({
 
       try {
         await func(id);
+        // taskParams.value = await listTaskParam(id)
       } catch (err) {
         if (err instanceof TimeoutError) {
           // 忽略超时错误
@@ -423,41 +436,43 @@ export default defineComponent({
       await loadData(func, id, retry);
     };
 
-    const initialize = (id: string) => {
-      taskInstanceId.value = id;
-      currentInstanceId.value = id;
-
-      // 加载参数
-      loadData(async (id: string) => {
-        taskParams.value = await listTaskParam(id);
-      }, id);
-    };
-
-    const destroy = () => {
-      taskInstanceId.value = '';
-    };
-
-
     // 初始化任务
     onBeforeMount(async () => {
       taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
       if (taskInstances.value.length > 0) {
+        const initialize = (id: string) => {
+          taskInstanceId.value = id;
+          currentInstanceId.value = id;
+          // 加载参数
+          loadData(async (id: string) => {
+            taskParams.value = await listTaskParam(id);
+          }, id);
+        };
         initialize(taskInstances.value[0].instanceId);
-        currentInstanceId.value = taskInstances.value[0].instanceId;
+        // currentInstanceId.value = taskInstances.value[0].instanceId;
       }
     });
 
     // 销毁任务
-    onBeforeUnmount(destroy);
+    onBeforeUnmount(() => {
+      taskInstanceId.value = '';
+      currentInstanceId.value = '';
+    });
 
     const maxWidthRecord = ref<Record<string, number>>({});
-    const changeTask = async (instanceId: string) => {
-      taskParams.value = await listTaskParam(instanceId);
-      await nextTick();
-      currentInstanceId.value = instanceId;
+    // 切换任务
+    const changeTask = (instanceId: string) => {
+      if (taskInstanceId.value === instanceId) {
+        currentInstanceId.value = taskInstances.value[0].instanceId;
+        return;
+      }
+      nextTick(() => {
+        currentInstanceId.value = instanceId;
+      });
     };
 
     const asyncTaskStartTime = ref<string>('');
+    // 监听新任务 触发新视图日志log
     onUpdated(async () => {
       if (asyncTask.value.startTime === asyncTaskStartTime.value) {
         return;
@@ -466,7 +481,7 @@ export default defineComponent({
       if (asyncTaskStartTime.value) {
         taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
         if (!taskInstanceId.value && taskInstances.value.length > 0) {
-          await changeTask(taskInstances.value[0].instanceId);
+          changeTask(taskInstances.value[0].instanceId);
         }
       }
       asyncTaskStartTime.value = asyncTask.value.startTime;
@@ -482,7 +497,6 @@ export default defineComponent({
     return {
       ParamTypeEnum,
       maxWidthRecord,
-      workflowName: state.recordDetail.record?.name,
       taskInstanceId,
       task,
       tasks,
@@ -491,12 +505,15 @@ export default defineComponent({
       tabActiveName,
       moreLog,
       nodeName: computed<string>(() => {
+        // const { alias } = (pipeline || workflow)[task.value.nodeName];
+        // return alias || task.value.nodeName;
         const { ref, name } = (pipeline || workflow).find(({ ref }: any) => ref === task.value.nodeName)!;
         return name || ref;
       }),
       download,
       currentInstanceId,
       nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}@`) ? SHELL_NODE_TYPE : task.value.defKey),
+      // nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value
           .filter(item => item.type === TaskParamTypeEnum.INPUT)
@@ -726,7 +743,6 @@ export default defineComponent({
       .log {
         margin: 16px;
         position: relative;
-        //height: calc(100vh - 286px);
 
         .loading {
           position: absolute;
@@ -753,7 +769,6 @@ export default defineComponent({
         background-color: #ffffff;
         border-radius: 4px;
         color: #082340;
-        //height: calc(100vh - 254px);
 
         .content {
           padding: 0 16px 16px 16px;

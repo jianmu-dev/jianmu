@@ -17,6 +17,7 @@ public class Trigger {
 
     private String id;
     private String projectId;
+    private String ref;
     private Type type;
     private String schedule;
     private Webhook webhook;
@@ -29,6 +30,10 @@ public class Trigger {
         return projectId;
     }
 
+    public String getRef() {
+        return ref;
+    }
+
     public Type getType() {
         return type;
     }
@@ -39,6 +44,10 @@ public class Trigger {
 
     public Webhook getWebhook() {
         return webhook;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
     }
 
     public void setType(Type type) {
@@ -55,6 +64,7 @@ public class Trigger {
 
     public static final class Builder {
         private String projectId;
+        private String ref;
         private Type type;
         private String schedule;
         private Webhook webhook;
@@ -68,6 +78,11 @@ public class Trigger {
 
         public Builder projectId(String projectId) {
             this.projectId = projectId;
+            return this;
+        }
+
+        public Builder ref(String ref) {
+            this.ref = ref;
             return this;
         }
 
@@ -89,6 +104,7 @@ public class Trigger {
         public Trigger build() {
             Trigger trigger = new Trigger();
             trigger.id = UUID.randomUUID().toString().replace("-", "");
+            trigger.ref = this.ref;
             trigger.schedule = this.schedule;
             trigger.webhook = this.webhook;
             trigger.projectId = this.projectId;
