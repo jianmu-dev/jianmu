@@ -1,5 +1,6 @@
 package dev.jianmu.api.eventhandler;
 
+import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.application.event.CronEvent;
 import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
@@ -27,10 +29,12 @@ import java.time.LocalDateTime;
 public class TriggerEventHandler {
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
+    private final UserContextHolder userContextHolder;
 
-    public TriggerEventHandler(ProjectApplication projectApplication, TriggerApplication triggerApplication) {
+    public TriggerEventHandler(ProjectApplication projectApplication, TriggerApplication triggerApplication, UserContextHolder userContextHolder) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
+        this.userContextHolder = userContextHolder;
     }
 
     @EventListener
@@ -54,16 +58,18 @@ public class TriggerEventHandler {
         this.triggerApplication.saveOrUpdate(cronEvent.getProjectId(), cronEvent.getSchedule());
     }
 
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleWebhookEvent(WebhookEvent webhookEvent) {
         // 创建Webhook触发器
-        this.triggerApplication.saveOrUpdate(webhookEvent.getProjectId(), webhookEvent.getWebhook());
+        var encryptedToken = this.userContextHolder.getSession().getEncryptedToken();
+        this.triggerApplication.saveOrUpdate(webhookEvent.getProjectId(), webhookEvent.getWebhook(), encryptedToken);
     }
 
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleManualEvent(ManualEvent manualEvent) {
         // 删除相关触发器
-        this.triggerApplication.deleteByProjectId(manualEvent.getProjectId());
+        var encryptedToken = this.userContextHolder.getSession().getEncryptedToken();
+        this.triggerApplication.deleteByProjectId(manualEvent.getProjectId(), encryptedToken, manualEvent.getAssociationId(), manualEvent.getAssociationType());
     }
 
     @Async

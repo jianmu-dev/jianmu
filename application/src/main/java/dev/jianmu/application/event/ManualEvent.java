@@ -17,4 +17,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ManualEvent {
     private String projectId;
+    private String associationId;
+    private String associationType;
 }

@@ -2,18 +2,20 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.jwt.UserContextHolder;
-import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.api.vo.ProjectIdVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
+import dev.jianmu.application.util.AssociationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 /**
@@ -26,6 +28,7 @@ import javax.validation.Valid;
 @RequestMapping("projects")
 @Tag(name = "项目API", description = "项目API")
 @SecurityRequirement(name = "bearerAuth")
+@Slf4j
 public class ProjectController {
     private final ProjectApplication projectApplication;
     private final GitRepoApplication gitRepoApplication;
@@ -68,7 +71,12 @@ public class ProjectController {
 
     @PostMapping
     @Operation(summary = "创建项目", description = "上传DSL并创建项目")
-    public ProjectIdVo createProject(@RequestBody @Valid DslTextDto dslTextDto) {
+    public ProjectIdVo createProject(HttpServletRequest request, @RequestBody @Valid DslTextDto dslTextDto) {
+        // TODO 打印日志
+        log.info("scheme:  {}", request.getScheme());
+        log.info("serverName:  {}", request.getServerName());
+        log.info("url:  {}", request.getRequestURL());
+        log.info("remoteAddr:  {}", request.getRemoteAddr());
         var session = this.userContextHolder.getSession();
         if (session.getAssociationId() != null) {
             if (dslTextDto.getBranch() == null) {
