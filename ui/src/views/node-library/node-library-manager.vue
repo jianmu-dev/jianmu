@@ -17,6 +17,7 @@
       </div>
       <div class="menu-bar">
         <button class="add" @click="creationActivated = true">
+          <i class="jm-icon-button-add"></i>
           <div class="label">新增本地节点</div>
         </button>
       </div>
@@ -372,29 +373,34 @@ export default defineComponent({
 
   .menu-bar {
     button {
-      position: relative;
+      color: #096DD9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
 
       .label {
-        position: absolute;
-        left: 0;
-        bottom: 45px;
+        color: #096DD9;
         width: 100%;
         text-align: center;
         font-size: 18px;
-        color: #b5bdc6;
       }
 
       &.add {
+        font-size: 36px;
         margin: 0.5%;
         width: 24%;
         min-width: 230px;
         height: 200px;
         background-color: #ffffff;
         border: 1px dashed #b5bdc6;
-        background-image: url('@/assets/svgs/btn/add.svg');
-        background-position: center 55px;
-        background-repeat: no-repeat;
         cursor: pointer;
+
+        i {
+          &::before {
+            font-weight: bold;
+          }
+        }
       }
     }
   }

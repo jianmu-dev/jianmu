@@ -188,10 +188,10 @@ export default defineComponent({
   .content {
     // 密钥命名空间
     ::v-deep(.secret-key-ns-manager) {
-      padding: 0;
+      padding-top: 20px;
 
-      .menu-bar button.add,
-      .content .item .local-item {
+      .add,
+      .vault-item {
         min-width: 288px;
       }
 
@@ -203,16 +203,18 @@ export default defineComponent({
     // 密钥管理页面
     ::v-deep(.secret-key-sk-manager) {
       .namespace {
-        margin: 20px 6px;
+        padding: 20px 0 10px;
       }
 
       .keys {
         padding: 0;
-      }
 
-      .menu-bar button.add,
-      .content .item {
-        min-width: 288px;
+        .content {
+          .add,
+          .item {
+            min-width: 288px;
+          }
+        }
       }
     }
 

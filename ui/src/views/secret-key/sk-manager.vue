@@ -10,6 +10,7 @@
     <div class="keys">
       <div class="content">
         <button class="add" @click="add">
+          <i class="jm-icon-button-add"></i>
           <div class="label">新增密钥</div>
         </button>
         <div class="item" v-for="{ id, name } of keys" :key="id">
@@ -186,30 +187,34 @@ export default defineComponent({
       flex-wrap: wrap;
 
       button {
-        position: relative;
+        color: #096DD9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
 
         .label {
-          position: absolute;
-          left: 0;
           width: 100%;
           text-align: center;
           font-size: 14px;
-          color: #096DD9;
-          margin-top: 10px;
         }
 
         &.add {
+          font-size: 36px;
           margin: 0.5%;
           width: 19%;
           min-width: 260px;
           height: 180px;
           background-color: #ffffff;
           border: 1px solid #E7ECF1;
-          background-image: url('@/assets/svgs/btn/add.svg');
-          background-position: center 56px;
-          background-repeat: no-repeat;
           cursor: pointer;
           border-radius: 4px;
+
+          i {
+            &::before {
+              font-weight: bold;
+            }
+          }
         }
       }
 
