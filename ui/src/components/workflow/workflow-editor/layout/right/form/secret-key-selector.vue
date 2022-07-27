@@ -63,3 +63,18 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="less">
+.el-cascader-panel {
+  .el-cascader-menu {
+    .el-cascader-menu__wrap {
+      .el-scrollbar__view {
+        .el-cascader-node {
+          .el-cascader-node__prefix{
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

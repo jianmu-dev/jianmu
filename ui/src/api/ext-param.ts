@@ -1,8 +1,8 @@
-import {IExternalParameterCreatingDto, IExternalParameterUpdatingDto, IExternalParameterVo,IExternalParameterLabelVo} from './dto/ext-param'
-import {restProxy} from "@/api/index";
+import { IExternalParameterCreatingDto, IExternalParameterLabelVo, IExternalParameterUpdatingDto, IExternalParameterVo } from './dto/ext-param';
+import { restProxy } from '@/api/index';
 
 const getExtParamUrl = '/view/external_parameters';
-const getExtParamLabelUrl = '/view/external_parameters/labels'
+const getExtParamLabelUrl = '/view/external_parameters/labels';
 const extParamUrl = '/external_parameters';
 
 /**
@@ -52,9 +52,9 @@ export function editorExtParam(dto: IExternalParameterUpdatingDto): Promise<void
   });
 }
 
-export function getExtParamLabelList():Promise<IExternalParameterLabelVo[]>{
+export function getExtParamLabelList(): Promise<IExternalParameterLabelVo[]> {
   return restProxy({
-    url:`${getExtParamLabelUrl}`,
-    method:'get',
+    url: `${getExtParamLabelUrl}`,
+    method: 'get',
   });
 }
