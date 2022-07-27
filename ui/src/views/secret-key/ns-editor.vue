@@ -2,24 +2,13 @@
   <jm-dialog
     custom-class="center"
     v-model="dialogVisible"
-    width="500px">
+    width="700px">
     <template v-slot:title>
       <div class="editor-title">新增密钥命名空间</div>
     </template>
     <jm-form :model="editorForm" :rules="editorRule" ref="editorFormRef" @submit.prevent>
       <jm-form-item label="命名空间" label-position="top" prop="name">
         <jm-input v-model="editorForm.name" clearable placeholder="请输入命名空间"/>
-      </jm-form-item>
-      <jm-form-item v-if="credentialManagerType === CredentialManagerTypeEnum.LOCAL" label="描述" label-position="top"
-                    prop="description">
-        <jm-input
-          type="textarea"
-          v-model="editorForm.description"
-          clearable
-          maxlength="256"
-          show-word-limit
-          placeholder="请输入描述"
-          :autosize="{minRows: 6, maxRows: 10}"/>
       </jm-form-item>
     </jm-form>
     <template #footer>
@@ -103,8 +92,6 @@ export default defineComponent({
 
 <style scoped lang="less">
 .editor-title {
-  padding-left: 36px;
-  background-image: url('@/assets/svgs/btn/edit.svg');
   background-repeat: no-repeat;
   background-position: left center;
 }
