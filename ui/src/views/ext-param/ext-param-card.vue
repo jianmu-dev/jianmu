@@ -221,10 +221,11 @@ export default defineComponent({
     line-height: 15px;
 
     .tag,
-    .custom-tag{
+    .custom-tag {
       padding: 4px;
       box-sizing: border-box;
     }
+
     .tag {
       background: #E6F7FF;
       border-radius: 2px;
