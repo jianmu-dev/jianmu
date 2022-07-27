@@ -47,6 +47,7 @@ export default defineComponent({
     let recordList:RecordList;
     // 更改当前record
     const handleChange = (record: IWorkflowExecutionRecordVo) => {
+      console.log('选择record', record.triggerId);
       emit('change-record', record);
       recordList.resetSuspended();
     };

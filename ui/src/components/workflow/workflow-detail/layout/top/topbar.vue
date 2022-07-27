@@ -11,7 +11,14 @@
             {{ project.branch || 'master' }}
           </div>
           <div v-show="!entry" class="jm-icon-workflow-group" style="color: #096DD9"></div>
-          <div v-show="!entry" class="project-group-name">{{ project.projectGroupName }}</div>
+          <router-link
+            v-show="!entry"
+            :to="{
+              path: `/project-group/detail/${project?.projectGroupId}`,
+            }"
+          >
+            <div class="project-group-name">{{ project.projectGroupName }}</div>
+          </router-link>
         </div>
         <div class="second-row" v-if="project.workflowDescription">{{ project.workflowDescription }}</div>
       </div>
