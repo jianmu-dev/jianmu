@@ -13,7 +13,7 @@
     <!--  内容  -->
     <div class="ext-content">
       <div class="add-param" @click="add">
-        <i class="add-btn"></i>
+        <i class="jm-icon-button-add"/>
         新增参数
       </div>
       <!--  外部参数卡片    -->
@@ -405,12 +405,12 @@ export default defineComponent({
       font-weight: 400;
       color: #096DD9;
 
-      .add-btn {
-        display: inline-block;
-        width: 36px;
-        height: 36px;
-        background-image: url("@/assets/svgs/ext-param/add-param-btn.svg");
-        margin-bottom: 10px;
+      .jm-icon-button-add {
+        font-size: 36px;
+
+        &::before {
+          font-weight: bold;
+        }
       }
     }
   }
