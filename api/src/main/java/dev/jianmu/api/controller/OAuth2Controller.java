@@ -22,6 +22,7 @@ import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.oauth2.api.exception.RepoExistedException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
 import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.oauth2.api.vo.ITokenVo;
@@ -116,9 +117,11 @@ public class OAuth2Controller {
         IUserInfoVo userInfoVo = oAuth2Api.getUserInfo(accessToken);
 
         Association association;
+        AssociationData associationData;
         try {
+            associationData = AssociationData.buildGitRepo(gitRepoLoggingDto.getRef(), gitRepoLoggingDto.getOwner());
             association = this.oAuth2Application.getAssociation(gitRepoLoggingDto.thirdPartyType(), accessToken, userInfoVo,
-                    AssociationData.buildGitRepo(gitRepoLoggingDto.getRef(), gitRepoLoggingDto.getOwner()));
+                    associationData);
         } catch (OAuth2IsNotAuthorizedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(JwtResponse.builder()
                     .message(e.getMessage())
@@ -165,11 +168,12 @@ public class OAuth2Controller {
                 .avatarUrl(user.getAvatarUrl())
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
                 .entryUrl(oAuth2Api.getEntryUrl(gitRepoLoggingDto.getOwner(), gitRepoLoggingDto.getRef()))
+                .associationData(associationData)
                 .build());
     }
 
     @PutMapping("/refresh/git_repo")
-    public ResponseEntity<JwtResponse> refreshToken(@Valid @RequestBody GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
         JwtSession session = this.userContextHolder.getSession();
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
@@ -181,19 +185,28 @@ public class OAuth2Controller {
         String accessToken;
         String encryptedToken;
         RoleEnum role;
+        AssociationData associationData;
         try {
             encryptedToken = session.getEncryptedToken();
             accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             userInfo = oAuth2Api.getUserInfo(accessToken);
+            associationData = AssociationData.buildGitRepo(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner());
             role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
-                    AssociationData.buildGitRepo(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner())).getRole();
+                    associationData).getRole();
+        } catch (OAuth2IsNotAuthorizedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (OAuth2EntryException | RepoExistedException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        GitRepo gitRepo = this.gitRepoRepository.findByRefAndOwner(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner())
-                .orElseThrow(() -> new DataNotFoundException("未找到此仓库"));
+        Optional<GitRepo> gitRepoOptional = this.gitRepoRepository.findByRefAndOwner(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner());
+        if (gitRepoOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        var gitRepo = gitRepoOptional.get();
         long expireTimestamp = session.getExpireTimestamp();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
@@ -219,6 +232,7 @@ public class OAuth2Controller {
                 .avatarUrl(session.getAvatarUrl())
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
                 .entryUrl(oAuth2Api.getEntryUrl(gitRepoTokenRefreshingDto.getOwner(), gitRepoTokenRefreshingDto.getRef()))
+                .associationData(associationData)
                 .build());
     }
 

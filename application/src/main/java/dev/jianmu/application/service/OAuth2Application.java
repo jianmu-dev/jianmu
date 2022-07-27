@@ -17,7 +17,6 @@ import dev.jianmu.oauth2.api.exception.NoPermissionException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
 import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
 import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.ITokenVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,7 +114,6 @@ public class OAuth2Application {
             } catch (NoPermissionException e) {
                 throw new OAuth2IsNotAuthorizedException(e.getMessage());
             }
-            throw new OAuth2EntryException("不存在此仓库");
         }
         throw new OAuth2EntryException("缺少仓库名或仓库所有者信息");
     }
