@@ -263,7 +263,7 @@ import {
 } from 'vue';
 import yaml from 'yaml';
 import { ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import TaskList from '@/views/workflow-execution-record/task-list.vue';
+import TaskList from '@/components/workflow/workflow-detail/layout/right/task-list.vue';
 import { datetimeFormatter } from '@/utils/formatter';
 import { listTaskInstance, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
@@ -743,7 +743,6 @@ export default defineComponent({
       .log {
         margin: 16px;
         position: relative;
-        //height: calc(100vh - 286px);
 
         .loading {
           position: absolute;
@@ -770,7 +769,6 @@ export default defineComponent({
         background-color: #ffffff;
         border-radius: 4px;
         color: #082340;
-        //height: calc(100vh - 254px);
 
         .content {
           padding: 0 16px 16px 16px;

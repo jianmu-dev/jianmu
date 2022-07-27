@@ -23,25 +23,26 @@ export class RecordList {
   }
 
   /**
-   * 不执行SSE
-  */
+   * 获取所有record
+   */
   async initAllRecords() {
     this.allRecords = await listWorkflowExecutionRecord(this.workflowRef);
     this.recordListCallbackFn([...this.allRecords]);
   }
   refreshSuspended() {
-    // 挂起状态刷新
+    // 打开挂起刷新开关
     this.ignoreSuspended = false;
   }
   resetSuspended() {
+    // 关闭挂起刷新开关
+    this.ignoreTime = 0;
     this.ignoreSuspended = true;
   }
   /**
    * listen刷新数据
-  */
+   */
   listen():void {
     this.eventSource = setInterval(async()=>{
-      // console.log('record-list 3秒', this.allRecords.length);
       if (!this.allRecords.length) {
         console.log('allRecords -> 0,不监听record-list状态');
         return;
@@ -50,12 +51,10 @@ export class RecordList {
       if (!this.allRecords.find(item => checkWorkflowRunning(item.status, this.ignoreSuspended))) {
         // 忽略挂起刷新状态(次数) 重置
         console.log('忽略record-list挂起 重置');
-        // console.log('忽略record-list挂起 重置', this.allRecords.map(e=>e.status));
         return;
       }
       // 不忽略挂起刷新次数 新增
       if (!this.ignoreSuspended) {
-        // this.ignoreSuspended -> false
         this.ignoreTime++;
         console.log(`graph 重试(忽略)后刷新第${this.ignoreTime}次`);
       }
@@ -74,12 +73,11 @@ export class RecordList {
     }, 3000);
   }
   /**
-   * 执行SSE
-  */
+   * TODO -> SSE
+   */
   private executeSSE() {
     this.eventSource = new EventSource(`/view/workflow_instances/${this.workflowRef}`, { withCredentials: true });
     this.eventSource.onmessage = async (e: any) => {
-      // this.allRecords e 数据处理
       this.recordListCallbackFn([...this.allRecords]);
     };
     this.eventSource.onerror = (e: any) => {
@@ -96,7 +94,6 @@ export class RecordList {
    * 销毁
    */
   destroy(): void {
-    // this.eventSource && this.eventSource.close();
     this.eventSource && clearInterval(this.eventSource);
   }
 }

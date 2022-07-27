@@ -2,7 +2,7 @@ import { terminate as _terminate } from '@/api/workflow-execution-record';
 
 /**
  * RecordInfo类
-*/
+ */
 export class RecordInfo {
   private recordId: string;
   constructor(recordId: string) {
@@ -16,7 +16,7 @@ export class RecordInfo {
 
 /**
  * 状态中文翻译
-*/
+ */
 export function statusTranslate(status: string) {
   const statusTranslate = {
     '': '未启动',

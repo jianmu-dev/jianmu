@@ -216,7 +216,7 @@ export default defineComponent({
       }
       router.push({
         name: 'workflow-execution-record-detail',
-        query: { projectId, entry: entry? 'true':'false' },
+        query: { projectId },
       });
     };
     return {

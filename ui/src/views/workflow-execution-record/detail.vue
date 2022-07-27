@@ -20,7 +20,7 @@ import { IState } from '@/model/modules/session';
 import { ISessionVo } from '@/api/dto/session';
 import { IWorkflowDetailParam } from '@/components/workflow/workflow-detail/model/data/common';
 import { ViewModeEnum } from '@/api/dto/enumeration';
-import { LOGIN_INDEX } from '@/router/path-def';
+// import { LOGIN_INDEX } from '@/router/path-def';
 import { IRootState } from '@/model';
 
 export default defineComponent({
@@ -34,18 +34,15 @@ export default defineComponent({
       default: ViewModeEnum.GRAPHIC,
     },
     triggerId: String,
-    entry: {
-      type: String as PropType<'true'|'false'>,
-      default: 'false',
-    },
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
     const state = store.state[sessionNs] as IState;
-    const entryUrl = store.state[sessionNs].session.entryUrl;
     const rootState = store.state as IRootState;
+    const entry = rootState.entry || false;
+    const entryUrl = store.state[sessionNs].session.entryUrl;
     const loading = ref<boolean>(false);
     // workflow 详情数据是否加载完成
     const loaded = ref<boolean>(false);
@@ -53,7 +50,7 @@ export default defineComponent({
       projectId: props.projectId,
       viewMode: props.viewMode,
       triggerId: props.triggerId,
-      entry: JSON.parse(props.entry),
+      entry,
     });
     return {
       loading,

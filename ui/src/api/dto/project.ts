@@ -214,7 +214,7 @@ export interface IGlobalParamseterVo
     ref: string;
     name: string;
     type: string;
-    value: string | number | boolean | object;
+    value: string | number | boolean;
     required: boolean;
   }> {
 }

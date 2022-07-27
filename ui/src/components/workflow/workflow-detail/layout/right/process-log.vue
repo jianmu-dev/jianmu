@@ -75,7 +75,6 @@ export default defineComponent({
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
-    // const state = useStore().state[namespace] as IState;
     const process = computed<IWorkflowExecutionRecordVo>(() => props.record as IWorkflowExecutionRecordVo);
     const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (props.record.status as WorkflowExecutionRecordStatusEnum));
     const isSuspended = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.SUSPENDED === (props.record.status as WorkflowExecutionRecordStatusEnum));
@@ -114,7 +113,6 @@ export default defineComponent({
 
   .basic-section {
     margin: 20px;
-    //padding: 16px 20px 0;
     padding: 16px 0 0 20px;
     display: flex;
     justify-content: space-between;

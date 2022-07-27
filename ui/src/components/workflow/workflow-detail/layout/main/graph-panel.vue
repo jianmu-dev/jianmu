@@ -75,7 +75,6 @@ import { ViewModeEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   components: { ProcessLog, TaskLog, WebhookLog, ParamLog },
-  // components: { ParamLog },
   props: {
     record: {
       type: Object as PropType<IWorkflowExecutionRecordVo>,
@@ -169,7 +168,6 @@ export default defineComponent({
         if ([NodeToolbarTabTypeEnum.RETRY, NodeToolbarTabTypeEnum.IGNORE].includes(tabType)) {
           const nodeData = taskRecords.value&&taskRecords.value.find(({ businessId }) => businessId === nodeId)!;
           await (tabType === NodeToolbarTabTypeEnum.RETRY ? retryTask : ignoreTask)(props.record!.id, nodeData? nodeData.nodeName: 'null');
-          // await loadData();
           // 重试 忽略
           graphPanel.refreshSuspended();
           // 传递给index 调用 recordListRefreshSuspended
@@ -180,14 +178,11 @@ export default defineComponent({
         taskLogForm.value.drawerVisible = true;
         taskLogForm.value.id = nodeId;
         taskLogForm.value.tabType = tabType;
-        // console.log('打开任务日志', nodeId, tabType);
       },
       openProcessLog: () => {
-        // console.log('打开流程日志');
         processLogDrawer.value = true;
       },
       openWebhookLog: (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
-        // console.log('打开webhook日志', nodeId, tabType);
         webhookLogForm.value.drawerVisible = true;
         webhookLogForm.value.nodeName = nodeId;
         webhookLogForm.value.tabType = tabType;
@@ -195,7 +190,6 @@ export default defineComponent({
         webhookLogForm.value.triggerType = props.record?.triggerType;
       },
       openParamLog() {
-        // console.log('打开全局参数窗口');
         paramLogDrawer.value = true;
       },
       async refreshGraphPanel() {
@@ -212,9 +206,7 @@ export default defineComponent({
 .jm-workflow-detail-graph-panel {
   background-color: #ffffff;
   height: calc(100vh - 140px);
-  // .jm-workflow-viewer{
-  //   height: calc(100% - 80px);
-  // }
+
   ::v-deep(.el-tabs__nav-scroll) {
     line-height: 46px;
   }

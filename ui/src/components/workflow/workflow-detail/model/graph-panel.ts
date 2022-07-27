@@ -29,7 +29,6 @@ export class GraphPanel {
   }
   async getGlobalParams() {
     if (!this.currentRecord.triggerId) {
-      // throw new Error('triggerId 缺失');
       console.log('triggerId 缺失');
       return;
     }
@@ -65,7 +64,7 @@ export class GraphPanel {
   }
   /**
    * listen刷新 graph数据
-  */
+   */
   listen():void {
     const checkTaskRunning = (status: TaskStatusEnum, ignoreSuspended: boolean=true): boolean => {
       const statuses = [
@@ -78,12 +77,11 @@ export class GraphPanel {
       return statuses.includes(status);
     };
     this.eventSource = setInterval(async()=>{
-      // console.log('graph-panel 3秒', this.taskRecords.length);
       if (!this.taskRecords.length) {
         console.log('taskRecords -> 0，不监听graph-panel状态');
         return;
       }
-      // 全量判断是否刷新 this.currentRecord
+      // 全量判断是否刷新
       if (!checkWorkflowRunning(this.currentRecord.status, this.ignoreSuspended) && !this.taskRecords.find(item => checkTaskRunning(item.status, this.ignoreSuspended))) {
         // 忽略挂起刷新状态(次数) 重置
         this.ignoreSuspended = true;
@@ -93,7 +91,6 @@ export class GraphPanel {
       }
       // 不忽略挂起刷新次数 新增
       if (!this.ignoreSuspended) {
-        // this.ignoreSuspended -> false
         this.ignoreTime++;
         console.log(`graph 重试(忽略)后刷新第${this.ignoreTime}次`);
       }
@@ -112,9 +109,12 @@ export class GraphPanel {
     }, 3000);
   }
   refreshSuspended() {
+    // 打开挂起刷新开关
     this.ignoreSuspended = false;
   }
   resetSuspended() {
+    // 关闭挂起刷新开关
+    this.ignoreTime = 0;
     this.ignoreSuspended = true;
   }
   reflushGparam(record: IWorkflowExecutionRecordVo) {
@@ -124,7 +124,6 @@ export class GraphPanel {
    * 销毁
    */
   destroy(): void {
-    // this.eventSource && this.eventSource.close();
     this.eventSource && clearInterval(this.eventSource);
   }
 }

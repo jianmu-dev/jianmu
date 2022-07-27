@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IWorkflowDetailParam, IRecordDetail, IRecordListParam } from './model/data/common';
 import Topbar from './layout/top/topbar.vue';
@@ -45,7 +45,6 @@ import GraphPanel from './layout/main/graph-panel.vue';
 import { ISessionVo } from '@/api/dto/session';
 import { ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
-import { useStore } from 'vuex';
 import { IProjectDetailVo } from '@/api/dto/project';
 
 export default defineComponent({
@@ -69,18 +68,13 @@ export default defineComponent({
       workflowRef: recordDetail.value.project?.workflowRef || '',
       triggerId: props.modelValue.triggerId,
     }));
-    // props.modelValue.entry;
     const recordList = ref();
     const graphPanel = ref();
-    // retry实例
-    let retryInstance:any = undefined;
     onMounted(async ()=>{
+      // 获取项目详情
       recordDetail.value.project = await fetchProjectDetail(props.modelValue.projectId);
     });
-    onBeforeUnmount(()=>{
-      // 销毁重试实例
-      retryInstance && retryInstance.destroy();
-    });
+
     return {
       recordDetail,
       recordList,
@@ -89,9 +83,8 @@ export default defineComponent({
       ViewModeEnum,
       handleChangeRecord(record: IWorkflowExecutionRecordVo) {
         const { name: projectGroupName, triggerId } = record;
-        // entry -> false
+        // entry -> false 建木CI的topbar 更改项目名
         if (!props.modelValue.entry) {
-          // topbar 更改项目名
           recordDetail.value.project = {
             ...recordDetail.value.project,
             projectGroupName,
@@ -108,7 +101,7 @@ export default defineComponent({
       },
       trigger(msg: any) {
         emit('trigger', msg);
-        // undefined 触发成功之后刷新record列表 msg undefined为成功
+        // undefined 触发成功之后刷新record列表 msg -> undefined为成功
         if(!msg) {
           recordList.value.refreshRecordList();
           graphPanel.value.refreshGraphPanel();
@@ -121,15 +114,8 @@ export default defineComponent({
         graphPanel.value.refreshGraphPanel();
       },
       recordListRefreshSuspended() {
+        // 开启 挂起刷新开关
         recordList.value.refreshSuspended();
-        // console.log('taskRecords', graphPanel.value.taskRecords);
-        // console.log('record', recordDetail.value.record);
-        // // 已经实例化就返回
-        // if (retryInstance) {
-        //   return;
-        // }
-        // retryInstance = new RetryTask(recordList.value.refreshRecordList, graphPanel.value.refreshGraphPanel);
-        // retryInstance.listen(recordDetail.value.record, graphPanel.value.taskRecords);
       },
     };
   },

@@ -173,7 +173,6 @@ export default defineComponent({
 
   .right {
     display: flex;
-    // width: 220px;
     justify-content: space-around;
     align-items: center;
     

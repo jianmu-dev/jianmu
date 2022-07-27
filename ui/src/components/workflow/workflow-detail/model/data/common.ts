@@ -1,9 +1,9 @@
-import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { INodeDefVo, IProjectDetailVo } from '@/api/dto/project';
+import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { IProjectDetailVo } from '@/api/dto/project';
 import { ViewModeEnum } from '@/api/dto/enumeration';
-// import { IAssociation } from '@/components/workflow/workflow-editor/model/data/common';
+
 /**
- * 详情页面 地址栏参数 todo triggerId -> triggerId
+ * 详情页面 地址栏参数 entry 适配gitLink(true)
  */
 export interface IWorkflowDetailParam {
   entry: boolean;
@@ -13,28 +13,16 @@ export interface IWorkflowDetailParam {
 }
 
 /**
- * 详情页面 具体实例
+ * 详情页面 当前项目 当前执行记录
  */
 export interface IRecordDetail {
   project?: IProjectDetailVo;
   record?: IWorkflowExecutionRecordVo;
 }
 /**
- * list 参数
+ * record-list 参数
  */
 export interface IRecordListParam {
   workflowRef: string;
   triggerId?: string;
-}
-/**
- * 详情页面数据
- */
-export interface IWorkflowDetail {
-  project: IProjectDetailVo;
-  navScrollLeft: number;
-  allRecords: IWorkflowExecutionRecordVo[];
-  record: IWorkflowExecutionRecordVo;
-  recordDsl: string;
-  taskRecords: ITaskExecutionRecordVo[];
-  nodeInfos: INodeDefVo[];
 }

@@ -4,7 +4,7 @@
       <div
       class="tab"
       :class="{
-        [(record.status || 'INIT').toLowerCase()]: true,
+        [(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true,
         [record.triggerId === param.triggerId ? 'selected' : 'unselected']: true
       }"
       v-for="(record, i) in allRecords"
@@ -22,12 +22,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
+import { computed, defineComponent, onBeforeUnmount, onMounted, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IRecordListParam } from '../../model/data/common';
 import { RecordList } from '../../model/record-list';
 import { IProjectDetailVo } from '@/api/dto/project';
-import { on } from 'process';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 export default defineComponent({
   props: {
@@ -53,17 +52,10 @@ export default defineComponent({
     };
     // 当前record的状态
     const currentRecordStatus = computed(()=>{
-      return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.status || 'INIT';
+      return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.status || WorkflowExecutionRecordStatusEnum.INIT;
     });
-    // onUpdated(()=>{
-    //   console.log('clickStatus list', clickStatus);
-    //   console.log('currentRecordStatus list', currentRecordStatus.value);
-    //   if (clickStatus !== currentRecordStatus.value) {
-    //     // emit('change-record', allRecords.value.find(e=>e.triggerId===props.param.triggerId));
-    //   }
-    // });
     onMounted(async ()=>{
-      // let fristGet = true;
+      // 实例化RecordList 传入项目的workflowRef，传入回调->获取allRecords并主动选择当前record
       recordList = new RecordList(props.param.workflowRef, (data: IWorkflowExecutionRecordVo[]):void=>{
         allRecords.value = data.length? data:[{
           endTime: '',
@@ -77,29 +69,28 @@ export default defineComponent({
           workflowRef: props.project.workflowRef,
           workflowVersion: props.project.workflowVersion,
         } as IWorkflowExecutionRecordVo];
-        // if (fristGet) {
-        //   fristGet = false;
         if (props.param.triggerId && allRecords.value.length) {
-          handleChange(allRecords.value.find(e=>e.triggerId===props.param.triggerId) as IWorkflowExecutionRecordVo);
+          handleChange(allRecords.value.find(e => e.triggerId === props.param.triggerId) as IWorkflowExecutionRecordVo);
         } else if (allRecords.value.length){
           handleChange(allRecords.value[0]);
         }
-        // }
       });
+      // 获取allRecords方法
       await recordList.initAllRecords();
-      // recordList.initAllRecords();
+      // 开启record-list数据监听
       recordList.listen();
     });
 
     onBeforeUnmount(()=>{
+      // 卸载record-list数据监听
       recordList.destroy();
     });
     return {
       allRecords,
       handleChange,
       currentRecordStatus,
+      WorkflowExecutionRecordStatusEnum,
       refreshRecordList() {
-        console.log('刷新RecordList');
         recordList.initAllRecords();
       },
       refreshSuspended() {
@@ -202,12 +193,9 @@ export default defineComponent({
 
     &.unselected {
       cursor: pointer;
-      // height: 59px;
-      // border-bottom: 1px solid #fff;
       opacity: 0.55;
 
       .label {
-        // padding: 7px 10px 0;
         text-align: right;
         font-size: 20px;
       }

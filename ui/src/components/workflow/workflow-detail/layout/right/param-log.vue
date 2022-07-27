@@ -118,7 +118,6 @@ export default defineComponent({
 <style lang="less" scoped>
 .tab-content {
   padding: 25px 30px 0;
-  // border: 1px solid #eef0f7;
 
   ::v-deep(.el-table) {
     overflow: visible;
@@ -193,7 +192,6 @@ export default defineComponent({
   .log {
     margin: 16px;
     position: relative;
-    //height: calc(100vh - 286px);
 
     .loading {
       position: absolute;
@@ -212,7 +210,6 @@ export default defineComponent({
     background-color: #ffffff;
     border-radius: 4px;
     color: #082340;
-    //height: calc(100vh - 254px);
 
     .content {
       padding: 0 16px 16px 16px;

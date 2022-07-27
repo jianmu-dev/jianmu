@@ -11,7 +11,7 @@
     </div>
     <div class="vertical-divider"></div>
     <div>状态：<span class="status" :class="{[(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true}">{{ statusTranslate(record.status) }}</span></div>
-    <button v-if="showTerminateBtn(record.status)" @click="handleTerminate" class="jm-icon-button-stop terminate-button">终止</button>
+    <button v-if="checkWorkflowRunning(record.status, false)" @click="handleTerminate" class="jm-icon-button-stop terminate-button">终止</button>
   </div>
 </template>
 
@@ -35,20 +35,12 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const isSuspended = computed(()=>props.record.status === WorkflowExecutionRecordStatusEnum.SUSPENDED);
     const recordInfo = new RecordInfo(props.record.id);
-    const showTerminateBtn = (status: WorkflowExecutionRecordStatusEnum)=>{
-      return [
-        WorkflowExecutionRecordStatusEnum.INIT,
-        WorkflowExecutionRecordStatusEnum.RUNNING,
-        WorkflowExecutionRecordStatusEnum.SUSPENDED,
-      ].includes(status);
-    };
     return {
       datetimeFormatter,
       isSuspended,
       checkWorkflowRunning,
       statusTranslate,
       WorkflowExecutionRecordStatusEnum,
-      showTerminateBtn,
       handleTerminate() {
         proxy.$confirm('确定要终止吗?', '终止项目执行', {
           confirmButtonText: '确定',
@@ -85,8 +77,6 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   height: @record-info-height;
-  // background: @default-background-color;
-  // background: @default-background-color;
   color: @shallow-black-color;
   z-index: 3;
   font-size: 16px;
