@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -25,10 +26,21 @@ import java.util.Objects;
 @ConfigurationProperties(prefix = "jianmu.oauth2")
 public class OAuth2Properties implements InitializingBean, EnvironmentAware {
     private String type;
+    private String webhookHost;
     private boolean allowRegistration = true;
     private GiteeConfigProperties gitee;
     private GitlinkConfigProperties gitlink;
     private Environment environment;
+
+    public String getWebhookHost() {
+        if (!StringUtils.hasText(this.webhookHost)) {
+            throw new RuntimeException("未配置jianmu.oauth2.webhook-host");
+        }
+        if (this.webhookHost.endsWith("/")) {
+            return this.webhookHost + "webhook/";
+        }
+        return this.webhookHost + "/webhhok/";
+    }
 
     public String getClientSecret() {
         if (this.gitee != null) {

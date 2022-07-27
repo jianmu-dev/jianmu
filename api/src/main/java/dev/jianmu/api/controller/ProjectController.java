@@ -28,7 +28,6 @@ import javax.validation.Valid;
 @RequestMapping("projects")
 @Tag(name = "项目API", description = "项目API")
 @SecurityRequirement(name = "bearerAuth")
-@Slf4j
 public class ProjectController {
     private final ProjectApplication projectApplication;
     private final GitRepoApplication gitRepoApplication;
@@ -71,12 +70,7 @@ public class ProjectController {
 
     @PostMapping
     @Operation(summary = "创建项目", description = "上传DSL并创建项目")
-    public ProjectIdVo createProject(HttpServletRequest request, @RequestBody @Valid DslTextDto dslTextDto) {
-        // TODO 打印日志
-        log.info("scheme:  {}", request.getScheme());
-        log.info("serverName:  {}", request.getServerName());
-        log.info("url:  {}", request.getRequestURL());
-        log.info("remoteAddr:  {}", request.getRemoteAddr());
+    public ProjectIdVo createProject(@RequestBody @Valid DslTextDto dslTextDto) {
         var session = this.userContextHolder.getSession();
         if (session.getAssociationId() != null) {
             if (dslTextDto.getBranch() == null) {
