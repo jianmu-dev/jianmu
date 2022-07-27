@@ -13,6 +13,7 @@ import dev.jianmu.project.event.TriggerEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.Map;
@@ -77,12 +78,13 @@ public class ProjectEventHandler {
         this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), this.userContextHolder.getSession().getAssociationId());
     }
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleProjectDelete(DeletedEvent deletedEvent) {
         // 项目删除事件, 删除相关的Trigger
-        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId());
+        var encryptedToken = this.userContextHolder.getSession().getEncryptedToken();
+        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId(), encryptedToken, deletedEvent.getAssociationId(), deletedEvent.getAssociationType());
         // 移除gitRepo中flow
-        this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), this.userContextHolder.getSession().getAssociationId());
+        this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), deletedEvent.getAssociationId());
     }
 
     @TransactionalEventListener

@@ -283,7 +283,7 @@ public class ProjectApplication {
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.publisher.publishEvent(new DeletedEvent(project.getId()));
+        this.publisher.publishEvent(new DeletedEvent(project.getId(), project.getAssociationId(), project.getAssociationType()));
     }
 
     @Transactional
@@ -332,6 +332,8 @@ public class ProjectApplication {
         if (project.getTriggerType() == Project.TriggerType.MANUAL) {
             var manualEvent = ManualEvent.builder()
                     .projectId(project.getId())
+                    .associationId(project.getAssociationId())
+                    .associationType(project.getAssociationType())
                     .build();
             this.publisher.publishEvent(manualEvent);
         }

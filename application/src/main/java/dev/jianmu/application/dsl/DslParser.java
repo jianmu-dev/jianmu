@@ -603,8 +603,8 @@ public class DslParser {
                                     throw new DslException("Webhook参数不支持使用SECRET类型");
                                 }
                             }
-                            if (value instanceof Map || value instanceof List) {
-                                throw new IllegalArgumentException("全局参数" + ref + "表达式配置错误");
+                            if (value == null || value instanceof Map || value instanceof List) {
+                                throw new IllegalArgumentException("webhook参数" + ref + "表达式配置错误");
                             }
                             if (required != null && !(required instanceof Boolean)) {
                                 throw new IllegalArgumentException("Webhook参数" + ref + "是否必填配置错误");
@@ -652,7 +652,7 @@ public class DslParser {
                     if (type != null && !(type instanceof String)) {
                         throw new IllegalArgumentException("全局参数" + ref + "类型配置错误");
                     }
-                    if (value instanceof Map || value instanceof List) {
+                    if (value == null || value instanceof Map || value instanceof List) {
                         throw new IllegalArgumentException("全局参数" + ref + "表达式配置错误");
                     }
                     if (required != null && !(required instanceof Boolean)) {

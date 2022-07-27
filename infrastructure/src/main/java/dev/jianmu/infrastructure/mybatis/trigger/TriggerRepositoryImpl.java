@@ -51,4 +51,9 @@ public class TriggerRepositoryImpl implements TriggerRepository {
     public List<Trigger> findCronTriggerAll() {
         return this.triggerMapper.findAllByType(Trigger.Type.CRON);
     }
+
+    @Override
+    public Optional<Trigger> findByRef(String ref) {
+        return this.triggerMapper.findByRef(ref);
+    }
 }

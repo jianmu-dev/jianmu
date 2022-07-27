@@ -12,15 +12,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 /**
+ * @author Ethan Liu
  * @class WebHookController
  * @description WebHookController
- * @author Ethan Liu
  * @create 2021-06-25 23:04
-*/
+ */
 @Controller
 @RequestMapping("webhook")
 @Tag(name = "WebHook API", description = "WebHook API")
@@ -43,7 +41,6 @@ public class WebHookController {
         var bestMatchPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         var apm = new AntPathMatcher();
         var projectName = apm.extractPathWithinPattern(bestMatchPattern, path);
-        var decodeProjectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8);
-        this.triggerApplication.receiveHttpEvent(decodeProjectName, request, contentType);
+        this.triggerApplication.receiveHttpEvent(projectName, request, contentType);
     }
 }
