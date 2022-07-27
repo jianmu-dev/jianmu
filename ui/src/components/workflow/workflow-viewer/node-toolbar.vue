@@ -1,74 +1,8 @@
 <template>
   <div class="jm-workflow-viewer-node-toolbar" ref="toolbar">
-    <template v-if="!operationVisible">
-      <div class="mask">
-        <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
-          <template #content>
-            <div style="white-space: nowrap" v-html="tips"/>
-          </template>
-          <div class="tooltip-section"></div>
-        </jm-tooltip>
-      </div>
-    </template>
-    <template v-else-if="status === TaskStatusEnum.SUSPENDED">
-      <jm-popover v-if="popoverVisible"
-                  :append-to-body="false"
-                  :offset="0"
-                  trigger="hover"
-                  width="auto"
-                  placement="top">
-        <template #reference>
-          <div class="mask clickable" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
-            <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
-              <template #content>
-                <div style="white-space: nowrap" v-html="tips"/>
-              </template>
-              <div class="tooltip-section"></div>
-            </jm-tooltip>
-          </div>
-        </template>
-        <div class="operation">
-          <jm-popconfirm
-            title="确定要重试吗？"
-            icon="jm-icon-warning"
-            confirmButtonText="确定"
-            cancelButtonText="取消"
-            confirmButtonIcon="jm-icon-button-confirm"
-            cancelButtonIcon="jm-icon-button-cancel"
-            @confirm="handleClick(NodeToolbarTabTypeEnum.RETRY)"
-            :append-to-body="false"
-            :offset="7"
-          >
-            <template #reference>
-              <div class="item">
-                <div class="icon retry"></div>
-                <div class="txt">重试</div>
-              </div>
-            </template>
-          </jm-popconfirm>
-          <div class="separator"></div>
-          <jm-popconfirm
-            title="确定要忽略吗？"
-            icon="jm-icon-warning"
-            confirmButtonText="确定"
-            cancelButtonText="取消"
-            confirmButtonIcon="jm-icon-button-confirm"
-            cancelButtonIcon="jm-icon-button-cancel"
-            @confirm="handleClick(NodeToolbarTabTypeEnum.IGNORE)"
-            :append-to-body="false"
-            :offset="7"
-          >
-            <template #reference>
-              <div class="item">
-                <div class="icon ignore"></div>
-                <div class="txt">忽略</div>
-              </div>
-            </template>
-          </jm-popconfirm>
-        </div>
-      </jm-popover>
-    </template>
-    <div v-else class="mask clickable" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
+    <div v-if="!operationVisible || status !== TaskStatusEnum.SUSPENDED"
+         :class="{ mask: true, clickable: operationVisible }"
+         @click="operationVisible ? handleClick(NodeToolbarTabTypeEnum.LOG) : () => {}">
       <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
         <template #content>
           <div style="white-space: nowrap" v-html="tips"/>
@@ -76,6 +10,62 @@
         <div class="tooltip-section"></div>
       </jm-tooltip>
     </div>
+    <jm-popover v-else
+                :append-to-body="false"
+                :offset="0"
+                trigger="hover"
+                width="auto"
+                placement="top">
+      <template #reference>
+        <div class="mask clickable" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
+          <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
+            <template #content>
+              <div style="white-space: nowrap" v-html="tips"/>
+            </template>
+            <div class="tooltip-section"></div>
+          </jm-tooltip>
+        </div>
+      </template>
+      <div class="operation">
+        <jm-popconfirm
+          title="确定要重试吗？"
+          icon="jm-icon-warning"
+          confirmButtonText="确定"
+          cancelButtonText="取消"
+          confirmButtonIcon="jm-icon-button-confirm"
+          cancelButtonIcon="jm-icon-button-cancel"
+          @confirm="handleClick(NodeToolbarTabTypeEnum.RETRY)"
+          :append-to-body="false"
+          :offset="7"
+        >
+          <template #reference>
+            <div class="item">
+              <div class="icon retry"></div>
+              <div class="txt">重试</div>
+            </div>
+          </template>
+        </jm-popconfirm>
+        <div class="separator"></div>
+        <jm-popconfirm
+          title="确定要忽略吗？"
+          icon="jm-icon-warning"
+          confirmButtonText="确定"
+          cancelButtonText="取消"
+          confirmButtonIcon="jm-icon-button-confirm"
+          cancelButtonIcon="jm-icon-button-cancel"
+          @confirm="handleClick(NodeToolbarTabTypeEnum.IGNORE)"
+          :append-to-body="false"
+          :offset="7"
+        >
+          <template #reference>
+            <div class="item">
+              <div class="icon ignore"></div>
+              <div class="txt">忽略</div>
+            </div>
+          </template>
+        </jm-popconfirm>
+      </div>
+    </jm-popover>
   </div>
 </template>
 
