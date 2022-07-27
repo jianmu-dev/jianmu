@@ -13,7 +13,6 @@
       @click-param-log="openParamLog"
       @change-view-mode="viewMode=>$emit('change-view-mode', viewMode)"
       :viewMode="viewMode"
-      :hasGlobalParam="Boolean(globalParams?.length)"
     />
     <jm-drawer
       title="查看任务执行日志"
