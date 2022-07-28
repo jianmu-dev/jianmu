@@ -120,4 +120,58 @@ public interface OAuth2Api {
      * @return
      */
     IWebhookVo getWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id);
+
+    /**
+     * 创建文件
+     *
+     * @param accessToken
+     * @param owner
+     * @param repo
+     * @param content
+     * @param filepath
+     * @param branch
+     * @param message
+     */
+    void createFile(String accessToken, String owner, String repo, String content, String filepath,
+                    String branch, String message);
+
+    /**
+     * 删除文件
+     *
+     * @param accessToken
+     * @param owner
+     * @param repo
+     * @param content
+     * @param filepath
+     * @param branch
+     * @param message
+     */
+    void deleteFile(String accessToken, String owner, String repo, String content, String filepath,
+                    String branch, String message);
+
+    /**
+     * 更新文件
+     *
+     * @param accessToken
+     * @param owner
+     * @param repo
+     * @param content
+     * @param filepath
+     * @param branch
+     * @param message
+     */
+    void updateFile(String accessToken, String owner, String repo, String content, String filepath,
+                    String branch, String message);
+
+    /**
+     * 获取文件
+     *
+     * @param accessToken
+     * @param owner
+     * @param repo
+     * @param filepath
+     * @param ref
+     * @return
+     */
+    IFileVo getFile(String accessToken, String owner, String repo, String filepath, String ref);
 }
