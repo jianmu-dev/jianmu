@@ -5,11 +5,11 @@
     <div>
       {{ isSuspended? '挂起':'执行' }}时长：
     </div>
-    <div class="record-time" :class="[startAndEndToWidthClass(record.startTime, record.endTime)]" >
+    <div class="record-time" :class="[startAndEndToWidthClass]">
       <jm-timer v-if="isSuspended" :start-time="record.suspendedTime"/>
       <jm-timer v-else :start-time="record.startTime" :end-time="record.endTime"/>
     </div>
-    <div class="vertical-divider"></div>
+    <div class="vertical-divider" style="margin-left: 15px;"></div>
     <div>状态：<span class="status" :class="{[(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true}">{{ statusTranslate(record.status) }}</span></div>
     <button v-if="checkWorkflowRunning(record.status, false)" @click="handleTerminate" class="jm-icon-button-stop terminate-button">终止</button>
   </div>
@@ -23,7 +23,6 @@ import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { computed } from '@vue/reactivity';
 import { RecordInfo, statusTranslate } from '../../model/record-info';
 import { checkWorkflowRunning } from '../../model/util/workflow';
-import { startAndEndToWidthClass } from '../../model/util/timetowidth';
 export default defineComponent({
   props: {
     record: {
@@ -35,6 +34,34 @@ export default defineComponent({
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const isSuspended = computed(()=>props.record.status === WorkflowExecutionRecordStatusEnum.SUSPENDED);
+    const startAndEndToWidthClass = computed(() => {
+      let start = new Date(props.record.startTime).getTime();
+      let end:any = props.record.endTime;
+      let back = new Date().getTime();
+      let sencends:number = 0;
+      if (end === undefined) {
+        if (props.record.suspendedTime === undefined) {
+          return 'one';
+        }
+        let font = new Date(props.record.suspendedTime as string).getTime();
+        sencends = (back - font)/1000;
+      } else {
+        sencends = (new Date(end).getTime() - start)/1000;
+      }
+      if (sencends < 60) {
+        // 59s
+        return 'one';
+      } else if (sencends > 60 && sencends < 21600){
+        // 59m 59s
+        return 'two';
+      } else if (sencends > 21600 && sencends < 5184000) {
+        // 59h 59m 59s
+        return 'three';
+      } else {
+        // 77d 59h 59m 59s
+        return 'four';
+      }
+    });
     const recordInfo = new RecordInfo(props.record.id);
     return {
       datetimeFormatter,
