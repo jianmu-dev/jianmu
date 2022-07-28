@@ -2,7 +2,8 @@ import { TaskStatusEnum } from "@/api/dto/enumeration";
 import { IGlobalParamseterVo, INodeDefVo } from "@/api/dto/project";
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from "@/api/dto/workflow-execution-record";
 import { fetchWorkflow, getGlobalParameters, listAsyncTaskInstance } from "@/api/view-no-auth";
-import { checkWorkflowRunning } from "./utils/workflow";
+import { refresh_seconds, refresh_times } from "./util/consts";
+import { checkWorkflowRunning } from "./util/workflow";
 
 type DslCallbackFnType = (dslSourceCode: string, nodeInfos: INodeDefVo[])=>void;
 type TaskCallbackFnType = (taskRecords: ITaskExecutionRecordVo[])=>void;
@@ -32,6 +33,7 @@ export class GraphPanel {
   async getGlobalParams() {
     if (!this.currentRecord.triggerId || this.currentRecord.status==='INIT') {
       console.log('triggerId 缺失', this.currentRecord.status);
+      this.globalParamsCallbackFn([]);
       return;
     }
     const params:IGlobalParamseterVo[] = await getGlobalParameters(this.currentRecord.triggerId);
@@ -80,7 +82,7 @@ export class GraphPanel {
     };
     this.eventSource = setInterval(async()=>{
       if (!this.taskRecords.length) {
-        console.log('taskRecords -> 0，不监听graph-panel状态');
+        console.debug('taskRecords -> 0，不监听graph-panel状态');
         return;
       }
       // 全量判断是否刷新
@@ -88,27 +90,27 @@ export class GraphPanel {
         // 忽略挂起刷新状态(次数) 重置
         this.ignoreSuspended = true;
         this.ignoreTime = 0;
-        console.log('忽略tasks挂起 重置');
+        console.debug('忽略tasks挂起 重置');
         return;
       }
       // 不忽略挂起刷新次数 新增
       if (!this.ignoreSuspended) {
         this.ignoreTime++;
-        console.log(`graph 重试(忽略)后刷新第${this.ignoreTime}次`);
+        console.debug(`graph 重试(忽略)后刷新第${this.ignoreTime}次`);
       }
       // 不忽略挂起刷新次数->重置 忽略挂起状态->重置
-      if (this.ignoreTime >= 20) {
+      if (this.ignoreTime >= refresh_times) {
         this.ignoreTime = 0;
         this.ignoreSuspended = true;
       }
-      console.log('任务中有waiting running suspended状态，刷新任务', this.currentRecord.status, this.ignoreSuspended);
+      console.debug('任务中有waiting running suspended状态，刷新任务', this.currentRecord.status, this.ignoreSuspended);
       try {
         await this.getTaskRecords();
       } catch (e: any) {
         // 捕获异常
         console.warn(e.message, e);
       }
-    }, 5000);
+    }, refresh_seconds);
   }
   refreshSuspended() {
     // 打开挂起刷新开关
