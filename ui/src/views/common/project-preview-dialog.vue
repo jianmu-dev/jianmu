@@ -97,17 +97,35 @@ export default defineComponent({
 <style scoped lang="less">
 .project-preview-dialog {
   ::v-deep(.el-dialog) {
+    box-shadow: none;
+    background-color: transparent;
     // 图标
     .el-dialog__header {
-      .el-dialog__title::before {
-        font-family: 'jm-icon-input';
-        content: '\e803';
-        margin-right: 10px;
-        color: #6b7b8d;
+      padding: 0;
+      color: #082340;
+      height: 40px;
+      // margin-bottom: 20px;
+      box-sizing: border-box;
+      .el-dialog__title {
+        color: #ffffff;
+      }
+      // .el-dialog__title::before {
+      //   font-family: 'jm-icon-input';
+      //   content: '\e803';
+      //   margin-right: 10px;
+      //   color: #6b7b8d;
+      //   font-size: 20px;
+      //   vertical-align: bottom;
+      //   position: relative;
+      //   top: 1px;
+      // }
+      .el-dialog__close::before {
         font-size: 20px;
-        vertical-align: bottom;
-        position: relative;
-        top: 1px;
+      }
+      .el-dialog__headerbtn {
+        top: 65px;
+        right: 30px;
+        z-index: 10;
       }
     }
 

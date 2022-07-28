@@ -17,7 +17,7 @@
                   @mouseleave="destroyNodeToolbar"/>
     <!-- 文档流占位 -->
     <div class="canvas-container">
-      <div class="view-mode">
+      <div class="view-mode" :class="{preview: readonly}">
         <div class="float-view-mode">
           <div class="tab" :class="{select: !dslMode}" @click="changeViewMode(ViewModeEnum.GRAPHIC)">图示</div>
           <div class="tab" :class="{select: dslMode}" @click="changeViewMode(ViewModeEnum.YAML)">yaml</div>
@@ -47,7 +47,7 @@
       </div>
     </div>
     <!-- 覆盖工具栏透明问题 -->
-    <div class="over-toolbar" :class="{moreHight: dslMode || readonly}"></div>
+    <div class="over-toolbar" :class="{moreHight: dslMode}"></div>
   </div>
 </template>
 
@@ -373,7 +373,17 @@ export default defineComponent({
       box-sizing: border-box;
       width: calc(100% - 60px);
       border-bottom: 1px solid #E6EBF2;
-
+      
+      &.preview {
+        left: 0;
+        width: 100%;
+        .float-view-mode {
+          left: 30px;
+        }
+        .float-param-log {
+          right: 30px;
+        }
+      }
       .float-view-mode {
         position: absolute;
         display: flex;
