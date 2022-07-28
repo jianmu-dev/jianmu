@@ -309,26 +309,36 @@ export default defineComponent({
     }
   }
 
-  ::v-deep(.el-dialog__footer) {
-    background-color: #fff;
+  ::v-deep(.el-dialog) {
+    .el-dialog__footer {
+      background-color: #fff;
 
-    .el-button {
-      border: none;
-      padding: 8px 24px;
-      border-radius: 2px;
+      .el-button {
+        border: none;
+        padding: 8px 24px;
+        border-radius: 2px;
+        box-shadow: none;
 
-      &:nth-child(2) {
-        margin: 0 10px 0 20px;
+        &:nth-child(2) {
+          margin: 0 10px 0 20px;
+        }
+      }
+
+      .el-button--default {
+        background-color: #F5F5F5;
+        color: #082340;
+
+        &:hover {
+          background-color: #EFF7FF;
+          color: #0091FF;
+        }
       }
     }
 
-    .el-button--default {
-      background-color: #F5F5F5;
-      color: #082340;
-
-      &:hover {
-        background-color: #EFF7FF;
-        color: #0091FF;
+    .el-form {
+      .el-textarea__inner {
+        height: 74px;
+        resize: none;
       }
     }
   }

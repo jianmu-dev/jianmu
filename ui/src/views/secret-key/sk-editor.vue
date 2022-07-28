@@ -8,15 +8,16 @@
     </template>
     <jm-form :model="editorForm" :rules="editorRule" ref="editorFormRef" @submit.prevent>
       <jm-form-item label="唯一标识" label-position="top" prop="key">
-        <jm-input v-model="editorForm.key" clearable placeholder="请输入唯一标识"/>
+        <jm-input v-model="editorForm.key" placeholder="支持下划线、数字、英文字母" show-word-limit :maxlength="45"/>
       </jm-form-item>
       <jm-form-item label="值" label-position="top" prop="value">
         <jm-input
           type="textarea"
           v-model="editorForm.value"
           clearable
-          placeholder="请输值"
-          :autosize="{minRows: 6, maxRows: 10}"/>
+          placeholder="请输入值"
+          :maxlength="512"
+        />
       </jm-form-item>
     </jm-form>
     <template #footer>
@@ -53,7 +54,7 @@ export default defineComponent({
     });
     const editorRule = ref<object>({
       key: [
-        { required: true, message: '名称不能为空', trigger: 'blur' },
+        { required: true, message: '唯一标识不能为空', trigger: 'blur' },
       ],
       value: [
         { required: true, message: '值不能为空', trigger: 'blur' },

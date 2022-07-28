@@ -8,7 +8,7 @@
     </template>
     <jm-form :model="editorForm" :rules="editorRule" ref="editorFormRef" @submit.prevent>
       <jm-form-item label="命名空间" label-position="top" prop="name">
-        <jm-input v-model="editorForm.name" clearable placeholder="请输入命名空间"/>
+        <jm-input v-model="editorForm.name" placeholder="支持下划线、数字、英文字母" show-word-limit :maxlength="100"/>
       </jm-form-item>
     </jm-form>
     <template #footer>
