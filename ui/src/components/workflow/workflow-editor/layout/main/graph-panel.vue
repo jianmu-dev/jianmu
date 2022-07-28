@@ -38,7 +38,10 @@ export default defineComponent({
         (node: Node) =>
           getWorkflowValidator().checkInitializingNode(node, true,
             nodeId => emit('node-selected', nodeId, true)),
-        (nodeId: string) => emit('node-selected', nodeId, false));
+        // 点击节点触发校验
+        (nodeId: string) => emit('node-selected', nodeId, true));
+      // 点击节点不触发校验
+      // (nodeId: string) => emit('node-selected', nodeId, false));
 
       emit('graph-created', workflowGraph.x6Graph);
       // 渲染画布，回显
