@@ -238,6 +238,21 @@ public class RestExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(OAuth2IsNotAuthorizedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public JwtResponse handleOAuth2IsNotAuthorizedException(OAuth2IsNotAuthorizedException ex) {
+        logger.error("Got ex: ", ex);
+        return JwtResponse.builder()
+                .message(ex.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler({OAuth2EntryException.class, RepoExistedException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public void handleOAuth2EntryException(Exception ex) {
+        logger.error("Got ex: ", ex);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage globalExceptionHandler(Exception ex, WebRequest request) {

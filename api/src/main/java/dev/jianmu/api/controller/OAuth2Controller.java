@@ -10,9 +10,10 @@ import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
-import dev.jianmu.application.exception.*;
+import dev.jianmu.application.exception.NotAllowRegistrationException;
+import dev.jianmu.application.exception.NotAllowThisPlatformLogInException;
+import dev.jianmu.application.exception.OAuth2IsNotConfiguredException;
 import dev.jianmu.application.service.OAuth2Application;
-import dev.jianmu.application.service.vo.Association;
 import dev.jianmu.application.service.vo.AssociationData;
 import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.git.repo.aggregate.GitRepo;
@@ -22,7 +23,6 @@ import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
-import dev.jianmu.oauth2.api.exception.RepoExistedException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
 import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.oauth2.api.vo.ITokenVo;
@@ -40,7 +40,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 /**
@@ -116,18 +121,9 @@ public class OAuth2Controller {
 
         IUserInfoVo userInfoVo = oAuth2Api.getUserInfo(accessToken);
 
-        Association association;
-        AssociationData associationData;
-        try {
-            associationData = AssociationData.buildGitRepo(gitRepoLoggingDto.getRef(), gitRepoLoggingDto.getOwner());
-            association = this.oAuth2Application.getAssociation(gitRepoLoggingDto.thirdPartyType(), accessToken, userInfoVo,
-                    associationData);
-        } catch (OAuth2IsNotAuthorizedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(JwtResponse.builder()
-                    .message(e.getMessage())
-                    .build()
-            );
-        }
+        var associationData = AssociationData.buildGitRepo(gitRepoLoggingDto.getRef(), gitRepoLoggingDto.getOwner());
+        var association = this.oAuth2Application.getAssociation(gitRepoLoggingDto.thirdPartyType(), accessToken, userInfoVo,
+                associationData);
 
         String userId = userInfoVo.getId();
         Optional<User> userOptional = this.userRepository.findById(userId);
@@ -173,6 +169,7 @@ public class OAuth2Controller {
     }
 
     @PutMapping("/refresh/git_repo")
+    @Transactional
     public ResponseEntity<?> refreshToken(@Valid @RequestBody GitRepoTokenRefreshingDto gitRepoTokenRefreshingDto) {
         JwtSession session = this.userContextHolder.getSession();
 
@@ -186,21 +183,19 @@ public class OAuth2Controller {
         String encryptedToken;
         RoleEnum role;
         AssociationData associationData;
+
+        encryptedToken = session.getEncryptedToken();
         try {
-            encryptedToken = session.getEncryptedToken();
             accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
-            userInfo = oAuth2Api.getUserInfo(accessToken);
-            associationData = AssociationData.buildGitRepo(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner());
-            role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
-                    associationData).getRole();
-        } catch (OAuth2IsNotAuthorizedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (OAuth2EntryException | RepoExistedException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage(), e);
         }
+        userInfo = oAuth2Api.getUserInfo(accessToken);
+        associationData = AssociationData.buildGitRepo(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner());
+        role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
+                associationData).getRole();
+
 
         Optional<GitRepo> gitRepoOptional = this.gitRepoRepository.findByRefAndOwner(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner());
         if (gitRepoOptional.isEmpty()) {
