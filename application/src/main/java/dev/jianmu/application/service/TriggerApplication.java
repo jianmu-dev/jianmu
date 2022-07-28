@@ -175,7 +175,7 @@ public class TriggerApplication {
         // 修改webhook
         if (optionalTrigger.isPresent()) {
             var trigger = optionalTrigger.get();
-            ref = this.updateGitWebhook(trigger.getRef(), encryptedToken, project.getAssociationId());
+            ref = this.updateGitWebhook(trigger.getRef(), ref, encryptedToken, project.getAssociationId(), project.getAssociationType());
             trigger.setType(Trigger.Type.WEBHOOK);
             trigger.setWebhook(webhook);
             trigger.setRef(ref);
@@ -207,7 +207,10 @@ public class TriggerApplication {
         this.triggerRepository.add(trigger);
     }
 
-    private String updateGitWebhook(String ref, String encryptedToken, String associationId) {
+    private String updateGitWebhook(String ref, String  newRef, String encryptedToken, String associationId, String associationType) {
+        if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
+            return newRef;
+        }
         var gitRepo = this.gitRepoRepository.findById(associationId)
                 .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
         var oAuth2Api = OAuth2ApiProxy.builder()
@@ -296,7 +299,7 @@ public class TriggerApplication {
 
     // 删除GitWebhook
     private void deleteGitWebhook(String associationId, String associationType, String ref, String encryptedToken) {
-        if (ObjectUtils.isEmpty(associationId) || ObjectUtils.isEmpty(associationType)) {
+        if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return;
         }
         var oAuth2Api = OAuth2ApiProxy.builder()
