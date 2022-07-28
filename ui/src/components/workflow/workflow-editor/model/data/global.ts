@@ -35,7 +35,6 @@ export class Global {
    * 表单校验规则
    */
   getFormRules(): Record<string, CustomRule> {
-
     const globalParamFields: Record<string, CustomRule> = {};
     this.params.forEach((_, index) => {
       globalParamFields[index] = {
@@ -85,8 +84,9 @@ export class Global {
   async validateParams(): Promise<void> {
     const { params } = this.getFormRules();
     const validator = new Schema({ params });
-    const source: Record<string, Value> = {};
-    Object.keys(this).forEach(key => (source[key] = (this as any)[key]));
+    const source: Record<string, Value> = {
+      params: this.params,
+    };
 
     await validator.validate(source, {
       first: true,

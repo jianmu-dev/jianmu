@@ -109,7 +109,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:reference', 'update:name', 'update:type', 'update:required', 'update:value', 'update:hidden', 'delete', 'change'],
+  emits: ['update:reference', 'update:name', 'update:type', 'update:required', 'update:value', 'update:hidden', 'change-reference', 'delete'],
   setup(props, { emit }) {
     const referenceVal = ref<string>(props.reference);
     const nameVal = ref<string>(props.name);
@@ -131,28 +131,24 @@ export default defineComponent({
       ParamTypeEnum,
       ExpressionTypeEnum,
       changeRef: () => {
+        const oldVal = props.reference;
         emit('update:reference', referenceVal.value);
-        emit('change');
+        emit('change-reference', referenceVal.value, oldVal);
       },
       changeName: () => {
         emit('update:name', nameVal.value);
-        emit('change');
       },
       changeType: () => {
         emit('update:type', typeVal.value);
-        emit('change');
       },
       changeRequired: () => {
         emit('update:required', requiredVal.value);
-        emit('change');
       },
       changeValue: () => {
         emit('update:value', valueVal.value);
-        emit('change');
       },
       changeHidden: () => {
         emit('update:hidden', hiddenVal.value);
-        emit('change');
       },
       deleteParam: () => {
         emit('delete', props.index);
