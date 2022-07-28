@@ -100,6 +100,9 @@ export default defineComponent({
         }
       },
       handleChangeRouterParam(routerParam: { viewMode?: ViewModeEnum, triggerId?: string }) {
+        if (!routerParam.triggerId) {
+          delete routerParam.triggerId;
+        }
         router.push({
           name: 'workflow-execution-record-detail',
           query: {
