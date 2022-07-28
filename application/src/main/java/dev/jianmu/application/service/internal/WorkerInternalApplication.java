@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.application.util.ParameterUtil;
+import dev.jianmu.el.ElContext;
+import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.*;
@@ -22,6 +25,7 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.worker.aggregate.Worker;
 import dev.jianmu.worker.repository.WorkerRepository;
@@ -31,6 +35,10 @@ import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.parameter.SecretParameter;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
+import dev.jianmu.workflow.el.EvaluationResult;
+import dev.jianmu.workflow.el.Expression;
+import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.el.ResultType;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -43,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
@@ -86,6 +95,8 @@ public class WorkerInternalApplication {
     private final WorkflowRepository workflowRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final ProjectRepository projectRepository;
+    private final ExpressionLanguage expressionLanguage;
+    private final ExternalParameterRepository externalParameterRepository;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -104,7 +115,10 @@ public class WorkerInternalApplication {
             GlobalProperties globalProperties,
             WorkflowRepository workflowRepository,
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
-            ProjectRepository projectRepository) {
+            ProjectRepository projectRepository,
+            ExpressionLanguage expressionLanguage,
+            ExternalParameterRepository externalParameterRepository
+    ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
@@ -122,17 +136,24 @@ public class WorkerInternalApplication {
         this.workflowRepository = workflowRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.projectRepository = projectRepository;
+        this.expressionLanguage = expressionLanguage;
+        this.externalParameterRepository = externalParameterRepository;
     }
 
     @Transactional
-    public void join(String workerId, Worker.Type type, String name) {
+    public void join(String workerId, Worker.Type type, String name, String tag) {
         if (this.workerRepository.findById(workerId).isPresent()) {
+            this.workerRepository.updateTag(Worker.Builder.aWorker()
+                    .id(workerId)
+                    .tags(tag)
+                    .build());
             return;
         }
         this.workerRepository.add(Worker.Builder.aWorker()
                 .id(workerId)
                 .name(name)
                 .type(type)
+                .tags(tag)
                 .status(Worker.Status.ONLINE)
                 .build());
     }
@@ -151,7 +172,16 @@ public class WorkerInternalApplication {
             this.workflowInstanceRepository.findByTriggerId(event.getTriggerId())
                     .ifPresent(workflowInstance -> {
                         // 分发worker
-                        var workers = this.workerRepository.findByTypeInAndCreatedTimeLessThan(List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES), workflowInstance.getStartTime());
+                        List<String> workerTags = this.getWorkerTag(workflowInstance);
+                        logger.info("triggerId:{} instanceId:{} tags: {}", workflowInstance.getTriggerId(),
+                                workflowInstance.getId(), workerTags);
+                        var workers = workerTags.isEmpty() ?
+                                this.workerRepository.findByTypeInAndCreatedTimeLessThan(
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workflowInstance.getStartTime()) :
+                                this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workerTags, workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
                             throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
@@ -166,6 +196,46 @@ public class WorkerInternalApplication {
             taskInstance.dispatchFailed();
             this.taskInstanceRepository.updateStatus(taskInstance);
         }
+    }
+
+    private List<String> getWorkerTag(WorkflowInstance workflowInstance) {
+        var workflow = this.workflowRepository.findByRefAndVersion(workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())
+                .orElseThrow(() -> new RuntimeException(String.format("无法找到对应的流程定义: %s, %s", workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion())));
+        var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目 ref:" + workflow.getRef()));
+        // 查询参数源
+        var eventParameters = this.triggerEventRepository.findById(workflowInstance.getTriggerId())
+                .map(TriggerEvent::getParameters)
+                .orElseGet(List::of);
+        // 创建表达式上下文
+        var context = new ElContext();
+        // 外部参数加入上下文
+        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
+                .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
+        // 全局参数加入上下文
+        workflowInstance.getGlobalParameters()
+                .forEach(globalParameter -> context.add(
+                        "global",
+                        globalParameter.getName(),
+                        Parameter.Type.getTypeByName(globalParameter.getType()).newParameter(globalParameter.getValue()))
+                );
+        // 事件参数加入上下文
+        var eventParams = eventParameters.stream()
+                .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
+        var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
+        // 事件参数scope为event
+        eventMap.forEach((key, val) -> context.add("trigger", key, val));
+
+        return workflow.getTags().stream().filter(StringUtils::hasText).map(tag -> {
+            Expression el = this.expressionLanguage.parseExpression(tag, ResultType.STRING);
+            EvaluationResult result = this.expressionLanguage.evaluateExpression(el, context);
+            if (result.isFailure()) {
+                throw new RuntimeException("解析执行器标签的表达式解析失败: " + result.getFailureMessage());
+            }
+            return result.getValue().getStringValue();
+        }).collect(Collectors.toList());
     }
 
     @Transactional
@@ -300,8 +370,8 @@ public class WorkerInternalApplication {
     private Map<String, String> getParameterMap(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
         var parameterMap = instanceParameters.stream()
                 .map(instanceParameter -> Map.entry(
-                                instanceParameter.getRef(),
-                                instanceParameter.getParameterId()
+                        instanceParameter.getRef(),
+                        instanceParameter.getParameterId()
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

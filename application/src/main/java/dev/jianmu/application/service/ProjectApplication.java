@@ -157,6 +157,7 @@ public class ProjectApplication {
         return Workflow.Builder.aWorkflow()
                 .ref(ref)
                 .type(parser.getType())
+                .tag(parser.getTag())
                 .name(parser.getName())
                 .description(parser.getDescription())
                 .nodes(nodes)

@@ -19,9 +19,13 @@ public interface WorkerRepository {
 
     void updateStatus(Worker worker);
 
+    void updateTag(Worker worker);
+
     Optional<Worker> findById(String workerId);
 
     Worker findByType(Worker.Type type);
 
     List<Worker> findByTypeInAndCreatedTimeLessThan(List<Worker.Type> types, LocalDateTime createdTime);
+
+    List<Worker> findByTypeInAndTagAndCreatedTimeLessThan(List<Worker.Type> types, List<String> tags, LocalDateTime createdTime);
 }
