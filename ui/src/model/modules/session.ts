@@ -20,7 +20,6 @@ export interface IState {
   remember: boolean;
   userSettings: IUserSettings;
   session?: ISessionVo;
-  associationData?: IAssociationData;
 }
 
 /**

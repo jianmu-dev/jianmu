@@ -3,7 +3,7 @@
     <div class="title">你的设备没有接入互联网</div>
     <div class="desc">无法显示此页面，因为你的电脑目前已离线</div>
     <div class="back">
-      <router-link to="/">
+      <router-link :to="{name:'index'}">
         <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
       </router-link>
     </div>

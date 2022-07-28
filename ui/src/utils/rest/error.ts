@@ -25,3 +25,16 @@ export class HttpError extends Error {
     this.response = response;
   }
 }
+
+/**
+ * 重置内容错误
+ */
+export class ResetContentError extends Error {
+  response: AxiosResponse;
+
+  constructor(response: AxiosResponse) {
+    super();
+    this.name = 'RestContentError';
+    this.response = response;
+  }
+}

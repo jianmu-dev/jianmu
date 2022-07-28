@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosTransformer, Method } from 'axios';
 import qs from 'qs';
-import { HttpError, TimeoutError } from '@/utils/rest/error';
+import { HttpError, ResetContentError, TimeoutError } from '@/utils/rest/error';
 import _store from '@/store';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
@@ -101,7 +101,6 @@ export default async function rest({
     if (err.message.startsWith('timeout of')) {
       throw new TimeoutError(err.message);
     }
-
     throw new HttpError(err.response, err.message);
   }
 
@@ -111,7 +110,9 @@ export default async function rest({
     // 更新认证
     store.commit(`${sessionNs}/mutateToken`, newToken);
   }
-
+  if (res.status === 201) {
+    throw new ResetContentError(res);
+  }
   if (m === 'head') {
     return res.headers;
   }
