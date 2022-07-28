@@ -52,6 +52,7 @@ public interface NamespaceMapper {
             " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
             " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
             "</where>" +
+            "ORDER BY `created_time` desc" +
             "</script>")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
