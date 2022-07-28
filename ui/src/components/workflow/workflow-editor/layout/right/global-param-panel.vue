@@ -27,7 +27,7 @@
               v-model:value="param.value"
               v-model:hidden="param.hidden"
               :index="index"
-              :rules="workflowForm.global.params[index].getFormRules()"
+              :rules="workflowForm.global.getFormRules().params.fields[index].fields"
               @delete="deleteParam"
               @change="updateInfo"
             />
@@ -46,7 +46,7 @@
 import { computed, defineComponent, getCurrentInstance, nextTick, onMounted, onUpdated, PropType, ref } from 'vue';
 import { ParamTypeEnum, RefTypeEnum } from '../../model/data/enumeration';
 import GlobalParam from './form/global-param.vue';
-import { GlobalParam as _GlobalParam } from '../../model/data/global-param';
+import { Global as _GlobalParam } from '../../model/data/global';
 import { IWorkflow } from '../../model/data/common';
 import { v4 as uuidv4 } from 'uuid';
 import { checkDuplicate } from '../../model/util/reference';
@@ -107,8 +107,12 @@ export default defineComponent({
         paramKeys.value.splice(index, 1);
       },
       addParam: () => {
-        const globalParam = new _GlobalParam('', '', ParamTypeEnum.STRING, false, '', false);
-        workflowForm.value.global.params.push(globalParam);
+        // 解构params参数
+        const { ref, name, type, required, value, hidden } = new _GlobalParam(
+          workflowForm.value.global.concurrent,
+          { ref: '', name: '', type: ParamTypeEnum.STRING, required: false, value: '', hidden: false },
+        ).params;
+        workflowForm.value.global.params.push({ ref, name, type, required, value, hidden });
         paramKeys.value.push(uuidv4());
       },
       updateInfo: () => {
