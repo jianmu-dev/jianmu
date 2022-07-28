@@ -76,7 +76,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:name', 'update:value', 'update:type', 'delete'],
+  emits: ['update:name', 'update:value', 'update:type', 'change-name', 'delete'],
   setup(props, { emit }) {
     const envName = ref<string>(props.name);
     const envVal = ref<string>(props.value);
@@ -106,7 +106,9 @@ export default defineComponent({
         envName.value = envName.value.toUpperCase();
       },
       changeEnv: (val: string) => {
+        const oldVal = props.name;
         emit('update:name', val);
+        emit('change-name', envName.value, oldVal);
       },
       changeVal: (val: string) => {
         emit('update:value', val);

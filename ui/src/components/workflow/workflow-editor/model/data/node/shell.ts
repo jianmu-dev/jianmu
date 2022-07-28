@@ -75,7 +75,7 @@ export class Shell extends BaseNode {
             },
           ],
           value: [
-            { required: true, message: '请输入变量值', trigger: 'blur' },
+            { required: true, message: '请输入变量值', trigger: 'change' },
             {
               validator: (rule: any, value: any, callback: any) => {
                 if (value && this.validateParam) {
