@@ -5,12 +5,13 @@
       class="tab"
       :class="{
         [(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true,
-        [record.triggerId === param.triggerId ? 'selected' : 'unselected']: true
+        [record.triggerId === param.triggerId ? 'selected' : 'unselected']: true,
       }"
       v-for="(record, i) in allRecords"
       :key="i"
       @click="handleChange(record)"
       >
+      <!-- param.triggerId===undefined -->
         <div v-if="record.triggerId === param.triggerId" class="left-horn"/>
         <div v-if="record.triggerId === param.triggerId" class="right-horn"/>
         <div class="label">{{ record.serialNo || '-' }}</div>
@@ -65,7 +66,7 @@ export default defineComponent({
           name: props.project.projectGroupName,
           startTime: '',
           status: '',
-          triggerId: '',
+          triggerId: undefined as unknown,
           triggerType: props.project.triggerType,
           workflowRef: props.project.workflowRef,
           workflowVersion: props.project.workflowVersion,
