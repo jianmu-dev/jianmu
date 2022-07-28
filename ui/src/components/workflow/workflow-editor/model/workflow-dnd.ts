@@ -5,6 +5,9 @@ import { IWorkflowNode } from './data/common';
 import { NODE, PORTS } from '../shape/gengral-config';
 import { ClickNodeWarningCallbackFnType, WorkflowValidator } from './workflow-validator';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import { BaseNode } from './data/node/base-node';
+import { AsyncTask } from './data/node/async-task';
+import { NodeTypeEnum } from './data/enumeration';
 
 const { icon: { width, height }, textMaxHeight } = NODE;
 
@@ -18,7 +21,7 @@ export class WorkflowDnd {
   private readonly dnd: Addon.Dnd;
   private readonly draggingListener: IDraggingListener = {
     mousePosition: { x: -1, y: -1 },
-  }
+  };
 
   constructor(graph: Graph,
     workflowValidator: WorkflowValidator,
@@ -40,6 +43,47 @@ export class WorkflowDnd {
 
         // 结束拖拽时，必须克隆拖动的节点，因为拖动的节点和目标节点不在一个画布
         const targetNode = draggingNode.clone();
+        const targetProxy = new CustomX6NodeProxy(targetNode);
+        if (targetProxy.isTask()) {
+          const targetWorkflowNode = targetProxy.getData() as BaseNode;
+          let targetNodeRef = `${targetWorkflowNode.getRef()}_`;
+
+          const refs = this.graph.getNodes()
+            .map(node => new CustomX6NodeProxy(node).getData())
+            .filter(data => {
+              if (data.getType() !== targetWorkflowNode.getType()) {
+                // 非任务节点
+                return false;
+              }
+              // 任务节点
+              if (targetWorkflowNode.getType() !== NodeTypeEnum.SHELL &&
+                (data as AsyncTask).nodeRef !== (targetWorkflowNode as AsyncTask).nodeRef) {
+                return false;
+              }
+              return data.getRef().startsWith(targetNodeRef);
+            })
+            .map(data => data.getRef());
+
+          const arr: number[] = [];
+          if (refs.length === 0) {
+            targetNodeRef += '0';
+          } else {
+            refs.forEach(ref => {
+              const refLength = Number(ref.slice(targetNodeRef.length));
+              if (isNaN(refLength)) {
+                return;
+              }
+              arr.push(refLength);
+            });
+            // 当前refs为空时
+            if (arr.length === 0) {
+              arr.push(-1);
+            }
+            targetNodeRef += Math.max(...arr) + 1;
+          }
+          targetWorkflowNode.ref = targetNodeRef;
+          targetProxy.setData(targetWorkflowNode);
+        }
         // 保证不偏移
         setTimeout(() => {
           const { x, y } = targetNode.getPosition();
