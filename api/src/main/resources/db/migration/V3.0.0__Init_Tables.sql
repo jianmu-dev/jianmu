@@ -93,6 +93,7 @@ CREATE TABLE `jm_workflow`
     `version`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '版本',
     `type`              varchar(45) COLLATE utf8mb4_unicode_ci                        NOT NULL COMMENT 'DSL 类型',
     `name`              varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '显示名称',
+    `tag`               varchar(255)                                                  NOT NULL COMMENT '标签',
     `description`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
     `nodes`             longblob COMMENT 'Node列表',
     `global_parameters` blob COMMENT '全局参数',

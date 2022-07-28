@@ -43,7 +43,7 @@ public interface WorkerMapper {
     List<Worker> findByTypeInAndCreatedTimeLessThan(@Param("types") List<Worker.Type> types, @Param("createdTime") LocalDateTime createdTime);
 
     @Select("<script> " +
-            "select * from worker" +
+            "select * from jm_worker" +
             "<where>" +
             " type IN " +
             " <foreach collection='types' item='item' open='(' close=')' separator=','> #{item} " +
