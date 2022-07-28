@@ -46,7 +46,6 @@
 import { computed, defineComponent, getCurrentInstance, nextTick, onMounted, onUpdated, PropType, ref } from 'vue';
 import { ParamTypeEnum, RefTypeEnum } from '../../model/data/enumeration';
 import GlobalParam from './form/global-param.vue';
-import { Global as _GlobalParam } from '../../model/data/global';
 import { IWorkflow } from '../../model/data/common';
 import { v4 as uuidv4 } from 'uuid';
 import { checkDuplicate } from '../../model/util/reference';
@@ -108,11 +107,7 @@ export default defineComponent({
       },
       addParam: () => {
         // 解构params参数
-        const { ref, name, type, required, value, hidden } = new _GlobalParam(
-          workflowForm.value.global.concurrent,
-          { ref: '', name: '', type: ParamTypeEnum.STRING, required: false, value: '', hidden: false },
-        ).params;
-        workflowForm.value.global.params.push({ ref, name, type, required, value, hidden });
+        workflowForm.value.global.params.push({ ref: '', name: '', type: ParamTypeEnum.STRING, required: false, value: '', hidden: false });
         paramKeys.value.push(uuidv4());
       },
       updateInfo: () => {
