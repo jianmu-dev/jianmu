@@ -5,12 +5,7 @@ import { IWorkflow } from './data/common';
 import { checkDuplicate } from './util/reference';
 import { NodeGroupEnum, NodeTypeEnum, RefTypeEnum } from './data/enumeration';
 import { AsyncTask } from './data/node/async-task';
-import {
-  getLocalNodeParams,
-  getLocalVersionList,
-  getOfficialNodeParams,
-  getOfficialVersionList,
-} from '@/api/node-library';
+import { getLocalNodeParams, getLocalVersionList, getOfficialNodeParams, getOfficialVersionList } from '@/api/node-library';
 import { pushParams } from './workflow-node';
 import { RefDuplicateError } from './data/error';
 
@@ -105,29 +100,8 @@ export class WorkflowValidator {
   }
 
   async check(): Promise<void> {
-    await this.checkGlobalParams();
+    await this.workflowData.global.validate();
     await this.checkNodes();
-  }
-
-  /**
-   * 校验全局参数
-   * @private
-   */
-  private async checkGlobalParams(): Promise<void> {
-    const refs: string[] = [];
-
-    // 验证参数
-    for (const globalParam of this.workflowData.global.params) {
-      refs.push(globalParam.ref);
-
-      try {
-        await globalParam.validate();
-      } catch ({ errors }) {
-        throw new Error(`全局参数${globalParam.name || globalParam.ref}：${errors[0].message}`);
-      }
-    }
-    // 验证ref是否重复
-    checkDuplicate(refs, RefTypeEnum.GLOBAL_PARAM);
   }
 
   /**
@@ -190,14 +164,14 @@ export class WorkflowValidator {
       }
     }
 
-    try{
+    try {
       checkDuplicate(refs, RefTypeEnum.NODE);
-    }catch(err){
+    } catch (err) {
       console.log(err);
-      if(err instanceof RefDuplicateError){
+      if (err instanceof RefDuplicateError) {
         const names = proxies
-          .filter(proxy=>proxy.getData().getRef() === err.ref)
-          .map(proxy=>proxy.getData().getName());
+          .filter(proxy => proxy.getData().getRef() === err.ref)
+          .map(proxy => proxy.getData().getName());
         throw new Error(`${err.message}，节点：${names.join('、')}`);
       }
       throw err;

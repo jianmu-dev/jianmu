@@ -8,12 +8,14 @@
       :tasks="taskRecords"
       :fullscreenRef="workflowRef"
       :entry="entry"
+      :viewMode="viewMode"
+      :hasGlobalParam="Boolean(globalParams?.length)"
+      :showLogBtn="record.status!==''"
       @click-process-log="openProcessLog"
       @click-task-node="openTaskLog"
       @click-webhook-node="openWebhookLog"
       @click-param-log="openParamLog"
       @change-view-mode="viewMode=>$emit('change-view-mode', viewMode)"
-      :viewMode="viewMode"
     />
     <jm-drawer
       title="查看任务执行日志"
@@ -111,12 +113,10 @@ export default defineComponent({
     // record 页面变化引起数据变化 函数执行
     onUpdated(async ()=>{
       if (recordStatus.value !== props.record.status) {
-        // console.log('------>>>> 111');
         recordStatus.value = props.record.status;
         graphPanel.refreshGparam(props.record);
       }
       if (triggerId.value === props.record.triggerId) {
-        // console.log('------>>>> 222');
         return;
       }
       triggerId.value = props.record.triggerId;
@@ -131,7 +131,6 @@ export default defineComponent({
     onMounted(async ()=>{
       // 赋值 dslSourceCode nodeInfos
       const dslCallbackFn = (dsl: string, nodes: INodeDefVo[]) => {
-      
         dslSourceCode.value = dsl;
         nodeInfos.value = nodes;
       };

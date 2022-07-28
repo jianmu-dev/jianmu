@@ -22,9 +22,9 @@ export function statusTranslate(status: string) {
     '': '未启动',
     INIT: '待启动',
     RUNNING: '执行中',
-    FINISHED: '成功',
-    TERMINATED: '失败',
-    SUSPENDED: '挂起',
+    FINISHED: '执行成功',
+    TERMINATED: '执行失败',
+    SUSPENDED: '已挂起',
   } as any;
   return statusTranslate[status];
 }

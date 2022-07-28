@@ -24,9 +24,9 @@
         </div>
         <div class="float-param-log" v-show="!dslMode && !readonly">
           <jm-tooltip content="全局参数" placement="bottom" :appendToBody="false">
-            <div class="jm-icon-workflow-param" @click="clickParamLog"></div>
+            <div class="jm-icon-workflow-param" v-show="hasGlobalParam" @click="clickParamLog"></div>
           </jm-tooltip>
-          <div class="btn" @click="clickProcessLog">{{entry? '流水线':graph?.dslType===DslTypeEnum.PIPELINE?'管道':'流程'}}日志</div>
+          <div class="btn" v-show="showLogBtn" @click="clickProcessLog">{{entry? '流水线':graph?.dslType===DslTypeEnum.PIPELINE?'管道':'流程'}}日志</div>
         </div>
       </div>
       <toolbar v-if="graph"
@@ -41,7 +41,6 @@
         @on-zoom="handleZoom"
         @on-fullscreen="handleFullscreen"
         @rotate="handleRotation"/>
-      <!-- <div v-show="!dslMode" class="canvas" ref="container"/> -->
       <div class="canvas" ref="container"/>
       <div class="dsl-editor-container" v-if="dslMode">
         <jm-dsl-editor :value="workflowGraph?.visibleDsl || ''" readonly/>
@@ -85,6 +84,14 @@ export default defineComponent({
   components: { TaskState, Toolbar, NodeToolbar },
   props: {
     entry: {
+      type: Boolean,
+      default: false,
+    },
+    hasGlobalParam: {
+      type: Boolean,
+      default: false,
+    },
+    showLogBtn: {
       type: Boolean,
       default: false,
     },
@@ -396,7 +403,7 @@ export default defineComponent({
           border: 1px solid rgba(202, 214, 238, 0.54);
           font-size: 24px;
           cursor: pointer;
-          &:hover {
+          &:hover:before {
             color: #096DD9;
           }
           &::before {
