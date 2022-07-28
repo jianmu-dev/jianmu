@@ -209,7 +209,7 @@ export default defineComponent({
       .label {
         padding-left: 4px;
         line-height: 52px;
-        font-size: 30px;
+        font-size: 26px;
         text-align: center;
 
         &::before {

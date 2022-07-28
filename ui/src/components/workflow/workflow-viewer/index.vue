@@ -17,7 +17,7 @@
                   @mouseleave="destroyNodeToolbar"/>
     <!-- 文档流占位 -->
     <div class="canvas-container">
-      <div class="view-mode" :class="{borderBottom: !readonly}">
+      <div class="view-mode">
         <div class="float-view-mode">
           <div class="tab" :class="{select: !dslMode}" @click="changeViewMode(ViewModeEnum.GRAPHIC)">图示</div>
           <div class="tab" :class="{select: dslMode}" @click="changeViewMode(ViewModeEnum.YAML)">yaml</div>
@@ -46,6 +46,8 @@
         <jm-dsl-editor :value="workflowGraph?.visibleDsl || ''" readonly/>
       </div>
     </div>
+    <!-- 覆盖工具栏透明问题 -->
+    <div class="over-toolbar" :class="{moreHight: dslMode || readonly}"></div>
   </div>
 </template>
 
@@ -334,7 +336,18 @@ export default defineComponent({
   position: relative;
   // height: calc(100% - 60px);
   height: 100%;
-
+  .over-toolbar {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    height: 59px;
+    width: 100%;
+    background-color: #ffffff;
+    &.moreHight {
+      height: 60px;
+    }
+  }
   .task-states {
     position: absolute;
     z-index: 1;
@@ -352,9 +365,7 @@ export default defineComponent({
     // height: calc(100% - 60px);
     height: 100%;
     background-color: #ffffff;
-    .borderBottom {
-      border-bottom: 1px solid #E6EBF2;
-    }
+
     .view-mode {
       position: absolute;
       top: 0;
@@ -363,6 +374,7 @@ export default defineComponent({
       height: 60px;
       box-sizing: border-box;
       width: calc(100% - 60px);
+      border-bottom: 1px solid #E6EBF2;
 
       .float-view-mode {
         position: absolute;
@@ -404,7 +416,7 @@ export default defineComponent({
           font-size: 24px;
           cursor: pointer;
           &:hover:before {
-            color: #096DD9;
+            color: #EFF7FF;
           }
           &::before {
             color: #52657a;
@@ -417,9 +429,12 @@ export default defineComponent({
           line-height: 36px;
           text-align: center;
           cursor: pointer;
-          box-shadow: 0px 0px 4px 0px rgba(194,194,194,0.5000);
+          // box-shadow: 0px 0px 4px 0px rgba(194,194,194,0.5000);
           border-radius: 2px;
-          border: 1px solid rgb(202 214 238 / 54%);
+          border: 0.5px solid rgba(227, 233, 246, 1);
+          &:hover {
+            background-color: #EFF7FF;
+          }
         }
       }
     }
