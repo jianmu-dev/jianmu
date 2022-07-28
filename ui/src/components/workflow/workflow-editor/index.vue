@@ -41,7 +41,7 @@ import { Graph, Node } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
 import { ISelectableParam } from '../workflow-expression-editor/model/data';
-import { buildSelectableExtParam, buildSelectableGlobalParam } from './model/data/global-param';
+import { buildSelectableExtParam, buildSelectableGlobalParam } from './model/data/global';
 import { getExtParamList } from '@/api/ext-param';
 import { IExternalParameterVo } from '@/api/dto/ext-param';
 

@@ -1,8 +1,9 @@
 import { BaseNode } from './base-node';
 import { CustomRule } from '../common';
-import { NodeRefEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
+import { NodeRefEnum, NodeTypeEnum, ParamTypeEnum, RefTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/webhook.svg';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
+import { checkDuplicate } from '../../util/reference';
 
 export const WEBHOOK_PARAM_SCOPE = 'trigger';
 
@@ -72,7 +73,27 @@ export class Webhook extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          ref: [{ required: true, message: '请输入参数唯一标识', trigger: 'blur' }],
+          ref: [
+            { required: true, message: '请输入参数唯一标识', trigger: 'blur' },
+            {
+              validator: (rule: any, value: any, callback: any) => {
+                if (!value) {
+                  callback();
+                  return;
+                }
+                try {
+                  checkDuplicate(this.params.map(({ ref }) => ref), RefTypeEnum.TRIGGER_PARAM);
+                } catch ({ message, ref }) {
+                  if (ref === value) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'blur',
+            },
+          ],
           name: [{ required: false, message: '请输入参数名称', trigger: 'blur' }],
           type: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
           value: [{ required: true, message: '请输入参数值', trigger: 'blur' }],
@@ -109,7 +130,10 @@ export class Webhook extends BaseNode {
     return {
       type: NodeTypeEnum.WEBHOOK,
       param: params.length === 0 ? undefined : params.map(param => {
-        const newParam: any = { ...param };
+        const newParam: any = {
+          ...param,
+          hidden: param.hidden || undefined,
+        };
         delete newParam.key;
         return newParam;
       }),
