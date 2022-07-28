@@ -22,7 +22,7 @@ import { datetimeFormatter } from '@/utils/formatter';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { computed } from '@vue/reactivity';
 import { RecordInfo, statusTranslate } from '../../model/record-info';
-import { checkWorkflowRunning } from '../../model/utils/workflow';
+import { checkWorkflowRunning } from '../../model/util/workflow';
 export default defineComponent({
   props: {
     record: {
