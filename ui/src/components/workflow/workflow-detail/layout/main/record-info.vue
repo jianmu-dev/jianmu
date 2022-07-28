@@ -5,7 +5,7 @@
     <div>
       {{ isSuspended? '挂起':'执行' }}时长：
     </div>
-    <div class="record-time" :class="{uninit: record.status==='' || record.status===WorkflowExecutionRecordStatusEnum.INIT}">
+    <div class="record-time" :class="[startAndEndToWidthClass(record.startTime, record.endTime)]" >
       <jm-timer v-if="isSuspended" :start-time="record.suspendedTime"/>
       <jm-timer v-else :start-time="record.startTime" :end-time="record.endTime"/>
     </div>
@@ -23,6 +23,7 @@ import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { computed } from '@vue/reactivity';
 import { RecordInfo, statusTranslate } from '../../model/record-info';
 import { checkWorkflowRunning } from '../../model/util/workflow';
+import { startAndEndToWidthClass } from '../../model/util/timetowidth';
 export default defineComponent({
   props: {
     record: {
@@ -41,6 +42,7 @@ export default defineComponent({
       checkWorkflowRunning,
       statusTranslate,
       WorkflowExecutionRecordStatusEnum,
+      startAndEndToWidthClass,
       handleTerminate() {
         proxy.$confirm('确定要终止吗?', '终止项目执行', {
           confirmButtonText: '确定',
@@ -79,7 +81,7 @@ export default defineComponent({
   height: @record-info-height;
   color: @shallow-black-color;
   z-index: 3;
-  font-size: 16px;
+  font-size: 14px;
   & > div > span {
     color: @default-black-color;
   }
@@ -112,12 +114,21 @@ export default defineComponent({
     background-color:#CDD1E3;
   }
   .record-time {
-    width: 88px;
+    min-width: 24px;
     height: 40px;
     line-height: 40px;
     color: @default-black-color;
-    &.uninit {
-      width: 16px;
+    &.one {
+      width: 24px;
+    }
+    &.two {
+      width: 58px;
+    }
+    &.three {
+      width: 88px;
+    }
+    &.four {
+      width: 116px;
     }
   }
   .terminate-button{
@@ -125,8 +136,9 @@ export default defineComponent({
     width: 82px;
     height: 36px;
     background: @default-background-color;
+    // box-shadow: 0px 0px 4px 0px rgba(194,194,194,0.5000);
     border-radius: 2px;
-    border: 1px solid rgb(202 214 238 / 54%);
+    border: 0.5px solid rgba(227, 233, 246, 1);
     font-size: 14px;
     color: #116ed2;
     cursor: pointer;
