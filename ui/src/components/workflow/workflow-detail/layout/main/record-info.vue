@@ -35,7 +35,7 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const isSuspended = computed(()=>props.record.status === WorkflowExecutionRecordStatusEnum.SUSPENDED);
     const startAndEndToWidthClass = computed(() => {
-      let start = new Date(props.record.startTime).getTime();
+      let start:any = props.record.startTime && new Date(props.record.startTime).getTime();
       let end:any = props.record.endTime;
       let back = new Date().getTime();
       let sencends:number = 0;
@@ -46,6 +46,9 @@ export default defineComponent({
         let font = new Date(props.record.suspendedTime as string).getTime();
         sencends = (back - font)/1000;
       } else {
+        if (start === undefined) {
+          return 'one';
+        }
         sencends = (new Date(end).getTime() - start)/1000;
       }
       // console.log('sencends', sencends);
