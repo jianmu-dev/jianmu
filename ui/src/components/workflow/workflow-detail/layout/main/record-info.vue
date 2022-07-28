@@ -48,13 +48,14 @@ export default defineComponent({
       } else {
         sencends = (new Date(end).getTime() - start)/1000;
       }
+      // console.log('sencends', sencends);
       if (sencends < 60) {
         // 59s
         return 'one';
-      } else if (sencends > 60 && sencends < 21600){
+      } else if (sencends > 60 && sencends < 3660){
         // 59m 59s
         return 'two';
-      } else if (sencends > 21600 && sencends < 5184000) {
+      } else if (sencends > 3660 && sencends < 21600) {
         // 59h 59m 59s
         return 'three';
       } else {
