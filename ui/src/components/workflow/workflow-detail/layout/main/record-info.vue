@@ -39,11 +39,16 @@ export default defineComponent({
       let end:any = props.record.endTime;
       let back = new Date().getTime();
       let sencends:number = 0;
+      console.log('start', start, end, props.record.suspendedTime);
       if (end === undefined) {
-        if (props.record.suspendedTime === undefined) {
+        if (props.record.suspendedTime === undefined && props.record.status !== WorkflowExecutionRecordStatusEnum.RUNNING) {
           return 'one';
         }
         let font = new Date(props.record.suspendedTime as string).getTime();
+        // 运行中的时间 宽度
+        if (props.record.status === WorkflowExecutionRecordStatusEnum.RUNNING) {
+          font = start;
+        }
         sencends = (back - font)/1000;
       } else {
         if (start === undefined) {
@@ -51,14 +56,14 @@ export default defineComponent({
         }
         sencends = (new Date(end).getTime() - start)/1000;
       }
-      // console.log('sencends', sencends);
+      console.log('sencends', sencends);
       if (sencends < 60) {
         // 59s
         return 'one';
       } else if (sencends > 60 && sencends < 3660){
         // 59m 59s
         return 'two';
-      } else if (sencends > 3660 && sencends < 21600) {
+      } else if (sencends > 3660 && sencends < 90060) {
         // 59h 59m 59s
         return 'three';
       } else {
