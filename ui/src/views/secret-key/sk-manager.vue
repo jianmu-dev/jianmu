@@ -149,7 +149,7 @@ export default defineComponent({
   margin-bottom: 20px;
 
   .namespace {
-    padding: 30px 0 10px 0.5%;
+    padding: 30px 0 10px calc(10px + 0.5%);
     background-color: #ffffff;
     display: flex;
     align-items: center;
@@ -181,6 +181,7 @@ export default defineComponent({
     background-color: #ffffff;
     box-sizing: border-box;
     height: calc(100vh - 208px);
+    padding: 0 10px;
 
     .content {
       display: flex;
@@ -235,7 +236,6 @@ export default defineComponent({
         &:hover {
           box-shadow: 0 0 12px 4px #EDF1F8;
           border: 1px solid transparent;
-          background-image: url('@/assets/svgs/secret-key/key-icon-active.svg');
 
           .operation {
             display: block;
