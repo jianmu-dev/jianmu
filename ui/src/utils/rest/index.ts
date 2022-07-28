@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosTransformer, Method } from 'axios';
 import qs from 'qs';
-import { HttpError, ResetContentError, TimeoutError } from '@/utils/rest/error';
+import { HttpError, ConflictError, TimeoutError } from '@/utils/rest/error';
 import _store from '@/store';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
@@ -98,6 +98,9 @@ export default async function rest({
       timeout: onDownloadProgress ? 0 : (timeout || 20 * 1000),
     });
   } catch (err) {
+    if (err.response.status === 409) {
+      throw new ConflictError(err.response);
+    }
     if (err.message.startsWith('timeout of')) {
       throw new TimeoutError(err.message);
     }
@@ -110,9 +113,7 @@ export default async function rest({
     // 更新认证
     store.commit(`${sessionNs}/mutateToken`, newToken);
   }
-  if (res.status === 201) {
-    throw new ResetContentError(res);
-  }
+
   if (m === 'head') {
     return res.headers;
   }

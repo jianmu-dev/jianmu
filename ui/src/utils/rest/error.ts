@@ -29,7 +29,7 @@ export class HttpError extends Error {
 /**
  * 重置内容错误
  */
-export class ResetContentError extends Error {
+export class ConflictError extends Error {
   response: AxiosResponse;
 
   constructor(response: AxiosResponse) {
