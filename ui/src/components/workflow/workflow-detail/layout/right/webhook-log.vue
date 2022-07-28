@@ -35,7 +35,7 @@
                     border>
                     <jm-table-column label="参数唯一标识" align="center">
                       <template #default="scope">
-                        <jm-text-viewer :value="scope.row.name" :tip-append-to-body="false" class="params-name"/>
+                        <jm-text-viewer :value="scope.row.ref" :tip-append-to-body="false" class="params-name"/>
                       </template>
                     </jm-table-column>
                     <jm-table-column
