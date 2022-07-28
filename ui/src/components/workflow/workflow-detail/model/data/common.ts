@@ -6,7 +6,6 @@ import { ViewModeEnum } from '@/api/dto/enumeration';
  * 详情页面 地址栏参数
  */
 export interface IWorkflowDetailParam {
-  entry: boolean;
   projectId: string;
   viewMode?: ViewModeEnum;
   triggerId?: string;

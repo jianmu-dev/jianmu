@@ -4,7 +4,7 @@
       v-if="recordDetail.project"
       :project="recordDetail.project"
       :session="session"
-      :entry="modelValue.entry"
+      :entry="entry"
       @jump="groupId=>$emit('jump', groupId)"
       @back="$emit('back')"
       @logout="$emit('logout')"
@@ -25,7 +25,7 @@
     <graph-panel
       ref="graphPanel"
       v-if="recordDetail.record"
-      :entry="modelValue.entry"
+      :entry="entry"
       :record="recordDetail.record"
       :currentRecordStatus="recordList.currentRecordStatus"
       :viewMode="modelValue.viewMode"
@@ -57,6 +57,10 @@ export default defineComponent({
       required: true,
     },
     session: Object as PropType<ISessionVo>,
+    entry: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['back', 'jump', 'update:model-value', 'logout', 'trigger'],
   setup(props, { emit }) {
@@ -84,7 +88,7 @@ export default defineComponent({
       handleChangeRecord(record: IWorkflowExecutionRecordVo) {
         const { name: projectGroupName, triggerId } = record;
         // entry -> false 建木CI的topbar 更改项目名
-        if (!props.modelValue.entry) {
+        if (!props.entry) {
           recordDetail.value.project = {
             ...recordDetail.value.project,
             projectGroupName,

@@ -3,6 +3,7 @@
     <jm-workflow-detail
       v-model="workflowDetail"
       :session="session"
+      :entry="entry"
       @jump="handleJump"
       @back="handleBack"
       @logout="handleLogout"
@@ -51,9 +52,9 @@ export default defineComponent({
       projectId: props.projectId,
       viewMode: props.viewMode,
       triggerId: props.triggerId,
-      entry,
     });
     return {
+      entry,
       loading,
       loaded,
       workflowDetail,
@@ -98,12 +99,11 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         }
       },
-      handleChangeRouterParam(routerParam: { viewMode?: ViewModeEnum, triggerId?: string, entry: boolean }) {
+      handleChangeRouterParam(routerParam: { viewMode?: ViewModeEnum, triggerId?: string }) {
         router.push({
           name: 'workflow-execution-record-detail',
           query: {
             ...routerParam,
-            entry: JSON.stringify(routerParam.entry),
           },
         });
       },
