@@ -453,6 +453,7 @@ export default defineComponent({
     }
     .dsl-editor-container {
       position: absolute;
+      z-index: 2;
       top: 0;
       left: 0;
       width: calc(100% - 60px);
