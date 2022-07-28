@@ -174,15 +174,12 @@ public class TriggerApplication {
         var optionalTrigger = this.triggerRepository.findByProjectId(projectId);
         // 修改webhook
         if (optionalTrigger.isPresent()) {
-            String finalRef = ref;
-            optionalTrigger.ifPresent(trigger -> {
-                trigger.setType(Trigger.Type.WEBHOOK);
-                trigger.setWebhook(webhook);
-                if (ObjectUtils.isEmpty(project.getAssociationType()) || ObjectUtils.isEmpty(project.getAssociationId())) {
-                    trigger.setRef(finalRef);
-                }
-                this.triggerRepository.updateById(trigger);
-            });
+            var trigger = optionalTrigger.get();
+            ref = this.updateGitWebhook(trigger.getRef(), encryptedToken, project.getAssociationId());
+            trigger.setType(Trigger.Type.WEBHOOK);
+            trigger.setWebhook(webhook);
+            trigger.setRef(ref);
+            this.triggerRepository.updateById(trigger);
             return;
         }
         // 创建webhook
@@ -198,7 +195,7 @@ public class TriggerApplication {
                 ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false).getId();
                 oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref);
             } catch (Exception e) {
-                throw new RuntimeException("创建webhook失败：", e);
+                throw new RuntimeException("创建webhook失败：" + e.getMessage());
             }
         }
         var trigger = Trigger.Builder.aTrigger()
@@ -208,6 +205,26 @@ public class TriggerApplication {
                 .webhook(webhook)
                 .build();
         this.triggerRepository.add(trigger);
+    }
+
+    private String updateGitWebhook(String ref, String encryptedToken, String associationId) {
+        var gitRepo = this.gitRepoRepository.findById(associationId)
+                .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
+        var oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .build();
+        try {
+            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            try {
+                oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
+            } catch (Exception e) {
+                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false).getId();
+                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref);
+            }
+            return ref;
+        } catch (Exception e) {
+            throw new RuntimeException("修改webhook失败：" + e.getMessage());
+        }
     }
 
     @Transactional
@@ -292,9 +309,9 @@ public class TriggerApplication {
             oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
             oAuth2Api.deleteWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
         } catch (UnknownException e) {
-            log.info("删除webhook失败，未找到git webhook: " + ref);
+            log.info("未找到git webhook: " + ref);
         } catch (Exception e) {
-            throw new RuntimeException("删除webhook失败：", e);
+            throw new RuntimeException("删除webhook失败：" + e.getMessage());
         }
     }
 
