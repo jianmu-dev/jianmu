@@ -69,13 +69,14 @@ export class WorkflowDnd {
             targetNodeRef += '0';
           } else {
             refs.forEach(ref => {
-              if(isNaN(Number(ref.slice(targetNodeRef.length)))){
+              const refLength = Number(ref.slice(targetNodeRef.length));
+              if (isNaN(refLength)) {
                 return;
               }
-              arr.push(Number(ref.slice(targetNodeRef.length)));
+              arr.push(refLength);
             });
             // 当前refs为空时
-            if(arr.length === 0){
+            if (arr.length === 0) {
               arr.push(-1);
             }
             targetNodeRef += Math.max(...arr) + 1;
