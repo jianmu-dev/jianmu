@@ -44,7 +44,8 @@ export default defineComponent({
     });
     const editorRule = ref<object>({
       name: [
-        { required: true, message: '命名空间不能为空', trigger: 'blur' },
+        { required: true, message: '请输入命名空间', trigger: 'blur' },
+        { pattern: /^[a-zA-Z0-9_]([a-zA-Z0-9_]+)?$/, message: '支持下划线、数字、英文字母', trigger: 'blur' },
       ],
     });
     const loading = ref<boolean>(false);

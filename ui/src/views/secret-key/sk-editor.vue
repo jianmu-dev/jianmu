@@ -54,10 +54,11 @@ export default defineComponent({
     });
     const editorRule = ref<object>({
       key: [
-        { required: true, message: '唯一标识不能为空', trigger: 'blur' },
+        { required: true, message: '请输入唯一标识', trigger: 'blur' },
+        { pattern: /^[a-zA-Z0-9_]([a-zA-Z0-9_]+)?$/, message: '支持下划线、数字、英文字母', trigger: 'blur' },
       ],
       value: [
-        { required: true, message: '值不能为空', trigger: 'blur' },
+        { required: true, message: '请输入值', trigger: 'blur' },
       ],
     });
     const loading = ref<boolean>(false);

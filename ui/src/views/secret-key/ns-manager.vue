@@ -182,8 +182,8 @@ export default defineComponent({
 
 <style scoped lang="less">
 .secret-key-ns-manager {
+  padding: 30px 10px 0;
   box-sizing: border-box;
-  padding-top: 30px;
   background-color: #ffffff;
   height: calc(100vh - 145px);
   margin-bottom: 20px;
