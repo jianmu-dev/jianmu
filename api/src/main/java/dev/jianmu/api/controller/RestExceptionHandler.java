@@ -144,7 +144,7 @@ public class RestExceptionHandler {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String newJwt = this.jwtProvider.generateJwtToken(authentication, expireTimestamp);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(JwtResponse.builder()
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(JwtResponse.builder()
                 .type("Bearer")
                 .token(newJwt)
                 .id(session.getId())

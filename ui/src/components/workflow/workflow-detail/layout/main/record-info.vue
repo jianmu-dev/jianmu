@@ -39,7 +39,7 @@ export default defineComponent({
       let end:any = props.record.endTime;
       let back = new Date().getTime();
       let sencends:number = 0;
-      console.log('start', start, end, props.record.suspendedTime);
+      // console.log('start', start, end, props.record.suspendedTime);
       if (end === undefined) {
         if (props.record.suspendedTime === undefined && props.record.status !== WorkflowExecutionRecordStatusEnum.RUNNING) {
           return 'one';
@@ -56,7 +56,7 @@ export default defineComponent({
         }
         sencends = (new Date(end).getTime() - start)/1000;
       }
-      console.log('sencends', sencends);
+
       if (sencends < 60) {
         // 59s
         return 'one';
