@@ -6,10 +6,7 @@ import dev.jianmu.workflow.el.*;
 import dev.jianmu.workflow.event.definition.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -21,6 +18,7 @@ import java.util.stream.Collectors;
  * @create 2021-01-21 14:10
  */
 public class Workflow extends AggregateRoot {
+
     public enum Type {
         WORKFLOW,
         PIPELINE
@@ -32,6 +30,8 @@ public class Workflow extends AggregateRoot {
     private String ref;
     // 类型
     private Type type;
+    // 对应执行器标签
+    private String tag;
     // 描述
     private String description;
     // 版本
@@ -357,6 +357,14 @@ public class Workflow extends AggregateRoot {
         return type;
     }
 
+    public String getTag() {
+        return this.tag;
+    }
+
+    public List<String> getTags() {
+        return Arrays.asList(this.tag.split(","));
+    }
+
     public String getDescription() {
         return description;
     }
@@ -388,6 +396,8 @@ public class Workflow extends AggregateRoot {
         private String ref;
         // 类型
         private Type type;
+        // 标签
+        private String tag;
         // 描述
         private String description;
         // Node列表
@@ -416,6 +426,11 @@ public class Workflow extends AggregateRoot {
 
         public Builder ref(String ref) {
             this.ref = ref;
+            return this;
+        }
+
+        public Builder tag(String tag) {
+            this.tag = tag;
             return this;
         }
 
@@ -467,6 +482,7 @@ public class Workflow extends AggregateRoot {
             workflow.nodes = Set.copyOf(this.nodes);
             workflow.globalParameters = Set.copyOf(this.globalParameters);
             workflow.ref = this.ref;
+            workflow.tag = this.tag;
             workflow.dslText = this.dslText;
             workflow.type = this.type;
             workflow.name = this.name;

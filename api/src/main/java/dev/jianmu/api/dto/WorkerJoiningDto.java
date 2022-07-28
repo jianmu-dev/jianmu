@@ -23,4 +23,6 @@ public class WorkerJoiningDto {
     private Worker.Type type = Worker.Type.DOCKER;
     @Schema(required = true, description = "name")
     private String name;
+    @Schema(required = true, description = "tag")
+    private String tag;
 }
