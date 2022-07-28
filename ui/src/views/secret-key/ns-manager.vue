@@ -349,6 +349,7 @@ export default defineComponent({
       border: none;
       padding: 8px 24px;
       border-radius: 2px;
+      box-shadow: none;
 
       &:nth-child(2) {
         margin: 0 10px 0 20px;

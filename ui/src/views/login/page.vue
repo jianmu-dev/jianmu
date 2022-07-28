@@ -53,7 +53,6 @@ export default defineComponent({
         return;
       }
       if (entry && associationData) {
-        console.log(associationData, props.reference, props.owner);
         if ((associationData.ref !== props.reference || associationData.owner !== props.owner)) {
           try {
             // 调用refreshApi
@@ -63,8 +62,7 @@ export default defineComponent({
             } as IGitRepoTokenRefreshingDto);
           } catch (err) {
             isShow.value = true;
-            proxy.$error(err.message);
-            return;
+            throw err;
           }
         }
         await router.push({ name: 'index' });
