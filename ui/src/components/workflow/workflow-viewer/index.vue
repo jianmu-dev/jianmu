@@ -334,7 +334,6 @@ export default defineComponent({
 
   background-color: #FFFFFF;
   position: relative;
-  // height: calc(100% - 60px);
   height: 100%;
   .over-toolbar {
     position: absolute;
@@ -362,7 +361,6 @@ export default defineComponent({
 
   .canvas-container {
     position: relative;
-    // height: calc(100% - 60px);
     height: 100%;
     background-color: #ffffff;
 
@@ -412,11 +410,11 @@ export default defineComponent({
           padding: 0 6px;
           background-color: #fff;
           border-radius: 2px;
-          border: 1px solid rgba(202, 214, 238, 0.54);
+          border: 0.5px solid rgba(227, 233, 246, 1);
           font-size: 24px;
           cursor: pointer;
           &:hover:before {
-            color: #EFF7FF;
+            color: #096DD9;
           }
           &::before {
             color: #52657a;
@@ -429,7 +427,6 @@ export default defineComponent({
           line-height: 36px;
           text-align: center;
           cursor: pointer;
-          // box-shadow: 0px 0px 4px 0px rgba(194,194,194,0.5000);
           border-radius: 2px;
           border: 0.5px solid rgba(227, 233, 246, 1);
           &:hover {
