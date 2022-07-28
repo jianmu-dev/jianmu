@@ -1,32 +1,36 @@
 <template>
   <div class="secret-key-sk-manager" v-loading="loading">
-    <div class="namespace">
-      <span class="key-title-icon"></span>
-      <span class="name">{{ ns }}</span>
-      <span class="divider"></span>
-      <span>密钥列表</span>
-      <span class="desc">（{{ keys.length }}）</span>
-    </div>
-    <div class="keys">
-      <div class="content">
-        <button class="add" @click="add">
-          <i class="jm-icon-button-add"></i>
-          <div class="label">新增密钥</div>
-        </button>
-        <div class="item" v-for="{ id, name } of keys" :key="id">
-          <div class="wrapper">
-            <div class="name">
-              <jm-text-viewer :value="name"/>
+    <div v-show="!loading">
+      <div class="namespace">
+        <router-link :to="{name:'secret-key'}">
+          <span class="key-title-icon"></span>
+          <span class="name">{{ ns }}</span>
+        </router-link>
+        <span class="divider"></span>
+        <span>密钥列表</span>
+        <span class="desc">（{{ keys.length }}）</span>
+      </div>
+      <div class="keys">
+        <div class="content">
+          <button class="add" @click="add">
+            <i class="jm-icon-button-add"></i>
+            <div class="label">新增密钥</div>
+          </button>
+          <div class="item" v-for="{ id, name } of keys" :key="id">
+            <div class="wrapper">
+              <div class="name">
+                <jm-text-viewer :value="name"/>
+              </div>
             </div>
-          </div>
-          <div class="operation">
-            <jm-tooltip content="删除" placement="top">
-              <button
-                :class="{ del: true, doing: deletings[name] }"
-                @click="del(name)"
-                @keypress.enter.prevent
-              ></button>
-            </jm-tooltip>
+            <div class="operation">
+              <jm-tooltip content="删除" placement="top">
+                <button
+                  :class="{ del: true, doing: deletings[name] }"
+                  @click="del(name)"
+                  @keypress.enter.prevent
+                ></button>
+              </jm-tooltip>
+            </div>
           </div>
         </div>
       </div>
@@ -95,8 +99,18 @@ export default defineComponent({
       loading,
       creationActivated,
       deletings,
-      handleKeyAdd: (namespace: string, name: string) => {
-        keys.value.push({ id: uuidv4(), name });
+      handleKeyAdd: async () => {
+        try {
+          loading.value = true;
+          keys.value = (await listSecretKey(props.ns)).map(item => ({
+            id: uuidv4(),
+            name: item,
+          }));
+        } catch (err) {
+          proxy.$throw(err, proxy);
+        } finally {
+          loading.value = false;
+        }
       },
       add: () => {
         creationActivated.value = true;
@@ -144,6 +158,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .secret-key-sk-manager {
+  height: calc(100vh - 145px);
   font-size: 14px;
   color: #333333;
   margin-bottom: 20px;
@@ -157,11 +172,22 @@ export default defineComponent({
     color: #082340;
     font-weight: 400;
 
-    .key-title-icon {
-      width: 20px;
-      height: 20px;
-      background: url('@/assets/svgs/secret-key/secret-key-icon.svg') no-repeat;
-      margin-right: 5px;
+    a {
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        .key-title-icon {
+          background: url('@/assets/svgs/secret-key/secret-key-icon-active.svg') no-repeat;
+        }
+      }
+
+      .key-title-icon {
+        width: 20px;
+        height: 20px;
+        background: url('@/assets/svgs/secret-key/secret-key-icon.svg') no-repeat;
+        margin-right: 5px;
+      }
     }
 
     .divider {
