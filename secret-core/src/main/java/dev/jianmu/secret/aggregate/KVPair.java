@@ -1,5 +1,7 @@
 package dev.jianmu.secret.aggregate;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Ethan Liu
  * @class KVPair
@@ -10,6 +12,11 @@ public class KVPair extends BaseAssociation {
     private String namespaceName;
     private String key;
     private String value;
+    private LocalDateTime createdTime = LocalDateTime.now();
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
 
     public String getNamespaceName() {
         return namespaceName;

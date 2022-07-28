@@ -211,6 +211,7 @@ CREATE TABLE `jm_secret_kv_pair`
     `namespace_name`   varchar(100) NOT NULL COMMENT '命名空间名称',
     `kv_key`           varchar(45)  NOT NULL COMMENT '参数key',
     `kv_value`         text         NOT NULL COMMENT '参数值',
+    `created_time`     datetime     NOT NULL COMMENT '创建时间',
     UNIQUE INDEX id_type_name_key (`association_id`, `association_type`, `namespace_name`, `kv_key`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create 2021-04-20 13:31
  */
 public interface KVPairMapper {
-    @Insert("insert into jm_secret_kv_pair(association_id, association_type, namespace_name, kv_key, kv_value) " +
-            "values(#{associationId}, #{associationType}, #{namespaceName}, #{key}, #{value})")
+    @Insert("insert into jm_secret_kv_pair(association_id, association_type, namespace_name, kv_key, kv_value, created_time) " +
+            "values(#{associationId}, #{associationType}, #{namespaceName}, #{key}, #{value}, #{createdTime})")
     void add(KVPair kvPair);
 
     @Delete("<script>" +
@@ -50,6 +50,7 @@ public interface KVPairMapper {
     @Result(column = "namespace_name", property = "namespaceName")
     @Result(column = "kv_key", property = "key")
     @Result(column = "kv_value", property = "value")
+    @Result(column = "created_time", property = "createdTime")
     Optional<KVPair> findByNamespaceNameAndKey(@Param("associationId") String associationId,
                                                @Param("associationType") String associationType,
                                                @Param("namespaceName") String namespaceName,
@@ -61,10 +62,12 @@ public interface KVPairMapper {
             " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
             " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
             "</where>" +
+            "order by created_time desc" +
             "</script>")
     @Result(column = "namespace_name", property = "namespaceName")
     @Result(column = "kv_key", property = "key")
     @Result(column = "kv_value", property = "value")
+    @Result(column = "created_time", property = "createdTime")
     List<KVPair> findByNamespaceName(@Param("associationId") String associationId,
                                      @Param("associationType") String associationType,
                                      @Param("namespaceName") String namespaceName);

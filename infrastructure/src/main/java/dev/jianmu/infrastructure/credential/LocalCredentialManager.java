@@ -57,7 +57,7 @@ public class LocalCredentialManager implements CredentialManager {
 
         var existedKvPair = this.kvPairMapper.findByNamespaceNameAndKey(kvPair.getAssociationId(), kvPair.getAssociationType(), kvPair.getNamespaceName(), kvPair.getKey());
         if (existedKvPair.isPresent()) {
-            throw new RuntimeException("秘钥名称在该命名空间下已存在");
+            throw new RuntimeException("密钥唯一标识在该命名空间下已存在");
         }
 
         if (kvPair.getAssociationId() == null || kvPair.getAssociationType() == null) {

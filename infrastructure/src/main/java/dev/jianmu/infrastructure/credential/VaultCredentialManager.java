@@ -71,7 +71,7 @@ public class VaultCredentialManager implements CredentialManager {
             throw new RuntimeException("未找到对应的命名空间");
         }
         if (res.getData().get(kvPair.getKey()) != null) {
-            throw new RuntimeException("秘钥名称在该命名空间下已存在");
+            throw new RuntimeException("密钥唯一标识在该命名空间下已存在");
         }
         res.getData().put(kvPair.getKey(), kvPair.getValue());
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
