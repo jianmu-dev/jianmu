@@ -104,7 +104,6 @@ export default defineComponent({
       session,
       ...mapMutations({
         deleteSession: 'mutateDeletion',
-        mutateSession: 'oauthMutate',
       }),
       view: () => {
         if (!newVersion.value) {

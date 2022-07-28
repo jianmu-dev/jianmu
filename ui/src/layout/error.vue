@@ -2,7 +2,7 @@
   <div class="error-layout">
     <div class="left-top">
       <div class="bg-graph"></div>
-      <router-link to="/">
+      <router-link :to="{name:'index'}">
         <div class="logo"></div>
       </router-link>
     </div>

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosTransformer, Method } from 'axios';
 import qs from 'qs';
-import { HttpError, TimeoutError } from '@/utils/rest/error';
+import { HttpError, ConflictError, TimeoutError } from '@/utils/rest/error';
 import _store from '@/store';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
@@ -98,10 +98,12 @@ export default async function rest({
       timeout: onDownloadProgress ? 0 : (timeout || 20 * 1000),
     });
   } catch (err) {
+    if (err.response.status === 409) {
+      throw new ConflictError(err.response);
+    }
     if (err.message.startsWith('timeout of')) {
       throw new TimeoutError(err.message);
     }
-
     throw new HttpError(err.response, err.message);
   }
 

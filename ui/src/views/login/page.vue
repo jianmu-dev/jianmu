@@ -44,7 +44,8 @@ export default defineComponent({
     const entry = store.state.entry;
     const isShow = ref<boolean>(false);
     const { proxy } = getCurrentInstance() as any;
-    const { session, associationData } = store.state[namespace] as IState;
+    const { session } = store.state[namespace] as IState;
+    const associationData = session?.associationData;
     onMounted(async () => {
       // 如果页面嵌入在iframe里面，localstorage中session存在，直接进入首页，condition防止参数被串改
       // session可能被清空

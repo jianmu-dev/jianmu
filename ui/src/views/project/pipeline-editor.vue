@@ -55,12 +55,8 @@ export default defineComponent({
         return;
       }
       defaultSession.value = JSON.parse(e.newValue)['_default'].session;
-      const newAssociationData = JSON.parse(e.newValue)['_default'].associationData;
       // 将新tab中的session值，保存在vuex中
-      proxy.mutateSession({
-        session: defaultSession.value,
-        associationData: newAssociationData,
-      });
+      proxy.mutateSession(defaultSession.value);
     }, 1000, {
       leading: true,
       trailing: false,

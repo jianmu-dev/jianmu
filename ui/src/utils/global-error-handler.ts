@@ -54,11 +54,16 @@ export async function globalErrorHandler(
         if (!checkLocation(error.response)) {
           break;
         }
-        await router.push({
-          name: 'http-status-error',
-          params: { value: status },
-          query: { errMessage: error.response.data.message },
-        });
+        if (!store.state.entry) {
+          await router.push({
+            name: 'http-status-error',
+            params: { value: status },
+            query: { errMessage: error.response.data.message },
+          });
+          return;
+        }
+        window.top.location.href = `/error/http-status/${status}`;
+
         break;
       }
       // TODO 待扩展，处理其他错误码

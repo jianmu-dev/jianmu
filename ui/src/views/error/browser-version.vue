@@ -2,7 +2,7 @@
   <div class="browser-version-error">
     <div class="desc">抱歉，不支持此浏览器</div>
     <div class="back">
-      <router-link to="/">
+      <router-link :to="{name:'index'}">
         <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
       </router-link>
     </div>
