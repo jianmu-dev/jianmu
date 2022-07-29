@@ -39,7 +39,7 @@ public class OAuth2Properties implements InitializingBean, EnvironmentAware {
         if (this.webhookHost.endsWith("/")) {
             return this.webhookHost + "webhook/";
         }
-        return this.webhookHost + "/webhhok/";
+        return this.webhookHost + "/webhook/";
     }
 
     public String getClientSecret() {
