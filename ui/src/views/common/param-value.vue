@@ -45,7 +45,7 @@ export default defineComponent({
     const getMaxWidth = (width: number) => {
       maxWidth.value += width + 'px';
     };
-    const regExp = /((http|https):\/\/([\w\-]+\.)+[\w\-]+(\/[\w\u4e00-\u9fa5\-\.\/?\@\%\!\&=\+\~\:\#\;\,]*)?)/ig;
+    const regExp = /((http|https):\/\/([\w-]+\.)+[\w-]+(\/[\w\u4e00-\u9fa5\-./?@%!&=+~:#;,]*)?)/ig;
     const isLink = computed<boolean>(() => {
       if (paramValue.value.startsWith('http://') || paramValue.value.startsWith('https://')) {
         return !!paramValue.value.match(regExp);
