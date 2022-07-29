@@ -39,6 +39,7 @@
             @update:reference="refreshEditorParams"
             @update:name="refreshEditorParams"
             @update:type="refreshEditorParams"
+            @change-reference="(newVal,oldVal)=>changeRef(index,oldVal,'params')"
           />
           <div class="add-param" @click="addParam">
             <i class="jm-icon-button-add"/>
@@ -214,6 +215,14 @@ export default defineComponent({
         if (val) {
           refreshEditorParams();
         }
+      },
+      changeRef: (index: number, oldVal: string, formModelName: string) => {
+        form.value.params.forEach(({ ref }, idx) => {
+          if (index === idx || ref !== oldVal) {
+            return;
+          }
+          formRef.value.validateField(`${formModelName}.${idx}.ref`);
+        });
       },
     };
   },

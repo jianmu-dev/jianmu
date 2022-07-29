@@ -11,7 +11,7 @@
         @blur="switchBackgroundFlag=false"/>
     </jm-form-item>
 
-    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
+    <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value" v-if="valueVisible">
       <template #label>变量值
         <jm-tooltip placement="top" :content="switchValueType?'切换至选择密钥模式':'切换至输入参数模式'">
           <i class="jm-icon-workflow-select-mode" v-if="switchValueType" @click="switchEnvMode(false)"/>
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, onMounted, PropType, ref } from 'vue';
+import { defineComponent, inject, nextTick, onMounted, PropType, ref } from 'vue';
 import { CustomRule } from '../../../model/data/common';
 import ExpressionEditor from './expression-editor.vue';
 import SecretKeySelector from './secret-key-selector.vue';
@@ -76,7 +76,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:name', 'update:value', 'update:type', 'delete'],
+  emits: ['update:name', 'update:value', 'update:type', 'change-name', 'delete'],
   setup(props, { emit }) {
     const envName = ref<string>(props.name);
     const envVal = ref<string>(props.value);
@@ -85,6 +85,7 @@ export default defineComponent({
     const envValRef = ref<HTMLElement>();
     const nodeId = ref<string>('');
     const getNode = inject('getNode') as () => Node;
+    const valueVisible = ref<boolean>(true);
     nodeId.value = getNode().id;
 
     onMounted(() => {
@@ -100,11 +101,14 @@ export default defineComponent({
       envValRef,
       nodeId,
       switchValueType,
+      valueVisible,
       upperCase: () => {
         envName.value = envName.value.toUpperCase();
       },
       changeEnv: (val: string) => {
+        const oldVal = props.name;
         emit('update:name', val);
+        emit('change-name', envName.value, oldVal);
       },
       changeVal: (val: string) => {
         emit('update:value', val);
@@ -113,8 +117,11 @@ export default defineComponent({
         emit('delete', props.index);
       },
       // 带参数区分tab
-      switchEnvMode: (flag: boolean) => {
+      switchEnvMode: async(flag: boolean) => {
         switchValueType.value = flag;
+        valueVisible.value = false;
+        await nextTick();
+        valueVisible.value = true;
         emit('update:type', flag ? ParamTypeEnum.STRING : ParamTypeEnum.SECRET);
       },
       // 密钥组件更新值

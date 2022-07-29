@@ -12,7 +12,7 @@
     </div>
     <!--  内容  -->
     <div class="ext-content">
-      <div class="add-param" @click="add">
+      <div class="add-param" @click="add" v-if="!pageLoading">
         <i class="jm-icon-button-add"/>
         新增参数
       </div>

@@ -1,4 +1,5 @@
 import { AssociationTypeEnum } from '@/api/dto/enumeration';
+import { IAssociationData } from '@/model/modules/session';
 
 /**
  * 创建会话dto
@@ -23,6 +24,7 @@ export interface ISessionVo extends Readonly<{
   // associationType?: string;
   thirdPartyType: string;
   entryUrl?: string;
+  associationData: IAssociationData;
 }> {
 }
 

@@ -188,7 +188,7 @@ export default defineComponent({
   .content {
     // 密钥命名空间
     ::v-deep(.secret-key-ns-manager) {
-      padding-top: 20px;
+      padding: 20px 0 0;
 
       .add,
       .vault-item {

@@ -5,12 +5,13 @@
       class="tab"
       :class="{
         [(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true,
-        [record.triggerId === param.triggerId ? 'selected' : 'unselected']: true
+        [record.triggerId === param.triggerId ? 'selected' : 'unselected']: true,
       }"
       v-for="(record, i) in allRecords"
       :key="i"
       @click="handleChange(record)"
       >
+      <!-- param.triggerId===undefined -->
         <div v-if="record.triggerId === param.triggerId" class="left-horn"/>
         <div v-if="record.triggerId === param.triggerId" class="right-horn"/>
         <div class="label">{{ record.serialNo || '-' }}</div>
@@ -59,13 +60,13 @@ export default defineComponent({
       // 实例化RecordList 传入项目的workflowRef，传入回调->获取allRecords并主动选择当前record
       recordList = new RecordList(props.param.workflowRef, (data: IWorkflowExecutionRecordVo[]):void=>{
         allRecords.value = data.length? data:[{
-          endTime: '',
+          endTime: undefined,
           id: '',
           serialNo: 0,
           name: props.project.projectGroupName,
           startTime: '',
           status: '',
-          triggerId: '',
+          triggerId: undefined as unknown,
           triggerType: props.project.triggerType,
           workflowRef: props.project.workflowRef,
           workflowVersion: props.project.workflowVersion,

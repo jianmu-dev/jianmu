@@ -100,8 +100,20 @@ export class WorkflowValidator {
   }
 
   async check(): Promise<void> {
-    await this.workflowData.global.validate();
+    await this.checkGlobal();
     await this.checkNodes();
+  }
+
+  /**
+   * 校验全局配置
+   * @private
+   */
+  private async checkGlobal(): Promise<void> {
+    try {
+      await this.workflowData.global.validate();
+    } catch ({ errors }) {
+      throw new Error(`${errors[0].message}`);
+    }
   }
 
   /**

@@ -139,11 +139,7 @@ export default defineComponent({
       if (e.key === 'session') {
         proxy.$success('登录成功');
         const newSession = JSON.parse(e.newValue)['_default'].session;
-        const newAssociationData = JSON.parse(e.newValue)['_default'].associationData;
-        proxy.mutateSession({
-          session: newSession,
-          associationData: newAssociationData,
-        });
+        proxy.mutateSession(newSession);
         // 如果嵌入在iframe里面登录成功后，直接进首页
         if (window.top !== window) {
           await router.push(INDEX);
@@ -190,8 +186,8 @@ export default defineComponent({
                 code: props.code,
                 thirdPartyType: loginType.value,
                 redirectUri: getRedirectUri(props.reference, props.owner),
-                ref: store.state[namespace].associationData?.ref,
-                owner: store.state[namespace].associationData?.owner,
+                ref: props.reference || undefined,
+                owner: props.owner || undefined,
               } as IGitRepoLoggingDto;
               break;
             case AssociationTypeEnum.USER:
@@ -219,12 +215,6 @@ export default defineComponent({
 
       if (route.path === AUTHORIZE_INDEX) {
         await fetchThirdAuthUrl();
-      }
-      if (entry && props.type === 'index') {
-        proxy.mutateAssociationData({
-          ref: props.reference,
-          owner: props.owner,
-        });
       }
     });
     onBeforeUnmount(() => {
@@ -278,7 +268,6 @@ export default defineComponent({
       }),
       ...mapMutations({
         mutateSession: 'oauthMutate',
-        mutateAssociationData: 'mutateAssociationData',
       }),
     };
   },

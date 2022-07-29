@@ -10,7 +10,6 @@ import dev.jianmu.git.repo.aggregate.Branch;
 import dev.jianmu.git.repo.aggregate.GitRepo;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.oauth2.api.OAuth2Api;
-import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.NoPermissionException;
@@ -33,12 +32,10 @@ import java.util.stream.Collectors;
  */
 @Service
 public class OAuth2Application {
-    private final OAuth2Properties oAuth2Properties;
     private final GitRepoRepository gitRepoRepository;
     private final AssociationUtil associationUtil;
 
-    public OAuth2Application(OAuth2Properties oAuth2Properties, GitRepoRepository gitRepoRepository, AssociationUtil associationUtil) {
-        this.oAuth2Properties = oAuth2Properties;
+    public OAuth2Application(GitRepoRepository gitRepoRepository, AssociationUtil associationUtil) {
         this.gitRepoRepository = gitRepoRepository;
         this.associationUtil = associationUtil;
     }

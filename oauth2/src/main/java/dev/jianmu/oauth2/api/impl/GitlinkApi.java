@@ -7,6 +7,7 @@ import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.exception.*;
 import dev.jianmu.oauth2.api.impl.dto.gitlink.LoggingDto;
+import dev.jianmu.oauth2.api.impl.dto.gitlink.RepositoryCommittingDto;
 import dev.jianmu.oauth2.api.impl.dto.gitlink.WebhookCreatingDto;
 import dev.jianmu.oauth2.api.impl.dto.gitlink.WebhookUpdatingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitlink.*;
@@ -20,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -402,5 +405,203 @@ public class GitlinkApi implements OAuth2Api {
             throw new JsonParseException(e.getMessage());
         }
         return webhookVo;
+    }
+
+    @Override
+    public void createFile(String accessToken, String owner, String repo,
+                           String content, String filepath,
+                           String branch, String message) {
+
+        String createFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + "v1/" + owner + "/" + repo +
+                "/contents/batch" + ".json";
+
+        long timeunix = new Date().getTime() / 1000;
+        ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
+        files.add(RepositoryCommittingDto.File.builder()
+                .action_type("create")
+                .file_path(filepath)
+                .content(content)
+                .build());
+        RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
+                .author_timeunix(timeunix)
+                .committer_timeunix(timeunix)
+                .branch(branch)
+                .message(message)
+                .files(files)
+                .build();
+
+        String repositoryCommittingJson;
+        try {
+            repositoryCommittingJson = MAPPER.writeValueAsString(repositoryCommittingDto);
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(repositoryCommittingJson, headers);
+
+        ResponseEntity<String> fileEntity;
+        try {
+            fileEntity = this.restTemplate.exchange(createFileUrl, HttpMethod.POST, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+
+        try {
+            Map<String, Object> createFileMap = MAPPER.readValue(fileEntity.getBody(), Map.class);
+            if (createFileMap != null && createFileMap.get("status") != null) {
+                throw new UnknownException((String) createFileMap.get("message"));
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteFile(String accessToken, String owner, String repo,
+                           String content, String filepath,
+                           String branch, String message) {
+        String deleteFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + "v1/" + owner + "/" + repo +
+                "/contents/batch" + ".json";
+
+        long timeunix = new Date().getTime() / 1000;
+        ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
+        files.add(RepositoryCommittingDto.File.builder()
+                .action_type("delete")
+                .file_path(filepath)
+                .content(content)
+                .build());
+        RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
+                .author_timeunix(timeunix)
+                .committer_timeunix(timeunix)
+                .branch(branch)
+                .message(message)
+                .files(files)
+                .build();
+
+        String repositoryCommittingJson;
+        try {
+            repositoryCommittingJson = MAPPER.writeValueAsString(repositoryCommittingDto);
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(repositoryCommittingJson, headers);
+
+        ResponseEntity<String> fileEntity;
+        try {
+            fileEntity = this.restTemplate.exchange(deleteFileUrl, HttpMethod.POST, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+
+        try {
+            Map<String, Object> deleteFileMap = MAPPER.readValue(fileEntity.getBody(), Map.class);
+            if (deleteFileMap != null && deleteFileMap.get("status") != null) {
+                throw new UnknownException((String) deleteFileMap.get("message"));
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateFile(String accessToken, String owner, String repo,
+                           String content, String filepath,
+                           String branch, String message) {
+
+        String updateFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + "v1/" + owner + "/" + repo +
+                "/contents/batch" + ".json";
+
+        long timeunix = new Date().getTime() / 1000;
+        ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
+        files.add(RepositoryCommittingDto.File.builder()
+                .action_type("update")
+                .file_path(filepath)
+                .content(content)
+                .build());
+        RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
+                .author_timeunix(timeunix)
+                .committer_timeunix(timeunix)
+                .branch(branch)
+                .message(message)
+                .files(files)
+                .build();
+
+        String repositoryCommittingJson;
+        try {
+            repositoryCommittingJson = MAPPER.writeValueAsString(repositoryCommittingDto);
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(repositoryCommittingJson, headers);
+
+        ResponseEntity<String> fileEntity;
+        try {
+            fileEntity = this.restTemplate.exchange(updateFileUrl, HttpMethod.POST, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+
+        try {
+            Map<String, Object> updateFileMap = MAPPER.readValue(fileEntity.getBody(), Map.class);
+            if (updateFileMap != null && updateFileMap.get("status") != null) {
+                throw new UnknownException((String) updateFileMap.get("message"));
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public IFileVo getFile(String accessToken, String owner, String repo, String filepath, String ref) {
+        String getFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + owner + "/" + repo + "/sub_entries" + ".json"
+                + "?ref=" + ref + "&filepath=" + filepath;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> fileEntity;
+        try {
+            fileEntity = this.restTemplate.exchange(getFileUrl, HttpMethod.GET, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientException("请求失败，客户端发生错误: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            throw new HttpServerException("请求失败，服务器端发生错误: " + e.getMessage());
+        }
+        FileVo file;
+        try {
+            file = MAPPER.readValue(fileEntity.getBody(), FileVo.class);
+            if (file != null && file.getStatus() != null) {
+                throw new UnknownException(file.getMessage());
+            }
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage());
+        }
+        return file;
     }
 }

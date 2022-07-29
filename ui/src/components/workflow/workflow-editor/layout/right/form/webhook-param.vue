@@ -57,7 +57,7 @@
         <jm-radio :label="true">是</jm-radio>
       </jm-radio-group>
     </jm-form-item>
-    <jm-form-item  :prop="`${formModelName}.${index}.hidden`" :rules="rules.hidden">
+    <jm-form-item :prop="`${formModelName}.${index}.hidden`" :rules="rules.hidden">
       <template #label>
         脱敏显示
         <jm-tooltip placement="top">
@@ -132,6 +132,7 @@ export default defineComponent({
     'update:value',
     'update:required',
     'update:hidden',
+    'change-reference',
     'delete',
   ],
   setup(props, { emit }) {
@@ -157,7 +158,9 @@ export default defineComponent({
       ExpressionTypeEnum,
       switchBackgroundFlag,
       changeReference: () => {
+        const oldVal = props.reference;
         emit('update:reference', refVal.value);
+        emit('change-reference', refVal.value, oldVal);
       },
       changeName: () => {
         emit('update:name', nameVal.value);
@@ -171,7 +174,7 @@ export default defineComponent({
       changeRequired: () => {
         emit('update:required', requiredVal.value);
       },
-      changeHidden:()=>{
+      changeHidden: () => {
         emit('update:hidden', hiddenVal.value);
       },
       deleteParam: () => {
