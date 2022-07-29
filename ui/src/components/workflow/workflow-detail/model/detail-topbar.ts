@@ -1,4 +1,4 @@
-import { executeImmediately } from "@/api/project";
+import { executeImmediately } from '@/api/project';
 
 type TriggerCallbackFnType = (error?: Error)=>void;
 

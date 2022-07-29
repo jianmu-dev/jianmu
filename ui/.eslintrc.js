@@ -42,7 +42,8 @@ module.exports = {
     // 使用 === 替代 ==
     eqeqeq: [2, 'always'],
     // 不能有声明后未被使用的变量或参数
-    'no-unused-vars': [1, { vars: 'all', args: 'after-used' }],
+    'no-unused-vars': 0,
+    '@typescript-eslint/no-unused-vars': [1, { vars: 'all', args: 'after-used' }],
     // 未定义前不能使用
     'no-use-before-define': 2,
     // 不能有无法执行的代码

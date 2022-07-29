@@ -1,9 +1,9 @@
-import { TaskStatusEnum } from "@/api/dto/enumeration";
-import { IGlobalParamseterVo, INodeDefVo } from "@/api/dto/project";
-import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from "@/api/dto/workflow-execution-record";
-import { fetchWorkflow, getGlobalParameters, listAsyncTaskInstance } from "@/api/view-no-auth";
-import { refresh_seconds, refresh_times } from "./util/consts";
-import { checkWorkflowRunning } from "./util/workflow";
+import { TaskStatusEnum } from '@/api/dto/enumeration';
+import { IGlobalParamseterVo, INodeDefVo } from '@/api/dto/project';
+import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
+import { fetchWorkflow, getGlobalParameters, listAsyncTaskInstance } from '@/api/view-no-auth';
+import { refresh_seconds, refresh_times } from './util/consts';
+import { checkWorkflowRunning } from './util/workflow';
 
 type DslCallbackFnType = (dslSourceCode: string, nodeInfos: INodeDefVo[])=>void;
 type TaskCallbackFnType = (taskRecords: ITaskExecutionRecordVo[])=>void;
