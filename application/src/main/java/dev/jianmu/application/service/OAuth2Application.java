@@ -41,7 +41,7 @@ public class OAuth2Application {
     }
 
     @Transactional
-    public Association getAssociation(ThirdPartyTypeEnum thirdPartyType, String accessToken, IUserInfoVo userInfo, AssociationData associationData) {
+    public Association getAssociation(ThirdPartyTypeEnum thirdPartyType, String accessToken, IUserInfoVo userInfo, AssociationData associationData, String userId) {
         String associationType = this.associationUtil.getAssociationType();
         if (this.associationUtil.getAssociationType() == null) {
             return Association.builder()
@@ -51,10 +51,17 @@ public class OAuth2Application {
                     .type(associationType)
                     .build();
         }
-
-        OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(thirdPartyType)
-                .build();
+        OAuth2Api oAuth2Api;
+        if (userId != null) {
+            oAuth2Api = OAuth2ApiProxy.builder()
+                    .thirdPartyType(thirdPartyType)
+                    .userId(userId)
+                    .build();
+        } else {
+            oAuth2Api = OAuth2ApiProxy.builder()
+                    .thirdPartyType(thirdPartyType)
+                    .build();
+        }
 
         RoleEnum role = null;
         String associationId = null;

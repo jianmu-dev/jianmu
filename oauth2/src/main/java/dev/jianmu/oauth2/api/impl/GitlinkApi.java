@@ -12,8 +12,8 @@ import dev.jianmu.oauth2.api.impl.dto.gitlink.WebhookCreatingDto;
 import dev.jianmu.oauth2.api.impl.dto.gitlink.WebhookUpdatingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitlink.*;
 import dev.jianmu.oauth2.api.vo.*;
+import lombok.Builder;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -32,15 +32,17 @@ import java.util.Map;
  * @description GitlinkApi
  * @create 2021-06-30 14:08
  */
-@Component
+@Builder
 public class GitlinkApi implements OAuth2Api {
     private final static ObjectMapper MAPPER = new ObjectMapper();
     private final RestTemplate restTemplate;
     private final OAuth2Properties oAuth2Properties;
+    private final String userId;
 
-    public GitlinkApi(RestTemplate restTemplate, OAuth2Properties oAuth2Properties) {
+    public GitlinkApi(RestTemplate restTemplate, OAuth2Properties oAuth2Properties, String userId) {
         this.restTemplate = restTemplate;
         this.oAuth2Properties = oAuth2Properties;
+        this.userId = userId;
     }
 
 
@@ -58,14 +60,24 @@ public class GitlinkApi implements OAuth2Api {
     @Override
     public ITokenVo getAccessToken(String code, String redirectUri) {
         // 封装请求条件
-        LoggingDto gitlinkLoginVo = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitlink().getClientId())
-                .client_secret(this.oAuth2Properties.getGitlink().getClientSecret())
-                .code(code)
-                .grant_type(this.oAuth2Properties.getGitlink().getGrantType())
-                .redirect_uri(redirectUri)
-                .build();
 
+        String grantType = this.oAuth2Properties.getGitlink().getGrantType();
+        LoggingDto gitlinkLoginVo;
+        if (grantType.equals("client_credentials")) {
+            gitlinkLoginVo = LoggingDto.builder()
+                    .client_id(this.oAuth2Properties.getGitlink().getClientId())
+                    .client_secret(this.oAuth2Properties.getGitlink().getClientSecret())
+                    .grant_type(grantType)
+                    .build();
+        } else {
+            gitlinkLoginVo = LoggingDto.builder()
+                    .client_id(this.oAuth2Properties.getGitlink().getClientId())
+                    .client_secret(this.oAuth2Properties.getGitlink().getClientSecret())
+                    .code(code)
+                    .grant_type(grantType)
+                    .redirect_uri(redirectUri)
+                    .build();
+        }
         String gitlinkLoginJson;
         try {
             gitlinkLoginJson = MAPPER.writeValueAsString(gitlinkLoginVo);
@@ -99,10 +111,13 @@ public class GitlinkApi implements OAuth2Api {
     @Override
     public IUserInfoVo getUserInfo(String token) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer");
+        headers.add("Authorization", "Bearer " + token);
         HttpEntity<MultiValueMap<String, Object>> param = new HttpEntity<>(headers);
 
-        String userTokenInfoUrl = this.oAuth2Properties.getGitlink().getApiUrl() + "users/me.json" + "?access_token=" + token;
+        String userTokenInfoUrl = this.oAuth2Properties.getGitlink().getApiUrl() + "users/me.json";
+        if (this.userId != null) {
+            userTokenInfoUrl += "?uid=" + this.userId;
+        }
 
         ResponseEntity<String> userInfoEntity;
         try {
@@ -136,10 +151,15 @@ public class GitlinkApi implements OAuth2Api {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
+        String getRepoUrl = this.oAuth2Properties.getGitlink().getApiUrl() + gitRepoOwner + "/" + gitRepo + "/detail";
+        if (this.userId != null) {
+            getRepoUrl += "?uid=" + this.userId;
+        }
+
         ResponseEntity<String> responseEntity;
         try {
             responseEntity = this.restTemplate.exchange(
-                    this.oAuth2Properties.getGitlink().getApiUrl() + gitRepoOwner + "/" + gitRepo + "/detail",
+                    getRepoUrl,
                     HttpMethod.GET,
                     entity,
                     String.class);
@@ -175,12 +195,17 @@ public class GitlinkApi implements OAuth2Api {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
+        String getRepoMembersUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + gitRepoOwner + "/" + gitRepo +
+                "/collaborators.json?page=1&limit=1000";
+        if (this.userId != null) {
+            getRepoMembersUrl += "&uid=" + this.userId;
+        }
+
         ResponseEntity<String> responseEntity;
         try {
             responseEntity = this.restTemplate.exchange(
-                    this.oAuth2Properties.getGitlink().getApiUrl()
-                            + gitRepoOwner + "/" + gitRepo +
-                            "/collaborators.json?page=1&limit=1000",
+                    getRepoMembersUrl,
                     HttpMethod.GET,
                     entity,
                     String.class);
@@ -213,12 +238,17 @@ public class GitlinkApi implements OAuth2Api {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
+        String getBranchesUrl = this.oAuth2Properties.getGitlink().getApiUrl()
+                + gitRepoOwner + "/" + gitRepo +
+                "/branches.json";
+        if (this.userId != null) {
+            getBranchesUrl += "?uid=" + this.userId;
+        }
+
         ResponseEntity<String> responseEntity;
         try {
             responseEntity = this.restTemplate.exchange(
-                    this.oAuth2Properties.getGitlink().getApiUrl()
-                            + gitRepoOwner + "/" + gitRepo +
-                            "/branches.json",
+                    getBranchesUrl,
                     HttpMethod.GET,
                     entity,
                     String.class);
@@ -258,6 +288,9 @@ public class GitlinkApi implements OAuth2Api {
         String createWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + gitRepoOwner + "/" + gitRepo +
                 "/webhooks.json";
+        if (this.userId != null) {
+            createWebhookUrl += "?uid=" + this.userId;
+        }
 
         WebhookCreatingDto webhookCreatingDto = WebhookCreatingDto.builder()
                 .active(active)
@@ -304,6 +337,9 @@ public class GitlinkApi implements OAuth2Api {
         String deleteWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + gitRepoOwner + "/" + gitRepo +
                 "/webhooks/" + id + ".json";
+        if (this.userId != null) {
+            deleteWebhookUrl += "?uid=" + this.userId;
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -335,6 +371,9 @@ public class GitlinkApi implements OAuth2Api {
         String updateWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + gitRepoOwner + "/" + gitRepo +
                 "/webhooks/" + id + ".json";
+        if (this.userId != null) {
+            updateWebhookUrl += "?uid=" + this.userId;
+        }
 
         WebhookUpdatingDto webhookUpdatingDto = WebhookUpdatingDto.builder()
                 .active(active)
@@ -379,6 +418,9 @@ public class GitlinkApi implements OAuth2Api {
         String getWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + gitRepoOwner + "/" + gitRepo +
                 "/webhooks/" + id + ".json";
+        if (this.userId != null) {
+            getWebhookUrl += "?uid=" + this.userId;
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -415,6 +457,9 @@ public class GitlinkApi implements OAuth2Api {
         String createFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + owner + "/" + repo +
                 "/contents/batch" + ".json";
+        if (this.userId != null) {
+            createFileUrl += "?uid=" + this.userId;
+        }
 
         long timeunix = new Date().getTime() / 1000;
         ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
@@ -470,6 +515,9 @@ public class GitlinkApi implements OAuth2Api {
         String deleteFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + owner + "/" + repo +
                 "/contents/batch" + ".json";
+        if (this.userId != null) {
+            deleteFileUrl += "?uid=" + this.userId;
+        }
 
         long timeunix = new Date().getTime() / 1000;
         ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
@@ -526,6 +574,9 @@ public class GitlinkApi implements OAuth2Api {
         String updateFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + owner + "/" + repo +
                 "/contents/batch" + ".json";
+        if (this.userId != null) {
+            updateFileUrl += "?uid=" + this.userId;
+        }
 
         long timeunix = new Date().getTime() / 1000;
         ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
@@ -579,6 +630,9 @@ public class GitlinkApi implements OAuth2Api {
         String getFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + owner + "/" + repo + "/sub_entries" + ".json"
                 + "?ref=" + ref + "&filepath=" + filepath;
+        if (this.userId != null) {
+            getFileUrl += "&uid=" + this.userId;
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);

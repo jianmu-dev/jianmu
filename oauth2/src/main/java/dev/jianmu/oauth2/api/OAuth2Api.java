@@ -27,6 +27,10 @@ public interface OAuth2Api {
      */
     ITokenVo getAccessToken(String code, String redirectUri);
 
+    default ITokenVo getAccessToken() {
+        return getAccessToken(null, null);
+    }
+
     /**
      * 获取用户信息
      *

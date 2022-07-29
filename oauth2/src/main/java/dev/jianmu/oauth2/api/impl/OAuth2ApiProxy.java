@@ -1,11 +1,13 @@
 package dev.jianmu.oauth2.api.impl;
 
 import dev.jianmu.oauth2.api.OAuth2Api;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.NotSupportedThirdPartPlatformException;
 import dev.jianmu.oauth2.api.util.ApplicationContextUtil;
 import dev.jianmu.oauth2.api.vo.*;
 import lombok.Builder;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -17,14 +19,21 @@ import java.util.List;
  */
 @Builder
 public class OAuth2ApiProxy implements OAuth2Api {
+    private String userId;
     private ThirdPartyTypeEnum thirdPartyType;
 
     private OAuth2Api getApi() {
+        final RestTemplate restTemplate = ApplicationContextUtil.getBean(RestTemplate.class);
+        final OAuth2Properties oAuth2Properties = ApplicationContextUtil.getBean(OAuth2Properties.class);
         switch (this.thirdPartyType) {
             case GITEE:
                 return ApplicationContextUtil.getBean(GiteeApi.class);
             case GITLINK:
-                return ApplicationContextUtil.getBean(GitlinkApi.class);
+                return GitlinkApi.builder()
+                        .restTemplate(restTemplate)
+                        .oAuth2Properties(oAuth2Properties)
+                        .userId(this.userId)
+                        .build();
             default:
                 throw new NotSupportedThirdPartPlatformException();
         }

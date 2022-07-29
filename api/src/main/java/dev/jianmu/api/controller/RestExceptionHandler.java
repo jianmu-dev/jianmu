@@ -114,7 +114,7 @@ public class RestExceptionHandler {
             gitRepo = gitRepoOptional.get();
             associationData = AssociationData.buildGitRepo(gitRepo.getRef(), gitRepo.getOwner());
             role = this.oAuth2Application.getAssociation(ThirdPartyTypeEnum.valueOf(thirdPartyType), accessToken, userInfo,
-                    associationData).getRole();
+                    associationData, null).getRole();
         } catch (OAuth2IsNotAuthorizedException e) {
             logger.warn(e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
