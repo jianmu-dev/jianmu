@@ -60,7 +60,7 @@ export default defineComponent({
       workflowDetail,
       session: computed<ISessionVo | undefined>(() => state.session),
       handleBack() {
-        if (!workflowDetail.value.entry) {
+        if (!entry) {
           // router.push({ name: 'index' });
           const { fullPath } = rootState.fromRoute;
           router.push(fullPath);

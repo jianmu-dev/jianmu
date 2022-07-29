@@ -107,6 +107,7 @@ export default defineComponent({
       // margin-bottom: 20px;
       box-sizing: border-box;
       .el-dialog__title {
+        font-size: 16px;
         color: #ffffff;
       }
       // .el-dialog__title::before {
