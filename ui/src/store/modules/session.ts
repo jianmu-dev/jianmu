@@ -1,7 +1,7 @@
 import { ActionContext, Module } from 'vuex';
 import { ILoginForm, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
-import { authLogin, create, oauthRefreshToken } from '@/api/session';
+import { authLogin, create, oauthRefreshToken, oauthSilentLogin } from '@/api/session';
 import { IOauth2LoggingDto, IOauth2RefreshingDto, ISessionVo } from '@/api/dto/session';
 import { getStorage, setStorage } from '@/utils/storage';
 
@@ -104,6 +104,7 @@ export default {
 
       commit('mutate', { session, loginForm });
     },
+    // oauth登录
     async oauthLogin({
       commit,
       rootState,
@@ -111,11 +112,19 @@ export default {
       const session = await authLogin(rootState.associationType!, payload);
       commit('oauthMutate', session);
     },
+    // oauth token刷新
     async oauthRefresh({
       commit,
       rootState,
     }: ActionContext<IState, IRootState>, payload: IOauth2RefreshingDto): Promise<void> {
       const session = await oauthRefreshToken(rootState.associationType!, payload);
+      commit('oauthMutate', session);
+    },
+    // oauth静默登录
+    async oauthSilentLogin({
+      commit,
+    }: ActionContext<IState, IRootState>, payload: string): Promise<void> {
+      const session = await oauthSilentLogin(payload);
       commit('oauthMutate', session);
     },
   },

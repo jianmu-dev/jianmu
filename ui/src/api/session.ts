@@ -9,6 +9,7 @@ import { restProxy } from '@/api/index';
 import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 export const baseUrl = '/auth';
+export const oAuthUrl = '/auth/oauth2';
 
 /**
  * 创建会话
@@ -27,7 +28,7 @@ export function create(dto: ISessionCreatingDto): Promise<ISessionVo> {
  */
 export function fetchThirdPartyType() {
   return restProxy<IThirdPartyTypeVo>({
-    url: `${baseUrl}/oauth2/third_party_type`,
+    url: `${oAuthUrl}/third_party_type`,
     method: 'get',
   });
 }
@@ -37,7 +38,7 @@ export function fetchThirdPartyType() {
  */
 export function fetchAuthUrl(dto: IAuthorizationUrlGettingDto) {
   return restProxy<IAuthorizationUrlVo>({
-    url: `${baseUrl}/oauth2/url`,
+    url: `${oAuthUrl}/url`,
     method: 'get',
     payload: dto,
   });
@@ -50,8 +51,8 @@ export function fetchAuthUrl(dto: IAuthorizationUrlGettingDto) {
  */
 export function authLogin(associationType: AssociationTypeEnum, dto: IOauth2LoggingDto) {
   return restProxy<ISessionVo>({
-    url: `${baseUrl}/oauth2/login/${associationType.toLowerCase()}`,
-    method: 'get',
+    url: `${oAuthUrl}/login/${associationType.toLowerCase()}`,
+    method: 'post',
     payload: dto,
   });
 }
@@ -63,9 +64,20 @@ export function authLogin(associationType: AssociationTypeEnum, dto: IOauth2Logg
  */
 export function oauthRefreshToken(associationType: AssociationTypeEnum, dto: IOauth2RefreshingDto) {
   return restProxy<ISessionVo>({
-    url: `${baseUrl}/oauth2/refresh/${associationType.toLowerCase()}`,
+    url: `${oAuthUrl}refresh/${associationType.toLowerCase()}`,
     method: 'put',
     payload: dto,
-    auth:true,
+    auth: true,
+  });
+}
+
+/**
+ * oauth静默登录
+ * @param code
+ */
+export function oauthSilentLogin(code: string) {
+  return restProxy<ISessionVo>({
+    url: `${oAuthUrl}/login/silent?code=${encodeURIComponent(code)}`,
+    method: 'get',
   });
 }
