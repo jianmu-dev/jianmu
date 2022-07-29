@@ -55,12 +55,9 @@ export default async (appContext: AppContext): Promise<Router> => {
         // 静默登录
         name: 'authorize',
         path: AUTHORIZE_INDEX,
-        component: () => import('@/views/login/page.vue'),
-        props: ({ query: { ref: reference, owner, code, error_description } }: RouteLocationNormalizedLoaded) => ({
-          reference,
-          owner,
+        component: () => import('@/views/login/authorize.vue'),
+        props: ({ query: { code } }: RouteLocationNormalizedLoaded) => ({
           code,
-          error_description,
         }),
       },
       {
