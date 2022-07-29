@@ -1,51 +1,53 @@
 <template>
   <router-view v-if="childRoute"/>
   <div v-else class="secret-key-ns-manager" v-loading="loading">
-    <div class="title">
-      <span>命名空间</span>
-      <span class="desc">（{{ namespaces.length }}）</span>
-    </div>
-    <div class="content">
-      <button class="add" @click="add">
-        <i class="jm-icon-button-add"></i>
-        <div class="label">新增命名空间</div>
-      </button>
-      <template v-if="credentialManagerType === CredentialManagerTypeEnum.LOCAL">
-        <div class="vault-item" v-for="ns of namespaces" :key="ns.name" @click="toNs(ns.name)">
-          <div class="wrapper">
-            <div class="vault-icon"></div>
-            <div class="vault-name">
-              <jm-text-viewer :value="ns.name"/>
+    <div v-show="!loading">
+      <div class="title">
+        <span>命名空间</span>
+        <span class="desc">（{{ namespaces.length }}）</span>
+      </div>
+      <div class="content">
+        <button class="add" @click="add">
+          <i class="jm-icon-button-add"></i>
+          <div class="label">新增命名空间</div>
+        </button>
+        <template v-if="credentialManagerType === CredentialManagerTypeEnum.LOCAL">
+          <div class="vault-item" v-for="ns of namespaces" :key="ns.name" @click="toNs(ns.name)">
+            <div class="wrapper">
+              <div class="vault-icon"></div>
+              <div class="vault-name">
+                <jm-text-viewer :value="ns.name"/>
+              </div>
             </div>
+            <jm-tooltip content="删除" placement="top">
+              <div class="operation">
+                <button
+                  :class="{ del: true, doing: deletings[ns.name] }"
+                  @click.stop="del(ns.name)"
+                ></button>
+              </div>
+            </jm-tooltip>
           </div>
-          <jm-tooltip content="删除" placement="top">
-            <div class="operation">
-              <button
-                :class="{ del: true, doing: deletings[ns.name] }"
-                @click.stop="del(ns.name)"
-              ></button>
+        </template>
+        <template v-else>
+          <div class="vault-item" v-for="ns of namespaces" :key="ns.name" @click="toNs(ns.name)">
+            <div class="wrapper">
+              <div class="vault-icon"></div>
+              <div class="vault-name">
+                <jm-text-viewer :value="ns.name"/>
+              </div>
             </div>
-          </jm-tooltip>
-        </div>
-      </template>
-      <template v-else>
-        <div class="vault-item" v-for="ns of namespaces" :key="ns.name" @click="toNs(ns.name)">
-          <div class="wrapper">
-            <div class="vault-icon"></div>
-            <div class="vault-name">
-              <jm-text-viewer :value="ns.name"/>
-            </div>
+            <jm-tooltip content="删除" placement="top">
+              <div class="operation">
+                <button
+                  :class="{ del: true, doing: deletings[ns.name] }"
+                  @click.stop="del(ns.name)"
+                ></button>
+              </div>
+            </jm-tooltip>
           </div>
-          <jm-tooltip content="删除" placement="top">
-            <div class="operation">
-              <button
-                :class="{ del: true, doing: deletings[ns.name] }"
-                @click.stop="del(ns.name)"
-              ></button>
-            </div>
-          </jm-tooltip>
-        </div>
-      </template>
+        </template>
+      </div>
     </div>
     <ns-editor
       v-if="creationActivated"
