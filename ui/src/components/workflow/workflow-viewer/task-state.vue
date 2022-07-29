@@ -98,9 +98,5 @@ export default defineComponent({
     border-radius: 2px;
     overflow: hidden;
   }
-
-  .label {
-
-  }
 }
 </style>

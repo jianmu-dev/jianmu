@@ -25,8 +25,7 @@ export abstract class BaseGraph {
     return this instanceof G6Graph ? GraphTypeEnum.G6 : GraphTypeEnum.X6;
   }
 
-  hideNodeToolbar(nodeId: string): void {
-  }
+  hideNodeToolbar(nodeId: string):void {}
 
   getAsyncTaskNodeCount(): number {
     return 0;
@@ -55,7 +54,7 @@ export abstract class BaseGraph {
   updateNodeStates(tasks: ITaskExecutionRecordVo[]): void {
   }
 
-  highlightNodeState(status: TaskStatusEnum, active: boolean, refreshing: boolean = false): void {
+  highlightNodeState(status: TaskStatusEnum | string, active: boolean, refreshing: boolean = false): void {
     if (refreshing) {
       // 刷新时，忽略，不会改变当前高亮状态
       return;
