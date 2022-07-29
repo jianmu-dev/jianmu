@@ -220,7 +220,7 @@ public class TriggerApplication {
             var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             try {
                 oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
-            } catch (Exception e) {
+            } catch (UnknownException e) {
                 ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false).getId();
                 oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref);
             }
