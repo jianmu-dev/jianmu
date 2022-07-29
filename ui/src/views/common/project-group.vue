@@ -16,7 +16,7 @@
             >{{ projectGroup?.name }}
             </router-link
             >
-            <span class="desc">（共有 {{ projectPage.total < 0 ? 0 : projectPage.total }} 个项目）</span>
+            <span class="desc">（共有 {{ projectPage.total >= 0 ? projectPage.total : 0 }} 个项目）</span>
           </div>
           <div class="more-container" v-if="!pageable && projectPage.total>10">
             <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }">

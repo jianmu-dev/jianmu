@@ -139,7 +139,7 @@ export default defineComponent({
       }
       nodeEvent.value = evt;
     };
-    const zoom = ref<number>();
+    const zoom = ref<number>(0);
     const updateZoom = () => {
       setTimeout(() => {
         if (!graph.value) {
@@ -268,7 +268,7 @@ export default defineComponent({
 
         updateZoom();
       },
-      handleFullscreen: (_: boolean) => {
+      handleFullscreen: () => {
         if (!graph.value) {
           return;
         }
@@ -292,7 +292,7 @@ export default defineComponent({
           count: number;
         }[] = [];
 
-        const tasks = props.tasks.filter(({ defKey }) =>
+        const tasks = props.tasks.filter(({ defKey }: { defKey: string}) =>
           defKey !== 'Start' && defKey !== 'End' && defKey !== 'Condition' && defKey !== 'Switch');
         const taskMap = new Map();
         // 按开始时间生序排序，保证最后一个是最新的
