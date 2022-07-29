@@ -16,10 +16,6 @@ import java.util.List;
 @Getter
 @Setter
 public class RepositoryCommittingDto {
-    private final String author_email = "1014@qq.com";
-    private final String author_name = "hx12332112345";
-    private final String committer_email = "1014@qq.com";
-    private final String committer_name = "hx12332112345";
     private List<File> files;
     private long author_timeunix;
     private long committer_timeunix;

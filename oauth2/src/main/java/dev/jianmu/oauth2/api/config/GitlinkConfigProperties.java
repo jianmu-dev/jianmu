@@ -2,6 +2,7 @@ package dev.jianmu.oauth2.api.config;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,4 +24,14 @@ public class GitlinkConfigProperties {
     private String username;
     private String password;
     private String responseType;
+    private SilentLogin silentLogin;
+
+    @Setter
+    @Getter
+    @Component
+    @ConfigurationProperties(prefix = "jianmu.oauth2.gitlink.silent-login")
+    public static class SilentLogin{
+        private String iv;
+        private String key;
+    }
 }
