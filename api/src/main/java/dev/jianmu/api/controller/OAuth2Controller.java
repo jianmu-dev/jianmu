@@ -1,12 +1,9 @@
 package dev.jianmu.api.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.api.dto.AuthorizationUrlGettingDto;
 import dev.jianmu.api.dto.GitRepoTokenRefreshingDto;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.impl.GitRepoLoggingDto;
-import dev.jianmu.api.dto.impl.GitlinkSilentLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.jwt.UserContextHolder;
@@ -26,7 +23,6 @@ import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
-import dev.jianmu.oauth2.api.exception.JsonParseException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
 import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.oauth2.api.vo.ITokenVo;
@@ -48,7 +44,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
@@ -108,9 +103,9 @@ public class OAuth2Controller {
      * @param gitRepoLoggingDto
      * @return
      */
-    @GetMapping("/login/git_repo")
+    @PostMapping("/login/git_repo")
     @Transactional
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid GitRepoLoggingDto gitRepoLoggingDto) {
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody GitRepoLoggingDto gitRepoLoggingDto) {
         this.beforeAuthenticate();
         this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(gitRepoLoggingDto.getThirdPartyType());
@@ -174,89 +169,6 @@ public class OAuth2Controller {
     }
 
     /**
-     * 静默登录
-     *
-     * @param code
-     * @return
-     */
-    @GetMapping("/login/silent/git_repo")
-    @Transactional
-    public ResponseEntity<JwtResponse> authenticateUser(@RequestParam("code") String code) {
-        ThirdPartyTypeEnum thirdPartyType = ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType());
-        this.beforeAuthenticate();
-        this.allowOrNotRegistration();
-        this.allowThisPlatformLogIn(thirdPartyType.name());
-
-        GitlinkSilentLoggingDto gitlinkSilentLoggingDto;
-        try {
-            String silentLoggingJson = AESEncryptionUtil.decryptWithIv(code, this.oAuth2Properties.getGitlink().getSilentLogin().getKey(), this.oAuth2Properties.getGitlink().getSilentLogin().getIv());
-            gitlinkSilentLoggingDto = new ObjectMapper().readValue(silentLoggingJson, GitlinkSilentLoggingDto.class);
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage(), e);
-        } catch (JsonProcessingException e) {
-            throw new JsonParseException(e.getMessage());
-        }
-
-        OAuth2ApiProxy oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(thirdPartyType)
-                .userId(gitlinkSilentLoggingDto.getUserId())
-                .build();
-
-        ITokenVo tokenVo = oAuth2Api.getAccessToken();
-        String accessToken = tokenVo.getAccessToken();
-        String encryptedToken = tokenVo.getEncryptedAccessToken();
-        long expireInMs = tokenVo.getExpireInMs();
-
-        IUserInfoVo userInfoVo = oAuth2Api.getUserInfo(accessToken);
-
-        var associationData = AssociationData.buildGitRepo(gitlinkSilentLoggingDto.getRef(), gitlinkSilentLoggingDto.getOwner());
-        var association = this.oAuth2Application.getAssociation(thirdPartyType, accessToken, userInfoVo, associationData, gitlinkSilentLoggingDto.getUserId());
-
-        String userId = userInfoVo.getId();
-        Optional<User> userOptional = this.userRepository.findById(userId);
-        User user = User.Builder.aReference()
-                .data(userInfoVo.getData())
-                .id(userId)
-                .avatarUrl(userInfoVo.getAvatarUrl())
-                .username(userInfoVo.getUsername())
-                .nickname(userInfoVo.getNickname())
-                .build();
-        if (userOptional.isEmpty()) {
-            this.userRepository.add(user);
-        } else {
-            this.userRepository.update(user);
-        }
-
-        Authentication authentication = this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
-                        .avatarUrl(user.getAvatarUrl())
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .nickname(user.getNickname())
-                        .role(association.getRole())
-                        .associationId(association.getId())
-                        .associationType(association.getType())
-                        .encryptedToken(encryptedToken)
-                        .expireTimestamp(System.currentTimeMillis() + expireInMs)
-                        .build()),
-                        this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = this.jwtProvider.generateJwtToken(authentication, expireInMs);
-
-        return ResponseEntity.ok(JwtResponse.builder()
-                .type("Bearer")
-                .token(jwt)
-                .id(user.getId())
-                .username(user.getUsername())
-                .avatarUrl(user.getAvatarUrl())
-                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
-                .entryUrl(oAuth2Api.getEntryUrl(gitlinkSilentLoggingDto.getOwner(), gitlinkSilentLoggingDto.getRef()))
-                .associationData(associationData)
-                .build());
-    }
-
-    /**
      * 刷新token
      *
      * @param gitRepoTokenRefreshingDto
@@ -283,7 +195,7 @@ public class OAuth2Controller {
             accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException("code有误，请检查");
         }
         userInfo = oAuth2Api.getUserInfo(accessToken);
         associationData = AssociationData.buildGitRepo(gitRepoTokenRefreshingDto.getRef(), gitRepoTokenRefreshingDto.getOwner());

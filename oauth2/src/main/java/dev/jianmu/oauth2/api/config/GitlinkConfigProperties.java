@@ -33,5 +33,6 @@ public class GitlinkConfigProperties {
     public static class SilentLogin{
         private String iv;
         private String key;
+        private int codeTimeout;
     }
 }
