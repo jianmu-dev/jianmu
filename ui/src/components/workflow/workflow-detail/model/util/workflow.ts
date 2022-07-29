@@ -1,4 +1,4 @@
-import { WorkflowExecutionRecordStatusEnum } from "@/api/dto/enumeration";
+import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 
 /**
  * 检查是否运行状态
