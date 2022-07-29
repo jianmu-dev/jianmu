@@ -8,8 +8,16 @@ import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.git.repo.aggregate.Flow;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.oauth2.api.exception.UnknownException;
+import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
+import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLastExecution;
@@ -53,6 +61,7 @@ import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PRO
 @Service
 public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
+    private static final String dslLocation = ".devops/";
 
     private final ProjectRepositoryImpl projectRepository;
     private final WorkflowRepository workflowRepository;
@@ -66,6 +75,8 @@ public class ProjectApplication {
     private final GlobalProperties globalProperties;
     private final TriggerEventRepository triggerEventRepository;
     private final ProjectLastExecutionRepository projectLastExecutionRepository;
+    private final GitRepoRepository gitRepoRepository;
+    private final OAuth2Properties oAuth2Properties;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -79,7 +90,9 @@ public class ProjectApplication {
             ProjectGroupRepository projectGroupRepository,
             GlobalProperties globalProperties,
             TriggerEventRepository triggerEventRepository,
-            ProjectLastExecutionRepository projectLastExecutionRepository
+            ProjectLastExecutionRepository projectLastExecutionRepository,
+            GitRepoRepository gitRepoRepository,
+            OAuth2Properties oAuth2Properties
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -93,6 +106,8 @@ public class ProjectApplication {
         this.globalProperties = globalProperties;
         this.triggerEventRepository = triggerEventRepository;
         this.projectLastExecutionRepository = projectLastExecutionRepository;
+        this.gitRepoRepository = gitRepoRepository;
+        this.oAuth2Properties = oAuth2Properties;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -167,7 +182,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch) {
+    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch, String encryptedToken) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -206,6 +221,7 @@ public class ProjectApplication {
                 .build();
 
         this.pubTriggerEvent(parser, project);
+        this.createOrUpdateGitFile(branch, encryptedToken, project, project.getWorkflowName());
         this.projectRepository.add(project);
         this.projectLastExecutionRepository.add(new ProjectLastExecution(project.getWorkflowRef()));
         this.projectLinkGroupRepository.add(projectLinkGroup);
@@ -215,17 +231,48 @@ public class ProjectApplication {
         return project;
     }
 
+    private void createOrUpdateGitFile(String branch, String encryptedToken, Project project, String oldName) {
+        if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
+            return;
+        }
+        var gitRepo = this.gitRepoRepository.findById(project.getAssociationId())
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库"));
+        if (branch == null)
+            branch = gitRepo.findFlowByProjectId(project.getId())
+                    .map(Flow::getBranchName)
+                    .orElseThrow(() -> new DataNotFoundException("未找到Git仓库项目"));
+        var dsl = project.getDslText().replaceAll("\nraw-data: \"\\{.*}\"$", "");
+        var filepath = dslLocation + project.getWorkflowName() + ".yml";
+        try {
+            var oAuth2Api = OAuth2ApiProxy.builder()
+                    .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                    .build();
+            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            try {
+                if (!project.getWorkflowName().equals(oldName)) {
+                    var oldFilepath = dslLocation + oldName + ".yml";
+                    oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", oldFilepath, branch, "refactor: delete " + oldFilepath);
+                }
+                oAuth2Api.getFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch);
+                oAuth2Api.updateFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, branch, "refactor: " + filepath);
+            } catch (UnknownException e) {
+                oAuth2Api.createFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, branch, "feat: " + filepath);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("创建或修改项目失败: " + e.getMessage());
+        }
+    }
+
     @Transactional
-    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType) {
+    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType, String encryptedToken) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         if (username != null) {
             this.checkProjectPermission(associationId, associationType, project);
         }
         var concurrent = project.isConcurrent();
-        if (project.getDslSource() == Project.DslSource.GIT) {
-            throw new IllegalArgumentException("不能修改通过Git导入的项目");
-        }
+        var oldName = project.getWorkflowName();
         // 移动项目到项目组
         this.publisher.publishEvent(new MovedEvent(project.getId(), projectGroupId));
         // 解析DSL,语法检查
@@ -245,7 +292,7 @@ public class ProjectApplication {
         project.setWorkflowVersion(workflow.getVersion());
         if (username != null) {
             project.setLastModifiedBy(username);
-
+            this.createOrUpdateGitFile(null, encryptedToken, project, oldName);
         }
 
         this.pubTriggerEvent(parser, project);
@@ -263,8 +310,34 @@ public class ProjectApplication {
         }
     }
 
+    private void deleteGitFile(String encryptedToken, Project project) {
+        if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
+            return;
+        }
+        var gitRepo = this.gitRepoRepository.findById(project.getAssociationId())
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库"));
+        var branch = gitRepo.findFlowByProjectId(project.getId())
+                .map(Flow::getBranchName)
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库项目"));
+        var filepath = dslLocation + project.getWorkflowName() + ".yml";
+        try {
+            var oAuth2Api = OAuth2ApiProxy.builder()
+                    .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                    .build();
+            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            try {
+                oAuth2Api.getFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch);
+                oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", filepath, branch, "refactor: delete " + filepath);
+            } catch (UnknownException e) {
+                logger.info("Git 项目dsl文件不存在: " + filepath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("删除项目失败: " + e.getMessage());
+        }
+    }
+
     @Transactional
-    public void deleteById(String id, String associationId, String associationType) {
+    public void deleteById(String id, String associationId, String associationType, String encryptedToken) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         this.checkProjectPermission(associationId, associationType, project);
@@ -278,6 +351,7 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目分组"));
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
+        this.deleteGitFile(encryptedToken, project);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
