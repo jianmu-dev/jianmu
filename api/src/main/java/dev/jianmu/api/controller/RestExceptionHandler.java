@@ -94,6 +94,7 @@ public class RestExceptionHandler {
 
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
         OAuth2ApiProxy oAuth2Api = OAuth2ApiProxy.builder()
+                .userId(session.getId())
                 .thirdPartyType(ThirdPartyTypeEnum.valueOf(thirdPartyType))
                 .build();
 

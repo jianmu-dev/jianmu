@@ -182,6 +182,7 @@ public class OAuth2Controller {
         String thirdPartyType = this.oAuth2Properties.getThirdPartyType();
         OAuth2ApiProxy oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(ThirdPartyTypeEnum.valueOf(thirdPartyType))
+                .userId(session.getId())
                 .build();
 
         IUserInfoVo userInfo;
