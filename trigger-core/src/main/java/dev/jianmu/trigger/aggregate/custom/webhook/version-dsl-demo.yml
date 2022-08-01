@@ -1,0 +1,46 @@
+ref: _/gitlink
+version: 1.0.0
+description: 版本说明
+event:
+  - ref: push_event
+    name: GitLink推送事件
+    # 可用参数
+    param:
+      - ref: git_event
+        value: header['x-gitea-event']
+        type: STRING
+      - ref: branch
+        value: body.json.branch
+        type: STRING
+      - ref: title
+        ...
+    # 规则集运算为AND，不提供OR，若想实现OR效果，定义多个事件
+    ruleset:
+      # 可选参数唯一标识
+      - param-ref: git_event
+        operator: include | exclude | equal | neq | reg_exp
+        value: Push Hook
+      # 可选参数唯一标识
+      - param-ref: branch
+        operator: include | exclude | equal | neq | reg_exp
+        value: master
+  - ref: pr_event
+    name: GitLink合并请求事件
+    param:
+      - ref: git_event
+        value: header['x-gitea-event']
+        type: STRING
+      - ref: target_branch
+        value: body.json.target_branch
+        type: STRING
+      - ref: title
+        ...
+    ruleset:
+      # 可选参数唯一标识
+      - param-ref: git_event
+        operator: include | exclude | equal | neq | reg_exp
+        value: Merge Request Hook
+      # 可选参数唯一标识
+      - param-ref: target_branch
+        operator: include | exclude | equal | neq | reg_exp
+        value: master
