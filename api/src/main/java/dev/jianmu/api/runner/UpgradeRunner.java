@@ -55,7 +55,7 @@ public class UpgradeRunner implements ApplicationRunner {
             var group = this.projectLinkGroupRepository.findByProjectId(project.getId())
                     .orElseThrow(() -> new DataNotFoundException("未找到归属的项目组"));
             var text = project.getDslText() + "\n";
-            this.projectApplication.updateProject(project.getId(), text, group.getProjectGroupId(), null, null, null, null);
+            this.projectApplication.updateProject(project.getId(), text, group.getProjectGroupId(), null, null, null, null, null);
             log.info("项目- {} -升级成功", project.getWorkflowName());
         });
     }

@@ -182,7 +182,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch, String encryptedToken) {
+    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch, String encryptedToken, String userId) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -220,8 +220,10 @@ public class ProjectApplication {
                 .sort(++sort)
                 .build();
 
-        this.pubTriggerEvent(parser, project);
-        this.createOrUpdateGitFile(branch, encryptedToken, project, project.getWorkflowName());
+        this.pubTriggerEvent(parser, project, userId, encryptedToken);
+        if (encryptedToken != null) {
+            this.createOrUpdateGitFile(branch, encryptedToken, project, project.getWorkflowName(), userId);
+        }
         this.projectRepository.add(project);
         this.projectLastExecutionRepository.add(new ProjectLastExecution(project.getWorkflowRef()));
         this.projectLinkGroupRepository.add(projectLinkGroup);
@@ -231,7 +233,7 @@ public class ProjectApplication {
         return project;
     }
 
-    private void createOrUpdateGitFile(String branch, String encryptedToken, Project project, String oldName) {
+    private void createOrUpdateGitFile(String branch, String encryptedToken, Project project, String oldName, String userId) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
             return;
         }
@@ -246,6 +248,7 @@ public class ProjectApplication {
         try {
             var oAuth2Api = OAuth2ApiProxy.builder()
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                    .userId(userId)
                     .build();
             var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             try {
@@ -265,7 +268,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType, String encryptedToken) {
+    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType, String encryptedToken, String userId) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         if (username != null) {
@@ -292,10 +295,10 @@ public class ProjectApplication {
         project.setWorkflowVersion(workflow.getVersion());
         if (username != null) {
             project.setLastModifiedBy(username);
-            this.createOrUpdateGitFile(null, encryptedToken, project, oldName);
+            this.createOrUpdateGitFile(null, encryptedToken, project, oldName, userId);
         }
 
-        this.pubTriggerEvent(parser, project);
+        this.pubTriggerEvent(parser, project, userId, encryptedToken);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         // 返回是否并发执行流程实例
@@ -310,7 +313,7 @@ public class ProjectApplication {
         }
     }
 
-    private void deleteGitFile(String encryptedToken, Project project) {
+    private void deleteGitFile(String encryptedToken, Project project, String userId) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
             return;
         }
@@ -323,6 +326,7 @@ public class ProjectApplication {
         try {
             var oAuth2Api = OAuth2ApiProxy.builder()
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                    .userId(userId)
                     .build();
             var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             try {
@@ -337,7 +341,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void deleteById(String id, String associationId, String associationType, String encryptedToken) {
+    public void deleteById(String id, String associationId, String associationType, String encryptedToken, String userId) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         this.checkProjectPermission(associationId, associationType, project);
@@ -351,7 +355,7 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目分组"));
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
-        this.deleteGitFile(encryptedToken, project);
+        this.deleteGitFile(encryptedToken, project, userId);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
@@ -381,7 +385,7 @@ public class ProjectApplication {
 
     }
 
-    private void pubTriggerEvent(DslParser parser, Project project) {
+    private void pubTriggerEvent(DslParser parser, Project project, String userId, String encryptedToken) {
         // 创建Cron触发器
         if (project.getTriggerType() == Project.TriggerType.CRON) {
             var cronEvent = CronEvent.builder()
@@ -400,6 +404,8 @@ public class ProjectApplication {
             var webhookEvent = WebhookEvent.builder()
                     .projectId(project.getId())
                     .webhook(webhook)
+                    .userId(userId)
+                    .encryptedToken(encryptedToken)
                     .build();
             this.publisher.publishEvent(webhookEvent);
         }
@@ -409,6 +415,8 @@ public class ProjectApplication {
                     .projectId(project.getId())
                     .associationId(project.getAssociationId())
                     .associationType(project.getAssociationType())
+                    .userId(userId)
+                    .encryptedToken(encryptedToken)
                     .build();
             this.publisher.publishEvent(manualEvent);
         }
@@ -438,5 +446,9 @@ public class ProjectApplication {
 
     public Optional<Project> findByWorkflowRef(String workflowRef) {
         return this.projectRepository.findByWorkflowRef(workflowRef);
+    }
+
+    public Optional<Project> findByName(String associationId, String associationType, String name) {
+        return this.projectRepository.findByName(associationId, associationType, name);
     }
 }

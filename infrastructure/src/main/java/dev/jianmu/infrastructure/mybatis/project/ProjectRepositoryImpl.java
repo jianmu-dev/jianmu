@@ -50,8 +50,8 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     @Override
-    public Optional<Project> findByName(String name) {
-        return this.projectMapper.findByName(name);
+    public Optional<Project> findByName(String associationId, String associationType, String name) {
+        return this.projectMapper.findByName(associationId, associationType, name);
     }
 
     @Override

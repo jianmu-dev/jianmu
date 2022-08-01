@@ -19,4 +19,6 @@ public class ManualEvent {
     private String projectId;
     private String associationId;
     private String associationType;
+    private String userId;
+    private String encryptedToken;
 }

@@ -167,7 +167,7 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void saveOrUpdate(String projectId, Webhook webhook, String encryptedToken) {
+    public void saveOrUpdate(String projectId, Webhook webhook, String encryptedToken, String userId) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
         String ref = URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
@@ -175,7 +175,7 @@ public class TriggerApplication {
         // 修改webhook
         if (optionalTrigger.isPresent()) {
             var trigger = optionalTrigger.get();
-            ref = this.updateGitWebhook(trigger.getRef(), ref, encryptedToken, project.getAssociationId(), project.getAssociationType());
+            ref = this.updateGitWebhook(trigger.getRef(), ref, encryptedToken, project.getAssociationId(), project.getAssociationType(), userId);
             trigger.setType(Trigger.Type.WEBHOOK);
             trigger.setWebhook(webhook);
             trigger.setRef(ref);
@@ -185,6 +185,7 @@ public class TriggerApplication {
         // 创建webhook
         if (AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
             var oAuth2Api = OAuth2ApiProxy.builder()
+                    .userId(userId)
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
                     .build();
             // 创建Git webhook
@@ -207,7 +208,7 @@ public class TriggerApplication {
         this.triggerRepository.add(trigger);
     }
 
-    private String updateGitWebhook(String ref, String  newRef, String encryptedToken, String associationId, String associationType) {
+    private String updateGitWebhook(String ref, String  newRef, String encryptedToken, String associationId, String associationType, String userId) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return newRef;
         }
@@ -215,6 +216,7 @@ public class TriggerApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
         var oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .userId(userId)
                 .build();
         try {
             var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
@@ -275,7 +277,7 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void deleteByProjectId(String projectId, String encryptedToken, String associationId, String associationType) {
+    public void deleteByProjectId(String projectId, String encryptedToken, String associationId, String associationType, String userId) {
         // 删除Cron触发器
         this.triggerRepository.findByProjectId(projectId)
                 .ifPresent(trigger -> {
@@ -293,17 +295,18 @@ public class TriggerApplication {
                         }
                     }
                     this.triggerRepository.deleteById(trigger.getId());
-                    this.deleteGitWebhook(associationId, associationType, trigger.getRef(), encryptedToken);
+                    this.deleteGitWebhook(associationId, associationType, trigger.getRef(), encryptedToken, userId);
                 });
     }
 
     // 删除GitWebhook
-    private void deleteGitWebhook(String associationId, String associationType, String ref, String encryptedToken) {
+    private void deleteGitWebhook(String associationId, String associationType, String ref, String encryptedToken, String userId) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return;
         }
         var oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .userId(userId)
                 .build();
         var gitRepo = this.gitRepoRepository.findById(associationId)
                 .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
