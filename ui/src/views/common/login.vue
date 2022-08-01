@@ -99,7 +99,6 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
-    const entry = store.state.entry;
     // 系统初始化后，自动决定登录方式（密码/第三方平台登录）
     const loginType = ref<string>(store.state.thirdPartyType);
     const { username, remember } = store.state[namespace] as IState;
@@ -162,7 +161,7 @@ export default defineComponent({
       trailing: false,
     });
     onMounted(async () => {
-      window.onstorage = refreshState;
+      window.addEventListener('storage', refreshState);
       // 判断是否为弹窗方式登录
       const dialogLogin = localStorage.getItem('temp-login-mode') === 'dialog';
       const isIframeLogin = localStorage.getItem('temp-login-mode') === 'iframe';
@@ -170,7 +169,7 @@ export default defineComponent({
         proxy.$error(props.error_description);
         localStorage.setItem('temp-login-error-message', props.error_description);
         (dialogLogin || isIframeLogin) && setTimeout(() => {
-          window.close();
+          // window.close();
         }, 2000);
         return;
       }
@@ -199,12 +198,12 @@ export default defineComponent({
           }
           await proxy.createOAuthSession(payload!);
           // 弹窗、以及iframe形式登录后自动关闭页面
-          (dialogLogin || isIframeLogin) ? window.close() : await router.push(INDEX);
+          // (dialogLogin || isIframeLogin) ? window.close() : await router.push(INDEX);
         } catch (err) {
           proxy.$throw(err, proxy);
           localStorage.setItem('temp-login-error-message', err.message);
           (dialogLogin || isIframeLogin) && setTimeout(() => {
-            window.close();
+            // window.close();
           }, 2000);
         } finally {
           loading.value = false;
@@ -218,7 +217,7 @@ export default defineComponent({
       }
     });
     onBeforeUnmount(() => {
-      window.onstorage = null;
+      window.removeEventListener('storage', refreshState);
     });
     return {
       authError,

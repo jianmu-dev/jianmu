@@ -170,6 +170,7 @@ import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { pushTop } from '@/utils/push-top';
 
 export default defineComponent({
   components: { ProjectPreviewDialog, WebhookDrawer },
@@ -211,7 +212,7 @@ export default defineComponent({
     const webhookDrawerFlag = ref<boolean>(false);
     const clickProject = (projectId: string) => {
       if (window.top !== window) {
-        window.top.location.href = `/full/workflow-execution-record/detail?projectId=${projectId}`;
+        pushTop(`/full/workflow-execution-record/detail?projectId=${projectId}`);
         return;
       }
       router.push({

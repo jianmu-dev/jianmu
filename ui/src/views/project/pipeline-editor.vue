@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, nextTick, onMounted, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
 import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
@@ -16,11 +16,9 @@ import { namespace } from '@/store/modules/session';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
-import { ISessionVo } from '@/api/dto/session';
 import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
-import _debounce from 'lodash/debounce';
 
 const { mapMutations } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -47,20 +45,8 @@ export default defineComponent({
     const reloadMain = inject('reloadMain') as () => void;
     const editMode = !!props.id;
     const workflow = ref<IWorkflow>();
-    const defaultSession = ref<ISessionVo>();
     // 项目分支信息
     const branches = ref<IGitRepoBranchVo[]>([]);
-    const refreshState = _debounce((e: any) => {
-      if (e.key !== 'session') {
-        return;
-      }
-      defaultSession.value = JSON.parse(e.newValue)['_default'].session;
-      // 将新tab中的session值，保存在vuex中
-      proxy.mutateSession(defaultSession.value);
-    }, 1000, {
-      leading: true,
-      trailing: false,
-    });
     // 验证用户是否登录
     const authLogin = () => {
       if (sessionState.session) {
@@ -69,7 +55,6 @@ export default defineComponent({
       dynamicRender(LoginVerify, appContext);
     };
     onMounted(async () => {
-      window.addEventListener('storage', refreshState);
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
         const { projectGroupId, branch, dslText } = JSON.parse(payload as string);
@@ -128,7 +113,7 @@ export default defineComponent({
             return item.branchName === branch;
           });
           if (!flag) {
-            branch = branches.value.find(item => item.isDefault).branchName;
+            branch = branches.value.find(item => item.isDefault)!.branchName;
           }
         }
         workflow.value = {
@@ -144,9 +129,6 @@ export default defineComponent({
         };
         loaded.value = true;
       }
-    });
-    onBeforeUnmount(() => {
-      window.removeEventListener('storage', refreshState);
     });
     const close = async () => {
       if (!entry.value) {
