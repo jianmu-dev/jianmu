@@ -162,7 +162,7 @@ export default defineComponent({
       trailing: false,
     });
     onMounted(async () => {
-      window.onstorage = refreshState;
+      window.addEventListener('storage', refreshState);
       // 判断是否为弹窗方式登录
       const dialogLogin = localStorage.getItem('temp-login-mode') === 'dialog';
       const isIframeLogin = localStorage.getItem('temp-login-mode') === 'iframe';
@@ -218,7 +218,7 @@ export default defineComponent({
       }
     });
     onBeforeUnmount(() => {
-      window.onstorage = null;
+      window.removeEventListener('storage', refreshState);
     });
     return {
       authError,
