@@ -78,8 +78,6 @@ export default {
     oauthMutate(state: IState, payload: ISessionVo) {
       state.session = payload;
       state.username = payload.username;
-      // TODO 测试
-      state.session.entryUrl = `/full/demo?owner=${payload.associationData.owner}&ref=${payload.associationData.ref}&userId=${payload.id}`;
       saveState(state);
     },
 
