@@ -2,17 +2,22 @@ package dev.jianmu.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.jianmu.api.dto.GitLinkWebhookDto;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.impl.GitlinkSilentLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.exception.CodeExpiredException;
 import dev.jianmu.application.exception.NotAllowRegistrationException;
 import dev.jianmu.application.exception.NotAllowThisPlatformLogInException;
 import dev.jianmu.application.exception.OAuth2IsNotConfiguredException;
+import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.OAuth2Application;
+import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.vo.AssociationData;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
@@ -23,24 +28,25 @@ import dev.jianmu.oauth2.api.vo.ITokenVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.user.aggregate.User;
 import dev.jianmu.user.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.validation.Valid;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 
 /**
@@ -52,6 +58,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping
 @Tag(name = "Gitlink控制器", description = "Gitlink控制器")
+@Slf4j
 public class GitlinkController {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
@@ -59,14 +66,18 @@ public class GitlinkController {
     private final JwtProperties jwtProperties;
     private final OAuth2Properties oAuth2Properties;
     private final OAuth2Application oAuth2Application;
+    private final GitRepoApplication gitRepoApplication;
+    private final ProjectApplication projectApplication;
 
-    public GitlinkController(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, OAuth2Application oAuth2Application) {
+    public GitlinkController(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, OAuth2Application oAuth2Application, GitRepoApplication gitRepoApplication, ProjectApplication projectApplication) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.jwtProperties = jwtProperties;
         this.oAuth2Properties = oAuth2Properties;
         this.oAuth2Application = oAuth2Application;
+        this.gitRepoApplication = gitRepoApplication;
+        this.projectApplication = projectApplication;
     }
 
     /**
@@ -193,5 +204,68 @@ public class GitlinkController {
             return;
         }
         throw new NotAllowThisPlatformLogInException("不允许" + thirdPartyType + "平台登录，请与管理员联系");
+    }
+
+    @PostMapping("webhook/projects/sync")
+    @Operation(summary = "同步项目webhook", description = "同步项目webhook")
+    public void syncProject(@RequestBody @Valid GitLinkWebhookDto dto) {
+        var userId = dto.getRepository().getOwner().getId();
+        var oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .userId(userId)
+                .build();
+        var gitRepo = this.gitRepoApplication.findById(dto.getRepository().getId());
+        var branch = dto.getBranch();
+        var accessToken = oAuth2Api.getAccessToken().getAccessToken();
+        var set = new HashSet<String>();
+        dto.getCommits().forEach(commit -> {
+            set.addAll(commit.getAdded());
+            set.addAll(commit.getModified());
+        });
+        for (String filepath : set) {
+            try {
+                var dsl = this.findDslByFilepath(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch, userId);
+                this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, userId);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void createOrUpdateProject(String filepath, String dslText, String repoId, String branch, String userId) {
+        String filename;
+        if (filepath.matches("^.devops/.*.yml$") && filepath.split("/").length == 2) {
+            filename = filepath.split("/")[1].replace(".yml", "");
+        } else {
+            return;
+        }
+        try {
+            var dsl = DslParser.parse(dslText);
+            if (!dsl.getName().equals(filename)) {
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("DSL文件地址：{}, 解析失败：{}", filepath, e.getMessage());
+            return;
+        }
+        var projectOptional = this.projectApplication.findByName(repoId, this.oAuth2Properties.getType(), filename);
+        if (projectOptional.isEmpty()) {
+            this.projectApplication.createProject(dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), branch, null, userId);
+            return;
+        }
+        var project = projectOptional.get();
+        this.projectApplication.updateProject(project.getId(), dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), null, userId);
+    }
+
+    public String findDslByFilepath(String accessToken, String owner, String repo, String filepath, String branch, String userId) {
+        var oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .userId(userId)
+                .build();
+        try {
+            var vo = oAuth2Api.getFile(accessToken, owner, repo, filepath, branch);
+            return vo.getContent();
+        } catch (Exception e) {
+            throw new RuntimeException("未找到项目DSL文件：" + e.getMessage());
+        }
     }
 }

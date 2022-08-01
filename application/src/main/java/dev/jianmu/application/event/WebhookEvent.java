@@ -19,4 +19,6 @@ import lombok.NoArgsConstructor;
 public class WebhookEvent {
     private String projectId;
     private Webhook webhook;
+    private String userId;
+    private String encryptedToken;
 }

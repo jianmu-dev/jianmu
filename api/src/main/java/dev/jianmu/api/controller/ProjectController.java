@@ -82,7 +82,7 @@ public class ProjectController {
             }
         }
         var associationType = this.associationUtil.getAssociationType();
-        var project = this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getAssociationId(), associationType, dslTextDto.getBranch(), session.getEncryptedToken());
+        var project = this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getAssociationId(), associationType, dslTextDto.getBranch(), session.getEncryptedToken(), session.getId());
         return ProjectIdVo.builder().id(project.getId()).build();
     }
 
@@ -91,7 +91,7 @@ public class ProjectController {
     public void updateProject(@PathVariable String projectId, @RequestBody @Valid DslTextDto dslTextDto) {
         var session = this.userContextHolder.getSession();
         var type = this.associationUtil.getAssociationType();
-        var concurrent = this.projectApplication.updateProject(projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getAssociationId(), type, session.getEncryptedToken());
+        var concurrent = this.projectApplication.updateProject(projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getUsername(), session.getAssociationId(), type, session.getEncryptedToken(), session.getId());
         // 并发执行正在排队的流程实例
         if (concurrent) {
             var project = this.projectApplication.findById(projectId, session.getAssociationId(), type)
@@ -104,6 +104,6 @@ public class ProjectController {
     @Operation(summary = "删除项目", description = "删除项目")
     public void deleteById(@PathVariable String projectId) {
         var session = this.userContextHolder.getSession();
-        this.projectApplication.deleteById(projectId, session.getAssociationId(), this.associationUtil.getAssociationType(), session.getEncryptedToken());
+        this.projectApplication.deleteById(projectId, session.getAssociationId(), this.associationUtil.getAssociationType(), session.getEncryptedToken(), session.getId());
     }
 }

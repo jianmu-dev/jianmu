@@ -43,7 +43,13 @@ public interface ProjectMapper {
     @Result(column = "association_type", property = "associationType")
     Optional<Project> findById(String id);
 
-    @Select("select * from jm_project where workflow_name = #{name}")
+    @Select("<script>" +
+            "SELECT * FROM `jm_project` " +
+            "<where>  `workflow_name` = #{name} " +
+            "   <if test='associationId != null'> AND `association_id` = #{associationId} </if>" +
+            "   <if test='associationType != null'> AND `association_type` = #{associationType} </if>" +
+            "</where>" +
+            "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "workflow_description", property = "workflowDescription")
     @Result(column = "dsl_source", property = "dslSource")
@@ -59,7 +65,7 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
-    Optional<Project> findByName(String name);
+    Optional<Project> findByName(@Param("associationId") String associationId, @Param("associationType") String associationType, @Param("name") String name);
 
     @Select("select * from jm_project where workflow_ref = #{workflowRef}")
     @Result(column = "workflow_name", property = "workflowName")

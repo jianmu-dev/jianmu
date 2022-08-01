@@ -81,14 +81,17 @@ public class ProjectEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleProjectDelete(DeletedEvent deletedEvent) {
         // 项目删除事件, 删除相关的Trigger
-        var encryptedToken = this.userContextHolder.getSession().getEncryptedToken();
-        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId(), encryptedToken, deletedEvent.getAssociationId(), deletedEvent.getAssociationType());
+        var session = this.userContextHolder.getSession();
+        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId(), session.getEncryptedToken(), deletedEvent.getAssociationId(), deletedEvent.getAssociationType(), session.getId());
         // 移除gitRepo中flow
         this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), deletedEvent.getAssociationId());
     }
 
     @TransactionalEventListener
     public void handleGroupUpdate(MovedEvent movedEvent) {
+        if (movedEvent.getProjectGroupId() == null) {
+            return;
+        }
         // 移动项目到项目组事件
         this.projectGroupApplication.moveProject(movedEvent.getProjectId(), movedEvent.getProjectGroupId());
     }

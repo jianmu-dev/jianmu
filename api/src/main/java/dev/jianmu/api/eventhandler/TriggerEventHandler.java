@@ -61,15 +61,13 @@ public class TriggerEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleWebhookEvent(WebhookEvent webhookEvent) {
         // 创建Webhook触发器
-        var encryptedToken = this.userContextHolder.getSession().getEncryptedToken();
-        this.triggerApplication.saveOrUpdate(webhookEvent.getProjectId(), webhookEvent.getWebhook(), encryptedToken);
+        this.triggerApplication.saveOrUpdate(webhookEvent.getProjectId(), webhookEvent.getWebhook(), webhookEvent.getEncryptedToken(), webhookEvent.getUserId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleManualEvent(ManualEvent manualEvent) {
         // 删除相关触发器
-        var encryptedToken = this.userContextHolder.getSession().getEncryptedToken();
-        this.triggerApplication.deleteByProjectId(manualEvent.getProjectId(), encryptedToken, manualEvent.getAssociationId(), manualEvent.getAssociationType());
+        this.triggerApplication.deleteByProjectId(manualEvent.getProjectId(), manualEvent.getEncryptedToken(), manualEvent.getAssociationId(), manualEvent.getAssociationType(), manualEvent.getUserId());
     }
 
     @Async

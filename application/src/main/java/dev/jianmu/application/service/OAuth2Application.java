@@ -10,6 +10,7 @@ import dev.jianmu.git.repo.aggregate.Branch;
 import dev.jianmu.git.repo.aggregate.GitRepo;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.oauth2.api.OAuth2Api;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.NoPermissionException;
@@ -34,10 +35,12 @@ import java.util.stream.Collectors;
 public class OAuth2Application {
     private final GitRepoRepository gitRepoRepository;
     private final AssociationUtil associationUtil;
+    private final OAuth2Properties oAuth2Properties;
 
-    public OAuth2Application(GitRepoRepository gitRepoRepository, AssociationUtil associationUtil) {
+    public OAuth2Application(GitRepoRepository gitRepoRepository, AssociationUtil associationUtil, OAuth2Properties oAuth2Properties) {
         this.gitRepoRepository = gitRepoRepository;
         this.associationUtil = associationUtil;
+        this.oAuth2Properties = oAuth2Properties;
     }
 
     @Transactional
@@ -67,6 +70,8 @@ public class OAuth2Application {
             // 同步仓库
             var branches = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
             this.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branches);
+            var webhookUrl = this.oAuth2Properties.getWebhookHost() + "projects/sync";
+            oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true);
         } else {
             //TODO 待扩展其他
         }
@@ -89,7 +94,6 @@ public class OAuth2Application {
         gitRepo.syncBranches(ref, owner, branches);
         this.gitRepoRepository.saveOrUpdate(gitRepo);
     }
-
 
     /**
      * 准入配置是否正确
