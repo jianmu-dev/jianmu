@@ -33,6 +33,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.BadPaddingException;
@@ -84,6 +85,7 @@ public class GitlinkController {
      * @return
      */
     @GetMapping("/auth/oauth2/login/silent")
+    @Transactional
     public ResponseEntity<JwtResponse> authenticateUser(@RequestParam("code") String code) {
         ThirdPartyTypeEnum thirdPartyType = ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType());
         this.beforeAuthenticate();
@@ -109,7 +111,39 @@ public class GitlinkController {
         return ResponseEntity.ok(this.silentLogin(gitlinkSilentLoggingDto.getRef(), gitlinkSilentLoggingDto.getOwner(), gitlinkSilentLoggingDto.getUserId()));
     }
 
-    public JwtResponse silentLogin(String ref, String owner, String userId) {
+    @PostMapping("webhook/projects/sync")
+    @Operation(summary = "同步项目webhook", description = "同步项目webhook")
+    public void syncProject(@RequestBody @Valid GitLinkWebhookDto dto) {
+        var gitRepo = this.gitRepoApplication.findByRefAndOwner(dto.getRepository().getName(), dto.getRepository().getOwner().getLogin())
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库 ref"));
+        // TODO： 暂时使用pusher查询用户
+        var user = this.userRepository.findByUsername(dto.getPusher().getLogin())
+                .orElseThrow(() -> new DataNotFoundException("未找到用户：" + dto.getPusher().getLogin()));
+        var oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .userId(user.getId())
+                .build();
+        var branch = dto.getBranch();
+        var tokenVo = oAuth2Api.getAccessToken();
+        var accessToken = tokenVo.getAccessToken();
+        var encryptedAccessToken = tokenVo.getEncryptedAccessToken();
+        var set = new HashSet<String>();
+        dto.getCommits().forEach(commit -> {
+            set.addAll(commit.getAdded());
+            set.addAll(commit.getModified());
+        });
+        for (String filepath : set) {
+            try {
+                var dsl = this.findDslByFilepath(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch, user.getId());
+                this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, user.getId(), encryptedAccessToken, user.getUsername());
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.warn("项目创建失败: {}", filepath);
+            }
+        }
+    }
+
+    private JwtResponse silentLogin(String ref, String owner, String userId) {
         ThirdPartyTypeEnum thirdPartyType = ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType());
         OAuth2ApiProxy oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(thirdPartyType)
@@ -203,39 +237,7 @@ public class GitlinkController {
         throw new NotAllowThisPlatformLogInException("不允许" + thirdPartyType + "平台登录，请与管理员联系");
     }
 
-    @PostMapping("webhook/projects/sync")
-    @Operation(summary = "同步项目webhook", description = "同步项目webhook")
-    public void syncProject(@RequestBody @Valid GitLinkWebhookDto dto) {
-        var gitRepo = this.gitRepoApplication.findByRefAndOwner(dto.getRepository().getName(), dto.getRepository().getOwner().getLogin())
-                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库 ref"));
-        // TODO： 暂时使用pusher查询用户
-        var user = this.userRepository.findByUsername(dto.getPusher().getLogin())
-                .orElseThrow(() -> new DataNotFoundException("未找到用户：" + dto.getPusher().getLogin()));
-        var oAuth2Api = OAuth2ApiProxy.builder()
-                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
-                .userId(user.getId())
-                .build();
-        var branch = dto.getBranch();
-        var tokenVo = oAuth2Api.getAccessToken();
-        var accessToken = tokenVo.getAccessToken();
-        var encryptedAccessToken  = tokenVo.getEncryptedAccessToken();
-        var set = new HashSet<String>();
-        dto.getCommits().forEach(commit -> {
-            set.addAll(commit.getAdded());
-            set.addAll(commit.getModified());
-        });
-        for (String filepath : set) {
-            try {
-                var dsl = this.findDslByFilepath(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch, user.getId());
-                this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, user.getId(), encryptedAccessToken);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.warn("项目创建失败: {}", filepath);
-            }
-        }
-    }
-
-    private void createOrUpdateProject(String filepath, String dslText, String repoId, String branch, String userId, String encryptedAccessToken) {
+    private void createOrUpdateProject(String filepath, String dslText, String repoId, String branch, String userId, String encryptedAccessToken, String username) {
         String filename;
         if (filepath.matches("^.devops/.*.yml$") && filepath.split("/").length == 2) {
             filename = filepath.split("/")[1].replace(".yml", "");
@@ -253,14 +255,14 @@ public class GitlinkController {
         }
         var projectOptional = this.projectApplication.findByName(repoId, this.oAuth2Properties.getType(), filename);
         if (projectOptional.isEmpty()) {
-            this.projectApplication.createProject(dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), branch, encryptedAccessToken, userId);
+            this.projectApplication.createProject(dslText, null, username, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), branch, encryptedAccessToken, userId, false);
             return;
         }
         var project = projectOptional.get();
-        this.projectApplication.updateProject(project.getId(), dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), encryptedAccessToken, userId);
+        this.projectApplication.updateProject(project.getId(), dslText, null, username, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), encryptedAccessToken, userId, false);
     }
 
-    public String findDslByFilepath(String accessToken, String owner, String repo, String filepath, String branch, String userId) {
+    private String findDslByFilepath(String accessToken, String owner, String repo, String filepath, String branch, String userId) {
         var oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
                 .userId(userId)
