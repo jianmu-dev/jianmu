@@ -47,7 +47,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginDto loginDto) {
         this.beforeAuthenticate();
-        var user = this.userRepository.findByUsername(loginDto.getUsername())
+        var user = this.userRepository.findByName(loginDto.getUsername())
                 .orElseThrow(() -> new DataNotFoundException("未找到该用户名"));
 
         Authentication authentication = this.authenticationManager.authenticate(

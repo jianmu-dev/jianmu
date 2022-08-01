@@ -69,9 +69,11 @@ public class OAuth2Application {
 
             // 同步仓库
             var branches = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
-            this.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branches);
-            var webhookUrl = this.oAuth2Properties.getWebhookHost() + "projects/sync";
-            oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true);
+            var isCreated = this.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branches);
+            if (isCreated) {
+                var webhookUrl = this.oAuth2Properties.getWebhookHost() + "projects/sync";
+                oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true);
+            }
         } else {
             //TODO 待扩展其他
         }
@@ -84,15 +86,17 @@ public class OAuth2Application {
                 .build();
     }
 
-    private void syncBranches(String id, String ref, String owner, String defaultBranch, List<String> branchesString) {
+    private Boolean syncBranches(String id, String ref, String owner, String defaultBranch, List<String> branchesString) {
         var branches = branchesString.stream()
                 .map(name -> new Branch(name, name.equals(defaultBranch)))
                 .collect(Collectors.toList());
         var gitRepo = this.gitRepoRepository.findById(id)
                 .orElse(new GitRepo(id));
+        boolean isCreated = gitRepo.getOwner() == null;
         // 同步分支
         gitRepo.syncBranches(ref, owner, branches);
         this.gitRepoRepository.saveOrUpdate(gitRepo);
+        return isCreated;
     }
 
     /**

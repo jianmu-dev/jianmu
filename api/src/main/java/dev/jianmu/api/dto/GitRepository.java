@@ -14,8 +14,8 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 public class GitRepository {
-    @NotBlank(message = "repository.id不能为空")
-    private String id;
+    @NotBlank(message = "repository.name不能为空")
+    private String name;
     @Valid
     @NotNull(message = "repository.owner不能为空")
     private GitOwner owner;

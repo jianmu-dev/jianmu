@@ -16,6 +16,8 @@ public interface UserRepository {
 
     void update(User user);
 
+    Optional<User> findByName(String username);
+
     Optional<User> findByUsername(String username);
 
     Optional<User> findById(String id);
