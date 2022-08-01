@@ -29,4 +29,8 @@ public interface UserMapper {
 
     @Update("update jm_user set avatar_url = #{avatarUrl}, nickname = #{nickname}, data = #{data}, username = #{username} where id = #{id}")
     void update(User user);
+
+    @Select("SELECT * FROM `jm_user` WHERE username = #{username}")
+    @Result(column = "avatar_url", property = "avatarUrl")
+    Optional<User> findByUsername(String username);
 }

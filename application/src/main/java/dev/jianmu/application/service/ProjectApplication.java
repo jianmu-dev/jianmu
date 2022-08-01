@@ -229,7 +229,7 @@ public class ProjectApplication {
         this.projectLinkGroupRepository.add(projectLinkGroup);
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
-        this.publisher.publishEvent(new CreatedEvent(project.getId(), branch));
+        this.publisher.publishEvent(new CreatedEvent(project.getId(), branch, associationId));
         return project;
     }
 

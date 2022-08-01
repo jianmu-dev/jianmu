@@ -9,10 +9,7 @@ import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.application.dsl.DslParser;
-import dev.jianmu.application.exception.CodeExpiredException;
-import dev.jianmu.application.exception.NotAllowRegistrationException;
-import dev.jianmu.application.exception.NotAllowThisPlatformLogInException;
-import dev.jianmu.application.exception.OAuth2IsNotConfiguredException;
+import dev.jianmu.application.exception.*;
 import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.OAuth2Application;
 import dev.jianmu.application.service.ProjectApplication;
@@ -209,14 +206,19 @@ public class GitlinkController {
     @PostMapping("webhook/projects/sync")
     @Operation(summary = "同步项目webhook", description = "同步项目webhook")
     public void syncProject(@RequestBody @Valid GitLinkWebhookDto dto) {
-        var userId = dto.getRepository().getOwner().getId();
+        var gitRepo = this.gitRepoApplication.findByRefAndOwner(dto.getRepository().getName(), dto.getRepository().getOwner().getLogin())
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库 ref"));
+        // TODO： 暂时使用pusher查询用户
+        var user = this.userRepository.findByUsername(dto.getPusher().getLogin())
+                .orElseThrow(() -> new DataNotFoundException("未找到用户：" + dto.getPusher().getLogin()));
         var oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
-                .userId(userId)
+                .userId(user.getId())
                 .build();
-        var gitRepo = this.gitRepoApplication.findById(dto.getRepository().getId());
         var branch = dto.getBranch();
-        var accessToken = oAuth2Api.getAccessToken().getAccessToken();
+        var tokenVo = oAuth2Api.getAccessToken();
+        var accessToken = tokenVo.getAccessToken();
+        var encryptedAccessToken  = tokenVo.getEncryptedAccessToken();
         var set = new HashSet<String>();
         dto.getCommits().forEach(commit -> {
             set.addAll(commit.getAdded());
@@ -224,14 +226,16 @@ public class GitlinkController {
         });
         for (String filepath : set) {
             try {
-                var dsl = this.findDslByFilepath(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch, userId);
-                this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, userId);
+                var dsl = this.findDslByFilepath(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch, user.getId());
+                this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, user.getId(), encryptedAccessToken);
             } catch (Exception e) {
+                e.printStackTrace();
+                log.warn("项目创建失败: {}", filepath);
             }
         }
     }
 
-    private void createOrUpdateProject(String filepath, String dslText, String repoId, String branch, String userId) {
+    private void createOrUpdateProject(String filepath, String dslText, String repoId, String branch, String userId, String encryptedAccessToken) {
         String filename;
         if (filepath.matches("^.devops/.*.yml$") && filepath.split("/").length == 2) {
             filename = filepath.split("/")[1].replace(".yml", "");
@@ -249,11 +253,11 @@ public class GitlinkController {
         }
         var projectOptional = this.projectApplication.findByName(repoId, this.oAuth2Properties.getType(), filename);
         if (projectOptional.isEmpty()) {
-            this.projectApplication.createProject(dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), branch, null, userId);
+            this.projectApplication.createProject(dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), branch, encryptedAccessToken, userId);
             return;
         }
         var project = projectOptional.get();
-        this.projectApplication.updateProject(project.getId(), dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), null, userId);
+        this.projectApplication.updateProject(project.getId(), dslText, null, null, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), encryptedAccessToken, userId);
     }
 
     public String findDslByFilepath(String accessToken, String owner, String repo, String filepath, String branch, String userId) {

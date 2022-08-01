@@ -39,7 +39,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> findByName(String username) {
         if (!username.equals(this.jwtProperties.getAdminUser())) {
             return Optional.empty();
         }
@@ -47,6 +47,11 @@ public class UserRepositoryImpl implements UserRepository {
                 .username(username)
                 .id("1")
                 .build());
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return this.userMapper.findByUsername(username);
     }
 
     @Override
