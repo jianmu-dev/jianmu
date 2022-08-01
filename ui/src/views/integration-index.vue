@@ -97,6 +97,7 @@ import ProjectItem from '@/views/common/project-item.vue';
 import { IProjectVo } from '@/api/dto/project';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { useRouter } from 'vue-router';
+import { pushTop } from '@/utils/push-top';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 export default defineComponent({
@@ -288,7 +289,7 @@ export default defineComponent({
       },
       async submit() {
         if (window.top !== window && createProjectType.value) {
-          window.top.location.href = `/full/project/pipeline-editor?branch=${selectBranch.value}`;
+          pushTop(`/full/project/pipeline-editor?branch=${selectBranch.value}`);
           return;
         }
         await router.push({
