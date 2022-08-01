@@ -182,7 +182,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch, String encryptedToken, String userId) {
+    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch, String encryptedToken, String userId, boolean isSyncProject) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -209,8 +209,9 @@ public class ProjectApplication {
         if (projectGroupId == null) {
             projectGroupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
                     .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
+        }else{
+            this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
         }
-        this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(projectGroupId)
                 .map(ProjectLinkGroup::getSort)
                 .orElse(-1);
@@ -221,7 +222,7 @@ public class ProjectApplication {
                 .build();
 
         this.pubTriggerEvent(parser, project, userId, encryptedToken);
-        if (encryptedToken != null) {
+        if (isSyncProject) {
             this.createOrUpdateGitFile(branch, encryptedToken, project, project.getWorkflowName(), userId);
         }
         this.projectRepository.add(project);
@@ -268,7 +269,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType, String encryptedToken, String userId) {
+    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType, String encryptedToken, String userId, boolean isSyncProject) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         if (username != null) {
@@ -295,6 +296,8 @@ public class ProjectApplication {
         project.setWorkflowVersion(workflow.getVersion());
         if (username != null) {
             project.setLastModifiedBy(username);
+        }
+        if (isSyncProject) {
             this.createOrUpdateGitFile(null, encryptedToken, project, oldName, userId);
         }
 
