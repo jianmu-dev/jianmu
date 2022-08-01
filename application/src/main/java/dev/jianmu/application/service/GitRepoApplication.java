@@ -86,4 +86,8 @@ public class GitRepoApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到git仓库：" + id));
         return gitRepo.getBranches();
     }
+
+    public Optional<GitRepo> findByRefAndOwner(String ref, String owner) {
+        return this.gitRepoRepository.findByRefAndOwner(ref, owner);
+    }
 }

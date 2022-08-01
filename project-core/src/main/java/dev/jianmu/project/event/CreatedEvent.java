@@ -9,10 +9,12 @@ package dev.jianmu.project.event;
 public class CreatedEvent {
     private final String projectId;
     private final String branch;
+    private String associationId;
 
-    public CreatedEvent(String projectId, String branch) {
+    public CreatedEvent(String projectId, String branch, String associationId) {
         this.projectId = projectId;
         this.branch = branch;
+        this.associationId = associationId;
     }
 
     public String getProjectId() {
@@ -21,5 +23,9 @@ public class CreatedEvent {
 
     public String getBranch() {
         return branch;
+    }
+
+    public String getAssociationId() {
+        return associationId;
     }
 }

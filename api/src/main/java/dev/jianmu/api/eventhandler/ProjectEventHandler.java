@@ -75,7 +75,7 @@ public class ProjectEventHandler {
     // 项目创建事件
     public void handleProjectCreate(CreatedEvent createdEvent) {
         // 添加gitRepo中的flow
-        this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), this.userContextHolder.getSession().getAssociationId());
+        this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), createdEvent.getAssociationId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
