@@ -16,7 +16,6 @@
           v-model="editorForm.value"
           clearable
           placeholder="请输入值"
-          :maxlength="512"
         />
       </jm-form-item>
     </jm-form>
