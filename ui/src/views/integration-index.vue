@@ -413,7 +413,7 @@ export default defineComponent({
 
     ::v-deep(.project-item) {
       box-sizing: border-box;
-      min-width: 278px;
+      min-width: 277px;
       box-shadow: none;
       border: 1px solid #E7ECF1;
       border-bottom-left-radius: 4px;

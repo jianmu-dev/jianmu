@@ -108,7 +108,7 @@ export default defineComponent({
 
 <style lang='less' scoped>
 .integration {
-  width: 1160px;
+  width: 1158px;
   margin: 0 auto;
   position: relative;
 
@@ -122,7 +122,7 @@ export default defineComponent({
   .top-tabs {
     min-height: 78px;
     box-sizing: border-box;
-    padding: 30px 0 15px;
+    padding-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -208,7 +208,7 @@ export default defineComponent({
 
       .add,
       .vault-item {
-        min-width: 278px;
+        min-width: 277px;
       }
 
       .menu-bar button.add {
@@ -230,7 +230,7 @@ export default defineComponent({
         .content {
           .add,
           .item {
-            min-width: 278px;
+            min-width: 277px;
           }
         }
       }
@@ -249,7 +249,7 @@ export default defineComponent({
 
       .ext-content {
         .add-param, .ext-param-card {
-          min-width: 278px;
+          min-width: 277px;
           margin: 0.8% 0.5% 0 0.5%;
         }
       }
