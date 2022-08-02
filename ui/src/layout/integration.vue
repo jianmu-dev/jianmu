@@ -57,8 +57,7 @@ export default defineComponent({
     });
     const route = useRoute();
     const observer = new ResizeObserver(
-      _throttle(() => {
-        const height: string = (scrollBarRef.value.wrap.firstElementChild.offsetHeight + 78 + (route.name === 'index' ? 40 : 40)).toString();
+      _throttle(() => {const height: string = (scrollBarRef.value.wrap.firstElementChild.offsetHeight + 118).toString();
         window.parent.postMessage(JSON.stringify({ height }), '*');
       }, 800),
     );
