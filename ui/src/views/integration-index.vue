@@ -314,7 +314,6 @@ export default defineComponent({
 </script>
 <style lang="less" scoped>
 .integration-index {
-  padding: 0 4px 4px;
 
   .top {
     z-index: 1;
@@ -403,20 +402,24 @@ export default defineComponent({
 
     display: flex;
     flex-wrap: wrap;
+    min-height: 300px;
 
     .loading {
       position: fixed;
       top: 158px;
       width: 1200px;
-      height: calc(100vh - 158px);
+      height: 300px;
     }
 
     ::v-deep(.project-item) {
-      min-width: 286px;
+      box-sizing: border-box;
+      min-width: 278px;
       box-shadow: none;
       border: 1px solid #E7ECF1;
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
+      margin: 0.5%;
+      min-height: 180px;
 
       &:hover {
         box-shadow: 0 4px 6px 1px #E1EBF5;

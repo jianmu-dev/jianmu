@@ -32,15 +32,15 @@
         </jm-form>
       </div>
     </div>
-    <iframe v-if="iframeVisible" :src="iframeSrc"/>
+    <iframe id="ifm" v-if="iframeVisible" :src="iframeSrc" :style="{height:iframeHeight}"/>
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { AUTHORIZE_INDEX } from '@/router/path-def';
 import { restProxy } from '@/api';
+import { AUTHORIZE_INDEX } from '@/router/path-def';
 
 function getCode(owner: string, ref: string, userId: string): Promise<string> {
   return restProxy({
@@ -83,7 +83,10 @@ export default defineComponent({
     const iframeSrc = computed<string>(() =>
       !code.value ? '' : `${AUTHORIZE_INDEX}?code=${encodeURIComponent(code.value)}`);
     const iframeVisible = ref<boolean>(false);
-
+    const iframeHeight = ref<string>('');
+    window.addEventListener('message', e => {
+      iframeHeight.value = JSON.parse(e.data).height + 'px';
+    });
     onMounted(async () => {
       const { owner, reference: ref, userId } = props;
       if (!owner || !ref || !userId) {
@@ -96,6 +99,7 @@ export default defineComponent({
     });
 
     return {
+      iframeHeight,
       formRef,
       form,
       rules: {
@@ -119,7 +123,7 @@ export default defineComponent({
           await router.push(`${route.path}?owner=${encodeURIComponent(owner)}&ref=${encodeURIComponent(ref)}&userId=${encodeURIComponent(userId)}`);
 
           // 获取code
-          code.value = await getCode(owner, ref, userId);
+          // code.value = await getCode(owner, ref, userId);
 
           iframeVisible.value = false;
           await nextTick();
@@ -135,6 +139,7 @@ export default defineComponent({
 .integration-demo {
   width: 1200px;
   height: 100vh;
+  overflow: auto;
   margin: 0 auto;
 
   .top {
@@ -155,8 +160,11 @@ export default defineComponent({
 
   iframe {
     width: 100%;
-    height: calc(100vh - 170px);
     border: 0;
+
+    html {
+      height: 100%;
+    }
   }
 }
 </style>

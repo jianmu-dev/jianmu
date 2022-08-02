@@ -59,14 +59,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  getCurrentInstance,
-  onBeforeMount,
-  Ref,
-  ref,
-  toRefs,
-} from 'vue';
+import { defineComponent, getCurrentInstance, onBeforeMount, Ref, ref, toRefs } from 'vue';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import { namespace } from '@/store/modules/secret-key';
 import { IState } from '@/model/modules/secret-key';
@@ -74,7 +67,8 @@ import {
   onBeforeRouteUpdate,
   RouteLocationNormalized,
   RouteLocationNormalizedLoaded,
-  useRoute, useRouter,
+  useRoute,
+  useRouter,
 } from 'vue-router';
 import { deleteNamespace } from '@/api/secret-key';
 import NsEditor from './ns-editor.vue';
@@ -174,7 +168,7 @@ export default defineComponent({
           .catch(() => {
           });
       },
-      toNs: async namespace => {
+      toNs: async (namespace: string) => {
         await router.push({ name: 'manage-secret-key', params: { namespace } });
       },
     };
@@ -187,7 +181,7 @@ export default defineComponent({
   padding: 30px 10px 0;
   box-sizing: border-box;
   background-color: #ffffff;
-  height: calc(100vh - 145px);
+  min-height: calc(100vh - 145px);
   margin-bottom: 20px;
 
   .title {
