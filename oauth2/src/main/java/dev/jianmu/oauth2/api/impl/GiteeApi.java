@@ -236,23 +236,20 @@ public class GiteeApi implements OAuth2Api {
     }
 
     @Override
-    public void createFile(String accessToken, String gitRepoOwner, String gitRepo,
-                           String content, String filepath,
-                           String branch, String message) {
+    public void createFile(String accessToken, String owner, String repo, String content, String filepath, String author_email, String author_name, String committer_email, String committer_name, String branch, String message) {
 
     }
 
     @Override
-    public void deleteFile(String accessToken, String gitRepoOwner, String gitRepo,
-                           String content, String filepath,
-                           String branch, String message) {
+    public void deleteFile(String accessToken, String owner, String repo, String content, String filepath, String author_email, String author_name, String committer_email, String committer_name, String branch, String message) {
+
     }
 
     @Override
-    public void updateFile(String accessToken, String gitRepoOwner, String gitRepo,
-                           String content, String filepath,
-                           String branch, String message) {
+    public void updateFile(String accessToken, String owner, String repo, String content, String filepath, String author_email, String author_name, String committer_email, String committer_name, String branch, String message) {
+
     }
+
 
     @Override
     public IFileVo getFile(String accessToken, String gitRepoOwner, String gitRepo, String filepath, String ref) {
