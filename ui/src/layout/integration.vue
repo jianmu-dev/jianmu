@@ -35,8 +35,9 @@
 </template>
 
 <script lang='ts'>
-import { computed, defineComponent, getCurrentInstance, provide, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { onBeforeRouteUpdate, useRoute } from 'vue-router';
+import _throttle from 'lodash/throttle';
 
 export default defineComponent({
   setup() {
@@ -54,8 +55,22 @@ export default defineComponent({
       scrollBarRef.value.wrap.scrollTop = 0;
       next();
     });
-    const currentTab = ref<number>(0);
     const route = useRoute();
+    const observer = new ResizeObserver(
+      _throttle(() => {
+        const height: string = (scrollBarRef.value.wrap.firstElementChild.offsetHeight + 78 + (route.name === 'index' ? 40 : 40)).toString();
+        window.parent.postMessage(JSON.stringify({ height }), '*');
+      }, 800),
+    );
+    onMounted(() => {
+      if (window.top !== window) {
+        observer.observe(scrollBarRef.value.wrap.firstElementChild);
+      }
+    });
+    onBeforeUnmount(() => {
+      observer.disconnect();
+    });
+    const currentTab = ref<number>(0);
     // 是否展示顶部导航
     const isShowTop = computed<boolean>(() => !((route.name === 'create-project') || (route.name === 'update-project')));
     const maxScrollHeight = computed<string>(() => {
@@ -93,7 +108,7 @@ export default defineComponent({
 
 <style lang='less' scoped>
 .integration {
-  width: 1200px;
+  width: 1160px;
   margin: 0 auto;
   position: relative;
 
@@ -188,11 +203,12 @@ export default defineComponent({
   .content {
     // 密钥命名空间
     ::v-deep(.secret-key-ns-manager) {
-      padding: 20px 0 0;
+      padding: 30px 0 0;
+      min-height: 300px;
 
       .add,
       .vault-item {
-        min-width: 288px;
+        min-width: 278px;
       }
 
       .menu-bar button.add {
@@ -202,6 +218,8 @@ export default defineComponent({
 
     // 密钥管理页面
     ::v-deep(.secret-key-sk-manager) {
+      min-height: 300px;
+
       .namespace {
         padding: 20px 0 10px;
       }
@@ -212,7 +230,7 @@ export default defineComponent({
         .content {
           .add,
           .item {
-            min-width: 288px;
+            min-width: 278px;
           }
         }
       }
@@ -226,11 +244,22 @@ export default defineComponent({
     // 外部参数页面
     ::v-deep(.ext-param) {
       padding: 20px 0;
+      min-height: 300px;
+      margin-bottom: 0;
 
       .ext-content {
         .add-param, .ext-param-card {
-          min-width: 288px;
+          min-width: 278px;
+          margin: 0.8% 0.5% 0 0.5%;
         }
+      }
+    }
+
+    // 代码项目编辑页
+    ::v-deep(.project-editor) {
+
+      .dsl-editor-entry, .dsl-editor {
+        height: 500px;
       }
     }
   }

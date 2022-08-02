@@ -1,6 +1,6 @@
 <template>
   <router-view v-if="!loading"/>
-  <div class="initialization" v-loading="loading"></div>
+  <div v-else class="initialization" v-loading="loading"></div>
 </template>
 
 <script lang="ts">

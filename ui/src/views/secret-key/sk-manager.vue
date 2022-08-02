@@ -158,10 +158,11 @@ export default defineComponent({
 
 <style scoped lang="less">
 .secret-key-sk-manager {
-  height: calc(100vh - 145px);
+  min-height: calc(100vh - 145px);
   font-size: 14px;
   color: #333333;
   margin-bottom: 20px;
+  background-color: #ffffff;
 
   .namespace {
     padding: 30px 0 10px calc(10px + 0.5%);
@@ -204,9 +205,7 @@ export default defineComponent({
   }
 
   .keys {
-    background-color: #ffffff;
     box-sizing: border-box;
-    height: calc(100vh - 208px);
     padding: 0 10px;
 
     .content {

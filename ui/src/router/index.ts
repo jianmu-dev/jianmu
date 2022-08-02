@@ -116,7 +116,10 @@ export default async (appContext: AppContext): Promise<Router> => {
       window.top.location.href = session.entryUrl!;
       return;
     }
-
+    if (to.name === 'index' && !session && entry) {
+      next({ name: 'http-status-error', params: { value: 404 } });
+      return;
+    }
     for (const m of to.matched) {
       if (m.meta.auth && !session) {
         // 处理认证
