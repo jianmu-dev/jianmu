@@ -76,7 +76,7 @@ export class AsyncTask extends BaseNode {
       };
     });
     children.push({
-      // 文档：https://docs.jianmu.dev/guide/custom-node.html#_4-%E5%86%85%E7%BD%AE%E8%BE%93%E5%87%BA%E5%8F%82%E6%95%B0
+      // 文档：https://v2.jianmu.dev/guide/custom-node.html#_4-%E5%86%85%E7%BD%AE%E8%BE%93%E5%87%BA%E5%8F%82%E6%95%B0
       value: INNER_PARAM_TAG,
       label: INNER_PARAM_LABEL,
       children: [

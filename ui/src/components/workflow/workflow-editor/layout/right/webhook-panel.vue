@@ -15,7 +15,7 @@
           <span class="title-text">触发器参数</span>
           <jm-tooltip placement="top">
             <template #content>
-              引用触发器参数参考<a href="https://docs.jianmu.dev/guide/vars.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0"
+              引用触发器参数参考<a href="https://v2.jianmu.dev/guide/vars.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0"
                           target="_blank" style="color:#fff;text-decoration: underline;">参数章节</a>
             </template>
             <i class="jm-icon-button-help"></i>
@@ -100,7 +100,7 @@
                   <div>匹配规则，结果为 true 时触发流程，当</div>
                   <div>
                     <span>前只可引用触发器参数。详见</span>
-                    <a href="https://docs.jianmu.dev/guide/expression.html"
+                    <a href="https://v2.jianmu.dev/guide/expression.html"
                        target="_blank"
                        style="color:#fff;text-decoration: underline;">运算表达式</a>
                   </div>
