@@ -2,7 +2,7 @@ package dev.jianmu.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.api.dto.GitLinkWebhookDto;
+import dev.jianmu.api.dto.gitlink.GitLinkWebhookDto;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.impl.GitlinkSilentLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
@@ -114,6 +114,11 @@ public class GitlinkController {
     @PostMapping("webhook/projects/sync")
     @Operation(summary = "同步项目webhook", description = "同步项目webhook")
     public void syncProject(@RequestBody @Valid GitLinkWebhookDto dto) {
+        // 校验是否为jianmu用户
+        var committer = dto.getHeadCommit().getCommitter();
+        if (ProjectApplication.committer.equals(committer.getName()) && ProjectApplication.committerEmail.equals(committer.getEmail())) {
+            return;
+        }
         var gitRepo = this.gitRepoApplication.findByRefAndOwner(dto.getRepository().getName(), dto.getRepository().getOwner().getLogin())
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库 ref"));
         // TODO： 暂时使用pusher查询用户
@@ -138,7 +143,7 @@ public class GitlinkController {
                 this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, user.getId(), encryptedAccessToken, user.getUsername());
             } catch (Exception e) {
                 e.printStackTrace();
-                log.warn("项目创建失败: {}", filepath);
+                log.warn("项目同步失败: {}", filepath);
             }
         }
     }

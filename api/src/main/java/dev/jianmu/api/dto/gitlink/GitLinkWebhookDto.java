@@ -1,10 +1,10 @@
-package dev.jianmu.api.dto;
+package dev.jianmu.api.dto.gitlink;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.util.List;
@@ -14,6 +14,11 @@ import java.util.List;
 public class GitLinkWebhookDto {
     @Pattern(regexp = "^refs/heads/.*$", message = "ref格式错误")
     private String ref;
+
+    @Valid
+    @NotNull(message = "head_commit不能为空")
+    @JsonProperty("head_commit")
+    private GitCommit headCommit;
 
     @Valid
     @NotNull(message = "commits不能为空")
@@ -31,4 +36,5 @@ public class GitLinkWebhookDto {
     public String getBranch() {
         return this.ref.split("/", 3)[2];
     }
+
 }

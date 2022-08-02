@@ -1,4 +1,4 @@
-package dev.jianmu.api.dto;
+package dev.jianmu.api.dto.gitlink;
 
 import lombok.Data;
 
