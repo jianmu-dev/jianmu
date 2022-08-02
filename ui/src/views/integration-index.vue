@@ -413,13 +413,13 @@ export default defineComponent({
 
     ::v-deep(.project-item) {
       box-sizing: border-box;
-      min-width: 278px;
+      min-width: 277px;
       box-shadow: none;
       border: 1px solid #E7ECF1;
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
       margin: 0.5%;
-      min-height: 180px;
+      height: 180px;
 
       &:hover {
         box-shadow: 0 4px 6px 1px #E1EBF5;
