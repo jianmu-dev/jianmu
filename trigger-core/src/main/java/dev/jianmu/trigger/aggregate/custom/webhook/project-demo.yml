@@ -1,0 +1,24 @@
+trigger:
+  #  type: _/gitlink@1.0.0
+  type: gitlink
+  event:
+    - ref: push_event
+      ruleset:
+        # 可选参数唯一标识
+        - param-ref: xxx
+          operator: include | exclude | equal | neq | reg_exp
+          value: xxx
+      # 规则集运算符
+      ruleset-operator: and | or
+    - ref: pr_event
+      ruleset:
+        - param-ref: xxx
+          operator: include | exclude | equal | neq | reg_exp
+          value: xxx
+      ruleset-operator: and | or
+
+
+
+
+
+

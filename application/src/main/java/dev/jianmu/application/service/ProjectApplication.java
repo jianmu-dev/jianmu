@@ -255,12 +255,12 @@ public class ProjectApplication {
             try {
                 if (!project.getWorkflowName().equals(oldName)) {
                     var oldFilepath = dslLocation + oldName + ".yml";
-                    oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", oldFilepath, branch, "refactor: delete " + oldFilepath);
+                    oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", oldFilepath, null, null, null, null, branch, "refactor: delete " + oldFilepath);
                 }
                 oAuth2Api.getFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch);
-                oAuth2Api.updateFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, branch, "refactor: " + filepath);
+                oAuth2Api.updateFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, null, null, null, null, branch, "refactor: " + filepath);
             } catch (UnknownException e) {
-                oAuth2Api.createFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, branch, "feat: " + filepath);
+                oAuth2Api.createFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, null, null, null, null, branch, "feat: " + filepath);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -334,7 +334,7 @@ public class ProjectApplication {
             var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             try {
                 oAuth2Api.getFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch);
-                oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", filepath, branch, "refactor: delete " + filepath);
+                oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", filepath, null, null, null, null, branch, "refactor: delete " + filepath);
             } catch (UnknownException e) {
                 logger.info("Git 项目dsl文件不存在: " + filepath);
             }

@@ -137,6 +137,7 @@ public interface OAuth2Api {
      * @param message
      */
     void createFile(String accessToken, String owner, String repo, String content, String filepath,
+                    String authorEmail, String authorName, String committerEmail, String committerName,
                     String branch, String message);
 
     /**
@@ -151,6 +152,7 @@ public interface OAuth2Api {
      * @param message
      */
     void deleteFile(String accessToken, String owner, String repo, String content, String filepath,
+                    String authorEmail, String authorName, String committerEmail, String committerName,
                     String branch, String message);
 
     /**
@@ -165,6 +167,7 @@ public interface OAuth2Api {
      * @param message
      */
     void updateFile(String accessToken, String owner, String repo, String content, String filepath,
+                    String authorEmail, String authorName, String committerEmail, String committerName,
                     String branch, String message);
 
     /**

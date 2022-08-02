@@ -452,6 +452,7 @@ public class GitlinkApi implements OAuth2Api {
     @Override
     public void createFile(String accessToken, String owner, String repo,
                            String content, String filepath,
+                           String authorEmail, String authorName, String committerEmail, String committerName,
                            String branch, String message) {
 
         String createFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
@@ -469,6 +470,10 @@ public class GitlinkApi implements OAuth2Api {
                 .content(content)
                 .build());
         RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
+                .author_email(authorEmail)
+                .author_name(authorName)
+                .committer_email(committerEmail)
+                .committer_name(committerName)
                 .author_timeunix(timeunix)
                 .committer_timeunix(timeunix)
                 .branch(branch)
@@ -511,6 +516,7 @@ public class GitlinkApi implements OAuth2Api {
     @Override
     public void deleteFile(String accessToken, String owner, String repo,
                            String content, String filepath,
+                           String authorEmail, String authorName, String committerEmail, String committerName,
                            String branch, String message) {
         String deleteFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + owner + "/" + repo +
@@ -527,6 +533,10 @@ public class GitlinkApi implements OAuth2Api {
                 .content(content)
                 .build());
         RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
+                .author_email(authorEmail)
+                .author_name(authorName)
+                .committer_email(committerEmail)
+                .committer_name(committerName)
                 .author_timeunix(timeunix)
                 .committer_timeunix(timeunix)
                 .branch(branch)
@@ -569,6 +579,7 @@ public class GitlinkApi implements OAuth2Api {
     @Override
     public void updateFile(String accessToken, String owner, String repo,
                            String content, String filepath,
+                           String authorEmail, String authorName, String committerEmail, String committerName,
                            String branch, String message) {
 
         String updateFileUrl = this.oAuth2Properties.getGitlink().getApiUrl()
@@ -586,6 +597,10 @@ public class GitlinkApi implements OAuth2Api {
                 .content(content)
                 .build());
         RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
+                .author_email(authorEmail)
+                .author_name(authorName)
+                .committer_email(committerEmail)
+                .committer_name(committerName)
                 .author_timeunix(timeunix)
                 .committer_timeunix(timeunix)
                 .branch(branch)

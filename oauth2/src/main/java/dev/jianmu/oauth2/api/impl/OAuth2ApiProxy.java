@@ -95,19 +95,31 @@ public class OAuth2ApiProxy implements OAuth2Api {
     }
 
     @Override
-    public void createFile(String accessToken, String owner, String repo, String content, String filepath, String branch, String message) {
-        this.getApi().createFile(accessToken, owner, repo, content, filepath, branch, message);
+    public void createFile(String accessToken, String owner, String repo, String content, String filepath,
+                           String authorEmail, String authorName, String committerEmail, String committerName,
+                           String branch, String message) {
+        this.getApi().createFile(accessToken, owner, repo, content, filepath,
+                authorEmail, authorName, committerEmail, committerName,
+                branch, message);
     }
 
     @Override
-    public void deleteFile(String accessToken, String owner, String repo, String content, String filepath, String branch, String message) {
-        this.getApi().deleteFile(accessToken, owner, repo, content, filepath, branch, message);
+    public void deleteFile(String accessToken, String owner, String repo, String content, String filepath,
+                           String authorEmail, String authorName, String committerEmail, String committerName,
+                           String branch, String message) {
+        this.getApi().deleteFile(accessToken, owner, repo, content, filepath,
+                authorEmail, authorName, committerEmail, committerName,
+                branch, message);
 
     }
 
     @Override
-    public void updateFile(String accessToken, String owner, String repo, String content, String filepath, String branch, String message) {
-        this.getApi().updateFile(accessToken, owner, repo, content, filepath, branch, message);
+    public void updateFile(String accessToken, String owner, String repo, String content, String filepath,
+                           String authorEmail, String authorName, String committerEmail, String committerName,
+                           String branch, String message) {
+        this.getApi().updateFile(accessToken, owner, repo, content, filepath,
+                authorEmail, authorName, committerEmail, committerName,
+                branch, message);
 
     }
 
