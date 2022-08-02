@@ -52,7 +52,7 @@ export class AsyncTask extends BaseNode {
     versionDescription: string = '', inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
     super(ref, name, NodeTypeEnum.ASYNC_TASK, checkDefaultIcon(icon) ? defaultIcon : icon,
-      `https://jianmuhub.com/${ownerRef}/${ref}/${version}`);
+      `https://jianmuhub.com/${ownerRef}/${nodeRef}/${version}`);
     this.ownerRef = ownerRef;
     this.nodeRef = nodeRef;
     this.version = version;
