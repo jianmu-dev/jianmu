@@ -1,7 +1,8 @@
-package dev.jianmu.api.dto;
+package dev.jianmu.api.dto.gitlink;
 
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -13,10 +14,16 @@ import java.util.List;
  */
 @Data
 public class GitCommit {
+    @Valid
+    @NotNull(message = "committer不能为空")
+    private GitCommitter committer;
+
     @NotNull(message = "commit.added不能为空")
     private List<String> added;
+
     @NotNull(message = "commit.removed不能为空")
     private List<String> removed;
+
     @NotNull(message = "commit.modified不能为空")
     private List<String> modified;
 }
