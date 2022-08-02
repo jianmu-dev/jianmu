@@ -62,6 +62,8 @@ import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PRO
 public class ProjectApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
     private static final String dslLocation = ".devops/";
+    public static final String committer = "jianmu";
+    public static final String committerEmail = "dev@jianmu.dev";
 
     private final ProjectRepositoryImpl projectRepository;
     private final WorkflowRepository workflowRepository;
@@ -255,12 +257,12 @@ public class ProjectApplication {
             try {
                 if (!project.getWorkflowName().equals(oldName)) {
                     var oldFilepath = dslLocation + oldName + ".yml";
-                    oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", oldFilepath, branch, "refactor: delete " + oldFilepath);
+                    oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", oldFilepath, null, null, committerEmail, committer, branch, "refactor: delete " + oldFilepath);
                 }
                 oAuth2Api.getFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch);
-                oAuth2Api.updateFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, branch, "refactor: " + filepath);
+                oAuth2Api.updateFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, null, null, committerEmail, committer, branch, "refactor: " + filepath);
             } catch (UnknownException e) {
-                oAuth2Api.createFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, branch, "feat: " + filepath);
+                oAuth2Api.createFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), dsl, filepath, null, null, committerEmail, committer, branch, "feat: " + filepath);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -334,7 +336,7 @@ public class ProjectApplication {
             var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             try {
                 oAuth2Api.getFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch);
-                oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", filepath, branch, "refactor: delete " + filepath);
+                oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", filepath, null, null, committerEmail, committer, branch, "refactor: delete " + filepath);
             } catch (UnknownException e) {
                 logger.info("Git 项目dsl文件不存在: " + filepath);
             }
