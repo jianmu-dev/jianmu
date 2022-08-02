@@ -26,7 +26,7 @@
     </div>
     <div class="content">
       <router-view v-slot="{ Component }">
-        <jm-scrollbar :max-height="maxScrollHeight" ref="scrollBarRef">
+        <jm-scrollbar ref="scrollBarRef">
           <component :is="Component" :keyword="key" v-model="flag" v-model:create-type="creatType"/>
         </jm-scrollbar>
       </router-view>
@@ -42,6 +42,7 @@ import _throttle from 'lodash/throttle';
 export default defineComponent({
   setup() {
     const { proxy } = getCurrentInstance() as any;
+    const route = useRoute();
     const loadMain = ref<boolean>(true);
     const reloadMain = () => {
       loadMain.value = false;
@@ -55,9 +56,9 @@ export default defineComponent({
       scrollBarRef.value.wrap.scrollTop = 0;
       next();
     });
-    const route = useRoute();
     const observer = new ResizeObserver(
-      _throttle(() => {const height: string = (scrollBarRef.value.wrap.firstElementChild.offsetHeight + 118).toString();
+      _throttle(() => {
+        const height: string = (scrollBarRef.value.wrap.firstElementChild.offsetHeight + 60 + (route.name === 'index' ? 40 : 0)).toString();
         window.parent.postMessage(JSON.stringify({ height }), '*');
       }, 800),
     );
@@ -72,9 +73,6 @@ export default defineComponent({
     const currentTab = ref<number>(0);
     // 是否展示顶部导航
     const isShowTop = computed<boolean>(() => !((route.name === 'create-project') || (route.name === 'update-project')));
-    const maxScrollHeight = computed<string>(() => {
-      return !((route.name === 'create-project') || (route.name === 'update-project')) ? 'calc(100vh - 96px)' : 'calc(100vh)';
-    });
     const keyWord = ref<string>('');
     const key = ref<string>('');
     const tabs = ref<Array<string>>(['流水线', '外部参数', '密钥管理']);
@@ -88,7 +86,6 @@ export default defineComponent({
     };
     return {
       isShowTop,
-      maxScrollHeight,
       scrollBarRef,
       flag,
       creatType,
@@ -119,7 +116,7 @@ export default defineComponent({
   //}
 
   .top-tabs {
-    min-height: 78px;
+    height: 60px;
     box-sizing: border-box;
     padding-bottom: 20px;
     display: flex;
