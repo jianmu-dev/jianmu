@@ -65,6 +65,7 @@ import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
+import { pushTop } from '@/utils/push-top';
 
 export default defineComponent({
   props: {
@@ -167,7 +168,7 @@ export default defineComponent({
           currentBranch.value = branch;
           if (checkDsl(dslText)) {
             if (window.top !== window) {
-              window.top.location.href = `/full/project/pipeline-editor/${props.id}`;
+              pushTop(`/full/project/pipeline-editor/${props.id}`);
               return;
             }
             const payload = {
