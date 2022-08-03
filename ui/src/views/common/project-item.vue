@@ -110,14 +110,14 @@
           content="预览流程"
           placement="bottom"
         >
-          <button class="workflow-label" @click="dslDialogFlag = true"></button>
+          <button class="workflow-label" @click="$emit('select-project-id')"></button>
         </jm-tooltip>
         <jm-tooltip
           v-else-if="project.dslType === DslTypeEnum.PIPELINE"
           content="预览管道"
           placement="bottom"
         >
-          <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+          <button class="pipeline-label" @click="$emit('select-project-id')"></button>
         </jm-tooltip>
         <div class="more">
           <jm-dropdown trigger="click" placement="bottom-start">
@@ -151,11 +151,6 @@
       :current-project-name="project.name"
       v-model:webhookVisible="webhookDrawerFlag"
     ></webhook-drawer>
-    <project-preview-dialog
-      v-if="dslDialogFlag"
-      :project-id="project.id"
-      @close="dslDialogFlag = false"
-    />
     <div class="cover"></div>
   </div>
 </template>
@@ -166,14 +161,13 @@ import { DslSourceEnum, DslTypeEnum, ProjectStatusEnum, TriggerTypeEnum } from '
 import { IProjectVo } from '@/api/dto/project';
 import { active, del, executeImmediately, synchronize } from '@/api/project';
 import { datetimeFormatter } from '@/utils/formatter';
-import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { pushTop } from '@/utils/push-top';
 
 export default defineComponent({
-  components: { ProjectPreviewDialog, WebhookDrawer },
+  components: { WebhookDrawer },
   props: {
     project: {
       type: Object as PropType<IProjectVo>,
@@ -195,7 +189,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['running', 'synchronized', 'deleted'],
+  emits: ['running', 'synchronized', 'deleted', 'select-project-id', 'clear-project-id', 'prev-project', 'next-project'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();

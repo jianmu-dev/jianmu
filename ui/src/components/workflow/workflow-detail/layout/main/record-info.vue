@@ -5,9 +5,9 @@
     <div>
       {{ isSuspended? '挂起':'执行' }}时长：
     </div>
-    <div class="record-time" :class="[startAndEndToWidthClass]">
-      <jm-timer v-if="isSuspended" :start-time="record.suspendedTime"/>
-      <jm-timer v-else :start-time="record.startTime" :end-time="record.endTime"/>
+    <div class="record-time" :style="{width:`${width}`}">
+      <jm-timer v-if="isSuspended" @loaded="maxWidth=>{width=maxWidth+'px'}" :start-time="record.suspendedTime"/>
+      <jm-timer v-else :start-time="record.startTime" @loaded="maxWidth=>{width=maxWidth+'px'}" :end-time="record.endTime"/>
     </div>
     <div class="vertical-divider" style="margin-left: 15px;"></div>
     <div>状态：<span class="status" :class="{[(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true}">{{ statusTranslate(record.status) }}</span></div>
@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, PropType } from 'vue';
+import { defineComponent, getCurrentInstance, onBeforeUnmount, onUpdated, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
@@ -34,43 +34,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const isSuspended = computed(()=>props.record.status === WorkflowExecutionRecordStatusEnum.SUSPENDED);
-    const startAndEndToWidthClass = computed(() => {
-      let start:any = props.record.startTime && new Date(props.record.startTime).getTime();
-      let end:any = props.record.endTime;
-      let back = new Date().getTime();
-      let sencends:number = 0;
-      // console.log('start', start, end, props.record.suspendedTime);
-      if (end === undefined) {
-        if (props.record.suspendedTime === undefined && props.record.status !== WorkflowExecutionRecordStatusEnum.RUNNING) {
-          return 'one';
-        }
-        let font = new Date(props.record.suspendedTime as string).getTime();
-        // 运行中的时间 宽度
-        if (props.record.status === WorkflowExecutionRecordStatusEnum.RUNNING) {
-          font = start;
-        }
-        sencends = (back - font)/1000;
-      } else {
-        if (start === undefined) {
-          return 'one';
-        }
-        sencends = (new Date(end).getTime() - start)/1000;
-      }
-
-      if (sencends < 60) {
-        // 59s
-        return 'one';
-      } else if (sencends > 60 && sencends < 3660){
-        // 59m 59s
-        return 'two';
-      } else if (sencends > 3660 && sencends < 90060) {
-        // 59h 59m 59s
-        return 'three';
-      } else {
-        // 77d 59h 59m 59s
-        return 'four';
-      }
-    });
+    let width = ref<string>('48px');
     const recordInfo = new RecordInfo(props.record.id);
     return {
       datetimeFormatter,
@@ -78,7 +42,7 @@ export default defineComponent({
       checkWorkflowRunning,
       statusTranslate,
       WorkflowExecutionRecordStatusEnum,
-      startAndEndToWidthClass,
+      width,
       handleTerminate() {
         proxy.$confirm('确定要终止吗?', '终止项目执行', {
           confirmButtonText: '确定',
@@ -154,18 +118,6 @@ export default defineComponent({
     height: 40px;
     line-height: 40px;
     color: @default-black-color;
-    &.one {
-      width: 24px;
-    }
-    &.two {
-      width: 58px;
-    }
-    &.three {
-      width: 88px;
-    }
-    &.four {
-      width: 116px;
-    }
   }
   .terminate-button{
     padding-right: 5px;

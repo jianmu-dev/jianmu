@@ -8,10 +8,18 @@
     >
       <div class="content" v-loading="loading">
         <jm-workflow-viewer
+          v-if="!loading"
           :dsl="dsl"
           readonly
+          :viewMode="viewMode"
           :node-infos="nodeDefs"
-          :trigger-type="triggerType"/>
+          :trigger-type="triggerType"
+          @change-view-mode="mode=>viewMode=mode"
+        />
+        <div class="overflow-bottom">
+          <div @click="prevProject" class="button-left" :class="{disabled: prevDis}"><i class="jm-icon-button-left"/>上一个</div>
+          <div @click="nextProject" class="button-right" :class="{disabled: nextDis}">下一个<i class="jm-icon-button-right"/></div>
+        </div>
       </div>
     </jm-dialog>
   </div>
@@ -19,7 +27,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
-import { TriggerTypeEnum } from '@/api/dto/enumeration';
+import { TriggerTypeEnum, ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail, fetchWorkflow } from '@/api/view-no-auth';
 import { INodeDefVo } from '@/api/dto/project';
 import { useStore } from 'vuex';
@@ -30,9 +38,13 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    projects: {
+      type: Array,
+      required: true,
+    },
   },
   // 覆盖dialog的close事件
-  emits: ['close'],
+  emits: ['close', 'prev-project', 'next-project'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const store = useStore();
@@ -44,12 +56,21 @@ export default defineComponent({
     const dsl = ref<string>();
     const nodeDefs = ref<INodeDefVo[]>([]);
     const triggerType = ref<TriggerTypeEnum>();
+    const viewMode = ref<string>(ViewModeEnum.GRAPHIC);
     const close = () => emit('close');
-
+    let previewId = ref(props.projectId);
+    // 上一个按钮禁止
+    const prevDis = computed<boolean>(()=>{
+      return props.projects.findIndex((e:any)=>e.id===previewId.value) === 0;
+    });
+    // 下一个按钮禁止
+    const nextDis = computed<boolean>(()=>{
+      return props.projects.findIndex((e:any)=>e.id===previewId.value) === props.projects.length-1;
+    });
     const loadDsl = async () => {
-      if (dsl.value) {
-        return;
-      }
+      // if (dsl.value) {
+      //   return;
+      // }
 
       try {
         loading.value = true;
@@ -59,7 +80,7 @@ export default defineComponent({
           workflowRef,
           workflowVersion,
           triggerType: _triggerType,
-        } = await fetchProjectDetail(props.projectId);
+        } = await fetchProjectDetail(previewId.value);
         title.value = workflowName;
         triggerType.value = _triggerType;
 
@@ -76,10 +97,11 @@ export default defineComponent({
         loading.value = false;
       }
     };
-
     onBeforeMount(() => loadDsl());
 
     return {
+      prevDis,
+      nextDis,
       dialogWidth,
       TriggerTypeEnum,
       dialogVisible,
@@ -88,7 +110,18 @@ export default defineComponent({
       dsl,
       nodeDefs,
       triggerType,
+      viewMode,
       close,
+      prevProject() {
+        const currentPreviewIdIndex = props.projects.findIndex((e:any)=>e.id === previewId.value);
+        previewId.value = props.projects[currentPreviewIdIndex-1].id;
+        loadDsl();
+      },
+      nextProject() {
+        const currentPreviewIdIndex = props.projects.findIndex((e:any)=>e.id === previewId.value);
+        previewId.value = props.projects[currentPreviewIdIndex+1].id;
+        loadDsl();
+      },
     };
   },
 });
@@ -132,11 +165,55 @@ export default defineComponent({
 
     .el-dialog__body {
       padding: 0;
+      background-color: #ffffff;
     }
   }
 
   .content {
-    height: 60vh;
+    position: relative;
+    height: 70vh;
+    .overflow-bottom {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      display: flex;
+      height: 70px;
+      width: 100%;
+      background-color: #ffffff;
+      align-items: center;
+      .button-left {
+        margin-left: 30px;
+        line-height: 30px;
+        width: 92px;
+        font-size: 16px;
+        border: 0.5px solid #CAD6EE;
+        color: #082340;
+        cursor: pointer;
+        padding-left: 18px;
+        &:hover {
+          color: #096DD9;
+          background-color: #EFF7FF;
+        }
+      }
+      .button-right {
+        margin-left: 20px;
+        line-height: 30px;
+        width: 86px;
+        font-size: 16px;
+        border: 0.5px solid #CAD6EE;
+        color: #082340;
+        cursor: pointer;
+        padding-left: 24px;
+        &:hover {
+          color: #096DD9;
+          background-color: #EFF7FF;
+        }
+      }
+      .disabled {
+        color: #979797;
+        pointer-events: none;
+      }
+    }
   }
 }
 </style>

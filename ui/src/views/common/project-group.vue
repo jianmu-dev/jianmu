@@ -60,6 +60,7 @@
               :concurrent="project.concurrent"
               :key="project.id"
               :project="project"
+              @select-project-id="()=>{previewId=project.id;dslDialogFlag=true;}"
               @running="handleProjectRunning"
               @synchronized="handleProjectSynchronized"
               @deleted="handleProjectDeleted"
@@ -76,6 +77,12 @@
         </div>
       </template>
     </folding>
+    <project-preview-dialog
+      v-if="dslDialogFlag"
+      :project-id="previewId"
+      :projects="projects"
+      @close="()=>{dslDialogFlag=false;previewId=''}"
+    />
   </div>
 </template>
 
@@ -99,6 +106,7 @@ import { queryProject } from '@/api/view-no-auth';
 import { IQueryForm } from '@/model/modules/project';
 import { ProjectStatusEnum, SortTypeEnum } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
+import ProjectPreviewDialog from './project-preview-dialog.vue';
 import { IPageVo } from '@/api/dto/common';
 import { Mutable } from '@/utils/lib';
 import { updateProjectGroupProjectSort } from '@/api/project-group';
@@ -114,7 +122,7 @@ import sleep from '@/utils/sleep';
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 
 export default defineComponent({
-  components: { JmSorter, ProjectItem, Folding },
+  components: { JmSorter, ProjectItem, Folding, ProjectPreviewDialog },
   props: {
     isDetail: {
       type: Boolean,
@@ -170,6 +178,9 @@ export default defineComponent({
       pageNum: START_PAGE_NUM,
     });
     const projects = computed<IProjectVo[]>(() => projectPage.value.list);
+    // 预览弹窗的项目id
+    const previewId = ref<string>('');
+    const dslDialogFlag = ref<boolean>(false);
     // 显示更多
     const loadState = ref<StateEnum>(StateEnum.MORE);
     const projectList = ref<Mutable<IProjectVo>[]>([]);
@@ -348,6 +359,18 @@ export default defineComponent({
       scrollableEl,
     };
     return {
+      prevProject() {
+        const list = projectPage.value.list;
+        const currentPreviewIdIndex = list.findIndex(e=>e.id === previewId.value);
+        previewId.value = list[currentPreviewIdIndex-1].id;
+      },
+      nextProject() {
+        const list = projectPage.value.list;
+        const currentPreviewIdIndex = list.findIndex(e=>e.id === previewId.value);
+        previewId.value = list[currentPreviewIdIndex+1].id;
+      },
+      previewId,
+      dslDialogFlag,
       noDataImg,
       projectsRef,
       spacing,

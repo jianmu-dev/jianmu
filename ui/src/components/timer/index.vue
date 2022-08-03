@@ -1,5 +1,5 @@
 <template>
-  <jm-text-viewer class="jm-timer" :value="time" :tip-append-to-body="tipAppendToBody"/>
+  <jm-text-viewer class="jm-timer" :value="time" @loaded="({contentMaxWidth})=>$emit('loaded', contentMaxWidth)" :tip-append-to-body="tipAppendToBody"/>
 </template>
 
 <script lang='ts'>
@@ -22,6 +22,7 @@ export default defineComponent({
       default: true,
     },
   },
+  emits: ['loaded'],
   setup(props) {
     const now = ref<Date>(new Date());
     const timer = setInterval(() => {
