@@ -37,8 +37,6 @@ export default defineComponent({
     const store = useStore();
     const entry = computed<boolean>(() => store.state.entry);
     const sessionState = store.state[namespace];
-    // 测试代码
-    console.log(sessionState);
     const { payload } = route.params;
     const loading = ref<boolean>(false);
     // workflow数据是否加载完成
