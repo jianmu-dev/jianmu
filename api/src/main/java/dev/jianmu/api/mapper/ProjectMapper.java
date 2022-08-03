@@ -34,5 +34,6 @@ public interface ProjectMapper {
     @ValueMapping(source = MappingConstants.NULL, target = "LOCAL")
     ProjectVo.Source enumConverter(Project.DslSource dslSource);
 
+    @ValueMapping(source = "concurrent", target = "concurrent")
     ProjectDetailVo toProjectDetailVo(Project project);
 }
