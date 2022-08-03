@@ -63,7 +63,7 @@
     </div>
     <!-- 选择分支的弹框 -->
     <jm-dialog
-      custom-class="select-branch-dialog"
+      custom-class="select-branch-dialog center"
       :model-value="dialogVisible"
       @close="close"
       width="460px">
@@ -328,6 +328,7 @@ export default defineComponent({
 </script>
 <style lang="less" scoped>
 .integration-index {
+  min-height: 600px;
 
   .top {
     z-index: 1;
@@ -372,14 +373,21 @@ export default defineComponent({
       ::v-deep(.el-select) {
         .select-trigger {
           .el-input {
-            width: 86px;
+            display: flex;
+            align-items: center;
 
             .el-input__inner {
+              text-align: right;
               border: none;
               padding: 0;
               color: #082340;
               font-weight: 400;
               background-color: transparent;
+            }
+
+            .el-input__suffix {
+              position: relative;
+              margin-left: 10px;
             }
 
             .el-select__caret {
@@ -389,8 +397,20 @@ export default defineComponent({
         }
       }
 
+      .sort {
+        width: 114px;
+
+        ::v-deep(.el-select) {
+          .el-input {
+            .el-input__inner {
+              width: 70px;
+            }
+          }
+        }
+      }
+
       .divider {
-        margin: 0 14px 0 4px;
+        margin: 0 0 0 5px;
         width: 1px;
         height: 14px;
         background-color: #E7ECF1;
@@ -398,8 +418,6 @@ export default defineComponent({
       }
 
       .item {
-        display: flex;
-        align-items: center;
         color: #082340;
         cursor: pointer;
         user-select: none;
@@ -416,7 +434,6 @@ export default defineComponent({
 
     display: flex;
     flex-wrap: wrap;
-    min-height: 300px;
 
     .loading {
       position: fixed;
