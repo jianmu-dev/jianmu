@@ -42,7 +42,7 @@
         @on-fullscreen="handleFullscreen"
         @rotate="handleRotation"/>
       <div class="canvas" ref="container"/>
-      <div class="dsl-editor-container" v-if="dslMode">
+      <div :class="['dsl-editor-container', readonly? 'bottom-height':'']" v-if="dslMode">
         <jm-dsl-editor :value="workflowGraph?.visibleDsl || ''" readonly/>
       </div>
     </div>
@@ -469,6 +469,9 @@ export default defineComponent({
       width: calc(100% - 60px);
       padding: 60px 30px 0;
       height: calc(100% - 60px);
+      &.bottom-height {
+        height: calc(100% - 130px);
+      }
     }
   }
 }

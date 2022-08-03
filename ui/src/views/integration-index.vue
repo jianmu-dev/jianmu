@@ -55,6 +55,7 @@
         :key="project.id"
         :project="project"
         :no-disable="true"
+        @select-project-id="()=>{previewId=project.id;dslDialogFlag=true;}"
         @running="handleProjectRunning"
         @synchronized="handleProjectSynchronized"
         @deleted="handleProjectDeleted"
@@ -87,6 +88,13 @@
         </span>
       </template>
     </jm-dialog>
+    <!--预览弹窗 -->
+    <project-preview-dialog
+      v-if="dslDialogFlag"
+      :project-id="previewId"
+      :projects="data[currentTab].projects"
+      @close="()=>{dslDialogFlag=false;previewId=''}"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -98,6 +106,7 @@ import { IProjectVo } from '@/api/dto/project';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { useRouter } from 'vue-router';
 import { pushTop } from '@/utils/push-top';
+import ProjectPreviewDialog from '@/views/common/project-preview-dialog.vue';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 export default defineComponent({
@@ -121,6 +130,7 @@ export default defineComponent({
   },
   components: {
     ProjectItem,
+    ProjectPreviewDialog,
   },
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
@@ -129,6 +139,8 @@ export default defineComponent({
     const dialogVisible = computed<boolean>(() => props.modelValue);
     // createProjectType为 0创建代码流水线,1创建创建图形流水线
     const createProjectType = computed<number>(() => props.createType);
+    const previewId = ref<string>('');
+    const dslDialogFlag = ref<boolean>(false);
     const key = ref<string>(props.keyword);
     // 流水线状态类型tab索引
     const currentTab = ref<number>(0);
@@ -258,6 +270,8 @@ export default defineComponent({
       clearInterval(autoRefreshingInterval);
     });
     return {
+      previewId,
+      dslDialogFlag,
       initProjects,
       loading,
       dialogVisible,
