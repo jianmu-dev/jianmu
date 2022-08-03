@@ -64,7 +64,7 @@ export default defineComponent({
     });
     const currentTab = ref<number>(0);
     // 是否展示顶部导航
-    const isShowTop = computed<boolean>(() => !((route.name === 'create-project') || (route.name === 'update-project')));
+    const isShowTop = computed<boolean>(() => !((route.name === 'create-project') || (route.name === 'update-project') || (route.name === 'manage-secret-key')));
     const keyWord = ref<string>('');
     const key = ref<string>('');
     const tabs = ref<Array<string>>(['流水线', '外部参数', '密钥管理']);
@@ -192,7 +192,7 @@ export default defineComponent({
     // 密钥命名空间
     ::v-deep(.secret-key-ns-manager) {
       padding: 30px 0 0;
-      min-height: 300px;
+      min-height: 600px;
 
       .add,
       .vault-item {
@@ -206,7 +206,7 @@ export default defineComponent({
 
     // 密钥管理页面
     ::v-deep(.secret-key-sk-manager) {
-      min-height: 300px;
+      min-height: 600px;
 
       .namespace {
         padding: 20px 0 10px;
@@ -232,7 +232,7 @@ export default defineComponent({
     // 外部参数页面
     ::v-deep(.ext-param) {
       padding: 20px 0;
-      min-height: 300px;
+      min-height: 600px;
       margin-bottom: 0;
 
       .ext-content {

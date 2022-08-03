@@ -176,6 +176,7 @@ export default defineComponent({
     a {
       display: flex;
       align-items: center;
+      max-width: 80%;
 
       &:hover {
         .key-title-icon {
@@ -184,10 +185,17 @@ export default defineComponent({
       }
 
       .key-title-icon {
+        flex-shrink: 0;
         width: 20px;
         height: 20px;
         background: url('@/assets/svgs/secret-key/secret-key-icon.svg') no-repeat;
         margin-right: 5px;
+      }
+
+      .name {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
 

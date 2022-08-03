@@ -21,6 +21,7 @@ export default defineComponent({
     const router = useRouter();
     const loading = ref<boolean>(false);
     onMounted(async () => {
+      window.parent.postMessage(JSON.stringify({ height: 600 }), '*');
       loading.value = true;
       try {
         await proxy.oauthSilentLogin(props.code);
