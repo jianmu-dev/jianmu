@@ -1,15 +1,15 @@
 import { RouteLocationNormalizedLoaded, RouteRecordRaw } from 'vue-router';
 
 export default [
-  {
-    name: 'demo',
-    path: 'demo',
-    component: () => import('@/views/integration-demo.vue'),
-    meta: {
-      title: '首页',
-    },
-    props: ({ query: { owner, ref: reference, userId } }: RouteLocationNormalizedLoaded) => ({ owner, reference, userId }),
-  },
+  // {
+  //   name: 'demo',
+  //   path: 'demo',
+  //   component: () => import('@/views/integration-demo.vue'),
+  //   meta: {
+  //     title: '首页',
+  //   },
+  //   props: ({ query: { owner, ref: reference, userId } }: RouteLocationNormalizedLoaded) => ({ owner, reference, userId }),
+  // },
   {
     name: 'create-pipeline',
     path: 'project/pipeline-editor',
