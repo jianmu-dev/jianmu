@@ -15,7 +15,7 @@ export default [
     path: 'project/pipeline-editor',
     component: () => import('@/views/project/pipeline-editor.vue'),
     meta: {
-      title: '创建管道项目',
+      title: '新增图形项目',
     },
     props: ({ query: { branch } }: RouteLocationNormalizedLoaded) => ({ branch }),
   },
@@ -24,7 +24,7 @@ export default [
     path: 'project/pipeline-editor/:id',
     component: () => import('@/views/project/pipeline-editor.vue'),
     meta: {
-      title: '编辑管道项目',
+      title: '编辑图形项目',
     },
     props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
   },
