@@ -5,11 +5,11 @@
     <div>
       {{ isSuspended? '挂起':'执行' }}时长：
     </div>
-    <div class="record-time" :style="{width:`${width}`}">
-      <jm-timer v-if="isSuspended" @loaded="maxWidth=>{width=maxWidth+'px'}" :start-time="record.suspendedTime"/>
-      <jm-timer v-else :start-time="record.startTime" @loaded="maxWidth=>{width=maxWidth+'px'}" :end-time="record.endTime"/>
+    <div class="record-time" :style="{width}">
+      <jm-timer v-if="isSuspended" @loaded="maxWidth=>{width=(maxWidth+15)+'px'}" :start-time="record.suspendedTime"/>
+      <jm-timer v-else :start-time="record.startTime" @loaded="maxWidth=>{width=(maxWidth+15)+'px'}" :end-time="record.endTime"/>
     </div>
-    <div class="vertical-divider" style="margin-left: 15px;"></div>
+    <div class="vertical-divider" style="margin-left: 0px;"></div>
     <div>状态：<span class="status" :class="{[(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true}">{{ statusTranslate(record.status) }}</span></div>
     <button v-if="checkWorkflowRunning(record.status, false)" @click="handleTerminate" class="jm-icon-button-stop terminate-button">终止</button>
   </div>

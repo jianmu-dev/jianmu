@@ -110,6 +110,7 @@ export interface IProjectVo
 export interface IProjectDetailVo
   extends Readonly<BaseVo & {
     id: string;
+    concurrent: boolean;
     dslSource: DslSourceEnum;
     dslType: DslTypeEnum;
     gitRepoId?: string;

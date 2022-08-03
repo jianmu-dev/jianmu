@@ -1,3 +1,4 @@
+import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { listWorkflowExecutionRecord } from '@/api/view-no-auth';
 import { refresh_seconds, refresh_times } from './util/consts';
@@ -6,21 +7,23 @@ import { checkWorkflowRunning } from './util/workflow';
 type RecordListCallbackFnType = (data: IWorkflowExecutionRecordVo[])=>void;
 
 /**
- * @param sseUrl sse接口地址 空字符默认为不执行SSE接口
- * @param workflowRef sse接口地址(或普通接口地址)后面拼接的 workflowRef
- * @param recordListCallbackFn 追加新数据的回调方法
+ * @param isConcurrent 是否并行
+ * @param workflowRef workflowRef
+ * @param recordListCallbackFn record-list数据回调
 */
 export class RecordList {
+  private isConcurrent: boolean;
   private ignoreSuspended: boolean = true;
   private ignoreTime: number = 0;
   private readonly workflowRef: string;
   private readonly recordListCallbackFn: RecordListCallbackFnType;
   private eventSource: any;
   private allRecords: IWorkflowExecutionRecordVo[];
-  constructor(workflowRef: string, recordListCallbackFn: RecordListCallbackFnType) {
+  constructor(workflowRef: string, isConcurrent: boolean = false, recordListCallbackFn: RecordListCallbackFnType) {
     this.workflowRef = workflowRef;
     this.recordListCallbackFn = recordListCallbackFn;
     this.allRecords = [];
+    this.isConcurrent = isConcurrent;
   }
 
   /**
@@ -46,6 +49,10 @@ export class RecordList {
     this.eventSource = setInterval(async()=>{
       if (!this.allRecords.length) {
         console.debug('allRecords -> 0,不监听record-list状态');
+        return;
+      }
+      // 是串行且有挂起->阻止刷新
+      if (!this.isConcurrent && this.allRecords.find(e => e.status === WorkflowExecutionRecordStatusEnum.SUSPENDED)) {
         return;
       }
       // 全量判断是否刷新
