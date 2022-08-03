@@ -113,11 +113,17 @@ export default defineComponent({
       viewMode,
       close,
       prevProject() {
+        if (prevDis.value) {
+          return;
+        }
         const currentPreviewIdIndex = props.projects.findIndex((e:any)=>e.id === previewId.value);
         previewId.value = props.projects[currentPreviewIdIndex-1].id;
         loadDsl();
       },
       nextProject() {
+        if (nextDis.value) {
+          return;
+        }
         const currentPreviewIdIndex = props.projects.findIndex((e:any)=>e.id === previewId.value);
         previewId.value = props.projects[currentPreviewIdIndex+1].id;
         loadDsl();
@@ -183,13 +189,20 @@ export default defineComponent({
       align-items: center;
       .button-left {
         margin-left: 30px;
-        line-height: 30px;
-        width: 92px;
+        line-height: 36px;
+        width: 110px;
         font-size: 16px;
+        text-align: center;
         border: 0.5px solid #CAD6EE;
+        border-radius: 2px;
         color: #082340;
         cursor: pointer;
-        padding-left: 18px;
+        .jm-icon-button-left:before {
+          margin-left: -4px;
+          margin-right: 8px;
+          font-size: 14px;
+          vertical-align: 1px;
+        }
         &:hover {
           color: #096DD9;
           background-color: #EFF7FF;
@@ -197,13 +210,20 @@ export default defineComponent({
       }
       .button-right {
         margin-left: 20px;
-        line-height: 30px;
-        width: 86px;
+        line-height: 36px;
+        width: 110px;
         font-size: 16px;
+        text-align: center;
         border: 0.5px solid #CAD6EE;
+        border-radius: 2px;
         color: #082340;
         cursor: pointer;
-        padding-left: 24px;
+        .jm-icon-button-right:before {
+          margin-left: 8px;
+          margin-right: -4px;
+          font-size: 14px;
+          vertical-align: 1px;
+        }
         &:hover {
           color: #096DD9;
           background-color: #EFF7FF;
@@ -211,7 +231,11 @@ export default defineComponent({
       }
       .disabled {
         color: #979797;
-        pointer-events: none;
+        cursor: not-allowed;
+        &:hover {
+          color: #979797;
+          background-color: #ffffff;
+        }
       }
     }
   }

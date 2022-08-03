@@ -129,6 +129,7 @@ export default defineComponent({
       graphPanel.getGlobalParams();
     });
     onMounted(async ()=>{
+      let firstGet = true;
       // 赋值 dslSourceCode nodeInfos
       const dslCallbackFn = (dsl: string, nodes: INodeDefVo[]) => {
         dslSourceCode.value = dsl;
@@ -136,11 +137,16 @@ export default defineComponent({
       };
       // 赋值 taskRecords
       const taskCallbackFn = (tasks: ITaskExecutionRecordVo[]) => {
-        reloadViewer.value = false;
+        if (firstGet) {
+          reloadViewer.value = false;
+        }
         taskRecords.value = tasks;
-        nextTick(()=>{
-          reloadViewer.value = true;
-        });
+        if (firstGet) {
+          nextTick(()=>{
+            firstGet = false;
+            reloadViewer.value = true;
+          });
+        }
       };
       // 赋值 globalParams
       const globalParamsCallbackFn = (globalParam: IGlobalParamseterVo[]) => {

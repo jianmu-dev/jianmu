@@ -58,7 +58,7 @@ export default defineComponent({
     });
     onMounted(async ()=>{
       // 实例化RecordList 传入项目的workflowRef，传入回调->获取allRecords并主动选择当前record
-      recordList = new RecordList(props.param.workflowRef, (data: IWorkflowExecutionRecordVo[]):void=>{
+      recordList = new RecordList(props.param.workflowRef, props.project.concurrent, (data: IWorkflowExecutionRecordVo[]):void=>{
         allRecords.value = data.length? data:[{
           endTime: undefined,
           id: '',

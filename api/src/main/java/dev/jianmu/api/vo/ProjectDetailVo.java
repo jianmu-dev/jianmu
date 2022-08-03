@@ -24,6 +24,8 @@ import java.util.List;
 public class ProjectDetailVo {
     // ID
     private String id;
+    // 是否并发
+    private Boolean concurrent;
     // DSL来源
     private String dslSource;
     // DSL类型
