@@ -148,7 +148,7 @@ export default defineComponent({
 
   .group {
     opacity: 1;
-    padding: 10px 0px;
+    padding: 8px 0px;
     // box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     // border-radius: 2px;
     // border: 1px solid #CAD6EE;
