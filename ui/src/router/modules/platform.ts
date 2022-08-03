@@ -97,7 +97,7 @@ export default [
     path: PLATFORM_PROJECT_EDITOR,
     component: () => import('@/views/project/editor.vue'),
     meta: {
-      title: '新增项目',
+      title: '新增代码项目',
     },
     props: ({ query: { branch } }: RouteLocationNormalizedLoaded) => ({ branch }),
   },
@@ -121,7 +121,7 @@ export default [
     component: () => import('@/views/project/editor.vue'),
     props: ({ params: { id } }: RouteLocationNormalizedLoaded) => ({ id }),
     meta: {
-      title: '编辑项目',
+      title: '编辑代码项目',
     },
   },
 ] as RouteRecordRaw[];

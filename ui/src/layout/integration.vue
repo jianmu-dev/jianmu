@@ -24,11 +24,9 @@
         </div>
       </div>
     </div>
-    <div class="content">
+    <div class="content" ref="contentRef">
       <router-view v-slot="{ Component }">
-        <jm-scrollbar ref="scrollBarRef">
-          <component :is="Component" :keyword="key" v-model="flag" v-model:create-type="creatType"/>
-        </jm-scrollbar>
+        <component :is="Component" :keyword="key" v-model="flag" v-model:create-type="creatType"/>
       </router-view>
     </div>
   </div>
@@ -36,7 +34,7 @@
 
 <script lang='ts'>
 import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, provide, ref } from 'vue';
-import { onBeforeRouteUpdate, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import _throttle from 'lodash/throttle';
 
 export default defineComponent({
@@ -48,23 +46,17 @@ export default defineComponent({
       loadMain.value = false;
       proxy.$nextTick(() => (loadMain.value = true));
     };
-    const scrollBarRef = ref();
+    const contentRef = ref();
     provide('reloadMain', reloadMain);
-    // 解决router-view中滚动位置被复用
-    onBeforeRouteUpdate(async (to, from, next) => {
-      // 将scrollbar滚动到顶部
-      scrollBarRef.value.wrap.scrollTop = 0;
-      next();
-    });
     const observer = new ResizeObserver(
       _throttle(() => {
-        const height: string = (scrollBarRef.value.wrap.firstElementChild.offsetHeight + 60 + (route.name === 'index' ? 40 : 0)).toString();
+        const height: string = (contentRef.value.offsetHeight + 60 + (route.name === 'index' ? 40 : 0)).toString();
         window.parent.postMessage(JSON.stringify({ height }), '*');
       }, 800),
     );
     onMounted(() => {
       if (window.top !== window) {
-        observer.observe(scrollBarRef.value.wrap.firstElementChild);
+        observer.observe(contentRef.value);
       }
     });
     onBeforeUnmount(() => {
@@ -86,7 +78,7 @@ export default defineComponent({
     };
     return {
       isShowTop,
-      scrollBarRef,
+      contentRef,
       flag,
       creatType,
       tabs,
