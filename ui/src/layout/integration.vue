@@ -209,7 +209,7 @@ export default defineComponent({
       min-height: 600px;
 
       .namespace {
-        padding: 20px 0 10px;
+        padding: 0 0 10px;
       }
 
       .keys {

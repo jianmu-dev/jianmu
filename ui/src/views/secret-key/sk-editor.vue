@@ -1,6 +1,6 @@
 <template>
   <jm-dialog
-    custom-class="center"
+    :custom-class="[entry?'':'center']"
     v-model="dialogVisible"
     width="700px">
     <template v-slot:title>
@@ -32,6 +32,7 @@
 import { defineComponent, getCurrentInstance, ref, SetupContext } from 'vue';
 import { ICreateSecretKeyForm } from '@/model/modules/secret-key';
 import { createSecretKey } from '@/api/secret-key';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
@@ -43,6 +44,8 @@ export default defineComponent({
   emits: ['completed'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
+    const store = useStore();
+    const entry = store.state.entry;
     const dialogVisible = ref<boolean>(true);
 
     const editorFormRef = ref<any>(null);
@@ -63,6 +66,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
 
     return {
+      entry,
       dialogVisible,
       editorFormRef,
       editorForm,

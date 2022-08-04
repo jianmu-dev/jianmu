@@ -1,6 +1,6 @@
 <template>
   <jm-dialog
-    custom-class="center"
+    :custom-class="[entry?'':'center']"
     v-model="dialogVisible"
     width="700px">
     <template v-slot:title>
@@ -25,6 +25,7 @@ import { defineComponent, getCurrentInstance, ref, SetupContext } from 'vue';
 import { ISaveNamespaceForm } from '@/model/modules/secret-key';
 import { saveNamespace } from '@/api/secret-key';
 import { CredentialManagerTypeEnum } from '@/api/dto/enumeration';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
@@ -36,6 +37,8 @@ export default defineComponent({
   emits: ['completed'],
   setup(_, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
+    const store = useStore();
+    const entry = store.state.entry;
     const dialogVisible = ref<boolean>(true);
 
     const editorFormRef = ref<any>(null);
@@ -51,6 +54,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
 
     return {
+      entry,
       CredentialManagerTypeEnum,
       dialogVisible,
       editorFormRef,
