@@ -63,7 +63,7 @@
     </div>
     <!-- 选择分支的弹框 -->
     <jm-dialog
-      :custom-class="['select-branch-dialog',entry?'':'center']"
+      :custom-class="`select-branch-dialog ${entry}?'':'center'`"
       :model-value="dialogVisible"
       @close="close"
       width="460px">
@@ -161,8 +161,7 @@ export default defineComponent({
       let result = [...initProjects.value].sort((pre, next) => {
         if (sortType.value === GitRepoEnum.LAST_EXECUTION_TIME) {
           // 根据时间戳降序排列
-          return next.latestTime ? Date.parse(next.latestTime) : 0 -
-            pre.latestTime ? Date.parse(pre.latestTime) : 0;
+          return (next.latestTime ? Date.parse(next.latestTime) : 0) - (pre.latestTime ? Date.parse(pre.latestTime) : 0);
         } else {
           return Date.parse(next.lastModifiedTime as string) - Date.parse(pre.lastModifiedTime as string);
         }
