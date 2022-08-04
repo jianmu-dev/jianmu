@@ -373,45 +373,6 @@ export default defineComponent({
       display: flex;
       align-items: center;
 
-      //::v-deep(.el-select) {
-      //  width: 100px;
-      //
-      //  .select-trigger {
-      //    .el-input {
-      //      display: flex;
-      //      align-items: center;
-      //      justify-content: flex-start;
-      //
-      //      .el-input__inner {
-      //        width: 70px;
-      //        border: none;
-      //        padding: 0;
-      //        color: #082340;
-      //        font-weight: 400;
-      //        background-color: transparent;
-      //      }
-      //
-      //      .el-input__suffix {
-      //        position: relative;
-      //      }
-      //
-      //      .el-select__caret {
-      //        color: #666666;
-      //      }
-      //    }
-      //  }
-      //}
-
-      //.all-branch {
-      //  ::v-deep(.el-select) {
-      //    .select-trigger {
-      //      .el-input {
-      //        justify-content: flex-end;
-      //      }
-      //    }
-      //  }
-      //}
-
       ::v-deep(.el-select) {
         .select-trigger {
           .el-input {
