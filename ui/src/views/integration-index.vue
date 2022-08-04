@@ -63,7 +63,7 @@
     </div>
     <!-- 选择分支的弹框 -->
     <jm-dialog
-      :custom-class="`select-branch-dialog ${entry}?'':'center'`"
+      :custom-class="entry?'entry':'center'"
       :model-value="dialogVisible"
       @close="close"
       width="460px">
@@ -161,7 +161,7 @@ export default defineComponent({
       let result = [...initProjects.value].sort((pre, next) => {
         if (sortType.value === GitRepoEnum.LAST_EXECUTION_TIME) {
           // 根据时间戳降序排列
-          return (next.latestTime ? Date.parse(next.latestTime) : 0) - (pre.latestTime ? Date.parse(pre.latestTime) : 0);
+          return (next.startTime ? Date.parse(next.startTime) : 0) - (pre.startTime ? Date.parse(pre.startTime) : 0);
         } else {
           return Date.parse(next.lastModifiedTime as string) - Date.parse(pre.lastModifiedTime as string);
         }
@@ -339,7 +339,7 @@ export default defineComponent({
     position: sticky;
     top: 0;
     box-sizing: border-box;
-    padding: 20px 0;
+    padding: 20px 10px 20px 0;
     display: flex;
     justify-content: space-between;
     font-size: 14px;
@@ -373,24 +373,56 @@ export default defineComponent({
       display: flex;
       align-items: center;
 
+      //::v-deep(.el-select) {
+      //  width: 100px;
+      //
+      //  .select-trigger {
+      //    .el-input {
+      //      display: flex;
+      //      align-items: center;
+      //      justify-content: flex-start;
+      //
+      //      .el-input__inner {
+      //        width: 70px;
+      //        border: none;
+      //        padding: 0;
+      //        color: #082340;
+      //        font-weight: 400;
+      //        background-color: transparent;
+      //      }
+      //
+      //      .el-input__suffix {
+      //        position: relative;
+      //      }
+      //
+      //      .el-select__caret {
+      //        color: #666666;
+      //      }
+      //    }
+      //  }
+      //}
+
+      //.all-branch {
+      //  ::v-deep(.el-select) {
+      //    .select-trigger {
+      //      .el-input {
+      //        justify-content: flex-end;
+      //      }
+      //    }
+      //  }
+      //}
+
       ::v-deep(.el-select) {
         .select-trigger {
           .el-input {
-            display: flex;
-            align-items: center;
+            width: 85px;
 
             .el-input__inner {
-              text-align: right;
               border: none;
-              padding: 0;
+              padding: 0 30px 0 0;
               color: #082340;
               font-weight: 400;
               background-color: transparent;
-            }
-
-            .el-input__suffix {
-              position: relative;
-              margin-left: 10px;
             }
 
             .el-select__caret {
@@ -400,20 +432,8 @@ export default defineComponent({
         }
       }
 
-      .sort {
-        width: 114px;
-
-        ::v-deep(.el-select) {
-          .el-input {
-            .el-input__inner {
-              width: 70px;
-            }
-          }
-        }
-      }
-
       .divider {
-        margin: 0 0 0 5px;
+        margin: 0 15px 0 5px;
         width: 1px;
         height: 14px;
         background-color: #E7ECF1;

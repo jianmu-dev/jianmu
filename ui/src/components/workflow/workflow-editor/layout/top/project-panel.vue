@@ -6,16 +6,16 @@
   >
     <template #title>
       <div class="title-container">
-        <i class="jm-icon-workflow-edit"></i>编辑项目信息
+        <i class="jm-icon-workflow-edit"></i>编辑信息
       </div>
     </template>
     <div class="jm-workflow-editor-project-panel">
       <jm-form ref="editProjectInfoRef" :model="projectInfoForm" :rules="rules">
-        <jm-form-item label="项目名称" prop="name" class="name-item">
-          <jm-input v-model="projectInfoForm.name" :maxlength="45" placeholder="请输入项目名称" :show-word-limit="true"/>
+        <jm-form-item label="名称" prop="name" class="name-item">
+          <jm-input v-model="projectInfoForm.name" :maxlength="45" placeholder="请输入名称" :show-word-limit="true"/>
         </jm-form-item>
-        <jm-form-item label="项目分组" class="group-item" prop="groupId" v-if="!workflowData.association.entry">
-          <jm-select v-model="projectInfoForm.groupId" placeholder="请选择项目分组" v-loading="loading">
+        <jm-form-item label="分组" class="group-item" prop="groupId" v-if="!workflowData.association.entry">
+          <jm-select v-model="projectInfoForm.groupId" placeholder="请选择分组" v-loading="loading">
             <jm-option
               v-for="item in projectGroupList"
               :key="item.id"
@@ -23,12 +23,12 @@
               :value="item.id"/>
           </jm-select>
         </jm-form-item>
-        <jm-form-item label="项目描述" class="description-item">
+        <jm-form-item label="描述" class="description-item">
           <jm-input
             type="textarea"
             v-model="projectInfoForm.description"
             :maxlength="255"
-            placeholder="请输入项目描述"
+            placeholder="请输入描述"
             :show-word-limit="true"/>
         </jm-form-item>
         <div class="btn-container">
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { IWorkflow } from '../../model/data/common';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { listProjectGroup } from '@/api/view-no-auth';
@@ -98,8 +98,8 @@ export default defineComponent({
         emit('update:model-value', false);
       },
       rules: {
-        name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
-        groupId: [{ required: true, message: '请选择项目分组', trigger: 'change' }],
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        groupId: [{ required: true, message: '请选择分组', trigger: 'change' }],
       },
     };
   },

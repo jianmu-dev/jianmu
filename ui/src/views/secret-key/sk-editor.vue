@@ -1,6 +1,6 @@
 <template>
   <jm-dialog
-    :custom-class="entry?'':'center'"
+    :custom-class="entry?'entry':'center'"
     v-model="dialogVisible"
     width="700px">
     <template v-slot:title>

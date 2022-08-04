@@ -33,7 +33,7 @@
 
     <!--  新增/编辑 外部参数  -->
     <jm-dialog v-model="addExtParamVisible" :title="!editorExtParams.flag?'新增参数':'编辑参数'" destroy-on-close
-               v-if="addExtParamVisible" custom-class="center">
+               v-if="addExtParamVisible" :custom-class="entry?'entry':'center'">
       <jm-form label-position="top" :model="addParam" ref="addParamRef">
         <jm-form-item label="唯一标识" prop="ref" :rules="rules.ref">
           <jm-input show-word-limit :maxlength="30" v-model="addParam.ref" :disabled="editorExtParams.flag"
@@ -98,6 +98,7 @@ import {addExtParam, deleteExtParam, editorExtParam, getExtParamLabelList, getEx
 import {IExternalParameterLabelVo, IExternalParameterVo} from '@/api/dto/ext-param';
 import ExtParamCard from './ext-param-card.vue';
 import {ParamTypeEnum} from '@/api/dto/enumeration';
+import {useStore} from 'vuex';
 
 interface addParamType {
   ref: string;
@@ -111,6 +112,9 @@ export default defineComponent({
   components: {ExtParamCard},
   setup() {
     const {proxy} = getCurrentInstance() as any;
+    const store = useStore();
+    const dynamicProjectDesc = store.getters.projectDesc;
+    const entry = store.state.entry;
     const pageLoading = ref<boolean>(false);
     const labelSelectRef = ref<HTMLElement>();
     const extParams = ref<IExternalParameterVo[]>();
@@ -193,6 +197,7 @@ export default defineComponent({
       return info;
     });
     return {
+      entry,
       pageLoading,
       addExtParamVisible,
       extParams,
@@ -289,7 +294,7 @@ export default defineComponent({
       del: (id: string, name: string) => {
         let msg = '<div>确定要删除参数吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">名称：${name}</div>`;
-        msg += '<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的项目将会报错</div>';
+        msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的${dynamicProjectDesc}将会报错</div>`;
 
         proxy
           .$confirm(msg, '删除参数', {

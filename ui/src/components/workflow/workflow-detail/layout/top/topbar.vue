@@ -70,9 +70,9 @@ export default defineComponent({
         let msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
           msg +=
-            '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
+            '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
         }
-        proxy.$confirm(msg, '触发项目执行', {
+        proxy.$confirm(msg, '触发执行', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: isWarning ? 'warning' : 'info',
@@ -179,7 +179,7 @@ export default defineComponent({
     display: flex;
     justify-content: space-around;
     align-items: center;
-    
+
     .trigger-button {
       padding-right: 5px;
       width: 98px;
