@@ -74,7 +74,7 @@ import TaskLog from '../right/task-log.vue';
 import WebhookLog from '../right/webhook-log.vue';
 import ParamLog from '../right/param-log.vue';
 import { ignoreTask, retryTask } from '@/api/workflow-execution-record';
-import { ViewModeEnum } from '@/api/dto/enumeration';
+import { ViewModeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
   components: { ProcessLog, TaskLog, WebhookLog, ParamLog },
@@ -110,6 +110,8 @@ export default defineComponent({
     const recordStatus = ref(props.record.status);
     const reloadViewer = ref<boolean>(false);
     let graphPanel:GraphPanel;
+    // 点击Record标识
+    let ifClickRecord = false;
     // record 页面变化引起数据变化 函数执行
     onUpdated(async ()=>{
       if (recordStatus.value !== props.record.status) {
@@ -119,6 +121,8 @@ export default defineComponent({
       if (triggerId.value === props.record.triggerId) {
         return;
       }
+      // 打开点击Record标识
+      ifClickRecord = true;
       triggerId.value = props.record.triggerId;
       graphPanel.refreshGparam(props.record);
       graphPanel.resetSuspended();
@@ -128,8 +132,14 @@ export default defineComponent({
       })();
       graphPanel.getGlobalParams();
     });
+    // 仅record运行中、挂起状态(workflow)->不会复位=false
+    const ifResetRefresh = (status: any): boolean=>{
+      return ![
+        WorkflowExecutionRecordStatusEnum.RUNNING,
+        WorkflowExecutionRecordStatusEnum.SUSPENDED,
+      ].includes(status);
+    };
     onMounted(async ()=>{
-      let firstGet = true;
       // 赋值 dslSourceCode nodeInfos
       const dslCallbackFn = (dsl: string, nodes: INodeDefVo[]) => {
         dslSourceCode.value = dsl;
@@ -137,16 +147,15 @@ export default defineComponent({
       };
       // 赋值 taskRecords
       const taskCallbackFn = (tasks: ITaskExecutionRecordVo[]) => {
-        if (firstGet) {
+        if (ifResetRefresh(props.currentRecordStatus) || ifClickRecord) {
+          // 重置点击Record标识
+          ifClickRecord = false;
           reloadViewer.value = false;
         }
         taskRecords.value = tasks;
-        if (firstGet) {
-          nextTick(()=>{
-            firstGet = false;
-            reloadViewer.value = true;
-          });
-        }
+        nextTick(()=>{
+          reloadViewer.value = true;
+        });
       };
       // 赋值 globalParams
       const globalParamsCallbackFn = (globalParam: IGlobalParamseterVo[]) => {
