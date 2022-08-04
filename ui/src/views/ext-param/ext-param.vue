@@ -33,7 +33,7 @@
 
     <!--  新增/编辑 外部参数  -->
     <jm-dialog v-model="addExtParamVisible" :title="!editorExtParams.flag?'新增参数':'编辑参数'" destroy-on-close
-               v-if="addExtParamVisible" :custom-class="[entry?'':'center']">
+               v-if="addExtParamVisible" custom-class="center">
       <jm-form label-position="top" :model="addParam" ref="addParamRef">
         <jm-form-item label="唯一标识" prop="ref" :rules="rules.ref">
           <jm-input show-word-limit :maxlength="30" v-model="addParam.ref" :disabled="editorExtParams.flag"
@@ -93,12 +93,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, nextTick, ref } from 'vue';
-import { addExtParam, deleteExtParam, editorExtParam, getExtParamLabelList, getExtParamList } from '@/api/ext-param';
-import { IExternalParameterLabelVo, IExternalParameterVo } from '@/api/dto/ext-param';
+import {computed, defineComponent, getCurrentInstance, nextTick, ref} from 'vue';
+import {addExtParam, deleteExtParam, editorExtParam, getExtParamLabelList, getExtParamList} from '@/api/ext-param';
+import {IExternalParameterLabelVo, IExternalParameterVo} from '@/api/dto/ext-param';
 import ExtParamCard from './ext-param-card.vue';
-import { ParamTypeEnum } from '@/api/dto/enumeration';
-import { useStore } from 'vuex';
+import {ParamTypeEnum} from '@/api/dto/enumeration';
 
 interface addParamType {
   ref: string;
@@ -109,11 +108,9 @@ interface addParamType {
 }
 
 export default defineComponent({
-  components: { ExtParamCard },
+  components: {ExtParamCard},
   setup() {
-    const { proxy } = getCurrentInstance() as any;
-    const store = useStore();
-    const entry = store.state.entry;
+    const {proxy} = getCurrentInstance() as any;
     const pageLoading = ref<boolean>(false);
     const labelSelectRef = ref<HTMLElement>();
     const extParams = ref<IExternalParameterVo[]>();
@@ -130,21 +127,21 @@ export default defineComponent({
     });
     // label默认值
     const labelOption = ref<{ label: string, value: string }[]>();
-    const addParam = ref<addParamType>({ ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: '' });
+    const addParam = ref<addParamType>({ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: ''});
 
     const init = async () => {
       try {
         pageLoading.value = true;
         extParams.value = await getExtParamList();
         extLabelList.value = await getExtParamLabelList();
-        extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
+        extLabelList.value?.unshift({id: '', value: '全部', createdTime: '', lastModifiedTime: ''});
         const list = [];
         //  判断是否已经有默认
         extLabelList.value?.forEach(item => {
           list.push(item.value);
         });
         if (list.indexOf('默认') === -1) {
-          extLabelList.value?.splice(1, 0, { id: '', value: '默认', createdTime: '', lastModifiedTime: '' });
+          extLabelList.value?.splice(1, 0, {id: '', value: '默认', createdTime: '', lastModifiedTime: ''});
         }
       } finally {
         pageLoading.value = false;
@@ -157,7 +154,7 @@ export default defineComponent({
       // 初始化
       labelOption.value = [];
       extLabelList.value?.slice(1).forEach(item => {
-        labelOption.value?.push({ label: item.value, value: item.value });
+        labelOption.value?.push({label: item.value, value: item.value});
       });
     };
     // 构建tab参数
@@ -180,8 +177,8 @@ export default defineComponent({
       extLabelList.value?.forEach(labels => {
         info.push({
           label: labels.value,
-          projects: extParams.value?.filter(({ label }) => labels.value === '全部' ? label !== labels.value : label === labels.value),
-          counter: extParams.value?.filter(({ label }) => labels.value === '全部' ? label !== labels.value : label === labels.value).length,
+          projects: extParams.value?.filter(({label}) => labels.value === '全部' ? label !== labels.value : label === labels.value),
+          counter: extParams.value?.filter(({label}) => labels.value === '全部' ? label !== labels.value : label === labels.value).length,
         });
       });
 
@@ -196,7 +193,6 @@ export default defineComponent({
       return info;
     });
     return {
-      entry,
       pageLoading,
       addExtParamVisible,
       extParams,
@@ -211,15 +207,15 @@ export default defineComponent({
       valueVisible,
       rules: {
         ref: [
-          { required: true, message: '请输入唯一标识', trigger: 'blur' },
-          { pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/, message: '以英文字母或下划线开头，支持下划线、数字、英文字母', trigger: 'blur' },
+          {required: true, message: '请输入唯一标识', trigger: 'blur'},
+          {pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/, message: '以英文字母或下划线开头，支持下划线、数字、英文字母', trigger: 'blur'},
         ],
-        type: { required: true, message: '请选择类型', trigger: 'change' },
+        type: {required: true, message: '请选择类型', trigger: 'change'},
         value: [
-          { required: true, message: '请输入参数值', trigger: 'blur' },
+          {required: true, message: '请输入参数值', trigger: 'blur'},
         ],
         label: [
-          { required: true, message: '请选择或创建参数标签', trigger: 'change' },
+          {required: true, message: '请选择或创建参数标签', trigger: 'change'},
         ],
       },
       // 新增-保存
@@ -264,10 +260,10 @@ export default defineComponent({
       // 编辑
       editor: (id: string) => {
         getLabelList();
-        const { ref, name, type, value, label } = extParams.value?.find(item => item.id === id);
-        addParam.value = { ref, name, type, value, label };
+        const {ref, name, type, value, label} = extParams.value?.find(item => item.id === id);
+        addParam.value = {ref, name, type, value, label};
         addExtParamVisible.value = true;
-        editorExtParams.value = { id: id, flag: true };
+        editorExtParams.value = {id: id, flag: true};
       },
       // 编辑-保存
       save: () => {
@@ -279,8 +275,8 @@ export default defineComponent({
             addParam.value.name = addParam.value.ref;
           }
           try {
-            const { name, type, value, label } = addParam.value;
-            await editorExtParam({ id: editorExtParams.value.id, name: name, type: type, value: value, label: label });
+            const {name, type, value, label} = addParam.value;
+            await editorExtParam({id: editorExtParams.value.id, name: name, type: type, value: value, label: label});
             proxy.$success('修改成功');
             addExtParamVisible.value = false;
             await init();
