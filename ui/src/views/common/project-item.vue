@@ -194,6 +194,7 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
+    const dynamicProjectDesc = store.getters.projectDesc;
     const entry = store.state.entry;
     const isMove = computed<boolean>(() => props.move);
     const isMoveMode = computed<boolean>(() => props.moveMode);
@@ -242,11 +243,11 @@ export default defineComponent({
         let msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
           msg +=
-            '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：项目已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
+            '<div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">注意：已配置webhook，手动触发可能会导致不可预知的结果，请慎重操作。</div>';
         }
 
         proxy
-          .$confirm(msg, '触发项目执行', {
+          .$confirm(msg, '触发执行', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: isWarning ? 'warning' : 'info',
@@ -349,11 +350,11 @@ export default defineComponent({
 
         const { name } = props.project;
 
-        let msg = '<div>确定要删除项目吗?</div>';
+        let msg = `<div>确定要删除${dynamicProjectDesc}吗?</div>`;
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
 
         proxy
-          .$confirm(msg, '删除项目', {
+          .$confirm(msg, `删除${dynamicProjectDesc}`, {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',

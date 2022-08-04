@@ -22,6 +22,12 @@ const store = createStore<IRootState>({
     },
     scrollbarOffset: {},
   },
+  // 根getter
+  getters: {
+    projectDesc(state: IRootState) {
+      return state.entry ? '流水线' : '项目';
+    },
+  },
   // 根mutation
   mutations: {
     mutateVersions(state: IRootState, payload: IVersionVo[]): void {

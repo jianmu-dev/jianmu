@@ -6,13 +6,13 @@
           <router-link :to="{ name: 'create-pipeline' }">
             <div class="btn-item">
               <button class="graph"></button>
-              <span class="text">新增图形项目</span>
+              <span class="text">图形项目</span>
             </div>
           </router-link>
           <router-link :to="{ name: 'create-project' }">
             <div class="btn-item">
               <button class="code"></button>
-              <span class="text">新增代码项目</span>
+              <span class="text">代码项目</span>
             </div>
           </router-link>
           <!--          <router-link :to="{ name: 'import-project' }">-->
