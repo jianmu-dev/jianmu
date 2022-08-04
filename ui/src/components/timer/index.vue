@@ -1,5 +1,7 @@
 <template>
-  <jm-text-viewer class="jm-timer" :value="time" @loaded="({contentMaxWidth})=>$emit('loaded', contentMaxWidth)" :tip-append-to-body="tipAppendToBody"/>
+  <jm-text-viewer class="jm-timer" :threshold="0" :value="time"
+                  @loaded="({contentMaxWidth})=>$emit('loaded', contentMaxWidth)"
+                  :tip-append-to-body="tipAppendToBody"/>
 </template>
 
 <script lang='ts'>

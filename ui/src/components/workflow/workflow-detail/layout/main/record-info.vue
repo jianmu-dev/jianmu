@@ -44,7 +44,7 @@ export default defineComponent({
       WorkflowExecutionRecordStatusEnum,
       width,
       handleTerminate() {
-        proxy.$confirm('确定要终止吗?', '终止项目执行', {
+        proxy.$confirm('确定要终止吗?', '终止执行', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'info',
