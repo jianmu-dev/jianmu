@@ -138,7 +138,7 @@ export default defineComponent({
         }
 
         let msg = '<div>确定要删除命名空间吗?</div>';
-        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
+        msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal; overflow: hidden;text-overflow: ellipsis">名称：${name}</div>`;
 
         proxy
           .$confirm(msg, '删除命名空间', {

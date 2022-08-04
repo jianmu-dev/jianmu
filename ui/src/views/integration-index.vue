@@ -63,7 +63,7 @@
     </div>
     <!-- 选择分支的弹框 -->
     <jm-dialog
-      custom-class="select-branch-dialog center"
+      :custom-class="['select-branch-dialog',entry?'':'center']"
       :model-value="dialogVisible"
       @close="close"
       width="460px">
@@ -107,6 +107,7 @@ import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { useRouter } from 'vue-router';
 import { pushTop } from '@/utils/push-top';
 import ProjectPreviewDialog from '@/views/common/project-preview-dialog.vue';
+import { useStore } from 'vuex';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 export default defineComponent({
@@ -134,6 +135,8 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
+    const store = useStore();
+    const entry = store.state.entry;
     const router = useRouter();
     const loading = ref<boolean>(false);
     const dialogVisible = computed<boolean>(() => props.modelValue);
@@ -270,6 +273,7 @@ export default defineComponent({
       clearInterval(autoRefreshingInterval);
     });
     return {
+      entry,
       previewId,
       dslDialogFlag,
       initProjects,
