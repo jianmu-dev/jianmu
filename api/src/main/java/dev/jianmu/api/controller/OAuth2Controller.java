@@ -3,6 +3,7 @@ package dev.jianmu.api.controller;
 import dev.jianmu.api.dto.AuthorizationUrlGettingDto;
 import dev.jianmu.api.dto.GitRepoTokenRefreshingDto;
 import dev.jianmu.api.dto.JwtResponse;
+import dev.jianmu.api.dto.Oauth2LoggingDto;
 import dev.jianmu.api.dto.impl.GitRepoLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
@@ -95,6 +96,62 @@ public class OAuth2Controller {
         return AuthorizationUrlVo.builder()
                 .authorizationUrl(oAuth2Api.getAuthUrl(authorizationUrlGettingDto.getRedirectUri()))
                 .build();
+    }
+
+    @PostMapping("/login")
+    @Transactional
+    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody Oauth2LoggingDto oauth2LoggingDto) {
+        this.beforeAuthenticate();
+        this.allowOrNotRegistration();
+        this.allowThisPlatformLogIn(oauth2LoggingDto.getThirdPartyType());
+
+        OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(oauth2LoggingDto.thirdPartyType())
+                .build();
+
+        ITokenVo tokenVo = oAuth2Api.getAccessToken(oauth2LoggingDto.getCode(), oauth2LoggingDto.getRedirectUri());
+        String accessToken = tokenVo.getAccessToken();
+        String encryptedToken = tokenVo.getEncryptedAccessToken();
+        long expireInMs = tokenVo.getExpireInMs();
+
+        IUserInfoVo userInfoVo = oAuth2Api.getUserInfo(accessToken);
+
+        String userId = userInfoVo.getId();
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        User user = User.Builder.aReference()
+                .data(userInfoVo.getData())
+                .id(userId)
+                .avatarUrl(userInfoVo.getAvatarUrl())
+                .username(userInfoVo.getUsername())
+                .nickname(userInfoVo.getNickname())
+                .build();
+        if (userOptional.isEmpty()) {
+            this.userRepository.add(user);
+        } else {
+            this.userRepository.update(user);
+        }
+
+        Authentication authentication = this.authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
+                        .avatarUrl(user.getAvatarUrl())
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .nickname(user.getNickname())
+                        .encryptedToken(encryptedToken)
+                        .expireTimestamp(System.currentTimeMillis() + expireInMs)
+                        .build()),
+                        this.jwtProperties.getPassword(this.oAuth2Properties.getClientSecret())));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = this.jwtProvider.generateJwtToken(authentication, expireInMs);
+
+        return ResponseEntity.ok(JwtResponse.builder()
+                .type("Bearer")
+                .token(jwt)
+                .id(user.getId())
+                .username(user.getUsername())
+                .avatarUrl(user.getAvatarUrl())
+                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                .build());
     }
 
     /**
