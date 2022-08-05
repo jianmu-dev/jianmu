@@ -18,7 +18,7 @@
               <!-- 左侧图标 -->
               <i class="jm-icon-input-hook"></i>
               <!-- 右侧链接 -->
-              <jm-text-viewer :value="link" class="webhook-link"/>
+              <jm-text-viewer :threshold="0" :value="link" class="webhook-link"/>
             </div>
             <div class="copy-link-address">
               <jm-button type="primary" @click="copy">复制链接</jm-button>
@@ -75,7 +75,7 @@
                 </jm-table-column>
                 <jm-table-column label="错误信息">
                   <template #default="scope">
-                    <jm-text-viewer :value="scope.row.errorMsg||''"/>
+                    <jm-text-viewer :threshold="0" :value="scope.row.errorMsg||''"/>
                   </template>
                 </jm-table-column>
                 <jm-table-column label="操作" align="center">
@@ -129,12 +129,12 @@
               <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
                 <jm-table-column label="参数唯一标识">
                   <template #default="scope">
-                    <jm-text-viewer :value="scope.row.ref"/>
+                    <jm-text-viewer :threshold="0" :value="scope.row.ref"/>
                   </template>
                 </jm-table-column>
                 <jm-table-column label="参数名称">
                   <template #default="scope">
-                    <jm-text-viewer :value="scope.row.name"/>
+                    <jm-text-viewer :threshold="0" :value="scope.row.name"/>
                   </template>
                 </jm-table-column>
                 <jm-table-column label="参数类型" width="200px" prop="type">
@@ -144,13 +144,14 @@
                     <div v-if="scope.row.hidden">
                       <!-- 密钥类型切换 -->
                       <div class="hide-container" v-if="scope.row.hidden">
-                        {{scope.row.value}}
+                        {{ scope.row.value }}
                       </div>
                       <div class="display-container" v-else>
                         <template v-if="scope.row.value">
                           <div class="param-value"
                                :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
-                            <jm-text-viewer v-if="!scope.row.hidden"
+                            <jm-text-viewer :threshold="0"
+                                            v-if="!scope.row.hidden"
                                             :value="scope.row.value"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
                                             class="value"

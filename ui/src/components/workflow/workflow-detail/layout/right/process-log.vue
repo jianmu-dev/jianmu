@@ -4,19 +4,19 @@
       <div class="item">
         <div class="param-key">流程名称</div>
         <div class="param-value">
-          <jm-text-viewer :value="record.name" :tip-append-to-body="false"/>
+         <jm-text-viewer :threshold="0" :value="record.name" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key">启动时间</div>
         <div class="param-value">
-          <jm-text-viewer :value="datetimeFormatter(record.startTime)" :tip-append-to-body="false"/>
+         <jm-text-viewer :threshold="0" :value="datetimeFormatter(record.startTime)" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key">最后完成时间</div>
         <div class="param-value">
-          <jm-text-viewer :value="datetimeFormatter(record.endTime)" :tip-append-to-body="false"/>
+         <jm-text-viewer :threshold="0" :value="datetimeFormatter(record.endTime)" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
@@ -29,13 +29,13 @@
       <div class="item">
         <div class="param-key">流程实例ID</div>
         <div class="param-value">
-          <jm-text-viewer :value="record.id" :tip-append-to-body="false"/>
+         <jm-text-viewer :threshold="0" :value="record.id" :tip-append-to-body="false"/>
         </div>
       </div>
       <div class="item">
         <div class="param-key">流程版本号</div>
         <div class="param-value">
-          <jm-text-viewer :value="record.workflowVersion" :tip-append-to-body="false"/>
+         <jm-text-viewer :threshold="0" :value="record.workflowVersion" :tip-append-to-body="false"/>
         </div>
       </div>
     </div>

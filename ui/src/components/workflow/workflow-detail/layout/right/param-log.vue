@@ -24,7 +24,7 @@
               }"
             >
               <div class="text-viewer">
-                <jm-text-viewer
+                <jm-text-viewer :threshold="0"
                   :value="scope.row.ref"
                   class="value"
                   :tip-append-to-body="false"
