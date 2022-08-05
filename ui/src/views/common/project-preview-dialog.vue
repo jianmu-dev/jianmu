@@ -185,6 +185,7 @@ export default defineComponent({
   .content {
     position: relative;
     height: 70vh;
+    max-height: 700px;
 
     .overflow-bottom {
       position: absolute;
