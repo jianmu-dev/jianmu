@@ -10,6 +10,8 @@ import dev.jianmu.node.definition.aggregate.ShellNode;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.trigger.aggregate.WebhookAuth;
 import dev.jianmu.trigger.aggregate.WebhookParameter;
+import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
+import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookRule;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.FailureMode;
@@ -41,6 +43,8 @@ public class DslParser {
     private Map<String, Object> trigger;
     private Project.TriggerType triggerType = Project.TriggerType.MANUAL;
     private Webhook webhook;
+    private String webhookType;
+    private List<CustomWebhookInstance.EventInstance> webhookEvents = new ArrayList<>();
     private String cron;
     private final Map<String, Object> global = new HashMap<>();
     private List<Object> workflow;
@@ -548,7 +552,12 @@ public class DslParser {
         if (this.trigger == null) {
             return;
         }
+        var webhook = this.trigger.get("webhook");
         var triggerType = this.trigger.get("type");
+        if (webhook instanceof String) {
+            this.triggerCustomWebhookSyntaxChek((String) webhook);
+            return;
+        }
         if (!(triggerType instanceof String)) {
             throw new IllegalArgumentException("trigger type配置错误");
         }
@@ -633,6 +642,59 @@ public class DslParser {
             }
             this.webhook = webhookBuilder.build();
             this.triggerType = Project.TriggerType.WEBHOOK;
+        }
+    }
+
+    private void triggerCustomWebhookSyntaxChek(String webhook) {
+        this.triggerType = Project.TriggerType.WEBHOOK;
+        this.webhookType = webhook;
+        var events = this.trigger.get("event");
+        if (events instanceof List) {
+            ((List<?>) events).stream()
+                    .filter(event -> event instanceof Map)
+                    .map(event -> (Map<String, Object>) event)
+                    .forEach(event -> {
+                        var ruleset = new ArrayList<CustomWebhookRule>();
+                        var ref = event.get("ref");
+                        var rules = event.get("ruleset");
+                        var rulesetOperator = event.get("ruleset-operator");
+                        if (!(ref instanceof String)) {
+                            throw new IllegalArgumentException("trigger中的事件未定义 ref");
+                        }
+                        if (!(rulesetOperator instanceof String) || !(List.of("or", "and").contains((String) rulesetOperator))) {
+                            throw new IllegalArgumentException("trigger中的 " + ref + " 事件运算符配置错误");
+                        }
+                        if (rules instanceof List) {
+                            ((List<?>) rules).stream()
+                                    .filter(rule -> rule instanceof Map)
+                                    .map(rule -> (Map<String, Object>) rule)
+                                    .forEach(rule -> {
+                                        var paramRef = rule.get("param-ref");
+                                        var paramOperator = rule.get("operator");
+                                        var value = rule.get("value");
+                                        if (!(paramRef instanceof String)) {
+                                            throw new IllegalArgumentException("trigger中的 " + ref + "事件未定义规则参数的ref");
+                                        }
+                                        if (!(paramOperator instanceof String) ||
+                                                Arrays.stream(CustomWebhookRule.Operator.values()).noneMatch(a -> a.name().toLowerCase().equals(paramOperator))) {
+                                            throw new IllegalArgumentException("trigger中的 " + ref + "事件规则参数的运算符配置错误");
+                                        }
+                                        if (value == null) {
+                                            throw new IllegalArgumentException("trigger中的 " + ref + "事件规则参数的value配置错误");
+                                        }
+                                        ruleset.add(CustomWebhookRule.Builder.aCustomWebhookRule()
+                                                .paramRef((String) paramRef)
+                                                .operator(CustomWebhookRule.Operator.valueOf(((String) paramOperator).toUpperCase()))
+                                                .matchingValue(value)
+                                                .build());
+                                    });
+                        }
+                        this.webhookEvents.add(CustomWebhookInstance.EventInstance.Builder.aEventInstance()
+                                .ref((String) ref)
+                                .rulesetOperator(CustomWebhookInstance.RulesetOperator.valueOf(((String) rulesetOperator).toUpperCase()))
+                                .ruleset(ruleset)
+                                .build());
+                    });
         }
     }
 
@@ -908,6 +970,14 @@ public class DslParser {
 
     public Set<GlobalParameter> getGlobalParameters() {
         return globalParameters;
+    }
+
+    public String getWebhookType() {
+        return webhookType;
+    }
+
+    public List<CustomWebhookInstance.EventInstance> getWebhookEvents() {
+        return webhookEvents;
     }
 
     public String getTag() {

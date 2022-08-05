@@ -1,6 +1,6 @@
 trigger:
   only:
     # push_event
-    trigger.git_event === 'Push Hook' && trigger.branch === 'master' &&  (ruleset and | or) ||
+    (trigger.git_event === 'Push Hook' && trigger.branch === 'master') &&  (ruleset and | or) ||
     # pr_event
-    trigger.git_event === 'Merge Request Hook' && trigger.target_branch === 'master' &&  (ruleset and | or)
+    (trigger.git_event === 'Merge Request Hook' && trigger.target_branch === 'master') &&  (ruleset and | or)

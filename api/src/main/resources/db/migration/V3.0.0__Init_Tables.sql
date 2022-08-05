@@ -269,11 +269,12 @@ CREATE TABLE `jm_shell_node_def`
 CREATE TABLE `jm_git_repo`
 (
     `id`       varchar(45)  NOT NULL COMMENT 'ID',
-    `ref`      varchar(128) NOT NULL DEFAULT '' COMMENT '唯一表示',
+    `ref`      varchar(128) NOT NULL DEFAULT '' COMMENT '唯一标识',
     `owner`    varchar(128) NOT NULL DEFAULT '' COMMENT '拥有者',
     `branches` blob         NOT NULL COMMENT '分支',
     `flows`    blob COMMENT '流水线',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `owner_ref` (`owner`, `ref`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='git仓库';
@@ -394,3 +395,47 @@ CREATE TABLE `jm_project_last_execution`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='项目最后执行记录';
+
+CREATE TABLE `jm_custom_webhook_definition`
+(
+    `id`           varchar(45)  NOT NULL COMMENT 'ID',
+    `ref`          varchar(128) NOT NULL DEFAULT '' COMMENT '唯一标识',
+    `name`         varchar(45)           DEFAULT NULL COMMENT '名称',
+    `description`  tinytext COMMENT '描述',
+    `icon`         varchar(255)          DEFAULT NULL COMMENT '图标地址',
+    `owner_ref`    varchar(45)           DEFAULT NULL COMMENT '所有者唯一引用',
+    `owner_name`   varchar(45)           DEFAULT NULL COMMENT '所有者名称',
+    `owner_type`   varchar(45)           DEFAULT NULL COMMENT '所有者类型',
+    `creator_ref`  varchar(45)           DEFAULT NULL COMMENT '创建者唯一引用',
+    `creator_name` varchar(45)           DEFAULT NULL COMMENT '创建者名称',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='自定义webhook定义';
+
+CREATE TABLE `jm_custom_webhook_definition_version`
+(
+    `id`            varchar(45)  NOT NULL COMMENT 'ID',
+    `definition_id` varchar(45)  NOT NULL COMMENT 'webhook定义ID',
+    `ref`           varchar(128) NOT NULL DEFAULT '' COMMENT '唯一标识',
+    `owner_ref`     varchar(45)           DEFAULT NULL COMMENT '所有者唯一引用',
+    `version`       varchar(45)           DEFAULT NULL COMMENT '版本号',
+    `creator_ref`   varchar(45)           DEFAULT NULL COMMENT '创建者唯一引用',
+    `creator_name`  varchar(45)           DEFAULT NULL COMMENT '创建者名称',
+    `events`        blob COMMENT '事件集',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='自定义webhook定义版本';
+
+CREATE TABLE `jm_custom_webhook_instance`
+(
+    `trigger_id`      varchar(45) NOT NULL COMMENT 'triggerID',
+    `definition_id`   varchar(45) NOT NULL COMMENT 'webhook定义ID',
+    `version_id`      varchar(45) NOT NULL COMMENT 'webhook定义版本ID',
+    `event_instances` blob COMMENT '事件实例集',
+    PRIMARY KEY (`trigger_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='自定义webhook实例';
+
