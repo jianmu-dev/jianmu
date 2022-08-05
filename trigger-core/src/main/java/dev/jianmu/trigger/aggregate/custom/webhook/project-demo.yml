@@ -1,6 +1,5 @@
 trigger:
-  #  type: _/gitlink@1.0.0
-  type: gitlink
+  webhook: gitlink@1.0.0
   event:
     - ref: push_event
       ruleset:

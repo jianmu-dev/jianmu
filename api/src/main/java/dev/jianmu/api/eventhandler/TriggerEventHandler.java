@@ -1,12 +1,13 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.application.event.CronEvent;
 import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
+import dev.jianmu.application.service.CustomWebhookDefinitionApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.infrastructure.quartz.CronTriggerEvent;
+import dev.jianmu.trigger.event.CustomWebhookInstanceEvent;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.event.TriggerFailedEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -19,22 +20,25 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.time.LocalDateTime;
 
 /**
+ * @author Ethan Liu
  * @class TriggerEventHandler
  * @description TriggerEventHandler
- * @author Ethan Liu
  * @create 2021-05-25 08:44
-*/
+ */
 @Component
 @Slf4j
 public class TriggerEventHandler {
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
-    private final UserContextHolder userContextHolder;
+    private final CustomWebhookDefinitionApplication webhookDefinitionApplication;
 
-    public TriggerEventHandler(ProjectApplication projectApplication, TriggerApplication triggerApplication, UserContextHolder userContextHolder) {
+    public TriggerEventHandler(ProjectApplication projectApplication,
+                               TriggerApplication triggerApplication,
+                               CustomWebhookDefinitionApplication webhookDefinitionApplication
+    ) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
-        this.userContextHolder = userContextHolder;
+        this.webhookDefinitionApplication = webhookDefinitionApplication;
     }
 
     @EventListener
@@ -59,9 +63,9 @@ public class TriggerEventHandler {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-    public void handleWebhookEvent(WebhookEvent webhookEvent) {
+    public void handleWebhookEvent(WebhookEvent event) {
         // 创建Webhook触发器
-        this.triggerApplication.saveOrUpdate(webhookEvent.getProjectId(), webhookEvent.getWebhook(), webhookEvent.getEncryptedToken(), webhookEvent.getUserId());
+        this.triggerApplication.saveOrUpdate(event.getProjectId(), event.getWebhook(), event.getEncryptedToken(), event.getUserId(), event.getWebhookType(), event.getEventInstances());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
@@ -76,4 +80,10 @@ public class TriggerEventHandler {
         // 修改Webhook状态
         this.triggerApplication.updateTriggerStatus(triggerFailedEvent.getTriggerId(), triggerFailedEvent.getTriggerType());
     }
- }
+
+    @EventListener
+    public void handleCustomWebhookInstanceEvent(CustomWebhookInstanceEvent event) {
+        // 创建修改自定义Webhook实例
+        this.webhookDefinitionApplication.saveOrUpdateWebhookInstance(event.getTriggerId(), event.getWebhook(), event.getEventInstances());
+    }
+}

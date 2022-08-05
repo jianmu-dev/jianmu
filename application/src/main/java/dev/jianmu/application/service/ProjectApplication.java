@@ -33,7 +33,10 @@ import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.Webhook;
+import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
+import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
+import dev.jianmu.trigger.service.WebhookOnlyService;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
@@ -46,9 +49,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
 
@@ -60,11 +65,10 @@ import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PRO
  */
 @Service
 public class ProjectApplication {
-    private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
-    private static final String dslLocation = ".devops/";
     public static final String committer = "jianmu";
     public static final String committerEmail = "dev@jianmu.dev";
-
+    private static final Logger logger = LoggerFactory.getLogger(ProjectApplication.class);
+    private static final String dslLocation = ".devops/";
     private final ProjectRepositoryImpl projectRepository;
     private final WorkflowRepository workflowRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
@@ -79,6 +83,8 @@ public class ProjectApplication {
     private final ProjectLastExecutionRepository projectLastExecutionRepository;
     private final GitRepoRepository gitRepoRepository;
     private final OAuth2Properties oAuth2Properties;
+    private final CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository;
+    private final WebhookOnlyService webhookOnlyService;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -94,7 +100,9 @@ public class ProjectApplication {
             TriggerEventRepository triggerEventRepository,
             ProjectLastExecutionRepository projectLastExecutionRepository,
             GitRepoRepository gitRepoRepository,
-            OAuth2Properties oAuth2Properties
+            OAuth2Properties oAuth2Properties,
+            CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
+            WebhookOnlyService webhookOnlyService
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -110,6 +118,8 @@ public class ProjectApplication {
         this.projectLastExecutionRepository = projectLastExecutionRepository;
         this.gitRepoRepository = gitRepoRepository;
         this.oAuth2Properties = oAuth2Properties;
+        this.webhookDefinitionVersionRepository = webhookDefinitionVersionRepository;
+        this.webhookOnlyService = webhookOnlyService;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -211,7 +221,7 @@ public class ProjectApplication {
         if (projectGroupId == null) {
             projectGroupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
                     .orElseThrow(() -> new DataNotFoundException("未找到默认项目组"));
-        }else{
+        } else {
             this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
         }
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(projectGroupId)
@@ -401,16 +411,35 @@ public class ProjectApplication {
         }
         // 创建Webhook触发器
         if (project.getTriggerType() == Project.TriggerType.WEBHOOK) {
-            var webhook = Webhook.Builder.aWebhook()
-                    .only(parser.getWebhook().getOnly())
-                    .auth(parser.getWebhook().getAuth())
-                    .param(parser.getWebhook().getParam())
-                    .build();
+            Webhook webhook;
+            if (parser.getWebhookType() != null) {
+                var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(parser.getWebhookType())
+                        .orElseThrow(() -> new DataNotFoundException("未找到Webhook: " + parser.getWebhookType()));
+                var params = webhookDefinitionVersion.getEvents().stream()
+                        .filter(event -> parser.getWebhookEvents().stream()
+                                .anyMatch(webhookEvent -> event.getRef().equals(webhookEvent.getRef()))
+                        )
+                        .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
+                        .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
+                var only = this.webhookOnlyService.getOnly(webhookDefinitionVersion.getEvents(), parser.getWebhookEvents());
+                webhook = Webhook.Builder.aWebhook()
+                        .only(only)
+                        .param(params)
+                        .build();
+            } else {
+                webhook = Webhook.Builder.aWebhook()
+                        .only(parser.getWebhook().getOnly())
+                        .auth(parser.getWebhook().getAuth())
+                        .param(parser.getWebhook().getParam())
+                        .build();
+            }
             var webhookEvent = WebhookEvent.builder()
                     .projectId(project.getId())
                     .webhook(webhook)
                     .userId(userId)
                     .encryptedToken(encryptedToken)
+                    .webhookType(parser.getWebhookType())
+                    .eventInstances(parser.getWebhookEvents())
                     .build();
             this.publisher.publishEvent(webhookEvent);
         }
