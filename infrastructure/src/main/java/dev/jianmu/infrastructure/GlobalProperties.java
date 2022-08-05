@@ -92,5 +92,11 @@ public class GlobalProperties {
     public static class El{
         @NotBlank
         public String server;
+        @NotNull
+        public Type type;
+
+        public enum Type{
+            deno
+        }
     }
 }

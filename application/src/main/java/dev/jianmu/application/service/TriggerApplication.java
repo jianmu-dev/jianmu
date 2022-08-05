@@ -25,8 +25,13 @@ import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.WebRequest;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.aggregate.WebhookParameter;
+import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
+import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
+import dev.jianmu.trigger.event.CustomWebhookInstanceEvent;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.event.TriggerEventParameter;
+import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
+import dev.jianmu.trigger.repository.CustomWebhookInstanceRepository;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.repository.TriggerRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
@@ -84,6 +89,8 @@ public class TriggerApplication {
     private final ExternalParameterRepository externalParameterRepository;
     private final OAuth2Properties oAuth2Properties;
     private final GitRepoRepository gitRepoRepository;
+    private final CustomWebhookInstanceRepository webhookInstanceRepository;
+    private final CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -100,7 +107,9 @@ public class TriggerApplication {
             StorageService storageService,
             ExternalParameterRepository externalParameterRepository,
             OAuth2Properties oAuth2Properties,
-            GitRepoRepository gitRepoRepository
+            GitRepoRepository gitRepoRepository,
+            CustomWebhookInstanceRepository webhookInstanceRepository,
+            CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository
     ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
@@ -117,6 +126,8 @@ public class TriggerApplication {
         this.externalParameterRepository = externalParameterRepository;
         this.oAuth2Properties = oAuth2Properties;
         this.gitRepoRepository = gitRepoRepository;
+        this.webhookInstanceRepository = webhookInstanceRepository;
+        this.webhookDefinitionVersionRepository = webhookDefinitionVersionRepository;
     }
 
     private static String decode(final String encoded) {
@@ -167,9 +178,12 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void saveOrUpdate(String projectId, Webhook webhook, String encryptedToken, String userId) {
+    public void saveOrUpdate(String projectId, Webhook webhook, String encryptedToken, String userId, String webhookType, List<CustomWebhookInstance.EventInstance> eventInstances) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
+        var webhookInstanceBuilder = CustomWebhookInstanceEvent.Builder.aCustomWebhookInstanceEvent()
+                .webhook(webhookType)
+                .eventInstances(eventInstances);
         String ref = URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
         var optionalTrigger = this.triggerRepository.findByProjectId(projectId);
         // 修改webhook
@@ -180,6 +194,8 @@ public class TriggerApplication {
             trigger.setWebhook(webhook);
             trigger.setRef(ref);
             this.triggerRepository.updateById(trigger);
+            // 修改自定义Webhook实例
+            this.publisher.publishEvent(webhookInstanceBuilder.triggerId(trigger.getId()).build());
             return;
         }
         // 创建webhook
@@ -206,9 +222,12 @@ public class TriggerApplication {
                 .webhook(webhook)
                 .build();
         this.triggerRepository.add(trigger);
+        this.triggerRepository.updateById(trigger);
+        // 创建CustomWebhookInstance
+        this.publisher.publishEvent(webhookInstanceBuilder.triggerId(trigger.getId()).build());
     }
 
-    private String updateGitWebhook(String ref, String  newRef, String encryptedToken, String associationId, String associationType, String userId) {
+    private String updateGitWebhook(String ref, String newRef, String encryptedToken, String associationId, String associationType, String userId) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return newRef;
         }
@@ -769,6 +788,17 @@ public class TriggerApplication {
         var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         dev.jianmu.application.dsl.webhook.Webhook trigger = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
+        if (trigger.getWebhook() != null) {
+            var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(trigger.getWebhook())
+                    .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + trigger.getWebhook()));
+            var params = webhookDefinitionVersion.getEvents().stream()
+                    .filter(e1 -> trigger.getEvent().stream()
+                            .anyMatch(e2 -> e1.getRef().equals(e2.getRef()))
+                    )
+                    .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
+                    .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
+            trigger.setParam(params);
+        }
         if (trigger.getParam() == null) {
             return trigger;
         }
