@@ -3,11 +3,11 @@
     <div class="basic-section">
       <div class="param-key">流程名称：
       </div>
-      <jm-text-viewer :value="workflowName" :tip-append-to-body="false" class="param-value"/>
+      <jm-text-viewer :threshold="0" :value="workflowName" :tip-append-to-body="false" class="param-value"/>
       <div class="param-key">节点名称：</div>
-      <jm-text-viewer :value="nodeName" :tip-append-to-body="false" class="param-value node-name"/>
+      <jm-text-viewer :threshold="0" :value="nodeName" :tip-append-to-body="false" class="param-value node-name"/>
       <div class="param-key">启动时间：</div>
-      <jm-text-viewer :value="startTime" :tip-append-to-body="false" class="param-value"/>
+      <jm-text-viewer :threshold="0" :value="startTime" :tip-append-to-body="false" class="param-value"/>
     </div>
 
     <div class="tab-section">
@@ -35,7 +35,7 @@
                     border>
                     <jm-table-column label="参数唯一标识" align="center">
                       <template #default="scope">
-                        <jm-text-viewer :value="scope.row.ref" :tip-append-to-body="false" class="params-name"/>
+                        <jm-text-viewer :threshold="0" :value="scope.row.ref" :tip-append-to-body="false" class="params-name"/>
                       </template>
                     </jm-table-column>
                     <jm-table-column
@@ -44,7 +44,7 @@
                       prop="type">
                       <template #default="scope">
                         <div class="text-viewer">
-                          <jm-text-viewer :value="scope.row.type" :tip-append-to-body="false" class="params-name"/>
+                          <jm-text-viewer :threshold="0" :value="scope.row.type" :tip-append-to-body="false" class="params-name"/>
                         </div>
                       </template>
                     </jm-table-column>

@@ -5,7 +5,7 @@
         <div>
           <div class="param-key">流程名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="record.name" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="record.name" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -17,7 +17,7 @@
         <div>
           <div class="param-key">节点名称</div>
           <div class="param-value">
-            <jm-text-viewer :value="nodeName" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="nodeName" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -29,7 +29,7 @@
         <div>
           <div class="param-key">节点定义</div>
           <div class="param-value">
-            <jm-text-viewer :value="nodeDef" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="nodeDef" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -41,7 +41,7 @@
         <div>
           <div class="param-key">启动时间</div>
           <div class="param-value">
-            <jm-text-viewer :value="datetimeFormatter(task.startTime)" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="datetimeFormatter(task.startTime)" :tip-append-to-body="false"/>
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -125,7 +125,7 @@
                         <div
                           :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
-                            <jm-text-viewer :value="scope.row.ref" class="value"
+                            <jm-text-viewer :threshold="0" :value="scope.row.ref" class="value"
                                             :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
@@ -191,7 +191,7 @@
                         <div
                           :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
                           <div class="text-viewer">
-                            <jm-text-viewer :value="scope.row.ref" class="value"
+                            <jm-text-viewer :threshold="0" :value="scope.row.ref" class="value"
                                             :tip-append-to-body="false"
                                             @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
                           </div>
