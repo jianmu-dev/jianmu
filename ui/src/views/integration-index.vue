@@ -490,6 +490,10 @@ export default defineComponent({
   }
 
   ::v-deep(.el-dialog) {
+    .el-dialog__body {
+      padding: 30px 30px 15px;
+    }
+
     .el-dialog__footer {
       background-color: #fff;
 

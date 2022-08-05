@@ -250,6 +250,11 @@ export default defineComponent({
         height: 500px;
       }
     }
+
+    //// 修改dialog蒙层颜色
+    ::v-deep(.el-overlay) {
+      background-color: transparent;
+    }
   }
 }
 </style>
