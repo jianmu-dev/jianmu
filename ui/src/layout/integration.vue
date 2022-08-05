@@ -255,6 +255,27 @@ export default defineComponent({
     ::v-deep(.el-overlay) {
       background-color: transparent;
     }
+
+    ::v-deep(.project-preview-dialog) {
+      .el-dialog.entry {
+
+        .el-dialog__header {
+          box-sizing: border-box;
+          padding: 10px 0 0 8px;
+          background-color: rgba(255, 255, 255, .6);
+          border-bottom: none;
+          height: 45px;
+
+          .el-dialog__title {
+            color: #082340;
+          }
+        }
+
+        .el-dialog__body {
+          box-shadow: 0 0 16px #DDE6EC;
+        }
+      }
+    }
   }
 }
 </style>
