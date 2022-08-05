@@ -155,23 +155,13 @@ export default defineComponent({
         color: #ffffff;
       }
 
-      // .el-dialog__title::before {
-      //   font-family: 'jm-icon-input';
-      //   content: '\e803';
-      //   margin-right: 10px;
-      //   color: #6b7b8d;
-      //   font-size: 20px;
-      //   vertical-align: bottom;
-      //   position: relative;
-      //   top: 1px;
-      // }
       .el-dialog__close::before {
         font-size: 20px;
       }
 
       .el-dialog__headerbtn {
-        top: 65px;
-        right: 30px;
+        top: 60px;
+        right: 20px;
         z-index: 10;
       }
     }
@@ -205,7 +195,8 @@ export default defineComponent({
         text-align: center;
         border: 0.5px solid #CAD6EE;
         border-radius: 2px;
-        color: #082340;
+        color: #3f536e;
+        font-weight: 400;
         cursor: pointer;
 
         .jm-icon-button-left:before {
@@ -229,7 +220,8 @@ export default defineComponent({
         text-align: center;
         border: 0.5px solid #CAD6EE;
         border-radius: 2px;
-        color: #082340;
+        color: #3f536e;
+        font-weight: 400;
         cursor: pointer;
 
         .jm-icon-button-right:before {
