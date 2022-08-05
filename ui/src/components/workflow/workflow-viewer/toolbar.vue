@@ -70,7 +70,7 @@ export default defineComponent({
     },
     fullscreenEl: HTMLElement,
   },
-  emits: ['on-zoom', 'click-process-log', 'update:dsl-mode', 'on-fullscreen', 'rotate', 'change-view-mode'],
+  emits: ['on-zoom', 'on-fullscreen', 'rotate'],
   setup(props, { emit }: SetupContext) {
     const zoom = ref<number>(props.zoomValue);
     const fullscreenEnabled = ref<boolean>(screenfull.isEnabled);

@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeUnmount, onUpdated, PropType, ref } from 'vue';
+import { defineComponent, getCurrentInstance, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
