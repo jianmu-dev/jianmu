@@ -16,7 +16,7 @@ import javax.validation.constraints.Pattern;
  */
 @Getter
 @Setter
-public abstract class Oauth2LoggingDto {
+public class Oauth2LoggingDto {
     /**
      * code值
      */
