@@ -29,11 +29,11 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext} from 'vue';
-import {TriggerTypeEnum, ViewModeEnum} from '@/api/dto/enumeration';
-import {fetchProjectDetail, fetchWorkflow} from '@/api/view-no-auth';
-import {INodeDefVo} from '@/api/dto/project';
-import {useStore} from 'vuex';
+import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
+import { TriggerTypeEnum, ViewModeEnum } from '@/api/dto/enumeration';
+import { fetchProjectDetail, fetchWorkflow } from '@/api/view-no-auth';
+import { INodeDefVo } from '@/api/dto/project';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
@@ -48,8 +48,8 @@ export default defineComponent({
   },
   // 覆盖dialog的close事件
   emits: ['close', 'prev-project', 'next-project'],
-  setup(props: any, {emit}: SetupContext) {
-    const {proxy} = getCurrentInstance() as any;
+  setup(props: any, { emit }: SetupContext) {
+    const { proxy } = getCurrentInstance() as any;
     const store = useStore();
     const entry = store.state.entry;
     const dialogVisible = ref<boolean>(true);
@@ -87,11 +87,11 @@ export default defineComponent({
         title.value = workflowName;
         triggerType.value = _triggerType;
 
-        const {nodes, dslText} = await fetchWorkflow(workflowRef, workflowVersion);
+        const { nodes, dslText } = await fetchWorkflow(workflowRef, workflowVersion);
         dsl.value = dslText;
         nodeDefs.value = nodes
-          .filter(({metadata}) => metadata)
-          .map(({metadata}) => JSON.parse(metadata as string));
+          .filter(({ metadata }) => metadata)
+          .map(({ metadata }) => JSON.parse(metadata as string));
       } catch (err) {
         close();
 
