@@ -14,10 +14,10 @@ import './utils/baidu-tongji.ts';
 console.debug(import.meta.env);
 (async () => {
   const app = createApp(App);
-  // 全局注册公共组件
-  app.use(components);
   // 创建路由
   const router = await createRouter(app._context);
+  // 全局注册公共组件
+  app.use(components);
   // 注册路由器
   app.use(router);
   // 安装vuex
