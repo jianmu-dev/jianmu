@@ -76,7 +76,7 @@ public class CustomWebhookController {
 
     @GetMapping("/{ownerRef}/{ref}/{version}/versions")
     @Operation(summary = "获取webhook version", description = "获取webhook version")
-    public WebhookDefinitionVersionVo findVersionByOwnerRefAndRefAndVersion(@PathVariable("ownerRef") String ownerRef, @PathVariable("ref") String ref, @Param("version") String version) {
+    public WebhookDefinitionVersionVo findVersionByOwnerRefAndRefAndVersion(@PathVariable("ownerRef") String ownerRef, @PathVariable("ref") String ref, @PathVariable String version) {
         var definitionVersion = this.definitionApplication.findVersionByOwnerRefAndRefAndVersion(ownerRef, ref, version)
                 .orElseThrow(() -> new DataNotFoundException("未找到version"));
         return CustomWebhookDefinitionMapper.INSTANCE.toWebhookDefinitionVersionVo(definitionVersion);
