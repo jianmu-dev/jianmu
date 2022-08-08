@@ -1,5 +1,5 @@
 import { IPageDto } from '@/api/dto/common';
-import { DslTypeEnum, NodeTypeEnum } from './enumeration';
+import { DslTypeEnum, WorkerTypeEnum } from './enumeration';
 
 export interface ICategoriesVo extends Readonly<{
   id: number;
@@ -27,7 +27,7 @@ export interface IContentVo extends Readonly<{
     ownerRef: string;
     sourceLink?: string;
     documentLink?: string;
-    workerType: NodeTypeEnum;
+    workerType: WorkerTypeEnum;
   }[];
 }> {
 }

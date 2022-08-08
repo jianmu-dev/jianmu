@@ -1,4 +1,4 @@
-import { NodeTypeEnum, OwnerTypeEnum } from './enumeration';
+import { OwnerTypeEnum, WorkerTypeEnum } from './enumeration';
 
 export interface INodeCreatingDto extends Readonly<{
   name: string;
@@ -15,7 +15,7 @@ export interface INodeVo extends Readonly<{
   ownerRef: string;
   creatorName: string;
   creatorRef: string;
-  type: NodeTypeEnum;
+  type: WorkerTypeEnum;
   description: string;
   ref: string;
   sourceLink: string;

@@ -1,7 +1,7 @@
 /**
  * 错误信息
  */
-import { NodeTypeEnum } from '@/api/dto/enumeration';
+import { NodeCategoryEnum } from '@/api/dto/enumeration';
 
 export interface IErrorMessageVo extends Readonly<{
   statusCode: number;
@@ -49,7 +49,7 @@ export interface IPageDto extends Readonly<{
   /**
    * 分页类型
    */
-  type?: NodeTypeEnum;
+  type?: NodeCategoryEnum;
 
   /**
    * 节点名

@@ -4,7 +4,7 @@ import { Webhook } from './data/node/webhook';
 import { Shell } from './data/node/shell';
 import { AsyncTask } from './data/node/async-task';
 import { fetchNodeLibraryList, getOfficialNodes } from '@/api/view-no-auth';
-import { NodeTypeEnum } from '@/api/dto/enumeration';
+import { NodeCategoryEnum } from '@/api/dto/enumeration';
 import { INodeParameterVo } from '@/api/dto/node-definitions';
 import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { Start } from './data/node/start';
@@ -78,7 +78,7 @@ export class WorkflowNode {
     const { list, pageNum: currentPageNum, pages: totalPages } = await fetchNodeLibraryList({
       pageNum,
       pageSize,
-      type: NodeTypeEnum.LOCAL,
+      type: NodeCategoryEnum.LOCAL,
       name: keyword,
     });
     const arr: IWorkflowNode[] = list.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
@@ -108,7 +108,7 @@ export class WorkflowNode {
       pageNum,
       pageSize,
       name: keyword,
-      type: NodeTypeEnum.COMMUNITY,
+      type: NodeCategoryEnum.COMMUNITY,
     });
     const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
     return {

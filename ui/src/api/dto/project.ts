@@ -2,10 +2,11 @@ import { BaseVo, IPageDto } from '@/api/dto/common';
 import {
   DslSourceEnum,
   DslTypeEnum,
-  NodeTypeEnum,
   ProjectImporterTypeEnum,
-  ProjectStatusEnum, SortTypeEnum,
+  ProjectStatusEnum,
+  SortTypeEnum,
   TriggerTypeEnum,
+  WorkerTypeEnum,
 } from '@/api/dto/enumeration';
 
 /**
@@ -252,6 +253,6 @@ export interface INodeDefVo
     sourceLink?: string;
     documentLink?: string;
     type: string;
-    workerType: NodeTypeEnum;
+    workerType: WorkerTypeEnum;
   }> {
 }
