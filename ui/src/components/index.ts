@@ -1,4 +1,5 @@
 import { App } from 'vue';
+import store from '@/store';
 import { locale } from 'element-plus';
 import lang from 'element-plus/lib/locale/lang/zh-cn';
 import 'dayjs/locale/zh-cn';
@@ -25,6 +26,11 @@ import JmInfiniteScroll from './infinite-scroll';
 export default {
   // app.use()触发install的调用
   install: (app: App) => {
+    if (store.state.entry) {
+      // 动态导入entry主题
+      import('@/components/theme/entry/index.less');
+    }
+
     // 动态加载组件
     Object.values(import.meta.globEager('./**/index.vue'))
       .concat(Object.values(import.meta.globEager('./**/index.ts')))
