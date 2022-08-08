@@ -1,4 +1,5 @@
 import { App } from 'vue';
+import { injectGlobal } from '@emotion/css';
 import store from '@/store';
 import { locale } from 'element-plus';
 import lang from 'element-plus/lib/locale/lang/zh-cn';
@@ -28,7 +29,8 @@ export default {
   install: (app: App) => {
     if (store.state.entry) {
       // 动态导入entry主题
-      import('@/components/theme/entry/index.less');
+      Object.values(import.meta.globEager('./theme/entry/index.less'))
+        .forEach(({ default: _default }) => injectGlobal(_default));
     }
 
     // 动态加载组件
