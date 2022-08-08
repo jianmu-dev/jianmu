@@ -41,6 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         AUTH_WHITELIST.add("/webhook/**");
         AUTH_WHITELIST.add("/workers/**");
         AUTH_WHITELIST.add("/workers/**");
+        AUTH_WHITELIST.add("/view/logs/**");
     }
 
     private final JwtUserDetailsService jwtUserDetailsService;
