@@ -36,6 +36,8 @@
 import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import _throttle from 'lodash/throttle';
+import store from '@/store';
+import { injectGlobal } from '@emotion/css';
 
 export default defineComponent({
   setup() {
@@ -57,6 +59,19 @@ export default defineComponent({
     onMounted(() => {
       if (window.top !== window) {
         observer.observe(contentRef.value);
+      }
+      if (store.state.entry) {
+        // 动态导入全局entry主题
+        injectGlobal(`
+          .el-overlay.is-message-box {
+            padding-top: 100px;
+            background-color: transparent;
+
+            &::after {
+              height: 0;
+            }
+          }
+        `);
       }
     });
     onBeforeUnmount(() => {
