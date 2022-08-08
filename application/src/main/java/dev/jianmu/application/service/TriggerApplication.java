@@ -195,7 +195,9 @@ public class TriggerApplication {
             trigger.setRef(ref);
             this.triggerRepository.updateById(trigger);
             // 修改自定义Webhook实例
-            this.publisher.publishEvent(webhookInstanceBuilder.triggerId(trigger.getId()).build());
+            if (webhookType != null) {
+                this.publisher.publishEvent(webhookInstanceBuilder.triggerId(trigger.getId()).build());
+            }
             return;
         }
         // 创建webhook
@@ -224,7 +226,9 @@ public class TriggerApplication {
         this.triggerRepository.add(trigger);
         this.triggerRepository.updateById(trigger);
         // 创建CustomWebhookInstance
-        this.publisher.publishEvent(webhookInstanceBuilder.triggerId(trigger.getId()).build());
+        if (webhookType != null) {
+            this.publisher.publishEvent(webhookInstanceBuilder.triggerId(trigger.getId()).build());
+        }
     }
 
     private String updateGitWebhook(String ref, String newRef, String encryptedToken, String associationId, String associationType, String userId) {
