@@ -273,14 +273,24 @@ export default defineComponent({
         border: none;
 
         .el-dialog__header {
+          width: 100%;
+          position: absolute;
+          top: 0;
+          z-index: 2;
           box-sizing: border-box;
-          padding: 10px 0 0 8px;
-          background-color: rgba(255, 255, 255, .6);
+          display: flex;
+          align-items: center;
           border-bottom: none;
-          height: 45px;
+          height: 60px;
 
           .el-dialog__title {
             color: #082340;
+            flex: 1;
+            text-align: center;
+          }
+
+          .el-dialog__headerbtn {
+            top: 18px;
           }
         }
 
