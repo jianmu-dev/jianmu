@@ -270,6 +270,7 @@ export default defineComponent({
 
     ::v-deep(.project-preview-dialog) {
       .el-dialog.entry {
+        border: none;
 
         .el-dialog__header {
           box-sizing: border-box;
@@ -284,6 +285,7 @@ export default defineComponent({
         }
 
         .el-dialog__body {
+          border: 1px solid #B9CFE6;
           box-shadow: 0 0 16px #DDE6EC;
         }
       }
