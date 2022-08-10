@@ -20,7 +20,8 @@
         @closed="handleGlobalParamPanelClosed"/>
     </template>
     <div class="main">
-      <node-panel v-if="graph" @node-selected="nodeId => handleNodeSelected(nodeId, true)"/>
+      <node-panel v-if="graph" :entry="workflowData.association.entry"
+                  @node-selected="nodeId => handleNodeSelected(nodeId, true)"/>
       <graph-panel :workflow-data="workflowData"
                    @graph-created="handleGraphCreated"
                    @node-selected="(nodeId, waringClicked) => handleNodeSelected(nodeId, waringClicked)"/>

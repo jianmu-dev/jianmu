@@ -41,6 +41,10 @@ import { WorkflowDnd } from '../../model/workflow-dnd';
 export default defineComponent({
   emits: ['getNodeCount'],
   props: {
+    entry: {
+      type: Boolean,
+      required: true,
+    },
     type: {
       type: String as PropType<NodeGroupEnum>,
       required: true,
@@ -81,7 +85,7 @@ export default defineComponent({
     const nodes = ref<IWorkflowNode[]>([]);
     const keyWord = ref<string>(props.keyword);
     const getWorkflowDnd = inject('getWorkflowDnd') as () => WorkflowDnd;
-    const workflowNode = new WorkflowNode();
+    const workflowNode = new WorkflowNode(props.entry);
     // 当前为第几页，默认第一页
     const currentPage = ref<number>(1);
     // 网络请求超时

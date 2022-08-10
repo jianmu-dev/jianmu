@@ -86,18 +86,24 @@ async function getWebhookLists(): Promise<IWebhookDefinitionVo[]> {
 }
 
 export class WorkflowNode {
+  private readonly entry: boolean;
 
-  constructor() {
+  constructor(entry: boolean) {
+    this.entry = entry;
   }
 
   async loadInnerTriggers(keyword?: string): Promise<IWorkflowNode[]> {
-    // 获取webhook列表
-    const customWebhookList = await getWebhookLists();
-    const arr: IWorkflowNode[] = [new Cron(), new Webhook()];
-    // 动态构建custom-webhook部分
-    customWebhookList.forEach(item => {
-      arr.push(new CustomWebhook(item.ref, item.ref, item.name, item.icon, item.ownerRef));
-    });
+    const arr: IWorkflowNode[] = [new Cron()];
+    if (this.entry) {
+      // 获取webhook列表
+      const customWebhookList = await getWebhookLists();
+      // 动态构建custom-webhook部分
+      customWebhookList.forEach(item => {
+        arr.push(new CustomWebhook(item.ref, item.ref, item.name, item.icon, item.ownerRef));
+      });
+    } else {
+      arr.push(new Webhook());
+    }
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
   }
 
