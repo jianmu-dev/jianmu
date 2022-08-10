@@ -85,11 +85,17 @@ export enum TriggerTypeEnum {
 }
 
 /**
- * 节点类型枚举
+ * 执行器类型枚举
  */
-export enum NodeTypeEnum {
+export enum WorkerTypeEnum {
   DOCKER = 'DOCKER',
   SHELL = 'SHELL',
+}
+
+/**
+ * 节点分类枚举
+ */
+export enum NodeCategoryEnum {
   LOCAL = 'LOCAL',
   COMMUNITY = 'COMMUNITY'
 }
