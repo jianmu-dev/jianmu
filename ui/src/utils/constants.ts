@@ -17,8 +17,3 @@ export const DEFAULT_DATE_FORMAT = 'yyyy-mm-dd';
  * 默认日期时间格式
  */
 export const DEFAULT_DATETIME_FORMAT = 'yyyy-mm-dd HH:MM:ss';
-
-/**
- * dsl v2版本
- */
-export const DSL_VERSION_V2 = 2;
