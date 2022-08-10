@@ -9,7 +9,7 @@
     <template #title>
       <div>
         <span>{{ nodeData.getDisplayName() }}</span>
-        <a :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help"/>
+        <a v-if="nodeData.getDocUrl()" :href="nodeData.getDocUrl()" target="_blank" class="jm-icon-button-help"/>
       </div>
     </template>
     <div class="jm-workflow-editor-node-config-panel">
