@@ -11,7 +11,7 @@ export interface IWebhookParam {
   key: string;
   ref: string;
   name: string;
-  type: ParamTypeEnum | undefined;
+  type: ParamTypeEnum;
   value: string;
   required: boolean;
   hidden: boolean;

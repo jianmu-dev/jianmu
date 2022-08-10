@@ -10,16 +10,15 @@
         </jm-input>
       </div>
       <div class="groups" v-show="nodeCount>0">
-        <node-group
-          class="trigger" :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          class="inner" :type="NodeGroupEnum.INNER" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          :type="NodeGroupEnum.OFFICIAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
-        <node-group
-          :type="NodeGroupEnum.COMMUNITY" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
+        <node-group class="trigger" :entry="entry" :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword"
+                    @get-node-count="getNodeCount"/>
+        <node-group class="inner" :entry="entry" :type="NodeGroupEnum.INNER" :keyword="tempKeyword"
+                    @get-node-count="getNodeCount"/>
+        <node-group :entry="entry" :type="NodeGroupEnum.LOCAL" :keyword="tempKeyword" @get-node-count="getNodeCount"/>
+        <node-group :entry="entry" :type="NodeGroupEnum.OFFICIAL" :keyword="tempKeyword"
+                    @get-node-count="getNodeCount"/>
+        <node-group :entry="entry" :type="NodeGroupEnum.COMMUNITY" :keyword="tempKeyword"
+                    @get-node-count="getNodeCount"/>
       </div>
       <div class="empty" v-if="nodeCount<=0">
         <jm-empty description="没有搜到相关结果" :image="noDataImage">
@@ -36,7 +35,6 @@
 import { defineComponent, inject, onMounted, provide, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import { WorkflowDnd } from '../../model/workflow-dnd';
-import { IWorkflowNode } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import NodeGroup from './node-group.vue';
 import { NodeGroupEnum } from '../../model/data/enumeration';
@@ -44,6 +42,12 @@ import noDataImage from '../../svgs/no-data.svg';
 
 export default defineComponent({
   components: { NodeGroup },
+  props: {
+    entry: {
+      type: Boolean,
+      required: true,
+    },
+  },
   emits: ['node-selected'],
   setup(props, { emit }) {
     const collapsed = ref<boolean>(false);

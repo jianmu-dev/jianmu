@@ -6,8 +6,10 @@ import { checkDuplicate } from './util/reference';
 import { NodeGroupEnum, NodeTypeEnum, RefTypeEnum } from './data/enumeration';
 import { AsyncTask } from './data/node/async-task';
 import { getLocalNodeParams, getLocalVersionList, getOfficialNodeParams, getOfficialVersionList } from '@/api/node-library';
-import { pushParams } from './workflow-node';
+import { pushCustomEvents, pushParams } from './workflow-node';
 import { RefDuplicateError } from './data/error';
+import { CustomWebhook } from './data/node/custom-webhook';
+import { getWebhookVersionList, getWebhookVersionParams } from '@/api/custom-webhook';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -65,14 +67,27 @@ export class WorkflowValidator {
   async checkInitializingNode(node: Node, copied: boolean, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): Promise<void> {
     const proxy = new CustomX6NodeProxy(node);
     const _data = proxy.getData();
-    if (_data.getType() !== NodeTypeEnum.ASYNC_TASK || copied) {
+    if (_data.getType() !== NodeTypeEnum.ASYNC_TASK && !(_data instanceof CustomWebhook) || copied) {
       _data
         .validate()
         // 校验节点有误时，加警告
         .catch(() => this.addWarning(node, clickNodeWarningCallback));
       return;
     }
-    const data = _data as AsyncTask;
+    if (_data instanceof CustomWebhook) {
+      await this.confirmCustomWebhookVersion(_data);
+    } else {
+      await this.confirmAsyncTaskVersion(_data as AsyncTask);
+    }
+    // fix: #I5DXPM
+    proxy.setData(_data);
+    _data
+      .validate()
+      // 校验节点有误时，加警告
+      .catch(() => this.addWarning(node, clickNodeWarningCallback));
+  }
+
+  private async confirmAsyncTaskVersion(data: AsyncTask): Promise<void> {
     const isOwnerRef = data.ownerRef === NodeGroupEnum.LOCAL;
     const res = await (isOwnerRef ? getLocalVersionList : getOfficialVersionList)(data.nodeRef, data.ownerRef);
     data.version = res.versions.length > 0 ? res.versions[0] : '';
@@ -91,12 +106,15 @@ export class WorkflowValidator {
       } = await getOfficialNodeParams(data.nodeRef, data.ownerRef, data.version);
       pushParams(data, inputs, outputs, versionDescription);
     }
-    // fix: #I5DXPM
-    proxy.setData(data);
-    data
-      .validate()
-      // 校验节点有误时，加警告
-      .catch(() => this.addWarning(node, clickNodeWarningCallback));
+  }
+
+  private async confirmCustomWebhookVersion(data: CustomWebhook): Promise<void> {
+    // 获取版本列表
+    const versionList = await getWebhookVersionList(data.ownerRef, data.nodeRef);
+    // 获取版本参数
+    const versionParams = await getWebhookVersionParams(data.ownerRef, data.nodeRef, versionList[0].version);
+    // 调用pushCustomEvents
+    pushCustomEvents(data, versionParams.events, versionList[0].version);
   }
 
   async check(): Promise<void> {

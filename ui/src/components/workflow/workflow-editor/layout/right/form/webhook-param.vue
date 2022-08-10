@@ -139,11 +139,14 @@ export default defineComponent({
     const refVal = ref<string>(props.reference);
     const nameVal = ref<string>(props.name);
     const typeVal = ref<ParamTypeEnum>(props.type);
-    const valueVal = ref<string>(props.value);
+    const valueVal = ref<string>(props.value || '');
     const requiredVal = ref<boolean>(props.required);
     const hiddenVal = ref<boolean>(props.hidden);
     const switchBackgroundFlag = ref<boolean>(false);
 
+    if (!valueVal.value && typeVal.value === ParamTypeEnum.STRING) {
+      valueVal.value = JSON.stringify(valueVal.value);
+    }
     // 初始化required的值
     emit('update:required', requiredVal.value);
 
