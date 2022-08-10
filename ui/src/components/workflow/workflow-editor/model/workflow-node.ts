@@ -9,6 +9,11 @@ import { INodeParameterVo } from '@/api/dto/node-definitions';
 import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { Start } from './data/node/start';
 import { End } from './data/node/end';
+import { CustomWebhook } from './data/node/custom-webhook';
+import { IEventVo, IWebhookDefinitionVo } from '@/api/dto/custom-webhook';
+import { getWebhookList } from '@/api/custom-webhook';
+import { v4 as uuidv4 } from 'uuid';
+
 
 interface IPageInfo {
   pageNum: number;
@@ -56,14 +61,43 @@ export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs:
   }
 };
 
+
+/**
+ * push自定义触发事件
+ */
+export const pushCustomEvents = (data: CustomWebhook, events: IEventVo[], version: string) => {
+  events.forEach(item => {
+    const availableParams = item.availableParams.map(param => ({
+      key: uuidv4(),
+      ...param,
+    }));
+    data.events.push({
+      ref: item.ref,
+      name: item.name,
+      availableParams,
+      eventRuleset: item.ruleset,
+    });
+    data.version = version;
+  });
+};
+
+async function getWebhookLists(): Promise<IWebhookDefinitionVo[]> {
+  return await getWebhookList();
+}
+
 export class WorkflowNode {
 
   constructor() {
   }
 
-  loadInnerTriggers(keyword?: string): IWorkflowNode[] {
+  async loadInnerTriggers(keyword?: string): Promise<IWorkflowNode[]> {
+    // 获取webhook列表
+    const customWebhookList = await getWebhookLists();
     const arr: IWorkflowNode[] = [new Cron(), new Webhook()];
-
+    // 动态构建custom-webhook部分
+    customWebhookList.forEach(item => {
+      arr.push(new CustomWebhook(item.ref, item.ref, item.name, item.icon, item.ownerRef));
+    });
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
   }
 

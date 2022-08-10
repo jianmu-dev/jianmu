@@ -16,8 +16,12 @@
       <jm-scrollbar v-if="drawerOpening" class="panel-container">
         <cron-panel v-if="nodeData.getType() === NodeTypeEnum.CRON"
                     :node-data="nodeData" @form-created="handleFormCreated"/>
-        <webhook-panel v-else-if="nodeData.getType() === NodeTypeEnum.WEBHOOK"
-                       :node-data="nodeData" @form-created="handleFormCreated"/>
+        <template v-else-if="nodeData.getType() === NodeTypeEnum.WEBHOOK">
+          <custom-webhook-panel v-if="isCustomWebhook"
+                                :node-data="nodeData" @form-created="handleFormCreated"/>
+          <webhook-panel v-else
+                         :node-data="nodeData" @form-created="handleFormCreated"/>
+        </template>
         <shell-panel v-else-if="nodeData.getType() === NodeTypeEnum.SHELL"
                      :node-data="nodeData" @form-created="handleFormCreated"/>
         <async-task-panel v-else-if="nodeData.getType() === NodeTypeEnum.ASYNC_TASK"
@@ -32,13 +36,15 @@ import { defineComponent, inject, nextTick, provide, ref } from 'vue';
 import { NodeTypeEnum } from '../../model/data/enumeration';
 import CronPanel from './cron-panel.vue';
 import WebhookPanel from './webhook-panel.vue';
+import CustomWebhookPanel from './custom-webhook-panel.vue';
 import ShellPanel from './shell-panel.vue';
 import AsyncTaskPanel from './async-task-panel.vue';
 import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../model/data/custom-x6-node-proxy';
+import { CustomWebhook } from '../../model/data/node/custom-webhook';
 
 export default defineComponent({
-  components: { CronPanel, WebhookPanel, ShellPanel, AsyncTaskPanel },
+  components: { CronPanel, WebhookPanel, ShellPanel, AsyncTaskPanel, CustomWebhookPanel },
   props: {
     nodeId: {
       type: String,
@@ -66,6 +72,7 @@ export default defineComponent({
       NodeTypeEnum,
       drawerOpening,
       nodeData,
+      isCustomWebhook: nodeData instanceof CustomWebhook,
       handleFormCreated: (ref: any) => {
         if (!ref) {
           return;

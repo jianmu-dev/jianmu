@@ -102,7 +102,7 @@ export default defineComponent({
         switch (props.type) {
           // 触发器
           case NodeGroupEnum.TRIGGER:
-            nodes.value = workflowNode.loadInnerTriggers(keyword);
+            nodes.value = await workflowNode.loadInnerTriggers(keyword);
             break;
           // 内置节点
           case NodeGroupEnum.INNER:

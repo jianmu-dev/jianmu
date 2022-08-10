@@ -8,6 +8,7 @@ import { AsyncTask } from './node/async-task';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
 import { Start } from './node/start';
 import { End } from './node/end';
+import { CustomWebhook } from './node/custom-webhook';
 
 export class CustomX6NodeProxy {
   readonly node: Node;
@@ -49,7 +50,7 @@ export class CustomX6NodeProxy {
         nodeData = Cron.build(obj);
         break;
       case NodeTypeEnum.WEBHOOK:
-        nodeData = Webhook.build(obj);
+        nodeData = obj.events ? CustomWebhook.build(obj) : Webhook.build(obj);
         break;
       case NodeTypeEnum.SHELL:
         nodeData = Shell.build(obj);
