@@ -20,19 +20,19 @@
         添加匹配规则
       </div>
       <jm-radio-group v-model="eventInstanceVal.rulesetOperator" @change="changeRulesetOperatorVal">
-        <jm-radio v-for="{ref,name} in RULESET_OPERATORS" :key="ref" :label="ref">{{ name }}</jm-radio>
+        <jm-radio v-for="{ref,name} in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
       </jm-radio-group>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, onMounted, PropType, ref } from 'vue';
 import Rule from './custom-webhook-rule.vue';
-import { ICustomWebhookEventInstance } from '../../../model/data/node/custom-webhook';
+import { getWebhookOperator, ICustomWebhookEventInstance } from '../../../model/data/node/custom-webhook';
 import { IWebhookParam } from '../../../model/data/node/webhook';
-import { RULESET_OPERATORS } from '../custom-webhook-panel.vue';
 import { v4 as uuidv4 } from 'uuid';
+import { IWebhookEventOperatorVo } from '@/api/dto/custom-webhook';
 
 export default defineComponent({
   components: { Rule },
@@ -59,10 +59,14 @@ export default defineComponent({
     const eventInstanceVal = ref<ICustomWebhookEventInstance>(props.eventInstance);
     isCheckedVal.value = !!props.eventInstance;
 
+    const rulesetOperators = ref<IWebhookEventOperatorVo[]>([]);
+    onMounted(async () => {
+      rulesetOperators.value = (await getWebhookOperator()).rulesetOperators;
+    });
     return {
       isCheckedVal,
       eventInstanceVal,
-      RULESET_OPERATORS,
+      rulesetOperators,
       updateParamRef: (val: string, index: number) => {
         eventInstanceVal.value.ruleset[index].paramRef = val;
         emit('update:eventInstance', eventInstanceVal.value);
@@ -87,7 +91,7 @@ export default defineComponent({
         eventInstanceVal.value = val ? {
           ref: props.reference,
           ruleset: [],
-          rulesetOperator: RULESET_OPERATORS[0].ref,
+          rulesetOperator: rulesetOperators.value[0].ref,
         } : undefined;
         // 初始化-勾选自动新增一条
         if (eventInstanceVal.value && eventInstanceVal.value.ruleset.length === 0) {

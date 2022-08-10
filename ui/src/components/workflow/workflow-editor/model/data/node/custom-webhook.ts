@@ -3,6 +3,8 @@ import { NodeRefEnum, NodeTypeEnum } from '../enumeration';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
 import { CustomRule } from '../common';
 import { IWebhookParam } from './webhook';
+import { IWebhookOperatorVo } from '@/api/dto/custom-webhook';
+import { getWebhookOperators } from '@/api/custom-webhook';
 
 const OFFICIAL_NODE_OWNER_REF = '_';
 
@@ -110,4 +112,16 @@ export class CustomWebhook extends BaseNode {
       }),
     };
   }
+}
+
+/**
+ * 获取规则参数 evens/rule
+ */
+let webhookOperator: IWebhookOperatorVo;
+
+export async function getWebhookOperator(): Promise<IWebhookOperatorVo> {
+  if (!webhookOperator) {
+    webhookOperator = await getWebhookOperators();
+  }
+  return webhookOperator;
 }
