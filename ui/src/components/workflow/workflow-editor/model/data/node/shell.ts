@@ -22,7 +22,7 @@ export class Shell extends BaseNode {
   constructor(ref: string = NodeRefEnum.SHELL, name: string = 'shell', image: string = '',
     envs: IShellEnv[] = [], script: string = '',
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
-    super(ref, name, NodeTypeEnum.SHELL, icon, 'https://docs.jianmu.dev/guide/shell-node.html');
+    super(ref, name, NodeTypeEnum.SHELL, icon, '');
     this.image = image;
     this.envs = envs;
     this.script = script;
