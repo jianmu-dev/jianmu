@@ -44,10 +44,10 @@
 <script lang="ts">
 import { computed, defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
-import { PARAM_OPERATORS } from '../custom-webhook-panel.vue';
 import ExpressionEditor from '../form/expression-editor.vue';
 import { IWebhookParam } from '@/components/workflow/workflow-editor/model/data/node/webhook';
-import { IWebhookEventOperatorVo } from '@/api/dto/custom-webhook';
+import { IWebhookEventOperatorVo, IWebhookParamOperatorVo } from '@/api/dto/custom-webhook';
+import { getWebhookOperator } from '../../../model/data/node/custom-webhook';
 
 export default defineComponent({
   components: { ExpressionEditor },
@@ -75,6 +75,7 @@ export default defineComponent({
   },
   emits: ['update:paramRef', 'update:operator', 'update:matchingValue', 'delete'],
   setup(props, { emit }) {
+    const paramOperators = ref<IWebhookParamOperatorVo[]>([]);
     // 参数唯一标识
     const paramRefVal = ref<String>(props.paramRef);
     // 类型-值
@@ -82,11 +83,16 @@ export default defineComponent({
     const paramType = computed<ParamTypeEnum>(() =>
       paramRefVal.value ? props.availableParams.find(({ ref }) => ref === paramRefVal.value)!.type : ParamTypeEnum.STRING);
     // 匹配规则下拉
-    const operatorOptions = computed<IWebhookEventOperatorVo>(() =>
-      PARAM_OPERATORS.find(({ type }) => type === paramType.value)!.operators);
+    const operatorOptions = computed<IWebhookEventOperatorVo[]>(() =>
+      paramOperators.value.length === 0 ? [] : paramOperators.value.find(({ type }) => type === paramType.value)!.operators);
     // 类型-文案
-    const operatorText = computed<string>(() =>
-      (operatorVal.value ? operatorOptions.value.find(({ ref }) => ref === operatorVal.value) : operatorOptions.value[0]).name);
+    const operatorText = computed<string>(() => {
+      if (operatorVal.value) {
+        const operatorOption = operatorOptions.value.find(({ ref }) => ref === operatorVal.value);
+        return operatorOption ? operatorOption.name : '';
+      }
+      return operatorOptions.value.length === 0 ? '' : operatorOptions.value[0].name;
+    });
     // 输入框动态placeholder
     const inputPlaceholder = computed<string>(() =>
       paramRefVal.value ? `请输入${props.availableParams.find(({ ref }) => ref === paramRefVal.value)!.name}` : '');
@@ -105,10 +111,11 @@ export default defineComponent({
       emit('update:operator', val);
     };
     onMounted(async () => {
+      paramOperators.value = (await getWebhookOperator()).paramOperators;
       if (operatorVal.value) {
         return;
       }
-      changeOperator(PARAM_OPERATORS.find(({ type }) => type === ParamTypeEnum.STRING).operators[0].ref);
+      changeOperator(paramOperators.value.find(({ type }) => type === ParamTypeEnum.STRING).operators[0].ref);
     });
     return {
       ExpressionTypeEnum,

@@ -24,23 +24,6 @@
 import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { CustomWebhook, ICustomWebhookEventInstance } from '../../model/data/node/custom-webhook';
 import Event from './form/custom-webhook-event.vue';
-import { getWebhookOperators } from '@/api/custom-webhook';
-import { IWebhookOperatorVo } from '@/api/dto/custom-webhook';
-import { ParamTypeEnum } from '../../model/data/enumeration';
-
-// 请求模拟数据
-async function getRulesOperators(): Promise<IWebhookOperatorVo> {
-  return await getWebhookOperators();
-}
-
-const { rulesetOperators, paramOperators } = await getRulesOperators();
-export const RULESET_OPERATORS = rulesetOperators;
-export const PARAM_OPERATORS = paramOperators.map(operator => {
-  return {
-    ...operator,
-    type: operator.type as ParamTypeEnum,
-  };
-});
 
 export default defineComponent({
   components: { Event },
