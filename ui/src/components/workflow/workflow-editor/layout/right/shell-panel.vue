@@ -38,7 +38,7 @@
               <div>可以使用表达式，引用全局参数、事件参</div>
               <div>
                 <span>数或上游节点的输出参数，详见</span>
-                <a href="https://docs.jianmu.dev/guide/expression.html"
+                <a href="https://v2.jianmu.dev/guide/expression.html"
                    target="_blank"
                    style="color:#fff;text-decoration: underline;">参数章节</a>
               </div>
