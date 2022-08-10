@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class DslParser {
+    private static final String V2_VERSION = "2";
+    private Object version;
     private Map<String, Object> trigger;
     private Project.TriggerType triggerType = Project.TriggerType.MANUAL;
     private Webhook webhook;
@@ -529,11 +531,22 @@ public class DslParser {
                 });
     }
 
+    private void checkVersion() {
+        if (version instanceof String && V2_VERSION.equals(version)) {
+            return;
+        }
+        if (version instanceof Number && V2_VERSION.equals(version.toString())) {
+            return;
+        }
+        throw new IllegalArgumentException("version配置错误");
+    }
+
     // DSL语法校验
     private void syntaxCheck() {
         if (null == this.name) {
             throw new DslException("project name未设置");
         }
+        this.checkVersion();
         this.triggerSyntaxCheck();
         // TODO 后面改成多个trigger
         if (trigger != null) {
@@ -957,6 +970,10 @@ public class DslParser {
 
     public Project.TriggerType getTriggerType() {
         return triggerType;
+    }
+
+    public String getVersion() {
+        return version.toString();
     }
 
     public String getCron() {
