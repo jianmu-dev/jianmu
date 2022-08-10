@@ -167,10 +167,6 @@ export default defineComponent({
   }
 
   .shell-env {
-    .jm-icon-button-help::before {
-      margin: 0;
-    }
-
     .shell-env-content {
       border: 1px solid #E6EBF2;
 
