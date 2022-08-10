@@ -9,7 +9,7 @@ import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import { Start } from './data/node/start';
 
 const { icon: { width, height } } = NODE;
-const { stroke: lineColor } = EDGE;
+const { stroke: lineColor, line } = EDGE;
 const { fill: circleBgColor } = PORT;
 
 type PasteNodeCallbackFnType = (node: Node) => void;
@@ -57,6 +57,12 @@ export function render(graph: Graph, data: string, workflowTool: WorkflowTool) {
 
   graph.resetCells(propertiesArr.map(properties => {
     if (properties.shape === 'edge') {
+      properties.attrs = {
+        line: {
+          stroke: lineColor._default,
+          ...line,
+        },
+      };
       return graph.createEdge(properties);
     }
     return graph.createNode(properties);
@@ -117,12 +123,7 @@ export class WorkflowGraph {
                 // 虚线
                 strokeDasharray: '4,1.5',
                 stroke: lineColor.connecting,
-                'stroke-width': 1.5,
-                targetMarker: {
-                  name: 'block',
-                  width: 12,
-                  height: 12,
-                },
+                ...line,
               },
             },
             router: {

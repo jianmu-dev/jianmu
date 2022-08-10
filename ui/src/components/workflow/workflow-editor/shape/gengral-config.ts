@@ -17,6 +17,14 @@ export const EDGE = {
     connecting: '#A7B0BB',
     hover: '#B9CFE6',
   },
+  line: {
+    'stroke-width': 1.5,
+    targetMarker: {
+      name: 'block',
+      width: 12,
+      height: 12,
+    },
+  },
 };
 
 export const PORT = {
