@@ -119,6 +119,7 @@ export default defineComponent({
       // 带参数区分tab
       switchEnvMode: async(flag: boolean) => {
         switchValueType.value = flag;
+        envVal.value = '""';
         valueVisible.value = false;
         await nextTick();
         valueVisible.value = true;
