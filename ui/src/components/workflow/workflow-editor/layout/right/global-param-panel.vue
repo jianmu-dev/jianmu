@@ -10,7 +10,7 @@
     <template #title>
       全局参数
       <span class="link-container">
-        <a href="https://docs.jianmu.dev/guide/vars.html" target="_blank" class="jm-icon-button-help"/>
+        <a href="https://v2.jianmu.dev/guide/vars.html" target="_blank" class="jm-icon-button-help"/>
       </span>
     </template>
     <div class="drawer-content">
