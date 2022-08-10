@@ -8,10 +8,7 @@
     @closed="close"
   >
     <template #title>
-      全局参数
-      <span class="link-container">
-        <a href="https://v2.jianmu.dev/guide/vars.html" target="_blank" class="jm-icon-button-help"/>
-      </span>
+      <div>全局参数</div>
     </template>
     <div class="drawer-content">
       <jm-scrollbar class="global-scroll">
@@ -128,21 +125,6 @@ export default defineComponent({
 
 <style scoped lang="less">
 .el-drawer {
-  .jm-icon-button-help {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    text-align: center;
-    font-size: 14px;
-    margin-left: 2px;
-
-    &:hover {
-      background: #EFF7FF;
-      color: #086CD8;
-    }
-  }
-
   .drawer-content {
     .global-scroll {
       height: calc(100vh - 140px);
