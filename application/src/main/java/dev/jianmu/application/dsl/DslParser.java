@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.DslException;
 import dev.jianmu.application.query.NodeDef;
+import dev.jianmu.application.query.CustomWebhookDef;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.node.definition.aggregate.ShellNode;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.trigger.aggregate.WebhookAuth;
 import dev.jianmu.trigger.aggregate.WebhookParameter;
-import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookRule;
 import dev.jianmu.workflow.aggregate.definition.*;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
@@ -43,8 +43,6 @@ public class DslParser {
     private Map<String, Object> trigger;
     private Project.TriggerType triggerType = Project.TriggerType.MANUAL;
     private Webhook webhook;
-    private String webhookType;
-    private List<CustomWebhookInstance.EventInstance> webhookEvents = new ArrayList<>();
     private String cron;
     private final Map<String, Object> global = new HashMap<>();
     private List<Object> workflow;
@@ -56,6 +54,7 @@ public class DslParser {
     @JsonProperty("raw-data")
     private String rawData;
     private Workflow.Type type;
+    private final List<DslCustomWebhook> customWebhooks = new ArrayList<>();
     private final List<DslNode> dslNodes = new ArrayList<>();
     private final List<ShellNode> shellNodes = new ArrayList<>();
     private Set<GlobalParameter> globalParameters = new HashSet<>();
@@ -85,11 +84,11 @@ public class DslParser {
         return parser;
     }
 
-    public Set<Node> createNodes(List<NodeDef> nodeDefs) {
+    public Set<Node> createNodes(List<NodeDef> nodeDefs, List<CustomWebhookDef> customWebhookDefs) {
         if (type.equals(Workflow.Type.WORKFLOW)) {
-            return this.calculateWorkflowNodes(nodeDefs);
+            return this.calculateWorkflowNodes(nodeDefs, customWebhookDefs);
         } else {
-            return this.calculatePipelineNodes(nodeDefs);
+            return this.calculatePipelineNodes(nodeDefs, customWebhookDefs);
         }
     }
 
@@ -126,11 +125,27 @@ public class DslParser {
         return johnson.findSimpleCycles();
     }
 
-    private Set<Node> calculateWorkflowNodes(List<NodeDef> nodeDefs) {
+    private Set<Node> calculateWorkflowNodes(List<NodeDef> nodeDefs, List<CustomWebhookDef> customWebhookDefs) {
+        // 添加触发器节点
+        var startSources = new ArrayList<String>();
+        customWebhookDefs.forEach(customWebhookDef -> {
+            var customWebhook = CustomWebhook.Builder.aCustomWebhook()
+                    .name(customWebhookDef.getName())
+                    .description(customWebhookDef.getDescription())
+                    .ref(customWebhookDef.getName())
+                    .type(customWebhookDef.getType())
+                    .webhook(customWebhookDef.getWebhook())
+                    .targets(Set.of("start"))
+                    .metadata(customWebhookDef.toJsonString())
+                    .build();
+            startSources.add(customWebhook.getRef());
+            symbolTable.put(customWebhook.getRef(), customWebhook);
+        });
         // 创建节点
         dslNodes.forEach(dslNode -> {
             if (dslNode.getType().equals("start")) {
                 var start = Start.Builder.aStart().name(dslNode.getName()).ref(dslNode.getName()).build();
+                startSources.forEach(start::addSource);
                 symbolTable.put(dslNode.getName(), start);
                 return;
             }
@@ -373,11 +388,27 @@ public class DslParser {
         }
     }
 
-    private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
+    private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs, List<CustomWebhookDef> customWebhookDefs) {
         // 创建节点
         Map<String, Node> symbolTable = new HashMap<>();
+        // 添加触发器节点
+        var startSources = new ArrayList<String>();
+        customWebhookDefs.forEach(customWebhookDef -> {
+            var customWebhook = CustomWebhook.Builder.aCustomWebhook()
+                    .name(customWebhookDef.getName())
+                    .description(customWebhookDef.getDescription())
+                    .ref(customWebhookDef.getName())
+                    .type(customWebhookDef.getType())
+                    .webhook(customWebhookDef.getWebhook())
+                    .targets(Set.of("Start"))
+                    .metadata(customWebhookDef.toJsonString())
+                    .build();
+            startSources.add(customWebhook.getRef());
+            symbolTable.put(customWebhook.getRef(), customWebhook);
+        });
         // 添加开始节点
         var start = Start.Builder.aStart().name("Start").ref("Start").build();
+        startSources.forEach(start::addSource);
         symbolTable.put("Start", start);
         // 添加结束节点
         var end = End.Builder.anEnd().name("End").ref("End").build();
@@ -504,6 +535,10 @@ public class DslParser {
             throw new DslException("project name未设置");
         }
         this.triggerSyntaxCheck();
+        // TODO 后面改成多个trigger
+        if (trigger != null) {
+            DslCustomWebhook.of(trigger).ifPresent(this.customWebhooks::add);
+        }
         this.globalParamSyntaxCheck();
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
@@ -555,7 +590,7 @@ public class DslParser {
         var webhook = this.trigger.get("webhook");
         var triggerType = this.trigger.get("type");
         if (webhook instanceof String) {
-            this.triggerCustomWebhookSyntaxChek((String) webhook);
+            this.checkCustomWebhook((String) webhook);
             return;
         }
         if (!(triggerType instanceof String)) {
@@ -645,56 +680,47 @@ public class DslParser {
         }
     }
 
-    private void triggerCustomWebhookSyntaxChek(String webhook) {
+    private void checkCustomWebhook(String webhook) {
         this.triggerType = Project.TriggerType.WEBHOOK;
-        this.webhookType = webhook;
         var events = this.trigger.get("event");
-        if (events instanceof List) {
-            ((List<?>) events).stream()
-                    .filter(event -> event instanceof Map)
-                    .map(event -> (Map<String, Object>) event)
-                    .forEach(event -> {
-                        var ruleset = new ArrayList<CustomWebhookRule>();
-                        var ref = event.get("ref");
-                        var rules = event.get("ruleset");
-                        var rulesetOperator = event.get("ruleset-operator");
-                        if (!(ref instanceof String)) {
-                            throw new IllegalArgumentException("trigger中的事件未定义 ref");
-                        }
-                        if (!(rulesetOperator instanceof String) || !(List.of("or", "and").contains((String) rulesetOperator))) {
-                            throw new IllegalArgumentException("trigger中的 " + ref + " 事件运算符配置错误");
-                        }
-                        if (rules instanceof List) {
-                            ((List<?>) rules).stream()
-                                    .filter(rule -> rule instanceof Map)
-                                    .map(rule -> (Map<String, Object>) rule)
-                                    .forEach(rule -> {
-                                        var paramRef = rule.get("param-ref");
-                                        var paramOperator = rule.get("operator");
-                                        var value = rule.get("value");
-                                        if (!(paramRef instanceof String)) {
-                                            throw new IllegalArgumentException("trigger中的 " + ref + "事件未定义规则参数的ref");
-                                        }
-                                        if (!(paramOperator instanceof String) ||
-                                                Arrays.stream(CustomWebhookRule.Operator.values()).noneMatch(a -> a.name().toLowerCase().equals(paramOperator))) {
-                                            throw new IllegalArgumentException("trigger中的 " + ref + "事件规则参数的运算符配置错误");
-                                        }
-                                        if (value == null) {
-                                            throw new IllegalArgumentException("trigger中的 " + ref + "事件规则参数的value配置错误");
-                                        }
-                                        ruleset.add(CustomWebhookRule.Builder.aCustomWebhookRule()
-                                                .paramRef((String) paramRef)
-                                                .operator(CustomWebhookRule.Operator.valueOf(((String) paramOperator).toUpperCase()))
-                                                .matchingValue(value)
-                                                .build());
-                                    });
-                        }
-                        this.webhookEvents.add(CustomWebhookInstance.EventInstance.Builder.aEventInstance()
-                                .ref((String) ref)
-                                .rulesetOperator(CustomWebhookInstance.RulesetOperator.valueOf(((String) rulesetOperator).toUpperCase()))
-                                .ruleset(ruleset)
-                                .build());
-                    });
+        if (!(events instanceof List)) {
+            throw new IllegalArgumentException("trigger中的webhook: " + webhook + " 事件配置错误");
+        }
+        ((List<?>) events).stream()
+                .filter(event -> event instanceof Map)
+                .map(event -> (Map<String, Object>) event)
+                .forEach(event -> {
+                    var ref = event.get("ref");
+                    var rules = event.get("ruleset");
+                    var rulesetOperator = event.get("ruleset-operator");
+                    if (!(ref instanceof String)) {
+                        throw new IllegalArgumentException("trigger中的事件未定义 ref");
+                    }
+                    if (!(rulesetOperator instanceof String) || !(List.of("or", "and").contains((String) rulesetOperator))) {
+                        throw new IllegalArgumentException("trigger中的 " + ref + " 事件运算符配置错误");
+                    }
+                    if (rules instanceof List) {
+                        ((List<?>) rules).stream()
+                                .filter(rule -> rule instanceof Map)
+                                .map(rule -> (Map<String, Object>) rule)
+                                .forEach(rule -> this.checkCustomWebhookEventRule((String) ref, rule));
+                    }
+                });
+    }
+
+    private void checkCustomWebhookEventRule(String ref, Map<String, Object> rule) {
+        var paramRef = rule.get("param-ref");
+        var paramOperator = rule.get("operator");
+        var value = rule.get("value");
+        if (!(paramRef instanceof String)) {
+            throw new IllegalArgumentException("trigger中的 " + ref + "事件未定义规则参数的ref");
+        }
+        if (!(paramOperator instanceof String) ||
+                Arrays.stream(CustomWebhookRule.Operator.values()).noneMatch(a -> a.name().toLowerCase().equals(paramOperator))) {
+            throw new IllegalArgumentException("trigger中的 " + ref + "事件规则参数的运算符配置错误");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("trigger中的 " + ref + "事件规则参数的value配置错误");
         }
     }
 
@@ -899,6 +925,19 @@ public class DslParser {
         return null;
     }
 
+    public Set<String> getTriggerTypes() {
+        return this.customWebhooks.stream()
+                .map(DslCustomWebhook::getWebhookType)
+                .map(webhookType -> {
+                    String[] strings = webhookType.split("@");
+                    if (strings.length == 1) {
+                        return webhookType + "@latest";
+                    }
+                    return webhookType;
+                })
+                .collect(Collectors.toSet());
+    }
+
     public Set<String> getAsyncTaskTypes() {
         return dslNodes.stream()
                 .map(DslNode::getType)
@@ -972,12 +1011,8 @@ public class DslParser {
         return globalParameters;
     }
 
-    public String getWebhookType() {
-        return webhookType;
-    }
-
-    public List<CustomWebhookInstance.EventInstance> getWebhookEvents() {
-        return webhookEvents;
+    public List<DslCustomWebhook> getCustomWebhooks() {
+        return customWebhooks;
     }
 
     public String getTag() {

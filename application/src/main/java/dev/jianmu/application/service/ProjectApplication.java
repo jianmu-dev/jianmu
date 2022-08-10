@@ -8,6 +8,7 @@ import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.application.query.CustomWebhookDefApi;
 import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
@@ -74,6 +75,7 @@ public class ProjectApplication {
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final TaskInstanceRepository taskInstanceRepository;
+    private final CustomWebhookDefApi customWebhookDefApi;
     private final NodeDefApi nodeDefApi;
     private final ApplicationEventPublisher publisher;
     private final ProjectLinkGroupRepository projectLinkGroupRepository;
@@ -92,6 +94,7 @@ public class ProjectApplication {
             WorkflowInstanceRepository workflowInstanceRepository,
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             TaskInstanceRepository taskInstanceRepository,
+            CustomWebhookDefApi customWebhookDefApi,
             NodeDefApi nodeDefApi,
             ApplicationEventPublisher publisher,
             ProjectLinkGroupRepository projectLinkGroupRepository,
@@ -109,6 +112,7 @@ public class ProjectApplication {
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.taskInstanceRepository = taskInstanceRepository;
+        this.customWebhookDefApi = customWebhookDefApi;
         this.nodeDefApi = nodeDefApi;
         this.publisher = publisher;
         this.projectLinkGroupRepository = projectLinkGroupRepository;
@@ -175,12 +179,16 @@ public class ProjectApplication {
         var shellNodes = parser.getShellNodes();
         this.nodeDefApi.addShellNodes(shellNodes);
 
+        // 查询相关的触发器定义
+        var triggerTypes = parser.getTriggerTypes();
+        var triggerDefs = this.customWebhookDefApi.getByTypes(triggerTypes);
+
         // 查询相关的节点定义
         var types = parser.getAsyncTaskTypes();
         var nodeDefs = this.nodeDefApi.getByTypes(types);
 
         // 根据节点定义与DSL节点列表创建Workflow
-        var nodes = parser.createNodes(nodeDefs);
+        var nodes = parser.createNodes(nodeDefs, triggerDefs);
         return Workflow.Builder.aWorkflow()
                 .ref(ref)
                 .type(parser.getType())
@@ -411,37 +419,41 @@ public class ProjectApplication {
         }
         // 创建Webhook触发器
         if (project.getTriggerType() == Project.TriggerType.WEBHOOK) {
-            Webhook webhook;
-            if (parser.getWebhookType() != null) {
-                var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(parser.getWebhookType())
-                        .orElseThrow(() -> new DataNotFoundException("未找到Webhook: " + parser.getWebhookType()));
-                var params = webhookDefinitionVersion.getEvents().stream()
-                        .filter(event -> parser.getWebhookEvents().stream()
-                                .anyMatch(webhookEvent -> event.getRef().equals(webhookEvent.getRef()))
-                        )
-                        .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
-                        .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
-                var only = this.webhookOnlyService.getOnly(webhookDefinitionVersion.getEvents(), parser.getWebhookEvents());
-                webhook = Webhook.Builder.aWebhook()
-                        .only(only)
-                        .param(params)
-                        .build();
-            } else {
-                webhook = Webhook.Builder.aWebhook()
-                        .only(parser.getWebhook().getOnly())
-                        .auth(parser.getWebhook().getAuth())
-                        .param(parser.getWebhook().getParam())
-                        .build();
-            }
-            var webhookEvent = WebhookEvent.builder()
-                    .projectId(project.getId())
-                    .webhook(webhook)
-                    .userId(userId)
-                    .encryptedToken(encryptedToken)
-                    .webhookType(parser.getWebhookType())
-                    .eventInstances(parser.getWebhookEvents())
-                    .build();
-            this.publisher.publishEvent(webhookEvent);
+            parser.getCustomWebhooks().stream()
+                    .filter(dslWebhook -> dslWebhook.getType() == Project.TriggerType.WEBHOOK)
+                    .forEach(dslWebhook -> {
+                        Webhook webhook;
+                        if (dslWebhook.getWebhookType() != null) {
+                            var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(dslWebhook.getWebhookType())
+                                    .orElseThrow(() -> new DataNotFoundException("未找到Webhook: " + dslWebhook.getWebhookType()));
+                            var params = webhookDefinitionVersion.getEvents().stream()
+                                    .filter(event -> dslWebhook.getEvent().stream()
+                                            .anyMatch(webhookEvent -> event.getRef().equals(webhookEvent.getRef()))
+                                    )
+                                    .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
+                                    .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
+                            var only = this.webhookOnlyService.getOnly(webhookDefinitionVersion.getEvents(), dslWebhook.getEvent());
+                            webhook = Webhook.Builder.aWebhook()
+                                    .only(only)
+                                    .param(params)
+                                    .build();
+                        } else {
+                            webhook = Webhook.Builder.aWebhook()
+                                    .only(parser.getWebhook().getOnly())
+                                    .auth(parser.getWebhook().getAuth())
+                                    .param(parser.getWebhook().getParam())
+                                    .build();
+                        }
+                        var webhookEvent = WebhookEvent.builder()
+                                .projectId(project.getId())
+                                .webhook(webhook)
+                                .userId(userId)
+                                .encryptedToken(encryptedToken)
+                                .webhookType(dslWebhook.getWebhookType())
+                                .eventInstances(dslWebhook.getEvent())
+                                .build();
+                        this.publisher.publishEvent(webhookEvent);
+                    });
         }
         // 当触发类型为手动时
         if (project.getTriggerType() == Project.TriggerType.MANUAL) {
