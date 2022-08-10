@@ -40,13 +40,28 @@ export default function (G6: typeof _G6) {
     afterDraw(cfg, group) {
       const width = iconW;
       const height = iconH;
+      const { iconUrl } = group?.cfg.item.getModel();
+
+      if (!iconUrl) {
+        group?.addShape('image', {
+          attrs: {
+            x: -width / 2,
+            y: -height / 2,
+            width,
+            height,
+            img,
+          },
+        });
+        return;
+      }
+
       group?.addShape('image', {
         attrs: {
           x: -width / 2,
           y: -height / 2,
           width,
           height,
-          img,
+          img: `${iconUrl}?roundPic/radius/!25.5p`,
         },
       });
     },

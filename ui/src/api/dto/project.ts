@@ -253,6 +253,7 @@ export interface INodeDefVo
     sourceLink?: string;
     documentLink?: string;
     type: string;
+    webhook?: string;
     workerType: WorkerTypeEnum;
   }> {
 }
