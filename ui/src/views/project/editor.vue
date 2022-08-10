@@ -66,7 +66,7 @@ import LoginVerify from '@/views/login/dialog.vue';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
 import { pushTop } from '@/utils/push-top';
-import { DSL_VERSION_V2 } from '@/utils/constants';
+import { DSL_CURRENT_VERSION } from '@/components/workflow/version';
 
 export default defineComponent({
   props: {
@@ -92,7 +92,7 @@ export default defineComponent({
     const editorForm = ref<ISaveForm>({
       id: projectId,
       branch: props.branch,
-      dslText: `version: ${DSL_VERSION_V2}\n`,
+      dslText: `version: ${DSL_CURRENT_VERSION}\n`,
       projectGroupId: '',
     });
     let tempString: string;
