@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DslParser {
     private static final String V2_VERSION = "2";
+    private static final String CURRENT_VERSION = V2_VERSION;
     private Object version;
     private Map<String, Object> trigger;
     private Project.TriggerType triggerType = Project.TriggerType.MANUAL;
@@ -532,10 +533,10 @@ public class DslParser {
     }
 
     private void checkVersion() {
-        if (version instanceof String && V2_VERSION.equals(version)) {
+        if (version instanceof String && CURRENT_VERSION.equals(version)) {
             return;
         }
-        if (version instanceof Number && V2_VERSION.equals(version.toString())) {
+        if (version instanceof Number && CURRENT_VERSION.equals(version.toString())) {
             return;
         }
         throw new IllegalArgumentException("version配置错误");
