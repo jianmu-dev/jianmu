@@ -115,6 +115,8 @@ export class WorkflowTool {
       // 移除所有工具
       delete cell.tools;
       if (cell.shape === 'edge') {
+        // 移除边属性
+        delete cell.attrs;
         return;
       }
       cell.ports.items.forEach((item: any) => {
