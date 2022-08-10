@@ -140,7 +140,7 @@ export default defineComponent({
       failureVisible,
       // 添加环境变量
       addShellEnv: () => {
-        form.value.envs.push({ key: uuidv4(), name: '', value: '', type: ParamTypeEnum.STRING });
+        form.value.envs.push({ key: uuidv4(), name: '', value: '""', type: ParamTypeEnum.STRING });
       },
       deleteShellEnv: (index: number) => {
         form.value.envs.splice(index, 1);
