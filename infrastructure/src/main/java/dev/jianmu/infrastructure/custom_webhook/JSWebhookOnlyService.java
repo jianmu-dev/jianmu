@@ -39,7 +39,7 @@ public class JSWebhookOnlyService implements WebhookOnlyService {
                 .filter(webhookParameter -> webhookParameter.getRef().equals(rule.getParamRef()))
                 .findFirst()
                 .map(WebhookParameter::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("未找到参数：" + rule.getParamRef()));
+                .orElseThrow(() -> new IllegalArgumentException("未找到Webhook参数：" + rule.getParamRef()));
         switch (rule.getOperator()) {
             case EQ:
                 return value + " === " + rule.getMatchingValue();
