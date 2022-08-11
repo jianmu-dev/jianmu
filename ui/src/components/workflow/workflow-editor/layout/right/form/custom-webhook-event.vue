@@ -1,7 +1,7 @@
 <template>
   <div class="custom-webhook-event">
     <jm-radio :label="reference">{{ name }}</jm-radio>
-    <div v-if="eventInstanceVal">
+    <div v-if="eventInstanceVal && rules">
       <Rule
         v-for="(rule,idx) in eventInstanceVal.ruleset"
         :key="rule.key"
@@ -156,6 +156,10 @@ export default defineComponent({
 
   ::v-deep(.el-radio-group) {
     margin-left: 0;
+  }
+
+  ::v-deep(.el-form-item) {
+    margin-bottom: 0;
   }
 
   .check-event {

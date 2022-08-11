@@ -97,5 +97,9 @@ export default defineComponent({
     display: block;
     margin-left: 0;
   }
+
+  ::v-deep(.el-form-item) {
+    margin-bottom: 0;
+  }
 }
 </style>
