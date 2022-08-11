@@ -1,7 +1,7 @@
 <template>
   <div class="custom-webhook-events">
-    <jm-checkbox v-model="isCheckedVal" :label="name" @change="changeChecked" class="check-event"/>
-    <div v-if="eventInstanceVal && isCheckedVal">
+    <jm-radio :label="reference">{{ name }}</jm-radio>
+    <div v-if="eventInstanceVal">
       <Rule
         v-for="(rule,index) in eventInstanceVal.ruleset"
         :key="rule.key"
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, onMounted, onUpdated, PropType, ref } from 'vue';
 import Rule from './custom-webhook-rule.vue';
 import { getWebhookOperator, ICustomWebhookEventInstance } from '../../../model/data/node/custom-webhook';
 import { IWebhookParam } from '../../../model/data/node/webhook';
@@ -37,6 +37,10 @@ import { IWebhookEventOperatorVo } from '@/api/dto/custom-webhook';
 export default defineComponent({
   components: { Rule },
   props: {
+    selectedReference: {
+      type: String,
+      required: true,
+    },
     name: {
       type: String,
       required: true,
@@ -53,18 +57,43 @@ export default defineComponent({
       type: Object as PropType<ICustomWebhookEventInstance>,
     },
   },
-  emits: ['update:eventInstance'],
+  emits: ['update:eventInstance', 'check-event'],
   setup(props, { emit }) {
-    const isCheckedVal = ref<boolean>(false);
     const eventInstanceVal = ref<ICustomWebhookEventInstance>(props.eventInstance);
-    isCheckedVal.value = !!props.eventInstance;
-
     const rulesetOperators = ref<IWebhookEventOperatorVo[]>([]);
+    const selectedReferenceVal = ref<string>(props.selectedReference);
+    const isChecked = ref<boolean>(false);
+
+    // 初始化时判断是否勾选
+    if (eventInstanceVal.value && eventInstanceVal.value.ref === props.reference) {
+      emit('check-event', props.reference);
+    }
+
+    const changeReference = async (val: boolean) => {
+      eventInstanceVal.value = val ? props.eventInstance || {
+        ref: props.reference,
+        ruleset: [],
+        rulesetOperator: (await getWebhookOperator()).rulesetOperators[0].ref,
+      } : undefined;
+      // 初始化-勾选自动新增一条
+      if (eventInstanceVal.value && eventInstanceVal.value.ruleset.length === 0) {
+        eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
+      }
+      emit('update:eventInstance', eventInstanceVal.value);
+    };
+
+    onUpdated(async () => {
+      if (selectedReferenceVal.value === props.selectedReference) {
+        return;
+      }
+      selectedReferenceVal.value = props.selectedReference;
+      await changeReference(selectedReferenceVal.value === props.reference);
+    });
     onMounted(async () => {
       rulesetOperators.value = (await getWebhookOperator()).rulesetOperators;
     });
     return {
-      isCheckedVal,
+      isChecked,
       eventInstanceVal,
       rulesetOperators,
       updateParamRef: (val: string, index: number) => {
@@ -85,18 +114,6 @@ export default defineComponent({
       },
       add: () => {
         eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
-        emit('update:eventInstance', eventInstanceVal.value);
-      },
-      changeChecked: (val: boolean) => {
-        eventInstanceVal.value = val ? {
-          ref: props.reference,
-          ruleset: [],
-          rulesetOperator: rulesetOperators.value[0].ref,
-        } : undefined;
-        // 初始化-勾选自动新增一条
-        if (eventInstanceVal.value && eventInstanceVal.value.ruleset.length === 0) {
-          eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
-        }
         emit('update:eventInstance', eventInstanceVal.value);
       },
       changeRulesetOperatorVal: () => {
