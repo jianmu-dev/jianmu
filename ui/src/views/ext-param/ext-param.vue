@@ -210,9 +210,6 @@ export default defineComponent({
       if (scrollX.value < 0) {
         scrollX.value = 0;
       }
-      if (scrollX.value > maxScrollX.value) {
-        scrollX.value = maxScrollX.value;
-      }
       scrollBarRef.value?.scrollTo(scrollX.value, 0);
     };
     onBeforeUnmount(() => {
