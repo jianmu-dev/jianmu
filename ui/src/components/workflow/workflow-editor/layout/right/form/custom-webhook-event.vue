@@ -1,27 +1,31 @@
 <template>
-  <div class="custom-webhook-events">
+  <div class="custom-webhook-event">
     <jm-radio :label="reference">{{ name }}</jm-radio>
     <div v-if="eventInstanceVal">
       <Rule
-        v-for="(rule,index) in eventInstanceVal.ruleset"
+        v-for="(rule,idx) in eventInstanceVal.ruleset"
         :key="rule.key"
         v-model:paramRef="rule.paramRef"
         v-model:operator="rule.operator"
         v-model:matchingValue="rule.matchingValue"
         :available-params="availableParams"
-        :index="index"
-        @update:paramRef="val=>updateParamRef(val,index)"
-        @update:operator="val=>updateOperator(val,index)"
-        @update:matchingValue="val=>updateMatchingValue(val,index)"
+        :index="idx"
+        :rules="rules.ruleset.fields[idx].fields"
+        :model-name="`${formModelName}.${index}.ruleset`"
+        @update:paramRef="val=>updateParamRef(val,idx)"
+        @update:operator="val=>updateOperator(val,idx)"
+        @update:matchingValue="val=>updateMatchingValue(val,idx)"
         @delete="del"
       />
       <div class="add" @click="add">
         <i class="jm-icon-button-add"/>
         添加匹配规则
       </div>
-      <jm-radio-group v-model="eventInstanceVal.rulesetOperator" @change="changeRulesetOperatorVal">
-        <jm-radio v-for="{ref,name} in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
-      </jm-radio-group>
+      <jm-form-item :prop="`${formModelName}.${index}.rulesetOperator`" :rules="rules.rulesetOperator">
+        <jm-radio-group v-model="eventInstanceVal.rulesetOperator" @change="changeRulesetOperatorVal">
+          <jm-radio v-for="{ref,name} in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
+        </jm-radio-group>
+      </jm-form-item>
     </div>
   </div>
 </template>
@@ -33,6 +37,7 @@ import { getWebhookOperator, ICustomWebhookEventInstance } from '../../../model/
 import { IWebhookParam } from '../../../model/data/node/webhook';
 import { v4 as uuidv4 } from 'uuid';
 import { IWebhookEventOperatorVo } from '@/api/dto/custom-webhook';
+import { CustomRule } from '../../../model/data/common';
 
 export default defineComponent({
   components: { Rule },
@@ -55,6 +60,17 @@ export default defineComponent({
     },
     eventInstance: {
       type: Object as PropType<ICustomWebhookEventInstance>,
+    },
+    index: {
+      type: Number,
+      required: true,
+    },
+    rules: {
+      type: Object as PropType<Record<string, CustomRule>>,
+    },
+    formModelName: {
+      type: String,
+      required: true,
     },
   },
   emits: ['update:eventInstance', 'check-event'],
@@ -125,7 +141,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.custom-webhook-events {
+.custom-webhook-event {
   color: #3F536E;
   font-size: 14px;
   border-bottom: 1px solid #E6EBF2;
@@ -133,7 +149,7 @@ export default defineComponent({
   padding-bottom: 20px;
   box-sizing: border-box;
 
-  &.custom-webhook-events:last-child {
+  &.custom-webhook-event:last-child {
     border-bottom: none;
     margin-bottom: 0;
   }
