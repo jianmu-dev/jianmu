@@ -8,6 +8,7 @@
         v-model:paramRef="rule.paramRef"
         v-model:operator="rule.operator"
         v-model:matchingValue="rule.matchingValue"
+        v-model:delVisible="delVisible"
         :available-params="availableParams"
         :index="idx"
         :rules="rules.ruleset.fields[idx].fields"
@@ -79,6 +80,7 @@ export default defineComponent({
     const rulesetOperators = ref<IWebhookEventOperatorVo[]>([]);
     const selectedReferenceVal = ref<string>(props.selectedReference);
     const isChecked = ref<boolean>(false);
+    const delVisible = ref<boolean>(true);
 
     // 初始化时判断是否勾选
     if (eventInstanceVal.value && eventInstanceVal.value.ref === props.reference) {
@@ -94,6 +96,7 @@ export default defineComponent({
       // 初始化-勾选自动新增一条
       if (eventInstanceVal.value && eventInstanceVal.value.ruleset.length === 0) {
         eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
+        delVisible.value = true;
       }
       emit('update:eventInstance', eventInstanceVal.value);
     };
@@ -106,12 +109,14 @@ export default defineComponent({
       await changeReference(selectedReferenceVal.value === props.reference);
     });
     onMounted(async () => {
+      delVisible.value = eventInstanceVal.value && eventInstanceVal.value.ruleset.length <= 1;
       rulesetOperators.value = (await getWebhookOperator()).rulesetOperators;
     });
     return {
       isChecked,
       eventInstanceVal,
       rulesetOperators,
+      delVisible,
       updateParamRef: (val: string, index: number) => {
         eventInstanceVal.value.ruleset[index].paramRef = val;
         emit('update:eventInstance', eventInstanceVal.value);
@@ -127,10 +132,12 @@ export default defineComponent({
       del: (index: number) => {
         eventInstanceVal.value!.ruleset.splice(index, 1);
         emit('update:eventInstance', eventInstanceVal.value);
+        delVisible.value = eventInstanceVal.value && eventInstanceVal.value.ruleset.length <= 1;
       },
       add: () => {
         eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
         emit('update:eventInstance', eventInstanceVal.value);
+        delVisible.value = eventInstanceVal.value && eventInstanceVal.value.ruleset.length <= 1;
       },
       changeRulesetOperatorVal: () => {
         emit('update:eventInstance', eventInstanceVal.value);
