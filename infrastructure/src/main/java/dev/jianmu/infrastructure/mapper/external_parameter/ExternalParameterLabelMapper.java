@@ -27,6 +27,7 @@ public interface ExternalParameterLabelMapper {
             " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
             " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
             "</where>" +
+            "order by created_time" +
             "</script>")
     @Result(column = "id", property = "id")
     @Result(column = "value", property = "value")
