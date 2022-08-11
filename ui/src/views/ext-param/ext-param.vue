@@ -1,14 +1,26 @@
 <template>
   <div class="ext-param" v-loading="pageLoading">
     <!--  tab  -->
-    <div class="tab-container">
-      <jm-scrollbar>
-        <div class="classification-tabs">
-            <span :class="['tab-item',currentTab===index?'is-active':'']" v-for="(item,index) in data" :key="index"
-                  @click="currentTab=index">{{ item.label }}・{{ item.counter }}
+    <div class="tab-container" v-if="data.length>0">
+      <span :class="['tab-item',currentTab===0?'is-active':'']" @click="currentTab=0">
+       {{ data[0].label }}・{{ data[0].counter }}
+      </span>
+      <template v-if="data.length>1">
+        <div class="classification-tabs" ref="scrollBarRef">
+            <span :class="['tab-item',currentTab===index+1?'is-active':'']" v-for="(item,index) in data.slice(1)"
+                  :key="index+1"
+                  @click="currentTab=index+1">{{ item.label }}・{{ item.counter }}
             </span>
         </div>
-      </jm-scrollbar>
+        <div class="btns" v-show="isShowBtn">
+          <div :disabled="disabledClass==='left'" class="left" @click="handleScroll(0)">
+            <div class="triangle"></div>
+          </div>
+          <div :disabled="disabledClass==='right'" class="right" @click="handleScroll(1)">
+            <div class="triangle"></div>
+          </div>
+        </div>
+      </template>
     </div>
     <!--  内容  -->
     <div class="ext-content">
@@ -95,9 +107,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, nextTick, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { addExtParam, deleteExtParam, editorExtParam, getExtParamLabelList, getExtParamList } from '@/api/ext-param';
 import { IExternalParameterLabelVo, IExternalParameterVo } from '@/api/dto/ext-param';
+// @ts-ignore
+import listen from 'good-listener';
 import ExtParamCard from './ext-param-card.vue';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
 import { useStore } from 'vuex';
@@ -122,6 +136,15 @@ export default defineComponent({
     const extParams = ref<IExternalParameterVo[]>();
     const addExtParamVisible = ref<boolean>(false);
     const addParamRef = ref<HTMLFormElement>();
+    const scrollBarRef = ref<HTMLElement>();
+    // 控制左右滚动按钮的显示隐藏
+    const isShowBtn = ref<boolean>(false);
+    // 横坐标滚动的偏移量
+    const scrollX = ref<number>(0);
+    // 动态向左右按钮添加禁用样式
+    const disabledClass = ref<string>('left');
+    // 最大可滚动区域
+    const maxScrollX = ref<number>(0);
     // 获取label列表
     const extLabelList = ref<IExternalParameterLabelVo[]>();
     const currentTab = ref<number>(0);
@@ -154,8 +177,48 @@ export default defineComponent({
       }
 
     };
-    init();
 
+    let listener: any;
+    const initScrollHandle = () => {
+      maxScrollX.value = scrollBarRef.value?.scrollWidth - scrollBarRef.value?.offsetWidth;
+      maxScrollX.value > 0 && (isShowBtn.value = true);
+      listener = listen(scrollBarRef.value, 'scroll', (e: MouseEvent) => {
+        scrollX.value = e.target.scrollLeft;
+        disabledClass.value = '';
+        if (e.target.scrollLeft === 0) {
+          disabledClass.value = 'left';
+        }
+        if (Math.round(e.target.clientWidth + e.target.scrollLeft) >= e.target.scrollWidth) {
+          disabledClass.value = 'right';
+        }
+      });
+    };
+    onMounted(async () => {
+      await init();
+      initScrollHandle();
+      window.addEventListener('resize', initScrollHandle);
+    });
+    const handleScroll = (direction: number) => {
+      // 0向左，1向右
+      if (!direction) {
+        // 向左
+        scrollX.value -= 200;
+      } else {
+        // 向右
+        scrollX.value += 200;
+      }
+      if (scrollX.value < 0) {
+        scrollX.value = 0;
+      }
+      if (scrollX.value > maxScrollX.value) {
+        scrollX.value = maxScrollX.value;
+      }
+      scrollBarRef.value?.scrollTo(scrollX.value, 0);
+    };
+    onBeforeUnmount(() => {
+      listener.destroy();
+      window.removeEventListener('resize', initScrollHandle);
+    });
     const getLabelList = () => {
       // 初始化
       labelOption.value = [];
@@ -164,7 +227,7 @@ export default defineComponent({
       });
     };
     // 构建tab参数
-    const data = computed<{ label: string, projects: IExternalParameterVo[], counter: number }>(() => {
+    const data = computed<{ label: string, projects: IExternalParameterVo[], counter: number }[]>(() => {
       let info: any = [];
 
       // label去重
@@ -199,6 +262,9 @@ export default defineComponent({
       return info;
     });
     return {
+      disabledClass,
+      isShowBtn,
+      scrollBarRef,
       entry,
       pageLoading,
       addExtParamVisible,
@@ -225,6 +291,7 @@ export default defineComponent({
           { required: true, message: '请选择或创建参数标签', trigger: 'change' },
         ],
       },
+      handleScroll,
       // 新增-保存
       sure: () => {
         addParamRef.value?.validate(async (valid: boolean) => {
@@ -245,6 +312,7 @@ export default defineComponent({
             addExtParamVisible.value = false;
             proxy.$success('新增参数成功');
             await init();
+            initScrollHandle();
           } catch (err) {
             proxy.$throw(err, proxy);
           }
@@ -287,6 +355,7 @@ export default defineComponent({
             proxy.$success('修改成功');
             addExtParamVisible.value = false;
             await init();
+            initScrollHandle();
           } catch (err) {
             proxy.$throw(err, proxy);
           }
@@ -310,6 +379,7 @@ export default defineComponent({
               await deleteExtParam(id);
               proxy.$success('删除参数成功');
               await init();
+              initScrollHandle();
             } catch (err) {
               proxy.$throw(err, proxy);
             }
@@ -353,38 +423,129 @@ export default defineComponent({
   min-height: calc(100vh - 185px);
   // tab
   .tab-container {
+    display: flex;
+    margin-bottom: 20px;
+    height: 30px;
+    line-height: 22px;
+    justify-content: space-between;
     align-items: center;
     font-size: 14px;
 
-    .classification-tabs {
-      width: 100%;
-      padding-left: 0.385%;
+    &:first-child {
+      flex-shrink: 0;
+    }
+
+    .tab-item {
+      cursor: pointer;
       box-sizing: border-box;
-      margin-bottom: 20px;
-      height: 30px;
-      line-height: 22px;
-      color: #082340;
+      padding: 5px 15px;
       display: flex;
+      white-space: nowrap;
+
+      // 取消双击选中
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
+      &.is-active {
+        font-weight: 500;
+        color: #096DD9;
+        background-color: #EBF4FF;
+        border-radius: 15px;
+      }
+    }
+
+    // 手动控制tabs左右滚动
+    .classification-tabs {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      box-sizing: border-box;
+      color: #082340;
       flex-wrap: nowrap;
+      // 隐藏元素滚动条
+      /*Firefox*/
+      scrollbar-width: none;
+      /*IE10+*/
+      -ms-overflow-style: none;
+      /*ChromeSafari*/
 
-      .tab-item {
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+    }
+
+    .btns {
+      padding: 2px 0;
+      box-sizing: border-box;
+      border-bottom-right-radius: 15px;
+      border-top-right-radius: 15px;
+      display: inline-flex;
+      background-color: #FFFFFF;
+
+      .left, .right {
         cursor: pointer;
-        box-sizing: border-box;
-        padding: 5px 15px;
-        display: flex;
-        white-space: nowrap;
 
-        // 取消双击选中
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
+        &[disabled='true'] {
+          position: relative;
+          cursor: not-allowed;
+        }
 
-        &.is-active {
-          font-weight: 500;
-          color: #096DD9;
-          background-color: #EBF4FF;
-          border-radius: 15px;
+        .triangle {
+          width: 0;
+          height: 0;
+          border: 8px solid transparent;
+        }
+      }
+
+      .left {
+        padding: 5px 12px 5px 0;
+
+        .triangle {
+          border-right-color: #6B7B8D;
+        }
+
+        &:hover {
+          background-color: #EFF7FF;
+
+          .triangle {
+            border-right-color: #096DD9;
+          }
+        }
+
+        &[disabled='true'] {
+          background-color: #FFFFFF;
+
+          .triangle {
+            border-right-color: #A7B0BB;
+          }
+        }
+      }
+
+      .right {
+        padding: 5px 0 5px 12px;
+        margin-left: -5px;
+
+        .triangle {
+          border-left-color: #6B7B8D;
+        }
+
+        &:hover {
+          background-color: #EFF7FF;
+
+          .triangle {
+            border-left-color: #096DD9;
+          }
+        }
+
+        &[disabled='true'] {
+          background-color: #FFFFFF;
+
+          .triangle {
+            border-left-color: #A7B0BB;
+          }
         }
       }
     }
