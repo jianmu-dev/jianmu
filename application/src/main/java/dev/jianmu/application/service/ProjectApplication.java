@@ -7,8 +7,8 @@ import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
-import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.query.CustomWebhookDefApi;
+import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
@@ -419,41 +419,42 @@ public class ProjectApplication {
         }
         // 创建Webhook触发器
         if (project.getTriggerType() == Project.TriggerType.WEBHOOK) {
-            parser.getCustomWebhooks().stream()
-                    .filter(dslWebhook -> dslWebhook.getType() == Project.TriggerType.WEBHOOK)
-                    .forEach(dslWebhook -> {
-                        Webhook webhook;
-                        if (dslWebhook.getWebhookType() != null) {
-                            var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(dslWebhook.getWebhookType())
-                                    .orElseThrow(() -> new DataNotFoundException("未找到Webhook: " + dslWebhook.getWebhookType()));
-                            var params = webhookDefinitionVersion.getEvents().stream()
-                                    .filter(event -> dslWebhook.getEvent().stream()
-                                            .anyMatch(webhookEvent -> event.getRef().equals(webhookEvent.getRef()))
-                                    )
-                                    .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
-                                    .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
-                            var only = this.webhookOnlyService.getOnly(webhookDefinitionVersion.getEvents(), dslWebhook.getEvent());
-                            webhook = Webhook.Builder.aWebhook()
-                                    .only(only)
-                                    .param(params)
-                                    .build();
-                        } else {
-                            webhook = Webhook.Builder.aWebhook()
-                                    .only(parser.getWebhook().getOnly())
-                                    .auth(parser.getWebhook().getAuth())
-                                    .param(parser.getWebhook().getParam())
-                                    .build();
-                        }
-                        var webhookEvent = WebhookEvent.builder()
-                                .projectId(project.getId())
-                                .webhook(webhook)
-                                .userId(userId)
-                                .encryptedToken(encryptedToken)
-                                .webhookType(dslWebhook.getWebhookType())
-                                .eventInstances(dslWebhook.getEvent())
-                                .build();
-                        this.publisher.publishEvent(webhookEvent);
-                    });
+            if (parser.getCustomWebhooks().isEmpty()) {
+                var webhookEvent = WebhookEvent.builder()
+                        .projectId(project.getId())
+                        .webhook(Webhook.Builder.aWebhook()
+                                .only(parser.getWebhook().getOnly())
+                                .auth(parser.getWebhook().getAuth())
+                                .param(parser.getWebhook().getParam())
+                                .build())
+                        .userId(userId)
+                        .encryptedToken(encryptedToken)
+                        .build();
+                this.publisher.publishEvent(webhookEvent);
+            }
+            parser.getCustomWebhooks().forEach(dslWebhook -> {
+                var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(dslWebhook.getWebhookType())
+                        .orElseThrow(() -> new DataNotFoundException("未找到Webhook: " + dslWebhook.getWebhookType()));
+                var params = webhookDefinitionVersion.getEvents().stream()
+                        .filter(event -> dslWebhook.getEvent().stream()
+                                .anyMatch(webhookEvent -> event.getRef().equals(webhookEvent.getRef()))
+                        )
+                        .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
+                        .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
+                var only = this.webhookOnlyService.getOnly(webhookDefinitionVersion.getEvents(), dslWebhook.getEvent());
+                var webhookEvent = WebhookEvent.builder()
+                        .projectId(project.getId())
+                        .webhook(Webhook.Builder.aWebhook()
+                                .only(only)
+                                .param(params)
+                                .build())
+                        .userId(userId)
+                        .encryptedToken(encryptedToken)
+                        .webhookType(dslWebhook.getWebhookType())
+                        .eventInstances(dslWebhook.getEvent())
+                        .build();
+                this.publisher.publishEvent(webhookEvent);
+            });
         }
         // 当触发类型为手动时
         if (project.getTriggerType() == Project.TriggerType.MANUAL) {

@@ -56,7 +56,7 @@
               v-else
               target="_blank"
               class="item-t-t"
-              :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}`"
+              :href="`https://jianmuhub.com/${i.ownerRef}/${i.ref}`"
             >
               <jm-text-viewer :value="i.name"/>
             </a
@@ -93,7 +93,7 @@
                   <a
                     v-else
                     target="_blank"
-                    :href="`https://hub.jianmu.dev/${i.ownerRef}/${i.ref}/${version}`"
+                    :href="`https://jianmuhub.com/${i.ownerRef}/${i.ref}/${version}`"
                   >
                     {{ version }}
                   </a

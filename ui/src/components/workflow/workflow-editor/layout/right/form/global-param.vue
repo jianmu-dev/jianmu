@@ -115,10 +115,14 @@ export default defineComponent({
     const nameVal = ref<string>(props.name);
     const typeVal = ref<ParamTypeEnum>(props.type);
     const requiredVal = ref<boolean>(props.required);
-    const valueVal = ref<string>(props.value);
+    const valueVal = ref<string>(props.value || '');
     const hiddenVal = ref<boolean>(props.hidden);
     // 切换背景
     const switchFlag = ref<boolean>(false);
+
+    if (!valueVal.value && typeVal.value === ParamTypeEnum.STRING) {
+      valueVal.value = JSON.stringify(valueVal.value);
+    }
 
     return {
       referenceVal,
