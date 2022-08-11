@@ -8,7 +8,7 @@ import { getWebhookOperators } from '@/api/custom-webhook';
 
 const OFFICIAL_NODE_OWNER_REF = '_';
 
-export const CUSTOM_PARAM_SCOPE = 'custom_trigger';
+export const CUSTOM_PARAM_SCOPE = 'trigger';
 
 export interface ICustomWebhookRule {
   key?: string;
@@ -60,12 +60,14 @@ export class CustomWebhook extends BaseNode {
     const refArr: string[] = [];
     // 整合参数 & 参数去重
     this.events.forEach(item => {
-      item.availableParams.forEach(_item => {
-        if (!refArr.includes(_item.ref)) {
-          arr.push(_item);
-          refArr.push(_item.ref);
-        }
-      });
+      if (item.ref === this.eventInstances[0].ref) {
+        item.availableParams.forEach(_item => {
+          if (!refArr.includes(_item.ref)) {
+            arr.push(_item);
+            refArr.push(_item.ref);
+          }
+        });
+      }
     });
 
     return {
