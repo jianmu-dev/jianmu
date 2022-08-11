@@ -52,23 +52,22 @@ export class CustomWebhook extends BaseNode {
   }
 
   async buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined> {
-    if (this.events.length === 0) {
+    if (this.eventInstances.length === 0) {
       return undefined;
     }
 
-    const arr: any[] = [];
+    const events = this.eventInstances.map(({ ref }) => this.events.find(event => event.ref === ref)!);
+    const arr: IWebhookParam[] = [];
     const refArr: string[] = [];
     // 整合参数 & 参数去重
-    this.events.forEach(item => {
-      if (item.ref === this.eventInstances[0].ref) {
-        item.availableParams.forEach(_item => {
-          if (!refArr.includes(_item.ref)) {
-            arr.push(_item);
-            refArr.push(_item.ref);
-          }
-        });
-      }
-    });
+    events.forEach(({ availableParams }) =>
+      availableParams.forEach(item => {
+        if (refArr.includes(item.ref)) {
+          return;
+        }
+        arr.push(item);
+        refArr.push(item.ref);
+      }));
 
     return {
       value: CUSTOM_PARAM_SCOPE,
@@ -87,9 +86,42 @@ export class CustomWebhook extends BaseNode {
 
   getFormRules(): Record<string, CustomRule> {
     const rules = super.getFormRules();
-    // TODO 待完善
+    const customWebhookFields: Record<string, CustomRule> = {};
+    this.events.forEach((item, index) => {
+      const instance = this.eventInstances.find(({ ref }) => ref === item.ref);
+      if (!instance) {
+        return;
+      }
+      const fields: Record<string, CustomRule> = {};
+      customWebhookFields[index] = {
+        ruleset: {
+          type: 'array',
+          required: true,
+          len: instance.ruleset.length,
+          fields,
+        },
+        rulesetOperator: [{ required: true, message: '请选择匹配类型', trigger: 'change' }],
+      } as Record<string, CustomRule>;
+      instance.ruleset.forEach((_item, idx) => {
+        fields[idx] = {
+          type: 'object',
+          required: true,
+          fields: {
+            paramRef: [{ required: true, message: '请选择匹配类型', trigger: 'change' }],
+            matchingValue: [{ required: true, message: '请输入参数值', trigger: 'blur' }],
+          } as Record<string, CustomRule>,
+        };
+      });
+    });
     return {
       ...rules,
+      selectedReference: [{ required: true, message: '请选择事件类型', trigger: 'change' }],
+      eventInstances: {
+        type: 'array',
+        required: false,
+        len: this.eventInstances.length,
+        fields: customWebhookFields,
+      },
     };
   }
 

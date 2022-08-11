@@ -1,5 +1,5 @@
 <template>
-  <div class="rules">
+  <div class="custom-webhook-rule">
     <div class="tool-label">
       <div class="label">
         匹配规则{{ index + 1 }}
@@ -7,14 +7,16 @@
       <i class="jm-icon-button-delete" @click="del"></i>
     </div>
     <div :class="['rules-container',switchFlag?'switch-bgc':'']">
-      <jm-select v-model="paramRefVal" placeholder="请选择参数类型" @change="changeParamRef">
-        <jm-option
-          v-for="item in availableParams"
-          :key="item.ref"
-          :label="item.name"
-          :value="item.ref"
-        />
-      </jm-select>
+      <jm-form-item :prop="`${modelName}.${index}.paramRef`" :rules="rules.paramRef">
+        <jm-select v-model="paramRefVal" placeholder="请选择参数类型" @change="changeParamRef">
+          <jm-option
+            v-for="item in availableParams"
+            :key="item.ref"
+            :label="item.name"
+            :value="item.ref"
+          />
+        </jm-select>
+      </jm-form-item>
       <jm-dropdown trigger="click" @command="changeOperator">
         <span class="el-dropdown-link">
           {{ operatorText }}
@@ -28,16 +30,18 @@
           </jm-dropdown-menu>
         </template>
       </jm-dropdown>
-      <expression-editor
-        v-model="matchingValueVal"
-        :placeholder="inputPlaceholder"
-        :type="ExpressionTypeEnum.WEBHOOK_PARAM"
-        :param-type="paramType"
-        :node-id="nodeId"
-        @change="changeMatchingValue"
-        @focus="switchFlag=true"
-        @blur="switchFlag=false"
-      />
+      <jm-form-item :prop="`${modelName}.${index}.matchingValue`" :rules="rules.matchingValue">
+        <expression-editor
+          v-model="matchingValueVal"
+          :placeholder="inputPlaceholder"
+          :type="ExpressionTypeEnum.WEBHOOK_PARAM"
+          :param-type="paramType"
+          :node-id="nodeId"
+          @change="changeMatchingValue"
+          @focus="switchFlag=true"
+          @blur="switchFlag=false"
+        />
+      </jm-form-item>
     </div>
   </div>
 </template>
@@ -45,9 +49,10 @@
 import { computed, defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import ExpressionEditor from '../form/expression-editor.vue';
-import { IWebhookParam } from '@/components/workflow/workflow-editor/model/data/node/webhook';
+import { IWebhookParam } from '../../../model/data/node/webhook';
 import { IWebhookEventOperatorVo, IWebhookParamOperatorVo } from '@/api/dto/custom-webhook';
 import { getWebhookOperator } from '../../../model/data/node/custom-webhook';
+import { CustomRule } from '../../../model/data/common';
 
 export default defineComponent({
   components: { ExpressionEditor },
@@ -70,6 +75,14 @@ export default defineComponent({
     },
     index: {
       type: Number,
+      required: true,
+    },
+    rules: {
+      type: Object as PropType<Record<string, CustomRule>>,
+      required: true,
+    },
+    modelName: {
+      type: String,
       required: true,
     },
   },
@@ -144,12 +157,12 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
-.rules {
+.custom-webhook-rule {
   font-size: 14px;
   color: #3F536E;
   margin-bottom: 20px;
 
-  &.rules:first-child {
+  &.custom-webhook-rule:first-child {
     margin-top: 20px;
   }
 

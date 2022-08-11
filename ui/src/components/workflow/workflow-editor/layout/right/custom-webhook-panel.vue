@@ -1,25 +1,30 @@
 <template>
   <div class="jm-workflow-editor-custom-webhook-panel">
     <jm-form
-      :model="form"
+      :model="{eventInstances,selectedReference}"
       ref="formRef"
       @submit.prevent
       label-position="top"
     >
       <div class="trigger-title">触发事件</div>
-      <jm-radio-group v-model="selectedReference" ref="radioGroupRef">
-        <Event
-          v-for="(event,idx) in form.events"
-          :key="event.ref"
-          :selected-reference="selectedReference"
-          :name="event.name"
-          :reference="event.ref"
-          :available-params="event.availableParams"
-          v-model:eventInstance="eventInstances[idx]"
-          @update:eventInstance="updateEventInstance"
-          @check-event="checkEvent"
-        />
-      </jm-radio-group>
+      <jm-form-item prop="selectedReference" :rules="nodeData.getFormRules().selectedReference">
+        <jm-radio-group v-model="selectedReference" ref="radioGroupRef">
+          <Event
+            v-for="(event,idx) in form.events"
+            :key="event.ref"
+            :selected-reference="selectedReference"
+            :name="event.name"
+            :reference="event.ref"
+            :index="idx"
+            :available-params="event.availableParams"
+            :rules="nodeData.getFormRules().eventInstances.fields[idx]"
+            :form-model-name="'eventInstances'"
+            v-model:eventInstance="eventInstances[idx]"
+            @update:eventInstance="updateEventInstance"
+            @check-event="checkEvent"
+          />
+        </jm-radio-group>
+      </jm-form-item>
     </jm-form>
   </div>
 </template>
