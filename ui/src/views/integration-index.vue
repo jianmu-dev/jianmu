@@ -63,7 +63,7 @@
     </div>
     <!-- 选择分支的弹框 -->
     <jm-dialog
-      :custom-class="entry?'entry':'center'"
+      :custom-class="`${entry?'entry':'center'} branch`"
       :model-value="dialogVisible"
       @close="close"
       width="460px">
@@ -489,7 +489,11 @@ export default defineComponent({
     }
   }
 
-  ::v-deep(.el-dialog) {
+  ::v-deep(.el-dialog.branch) {
+    .el-dialog__body {
+      padding: 30px 30px 15px;
+    }
+
     .el-dialog__footer {
       background-color: #fff;
 

@@ -11,6 +11,8 @@ public class Webhook {
     private List<WebhookParameter> param;
     private WebhookAuth auth;
     private String only;
+    private String webhook;
+    private List<CustomWebhookEvent> event;
 
     public void setParam(List<WebhookParameter> param) {
         this.param = param;

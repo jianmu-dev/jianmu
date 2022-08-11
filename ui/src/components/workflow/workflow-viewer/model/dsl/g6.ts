@@ -13,12 +13,15 @@ export const MAX_LABEL_LENGTH = 10;
 
 /**
  * 解析webhook节点
+ * @param trigger
  * @param nodes
  * @param edges
  * @param isWorkflow
  */
-function parseWebhook(nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
-  const key = 'webhook';
+function parseWebhook(trigger: any, nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: boolean): void {
+  const { webhook } = trigger;
+
+  const key = webhook ? webhook.split('@')[0] : 'webhook';
   const label = key;
   const type = NodeTypeEnum.WEBHOOK;
 
@@ -27,6 +30,7 @@ function parseWebhook(nodes: NodeConfig[], edges: EdgeConfig[], isWorkflow: bool
     label,
     description: key,
     type,
+    uniqueKey: webhook || undefined,
   });
 
   let startNode;
@@ -300,18 +304,34 @@ export function parse(dsl: string | undefined, triggerType: TriggerTypeEnum | un
       break;
     case TriggerTypeEnum.WEBHOOK:
       // 解析webhook节点
-      parseWebhook(nodes, edges, !!workflow);
+      parseWebhook(trigger, nodes, edges, !!workflow);
       break;
   }
 
   if (nodeInfos) {
     // 匹配icon
     nodes.forEach((node: NodeConfig) => {
-      if (node.uniqueKey === SHELL_NODE_TYPE) {
+      const { type, uniqueKey } = node;
+      if (!uniqueKey) {
+        return;
+      }
+
+      if (uniqueKey === SHELL_NODE_TYPE) {
         node.iconUrl = shellIcon;
         return;
       }
-      node.iconUrl = nodeInfos.find(nodeInfo => nodeInfo.type === node.uniqueKey)?.icon;
+
+      node.iconUrl = nodeInfos.find(nodeInfo => {
+        if (type === NodeTypeEnum.WEBHOOK) {
+          return nodeInfo.webhook === uniqueKey;
+        }
+
+        if (type === NodeTypeEnum.ASYNC_TASK) {
+          return nodeInfo.type === uniqueKey;
+        }
+
+        return false;
+      })?.icon;
     });
   }
 

@@ -1,10 +1,13 @@
 package dev.jianmu.application.event;
 
 import dev.jianmu.trigger.aggregate.Webhook;
+import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @class WebhookEvent
@@ -21,4 +24,6 @@ public class WebhookEvent {
     private Webhook webhook;
     private String userId;
     private String encryptedToken;
+    private String webhookType;
+    private List<CustomWebhookInstance.EventInstance> eventInstances;
 }

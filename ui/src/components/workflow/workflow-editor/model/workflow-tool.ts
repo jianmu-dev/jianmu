@@ -4,6 +4,7 @@ import { ZoomTypeEnum } from './data/enumeration';
 import { NODE } from '../shape/gengral-config';
 import { IWorkflow } from './data/common';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
+import { DSL_CURRENT_VERSION } from '@/components/workflow/version';
 
 const { selectedBorderWidth } = NODE;
 
@@ -114,6 +115,8 @@ export class WorkflowTool {
       // 移除所有工具
       delete cell.tools;
       if (cell.shape === 'edge') {
+        // 移除边属性
+        delete cell.attrs;
         return;
       }
       cell.ports.items.forEach((item: any) => {
@@ -146,6 +149,7 @@ export class WorkflowTool {
     nodeProxies.forEach(nodeProxy => workflow.push(nodeProxy.toDsl(this.graph)));
 
     let dsl = yaml.stringify({
+      version: DSL_CURRENT_VERSION,
       name: workflowData.name,
       description: workflowData.description,
       global: workflowData.global.toDsl(),

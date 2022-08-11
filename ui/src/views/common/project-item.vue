@@ -280,12 +280,12 @@ export default defineComponent({
         const msg = props.project.mutable ? `
           <div>
             <span>确定要${str}吗?</span>
-            <a href="https://docs.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
+            <a href="https://v2.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
           </div>
         ` : `
           <div>
             <span>${enabled.value ? '已启用' : '已禁用'}，不可修改</span>
-            <a href="https://docs.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
+            <a href="https://v2.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
           </div>
           <div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">若要修改，请通过DSL更新</div>
         `;

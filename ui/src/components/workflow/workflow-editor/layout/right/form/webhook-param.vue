@@ -31,7 +31,7 @@
         <jm-tooltip placement="top">
           <template #content>
             详见<a
-            href="https://docs.jianmu.dev/guide/webhook.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0%E6%8F%90%E5%8F%96%E8%A7%84%E5%88%99"
+            href="https://v2.jianmu.dev/guide/webhook.html#%E8%A7%A6%E5%8F%91%E5%99%A8%E5%8F%82%E6%95%B0%E6%8F%90%E5%8F%96%E8%A7%84%E5%88%99"
             target="_blank"
             style="color:#fff;text-decoration: underline;">提取规则</a>
           </template>
@@ -139,11 +139,14 @@ export default defineComponent({
     const refVal = ref<string>(props.reference);
     const nameVal = ref<string>(props.name);
     const typeVal = ref<ParamTypeEnum>(props.type);
-    const valueVal = ref<string>(props.value);
+    const valueVal = ref<string>(props.value || '');
     const requiredVal = ref<boolean>(props.required);
     const hiddenVal = ref<boolean>(props.hidden);
     const switchBackgroundFlag = ref<boolean>(false);
 
+    if (!valueVal.value && typeVal.value === ParamTypeEnum.STRING) {
+      valueVal.value = JSON.stringify(valueVal.value);
+    }
     // 初始化required的值
     emit('update:required', requiredVal.value);
 

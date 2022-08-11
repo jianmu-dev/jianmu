@@ -397,6 +397,7 @@ export default defineComponent({
           line-height: 59px;
           font-size: 16px;
           margin-right: 55px;
+          color: #082340;
           cursor: pointer;
           &.select {
             color: #096DD9;

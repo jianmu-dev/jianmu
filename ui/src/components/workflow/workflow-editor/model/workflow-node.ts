@@ -4,11 +4,16 @@ import { Webhook } from './data/node/webhook';
 import { Shell } from './data/node/shell';
 import { AsyncTask } from './data/node/async-task';
 import { fetchNodeLibraryList, getOfficialNodes } from '@/api/view-no-auth';
-import { NodeTypeEnum } from '@/api/dto/enumeration';
+import { NodeCategoryEnum } from '@/api/dto/enumeration';
 import { INodeParameterVo } from '@/api/dto/node-definitions';
 import { ParamTypeEnum } from '@/components/workflow/workflow-editor/model/data/enumeration';
 import { Start } from './data/node/start';
 import { End } from './data/node/end';
+import { CustomWebhook } from './data/node/custom-webhook';
+import { IEventVo, IWebhookDefinitionVo } from '@/api/dto/custom-webhook';
+import { getWebhookList } from '@/api/custom-webhook';
+import { v4 as uuidv4 } from 'uuid';
+
 
 interface IPageInfo {
   pageNum: number;
@@ -56,14 +61,49 @@ export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs:
   }
 };
 
-export class WorkflowNode {
 
-  constructor() {
+/**
+ * push自定义触发事件
+ */
+export const pushCustomEvents = (data: CustomWebhook, events: IEventVo[], version: string) => {
+  events.forEach(item => {
+    const availableParams = item.availableParams.map(param => ({
+      key: uuidv4(),
+      ...param,
+    }));
+    data.events.push({
+      ref: item.ref,
+      name: item.name,
+      availableParams,
+      eventRuleset: item.ruleset,
+    });
+    data.version = version;
+  });
+};
+
+async function getWebhookLists(): Promise<IWebhookDefinitionVo[]> {
+  return await getWebhookList();
+}
+
+export class WorkflowNode {
+  private readonly entry: boolean;
+
+  constructor(entry: boolean) {
+    this.entry = entry;
   }
 
-  loadInnerTriggers(keyword?: string): IWorkflowNode[] {
-    const arr: IWorkflowNode[] = [new Cron(), new Webhook()];
-
+  async loadInnerTriggers(keyword?: string): Promise<IWorkflowNode[]> {
+    const arr: IWorkflowNode[] = [new Cron()];
+    if (this.entry) {
+      // 获取webhook列表
+      const customWebhookList = await getWebhookLists();
+      // 动态构建custom-webhook部分
+      customWebhookList.forEach(item => {
+        arr.push(new CustomWebhook(item.ref, item.ref, item.name, item.icon, item.ownerRef));
+      });
+    } else {
+      arr.push(new Webhook());
+    }
     return keyword ? arr.filter(item => item.getName().includes(keyword)) : arr;
   }
 
@@ -78,7 +118,7 @@ export class WorkflowNode {
     const { list, pageNum: currentPageNum, pages: totalPages } = await fetchNodeLibraryList({
       pageNum,
       pageSize,
-      type: NodeTypeEnum.LOCAL,
+      type: NodeCategoryEnum.LOCAL,
       name: keyword,
     });
     const arr: IWorkflowNode[] = list.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
@@ -108,7 +148,7 @@ export class WorkflowNode {
       pageNum,
       pageSize,
       name: keyword,
-      type: NodeTypeEnum.COMMUNITY,
+      type: NodeCategoryEnum.COMMUNITY,
     });
     const arr: IWorkflowNode[] = content.map(item => new AsyncTask(item.ownerRef, item.ref, item.ref, item.name, item.icon));
     return {

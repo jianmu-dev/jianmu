@@ -33,18 +33,6 @@
       <jm-form-item class="shell-env node-item">
         <template #label>
           环境变量
-          <jm-tooltip placement="top">
-            <template #content>
-              <div>可以使用表达式，引用全局参数、事件参</div>
-              <div>
-                <span>数或上游节点的输出参数，详见</span>
-                <a href="https://docs.jianmu.dev/guide/expression.html"
-                   target="_blank"
-                   style="color:#fff;text-decoration: underline;">参数章节</a>
-              </div>
-            </template>
-            <i class="jm-icon-button-help"></i>
-          </jm-tooltip>
         </template>
         <div class="shell-env-content">
           <shell-env
@@ -140,7 +128,7 @@ export default defineComponent({
       failureVisible,
       // 添加环境变量
       addShellEnv: () => {
-        form.value.envs.push({ key: uuidv4(), name: '', value: '', type: ParamTypeEnum.STRING });
+        form.value.envs.push({ key: uuidv4(), name: '', value: '""', type: ParamTypeEnum.STRING });
       },
       deleteShellEnv: (index: number) => {
         form.value.envs.splice(index, 1);
@@ -179,10 +167,6 @@ export default defineComponent({
   }
 
   .shell-env {
-    .jm-icon-button-help::before {
-      margin: 0;
-    }
-
     .shell-env-content {
       border: 1px solid #E6EBF2;
 

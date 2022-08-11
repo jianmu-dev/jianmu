@@ -1,6 +1,7 @@
 <template>
   <div class="project-preview-dialog">
     <jm-dialog
+      :custom-class="entry?'entry':'center'"
       :title="title"
       v-model="dialogVisible"
       :width="dialogWidth"
@@ -17,8 +18,10 @@
           @change-view-mode="mode=>viewMode=mode"
         />
         <div class="overflow-bottom">
-          <div @click="prevProject" class="button-left" :class="{disabled: prevDis}"><i class="jm-icon-button-left"/>上一个</div>
-          <div @click="nextProject" class="button-right" :class="{disabled: nextDis}">下一个<i class="jm-icon-button-right"/></div>
+          <div @click="prevProject" class="button-left" :class="{disabled: prevDis}"><i class="jm-icon-button-left"/>上一个
+          </div>
+          <div @click="nextProject" class="button-right" :class="{disabled: nextDis}">下一个<i
+            class="jm-icon-button-right"/></div>
         </div>
       </div>
     </jm-dialog>
@@ -60,12 +63,12 @@ export default defineComponent({
     const close = () => emit('close');
     let previewId = ref(props.projectId);
     // 上一个按钮禁止
-    const prevDis = computed<boolean>(()=>{
-      return props.projects.findIndex((e:any)=>e.id===previewId.value) === 0;
+    const prevDis = computed<boolean>(() => {
+      return props.projects.findIndex((e: any) => e.id === previewId.value) === 0;
     });
     // 下一个按钮禁止
-    const nextDis = computed<boolean>(()=>{
-      return props.projects.findIndex((e:any)=>e.id===previewId.value) === props.projects.length-1;
+    const nextDis = computed<boolean>(() => {
+      return props.projects.findIndex((e: any) => e.id === previewId.value) === props.projects.length - 1;
     });
     const loadDsl = async () => {
       // if (dsl.value) {
@@ -100,6 +103,7 @@ export default defineComponent({
     onBeforeMount(() => loadDsl());
 
     return {
+      entry,
       prevDis,
       nextDis,
       dialogWidth,
@@ -116,16 +120,16 @@ export default defineComponent({
         if (prevDis.value) {
           return;
         }
-        const currentPreviewIdIndex = props.projects.findIndex((e:any)=>e.id === previewId.value);
-        previewId.value = props.projects[currentPreviewIdIndex-1].id;
+        const currentPreviewIdIndex = props.projects.findIndex((e: any) => e.id === previewId.value);
+        previewId.value = props.projects[currentPreviewIdIndex - 1].id;
         loadDsl();
       },
       nextProject() {
         if (nextDis.value) {
           return;
         }
-        const currentPreviewIdIndex = props.projects.findIndex((e:any)=>e.id === previewId.value);
-        previewId.value = props.projects[currentPreviewIdIndex+1].id;
+        const currentPreviewIdIndex = props.projects.findIndex((e: any) => e.id === previewId.value);
+        previewId.value = props.projects[currentPreviewIdIndex + 1].id;
         loadDsl();
       },
     };
@@ -145,26 +149,19 @@ export default defineComponent({
       height: 40px;
       // margin-bottom: 20px;
       box-sizing: border-box;
+
       .el-dialog__title {
         font-size: 16px;
         color: #ffffff;
       }
-      // .el-dialog__title::before {
-      //   font-family: 'jm-icon-input';
-      //   content: '\e803';
-      //   margin-right: 10px;
-      //   color: #6b7b8d;
-      //   font-size: 20px;
-      //   vertical-align: bottom;
-      //   position: relative;
-      //   top: 1px;
-      // }
+
       .el-dialog__close::before {
         font-size: 20px;
       }
+
       .el-dialog__headerbtn {
-        top: 65px;
-        right: 30px;
+        top: 60px;
+        right: 20px;
         z-index: 10;
       }
     }
@@ -178,6 +175,8 @@ export default defineComponent({
   .content {
     position: relative;
     height: 70vh;
+    max-height: 700px;
+
     .overflow-bottom {
       position: absolute;
       left: 0;
@@ -187,6 +186,7 @@ export default defineComponent({
       width: 100%;
       background-color: #ffffff;
       align-items: center;
+
       .button-left {
         margin-left: 30px;
         line-height: 36px;
@@ -195,19 +195,23 @@ export default defineComponent({
         text-align: center;
         border: 0.5px solid #CAD6EE;
         border-radius: 2px;
-        color: #082340;
+        color: #3f536e;
+        font-weight: 400;
         cursor: pointer;
+
         .jm-icon-button-left:before {
           margin-left: -4px;
           margin-right: 8px;
           font-size: 14px;
           vertical-align: 1px;
         }
+
         &:hover {
           color: #096DD9;
           background-color: #EFF7FF;
         }
       }
+
       .button-right {
         margin-left: 20px;
         line-height: 36px;
@@ -216,22 +220,27 @@ export default defineComponent({
         text-align: center;
         border: 0.5px solid #CAD6EE;
         border-radius: 2px;
-        color: #082340;
+        color: #3f536e;
+        font-weight: 400;
         cursor: pointer;
+
         .jm-icon-button-right:before {
           margin-left: 8px;
           margin-right: -4px;
           font-size: 14px;
           vertical-align: 1px;
         }
+
         &:hover {
           color: #096DD9;
           background-color: #EFF7FF;
         }
       }
+
       .disabled {
         color: #979797;
         cursor: not-allowed;
+
         &:hover {
           color: #979797;
           background-color: #ffffff;

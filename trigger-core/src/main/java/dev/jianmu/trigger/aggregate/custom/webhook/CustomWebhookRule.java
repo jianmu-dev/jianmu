@@ -1,5 +1,7 @@
 package dev.jianmu.trigger.aggregate.custom.webhook;
 
+import java.util.List;
+
 /**
  * @author laoji
  * @class 自定义Webhook规则
@@ -27,22 +29,76 @@ public class CustomWebhookRule {
         /**
          * 包含
          */
-        INCLUDE,
+        INCLUDE("包含"),
         /**
          * 不包含
          */
-        EXCLUDE,
+        EXCLUDE("不包含"),
         /**
          * 等于
          */
-        EQ,
+        EQ("等于"),
         /**
          * 不等于
          */
-        NE,
+        NE("不等于"),
         /**
          * 正则表达式
          */
-        REG_EXP
+        REG_EXP("正则匹配");
+
+        public final String name;
+
+        Operator(String name) {
+            this.name = name;
+        }
+    }
+
+    public CustomWebhookRule() {
+    }
+
+    public String getParamRef() {
+        return paramRef;
+    }
+
+    public Operator getOperator() {
+        return operator;
+    }
+
+    public Object getMatchingValue() {
+        return matchingValue;
+    }
+
+    public static class Builder{
+        private String paramRef;
+        private Operator operator;
+        private Object matchingValue;
+
+        public static Builder aCustomWebhookRule() {
+            return new Builder();
+        }
+
+        public Builder paramRef(String paramRef) {
+            this.paramRef = paramRef;
+            return this;
+        }
+
+        public Builder operator(Operator operator) {
+            this.operator = operator;
+            return this;
+        }
+
+        public Builder matchingValue(Object matchingValue) {
+            this.matchingValue = matchingValue;
+            return this;
+        }
+
+        public CustomWebhookRule build() {
+            var rule = new CustomWebhookRule();
+            rule.paramRef = this.paramRef;
+            rule.operator = this.operator;
+            rule.matchingValue = this.matchingValue;
+            return rule;
+        }
     }
 }

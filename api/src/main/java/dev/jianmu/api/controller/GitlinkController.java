@@ -255,7 +255,7 @@ public class GitlinkController {
                 return;
             }
         } catch (Exception e) {
-            log.warn("DSL文件地址：{}, 解析失败：{}", filepath, e.getMessage());
+            log.warn("DSL文件地址：{}, DSL校验失败：{}", filepath, e.getMessage());
             return;
         }
         var projectOptional = this.projectApplication.findByName(repoId, this.oAuth2Properties.getType(), filename);
