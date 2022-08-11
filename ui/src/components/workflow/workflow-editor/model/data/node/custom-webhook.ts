@@ -115,7 +115,19 @@ export class CustomWebhook extends BaseNode {
     });
     return {
       ...rules,
-      selectedReference: [{ required: true, message: '请选择事件类型', trigger: 'change' }],
+      selectedReference: [{
+        validator: (rule: any, value: any, callback: any) => {
+          if (value) {
+            callback();
+          }
+          if (this.eventInstances.length === 0) {
+            callback('请选择一类触发事件');
+            return;
+          }
+          callback();
+        },
+        trigger: 'change',
+      }],
       eventInstances: {
         type: 'array',
         required: false,
