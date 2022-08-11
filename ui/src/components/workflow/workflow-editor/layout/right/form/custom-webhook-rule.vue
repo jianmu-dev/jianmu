@@ -4,7 +4,7 @@
       <div class="label">
         匹配规则{{ index + 1 }}
       </div>
-      <i class="jm-icon-button-delete" @click="del"></i>
+      <i class="jm-icon-button-delete" @click="del" v-if="!delVisibleVal"></i>
     </div>
     <div :class="['rules-container',switchFlag?'switch-bgc':'']">
       <jm-form-item :prop="`${modelName}.${index}.paramRef`" :rules="rules.paramRef">
@@ -46,7 +46,7 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, onUpdated, PropType, ref } from 'vue';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import ExpressionEditor from '../form/expression-editor.vue';
 import { IWebhookParam } from '../../../model/data/node/webhook';
@@ -85,9 +85,14 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    delVisible: {
+      type: Boolean,
+      required: true,
+    },
   },
   emits: ['update:paramRef', 'update:operator', 'update:matchingValue', 'delete'],
   setup(props, { emit }) {
+    const delVisibleVal = ref<boolean>(props.delVisible);
     const paramOperators = ref<IWebhookParamOperatorVo[]>([]);
     // 参数唯一标识
     const paramRefVal = ref<String>(props.paramRef);
@@ -124,6 +129,12 @@ export default defineComponent({
       operatorVal.value = val;
       emit('update:operator', val);
     };
+    onUpdated(() => {
+      if (delVisibleVal.value === props.delVisible) {
+        return;
+      }
+      delVisibleVal.value = props.delVisible;
+    });
     onMounted(async () => {
       paramOperators.value = (await getWebhookOperator()).paramOperators;
       if (operatorVal.value) {
@@ -142,6 +153,7 @@ export default defineComponent({
       switchFlag,
       paramType,
       nodeId,
+      delVisibleVal,
       del: () => {
         emit('delete', props.index);
       },
