@@ -7,6 +7,7 @@ import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookRule;
 import dev.jianmu.trigger.service.WebhookOnlyService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ public class JSWebhookOnlyService implements WebhookOnlyService {
                                     var post = eventInstance.getRuleset().stream()
                                             .map(rule -> this.getRuleExpression(event.getAvailableParams(), rule))
                                             .collect(Collectors.joining(this.getRuleOperator(eventInstance.getRulesetOperator())));
-                                    return "(" + pre + ") && (" + post + ")";
+                                    return StringUtils.hasText(post) ? "(" + pre + ") && (" + post + ")" : pre;
                                 }).orElseThrow(() -> new IllegalArgumentException("未找到Webhook事件：" + eventInstance.getRef()))
                 ).collect(Collectors.joining(" || "));
     }
