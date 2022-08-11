@@ -145,7 +145,8 @@ export default defineComponent({
     const switchBackgroundFlag = ref<boolean>(false);
 
     if (!valueVal.value && typeVal.value === ParamTypeEnum.STRING) {
-      valueVal.value = JSON.stringify(valueVal.value);
+      valueVal.value = '""';
+      emit('update:value', valueVal.value);
     }
     // 初始化required的值
     emit('update:required', requiredVal.value);
