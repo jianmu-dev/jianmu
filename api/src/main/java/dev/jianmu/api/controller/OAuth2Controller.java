@@ -62,9 +62,9 @@ public class OAuth2Controller {
     /**
      * 获取授权url
      */
-    @PostMapping("url")
+    @GetMapping("url")
     @Operation(summary = "获取授权url", description = "获取授权url")
-    public AuthorizationUrlVo getAuthorizationUrl(@Valid @RequestBody AuthorizationUrlGettingDto authorizationUrlGettingDto) {
+    public AuthorizationUrlVo getAuthorizationUrl(@Valid AuthorizationUrlGettingDto authorizationUrlGettingDto) {
         this.beforeAuthenticate();
         this.allowThisPlatformLogIn(authorizationUrlGettingDto.getThirdPartyType());
 
@@ -82,8 +82,8 @@ public class OAuth2Controller {
      * @param oauth2LoggingDto
      * @return
      */
-    @GetMapping("/login")
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid Oauth2LoggingDto oauth2LoggingDto) {
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> authenticateUser(@RequestBody @Valid Oauth2LoggingDto oauth2LoggingDto) {
         this.beforeAuthenticate();
         this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(oauth2LoggingDto.getThirdPartyType());
