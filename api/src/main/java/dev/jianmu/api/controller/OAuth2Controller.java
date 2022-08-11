@@ -29,9 +29,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -64,9 +62,9 @@ public class OAuth2Controller {
     /**
      * 获取授权url
      */
-    @GetMapping("url")
+    @PostMapping("url")
     @Operation(summary = "获取授权url", description = "获取授权url")
-    public AuthorizationUrlVo getAuthorizationUrl(@Valid AuthorizationUrlGettingDto authorizationUrlGettingDto) {
+    public AuthorizationUrlVo getAuthorizationUrl(@Valid @RequestBody AuthorizationUrlGettingDto authorizationUrlGettingDto) {
         this.beforeAuthenticate();
         this.allowThisPlatformLogIn(authorizationUrlGettingDto.getThirdPartyType());
 
@@ -172,7 +170,9 @@ public class OAuth2Controller {
      * 认证之前
      */
     private void beforeAuthenticate() {
-        if (this.oAuth2Properties.getGitee() != null || this.oAuth2Properties.getGitlink() != null) {
+        if (this.oAuth2Properties.getGitee() != null
+                || this.oAuth2Properties.getGitlink() != null
+                || this.oAuth2Properties.getGitlab() != null) {
             return;
         }
         throw new OAuth2IsNotConfiguredException("未配置OAuth2登录");
@@ -195,8 +195,8 @@ public class OAuth2Controller {
      */
     private void allowThisPlatformLogIn(String thirdPartyType) {
         if (this.oAuth2Properties.getGitee() != null && ThirdPartyTypeEnum.GITEE.name().equals(thirdPartyType)
-                ||
-                this.oAuth2Properties.getGitlink() != null && ThirdPartyTypeEnum.GITLINK.name().equals(thirdPartyType)) {
+                || this.oAuth2Properties.getGitlink() != null && ThirdPartyTypeEnum.GITLINK.name().equals(thirdPartyType)
+                || this.oAuth2Properties.getGitlab() != null && ThirdPartyTypeEnum.GITLAB.name().equals(thirdPartyType)) {
             return;
         }
         throw new NotAllowThisPlatformLogInException("不允许" + thirdPartyType + "平台登录，请与管理员联系");
