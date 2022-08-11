@@ -487,9 +487,9 @@ public class TriggerApplication {
                 var value = this.extractParameter(context, webhookParameter);
                 if (value == null && webhookParameter.getRequired()) {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
-                    newWebRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
+                    newWebRequest.setErrorMsg("未找到Webhook参数：" + webhookParameter.getName());
                     this.webRequestRepositoryImpl.add(newWebRequest);
-                    throw new IllegalArgumentException("项目：" + project.getWorkflowName() + " 触发器参数" + webhookParameter.getName() + "的值为null");
+                    throw new IllegalArgumentException("项目：" + project.getWorkflowName() + "，未找到Webhook参数：" + webhookParameter.getName());
                 }
                 if (value == null) {
                     continue;
@@ -582,9 +582,9 @@ public class TriggerApplication {
                 var value = this.extractParameter(context, webhookParameter);
                 if (value == null && webhookParameter.getRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
-                    webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
+                    webRequest.setErrorMsg("未找到Webhook参数：" + webhookParameter.getName());
                     this.webRequestRepositoryImpl.add(webRequest);
-                    throw new IllegalArgumentException("项目：" + project.getWorkflowName() + " 触发器参数" + webhookParameter.getName() + "的值为null");
+                    throw new IllegalArgumentException("项目：" + project.getWorkflowName() + "，未找到Webhook参数：" + webhookParameter.getName());
                 }
                 if (value == null) {
                     continue;
