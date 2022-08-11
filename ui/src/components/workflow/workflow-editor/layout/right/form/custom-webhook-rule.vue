@@ -7,7 +7,7 @@
       <i class="jm-icon-button-delete" @click="del"></i>
     </div>
     <div :class="['rules-container',switchFlag?'switch-bgc':'']">
-      <jm-select v-model="paramRefVal" placeholder="请选择参数" @change="changeParamRef">
+      <jm-select v-model="paramRefVal" placeholder="请选择参数类型" @change="changeParamRef">
         <jm-option
           v-for="item in availableParams"
           :key="item.ref"
@@ -89,7 +89,7 @@ export default defineComponent({
     const operatorText = computed<string>(() => {
       if (operatorVal.value) {
         const operatorOption = operatorOptions.value.find(({ ref }) => ref === operatorVal.value);
-        return operatorOption ? operatorOption.name : '';
+        return operatorOption ? operatorOption.name : (operatorOptions.value ? { ...operatorOptions.value[0] }.name : '');
       }
       return operatorOptions.value.length === 0 ? '' : operatorOptions.value[0].name;
     });

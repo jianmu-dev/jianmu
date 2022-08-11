@@ -131,10 +131,15 @@ export default defineComponent({
   border-bottom: 1px solid #E6EBF2;
   margin-bottom: 20px;
   padding-bottom: 20px;
+  box-sizing: border-box;
 
   &.custom-webhook-events:last-child {
     border-bottom: none;
     margin-bottom: 0;
+  }
+
+  ::v-deep(.el-radio-group) {
+    margin-left: 0;
   }
 
   .check-event {
@@ -156,7 +161,7 @@ export default defineComponent({
     padding: 14px 20px;
     border: 1px solid #E6EBF2;
     box-sizing: border-box;
-    margin-bottom: 20px;
+    margin: 20px 0;
 
     .jm-icon-button-add::before {
       font-weight: 700;
