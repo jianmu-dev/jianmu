@@ -15,9 +15,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * @author Daihw
  * @class DslCustomWebhook
  * @description DslCustomWebhook
- * @author Daihw
  * @create 2022/8/9 4:41 下午
  */
 @Getter
@@ -40,18 +40,19 @@ public class DslCustomWebhook {
                     var ruleset = new ArrayList<CustomWebhookRule>();
                     var ref = (String) event.get("ref");
                     var rules = (List<?>) event.get("ruleset");
-                    rules.stream()
-                            .map(rule -> (Map<String, Object>) rule)
-                            .forEach(rule -> {
-                                var paramRef = (String) rule.get("param-ref");
-                                var paramOperator = (String) rule.get("operator");
-                                var value = rule.get("value");
-                                ruleset.add(CustomWebhookRule.Builder.aCustomWebhookRule()
-                                        .paramRef(paramRef)
-                                        .operator(CustomWebhookRule.Operator.valueOf(paramOperator.toUpperCase()))
-                                        .matchingValue(value)
-                                        .build());
-                            });
+                    if (rules != null) {
+                        rules.stream().map(rule -> (Map<String, Object>) rule)
+                                .forEach(rule -> {
+                                    var paramRef = (String) rule.get("param-ref");
+                                    var paramOperator = (String) rule.get("operator");
+                                    var value = rule.get("value");
+                                    ruleset.add(CustomWebhookRule.Builder.aCustomWebhookRule()
+                                            .paramRef(paramRef)
+                                            .operator(CustomWebhookRule.Operator.valueOf(paramOperator.toUpperCase()))
+                                            .matchingValue(value)
+                                            .build());
+                                });
+                    }
                     var rulesetOperator = event.get("ruleset-operator");
                     dslCustomWebhook.event.add(CustomWebhookInstance.EventInstance.Builder.aEventInstance()
                             .ref(ref)
