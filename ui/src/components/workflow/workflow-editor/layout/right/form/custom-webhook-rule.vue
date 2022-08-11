@@ -110,9 +110,10 @@ export default defineComponent({
     const inputPlaceholder = computed<string>(() =>
       paramRefVal.value ? `请输入${props.availableParams.find(({ ref }) => ref === paramRefVal.value)!.name}` : '');
     // 值
-    const matchingValueVal = ref<String>(props.matchingValue || '');
+    const matchingValueVal = ref<String>(props.matchingValue);
     if (!matchingValueVal.value && paramType.value === ParamTypeEnum.STRING) {
-      matchingValueVal.value = JSON.stringify(matchingValueVal.value);
+      matchingValueVal.value = '""';
+      emit('update:matchingValue', matchingValueVal.value);
     }
     const switchFlag = ref<boolean>(false);
 
@@ -209,7 +210,6 @@ export default defineComponent({
 
     ::v-deep(.el-select) {
       width: 100%;
-      margin-bottom: 20px;
     }
 
     ::v-deep(.el-dropdown) {
@@ -232,6 +232,14 @@ export default defineComponent({
           left: -3px;
         }
       }
+    }
+
+    ::v-deep(.el-form-item):first-child {
+      margin-bottom: 20px;
+    }
+
+    ::v-deep(.el-form-item):last-child {
+      margin-bottom: 0;
     }
   }
 }
