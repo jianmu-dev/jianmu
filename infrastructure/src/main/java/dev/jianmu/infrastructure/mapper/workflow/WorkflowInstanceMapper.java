@@ -61,6 +61,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
+    @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     Optional<WorkflowInstance> findById(String instanceId);
 
     @Select("select * from jm_workflow_instance where trigger_id = #{triggerId}")
