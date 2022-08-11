@@ -7,7 +7,7 @@
       label-position="top"
     >
       <div class="trigger-title">触发事件</div>
-      <jm-radio-group v-model="selectedReference">
+      <jm-radio-group v-model="selectedReference" ref="radioGroupRef">
         <Event
           v-for="(event,idx) in form.events"
           :key="event.ref"
@@ -45,10 +45,14 @@ export default defineComponent({
     const eventInstances = ref<(ICustomWebhookEventInstance | undefined)[]>(form.value.events.map(({ ref }) =>
       form.value.eventInstances.find(instance => instance.ref === ref)));
     const selectedReference = ref<string>('');
+    const radioGroupRef = ref<any>();
 
     onMounted(() => emit('form-created', formRef.value));
 
     onMounted(async () => {
+      // 屏蔽radio-group keydown事件
+      radioGroupRef.value.handleKeydown = () => {
+      };
       // 获取版本列表
       const versionList = await getWebhookVersionList(form.value.ownerRef, form.value.nodeRef);
       // 获取版本参数
@@ -62,6 +66,7 @@ export default defineComponent({
       form,
       eventInstances,
       selectedReference,
+      radioGroupRef,
       updateEventInstance: () => {
         form.value.eventInstances = eventInstances.value.filter(eventInstance => eventInstance);
       },
