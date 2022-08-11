@@ -115,6 +115,7 @@ export class CustomWebhook extends BaseNode {
     });
     return {
       ...rules,
+      selectedReference: [{ required: true, message: '请选择事件类型', trigger: 'change' }],
       eventInstances: {
         type: 'array',
         required: false,
