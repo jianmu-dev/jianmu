@@ -24,7 +24,7 @@ public interface WorkerMapper {
     @Update("update jm_worker set status = #{status} where id = #{id}")
     void updateStatus(Worker worker);
 
-    @Update("update worker set tags = #{tags} where id = #{id}")
+    @Update("update jm_worker set tags = #{tags} where id = #{id}")
     void updateTag(Worker worker);
 
     @Select("select * from jm_worker where id = #{workerId}")
