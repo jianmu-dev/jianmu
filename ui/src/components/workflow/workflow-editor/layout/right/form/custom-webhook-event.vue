@@ -16,7 +16,6 @@
         v-model:paramRef="rule.paramRef"
         v-model:operator="rule.operator"
         v-model:matchingValue="rule.matchingValue"
-        v-model:delVisible="delVisible"
         :available-params="availableParams"
         :index="idx"
         :rules="rules.ruleset.fields[idx].fields"
@@ -30,7 +29,8 @@
         <i class="jm-icon-button-add"/>
         添加匹配规则
       </div>
-      <jm-form-item :prop="`${formModelName}.${index}.rulesetOperator`" :rules="rules.rulesetOperator">
+      <jm-form-item :prop="`${formModelName}.${index}.rulesetOperator`" :rules="rules.rulesetOperator"
+                    class="ruleset-operator" v-if="rulesetOperatorsVisible">
         <jm-radio-group v-model="eventInstanceVal.rulesetOperator" @change="changeRulesetOperatorVal">
           <jm-radio v-for="{ref,name} in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
         </jm-radio-group>
@@ -88,7 +88,7 @@ export default defineComponent({
     const rulesetOperators = ref<IWebhookEventOperatorVo[]>([]);
     const selectedReferenceVal = ref<string>(props.selectedReference);
     const isChecked = ref<boolean>(false);
-    const delVisible = ref<boolean>(true);
+    const rulesetOperatorsVisible = ref<boolean>(false);
 
     // 初始化时判断是否勾选
     if (eventInstanceVal.value && eventInstanceVal.value.ref === props.reference) {
@@ -101,11 +101,6 @@ export default defineComponent({
         ruleset: [],
         rulesetOperator: (await getWebhookOperator()).rulesetOperators[0].ref,
       } : undefined;
-      // 初始化-勾选自动新增一条
-      if (eventInstanceVal.value && eventInstanceVal.value.ruleset.length === 0) {
-        eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
-        delVisible.value = true;
-      }
       emit('update:eventInstance', eventInstanceVal.value);
     };
 
@@ -117,14 +112,14 @@ export default defineComponent({
       await changeReference(selectedReferenceVal.value === props.reference);
     });
     onMounted(async () => {
-      delVisible.value = eventInstanceVal.value && eventInstanceVal.value.ruleset.length <= 1;
+      rulesetOperatorsVisible.value = (eventInstanceVal.value && eventInstanceVal.value.ruleset.length >= 2);
       rulesetOperators.value = (await getWebhookOperator()).rulesetOperators;
     });
     return {
       isChecked,
       eventInstanceVal,
       rulesetOperators,
-      delVisible,
+      rulesetOperatorsVisible,
       updateParamRef: (val: string, index: number) => {
         eventInstanceVal.value.ruleset[index].paramRef = val;
         emit('update:eventInstance', eventInstanceVal.value);
@@ -140,12 +135,12 @@ export default defineComponent({
       del: (index: number) => {
         eventInstanceVal.value!.ruleset.splice(index, 1);
         emit('update:eventInstance', eventInstanceVal.value);
-        delVisible.value = eventInstanceVal.value && eventInstanceVal.value.ruleset.length <= 1;
+        rulesetOperatorsVisible.value = eventInstanceVal.value.ruleset.length >= 2;
       },
       add: () => {
         eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
         emit('update:eventInstance', eventInstanceVal.value);
-        delVisible.value = eventInstanceVal.value && eventInstanceVal.value.ruleset.length <= 1;
+        rulesetOperatorsVisible.value = eventInstanceVal.value.ruleset.length >= 2;
       },
       changeRulesetOperatorVal: () => {
         emit('update:eventInstance', eventInstanceVal.value);
