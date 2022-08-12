@@ -17,7 +17,7 @@
             :reference="event.ref"
             :index="idx"
             :available-params="event.availableParams"
-            :rules="nodeData.getFormRules().eventInstances.fields[idx]"
+            :rules="nodeData.getFormRules().eventInstances.fields[idx]?.fields"
             :form-model-name="'eventInstances'"
             v-model:eventInstance="eventInstances[idx]"
             @update:eventInstance="updateEventInstance"

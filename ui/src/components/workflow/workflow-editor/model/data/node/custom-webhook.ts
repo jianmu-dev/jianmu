@@ -94,20 +94,24 @@ export class CustomWebhook extends BaseNode {
       }
       const fields: Record<string, CustomRule> = {};
       customWebhookFields[index] = {
-        ruleset: {
-          type: 'array',
-          required: true,
-          len: instance.ruleset.length,
-          fields,
-        },
-        rulesetOperator: [{ required: true, message: '请选择匹配类型', trigger: 'change' }],
-      } as Record<string, CustomRule>;
+        type: 'object',
+        required: false,
+        fields: {
+          ruleset: {
+            type: 'array',
+            required: false,
+            len: instance.ruleset.length,
+            fields,
+          },
+          rulesetOperator: [{ required: true, message: '请选择匹配类型', trigger: 'change' }],
+        } as Record<string, CustomRule>,
+      };
       instance.ruleset.forEach((_item, idx) => {
         fields[idx] = {
           type: 'object',
           required: true,
           fields: {
-            paramRef: [{ required: true, message: '请选择匹配类型', trigger: 'change' }],
+            paramRef: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
             matchingValue: [{ required: true, message: '请输入参数值', trigger: 'blur' }],
           } as Record<string, CustomRule>,
         };
