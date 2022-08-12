@@ -67,7 +67,8 @@ export default defineComponent({
       default: '',
     },
     matchingValue: {
-      type: Object as PropType<ParamValueType>,
+      type: [String, Number, Boolean],
+      default: '',
     },
     availableParams: {
       type: Array as PropType<IWebhookParam[]>,
@@ -110,7 +111,7 @@ export default defineComponent({
     const inputPlaceholder = computed<string>(() =>
       paramRefVal.value ? `请输入${props.availableParams.find(({ ref }) => ref === paramRefVal.value)!.name}` : '');
     // 值
-    const matchingValueVal = ref<ParamValueType>(props.matchingValue || '');
+    const matchingValueVal = ref<ParamValueType>(props.matchingValue);
     if (!matchingValueVal.value && paramType.value === ParamTypeEnum.STRING) {
       matchingValueVal.value = '""';
       emit('update:matchingValue', matchingValueVal.value);
