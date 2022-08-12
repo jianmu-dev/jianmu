@@ -6,13 +6,20 @@ const target = 'http://localhost:8081';
 const changeOrigin = true;
 // https://vitejs.dev/config/
 export default ({ command, mode }: ConfigEnv): UserConfigExport => {
+  let base = '/';
+  if (command === 'build') {
+    switch (mode) {
+      case 'gitlink':
+      case 'cdn':
+        base = `https://jianmu-ci.assets.dghub.cn/${name}/v${version}/`;
+        break;
+    }
+  }
+
   return {
     plugins: [vue()],
     // base public path
-    base:
-      command === 'build' && mode === 'cdn'
-        ? `https://jianmu-ci-gitlink.assets.dghub.cn/${name}/v${version}/`
-        : '/',
+    base,
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),

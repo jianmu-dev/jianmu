@@ -1,6 +1,6 @@
 {
   "name": "jianmu-ci-ui",
-  "version": "0.0.1-gitlink",
+  "version": "0.0.1-gitlink.1",
   "repository": "https://gitee.com/jianmu-dev/jianmu-ci-server.git",
   "license": "MulanPubL-2.0",
   "scripts": {
