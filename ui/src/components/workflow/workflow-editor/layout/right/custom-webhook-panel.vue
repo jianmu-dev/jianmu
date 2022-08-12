@@ -16,7 +16,7 @@
             :name="event.name"
             :reference="event.ref"
             :index="idx"
-            :available-params="event.availableParams.filter(({ref})=>ref !== 'git_event')"
+            :available-params="event.availableParams.filter(({ ref }) => !event.eventRuleset.find((({ paramRef }) => paramRef === ref)))"
             :rules="nodeData.getFormRules().eventInstances.fields[idx]?.fields"
             :form-model-name="'eventInstances'"
             v-model:eventInstance="eventInstances[idx]"
@@ -34,6 +34,7 @@ import { defineComponent, onMounted, PropType, ref } from 'vue';
 import { CustomWebhook, ICustomWebhookEventInstance } from '../../model/data/node/custom-webhook';
 import Event from './form/custom-webhook-event.vue';
 import { getWebhookVersionList, getWebhookVersionParams } from '@/api/custom-webhook';
+import { pushCustomEvents } from '../../model/workflow-node';
 
 export default defineComponent({
   components: { Event },
@@ -62,8 +63,10 @@ export default defineComponent({
       const versionList = await getWebhookVersionList(form.value.ownerRef, form.value.nodeRef);
       // 获取版本参数
       const versionParams = await getWebhookVersionParams(form.value.ownerRef, form.value.nodeRef, versionList[0].version);
-      // 覆盖参数，避免影响eventInstances
-      form.value.events = versionParams.events;
+      form.value.events.length = 0;
+      pushCustomEvents(form.value as CustomWebhook, versionParams.events, versionList[0].version);
+      // // 覆盖参数，避免影响eventInstances
+      // form.value.events = versionParams.events;
     });
 
     return {
