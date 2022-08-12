@@ -11,7 +11,7 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
     // base public path
     base:
       command === 'build' && mode === 'cdn'
-        ? `https://jianmu-ci.assets.dghub.cn/${name}/v${version}/`
+        ? `https://jianmu-ci-gitlink.assets.dghub.cn/${name}/v${version}/`
         : '/',
     resolve: {
       alias: {
