@@ -16,7 +16,7 @@
             :name="event.name"
             :reference="event.ref"
             :index="idx"
-            :available-params="event.availableParams.filter(({ ref }) => !event.eventRuleset.find((({ paramRef }) => paramRef === ref)))"
+            :available-params="event.availableParams.filter(({ ref }) => !event.eventRuleset?.find((({ paramRef }) => paramRef === ref)))"
             :rules="nodeData.getFormRules().eventInstances.fields[idx]?.fields"
             :form-model-name="'eventInstances'"
             v-model:eventInstance="eventInstances[idx]"
