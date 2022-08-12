@@ -16,7 +16,7 @@
             :name="event.name"
             :reference="event.ref"
             :index="idx"
-            :available-params="event.availableParams"
+            :available-params="event.availableParams.filter(({ref})=>ref !== 'git_event')"
             :rules="nodeData.getFormRules().eventInstances.fields[idx]?.fields"
             :form-model-name="'eventInstances'"
             v-model:eventInstance="eventInstances[idx]"

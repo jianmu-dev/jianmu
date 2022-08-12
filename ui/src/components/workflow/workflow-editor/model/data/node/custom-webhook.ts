@@ -1,7 +1,7 @@
 import { BaseNode } from './base-node';
 import { NodeRefEnum, NodeTypeEnum } from '../enumeration';
 import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
-import { CustomRule } from '../common';
+import { CustomRule, ParamValueType } from '../common';
 import { IWebhookParam } from './webhook';
 import { IWebhookOperatorVo } from '@/api/dto/custom-webhook';
 import { getWebhookOperators } from '@/api/custom-webhook';
@@ -14,7 +14,7 @@ export interface ICustomWebhookRule {
   key?: string;
   paramRef: string;
   operator: string;
-  matchingValue: string | number | boolean;
+  matchingValue: ParamValueType;
 }
 
 export interface ICustomWebhookEvent {
