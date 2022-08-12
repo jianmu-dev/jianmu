@@ -5,6 +5,8 @@ import { Global } from './global';
 
 type TriggerValue = 'blur' | 'change';
 
+export type ParamValueType = string | number | boolean;
+
 export interface CustomRuleItem extends RuleItem {
   trigger?: TriggerValue;
 }

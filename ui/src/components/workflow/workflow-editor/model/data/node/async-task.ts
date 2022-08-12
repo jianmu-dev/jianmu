@@ -1,7 +1,7 @@
 import { BaseNode, buildSelectableInnerOutputParam } from './base-node';
 import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
-import { CustomRule, ValidateParamFn } from '../common';
+import { CustomRule, ParamValueType, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
@@ -141,7 +141,7 @@ export class AsyncTask extends BaseNode {
   toDsl(): object {
     const { ownerRef, nodeRef, ref, name, version, inputs, failureMode } = this;
     const param: {
-      [key: string]: string | number | boolean;
+      [key: string]: ParamValueType;
     } = {};
     inputs.forEach(({ ref, type, required, value }) => {
       switch (type) {

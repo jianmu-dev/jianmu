@@ -47,12 +47,13 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, inject, onMounted, PropType, ref } from 'vue';
+import { Node } from '@antv/x6';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import ExpressionEditor from '../form/expression-editor.vue';
 import { IWebhookParam } from '../../../model/data/node/webhook';
 import { IWebhookEventOperatorVo, IWebhookParamOperatorVo } from '@/api/dto/custom-webhook';
 import { getWebhookOperator } from '../../../model/data/node/custom-webhook';
-import { CustomRule } from '../../../model/data/common';
+import { CustomRule, ParamValueType } from '../../../model/data/common';
 
 export default defineComponent({
   components: { ExpressionEditor },
@@ -66,8 +67,7 @@ export default defineComponent({
       default: '',
     },
     matchingValue: {
-      type: String || Number || Boolean,
-      default: '',
+      type: Object as PropType<ParamValueType>,
     },
     availableParams: {
       type: Array as PropType<IWebhookParam[]>,
@@ -110,7 +110,7 @@ export default defineComponent({
     const inputPlaceholder = computed<string>(() =>
       paramRefVal.value ? `请输入${props.availableParams.find(({ ref }) => ref === paramRefVal.value)!.name}` : '');
     // 值
-    const matchingValueVal = ref<string | number | boolean>(props.matchingValue);
+    const matchingValueVal = ref<ParamValueType>(props.matchingValue || '');
     if (!matchingValueVal.value && paramType.value === ParamTypeEnum.STRING) {
       matchingValueVal.value = '""';
       emit('update:matchingValue', matchingValueVal.value);
@@ -129,7 +129,7 @@ export default defineComponent({
       if (operatorVal.value) {
         return;
       }
-      changeOperator(paramOperators.value.find(({ type }) => type === ParamTypeEnum.STRING).operators[0].ref);
+      changeOperator(paramOperators.value.find(({ type }) => type === ParamTypeEnum.STRING)!.operators[0].ref);
     });
     return {
       ExpressionTypeEnum,
