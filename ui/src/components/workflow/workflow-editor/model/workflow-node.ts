@@ -66,6 +66,7 @@ export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs:
  * push自定义触发事件
  */
 export const pushCustomEvents = (data: CustomWebhook, events: IEventVo[], version: string) => {
+  data.version = version;
   events.forEach(item => {
     const availableParams = item.availableParams.map(param => ({
       key: uuidv4(),
@@ -77,7 +78,6 @@ export const pushCustomEvents = (data: CustomWebhook, events: IEventVo[], versio
       availableParams,
       eventRuleset: item.ruleset,
     });
-    data.version = version;
   });
 };
 
