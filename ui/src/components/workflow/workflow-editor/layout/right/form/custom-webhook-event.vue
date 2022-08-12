@@ -1,6 +1,14 @@
 <template>
   <div class="custom-webhook-event">
-    <jm-radio :label="reference">{{ name }}</jm-radio>
+    <jm-radio :label="reference">
+      {{ name }}
+    </jm-radio>
+    <jm-tooltip placement="top">
+      <template #content>
+        <div>未添加规则，则所有的{{ name }}都会触发执行。</div>
+      </template>
+      <i class="jm-icon-button-help"></i>
+    </jm-tooltip>
     <div v-if="eventInstanceVal && rules">
       <Rule
         v-for="(rule,idx) in eventInstanceVal.ruleset"
@@ -161,6 +169,29 @@ export default defineComponent({
     margin-bottom: 0;
   }
 
+  .jm-icon-button-help {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+
+    ::before {
+      font-size: 14px;
+      margin: 0;
+    }
+  }
+
+  .ruleset-operator {
+    margin-top: 20px;
+
+    ::v-deep(.el-radio) {
+      margin-right: 30px;
+    }
+  }
+
+  ::v-deep(.el-radio) {
+    margin-right: 5px;
+  }
+
   ::v-deep(.el-radio-group) {
     margin-left: 0;
   }
@@ -188,7 +219,7 @@ export default defineComponent({
     padding: 14px 20px;
     border: 1px solid #E6EBF2;
     box-sizing: border-box;
-    margin: 20px 0;
+    margin-top: 20px;
 
     .jm-icon-button-add::before {
       font-weight: 700;
