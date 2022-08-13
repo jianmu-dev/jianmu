@@ -151,12 +151,12 @@ export class CustomWebhook extends BaseNode {
           ruleset: param.ruleset.length === 0 ? undefined : param.ruleset.map(item => {
             const rule: any = {
               'param-ref': item.paramRef,
-              operator: item.operator.toLowerCase(),
+              operator: item.operator,
               value: item.matchingValue,
             };
             return rule;
           }),
-          'ruleset-operator': param.rulesetOperator.toLowerCase(),
+          'ruleset-operator': param.rulesetOperator,
         };
         return customEvent;
       }),
