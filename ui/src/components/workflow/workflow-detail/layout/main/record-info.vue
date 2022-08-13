@@ -11,7 +11,7 @@
     </div>
     <div class="vertical-divider" style="margin-left: 0px;"></div>
     <div>状态：<span class="status" :class="{[(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true}">{{ statusTranslate(record.status) }}</span></div>
-    <button v-if="checkWorkflowRunning(record.status, false)" @click="handleTerminate" class="jm-icon-button-stop terminate-button">终止</button>
+    <button v-if="checkWorkflowRunning(record.status, false)" @click="handleTerminate" class="jm-icon-button-stop terminate-button" @keypress.enter.prevent>终止</button>
   </div>
 </template>
 
