@@ -710,7 +710,7 @@ public class DslParser {
                     if (!(ref instanceof String)) {
                         throw new IllegalArgumentException("trigger中的事件未定义 ref");
                     }
-                    if (!(rulesetOperator instanceof String) || !(List.of("or", "and").contains((String) rulesetOperator))) {
+                    if (!(rulesetOperator instanceof String) || !(List.of("OR", "AND").contains(((String) rulesetOperator).toUpperCase()))) {
                         throw new IllegalArgumentException("trigger中的 " + ref + " 事件运算符配置错误");
                     }
                     if (rules instanceof List) {
@@ -730,7 +730,7 @@ public class DslParser {
             throw new IllegalArgumentException("trigger中的 " + ref + "事件未定义规则参数的ref");
         }
         if (!(paramOperator instanceof String) ||
-                Arrays.stream(CustomWebhookRule.Operator.values()).noneMatch(a -> a.name().toLowerCase().equals(paramOperator))) {
+                Arrays.stream(CustomWebhookRule.Operator.values()).noneMatch(a -> a.name().equals(((String) paramOperator).toUpperCase()))) {
             throw new IllegalArgumentException("trigger中的 " + ref + "事件规则参数的运算符配置错误");
         }
         if (value == null) {
