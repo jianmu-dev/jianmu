@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="right">
-      <button class="jm-icon-button-on trigger-button" @click="trigger">触发</button>
+      <button class="jm-icon-button-on trigger-button" @click="trigger" @keypress.enter.prevent>触发</button>
       <div v-show="!entry" class="vertical-divider"></div>
       <router-link v-if="!session && !entry" :to="{ name: 'login' }">
         <div class="no-login"></div>
