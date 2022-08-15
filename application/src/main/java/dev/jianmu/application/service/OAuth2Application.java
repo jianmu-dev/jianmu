@@ -18,6 +18,7 @@ import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
 import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
 import dev.jianmu.oauth2.api.vo.IRepoVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
+import dev.jianmu.trigger.service.CustomWebhookDomainService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -36,11 +37,13 @@ public class OAuth2Application {
     private final GitRepoRepository gitRepoRepository;
     private final AssociationUtil associationUtil;
     private final OAuth2Properties oAuth2Properties;
+    private final CustomWebhookDomainService customWebhookDomainService;
 
-    public OAuth2Application(GitRepoRepository gitRepoRepository, AssociationUtil associationUtil, OAuth2Properties oAuth2Properties) {
+    public OAuth2Application(GitRepoRepository gitRepoRepository, AssociationUtil associationUtil, OAuth2Properties oAuth2Properties, CustomWebhookDomainService customWebhookDomainService) {
         this.gitRepoRepository = gitRepoRepository;
         this.associationUtil = associationUtil;
         this.oAuth2Properties = oAuth2Properties;
+        this.customWebhookDomainService = customWebhookDomainService;
     }
 
     @Transactional
@@ -72,7 +75,8 @@ public class OAuth2Application {
             var isCreated = this.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branches);
             if (isCreated) {
                 var webhookUrl = this.oAuth2Properties.getWebhookHost() + "projects/sync";
-                oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true, null);
+                var events = this.customWebhookDomainService.getGitEvents(this.oAuth2Properties.getThirdPartyType(), null);
+                oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true, events);
             }
         } else {
             //TODO 待扩展其他
