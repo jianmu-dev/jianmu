@@ -75,8 +75,8 @@ public class OAuth2ApiProxy implements OAuth2Api {
     }
 
     @Override
-    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active) {
-        return this.getApi().createWebhook(accessToken, gitRepoOwner, gitRepo, url, active);
+    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, List<String> events) {
+        return this.getApi().createWebhook(accessToken, gitRepoOwner, gitRepo, url, active, events);
     }
 
     @Override
@@ -85,8 +85,8 @@ public class OAuth2ApiProxy implements OAuth2Api {
     }
 
     @Override
-    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id) {
-        this.getApi().updateWebhook(accessToken, gitRepoOwner, gitRepo, url, active, id);
+    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id, List<String> events) {
+        this.getApi().updateWebhook(accessToken, gitRepoOwner, gitRepo, url, active, id, events);
     }
 
     @Override

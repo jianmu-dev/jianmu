@@ -284,7 +284,7 @@ public class GitlinkApi implements OAuth2Api {
     }
 
     @Override
-    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active) {
+    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, List<String> events) {
         String createWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + gitRepoOwner + "/" + gitRepo +
                 "/webhooks.json";
@@ -295,6 +295,7 @@ public class GitlinkApi implements OAuth2Api {
         WebhookCreatingDto webhookCreatingDto = WebhookCreatingDto.builder()
                 .active(active)
                 .url(url)
+                .events(events)
                 .build();
 
         String webhookCreatingJson;
@@ -367,7 +368,7 @@ public class GitlinkApi implements OAuth2Api {
     }
 
     @Override
-    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id) {
+    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id, List<String> events) {
         String updateWebhookUrl = this.oAuth2Properties.getGitlink().getApiUrl()
                 + "v1/" + gitRepoOwner + "/" + gitRepo +
                 "/webhooks/" + id + ".json";
@@ -378,6 +379,7 @@ public class GitlinkApi implements OAuth2Api {
         WebhookUpdatingDto webhookUpdatingDto = WebhookUpdatingDto.builder()
                 .active(active)
                 .url(url)
+                .events(events)
                 .build();
 
         String webhookUpdatingJson;

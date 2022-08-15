@@ -18,7 +18,7 @@ import java.util.List;
 public class WebhookCreatingDto {
     private final String content_type = "json";
     private final String http_method = "POST";
-    private final List<String> events = List.of("push", "pull_request_only");
+    private List<String> events;
     private String url;
     private boolean active;
 }

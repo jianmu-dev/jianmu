@@ -72,7 +72,7 @@ public class OAuth2Application {
             var isCreated = this.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branches);
             if (isCreated) {
                 var webhookUrl = this.oAuth2Properties.getWebhookHost() + "projects/sync";
-                oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true);
+                oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true, null);
             }
         } else {
             //TODO 待扩展其他
