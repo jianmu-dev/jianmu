@@ -90,7 +90,7 @@ public interface OAuth2Api {
      * @param active
      * @return
      */
-    IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active);
+    IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, List<String> events);
 
     /**
      * 删除webhook
@@ -112,7 +112,7 @@ public interface OAuth2Api {
      * @param active
      * @param id
      */
-    void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id);
+    void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id, List<String> events);
 
     /**
      * 获取webhook

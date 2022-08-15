@@ -216,9 +216,10 @@ public class GiteeApi implements OAuth2Api {
     }
 
     @Override
-    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active) {
+    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, List<String> events) {
         return null;
     }
+
 
     @Override
     public void deleteWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
@@ -226,9 +227,10 @@ public class GiteeApi implements OAuth2Api {
     }
 
     @Override
-    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id) {
+    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id, List<String> events) {
 
     }
+
 
     @Override
     public IWebhookVo getWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
