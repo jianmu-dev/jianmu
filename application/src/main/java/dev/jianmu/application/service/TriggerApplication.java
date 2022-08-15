@@ -31,9 +31,9 @@ import dev.jianmu.trigger.event.CustomWebhookInstanceEvent;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.event.TriggerEventParameter;
 import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
-import dev.jianmu.trigger.repository.CustomWebhookInstanceRepository;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.repository.TriggerRepository;
+import dev.jianmu.trigger.service.CustomWebhookDomainService;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.*;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -89,8 +89,8 @@ public class TriggerApplication {
     private final ExternalParameterRepository externalParameterRepository;
     private final OAuth2Properties oAuth2Properties;
     private final GitRepoRepository gitRepoRepository;
-    private final CustomWebhookInstanceRepository webhookInstanceRepository;
     private final CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository;
+    private final CustomWebhookDomainService customWebhookDomainService;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -108,8 +108,8 @@ public class TriggerApplication {
             ExternalParameterRepository externalParameterRepository,
             OAuth2Properties oAuth2Properties,
             GitRepoRepository gitRepoRepository,
-            CustomWebhookInstanceRepository webhookInstanceRepository,
-            CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository
+            CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
+            CustomWebhookDomainService customWebhookDomainService
     ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
@@ -126,8 +126,8 @@ public class TriggerApplication {
         this.externalParameterRepository = externalParameterRepository;
         this.oAuth2Properties = oAuth2Properties;
         this.gitRepoRepository = gitRepoRepository;
-        this.webhookInstanceRepository = webhookInstanceRepository;
         this.webhookDefinitionVersionRepository = webhookDefinitionVersionRepository;
+        this.customWebhookDomainService = customWebhookDomainService;
     }
 
     private static String decode(final String encoded) {
@@ -184,12 +184,13 @@ public class TriggerApplication {
         var webhookInstanceBuilder = CustomWebhookInstanceEvent.Builder.aCustomWebhookInstanceEvent()
                 .webhook(webhookType)
                 .eventInstances(eventInstances);
+        var events = this.customWebhookDomainService.getGitEvents(this.oAuth2Properties.getThirdPartyType(), eventInstances);
         String ref = URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
         var optionalTrigger = this.triggerRepository.findByProjectId(projectId);
         // 修改webhook
         if (optionalTrigger.isPresent()) {
             var trigger = optionalTrigger.get();
-            ref = this.updateGitWebhook(trigger.getRef(), ref, encryptedToken, project.getAssociationId(), project.getAssociationType(), userId);
+            ref = this.updateGitWebhook(trigger.getRef(), ref, encryptedToken, project.getAssociationId(), project.getAssociationType(), userId, events);
             trigger.setType(Trigger.Type.WEBHOOK);
             trigger.setWebhook(webhook);
             trigger.setRef(ref);
@@ -211,8 +212,8 @@ public class TriggerApplication {
                     .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + project.getAssociationId()));
             try {
                 var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
-                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false).getId();
-                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref);
+                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false, events).getId();
+                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref, events);
             } catch (Exception e) {
                 throw new RuntimeException("创建webhook失败：" + e.getMessage());
             }
@@ -231,7 +232,7 @@ public class TriggerApplication {
         }
     }
 
-    private String updateGitWebhook(String ref, String newRef, String encryptedToken, String associationId, String associationType, String userId) {
+    private String updateGitWebhook(String ref, String newRef, String encryptedToken, String associationId, String associationType, String userId, List<String> events) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return newRef;
         }
@@ -245,9 +246,10 @@ public class TriggerApplication {
             var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
             try {
                 oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
+                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref, events);
             } catch (UnknownException e) {
-                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false).getId();
-                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref);
+                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false, events).getId();
+                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref, events);
             }
             return ref;
         } catch (Exception e) {

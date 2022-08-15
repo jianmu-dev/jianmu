@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure;
 
 import dev.jianmu.task.service.InstanceDomainService;
+import dev.jianmu.trigger.service.CustomWebhookDomainService;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
 import org.slf4j.Logger;
@@ -42,6 +43,11 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     @Bean
     public ParameterDomainService createParameterDomainService() {
         return new ParameterDomainService();
+    }
+
+    @Bean
+    public CustomWebhookDomainService createCustomWebhookDomainService() {
+        return new CustomWebhookDomainService();
     }
 
     @Bean
