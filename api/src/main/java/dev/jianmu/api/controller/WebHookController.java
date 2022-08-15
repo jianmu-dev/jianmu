@@ -1,5 +1,6 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.api.vo.WebhookResult;
 import dev.jianmu.application.service.TriggerApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,7 +36,7 @@ public class WebHookController {
     @RequestMapping(value = "/**", method = RequestMethod.POST, consumes = {"application/json", "application/x-www-form-urlencoded", "text/plain"})
     @ResponseBody
     @Operation(summary = "触发项目", description = "触发项目启动")
-    public void receivePostJsonEvent(
+    public WebhookResult receivePostJsonEvent(
             HttpServletRequest request,
             @RequestHeader("Content-Type") String contentType
     ) {
@@ -44,6 +45,10 @@ public class WebHookController {
         var apm = new AntPathMatcher();
         var projectName = apm.extractPathWithinPattern(bestMatchPattern, path);
         var decodeProjectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8);
-        this.triggerApplication.receiveHttpEvent(decodeProjectName, request, contentType);
+        var triggerEvent = this.triggerApplication.receiveHttpEvent(decodeProjectName, request, contentType);
+        return WebhookResult.builder()
+                .projectId(triggerEvent.getProjectId())
+                .triggerId(triggerEvent.getId())
+                .build();
     }
 }

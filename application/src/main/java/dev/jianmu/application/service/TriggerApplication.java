@@ -130,7 +130,7 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void trigger(
+    public TriggerEvent trigger(
             List<TriggerEventParameter> eventParameters,
             List<Parameter> parameters,
             WebRequest webRequest
@@ -153,6 +153,7 @@ public class TriggerApplication {
         this.parameterRepository.addAll(parametersClean);
         this.triggerEventRepository.save(event);
         this.publisher.publishEvent(event);
+        return event;
     }
 
     @Transactional
@@ -412,7 +413,7 @@ public class TriggerApplication {
         this.trigger(eventParameters, parameters, newWebRequest);
     }
 
-    public void receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
+    public TriggerEvent receiveHttpEvent(String projectName, HttpServletRequest request, String contentType) {
         var webRequest = this.createWebRequest(request, contentType);
         this.writeWebhook(webRequest.getId(), webRequest.getPayload());
         var project = this.projectRepository.findByName(projectName)
@@ -453,9 +454,9 @@ public class TriggerApplication {
                 var value = this.extractParameter(webRequest.getPayload(), webhookParameter.getExp(), webhookParameter.getType());
                 if (value == null && webhookParameter.isRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
-                    webRequest.setErrorMsg("触发器参数" + webhookParameter.getName() + "的值为null");
+                    webRequest.setErrorMsg("未找到触发器参数：" + webhookParameter.getName());
                     this.webRequestRepositoryImpl.add(webRequest);
-                    throw new IllegalArgumentException("项目：" + project.getWorkflowName() + " 触发器参数" + webhookParameter.getName() + "的值为null");
+                    throw new IllegalArgumentException("未找到触发器参数：" + webhookParameter.getName());
                 }
                 Parameter<?> parameter = Parameter.Type
                         .getTypeByName(webhookParameter.getType())
@@ -481,14 +482,14 @@ public class TriggerApplication {
                 webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
                 webRequest.setErrorMsg("Auth Token表达式计算错误");
                 this.webRequestRepositoryImpl.add(webRequest);
-                return;
+                throw new RuntimeException("Auth Token表达式计算错误");
             }
             if (!authToken.getValue().equals(authValue)) {
                 log.warn("Webhook密钥不匹配");
                 webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
                 webRequest.setErrorMsg("Webhook密钥不匹配");
                 this.webRequestRepositoryImpl.add(webRequest);
-                return;
+                throw new RuntimeException("Webhook密钥不匹配");
             }
         }
         // 验证Matcher
@@ -499,11 +500,11 @@ public class TriggerApplication {
                 webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
                 webRequest.setErrorMsg("Only计算不匹配，计算结果为：" + res.getStringValue());
                 this.webRequestRepositoryImpl.add(webRequest);
-                return;
+                throw new RuntimeException("Only计算不匹配，计算结果为：" + res.getStringValue());
             }
         }
         this.webRequestRepositoryImpl.add(webRequest);
-        this.trigger(eventParameters, parameters, webRequest);
+        return this.trigger(eventParameters, parameters, webRequest);
     }
 
     private void writeWebhook(String webhookRequestId, String payload) {
@@ -704,7 +705,7 @@ public class TriggerApplication {
         var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
-        webRequest.setErrorMsg("待执行流程数已超过最大值" );
+        webRequest.setErrorMsg("待执行流程数已超过最大值");
         this.webRequestRepositoryImpl.update(webRequest);
     }
 
