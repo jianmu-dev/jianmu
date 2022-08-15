@@ -48,7 +48,7 @@ export function fetchAuthUrl(dto: IAuthorizationUrlGettingDto) {
 export function authLogin(dto: IOauth2LoggingDto) {
   return restProxy<ISessionVo>({
     url: `${baseUrl}/oauth2/login`,
-    method: 'get',
+    method: 'post',
     payload: dto,
   });
 }
