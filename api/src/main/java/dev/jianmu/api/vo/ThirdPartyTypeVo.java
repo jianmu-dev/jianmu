@@ -26,4 +26,10 @@ public class ThirdPartyTypeVo {
      */
     @Schema(required = true)
     private boolean entry;
+
+    /**
+     * authMode
+     */
+    @Schema(required = true)
+    private boolean authMode;
 }
