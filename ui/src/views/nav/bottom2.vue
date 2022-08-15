@@ -1,12 +1,12 @@
 <template>
   <div class="bottom-nav">
     <a href="https://portal.mulanos.cn" target="_blank" class="mulan"
-      >木兰社区孵化项目</a
+    >木兰社区孵化项目</a
     >
     <i class="line"></i>
     <a href="https://jianmu.dev" target="_blank">关于建木</a>
     <i class="line"></i>
-    <a href="https://docs.jianmu.dev" target="_blank">使用手册</a>
+    <a href="https://v2.jianmu.dev" target="_blank">使用手册</a>
     <i class="line"></i>
     <a href="mailto:support@jianmu.dev">联系我们</a>
   </div>
@@ -41,10 +41,11 @@ export default defineComponent({
   > :nth-child(n + 2) {
     margin-left: 20px;
   }
-  .line{
-    width:1px;
-    height:14px;
-    background:#B9CFE6;
+
+  .line {
+    width: 1px;
+    height: 14px;
+    background: #B9CFE6;
   }
 
   .mulan {
