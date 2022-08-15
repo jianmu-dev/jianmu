@@ -1,10 +1,10 @@
 import { ActionContext, Module } from 'vuex';
 import { ILoginForm, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
-import { create } from '@/api/session';
-import { ISessionVo, IOauth2LoggingDto } from '@/api/dto/session';
+import { authLogin, create } from '@/api/session';
+import { IOauth2LoggingDto, ISessionVo } from '@/api/dto/session';
 import { getStorage, setStorage } from '@/utils/storage';
-import { authLogin } from '@/api/session';
+import dynamicRender from '@/utils/dynamic-render';
 
 /**
  * 命名空间
@@ -117,6 +117,13 @@ export default {
         redirectUri: payload.redirectUri,
       });
       commit('oauthMutate', session);
+    },
+    async openAuthDialog({ rootState }: ActionContext<IState, IRootState>, { appContext, LoginVerify }) {
+      const authMode = rootState.authMode;
+      if (!authMode) {
+        return;
+      }
+      dynamicRender(LoginVerify, appContext);
     },
   },
 } as Module<IState, IRootState>;

@@ -69,7 +69,6 @@ import { useStore } from 'vuex';
 import { IRootState } from '@/model';
 import { namespace } from '@/store/modules/session';
 import yaml from 'yaml';
-import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 
 export default defineComponent({
@@ -105,6 +104,7 @@ export default defineComponent({
       const defaultGroup = projectGroupList.value.find(item => item.isDefaultGroup);
       editorForm.value.projectGroupId = defaultGroup!.id;
     });
+
     const rules = {
       projectGroupId: [
         { required: true, message: '请选择项目组', trigger: 'change' },
@@ -112,7 +112,7 @@ export default defineComponent({
     };
     // 没有登录时做的弹框判断
     if (!sessionState.session) {
-      dynamicRender(LoginVerify, appContext);
+      store.dispatch(`${namespace}/openAuthDialog`, { appContext, LoginVerify });
     }
     if (route.query.templateId) {
       getProcessTemplate(route.query.templateId as unknown as number)

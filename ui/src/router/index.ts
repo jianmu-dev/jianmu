@@ -3,9 +3,8 @@ import _store from '@/store';
 import { AUTHORIZE_INDEX, LOGIN_INDEX, PLATFORM_INDEX } from '@/router/path-def';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
-import { AppContext } from 'vue';
-import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
+import { AppContext } from 'vue';
 
 /**
  * 加载业务模块路由
@@ -111,7 +110,7 @@ export default (appContext: AppContext) => {
           });
         } else {
           // 登录弹框
-          dynamicRender(LoginVerify, appContext);
+          _store.dispatch(`${sessionNs}/openAuthDialog`, { appContext, LoginVerify });
         }
         return;
       }

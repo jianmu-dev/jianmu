@@ -44,7 +44,9 @@ export interface IAuthorizationUrlVo extends Readonly<{
  * 获取三方登录方式 vo
  */
 export interface IThirdPartyTypeVo extends Readonly<{
-  thirdPartyType: string
+  thirdPartyType: string,
+  entry: boolean,
+  authMode: boolean
 }> {
 }
 
