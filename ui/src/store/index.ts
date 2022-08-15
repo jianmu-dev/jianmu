@@ -13,6 +13,7 @@ const store = createStore<IRootState>({
   state: {
     versions: [],
     thirdPartyType: '',
+    authMode: true,
     workerTypes: [],
     parameterTypes: [],
     fromRoute: {
@@ -28,6 +29,7 @@ const store = createStore<IRootState>({
     },
     mutateThirdPartyType(state: IRootState, payload: IThirdPartyTypeVo): void {
       state.thirdPartyType = payload.thirdPartyType;
+      state.authMode = payload.authMode;
     },
     mutateWorkerTypes(state: IRootState, payload: string[]): void {
       state.workerTypes = payload;

@@ -14,11 +14,10 @@ import { fetchProjectDetail } from '@/api/view-no-auth';
 import yaml from 'yaml';
 import { namespace } from '@/store/modules/session';
 import { createNamespacedHelpers, useStore } from 'vuex';
-import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { ISessionVo } from '@/api/dto/session';
 
-const { mapMutations } = createNamespacedHelpers(namespace);
+const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 export default defineComponent({
   props: {
     id: {
@@ -60,7 +59,7 @@ export default defineComponent({
       if (sessionState.session) {
         return;
       }
-      dynamicRender(LoginVerify, appContext);
+      proxy.openAuthDialog({ appContext, LoginVerify });
     };
     onMounted(async () => {
       window.addEventListener('storage', refreshState);
@@ -134,6 +133,9 @@ export default defineComponent({
       },
       ...mapMutations({
         mutateSession: 'oauthMutate',
+      }),
+      ...mapActions({
+        openAuthDialog: 'openAuthDialog',
       }),
     };
   },

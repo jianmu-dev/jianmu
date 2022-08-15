@@ -14,6 +14,7 @@ export interface IScrollOffset {
 export interface IRootState {
   versions: IVersionVo[];
   thirdPartyType: string;
+  authMode: boolean;
   workerTypes: string[];
   parameterTypes: string[];
   fromRoute: {
