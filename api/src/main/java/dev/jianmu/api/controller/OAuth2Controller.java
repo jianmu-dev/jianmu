@@ -9,6 +9,7 @@ import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.*;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
@@ -29,9 +30,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -52,13 +51,15 @@ public class OAuth2Controller {
     private final JwtProvider jwtProvider;
     private final JwtProperties jwtProperties;
     private final OAuth2Properties oAuth2Properties;
+    private final GlobalProperties globalProperties;
 
-    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, GlobalProperties globalProperties) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
         this.jwtProperties = jwtProperties;
         this.oAuth2Properties = oAuth2Properties;
+        this.globalProperties = globalProperties;
     }
 
     /**
@@ -84,8 +85,8 @@ public class OAuth2Controller {
      * @param oauth2LoggingDto
      * @return
      */
-    @GetMapping("/login")
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid Oauth2LoggingDto oauth2LoggingDto) {
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> authenticateUser(@RequestBody @Valid Oauth2LoggingDto oauth2LoggingDto) {
         this.beforeAuthenticate();
         this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(oauth2LoggingDto.getThirdPartyType());
@@ -163,6 +164,7 @@ public class OAuth2Controller {
     @GetMapping("third_party_type")
     public ThirdPartyTypeVo getThirdPartyType() {
         return ThirdPartyTypeVo.builder()
+                .authMode(this.globalProperties.getAuthMode())
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
                 .entry(this.oAuth2Properties.isEntry())
                 .build();
@@ -172,7 +174,9 @@ public class OAuth2Controller {
      * 认证之前
      */
     private void beforeAuthenticate() {
-        if (this.oAuth2Properties.getGitee() != null || this.oAuth2Properties.getGitlink() != null) {
+        if (this.oAuth2Properties.getGitee() != null
+                || this.oAuth2Properties.getGitlink() != null
+                || this.oAuth2Properties.getGitlab() != null) {
             return;
         }
         throw new OAuth2IsNotConfiguredException("未配置OAuth2登录");
@@ -195,8 +199,8 @@ public class OAuth2Controller {
      */
     private void allowThisPlatformLogIn(String thirdPartyType) {
         if (this.oAuth2Properties.getGitee() != null && ThirdPartyTypeEnum.GITEE.name().equals(thirdPartyType)
-                ||
-                this.oAuth2Properties.getGitlink() != null && ThirdPartyTypeEnum.GITLINK.name().equals(thirdPartyType)) {
+                || this.oAuth2Properties.getGitlink() != null && ThirdPartyTypeEnum.GITLINK.name().equals(thirdPartyType)
+                || this.oAuth2Properties.getGitlab() != null && ThirdPartyTypeEnum.GITLAB.name().equals(thirdPartyType)) {
             return;
         }
         throw new NotAllowThisPlatformLogInException("不允许" + thirdPartyType + "平台登录，请与管理员联系");

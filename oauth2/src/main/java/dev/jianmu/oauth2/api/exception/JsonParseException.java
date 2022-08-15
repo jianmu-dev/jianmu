@@ -13,4 +13,7 @@ public class JsonParseException extends BaseBusinessException {
     public JsonParseException() {
         super(ErrorCodeEnum.JSON_PARSE_EXCEPTION);
     }
+    public JsonParseException(String msg) {
+        super(ErrorCodeEnum.JSON_PARSE_EXCEPTION, msg);
+    }
 }
