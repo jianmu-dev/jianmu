@@ -31,6 +31,7 @@ import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
+import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -407,6 +408,9 @@ public class ProjectApplication {
     private void pubTriggerEvent(DslParser parser, Project project) {
         // 创建Cron触发器
         if (project.getTriggerType() == Project.TriggerType.CRON) {
+            if (!CronExpression.isValidExpression(parser.getCron())) {
+                throw new RuntimeException("cron表达式不合法");
+            }
             var cronEvent = CronEvent.builder()
                     .projectId(project.getId())
                     .schedule(parser.getCron())
