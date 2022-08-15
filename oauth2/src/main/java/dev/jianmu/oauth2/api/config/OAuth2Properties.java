@@ -28,6 +28,7 @@ public class OAuth2Properties implements InitializingBean, EnvironmentAware {
     private boolean allowRegistration = true;
     private GiteeConfigProperties gitee;
     private GitlinkConfigProperties gitlink;
+    private GitLabConfigProperties gitlab;
     private Environment environment;
 
     public String getClientSecret() {
@@ -36,6 +37,9 @@ public class OAuth2Properties implements InitializingBean, EnvironmentAware {
         }
         if (this.gitlink != null) {
             return this.gitlink.getClientSecret();
+        }
+        if (this.gitlab != null) {
+            return this.gitlab.getClientSecret();
         }
         return null;
     }
@@ -46,6 +50,9 @@ public class OAuth2Properties implements InitializingBean, EnvironmentAware {
         }
         if (gitee != null) {
             return ThirdPartyTypeEnum.GITEE.name();
+        }
+        if (gitlab != null) {
+            return ThirdPartyTypeEnum.GITLAB.name();
         }
         return "";
     }
@@ -63,6 +70,9 @@ public class OAuth2Properties implements InitializingBean, EnvironmentAware {
             total++;
         }
         if (this.gitlink != null) {
+            total++;
+        }
+        if (this.gitlab != null) {
             total++;
         }
         if (total > 1) {
