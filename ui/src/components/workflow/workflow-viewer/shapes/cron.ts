@@ -13,7 +13,7 @@ export default function (G6: typeof _G6) {
       labelCfg: {
         position: 'bottom',
         style: {
-          fontSize: 14,,
+          fontSize: 14,
           fontWeight: 500,
           fill: '#3F536E',
 
