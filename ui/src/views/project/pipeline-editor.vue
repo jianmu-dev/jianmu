@@ -14,13 +14,12 @@ import { fetchProjectDetail } from '@/api/view-no-auth';
 import yaml from 'yaml';
 import { namespace } from '@/store/modules/session';
 import { createNamespacedHelpers, useStore } from 'vuex';
-import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
 
-const { mapMutations } = createNamespacedHelpers(namespace);
+const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 export default defineComponent({
   props: {
     id: {
@@ -51,7 +50,7 @@ export default defineComponent({
       if (sessionState.session) {
         return;
       }
-      dynamicRender(LoginVerify, appContext);
+      proxy.openAuthDialog({ appContext, LoginVerify });
     };
     onMounted(async () => {
       // 如果路由中带有workflow的回显数据不在发送请求
@@ -169,6 +168,9 @@ export default defineComponent({
       },
       ...mapMutations({
         mutateSession: 'oauthMutate',
+      }),
+      ...mapActions({
+        openAuthDialog: 'openAuthDialog',
       }),
     };
   },

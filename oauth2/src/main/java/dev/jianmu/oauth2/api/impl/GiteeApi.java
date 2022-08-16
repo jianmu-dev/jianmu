@@ -77,9 +77,9 @@ public class GiteeApi implements OAuth2Api {
         try {
             tokenEntity = this.restTemplate.exchange(this.oAuth2Properties.getGitee().getTokenUrl(), HttpMethod.POST, entity, String.class);
         } catch (HttpClientErrorException e) {
-            throw new GetTokenRequestParameterErrorException();
+            throw new GetTokenRequestParameterErrorException(e.getMessage());
         } catch (ServerErrorException e) {
-            throw new HttpServerException();
+            throw new HttpServerException(e.getMessage());
         }
 
         TokenVo giteeTokenVo;
@@ -102,9 +102,9 @@ public class GiteeApi implements OAuth2Api {
                     null,
                     String.class);
         } catch (HttpClientErrorException e) {
-            throw new AccessTokenDoesNotExistException();
+            throw new AccessTokenDoesNotExistException(e.getMessage());
         } catch (ServerErrorException e) {
-            throw new HttpServerException();
+            throw new HttpServerException(e.getMessage());
         }
 
         String userInfo = userInfoEntity.getBody();

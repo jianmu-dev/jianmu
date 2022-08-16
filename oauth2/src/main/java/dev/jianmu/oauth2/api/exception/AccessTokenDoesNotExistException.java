@@ -13,4 +13,7 @@ public class AccessTokenDoesNotExistException extends BaseBusinessException {
     public AccessTokenDoesNotExistException() {
         super(ErrorCodeEnum.ACCESS_TOKEN_DOES_NOT_EXIST);
     }
+    public  AccessTokenDoesNotExistException(String msg){
+        super(ErrorCodeEnum.ACCESS_TOKEN_DOES_NOT_EXIST, msg);
+    }
 }

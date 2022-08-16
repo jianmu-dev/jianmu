@@ -5,7 +5,10 @@ import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.NotSupportedThirdPartPlatformException;
 import dev.jianmu.oauth2.api.util.ApplicationContextUtil;
-import dev.jianmu.oauth2.api.vo.*;
+import dev.jianmu.oauth2.api.vo.IBranchesVo;
+import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
+import dev.jianmu.oauth2.api.vo.IRepoVo;
+import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import lombok.Builder;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,6 +37,9 @@ public class OAuth2ApiProxy implements OAuth2Api {
                         .oAuth2Properties(oAuth2Properties)
                         .userId(this.userId)
                         .build();
+            case GITLAB:
+                return ApplicationContextUtil.getBean(GitLabApi.class);
+
             default:
                 throw new NotSupportedThirdPartPlatformException();
         }
@@ -45,7 +51,7 @@ public class OAuth2ApiProxy implements OAuth2Api {
     }
 
     @Override
-    public ITokenVo getAccessToken(String code, String redirectUri) {
+    public String getAccessToken(String code, String redirectUri) {
         return this.getApi().getAccessToken(code, redirectUri);
     }
 
