@@ -29,12 +29,14 @@
         <i class="jm-icon-button-add"/>
         添加匹配规则
       </div>
-      <jm-form-item :prop="`${formModelName}.${index}.rulesetOperator`" :rules="rules.rulesetOperator"
-                    class="ruleset-operator" v-if="rulesetOperatorsVisible">
-        <jm-radio-group v-model="eventInstanceVal.rulesetOperator" @change="changeRulesetOperatorVal">
-          <jm-radio v-for="{ref,name} in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
-        </jm-radio-group>
-      </jm-form-item>
+      <div class="ruleset-operator-container">
+        <jm-form-item :prop="`${formModelName}.${index}.rulesetOperator`" :rules="rules.rulesetOperator"
+                      class="ruleset-operator" v-if="rulesetOperatorsVisible">
+          <jm-radio-group v-model="eventInstanceVal.rulesetOperator" @change="changeRulesetOperatorVal">
+            <jm-radio v-for="{ref,name} in rulesetOperators" :key="ref" :label="ref">{{ name }}</jm-radio>
+          </jm-radio-group>
+        </jm-form-item>
+      </div>
     </div>
   </div>
 </template>
@@ -175,11 +177,17 @@ export default defineComponent({
     }
   }
 
-  .ruleset-operator {
-    margin-top: 20px;
+  .ruleset-operator-container {
+    .ruleset-operator {
+      margin-top: 20px;
 
     ::v-deep(.el-radio) {
       margin-right: 30px;
+    }
+  }
+
+    &::v-deep(.el-form-item) {
+      margin-bottom: 0;
     }
   }
 
@@ -191,9 +199,6 @@ export default defineComponent({
     margin-left: 0;
   }
 
-  ::v-deep(.el-form-item) {
-    margin-bottom: 0;
-  }
 
   .check-event {
     display: flex;

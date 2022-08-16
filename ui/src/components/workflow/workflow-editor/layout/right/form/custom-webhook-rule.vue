@@ -8,7 +8,7 @@
     </div>
     <div :class="['rules-container',switchFlag?'switch-bgc':'']">
       <jm-form-item :prop="`${modelName}.${index}.paramRef`" :rules="rules.paramRef">
-        <jm-select v-model="paramRefVal" placeholder="请选择参数类型" @change="changeParamRef">
+        <jm-select v-model="paramRefVal" placeholder="请选择参数" @change="changeParamRef">
           <jm-option
             v-for="item in availableParams"
             :key="item.ref"
@@ -193,7 +193,7 @@ export default defineComponent({
   }
 
   .rules-container {
-    padding: 20px;
+    padding: 20px 20px 0;
     border-radius: 2px;
     border: 1px solid #E6EBF2;
 
@@ -235,12 +235,8 @@ export default defineComponent({
       }
     }
 
-    ::v-deep(.el-form-item):first-child {
+    ::v-deep(.el-form-item) {
       margin-bottom: 20px;
-    }
-
-    ::v-deep(.el-form-item):last-child {
-      margin-bottom: 0;
     }
   }
 }
