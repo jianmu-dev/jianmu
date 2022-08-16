@@ -16,7 +16,7 @@
             :name="event.name"
             :reference="event.ref"
             :index="idx"
-            :available-params="event.availableParams.filter(({ ref }) => !event.eventRuleset?.find((({ paramRef }) => paramRef === ref)))"
+            :available-params="event.availableParams.filter(({ ref }) => !event.eventRuleset.find((({ paramRef }) => paramRef === ref)))"
             :rules="nodeData.getFormRules().eventInstances.fields[idx]?.fields"
             :form-model-name="'eventInstances'"
             v-model:eventInstance="eventInstances[idx]"
@@ -76,7 +76,12 @@ export default defineComponent({
       selectedReference,
       radioGroupRef,
       updateEventInstance: () => {
-        form.value.eventInstances = eventInstances.value.filter(eventInstance => eventInstance);
+        // 清空eventInstances，将过滤后的eventInstances push到form中
+        form.value.eventInstances.length = 0;
+        eventInstances.value.filter(eventInstance => eventInstance).forEach(item => {
+          const { ref, ruleset, rulesetOperator } = item!;
+          form.value.eventInstances.push({ ref, ruleset, rulesetOperator });
+        });
       },
       checkEvent: (val: string) => {
         selectedReference.value = val;

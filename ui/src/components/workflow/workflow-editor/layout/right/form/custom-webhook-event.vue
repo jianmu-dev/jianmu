@@ -86,7 +86,7 @@ export default defineComponent({
   },
   emits: ['update:eventInstance', 'check-event'],
   setup(props, { emit }) {
-    const eventInstanceVal = ref<ICustomWebhookEventInstance>(props.eventInstance);
+    const eventInstanceVal = ref<ICustomWebhookEventInstance | undefined>(props.eventInstance);
     const rulesetOperators = ref<IWebhookEventOperatorVo[]>([]);
     const selectedReferenceVal = ref<string>(props.selectedReference);
     const isChecked = ref<boolean>(false);
@@ -103,6 +103,7 @@ export default defineComponent({
         ruleset: [],
         rulesetOperator: (await getWebhookOperator()).rulesetOperators[0].ref,
       } : undefined;
+      rulesetOperatorsVisible.value = (eventInstanceVal.value && eventInstanceVal.value.ruleset.length >= 2)!;
       emit('update:eventInstance', eventInstanceVal.value);
     };
 
@@ -114,8 +115,11 @@ export default defineComponent({
       await changeReference(selectedReferenceVal.value === props.reference);
     });
     onMounted(async () => {
-      rulesetOperatorsVisible.value = (eventInstanceVal.value && eventInstanceVal.value.ruleset.length >= 2);
       rulesetOperators.value = (await getWebhookOperator()).rulesetOperators;
+
+      if (eventInstanceVal.value && eventInstanceVal.value.ruleset.length >= 2) {
+        rulesetOperatorsVisible.value = true;
+      }
     });
     return {
       isChecked,
@@ -123,26 +127,26 @@ export default defineComponent({
       rulesetOperators,
       rulesetOperatorsVisible,
       updateParamRef: (val: string, index: number) => {
-        eventInstanceVal.value.ruleset[index].paramRef = val;
+        eventInstanceVal.value!.ruleset[index].paramRef = val;
         emit('update:eventInstance', eventInstanceVal.value);
       },
       updateOperator: (val: string, index: number) => {
-        eventInstanceVal.value.ruleset[index].operator = val;
+        eventInstanceVal.value!.ruleset[index].operator = val;
         emit('update:eventInstance', eventInstanceVal.value);
       },
       updateMatchingValue: (val: string, index: number) => {
-        eventInstanceVal.value.ruleset[index].matchingValue = val;
+        eventInstanceVal.value!.ruleset[index].matchingValue = val;
         emit('update:eventInstance', eventInstanceVal.value);
       },
       del: (index: number) => {
         eventInstanceVal.value!.ruleset.splice(index, 1);
+        rulesetOperatorsVisible.value = (eventInstanceVal.value && eventInstanceVal.value.ruleset.length >= 2)!;
         emit('update:eventInstance', eventInstanceVal.value);
-        rulesetOperatorsVisible.value = eventInstanceVal.value.ruleset.length >= 2;
       },
       add: () => {
-        eventInstanceVal.value.ruleset.push({ key: uuidv4(), paramRef: '', operator: 'INCLUDE', matchingValue: '' });
+        eventInstanceVal.value!.ruleset.push({ key: uuidv4(), paramRef: '', operator: '', matchingValue: '' });
+        rulesetOperatorsVisible.value = (eventInstanceVal.value && eventInstanceVal.value.ruleset.length >= 2)!;
         emit('update:eventInstance', eventInstanceVal.value);
-        rulesetOperatorsVisible.value = eventInstanceVal.value.ruleset.length >= 2;
       },
       changeRulesetOperatorVal: () => {
         emit('update:eventInstance', eventInstanceVal.value);
@@ -181,10 +185,10 @@ export default defineComponent({
     .ruleset-operator {
       margin-top: 20px;
 
-    ::v-deep(.el-radio) {
-      margin-right: 30px;
+      ::v-deep(.el-radio) {
+        margin-right: 30px;
+      }
     }
-  }
 
     &::v-deep(.el-form-item) {
       margin-bottom: 0;
