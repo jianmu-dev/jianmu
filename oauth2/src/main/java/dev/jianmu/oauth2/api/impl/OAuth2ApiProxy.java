@@ -34,6 +34,9 @@ public class OAuth2ApiProxy implements OAuth2Api {
                         .oAuth2Properties(oAuth2Properties)
                         .userId(this.userId)
                         .build();
+            case GITLAB:
+                return ApplicationContextUtil.getBean(GitLabApi.class);
+
             default:
                 throw new NotSupportedThirdPartPlatformException();
         }

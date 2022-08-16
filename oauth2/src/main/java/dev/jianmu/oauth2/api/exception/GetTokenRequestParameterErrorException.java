@@ -13,4 +13,8 @@ public class GetTokenRequestParameterErrorException extends BaseBusinessExceptio
     public GetTokenRequestParameterErrorException() {
         super(ErrorCodeEnum.GET_TOKEN_REQUEST_PARAMETER_ERROR);
     }
+
+    public GetTokenRequestParameterErrorException(String msg) {
+        super(ErrorCodeEnum.GET_TOKEN_REQUEST_PARAMETER_ERROR, msg);
+    }
 }
