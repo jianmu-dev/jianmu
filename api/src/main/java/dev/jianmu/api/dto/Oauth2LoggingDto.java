@@ -26,7 +26,7 @@ public class Oauth2LoggingDto {
     /**
      * 第三方登录平台
      */
-    @NotNull
+    @NotNull(message = "请输入第三方登录平台")
     private String thirdPartyType;
 
     /**

@@ -33,6 +33,8 @@ public class CustomWebhookDomainService {
                 return List.of();
             case "GITLINK":
                 return this.getGitLinkEvents(eventInstances);
+            case "GITLAB":
+                return List.of();
             default:
                 throw new RuntimeException("未集成Git：" + gitType);
         }

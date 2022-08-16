@@ -25,6 +25,10 @@ public class ExternalParameterLabelRepositoryImpl implements ExternalParameterLa
 
     @Override
     public void add(ExternalParameterLabel externalParameterLabel) {
+        if (externalParameterLabel.getAssociationId() == null || externalParameterLabel.getAssociationType() == null) {
+            externalParameterLabel.setAssociationId("");
+            externalParameterLabel.setAssociationType("");
+        }
         this.externalParameterLabelMapper.add(externalParameterLabel);
     }
 

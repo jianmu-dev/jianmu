@@ -25,6 +25,10 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
 
     @Override
     public void add(ExternalParameter externalParameter) {
+        if (externalParameter.getAssociationId() == null || externalParameter.getAssociationType() == null) {
+            externalParameter.setAssociationId("");
+            externalParameter.setAssociationType("");
+        }
         this.externalParameterMapper.add(externalParameter);
     }
 
