@@ -59,14 +59,14 @@ import { IProcessTemplateVo, IProjectIdVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { useStore } from 'vuex';
 import { IRootState } from '@/model';
-import { namespace } from '@/store/modules/session';
+import { namespace as sessionNs, namespace } from '@/store/modules/session';
 import yaml from 'yaml';
-import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
 import { pushTop } from '@/utils/push-top';
 import { DSL_CURRENT_VERSION } from '@/components/workflow/version';
+import _store from '@/store';
 
 export default defineComponent({
   props: {
@@ -90,7 +90,7 @@ export default defineComponent({
     // 项目id
     const projectId = computed<string>(() => props.id);
     const editorForm = ref<ISaveForm>({
-      id: projectId,
+      id: projectId.value,
       branch: props.branch,
       dslText: `version: ${DSL_CURRENT_VERSION}\n`,
       projectGroupId: '',
@@ -123,7 +123,7 @@ export default defineComponent({
           return item.branchName === currentBranch.value;
         });
         if (!flag) {
-          currentBranch.value = branches.value.find(item => item.isDefault).branchName;
+          currentBranch.value = branches.value.find(item => item.isDefault)!.branchName;
         }
         return;
       }
@@ -137,7 +137,7 @@ export default defineComponent({
     });
     // 没有登录时做的弹框判断
     if (!sessionState.session) {
-      dynamicRender(LoginVerify, appContext);
+      _store.dispatch(`${sessionNs}/openAuthDialog`, { appContext, LoginVerify });
     }
     if (route.query.templateId) {
       getProcessTemplate(route.query.templateId as unknown as number)

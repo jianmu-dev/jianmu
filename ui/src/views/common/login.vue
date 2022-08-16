@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onMounted, ref } from 'vue';
 import { createNamespacedHelpers, mapActions, useStore } from 'vuex';
 import { ILoginForm, IState } from '@/model/modules/session';
 import { namespace } from '@/store/modules/session';
@@ -173,7 +173,7 @@ export default defineComponent({
       trailing: false,
     });
     onMounted(async () => {
-      window.addEventListener('storage', refreshState);
+      window.onstorage = refreshState;
       // 判断是否为弹窗方式登录
       const dialogLogin = localStorage.getItem('temp-login-mode') === 'dialog';
       const isIframeLogin = localStorage.getItem('temp-login-mode') === 'iframe';
@@ -181,7 +181,7 @@ export default defineComponent({
         proxy.$error(props.error_description);
         localStorage.setItem('temp-login-error-message', props.error_description);
         (dialogLogin || isIframeLogin) && setTimeout(() => {
-          // window.close();
+          window.close();
         }, 2000);
         return;
       }
@@ -191,31 +191,39 @@ export default defineComponent({
         try {
           let payload: IOauth2LoggingDto;
           const associationType = store.state.associationType;
-          switch (associationType) {
-            case AssociationTypeEnum.GIT_REPO:
-              payload = {
-                code: props.code,
-                thirdPartyType: loginType.value,
-                redirectUri: getRedirectUri(props.reference, props.owner),
-                ref: props.reference || undefined,
-                owner: props.owner || undefined,
-              } as IGitRepoLoggingDto;
-              break;
-            case AssociationTypeEnum.USER:
-              // TODO 待完善其他登录
-              break;
-            case AssociationTypeEnum.ORG:
-              // TODO 待完善其他登录
-              break;
+          if (!associationType) {
+            payload = {
+              code: props.code,
+              thirdPartyType: loginType.value,
+              redirectUri: getRedirectUri(props.reference, props.owner),
+            } as IOauth2LoggingDto;
+          } else {
+            switch (associationType) {
+              case AssociationTypeEnum.GIT_REPO:
+                payload = {
+                  code: props.code,
+                  thirdPartyType: loginType.value,
+                  redirectUri: getRedirectUri(props.reference, props.owner),
+                  ref: props.reference as string,
+                  owner: props.owner as string,
+                } as IGitRepoLoggingDto;
+                break;
+              case AssociationTypeEnum.USER:
+                // TODO 待完善其他登录
+                break;
+              case AssociationTypeEnum.ORG:
+                // TODO 待完善其他登录
+                break;
+            }
           }
           await proxy.createOAuthSession(payload!);
           // 弹窗、以及iframe形式登录后自动关闭页面
-          // (dialogLogin || isIframeLogin) ? window.close() : await router.push(INDEX);
+          (dialogLogin || isIframeLogin) ? window.close() : await router.push(INDEX);
         } catch (err) {
           proxy.$throw(err, proxy);
           localStorage.setItem('temp-login-error-message', err.message);
           (dialogLogin || isIframeLogin) && setTimeout(() => {
-            // window.close();
+            window.close();
           }, 2000);
         } finally {
           loading.value = false;
@@ -227,9 +235,6 @@ export default defineComponent({
       if (route.path === AUTHORIZE_INDEX) {
         await fetchThirdAuthUrl();
       }
-    });
-    onBeforeUnmount(() => {
-      window.removeEventListener('storage', refreshState);
     });
     return {
       authError,

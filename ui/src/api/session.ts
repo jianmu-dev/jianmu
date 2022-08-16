@@ -1,6 +1,8 @@
 import {
   IAuthorizationUrlGettingDto,
-  IAuthorizationUrlVo, IOauth2LoggingDto, IOauth2RefreshingDto,
+  IAuthorizationUrlVo,
+  IOauth2LoggingDto,
+  IOauth2RefreshingDto,
   ISessionCreatingDto,
   ISessionVo,
   IThirdPartyTypeVo,
@@ -49,9 +51,13 @@ export function fetchAuthUrl(dto: IAuthorizationUrlGettingDto) {
  * @param associationType
  * @param dto
  */
-export function authLogin(associationType: AssociationTypeEnum, dto: IOauth2LoggingDto) {
+export function authLogin(associationType: AssociationTypeEnum | undefined, dto: IOauth2LoggingDto) {
+  let url = `${oAuthUrl}/login`;
+  if (associationType) {
+    url += `/${associationType.toLowerCase()}`;
+  }
   return restProxy<ISessionVo>({
-    url: `${oAuthUrl}/login/${associationType.toLowerCase()}`,
+    url,
     method: 'post',
     payload: dto,
   });

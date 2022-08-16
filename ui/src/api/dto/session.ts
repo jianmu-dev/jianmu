@@ -51,6 +51,7 @@ export interface IAuthorizationUrlVo extends Readonly<{
 export interface IThirdPartyTypeVo extends Readonly<{
   thirdPartyType: string,
   associationType?: AssociationTypeEnum,
+  authMode: boolean
 }> {
 }
 
@@ -65,8 +66,8 @@ export interface IOauth2LoggingDto extends Readonly<{
 }
 
 export interface IGitRepoLoggingDto extends Readonly<IOauth2LoggingDto & {
-  ref?: string,
-  owner?: string
+  ref: string,
+  owner: string
 }> {
 }
 
