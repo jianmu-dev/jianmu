@@ -9,13 +9,13 @@ public class CustomWebhookRuleUtil {
     public static List<CustomWebhookRule.Operator> getOperators(Parameter.Type type) {
         switch (type) {
             case NUMBER:
-                return List.of(CustomWebhookRule.Operator.NE, CustomWebhookRule.Operator.EQ);
+                return List.of(CustomWebhookRule.Operator.EQ, CustomWebhookRule.Operator.NE);
             case BOOL:
-                return List.of(CustomWebhookRule.Operator.NE, CustomWebhookRule.Operator.EQ);
+                return List.of(CustomWebhookRule.Operator.EQ, CustomWebhookRule.Operator.NE);
             case STRING:
             case SECRET:
             default:
-                return List.of(CustomWebhookRule.Operator.EXCLUDE, CustomWebhookRule.Operator.INCLUDE, CustomWebhookRule.Operator.REG_EXP);
+                return List.of(CustomWebhookRule.Operator.INCLUDE, CustomWebhookRule.Operator.EXCLUDE, CustomWebhookRule.Operator.REG_EXP);
         }
     }
 }
