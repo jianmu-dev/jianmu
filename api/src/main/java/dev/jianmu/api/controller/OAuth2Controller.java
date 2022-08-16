@@ -1,22 +1,33 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.AuthorizationUrlGettingDto;
+import dev.jianmu.api.dto.GitRepoTokenRefreshingDto;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.Oauth2LoggingDto;
+import dev.jianmu.api.dto.impl.GitRepoLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
+import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
-import dev.jianmu.application.exception.*;
+import dev.jianmu.application.exception.NotAllowRegistrationException;
+import dev.jianmu.application.exception.NotAllowThisPlatformLogInException;
+import dev.jianmu.application.exception.OAuth2IsNotConfiguredException;
+import dev.jianmu.application.service.OAuth2Application;
+import dev.jianmu.application.service.vo.AssociationData;
+import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
-import dev.jianmu.oauth2.api.exception.NoPermissionException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
+import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
+import dev.jianmu.oauth2.api.vo.ITokenVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.user.aggregate.User;
 import dev.jianmu.user.repository.UserRepository;
@@ -28,13 +39,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
-import java.util.List;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 /**
@@ -58,7 +71,7 @@ public class OAuth2Controller {
     private final GitRepoRepository gitRepoRepository;
     private final GlobalProperties globalProperties;
 
-    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, AssociationUtil associationUtil, OAuth2Application oAuth2Application, UserContextHolder userContextHolder, GitRepoRepository gitRepoRepository) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, AssociationUtil associationUtil, OAuth2Application oAuth2Application, UserContextHolder userContextHolder, GitRepoRepository gitRepoRepository, GlobalProperties globalProperties) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
@@ -68,6 +81,7 @@ public class OAuth2Controller {
         this.oAuth2Application = oAuth2Application;
         this.userContextHolder = userContextHolder;
         this.gitRepoRepository = gitRepoRepository;
+        this.globalProperties = globalProperties;
     }
 
     /**
@@ -146,7 +160,7 @@ public class OAuth2Controller {
     /**
      * 获取jwt
      *
-     * @param oauth2LoggingDto
+     * @param gitRepoLoggingDto
      * @return
      */
     @PostMapping("/login/git_repo")

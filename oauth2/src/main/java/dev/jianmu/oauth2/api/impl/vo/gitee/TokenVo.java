@@ -33,14 +33,4 @@ public class TokenVo implements ITokenVo {
     public long getExpireInMs() {
         return this.expires_in * 1000;
     }
-
-    @Override
-    public String getEncryptedAccessToken() {
-        try {
-            return AESEncryptionUtil.encrypt(this.access_token, ApplicationContextUtil.getBean(OAuth2Properties.class).getClientSecret());
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new UnknownException(e.getMessage());
-        }
-    }
 }

@@ -5,10 +5,7 @@ import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.NotSupportedThirdPartPlatformException;
 import dev.jianmu.oauth2.api.util.ApplicationContextUtil;
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
+import dev.jianmu.oauth2.api.vo.*;
 import lombok.Builder;
 import org.springframework.web.client.RestTemplate;
 
@@ -51,7 +48,7 @@ public class OAuth2ApiProxy implements OAuth2Api {
     }
 
     @Override
-    public String getAccessToken(String code, String redirectUri) {
+    public ITokenVo getAccessToken(String code, String redirectUri) {
         return this.getApi().getAccessToken(code, redirectUri);
     }
 

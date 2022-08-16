@@ -11,10 +11,7 @@ import dev.jianmu.oauth2.api.exception.JsonParseException;
 import dev.jianmu.oauth2.api.impl.dto.gitlab.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitlab.UserInfoVo;
 import dev.jianmu.oauth2.api.impl.vo.gitlab.TokenVo;
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
+import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -56,7 +53,7 @@ public class GitLabApi implements OAuth2Api {
     }
 
     @Override
-    public String getAccessToken(String code, String redirectUri) {
+    public ITokenVo getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto gitlabLoggingDto = LoggingDto.builder()
                 .client_id(this.oAuth2Properties.getGitlab().getClientId())
@@ -93,7 +90,7 @@ public class GitLabApi implements OAuth2Api {
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
-        return gitlabTokenVo.getAccess_token();
+        return gitlabTokenVo;
     }
 
     @Override
@@ -135,6 +132,46 @@ public class GitLabApi implements OAuth2Api {
 
     @Override
     public IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner) {
+        return null;
+    }
+
+    @Override
+    public IWebhookVo createWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, List<String> events) {
+        return null;
+    }
+
+    @Override
+    public void deleteWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
+
+    }
+
+    @Override
+    public void updateWebhook(String accessToken, String gitRepoOwner, String gitRepo, String url, boolean active, String id, List<String> events) {
+
+    }
+
+    @Override
+    public IWebhookVo getWebhook(String accessToken, String gitRepoOwner, String gitRepo, String id) {
+        return null;
+    }
+
+    @Override
+    public void createFile(String accessToken, String owner, String repo, String content, String filepath, String authorEmail, String authorName, String committerEmail, String committerName, String branch, String message) {
+
+    }
+
+    @Override
+    public void deleteFile(String accessToken, String owner, String repo, String content, String filepath, String authorEmail, String authorName, String committerEmail, String committerName, String branch, String message) {
+
+    }
+
+    @Override
+    public void updateFile(String accessToken, String owner, String repo, String content, String filepath, String authorEmail, String authorName, String committerEmail, String committerName, String branch, String message) {
+
+    }
+
+    @Override
+    public IFileVo getFile(String accessToken, String owner, String repo, String filepath, String ref) {
         return null;
     }
 
