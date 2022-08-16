@@ -57,6 +57,10 @@ export class ExpressionEditor {
     this.instance.on('change', () => this.instance.save());
   }
 
+  updateValue(newVal: string): void {
+    this.instance.setValue(newVal);
+  }
+
   insertParam(arr: string[]): void {
     this.instance.replaceSelection(arr.join('.'));
   }
