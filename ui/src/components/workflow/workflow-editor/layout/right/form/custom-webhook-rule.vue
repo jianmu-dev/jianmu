@@ -147,6 +147,20 @@ export default defineComponent({
         emit('delete', props.index);
       },
       changeParamRef: () => {
+        switch (paramType.value) {
+          case ParamTypeEnum.STRING:
+            matchingValueVal.value = '""';
+            break;
+          case ParamTypeEnum.BOOL:
+            matchingValueVal.value = '';
+            break;
+          case ParamTypeEnum.NUMBER:
+            matchingValueVal.value = '';
+            break;
+        }
+        emit('update:matchingValue', matchingValueVal.value);
+        // changeParamRef时修改operator
+        emit('update:operator', operatorOptions.value.find(({ name }) => name === operatorText.value)!.ref);
         emit('update:paramRef', paramRefVal.value);
       },
       changeMatchingValue: () => {
