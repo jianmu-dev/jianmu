@@ -4,7 +4,6 @@ import { AUTHORIZE_INDEX, INDEX, LOGIN_INDEX } from '@/router/path-def';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState as ISessionState } from '@/model/modules/session';
 import { AppContext } from 'vue';
-import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 import { fetchThirdPartyType } from '@/api/session';
 
@@ -120,6 +119,11 @@ export default async (appContext: AppContext): Promise<Router> => {
       next({ name: 'http-status-error', params: { value: 404 } });
       return;
     }
+    // authMode为false不需要登录，路由限制
+    if ((!_store.state.authMode) && to.name === 'login') {
+      next({ path: '/' });
+      return;
+    }
     for (const m of to.matched) {
       if (m.meta.auth && !session) {
         // 处理认证
@@ -135,7 +139,7 @@ export default async (appContext: AppContext): Promise<Router> => {
           });
         } else {
           // 登录弹框
-          dynamicRender(LoginVerify, appContext);
+          _store.dispatch(`${sessionNs}/openAuthDialog`, { appContext, LoginVerify });
         }
         return;
       }
