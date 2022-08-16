@@ -156,7 +156,7 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void trigger(
+    public TriggerEvent trigger(
             List<TriggerEventParameter> eventParameters,
             List<Parameter> parameters,
             WebRequest webRequest
@@ -175,6 +175,7 @@ public class TriggerApplication {
         this.parameterRepository.addAll(parametersClean);
         this.triggerEventRepository.save(event);
         this.publisher.publishEvent(event);
+        return event;
     }
 
     @Transactional
@@ -548,7 +549,7 @@ public class TriggerApplication {
         this.trigger(eventParameters, parameters, newWebRequest);
     }
 
-    public void receiveHttpEvent(String ref, HttpServletRequest request, String contentType) {
+    public TriggerEvent receiveHttpEvent(String ref, HttpServletRequest request, String contentType) {
         var webRequest = this.createWebRequest(request, contentType);
         this.writeWebhook(webRequest.getId(), webRequest.getPayload());
         var trigger = this.triggerRepository.findByRef(ref)
@@ -618,14 +619,14 @@ public class TriggerApplication {
                 webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
                 webRequest.setErrorMsg("Auth Token表达式计算错误");
                 this.webRequestRepositoryImpl.add(webRequest);
-                return;
+                throw new RuntimeException("Auth Token表达式计算错误");
             }
             if (!authToken.getValue().equals(authValue)) {
                 log.warn("Webhook密钥不匹配");
                 webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
                 webRequest.setErrorMsg("Webhook密钥不匹配");
                 this.webRequestRepositoryImpl.add(webRequest);
-                return;
+                throw new RuntimeException("Webhook密钥不匹配");
             }
         }
         // 验证Matcher
@@ -636,11 +637,11 @@ public class TriggerApplication {
                 webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
                 webRequest.setErrorMsg("Only计算不匹配，计算结果为：" + res.getStringValue());
                 this.webRequestRepositoryImpl.add(webRequest);
-                return;
+                throw new RuntimeException("Only计算不匹配，计算结果为：" + res.getStringValue());
             }
         }
         this.webRequestRepositoryImpl.add(webRequest);
-        this.trigger(eventParameters, parameters, webRequest);
+        return this.trigger(eventParameters, parameters, webRequest);
     }
 
     private void writeWebhook(String webhookRequestId, String payload) {

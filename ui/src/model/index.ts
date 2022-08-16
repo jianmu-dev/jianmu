@@ -17,6 +17,7 @@ export interface IRootState {
   entry: boolean;
   associationType?: AssociationTypeEnum;
   thirdPartyType: string;
+  authMode: boolean;
   workerTypes: string[];
   parameterTypes: string[];
   fromRoute: {
