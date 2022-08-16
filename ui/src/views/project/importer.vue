@@ -25,7 +25,6 @@ import { IGitVo } from '@/api/dto/project';
 import { IGitCloneForm } from '@/model/modules/project';
 import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/session';
-import dynamicRender from '@/utils/dynamic-render';
 import LoginVerify from '@/views/login/dialog.vue';
 
 export default defineComponent({
@@ -35,7 +34,9 @@ export default defineComponent({
     const store = useStore();
     const sessionState = { ...store.state[namespace] };
     if (!sessionState.session) {
-      dynamicRender(LoginVerify, appContext);
+      store.dispatch(`${namespace}/openAuthDialog`, {
+        appContext, LoginVerify,
+      });
     }
     const step = ref<number>(0);
     const stepTwoData = ref<{

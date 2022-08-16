@@ -19,6 +19,7 @@ import dev.jianmu.application.service.vo.AssociationData;
 import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.git.repo.aggregate.GitRepo;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
@@ -68,8 +69,9 @@ public class OAuth2Controller {
     private final OAuth2Application oAuth2Application;
     private final UserContextHolder userContextHolder;
     private final GitRepoRepository gitRepoRepository;
+    private final GlobalProperties globalProperties;
 
-    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, AssociationUtil associationUtil, OAuth2Application oAuth2Application, UserContextHolder userContextHolder, GitRepoRepository gitRepoRepository) {
+    public OAuth2Controller(UserRepository userRepository, AuthenticationManager authenticationManager, JwtProvider jwtProvider, JwtProperties jwtProperties, OAuth2Properties oAuth2Properties, AssociationUtil associationUtil, OAuth2Application oAuth2Application, UserContextHolder userContextHolder, GitRepoRepository gitRepoRepository, GlobalProperties globalProperties) {
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.authenticationManager = authenticationManager;
@@ -79,6 +81,7 @@ public class OAuth2Controller {
         this.oAuth2Application = oAuth2Application;
         this.userContextHolder = userContextHolder;
         this.gitRepoRepository = gitRepoRepository;
+        this.globalProperties = globalProperties;
     }
 
     /**
@@ -303,6 +306,7 @@ public class OAuth2Controller {
     @GetMapping("third_party_type")
     public ThirdPartyTypeVo getThirdPartyType() {
         return ThirdPartyTypeVo.builder()
+                .authMode(this.globalProperties.getAuthMode())
                 .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
                 .associationType(this.associationUtil.getAssociationType())
                 .build();
@@ -312,7 +316,9 @@ public class OAuth2Controller {
      * 认证之前
      */
     private void beforeAuthenticate() {
-        if (this.oAuth2Properties.getGitee() != null || this.oAuth2Properties.getGitlink() != null) {
+        if (this.oAuth2Properties.getGitee() != null
+                || this.oAuth2Properties.getGitlink() != null
+                || this.oAuth2Properties.getGitlab() != null) {
             return;
         }
         throw new OAuth2IsNotConfiguredException("未配置OAuth2登录");
@@ -335,8 +341,8 @@ public class OAuth2Controller {
      */
     private void allowThisPlatformLogIn(String thirdPartyType) {
         if (this.oAuth2Properties.getGitee() != null && ThirdPartyTypeEnum.GITEE.name().equals(thirdPartyType)
-                ||
-                this.oAuth2Properties.getGitlink() != null && ThirdPartyTypeEnum.GITLINK.name().equals(thirdPartyType)) {
+                || this.oAuth2Properties.getGitlink() != null && ThirdPartyTypeEnum.GITLINK.name().equals(thirdPartyType)
+                || this.oAuth2Properties.getGitlab() != null && ThirdPartyTypeEnum.GITLAB.name().equals(thirdPartyType)) {
             return;
         }
         throw new NotAllowThisPlatformLogInException("不允许" + thirdPartyType + "平台登录，请与管理员联系");

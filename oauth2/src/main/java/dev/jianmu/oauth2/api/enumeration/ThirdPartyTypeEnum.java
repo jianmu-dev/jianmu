@@ -7,5 +7,5 @@ package dev.jianmu.oauth2.api.enumeration;
  * @create 2021-06-30 14:08
  */
 public enum ThirdPartyTypeEnum {
-    GITEE, GITLINK;
+    GITEE, GITLINK,GITLAB
 }
