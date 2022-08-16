@@ -61,14 +61,14 @@
         <div class="loading" v-else></div>
       </div>
       <span class="tip">{{
-          loading ? `${loginType === 'GITEE' ? 'Gitee' : 'GitLink'} 账号登录中…` : `使用 ${loginType === 'GITEE' ? 'Gitee' : 'GitLink'} 账号登录`
+          loading ? `${Type} 账号登录中…` : `使用 ${Type} 账号登录`
         }}</span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
 import { createNamespacedHelpers, mapActions, useStore } from 'vuex';
 import { ILoginForm, IState } from '@/model/modules/session';
 import { namespace } from '@/store/modules/session';
@@ -101,6 +101,18 @@ export default defineComponent({
     const store = useStore();
     // 系统初始化后，自动决定登录方式（密码/第三方平台登录）
     const loginType = ref<string>(store.state.thirdPartyType);
+    const Type = computed<string>(() => {
+      switch (loginType.value) {
+        case 'GITEE':
+          return 'Gitee';
+        case 'GITLINK':
+          return 'GitLink';
+        case 'GITLAB':
+          return 'GitLab';
+        default:
+          return '';
+      }
+    });
     const { username, remember } = store.state[namespace] as IState;
     const loading = ref<boolean>(false);
     const loginFormRef = ref<any>(null);
@@ -222,6 +234,7 @@ export default defineComponent({
     return {
       authError,
       loginType,
+      Type,
       fetchThirdAuthUrl,
       loading,
       loginFormRef,
@@ -317,7 +330,7 @@ export default defineComponent({
     }
   }
 
-  .gitee-login, .gitlink-login, .error-login {
+  .gitee-login, .gitlink-login, .gitlab-login, .error-login {
     cursor: pointer;
     position: absolute;
     top: 50%;
@@ -366,6 +379,18 @@ export default defineComponent({
         width: 56px;
         height: 35px;
         background-image: url("@/assets/svgs/logo/gitlink.svg");
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
+    }
+  }
+
+  .gitlab-login {
+    .logo {
+      .img {
+        width: 56px;
+        height: 56px;
+        background-image: url("@/assets/svgs/logo/gitlab.svg");
         background-size: cover;
         background-repeat: no-repeat;
       }
