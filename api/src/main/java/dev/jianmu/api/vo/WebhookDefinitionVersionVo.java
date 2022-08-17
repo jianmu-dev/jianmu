@@ -41,4 +41,8 @@ public class WebhookDefinitionVersionVo {
      * 事件集
      */
     private List<CustomWebhookDefinitionVersion.Event> events;
+    /**
+     * DSL文本
+     */
+    private String dslText;
 }

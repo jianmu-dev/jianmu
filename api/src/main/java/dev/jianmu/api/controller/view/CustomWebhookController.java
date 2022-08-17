@@ -1,5 +1,6 @@
 package dev.jianmu.api.controller.view;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.api.mapper.CustomWebhookDefinitionMapper;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
@@ -11,10 +12,10 @@ import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,7 +84,25 @@ public class CustomWebhookController {
     }
 
     @PostMapping
-    public void test(@RequestBody CustomWebhookDefinitionVersion customWebhookDefinitionVersion) {
-        this.versionRepository.saveOrUpdate(customWebhookDefinitionVersion);
+    public void test(HttpServletRequest request) throws Exception {
+        var reader = request.getReader();
+        var dslText = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            dslText.append(line);
+        }
+        var objectMapper = new ObjectMapper();
+        var dslParser = objectMapper.readValue(dslText.toString(), CustomWebhookDefinitionVersion.class);
+        this.versionRepository.saveOrUpdate(CustomWebhookDefinitionVersion.Builder.aCustomWebhookDefinitionVersion()
+                .id(dslParser.getId())
+                .definitionId(dslParser.getDefinitionId())
+                .ref(dslParser.getRef())
+                .ownerRef(dslParser.getOwnerRef())
+                .version(dslParser.getVersion())
+                .creatorRef(dslParser.getCreatorRef())
+                .creatorName(dslParser.getCreatorName())
+                .events(dslParser.getEvents())
+                .dslText(dslText.toString())
+                .build());
     }
 }
