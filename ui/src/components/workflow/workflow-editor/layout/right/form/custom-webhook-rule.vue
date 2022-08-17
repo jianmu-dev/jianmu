@@ -17,21 +17,33 @@
           />
         </jm-select>
       </jm-form-item>
-      <jm-dropdown trigger="click" @command="changeOperator">
-        <span class="el-dropdown-link">
-          {{ operatorText }}
-          <i class="jm-icon-button-right"/>
-        </span>
-        <template #dropdown>
-          <jm-dropdown-menu>
-            <jm-dropdown-item v-for="item in operatorOptions" :key="item.ref" :command="item.ref">
-              {{ item.name }}
-            </jm-dropdown-item>
-          </jm-dropdown-menu>
-        </template>
-      </jm-dropdown>
-      <jm-form-item :prop="`${modelName}.${index}.matchingValue`" :rules="rules.matchingValue">
+      <div class="operator-container">
+        <div class="switch-dropdown">
+          <jm-dropdown trigger="click" @command="changeOperator" v-if="switchIconFlag">
+            <span class="el-dropdown-link">
+              {{ operatorText }}
+              <i class="jm-icon-button-right"/>
+            </span>
+            <template #dropdown>
+              <jm-dropdown-menu>
+                <jm-dropdown-item v-for="item in operatorOptions" :key="item.ref" :command="item.ref">
+                  {{ item.name }}
+                </jm-dropdown-item>
+              </jm-dropdown-menu>
+            </template>
+          </jm-dropdown>
+          <span class="operator-text" v-else>{{ operatorText }}</span>
+        </div>
+        <div class="icon-container" v-if="paramType === ParamTypeEnum.BOOL">
+          <jm-tooltip placement="top" :content="switchIconFlag?'切换至单选模式':'切换至表达式模式'" v-if="tooltipVisible">
+            <i class="jm-icon-workflow-select-mode" v-if="switchIconFlag" @click="switchMode(false)"/>
+            <i class="jm-icon-workflow-edit-mode" v-else @click="switchMode(true)"/>
+          </jm-tooltip>
+        </div>
+      </div>
+      <jm-form-item :prop="`${modelName}.${index}.matchingValue`" :rules="rules.matchingValue" v-if="reloadPlaceholder">
         <expression-editor
+          v-if="switchIconFlag"
           v-model="matchingValueVal"
           :placeholder="inputPlaceholder"
           :type="ExpressionTypeEnum.WEBHOOK_PARAM"
@@ -41,12 +53,16 @@
           @focus="switchFlag=true"
           @blur="switchFlag=false"
         />
+        <jm-radio-group v-model="matchingValueVal" @change="changeMatchingValue" v-else>
+          <jm-radio label="true" @change="changeMatchingValue">true</jm-radio>
+          <jm-radio label="false" @change="changeMatchingValue">false</jm-radio>
+        </jm-radio-group>
       </jm-form-item>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, inject, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, inject, nextTick, onMounted, PropType, ref } from 'vue';
 import { Node } from '@antv/x6';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import ExpressionEditor from '../form/expression-editor.vue';
@@ -89,6 +105,9 @@ export default defineComponent({
   },
   emits: ['update:paramRef', 'update:operator', 'update:matchingValue', 'delete'],
   setup(props, { emit }) {
+    const reloadPlaceholder = ref<boolean>(true);
+    const switchIconFlag = ref<boolean>(true);
+    const tooltipVisible = ref<boolean>(true);
     const paramOperators = ref<IWebhookParamOperatorVo[]>([]);
     // 参数唯一标识
     const paramRefVal = ref<String>(props.paramRef);
@@ -127,6 +146,9 @@ export default defineComponent({
     };
     onMounted(async () => {
       paramOperators.value = (await getWebhookOperator()).paramOperators;
+      if (paramType.value === ParamTypeEnum.BOOL) {
+        switchIconFlag.value = !(matchingValueVal.value === 'true' || matchingValueVal.value === 'false');
+      }
       if (operatorVal.value) {
         return;
       }
@@ -143,30 +165,61 @@ export default defineComponent({
       switchFlag,
       paramType,
       nodeId,
+      reloadPlaceholder,
+      switchIconFlag,
+      tooltipVisible,
       del: () => {
         emit('delete', props.index);
       },
-      changeParamRef: () => {
+      changeParamRef: async () => {
         switch (paramType.value) {
           case ParamTypeEnum.STRING:
             matchingValueVal.value = '""';
+            switchIconFlag.value = true;
             break;
           case ParamTypeEnum.BOOL:
-            matchingValueVal.value = '';
+            matchingValueVal.value = matchingValueVal.value === '""' ? 'true' : matchingValueVal.value;
+            switchIconFlag.value = false;
             break;
           case ParamTypeEnum.NUMBER:
             matchingValueVal.value = '';
+            switchIconFlag.value = true;
             break;
         }
         emit('update:matchingValue', matchingValueVal.value);
         // changeParamRef时修改operator
         emit('update:operator', operatorOptions.value.find(({ name }) => name === operatorText.value)!.ref);
         emit('update:paramRef', paramRefVal.value);
+        // 保证paramRef切换时值placeholder能更新
+        reloadPlaceholder.value = false;
+        await nextTick();
+        reloadPlaceholder.value = true;
       },
       changeMatchingValue: () => {
         emit('update:matchingValue', matchingValueVal.value);
       },
       changeOperator,
+      switchMode: async (val: boolean) => {
+        // 切换
+        switchIconFlag.value = val;
+        // 更改operator状态
+        if (!val) {
+          // 单选 else分支表达式输入框
+          operatorVal.value = operatorOptions.value[0].ref;
+          // matchingValueVal.value = 'true';
+          matchingValueVal.value = (matchingValueVal.value === 'true' || matchingValueVal.value === 'false') ? matchingValueVal.value : 'true';
+          emit('update:operator', operatorVal.value);
+        }
+        emit('update:matchingValue', matchingValueVal.value);
+
+        // 优化tooltip位移问题
+        tooltipVisible.value = false;
+        // 切换时隐藏表单校验
+        reloadPlaceholder.value = false;
+        await nextTick();
+        tooltipVisible.value = true;
+        reloadPlaceholder.value = true;
+      },
     };
   },
 });
@@ -239,6 +292,9 @@ export default defineComponent({
       }
 
       .jm-icon-button-right {
+        width: 20px;
+        height: 20px;
+
         &::before {
           transform: rotate(90deg) scale(.9);
           font-size: 12px;
@@ -251,6 +307,38 @@ export default defineComponent({
 
     ::v-deep(.el-form-item) {
       margin-bottom: 20px;
+    }
+
+    .operator-container {
+      display: flex;
+
+      .icon-container {
+        // 输入
+        .jm-icon-workflow-select-mode,
+        .jm-icon-workflow-edit-mode {
+          width: 20px;
+          height: 20px;
+          color: #6B7B8D;
+          margin-left: 10px;
+
+          &:hover {
+            cursor: pointer;
+            color: #096DD9;
+          }
+        }
+
+        .jm-icon-workflow-select-mode {
+          margin-left: 6px;
+        }
+      }
+    }
+
+    ::v-deep(.el-radio-group) {
+      margin-top: 14px;
+
+      .el-radio {
+        margin-right: 30px;
+      }
     }
   }
 }
