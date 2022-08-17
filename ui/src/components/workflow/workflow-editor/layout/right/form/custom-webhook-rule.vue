@@ -178,7 +178,7 @@ export default defineComponent({
             switchIconFlag.value = true;
             break;
           case ParamTypeEnum.BOOL:
-            matchingValueVal.value = matchingValueVal.value === '""' ? 'true' : matchingValueVal.value;
+            matchingValueVal.value = (matchingValueVal.value === '""' || matchingValueVal.value === '') ? 'true' : matchingValueVal.value;
             switchIconFlag.value = false;
             break;
           case ParamTypeEnum.NUMBER:
