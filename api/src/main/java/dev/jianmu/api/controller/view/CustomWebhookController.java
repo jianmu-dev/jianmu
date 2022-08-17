@@ -1,18 +1,14 @@
 package dev.jianmu.api.controller.view;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.api.mapper.CustomWebhookDefinitionMapper;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.CustomWebhookDefinitionApplication;
 import dev.jianmu.application.util.CustomWebhookRuleUtil;
-import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
-import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,8 +21,6 @@ import java.util.stream.Collectors;
 @Tag(name = "查询自定义Webhook API", description = "查询自定义Webhook API")
 public class CustomWebhookController {
     private final CustomWebhookDefinitionApplication definitionApplication;
-    @Autowired
-    private CustomWebhookDefinitionVersionRepository versionRepository;
 
     public CustomWebhookController(CustomWebhookDefinitionApplication definitionApplication) {
         this.definitionApplication = definitionApplication;
@@ -89,20 +83,8 @@ public class CustomWebhookController {
         var dslText = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
-            dslText.append(line);
+            dslText.append(line).append(System.lineSeparator());
         }
-        var objectMapper = new ObjectMapper();
-        var dslParser = objectMapper.readValue(dslText.toString(), CustomWebhookDefinitionVersion.class);
-        this.versionRepository.saveOrUpdate(CustomWebhookDefinitionVersion.Builder.aCustomWebhookDefinitionVersion()
-                .id(dslParser.getId())
-                .definitionId(dslParser.getDefinitionId())
-                .ref(dslParser.getRef())
-                .ownerRef(dslParser.getOwnerRef())
-                .version(dslParser.getVersion())
-                .creatorRef(dslParser.getCreatorRef())
-                .creatorName(dslParser.getCreatorName())
-                .events(dslParser.getEvents())
-                .dslText(dslText.toString())
-                .build());
+        this.definitionApplication.updateVersion(dslText.toString());
     }
 }
