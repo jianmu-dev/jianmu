@@ -1,5 +1,6 @@
 package dev.jianmu.application.service;
 
+import dev.jianmu.application.dsl.CustomWebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.CustomWebhookDef;
 import dev.jianmu.project.aggregate.Project;
@@ -108,6 +109,24 @@ public class CustomWebhookDefinitionApplication {
                 .definitionId(definitionVersion.getDefinitionId())
                 .versionId(definitionVersion.getId())
                 .eventInstances(eventInstances)
+                .build());
+    }
+
+    @Transactional
+    public void updateVersion(String dslText) {
+        var dslParser = CustomWebhookDslParser.parse(dslText);
+        var version = this.definitionVersionRepository.findByType(dslParser.getWebhookType())
+                .orElseThrow(() -> new DataNotFoundException("未找到自定义Webhook：" + dslParser.getWebhookType()));
+        this.definitionVersionRepository.saveOrUpdate(CustomWebhookDefinitionVersion.Builder.aCustomWebhookDefinitionVersion()
+                .id(version.getId())
+                .definitionId(version.getDefinitionId())
+                .ref(version.getRef())
+                .ownerRef(version.getOwnerRef())
+                .version(version.getVersion())
+                .creatorRef(version.getCreatorRef())
+                .creatorName(version.getCreatorName())
+                .events(dslParser.getVersionEvents())
+                .dslText(dslText)
                 .build());
     }
 }

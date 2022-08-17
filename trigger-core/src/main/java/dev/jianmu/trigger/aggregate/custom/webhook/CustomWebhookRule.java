@@ -1,7 +1,5 @@
 package dev.jianmu.trigger.aggregate.custom.webhook;
 
-import java.util.List;
-
 /**
  * @author laoji
  * @class 自定义Webhook规则
