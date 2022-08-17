@@ -276,7 +276,7 @@ export default defineComponent({
           width: 100%;
           position: absolute;
           top: 0;
-          z-index: 2;
+          z-index: 20;
           box-sizing: border-box;
           display: flex;
           align-items: center;

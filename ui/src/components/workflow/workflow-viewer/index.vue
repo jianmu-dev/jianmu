@@ -472,6 +472,7 @@ export default defineComponent({
       height: calc(100% - 60px);
       &.bottom-height {
         height: calc(100% - 130px);
+        background-color: #ffffff;
       }
     }
   }
