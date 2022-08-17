@@ -111,7 +111,7 @@ export class CustomWebhook extends BaseNode {
           type: 'object',
           required: true,
           fields: {
-            paramRef: [{ required: true, message: '请选择参数类型', trigger: 'change' }],
+            paramRef: [{ required: true, message: '请选择参数', trigger: 'change' }],
             matchingValue: [{ required: true, message: '请输入参数值', trigger: 'blur' }],
           } as Record<string, CustomRule>,
         };

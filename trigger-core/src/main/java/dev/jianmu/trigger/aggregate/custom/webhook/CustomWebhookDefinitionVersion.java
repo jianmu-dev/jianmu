@@ -43,6 +43,10 @@ public class CustomWebhookDefinitionVersion {
      * 事件集
      */
     private List<Event> events;
+    /**
+     * DSL文本
+     */
+    private String dslText;
 
     /**
      * 事件
@@ -158,6 +162,10 @@ public class CustomWebhookDefinitionVersion {
         return events;
     }
 
+    public String getDslText() {
+        return dslText;
+    }
+
     public static class Builder{
         private String id;
         private String definitionId;
@@ -167,6 +175,7 @@ public class CustomWebhookDefinitionVersion {
         private String creatorRef;
         private String creatorName;
         private List<Event> events;
+        private String dslText;
 
         public static Builder aCustomWebhookDefinitionVersion() {
             return new Builder();
@@ -212,6 +221,11 @@ public class CustomWebhookDefinitionVersion {
             return this;
         }
 
+        public Builder dslText(String dslText) {
+            this.dslText = dslText;
+            return this;
+        }
+
         public CustomWebhookDefinitionVersion build() {
             var customWebhookDefinitionVersion = new CustomWebhookDefinitionVersion();
             customWebhookDefinitionVersion.id = this.id;
@@ -222,6 +236,7 @@ public class CustomWebhookDefinitionVersion {
             customWebhookDefinitionVersion.creatorRef = this.creatorRef;
             customWebhookDefinitionVersion.creatorName = this.creatorName;
             customWebhookDefinitionVersion.events = this.events;
+            customWebhookDefinitionVersion.dslText = this.dslText;
             return customWebhookDefinitionVersion;
         }
     }

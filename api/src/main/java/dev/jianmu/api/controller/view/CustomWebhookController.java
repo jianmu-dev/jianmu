@@ -5,16 +5,13 @@ import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.CustomWebhookDefinitionApplication;
 import dev.jianmu.application.util.CustomWebhookRuleUtil;
-import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
-import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +21,6 @@ import java.util.stream.Collectors;
 @Tag(name = "查询自定义Webhook API", description = "查询自定义Webhook API")
 public class CustomWebhookController {
     private final CustomWebhookDefinitionApplication definitionApplication;
-    @Autowired
-    private CustomWebhookDefinitionVersionRepository versionRepository;
 
     public CustomWebhookController(CustomWebhookDefinitionApplication definitionApplication) {
         this.definitionApplication = definitionApplication;
@@ -83,7 +78,13 @@ public class CustomWebhookController {
     }
 
     @PostMapping
-    public void test(@RequestBody CustomWebhookDefinitionVersion customWebhookDefinitionVersion) {
-        this.versionRepository.saveOrUpdate(customWebhookDefinitionVersion);
+    public void test(HttpServletRequest request) throws Exception {
+        var reader = request.getReader();
+        var dslText = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            dslText.append(line).append(System.lineSeparator());
+        }
+        this.definitionApplication.updateVersion(dslText.toString());
     }
 }

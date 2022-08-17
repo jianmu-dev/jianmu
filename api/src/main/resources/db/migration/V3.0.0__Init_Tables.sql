@@ -423,6 +423,7 @@ CREATE TABLE `jm_custom_webhook_definition_version`
     `creator_ref`   varchar(45)           DEFAULT NULL COMMENT '创建者唯一引用',
     `creator_name`  varchar(45)           DEFAULT NULL COMMENT '创建者名称',
     `events`        blob COMMENT '事件集',
+    `dsl_text`           longtext     NOT NULL COMMENT 'DSL内容文本',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, nextTick, onMounted, onUpdated, PropType, ref } from 'vue';
 import { ExpressionEditor } from './model/expression-editor';
 import { ISelectableParam } from './model/data';
 import ParamButton from './param-button.vue';
@@ -46,16 +46,26 @@ export default defineComponent({
     const textareaRef = ref<HTMLTextAreaElement>();
     const paramTypeVisible = ref<boolean>(false);
     let expressionEditor: ExpressionEditor;
+    const modelValueVal = ref<string>(props.modelValue);
+    onUpdated(() => {
+      if (modelValueVal.value === props.modelValue) {
+        return;
+      }
+      modelValueVal.value = props.modelValue;
+      expressionEditor.updateValue(modelValueVal.value);
+    });
 
     const syncValue = () => {
       const val = textareaRef.value!.value;
+      // 减少触发onUpdated钩子次数
+      modelValueVal.value = val;
       emit('update:model-value', val);
       emit('change', val);
     };
 
     onMounted(async () => {
       const textareaEl = textareaRef.value!;
-      textareaEl.value = props.modelValue;
+      textareaEl.value = modelValueVal.value;
 
       // 保证textarea值正确渲染
       await nextTick();
