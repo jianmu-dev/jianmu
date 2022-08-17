@@ -15,7 +15,7 @@ public class CustomWebhookRuleUtil {
             case STRING:
             case SECRET:
             default:
-                return List.of(CustomWebhookRule.Operator.INCLUDE, CustomWebhookRule.Operator.EXCLUDE, CustomWebhookRule.Operator.REG_EXP);
+                return List.of(CustomWebhookRule.Operator.EQ, CustomWebhookRule.Operator.NE, CustomWebhookRule.Operator.INCLUDE, CustomWebhookRule.Operator.EXCLUDE, CustomWebhookRule.Operator.REG_EXP);
         }
     }
 }
