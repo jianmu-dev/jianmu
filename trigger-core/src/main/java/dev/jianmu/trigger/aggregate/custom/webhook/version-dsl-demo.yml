@@ -44,3 +44,18 @@ event:
       - param-ref: target_branch
         operator: include | exclude | equal | neq | reg_exp
         value: master
+
+ui:
+  event:
+    pr:
+      param:
+        action:
+          option:
+            - name: 打开
+              value: "'opened'"
+            - name: 编辑
+              value: "'edited'"
+            - name: 分配
+              value: "'assigned'"
+            - name: 关闭
+              value: "'closed'"
