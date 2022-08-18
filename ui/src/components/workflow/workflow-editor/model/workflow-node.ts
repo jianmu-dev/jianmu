@@ -65,8 +65,9 @@ export const pushParams = (data: AsyncTask, inputs: INodeParameterVo[], outputs:
 /**
  * push自定义触发事件
  */
-export const pushCustomEvents = (data: CustomWebhook, events: IEventVo[], version: string) => {
+export const pushCustomEvents = (data: CustomWebhook, events: IEventVo[], version: string, dslText: string) => {
   data.version = version;
+  data.dslText = dslText;
   events.forEach(item => {
     const availableParams = item.availableParams.map(param => ({
       key: uuidv4(),
