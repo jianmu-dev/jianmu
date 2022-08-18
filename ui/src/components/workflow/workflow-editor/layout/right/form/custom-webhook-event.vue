@@ -20,6 +20,7 @@
         :index="idx"
         :rules="rules.ruleset.fields[idx].fields"
         :model-name="`${formModelName}.${index}.ruleset`"
+        :ui-event="uiEvent"
         @update:paramRef="val=>updateParamRef(val,idx)"
         @update:operator="val=>updateOperator(val,idx)"
         @update:matchingValue="val=>updateMatchingValue(val,idx)"
@@ -71,6 +72,9 @@ export default defineComponent({
     },
     eventInstance: {
       type: Object as PropType<ICustomWebhookEventInstance>,
+    },
+    uiEvent: {
+      type: Object as PropType<any>,
     },
     index: {
       type: Number,

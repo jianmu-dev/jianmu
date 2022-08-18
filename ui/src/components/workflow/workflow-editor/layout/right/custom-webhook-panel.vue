@@ -15,6 +15,7 @@
             :selected-reference="selectedReference"
             :name="event.name"
             :reference="event.ref"
+            :ui-event="uiEvent?uiEvent[event.ref]:undefined"
             :index="idx"
             :available-params="event.availableParams.filter(({ ref }) => !event.eventRuleset.find((({ paramRef }) => paramRef === ref)))"
             :rules="nodeData.getFormRules().eventInstances.fields[idx]?.fields"
@@ -35,6 +36,7 @@ import { CustomWebhook, ICustomWebhookEventInstance } from '../../model/data/nod
 import Event from './form/custom-webhook-event.vue';
 import { getWebhookVersionList, getWebhookVersionParams } from '@/api/custom-webhook';
 import { pushCustomEvents } from '../../model/workflow-node';
+import yaml from 'yaml';
 
 export default defineComponent({
   components: { Event },
@@ -52,6 +54,7 @@ export default defineComponent({
       form.value.eventInstances.find(instance => instance.ref === ref)));
     const selectedReference = ref<string>('');
     const radioGroupRef = ref<any>();
+    const uiEvent = ref<any>();
 
     onMounted(() => emit('form-created', formRef.value));
 
@@ -64,9 +67,11 @@ export default defineComponent({
       // 获取版本参数
       const versionParams = await getWebhookVersionParams(form.value.ownerRef, form.value.nodeRef, versionList[0].version);
       form.value.events.length = 0;
-      pushCustomEvents(form.value as CustomWebhook, versionParams.events, versionList[0].version);
-      // // 覆盖参数，避免影响eventInstances
+      pushCustomEvents(form.value as CustomWebhook, versionParams.events, versionList[0].version, versionParams.dslText);
+      // 覆盖参数，避免影响eventInstances
       // form.value.events = versionParams.events;
+      const { ui } = yaml.parse(form.value.dslText);
+      uiEvent.value = ui?.event;
     });
 
     return {
@@ -75,6 +80,7 @@ export default defineComponent({
       eventInstances,
       selectedReference,
       radioGroupRef,
+      uiEvent,
       updateEventInstance: () => {
         // 清空eventInstances，将过滤后的eventInstances push到form中
         form.value.eventInstances.length = 0;
