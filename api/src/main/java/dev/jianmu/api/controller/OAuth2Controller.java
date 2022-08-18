@@ -1,23 +1,33 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.AuthorizationUrlGettingDto;
+import dev.jianmu.api.dto.GitRepoTokenRefreshingDto;
 import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.Oauth2LoggingDto;
+import dev.jianmu.api.dto.impl.GitRepoLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
+import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.util.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
-import dev.jianmu.application.exception.*;
+import dev.jianmu.application.exception.NotAllowRegistrationException;
+import dev.jianmu.application.exception.NotAllowThisPlatformLogInException;
+import dev.jianmu.application.exception.OAuth2IsNotConfiguredException;
+import dev.jianmu.application.service.OAuth2Application;
+import dev.jianmu.application.service.vo.AssociationData;
+import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.enumeration.RoleEnum;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
-import dev.jianmu.oauth2.api.exception.NoPermissionException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
+import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
+import dev.jianmu.oauth2.api.vo.ITokenVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.user.aggregate.User;
 import dev.jianmu.user.repository.UserRepository;
@@ -29,11 +39,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
-import java.util.List;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 /**
@@ -114,6 +128,7 @@ public class OAuth2Controller {
                 .nickname(userInfoVo.getNickname())
                 .build();
         if (userOptional.isEmpty()) {
+            this.allowOrNotRegistration();
             this.userRepository.add(user);
         } else {
             this.userRepository.update(user);
@@ -152,7 +167,6 @@ public class OAuth2Controller {
     @Transactional
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody GitRepoLoggingDto gitRepoLoggingDto) {
         this.beforeAuthenticate();
-        this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(gitRepoLoggingDto.getThirdPartyType());
 
         OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()

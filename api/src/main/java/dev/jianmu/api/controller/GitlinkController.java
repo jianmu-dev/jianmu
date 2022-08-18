@@ -2,8 +2,8 @@ package dev.jianmu.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.api.dto.gitlink.GitLinkWebhookDto;
 import dev.jianmu.api.dto.JwtResponse;
+import dev.jianmu.api.dto.gitlink.GitLinkWebhookDto;
 import dev.jianmu.api.dto.impl.GitlinkSilentLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
@@ -89,7 +89,6 @@ public class GitlinkController {
     public ResponseEntity<JwtResponse> authenticateUser(@RequestParam("code") String code) {
         ThirdPartyTypeEnum thirdPartyType = ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType());
         this.beforeAuthenticate();
-        this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(thirdPartyType.name());
 
         GitlinkSilentLoggingDto gitlinkSilentLoggingDto;
@@ -175,6 +174,7 @@ public class GitlinkController {
                 .nickname(userInfoVo.getNickname())
                 .build();
         if (userOptional.isEmpty()) {
+            this.allowOrNotRegistration();
             this.userRepository.add(user);
         } else {
             this.userRepository.update(user);
