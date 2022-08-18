@@ -88,7 +88,6 @@ public class OAuth2Controller {
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody @Valid Oauth2LoggingDto oauth2LoggingDto) {
         this.beforeAuthenticate();
-        this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(oauth2LoggingDto.getThirdPartyType());
 
         OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
@@ -122,6 +121,7 @@ public class OAuth2Controller {
                 .nickname(userInfoVo.getNickname())
                 .build();
         if (userOptional.isEmpty()) {
+            this.allowOrNotRegistration();
             this.userRepository.add(user);
         } else {
             this.userRepository.update(user);
