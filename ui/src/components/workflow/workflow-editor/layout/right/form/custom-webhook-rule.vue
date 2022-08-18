@@ -19,7 +19,7 @@
       </jm-form-item>
       <div class="operator-container">
         <div class="switch-dropdown">
-          <jm-dropdown trigger="click" @command="changeOperator" v-if="switchIconFlag">
+          <jm-dropdown trigger="click" @command="changeOperator" v-if="expressionVisible">
             <span class="el-dropdown-link">
               {{ operatorText }}
               <i class="jm-icon-button-right"/>
@@ -34,16 +34,17 @@
           </jm-dropdown>
           <span class="operator-text" v-else>{{ operatorText }}</span>
         </div>
-        <div class="icon-container" v-if="paramType === ParamTypeEnum.BOOL">
-          <jm-tooltip placement="top" :content="switchIconFlag?'切换至单选模式':'切换至表达式模式'" v-if="tooltipVisible">
-            <i class="jm-icon-workflow-select-mode" v-if="switchIconFlag" @click="switchMode(false)"/>
+        <div class="icon-container" v-if="iconVisible">
+          <jm-tooltip placement="top" :content="!switchIcon?'切换至表达式模式':radioVisible?'切换至单选模式':'切换至下拉选择模式'"
+                      v-if="tooltipVisible">
+            <i class="jm-icon-workflow-select-mode" v-if="switchIcon" @click="switchMode(false)"/>
             <i class="jm-icon-workflow-edit-mode" v-else @click="switchMode(true)"/>
           </jm-tooltip>
         </div>
       </div>
       <jm-form-item :prop="`${modelName}.${index}.matchingValue`" :rules="rules.matchingValue" v-if="reloadPlaceholder">
         <expression-editor
-          v-if="switchIconFlag"
+          v-if="expressionVisible"
           v-model="matchingValueVal"
           :placeholder="inputPlaceholder"
           :type="ExpressionTypeEnum.WEBHOOK_PARAM"
@@ -53,16 +54,25 @@
           @focus="switchFlag=true"
           @blur="switchFlag=false"
         />
-        <jm-radio-group v-model="matchingValueVal" @change="changeMatchingValue" v-else>
+        <jm-radio-group v-model="matchingValueVal" @change="changeMatchingValue" v-else-if="radioVisible">
           <jm-radio label="true" @change="changeMatchingValue">true</jm-radio>
           <jm-radio label="false" @change="changeMatchingValue">false</jm-radio>
         </jm-radio-group>
+        <jm-select v-else-if="selectVisible" v-model="matchingValueVal" placeholder="请选择合并请求动作"
+                   class="select-action" @change="changeMatchingValue">
+          <jm-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.name"
+            :value="item.value"
+          />
+        </jm-select>
       </jm-form-item>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, inject, nextTick, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, inject, nextTick, onMounted, onUpdated, PropType, ref } from 'vue';
 import { Node } from '@antv/x6';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import ExpressionEditor from '../form/expression-editor.vue';
@@ -90,6 +100,9 @@ export default defineComponent({
       type: Array as PropType<IWebhookParam[]>,
       required: true,
     },
+    uiEvent: {
+      type: Object as PropType<any>,
+    },
     index: {
       type: Number,
       required: true,
@@ -106,11 +119,11 @@ export default defineComponent({
   emits: ['update:paramRef', 'update:operator', 'update:matchingValue', 'delete'],
   setup(props, { emit }) {
     const reloadPlaceholder = ref<boolean>(true);
-    const switchIconFlag = ref<boolean>(true);
     const tooltipVisible = ref<boolean>(true);
     const paramOperators = ref<IWebhookParamOperatorVo[]>([]);
     // 参数唯一标识
-    const paramRefVal = ref<String>(props.paramRef);
+    const paramRefVal = ref<string>(props.paramRef);
+    const visible = ref<boolean>(true);
     // 类型-值
     const operatorVal = ref<string>(props.operator);
     const paramType = computed<ParamTypeEnum>(() =>
@@ -144,14 +157,100 @@ export default defineComponent({
       operatorVal.value = val;
       emit('update:operator', val);
     };
+
+    const uiEventVal = ref<any>(props.uiEvent);
+    const buildOptions = (): { name: string, value: string | number }[] | undefined => {
+      if (!uiEventVal.value?.param) {
+        return undefined;
+      }
+      return uiEventVal.value.param[paramRefVal.value]?.option;
+    };
+    const options = computed(buildOptions);
+
+    onUpdated(() => {
+      if (uiEventVal.value === props.uiEvent) {
+        return;
+      }
+      uiEventVal.value = props.uiEvent;
+      if (!paramRefVal.value) {
+        return;
+      }
+      const options = buildOptions();
+      if (!options) {
+        return;
+      }
+      const arr: any[] = [];
+      options.forEach(({ value }) => arr.push(value));
+      // 判断是否有值，没有值就默认下拉框
+      if (matchingValueVal.value === '""') {
+        matchingValueVal.value = matchingValueVal.value !== '""' ? matchingValueVal.value : options[0].value;
+      }
+      if (arr.includes(matchingValueVal.value)) {
+        visible.value = false;
+      }
+      emit('update:matchingValue', matchingValueVal.value);
+    });
+
+    const switchIcon = computed<boolean>(() => {
+      const arr: any[] = [];
+      options.value?.forEach(({ value }) => arr.push(value));
+      if (options.value && !arr.includes(matchingValueVal.value)) {
+        return true;
+      } else if (paramType.value && visible.value) {
+        return true;
+      }
+      return false;
+    });
+
+    const selectVisible = computed<boolean>(() => {
+      const arr: any[] = [];
+      options.value?.forEach(({ value }) => arr.push(value));
+      if (options.value && (matchingValueVal.value === '""' || arr.includes(matchingValueVal.value))) {
+        return true;
+      } else if (options.value) {
+        return true;
+      }
+      return false;
+    });
+
+    const radioVisible = computed<boolean>(() => {
+      if (paramType.value === ParamTypeEnum.BOOL && (matchingValueVal.value === 'true' || matchingValueVal.value === 'false')) {
+        return true;
+      } else if (paramType.value === ParamTypeEnum.BOOL && !radioVisible.value) {
+        return true;
+      }
+      return false;
+    });
+
+    const iconVisible = computed<boolean>(() => {
+      if ((radioVisible.value || selectVisible.value) || paramType.value === ParamTypeEnum.BOOL || options.value || radioVisible.value || selectVisible.value) {
+        return true;
+      }
+      return false;
+    });
+
+    const expressionVisible = computed<boolean>(() => {
+      const arr: any[] = [];
+      options.value?.forEach(({ value }) => arr.push(value));
+      if (paramType.value === ParamTypeEnum.BOOL && !radioVisible.value) {
+        return false;
+      } else if (paramType.value === ParamTypeEnum.BOOL && (matchingValueVal.value === 'true' || matchingValueVal.value === 'false') && !visible.value) {
+        return false;
+      } else if (options.value && arr.includes(matchingValueVal.value)) {
+        return false;
+      }
+      return true;
+    });
+
     onMounted(async () => {
       paramOperators.value = (await getWebhookOperator()).paramOperators;
-      if (paramType.value === ParamTypeEnum.BOOL) {
-        switchIconFlag.value = !(matchingValueVal.value === 'true' || matchingValueVal.value === 'false');
+      if (paramType.value === ParamTypeEnum.BOOL && (matchingValueVal.value === 'true' || matchingValueVal.value === 'false')) {
+        visible.value = false;
       }
       if (operatorVal.value) {
         return;
       }
+      // operator 初始值
       changeOperator(paramOperators.value.find(({ type }) => type === ParamTypeEnum.STRING)!.operators[0].ref);
     });
     return {
@@ -166,7 +265,12 @@ export default defineComponent({
       paramType,
       nodeId,
       reloadPlaceholder,
-      switchIconFlag,
+      expressionVisible,
+      radioVisible,
+      selectVisible,
+      switchIcon,
+      iconVisible,
+      options,
       tooltipVisible,
       del: () => {
         emit('delete', props.index);
@@ -175,16 +279,21 @@ export default defineComponent({
         switch (paramType.value) {
           case ParamTypeEnum.STRING:
             matchingValueVal.value = '""';
-            switchIconFlag.value = true;
             break;
           case ParamTypeEnum.BOOL:
-            matchingValueVal.value = (matchingValueVal.value === '""' || matchingValueVal.value === '') ? 'true' : matchingValueVal.value;
-            switchIconFlag.value = false;
+            visible.value = false;
+            matchingValueVal.value = 'true';
             break;
           case ParamTypeEnum.NUMBER:
             matchingValueVal.value = '';
-            switchIconFlag.value = true;
             break;
+        }
+        // 选择"动作"时
+        if (options.value) {
+          visible.value = false;
+          // 更新值
+          matchingValueVal.value = options.value[0].value;
+          emit('update:matchingValue', matchingValueVal.value);
         }
         emit('update:matchingValue', matchingValueVal.value);
         // changeParamRef时修改operator
@@ -200,18 +309,28 @@ export default defineComponent({
       },
       changeOperator,
       switchMode: async (val: boolean) => {
-        // 切换
-        switchIconFlag.value = val;
-        // 更改operator状态
-        if (!val) {
-          // 单选 else分支表达式输入框
-          operatorVal.value = operatorOptions.value[0].ref;
-          // matchingValueVal.value = 'true';
-          matchingValueVal.value = (matchingValueVal.value === 'true' || matchingValueVal.value === 'false') ? matchingValueVal.value : 'true';
-          emit('update:operator', operatorVal.value);
+        visible.value = val;
+        // bool类型
+        if (radioVisible.value || paramType.value === ParamTypeEnum.BOOL) {
+          // 更改operator状态
+          if (!val) {
+            // 单选 else分支表达式输入框
+            operatorVal.value = operatorOptions.value[0].ref;
+            matchingValueVal.value = (matchingValueVal.value === 'true' || matchingValueVal.value === 'false') ? matchingValueVal.value : 'true';
+            emit('update:operator', operatorVal.value);
+          }
+          emit('update:matchingValue', matchingValueVal.value);
+        } else if (selectVisible.value || options.value) {
+          // 更改operator状态
+          if (!val) {
+            matchingValueVal.value = options.value ? options.value[0].value : '""';
+            operatorVal.value = operatorOptions.value[0].ref;
+            emit('update:operator', operatorVal.value);
+          } else {
+            matchingValueVal.value = '""';
+          }
+          emit('update:matchingValue', matchingValueVal.value);
         }
-        emit('update:matchingValue', matchingValueVal.value);
-
         // 优化tooltip位移问题
         tooltipVisible.value = false;
         // 切换时隐藏表单校验
@@ -331,6 +450,10 @@ export default defineComponent({
           margin-left: 6px;
         }
       }
+    }
+
+    .select-action {
+      margin-top: 14px;
     }
 
     ::v-deep(.el-radio-group) {
