@@ -595,6 +595,14 @@ public class WorkerInternalApplication {
             });
             runners.add(this.findUnitRunner(asyncTaskInstances, nodeDef, node, runnerSecrets, runnerEnvs, worker));
         });
+        // 添加keepalive
+        var keepAliveRunner = Runner.builder()
+                .id("keep-alive")
+                .placeholder(this.globalProperties.getWorker().getK8s().getKeepalive())
+                .entrypoint(new String[]{"tail", "-f", "/dev/null"})
+                .volumes(runners.get(0).getVolumes())
+                .build();
+        runners.add(keepAliveRunner);
         var startRunner = Runner.builder()
                 .id(taskInstance.getBusinessId())
                 .version(taskInstance.getVersion())
