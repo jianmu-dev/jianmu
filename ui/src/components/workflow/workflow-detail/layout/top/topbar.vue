@@ -14,7 +14,6 @@
       </div>
     </div>
     <div class="right">
-      <button class="jm-icon-workflow-edit edit-button" @click="jumpToEdit">编辑</button>
       <button class="jm-icon-button-on trigger-button" @click="trigger" @keypress.enter.prevent>触发</button>
       <div v-show="!entry" class="vertical-divider"></div>
       <router-link v-if="!session && !entry" :to="{ name: 'login' }">
@@ -58,7 +57,7 @@ export default defineComponent({
     },
     session: Object as PropType<ISessionVo>,
   },
-  emits: [ 'back', 'trigger', 'logout', 'jump', 'jump-to-edit'],
+  emits: [ 'back', 'trigger', 'logout', 'jump'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     const detailTopbar = new DeatilTopbar(props.project.id, (error?: Error):void=> {
@@ -81,9 +80,6 @@ export default defineComponent({
         }).then(() => {
           detailTopbar.trigger();
         }).catch(() => {});
-      },
-      jumpToEdit() {
-        emit('jump-to-edit');
       },
     };
   },
@@ -184,28 +180,6 @@ export default defineComponent({
     justify-content: space-around;
     align-items: center;
 
-    .edit-button {
-      width: 98px;
-      height: 36px;
-      font-size: 14px;
-      padding-right: 5px;
-      color: #082340;
-      margin-right: 30px;
-      background-color: #FFFFFF;
-      border: 0.5px solid #CAD6EE;
-      border-radius: 2px;
-      cursor: pointer;
-
-      &::before {
-        font-size: 16px;
-        margin-right: 6px;
-      }
-
-      &:hover {
-        color: #0E70D9;
-        background-color: #FFFFFF;
-      }
-    }
     .trigger-button {
       padding-right: 5px;
       width: 98px;

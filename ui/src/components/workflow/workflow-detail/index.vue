@@ -9,7 +9,6 @@
       @back="$emit('back')"
       @logout="$emit('logout')"
       @trigger="trigger"
-      @jump-to-edit="$emit('jump-to-edit')"
     />
     <record-list
       ref="recordList"
@@ -63,7 +62,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['back', 'jump', 'update:model-value', 'logout', 'jump-to-edit', 'trigger'],
+  emits: ['back', 'jump', 'update:model-value', 'logout', 'trigger'],
   setup(props, { emit }) {
     const recordDetail = ref<IRecordDetail>({});
     // list组件需要的参数
