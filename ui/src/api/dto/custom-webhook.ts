@@ -84,4 +84,5 @@ export interface IWebhookDefinitionVersionVo {
   creatorRef: string;
   creatorName: string;
   events: IEventVo[];
+  dslText: string;
 }

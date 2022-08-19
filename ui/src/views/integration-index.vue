@@ -98,16 +98,16 @@
   </div>
 </template>
 <script lang="ts">
-import {computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, onUpdated, ref} from 'vue';
-import {getAssemblyLineList, getBranches} from '@/api/git-repo';
-import {GitRepoEnum, ProjectStatusEnum} from '@/api/dto/enumeration';
+import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, onUpdated, ref } from 'vue';
+import { getAssemblyLineList, getBranches } from '@/api/git-repo';
+import { GitRepoEnum, ProjectStatusEnum } from '@/api/dto/enumeration';
 import ProjectItem from '@/views/common/project-item.vue';
-import {IProjectVo} from '@/api/dto/project';
-import {IGitRepoBranchVo} from '@/api/dto/git-repo';
-import {useRouter} from 'vue-router';
-import {pushTop} from '@/utils/push-top';
+import { IProjectVo } from '@/api/dto/project';
+import { IGitRepoBranchVo } from '@/api/dto/git-repo';
+import { useRouter } from 'vue-router';
+import { pushTop } from '@/utils/push-top';
 import ProjectPreviewDialog from '@/views/common/project-preview-dialog.vue';
-import {useStore} from 'vuex';
+import { useStore } from 'vuex';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 export default defineComponent({
@@ -133,8 +133,8 @@ export default defineComponent({
     ProjectItem,
     ProjectPreviewDialog,
   },
-  setup(props, {emit}) {
-    const {proxy} = getCurrentInstance() as any;
+  setup(props, { emit }) {
+    const { proxy } = getCurrentInstance() as any;
     const store = useStore();
     const entry = store.state.entry;
     const router = useRouter();
@@ -167,12 +167,12 @@ export default defineComponent({
         }
       });
       if (branch.value !== 'default') {
-        result = result.filter(({branch: b}) => {
+        result = result.filter(({ branch: b }) => {
           return b === branch.value;
         });
       }
       if (key.value) {
-        result = result.filter(({name}) => name.includes(key.value));
+        result = result.filter(({ name }) => name.includes(key.value));
       }
       return result;
     });
@@ -184,28 +184,28 @@ export default defineComponent({
       },
       {
         label: '未启动',
-        projects: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.INIT),
-        counter: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.INIT).length,
+        projects: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.INIT),
+        counter: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.INIT).length,
       },
       {
         label: '执行中',
-        projects: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.RUNNING),
-        counter: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.RUNNING).length,
+        projects: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.RUNNING),
+        counter: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.RUNNING).length,
       },
       {
         label: '挂起',
-        projects: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.SUSPENDED),
-        counter: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.SUSPENDED).length,
+        projects: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.SUSPENDED),
+        counter: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.SUSPENDED).length,
       },
       {
         label: '失败',
-        projects: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.FAILED),
-        counter: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.FAILED).length,
+        projects: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.FAILED),
+        counter: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.FAILED).length,
       },
       {
         label: '成功',
-        projects: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.SUCCEEDED),
-        counter: filteredProjects.value.filter(({status}) => status === ProjectStatusEnum.SUCCEEDED).length,
+        projects: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.SUCCEEDED),
+        counter: filteredProjects.value.filter(({ status }) => status === ProjectStatusEnum.SUCCEEDED).length,
       },
     ]);
     // 对请求的所有项目,项目分支数据进行处理
@@ -254,7 +254,7 @@ export default defineComponent({
           return;
         }
         await handleData();
-      }, 3000);
+      }, 10000);
     };
     onMounted(async () => {
       await loadData(true);
