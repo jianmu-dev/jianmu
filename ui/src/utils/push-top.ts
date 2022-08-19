@@ -1,7 +1,16 @@
 import { namespace } from '@/store/modules/session';
 import _store from '@/store';
+import Security from '@/views/common/security.vue';
+import dynamicRender from '@/utils/dynamic-render';
+import { AppContext } from 'vue';
 
-export function pushTop(url: string) {
+export async function pushTop(url: string, appContext: AppContext) {
+  // @ts-ignore
+  if (document.hasStorageAccess && !await document.hasStorageAccess()) {
+    // 检验到浏览器为safari且开启网站跟踪，弹窗提示
+    dynamicRender(Security, appContext);
+    return;
+  }
   const store = _store as any;
   const session = store.state[namespace].session;
   if (session) {

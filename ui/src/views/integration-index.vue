@@ -134,7 +134,7 @@ export default defineComponent({
     ProjectPreviewDialog,
   },
   setup(props, { emit }) {
-    const { proxy } = getCurrentInstance() as any;
+    const { proxy, appContext } = getCurrentInstance() as any;
     const store = useStore();
     const entry = store.state.entry;
     const router = useRouter();
@@ -309,7 +309,7 @@ export default defineComponent({
       },
       async submit() {
         if (window.top !== window && createProjectType.value) {
-          pushTop(`/full/project/pipeline-editor?branch=${selectBranch.value}`);
+          pushTop(`/full/project/pipeline-editor?branch=${selectBranch.value}`, appContext);
           return;
         }
         await router.push({
