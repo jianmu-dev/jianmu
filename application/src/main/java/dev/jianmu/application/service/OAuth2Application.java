@@ -99,23 +99,15 @@ public class OAuth2Application {
         var branches = branchesString.stream()
                 .map(name -> new Branch(name, name.equals(defaultBranch)))
                 .collect(Collectors.toList());
-        var optionalGitRepo = this.gitRepoRepository.findByRefAndOwner(ref, owner);
+        var optionalGitRepoById = this.gitRepoRepository.findById(id);
+        var optionalGitRepoByRef = this.gitRepoRepository.findByRefAndOwner(ref, owner);
         GitRepo gitRepo;
-        if (optionalGitRepo.isPresent()) {
-            gitRepo = optionalGitRepo.get();
-            if (!gitRepo.getId().equals(id)) {
-                // 删除gitRepo
-                this.gitRepoRepository.deleteById(gitRepo.getId());
-                var event = GitRepoDeletedEvent.Builder.aGetRepoDeletedEvent()
-                        .id(gitRepo.getId())
-                        .projectIds(gitRepo.getFlows().stream()
-                                .map(Flow::getProjectId)
-                                .collect(Collectors.toList()))
-                        .build();
-                this.publisher.publishEvent(event);
-                gitRepo = new GitRepo(id);
-            }
-        } else {
+        if (optionalGitRepoById.isPresent()) {
+            gitRepo = optionalGitRepoById.get();
+        } else if (optionalGitRepoByRef.isPresent()) {
+            this.deleteGitRepo(optionalGitRepoByRef.get());
+            gitRepo = new GitRepo(id);
+        }else {
             gitRepo = new GitRepo(id);
         }
         boolean isCreated = gitRepo.getOwner() == null;
@@ -123,6 +115,18 @@ public class OAuth2Application {
         gitRepo.syncBranches(ref, owner, branches);
         this.gitRepoRepository.saveOrUpdate(gitRepo);
         return isCreated;
+    }
+
+    private void deleteGitRepo(GitRepo gitRepo) {
+        // 删除gitRepo
+        this.gitRepoRepository.deleteById(gitRepo.getId());
+        var event = GitRepoDeletedEvent.Builder.aGetRepoDeletedEvent()
+                .id(gitRepo.getId())
+                .projectIds(gitRepo.getFlows().stream()
+                        .map(Flow::getProjectId)
+                        .collect(Collectors.toList()))
+                .build();
+        this.publisher.publishEvent(event);
     }
 
     /**
