@@ -33,6 +33,11 @@ public class ExternalParameterLabelRepositoryImpl implements ExternalParameterLa
     }
 
     @Override
+    public void deleteByAssociationIdAndType(String associationId, String associationType) {
+        this.externalParameterLabelMapper.deleteByAssociationIdAndType(associationId, associationType);
+    }
+
+    @Override
     public List<ExternalParameterLabel> findAll(String id, String type) {
         return this.externalParameterLabelMapper.findAll(id, type);
     }

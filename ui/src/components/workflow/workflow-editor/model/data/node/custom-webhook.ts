@@ -36,8 +36,9 @@ export class CustomWebhook extends BaseNode {
   readonly events: ICustomWebhookEvent[];
   version: string;
   readonly eventInstances: ICustomWebhookEventInstance[];
+  dslText: string;
 
-  constructor(ref: string, nodeRef: string, name: string, icon: string, ownerRef: string, version: string = '',
+  constructor(ref: string, nodeRef: string, name: string, icon: string, ownerRef: string, version: string = '', dslText: string = '',
     events: ICustomWebhookEvent[] = [], eventInstances: ICustomWebhookEventInstance[] = []) {
     super(NodeRefEnum.WEBHOOK, name, NodeTypeEnum.WEBHOOK, icon, '');
     this.ownerRef = ownerRef;
@@ -45,10 +46,11 @@ export class CustomWebhook extends BaseNode {
     this.events = events;
     this.version = version;
     this.eventInstances = eventInstances;
+    this.dslText = dslText;
   }
 
-  static build({ ref, nodeRef, name, icon, ownerRef, version, events, eventInstances }: any): CustomWebhook {
-    return new CustomWebhook(ref, nodeRef, name, icon, ownerRef, version, events, eventInstances);
+  static build({ ref, nodeRef, name, icon, ownerRef, version, dslText, events, eventInstances }: any): CustomWebhook {
+    return new CustomWebhook(ref, nodeRef, name, icon, ownerRef, version, dslText, events, eventInstances);
   }
 
   async buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined> {

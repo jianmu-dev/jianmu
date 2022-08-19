@@ -28,4 +28,6 @@ public interface CredentialManager {
     List<Namespace> findAllNamespace(String associationId, String associationType);
 
     Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String namespaceName, String key);
+
+    void deleteByAssociationIdAndType(String id, String name);
 }

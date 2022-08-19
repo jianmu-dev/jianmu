@@ -170,4 +170,11 @@ public class VaultCredentialManager implements CredentialManager {
         }
         return namespaceName;
     }
+
+    @Override
+    public void deleteByAssociationIdAndType(String associationId, String associationType) {
+        this.findAllNamespace(associationId, associationType)
+                .forEach(namespace -> this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
+                .delete(this.getNamespace(associationId, associationType, namespace.getName())));
+    }
 }

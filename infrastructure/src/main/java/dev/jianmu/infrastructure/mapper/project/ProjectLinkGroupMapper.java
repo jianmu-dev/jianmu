@@ -53,6 +53,14 @@ public interface ProjectLinkGroupMapper {
             "</script>")
     void deleteByIdIn(@Param("projectLinkGroupIds") List<String> projectLinkGroupIds);
 
+    @Delete("<script>" +
+            "DELETE FROM `jm_project_link_group` WHERE `project_id` IN " +
+            "<foreach collection='projectIds' item='i'  open='(' separator=',' close=')'>#{i}" +
+            "</foreach>" +
+            "</script>")
+    void deleteByProjectIdIn(@Param("projectIds") List<String> projectIds);
+
+
     @Select("select * from jm_project_link_group where project_group_id = #{projectGroupId} and sort between #{originSort} and #{targetSort} order by sort")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "project_group_id", property = "projectGroupId")

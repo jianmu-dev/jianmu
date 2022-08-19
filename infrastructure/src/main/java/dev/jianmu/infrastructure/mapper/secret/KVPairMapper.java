@@ -71,4 +71,6 @@ public interface KVPairMapper {
     List<KVPair> findByNamespaceName(@Param("associationId") String associationId,
                                      @Param("associationType") String associationType,
                                      @Param("namespaceName") String namespaceName);
-}
+
+    @Delete("DELETE FROM `jm_secret_kv_pair` WHERE `association_id` = #{associationId} AND `association_type` = #{associationType}")
+    void deleteByAssociationIdAndType(@Param("associationId") String associationId, @Param("associationType") String associationType);}

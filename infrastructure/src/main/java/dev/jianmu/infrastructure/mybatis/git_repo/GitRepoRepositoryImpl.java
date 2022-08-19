@@ -35,4 +35,9 @@ public class GitRepoRepositoryImpl implements GitRepoRepository {
     public Optional<GitRepo> findByRefAndOwner(String ref, String owner) {
         return this.gitRepoMapper.findByRefAndOwner(ref, owner);
     }
+
+    @Override
+    public void deleteById(String id) {
+        this.gitRepoMapper.deleteById(id);
+    }
 }

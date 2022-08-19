@@ -38,6 +38,11 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
     }
 
     @Override
+    public void deleteByAssociationIdAndType(String associationId, String associationType) {
+        this.externalParameterMapper.deleteByAssociationIdAndType(associationId, associationType);
+    }
+
+    @Override
     public void updateById(ExternalParameter externalParameter) {
         this.externalParameterMapper.updateById(externalParameter);
     }

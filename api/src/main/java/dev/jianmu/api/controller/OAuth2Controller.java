@@ -105,7 +105,6 @@ public class OAuth2Controller {
     @Transactional
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody Oauth2LoggingDto oauth2LoggingDto) {
         this.beforeAuthenticate();
-        this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(oauth2LoggingDto.getThirdPartyType());
 
         OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
@@ -129,6 +128,7 @@ public class OAuth2Controller {
                 .nickname(userInfoVo.getNickname())
                 .build();
         if (userOptional.isEmpty()) {
+            this.allowOrNotRegistration();
             this.userRepository.add(user);
         } else {
             this.userRepository.update(user);
@@ -167,7 +167,6 @@ public class OAuth2Controller {
     @Transactional
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody GitRepoLoggingDto gitRepoLoggingDto) {
         this.beforeAuthenticate();
-        this.allowOrNotRegistration();
         this.allowThisPlatformLogIn(gitRepoLoggingDto.getThirdPartyType());
 
         OAuth2Api oAuth2Api = OAuth2ApiProxy.builder()
@@ -195,6 +194,7 @@ public class OAuth2Controller {
                 .nickname(userInfoVo.getNickname())
                 .build();
         if (userOptional.isEmpty()) {
+            this.allowOrNotRegistration();
             this.userRepository.add(user);
         } else {
             this.userRepository.update(user);
