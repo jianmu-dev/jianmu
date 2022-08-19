@@ -121,12 +121,12 @@ export default defineComponent({
   }
   .terminate-button{
     padding-right: 5px;
-    width: 82px;
+    width: 90px;
     height: 36px;
     background: @default-background-color;
     // box-shadow: 0px 0px 4px 0px rgba(194,194,194,0.5000);
     border-radius: 2px;
-    border: 0.5px solid rgba(227, 233, 246, 1);
+    border: 0.5px solid #CAD6EE;
     font-size: 14px;
     color: #116ed2;
     cursor: pointer;
