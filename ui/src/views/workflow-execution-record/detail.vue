@@ -7,6 +7,7 @@
       @jump="handleJump"
       @back="handleBack"
       @logout="handleLogout"
+      @jump-to-edit="jumpToEdit"
       @trigger="handleTrigger"
       @update:model-value="handleChangeRouterParam"
     />
@@ -75,6 +76,7 @@ export default defineComponent({
         router.push({ path: `/project-group/detail/${projectGroupId}` });
       },
       handleLogout() {
+        // TODO
         console.log('退出登录事件');
         // try {
         //   // 清理token
@@ -85,6 +87,9 @@ export default defineComponent({
         // } catch (err) {
         //   proxy.$throw(err, proxy);
         // }
+      },
+      jumpToEdit() {
+        router.push({ name: 'update-project', params: { id: props.projectId } });
       },
       handleTrigger(err?: Error) {
         if (!err) {
