@@ -421,7 +421,7 @@ export default defineComponent({
           padding: 0 6px;
           background-color: #fff;
           border-radius: 2px;
-          border: 0.5px solid rgba(227, 233, 246, 1);
+          border: 0.5px solid #CAD6EE;
           font-size: 24px;
           cursor: pointer;
           &:hover:before {
@@ -436,10 +436,12 @@ export default defineComponent({
           color: #096DD9;
           width: 96px;
           line-height: 36px;
+          height: 36px;
           text-align: center;
           cursor: pointer;
           border-radius: 2px;
-          border: 0.5px solid rgba(227, 233, 246, 1);
+          border: 0.5px solid #CAD6EE;
+          box-sizing: border-box;
           &:hover {
             background-color: #EFF7FF;
           }
@@ -470,6 +472,7 @@ export default defineComponent({
       width: calc(100% - 60px);
       padding: 60px 30px 0;
       height: calc(100% - 60px);
+      background-color: #ffffff;
       &.bottom-height {
         height: calc(100% - 130px);
         background-color: #ffffff;
