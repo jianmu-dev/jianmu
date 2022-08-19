@@ -1,13 +1,32 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
+import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.git.repo.aggregate.Branch;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.git.repo.aggregate.GitRepo;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.project.query.ProjectVo;
+import dev.jianmu.project.repository.ProjectGroupRepository;
+import dev.jianmu.project.repository.ProjectLastExecutionRepository;
+import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.project.repository.ProjectRepository;
-import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.secret.aggregate.CredentialManager;
+import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.trigger.aggregate.Trigger;
+import dev.jianmu.trigger.repository.TriggerEventRepository;
+import dev.jianmu.trigger.repository.TriggerRepository;
+import dev.jianmu.trigger.repository.WebRequestRepository;
+import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
+import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
+import dev.jianmu.workflow.repository.WorkflowRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +35,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
+
 /**
  * @author Daihw
  * @class GitRepoApplication
@@ -23,16 +44,59 @@ import java.util.stream.Collectors;
  * @create 2022/7/5 9:45 上午
  */
 @Service
+@Slf4j
 public class GitRepoApplication {
     private final GitRepoRepository gitRepoRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectLastExecutionRepository projectLastExecutionRepository;
+    private final ProjectLinkGroupRepository projectLinkGroupRepository;
+    private final CredentialManager credentialManager;
+    private final ExternalParameterRepository externalParameterRepository;
+    private final ExternalParameterLabelRepository externalParameterLabelRepository;
+    private final WorkflowRepository workflowRepository;
+    private final WorkflowInstanceRepository workflowInstanceRepository;
+    private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
+    private final TaskInstanceRepository taskInstanceRepository;
+    private final TriggerRepository triggerRepository;
+    private final TriggerEventRepository triggerEventRepository;
+    private final WebRequestRepository webRequestRepository;
+    private final Scheduler quartzScheduler;
+    private final ProjectGroupRepository projectGroupRepository;
 
     public GitRepoApplication(
             GitRepoRepository gitRepoRepository,
-            ProjectRepository projectRepository
+            ProjectRepository projectRepository,
+            ProjectLastExecutionRepository projectLastExecutionRepository,
+            ProjectLinkGroupRepository projectLinkGroupRepository,
+            CredentialManager credentialManager,
+            ExternalParameterRepository externalParameterRepository,
+            ExternalParameterLabelRepository externalParameterLabelRepository,
+            WorkflowRepository workflowRepository,
+            WorkflowInstanceRepository workflowInstanceRepository,
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository,
+            TaskInstanceRepository taskInstanceRepository,
+            TriggerRepository triggerRepository,
+            TriggerEventRepository triggerEventRepository,
+            WebRequestRepository webRequestRepository,
+            Scheduler quartzScheduler,
+            ProjectGroupRepository projectGroupRepository
     ) {
         this.gitRepoRepository = gitRepoRepository;
         this.projectRepository = projectRepository;
+        this.projectLastExecutionRepository = projectLastExecutionRepository;
+        this.projectLinkGroupRepository = projectLinkGroupRepository;
+        this.credentialManager = credentialManager;
+        this.externalParameterRepository = externalParameterRepository;
+        this.externalParameterLabelRepository = externalParameterLabelRepository;
+        this.workflowRepository = workflowRepository;
+        this.workflowInstanceRepository = workflowInstanceRepository;
+        this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
+        this.taskInstanceRepository = taskInstanceRepository;
+        this.triggerRepository = triggerRepository;
+        this.triggerEventRepository = triggerEventRepository;
+        this.webRequestRepository = webRequestRepository;
+        this.quartzScheduler = quartzScheduler;
+        this.projectGroupRepository = projectGroupRepository;
     }
 
     public GitRepo findById(String id) {
@@ -69,7 +133,7 @@ public class GitRepoApplication {
         if (projectIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return this.projectRepository.findByIdIn(projectIds);
+        return this.projectRepository.findVoByIdIn(projectIds);
     }
 
     public Optional<Flow> findFlowByProjectId(String projectId, String gitRepoId) {
@@ -89,5 +153,52 @@ public class GitRepoApplication {
 
     public Optional<GitRepo> findByRefAndOwner(String ref, String owner) {
         return this.gitRepoRepository.findByRefAndOwner(ref, owner);
+    }
+
+    /**
+     * 删除GitRepo下的数据
+     *
+     * @param id
+     * @param projectIds
+     */
+    @Transactional
+    public void deleteGitRepoData(String id, List<String> projectIds) {
+        // 删除密钥
+        this.credentialManager.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name());
+        // 删除外部参数
+        this.externalParameterRepository.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name());
+        this.externalParameterLabelRepository.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name());
+        //删除项目关联表
+        this.projectLinkGroupRepository.deleteByProjectIdIn(projectIds);
+        this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME)
+                .ifPresent(p -> this.projectGroupRepository.subProjectCountById(p.getId(), projectIds.size()));
+        // 删除项目
+        this.projectRepository.findByIdIn(projectIds).forEach(project -> {
+            this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
+            this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
+            this.workflowRepository.deleteByRef(project.getWorkflowRef());
+            this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+            this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+            this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
+            // 删除触发器
+            this.triggerRepository.findByProjectId(project.getId())
+                    .ifPresent(trigger -> {
+                        if (trigger.getType() == Trigger.Type.CRON) {
+                            try {
+                                // 停止触发器
+                                quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
+                                // 卸载任务
+                                quartzScheduler.unscheduleJob(TriggerKey.triggerKey(trigger.getId()));
+                                // 删除任务
+                                quartzScheduler.deleteJob(JobKey.jobKey(trigger.getId()));
+                            } catch (SchedulerException e) {
+                                log.error("触发器删除失败: {}", e.getMessage());
+                            }
+                        }
+                        this.triggerRepository.deleteById(trigger.getId());
+                        this.triggerEventRepository.deleteByTriggerId(trigger.getId());
+                    });
+            this.webRequestRepository.deleteByProjectId(project.getId());
+        });
     }
 }

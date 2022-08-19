@@ -28,6 +28,8 @@ public interface ProjectLinkGroupRepository {
 
     void deleteByIdIn(List<String> projectLinkGroupIds);
 
+    void deleteByProjectIdIn(List<String> projectIds);
+
     List<ProjectLinkGroup> findAllByGroupIdAndSortBetween(String projectGroupId, Integer originSort, Integer targetSort);
 
     Optional<ProjectLinkGroup> findByProjectId(String projectId);

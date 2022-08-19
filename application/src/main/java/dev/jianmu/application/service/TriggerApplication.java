@@ -33,6 +33,7 @@ import dev.jianmu.trigger.event.TriggerEventParameter;
 import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.repository.TriggerRepository;
+import dev.jianmu.trigger.repository.WebRequestRepository;
 import dev.jianmu.trigger.service.CustomWebhookDomainService;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.*;
@@ -91,6 +92,7 @@ public class TriggerApplication {
     private final GitRepoRepository gitRepoRepository;
     private final CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository;
     private final CustomWebhookDomainService customWebhookDomainService;
+    private final WebRequestRepository webRequestRepository;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -109,7 +111,8 @@ public class TriggerApplication {
             OAuth2Properties oAuth2Properties,
             GitRepoRepository gitRepoRepository,
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
-            CustomWebhookDomainService customWebhookDomainService
+            CustomWebhookDomainService customWebhookDomainService,
+            WebRequestRepository webRequestRepository
     ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
@@ -128,6 +131,7 @@ public class TriggerApplication {
         this.gitRepoRepository = gitRepoRepository;
         this.webhookDefinitionVersionRepository = webhookDefinitionVersionRepository;
         this.customWebhookDomainService = customWebhookDomainService;
+        this.webRequestRepository = webRequestRepository;
     }
 
     private static String decode(final String encoded) {
@@ -323,6 +327,8 @@ public class TriggerApplication {
                     this.triggerRepository.deleteById(trigger.getId());
                     this.deleteGitWebhook(associationId, associationType, trigger.getRef(), encryptedToken, userId);
                 });
+        // 删除WebRequest
+        this.webRequestRepository.deleteByProjectId(projectId);
     }
 
     // 删除GitWebhook

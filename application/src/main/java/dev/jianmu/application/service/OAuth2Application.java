@@ -7,7 +7,9 @@ import dev.jianmu.application.service.vo.AssociationData;
 import dev.jianmu.application.service.vo.impl.GitRepoData;
 import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.git.repo.aggregate.Branch;
+import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.event.GitRepoDeletedEvent;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
@@ -19,6 +21,7 @@ import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
 import dev.jianmu.oauth2.api.vo.IRepoVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import dev.jianmu.trigger.service.CustomWebhookDomainService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -38,12 +41,14 @@ public class OAuth2Application {
     private final AssociationUtil associationUtil;
     private final OAuth2Properties oAuth2Properties;
     private final CustomWebhookDomainService customWebhookDomainService;
+    private final ApplicationEventPublisher publisher;
 
-    public OAuth2Application(GitRepoRepository gitRepoRepository, AssociationUtil associationUtil, OAuth2Properties oAuth2Properties, CustomWebhookDomainService customWebhookDomainService) {
+    public OAuth2Application(GitRepoRepository gitRepoRepository, AssociationUtil associationUtil, OAuth2Properties oAuth2Properties, CustomWebhookDomainService customWebhookDomainService, ApplicationEventPublisher publisher) {
         this.gitRepoRepository = gitRepoRepository;
         this.associationUtil = associationUtil;
         this.oAuth2Properties = oAuth2Properties;
         this.customWebhookDomainService = customWebhookDomainService;
+        this.publisher = publisher;
     }
 
     @Transactional
@@ -94,8 +99,25 @@ public class OAuth2Application {
         var branches = branchesString.stream()
                 .map(name -> new Branch(name, name.equals(defaultBranch)))
                 .collect(Collectors.toList());
-        var gitRepo = this.gitRepoRepository.findById(id)
-                .orElse(new GitRepo(id));
+        var optionalGitRepo = this.gitRepoRepository.findByRefAndOwner(ref, owner);
+        GitRepo gitRepo;
+        if (optionalGitRepo.isPresent()) {
+            gitRepo = optionalGitRepo.get();
+            if (!gitRepo.getId().equals(id)) {
+                // 删除gitRepo
+                this.gitRepoRepository.deleteById(gitRepo.getId());
+                var event = GitRepoDeletedEvent.Builder.aGetRepoDeletedEvent()
+                        .id(gitRepo.getId())
+                        .projectIds(gitRepo.getFlows().stream()
+                                .map(Flow::getProjectId)
+                                .collect(Collectors.toList()))
+                        .build();
+                this.publisher.publishEvent(event);
+                gitRepo = new GitRepo(id);
+            }
+        } else {
+            gitRepo = new GitRepo(id);
+        }
         boolean isCreated = gitRepo.getOwner() == null;
         // 同步分支
         gitRepo.syncBranches(ref, owner, branches);

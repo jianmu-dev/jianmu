@@ -60,7 +60,18 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     @Override
-    public List<ProjectVo> findByIdIn(List<String> ids) {
+    public List<ProjectVo> findVoByIdIn(List<String> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return this.projectMapper.findVoByIdIn(ids);
+    }
+
+    @Override
+    public List<Project> findByIdIn(List<String> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
         return this.projectMapper.findByIdIn(ids);
     }
 

@@ -16,4 +16,6 @@ public interface GitRepoRepository {
     Optional<GitRepo> findById(String id);
 
     Optional<GitRepo> findByRefAndOwner(String ref, String owner);
+
+    void deleteById(String id);
 }

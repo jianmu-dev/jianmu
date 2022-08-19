@@ -97,4 +97,10 @@ public class LocalCredentialManager implements CredentialManager {
     public Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String namespaceName, String key) {
         return this.kvPairMapper.findByNamespaceNameAndKey(associationId, associationType, namespaceName, key);
     }
+
+    @Override
+    public void deleteByAssociationIdAndType(String associationId, String associationType) {
+        this.namespaceMapper.deleteByAssociationIdAndType(associationId, associationType);
+        this.kvPairMapper.deleteByAssociationIdAndType(associationId, associationType);
+    }
 }

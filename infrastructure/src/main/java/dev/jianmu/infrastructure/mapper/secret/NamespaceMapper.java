@@ -58,4 +58,7 @@ public interface NamespaceMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Namespace> findAll(@Param("associationId") String associationId,
                             @Param("associationType") String associationType);
+
+    @Delete("DELETE FROM `jm_secret_namespace` WHERE `association_id` = #{associationId} AND `association_type` = #{associationType}")
+    void deleteByAssociationIdAndType(@Param("associationId") String associationId, @Param("associationType") String associationType);
 }

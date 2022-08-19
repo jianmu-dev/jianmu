@@ -68,6 +68,14 @@ public class ProjectLinkGroupRepositoryImpl implements ProjectLinkGroupRepositor
     }
 
     @Override
+    public void deleteByProjectIdIn(List<String> projectIds) {
+        if (projectIds.isEmpty()) {
+            return;
+        }
+        this.projectLinkGroupMapper.deleteByProjectIdIn(projectIds);
+    }
+
+    @Override
     public List<ProjectLinkGroup> findAllByGroupIdAndSortBetween(String projectGroupId, Integer originSort, Integer targetSort) {
         return this.projectLinkGroupMapper.findAllByGroupIdAndSortBetween(projectGroupId, originSort, targetSort);
     }
