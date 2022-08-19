@@ -81,7 +81,7 @@ export default defineComponent({
     });
     const code = ref<string>();
     const iframeSrc = computed<string>(() =>
-      !code.value ? '' : `http://127.0.0.1:3000${AUTHORIZE_INDEX}?code=${encodeURIComponent(code.value)}`);
+      !code.value ? '' : `${AUTHORIZE_INDEX}?code=${encodeURIComponent(code.value)}`);
     const iframeVisible = ref<boolean>(false);
     const iframeHeight = ref<string>('');
     window.addEventListener('message', e => {
