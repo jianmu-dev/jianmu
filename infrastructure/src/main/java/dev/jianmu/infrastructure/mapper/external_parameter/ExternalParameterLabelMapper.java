@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure.mapper.external_parameter;
 
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +17,8 @@ public interface ExternalParameterLabelMapper {
             "values(#{id}, #{value}, #{associationId}, #{associationType}, #{createdTime}, #{lastModifiedTime})")
     void add(ExternalParameterLabel externalParameterLabel);
 
+    @Delete("DELETE FROM `jm_external_parameter_label` WHERE `association_id` = #{associationId} AND `association_type` = #{associationType}")
+    void deleteByAssociationIdAndType(@Param("associationId") String associationId, @Param("associationType") String associationType);
 
     @Select("<script>" +
             "SELECT * FROM `jm_external_parameter_label`" +

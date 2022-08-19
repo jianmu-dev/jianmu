@@ -3,10 +3,7 @@ package dev.jianmu.infrastructure.mapper.git_repo;
 import dev.jianmu.git.repo.aggregate.GitRepo;
 import dev.jianmu.infrastructure.typehandler.BranchListTypeHandler;
 import dev.jianmu.infrastructure.typehandler.FlowListTypeHandler;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.Optional;
 
@@ -35,4 +32,7 @@ public interface GitRepoMapper {
     @Result(column = "branches", property = "branches", typeHandler = BranchListTypeHandler.class)
     @Result(column = "flows", property = "flows", typeHandler = FlowListTypeHandler.class)
     Optional<GitRepo> findByRefAndOwner(@Param("ref") String ref, @Param("owner") String owner);
+
+    @Delete("DELETE FROM `jm_git_repo` where `id` = #{id}")
+    void deleteById(String id);
 }

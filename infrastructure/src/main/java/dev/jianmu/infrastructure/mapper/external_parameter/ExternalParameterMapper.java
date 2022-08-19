@@ -20,6 +20,9 @@ public interface ExternalParameterMapper {
     @Delete("delete from jm_external_parameter where id = #{id}")
     void deleteById(String id);
 
+    @Delete("DELETE FROM `jm_external_parameter` WHERE `association_id` = #{associationId} AND `association_type` = #{associationType}")
+    void deleteByAssociationIdAndType(@Param("associationId") String associationId, @Param("associationType") String associationType);
+
     @Update("update jm_external_parameter set name = #{name}, value = #{value}, label = #{label}, last_modified_time = #{lastModifiedTime}, type = #{type} where id = #{id}")
     void updateById(ExternalParameter externalParameter);
 

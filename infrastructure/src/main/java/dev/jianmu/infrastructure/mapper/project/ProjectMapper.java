@@ -180,5 +180,25 @@ public interface ProjectMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")
-    List<ProjectVo> findByIdIn(@Param("ids") List<String> ids);
+    List<ProjectVo> findVoByIdIn(@Param("ids") List<String> ids);
+
+    @Select("<script>" +
+            "SELECT * FROM `jm_project` `jp`" +
+            " WHERE `jp`.`id` IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
+            " </foreach>" +
+            "</script>")
+    @Result(column = "workflow_name", property = "workflowName")
+    @Result(column = "workflow_description", property = "workflowDescription")
+    @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
+    @Result(column = "event_bridge_id", property = "eventBridgeId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "git_repo_id", property = "gitRepoId")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    List<Project> findByIdIn(@Param("ids") List<String> ids);
 }

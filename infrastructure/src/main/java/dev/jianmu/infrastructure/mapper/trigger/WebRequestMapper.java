@@ -41,4 +41,7 @@ public interface WebRequestMapper {
 
     @Update("UPDATE jm_web_request set status_code = #{statusCode}, error_msg = #{errorMsg} where id = #{id}")
     void update(WebRequest webRequest);
+
+    @Delete("DELETE FROM jm_web_request where project_id = #{projectId}")
+    void deleteByProjectId(String projectId);
 }

@@ -16,6 +16,8 @@ public interface ExternalParameterRepository {
 
     void deleteById(String id);
 
+    void deleteByAssociationIdAndType(String associationId, String associationType);
+
     void updateById(ExternalParameter externalParameter);
 
     Optional<ExternalParameter> findById(String id);

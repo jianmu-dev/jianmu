@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.mapper.trigger;
 
 import dev.jianmu.trigger.event.TriggerEvent;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
@@ -25,4 +26,7 @@ public interface TriggerEventMapper {
     @Insert("insert into jm_trigger_event(id, project_id, trigger_id, web_request_id, trigger_type, occurred_time) " +
             "values(#{id}, #{projectId}, #{triggerId}, #{webRequestId}, #{triggerType}, #{occurredTime})")
     void save(TriggerEvent triggerEvent);
+
+    @Delete("DELETE FROM jm_trigger_event where trigger_id = #{triggerId}")
+    void deleteByTriggerId(String triggerId);
 }
