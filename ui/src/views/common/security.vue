@@ -54,7 +54,15 @@ export default defineComponent({
 
 <style scoped lang='less'>
 .security {
+  ::v-deep(.el-overlay) {
+    background-color: transparent;
+  }
+
   ::v-deep(.el-dialog) {
+    box-shadow: 0 0 16px 0 #CDD5E6;
+    border-radius: 4px;
+    border: 1px solid #B9CFE6;
+
     .el-dialog__header {
       height: 5px;
       padding: 0 30px;
