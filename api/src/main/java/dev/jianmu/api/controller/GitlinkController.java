@@ -119,7 +119,7 @@ public class GitlinkController {
             return;
         }
         var gitRepo = this.gitRepoApplication.findByRefAndOwner(dto.getRepository().getName(), dto.getRepository().getOwner().getLogin())
-                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库 ref"));
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库：" + dto.getRepository().getOwner().getLogin() + "/" + dto.getRepository().getName()));
         // TODO： 暂时使用pusher查询用户
         var user = this.userRepository.findByUsername(dto.getPusher().getLogin())
                 .orElseThrow(() -> new DataNotFoundException("未找到用户：" + dto.getPusher().getLogin()));
@@ -138,11 +138,12 @@ public class GitlinkController {
         });
         for (String filepath : set) {
             try {
-                var dsl = this.findDslByFilepath(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch, user.getId());
-                this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, user.getId(), encryptedAccessToken, user.getUsername());
+                if (filepath.matches("^.devops/.*.yml$") && filepath.split("/").length == 2) {
+                    var dsl = this.findDslByFilepath(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch, user.getId());
+                    this.createOrUpdateProject(filepath, dsl, gitRepo.getId(), branch, user.getId(), encryptedAccessToken, user.getUsername());
+                }
             } catch (Exception e) {
-                e.printStackTrace();
-                log.warn("项目同步失败: {}", filepath);
+                log.warn("项目同步失败: ", e);
             }
         }
     }
@@ -243,12 +244,7 @@ public class GitlinkController {
     }
 
     private void createOrUpdateProject(String filepath, String dslText, String repoId, String branch, String userId, String encryptedAccessToken, String username) {
-        String filename;
-        if (filepath.matches("^.devops/.*.yml$") && filepath.split("/").length == 2) {
-            filename = filepath.split("/")[1].replace(".yml", "");
-        } else {
-            return;
-        }
+        String filename = filepath.split("/")[1].replace(".yml", "");
         try {
             var dsl = DslParser.parse(dslText);
             if (!dsl.getName().equals(filename)) {
@@ -264,7 +260,10 @@ public class GitlinkController {
             return;
         }
         var project = projectOptional.get();
-        this.projectApplication.updateProject(project.getId(), dslText, null, username, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), encryptedAccessToken, userId, false);
+        this.gitRepoApplication.findById(repoId)
+                .findFlowByProjectId(project.getId())
+                .filter(flow -> flow.getBranchName().equals(branch))
+                .ifPresent(flow -> this.projectApplication.updateProject(project.getId(), dslText, null, username, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), encryptedAccessToken, userId, false));
     }
 
     private String findDslByFilepath(String accessToken, String owner, String repo, String filepath, String branch, String userId) {
