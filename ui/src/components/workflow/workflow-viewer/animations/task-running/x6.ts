@@ -24,6 +24,13 @@ const toolItem = {
 
 const { userAgent: ua } = navigator;
 const isSafari = !ua.includes('Chrome') && ua.includes('Safari');
+const is2345Explorer = ua.includes('2345Explorer');
+const isQQBrowser = ua.includes('QQBrowser');
+// const isOPR = ua.includes('OPR'); // OPR谷歌版本高不需要适配
+// const isEdg = ua.includes('Edg'); // edg谷歌版本高不需要适配
+// const version = ua.match(/Chrome\/\d{2,3}/)![0].substring(7);
+// const isCompatible = Number(version) < 80 || isSafari;
+const isCompatible = is2345Explorer || isQQBrowser || isSafari;
 
 /**
  * X6任务执行中动画
@@ -50,8 +57,8 @@ export default class X6TaskRunning extends BaseTaskRunning {
     this.iconShape.style.transition =
       `opacity ${Math.round(durations.iconShape.first / 1000)}s linear`;
 
-    if (isSafari) {
-      // 兼容safari
+    if (isCompatible) {
+      // 兼容其他浏览器
       graph.container.querySelectorAll('.x6-cell-tool-boundary').forEach(el => {
         const delta = 15;
         const factor = graph.zoom();
@@ -72,7 +79,8 @@ export default class X6TaskRunning extends BaseTaskRunning {
       reverse = !reverse;
     }, durations.iconShape.first);
 
-    if (!isSafari) {
+    if (!isCompatible) {
+      // 兼容其他浏览器
       this.animateIconShape();
     }
   }
