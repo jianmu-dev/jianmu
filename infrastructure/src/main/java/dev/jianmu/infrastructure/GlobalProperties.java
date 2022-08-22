@@ -26,6 +26,7 @@ public class GlobalProperties {
     private Worker worker = new Worker();
     private TriggerQueue triggerQueue = new TriggerQueue();
     private El el = new El();
+    private Boolean backup = false;
 
     @Data
     @Component

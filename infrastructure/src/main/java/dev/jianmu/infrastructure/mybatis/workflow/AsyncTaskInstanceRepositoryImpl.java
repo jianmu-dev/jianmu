@@ -1,6 +1,8 @@
 package dev.jianmu.infrastructure.mybatis.workflow;
 
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.exception.DBException;
+import dev.jianmu.infrastructure.mapper.workflow.AsyncTaskInstanceBackupMapper;
 import dev.jianmu.infrastructure.mapper.workflow.AsyncTaskInstanceMapper;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
@@ -21,11 +23,19 @@ import java.util.Optional;
 @Repository
 public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceRepository {
     private final AsyncTaskInstanceMapper asyncTaskInstanceMapper;
+    private final AsyncTaskInstanceBackupMapper asyncTaskInstanceBackupMapper;
     private final ApplicationEventPublisher publisher;
+    private final boolean backup;
 
-    public AsyncTaskInstanceRepositoryImpl(AsyncTaskInstanceMapper asyncTaskInstanceMapper, ApplicationEventPublisher publisher) {
+    public AsyncTaskInstanceRepositoryImpl(AsyncTaskInstanceMapper asyncTaskInstanceMapper,
+                                           AsyncTaskInstanceBackupMapper asyncTaskInstanceBackupMapper,
+                                           ApplicationEventPublisher publisher,
+                                           GlobalProperties globalProperties
+    ) {
         this.asyncTaskInstanceMapper = asyncTaskInstanceMapper;
+        this.asyncTaskInstanceBackupMapper = asyncTaskInstanceBackupMapper;
         this.publisher = publisher;
+        this.backup = globalProperties.getBackup();
     }
 
     @Override
@@ -51,17 +61,26 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     @Override
     public void addAll(List<AsyncTaskInstance> asyncTaskInstances) {
         this.asyncTaskInstanceMapper.addAll(asyncTaskInstances);
+        if (this.backup) {
+            this.asyncTaskInstanceBackupMapper.addAll(asyncTaskInstances);
+        }
     }
 
     @Override
     public void updateById(AsyncTaskInstance asyncTaskInstance) {
         this.asyncTaskInstanceMapper.updateById(asyncTaskInstance);
+        if (this.backup) {
+            this.asyncTaskInstanceBackupMapper.updateById(asyncTaskInstance);
+        }
         this.publisher.publishEvent(asyncTaskInstance);
     }
 
     @Override
     public void succeedById(AsyncTaskInstance asyncTaskInstance, int version) {
         var succeed = this.asyncTaskInstanceMapper.succeedById(asyncTaskInstance, version);
+        if (this.backup) {
+            this.asyncTaskInstanceBackupMapper.succeedById(asyncTaskInstance, version);
+        }
         if (!succeed) {
             throw new DBException.OptimisticLocking("未找到对应的乐观锁版本数据，无法完成数据更新");
         }
@@ -71,6 +90,9 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     @Override
     public void activateById(AsyncTaskInstance asyncTaskInstance, int version) {
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
+        if (this.backup) {
+            this.asyncTaskInstanceBackupMapper.activateById(asyncTaskInstance, version);
+        }
         if (!succeed) {
             throw new DBException.OptimisticLocking("未找到对应的乐观锁版本数据，无法完成数据更新");
         }
@@ -81,6 +103,9 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     public void retryById(AsyncTaskInstance asyncTaskInstance) {
         int version = this.asyncTaskInstanceMapper.getVersion(asyncTaskInstance.getId());
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
+        if (this.backup) {
+            this.asyncTaskInstanceBackupMapper.activateById(asyncTaskInstance, version);
+        }
         if (!succeed) {
             throw new DBException.OptimisticLocking("未找到对应的乐观锁版本数据，无法完成数据更新");
         }
@@ -91,6 +116,9 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     public void ignoreById(AsyncTaskInstance asyncTaskInstance) {
         int version = this.asyncTaskInstanceMapper.getVersion(asyncTaskInstance.getId());
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
+        if (this.backup) {
+            this.asyncTaskInstanceBackupMapper.activateById(asyncTaskInstance, version);
+        }
         if (!succeed) {
             throw new DBException.OptimisticLocking("未找到对应的乐观锁版本数据，无法完成数据更新");
         }
