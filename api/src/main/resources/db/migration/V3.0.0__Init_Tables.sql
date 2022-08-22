@@ -440,3 +440,71 @@ CREATE TABLE `jm_custom_webhook_instance`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT ='自定义webhook实例';
 
+CREATE TABLE `jm_task_instance_backup`
+(
+    `id`               varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '主键',
+    `serial_no`        int                                                          DEFAULT NULL COMMENT '执行序号',
+    `def_key`          varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务定义唯一Key',
+    `node_info`        blob                                                          NOT NULL COMMENT '节点定义快照',
+    `async_task_ref`   varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义上下文中的AsyncTask唯一标识',
+    `workflow_ref`     varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义Ref',
+    `workflow_version` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '流程定义版本',
+    `business_id`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '外部业务ID',
+    `trigger_id`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Trigger ID',
+    `worker_id`        varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Worker ID',
+    `start_time`       datetime                                                     DEFAULT NULL COMMENT '开始时间',
+    `end_time`         datetime                                                     DEFAULT NULL COMMENT '结束时间',
+    `status`           varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '任务运行状态',
+    `_version`         int                                                           NOT NULL COMMENT '乐观锁版本字段',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='任务实例backup表';
+
+CREATE TABLE IF NOT EXISTS `jm_async_task_instance_backup`
+(
+    `id`                   varchar(45)  NOT NULL,
+    `trigger_id`           varchar(45)  NOT NULL COMMENT 'Trigger ID',
+    `workflow_ref`         varchar(45)  NOT NULL COMMENT '流程Ref',
+    `workflow_version`     varchar(45)  NOT NULL COMMENT '流程版本',
+    `workflow_instance_id` varchar(45)  NOT NULL COMMENT '流程实例ID',
+    `name`                 varchar(45)  NOT NULL COMMENT '名称',
+    `description`          varchar(255) NOT NULL COMMENT '描述',
+    `status`               varchar(45)  NOT NULL COMMENT '状态',
+    `failure_mode`         varchar(45) DEFAULT 'SUSPEND' COMMENT '错误处理模式',
+    `async_task_ref`       varchar(45)  NOT NULL COMMENT '任务定义Ref',
+    `async_task_type`      varchar(45)  NOT NULL COMMENT '任务定义类型',
+    `serial_no`            integer     DEFAULT 0 COMMENT '完成次数累计',
+    `next_target`          varchar(45) DEFAULT NULL COMMENT '下一个要触发的节点',
+    `activating_time`      datetime     NOT NULL COMMENT '激活时间',
+    `start_time`           datetime    DEFAULT NULL COMMENT '开始时间',
+    `end_time`             datetime    DEFAULT NULL COMMENT '结束时间',
+    `_version`             integer     DEFAULT 0 COMMENT '乐观锁版本字段',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX trigger_id_and_task_ref (`trigger_id`, `async_task_ref`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='异步任务实例backup表';
+
+CREATE TABLE `jm_workflow_instance_backup`
+(
+    `id`                varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '唯一ID主键',
+    `serial_no`         int                                                           NOT NULL COMMENT '执行顺序',
+    `trigger_id`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器ID',
+    `trigger_type`      varchar(45) COLLATE utf8mb4_unicode_ci                        DEFAULT NULL COMMENT 'Trigger Type',
+    `name`              varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '显示名称',
+    `description`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '描述',
+    `run_mode`          varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '运行模式',
+    `status`            varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '运行状态',
+    `workflow_ref`      varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义唯一引用名称',
+    `workflow_version`  varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '流程定义版本',
+    `global_parameters` blob COMMENT '全局参数列表',
+    `start_time`        datetime                                                      DEFAULT NULL COMMENT '开始时间',
+    `suspended_time`    datetime                                                      DEFAULT NULL COMMENT '挂起时间',
+    `end_time`          datetime                                                      DEFAULT NULL COMMENT '结束时间',
+    `_version`          int                                                           NOT NULL COMMENT '乐观锁版本字段',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX trigger_id (`trigger_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='流程实例backup表';

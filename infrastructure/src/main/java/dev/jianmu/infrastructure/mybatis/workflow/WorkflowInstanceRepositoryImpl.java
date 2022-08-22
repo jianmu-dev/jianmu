@@ -2,6 +2,8 @@ package dev.jianmu.infrastructure.mybatis.workflow;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import dev.jianmu.infrastructure.GlobalProperties;
+import dev.jianmu.infrastructure.mapper.workflow.WorkflowInstanceBackupMapper;
 import dev.jianmu.infrastructure.mapper.workflow.WorkflowInstanceMapper;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
@@ -11,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,11 +26,22 @@ import java.util.Optional;
 public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceRepositoryImpl.class);
-    @Resource
-    private ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
+    private final WorkflowInstanceMapper workflowInstanceMapper;
+    private final WorkflowInstanceBackupMapper workflowInstanceBackupMapper;
+    private final boolean bakcup;
 
-    @Resource
-    private WorkflowInstanceMapper workflowInstanceMapper;
+
+    public WorkflowInstanceRepositoryImpl(ApplicationEventPublisher publisher,
+                                          WorkflowInstanceMapper workflowInstanceMapper,
+                                          WorkflowInstanceBackupMapper workflowInstanceBackupMapper,
+                                          GlobalProperties globalProperties
+    ) {
+        this.publisher = publisher;
+        this.workflowInstanceMapper = workflowInstanceMapper;
+        this.workflowInstanceBackupMapper = workflowInstanceBackupMapper;
+        this.bakcup = globalProperties.getBackup();
+    }
 
     @Override
     public List<WorkflowInstance> findByRefAndStatuses(String workflowRef, List<ProcessStatus> statuses) {
@@ -54,12 +66,18 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     @Override
     public void add(WorkflowInstance workflowInstance) {
         this.workflowInstanceMapper.add(workflowInstance, 1);
+        if (this.bakcup) {
+            this.workflowInstanceBackupMapper.add(workflowInstance, 1);
+        }
         publisher.publishEvent(workflowInstance);
     }
 
     @Override
     public void save(WorkflowInstance workflowInstance) {
         this.workflowInstanceMapper.save(workflowInstance);
+        if (this.bakcup) {
+            this.workflowInstanceBackupMapper.save(workflowInstance);
+        }
         this.publisher.publishEvent(workflowInstance);
     }
 

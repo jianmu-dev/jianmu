@@ -1,5 +1,7 @@
 package dev.jianmu.infrastructure.mybatis.task;
 
+import dev.jianmu.infrastructure.GlobalProperties;
+import dev.jianmu.infrastructure.mapper.task.TaskInstanceBackupMapper;
 import dev.jianmu.infrastructure.mapper.task.TaskInstanceMapper;
 import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.task.aggregate.TaskInstance;
@@ -24,13 +26,19 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     private static final Logger logger = LoggerFactory.getLogger(TaskInstanceRepositoryImpl.class);
     private final TaskInstanceMapper taskInstanceMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final TaskInstanceBackupMapper taskInstanceBackupMapper;
+    private final boolean backup;
 
     public TaskInstanceRepositoryImpl(
             TaskInstanceMapper taskInstanceMapper,
-            ApplicationEventPublisher applicationEventPublisher
+            ApplicationEventPublisher applicationEventPublisher,
+            TaskInstanceBackupMapper taskInstanceBackupMapper,
+            GlobalProperties globalProperties
     ) {
         this.taskInstanceMapper = taskInstanceMapper;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.taskInstanceBackupMapper = taskInstanceBackupMapper;
+        this.backup = globalProperties.getBackup();
     }
 
     private void publishEvent(TaskInstance taskInstance) {
@@ -99,33 +107,51 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void add(TaskInstance taskInstance) {
         this.taskInstanceMapper.add(taskInstance);
+        if (this.backup) {
+            this.taskInstanceBackupMapper.add(taskInstance);
+        }
         this.publishEvent(taskInstance);
     }
 
     @Override
     public void updateStatus(TaskInstance taskInstance) {
         this.taskInstanceMapper.updateStatus(taskInstance);
+        if (this.backup) {
+            this.taskInstanceBackupMapper.updateStatus(taskInstance);
+        }
         this.publishEvent(taskInstance);
     }
 
     @Override
     public void updateWorkerId(TaskInstance taskInstance) {
         this.taskInstanceMapper.updateWorkerId(taskInstance);
+        if (this.backup) {
+            this.taskInstanceBackupMapper.updateWorkerId(taskInstance);
+        }
     }
 
     @Override
     public boolean acceptTask(TaskInstance taskInstance) {
+        if (this.backup) {
+            this.taskInstanceBackupMapper.acceptTask(taskInstance);
+        }
         return this.taskInstanceMapper.acceptTask(taskInstance);
     }
 
     @Override
     public void terminate(TaskInstance taskInstance) {
         this.taskInstanceMapper.updateStatus(taskInstance);
+        if (this.backup) {
+            this.taskInstanceBackupMapper.updateStatus(taskInstance);
+        }
     }
 
     @Override
     public void saveSucceeded(TaskInstance taskInstance) {
         this.taskInstanceMapper.saveSucceeded(taskInstance);
+        if (this.backup) {
+            this.taskInstanceBackupMapper.saveSucceeded(taskInstance);
+        }
         this.publishEvent(taskInstance);
     }
 
