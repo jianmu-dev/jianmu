@@ -169,7 +169,7 @@ export default defineComponent({
           currentBranch.value = branch;
           if (checkDsl(dslText)) {
             if (window.top !== window) {
-              pushTop(`/full/project/pipeline-editor/${props.id}`);
+              pushTop(`/full/project/pipeline-editor/${props.id}`, appContext);
               return;
             }
             const payload = {

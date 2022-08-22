@@ -191,7 +191,7 @@ export default defineComponent({
   },
   emits: ['running', 'synchronized', 'deleted', 'select-project-id', 'clear-project-id', 'prev-project', 'next-project'],
   setup(props: any, { emit }: SetupContext) {
-    const { proxy } = getCurrentInstance() as any;
+    const { proxy, appContext } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
     const dynamicProjectDesc = store.getters.projectDesc;
@@ -207,7 +207,7 @@ export default defineComponent({
     const webhookDrawerFlag = ref<boolean>(false);
     const clickProject = (projectId: string) => {
       if (window.top !== window) {
-        pushTop(`/full/workflow-execution-record/detail?projectId=${projectId}`);
+        pushTop(`/full/workflow-execution-record/detail?projectId=${projectId}`, appContext);
         return;
       }
       router.push({
