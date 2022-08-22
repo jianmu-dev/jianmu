@@ -470,12 +470,13 @@ export default defineComponent({
       top: 0;
       left: 0;
       width: calc(100% - 60px);
-      padding: 60px 30px 0;
-      height: calc(100% - 60px);
+      padding: 60px 30px 30px;
+      height: calc(100% - 90px);
       background-color: #ffffff;
       &.bottom-height {
+        padding-bottom: 0;
+        // 预览全屏dsl留白有点高 TODO
         height: calc(100% - 130px);
-        background-color: #ffffff;
       }
     }
   }
