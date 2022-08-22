@@ -3,7 +3,9 @@
     <div v-if="readonly" class="operation">
       <jm-text-copy :value="value"/>
     </div>
-    <textarea ref="textareaRef"></textarea>
+    <jm-scrollbar>
+      <textarea ref="textareaRef"></textarea>
+    </jm-scrollbar>
   </div>
 </template>
 
