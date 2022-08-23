@@ -152,7 +152,7 @@ export default defineComponent({
 
   &:hover {
     .operation {
-      visibility: visible;
+      opacity: 1;
     }
   }
 
@@ -172,7 +172,8 @@ export default defineComponent({
     border-radius: 50%;
     border: 1px solid #767F91;
 
-    visibility: hidden;
+    opacity: 0;
+    transition: .3s opacity;
 
     ::v-deep(.jm-text-copy) {
       font-size: 20px;
@@ -214,6 +215,7 @@ export default defineComponent({
     .CodeMirror-overlayscroll-horizontal,
     .CodeMirror-overlayscroll-vertical {
       opacity: 0;
+      transition: .3s opacity;
 
       div {
         background-color: @thumb-color;
