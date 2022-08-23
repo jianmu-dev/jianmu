@@ -42,6 +42,9 @@ public class ParameterSetTypeHandler extends BaseTypeHandler<Set<GlobalParameter
     }
 
     private Set<GlobalParameter> toGlobalParameterSet(Blob blob) {
+        if (blob == null) {
+            return null;
+        }
         JavaType javaType = this.objectMapper.getTypeFactory().constructCollectionType(Set.class, GlobalParameter.class);
         try {
             Set<GlobalParameter> globalParameters = this.objectMapper.readValue(blob.getBytes(1, (int) blob.length()), javaType);
