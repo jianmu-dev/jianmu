@@ -3,9 +3,7 @@
     <div v-if="readonly" class="operation">
       <jm-text-copy :value="value"/>
     </div>
-    <jm-scrollbar>
-      <textarea ref="textareaRef"></textarea>
-    </jm-scrollbar>
+    <textarea ref="textareaRef"></textarea>
   </div>
 </template>
 
@@ -27,6 +25,10 @@ import 'codemirror/mode/yaml/yaml.js';
 
 // 查找插件
 import './addon/search.js';
+
+// 滚动条插件
+import 'codemirror/addon/scroll/simplescrollbars.js';
+import 'codemirror/addon/scroll/simplescrollbars.css';
 
 // 尝试获取全局实例
 const codemirror = window.CodeMirror || CodeMirror;
@@ -50,6 +52,8 @@ function initialize(textarea, readonly, onChange) {
     lineWrapping: true,
     // 显示行号
     lineNumbers: true,
+    // 滚动条样式
+    scrollbarStyle: 'overlay',
     // 是否只读
     readOnly: readonly,
     // 快捷键
@@ -137,6 +141,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+@thumb-color: #667085;
+
 .jm-dsl-editor {
   position: relative;
   z-index: 0;
@@ -196,6 +202,27 @@ export default defineComponent({
 
     .CodeMirror-linenumber {
       color: #C1D7FF;
+    }
+
+    &:hover {
+      .CodeMirror-overlayscroll-horizontal,
+      .CodeMirror-overlayscroll-vertical {
+        opacity: 1;
+      }
+    }
+
+    .CodeMirror-overlayscroll-horizontal,
+    .CodeMirror-overlayscroll-vertical {
+      opacity: 0;
+
+      div {
+        background-color: @thumb-color;
+        opacity: 0.5;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
     }
   }
 }
