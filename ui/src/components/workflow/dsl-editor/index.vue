@@ -221,6 +221,7 @@ export default defineComponent({
 
         &:hover {
           opacity: 1;
+          cursor: pointer;
         }
       }
     }
