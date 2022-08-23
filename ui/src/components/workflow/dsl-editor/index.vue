@@ -158,16 +158,18 @@ export default defineComponent({
 
     display: flex;
     align-items: center;
-    padding: 10px 15px;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
     background-color: #818894;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
-    border-radius: 2px;
+    border-radius: 50%;
     border: 1px solid #767F91;
 
     visibility: hidden;
 
     ::v-deep(.jm-text-copy) {
-      font-size: 24px;
+      font-size: 20px;
 
       .jm-icon-button-copy {
         color: #FFFFFF;
