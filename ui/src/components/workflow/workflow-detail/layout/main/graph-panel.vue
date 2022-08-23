@@ -17,6 +17,7 @@
       @click-param-log="openParamLog"
       @change-view-mode="viewMode=>$emit('change-view-mode', viewMode)"
     />
+    <!-- :readonly="true" 不能加true 组件内部逻辑需要处理 -->
     <jm-drawer
       title="查看任务执行日志"
       :size="850"

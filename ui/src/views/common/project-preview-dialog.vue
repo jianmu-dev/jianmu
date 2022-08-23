@@ -7,7 +7,7 @@
       :width="dialogWidth"
       @close="close"
     >
-      <div class="content" v-loading="loading">
+      <div class="content" :class="[isFullscreen? 'isFullscreen':'']" v-loading="loading">
         <jm-workflow-viewer
           v-if="!loading"
           :dsl="dsl"
@@ -15,6 +15,7 @@
           :viewMode="viewMode"
           :node-infos="nodeDefs"
           :trigger-type="triggerType"
+          @is-fullscreen="isfull=>isFullscreen=isfull"
           @change-view-mode="mode=>viewMode=mode"
         />
         <div class="overflow-bottom">
@@ -55,6 +56,7 @@ export default defineComponent({
     const dialogVisible = ref<boolean>(true);
     const dialogWidth = computed<string>(() => entry ? '1000px' : '1200px');
     const title = ref<string>('');
+    const isFullscreen = ref<boolean>(false);
     const loading = ref<boolean>(false);
     const dsl = ref<string>();
     const nodeDefs = ref<INodeDefVo[]>([]);
@@ -109,6 +111,7 @@ export default defineComponent({
       dialogWidth,
       TriggerTypeEnum,
       dialogVisible,
+      isFullscreen,
       title,
       loading,
       dsl,
@@ -177,6 +180,10 @@ export default defineComponent({
     height: 70vh;
     max-height: 700px;
 
+    ::v-deep(.dsl-editor-container) {
+      padding-bottom: 0;
+      height: calc(100% - 130px);
+    }
     .overflow-bottom {
       position: absolute;
       left: 0;
@@ -246,6 +253,12 @@ export default defineComponent({
           background-color: #ffffff;
         }
       }
+    }
+  }
+  .isFullscreen {
+    ::v-deep(.dsl-editor-container) {
+      padding-bottom: 30px;
+      height: calc(100% - 90px);
     }
   }
 }

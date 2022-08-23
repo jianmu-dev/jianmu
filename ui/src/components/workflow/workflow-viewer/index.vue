@@ -42,7 +42,7 @@
         @on-fullscreen="handleFullscreen"
         @rotate="handleRotation"/>
       <div class="canvas" ref="container"/>
-      <div :class="['dsl-editor-container', readonly? 'bottom-height':'']" v-if="dslMode">
+      <div class="dsl-editor-container" v-if="dslMode">
         <jm-dsl-editor :value="workflowGraph?.visibleDsl || ''" readonly/>
       </div>
     </div>
@@ -117,7 +117,7 @@ export default defineComponent({
     },
     fullscreenRef: HTMLElement,
   },
-  emits: ['click-task-node', 'click-webhook-node', 'click-process-log', 'click-param-log', 'change-view-mode'],
+  emits: ['click-task-node', 'click-webhook-node', 'click-process-log', 'click-param-log', 'change-view-mode', 'is-fullscreen'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const container = ref<HTMLElement>();
@@ -268,7 +268,9 @@ export default defineComponent({
 
         updateZoom();
       },
-      handleFullscreen: () => {
+      handleFullscreen: (boo: boolean) => {
+        // 同步全屏状态
+        emit('is-fullscreen', boo);
         if (!graph.value) {
           return;
         }
@@ -473,11 +475,6 @@ export default defineComponent({
       padding: 60px 30px 30px;
       height: calc(100% - 90px);
       background-color: #ffffff;
-      &.bottom-height {
-        padding-bottom: 0;
-        // 预览全屏dsl留白有点高 TODO
-        height: calc(100% - 130px);
-      }
     }
   }
 }
