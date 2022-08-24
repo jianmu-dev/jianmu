@@ -144,6 +144,7 @@ export default defineComponent({
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  background-color: #FFFFFF;
   box-shadow: 0px 0px 4px 0px rgb(194 194 194 / 50%);
 
   .group {
