@@ -24,13 +24,13 @@ const toolItem = {
 
 const { userAgent: ua } = navigator;
 const isSafari = !ua.includes('Chrome') && ua.includes('Safari');
-const is2345Explorer = ua.includes('2345Explorer');
-const isQQBrowser = ua.includes('QQBrowser');
+// const is2345Explorer = ua.includes('2345Explorer');
+// const isQQBrowser = ua.includes('QQBrowser');
 // const isOPR = ua.includes('OPR'); // OPR谷歌版本高不需要适配
 // const isEdg = ua.includes('Edg'); // edg谷歌版本高不需要适配
 // const version = ua.match(/Chrome\/\d{2,3}/)![0].substring(7);
 // const isCompatible = Number(version) < 80 || isSafari;
-const isCompatible = is2345Explorer || isQQBrowser || isSafari;
+const isCompatible = isSafari;
 
 /**
  * X6任务执行中动画
