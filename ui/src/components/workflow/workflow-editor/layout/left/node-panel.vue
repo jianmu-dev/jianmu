@@ -1,14 +1,14 @@
 <template>
   <div :class="{ 'jm-workflow-editor-node-panel': true, collapsed }" ref="container">
     <div class="collapse-btn jm-icon-button-left" @click="collapse"/>
+    <div class="search">
+      <jm-input placeholder="搜索" v-model="keyword" @change="changeKeyword" :clearable="true">
+        <template #prefix>
+          <i class="jm-icon-button-search"></i>
+        </template>
+      </jm-input>
+    </div>
     <jm-scrollbar>
-      <div class="search">
-        <jm-input placeholder="搜索" v-model="keyword" @change="changeKeyword" :clearable="true">
-          <template #prefix>
-            <i class="jm-icon-button-search"></i>
-          </template>
-        </jm-input>
-      </div>
       <div class="groups" v-show="nodeCount>0">
         <node-group class="trigger" :entry="entry" :type="NodeGroupEnum.TRIGGER" :keyword="tempKeyword"
                     @get-node-count="getNodeCount"/>
@@ -137,6 +137,10 @@ export default defineComponent({
         margin-left: 5.5px;
       }
     }
+
+    .search {
+      opacity: 0;
+    }
   }
 
   .collapse-btn {
@@ -169,6 +173,7 @@ export default defineComponent({
     position: absolute;
     top: 0;
     width: 100%;
+    transition: opacity 0.3s ease-in-out;
     padding: 30px 0 30px;
     display: flex;
     justify-content: center;
@@ -187,8 +192,12 @@ export default defineComponent({
     }
   }
 
+  ::v-deep(.el-scrollbar) {
+    height: calc(100% - 97px);
+    margin-top: 97px;
+  }
+
   .groups {
-    padding-top: 96px;
     width: @node-panel-width;
   }
 
