@@ -54,6 +54,14 @@ export default defineComponent({
       modelValueVal.value = props.modelValue;
       expressionEditor.updateValue(modelValueVal.value);
     });
+    const placeholderVal = ref<string>(props.placeholder);
+    onUpdated(() => {
+      if (placeholderVal.value === props.placeholder) {
+        return;
+      }
+      placeholderVal.value = props.placeholder;
+      expressionEditor.updatePlaceholder(placeholderVal.value);
+    });
 
     const syncValue = () => {
       const val = textareaRef.value!.value;
@@ -70,7 +78,7 @@ export default defineComponent({
       // 保证textarea值正确渲染
       await nextTick();
 
-      expressionEditor = new ExpressionEditor(textareaEl, props.placeholder,
+      expressionEditor = new ExpressionEditor(textareaEl, placeholderVal.value,
         e => {
           paramTypeVisible.value = true;
           emit('focus', e);
