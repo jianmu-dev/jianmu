@@ -68,16 +68,16 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref} from 'vue';
-import {createNamespacedHelpers, mapActions, useStore} from 'vuex';
-import {ILoginForm, IState} from '@/model/modules/session';
-import {namespace} from '@/store/modules/session';
-import {useRoute, useRouter} from 'vue-router';
-import {AUTHORIZE_INDEX, PLATFORM_INDEX} from '@/router/path-def';
-import {fetchAuthUrl} from '@/api/session';
-import {getRedirectUri} from '@/utils/redirect-uri';
+import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, ref } from 'vue';
+import { createNamespacedHelpers, mapActions, useStore } from 'vuex';
+import { ILoginForm, IState } from '@/model/modules/session';
+import { namespace } from '@/store/modules/session';
+import { useRoute, useRouter } from 'vue-router';
+import { AUTHORIZE_INDEX, PLATFORM_INDEX } from '@/router/path-def';
+import { fetchAuthUrl } from '@/api/session';
+import { getRedirectUri } from '@/utils/redirect-uri';
 
-const {mapActions: mapSessionActions, mapMutations} = createNamespacedHelpers(namespace);
+const { mapActions: mapSessionActions, mapMutations } = createNamespacedHelpers(namespace);
 
 export default defineComponent({
   emits: ['logined', 'cancel'],
@@ -91,8 +91,8 @@ export default defineComponent({
       default: 'index',
     },
   },
-  setup(props: any, {emit}) {
-    const {proxy} = getCurrentInstance() as any;
+  setup(props: any, { emit }) {
+    const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
@@ -112,7 +112,7 @@ export default defineComponent({
           return '';
       }
     });
-    const {username, remember} = store.state[namespace] as IState;
+    const { username, remember } = store.state[namespace] as IState;
     const loading = ref<boolean>(false);
     const loginFormRef = ref<any>(null);
     const loginForm = ref<ILoginForm>({
@@ -129,7 +129,7 @@ export default defineComponent({
       // 弹框登录方式获取授权地址时显示登录中
       localStorage.getItem('temp-login-mode') !== 'index' && (loading.value = true);
       try {
-        const {authorizationUrl} = await fetchAuthUrl({
+        const { authorizationUrl } = await fetchAuthUrl({
           thirdPartyType: loginType.value,
           redirectUri: getRedirectUri(props.gitRepo, props.gitRepoOwner),
         });
@@ -214,10 +214,10 @@ export default defineComponent({
       loginForm,
       loginRule: ref<object>({
         username: [
-          {required: true, message: '用户名不能为空', trigger: 'blur'},
+          { required: true, message: '用户名不能为空', trigger: 'blur' },
         ],
         password: [
-          {required: true, message: '密码不能为空', trigger: 'blur'},
+          { required: true, message: '密码不能为空', trigger: 'blur' },
         ],
       }),
       login: () => {
@@ -232,7 +232,7 @@ export default defineComponent({
             return false;
           }
           try {
-            await proxy.createSession({...loginForm.value});
+            await proxy.createSession({ ...loginForm.value });
             await proxy.initialize();
             if (route.name === 'login') {
               await router.push(PLATFORM_INDEX);
