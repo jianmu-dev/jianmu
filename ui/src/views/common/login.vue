@@ -380,6 +380,10 @@ export default defineComponent({
         background-repeat: no-repeat;
       }
     }
+
+    .tip {
+      margin-top: 10px;
+    }
   }
 
   .error-login {
