@@ -57,6 +57,10 @@ export class ExpressionEditor {
     this.instance.on('change', () => this.instance.save());
   }
 
+  updatePlaceholder(newVal: string): void {
+    this.instance.setOption('placeholder', newVal);
+  }
+
   updateValue(newVal: string): void {
     this.instance.setValue(newVal);
   }
