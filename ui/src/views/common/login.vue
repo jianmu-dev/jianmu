@@ -106,6 +106,8 @@ export default defineComponent({
           return 'GitLink';
         case 'GITLAB':
           return 'GitLab';
+        case 'GITEA':
+          return 'Gitea';
         default:
           return '';
       }
@@ -301,7 +303,7 @@ export default defineComponent({
     }
   }
 
-  .gitee-login, .gitlink-login, .gitlab-login, .error-login {
+  .gitee-login, .gitlink-login, .gitlab-login, .gitea-login, .error-login {
     cursor: pointer;
     position: absolute;
     top: 50%;
@@ -362,6 +364,18 @@ export default defineComponent({
         width: 56px;
         height: 56px;
         background-image: url("@/assets/svgs/logo/gitlab.svg");
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
+    }
+  }
+
+  .gitea-login {
+    .logo {
+      .img {
+        width: 56px;
+        height: 56px;
+        background-image: url("@/assets/svgs/logo/gitea.svg");
         background-size: cover;
         background-repeat: no-repeat;
       }
