@@ -30,6 +30,8 @@ public class OAuth2ApiProxy implements OAuth2Api {
                 return ApplicationContextUtils.getBean(GitlinkApi.class);
             case GITLAB:
                 return ApplicationContextUtils.getBean(GitLabApi.class);
+            case GITEA:
+                return ApplicationContextUtils.getBean(GiteaApi.class);
             default:
                 throw new NotSupportedThirdPartPlatformException();
         }

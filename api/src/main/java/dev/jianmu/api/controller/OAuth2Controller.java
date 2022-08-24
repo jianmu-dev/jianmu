@@ -176,7 +176,8 @@ public class OAuth2Controller {
     private void beforeAuthenticate() {
         if (this.oAuth2Properties.getGitee() != null
                 || this.oAuth2Properties.getGitlink() != null
-                || this.oAuth2Properties.getGitlab() != null) {
+                || this.oAuth2Properties.getGitlab() != null
+                || this.oAuth2Properties.getGitea() != null) {
             return;
         }
         throw new OAuth2IsNotConfiguredException("未配置OAuth2登录");
@@ -200,7 +201,8 @@ public class OAuth2Controller {
     private void allowThisPlatformLogIn(String thirdPartyType) {
         if (this.oAuth2Properties.getGitee() != null && ThirdPartyTypeEnum.GITEE.name().equals(thirdPartyType)
                 || this.oAuth2Properties.getGitlink() != null && ThirdPartyTypeEnum.GITLINK.name().equals(thirdPartyType)
-                || this.oAuth2Properties.getGitlab() != null && ThirdPartyTypeEnum.GITLAB.name().equals(thirdPartyType)) {
+                || this.oAuth2Properties.getGitlab() != null && ThirdPartyTypeEnum.GITLAB.name().equals(thirdPartyType)
+                || this.oAuth2Properties.getGitea() != null && ThirdPartyTypeEnum.GITEA.name().equals(thirdPartyType)) {
             return;
         }
         throw new NotAllowThisPlatformLogInException("不允许" + thirdPartyType + "平台登录，请与管理员联系");
