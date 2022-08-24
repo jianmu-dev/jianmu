@@ -18,7 +18,7 @@
           @is-fullscreen="isfull=>isFullscreen=isfull"
           @change-view-mode="mode=>viewMode=mode"
         />
-        <div class="overflow-bottom">
+        <div class="overflow-bottom" :class="{'white-bottom': viewMode === ViewModeEnum.YAML}">
           <div @click="prevProject" class="button-left" :class="{disabled: prevDis}"><i class="jm-icon-button-left"/>上一个
           </div>
           <div @click="nextProject" class="button-right" :class="{disabled: nextDis}">下一个<i
@@ -118,6 +118,7 @@ export default defineComponent({
       nodeDefs,
       triggerType,
       viewMode,
+      ViewModeEnum,
       close,
       prevProject() {
         if (prevDis.value) {
@@ -191,7 +192,6 @@ export default defineComponent({
       display: flex;
       height: 70px;
       width: 100%;
-      background-color: #ffffff;
       align-items: center;
 
       .button-left {
@@ -204,6 +204,7 @@ export default defineComponent({
         border-radius: 2px;
         color: #3f536e;
         font-weight: 400;
+        background-color: #ffffff;
         cursor: pointer;
 
         .jm-icon-button-left:before {
@@ -229,6 +230,7 @@ export default defineComponent({
         border-radius: 2px;
         color: #3f536e;
         font-weight: 400;
+        background-color: #ffffff;
         cursor: pointer;
 
         .jm-icon-button-right:before {
@@ -253,6 +255,10 @@ export default defineComponent({
           background-color: #ffffff;
         }
       }
+    }
+
+    .white-bottom {
+      background-color: #FFFFFF;
     }
   }
   .isFullscreen {
