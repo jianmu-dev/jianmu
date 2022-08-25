@@ -64,10 +64,12 @@ public class CustomWebhookController {
 
     @GetMapping("/{ownerRef}/{ref}/versions")
     @Operation(summary = "查询webhook version列表", description = "查询webhook version列表")
-    public List<String> findVersionByOwnerRefAndRef(@PathVariable("ownerRef") String ownerRef, @PathVariable("ref") String ref) {
-        return this.definitionApplication.findVersionByOwnerRefAndRef(ownerRef, ref).stream()
-                .map(CustomWebhookDefinitionVersion::getVersion)
-                .collect(Collectors.toList());
+    public WebhookDefinitionVersionListVo findVersionByOwnerRefAndRef(@PathVariable("ownerRef") String ownerRef, @PathVariable("ref") String ref) {
+        return WebhookDefinitionVersionListVo.builder()
+                .versions(this.definitionApplication.findVersionByOwnerRefAndRef(ownerRef, ref).stream()
+                        .map(CustomWebhookDefinitionVersion::getVersion)
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     @GetMapping("/{ownerRef}/{ref}/{version}/versions")
