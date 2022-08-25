@@ -55,7 +55,7 @@ export default defineComponent({
     padding: 0 6px;
     background-color: #fff;
     border-radius: 2px;
-    border: 0.5px solid rgba(227, 233, 246, 1);
+    border: 0.5px solid #cad6ee;
     font-size: 24px;
     cursor: pointer;
     &:hover:before {
@@ -73,7 +73,7 @@ export default defineComponent({
     text-align: center;
     cursor: pointer;
     border-radius: 2px;
-    border: 0.5px solid rgba(227, 233, 246, 1);
+    border: 0.5px solid #cad6ee;
     &:hover {
       background-color: #EFF7FF;
     }

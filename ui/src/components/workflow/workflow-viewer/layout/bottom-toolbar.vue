@@ -172,6 +172,7 @@ export default defineComponent({
     padding-left: 20px;
     div[class*='jm-icon-workflow-'] {
       &:before {
+        color: #000;
         font-size: 18px;
         font-weight: 500;
       }

@@ -169,6 +169,7 @@ export default defineComponent({
     }
 
     .el-dialog__body {
+      // color: ;
       padding: 0;
       background-color: #ffffff;
     }
