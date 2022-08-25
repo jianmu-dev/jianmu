@@ -5,6 +5,7 @@ import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.CustomWebhookDefinitionApplication;
 import dev.jianmu.application.util.CustomWebhookRuleUtil;
+import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,9 +64,9 @@ public class CustomWebhookController {
 
     @GetMapping("/{ownerRef}/{ref}/versions")
     @Operation(summary = "查询webhook version列表", description = "查询webhook version列表")
-    public List<WebhookDefinitionVersionVo> findVersionByOwnerRefAndRef(@PathVariable("ownerRef") String ownerRef, @PathVariable("ref") String ref) {
+    public List<String> findVersionByOwnerRefAndRef(@PathVariable("ownerRef") String ownerRef, @PathVariable("ref") String ref) {
         return this.definitionApplication.findVersionByOwnerRefAndRef(ownerRef, ref).stream()
-                .map(CustomWebhookDefinitionMapper.INSTANCE::toWebhookDefinitionVersionVo)
+                .map(CustomWebhookDefinitionVersion::getVersion)
                 .collect(Collectors.toList());
     }
 
