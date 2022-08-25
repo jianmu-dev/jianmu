@@ -202,16 +202,16 @@ export default defineComponent({
   .operation {
     position: absolute;
     right: 10px;
-    top: 15px;
+    top: 10px;
     z-index: 1;
 
     display: flex;
     align-items: center;
-    padding: 5px 10px;
+    padding: 1px 10px;
     background-color: #818894;
-    box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
+    // box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
-    border: 1px solid #767F91;
+    // border: 1px solid #767F91;
     white-space: nowrap;
 
     visibility: hidden;
@@ -219,7 +219,7 @@ export default defineComponent({
     .download {
       width: 20px;
       height: 20px;
-      padding: 4px;
+      // padding: 4px;
       background-image: url('./svgs/download.svg');
       background-repeat: no-repeat;
       background-size: 20px;

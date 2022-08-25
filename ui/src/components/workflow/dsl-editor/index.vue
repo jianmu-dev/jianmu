@@ -158,21 +158,20 @@ export default defineComponent({
 
   .operation {
     position: absolute;
-    right: 40px;
-    top:40px;
+    right: 10px;
+    top: 10px;
     z-index: 5;
-
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
-    height: 40px;
+    height: 30px;
     background-color: #818894;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
-    border-radius: 50%;
-    border: 1px solid #767F91;
+    // border-radius: 50%;
+    // border: 1px solid #767F91;
 
-    opacity: 0;
+    // opacity: 0;
     transition: .3s opacity;
 
     ::v-deep(.jm-text-copy) {
