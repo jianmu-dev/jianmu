@@ -3,21 +3,21 @@
     <div class="group leftbar" v-if="!dslMode">
       <template v-if="fullscreenEnabled">
         <jm-tooltip :content="isFullscreen? '退出全屏' : '全屏'" placement="top" :appendToBody="false">
-          <div :class="isFullscreen? 'screen-normal-icon' : 'screen-full-icon'"
+          <div :class="isFullscreen? 'jm-icon-workflow-screen-normal' : 'jm-icon-workflow-screen-full'"
                @click="handleFullScreen(!isFullscreen)"></div>
         </jm-tooltip>
         <div class="separator"></div>
       </template>
       <jm-tooltip v-if="zoom !== ORIGINAL_ZOOM" content="原始大小" placement="top" :appendToBody="false">
-        <div class="full-icon" @click="normalize"></div>
+        <div class="jm-icon-workflow-full" @click="normalize"></div>
       </jm-tooltip>
       <jm-tooltip v-else content="适屏" placement="top" :appendToBody="false">
-        <div class="normal-icon" @click="fitViewer"></div>
+        <div class="jm-icon-workflow-normal" @click="fitViewer"></div>
       </jm-tooltip>
       <template v-if="isWorkflow && !isX6">
         <div class="separator"></div>
         <jm-tooltip content="旋转" placement="top" :appendToBody="false">
-          <div class="rotate-icon" @click="rotate"></div>
+          <div class="jm-icon-workflow-rotate" @click="rotate"></div>
         </jm-tooltip>
       </template>
       <div class="separator"></div>
@@ -95,9 +95,6 @@ export default defineComponent({
       MIN_ZOOM,
       MAX_ZOOM,
       isWorkflow: computed<boolean>(() => props.dslType === DslTypeEnum.WORKFLOW),
-      processLog: () => {
-        emit('click-process-log');
-      },
       handleFullScreen: (val: boolean) => {
         if (val) {
           screenfull.request(props.fullscreenEl);
@@ -135,7 +132,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .jm-workflow-viewer-toolbar {
   position: absolute;
   z-index: 1;
@@ -150,86 +147,8 @@ export default defineComponent({
   .group {
     opacity: 1;
     padding: 8px 0px;
-    // box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
-    // border-radius: 2px;
-    // border: 1px solid #CAD6EE;
-    // background-color: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
-
-    &.dsl {
-      background-color: #818894;
-      border: 1px solid #767F91;
-      box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
-    }
-
-    > [class*='-icon'] {
-      width: 24px;
-      height: 24px;
-      background-repeat: no-repeat;
-      cursor: pointer;
-
-      &.disabled {
-        cursor: not-allowed;
-      }
-    }
-
-    .process-log-icon {
-      background-image: url('./svgs/tool/process-log.svg');
-    }
-
-    .dsl-icon {
-      background-image: url('./svgs/tool/dsl.svg');
-      background-size: 24px;
-    }
-
-    .workflow-icon {
-      background-image: url('./svgs/tool/workflow.svg');
-    }
-
-    .pipeline-icon {
-      background-image: url('./svgs/tool/pipeline.svg');
-    }
-
-    .screen-full-icon {
-      background-image: url('./svgs/tool/screen-full.svg');
-
-      &:hover {
-        background-image: url('./svgs/tool/screen-full-hover.svg');
-      }
-    }
-
-    .screen-normal-icon {
-      background-image: url('./svgs/tool/screen-normal.svg');
-
-      &:hover {
-        background-image: url('./svgs/tool/screen-normal-hover.svg');
-      }
-    }
-
-    .full-icon {
-      background-image: url('./svgs/tool/full.svg');
-
-      &:hover {
-        background-image: url('./svgs/tool/full-hover.svg');
-      }
-    }
-
-    .normal-icon {
-      background-image: url('./svgs/tool/normal.svg');
-
-      &:hover {
-        background-image: url('./svgs/tool/normal-hover.svg');
-      }
-    }
-
-    .rotate-icon {
-      background-image: url('./svgs/tool/rotate.svg');
-
-      &:hover {
-        background-image: url('./svgs/tool/rotate-hover.svg');
-      }
-    }
 
     .separator {
       margin: 0 16px;
@@ -237,22 +156,6 @@ export default defineComponent({
       height: 15px;
       background-color: #CDD1E3;
       overflow: hidden;
-    }
-
-    .enlarge-icon {
-      background-image: url('./svgs/tool/enlarge.svg');
-
-      &.disabled {
-        background-image: url('./svgs/tool/enlarge-disabled.svg');
-      }
-    }
-
-    .narrow-icon {
-      background-image: url('./svgs/tool/narrow.svg');
-
-      &.disabled {
-        background-image: url('./svgs/tool/narrow-disabled.svg');
-      }
     }
 
     .percentage {
@@ -267,6 +170,17 @@ export default defineComponent({
   }
   .leftbar {
     padding-left: 20px;
+    div[class*='jm-icon-workflow-'] {
+      &:before {
+        font-size: 18px;
+        font-weight: 500;
+      }
+      &:hover {
+        // background-color: #EFF7FF;
+        cursor: pointer;
+        color: #096DD9;
+      }
+    }
   }
   .rightbar {
     padding-right: 20px;
@@ -278,7 +192,11 @@ export default defineComponent({
         margin: 0;
       }
       &:hover {
+        cursor: pointer;
         color: #096DD9;
+      }
+      &.disabled {
+        cursor: not-allowed;
       }
     }
     .jm-icon-workflow-zoom-out {
@@ -286,10 +204,14 @@ export default defineComponent({
       line-height: 24px;
       color: #748394;
       &:hover {
+        cursor: pointer;
         color: #096DD9;
       }
       &::before {
         margin: 0;
+      }
+      &.disabled {
+        cursor: not-allowed;
       }
     }
   }

@@ -25,14 +25,14 @@ export class GraphPanel {
     this.taskCallbackFn = taskCallbackFn;
     this.globalParamsCallbackFn = globalParamsCallbackFn;
     (async () => {
-      await this.getDslAndNodeinfos();
+      // await this.getDslAndNodeinfos();
       await this.getTaskRecords();
     })();
     this.getGlobalParams();
   }
   async getGlobalParams() {
     if (!this.currentRecord.triggerId || this.currentRecord.status==='INIT') {
-      console.log('triggerId 缺失', this.currentRecord.status);
+      // console.log('triggerId 缺失', this.currentRecord.status);
       this.globalParamsCallbackFn([]);
       return;
     }

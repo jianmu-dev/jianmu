@@ -22,6 +22,16 @@
       :record="recordDetail.record"
       @terminate="terminate"
     />
+    <log-toolbar
+      v-if="recordDetail.project && recordDetail.record"
+      :entry="entry"
+      :showLogBtn="recordDetail.record.status!==''"
+      :showParamBtn="globalParamBtn"
+      :dslType="recordDetail.project.dslType"
+      :dslMode="modelValue.viewMode === ViewModeEnum.YAML"
+      @click-param-log="openParamLog"
+      @click-process-log="openProcessLog"
+    />
     <graph-panel
       ref="graphPanel"
       v-if="recordDetail.record"
@@ -29,8 +39,9 @@
       :record="recordDetail.record"
       :currentRecordStatus="recordList.currentRecordStatus"
       :viewMode="modelValue.viewMode"
+      @has-global-param="bool=>globalParamBtn=bool"
       @change-view-mode="handleChangeDslMode"
-      @trigger-refresh="recordListRefreshSuspended"
+      @trigger-refresh="recordList.refreshSuspended()"
     />
   </div>
 </template>
@@ -42,15 +53,17 @@ import { IWorkflowDetailParam, IRecordDetail, IRecordListParam } from './model/d
 import Topbar from './layout/top/topbar.vue';
 import RecordList from './layout/main/record-list.vue';
 import RecordInfo from './layout/main/record-info.vue';
+import LogToolbar from './layout/main/log-toolbar.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
 import { ISessionVo } from '@/api/dto/session';
 import { ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import { IProjectDetailVo } from '@/api/dto/project';
+import sleep from '@/utils/sleep';
 
 export default defineComponent({
   name: 'jm-workflow-detail',
-  components: { Topbar, RecordList, RecordInfo, GraphPanel },
+  components: { Topbar, RecordList, RecordInfo, GraphPanel, LogToolbar },
   props: {
     modelValue: {
       type: Object as PropType<IWorkflowDetailParam>,
@@ -74,6 +87,8 @@ export default defineComponent({
     const recordList = ref<any>();
     // graph-panel.vue组件
     const graphPanel = ref<any>();
+    //  全局参数按钮
+    const globalParamBtn = ref<boolean>(false);
     onMounted(async ()=>{
       // 获取项目详情
       recordDetail.value.project = await fetchProjectDetail(props.modelValue.projectId);
@@ -84,6 +99,7 @@ export default defineComponent({
       recordList,
       graphPanel,
       param,
+      globalParamBtn,
       ViewModeEnum,
       handleChangeRecord(record: IWorkflowExecutionRecordVo) {
         const { name: projectGroupName, triggerId } = record;
@@ -105,23 +121,32 @@ export default defineComponent({
         emit('update:model-value', { ...props.modelValue, viewMode });
       },
       trigger(msg: any) {
-        emit('trigger', msg);
         // undefined 触发成功之后刷新record列表 msg -> undefined为成功
         if(!msg) {
-          emit('update:model-value', { ...props.modelValue, triggerId: '' });
           recordList.value.refreshRecordList();
-          graphPanel.value.refreshGraphPanel();
+          emit('trigger', msg);
+          setTimeout(() => {
+            graphPanel.value.refreshGraphPanel();
+            // TODO 触发之后第一时间task为0 导致不能进入状态实时更新(延后500毫秒)
+          }, 500);
         }
       },
-      terminate() {
+      async terminate() {
         // 终止成功之后刷新列表
         recordList.value.refreshRecordList();
-        // 终止成功之后刷新graph
-        graphPanel.value.refreshGraphPanel();
+        setTimeout(() => {
+          // 终止成功之后刷新graph
+          graphPanel.value.refreshGraphPanel();
+          // TODO 终止之后第一时间有时候 task对应状态没有改变(延后200豪秒)
+        }, 200);
       },
-      recordListRefreshSuspended() {
-        // 开启 挂起刷新开关
-        recordList.value.refreshSuspended();
+      // 打开全局参数弹窗
+      openParamLog() {
+        graphPanel.value.openParamLog();
+      },
+      // 打开日志参数弹窗
+      openProcessLog() {
+        graphPanel.value.openProcessLog();
       },
     };
   },

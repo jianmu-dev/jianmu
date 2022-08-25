@@ -80,7 +80,7 @@ export default defineComponent({
   justify-content: center;
   height: @record-info-height;
   color: @shallow-black-color;
-  z-index: 3;
+  z-index: 5;
   font-size: 14px;
   & > div > span {
     color: @default-black-color;

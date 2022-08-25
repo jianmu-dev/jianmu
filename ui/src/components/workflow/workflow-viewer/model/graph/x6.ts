@@ -120,6 +120,7 @@ export class X6Graph extends BaseGraph {
 
       const { id, description, type } = this.buildEvt(node);
       const { width, height, x, y } = shapeEl.getBoundingClientRect();
+      // TODO 鼠标移动到文字上不触发 mouseoverNode
       mouseoverNode({ id, description, type, width, height: height - textMaxHeight, x, y });
     });
   }

@@ -7,13 +7,13 @@
       :width="dialogWidth"
       @close="close"
     >
-      <div class="content" :class="[isFullscreen? 'isFullscreen':'']" v-loading="loading">
+      <div class="content" :class="[isFullscreen? 'isFullscreen':'']">
         <jm-workflow-viewer
-          v-if="!loading"
-          :dsl="dsl"
+          v-if="!loading && workflowRef && workflowVersion"
           readonly
           :viewMode="viewMode"
-          :node-infos="nodeDefs"
+          :workflow-ref="workflowRef"
+          :workflow-version="workflowVersion"
           :trigger-type="triggerType"
           @is-fullscreen="isfull=>isFullscreen=isfull"
           @change-view-mode="mode=>viewMode=mode"
@@ -32,7 +32,7 @@
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref, SetupContext } from 'vue';
 import { TriggerTypeEnum, ViewModeEnum } from '@/api/dto/enumeration';
-import { fetchProjectDetail, fetchWorkflow } from '@/api/view-no-auth';
+import { fetchProjectDetail } from '@/api/view-no-auth';
 import { INodeDefVo } from '@/api/dto/project';
 import { useStore } from 'vuex';
 
@@ -60,6 +60,8 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const dsl = ref<string>();
     const nodeDefs = ref<INodeDefVo[]>([]);
+    const workflowRef = ref<string>('');
+    const workflowVersion = ref<string>('');
     const triggerType = ref<TriggerTypeEnum>();
     const viewMode = ref<string>(ViewModeEnum.GRAPHIC);
     const close = () => emit('close');
@@ -82,18 +84,15 @@ export default defineComponent({
 
         const {
           workflowName,
-          workflowRef,
-          workflowVersion,
+          workflowRef:ref,
+          workflowVersion:version,
           triggerType: _triggerType,
         } = await fetchProjectDetail(previewId.value);
         title.value = workflowName;
         triggerType.value = _triggerType;
+        workflowRef.value = ref;
+        workflowVersion.value = version;
 
-        const { nodes, dslText } = await fetchWorkflow(workflowRef, workflowVersion);
-        dsl.value = dslText;
-        nodeDefs.value = nodes
-          .filter(({ metadata }) => metadata)
-          .map(({ metadata }) => JSON.parse(metadata as string));
       } catch (err) {
         close();
 
@@ -109,6 +108,8 @@ export default defineComponent({
       prevDis,
       nextDis,
       dialogWidth,
+      workflowRef,
+      workflowVersion,
       TriggerTypeEnum,
       dialogVisible,
       isFullscreen,
@@ -151,9 +152,7 @@ export default defineComponent({
       padding: 0;
       color: #082340;
       height: 40px;
-      // margin-bottom: 20px;
       box-sizing: border-box;
-
       .el-dialog__title {
         font-size: 16px;
         color: #ffffff;
@@ -162,7 +161,6 @@ export default defineComponent({
       .el-dialog__close::before {
         font-size: 20px;
       }
-
       .el-dialog__headerbtn {
         top: 60px;
         right: 20px;
@@ -213,7 +211,6 @@ export default defineComponent({
           font-size: 14px;
           vertical-align: 1px;
         }
-
         &:hover {
           color: #096DD9;
           background-color: #EFF7FF;
