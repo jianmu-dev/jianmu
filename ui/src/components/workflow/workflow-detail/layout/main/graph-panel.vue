@@ -1,23 +1,20 @@
 <template>
-  <div class="jm-workflow-detail-graph-panel" ref="workflowRef" v-loading="!reloadViewer">
+  <div class="jm-workflow-detail-graph-panel" ref="workflowRef">
     <jm-workflow-viewer
-      v-if="reloadViewer"
-      :dsl="dslSourceCode"
       :trigger-type="record.triggerType"
-      :node-infos="nodeInfos"
+      :workflow-ref="record.workflowRef"
+      :workflow-version="record.workflowVersion"
       :tasks="taskRecords"
       :fullscreenRef="workflowRef"
       :entry="entry"
       :viewMode="viewMode"
-      :hasGlobalParam="Boolean(globalParams?.length)"
-      :showLogBtn="record.status!==''"
-      @click-process-log="openProcessLog"
       @click-task-node="openTaskLog"
       @click-webhook-node="openWebhookLog"
-      @click-param-log="openParamLog"
+      @async-dsl="dslText=>dslSourceCode=dslText"
       @change-view-mode="viewMode=>$emit('change-view-mode', viewMode)"
     />
     <!-- :readonly="true" 不能加true 组件内部逻辑需要处理 -->
+    <!-- 查看任务执行日志 -->
     <jm-drawer
       title="查看任务执行日志"
       :size="850"
@@ -25,8 +22,9 @@
       direction="rtl"
       destroy-on-close
     >
-      <task-log :dsl="(dslSourceCode || '')" :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType" :record="record" :taskRecords="taskRecords"/>
+      <task-log :dsl="dslSourceCode" :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType" :record="record" :taskRecords="taskRecords"/>
     </jm-drawer>
+    <!-- 查看流程日志 -->
     <jm-drawer
       title="查看流程日志"
       :size="850"
@@ -36,6 +34,7 @@
     >
       <process-log :record="record"/>
     </jm-drawer>
+    <!-- 查看Webhook日志 -->
     <jm-drawer
       title="查看Webhook日志"
       :size="850"
@@ -51,6 +50,7 @@
         :record="record"
       />
     </jm-drawer>
+    <!-- 查看全局参数 -->
     <jm-drawer
       title="查看全局参数"
       :size="810"
@@ -58,7 +58,7 @@
       direction="rtl"
       destroy-on-close
     >
-      <param-log :globalParams="globalParams||[]"></param-log>
+      <param-log :globalParams="globalParams"></param-log>
     </jm-drawer>
   </div>
 </template>
@@ -68,7 +68,7 @@ import { IGlobalParamseterVo, INodeDefVo } from '@/api/dto/project';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/model/data/enumeration';
 import { IOpenTaskLogForm, IOpenWebhookLogForm } from '@/model/modules/workflow-execution-record';
-import { nextTick, computed, defineComponent, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
+import { computed, defineComponent, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
 import { GraphPanel } from '../../model/graph-panel';
 import ProcessLog from '../right/process-log.vue';
 import TaskLog from '../right/task-log.vue';
@@ -85,7 +85,7 @@ export default defineComponent({
       required: true,
     },
     currentRecordStatus: {
-      type: String,
+      type: String as PropType<WorkflowExecutionRecordStatusEnum>,
       default: '',
     },
     entry: {
@@ -97,22 +97,19 @@ export default defineComponent({
       default: ViewModeEnum.GRAPHIC,
     },
   },
-  emits: ['change-view-mode', 'trigger-refresh'],
+  emits: ['change-view-mode', 'trigger-refresh', 'has-global-param'],
   setup(props, { emit }) {
     const workflowRef = ref<HTMLElement>();
-    const dslSourceCode = ref<string>();
+    const dslSourceCode = ref<string>('');
     const nodeInfos = ref<INodeDefVo[]>();
-    const taskRecords = ref<ITaskExecutionRecordVo[]>();
-    const globalParams = ref<IGlobalParamseterVo[]>();
+    const taskRecords = ref<ITaskExecutionRecordVo[]>([]);
+    const globalParams = ref<IGlobalParamseterVo[]>([]);
     const gparam = computed<IWorkflowExecutionRecordVo>(()=>({
       ...props.record,
     }));
     const triggerId = ref(props.record.triggerId);
     const recordStatus = ref(props.record.status);
-    const reloadViewer = ref<boolean>(false);
     let graphPanel:GraphPanel;
-    // 点击Record标识
-    let ifClickRecord = false;
     // record 页面变化引起数据变化 函数执行
     onUpdated(async ()=>{
       if (recordStatus.value !== props.record.status) {
@@ -122,24 +119,15 @@ export default defineComponent({
       if (triggerId.value === props.record.triggerId) {
         return;
       }
-      // 打开点击Record标识
-      ifClickRecord = true;
       triggerId.value = props.record.triggerId;
       graphPanel.refreshGparam(props.record);
       graphPanel.resetSuspended();
       (async () => {
-        await graphPanel.getDslAndNodeinfos();
+        // await graphPanel.getDslAndNodeinfos();
         await graphPanel.getTaskRecords();
       })();
       graphPanel.getGlobalParams();
     });
-    // 仅record运行中、挂起状态(workflow)->不会复位=false
-    const ifResetRefresh = (status: any): boolean=>{
-      return ![
-        WorkflowExecutionRecordStatusEnum.RUNNING,
-        WorkflowExecutionRecordStatusEnum.SUSPENDED,
-      ].includes(status);
-    };
     onMounted(async ()=>{
       // 赋值 dslSourceCode nodeInfos
       const dslCallbackFn = (dsl: string, nodes: INodeDefVo[]) => {
@@ -148,25 +136,15 @@ export default defineComponent({
       };
       // 赋值 taskRecords
       const taskCallbackFn = (tasks: ITaskExecutionRecordVo[]) => {
-        if (ifResetRefresh(props.currentRecordStatus) || ifClickRecord) {
-          // 重置点击Record标识
-          ifClickRecord = false;
-          reloadViewer.value = false;
-        }
         taskRecords.value = tasks;
-        nextTick(()=>{
-          reloadViewer.value = true;
-        });
       };
       // 赋值 globalParams
       const globalParamsCallbackFn = (globalParam: IGlobalParamseterVo[]) => {
         globalParams.value = globalParam;
+        emit('has-global-param', Boolean(globalParam?.length));
       };
       graphPanel = await new GraphPanel(gparam.value, dslCallbackFn, taskCallbackFn, globalParamsCallbackFn);
       graphPanel.listen();
-      if (props.record.status === '') {
-        reloadViewer.value = true;
-      }
     });
     onBeforeUnmount(()=>{
       graphPanel.destroy();
@@ -193,18 +171,18 @@ export default defineComponent({
       paramLogDrawer,
       taskLogForm,
       webhookLogForm,
-      reloadViewer,
       openTaskLog: async (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         if ([NodeToolbarTabTypeEnum.RETRY, NodeToolbarTabTypeEnum.IGNORE].includes(tabType)) {
           const nodeData = taskRecords.value&&taskRecords.value.find(({ businessId }) => businessId === nodeId)!;
           await (tabType === NodeToolbarTabTypeEnum.RETRY ? retryTask : ignoreTask)(props.record!.id, nodeData? nodeData.nodeName: 'null');
-          // 重试 忽略
+          // 开启 graph刷新(挂起状态下 刷新20次)
           graphPanel.refreshSuspended();
-          // 传递给index 调用 recordListRefreshSuspended
+          // 开启 recordlist刷新(挂起状态下 刷新20次) 传递给index 调用 recordListRefreshSuspended
           emit('trigger-refresh');
           return;
         }
 
+        console.log('tabType', nodeId, tabType);
         taskLogForm.value.drawerVisible = true;
         taskLogForm.value.id = nodeId;
         taskLogForm.value.tabType = tabType;
@@ -224,8 +202,8 @@ export default defineComponent({
       },
       async refreshGraphPanel() {
         console.log('刷新GraphPanel');
-        await graphPanel.getDslAndNodeinfos();
-        await graphPanel.getTaskRecords();
+        // await graphPanel.getDslAndNodeinfos();
+        graphPanel.getTaskRecords();
       },
     };
   },

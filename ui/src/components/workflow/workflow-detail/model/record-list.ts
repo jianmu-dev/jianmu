@@ -52,7 +52,7 @@ export class RecordList {
         return;
       }
       // 是串行且有挂起->阻止刷新
-      if (!this.isConcurrent && this.allRecords.find(e => e.status === WorkflowExecutionRecordStatusEnum.SUSPENDED)) {
+      if (!this.isConcurrent && this.ignoreSuspended && this.allRecords.find(e => e.status === WorkflowExecutionRecordStatusEnum.SUSPENDED)) {
         return;
       }
       // 全量判断是否刷新

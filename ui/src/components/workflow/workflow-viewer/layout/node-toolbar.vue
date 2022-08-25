@@ -10,6 +10,7 @@
         <div class="tooltip-section"></div>
       </jm-tooltip>
     </div>
+    <!-- trigger="hover" -->
     <jm-popover v-else
                 :append-to-body="false"
                 :offset="0"
@@ -40,7 +41,7 @@
         >
           <template #reference>
             <div class="item">
-              <div class="icon retry"></div>
+              <div class="jm-icon-workflow-retry"></div>
               <div class="txt">重试</div>
             </div>
           </template>
@@ -59,7 +60,7 @@
         >
           <template #reference>
             <div class="item">
-              <div class="icon ignore"></div>
+              <div class="jm-icon-workflow-ignore"></div>
               <div class="txt">忽略</div>
             </div>
           </template>
@@ -71,9 +72,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, nextTick, onMounted, onUpdated, PropType, ref, SetupContext } from 'vue';
-import { INodeMouseoverEvent } from './model/data/common';
-import { MAX_LABEL_LENGTH } from './model/dsl/g6';
-import { GraphTypeEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from './model/data/enumeration';
+import { INodeMouseoverEvent } from '../model/data/common';
+import { MAX_LABEL_LENGTH } from '../model/dsl/g6';
+import { GraphTypeEnum, NodeToolbarTabTypeEnum, NodeTypeEnum } from '../model/data/enumeration';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
 
 export default defineComponent({
@@ -209,30 +210,18 @@ export default defineComponent({
     align-items: center;
 
     .item {
+      // display: flex;
       user-select: none;
       cursor: pointer;
+      white-space: nowrap;
+      // justify-content: center;
+      // align-items: center;
+      font-size: 16px;
 
       &:active {
         .icon {
           background-color: #EFF7FF;
           border-radius: 2px;
-        }
-      }
-
-      .icon {
-        width: 28px;
-        height: 28px;
-        background-color: transparent;
-        border: 0;
-        background-position: center center;
-        background-repeat: no-repeat;
-
-        &.retry {
-          background-image: url('./svgs/task-tool/retry.svg');
-        }
-
-        &.ignore {
-          background-image: url('./svgs/task-tool/ignore.svg');
         }
       }
 
@@ -245,7 +234,7 @@ export default defineComponent({
     }
 
     .separator {
-      margin: 0 10px 20px 10px;
+      margin: 10px;
       width: 1px;
       height: 15px;
       background-color: #D9DEE7;

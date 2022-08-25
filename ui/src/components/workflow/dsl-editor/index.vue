@@ -158,9 +158,9 @@ export default defineComponent({
 
   .operation {
     position: absolute;
-    right: 20px;
-    top: 20px;
-    z-index: 1;
+    right: 40px;
+    top:40px;
+    z-index: 5;
 
     display: flex;
     align-items: center;

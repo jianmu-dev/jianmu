@@ -89,6 +89,9 @@ export default defineComponent({
       handleTrigger(err?: Error) {
         if (!err) {
           proxy.$success('操作成功');
+          // 清空当前选中record
+          workflowDetail.value.triggerId = '';
+          // 地址跳转
           router.push({
             name: 'workflow-execution-record-detail',
             query: {

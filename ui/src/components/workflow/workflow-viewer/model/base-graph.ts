@@ -13,7 +13,7 @@ interface Zoom {
 
 export abstract class BaseGraph {
   protected readonly zoom: Zoom = { min: 20, max: 500, interval: 10 };
-  readonly dslType: DslTypeEnum;
+  readonly dslType: DslTypeEnum = DslTypeEnum.PIPELINE;
   // 刷新当前高亮状态监听器
   private highlightRefreshingListener?: any;
 
