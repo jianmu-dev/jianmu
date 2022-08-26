@@ -121,6 +121,20 @@ export class CustomWebhook extends BaseNode {
     });
     return {
       ...rules,
+      version: [{
+        required: true,
+        validator: (rule: any, value: any, callback: any) => {
+          if (value) {
+            callback();
+          }
+          if (!this.version) {
+            callback('请选择版本');
+            return;
+          }
+          callback();
+        },
+        trigger: 'change',
+      }],
       selectedReference: [{
         validator: (rule: any, value: any, callback: any) => {
           if (value) {

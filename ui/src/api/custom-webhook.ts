@@ -1,4 +1,4 @@
-import { IWebhookDefinitionVersionVo, IWebhookDefinitionVo, IWebhookOperatorVo } from './dto/custom-webhook';
+import { INodeDefVersionListVo, IWebhookDefinitionVersionVo, IWebhookDefinitionVo, IWebhookOperatorVo } from './dto/custom-webhook';
 import { restProxy } from '@/api/index';
 
 const baseUrl = {
@@ -34,7 +34,7 @@ export function getWebhookList(): Promise<IWebhookDefinitionVo[]> {
  * @param ref
  * @param ownerRef
  */
-export function getWebhookVersionList(ownerRef: string, ref: string): Promise<IWebhookDefinitionVersionVo[]> {
+export function getWebhookVersionList(ownerRef: string, ref: string): Promise<INodeDefVersionListVo> {
   return restProxy({
     url: `${baseUrl.webhookVersionList}/${ownerRef}/${ref}/versions`,
     method: 'get',
