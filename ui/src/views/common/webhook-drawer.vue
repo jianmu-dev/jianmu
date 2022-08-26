@@ -123,7 +123,9 @@
         <!-- 触发器 -->
         <div v-else class="trigger-content" v-loading="triggerParamsLoading">
           <jm-scrollbar>
-            <div style="padding:20px;">
+            <custom-webhook-detail v-if="webhookParamsDetail.webhookEvent"
+                                   :webhook-params-detail="webhookParamsDetail"></custom-webhook-detail>
+            <div style="padding:20px;" v-else>
               <!-- 参数列表 -->
               <div class="trigger-title">参数列表</div>
               <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
@@ -194,22 +196,23 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, nextTick, onUpdated, ref } from 'vue';
+import {computed, defineComponent, getCurrentInstance, nextTick, onUpdated, ref} from 'vue';
 import useClipboard from 'vue-clipboard3';
-import { getPayloadParams, getWebhookList, getWebhookParams, retryWebRequest } from '@/api/trigger';
-import { IWebhookAuthVo, IWebhookParamVo, IWebRequestVo } from '@/api/dto/trigger';
-import { datetimeFormatter } from '@/utils/formatter';
-import { IPageVo } from '@/api/dto/common';
-import { DEFAULT_PAGE_SIZE, START_PAGE_NUM } from '@/utils/constants';
-import { fetchTriggerWebhook } from '@/api/view-no-auth';
-import { ElScrollbar } from 'element-plus';
-import { StateEnum } from '@/components/load-more/enumeration';
-import { ParamTypeEnum } from '@/api/dto/enumeration';
+import {getPayloadParams, getWebhookList, getWebhookParams, retryWebRequest} from '@/api/trigger';
+import {IWebhookAuthVo, IWebhookParamVo, IWebRequestVo} from '@/api/dto/trigger';
+import {datetimeFormatter} from '@/utils/formatter';
+import {IPageVo} from '@/api/dto/common';
+import {DEFAULT_PAGE_SIZE, START_PAGE_NUM} from '@/utils/constants';
+import {fetchTriggerWebhook} from '@/api/view-no-auth';
+import {ElScrollbar} from 'element-plus';
+import {StateEnum} from '@/components/load-more/enumeration';
+import {ParamTypeEnum} from '@/api/dto/enumeration';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
+import CustomWebhookDetail from '@/views/common/custom-webhook-detail.vue';
 
 export default defineComponent({
-  components: { JmTextViewer, ParamValue },
+  components: {CustomWebhookDetail, JmTextViewer, ParamValue},
   props: {
     webhookVisible: {
       type: Boolean,
@@ -222,9 +225,9 @@ export default defineComponent({
     },
   },
   emits: ['update:webhookVisible'],
-  setup(props, { emit }) {
-    const { proxy } = getCurrentInstance() as any;
-    const { toClipboard } = useClipboard();
+  setup(props, {emit}) {
+    const {proxy} = getCurrentInstance() as any;
+    const {toClipboard} = useClipboard();
 
     // 抽屉控制
     const drawerVisible = ref<boolean>(props.webhookVisible);
@@ -300,7 +303,7 @@ export default defineComponent({
     // webhookUrl
     const getWebhookUrlRequest = async () => {
       try {
-        const { webhook: webhookUrl } = await fetchTriggerWebhook(
+        const {webhook: webhookUrl} = await fetchTriggerWebhook(
           webhookRequestParams.value.projectId,
         );
         webhook.value = webhookUrl;

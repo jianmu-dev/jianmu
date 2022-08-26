@@ -75,6 +75,24 @@ export interface IWebhookParameterVo
   }> {
 }
 
+/**
+ * 获取webhookRule参数
+ */
+export interface IWebhookRuleVo extends Readonly<{
+  ruleStr: string,
+  succeed: boolean
+}> {
+}
+
+/**
+ * 获取webhookEvent参数
+ */
+export interface IWebhookEventVo extends Readonly<{
+  name: string,
+  ruleset: IWebhookRuleVo[]
+}> {
+}
+
 export interface IWebhookAuthVo
   extends Readonly<{
     token: string;
@@ -87,6 +105,7 @@ export interface IWebhookParamVo
     param: IWebhookParameterVo[];
     auth: IWebhookAuthVo;
     only: string;
+    webhookEvent?: IWebhookEventVo
   }> {
 }
 
