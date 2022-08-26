@@ -6,6 +6,15 @@
       @submit.prevent
       label-position="top"
     >
+      <jm-form-item label="版本" class="version-select" prop="version" :rules="nodeData.getFormRules().version">
+        <jm-select
+          v-model="form.version"
+          placeholder="请选择版本"
+          @change="changeVersion"
+        >
+          <jm-option v-for="item in versionList.versions" :key="item" :label="item" :value="item"/>
+        </jm-select>
+      </jm-form-item>
       <div class="trigger-title">触发事件</div>
       <jm-form-item prop="selectedReference" :rules="nodeData.getFormRules().selectedReference">
         <jm-radio-group v-model="selectedReference" ref="radioGroupRef">
@@ -17,7 +26,7 @@
             :reference="event.ref"
             :ui-event="uiEvent?uiEvent[event.ref]:undefined"
             :index="idx"
-            :available-params="event.availableParams.filter(({ ref }) => !event.eventRuleset.find((({ paramRef }) => paramRef === ref)))"
+            :available-params="filterParam(event)"
             :rules="nodeData.getFormRules().eventInstances.fields[idx]?.fields"
             :form-model-name="'eventInstances'"
             v-model:eventInstance="eventInstances[idx]"
@@ -31,10 +40,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onMounted, PropType, ref } from 'vue';
 import { CustomWebhook, ICustomWebhookEventInstance } from '../../model/data/node/custom-webhook';
 import Event from './form/custom-webhook-event.vue';
 import { getWebhookVersionList, getWebhookVersionParams } from '@/api/custom-webhook';
+import { INodeDefVersionListVo } from '@/api/dto/custom-webhook';
 import { pushCustomEvents } from '../../model/workflow-node';
 import yaml from 'yaml';
 
@@ -48,28 +58,60 @@ export default defineComponent({
   },
   emits: ['form-created'],
   setup(props, { emit }) {
+    const { proxy } = getCurrentInstance() as any;
     const formRef = ref<HTMLFormElement>();
     const form = ref<CustomWebhook>(props.nodeData);
     const eventInstances = ref<(ICustomWebhookEventInstance | undefined)[]>(form.value.events.map(({ ref }) =>
       form.value.eventInstances.find(instance => instance.ref === ref)));
     const selectedReference = ref<string>('');
     const radioGroupRef = ref<any>();
+    const versionList = ref<INodeDefVersionListVo>({ versions: [] });
     const uiEvent = ref<any>();
 
     onMounted(() => emit('form-created', formRef.value));
 
+
+    const updateEventInstance = () => {
+      // 清空eventInstances，将过滤后的eventInstances push到form中
+      form.value.eventInstances.length = 0;
+      eventInstances.value.filter(eventInstance => eventInstance).forEach(item => {
+        const { ref, ruleset, rulesetOperator } = item!;
+        form.value.eventInstances.push({ ref, ruleset, rulesetOperator });
+      });
+    };
+
+    const changeVersion = async () => {
+      // 切换版本时清空events
+      form.value.events.length = 0;
+      // 清空eventInstances
+      eventInstances.value = [];
+      selectedReference.value = '';
+      // 更新form
+      updateEventInstance();
+      try {
+        const versionParams = await getWebhookVersionParams(form.value.ownerRef, form.value.nodeRef, form.value.version);
+        pushCustomEvents(form.value as CustomWebhook, versionParams.events, form.value.version, versionParams.dslText);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
     onMounted(async () => {
       // 屏蔽radio-group keydown事件
       radioGroupRef.value.handleKeydown = () => {
       };
-      // 获取版本列表
-      const versionList = await getWebhookVersionList(form.value.ownerRef, form.value.nodeRef);
-      // 获取版本参数
-      const versionParams = await getWebhookVersionParams(form.value.ownerRef, form.value.nodeRef, versionList[0].version);
-      form.value.events.length = 0;
-      pushCustomEvents(form.value as CustomWebhook, versionParams.events, versionList[0].version, versionParams.dslText);
-      // 覆盖参数，避免影响eventInstances
-      // form.value.events = versionParams.events;
+
+      versionList.value = await getWebhookVersionList(form.value.ownerRef, form.value.nodeRef);
+      if (form.value.version) {
+        if (!form.value.dslText) {
+          // 旧项目已有version但没有dslText
+          await changeVersion();
+        }
+      } else {
+        if (versionList.value.versions.length > 0) {
+          form.value.version = versionList.value.versions[0];
+          await changeVersion();
+        }
+      }
       const { ui } = yaml.parse(form.value.dslText);
       uiEvent.value = ui?.event;
     });
@@ -81,16 +123,15 @@ export default defineComponent({
       selectedReference,
       radioGroupRef,
       uiEvent,
-      updateEventInstance: () => {
-        // 清空eventInstances，将过滤后的eventInstances push到form中
-        form.value.eventInstances.length = 0;
-        eventInstances.value.filter(eventInstance => eventInstance).forEach(item => {
-          const { ref, ruleset, rulesetOperator } = item!;
-          form.value.eventInstances.push({ ref, ruleset, rulesetOperator });
-        });
-      },
+      versionList,
+      changeVersion,
+      updateEventInstance,
       checkEvent: (val: string) => {
         selectedReference.value = val;
+      },
+      filterParam: (event: any) => {
+        event.eventRuleset = event.eventRuleset ? event.eventRuleset : [];
+        return event.availableParams.filter(({ ref }) => !event.eventRuleset.find((({ paramRef }) => paramRef === ref)));
       },
     };
   },
@@ -101,9 +142,13 @@ export default defineComponent({
 .jm-workflow-editor-custom-webhook-panel {
   padding: 0 20px;
 
+  .version-select {
+    margin-top: 20px;
+  }
+
   .trigger-title {
     font-size: 14px;
-    color: #082340;
+    color: #3F536E;
     margin: 20px 0;
   }
 

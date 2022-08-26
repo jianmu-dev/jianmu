@@ -112,9 +112,9 @@ export class WorkflowValidator {
     // 获取版本列表
     const versionList = await getWebhookVersionList(data.ownerRef, data.nodeRef);
     // 获取版本参数
-    const versionParams = await getWebhookVersionParams(data.ownerRef, data.nodeRef, versionList[0].version);
+    const versionParams = await getWebhookVersionParams(data.ownerRef, data.nodeRef, versionList.versions[0]);
     // 调用pushCustomEvents
-    pushCustomEvents(data, versionParams.events, versionList[0].version, versionParams.dslText);
+    pushCustomEvents(data, versionParams.events, versionList.versions[0], versionParams.dslText);
   }
 
   async check(): Promise<void> {
