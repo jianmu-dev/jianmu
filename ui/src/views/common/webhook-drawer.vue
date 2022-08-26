@@ -123,7 +123,9 @@
         <!-- 触发器 -->
         <div v-else class="trigger-content" v-loading="triggerParamsLoading">
           <jm-scrollbar>
-            <div style="padding:20px;">
+            <custom-webhook-detail v-if="webhookParamsDetail.webhookEvent"
+                                   :webhook-params-detail="webhookParamsDetail"></custom-webhook-detail>
+            <div style="padding:20px;" v-else>
               <!-- 参数列表 -->
               <div class="trigger-title">参数列表</div>
               <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
@@ -207,9 +209,10 @@ import { StateEnum } from '@/components/load-more/enumeration';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
 import JmTextViewer from '@/components/text-viewer/index.vue';
 import ParamValue from '@/views/common/param-value.vue';
+import CustomWebhookDetail from '@/views/common/custom-webhook-detail.vue';
 
 export default defineComponent({
-  components: { JmTextViewer, ParamValue },
+  components: { CustomWebhookDetail, JmTextViewer, ParamValue },
   props: {
     webhookVisible: {
       type: Boolean,
