@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class ElContext implements EvaluationContext {
 
-    private final List<ElParam> params = new ArrayList<>();
+    private List<ElParam> params = new ArrayList<>();
 
     public EvaluationContext add(String name, Parameter<?> value) {
         this.params.add(ElParam.aParamVo()
@@ -52,5 +52,11 @@ public class ElContext implements EvaluationContext {
                 .filter(elParam -> elParam.getKey().equals(variableName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public ElContext copy() {
+        var context = new ElContext();
+        context.params = new ArrayList<>(this.getParams());
+        return context;
     }
 }

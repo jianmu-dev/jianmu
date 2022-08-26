@@ -4,10 +4,10 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.*;
 import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.mapper.*;
-import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.git.repo.aggregate.Flow;
@@ -17,7 +17,6 @@ import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.workflow.aggregate.parameter.NodeOutputDefinitionEnum;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -119,14 +118,33 @@ public class ViewController {
 
     @GetMapping("/trigger_events/{triggerId}")
     @Operation(summary = "查询触发事件", description = "查询触发事件")
-    public TriggerEvent findTriggerEvent(@PathVariable String triggerId) {
+    public TriggerEventVo findTriggerEvent(@PathVariable String triggerId) {
         var triggerEvent = this.triggerApplication.findTriggerEvent(triggerId);
+        var webhookEvent = this.triggerApplication.findWebhookEventByTriggerEvent(triggerEvent);
         triggerEvent.getParameters().forEach(triggerEventParameter -> {
             if (triggerEventParameter.getHidden()) {
                 triggerEventParameter.setValue("**********");
             }
         });
-        return triggerEvent;
+        return TriggerEventVo.builder()
+                .id(triggerEvent.getId())
+                .triggerId(triggerEvent.getTriggerId())
+                .occurredTime(triggerEvent.getOccurredTime())
+                .parameters(triggerEvent.getParameters())
+                .triggerType(triggerEvent.getTriggerType())
+                .payload(triggerEvent.getPayload())
+                .projectId(triggerEvent.getProjectId())
+                .webhookEvent(webhookEvent == null ? null : WebhookParamVo.WebhookEventVo.builder()
+                        .name(webhookEvent.getName())
+                        .ruleset(webhookEvent.getRuleset().stream()
+                                .map(rule -> WebhookParamVo.WebhookRuleVo.builder()
+                                        .ruleStr(rule.getParamName() + rule.getOperator().name + rule.getMatchingValue())
+                                        .succeed(rule.getSucceed())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .rulesetOperator(webhookEvent.getRulesetOperator().name)
+                        .build())
+                .build();
     }
 
     @GetMapping("/namespaces")

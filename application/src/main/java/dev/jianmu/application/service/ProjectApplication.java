@@ -439,18 +439,11 @@ public class ProjectApplication {
             parser.getCustomWebhooks().forEach(dslWebhook -> {
                 var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(dslWebhook.getWebhookType())
                         .orElseThrow(() -> new DataNotFoundException("未找到Webhook: " + dslWebhook.getWebhookType()));
-                var params = webhookDefinitionVersion.getEvents().stream()
-                        .filter(event -> dslWebhook.getEvent().stream()
-                                .anyMatch(webhookEvent -> event.getRef().equals(webhookEvent.getRef()))
-                        )
-                        .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
-                        .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
-                var only = this.webhookOnlyService.getOnly(webhookDefinitionVersion.getEvents(), dslWebhook.getEvent());
+                var events = this.webhookOnlyService.findEvents(webhookDefinitionVersion.getEvents(), dslWebhook.getEvent());
                 var webhookEvent = WebhookEvent.builder()
                         .projectId(project.getId())
                         .webhook(Webhook.Builder.aWebhook()
-                                .only(only)
-                                .param(params)
+                                .events(events)
                                 .build())
                         .userId(userId)
                         .encryptedToken(encryptedToken)

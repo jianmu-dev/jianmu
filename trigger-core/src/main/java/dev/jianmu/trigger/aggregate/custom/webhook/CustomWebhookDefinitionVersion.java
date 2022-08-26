@@ -4,6 +4,7 @@ import dev.jianmu.trigger.aggregate.WebhookParameter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author laoji
@@ -82,6 +83,17 @@ public class CustomWebhookDefinitionVersion {
          * 规则集运算为AND，不提供OR，若想实现OR效果，定义多个事件
          */
         private List<CustomWebhookRule> ruleset;
+
+        public List<WebhookParameter> findEventParams() {
+            return this.ruleset.stream()
+                    .map(rule -> this.availableParams.stream()
+                            .filter(param -> rule.getParamRef().equals(param.getRef()))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("未找到Webhook参数：" + rule.getParamRef()))
+                    ).collect(Collectors.toList());
+
+        }
+
 
         public String getRef() {
             return ref;
