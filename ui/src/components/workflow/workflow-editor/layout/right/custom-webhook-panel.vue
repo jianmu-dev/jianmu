@@ -80,20 +80,24 @@ export default defineComponent({
       });
     };
 
-    const changeVersion = async () => {
-      // 切换版本时清空events
+    const getVersionParam = async () => {
+      // 清空events
       form.value.events.length = 0;
-      // 清空eventInstances
-      eventInstances.value = [];
-      selectedReference.value = '';
-      // 更新form
-      updateEventInstance();
       try {
         const versionParams = await getWebhookVersionParams(form.value.ownerRef, form.value.nodeRef, form.value.version);
         pushCustomEvents(form.value as CustomWebhook, versionParams.events, form.value.version, versionParams.dslText);
       } catch (err) {
         proxy.$throw(err, proxy);
       }
+    };
+
+    const changeVersion = async () => {
+      // 清空eventInstances
+      eventInstances.value = [];
+      selectedReference.value = '';
+      // 更新form
+      updateEventInstance();
+      await getVersionParam();
     };
     onMounted(async () => {
       // 屏蔽radio-group keydown事件
@@ -104,12 +108,12 @@ export default defineComponent({
       if (form.value.version) {
         if (!form.value.dslText) {
           // 旧项目已有version但没有dslText
-          await changeVersion();
+          await getVersionParam();
         }
       } else {
         if (versionList.value.versions.length > 0) {
           form.value.version = versionList.value.versions[0];
-          await changeVersion();
+          await getVersionParam();
         }
       }
       const { ui } = yaml.parse(form.value.dslText);
