@@ -168,10 +168,9 @@ export default defineComponent({
     height: 30px;
     background-color: #818894;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
-    // border-radius: 50%;
-    // border: 1px solid #767F91;
+    border-radius: 2px;
 
-    // opacity: 0;
+    opacity: 0;
     transition: .3s opacity;
 
     ::v-deep(.jm-text-copy) {
