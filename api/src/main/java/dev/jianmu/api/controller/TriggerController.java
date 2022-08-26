@@ -14,6 +14,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.stream.Collectors;
+
 /**
  * @author Ethan Liu
  * @class TriggerController
@@ -61,10 +63,21 @@ public class TriggerController {
     @Operation(summary = "获取webhook参数", description = "获取webhook参数")
     public WebhookParamVo getWebhookParam(@PathVariable String id) {
         var webhook = this.triggerApplication.getWebhookParam(id);
+        var webhookEvent = webhook.getWebhookEvent();
         return WebhookParamVo.builder()
                 .param(webhook.getParam())
                 .auth(webhook.getAuth())
                 .only(webhook.getOnly())
+                .webhookEvent(webhookEvent == null ? null : WebhookParamVo.WebhookEventVo.builder()
+                        .name(webhookEvent.getName())
+                        .ruleset(webhookEvent.getRuleset().stream()
+                                .map(rule -> WebhookParamVo.WebhookRuleVo.builder()
+                                        .ruleStr(rule.getParamName() + rule.getOperator().name + rule.getMatchingValue())
+                                        .succeed(rule.getSucceed())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .rulesetOperator(webhookEvent.getRulesetOperator().name)
+                        .build())
                 .build();
     }
 }

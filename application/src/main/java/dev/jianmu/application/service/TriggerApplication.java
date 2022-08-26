@@ -22,9 +22,7 @@ import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
-import dev.jianmu.trigger.aggregate.WebRequest;
-import dev.jianmu.trigger.aggregate.Webhook;
-import dev.jianmu.trigger.aggregate.WebhookParameter;
+import dev.jianmu.trigger.aggregate.*;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
 import dev.jianmu.trigger.event.CustomWebhookInstanceEvent;
@@ -35,6 +33,7 @@ import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.repository.TriggerRepository;
 import dev.jianmu.trigger.repository.WebRequestRepository;
 import dev.jianmu.trigger.service.CustomWebhookDomainService;
+import dev.jianmu.trigger.service.WebhookOnlyService;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.*;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -93,6 +92,7 @@ public class TriggerApplication {
     private final CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository;
     private final CustomWebhookDomainService customWebhookDomainService;
     private final WebRequestRepository webRequestRepository;
+    private final WebhookOnlyService webhookOnlyService;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -112,7 +112,8 @@ public class TriggerApplication {
             GitRepoRepository gitRepoRepository,
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
             CustomWebhookDomainService customWebhookDomainService,
-            WebRequestRepository webRequestRepository
+            WebRequestRepository webRequestRepository,
+            WebhookOnlyService webhookOnlyService
     ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
@@ -132,6 +133,7 @@ public class TriggerApplication {
         this.webhookDefinitionVersionRepository = webhookDefinitionVersionRepository;
         this.customWebhookDomainService = customWebhookDomainService;
         this.webRequestRepository = webRequestRepository;
+        this.webhookOnlyService = webhookOnlyService;
     }
 
     private static String decode(final String encoded) {
@@ -198,7 +200,9 @@ public class TriggerApplication {
             ref = this.updateGitWebhook(trigger.getRef(), ref, encryptedToken, project.getAssociationId(), project.getAssociationType(), userId, events);
             trigger.setType(Trigger.Type.WEBHOOK);
             trigger.setWebhook(webhook);
-            trigger.setRef(ref);
+            if (encryptedToken != null) {
+                trigger.setRef(ref);
+            }
             this.triggerRepository.updateById(trigger);
             // 修改自定义Webhook实例
             if (webhookType != null) {
@@ -207,22 +211,7 @@ public class TriggerApplication {
             return;
         }
         // 创建webhook
-        if (AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
-            var oAuth2Api = OAuth2ApiProxy.builder()
-                    .userId(userId)
-                    .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
-                    .build();
-            // 创建Git webhook
-            var gitRepo = this.gitRepoRepository.findById(project.getAssociationId())
-                    .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + project.getAssociationId()));
-            try {
-                var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
-                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false, events).getId();
-                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref, events);
-            } catch (Exception e) {
-                throw new RuntimeException("创建webhook失败：" + e.getMessage());
-            }
-        }
+        ref = this.createGitWebhook(ref, encryptedToken, project.getAssociationId(), project.getAssociationType(), userId, events);
         var trigger = Trigger.Builder.aTrigger()
                 .ref(ref)
                 .projectId(projectId)
@@ -237,7 +226,33 @@ public class TriggerApplication {
         }
     }
 
+    private String createGitWebhook(String ref, String encryptedToken, String associationId, String associationType, String userId, List<String> events) {
+        if (encryptedToken == null) {
+            return ref;
+        }
+        if (AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
+            var oAuth2Api = OAuth2ApiProxy.builder()
+                    .userId(userId)
+                    .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                    .build();
+            // 创建Git webhook
+            var gitRepo = this.gitRepoRepository.findById(associationId)
+                    .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
+            try {
+                var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+                ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false, events).getId();
+                oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref, events);
+            } catch (Exception e) {
+                throw new RuntimeException("创建webhook失败：" + e.getMessage());
+            }
+        }
+        return ref;
+    }
+
     private String updateGitWebhook(String ref, String newRef, String encryptedToken, String associationId, String associationType, String userId, List<String> events) {
+        if (encryptedToken == null) {
+            return newRef;
+        }
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return newRef;
         }
@@ -421,6 +436,37 @@ public class TriggerApplication {
         return event;
     }
 
+    public WebhookEvent findWebhookEventByTriggerEvent(TriggerEvent triggerEvent) {
+        var webRequest = webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
+                .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
+        var workflow = this.workflowRepository.findByRefAndVersion(webRequest.getWorkflowRef(), webRequest.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
+        var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        dev.jianmu.application.dsl.webhook.Webhook dslWebhook = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
+        if (dslWebhook.getWebhook() == null) {
+            return null;
+        }
+        // 创建表达式上下文
+        var context = this.findTriggerContext(triggerEvent.getPayload(), project.getAssociationId(), project.getAssociationType());
+        var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(dslWebhook.getWebhook())
+                .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + dslWebhook.getWebhook()));
+        // 查询触发事件
+        var webhookEvents = this.webhookOnlyService.findEvents(webhookDefinitionVersion.getEvents(), dslWebhook.getEventInstances());
+        var webhookEvent = this.findWebhookEvent(webhookEvents, context);
+        if (webhookEvent == null) {
+            throw new RuntimeException("未找到触发事件");
+        }
+        // 验证触发规则
+        for (WebhookRule webhookRule : webhookEvent.getRuleset()) {
+            var res = this.calculateExp(webhookRule.getExpression(), ResultType.BOOL, context);
+            if ((Boolean) res.getValue()) {
+                webhookRule.succeed();
+            }
+        }
+        return webhookEvent;
+    }
+
     public PageInfo<WebRequest> findWebRequestPage(String projectId, int pageNum, int pageSize) {
         return this.webRequestRepositoryImpl.findPage(projectId, pageNum, pageSize);
     }
@@ -485,14 +531,27 @@ public class TriggerApplication {
             this.webRequestRepositoryImpl.add(newWebRequest);
             throw new IllegalArgumentException("项目：" + project.getWorkflowName() + "触发器类型错误");
         }
+        var webhook = trigger.getWebhook();
+        var webhookParams = webhook.getParam();
         // 创建表达式上下文
         var context = this.findTriggerContext(newWebRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
+        // 查询触发事件
+        WebhookEvent webhookEvent = null;
+        if (webhook.getEvents() != null) {
+            webhookEvent = this.findWebhookEvent(trigger.getWebhook().getEvents(), context);
+            if (webhookEvent == null) {
+                newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                newWebRequest.setErrorMsg("未找到触发器事件");
+                this.webRequestRepositoryImpl.add(newWebRequest);
+                throw new IllegalArgumentException("项目：" + project.getWorkflowName() + "，未找到触发器事件");
+            }
+            webhookParams = webhookEvent.getAvailableParams();
+        }
         // 提取参数
-        var webhook = trigger.getWebhook();
         List<TriggerEventParameter> eventParameters = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
-        if (webhook.getParam() != null) {
-            for (WebhookParameter webhookParameter : webhook.getParam()) {
+        if (webhookParams != null) {
+            for (WebhookParameter webhookParameter : webhookParams) {
                 var value = this.extractParameter(context, webhookParameter);
                 if (value == null && webhookParameter.getRequired()) {
                     newWebRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
@@ -518,6 +577,33 @@ public class TriggerApplication {
                 parameters.add(parameter);
                 eventParameters.add(eventParameter);
                 context.add("trigger", eventParameter.getName(), parameter);
+            }
+        }
+        // 验证触发规则
+        if (webhookEvent != null) {
+            boolean succeed = false;
+            for (WebhookRule webhookRule : webhookEvent.getRuleset()) {
+                var res = this.calculateExp(webhookRule.getExpression(), ResultType.BOOL, context);
+                var bool = (Boolean) res.getValue();
+                succeed = bool;
+                if (!bool && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.AND) {
+                        var message = "不满足：" + webhookRule.getParamName() + webhookRule.getOperator().name + webhookRule.getMatchingValue();
+                        log.warn(message);
+                    newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+                    newWebRequest.setErrorMsg(message);
+                        this.webRequestRepositoryImpl.add(newWebRequest);
+                        throw new RuntimeException(message);
+                }
+                if (bool && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.OR) {
+                    break;
+                }
+            }
+            if (!succeed && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.OR) {
+                log.warn("未满足任何一条触发规则");
+                newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+                newWebRequest.setErrorMsg("未满足任何一条触发规则");
+                this.webRequestRepositoryImpl.add(newWebRequest);
+                throw new RuntimeException("未满足任何一条触发规则");
             }
         }
         // 验证Auth
@@ -555,6 +641,36 @@ public class TriggerApplication {
         this.trigger(eventParameters, parameters, newWebRequest);
     }
 
+    private WebhookEvent findWebhookEvent(List<WebhookEvent> events, ElContext context) {
+        return events.stream()
+                .filter(event -> {
+                    var currentContext = context.copy();
+                    for (WebhookParameter webhookParameter : event.getEventParams()) {
+                        var value = this.extractParameter(currentContext, webhookParameter);
+                        if (value == null) {
+                            return false;
+                        }
+                        Parameter<?> parameter = Parameter.Type
+                                .getTypeByName(webhookParameter.getType())
+                                .newParameter(value);
+                        var eventParameter = TriggerEventParameter.Builder.aTriggerParameter()
+                                .ref(webhookParameter.getRef())
+                                .name(webhookParameter.getName())
+                                .type(webhookParameter.getType())
+                                .value(parameter.getStringValue())
+                                .required(webhookParameter.getRequired())
+                                .hidden(webhookParameter.getHidden())
+                                .parameterId(parameter.getId())
+                                .build();
+                        currentContext.add("trigger", eventParameter.getName(), parameter);
+                    }
+                    var res = this.calculateExp(event.getOnly(), ResultType.BOOL, context);
+                    return res.getType() == Parameter.Type.BOOL && (Boolean) res.getValue();
+                })
+                .findFirst()
+                .orElse(null);
+    }
+
     public TriggerEvent receiveHttpEvent(String ref, HttpServletRequest request, String contentType) {
         var webRequest = this.createWebRequest(request, contentType);
         this.writeWebhook(webRequest.getId(), webRequest.getPayload());
@@ -580,14 +696,27 @@ public class TriggerApplication {
         webRequest.setWorkflowRef(project.getWorkflowRef());
         webRequest.setWorkflowVersion(project.getWorkflowVersion());
         webRequest.setTriggerId(trigger.getId());
+        var webhook = trigger.getWebhook();
+        var webhookParams = webhook.getParam();
         // 创建表达式上下文
         var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
+        // 查询触发事件
+        WebhookEvent webhookEvent = null;
+        if (webhook.getEvents() != null) {
+            webhookEvent = this.findWebhookEvent(trigger.getWebhook().getEvents(), context);
+            if (webhookEvent == null) {
+                webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
+                webRequest.setErrorMsg("未找到触发器事件");
+                this.webRequestRepositoryImpl.add(webRequest);
+                throw new IllegalArgumentException("项目：" + project.getWorkflowName() + "，未找到触发器事件");
+            }
+            webhookParams = webhookEvent.getAvailableParams();
+        }
         // 提取参数
-        var webhook = trigger.getWebhook();
         List<TriggerEventParameter> eventParameters = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
-        if (webhook.getParam() != null) {
-            for (WebhookParameter webhookParameter : webhook.getParam()) {
+        if (webhookParams != null) {
+            for (WebhookParameter webhookParameter : webhookParams) {
                 var value = this.extractParameter(context, webhookParameter);
                 if (value == null && webhookParameter.getRequired()) {
                     webRequest.setStatusCode(WebRequest.StatusCode.PARAMETER_WAS_NULL);
@@ -613,6 +742,33 @@ public class TriggerApplication {
                 parameters.add(parameter);
                 eventParameters.add(eventParameter);
                 context.add("trigger", eventParameter.getName(), parameter);
+            }
+        }
+        // 验证触发规则
+        if (webhookEvent != null) {
+            boolean succeed = false;
+            for (WebhookRule webhookRule : webhookEvent.getRuleset()) {
+                var res = this.calculateExp(webhookRule.getExpression(), ResultType.BOOL, context);
+                var bool = (Boolean) res.getValue();
+                succeed = bool;
+                if (!bool && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.AND) {
+                    var message = "不满足：" + webhookRule.getParamName() + webhookRule.getOperator().name + webhookRule.getMatchingValue();
+                    log.warn(message);
+                    webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+                    webRequest.setErrorMsg(message);
+                    this.webRequestRepositoryImpl.add(webRequest);
+                    throw new RuntimeException(message);
+                }
+                if (bool && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.OR) {
+                    break;
+                }
+            }
+            if (!succeed && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.OR) {
+                log.warn("未满足任何一条触发规则");
+                webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
+                webRequest.setErrorMsg("未满足任何一条触发规则");
+                this.webRequestRepositoryImpl.add(webRequest);
+                throw new RuntimeException("未满足任何一条触发规则");
             }
         }
         // 验证Auth
@@ -800,25 +956,29 @@ public class TriggerApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var project = this.projectRepository.findByWorkflowRef(workflow.getRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        if (ObjectUtils.isEmpty(webRequest.getPayload())) {
+            webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
+        }
+        // 创建表达式上下文
+        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
+        WebhookEvent webhookEvent = null;
         dev.jianmu.application.dsl.webhook.Webhook trigger = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
         if (trigger.getWebhook() != null) {
             var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(trigger.getWebhook())
                     .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + trigger.getWebhook()));
-            var params = webhookDefinitionVersion.getEvents().stream()
-                    .filter(e1 -> trigger.getEvent().stream()
-                            .anyMatch(e2 -> e1.getRef().equals(e2.getRef()))
-                    )
-                    .map(CustomWebhookDefinitionVersion.Event::getAvailableParams)
-                    .collect(Collectors.flatMapping(Collection::stream, Collectors.toList()));
-            trigger.setParam(params);
+            // 查询触发事件
+            var webhookEvents = this.webhookOnlyService.findEvents(webhookDefinitionVersion.getEvents(), trigger.getEventInstances());
+            webhookEvent = this.findWebhookEvent(webhookEvents, context);
+            if (webhookEvent == null) {
+                throw new RuntimeException("未找到触发事件");
+            }
+            trigger.setParam(webhookEvent.getAvailableParams());
+            trigger.setWebhookEvent(webhookEvent);
         }
         if (trigger.getParam() == null) {
             return trigger;
         }
-        if (ObjectUtils.isEmpty(webRequest.getPayload())) {
-            webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
-        }
-        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
+        // 添加触发器参数
         var parameters = new ArrayList<WebhookParameter>();
         for (WebhookParameter webhookParameter : trigger.getParam()) {
             var newParam = WebhookParameter.Builder.aWebhookParameter()
@@ -836,6 +996,15 @@ public class TriggerApplication {
             }
         }
         trigger.setParam(parameters);
+        // 验证触发规则
+        if (webhookEvent != null) {
+            for (WebhookRule webhookRule : webhookEvent.getRuleset()) {
+                var res = this.calculateExp(webhookRule.getExpression(), ResultType.BOOL, context);
+                if ((Boolean) res.getValue()) {
+                    webhookRule.succeed();
+                }
+            }
+        }
         return trigger;
     }
 

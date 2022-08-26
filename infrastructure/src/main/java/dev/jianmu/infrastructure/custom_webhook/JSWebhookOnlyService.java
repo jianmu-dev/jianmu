@@ -1,13 +1,14 @@
 package dev.jianmu.infrastructure.custom_webhook;
 
+import dev.jianmu.trigger.aggregate.WebhookEvent;
 import dev.jianmu.trigger.aggregate.WebhookParameter;
+import dev.jianmu.trigger.aggregate.WebhookRule;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookRule;
 import dev.jianmu.trigger.service.WebhookOnlyService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,53 +17,61 @@ import java.util.stream.Collectors;
 @ConditionalOnProperty(prefix = "jianmu.el", name = "type", havingValue = "deno", matchIfMissing = true)
 public class JSWebhookOnlyService implements WebhookOnlyService {
 
-    @Override
-    public String getOnly(List<CustomWebhookDefinitionVersion.Event> events, List<CustomWebhookInstance.EventInstance> eventInstances) {
-        return eventInstances.stream()
-                .map(eventInstance ->
-                        events.stream()
-                                .filter(event -> event.getRef().equals(eventInstance.getRef()))
-                                .findFirst()
-                                .map(event -> {
-                                    var pre = event.getRuleset().stream()
-                                            .map(rule -> this.getRuleExpression(event.getAvailableParams(), rule))
-                                            .collect(Collectors.joining(" && "));
-                                    var post = eventInstance.getRuleset().stream()
-                                            .map(rule -> this.getRuleExpression(event.getAvailableParams(), rule))
-                                            .collect(Collectors.joining(this.getRuleOperator(eventInstance.getRulesetOperator())));
-                                    return StringUtils.hasText(post) ? "(" + pre + ") && (" + post + ")" : pre;
-                                }).orElseThrow(() -> new IllegalArgumentException("未找到Webhook事件：" + eventInstance.getRef()))
-                ).collect(Collectors.joining(" || "));
-    }
-
-    private String getRuleExpression(List<WebhookParameter> parameters, CustomWebhookRule rule) {
-        var value = parameters.stream()
-                .filter(webhookParameter -> webhookParameter.getRef().equals(rule.getParamRef()))
-                .findFirst()
-                .map(WebhookParameter::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("未找到Webhook参数：" + rule.getParamRef()));
+    private String getRuleExpression(WebhookParameter webhookParameter, CustomWebhookRule rule) {
         switch (rule.getOperator()) {
             case EQ:
-                return value + " === " + rule.getMatchingValue();
+                return webhookParameter.getValue() + " === " + rule.getMatchingValue();
             case NE:
-                return value + " !== " + rule.getMatchingValue();
+                return webhookParameter.getValue() + " !== " + rule.getMatchingValue();
             case INCLUDE:
-                return value + ".includes(" + rule.getMatchingValue() + ")";
+                return webhookParameter.getValue() + ".includes(" + rule.getMatchingValue() + ")";
             case EXCLUDE:
-                return "!" + value + ".includes(" + rule.getMatchingValue() + ")";
+                return "!" + webhookParameter.getValue() + ".includes(" + rule.getMatchingValue() + ")";
             case REG_EXP:
             default:
-                return "new RegExp(" + rule.getMatchingValue() + ").test(" + value + ")";
+                return "new RegExp(" + rule.getMatchingValue() + ").test(" + webhookParameter.getValue() + ")";
         }
     }
 
-    private CharSequence getRuleOperator(CustomWebhookInstance.RulesetOperator rulesetOperator) {
-        switch (rulesetOperator) {
-            case OR:
-                return " || ";
-            case AND:
-            default:
-                return " && ";
-        }
+    private WebhookParameter getWebhookParameter(List<WebhookParameter> parameters, CustomWebhookRule rule) {
+        return parameters.stream()
+                .filter(webhookParameter -> webhookParameter.getRef().equals(rule.getParamRef()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("未找到Webhook参数：" + rule.getParamRef()));
+    }
+
+    @Override
+    public List<WebhookEvent> findEvents(List<CustomWebhookDefinitionVersion.Event> events, List<CustomWebhookInstance.EventInstance> eventInstances) {
+        return eventInstances.stream()
+                .map(eventInstance -> {
+                    var event = events.stream()
+                            .filter(e -> e.getRef().equals(eventInstance.getRef()))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("未找到Webhook事件：" + eventInstance.getRef()));
+                    var only = event.getRuleset().stream()
+                            .map(rule -> this.getRuleExpression(this.getWebhookParameter(event.getAvailableParams(), rule), rule))
+                            .collect(Collectors.joining(" && "));
+                    var postRuleset = eventInstance.getRuleset().stream()
+                            .map(rule -> {
+                                var webhookParameter = this.getWebhookParameter(event.getAvailableParams(), rule);
+                                return WebhookRule.Builder.aWebhookRule()
+                                        .paramRef(rule.getParamRef())
+                                        .paramName(webhookParameter.getName())
+                                        .operator(rule.getOperator())
+                                        .matchingValue(rule.getMatchingValue())
+                                        .expression(this.getRuleExpression(webhookParameter, rule))
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
+                    return WebhookEvent.Builder.aWebhookEvent()
+                            .ref(event.getRef())
+                            .name(event.getName())
+                            .availableParams(event.getAvailableParams())
+                            .eventParams(event.findEventParams())
+                            .only(only)
+                            .ruleset(postRuleset)
+                            .rulesetOperator(eventInstance.getRulesetOperator())
+                            .build();
+                }).collect(Collectors.toList());
     }
 }

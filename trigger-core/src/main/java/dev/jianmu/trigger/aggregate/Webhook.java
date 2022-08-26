@@ -12,6 +12,7 @@ public class Webhook {
     private String only;
     private WebhookAuth auth;
     private List<WebhookParameter> param;
+    private List<WebhookEvent> events;
 
     public String getOnly() {
         return only;
@@ -25,10 +26,15 @@ public class Webhook {
         return param;
     }
 
+    public List<WebhookEvent> getEvents() {
+        return events;
+    }
+
     public static final class Builder {
         private String only;
         private WebhookAuth auth;
         private List<WebhookParameter> param;
+        private List<WebhookEvent> events;
 
         private Builder() {
         }
@@ -52,11 +58,17 @@ public class Webhook {
             return this;
         }
 
+        public Builder events(List<WebhookEvent> events) {
+            this.events = events;
+            return this;
+        }
+
         public Webhook build() {
             Webhook webhook = new Webhook();
             webhook.only = this.only;
             webhook.auth = this.auth;
             webhook.param = this.param;
+            webhook.events = this.events;
             return webhook;
         }
     }

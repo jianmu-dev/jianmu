@@ -27,4 +27,24 @@ public class WebhookParamVo {
     private WebhookAuth auth;
     @Schema(description = "only")
     private String only;
+    private WebhookEventVo webhookEvent;
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class WebhookEventVo {
+        private String name;
+        private List<WebhookRuleVo> ruleset;
+        private String rulesetOperator;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class WebhookRuleVo {
+        private String ruleStr;
+        private Boolean succeed;
+    }
 }

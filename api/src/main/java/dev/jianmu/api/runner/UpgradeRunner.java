@@ -36,26 +36,18 @@ public class UpgradeRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         // 查找需要升级的项目
         var projects = this.projectApplication.findAll().stream()
-                .filter(project -> project.getDslType() == Project.DslType.WORKFLOW)
-                .filter(project -> {
-                    var workflow = this.workflowRepository.findByRefAndVersion(project.getWorkflowRef(), project.getWorkflowVersion())
-                            .orElseThrow(() -> new DataNotFoundException("未找到项目对应的流程定义"));
-                    var conditions = workflow.getNodes().stream()
-                            .filter(node -> node instanceof Condition)
-                            .collect(Collectors.toList());
-                    var count = conditions.stream()
-                            .map(node -> (Condition) node)
-                            .filter(condition -> condition.getLoopPairs() == null)
-                            .count();
-                    return count > 0;
-                })
+                .filter(project -> project.getTriggerType() == Project.TriggerType.WEBHOOK)
                 .collect(Collectors.toList());
         // 更新项目DSL，升级Workflow
         projects.forEach(project -> {
             var group = this.projectLinkGroupRepository.findByProjectId(project.getId())
                     .orElseThrow(() -> new DataNotFoundException("未找到归属的项目组"));
             var text = project.getDslText() + "\n";
-            this.projectApplication.updateProject(project.getId(), text, group.getProjectGroupId(), null, null, null, null, null, false);
+            try {
+                this.projectApplication.updateProject(project.getId(), text, group.getProjectGroupId(), null, null, null, null, null, false);
+            } catch (Exception e) {
+                log.warn("项目- {}升级失败：", project.getWorkflowName(), e);
+            }
             log.info("项目- {} -升级成功", project.getWorkflowName());
         });
     }
