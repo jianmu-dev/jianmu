@@ -126,18 +126,25 @@ public class ViewController {
                 triggerEventParameter.setValue("**********");
             }
         });
-        var triggerEventVo = TriggerEventMapper.INSTANCE.toTriggerEventVo(triggerEvent);
-        triggerEventVo.setWebhookEvent(webhookEvent == null ? null : WebhookParamVo.WebhookEventVo.builder()
-                .name(webhookEvent.getName())
-                .ruleset(webhookEvent.getRuleset().stream()
-                        .map(rule -> WebhookParamVo.WebhookRuleVo.builder()
-                                .ruleStr(rule.getParamName() + rule.getOperator().name + rule.getMatchingValue())
-                                .succeed(rule.getSucceed())
-                                .build())
-                        .collect(Collectors.toList()))
-                .rulesetOperator(webhookEvent.getRulesetOperator().name)
-                .build());
-        return triggerEventVo;
+        return TriggerEventVo.builder()
+                .id(triggerEvent.getId())
+                .triggerId(triggerEvent.getTriggerId())
+                .occurredTime(triggerEvent.getOccurredTime())
+                .parameters(triggerEvent.getParameters())
+                .triggerType(triggerEvent.getTriggerType())
+                .payload(triggerEvent.getPayload())
+                .projectId(triggerEvent.getProjectId())
+                .webhookEvent(webhookEvent == null ? null : WebhookParamVo.WebhookEventVo.builder()
+                        .name(webhookEvent.getName())
+                        .ruleset(webhookEvent.getRuleset().stream()
+                                .map(rule -> WebhookParamVo.WebhookRuleVo.builder()
+                                        .ruleStr(rule.getParamName() + rule.getOperator().name + rule.getMatchingValue())
+                                        .succeed(rule.getSucceed())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .rulesetOperator(webhookEvent.getRulesetOperator().name)
+                        .build())
+                .build();
     }
 
     @GetMapping("/namespaces")
