@@ -2,6 +2,7 @@ package dev.jianmu.trigger.aggregate.custom.webhook;
 
 import dev.jianmu.trigger.aggregate.WebhookParameter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -47,6 +48,18 @@ public class CustomWebhookDefinitionVersion {
      * DSL文本
      */
     private String dslText;
+    /**
+     * 创建时间
+     */
+    private final LocalDateTime createdTime = LocalDateTime.now();
+    /**
+     * 最后修改时间
+     */
+    private LocalDateTime lastModifiedTime;
+
+    public void modified() {
+        this.lastModifiedTime = LocalDateTime.now();
+    }
 
     /**
      * 事件
@@ -158,6 +171,14 @@ public class CustomWebhookDefinitionVersion {
         return creatorName;
     }
 
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public LocalDateTime getLastModifiedTime() {
+        return lastModifiedTime;
+    }
+
     public List<Event> getEvents() {
         return events;
     }
@@ -237,6 +258,7 @@ public class CustomWebhookDefinitionVersion {
             customWebhookDefinitionVersion.creatorName = this.creatorName;
             customWebhookDefinitionVersion.events = this.events;
             customWebhookDefinitionVersion.dslText = this.dslText;
+            customWebhookDefinitionVersion.modified();
             return customWebhookDefinitionVersion;
         }
     }

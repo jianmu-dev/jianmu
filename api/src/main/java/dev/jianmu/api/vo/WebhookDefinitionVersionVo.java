@@ -4,6 +4,7 @@ import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersio
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -45,4 +46,12 @@ public class WebhookDefinitionVersionVo {
      * DSL文本
      */
     private String dslText;
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdTime;
+    /**
+     * 最后修改时间
+     */
+    private LocalDateTime lastModifiedTime;
 }
