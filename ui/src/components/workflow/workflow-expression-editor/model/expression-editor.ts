@@ -66,6 +66,6 @@ export class ExpressionEditor {
   }
 
   insertParam(arr: string[]): void {
-    this.instance.replaceSelection(arr.join('.'));
+    this.instance.replaceSelection(arr.filter(item => item).join('.'));
   }
 }

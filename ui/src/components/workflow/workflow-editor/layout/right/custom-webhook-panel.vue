@@ -68,9 +68,6 @@ export default defineComponent({
     const versionList = ref<INodeDefVersionListVo>({ versions: [] });
     const uiEvent = ref<any>();
 
-    onMounted(() => emit('form-created', formRef.value));
-
-
     const updateEventInstance = () => {
       // 清空eventInstances，将过滤后的eventInstances push到form中
       form.value.eventInstances.length = 0;
@@ -117,7 +114,8 @@ export default defineComponent({
         }
       }
       const { ui } = yaml.parse(form.value.dslText);
-      uiEvent.value = ui?.event;
+      uiEvent.value = ui?.event || {};
+      emit('form-created', formRef.value);
     });
 
     return {

@@ -191,3 +191,28 @@ export async function getWebhookOperator(): Promise<IWebhookOperatorVo> {
   }
   return webhookOperator;
 }
+
+/**
+ * 构造下拉option
+ * @param uiEvent
+ * @param ref
+ */
+export function buildSelectableOption(uiEvent: any, ref: string): ISelectableParam | undefined {
+  // TODO 判断了是否有uiEvent，但初始情况下可能没有uiEvent
+
+  const options = !uiEvent?.param ? undefined : uiEvent.param[ref]?.option;
+  if (!options) {
+    return options;
+  }
+
+  return {
+    value: '',
+    label: '动作参数',
+    children: options.map(({ value, name }: { value: string | number, name: string }) => {
+      return {
+        value: value,
+        label: name || value,
+      };
+    }),
+  };
+}

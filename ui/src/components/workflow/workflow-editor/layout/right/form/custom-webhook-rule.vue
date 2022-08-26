@@ -42,7 +42,8 @@
           </jm-tooltip>
         </div>
       </div>
-      <jm-form-item :prop="`${modelName}.${index}.matchingValue`" :rules="rules.matchingValue" v-if="reloadPlaceholder">
+      <jm-form-item :prop="`${modelName}.${index}.matchingValue`" :rules="rules.matchingValue"
+                    v-if="reloadFormItem">
         <expression-editor
           v-if="expressionVisible"
           v-model="matchingValueVal"
@@ -50,16 +51,16 @@
           :type="ExpressionTypeEnum.WEBHOOK_PARAM"
           :param-type="paramType"
           :node-id="nodeId"
-          @change="changeMatchingValue"
+          @change="changeMatchingValue(true)"
           @focus="switchFlag=true"
           @blur="switchFlag=false"
         />
-        <jm-radio-group v-model="matchingValueVal" @change="changeMatchingValue" v-else-if="radioVisible">
+        <jm-radio-group v-model="matchingValueVal" @change="changeMatchingValue(false)" v-else-if="radioVisible">
           <jm-radio label="true" @change="changeMatchingValue">true</jm-radio>
           <jm-radio label="false" @change="changeMatchingValue">false</jm-radio>
         </jm-radio-group>
         <jm-select v-else-if="selectVisible" v-model="matchingValueVal" placeholder="请选择合并请求动作"
-                   class="select-action" @change="changeMatchingValue">
+                   class="select-action" @change="changeMatchingValue(false)">
           <jm-option
             v-for="item in options"
             :key="item.value"
@@ -72,14 +73,15 @@
   </div>
 </template>
 <script lang="ts">
-import { computed, defineComponent, inject, nextTick, onMounted, onUpdated, PropType, ref } from 'vue';
+import { computed, defineComponent, inject, nextTick, onMounted, onUpdated, PropType, provide, ref } from 'vue';
 import { Node } from '@antv/x6';
 import { ExpressionTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
 import ExpressionEditor from '../form/expression-editor.vue';
 import { IWebhookParam } from '../../../model/data/node/webhook';
 import { IWebhookEventOperatorVo, IWebhookParamOperatorVo } from '@/api/dto/custom-webhook';
-import { getWebhookOperator } from '../../../model/data/node/custom-webhook';
+import { buildSelectableOption, getWebhookOperator } from '../../../model/data/node/custom-webhook';
 import { CustomRule, ParamValueType } from '../../../model/data/common';
+import { ISelectableParam } from '@/components/workflow/workflow-expression-editor/model/data';
 
 export default defineComponent({
   components: { ExpressionEditor },
@@ -118,12 +120,13 @@ export default defineComponent({
   },
   emits: ['update:paramRef', 'update:operator', 'update:matchingValue', 'delete'],
   setup(props, { emit }) {
-    const reloadPlaceholder = ref<boolean>(true);
+    const reloadFormItem = ref<boolean>(true);
     const tooltipVisible = ref<boolean>(true);
     const paramOperators = ref<IWebhookParamOperatorVo[]>([]);
     // 参数唯一标识
     const paramRefVal = ref<string>(props.paramRef);
     const visible = ref<boolean>(true);
+    const isExpression = ref<boolean>(false);
     // 类型-值
     const operatorVal = ref<string>(props.operator);
     const paramType = computed<ParamTypeEnum>(() =>
@@ -159,6 +162,7 @@ export default defineComponent({
     };
 
     const uiEventVal = ref<any>(props.uiEvent);
+    provide('buildSelectableOption', (): ISelectableParam | undefined => buildSelectableOption(uiEventVal.value, paramRefVal.value));
     const buildOptions = (): { name: string, value: string | number }[] | undefined => {
       if (!uiEventVal.value?.param) {
         return undefined;
@@ -167,11 +171,18 @@ export default defineComponent({
     };
     const options = computed(buildOptions);
 
-    onUpdated(() => {
+    const reloadFormItemFn = async () => {
+      reloadFormItem.value = false;
+      await nextTick();
+      reloadFormItem.value = true;
+    };
+
+    onUpdated(async() => {
       if (uiEventVal.value === props.uiEvent) {
         return;
       }
       uiEventVal.value = props.uiEvent;
+      await reloadFormItemFn();
       if (!paramRefVal.value) {
         return;
       }
@@ -189,17 +200,6 @@ export default defineComponent({
         visible.value = false;
       }
       emit('update:matchingValue', matchingValueVal.value);
-    });
-
-    const switchIcon = computed<boolean>(() => {
-      const arr: any[] = [];
-      options.value?.forEach(({ value }) => arr.push(value));
-      if (options.value && !arr.includes(matchingValueVal.value)) {
-        return true;
-      } else if (paramType.value && visible.value) {
-        return true;
-      }
-      return false;
     });
 
     const selectVisible = computed<boolean>(() => {
@@ -222,13 +222,6 @@ export default defineComponent({
       return false;
     });
 
-    const iconVisible = computed<boolean>(() => {
-      if ((radioVisible.value || selectVisible.value) || paramType.value === ParamTypeEnum.BOOL || options.value || radioVisible.value || selectVisible.value) {
-        return true;
-      }
-      return false;
-    });
-
     const expressionVisible = computed<boolean>(() => {
       const arr: any[] = [];
       options.value?.forEach(({ value }) => arr.push(value));
@@ -236,16 +229,37 @@ export default defineComponent({
         return false;
       } else if (paramType.value === ParamTypeEnum.BOOL && (matchingValueVal.value === 'true' || matchingValueVal.value === 'false') && !visible.value) {
         return false;
-      } else if (options.value && arr.includes(matchingValueVal.value)) {
+      } else if (options.value && arr.includes(matchingValueVal.value) && !isExpression.value) {
         return false;
       }
       return true;
+    });
+
+    const iconVisible = computed<boolean>(() => {
+      if ((radioVisible.value || selectVisible.value) || paramType.value === ParamTypeEnum.BOOL || options.value || radioVisible.value || selectVisible.value) {
+        return true;
+      }
+      return false;
+    });
+
+    const switchIcon = computed<boolean>(() => {
+      const arr: any[] = [];
+      options.value?.forEach(({ value }) => arr.push(value));
+      if (options.value && !arr.includes(matchingValueVal.value)) {
+        return true;
+      } else if (paramType.value === ParamTypeEnum.BOOL && visible.value) {
+        return true;
+      }
+      return false;
     });
 
     onMounted(async () => {
       paramOperators.value = (await getWebhookOperator()).paramOperators;
       if (paramType.value === ParamTypeEnum.BOOL && (matchingValueVal.value === 'true' || matchingValueVal.value === 'false')) {
         visible.value = false;
+      }
+      if (options.value && matchingValueVal.value === '""') {
+        matchingValueVal.value = options.value[0].value;
       }
       if (operatorVal.value) {
         return;
@@ -264,7 +278,7 @@ export default defineComponent({
       switchFlag,
       paramType,
       nodeId,
-      reloadPlaceholder,
+      reloadFormItem,
       expressionVisible,
       radioVisible,
       selectVisible,
@@ -299,12 +313,18 @@ export default defineComponent({
         // changeParamRef时修改operator
         emit('update:operator', operatorOptions.value.find(({ name }) => name === operatorText.value)!.ref);
         emit('update:paramRef', paramRefVal.value);
-        // 保证paramRef切换时值placeholder能更新
-        reloadPlaceholder.value = false;
-        await nextTick();
-        reloadPlaceholder.value = true;
+        await reloadFormItemFn();
       },
-      changeMatchingValue: () => {
+      changeMatchingValue: (val: boolean) => {
+        // val=true 表达式框
+        if (options.value && val) {
+          const arr: any[] = [];
+          options.value?.forEach(({ value }) => arr.push(value));
+          if (arr.includes(matchingValueVal.value)) {
+            isExpression.value = true;
+          }
+        }
+        // 获取options change时判断是否在options中，在就切换visible
         emit('update:matchingValue', matchingValueVal.value);
       },
       changeOperator,
@@ -333,11 +353,9 @@ export default defineComponent({
         }
         // 优化tooltip位移问题
         tooltipVisible.value = false;
-        // 切换时隐藏表单校验
-        reloadPlaceholder.value = false;
         await nextTick();
         tooltipVisible.value = true;
-        reloadPlaceholder.value = true;
+        await reloadFormItemFn();
       },
     };
   },

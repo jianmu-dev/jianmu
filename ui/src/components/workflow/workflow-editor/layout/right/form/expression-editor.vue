@@ -9,6 +9,7 @@ import { Graph, Node } from '@antv/x6';
 import { CustomX6NodeProxy } from '../../../model/data/custom-x6-node-proxy';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { ExpressionTypeEnum, NodeTypeEnum, ParamTypeEnum } from '../../../model/data/enumeration';
+import { buildSelectableOption } from '../../../model/data/node/custom-webhook';
 
 export default defineComponent({
   props: {
@@ -32,6 +33,7 @@ export default defineComponent({
     const getGraph = inject('getGraph') as () => Graph;
     const buildSelectableExtParam = inject('buildSelectableExtParam') as () => Promise<ISelectableParam | undefined>;
     const buildSelectableGlobalParam = inject('buildSelectableGlobalParam') as () => ISelectableParam | undefined;
+    const buildSelectableOption = inject('buildSelectableOption') as (() => ISelectableParam | undefined) | undefined;
     const graph = getGraph();
     let extParam: ISelectableParam | undefined;
     const selectableParams = ref<ISelectableParam[]>([]);
@@ -41,6 +43,13 @@ export default defineComponent({
       extParam = await buildSelectableExtParam();
       if (extParam && extParam.children && extParam.children.length > 0) {
         selectableParams.value.push(extParam);
+      }
+
+      if (buildSelectableOption) {
+        const option = buildSelectableOption();
+        if (option) {
+          selectableParams.value.push(option);
+        }
       }
 
       let proxy: CustomX6NodeProxy | undefined;
