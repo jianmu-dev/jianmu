@@ -47,6 +47,8 @@ export default defineComponent({
     const visibleDsl = ref<string>();
     // record版本号
     const workflowVersion = ref(props.workflowVersion);
+    // triggerType
+    const triggerType = ref(props.triggerType);
     // 任务状态字符串
     const taskStatus = ref<string>('');
     // 实例化workflowGraph并传向父组件
@@ -56,7 +58,7 @@ export default defineComponent({
       // console.log('获取新画布', props.workflowVersion);
       const { dslText: dsl, nodes } = await fetchWorkflow(props.workflowRef, props.workflowVersion);
       const nodeInfos = nodes.filter(({ metadata }) => metadata).map(({ metadata }) => JSON.parse(metadata as string));
-      workflowGraph = new WorkflowGraph(dsl, nodeInfos, props.triggerType, container.value!, (evt: INodeMouseoverEvent)=> {
+      workflowGraph = new WorkflowGraph(dsl, nodeInfos, triggerType.value, container.value!, (evt: INodeMouseoverEvent)=> {
         emit('mouseenter-node', evt);
       });
       visibleDsl.value = workflowGraph.visibleDsl;
@@ -66,7 +68,7 @@ export default defineComponent({
     const executeAnimation = () => {
       // 状态不同，执行动画(''时不用更新)
       if (taskStatus.value && taskStatus.value !== props.tasks.map(e=>e.status).join()) {
-        console.log('props.tasks', props.tasks.map(e=>e.status));
+        // console.log('props.tasks', props.tasks.map(e=>e.status));
         // 运行时动画
         workflowGraph.updateNodeStates(props.tasks);
       }
@@ -74,10 +76,12 @@ export default defineComponent({
     };
     // 切换画布实例
     const recordChangeGraph = async () => {
-      if (workflowVersion.value === props.workflowVersion) {
+      // version 和 triggerType 都没变化 返回
+      if (workflowVersion.value === props.workflowVersion && triggerType.value === props.triggerType) {
         return;
       }
       workflowVersion.value = props.workflowVersion;
+      triggerType.value = props.triggerType;
       // 获取新画布前 销毁旧画布
       workflowGraph.destroy();
       // 获取新画布
