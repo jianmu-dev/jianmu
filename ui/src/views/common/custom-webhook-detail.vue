@@ -90,13 +90,13 @@
 
 <script lang='ts'>
 import { computed, defineComponent, PropType } from 'vue';
-import { IWebhookEventVo, IWebhookRuleVo } from '@/api/dto/trigger';
+import { IWebhookParamVo, IWebhookRuleVo } from '@/api/dto/trigger';
 import ParamValue from '@/views/common/param-value.vue';
 
 export default defineComponent({
   props: {
     webhookParamsDetail: {
-      type: Object as PropType<IWebhookEventVo>,
+      type: Object as PropType<IWebhookParamVo>,
       required: true,
     },
   },
@@ -105,11 +105,11 @@ export default defineComponent({
   },
   setup(props) {
     const triggerEvent = computed(() => [{
-      name: props.webhookParamsDetail.webhookEvent.name,
+      name: props.webhookParamsDetail.webhookEvent!.name,
       succeed: true,
     }]);
-    const triggerRules = computed<IWebhookRuleVo[]>(() => props.webhookParamsDetail.webhookEvent.ruleset);
-    const tips = computed<string>(() => props.webhookParamsDetail.webhookEvent.rulesetOperator);
+    const triggerRules = computed<IWebhookRuleVo[]>(() => props.webhookParamsDetail.webhookEvent!.ruleset);
+    const tips = computed<string>(() => props.webhookParamsDetail.webhookEvent!.rulesetOperator);
     return {
       triggerEvent,
       triggerRules,

@@ -123,7 +123,7 @@
         <!-- 触发器 -->
         <div v-else class="trigger-content" v-loading="triggerParamsLoading">
           <jm-scrollbar>
-            <custom-webhook-detail v-if="webhookParamsDetail.webhookEvent"
+            <custom-webhook-detail v-if="webhookParamsDetail?.webhookEvent"
                                    :webhook-params-detail="webhookParamsDetail"></custom-webhook-detail>
             <div style="padding:20px;" v-else>
               <!-- 参数列表 -->
@@ -434,6 +434,12 @@ export default defineComponent({
           ? webhookAuth.value.push(webhookParamsDetail.value.auth)
           : webhookAuth.value;
       } catch (err) {
+        // 对状态码为400且错误提示为未找到webhook参数的错误单独处理
+        const { data: { statusCode, message } } = err.response;
+        if (statusCode === 400) {
+          console.warn(message);
+          return;
+        }
         proxy.$throw(err, proxy);
       } finally {
         triggerParamsLoading.value = false;
