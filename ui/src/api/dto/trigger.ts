@@ -89,7 +89,8 @@ export interface IWebhookRuleVo extends Readonly<{
  */
 export interface IWebhookEventVo extends Readonly<{
   name: string,
-  ruleset: IWebhookRuleVo[]
+  ruleset: IWebhookRuleVo[],
+  rulesetOperator: string
 }> {
 }
 
