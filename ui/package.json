@@ -1,6 +1,6 @@
 {
   "name": "jianmu-ci-ui",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "repository": "https://gitee.com/jianmu-dev/jianmu-ci-server.git",
   "license": "MulanPubL-2.0",
   "scripts": {
