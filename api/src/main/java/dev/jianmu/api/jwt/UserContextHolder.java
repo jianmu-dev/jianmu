@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Component
@@ -31,7 +32,12 @@ public class UserContextHolder {
                 .getRequest())
                 .getHeader("Authorization")
                 .substring(7);
-        String userJson = Jwts.parser().setSigningKey(this.jwtProperties.getJwtSecret()).parseClaimsJws(jwt).getBody().getSubject();
+        String userJson = Jwts.parserBuilder()
+                .setSigningKey(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(jwt)
+                .getBody()
+                .getSubject();
         try {
             return mapper.readValue(userJson, JwtSession.class);
         } catch (JsonProcessingException e) {
