@@ -2,7 +2,6 @@ package dev.jianmu.api.jwt;
 
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
@@ -34,7 +33,7 @@ public class JwtProvider {
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtProperties.getJwtExpirationMs()))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(this.jwtProperties.getJwtSecret())), SignatureAlgorithm.HS512)
+                .signWith(Keys.hmacShaKeyFor(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -56,7 +55,6 @@ public class JwtProvider {
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
         }
-
         return false;
     }
 
