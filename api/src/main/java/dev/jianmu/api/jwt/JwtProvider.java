@@ -2,19 +2,23 @@ package dev.jianmu.api.jwt;
 
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
+ * @author Ethan Liu
  * @class JwtProvider
  * @description JwtProvider
- * @author Ethan Liu
  * @create 2021-05-17 21:02
-*/
+ */
 @Component
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
@@ -30,13 +34,16 @@ public class JwtProvider {
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtProperties.getJwtExpirationMs()))
-                .signWith(SignatureAlgorithm.HS512, jwtProperties.getJwtSecret())
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(this.jwtProperties.getJwtSecret())), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public boolean validateJwtToken(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtProperties.getJwtSecret()).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8))
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
@@ -54,6 +61,11 @@ public class JwtProvider {
     }
 
     public String getUsernameFromToken(String token) {
-        return Jwts.parser().setSigningKey(jwtProperties.getJwtSecret()).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 }
