@@ -2,7 +2,6 @@ package dev.jianmu.api.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.exception.JsonParseException;
 import io.jsonwebtoken.Jwts;
@@ -37,7 +36,12 @@ public class UserContextHolder {
             return new JwtSession();
         }
         authorizationHeader = authorizationHeader.substring(7);
-        String userJson = Jwts.parser().setSigningKey(this.jwtProperties.getJwtSecret()).parseClaimsJws(authorizationHeader).getBody().getSubject();
+        String userJson = Jwts.parserBuilder()
+                .setSigningKey(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(authorizationHeader)
+                .getBody()
+                .getSubject();
         try {
             return mapper.readValue(userJson, JwtSession.class);
         } catch (JsonProcessingException e) {
