@@ -14,11 +14,11 @@ import java.util.Date;
 
 /**
  * @author Ethan Liu
+ * @author Ethan Liu
  * @class JwtProvider
  * @description JwtProvider
- * @author Ethan Liu
  * @create 2021-05-17 21:02
-*/
+ */
 @Component
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
@@ -33,9 +33,13 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() +Math.min(expireInMs,jwtProperties.getJwtExpirationMs())))
+                .setExpiration(new Date((new Date()).getTime() + Math.min(expireInMs, jwtProperties.getJwtExpirationMs())))
                 .signWith(Keys.hmacShaKeyFor(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS512)
                 .compact();
+    }
+
+    public String generateJwtToken(Authentication authentication) {
+        return this.generateJwtToken(authentication, jwtProperties.getJwtExpirationMs());
     }
 
     public boolean validateJwtToken(String token) {
