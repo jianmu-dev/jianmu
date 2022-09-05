@@ -13,6 +13,7 @@ const store = createStore<IRootState>({
     versions: [],
     // 是否开启三方平台验证，默认不开启
     entry: false,
+    authMode: false,
     thirdPartyType: '',
     workerTypes: [],
     parameterTypes: [],
@@ -36,6 +37,7 @@ const store = createStore<IRootState>({
     mutateThirdPartyType(state: IRootState, payload: IThirdPartyTypeVo): void {
       state.thirdPartyType = payload.thirdPartyType;
       state.associationType = payload.associationType;
+      state.authMode = payload.authMode;
       state.entry = !!payload.associationType;
     },
     mutateWorkerTypes(state: IRootState, payload: string[]): void {
