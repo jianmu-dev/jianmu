@@ -252,7 +252,7 @@ export default defineComponent({
     }
 
     .separator {
-      margin: 10px;
+      margin: 0 10px 20px;
       width: 1px;
       height: 15px;
       background-color: #D9DEE7;
