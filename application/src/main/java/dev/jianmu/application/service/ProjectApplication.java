@@ -243,15 +243,15 @@ public class ProjectApplication {
                 .build();
 
         this.pubTriggerEvent(parser, project, userId, encryptedToken);
-        if (isSyncProject) {
-            this.createOrUpdateGitFile(branch, encryptedToken, project, project.getWorkflowName(), userId);
-        }
         this.projectRepository.add(project);
         this.projectLastExecutionRepository.add(new ProjectLastExecution(project.getWorkflowRef()));
         this.projectLinkGroupRepository.add(projectLinkGroup);
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId(), branch, associationId));
+        if (isSyncProject) {
+            this.createOrUpdateGitFile(branch, encryptedToken, project, project.getWorkflowName(), userId);
+        }
         return project;
     }
 
@@ -318,13 +318,13 @@ public class ProjectApplication {
         if (username != null) {
             project.setLastModifiedBy(username);
         }
-        if (isSyncProject) {
-            this.createOrUpdateGitFile(null, encryptedToken, project, oldName, userId);
-        }
 
         this.pubTriggerEvent(parser, project, userId, encryptedToken);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
+        if (isSyncProject) {
+            this.createOrUpdateGitFile(null, encryptedToken, project, oldName, userId);
+        }
         // 返回是否并发执行流程实例
         return !concurrent && project.isConcurrent();
     }
