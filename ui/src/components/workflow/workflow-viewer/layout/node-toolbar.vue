@@ -218,6 +218,24 @@ export default defineComponent({
       // align-items: center;
       font-size: 16px;
 
+      .jm-icon-workflow-retry::before {
+        font-weight: 600;
+      }
+      .jm-icon-workflow-retry {
+        font-size: 24px;
+      }
+      .jm-icon-workflow-retry:hover {
+        background-color: #EFF7FF;
+      }
+      .jm-icon-workflow-ignore:hover {
+        background-color: #EFF7FF;
+      }
+      .jm-icon-workflow-ignore::before {
+        font-weight: 590;
+      }
+      .jm-icon-workflow-ignore {
+        font-size: 24px;
+      }
       &:active {
         .icon {
           background-color: #EFF7FF;
