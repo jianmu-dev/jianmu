@@ -963,7 +963,7 @@ public class TriggerApplication {
             if (!"push".equals(header.get("x-gitea-event").asText())) {
                 return;
             }
-            var author = body.get("head_commit").get("author");
+            var author = body.get("head_commit").get("committer");
             if (!ProjectApplication.committer.equals(author.get("name").asText())) {
                 return;
             }
