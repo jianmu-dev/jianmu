@@ -1,10 +1,13 @@
 package dev.jianmu.application.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.application.dsl.webhook.WebhookDslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.IgnoreSyncDslEventException;
 import dev.jianmu.application.service.vo.WebhookPayload;
 import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.application.util.ParameterUtil;
@@ -23,7 +26,6 @@ import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.*;
-import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
 import dev.jianmu.trigger.event.CustomWebhookInstanceEvent;
 import dev.jianmu.trigger.event.TriggerEvent;
@@ -587,12 +589,12 @@ public class TriggerApplication {
                 var bool = (Boolean) res.getValue();
                 succeed = bool;
                 if (!bool && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.AND) {
-                        var message = "不满足：" + webhookRule.getParamName() + webhookRule.getOperator().name + webhookRule.getMatchingValue();
-                        log.warn(message);
+                    var message = "不满足：" + webhookRule.getParamName() + webhookRule.getOperator().name + webhookRule.getMatchingValue();
+                    log.warn(message);
                     newWebRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
                     newWebRequest.setErrorMsg(message);
-                        this.webRequestRepositoryImpl.add(newWebRequest);
-                        throw new RuntimeException(message);
+                    this.webRequestRepositoryImpl.add(newWebRequest);
+                    throw new RuntimeException(message);
                 }
                 if (bool && webhookEvent.getRulesetOperator() == CustomWebhookInstance.RulesetOperator.OR) {
                     break;
@@ -914,6 +916,8 @@ public class TriggerApplication {
             if (contentType.startsWith("application/json")) {
                 var bodyJson = this.objectMapper.readTree(body);
                 bodyNode.set("json", bodyJson);
+                // 忽略同步流水线DSl引发的push事件
+                this.ignoreSyncDslEvent(headerNode, bodyJson);
             }
             // Body Form node
             if (contentType.startsWith("application/x-www-form-urlencoded")) {
@@ -940,12 +944,36 @@ public class TriggerApplication {
                     .payload(root.toString())
                     .statusCode(WebRequest.StatusCode.OK)
                     .build();
+        } catch (IgnoreSyncDslEventException e) {
+            throw new IgnoreSyncDslEventException(e.getMessage());
         } catch (Exception e) {
             return WebRequest.Builder.aWebRequest()
                     .userAgent(request.getHeader("User-Agent"))
                     .statusCode(WebRequest.StatusCode.UNKNOWN)
                     .errorMsg(e.getMessage())
                     .build();
+        }
+    }
+
+    private void ignoreSyncDslEvent(ObjectNode header, JsonNode body) {
+        if (!this.oAuth2Properties.getThirdPartyType().equals(ThirdPartyTypeEnum.GITLINK.name())) {
+            return;
+        }
+        try {
+            if (!"push".equals(header.get("x-gitea-event").asText())) {
+                return;
+            }
+            var author = body.get("head_commit").get("author");
+            if (!ProjectApplication.committer.equals(author.get("name").asText())) {
+                return;
+            }
+            if (!ProjectApplication.committerEmail.equals(author.get("email").asText())) {
+                return;
+            }
+            throw new IgnoreSyncDslEventException("忽略同步流水线DSl所触发的push事件");
+        } catch (IgnoreSyncDslEventException e) {
+            throw new IgnoreSyncDslEventException(e.getMessage());
+        } catch (Exception ignored) {
         }
     }
 
