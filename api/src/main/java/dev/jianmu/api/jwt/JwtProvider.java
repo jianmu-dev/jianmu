@@ -2,14 +2,18 @@ package dev.jianmu.api.jwt;
 
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
+ * @author Ethan Liu
  * @author Ethan Liu
  * @class JwtProvider
  * @description JwtProvider
@@ -30,7 +34,7 @@ public class JwtProvider {
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + Math.min(expireInMs, jwtProperties.getJwtExpirationMs())))
-                .signWith(SignatureAlgorithm.HS512, jwtProperties.getJwtSecret())
+                .signWith(Keys.hmacShaKeyFor(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -40,7 +44,10 @@ public class JwtProvider {
 
     public boolean validateJwtToken(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtProperties.getJwtSecret()).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8))
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
@@ -58,6 +65,11 @@ public class JwtProvider {
     }
 
     public String getUsernameFromToken(String token) {
-        return Jwts.parser().setSigningKey(jwtProperties.getJwtSecret()).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 }
