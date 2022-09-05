@@ -437,6 +437,8 @@ export default defineComponent({
         // 对状态码为400且错误提示为未找到webhook参数的错误单独处理
         const { data: { statusCode, message } } = err.response;
         if (statusCode === 400) {
+          // 将之前缓存的正确数据清空，保证数据渲染正常
+          webhookParamsDetail.value = null;
           console.warn(message);
           return;
         }
