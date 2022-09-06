@@ -11,6 +11,11 @@
         <router-link :to="{name:'secret-key'}" @click="currentTab=2" class="tab-item">
           密钥管理
         </router-link>
+        <div class="divider"></div>
+        <a class="using-docs-btn" href="https://forum.gitlink.org.cn/forums/7487/detail" target="_blank">
+          <span>使用文档</span>
+          <i class="jump-icon"></i>
+        </a>
       </div>
       <div class="right" v-show="$route.name==='index'">
         <jm-input placeholder="搜索流水线" class="search-input" size="small" v-model="keyWord" @change="search" clearable>
@@ -133,11 +138,40 @@ export default defineComponent({
       margin-right: 40px;
       font-size: 14px;
 
+      .divider {
+        width: 1px;
+        height: 20px;
+        background-color: #D0D0D0;
+        margin-right: 30px;
+      }
+
+      .using-docs-btn {
+        font-weight: 500;
+        color: #333333;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+          color: #096DD9;
+
+          i {
+            background: url("@/assets/svgs/index/jump-active.svg") no-repeat 100%;
+          }
+        }
+
+        i {
+          margin-left: 5px;
+          width: 16px;
+          height: 16px;
+          background: url("@/assets/svgs/index/jump.svg") no-repeat 100%;
+        }
+      }
+
       .tab-item {
         cursor: pointer;
         color: #333333;
         font-weight: 500;
-        margin-right: 40px;
+        margin-right: 30px;
 
         &.router-link-exact-active, &:hover {
           //color: #466AFF;
