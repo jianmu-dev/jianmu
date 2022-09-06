@@ -5,7 +5,7 @@
       <div class="classification-tabs">
         <div :class="['tab-item',currentTab===index?'is-active':'']" v-for="(item,index) in data" :key="index"
              @click="currentTab=index">{{
-            item.label
+          item.label
           }}・{{ item.counter }}
         </div>
       </div>
@@ -14,7 +14,7 @@
           <jm-select v-model="branch" popper-class="no-arrow">
             <jm-option label="全部分支" value="default">全部分支</jm-option>
             <jm-option :label="b.branchName" v-for='(b,i) in branches' :key="i" :value="b.branchName">{{
-                b.branchName
+              b.branchName
               }}
             </jm-option>
           </jm-select>
@@ -438,6 +438,15 @@ export default defineComponent({
       border-bottom-right-radius: 4px;
       margin: 0.5%;
       height: 180px;
+
+      .webhook-drawer-container {
+        .el-overlay {
+          // 解决webhook-drawer组件弹窗在此页面上下可滚动问题
+          .webhook-drawer + .el-overlay {
+            overflow: hidden;
+          }
+        }
+      }
 
       &:hover {
         box-shadow: 0 4px 6px 1px #E1EBF5;
