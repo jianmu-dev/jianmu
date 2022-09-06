@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @description UpgradeRunner
  * @create 2022-03-14 09:54
  */
-@Component
+//@Component
 @Slf4j
 public class UpgradeRunner implements ApplicationRunner {
     private final WorkflowRepository workflowRepository;
