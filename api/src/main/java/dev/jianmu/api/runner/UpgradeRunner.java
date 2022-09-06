@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @description UpgradeRunner
  * @create 2022-03-14 09:54
  */
-@Component
+//@Component
 @Slf4j
 public class UpgradeRunner implements ApplicationRunner {
     private final WorkflowRepository workflowRepository;
@@ -36,7 +36,7 @@ public class UpgradeRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         // 查找需要升级的项目
         var projects = this.projectApplication.findAll().stream()
-                .filter(project -> project.getTriggerType() == Project.TriggerType.WEBHOOK)
+                .filter(project -> false)
                 .collect(Collectors.toList());
         // 更新项目DSL，升级Workflow
         projects.forEach(project -> {
