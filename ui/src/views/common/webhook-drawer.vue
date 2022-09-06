@@ -407,6 +407,8 @@ export default defineComponent({
         // 旧数据覆盖新数据
         await getWebhookRequestList('cover');
       } catch (err) {
+        // 失败重新获取列表覆盖渲染
+        await getWebhookRequestList('cover');
         proxy.$throw(err, proxy);
       }
     };
