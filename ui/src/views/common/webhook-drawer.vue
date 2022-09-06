@@ -680,14 +680,14 @@ export default defineComponent({
 
     // 表格
     .table-container {
-      max-height: calc(100vh - 254px);
+      max-height: calc(100vh - 315px);
       background: #fff;
       box-sizing: border-box;
       padding: 20px;
       margin-bottom: 20px;
 
       ::v-deep(.el-scrollbar__wrap) {
-        max-height: calc(100vh - 380px);
+        height: calc(100vh - 355px) !important;
       }
 
       .table-content {

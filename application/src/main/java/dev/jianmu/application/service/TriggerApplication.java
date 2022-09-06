@@ -14,6 +14,7 @@ import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
+import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
 import dev.jianmu.infrastructure.quartz.PublishJob;
 import dev.jianmu.infrastructure.storage.StorageService;
@@ -95,6 +96,7 @@ public class TriggerApplication {
     private final CustomWebhookDomainService customWebhookDomainService;
     private final WebRequestRepository webRequestRepository;
     private final WebhookOnlyService webhookOnlyService;
+    private final GlobalProperties globalProperties;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -115,7 +117,8 @@ public class TriggerApplication {
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
             CustomWebhookDomainService customWebhookDomainService,
             WebRequestRepository webRequestRepository,
-            WebhookOnlyService webhookOnlyService
+            WebhookOnlyService webhookOnlyService,
+            GlobalProperties globalProperties
     ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
@@ -136,6 +139,7 @@ public class TriggerApplication {
         this.customWebhookDomainService = customWebhookDomainService;
         this.webRequestRepository = webRequestRepository;
         this.webhookOnlyService = webhookOnlyService;
+        this.globalProperties = globalProperties;
     }
 
     private static String decode(final String encoded) {
@@ -1046,7 +1050,7 @@ public class TriggerApplication {
         var webRequest = this.webRequestRepositoryImpl.findById(triggerEvent.getWebRequestId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook请求"));
         webRequest.setStatusCode(WebRequest.StatusCode.ALREADY_RUNNING);
-        webRequest.setErrorMsg("待执行流程数已超过最大值");
+        webRequest.setErrorMsg("待执行流程数已超过最大值：" + this.globalProperties.getTriggerQueue().getMax());
         this.webRequestRepositoryImpl.update(webRequest);
     }
 
