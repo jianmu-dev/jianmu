@@ -30,7 +30,7 @@
       </jm-form-item>
       <jm-form-item label="URL" prop="uri">
         <jm-input v-model="gitCloneForm.uri" clearable
-                  placeholder="请输入URL，例如：https://gitee.com/jianmu-dev/jianmu-ci-server.git"/>
+                  placeholder="请输入URL，例如：https://gitee.com/jianmu-dev/jianmu.git"/>
       </jm-form-item>
       <jm-form-item label="分支" prop="branch">
         <jm-input v-model="gitCloneForm.branch" clearable placeholder="请输入分支"/>

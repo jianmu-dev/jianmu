@@ -103,7 +103,7 @@ export default defineComponent({
         '    param:\n' +
         '      workspace: jianmu-ci-ui\n' +
         '      commit_branch: ${branch_name}\n' +
-        '      remote_url: https://gitee.com/jianmu-dev/jianmu-ci-server.git\n' +
+        '      remote_url: https://gitee.com/jianmu-dev/jianmu.git\n' +
         '      netrc_machine: ${git_site}\n' +
         '      netrc_username: ((gitee.user))\n' +
         '      netrc_password: ((gitee.pass))\n' +
