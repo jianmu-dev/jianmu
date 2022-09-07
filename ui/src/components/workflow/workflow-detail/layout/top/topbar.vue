@@ -115,6 +115,7 @@ export default defineComponent({
     width: 24px;
     height: 24px;
     font-size: 18px;
+    outline: none;
 
     &::before {
       font-weight: 500;

@@ -7,7 +7,6 @@ import { INodeDefVo } from '@/api/dto/project';
 import { GraphDirectionEnum } from './data/enumeration';
 import { INodeMouseoverEvent } from './data/common';
 import { ITaskExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { Ref } from 'vue';
 
 type ConfigNodeCallbackFnType = (evt: INodeMouseoverEvent) => void
 export class WorkflowGraph {
@@ -55,41 +54,37 @@ export class WorkflowGraph {
     this.graph = new G6Graph(this.dsl, this.triggerType, this.nodeInfos, this.container, this.getRotationDirection());
     this.graph.configNodeAction(this.configNodeCallbackFn);
     // 点亮状态
-    this.graph.updateNodeStates(tasks);
+    tasks.length && this.graph.updateNodeStates(tasks);
     this.resizeObserver = new ResizeObserver(() => {
       const { clientWidth, clientHeight } = this.container.parentElement!;
       this.graph.changeSize(clientWidth, clientHeight);
     });
     this.resizeObserver.observe(this.container.parentElement!);
   }
-  // 更新zoom缩放层级
-  getZoom(callBack: (n:number) => void) {
-    callBack(Math.round(this.graph.getZoom() * 100));
+  // 获取zoom缩放层级
+  getZoom() {
+    return Math.round(this.graph.getZoom() * 100);
   }
-  // 更新zoom缩放层级s
-  getZooms(zoom: Ref<number>) {
-    zoom.value = Math.round(this.graph.getZoom() * 100);
+  // 获取是否X6
+  getIsX6() {
+    return this.isX6;
   }
-  // 更新是否X6
-  getIsX6(isX6: Ref<boolean>) {
-    isX6.value = this.isX6;
-  }
-  // 缩放
-  handleZoom(zoom: Ref<number>, val?: number){
-    // undefined 适配
+  // 缩放层级
+  handleZoom(val?: number){
+    // undefined 适屏
     if (val === undefined) {
       this.graph.fitView();
     } else {
       this.graph.zoomTo(val);
     }
-    this.getZooms(zoom);
   }
   // 全屏/退出全屏
-  handleFullscreen(zoom: Ref<number>) {
+  handleFullscreen(callback: (x: number) => void) {
     this.container.style.visibility = 'hidden';
     setTimeout(() => {
       this.graph.fitCanvas();
-      this.getZooms(zoom);
+      // 传回缩放层级
+      callback(this.getZoom());
       this.container.style.visibility = '';
     }, 50);
   }
