@@ -340,7 +340,7 @@ public class ProjectApplication {
         if (project.getDslText().equals(dslText)) {
             return;
         }
-        dslText = this.diffDsl(project, dslText);
+        dslText = this.diffDsl(project.getDslText(), dslText);
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
@@ -367,17 +367,17 @@ public class ProjectApplication {
     }
 
     // diff DSL
-    private String diffDsl(Project project, String dslText) {
-        var diff = DslUtil.diff(project.getDslText(), dslText);
+    private String diffDsl(String oldDsl, String newDsl) {
+        var diff = DslUtil.diff(oldDsl, newDsl);
         // 忽略新增的raw-data
         if (!diff.isO1HasRawData() && diff.isO2HasRawData()) {
-            return dslText.replaceAll("\nraw-data: \"\\{.*}\"$", "");
+            return newDsl.replaceAll("\nraw-data: \"\\{.*}\"$", "");
         }
         // 对象不变时，保留raw-data
         if (diff.isDiff() && diff.isO1HasRawData() && !diff.isO2HasRawData()) {
-            return dslText + "\nraw-data: \"" + diff.getOldRawData() + "\"";
+            return newDsl + oldDsl.substring(oldDsl.indexOf("\nraw-data: \""));
         }
-        return dslText;
+        return newDsl;
     }
 
     @Transactional

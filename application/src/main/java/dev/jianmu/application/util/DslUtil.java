@@ -27,25 +27,21 @@ public class DslUtil {
         var o1 = yaml.load(dslText1);
         var o2 = yaml.load(dslText2);
 
-        var o1RawData = getRawData(o1);
-        var o2RawData = getRawData(o2);
-
         var diff = new Diff();
         diff.diff = compare(o1, o2);
-        diff.o1HasRawData = o1RawData != null;
-        diff.o2HasRawData = o2RawData != null;
-        diff.oldRawData = o1RawData;
+        diff.o1HasRawData = containsRawData(o1);
+        diff.o2HasRawData = containsRawData(o2);
         return diff;
     }
 
-    private static String getRawData(Object o) {
+    private static boolean containsRawData(Object o) {
         if (o == null) {
-            return null;
+            return false;
         }
         if (!(o instanceof Map)) {
-            return null;
+            return false;
         }
-        return (String) ((Map<?, ?>) o).get("raw-data");
+        return ((Map<?, ?>) o).containsKey("raw-data");
     }
 
     private static boolean compare(Object o1, Object o2) {
@@ -90,6 +86,5 @@ public class DslUtil {
         private boolean diff;
         private boolean o1HasRawData;
         private boolean o2HasRawData;
-        private String oldRawData;
     }
 }
