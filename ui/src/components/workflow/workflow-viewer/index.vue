@@ -229,7 +229,7 @@ export default defineComponent({
       // 旋转
       handleRotation(){
         // console.log('调用内置旋转 workflowGraph.rotation()');
-        props.tasks && workflowGraph.rotation(props.tasks);
+        props.tasks && workflowGraph.rotate(props.tasks);
       },
       // 点击节点上的任务和参数
       clickNode(id: string, nodeType: NodeTypeEnum, tabType: NodeToolbarTabTypeEnum) {

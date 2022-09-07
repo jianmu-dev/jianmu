@@ -49,7 +49,7 @@ export class WorkflowGraph {
     return this.graph.getDirection() === GraphDirectionEnum.HORIZONTAL ? GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
   }
   // 旋转
-  rotation(tasks: ITaskExecutionRecordVo[]) {
+  rotate(tasks: ITaskExecutionRecordVo[]) {
     // 销毁旧画布
     this.destroy();
     this.graph = new G6Graph(this.dsl, this.triggerType, this.nodeInfos, this.container, this.getRotationDirection());
