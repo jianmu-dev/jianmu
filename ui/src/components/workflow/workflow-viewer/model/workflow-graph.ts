@@ -25,9 +25,9 @@ export class WorkflowGraph {
     this.triggerType = triggerType;
     this.container = container;
     this.configNodeCallbackFn = configNodeCallbackFn;
-    if (dsl.lastIndexOf('raw-data: "{') !== -1) {
+    if (dsl.lastIndexOf('\nraw-data: "{') !== -1) {
       this.isX6 = true;
-      this.visibleDsl = dsl.substring(0, dsl.lastIndexOf('raw-data: "{')).trim();
+      this.visibleDsl = dsl.substring(0, dsl.lastIndexOf('\nraw-data: "{')).trim();
     } else {
       this.isX6 = false;
       this.visibleDsl = dsl;
