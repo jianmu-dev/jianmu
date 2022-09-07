@@ -37,6 +37,9 @@ public class UserContextHolder {
         if (!this.globalProperties.getAuthMode() && authorizationHeader == null) {
             return new JwtSession();
         }
+        if (authorizationHeader == null) {
+            return new JwtSession();
+        }
         authorizationHeader = authorizationHeader.substring(7);
         String userJson = Jwts.parserBuilder()
                 .setSigningKey(this.jwtProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8))
@@ -50,5 +53,15 @@ public class UserContextHolder {
             throw new JsonParseException();
         }
     }
-}
 
+    /**
+     * 获取jwt
+     *
+     * @return
+     */
+    public String getJwt() {
+        return (((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes()))
+                .getRequest())
+                .getHeader("Authorization");
+    }
+}
