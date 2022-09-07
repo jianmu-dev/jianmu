@@ -1,4 +1,3 @@
-import yaml from 'yaml';
 import { BaseGraph } from './base-graph';
 import { G6Graph } from './graph/g6';
 import { X6Graph } from './graph/x6';
@@ -26,14 +25,12 @@ export class WorkflowGraph {
     this.triggerType = triggerType;
     this.container = container;
     this.configNodeCallbackFn = configNodeCallbackFn;
-    const data = yaml.parse(dsl);
-    if (data['raw-data']) {
-      delete data['raw-data'];
+    if (dsl.lastIndexOf('\nraw-data: "{') !== -1) {
       this.isX6 = true;
-      this.visibleDsl = yaml.stringify(data);
+      this.visibleDsl = dsl.substring(0, dsl.lastIndexOf('\nraw-data: "{')).trim();
     } else {
       this.isX6 = false;
-      this.visibleDsl = yaml.stringify(data);
+      this.visibleDsl = dsl;
     }
     this.graph = this.isX6? new X6Graph(dsl, triggerType, this.container) : new G6Graph(dsl, triggerType, nodeInfos, this.container, GraphDirectionEnum.HORIZONTAL);
     this.graph.configNodeAction(this.configNodeCallbackFn);
@@ -93,7 +90,7 @@ export class WorkflowGraph {
     // TODO
     setTimeout(() => {
       this.graph.updateNodeStates(tasks);
-    }, 100);
+    }, 200);
   }
   // 高亮节点方法
   highlightNodeState(status: string, boo: boolean) {
