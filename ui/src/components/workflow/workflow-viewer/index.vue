@@ -22,7 +22,7 @@
     ></top-toolbar>
     <!-- 底部工具栏 -->
     <bottom-toolbar
-      v-if="!workeflow_viewer_first_load"
+      v-if="!firstLoad"
       :is-x6="isX6"
       :dslMode="dslMode"
       :zoom-value="zoom"
@@ -35,7 +35,7 @@
     ></bottom-toolbar>
     <!-- 底部状态统计栏 -->
     <task-state
-      v-if="!readonly && !dslMode && !workeflow_viewer_first_load && taskStates.length > 0"
+      v-if="!readonly && !dslMode && !firstLoad && taskStates.length > 0"
       :taskStates="taskStates"
       @mouse-event="highlightNodeState"
     ></task-state>
@@ -129,7 +129,7 @@ export default defineComponent({
     // 预览模式(图示-> false/yaml-> true)
     const dslMode = ref<boolean>(props.viewMode===ViewModeEnum.YAML);
     // 第一次加载viewer 也用作加载状态栏和底部工具栏
-    const workeflow_viewer_first_load = ref<boolean>(true);
+    const firstLoad = ref<boolean>(true);
     // 第一次加载viewer 也用作加载状态栏和底部工具栏
     const graphDslPanel = ref();
 
@@ -139,7 +139,7 @@ export default defineComponent({
       dslMode,
       nodeEvent,
       loadingGraph,
-      workeflow_viewer_first_load,
+      firstLoad,
       graphDslPanel,
       // 鼠标移动到不同状态上高亮对应状态节点
       highlightNodeState(status: string, boo: boolean) {
@@ -154,10 +154,10 @@ export default defineComponent({
         // 更新缩放视图
         workflowGraph.getZooms(zoom);
         // X6赋值
-        workflowGraph.getIsx6(isX6);
+        workflowGraph.getIsX6(isX6);
         // 延迟更新节点状态(解决第一次进入或刷新时 props.tasks长度为0的情况会报错，故延长50毫秒)
-        if (workeflow_viewer_first_load.value) {
-          workeflow_viewer_first_load.value = false;
+        if (firstLoad.value) {
+          firstLoad.value = false;
           setTimeout(()=> {
             props.tasks?.length && workflowGraph.updateNodeStates(props.tasks);
           }, 50);
@@ -229,7 +229,7 @@ export default defineComponent({
       // 旋转
       handleRotation(){
         // console.log('调用内置旋转 workflowGraph.rotation()');
-        props.tasks && workflowGraph.rotation(props.tasks);
+        props.tasks && workflowGraph.rotate(props.tasks);
       },
       // 点击节点上的任务和参数
       clickNode(id: string, nodeType: NodeTypeEnum, tabType: NodeToolbarTabTypeEnum) {

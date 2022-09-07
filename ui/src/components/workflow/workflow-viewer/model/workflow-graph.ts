@@ -17,9 +17,9 @@ export class WorkflowGraph {
   isX6: boolean = false;
   nodeInfos: INodeDefVo[];
   triggerType: TriggerTypeEnum;
-  private container: HTMLElement;
+  private readonly container: HTMLElement;
   private resizeObserver: ResizeObserver;
-  private configNodeCallbackFn: ConfigNodeCallbackFnType;
+  private readonly configNodeCallbackFn: ConfigNodeCallbackFnType;
 
   constructor(dsl: string, nodeInfos: INodeDefVo[], triggerType: TriggerTypeEnum, container: HTMLElement, configNodeCallbackFn: ConfigNodeCallbackFnType) {
     this.dsl = dsl;
@@ -49,7 +49,7 @@ export class WorkflowGraph {
     return this.graph.getDirection() === GraphDirectionEnum.HORIZONTAL ? GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
   }
   // 旋转
-  rotation(tasks: ITaskExecutionRecordVo[]) {
+  rotate(tasks: ITaskExecutionRecordVo[]) {
     // 销毁旧画布
     this.destroy();
     this.graph = new G6Graph(this.dsl, this.triggerType, this.nodeInfos, this.container, this.getRotationDirection());
@@ -71,7 +71,7 @@ export class WorkflowGraph {
     zoom.value = Math.round(this.graph.getZoom() * 100);
   }
   // 更新是否X6
-  getIsx6(isX6: Ref<boolean>) {
+  getIsX6(isX6: Ref<boolean>) {
     isX6.value = this.isX6;
   }
   // 缩放
