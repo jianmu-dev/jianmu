@@ -58,6 +58,7 @@ export default defineComponent({
     border: 0.5px solid #cad6ee;
     font-size: 24px;
     cursor: pointer;
+    outline: none;
     &:hover:before {
       color: #096DD9;
     }
@@ -74,6 +75,7 @@ export default defineComponent({
     cursor: pointer;
     border-radius: 2px;
     border: 0.5px solid #cad6ee;
+    outline: none;
     &:hover {
       background-color: #EFF7FF;
     }
