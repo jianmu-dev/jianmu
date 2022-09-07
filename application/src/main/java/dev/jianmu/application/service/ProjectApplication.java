@@ -7,6 +7,7 @@ import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDefApi;
+import dev.jianmu.application.util.DslUtil;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
@@ -335,12 +336,15 @@ public class ProjectApplication {
         }
         // 移动项目到项目组
         this.publisher.publishEvent(new MovedEvent(project.getId(), projectGroupId));
-        // 解析DSL,语法检查
-        var parser = DslParser.parse(dslText);
-        var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
+        // diff DSL
         if (project.getDslText().equals(dslText)) {
             return;
         }
+        dslText = this.diffDsl(project, dslText);
+        // 解析DSL,语法检查
+        var parser = DslParser.parse(dslText);
+        var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
+
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(parser.getTriggerType());
@@ -360,6 +364,20 @@ public class ProjectApplication {
         if (!concurrent && project.isConcurrent()) {
             this.concurrentWorkflowInstance(workflow.getRef());
         }
+    }
+
+    // diff DSL
+    private String diffDsl(Project project, String dslText) {
+        var diff = DslUtil.diff(project.getDslText(), dslText);
+        // 忽略新增的raw-data
+        if (!diff.isO1HasRawData() && diff.isO2HasRawData()) {
+            return dslText.replaceAll("\nraw-data: \"\\{.*}\"$", "");
+        }
+        // 对象不变时，保留raw-data
+        if (diff.isDiff() && diff.isO1HasRawData() && !diff.isO2HasRawData()) {
+            return dslText + "\nraw-data: \"" + diff.getOldRawData() + "\"";
+        }
+        return dslText;
     }
 
     @Transactional
