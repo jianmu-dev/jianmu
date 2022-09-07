@@ -188,7 +188,7 @@ export default defineComponent({
     position: absolute;
     left: 0;
     top: -10px;
-    width: 100%;
+    width: calc(100% + 8px);
     height: calc(100% + 10px);
 
     &.clickable {
