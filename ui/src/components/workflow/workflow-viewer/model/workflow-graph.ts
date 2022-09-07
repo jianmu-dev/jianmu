@@ -17,9 +17,9 @@ export class WorkflowGraph {
   isX6: boolean = false;
   nodeInfos: INodeDefVo[];
   triggerType: TriggerTypeEnum;
-  private container: HTMLElement;
+  private readonly container: HTMLElement;
   private resizeObserver: ResizeObserver;
-  private configNodeCallbackFn: ConfigNodeCallbackFnType;
+  private readonly configNodeCallbackFn: ConfigNodeCallbackFnType;
 
   constructor(dsl: string, nodeInfos: INodeDefVo[], triggerType: TriggerTypeEnum, container: HTMLElement, configNodeCallbackFn: ConfigNodeCallbackFnType) {
     this.dsl = dsl;
@@ -71,7 +71,7 @@ export class WorkflowGraph {
     zoom.value = Math.round(this.graph.getZoom() * 100);
   }
   // 更新是否X6
-  getIsx6(isX6: Ref<boolean>) {
+  getIsX6(isX6: Ref<boolean>) {
     isX6.value = this.isX6;
   }
   // 缩放
