@@ -28,9 +28,9 @@ public class DslUtil {
         var o2 = yaml.load(dslText2);
 
         var diff = new Diff();
-        diff.diff = compare(o1, o2);
         diff.o1HasRawData = containsRawData(o1);
         diff.o2HasRawData = containsRawData(o2);
+        diff.diff = compare(o1, o2);
         return diff;
     }
 
