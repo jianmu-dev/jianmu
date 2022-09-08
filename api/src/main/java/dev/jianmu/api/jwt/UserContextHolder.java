@@ -34,9 +34,6 @@ public class UserContextHolder {
         String authorizationHeader = (((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes()))
                 .getRequest())
                 .getHeader("Authorization");
-        if (!this.globalProperties.getAuthMode() && authorizationHeader == null) {
-            return new JwtSession();
-        }
         if (authorizationHeader == null) {
             return new JwtSession();
         }
