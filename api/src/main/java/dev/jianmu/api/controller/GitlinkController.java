@@ -97,36 +97,43 @@ public class GitlinkController {
         ThirdPartyTypeEnum thirdPartyType = ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType());
         this.beforeAuthenticate();
         this.allowThisPlatformLogIn(thirdPartyType.name());
-
         GitlinkSilentLoggingDto gitlinkSilentLoggingDto;
         try {
             String silentLoggingJson = AESEncryptionUtil.decryptWithIv(code, this.oAuth2Properties.getGitlink().getSilentLogin().getKey(), this.oAuth2Properties.getGitlink().getSilentLogin().getIv());
             gitlinkSilentLoggingDto = new ObjectMapper().readValue(silentLoggingJson, GitlinkSilentLoggingDto.class);
+            if (new Date().getTime() > gitlinkSilentLoggingDto.getTimestamp() + this.oAuth2Properties.getGitlink().getSilentLogin().getCodeTimeout() * 1000L) {
+                throw new CodeExpiredException("code已过期");
+            }
             // 检查登录状态，防止重复登录
-            JwtSession session = this.userContextHolder.getSession();
-            String id = session.getId();
-            String userId = gitlinkSilentLoggingDto.getUserId();
-            if (id != null && id.equals(userId) && session.getExpireTimestamp() > System.currentTimeMillis()) {
-                GitRepo gitRepo = this.gitRepoRepository.findById(session.getAssociationId()).orElse(null);
-                if (gitRepo != null && gitRepo.getOwner().equals(gitlinkSilentLoggingDto.getOwner()) && gitRepo.getRef().equals(gitlinkSilentLoggingDto.getRef())) {
-                    OAuth2ApiProxy oAuth2Api = OAuth2ApiProxy.builder()
-                            .thirdPartyType(thirdPartyType)
-                            .userId(userId)
-                            .build();
-                    String jwt = this.userContextHolder.getJwt();
-                    String owner = gitlinkSilentLoggingDto.getOwner();
-                    String ref = gitlinkSilentLoggingDto.getRef();
-                    return ResponseEntity.ok(JwtResponse.builder()
-                            .type("Bearer")
-                            .token(jwt)
-                            .id(userId)
-                            .username(session.getUsername())
-                            .avatarUrl(session.getAvatarUrl())
-                            .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
-                            .entryUrl(oAuth2Api.getEntryUrl(owner, ref))
-                            .associationData(AssociationData.buildGitRepo(ref, owner))
-                            .build());
+            JwtSession session;
+            try {
+                session = this.userContextHolder.getSession();
+                String id = session.getId();
+                String userId = gitlinkSilentLoggingDto.getUserId();
+                if (id != null && id.equals(userId) && session.getExpireTimestamp() > System.currentTimeMillis()) {
+                    GitRepo gitRepo = this.gitRepoRepository.findById(session.getAssociationId()).orElse(null);
+                    if (gitRepo != null && gitRepo.getOwner().equals(gitlinkSilentLoggingDto.getOwner()) && gitRepo.getRef().equals(gitlinkSilentLoggingDto.getRef())) {
+                        OAuth2ApiProxy oAuth2Api = OAuth2ApiProxy.builder()
+                                .thirdPartyType(thirdPartyType)
+                                .userId(userId)
+                                .build();
+                        String jwt = this.userContextHolder.getJwt();
+                        String owner = gitlinkSilentLoggingDto.getOwner();
+                        String ref = gitlinkSilentLoggingDto.getRef();
+                        return ResponseEntity.ok(JwtResponse.builder()
+                                .type("Bearer")
+                                .token(jwt)
+                                .id(userId)
+                                .username(session.getUsername())
+                                .avatarUrl(session.getAvatarUrl())
+                                .thirdPartyType(this.oAuth2Properties.getThirdPartyType())
+                                .entryUrl(oAuth2Api.getEntryUrl(owner, ref))
+                                .associationData(AssociationData.buildGitRepo(ref, owner))
+                                .build());
+                    }
                 }
+            } catch (Exception e) {
+                log.warn("JWT失效，将正常登录");
             }
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
@@ -134,12 +141,6 @@ public class GitlinkController {
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
-
-        if (new Date().getTime() > gitlinkSilentLoggingDto.getTimestamp() + this.oAuth2Properties.getGitlink().getSilentLogin().getCodeTimeout() * 1000L) {
-            throw new CodeExpiredException("code已过期");
-        }
-
-
         return ResponseEntity.ok(this.silentLogin(gitlinkSilentLoggingDto.getRef(), gitlinkSilentLoggingDto.getOwner(), gitlinkSilentLoggingDto.getUserId()));
     }
 
