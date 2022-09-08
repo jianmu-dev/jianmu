@@ -57,6 +57,7 @@ public class UserContextHolder {
     public String getJwt() {
         return (((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes()))
                 .getRequest())
-                .getHeader("Authorization");
+                .getHeader("Authorization")
+                .substring(7);
     }
 }
