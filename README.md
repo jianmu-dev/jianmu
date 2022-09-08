@@ -67,3 +67,5 @@ openssl rand -hex 16
 [快速开始](https://docs.jianmu.dev/guide/quick-start.html)
 
 [官网首页](https://jianmu.dev)
+
+![联系我们](./contact.png)
