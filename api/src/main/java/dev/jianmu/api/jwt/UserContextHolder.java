@@ -2,11 +2,11 @@ package dev.jianmu.api.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.exception.JsonParseException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -17,11 +17,9 @@ import java.util.Objects;
 public class UserContextHolder {
     private final static ObjectMapper mapper = new ObjectMapper();
 
-    private final GlobalProperties globalProperties;
     private final JwtProperties jwtProperties;
 
-    public UserContextHolder(GlobalProperties globalProperties, JwtProperties jwtProperties) {
-        this.globalProperties = globalProperties;
+    public UserContextHolder(JwtProperties jwtProperties) {
         this.jwtProperties = jwtProperties;
     }
 
@@ -34,7 +32,7 @@ public class UserContextHolder {
         String authorizationHeader = (((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes()))
                 .getRequest())
                 .getHeader("Authorization");
-        if (authorizationHeader == null) {
+        if (!StringUtils.hasLength(authorizationHeader)) {
             return new JwtSession();
         }
         authorizationHeader = authorizationHeader.substring(7);
