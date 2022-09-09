@@ -174,7 +174,7 @@ export enum GitRepoEnum {
 }
 
 /**
- * 第三方协会类型枚举
+ * 关联类型枚举
  */
 
 export enum AssociationTypeEnum {
