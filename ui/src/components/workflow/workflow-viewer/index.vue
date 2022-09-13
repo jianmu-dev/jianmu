@@ -152,9 +152,9 @@ export default defineComponent({
         // 同步detail的dsl->弹窗展示
         emit('async-dsl', workflowGraph.dsl);
         // 更新缩放视图
-        workflowGraph.getZooms(zoom);
+        zoom.value = workflowGraph.getZoom();
         // X6赋值
-        workflowGraph.getIsX6(isX6);
+        isX6.value = workflowGraph.getIsX6();
         // 延迟更新节点状态(解决第一次进入或刷新时 props.tasks长度为0的情况会报错，故延长50毫秒)
         if (firstLoad.value) {
           firstLoad.value = false;
@@ -217,19 +217,25 @@ export default defineComponent({
         loadingGraph.value = true;
       },
       // 缩放
-      handleZoom(val?: number){
-        workflowGraph.handleZoom(zoom, val);
+      handleZoom(val?: number) {
+        // 执行缩放
+        workflowGraph.handleZoom(val);
+        // 更新缩放视图
+        zoom.value = workflowGraph.getZoom();
       },
       // 全屏/退出全屏
       handleFullscreen(boo: boolean) {
-        // 同步全屏状态
+        // 同步全屏状态 预览需要这个状态
         emit('is-fullscreen', boo);
-        workflowGraph.handleFullscreen(zoom);
+        // 执行内置 全屏/退出全屏方法
+        workflowGraph.handleFullscreen((num: number) => {
+          // 更新缩放视图
+          zoom.value = num;
+        });
       },
       // 旋转
-      handleRotation(){
-        // console.log('调用内置旋转 workflowGraph.rotation()');
-        props.tasks && workflowGraph.rotate(props.tasks);
+      handleRotation() {
+        workflowGraph.rotate(props.tasks? props.tasks : []);
       },
       // 点击节点上的任务和参数
       clickNode(id: string, nodeType: NodeTypeEnum, tabType: NodeToolbarTabTypeEnum) {
