@@ -268,13 +268,6 @@ export default defineComponent({
         if (nodeEvent.value && JSON.stringify(nodeEvent.value) === JSON.stringify(evt)) {
           return;
         }
-        // 临时判断处理，需要删掉 TODO
-        if (isX6.value) {
-          evt = {
-            ...evt,
-            height: evt.height + 40,
-          };
-        }
         nodeEvent.value = evt;
       },
     };
