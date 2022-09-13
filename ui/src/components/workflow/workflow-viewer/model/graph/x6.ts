@@ -112,15 +112,21 @@ export class X6Graph extends BaseGraph {
 
   configNodeAction(mouseoverNode: ((evt: INodeMouseoverEvent) => void)): void {
     // 设置鼠标滑过事件
-    this.graph.on('node:mouseenter', ({ node }) => {
+    this.graph.on('node:mouseover', ({ e: { pageY }, node }) => {
       const shapeEl = this.getShapeEl(node.id);
+      // 强制改为默认手势
+      shapeEl.style.cursor = 'default';
+      const { width, height, x, y } = shapeEl.getBoundingClientRect();
+      if (pageY > y + width) {
+        // 鼠标移动到文字上不触发 mouseoverNode
+        return;
+      }
+
       // 鼠标进入节点时，显示阴影
       (shapeEl.querySelector('.img')! as HTMLElement)
         .style.boxShadow = '0 0 8px 1px #C5D9FF';
 
       const { id, description, type } = this.buildEvt(node);
-      const { width, height, x, y } = shapeEl.getBoundingClientRect();
-      // TODO 鼠标移动到文字上不触发 mouseoverNode
       mouseoverNode({ id, description, type, width, height: height - textMaxHeight, x, y });
     });
   }
