@@ -1,5 +1,6 @@
 package dev.jianmu.oauth2.api.impl.vo.gitlab;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.jianmu.oauth2.api.vo.ITokenVo;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,20 +14,30 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TokenVo implements ITokenVo {
-    private String access_token;
-    private String token_type;
-    private String refresh_token;
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    @JsonProperty("token_type")
+    private String tokenType;
+
+    @JsonProperty("expires_in")
+    private long expiresIn;
+
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+
     private String scope;
-    private long created_at;
-    private long expires_in;
+
+    @JsonProperty("created_at")
+    private long createdAt;
 
     @Override
     public String getAccessToken() {
-        return this.access_token;
+        return this.accessToken;
     }
 
     @Override
     public long getExpireInMs() {
-        return expires_in * 1000;
+        return expiresIn * 1000;
     }
 }

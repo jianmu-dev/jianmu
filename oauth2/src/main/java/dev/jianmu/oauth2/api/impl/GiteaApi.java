@@ -54,11 +54,11 @@ public class GiteaApi implements OAuth2Api {
     public ITokenVo getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto giteaLoggingDto = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitea().getClientId())
-                .client_secret(this.oAuth2Properties.getGitea().getClientSecret())
+                .clientId(this.oAuth2Properties.getGitea().getClientId())
+                .clientSecret(this.oAuth2Properties.getGitea().getClientSecret())
                 .code(code)
-                .grant_type(this.oAuth2Properties.getGitea().getGrantType())
-                .redirect_uri(redirectUri)
+                .grantType(this.oAuth2Properties.getGitea().getGrantType())
+                .redirectUri(redirectUri)
                 .build();
 
         String giteaLoginJson;
