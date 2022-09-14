@@ -18,6 +18,28 @@ import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config
 
 const { textMaxHeight } = NODE;
 
+function getIndicatorToolItem(status: TaskStatusEnum) {
+  return {
+    name: 'button',
+    args: {
+      markup: [
+        {
+          tagName: 'circle',
+          selector: 'button',
+          attrs: {
+            r: 4,
+            fill: states[status].indicatorStyle.fill,
+            cursor: 'default',
+          },
+        },
+      ],
+      x: '100%',
+      y: 0,
+      offset: { x: 4, y: 4 },
+    },
+  };
+}
+
 export class X6Graph extends BaseGraph {
   private readonly graph: Graph;
   private readonly workflowTool: WorkflowTool;
@@ -73,28 +95,9 @@ export class X6Graph extends BaseGraph {
 
     render(this.graph, data, this.workflowTool);
 
-    this.graph.getNodes().forEach(node => {
+    this.graph.getNodes().forEach(node =>
       // 添加指示灯
-      node.addTools({
-        name: 'button',
-        args: {
-          markup: [
-            {
-              tagName: 'circle',
-              selector: 'button',
-              attrs: {
-                r: 4,
-                fill: states[TaskStatusEnum.INIT].indicatorStyle.fill,
-                cursor: 'default',
-              },
-            },
-          ],
-          x: '100%',
-          y: 0,
-          offset: { x: 4, y: 4 },
-        },
-      });
-    });
+      node.addTools(getIndicatorToolItem(TaskStatusEnum.INIT)));
   }
 
   hideNodeToolbar(nodeRef: string): void {
@@ -225,10 +228,8 @@ export class X6Graph extends BaseGraph {
 
   private refreshIndicator(node: Node, status: TaskStatusEnum): void {
     // 刷新指示灯
-    const indicator = Array.from(this.graph.container.querySelectorAll('.x6-cell-tool.x6-node-tool.x6-cell-tool-button'))
-      .filter(el => (el.getAttribute('data-cell-id') === node.id))[0] as SVGElement;
-    const circle = (indicator.childNodes.item(0) as SVGElement);
-    circle.setAttribute('fill', states[status].indicatorStyle.fill!);
+    node.removeTool('button');
+    node.addTools(getIndicatorToolItem(status));
   }
 
   private startAnimation(node: Node): void {
