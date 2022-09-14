@@ -19,19 +19,25 @@ import lombok.Setter;
 public class UserInfoVo implements IUserInfoVo {
     @JsonProperty("username")
     private String username_;
+
     private String login;
-    private String image_url;
+
+    @JsonProperty("image_url")
+    private String imageUrl;
+
     private boolean admin;
-    private long user_id;
+
+    @JsonProperty("user_id")
+    private long userId;
 
     @Override
     public String getId() {
-        return String.valueOf(this.user_id);
+        return String.valueOf(this.userId);
     }
 
     @Override
     public String getAvatarUrl() {
-        return ApplicationContextUtil.getBean(OAuth2Properties.class).getGitlink().getBaseUrl() + this.image_url;
+        return ApplicationContextUtil.getBean(OAuth2Properties.class).getGitlink().getBaseUrl() + this.imageUrl;
     }
 
     @Override

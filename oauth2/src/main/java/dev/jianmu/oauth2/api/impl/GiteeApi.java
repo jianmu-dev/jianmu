@@ -53,11 +53,11 @@ public class GiteeApi implements OAuth2Api {
     public ITokenVo getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto giteeLoginVo = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitee().getClientId())
-                .client_secret(this.oAuth2Properties.getGitee().getClientSecret())
+                .clientId(this.oAuth2Properties.getGitee().getClientId())
+                .clientSecret(this.oAuth2Properties.getGitee().getClientSecret())
                 .code(code)
-                .grant_type(this.oAuth2Properties.getGitee().getGrantType())
-                .redirect_uri(redirectUri)
+                .grantType(this.oAuth2Properties.getGitee().getGrantType())
+                .redirectUri(redirectUri)
                 .build();
 
 

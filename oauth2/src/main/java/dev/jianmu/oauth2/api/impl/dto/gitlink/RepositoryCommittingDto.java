@@ -1,6 +1,7 @@
 package dev.jianmu.oauth2.api.impl.dto.gitlink;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,16 +19,22 @@ import java.util.List;
 @Setter
 public class RepositoryCommittingDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String author_email;
+    @JsonProperty("author_email")
+    private String authorEmail;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String author_name;
+    @JsonProperty("author_name")
+    private String authorName;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String committer_email;
+    @JsonProperty("committer_email")
+    private String committerEmail;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String committer_name;
+    @JsonProperty("committer_name")
+    private String committerName;
     private List<File> files;
-    private long author_timeunix;
-    private long committer_timeunix;
+    @JsonProperty("author_timeunix")
+    private long authorTimeunix;
+    @JsonProperty("committer_timeunix")
+    private long committerTimeunix;
     private String branch;
     private String message;
 
@@ -36,8 +43,10 @@ public class RepositoryCommittingDto {
     @Setter
     public static class File {
         private final String encoding = "text";
-        private String action_type;
+        @JsonProperty("action_type")
+        private String actionType;
         private String content;
-        private String file_path;
+        @JsonProperty("file_path")
+        private String filePath;
     }
 }

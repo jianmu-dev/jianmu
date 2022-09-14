@@ -56,11 +56,11 @@ public class GitLabApi implements OAuth2Api {
     public ITokenVo getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto gitlabLoggingDto = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitlab().getClientId())
-                .client_secret(this.oAuth2Properties.getGitlab().getClientSecret())
+                .clientId(this.oAuth2Properties.getGitlab().getClientId())
+                .clientSecret(this.oAuth2Properties.getGitlab().getClientSecret())
                 .code(code)
-                .grant_type(this.oAuth2Properties.getGitlab().getGrantType())
-                .redirect_uri(redirectUri)
+                .grantType(this.oAuth2Properties.getGitlab().getGrantType())
+                .redirectUri(redirectUri)
                 .build();
 
         String gitlabLoginJson;

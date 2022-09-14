@@ -65,17 +65,17 @@ public class GitlinkApi implements OAuth2Api {
         LoggingDto gitlinkLoginVo;
         if (grantType.equals("client_credentials")) {
             gitlinkLoginVo = LoggingDto.builder()
-                    .client_id(this.oAuth2Properties.getGitlink().getClientId())
-                    .client_secret(this.oAuth2Properties.getGitlink().getClientSecret())
-                    .grant_type(grantType)
+                    .clientId(this.oAuth2Properties.getGitlink().getClientId())
+                    .clientSecret(this.oAuth2Properties.getGitlink().getClientSecret())
+                    .grantType(grantType)
                     .build();
         } else {
             gitlinkLoginVo = LoggingDto.builder()
-                    .client_id(this.oAuth2Properties.getGitlink().getClientId())
-                    .client_secret(this.oAuth2Properties.getGitlink().getClientSecret())
+                    .clientId(this.oAuth2Properties.getGitlink().getClientId())
+                    .clientSecret(this.oAuth2Properties.getGitlink().getClientSecret())
                     .code(code)
-                    .grant_type(grantType)
-                    .redirect_uri(redirectUri)
+                    .grantType(grantType)
+                    .redirectUri(redirectUri)
                     .build();
         }
         String gitlinkLoginJson;
@@ -467,17 +467,17 @@ public class GitlinkApi implements OAuth2Api {
         long timeunix = new Date().getTime() / 1000;
         ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
         files.add(RepositoryCommittingDto.File.builder()
-                .action_type("create")
-                .file_path(filepath)
+                .actionType("create")
+                .filePath(filepath)
                 .content(content)
                 .build());
         RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
-                .author_email(authorEmail)
-                .author_name(authorName)
-                .committer_email(committerEmail)
-                .committer_name(committerName)
-                .author_timeunix(timeunix)
-                .committer_timeunix(timeunix)
+                .authorEmail(authorEmail)
+                .authorName(authorName)
+                .committerEmail(committerEmail)
+                .committerName(committerName)
+                .authorTimeunix(timeunix)
+                .committerTimeunix(timeunix)
                 .branch(branch)
                 .message(message)
                 .files(files)
@@ -530,17 +530,17 @@ public class GitlinkApi implements OAuth2Api {
         long timeunix = new Date().getTime() / 1000;
         ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
         files.add(RepositoryCommittingDto.File.builder()
-                .action_type("delete")
-                .file_path(filepath)
+                .actionType("delete")
+                .filePath(filepath)
                 .content(content)
                 .build());
         RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
-                .author_email(authorEmail)
-                .author_name(authorName)
-                .committer_email(committerEmail)
-                .committer_name(committerName)
-                .author_timeunix(timeunix)
-                .committer_timeunix(timeunix)
+                .authorEmail(authorEmail)
+                .authorName(authorName)
+                .committerEmail(committerEmail)
+                .committerName(committerName)
+                .authorTimeunix(timeunix)
+                .committerTimeunix(timeunix)
                 .branch(branch)
                 .message(message)
                 .files(files)
@@ -594,17 +594,17 @@ public class GitlinkApi implements OAuth2Api {
         long timeunix = new Date().getTime() / 1000;
         ArrayList<RepositoryCommittingDto.File> files = new ArrayList<>();
         files.add(RepositoryCommittingDto.File.builder()
-                .action_type("update")
-                .file_path(filepath)
+                .actionType("update")
+                .filePath(filepath)
                 .content(content)
                 .build());
         RepositoryCommittingDto repositoryCommittingDto = RepositoryCommittingDto.builder()
-                .author_email(authorEmail)
-                .author_name(authorName)
-                .committer_email(committerEmail)
-                .committer_name(committerName)
-                .author_timeunix(timeunix)
-                .committer_timeunix(timeunix)
+                .authorEmail(authorEmail)
+                .authorName(authorName)
+                .committerEmail(committerEmail)
+                .committerName(committerName)
+                .authorTimeunix(timeunix)
+                .committerTimeunix(timeunix)
                 .branch(branch)
                 .message(message)
                 .files(files)

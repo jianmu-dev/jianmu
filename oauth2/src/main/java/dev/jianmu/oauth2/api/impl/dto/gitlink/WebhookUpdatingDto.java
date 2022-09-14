@@ -1,5 +1,6 @@
 package dev.jianmu.oauth2.api.impl.dto.gitlink;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,9 @@ import java.util.List;
 @Getter
 @Setter
 public class WebhookUpdatingDto {
+    @JsonProperty("content_type")
     private final String content_type = "json";
+    @JsonProperty("http_method")
     private final String http_method = "POST";
     private List<String> events;
     private String url;

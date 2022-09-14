@@ -1,5 +1,6 @@
 package dev.jianmu.oauth2.api.impl.dto.gitea;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +15,17 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoggingDto {
-    private String grant_type;
+    @JsonProperty("grant_type")
+    private String grantType;
+
     private String code;
-    private String client_id;
-    private String redirect_uri;
-    private String client_secret;
+
+    @JsonProperty("client_id")
+    private String clientId;
+
+    @JsonProperty("redirect_uri")
+    private String redirectUri;
+
+    @JsonProperty("client_secret")
+    private String clientSecret;
 }
