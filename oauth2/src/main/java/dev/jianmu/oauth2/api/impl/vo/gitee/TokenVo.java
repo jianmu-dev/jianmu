@@ -1,6 +1,6 @@
-
 package dev.jianmu.oauth2.api.impl.vo.gitee;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,10 +13,21 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TokenVo {
-    private String access_token;
-    private String token_type;
-    private long expires_in;
-    private String refresh_token;
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    @JsonProperty("token_type")
+    private String tokenType;
+
+    @JsonProperty("expires_in")
+    private long expiresIn;
+
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+
     private String scope;
-    private long created_at;
+
+    @JsonProperty("created_at")
+    private long createdAt;
+
 }

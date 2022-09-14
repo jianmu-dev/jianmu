@@ -116,7 +116,8 @@ public class OAuth2Controller {
         User user = User.Builder.aReference()
                 .data(userInfoVo.getData())
                 .id(userId)
-                .avatarUrl(userInfoVo.getAvatarUrl())
+                .avatarUrl(userInfoVo.getAvatarUrl() == null ?
+                        "" : userInfoVo.getAvatarUrl())
                 .username(userInfoVo.getUsername())
                 .nickname(userInfoVo.getNickname())
                 .build();
