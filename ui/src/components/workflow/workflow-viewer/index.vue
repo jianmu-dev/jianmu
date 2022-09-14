@@ -264,10 +264,6 @@ export default defineComponent({
       },
       // 鼠标移动节点上去 x6evt数据监听回调
       mouseenterNode(evt: INodeMouseoverEvent) {
-        // 与上一个一致返回(字和节点会触发两次) TODO
-        if (nodeEvent.value && JSON.stringify(nodeEvent.value) === JSON.stringify(evt)) {
-          return;
-        }
         nodeEvent.value = evt;
       },
     };
