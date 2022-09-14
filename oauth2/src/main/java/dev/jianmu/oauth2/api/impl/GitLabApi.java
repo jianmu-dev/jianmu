@@ -11,10 +11,7 @@ import dev.jianmu.oauth2.api.exception.JsonParseException;
 import dev.jianmu.oauth2.api.impl.dto.gitlab.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitlab.UserInfoVo;
 import dev.jianmu.oauth2.api.impl.vo.gitlab.TokenVo;
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
+import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -59,11 +56,11 @@ public class GitLabApi implements OAuth2Api {
     public String getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto gitlabLoggingDto = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitlab().getClientId())
-                .client_secret(this.oAuth2Properties.getGitlab().getClientSecret())
+                .clientId(this.oAuth2Properties.getGitlab().getClientId())
+                .clientSecret(this.oAuth2Properties.getGitlab().getClientSecret())
                 .code(code)
-                .grant_type(this.oAuth2Properties.getGitlab().getGrantType())
-                .redirect_uri(redirectUri)
+                .grantType(this.oAuth2Properties.getGitlab().getGrantType())
+                .redirectUri(redirectUri)
                 .build();
 
         String gitlabLoginJson;
@@ -93,7 +90,7 @@ public class GitLabApi implements OAuth2Api {
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
-        return gitlabTokenVo.getAccess_token();
+        return gitlabTokenVo.getAccessToken();
     }
 
     @Override
@@ -137,6 +134,5 @@ public class GitLabApi implements OAuth2Api {
     public IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner) {
         return null;
     }
-
 }
 

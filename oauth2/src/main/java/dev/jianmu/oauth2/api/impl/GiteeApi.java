@@ -5,13 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.exception.*;
 import dev.jianmu.oauth2.api.impl.dto.gitee.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitee.*;
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
-import dev.jianmu.oauth2.api.exception.*;
+import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -30,6 +27,7 @@ import java.util.List;
  */
 @Component
 public class GiteeApi implements OAuth2Api {
+    private final static ObjectMapper MAPPER = new ObjectMapper();
     private final RestTemplate restTemplate;
     private final OAuth2Properties oAuth2Properties;
 
@@ -55,17 +53,17 @@ public class GiteeApi implements OAuth2Api {
     public String getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto giteeLoginVo = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitee().getClientId())
-                .client_secret(this.oAuth2Properties.getGitee().getClientSecret())
+                .clientId(this.oAuth2Properties.getGitee().getClientId())
+                .clientSecret(this.oAuth2Properties.getGitee().getClientSecret())
                 .code(code)
-                .grant_type(this.oAuth2Properties.getGitee().getGrantType())
-                .redirect_uri(redirectUri)
+                .grantType(this.oAuth2Properties.getGitee().getGrantType())
+                .redirectUri(redirectUri)
                 .build();
 
-        ObjectMapper mapper = new ObjectMapper();
+
         String giteeLoginJson;
         try {
-            giteeLoginJson = mapper.writeValueAsString(giteeLoginVo);
+            giteeLoginJson = MAPPER.writeValueAsString(giteeLoginVo);
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
@@ -86,11 +84,11 @@ public class GiteeApi implements OAuth2Api {
 
         TokenVo giteeTokenVo;
         try {
-            giteeTokenVo = mapper.readValue(tokenEntity.getBody(), TokenVo.class);
+            giteeTokenVo = MAPPER.readValue(tokenEntity.getBody(), TokenVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
-        return giteeTokenVo.getAccess_token();
+        return giteeTokenVo.getAccessToken();
     }
 
     @Override
@@ -111,9 +109,8 @@ public class GiteeApi implements OAuth2Api {
 
         String userInfo = userInfoEntity.getBody();
         UserInfoVo giteeUserInfoVo;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            giteeUserInfoVo = mapper.readValue(userInfo, UserInfoVo.class);
+            giteeUserInfoVo = MAPPER.readValue(userInfo, UserInfoVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
@@ -143,9 +140,8 @@ public class GiteeApi implements OAuth2Api {
         }
 
         RepoVo repoVo;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            repoVo = mapper.readValue(entity.getBody(), RepoVo.class);
+            repoVo = MAPPER.readValue(entity.getBody(), RepoVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
@@ -175,13 +171,10 @@ public class GiteeApi implements OAuth2Api {
             throw new HttpServerException(e.getMessage());
         }
         List<RepoMembersVo> repoMembersVos;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            repoMembersVos = mapper.readValue(entity.getBody(), new TypeReference<>() {
+            repoMembersVos = MAPPER.readValue(entity.getBody(), new TypeReference<>() {
             });
-            repoMembersVos.forEach(m -> {
-                m.setOwner(gitRepoOwner);
-            });
+            repoMembersVos.forEach(m -> m.setOwner(gitRepoOwner));
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
@@ -211,9 +204,8 @@ public class GiteeApi implements OAuth2Api {
         }
 
         List<BranchesVo.Branch> branches;
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            branches = mapper.readValue(entity.getBody(), new TypeReference<>() {
+            branches = MAPPER.readValue(entity.getBody(), new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());

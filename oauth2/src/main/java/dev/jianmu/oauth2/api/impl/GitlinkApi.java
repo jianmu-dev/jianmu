@@ -54,11 +54,11 @@ public class GitlinkApi implements OAuth2Api {
     public String getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto gitlinkLoginVo = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitlink().getClientId())
-                .client_secret(this.oAuth2Properties.getGitlink().getClientSecret())
+                .clientId(this.oAuth2Properties.getGitlink().getClientId())
+                .clientSecret(this.oAuth2Properties.getGitlink().getClientSecret())
                 .code(code)
-                .grant_type(this.oAuth2Properties.getGitlink().getGrantType())
-                .redirect_uri(redirectUri)
+                .grantType(this.oAuth2Properties.getGitlink().getGrantType())
+                .redirectUri(redirectUri)
                 .build();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -89,7 +89,7 @@ public class GitlinkApi implements OAuth2Api {
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
-        return gitlinkTokenVo.getAccess_token();
+        return gitlinkTokenVo.getAccessToken();
     }
 
     @Override

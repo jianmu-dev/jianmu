@@ -11,10 +11,7 @@ import dev.jianmu.oauth2.api.exception.JsonParseException;
 import dev.jianmu.oauth2.api.impl.dto.gitea.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitea.TokenVo;
 import dev.jianmu.oauth2.api.impl.vo.gitea.UserInfoVo;
-import dev.jianmu.oauth2.api.vo.IBranchesVo;
-import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
-import dev.jianmu.oauth2.api.vo.IRepoVo;
-import dev.jianmu.oauth2.api.vo.IUserInfoVo;
+import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -57,11 +54,11 @@ public class GiteaApi implements OAuth2Api {
     public String getAccessToken(String code, String redirectUri) {
         // 封装请求条件
         LoggingDto giteaLoggingDto = LoggingDto.builder()
-                .client_id(this.oAuth2Properties.getGitea().getClientId())
-                .client_secret(this.oAuth2Properties.getGitea().getClientSecret())
+                .clientId(this.oAuth2Properties.getGitea().getClientId())
+                .clientSecret(this.oAuth2Properties.getGitea().getClientSecret())
                 .code(code)
-                .grant_type(this.oAuth2Properties.getGitea().getGrantType())
-                .redirect_uri(redirectUri)
+                .grantType(this.oAuth2Properties.getGitea().getGrantType())
+                .redirectUri(redirectUri)
                 .build();
 
         String giteaLoginJson;
@@ -91,7 +88,7 @@ public class GiteaApi implements OAuth2Api {
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage());
         }
-        return giteaTokenVo.getAccess_token();
+        return giteaTokenVo.getAccessToken();
     }
 
     @Override
