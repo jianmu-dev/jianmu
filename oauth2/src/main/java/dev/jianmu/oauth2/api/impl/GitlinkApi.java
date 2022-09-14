@@ -31,6 +31,7 @@ import java.util.List;
  */
 @Component
 public class GitlinkApi implements OAuth2Api {
+    private final static ObjectMapper MAPPER = new ObjectMapper();
     private final RestTemplate restTemplate;
     private final OAuth2Properties oAuth2Properties;
 
@@ -60,11 +61,10 @@ public class GitlinkApi implements OAuth2Api {
                 .grantType(this.oAuth2Properties.getGitlink().getGrantType())
                 .redirectUri(redirectUri)
                 .build();
-
-        ObjectMapper mapper = new ObjectMapper();
+        
         String gitlinkLoginJson;
         try {
-            gitlinkLoginJson = mapper.writeValueAsString(gitlinkLoginVo);
+            gitlinkLoginJson = MAPPER.writeValueAsString(gitlinkLoginVo);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -85,7 +85,7 @@ public class GitlinkApi implements OAuth2Api {
 
         TokenVo gitlinkTokenVo;
         try {
-            gitlinkTokenVo = mapper.readValue(tokenEntity.getBody(), TokenVo.class);
+            gitlinkTokenVo = MAPPER.readValue(tokenEntity.getBody(), TokenVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -115,9 +115,9 @@ public class GitlinkApi implements OAuth2Api {
 
         String userInfo = userInfoEntity.getBody();
         UserInfoVo gitlinkUserInfoVo;
-        ObjectMapper mapper = new ObjectMapper();
+        
         try {
-            gitlinkUserInfoVo = mapper.readValue(userInfo, UserInfoVo.class);
+            gitlinkUserInfoVo = MAPPER.readValue(userInfo, UserInfoVo.class);
         } catch (JsonProcessingException e) {
             throw new JsonParseException();
         }
@@ -145,11 +145,11 @@ public class GitlinkApi implements OAuth2Api {
         } catch (HttpServerErrorException serverErrorException) {
             throw new HttpServerException();
         }
-        ObjectMapper mapper = new ObjectMapper();
+        
         RepoVo gitlinkRepoVo;
 
         try {
-            gitlinkRepoVo = mapper.readValue(responseEntity.getBody(), RepoVo.class);
+            gitlinkRepoVo = MAPPER.readValue(responseEntity.getBody(), RepoVo.class);
             if (gitlinkRepoVo.getStatus() == HttpStatus.FORBIDDEN.value()) {
                 throw new NoPermissionException(gitlinkRepoVo.getMessage());
             }
@@ -184,11 +184,10 @@ public class GitlinkApi implements OAuth2Api {
         } catch (HttpServerErrorException serverErrorException) {
             throw new HttpServerException();
         }
-
-        ObjectMapper mapper = new ObjectMapper();
+        
         RepoMembersVo gitlinkRepoMemberVo;
         try {
-            gitlinkRepoMemberVo = mapper.readValue(responseEntity.getBody(), RepoMembersVo.class);
+            gitlinkRepoMemberVo = MAPPER.readValue(responseEntity.getBody(), RepoMembersVo.class);
             if (gitlinkRepoMemberVo.getStatus() != null) {
                 if (gitlinkRepoMemberVo.getStatus() == HttpStatus.FORBIDDEN.value()) {
                     throw new NoPermissionException(gitlinkRepoMemberVo.getMessage());
@@ -223,10 +222,10 @@ public class GitlinkApi implements OAuth2Api {
         } catch (HttpServerErrorException serverErrorException) {
             throw new HttpServerException();
         }
-        ObjectMapper mapper = new ObjectMapper();
+       
         List<BranchesVo.Branch> branches = null;
         try {
-            BranchesVo branchesVo = mapper.readValue(responseEntity.getBody(), BranchesVo.class);
+            BranchesVo branchesVo = MAPPER.readValue(responseEntity.getBody(), BranchesVo.class);
             if (branchesVo.getStatus() != null) {
                 if (branchesVo.getStatus() == HttpStatus.FORBIDDEN.value()) {
                     throw new NoPermissionException(branchesVo.getMessage());
@@ -235,7 +234,7 @@ public class GitlinkApi implements OAuth2Api {
             }
         } catch (JsonProcessingException e) {
             try {
-                branches = mapper.readValue(responseEntity.getBody(), new TypeReference<>() {
+                branches = MAPPER.readValue(responseEntity.getBody(), new TypeReference<>() {
                 });
             } catch (JsonProcessingException ex) {
                 throw new JsonParseException();
