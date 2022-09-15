@@ -274,7 +274,8 @@ public class OAuth2Controller {
         long expireTimestamp = session.getExpireTimestamp();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
-                        .avatarUrl(userInfo.getAvatarUrl())
+                        .avatarUrl(userInfo.getAvatarUrl() == null ?
+                                "" : userInfo.getAvatarUrl())
                         .id(userInfo.getId())
                         .username(userInfo.getUsername())
                         .nickname(userInfo.getNickname())
