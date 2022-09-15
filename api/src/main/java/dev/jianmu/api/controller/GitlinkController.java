@@ -205,7 +205,8 @@ public class GitlinkController {
         User user = User.Builder.aReference()
                 .data(userInfoVo.getData())
                 .id(userInfoId)
-                .avatarUrl(userInfoVo.getAvatarUrl())
+                .avatarUrl(userInfoVo.getAvatarUrl() == null ?
+                        "" : userInfoVo.getAvatarUrl())
                 .username(userInfoVo.getUsername())
                 .nickname(userInfoVo.getNickname())
                 .build();
