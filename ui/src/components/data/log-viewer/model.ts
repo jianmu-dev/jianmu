@@ -1,7 +1,7 @@
 // @ts-ignore
 import _listen from 'good-listener';
 
-export const MAX_SIZE = 30000;
+export const MAX_SIZE = 3000;
 export type DownloadFnType = () => Promise<string>;
 export type CallBackFnType = (data: string[], startLine?: number) => void;
 export type CheckAutoScrollFnType = () => boolean;
