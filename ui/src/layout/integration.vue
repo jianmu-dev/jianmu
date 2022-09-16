@@ -287,6 +287,15 @@ export default defineComponent({
           margin: 0.8% 0.5% 0 0.5%;
         }
       }
+
+      .el-overlay {
+        // 解决弹窗可以上下滚动
+        overflow: hidden;
+        // 调整上间距防止弹窗底部被截
+        .el-dialog.entry {
+          margin-top: 70px !important;
+        }
+      }
     }
 
     // 代码项目编辑页
