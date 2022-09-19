@@ -21,6 +21,6 @@ public class WorkflowInstanceCreatedEventHandler implements Subscriber<WorkflowI
 
     @Override
     public void subscribe(WorkflowInstanceCreatedEvent event) {
-        this.workflowInstanceStatusSubscribeService.sendWorkflowInstanceMessage(event.getWorkflowRef(), event);
+        this.workflowInstanceStatusSubscribeService.sendMessageByWorkflowRef(event.getWorkflowRef(), event);
     }
 }

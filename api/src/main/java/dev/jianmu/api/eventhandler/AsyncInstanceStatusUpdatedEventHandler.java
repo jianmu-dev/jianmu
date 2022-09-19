@@ -19,6 +19,6 @@ public class AsyncInstanceStatusUpdatedEventHandler implements Subscriber<AsyncT
 
     @Override
     public void subscribe(AsyncTaskInstanceStatusUpdatedEvent event) {
-        this.workflowInstanceStatusSubscribeService.sendWorkflowInstanceMessage(event.getWorkflowRef(), event.getWorkflowInstanceId(), event);
+        this.workflowInstanceStatusSubscribeService.sendMessageByWorkflowRef(event.getWorkflowRef(), event);
     }
 }

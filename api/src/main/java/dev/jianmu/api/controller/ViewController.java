@@ -355,12 +355,12 @@ public class ViewController {
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVo(instance);
     }
 
-    @GetMapping(path = "/workflow_instance/subscribe/{workflowInstanceId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path = "/workflow_instance/subscribe/{workflowRef}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "流程实例状态更改订阅接口", description = "流程实例状态更改订阅接口")
-    public SseEmitter subscribeWorkflowInstanceUpdated(@PathVariable("workflowInstanceId") String workflowInstanceId) {
-        var workflowInstance = this.instanceApplication.findById(workflowInstanceId)
-                .orElseThrow(() -> new RuntimeException("未找到流程实例"));
-        return this.workflowInstanceStatusSubscribeService.newSseEmitter(workflowInstance.getWorkflowRef(), workflowInstanceId);
+    public SseEmitter subscribeWorkflowInstanceUpdated(@PathVariable("workflowRef") String workflowRef) {
+        this.projectApplication.findByWorkflowRef(workflowRef)
+                .orElseThrow(() -> new RuntimeException("未找到项目"));
+        return this.workflowInstanceStatusSubscribeService.newSseEmitter(workflowRef);
     }
 
     @GetMapping("/workflow/{ref}/{version}")
