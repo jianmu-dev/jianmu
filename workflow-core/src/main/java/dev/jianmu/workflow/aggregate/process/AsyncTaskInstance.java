@@ -263,8 +263,8 @@ public class AsyncTaskInstance extends AggregateRoot {
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
                 .workflowInstanceId(this.workflowInstanceId)
-                .asyncTaskInstanceId(this.asyncTaskRef)
-                .asyncTaskInstanceStatus(this.status.name())
+                .id(this.id)
+                .status(this.status.name())
                 .asyncTaskRef(this.asyncTaskRef)
                 .asyncTaskType(this.asyncTaskType)
                 .build());

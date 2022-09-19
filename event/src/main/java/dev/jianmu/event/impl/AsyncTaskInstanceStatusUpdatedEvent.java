@@ -10,8 +10,8 @@ public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
     private String workflowRef;
     private String workflowVersion;
     private String workflowInstanceId;
-    private String asyncTaskInstanceId;
-    private String asyncTaskInstanceStatus;
+    private String id;
+    private String status;
     private String asyncTaskRef;
     private String asyncTaskType;
 
@@ -35,20 +35,20 @@ public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
         return workflowInstanceId;
     }
 
-    public String getAsyncTaskInstanceId() {
-        return asyncTaskInstanceId;
+    public String getId() {
+        return id;
     }
 
-    public String getAsyncTaskInstanceStatus() {
-        return asyncTaskInstanceStatus;
+    public String getStatus() {
+        return status;
     }
 
     public static class Builder{
         private String workflowRef;
         private String workflowVersion;
         private String workflowInstanceId;
-        private String asyncTaskInstanceId;
-        private String asyncTaskInstanceStatus;
+        private String id;
+        private String status;
         private String asyncTaskRef;
         private String asyncTaskType;
 
@@ -71,19 +71,21 @@ public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
             return this;
         }
 
-        public Builder asyncTaskInstanceId(String asyncTaskInstanceId) {
-            this.asyncTaskInstanceId = asyncTaskInstanceId;
+        public Builder id(String id) {
+            this.id = id;
             return this;
         }
 
-        public Builder asyncTaskInstanceStatus(String asyncTaskInstanceStatus) {
-            this.asyncTaskInstanceStatus = asyncTaskInstanceStatus;
+        public Builder status(String status) {
+            this.status = status;
             return this;
         }
+
         public Builder asyncTaskRef(String asyncTaskRef) {
             this.asyncTaskRef = asyncTaskRef;
             return this;
         }
+
         public Builder asyncTaskType(String asyncTaskType) {
             this.asyncTaskType = asyncTaskType;
             return this;
@@ -94,8 +96,8 @@ public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
             event.workflowRef = this.workflowRef;
             event.workflowVersion = this.workflowVersion;
             event.workflowInstanceId = this.workflowInstanceId;
-            event.asyncTaskInstanceId = this.asyncTaskInstanceId;
-            event.asyncTaskInstanceStatus = this.asyncTaskInstanceStatus;
+            event.id = this.id;
+            event.status = this.status;
             event.asyncTaskRef = this.asyncTaskRef;
             event.asyncTaskType = this.asyncTaskType;
             return event;
@@ -108,8 +110,8 @@ public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
                 "workflowRef='" + workflowRef + '\'' +
                 ", workflowVersion='" + workflowVersion + '\'' +
                 ", workflowInstanceId='" + workflowInstanceId + '\'' +
-                ", asyncTaskInstanceId='" + asyncTaskInstanceId + '\'' +
-                ", asyncTaskInstanceStatus='" + asyncTaskInstanceStatus + '\'' +
+                ", id='" + id + '\'' +
+                ", status='" + status + '\'' +
                 ", asyncTaskRef='" + asyncTaskRef + '\'' +
                 ", asyncTaskType='" + asyncTaskType + '\'' +
                 '}';
