@@ -20,33 +20,69 @@ import lombok.Setter;
 public class UserInfoVo implements IUserInfoVo {
     @JsonProperty("id")
     private Integer _id;
+
     private String login;
     private String name;
-    private String avatar_url;
+
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
+
     private String url;
-    private String html_url;
+
+    @JsonProperty("html_url")
+    private String htmlUrl;
+
     private String remark;
-    private String followers_url;
-    private String following_url;
-    private String gists_url;
-    private String starred_url;
-    private String subscriptions_url;
-    private String organizations_url;
-    private String repos_url;
-    private String events_url;
-    private String received_events_url;
+
+    @JsonProperty("followers_url")
+    private String followersUrl;
+
+    @JsonProperty("following_url")
+    private String followingUrl;
+
+    @JsonProperty("gists_url")
+    private String gistsUrl;
+
+    @JsonProperty("starred_url")
+    private String starredUrl;
+
+    @JsonProperty("subscriptions_url")
+    private String subscriptionsUrl;
+
+    @JsonProperty("organizations_url")
+    private String organizationsUrl;
+
+    @JsonProperty("repos_url")
+    private String reposUrl;
+
+    @JsonProperty("events_url")
+    private String eventsUrl;
+
+    @JsonProperty("received_events_url")
+    private String received_eventsUrl;
+
     private String type;
     private String blog;
     private String weibo;
     private String bio;
-    private String public_repos;
-    private String public_gists;
+
+    @JsonProperty("public_repos")
+    private String publicRepos;
+
+    @JsonProperty("public_gists")
+    private String publicGists;
+
     private String followers;
     private String following;
     private String stared;
     private String watched;
-    private String created_at;
-    private String updated_at;
+
+    @JsonProperty("created_at")
+    private String createdAt;
+
+    @JsonProperty("updated_at")
+    private String updatedAt;
+
     private String email;
 
     @Override
@@ -57,7 +93,7 @@ public class UserInfoVo implements IUserInfoVo {
 
     @Override
     public String getAvatarUrl() {
-        return this.avatar_url;
+        return this.avatarUrl;
     }
 
     @Override

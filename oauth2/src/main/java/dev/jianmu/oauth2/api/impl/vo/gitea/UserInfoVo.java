@@ -20,8 +20,10 @@ public class UserInfoVo implements IUserInfoVo {
     private Integer _id;
     @JsonProperty("username")
     private String _username;
-    private String full_name;
-    private String avatar_url;
+    @JsonProperty("full_name")
+    private String fullName;
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
 
     @Override
     public String getId() {
@@ -30,12 +32,12 @@ public class UserInfoVo implements IUserInfoVo {
 
     @Override
     public String getAvatarUrl() {
-        return this.avatar_url;
+        return this.avatarUrl;
     }
 
     @Override
     public String getNickname() {
-        return this.full_name;
+        return this.fullName;
     }
 
     @Override

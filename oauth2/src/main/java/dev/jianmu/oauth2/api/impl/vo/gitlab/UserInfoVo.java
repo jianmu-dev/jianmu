@@ -21,7 +21,8 @@ public class UserInfoVo implements IUserInfoVo {
     @JsonProperty("username")
     private String _username;
     private String name;
-    private String avatar_url;
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
 
     @Override
     public String getId() {
@@ -30,7 +31,7 @@ public class UserInfoVo implements IUserInfoVo {
 
     @Override
     public String getAvatarUrl() {
-        return this.avatar_url;
+        return this.avatarUrl;
     }
 
     @Override

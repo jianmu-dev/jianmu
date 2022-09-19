@@ -123,7 +123,8 @@ public class OAuth2Controller {
         User user = User.Builder.aReference()
                 .data(userInfoVo.getData())
                 .id(userId)
-                .avatarUrl(userInfoVo.getAvatarUrl())
+                .avatarUrl(userInfoVo.getAvatarUrl() == null ?
+                        "" : userInfoVo.getAvatarUrl())
                 .username(userInfoVo.getUsername())
                 .nickname(userInfoVo.getNickname())
                 .build();
@@ -189,7 +190,8 @@ public class OAuth2Controller {
         User user = User.Builder.aReference()
                 .data(userInfoVo.getData())
                 .id(userId)
-                .avatarUrl(userInfoVo.getAvatarUrl())
+                .avatarUrl(userInfoVo.getAvatarUrl() == null ?
+                        "" : userInfoVo.getAvatarUrl())
                 .username(userInfoVo.getUsername())
                 .nickname(userInfoVo.getNickname())
                 .build();
@@ -272,7 +274,8 @@ public class OAuth2Controller {
         long expireTimestamp = session.getExpireTimestamp();
         Authentication authentication = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(JsonUtil.jsonToString(JwtSession.builder()
-                        .avatarUrl(userInfo.getAvatarUrl())
+                        .avatarUrl(userInfo.getAvatarUrl() == null ?
+                                "" : userInfo.getAvatarUrl())
                         .id(userInfo.getId())
                         .username(userInfo.getUsername())
                         .nickname(userInfo.getNickname())
