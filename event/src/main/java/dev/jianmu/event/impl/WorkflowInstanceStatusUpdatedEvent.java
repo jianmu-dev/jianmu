@@ -7,8 +7,8 @@ package dev.jianmu.event.impl;
  * @create 2022/9/15 1:49 下午
  */
 public class WorkflowInstanceStatusUpdatedEvent extends BaseEvent {
-    private String workflowInstanceId;
-    private String workflowInstanceStatus;
+    private String id;
+    private String status;
     private String workflowRef;
     private String workflowVersion;
 
@@ -20,17 +20,17 @@ public class WorkflowInstanceStatusUpdatedEvent extends BaseEvent {
         return workflowVersion;
     }
 
-    public String getWorkflowInstanceId() {
-        return workflowInstanceId;
+    public String getId() {
+        return id;
     }
 
-    public String getWorkflowInstanceStatus() {
-        return workflowInstanceStatus;
+    public String getStatus() {
+        return status;
     }
 
     public static class Builder{
-        private String workflowInstanceId;
-        private String workflowInstanceStatus;
+        private String id;
+        private String status;
         private String workflowRef;
         private String workflowVersion;
 
@@ -38,13 +38,13 @@ public class WorkflowInstanceStatusUpdatedEvent extends BaseEvent {
             return new Builder();
         }
 
-        public Builder workflowInstanceId(String workflowInstanceId) {
-            this.workflowInstanceId = workflowInstanceId;
+        public Builder id(String id) {
+            this.id = id;
             return this;
         }
 
-        public Builder workflowInstanceStatus(String workflowInstanceStatus) {
-            this.workflowInstanceStatus = workflowInstanceStatus;
+        public Builder status(String status) {
+            this.status = status;
             return this;
         }
 
@@ -60,8 +60,8 @@ public class WorkflowInstanceStatusUpdatedEvent extends BaseEvent {
 
         public WorkflowInstanceStatusUpdatedEvent build() {
             var event = new WorkflowInstanceStatusUpdatedEvent();
-            event.workflowInstanceId = this.workflowInstanceId;
-            event.workflowInstanceStatus = this.workflowInstanceStatus;
+            event.id = this.id;
+            event.status = this.status;
             event.workflowRef = this.workflowRef;
             event.workflowVersion = this.workflowVersion;
             return event;
@@ -71,8 +71,8 @@ public class WorkflowInstanceStatusUpdatedEvent extends BaseEvent {
     @Override
     public String toString() {
         return "WorkflowInstanceStatusUpdatedEvent{" +
-                "workflowInstanceId='" + workflowInstanceId + '\'' +
-                ", workflowInstanceStatus='" + workflowInstanceStatus + '\'' +
+                "id='" + id + '\'' +
+                ", status='" + status + '\'' +
                 ", workflowRef='" + workflowRef + '\'' +
                 ", workflowVersion='" + workflowVersion + '\'' +
                 '}';

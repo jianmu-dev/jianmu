@@ -214,8 +214,8 @@ public class WorkflowInstance extends AggregateRoot {
         var event = WorkflowInstanceStatusUpdatedEvent.Builder.aWorkflowInstanceStatusUpdatedEvent()
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
-                .workflowInstanceId(this.id)
-                .workflowInstanceStatus(this.status.toString())
+                .id(this.id)
+                .status(this.status.name())
                 .build();
         this.raiseSseEvents(event);
     }
