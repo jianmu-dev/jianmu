@@ -20,10 +20,6 @@ public class WorkflowInstanceStatusUpdatedEventHandler implements Subscriber<Wor
 
     @Override
     public void subscribe(WorkflowInstanceStatusUpdatedEvent event) {
-        this.workflowInstanceStatusSubscribeService.sendWorkflowInstanceMessage(event.getWorkflowRef(), event);
-        var status = event.getStatus();
-        if (ProcessStatus.FINISHED.name().equals(status) || ProcessStatus.TERMINATED.name().equals(status)) {
-            this.workflowInstanceStatusSubscribeService.clearByWorkflowInstanceId(event.getWorkflowRef(), event.getId());
-        }
+        this.workflowInstanceStatusSubscribeService.sendMessageByWorkflowRef(event.getWorkflowRef(), event);
     }
 }

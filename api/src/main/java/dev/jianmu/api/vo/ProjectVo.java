@@ -33,6 +33,10 @@ public class ProjectVo {
     // ID
     @Schema(description = "项目ID")
     private String id;
+    // 关联流程定义Ref
+    private String workflowRef;
+    // 关联流程定义版本
+    private String workflowVersion;
     // 关联流程定义名称 workflowName
     @Schema(description = "项目名称")
     private String name;
