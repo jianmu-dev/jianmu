@@ -5,7 +5,9 @@ import dev.jianmu.application.command.TaskActivatingCmd;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInternalApplication;
+import dev.jianmu.event.Publisher;
 import dev.jianmu.workflow.aggregate.process.AsyncTaskInstance;
+import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.event.process.*;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -28,17 +30,19 @@ public class AsyncTaskInstanceEventHandler {
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final WorkflowInternalApplication workflowInternalApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
-    private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final Publisher publisher;
 
     public AsyncTaskInstanceEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             WorkflowInternalApplication workflowInternalApplication,
             TaskInstanceInternalApplication taskInstanceInternalApplication,
-            ApplicationEventPublisher publisher
-    ) {
+            ApplicationEventPublisher applicationEventPublisher,
+            Publisher publisher) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.workflowInternalApplication = workflowInternalApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.publisher = publisher;
     }
 
@@ -47,9 +51,16 @@ public class AsyncTaskInstanceEventHandler {
         log.info("Get AsyncTaskInstance here -------------------------");
         asyncTaskInstance.getUncommittedDomainEvents().forEach(event -> {
             log.info("publish {} here", event.getClass().getSimpleName());
-            this.publisher.publishEvent(event);
+            this.applicationEventPublisher.publishEvent(event);
         });
         asyncTaskInstance.clear();
+
+        // 发布异步任务实例状态变更事件
+        asyncTaskInstance.getUncommittedSseEvents().forEach(event -> {
+            log.info("publish {} here", event.getClass().getSimpleName());
+            this.publisher.publish(event);
+        });
+        asyncTaskInstance.clearSseEvents();
         log.info("-----------------------------------------------------");
     }
 
@@ -100,13 +111,15 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleTaskRunningEvent(TaskRunningEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskRunningEvent here -------------------------");
         log.info(event.toString());
-        this.workflowInstanceInternalApplication.resume(event.getWorkflowInstanceId(), event.getNodeRef());
-        log.info("-----------------------------------------------------");
+        if (event.getPreStatus() == TaskStatus.SUSPENDED) {
+            this.workflowInstanceInternalApplication.resume(event.getWorkflowInstanceId(), event.getNodeRef());
+        }        log.info("-----------------------------------------------------");
     }
 
     @Async

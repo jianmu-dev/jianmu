@@ -11,6 +11,7 @@ import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.git.repo.aggregate.Flow;
+import dev.jianmu.infrastructure.sse.WorkflowInstanceStatusSubscribeService;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
@@ -65,6 +66,7 @@ public class ViewController {
     private final UserContextHolder userContextHolder;
     private final ExternalParameterApplication externalParameterApplication;
     private final ExternalParameterLabelApplication externalParameterLabelApplication;
+    private final WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService;
 
     private final AssociationUtil associationUtil;
 
@@ -83,6 +85,7 @@ public class ViewController {
             UserContextHolder userContextHolder,
             ExternalParameterApplication externalParameterApplication,
             ExternalParameterLabelApplication externalParameterLabelApplication,
+            WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService,
             AssociationUtil associationUtil
     ) {
         this.projectApplication = projectApplication;
@@ -99,6 +102,7 @@ public class ViewController {
         this.userContextHolder = userContextHolder;
         this.externalParameterApplication = externalParameterApplication;
         this.externalParameterLabelApplication = externalParameterLabelApplication;
+        this.workflowInstanceStatusSubscribeService = workflowInstanceStatusSubscribeService;
         this.associationUtil = associationUtil;
     }
 
@@ -349,6 +353,14 @@ public class ViewController {
         var instance = this.instanceApplication.findByTriggerId(triggerId)
                 .orElseThrow(() -> new RuntimeException("未找到流程实例"));
         return WorkflowInstanceMapper.INSTANCE.toWorkflowInstanceVo(instance);
+    }
+
+    @GetMapping(path = "/workflow_instance/subscribe/{workflowInstanceId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "流程实例状态更改订阅接口", description = "流程实例状态更改订阅接口")
+    public SseEmitter subscribeWorkflowInstanceUpdated(@PathVariable("workflowInstanceId") String workflowInstanceId) {
+        var workflowInstance = this.instanceApplication.findById(workflowInstanceId)
+                .orElseThrow(() -> new RuntimeException("未找到流程实例"));
+        return this.workflowInstanceStatusSubscribeService.newSseEmitter(workflowInstance.getWorkflowRef(), workflowInstanceId);
     }
 
     @GetMapping("/workflow/{ref}/{version}")
