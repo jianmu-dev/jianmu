@@ -1,5 +1,7 @@
 package dev.jianmu.workflow.aggregate.process;
 
+import dev.jianmu.event.impl.WorkflowInstanceCreatedEvent;
+import dev.jianmu.event.impl.WorkflowInstanceStatusUpdatedEvent;
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.aggregate.definition.GlobalParameter;
 import dev.jianmu.workflow.event.process.*;
@@ -79,6 +81,18 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processStartedEvent);
+        // 发布流程实例创建事件
+        this.raiseSseEvents(WorkflowInstanceCreatedEvent.Builder.aWorkflowInstanceCreatedEvent()
+                .id(this.id)
+                .triggerId(this.triggerId)
+                .triggerType(this.triggerType)
+                .name(this.name)
+                .description(this.description)
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.getWorkflowVersion())
+                .serialNo(this.serialNo)
+                .status(this.status.name())
+                .build());
     }
 
     // 执行流程Volume任务
@@ -96,6 +110,8 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processPendedEvent);
+        // 发布流程实例状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     // 开始执行流程实例
@@ -127,6 +143,8 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processSuspendedEvent);
+        // 发布流程实例状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     // 恢复流程运行
@@ -142,12 +160,16 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processRunningEvent);
+        // 发布流程实例状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     // 在start任务中终止流程实例
     public void terminateInStart() {
         this.status = ProcessStatus.TERMINATED;
         this.endTime = LocalDateTime.now();
+        // 发布流程实例状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     // 终止流程实例
@@ -164,6 +186,8 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processTerminatedEvent);
+        // 发布流程实例状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     // 结束流程实例
@@ -181,6 +205,19 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processEndedEvent);
+        // 发布流程实例状态变更事件
+        this.publishStatusUpdatedEvent();
+    }
+
+    // 发布流程实例状态变更事件
+    public void publishStatusUpdatedEvent() {
+        var event = WorkflowInstanceStatusUpdatedEvent.Builder.aWorkflowInstanceStatusUpdatedEvent()
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .id(this.id)
+                .status(this.status.name())
+                .build();
+        this.raiseSseEvents(event);
     }
 
     public void setGlobalParameters(Set<GlobalParameter> globalParameters) {

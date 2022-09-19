@@ -20,6 +20,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>dev.jianmu</groupId>
+            <artifactId>event</artifactId>
+            <version>0.2.3-gitlink</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>

@@ -1,5 +1,6 @@
 package dev.jianmu.workflow.aggregate.process;
 
+import dev.jianmu.event.impl.AsyncTaskInstanceStatusUpdatedEvent;
 import dev.jianmu.workflow.aggregate.AggregateRoot;
 import dev.jianmu.workflow.event.process.*;
 
@@ -73,6 +74,7 @@ public class AsyncTaskInstance extends AggregateRoot {
 
     // 异步任务开始执行
     public void run() {
+        var preStatus = this.status;
         this.status = TaskStatus.RUNNING;
         this.startTime = LocalDateTime.now();
         this.endTime = null;
@@ -86,8 +88,11 @@ public class AsyncTaskInstance extends AggregateRoot {
                         .workflowRef(this.workflowRef)
                         .workflowVersion(this.workflowVersion)
                         .nodeType(this.asyncTaskType)
+                        .preStatus(preStatus)
                         .build()
         );
+        // 发布状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     public void retry() {
@@ -141,6 +146,8 @@ public class AsyncTaskInstance extends AggregateRoot {
                         .nodeType(this.asyncTaskType)
                         .build()
         );
+        // 发布状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     private void ignore() {
@@ -159,6 +166,8 @@ public class AsyncTaskInstance extends AggregateRoot {
                         .nodeType(this.asyncTaskType)
                         .build()
         );
+        // 发布状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     public void succeed() {
@@ -177,6 +186,8 @@ public class AsyncTaskInstance extends AggregateRoot {
                         .nodeType(this.asyncTaskType)
                         .build()
         );
+        // 发布状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     public void succeed(String nextTarget) {
@@ -197,6 +208,8 @@ public class AsyncTaskInstance extends AggregateRoot {
                         .nodeType(this.asyncTaskType)
                         .build()
         );
+        // 发布状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     public void fail() {
@@ -214,6 +227,8 @@ public class AsyncTaskInstance extends AggregateRoot {
                         .nodeType(this.asyncTaskType)
                         .build()
         );
+        // 发布状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     public void skip() {
@@ -223,6 +238,8 @@ public class AsyncTaskInstance extends AggregateRoot {
         this.activatingTime = LocalDateTime.now();
         this.endTime = LocalDateTime.now();
         this.serialNo++;
+        // 发布状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     // 中止任务执行
@@ -238,6 +255,19 @@ public class AsyncTaskInstance extends AggregateRoot {
                 .nodeType(this.asyncTaskType)
                 .build();
         this.raiseEvent(terminatingEvent);
+    }
+
+    // 发布状态变更事件
+    public void publishStatusUpdatedEvent() {
+        this.raiseSseEvents(AsyncTaskInstanceStatusUpdatedEvent.Builder.aWorkflowInstanceStatusUpdatedEvent()
+                .workflowRef(this.workflowRef)
+                .workflowVersion(this.workflowVersion)
+                .workflowInstanceId(this.workflowInstanceId)
+                .id(this.id)
+                .status(this.status.name())
+                .asyncTaskRef(this.asyncTaskRef)
+                .asyncTaskType(this.asyncTaskType)
+                .build());
     }
 
     public String getId() {
