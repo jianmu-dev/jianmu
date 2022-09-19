@@ -26,7 +26,16 @@
           </div>
         </div>
         <div class="table-title">
-          <div class="title">请求列表</div>
+          <div class="title-container">
+            <div class="title">请求列表</div>
+            <jm-tooltip placement="top">
+              <template #content>
+                若无对应的触发记录，可到上游webhook管理中，<br/>
+                查看请求是否发送成功
+              </template>
+              <i class="jm-icon-button-help"></i>
+            </jm-tooltip>
+          </div>
           <jm-tooltip content="刷新" placement="bottom">
             <jm-button
               :class="{ 'jm-icon-button-refresh': true, 'doing': refreshFlag}"
@@ -654,8 +663,18 @@ export default defineComponent({
       justify-content: space-between;
       align-items: center;
 
-      .title {
-        color: #082340;
+      .title-container {
+        display: flex;
+
+        .title {
+          color: #082340;
+          margin-right: 5px;
+        }
+
+        .jm-icon-button-help {
+          min-height: 16px;
+          color: #818c9b;
+        }
       }
 
       .jm-icon-button-refresh {
