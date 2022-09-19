@@ -22,7 +22,7 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>event</artifactId>
-            <version>0.2.1-gitlink</version>
+            <version>0.2.3-gitlink</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
