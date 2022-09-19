@@ -42,6 +42,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         AUTH_WHITELIST.add("/workers/**");
         AUTH_WHITELIST.add("/workers/**");
         AUTH_WHITELIST.add("/view/logs/**");
+        AUTH_WHITELIST.add("/view/workflow_instance/subscribe/**");
     }
 
     private final JwtUserDetailsService jwtUserDetailsService;
