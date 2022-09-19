@@ -72,6 +72,11 @@
             <artifactId>git-repo-core</artifactId>
             <version>0.2.1-gitlink</version>
         </dependency>
+        <dependency>
+            <groupId>dev.jianmu</groupId>
+            <artifactId>event</artifactId>
+            <version>0.2.1-gitlink</version>
+        </dependency>
 
         <!--For JWT-->
         <dependency>

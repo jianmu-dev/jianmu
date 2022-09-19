@@ -2,6 +2,7 @@ package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.service.internal.*;
+import dev.jianmu.event.Publisher;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.event.process.*;
 import lombok.extern.slf4j.Slf4j;
@@ -24,24 +25,26 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class WorkflowInstanceEventHandler {
     private final WorkflowInternalApplication workflowInternalApplication;
     private final AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication;
-    private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final WorkerInternalApplication workerInternalApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
+    private final Publisher publisher;
 
     public WorkflowInstanceEventHandler(
             WorkflowInternalApplication workflowInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
-            ApplicationEventPublisher publisher,
+            ApplicationEventPublisher applicationEventPublisher,
             WorkerInternalApplication workerInternalApplication,
             TaskInstanceInternalApplication taskInstanceInternalApplication,
-            WorkflowInstanceInternalApplication workflowInstanceInternalApplication) {
+            WorkflowInstanceInternalApplication workflowInstanceInternalApplication, Publisher publisher) {
         this.workflowInternalApplication = workflowInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
-        this.publisher = publisher;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.workerInternalApplication = workerInternalApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
+        this.publisher = publisher;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -49,9 +52,16 @@ public class WorkflowInstanceEventHandler {
         log.info("Get workflowInstance here -------------------------");
         workflowInstance.getUncommittedDomainEvents().forEach(event -> {
             log.info("publish {} here", event.getClass().getSimpleName());
-            this.publisher.publishEvent(event);
+            this.applicationEventPublisher.publishEvent(event);
         });
         workflowInstance.clear();
+
+        // 发布流程实例状态变更事件
+        workflowInstance.getUncommittedSseEvents().forEach(event -> {
+            log.info("publish {} here", event.getClass().getSimpleName());
+            this.publisher.publish(event);
+        });
+        workflowInstance.clearSseEvents();
         log.info("-----------------------------------------------------");
     }
 

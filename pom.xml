@@ -25,6 +25,7 @@
         <module>git-repo-core</module>
         <module>oauth2</module>
         <module>external-parameter-core</module>
+        <module>event</module>
     </modules>
 
     <properties>
