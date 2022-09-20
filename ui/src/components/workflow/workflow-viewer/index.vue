@@ -160,7 +160,7 @@ export default defineComponent({
           firstLoad.value = false;
           setTimeout(()=> {
             props.tasks?.length && workflowGraph.updateNodeStates(props.tasks);
-          }, 100);
+          }, 500);
         } else {
           props.tasks?.length && workflowGraph.updateNodeStates(props.tasks);
         }
