@@ -182,3 +182,13 @@ export enum AssociationTypeEnum {
   USER = 'USER',
   ORG = 'ORG'
 }
+
+/**
+ * SSE事件类型枚举
+ */
+
+export enum IEventType {
+  WorkflowInstanceCreatedEvent = 'WorkflowInstanceCreatedEvent',
+  WorkflowInstanceStatusUpdatedEvent = 'WorkflowInstanceStatusUpdatedEvent',
+  AsyncTaskInstanceStatusUpdatedEvent = 'AsyncTaskInstanceStatusUpdatedEvent'
+}

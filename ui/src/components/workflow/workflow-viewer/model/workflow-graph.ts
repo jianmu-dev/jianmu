@@ -89,8 +89,8 @@ export class WorkflowGraph {
   updateNodeStates(tasks: ITaskExecutionRecordVo[]) {
     // TODO
     setTimeout(() => {
-      this.graph.updateNodeStates(tasks);
-    }, 200);
+      tasks.length && this.graph.updateNodeStates(tasks);
+    }, 300);
   }
   // 高亮节点方法
   highlightNodeState(status: string, boo: boolean) {

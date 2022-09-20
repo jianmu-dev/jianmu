@@ -15,6 +15,7 @@
       v-if="recordDetail.project"
       :param="param"
       :project="recordDetail.project"
+      :event="listEvent"
       @change-record="handleChangeRecord"
     />
     <record-info
@@ -39,15 +40,15 @@
       :record="recordDetail.record"
       :currentRecordStatus="recordList.currentRecordStatus"
       :viewMode="modelValue.viewMode"
+      :event="taskEvent"
       @has-global-param="bool=>globalParamBtn=bool"
       @change-view-mode="handleChangeDslMode"
-      @trigger-refresh="recordList.refreshSuspended()"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IWorkflowDetailParam, IRecordDetail, IRecordListParam } from './model/data/common';
 import Topbar from './layout/top/topbar.vue';
@@ -59,7 +60,10 @@ import { ISessionVo } from '@/api/dto/session';
 import { ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import { IProjectDetailVo } from '@/api/dto/project';
-import sleep from '@/utils/sleep';
+import { IEventType } from '@/api/dto/enumeration';
+import { WorkflowDetail } from './model/detail-sse';
+import { IEvent } from '@/api/event/common';
+import { IAsyncTaskInstanceStatusUpdatedEvent } from '@/api/event/workflow-execution-record';
 
 export default defineComponent({
   name: 'jm-workflow-detail',
@@ -79,25 +83,48 @@ export default defineComponent({
   setup(props, { emit }) {
     const recordDetail = ref<IRecordDetail>({});
     // list组件需要的参数
-    const param =  computed(():IRecordListParam => ({
+    const param = computed((): IRecordListParam => ({
       workflowRef: recordDetail.value.project?.workflowRef || '',
       triggerId: props.modelValue.triggerId,
     }));
     // record-list.vue组件
     const recordList = ref<any>();
+    // 新增更新实例 event
+    const listEvent = ref<IEvent>();
     // graph-panel.vue组件
     const graphPanel = ref<any>();
+    // 更新任务状态 event
+    const taskEvent = ref<IAsyncTaskInstanceStatusUpdatedEvent>();
     //  全局参数按钮
     const globalParamBtn = ref<boolean>(false);
-    onMounted(async ()=>{
+    let detailSse: any;
+    onMounted(async () => {
       // 获取项目详情
       recordDetail.value.project = await fetchProjectDetail(props.modelValue.projectId);
+      // 详情页的SSE数据推送
+      detailSse = new WorkflowDetail(recordDetail.value.project.workflowRef, event => {
+        // 异步任务推送事件
+        if (event.eventName === IEventType.AsyncTaskInstanceStatusUpdatedEvent) {
+          // 必须是推送的是当前页面停留实例的任务数据
+          if (recordDetail.value.record && recordDetail.value.record?.id === (event as IAsyncTaskInstanceStatusUpdatedEvent).workflowInstanceId) {
+            taskEvent.value = event as IAsyncTaskInstanceStatusUpdatedEvent;
+          }
+          // 实例新增更新推送事件
+        } else {
+          listEvent.value = event;
+        }
+      });
     });
 
+    onUnmounted(() => {
+      detailSse.destroy();
+    });
     return {
       recordDetail,
       recordList,
+      listEvent,
       graphPanel,
+      taskEvent,
       param,
       globalParamBtn,
       ViewModeEnum,
@@ -115,14 +142,13 @@ export default defineComponent({
         // record-list 同步modelValue数据/地址栏
         emit('update:model-value', { ...props.modelValue, triggerId });
       },
-      // ui/src/components/workflow/workflow-detail
       handleChangeDslMode(viewMode: ViewModeEnum) {
         // graph-panel 同步modelValue数据/地址栏
         emit('update:model-value', { ...props.modelValue, viewMode });
       },
       trigger(msg: any) {
         // undefined 触发成功之后刷新record列表 msg -> undefined为成功
-        if(!msg) {
+        if (!msg) {
           recordList.value.refreshRecordList();
           emit('trigger', msg);
           setTimeout(() => {
