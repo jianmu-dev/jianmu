@@ -76,6 +76,7 @@ import WebhookLog from '../right/webhook-log.vue';
 import ParamLog from '../right/param-log.vue';
 import { ignoreTask, retryTask } from '@/api/workflow-execution-record';
 import { ViewModeEnum, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
+import { IAsyncTaskInstanceStatusUpdatedEvent } from '@/api/event/workflow-execution-record';
 
 export default defineComponent({
   components: { ProcessLog, TaskLog, WebhookLog, ParamLog },
@@ -96,6 +97,9 @@ export default defineComponent({
       type: String as PropType<ViewModeEnum>,
       default: ViewModeEnum.GRAPHIC,
     },
+    event: {
+      type: Object as PropType<IAsyncTaskInstanceStatusUpdatedEvent>,
+    },
   },
   emits: ['change-view-mode', 'trigger-refresh', 'has-global-param'],
   setup(props, { emit }) {
@@ -110,22 +114,46 @@ export default defineComponent({
     const triggerId = ref(props.record.triggerId);
     const recordStatus = ref(props.record.status);
     let graphPanel:GraphPanel;
+    const timestamp = ref<number>(props.event?.timestamp || 0);
+    // 节流
+    let shortTimeGetOne:boolean = true;
     // record 页面变化引起数据变化 函数执行
-    onUpdated(async ()=>{
+    onUpdated(async () => {
+      // 非手动更改当前实例状态
       if (recordStatus.value !== props.record.status) {
         recordStatus.value = props.record.status;
         graphPanel.refreshGparam(props.record);
+      }
+      // 异步任务实例状态更新事件
+      if (props.event && props.event.timestamp !== timestamp.value) {
+        // 记录当前触发事件时间戳(时间戳没改变即不会改变任务状态)
+        timestamp.value = props.event.timestamp;
+        // 修改任务数据和状态
+        const i = taskRecords.value.findIndex(e=>e.businessId===props.event!.id);
+        // 找不到更新的那条任务就返回
+        // console.log('iii', i, JSON.parse(JSON.stringify(props.event)));
+        if (i === -1 && shortTimeGetOne) {
+          shortTimeGetOne = false;
+          graphPanel.getTaskRecords();
+          console.log('获取任务--- -1');
+          setTimeout(()=> {
+            shortTimeGetOne = true;
+          }, 1000);
+        }
+        taskRecords.value.splice(i, 1, {
+          ...taskRecords.value[i],
+          status: props.event.status,
+        });
+        // 引起子组件 onUpdated 更新状态灯
+        taskRecords.value = JSON.parse(JSON.stringify(taskRecords.value));
+        // console.log('SSE 1', taskRecords.value.map(e=>e.status));
       }
       if (triggerId.value === props.record.triggerId) {
         return;
       }
       triggerId.value = props.record.triggerId;
       graphPanel.refreshGparam(props.record);
-      graphPanel.resetSuspended();
-      (async () => {
-        // await graphPanel.getDslAndNodeinfos();
-        await graphPanel.getTaskRecords();
-      })();
+      await graphPanel.getTaskRecords();
       graphPanel.getGlobalParams();
     });
     onMounted(async ()=>{
@@ -144,10 +172,6 @@ export default defineComponent({
         emit('has-global-param', Boolean(globalParam?.length));
       };
       graphPanel = await new GraphPanel(gparam.value, dslCallbackFn, taskCallbackFn, globalParamsCallbackFn);
-      graphPanel.listen();
-    });
-    onBeforeUnmount(()=>{
-      graphPanel.destroy();
     });
     const taskLogForm = ref<IOpenTaskLogForm>({
       drawerVisible: false,
@@ -175,14 +199,8 @@ export default defineComponent({
         if ([NodeToolbarTabTypeEnum.RETRY, NodeToolbarTabTypeEnum.IGNORE].includes(tabType)) {
           const nodeData = taskRecords.value&&taskRecords.value.find(({ businessId }) => businessId === nodeId)!;
           await (tabType === NodeToolbarTabTypeEnum.RETRY ? retryTask : ignoreTask)(props.record!.id, nodeData? nodeData.nodeName: 'null');
-          // 开启 graph刷新(挂起状态下 刷新20次)
-          graphPanel.refreshSuspended();
-          // 开启 recordlist刷新(挂起状态下 刷新20次) 传递给index 调用 recordListRefreshSuspended
-          emit('trigger-refresh');
           return;
         }
-
-        console.log('tabType', nodeId, tabType);
         taskLogForm.value.drawerVisible = true;
         taskLogForm.value.id = nodeId;
         taskLogForm.value.tabType = tabType;
@@ -201,8 +219,6 @@ export default defineComponent({
         paramLogDrawer.value = true;
       },
       async refreshGraphPanel() {
-        console.log('刷新GraphPanel');
-        // await graphPanel.getDslAndNodeinfos();
         graphPanel.getTaskRecords();
       },
     };

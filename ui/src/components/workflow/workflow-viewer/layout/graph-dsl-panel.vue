@@ -58,7 +58,7 @@ export default defineComponent({
       // console.log('获取新画布', props.workflowVersion);
       const { dslText: dsl, nodes } = await fetchWorkflow(props.workflowRef, props.workflowVersion);
       const nodeInfos = nodes.filter(({ metadata }) => metadata).map(({ metadata }) => JSON.parse(metadata as string));
-      workflowGraph = new WorkflowGraph(dsl, nodeInfos, triggerType.value, container.value!, (evt: INodeMouseoverEvent)=> {
+      workflowGraph = new WorkflowGraph(dsl, nodeInfos, triggerType.value, container.value!, (evt: INodeMouseoverEvent) => {
         emit('mouseenter-node', evt);
       });
       visibleDsl.value = workflowGraph.visibleDsl;
@@ -67,27 +67,32 @@ export default defineComponent({
     // 执行动画
     const executeAnimation = () => {
       // 状态不同，执行动画(''时不用更新)
-      if (taskStatus.value && taskStatus.value !== props.tasks.map(e=>e.status).join()) {
+      if (taskStatus.value && taskStatus.value !== props.tasks.map(e => e.status).join()) {
         // console.log('props.tasks', props.tasks.map(e=>e.status));
         // 运行时动画
         workflowGraph.updateNodeStates(props.tasks);
       }
-      taskStatus.value = props.tasks.map(e=>e.status).join();
+      taskStatus.value = props.tasks.map(e => e.status).join();
     };
+    let lastedTaskStatus = 0;
     // 切换画布实例
     const recordChangeGraph = async () => {
-      // version 和 triggerType 都没变化 返回
-      if (workflowVersion.value === props.workflowVersion && triggerType.value === props.triggerType) {
+      // 状态是否为INIT
+      // console.log('noInit', taskStatus.value.length, lastedTaskStatus);
+      // version 和 triggerType 都没变化并且非INIT状态(taskStatus.value.length>0)且上一次字符长度非0 返回
+      if (workflowVersion.value === props.workflowVersion && triggerType.value === props.triggerType && taskStatus.value.length && lastedTaskStatus) {
         return;
       }
+      // 记录上一次状态字符长度
+      lastedTaskStatus = taskStatus.value.length;
       workflowVersion.value = props.workflowVersion;
       triggerType.value = props.triggerType;
       // 获取新画布前 销毁旧画布
-      workflowGraph.destroy();
+      workflowGraph && workflowGraph.destroy();
       // 获取新画布
       getGraphData();
     };
-    onUpdated(()=> {
+    onUpdated(() => {
       // 执行动画
       executeAnimation();
       // 切换record 重新生成画布
