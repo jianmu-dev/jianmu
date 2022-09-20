@@ -59,7 +59,7 @@ export default defineComponent({
     const currentRecordStatus = computed(()=>{
       return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.status || WorkflowExecutionRecordStatusEnum.INIT;
     });
-    const event = ref(props.event);
+    const event = ref<IEvent | undefined>(props.event);
     onUpdated(()=>{
       if (event.value === props.event) {
         return;
