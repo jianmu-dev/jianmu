@@ -10,6 +10,7 @@ export interface IWorkflowInstanceCreatedEvent extends IEvent {
    */
   status: string;
 }
+
 /**
  * 流程实例状态更新事件
  */
@@ -19,6 +20,7 @@ export interface IWorkflowInstanceStatusUpdatedEvent extends IEvent {
    */
   status: WorkflowExecutionRecordStatusEnum;
 }
+
 /**
  * 异步任务实例状态更新事件
  */
@@ -26,7 +28,7 @@ export interface IAsyncTaskInstanceStatusUpdatedEvent extends IEvent {
   /**
    * 流程实例id
    */
-   workflowInstanceId: string;
+  workflowInstanceId: string;
   /**
    * 状态
    */

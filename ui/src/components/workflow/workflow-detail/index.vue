@@ -83,7 +83,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const recordDetail = ref<IRecordDetail>({});
     // list组件需要的参数
-    const param =  computed(():IRecordListParam => ({
+    const param = computed((): IRecordListParam => ({
       workflowRef: recordDetail.value.project?.workflowRef || '',
       triggerId: props.modelValue.triggerId,
     }));
@@ -97,8 +97,8 @@ export default defineComponent({
     const taskEvent = ref<IAsyncTaskInstanceStatusUpdatedEvent>();
     //  全局参数按钮
     const globalParamBtn = ref<boolean>(false);
-    let detailSse:any;
-    onMounted(async ()=>{
+    let detailSse: any;
+    onMounted(async () => {
       // 获取项目详情
       recordDetail.value.project = await fetchProjectDetail(props.modelValue.projectId);
       // 详情页的SSE数据推送
@@ -110,7 +110,7 @@ export default defineComponent({
           if (recordDetail.value.record && recordDetail.value.record?.id === (event as IAsyncTaskInstanceStatusUpdatedEvent).workflowInstanceId) {
             taskEvent.value = event as IAsyncTaskInstanceStatusUpdatedEvent;
           }
-        // 实例新增更新推送事件
+          // 实例新增更新推送事件
         } else {
           listEvent.value = event;
         }
@@ -150,7 +150,7 @@ export default defineComponent({
       },
       trigger(msg: any) {
         // undefined 触发成功之后刷新record列表 msg -> undefined为成功
-        if(!msg) {
+        if (!msg) {
           recordList.value.refreshRecordList();
           emit('trigger', msg);
           setTimeout(() => {
