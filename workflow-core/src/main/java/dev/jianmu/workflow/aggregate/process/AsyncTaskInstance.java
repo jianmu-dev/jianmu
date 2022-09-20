@@ -259,7 +259,7 @@ public class AsyncTaskInstance extends AggregateRoot {
 
     // 发布状态变更事件
     public void publishStatusUpdatedEvent() {
-        this.raiseSseEvents(AsyncTaskInstanceStatusUpdatedEvent.Builder.aWorkflowInstanceStatusUpdatedEvent()
+        this.raiseSseEvents(AsyncTaskInstanceStatusUpdatedEvent.builder()
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
                 .workflowInstanceId(this.workflowInstanceId)
