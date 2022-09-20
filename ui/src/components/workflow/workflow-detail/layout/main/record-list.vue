@@ -59,24 +59,32 @@ export default defineComponent({
     const currentRecordStatus = computed(()=>{
       return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.status || WorkflowExecutionRecordStatusEnum.INIT;
     });
-    const timestamp = ref<number>(props.event?.timestamp || 0);
+    const event = ref(props.event);
     onUpdated(()=>{
+      if (event.value === props.event) {
+        return;
+      }
+      event.value = props.event;
       // 监听流程实例新增和修改事件
-      if (props.event && props.event.timestamp !== timestamp.value) {
-        // 记录当前触发事件时间戳(时间戳没改变即不会改变实例列表数据)
-        timestamp.value = props.event.timestamp;
+      if (props.event) {
         // 新增刷新全部
         if (props.event.eventName === IEventType.WorkflowInstanceCreatedEvent) {
           recordList.initAllRecords();
         // 更新某一条实例
         } else if (props.event.eventName === IEventType.WorkflowInstanceStatusUpdatedEvent) {
           // 找出变化那条下标
-          const i = allRecords.value.findIndex(e => e.id === props.event!.id);
+          const i = allRecords.value.findIndex(e => e.id === (props.event as IWorkflowInstanceStatusUpdatedEvent).id);
+          // 找不到返回
+          if (i === -1) {
+            return;
+          }
           // 改变那条status
           allRecords.value.splice(i, 1, {
             ...allRecords.value[i],
             status: (props.event as IWorkflowInstanceStatusUpdatedEvent).status,
           });
+          console.log('allRecords.value[i]', allRecords.value[i]);
+          handleChange(allRecords.value[i]);
         }
       }
     });

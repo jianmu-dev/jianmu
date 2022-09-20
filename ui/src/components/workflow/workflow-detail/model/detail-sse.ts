@@ -32,6 +32,8 @@ export class WorkflowDetail {
    * 销毁
    */
   destroy(): void {
-    this.eventSource && this.eventSource.close();
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
   }
 }
