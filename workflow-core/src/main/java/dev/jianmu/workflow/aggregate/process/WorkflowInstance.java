@@ -82,7 +82,7 @@ public class WorkflowInstance extends AggregateRoot {
                 .build();
         this.raiseEvent(processStartedEvent);
         // 发布流程实例创建事件
-        this.raiseSseEvents(WorkflowInstanceCreatedEvent.Builder.aWorkflowInstanceCreatedEvent()
+        this.raiseSseEvents(WorkflowInstanceCreatedEvent.builder()
                 .id(this.id)
                 .triggerId(this.triggerId)
                 .triggerType(this.triggerType)
@@ -211,7 +211,7 @@ public class WorkflowInstance extends AggregateRoot {
 
     // 发布流程实例状态变更事件
     public void publishStatusUpdatedEvent() {
-        var event = WorkflowInstanceStatusUpdatedEvent.Builder.aWorkflowInstanceStatusUpdatedEvent()
+        var event = WorkflowInstanceStatusUpdatedEvent.builder()
                 .workflowRef(this.workflowRef)
                 .workflowVersion(this.workflowVersion)
                 .id(this.id)

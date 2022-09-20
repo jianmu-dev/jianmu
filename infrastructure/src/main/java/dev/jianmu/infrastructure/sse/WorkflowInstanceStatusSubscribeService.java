@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.sse;
 
 import dev.jianmu.event.Event;
+import dev.jianmu.event.impl.SseConnectedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -16,11 +17,22 @@ public class WorkflowInstanceStatusSubscribeService {
     private final Map<String, List<SseEmitter>> workflowMap = new ConcurrentHashMap<>();
 
     public SseEmitter newSseEmitter(String workflowRef) {
-        var sseEmitter = new SseEmitter(0L);
-        sseEmitter.onError(e -> this.clearByWorkflowAndSseEmitter(workflowRef, sseEmitter));
+        var sseEmitter = new SseEmitter(1000 * 60L);
+        // 回调
+        sseEmitter.onTimeout(sseEmitter::complete);
+        sseEmitter.onCompletion(completionCallBack(workflowRef, sseEmitter));
+
         this.workflowMap.putIfAbsent(workflowRef, Collections.synchronizedList(new ArrayList<>()));
         this.workflowMap.get(workflowRef).add(sseEmitter);
+        // 发送成功连接事件
+        this.sendMessageByWorkflowRef(workflowRef, new SseConnectedEvent());
         return sseEmitter;
+    }
+
+    private Runnable completionCallBack(String workflowRef, SseEmitter sseEmitter) {
+        return () -> {
+            this.clearByWorkflowAndSseEmitter(workflowRef, sseEmitter);
+        };
     }
 
     public void sendMessageByWorkflowRef(String workflowRef, Event event) {
