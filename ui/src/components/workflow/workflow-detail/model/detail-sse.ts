@@ -6,7 +6,7 @@ type RecordListCallbackFnType = (event: IEvent)=>void;
  * @param workflowRef workflowRef
  * @param eventCallbackFn 事件以及数据回调
 */
-export class DetailSse {
+export class WorkflowDetail {
   private readonly workflowRef: string;
   private readonly eventCallbackFn: RecordListCallbackFnType;
   private eventSource: any;
@@ -19,17 +19,12 @@ export class DetailSse {
    * listen刷新数据
    */
   listen() {
-    console.log('连接EventSource');
     this.eventSource = new EventSource(`/view/workflow_instance/subscribe/${this.workflowRef}`, { withCredentials: true });
     this.eventSource.onmessage = async ({ data }:any) => {
       const changData = JSON.parse(data);
       this.eventCallbackFn(changData);
     };
     this.eventSource.onerror = (e: any) => {
-      if (e.currentTarget.readyState === 0) {
-        console.log('服务端已断开连接，尝试重连');
-        return;
-      }
       console.error(e);
     };
   }

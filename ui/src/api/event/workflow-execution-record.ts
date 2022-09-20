@@ -6,15 +6,23 @@ import { IEvent } from './common';
  */
 export interface IWorkflowInstanceCreatedEvent extends IEvent {
   /**
+   * id
+   */
+  id: string;
+  /**
    * 状态
    */
-  status: string;
+  status: WorkflowExecutionRecordStatusEnum;
 }
 
 /**
  * 流程实例状态更新事件
  */
 export interface IWorkflowInstanceStatusUpdatedEvent extends IEvent {
+  /**
+   * id
+   */
+  id: string;
   /**
    * 状态
    */
@@ -25,6 +33,10 @@ export interface IWorkflowInstanceStatusUpdatedEvent extends IEvent {
  * 异步任务实例状态更新事件
  */
 export interface IAsyncTaskInstanceStatusUpdatedEvent extends IEvent {
+  /**
+   * id
+   */
+  id: string;
   /**
    * 流程实例id
    */

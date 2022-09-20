@@ -61,7 +61,7 @@ import { ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import { IProjectDetailVo } from '@/api/dto/project';
 import { IEventType } from '@/api/dto/enumeration';
-import { DetailSse } from './model/detail-sse';
+import { WorkflowDetail } from './model/detail-sse';
 import { IEvent } from '@/api/event/common';
 import { IAsyncTaskInstanceStatusUpdatedEvent } from '@/api/event/workflow-execution-record';
 
@@ -102,11 +102,10 @@ export default defineComponent({
       // 获取项目详情
       recordDetail.value.project = await fetchProjectDetail(props.modelValue.projectId);
       // 详情页的SSE数据推送
-      detailSse = new DetailSse(recordDetail.value.project.workflowRef, event => {
+      detailSse = new WorkflowDetail(recordDetail.value.project.workflowRef, event => {
         // 异步任务推送事件
         if (event.eventName === IEventType.AsyncTaskInstanceStatusUpdatedEvent) {
           // 必须是推送的是当前页面停留实例的任务数据
-          // console.log('record.id', recordDetail.value.record?.id, (event as any).workflowInstanceId);
           if (recordDetail.value.record && recordDetail.value.record?.id === (event as IAsyncTaskInstanceStatusUpdatedEvent).workflowInstanceId) {
             taskEvent.value = event as IAsyncTaskInstanceStatusUpdatedEvent;
           }
@@ -143,7 +142,6 @@ export default defineComponent({
         // record-list 同步modelValue数据/地址栏
         emit('update:model-value', { ...props.modelValue, triggerId });
       },
-      // ui/src/components/workflow/workflow-detail
       handleChangeDslMode(viewMode: ViewModeEnum) {
         // graph-panel 同步modelValue数据/地址栏
         emit('update:model-value', { ...props.modelValue, viewMode });

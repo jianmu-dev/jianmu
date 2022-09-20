@@ -129,16 +129,14 @@ export default defineComponent({
         // 记录当前触发事件时间戳(时间戳没改变即不会改变任务状态)
         timestamp.value = props.event.timestamp;
         // 修改任务数据和状态
-        const i = taskRecords.value.findIndex(e=>e.businessId===props.event!.id);
+        const i = taskRecords.value.findIndex(e => e.businessId===props.event!.id);
         // 找不到更新的那条任务就返回
-        // console.log('iii', i, JSON.parse(JSON.stringify(props.event)));
         if (i === -1 && shortTimeGetOne) {
           shortTimeGetOne = false;
           graphPanel.getTaskRecords();
-          console.log('获取任务--- -1');
           setTimeout(()=> {
             shortTimeGetOne = true;
-          }, 1000);
+          }, 60000);
         }
         taskRecords.value.splice(i, 1, {
           ...taskRecords.value[i],
@@ -146,7 +144,6 @@ export default defineComponent({
         });
         // 引起子组件 onUpdated 更新状态灯
         taskRecords.value = JSON.parse(JSON.stringify(taskRecords.value));
-        // console.log('SSE 1', taskRecords.value.map(e=>e.status));
       }
       if (triggerId.value === props.record.triggerId) {
         return;
