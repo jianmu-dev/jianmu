@@ -102,6 +102,11 @@ export default defineComponent({
               (props.event as IWorkflowInstanceStatusUpdatedEvent).status === WorkflowExecutionRecordStatusEnum.RUNNING
                 ? new Date().toJSON()
                 : allRecords.value[i].startTime,
+            endTime:
+              (props.event as IWorkflowInstanceStatusUpdatedEvent).status ===
+              WorkflowExecutionRecordStatusEnum.TERMINATED
+                ? new Date().toJSON()
+                : allRecords.value[i].endTime,
           });
           // 如果当前停留的跟改变的是同一条(传递数据给info组件)
           if (currentRecordId.value === allRecords.value[i].id) {

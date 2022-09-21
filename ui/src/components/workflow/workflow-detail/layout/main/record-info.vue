@@ -73,12 +73,13 @@ export default defineComponent({
       if (props.record.status === status.value) {
         return;
       }
-      status.value = props.record.status;
       if (props.record.status === WorkflowExecutionRecordStatusEnum.TERMINATED) {
         endTime.value = new Date().toJSON();
-      } else {
+      }
+      if (props.record.status === WorkflowExecutionRecordStatusEnum.RUNNING) {
         endTime.value = undefined;
       }
+      status.value = props.record.status;
     });
     return {
       endTime,
