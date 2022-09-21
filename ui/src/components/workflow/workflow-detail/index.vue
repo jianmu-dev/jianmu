@@ -5,7 +5,7 @@
       :project="recordDetail.project"
       :session="session"
       :entry="entry"
-      @jump="groupId=>$emit('jump', groupId)"
+      @jump="groupId => $emit('jump', groupId)"
       @back="$emit('back')"
       @logout="$emit('logout')"
       @trigger="trigger"
@@ -19,14 +19,14 @@
       @change-record="handleChangeRecord"
     />
     <record-info
-      v-if="recordDetail.record && modelValue.viewMode===ViewModeEnum.GRAPHIC"
+      v-if="recordDetail.record && modelValue.viewMode === ViewModeEnum.GRAPHIC"
       :record="recordDetail.record"
       @terminate="terminate"
     />
     <log-toolbar
       v-if="recordDetail.project && recordDetail.record"
       :entry="entry"
-      :showLogBtn="recordDetail.record.status!==''"
+      :showLogBtn="recordDetail.record.status !== ''"
       :showParamBtn="globalParamBtn"
       :dslType="recordDetail.project.dslType"
       :dslMode="modelValue.viewMode === ViewModeEnum.YAML"
@@ -41,7 +41,7 @@
       :currentRecordStatus="recordList.currentRecordStatus"
       :viewMode="modelValue.viewMode"
       :event="taskEvent"
-      @has-global-param="bool=>globalParamBtn=bool"
+      @has-global-param="bool => (globalParamBtn = bool)"
       @change-view-mode="handleChangeDslMode"
     />
   </div>
@@ -83,10 +83,12 @@ export default defineComponent({
   setup(props, { emit }) {
     const recordDetail = ref<IRecordDetail>({});
     // list组件需要的参数
-    const param = computed((): IRecordListParam => ({
-      workflowRef: recordDetail.value.project?.workflowRef || '',
-      triggerId: props.modelValue.triggerId,
-    }));
+    const param = computed(
+      (): IRecordListParam => ({
+        workflowRef: recordDetail.value.project?.workflowRef || '',
+        triggerId: props.modelValue.triggerId,
+      }),
+    );
     // record-list.vue组件
     const recordList = ref<any>();
     // 新增更新实例 event
@@ -98,22 +100,38 @@ export default defineComponent({
     //  全局参数按钮
     const globalParamBtn = ref<boolean>(false);
     let detailSse: any;
+    let firstLoad = true;
     onMounted(async () => {
       // 获取项目详情
       recordDetail.value.project = await fetchProjectDetail(props.modelValue.projectId);
       // 详情页的SSE数据推送
-      detailSse = new WorkflowDetail(recordDetail.value.project.workflowRef, event => {
-        // 异步任务推送事件
-        if (event.eventName === IEventType.AsyncTaskInstanceStatusUpdatedEvent) {
-          // 必须是推送的是当前页面停留实例的任务数据
-          if (recordDetail.value.record && recordDetail.value.record?.id === (event as IAsyncTaskInstanceStatusUpdatedEvent).workflowInstanceId) {
-            taskEvent.value = event as IAsyncTaskInstanceStatusUpdatedEvent;
+      detailSse = new WorkflowDetail(
+        recordDetail.value.project.workflowRef,
+        event => {
+          // 异步任务推送事件
+          if (event.eventName === IEventType.AsyncTaskInstanceStatusUpdatedEvent) {
+            // 必须是推送的是当前页面停留实例的任务数据
+            if (
+              recordDetail.value.record &&
+              recordDetail.value.record?.id === (event as IAsyncTaskInstanceStatusUpdatedEvent).workflowInstanceId
+            ) {
+              taskEvent.value = event as IAsyncTaskInstanceStatusUpdatedEvent;
+            }
+            // 实例新增更新推送事件
+          } else {
+            listEvent.value = event;
           }
-          // 实例新增更新推送事件
-        } else {
-          listEvent.value = event;
-        }
-      });
+        },
+        () => {
+          if (!firstLoad) {
+            // SSE重连之前请求最新数据
+            recordList.value.refreshRecordList();
+            graphPanel.value.refreshGraphPanel();
+            return;
+          }
+          firstLoad = false;
+        },
+      );
     });
 
     onUnmounted(() => {
