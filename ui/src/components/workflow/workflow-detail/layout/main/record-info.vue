@@ -44,7 +44,7 @@ export default defineComponent({
         return;
       }
       status.value = props.record.status;
-      if (props.record.status === 'TERMINATED') {
+      if (props.record.status === WorkflowExecutionRecordStatusEnum.TERMINATED) {
         endTime.value = new Date().toJSON();
       }
     });
