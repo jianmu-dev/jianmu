@@ -2,24 +2,27 @@
   <jm-scrollbar style="height: 70px">
     <div class="jm-workflow-detail-record-list">
       <div
-      class="tab"
-      :class="{
-        [(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true,
-        [record.triggerId === param.triggerId ? 'selected' : 'unselected']: true,
-      }"
-      v-for="(record, i) in allRecords"
-      :key="i"
-      @click="handleChange(record)"
+        class="tab"
+        :class="{
+          [(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true,
+          [record.triggerId === param.triggerId ? 'selected' : 'unselected']: true,
+        }"
+        v-for="(record, i) in allRecords"
+        :key="i"
+        @click="handleChange(record)"
       >
-      <!-- param.triggerId===undefined -->
-        <div v-if="record.triggerId === param.triggerId" class="left-horn"/>
-        <div v-if="record.triggerId === param.triggerId" class="right-horn"/>
+        <!-- param.triggerId===undefined -->
+        <div v-if="record.triggerId === param.triggerId" class="left-horn" />
+        <div v-if="record.triggerId === param.triggerId" class="right-horn" />
         <div class="label">{{ record.serialNo || '-' }}</div>
       </div>
     </div>
   </jm-scrollbar>
-  <div class="record-list-bottom-line" v-if="allRecords.length" :class="{[currentRecordStatus.toLowerCase()]: true}">
-  </div>
+  <div
+    class="record-list-bottom-line"
+    v-if="allRecords.length"
+    :class="{ [currentRecordStatus.toLowerCase()]: true }"
+  ></div>
 </template>
 
 <script lang="ts">
@@ -50,21 +53,24 @@ export default defineComponent({
     // 所有record数据列表
     const allRecords = ref<IWorkflowExecutionRecordVo[]>([]);
     // RecordList组件实例
-    let recordList:RecordList;
+    let recordList: RecordList;
     // 更改当前record
     const handleChange = (record: IWorkflowExecutionRecordVo) => {
       emit('change-record', record);
     };
     // 当前record的状态
-    const currentRecordStatus = computed(()=>{
-      return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.status || WorkflowExecutionRecordStatusEnum.INIT;
+    const currentRecordStatus = computed(() => {
+      return (
+        allRecords.value.find(e => e.triggerId === props.param.triggerId)?.status ||
+        WorkflowExecutionRecordStatusEnum.INIT
+      );
     });
     // 当前record的id
-    const currentRecordId = computed(()=>{
-      return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.id || '';
+    const currentRecordId = computed(() => {
+      return allRecords.value.find(e => e.triggerId === props.param.triggerId)?.id || '';
     });
     const event = ref<IEvent | undefined>(props.event);
-    onUpdated(()=>{
+    onUpdated(() => {
       if (event.value === props.event) {
         return;
       }
@@ -74,7 +80,7 @@ export default defineComponent({
         // 新增刷新全部
         if (props.event.eventName === IEventType.WorkflowInstanceCreatedEvent) {
           recordList.initAllRecords();
-        // 更新某一条实例
+          // 更新某一条实例
         } else if (props.event.eventName === IEventType.WorkflowInstanceStatusUpdatedEvent) {
           // 找出变化那条下标
           const i = allRecords.value.findIndex(e => e.id === (props.event as IWorkflowInstanceStatusUpdatedEvent).id);
@@ -87,7 +93,15 @@ export default defineComponent({
             ...allRecords.value[i],
             status: (props.event as IWorkflowInstanceStatusUpdatedEvent).status,
             // 当更改状态为挂起时 设置当前时间为挂起时间
-            suspendedTime: (props.event as IWorkflowInstanceStatusUpdatedEvent).status === WorkflowExecutionRecordStatusEnum.SUSPENDED ? new Date().toJSON():undefined,
+            suspendedTime:
+              (props.event as IWorkflowInstanceStatusUpdatedEvent).status ===
+              WorkflowExecutionRecordStatusEnum.SUSPENDED
+                ? new Date().toJSON()
+                : undefined,
+            startTime:
+              (props.event as IWorkflowInstanceStatusUpdatedEvent).status === WorkflowExecutionRecordStatusEnum.RUNNING
+                ? new Date().toJSON()
+                : allRecords.value[i].startTime,
           });
           // 如果当前停留的跟改变的是同一条(传递数据给info组件)
           if (currentRecordId.value === allRecords.value[i].id) {
@@ -99,22 +113,26 @@ export default defineComponent({
 
     onMounted(async () => {
       // 实例化RecordList 传入项目的workflowRef，传入回调->获取allRecords并主动选择当前record
-      recordList = new RecordList(props.param.workflowRef, (data: IWorkflowExecutionRecordVo[]):void=>{
-        allRecords.value = data.length? data : [{
-          endTime: undefined,
-          id: '',
-          serialNo: 0,
-          name: props.project.projectGroupName,
-          startTime: '',
-          status: '',
-          triggerId: undefined as unknown,
-          triggerType: props.project.triggerType,
-          workflowRef: props.project.workflowRef,
-          workflowVersion: props.project.workflowVersion,
-        } as IWorkflowExecutionRecordVo];
+      recordList = new RecordList(props.param.workflowRef, (data: IWorkflowExecutionRecordVo[]): void => {
+        allRecords.value = data.length
+          ? data
+          : [
+              {
+                endTime: undefined,
+                id: '',
+                serialNo: 0,
+                name: props.project.projectGroupName,
+                startTime: '',
+                status: '',
+                triggerId: undefined as unknown,
+                triggerType: props.project.triggerType,
+                workflowRef: props.project.workflowRef,
+                workflowVersion: props.project.workflowVersion,
+              } as IWorkflowExecutionRecordVo,
+          ];
         if (props.param.triggerId && allRecords.value.length) {
           handleChange(allRecords.value.find(e => e.triggerId === props.param.triggerId) as IWorkflowExecutionRecordVo);
-        } else if (allRecords.value.length){
+        } else if (allRecords.value.length) {
           handleChange(allRecords.value[0]);
         }
       });

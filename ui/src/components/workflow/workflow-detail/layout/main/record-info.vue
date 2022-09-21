@@ -1,17 +1,47 @@
 <template>
   <div class="jm-workflow-detail-record-info">
-    <div>启动时间：<span>{{ datetimeFormatter(record.startTime) }}</span></div>
-    <div class="vertical-divider"></div>
     <div>
-      {{ isSuspended? '挂起':'执行' }}时长：
+      启动时间：<span>{{ datetimeFormatter(record.startTime) }}</span>
     </div>
-    <div class="record-time" :style="{width}">
-      <jm-timer v-if="isSuspended" @loaded="maxWidth=>{width=(maxWidth+15)+'px'}" :start-time="record.suspendedTime"/>
-      <jm-timer v-else :start-time="record.startTime" @loaded="maxWidth=>{width=(maxWidth+15)+'px'}" :end-time="record.endTime || endTime"/>
+    <div class="vertical-divider"></div>
+    <div>{{ isSuspended ? '挂起' : '执行' }}时长：</div>
+    <div class="record-time" :style="{ width }">
+      <jm-timer
+        v-if="isSuspended"
+        @loaded="
+          maxWidth => {
+            width = maxWidth + 15 + 'px';
+          }
+        "
+        :start-time="record.suspendedTime"
+      />
+      <jm-timer
+        v-else
+        :start-time="record.startTime"
+        @loaded="
+          maxWidth => {
+            width = maxWidth + 15 + 'px';
+          }
+        "
+        :end-time="record.endTime || endTime"
+      />
     </div>
-    <div class="vertical-divider" style="margin-left: 0px;"></div>
-    <div>状态：<span class="status" :class="{[(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true}">{{ statusTranslate(record.status) }}</span></div>
-    <button v-if="checkWorkflowRunning(record.status, false)" @click="handleTerminate" class="jm-icon-button-stop terminate-button" @keypress.enter.prevent>终止</button>
+    <div class="vertical-divider" style="margin-left: 0px"></div>
+    <div>
+      状态：<span
+        class="status"
+        :class="{ [(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true }"
+        >{{ statusTranslate(record.status) }}</span
+      >
+    </div>
+    <button
+      v-if="checkWorkflowRunning(record.status, false)"
+      @click="handleTerminate"
+      class="jm-icon-button-stop terminate-button"
+      @keypress.enter.prevent
+    >
+      终止
+    </button>
   </div>
 </template>
 
@@ -33,7 +63,7 @@ export default defineComponent({
   emits: ['terminate'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
-    const isSuspended = computed(()=>props.record.status === WorkflowExecutionRecordStatusEnum.SUSPENDED);
+    const isSuspended = computed(() => props.record.status === WorkflowExecutionRecordStatusEnum.SUSPENDED);
     let width = ref<string>('48px');
     const recordInfo = new RecordInfo(props.record.id);
 
@@ -46,6 +76,8 @@ export default defineComponent({
       status.value = props.record.status;
       if (props.record.status === WorkflowExecutionRecordStatusEnum.TERMINATED) {
         endTime.value = new Date().toJSON();
+      } else {
+        endTime.value = undefined;
       }
     });
     return {
@@ -57,23 +89,25 @@ export default defineComponent({
       WorkflowExecutionRecordStatusEnum,
       width,
       handleTerminate() {
-        proxy.$confirm('确定要终止吗?', '终止执行', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'info',
-        }).then(async () => {
-          if (!props.record) {
-            return;
-          }
-          try {
-            await recordInfo.terminate(props.record.id);
-            proxy.$success('终止成功');
-            // 刷新 list graph
-            emit('terminate');
-          } catch (error) {
-            proxy.$throw(error, proxy);
-          }
-        }).catch(() => {});
+        proxy
+          .$confirm('确定要终止吗?', '终止执行', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'info',
+          })
+          .then(async () => {
+            if (!props.record) {
+              return;
+            }
+            try {
+              await recordInfo.terminate(props.record.id);
+              proxy.$success('终止成功');
+              // 刷新 list graph
+              emit('terminate');
+            } catch (error) {
+              proxy.$throw(error, proxy);
+            }
+          });
       },
     };
   },
@@ -124,7 +158,7 @@ export default defineComponent({
     width: 1px;
     height: 14px;
     margin: 0 20px;
-    background-color:#CDD1E3;
+    background-color: #cdd1e3;
   }
   .record-time {
     min-width: 24px;
@@ -132,14 +166,14 @@ export default defineComponent({
     line-height: 40px;
     color: @default-black-color;
   }
-  .terminate-button{
+  .terminate-button {
     padding-right: 5px;
     width: 90px;
     height: 36px;
     background: @default-background-color;
     // box-shadow: 0px 0px 4px 0px rgba(194,194,194,0.5000);
     border-radius: 2px;
-    border: 0.5px solid #CAD6EE;
+    border: 0.5px solid #cad6ee;
     font-size: 14px;
     color: #116ed2;
     cursor: pointer;
@@ -151,7 +185,7 @@ export default defineComponent({
     }
 
     &:hover {
-      background-color: #EFF7FF;
+      background-color: #eff7ff;
       color: @primary-color;
     }
   }
