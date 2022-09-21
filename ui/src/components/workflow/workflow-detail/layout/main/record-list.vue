@@ -23,12 +23,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onMounted, PropType, ref } from 'vue';
+import { computed, defineComponent, onMounted, onUpdated, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IRecordListParam } from '../../model/data/common';
 import { RecordList } from '../../model/record-list';
 import { IProjectDetailVo } from '@/api/dto/project';
-import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
+import { IEventType, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
+import { IEvent } from '@/api/event/common';
+import { IWorkflowInstanceStatusUpdatedEvent } from '@/api/event/workflow-execution-record';
 export default defineComponent({
   props: {
     param: {
@@ -39,6 +41,9 @@ export default defineComponent({
       type: Object as PropType<IProjectDetailVo>,
       required: true,
     },
+    event: {
+      type: Object as PropType<IEvent>,
+    },
   },
   emits: ['change-record'],
   setup(props, { emit }) {
@@ -48,18 +53,46 @@ export default defineComponent({
     let recordList:RecordList;
     // 更改当前record
     const handleChange = (record: IWorkflowExecutionRecordVo) => {
-      // console.log('选择record', record.triggerId);
       emit('change-record', record);
-      recordList.resetSuspended();
     };
     // 当前record的状态
     const currentRecordStatus = computed(()=>{
       return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.status || WorkflowExecutionRecordStatusEnum.INIT;
     });
-    onMounted(async ()=>{
+    const event = ref<IEvent | undefined>(props.event);
+    onUpdated(()=>{
+      if (event.value === props.event) {
+        return;
+      }
+      event.value = props.event;
+      // 监听流程实例新增和修改事件
+      if (props.event) {
+        // 新增刷新全部
+        if (props.event.eventName === IEventType.WorkflowInstanceCreatedEvent) {
+          recordList.initAllRecords();
+        // 更新某一条实例
+        } else if (props.event.eventName === IEventType.WorkflowInstanceStatusUpdatedEvent) {
+          // 找出变化那条下标
+          const i = allRecords.value.findIndex(e => e.id === (props.event as IWorkflowInstanceStatusUpdatedEvent).id);
+          // 找不到返回
+          if (i === -1) {
+            return;
+          }
+          // 改变那条status
+          allRecords.value.splice(i, 1, {
+            ...allRecords.value[i],
+            status: (props.event as IWorkflowInstanceStatusUpdatedEvent).status,
+          });
+          console.log('allRecords.value[i]', allRecords.value[i]);
+          handleChange(allRecords.value[i]);
+        }
+      }
+    });
+
+    onMounted(async () => {
       // 实例化RecordList 传入项目的workflowRef，传入回调->获取allRecords并主动选择当前record
-      recordList = new RecordList(props.param.workflowRef, props.project.concurrent, (data: IWorkflowExecutionRecordVo[]):void=>{
-        allRecords.value = data.length? data:[{
+      recordList = new RecordList(props.param.workflowRef, (data: IWorkflowExecutionRecordVo[]):void=>{
+        allRecords.value = data.length? data : [{
           endTime: undefined,
           id: '',
           serialNo: 0,
@@ -78,15 +111,9 @@ export default defineComponent({
         }
       });
       // 获取allRecords方法
-      await recordList.initAllRecords();
-      // 开启record-list数据监听
-      recordList.listen();
+      recordList.initAllRecords();
     });
 
-    onBeforeUnmount(()=>{
-      // 卸载record-list数据监听
-      recordList.destroy();
-    });
     return {
       allRecords,
       handleChange,
@@ -94,9 +121,6 @@ export default defineComponent({
       WorkflowExecutionRecordStatusEnum,
       refreshRecordList() {
         recordList.initAllRecords();
-      },
-      refreshSuspended() {
-        recordList.refreshSuspended();
       },
     };
   },

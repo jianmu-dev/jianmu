@@ -160,7 +160,7 @@ export default defineComponent({
           firstLoad.value = false;
           setTimeout(()=> {
             props.tasks?.length && workflowGraph.updateNodeStates(props.tasks);
-          }, 50);
+          }, 500);
         } else {
           props.tasks?.length && workflowGraph.updateNodeStates(props.tasks);
         }
@@ -258,7 +258,6 @@ export default defineComponent({
       },
       // 重置节点悬浮窗(隐藏dom,重置nodeEvent)
       destroyNodeToolbar() {
-        // console.log(nodeEvent.value!.id, 11);
         workflowGraph.hideNodeToolbar(nodeEvent.value!.id);
         nodeEvent.value = undefined;
       },
