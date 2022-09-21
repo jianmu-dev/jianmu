@@ -1,22 +1,32 @@
+/* eslint-env node */
+require('@rushstack/eslint-patch/modern-module-resolution');
+
 module.exports = {
   root: true,
   env: {
     node: true,
+    browser: true,
+    es6: true,
   },
   extends: [
     'plugin:vue/vue3-essential',
     'eslint:recommended',
-    '@vue/typescript',
+    '@vue/eslint-config-typescript/recommended',
+    '@vue/eslint-config-prettier',
   ],
   parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
     parser: '@typescript-eslint/parser',
   },
+  ignorePatterns: ['auto-imports.d.ts', 'components.d.ts'],
   rules: {
     /**
      * “off” or 0 - 关闭(禁用)规则
      * “warn” or 1 - 将规则视为一个警告（并不会导致检查不通过）
      * “error” or 2 - 将规则视为一个错误 (退出码为1，检查不通过)
      */
+    'prettier/prettier': 0,
     // 缩进风格
     indent: [1, 2, { SwitchCase: 1 }],
     // 禁止修改const声明的变量
@@ -42,7 +52,8 @@ module.exports = {
     // 使用 === 替代 ==
     eqeqeq: [2, 'always'],
     // 不能有声明后未被使用的变量或参数
-    'no-unused-vars': [1, { vars: 'all', args: 'after-used' }],
+    'no-unused-vars': 0,
+    '@typescript-eslint/no-unused-vars': [1, { vars: 'all', args: 'after-used' }],
     // 未定义前不能使用
     'no-use-before-define': 2,
     // 不能有无法执行的代码
@@ -81,8 +92,10 @@ module.exports = {
       },
     ],
     // 禁止使用console
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'no-console': process.env.NODE_ENV === 'production' ? 2 : 0,
     // 禁止使用debugger
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
+    // interface为空对象不报错
+    '@typescript-eslint/no-empty-interface': 0,
   },
 };
