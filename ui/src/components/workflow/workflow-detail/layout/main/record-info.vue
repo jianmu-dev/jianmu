@@ -7,7 +7,7 @@
     </div>
     <div class="record-time" :style="{width}">
       <jm-timer v-if="isSuspended" @loaded="maxWidth=>{width=(maxWidth+15)+'px'}" :start-time="record.suspendedTime"/>
-      <jm-timer v-else :start-time="record.startTime" @loaded="maxWidth=>{width=(maxWidth+15)+'px'}" :end-time="record.endTime"/>
+      <jm-timer v-else :start-time="record.startTime" @loaded="maxWidth=>{width=(maxWidth+15)+'px'}" :end-time="record.endTime || endTime"/>
     </div>
     <div class="vertical-divider" style="margin-left: 0px;"></div>
     <div>状态：<span class="status" :class="{[(record.status || WorkflowExecutionRecordStatusEnum.INIT).toLowerCase()]: true}">{{ statusTranslate(record.status) }}</span></div>
@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, PropType, ref } from 'vue';
+import { defineComponent, getCurrentInstance, onUpdated, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { datetimeFormatter } from '@/utils/formatter';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
@@ -36,7 +36,20 @@ export default defineComponent({
     const isSuspended = computed(()=>props.record.status === WorkflowExecutionRecordStatusEnum.SUSPENDED);
     let width = ref<string>('48px');
     const recordInfo = new RecordInfo(props.record.id);
+
+    const status = ref<string>(props.record.status);
+    const endTime = ref<string | undefined>();
+    onUpdated(() => {
+      if (props.record.status === status.value) {
+        return;
+      }
+      status.value = props.record.status;
+      if (props.record.status === 'TERMINATED') {
+        endTime.value = new Date().toJSON();
+      }
+    });
     return {
+      endTime,
       datetimeFormatter,
       isSuspended,
       checkWorkflowRunning,
