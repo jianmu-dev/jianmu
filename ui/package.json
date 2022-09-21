@@ -7,7 +7,8 @@
     "serve": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ./ --ext .vue,.ts,.tsx --cache --fix"
+    "lint": "eslint ./ --ext .vue,.ts,.tsx --cache --fix",
+    "prepare": "cd .. && husky install ui/.husky"
   },
   "dependencies": {
     "@antv/g6": "^4.2.7",
@@ -33,6 +34,9 @@
     "yaml": "^2.0.0-5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
+    "@rushstack/eslint-patch": "^1.1.4",
     "@types/dateformat": "^3.0.1",
     "@types/node": "^14.14.37",
     "@types/normalize-wheel": "^1.0.0",
@@ -42,13 +46,26 @@
     "@typescript-eslint/parser": "^4.20.0",
     "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.5",
+    "@vue/eslint-config-prettier": "^7.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "eslint": "^7.23.0",
     "eslint-plugin-vue": "^7.8.0",
+    "husky": "^8.0.1",
     "less": "^4.1.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1",
     "sass": "^1.32.8",
     "typescript": "^4.1.3",
     "vite": "^2.1.3",
     "vue-tsc": "^0.0.8"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,vue}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,css,less,html,scss,sass}": [
+      "prettier --write"
+    ]
   }
 }
