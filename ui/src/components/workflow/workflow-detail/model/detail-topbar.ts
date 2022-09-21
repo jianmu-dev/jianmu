@@ -14,7 +14,6 @@ export class DeatilTopbar {
    */
   async trigger():Promise<void> {
     try {
-      console.log('触发新流程', this.projectId);
       await executeImmediately(this.projectId);
       this.triggerCallbackFn();
     } catch (error: any) {

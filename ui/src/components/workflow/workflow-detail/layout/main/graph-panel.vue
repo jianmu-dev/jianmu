@@ -130,14 +130,17 @@ export default defineComponent({
         timestamp.value = props.event.timestamp;
         // 修改任务数据和状态
         const i = taskRecords.value.findIndex(e => e.businessId===props.event!.id);
-        // 找不到更新的那条任务就返回
+        // 找不到更新的那条任务就查询数据并返回
         if (i === -1 && shortTimeGetOne) {
           shortTimeGetOne = false;
           graphPanel.getTaskRecords();
           setTimeout(()=> {
             shortTimeGetOne = true;
           }, 60000);
+          return;
         }
+        // 查询任务数据后还是找不到更新那条 即返回
+        if (i === -1) return;
         taskRecords.value.splice(i, 1, {
           ...taskRecords.value[i],
           status: props.event.status,

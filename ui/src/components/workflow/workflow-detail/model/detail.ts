@@ -25,7 +25,7 @@ export class WorkflowDetail {
       this.eventCallbackFn(changData);
     };
     this.eventSource.onerror = (e: any) => {
-      console.error(e);
+      // console.error(e);
     };
   }
   /**
