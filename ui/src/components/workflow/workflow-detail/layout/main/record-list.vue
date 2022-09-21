@@ -59,6 +59,10 @@ export default defineComponent({
     const currentRecordStatus = computed(()=>{
       return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.status || WorkflowExecutionRecordStatusEnum.INIT;
     });
+    // 当前record的id
+    const currentRecordId = computed(()=>{
+      return allRecords.value.find(e=>e.triggerId===props.param.triggerId)?.id || '';
+    });
     const event = ref<IEvent | undefined>(props.event);
     onUpdated(()=>{
       if (event.value === props.event) {
@@ -83,8 +87,10 @@ export default defineComponent({
             ...allRecords.value[i],
             status: (props.event as IWorkflowInstanceStatusUpdatedEvent).status,
           });
-          console.log('allRecords.value[i]', allRecords.value[i]);
-          handleChange(allRecords.value[i]);
+          // 如果当前停留的跟改变的是同一条(传递数据给info组件)
+          if (currentRecordId.value === allRecords.value[i].id) {
+            handleChange(allRecords.value[i]);
+          }
         }
       }
     });

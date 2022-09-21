@@ -61,7 +61,7 @@ import { ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import { IProjectDetailVo } from '@/api/dto/project';
 import { IEventType } from '@/api/dto/enumeration';
-import { WorkflowDetail } from './model/detail-sse';
+import { WorkflowDetail } from './model/detail';
 import { IEvent } from '@/api/event/common';
 import { IAsyncTaskInstanceStatusUpdatedEvent } from '@/api/event/workflow-execution-record';
 
