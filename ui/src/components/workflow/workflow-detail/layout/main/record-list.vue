@@ -86,6 +86,8 @@ export default defineComponent({
           allRecords.value.splice(i, 1, {
             ...allRecords.value[i],
             status: (props.event as IWorkflowInstanceStatusUpdatedEvent).status,
+            // 当更改状态为挂起时 设置当前时间为挂起时间
+            suspendedTime: (props.event as IWorkflowInstanceStatusUpdatedEvent).status === WorkflowExecutionRecordStatusEnum.SUSPENDED ? new Date().toJSON():undefined,
           });
           // 如果当前停留的跟改变的是同一条(传递数据给info组件)
           if (currentRecordId.value === allRecords.value[i].id) {
