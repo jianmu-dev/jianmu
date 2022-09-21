@@ -72,8 +72,8 @@ public class DslUtil {
             if (map1.size() != map2.size()) {
                 return false;
             }
-            for (String key : map1.keySet()) {
-                if (!compare(map1.get(key), map2.get(key))) {
+            for (Object key : map1.keySet()) {
+                if (!compare(map1.get(key.toString()), map2.get(key.toString()))) {
                     return false;
                 }
             }
