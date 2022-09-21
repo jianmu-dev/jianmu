@@ -25,7 +25,7 @@ public class WorkflowInstanceStatusSubscribeService {
         this.workflowMap.putIfAbsent(workflowRef, Collections.synchronizedList(new ArrayList<>()));
         this.workflowMap.get(workflowRef).add(sseEmitter);
         // 发送成功连接事件
-        this.sendMessageByWorkflowRef(workflowRef, new SseConnectedEvent());
+        this.sendEvent(sseEmitter, workflowRef, new SseConnectedEvent());
         return sseEmitter;
     }
 
@@ -33,6 +33,16 @@ public class WorkflowInstanceStatusSubscribeService {
         return () -> {
             this.clearByWorkflowAndSseEmitter(workflowRef, sseEmitter);
         };
+    }
+
+    public void sendEvent(SseEmitter sseEmitter, String workflowRef, Event event) {
+        try {
+            sseEmitter.send(SseEmitter.event()
+                    .id(workflowRef)
+                    .data(event));
+        } catch (IOException e) {
+            sseEmitter.completeWithError(e);
+        }
     }
 
     public void sendMessageByWorkflowRef(String workflowRef, Event event) {
