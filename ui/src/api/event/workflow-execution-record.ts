@@ -27,6 +27,18 @@ export interface IWorkflowInstanceStatusUpdatedEvent extends IEvent {
    * 状态
    */
   status: WorkflowExecutionRecordStatusEnum;
+  /**
+   * startTime
+   */
+  startTime: string;
+  /**
+   * endTime
+   */
+  endTime: string;
+  /**
+   * suspendedTime
+   */
+  suspendedTime: string;
 }
 
 /**

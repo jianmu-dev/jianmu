@@ -32,7 +32,6 @@ import { IRecordListParam } from '../../model/data/common';
 import { RecordList } from '../../model/record-list';
 import { IProjectDetailVo } from '@/api/dto/project';
 import { IEventType, WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
-import { IEvent } from '@/api/event/common';
 import { IWorkflowInstanceStatusUpdatedEvent } from '@/api/event/workflow-execution-record';
 export default defineComponent({
   props: {
@@ -45,7 +44,7 @@ export default defineComponent({
       required: true,
     },
     event: {
-      type: Object as PropType<IEvent>,
+      type: Object as PropType<IWorkflowInstanceStatusUpdatedEvent>,
     },
   },
   emits: ['change-record'],
@@ -69,44 +68,51 @@ export default defineComponent({
     const currentRecordId = computed(() => {
       return allRecords.value.find(e => e.triggerId === props.param.triggerId)?.id || '';
     });
-    const event = ref<IEvent | undefined>(props.event);
+    const event = ref<IWorkflowInstanceStatusUpdatedEvent | undefined>(props.event);
     onUpdated(() => {
-      if (event.value === props.event) {
+      const eString = JSON.stringify({ id: event.value?.id, status: event.value?.status });
+      const pString = JSON.stringify({ id: props.event?.id, status: props.event?.status });
+      if (eString === pString) {
         return;
       }
       event.value = props.event;
       // 监听流程实例新增和修改事件
-      if (props.event) {
+      if (event.value) {
         // 新增刷新全部
-        if (props.event.eventName === IEventType.WorkflowInstanceCreatedEvent) {
+        if (event.value.eventName === IEventType.WorkflowInstanceCreatedEvent) {
           recordList.initAllRecords();
           // 更新某一条实例
-        } else if (props.event.eventName === IEventType.WorkflowInstanceStatusUpdatedEvent) {
+        } else if (event.value.eventName === IEventType.WorkflowInstanceStatusUpdatedEvent) {
           // 找出变化那条下标
-          const i = allRecords.value.findIndex(e => e.id === (props.event as IWorkflowInstanceStatusUpdatedEvent).id);
+          const i = allRecords.value.findIndex(e => e.id === event.value?.id);
           // 找不到返回
           if (i === -1) {
             return;
           }
-          // 改变那条status
+          // 不同状态下的时间处理
+          const time = {} as any;
+          switch (event.value.status) {
+            case WorkflowExecutionRecordStatusEnum.SUSPENDED:
+              time.suspendedTime = event.value.suspendedTime || new Date().toJSON();
+              break;
+            case WorkflowExecutionRecordStatusEnum.RUNNING:
+              time.startTime = event.value.startTime || new Date().toJSON();
+              break;
+            case WorkflowExecutionRecordStatusEnum.TERMINATED:
+              time.endTime = event.value.endTime || new Date().toJSON();
+              break;
+            case WorkflowExecutionRecordStatusEnum.FINISHED:
+              time.endTime = event.value.endTime || new Date().toJSON();
+              break;
+            default:
+              break;
+          }
+          // 改变那条status list组件变化
           allRecords.value.splice(i, 1, {
             ...allRecords.value[i],
-            status: (props.event as IWorkflowInstanceStatusUpdatedEvent).status,
-            // 当更改状态为挂起时 设置当前时间为挂起时间
-            suspendedTime:
-              (props.event as IWorkflowInstanceStatusUpdatedEvent).status ===
-              WorkflowExecutionRecordStatusEnum.SUSPENDED
-                ? new Date().toJSON()
-                : undefined,
-            startTime:
-              (props.event as IWorkflowInstanceStatusUpdatedEvent).status === WorkflowExecutionRecordStatusEnum.RUNNING
-                ? new Date().toJSON()
-                : allRecords.value[i].startTime,
-            endTime:
-              (props.event as IWorkflowInstanceStatusUpdatedEvent).status ===
-              WorkflowExecutionRecordStatusEnum.TERMINATED
-                ? new Date().toJSON()
-                : allRecords.value[i].endTime,
+            // 更改状态
+            status: event.value.status,
+            ...time,
           });
           // 如果当前停留的跟改变的是同一条(传递数据给info组件)
           if (currentRecordId.value === allRecords.value[i].id) {
