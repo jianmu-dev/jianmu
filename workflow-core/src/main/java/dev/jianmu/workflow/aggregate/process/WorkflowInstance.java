@@ -216,6 +216,9 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowVersion(this.workflowVersion)
                 .id(this.id)
                 .status(this.status.name())
+                .startTime(this.startTime)
+                .suspendedTime(this.suspendedTime)
+                .endTime(this.endTime)
                 .build();
         this.raiseSseEvents(event);
     }
