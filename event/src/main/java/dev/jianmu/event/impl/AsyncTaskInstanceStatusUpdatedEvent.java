@@ -2,6 +2,8 @@ package dev.jianmu.event.impl;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 /**
  * @class AsyncTaskInstanceStatusUpdatedEvent
  * @description 异步任务实例状态更新事件
@@ -21,4 +23,8 @@ public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
     private String status;
     private String asyncTaskRef;
     private String asyncTaskType;
+    // 开始时间
+    private LocalDateTime startTime;
+    // 结束时间
+    private LocalDateTime endTime;
 }
