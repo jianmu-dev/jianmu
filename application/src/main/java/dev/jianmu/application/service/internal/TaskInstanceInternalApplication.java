@@ -288,7 +288,7 @@ public class TaskInstanceInternalApplication {
             Map<String, Parameter<?>> parameterMap,
             TaskInstance taskInstance,
             String workflowType,
-            Set<NodeParameter> nodeParameters
+            List<NodeParameter> nodeParameters
     ) {
         var instanceParameters = parameterMap.entrySet().stream()
                 .filter(entry ->

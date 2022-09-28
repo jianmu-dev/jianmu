@@ -14,15 +14,15 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * @author Ethan Liu
  * @class NodeDslVo
  * @description 节点定义版本
- * @author Ethan Liu
  * @create 2021-10-01 13:12
-*/
+ */
 @Getter
 @Builder
 @NoArgsConstructor
@@ -55,12 +55,12 @@ public class NodeDsl {
     /**
      * 输入参数
      */
-    private Set<NodeParameter> inputParameters = new HashSet<>();
+    private List<NodeParameter> inputParameters = new ArrayList<>();
 
     /**
      * 输出参数
      */
-    private Set<NodeParameter> outputParameters = new HashSet<>();
+    private List<NodeParameter> outputParameters = new ArrayList<>();
 
     /**
      * 镜像规格信息
@@ -135,7 +135,7 @@ public class NodeDsl {
     /**
      * 校验参数是否必填
      */
-    private void checkParameterRequired(Set<NodeParameter> set) {
+    private void checkParameterRequired(List<NodeParameter> set) {
         set.forEach(nodeParameter -> {
             if (nodeParameter.getRequired() && nodeParameter.getValue() != null) {
                 throw new DslException("必填参数不能定义默认值");
