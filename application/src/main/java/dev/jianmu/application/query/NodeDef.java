@@ -9,17 +9,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
+ * @author Ethan Liu
  * @class NodeDef
  * @description 节点定义
- * @author Ethan Liu
  * @create 2021-09-04 11:59
-*/
+ */
 @Getter
 @Builder
 @Slf4j
@@ -37,9 +36,9 @@ public class NodeDef {
     private final String type;
     private final String workerType;
     @JsonIgnore
-    private final Set<NodeParameter> inputParameters;
+    private final List<NodeParameter> inputParameters;
     @JsonIgnore
-    private final Set<NodeParameter> outputParameters;
+    private final List<NodeParameter> outputParameters;
     @JsonIgnore
     private final String resultFile;
     @JsonIgnore
@@ -52,8 +51,8 @@ public class NodeDef {
     @JsonIgnore
     private final List<String> script;
 
-    public Set<NodeParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
-        var nodeParameters = new HashSet<NodeParameter>();
+    public List<NodeParameter> matchedOutputParameters(Map<String, Object> parameterMap) {
+        var nodeParameters = new ArrayList<NodeParameter>();
         outputParameters.forEach(nodeParameter -> {
             if (nodeParameter.getRequired() && parameterMap.get(nodeParameter.getRef()) == null) {
                 throw new OutputParamNotFoundException(name + "节点的必填输出参数" + nodeParameter.getRef() + "为空");
