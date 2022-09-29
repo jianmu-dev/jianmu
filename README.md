@@ -64,7 +64,7 @@ openssl rand -hex 16
 
 [官方示例](https://ci.jianmu.dev)
 
-[建木文档](https://docs.jianmu.dev/guide/quick-start.html)
+[建木文档](https://docs.jianmu.dev)
 
 [建木官网](https://jianmu.dev)
 
