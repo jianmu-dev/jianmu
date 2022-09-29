@@ -11,10 +11,7 @@ import dev.jianmu.application.util.DslUtil;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.jgit.JgitService;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
-import dev.jianmu.project.aggregate.GitRepo;
-import dev.jianmu.project.aggregate.Project;
-import dev.jianmu.project.aggregate.ProjectGroup;
-import dev.jianmu.project.aggregate.ProjectLinkGroup;
+import dev.jianmu.project.aggregate.*;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
@@ -22,6 +19,7 @@ import dev.jianmu.project.event.TriggerEvent;
 import dev.jianmu.project.query.ProjectVo;
 import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.project.repository.ProjectGroupRepository;
+import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -69,6 +67,7 @@ public class ProjectApplication {
     private final ProjectGroupRepository projectGroupRepository;
     private final GlobalProperties globalProperties;
     private final TriggerEventRepository triggerEventRepository;
+    private final ProjectLastExecutionRepository projectLastExecutionRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -83,7 +82,8 @@ public class ProjectApplication {
             ProjectLinkGroupRepository projectLinkGroupRepository,
             ProjectGroupRepository projectGroupRepository,
             GlobalProperties globalProperties,
-            TriggerEventRepository triggerEventRepository
+            TriggerEventRepository triggerEventRepository,
+            ProjectLastExecutionRepository projectLastExecutionRepository
     ) {
         this.projectRepository = projectRepository;
         this.gitRepoRepository = gitRepoRepository;
@@ -98,6 +98,7 @@ public class ProjectApplication {
         this.projectGroupRepository = projectGroupRepository;
         this.globalProperties = globalProperties;
         this.triggerEventRepository = triggerEventRepository;
+        this.projectLastExecutionRepository = projectLastExecutionRepository;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -319,6 +320,7 @@ public class ProjectApplication {
 
         this.pubTriggerEvent(parser, project);
         this.projectRepository.add(project);
+        this.projectLastExecutionRepository.add(new ProjectLastExecution(project.getWorkflowRef()));
         this.projectLinkGroupRepository.add(projectLinkGroup);
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
@@ -395,6 +397,7 @@ public class ProjectApplication {
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
+        this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
