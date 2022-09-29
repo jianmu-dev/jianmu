@@ -7,12 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 /**
+ * @author Daihw
  * @class NodeDefVersionVo
  * @description NodeDefVersionVo
- * @author Daihw
  * @create 2022/5/12 4:52 下午
  */
 @Data
@@ -36,9 +36,9 @@ public class NodeDefVersionVo {
     @Schema(description = "返回文件路径")
     private String resultFile;
     @Schema(description = "输入参数")
-    private Set<NodeParameter> inputParameters;
+    private List<NodeParameter> inputParameters;
     @Schema(description = "输出参数")
-    private Set<NodeParameter> outputParameters;
+    private List<NodeParameter> outputParameters;
     @Schema(required = true, description = "镜像相关信息")
     private String spec;
 }

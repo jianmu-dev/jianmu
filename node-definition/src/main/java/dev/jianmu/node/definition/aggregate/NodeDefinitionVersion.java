@@ -1,14 +1,14 @@
 package dev.jianmu.node.definition.aggregate;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * @author Ethan Liu
  * @class NodeDefinitionVersion
  * @description 节点定义版本
- * @author Ethan Liu
  * @create 2021-09-03 14:58
-*/
+ */
 public class NodeDefinitionVersion {
 
     private String id;
@@ -20,8 +20,8 @@ public class NodeDefinitionVersion {
     private String version;
     private String resultFile;
 
-    private Set<NodeParameter> inputParameters = new HashSet<>();
-    private Set<NodeParameter> outputParameters = new HashSet<>();
+    private List<NodeParameter> inputParameters = new ArrayList<>();
+    private List<NodeParameter> outputParameters = new ArrayList<>();
 
     private String spec;
 
@@ -57,11 +57,11 @@ public class NodeDefinitionVersion {
         return resultFile;
     }
 
-    public Set<NodeParameter> getInputParameters() {
+    public List<NodeParameter> getInputParameters() {
         return inputParameters;
     }
 
-    public Set<NodeParameter> getOutputParameters() {
+    public List<NodeParameter> getOutputParameters() {
         return outputParameters;
     }
 
@@ -78,8 +78,8 @@ public class NodeDefinitionVersion {
         private String creatorRef;
         private String version;
         private String resultFile;
-        private Set<NodeParameter> inputParameters = new HashSet<>();
-        private Set<NodeParameter> outputParameters = new HashSet<>();
+        private List<NodeParameter> inputParameters = new ArrayList<>();
+        private List<NodeParameter> outputParameters = new ArrayList<>();
         private String spec;
 
         private Builder() {
@@ -129,12 +129,12 @@ public class NodeDefinitionVersion {
             return this;
         }
 
-        public Builder inputParameters(Set<NodeParameter> inputParameters) {
+        public Builder inputParameters(List<NodeParameter> inputParameters) {
             this.inputParameters = inputParameters;
             return this;
         }
 
-        public Builder outputParameters(Set<NodeParameter> outputParameters) {
+        public Builder outputParameters(List<NodeParameter> outputParameters) {
             this.outputParameters = outputParameters;
             return this;
         }

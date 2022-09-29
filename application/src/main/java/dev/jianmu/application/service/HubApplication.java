@@ -93,7 +93,7 @@ public class HubApplication {
                     .value(parameter.getValue())
                     .required(parameter.getRequired())
                     .build();
-        }).collect(Collectors.toSet());
+        }).collect(Collectors.toList());
 
         var outputParameters = nodeDsl.getOutputParameters().stream().map(parameter -> {
             var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
@@ -107,7 +107,7 @@ public class HubApplication {
                     .value(parameter.getValue())
                     .required(parameter.getRequired())
                     .build();
-        }).collect(Collectors.toSet());
+        }).collect(Collectors.toList());
 
         this.parameterRepository.addAll(parameters);
 
@@ -237,7 +237,7 @@ public class HubApplication {
                     .value(parameter.getValue())
                     .required(parameter.getRequired())
                     .build();
-        }).collect(Collectors.toSet());
+        }).collect(Collectors.toList());
 
         var outputParameters = dto.getOutputParameters().stream().map(parameter -> {
             var p = Parameter.Type.getTypeByName(parameter.getType()).newParameter(parameter.getValue());
@@ -251,7 +251,7 @@ public class HubApplication {
                     .value(parameter.getValue())
                     .required(parameter.getRequired())
                     .build();
-        }).collect(Collectors.toSet());
+        }).collect(Collectors.toList());
 
         this.parameterRepository.addAll(parameters);
 
@@ -281,7 +281,7 @@ public class HubApplication {
                         .value("")
                         .build()
                 )
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         return NodeDef.builder()
                 .name("Shell Node")
                 .description("Shell Node")
