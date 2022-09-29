@@ -64,11 +64,29 @@ export default (appContext: AppContext) => {
         }),
       },
       // platform模块
-      loadModuleRoute(PLATFORM_INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
+      loadModuleRoute(
+        PLATFORM_INDEX,
+        '首页',
+        false,
+        import('@/layout/platform.vue'),
+        import.meta.globEager('./modules/platform.ts'),
+      ),
       // full模块
-      loadModuleRoute('/full', undefined, false, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
+      loadModuleRoute(
+        '/full',
+        undefined,
+        false,
+        import('@/layout/full.vue'),
+        import.meta.globEager('./modules/full.ts'),
+      ),
       // error模块
-      loadModuleRoute('/error', undefined, false, import('@/layout/error.vue'), import.meta.globEager('./modules/error.ts')),
+      loadModuleRoute(
+        '/error',
+        undefined,
+        false,
+        import('@/layout/error.vue'),
+        import.meta.globEager('./modules/error.ts'),
+      ),
       {
         // 默认
         // path匹配规则：按照路由的定义顺序
@@ -82,13 +100,13 @@ export default (appContext: AppContext) => {
       },
     ],
   });
-  router.beforeEach((to, from, next) => {
+  router.beforeEach(async (to, from, next) => {
     const lastMatched = to.matched[to.matched.length - 1];
 
     if (lastMatched.meta.title) {
-      document.title = `建木CI - ${lastMatched.meta.title}`;
+      document.title = `建木 - ${lastMatched.meta.title}`;
     } else {
-      document.title = '建木CI';
+      document.title = '建木';
     }
 
     const store = _store as any;
@@ -101,16 +119,15 @@ export default (appContext: AppContext) => {
         next(false);
 
         if (from.matched.length === 0) {
-          router.push({
+          await router.push({
             name: 'login',
             query: {
               redirectUrl: to.path === LOGIN_INDEX ? undefined : to.fullPath,
             },
-          }).then(() => {
           });
         } else {
           // 登录弹框
-          _store.dispatch(`${sessionNs}/openAuthDialog`, { appContext, LoginVerify });
+          await _store.dispatch(`${sessionNs}/openAuthDialog`, { appContext, LoginVerify });
         }
         return;
       }

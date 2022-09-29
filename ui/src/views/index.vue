@@ -15,12 +15,12 @@
               <span class="text">代码项目</span>
             </div>
           </router-link>
-          <router-link :to="{ name: 'import-project' }">
-            <div class="btn-item">
-              <button class="git"></button>
-              <span class="text">导入项目</span>
-            </div>
-          </router-link>
+          <!--          <router-link :to="{ name: 'import-project' }">-->
+          <!--            <div class="btn-item">-->
+          <!--              <button class="git"></button>-->
+          <!--              <span class="text">导入项目</span>-->
+          <!--            </div>-->
+          <!--          </router-link>-->
         </div>
         <div class="right-area">
           <router-link :to="{ name: 'node-library' }">
@@ -44,15 +44,11 @@
         </div>
       </div>
       <!-- 全部项目 -->
-      <all-project v-if="searchResultFlag"/>
+      <all-project v-if="searchResultFlag" />
       <!-- 搜索结果 -->
-      <search-project
-        :searchName="searchName"
-        :projectGroupId="projectGroupId"
-        v-else
-      />
+      <search-project :searchName="searchName" :projectGroupId="projectGroupId" v-else />
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
 </template>
 
@@ -88,7 +84,7 @@ export default defineComponent({
 
     .menu-bar {
       margin-top: 20px;
-      background-color: #FFFFFF;
+      background-color: #ffffff;
       padding: 40px 20px;
       display: flex;
       justify-content: space-between;
@@ -109,7 +105,7 @@ export default defineComponent({
 
         &:hover {
           .text {
-            color: #096DD9;
+            color: #096dd9;
           }
         }
 
@@ -123,27 +119,27 @@ export default defineComponent({
           background-repeat: no-repeat;
 
           &.graph {
-            background-image: url("@/assets/svgs/index/graph-project-btn.svg");
+            background-image: url('@/assets/svgs/index/graph-project-btn.svg');
           }
 
           &.code {
-            background-image: url("@/assets/svgs/index/code-project-btn.svg");
+            background-image: url('@/assets/svgs/index/code-project-btn.svg');
           }
 
           &.git {
-            background-image: url("@/assets/svgs/index/git-btn.svg");
+            background-image: url('@/assets/svgs/index/git-btn.svg');
           }
 
           &.node-library {
-            background-image: url("@/assets/svgs/index/node-library-btn.svg");
+            background-image: url('@/assets/svgs/index/node-library-btn.svg');
           }
 
           &.group {
-            background-image: url("@/assets/svgs/index/group-btn.svg");
+            background-image: url('@/assets/svgs/index/group-btn.svg');
           }
 
           &.secret-key {
-            background-image: url("@/assets/svgs/index/secret-key-btn.svg");
+            background-image: url('@/assets/svgs/index/secret-key-btn.svg');
           }
         }
 
@@ -155,7 +151,8 @@ export default defineComponent({
         }
       }
 
-      .left-area, .right-area {
+      .left-area,
+      .right-area {
         display: flex;
       }
     }
