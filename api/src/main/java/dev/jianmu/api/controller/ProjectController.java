@@ -60,8 +60,8 @@ public class ProjectController {
         return ProjectIdVo.builder().id(project.getId()).build();
     }
 
-    @PostMapping("/import")
-    @Operation(summary = "导入DSL", description = "导入Git库中的DSL文件创建项目")
+//    @PostMapping("/import")
+//    @Operation(summary = "导入DSL", description = "导入Git库中的DSL文件创建项目")
     public void importDsl(@RequestBody @Validated(AddGroup.class) GitRepoDto gitRepoDto) {
         var gitRepo = GitRepoMapper.INSTANCE.toGitRepo(gitRepoDto);
         this.projectApplication.importProject(gitRepo, gitRepoDto.getProjectGroupId());
