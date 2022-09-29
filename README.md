@@ -62,10 +62,10 @@ openssl rand -hex 16
 
 这部分配置是用来验证Worker与服务器的连接，Worker和服务器必须配置相同的密钥值。
 
-[示例](https://ci.jianmu.dev)
+[官方示例](https://ci.jianmu.dev)
 
-[文档](https://docs.jianmu.dev/guide/quick-start.html)
+[建木文档](https://docs.jianmu.dev/guide/quick-start.html)
 
-[官网](https://jianmu.dev)
+[建木官网](https://jianmu.dev)
 
 ![联系我们](./contact.png)
