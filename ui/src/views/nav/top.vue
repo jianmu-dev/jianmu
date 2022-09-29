@@ -2,7 +2,7 @@
   <div class="top-nav">
     <div class="left">
       <router-link to="/">
-        <div class="logo"/>
+        <div class="logo" />
       </router-link>
       <jm-popconfirm
         v-if="newVersion"
@@ -32,17 +32,16 @@
       <jm-dropdown v-else trigger="click">
         <span class="el-dropdown-link">
           <jm-tooltip :content="session.username" placement="left" v-if="loginType">
-            <img :src="session.avatarUrl" class="avatar"
-                 @error="loadedError"
-                 v-if="session.avatarUrl!=='https://gitee.com/assets/no_portrait.png'&&loaded">
-            <span class="username" v-else>{{
-                session.username?.charAt(0).toUpperCase()
-              }}</span>
+            <img
+              :src="session.avatarUrl"
+              class="avatar"
+              @error="loadedError"
+              v-if="session.avatarUrl !== 'https://gitee.com/assets/no_portrait.png' && loaded"
+            />
+            <span class="username" v-else>{{ session.username?.charAt(0).toUpperCase() }}</span>
           </jm-tooltip>
           <jm-tooltip :content="session.username" placement="left" v-else>
-            <span class="username">{{
-                session.username?.charAt(0).toUpperCase()
-              }}</span>
+            <span class="username">{{ session.username?.charAt(0).toUpperCase() }}</span>
           </jm-tooltip>
           <i class="el-icon-arrow-down el-icon--right"></i>
         </span>
@@ -86,10 +85,7 @@ export default defineComponent({
     });
     const currentVersion = `v${v}`;
     const newVersion = computed<IVersionVo | undefined>(() => {
-      if (
-        rootState.versions.length === 0 ||
-        rootState.versions[0].versionNo === currentVersion
-      ) {
+      if (rootState.versions.length === 0 || rootState.versions[0].versionNo === currentVersion) {
         return undefined;
       }
 
@@ -161,7 +157,7 @@ export default defineComponent({
 
     .version {
       position: absolute;
-      left: 160px;
+      left: 150px;
       bottom: 2px;
       letter-spacing: normal;
       white-space: nowrap;
