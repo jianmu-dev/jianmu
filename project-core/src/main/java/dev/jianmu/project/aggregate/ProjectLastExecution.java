@@ -30,6 +30,12 @@ public class ProjectLastExecution {
         this.workflowRef = workflowRef;
     }
 
+    public void init(String workflowInstanceId, int serialNo, String status) {
+        this.workflowInstanceId = workflowInstanceId;
+        this.serialNo = serialNo;
+        this.status = status;
+    }
+
     public void running(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
