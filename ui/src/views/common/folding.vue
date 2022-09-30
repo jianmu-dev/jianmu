@@ -1,19 +1,18 @@
 <template>
   <div class="folding">
     <div class="prefix">
-      <slot name="prefix"/>
+      <slot name="prefix" />
       <div class="title">
-        <slot name="title"/>
+        <slot name="title" />
       </div>
     </div>
     <transition name="folding">
-      <slot v-if="status||pageAble">
-      </slot>
+      <slot v-if="status || pageAble"> </slot>
     </transition>
   </div>
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -30,7 +29,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang='less'>
+<style scoped lang="less">
 @keyframes appearIn {
   0% {
     opacity: 0;
@@ -41,10 +40,10 @@ export default defineComponent({
 }
 
 .folding {
-
   .prefix {
     display: flex;
     align-items: center;
+    margin-bottom: 10px;
 
     .title {
       flex: 1;
@@ -52,11 +51,11 @@ export default defineComponent({
   }
 
   .folding-enter-active {
-    animation: appearIn .3s;
+    animation: appearIn 0.3s;
   }
 
   .folding-leave-active {
-    animation: appearIn reverse .1s;
+    animation: appearIn reverse 0.1s;
   }
 }
 </style>
