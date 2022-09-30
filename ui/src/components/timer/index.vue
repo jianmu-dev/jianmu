@@ -1,8 +1,8 @@
 <template>
-  <jm-text-viewer class="jm-timer" :value="time" :tip-append-to-body="tipAppendToBody"/>
+  <jm-text-viewer class="jm-timer" :value="time" :tip-append-to-body="tipAppendToBody" />
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import { computed, defineComponent, onBeforeUnmount, ref } from 'vue';
 
 export default defineComponent({
@@ -21,6 +21,11 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    // 简写
+    abbr: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
     const now = ref<Date>(new Date());
@@ -28,11 +33,12 @@ export default defineComponent({
       now.value = new Date();
     }, 1000);
     const time = computed<string>(() => {
+      let startTimeMillis;
       if (!props.startTime) {
-        return '无';
+        startTimeMillis = now.value.getTime();
+      } else {
+        startTimeMillis = Date.parse(props.startTime);
       }
-
-      const startTimeMillis = Date.parse(props.startTime);
       let endTimeMillis;
       if (!props.endTime) {
         endTimeMillis = now.value.getTime();
@@ -68,7 +74,12 @@ export default defineComponent({
       } else if (seconds === 60) {
         result += '0s';
       }
-
+      if (props.abbr) {
+        const arr = result.split(' ');
+        if (arr.length > 2) {
+          return `${arr[0]} ${arr[1]}`;
+        }
+      }
       return result || '无';
     });
     onBeforeUnmount(() => {

@@ -3,22 +3,22 @@
     <folding :status="toggle" :page-able="pageable">
       <template #prefix v-if="!pageable">
         <span class="prefix-wrapper">
-          <i :class="['jm-icon-button-right','prefix',toggle?'rotate':'']"
-             :disabled="projectPage.total===0"
-             @click="saveFoldStatus(toggle,projectGroup.id)"/>
+          <i
+            :class="['jm-icon-button-right', 'prefix', toggle ? 'rotate' : '']"
+            :disabled="projectPage.total === 0"
+            @click="saveFoldStatus(toggle, projectGroup.id)"
+          />
         </span>
       </template>
       <template #title>
         <div v-if="!pageable" class="name">
           <div class="group-name">
-            <router-link
-              :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
-            >{{ projectGroup?.name }}
-            </router-link
-            >
-            <span class="desc">（共有 {{ projectPage.total < 0 ? 0 : projectPage.total }} 个项目）</span>
+            <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }"
+              >{{ projectGroup?.name }}
+            </router-link>
+            <span class="desc">（共有 {{ projectPage.total >= 0 ? projectPage.total : 0 }} 个项目）</span>
           </div>
-          <div class="more-container" v-if="!pageable && projectPage.total>10">
+          <div class="more-container" v-if="!pageable && projectPage.total > 10">
             <router-link :to="{ path: `/project-group/detail/${projectGroup?.id}` }">
               查看更多
               <i class="more-icon"></i>
@@ -29,16 +29,14 @@
       <template #default>
         <div>
           <div class="projects" ref="projectsRef">
-            <jm-empty description="暂无项目" :image-size="98"
-                      v-if="projects.length === 0 && pageable && isDetail"/>
-            <jm-empty :image="noDataImg" description="没有搜到相关结果" :image-size="98"
-                      v-else-if="projects.length === 0 && pageable"/>
-            <jm-sorter
-              v-else-if="moveListener"
-              class="list"
-              v-model="projectList"
-              @change="sortList"
-            >
+            <jm-empty description="暂无项目" :image-size="98" v-if="projects.length === 0 && pageable && isDetail" />
+            <jm-empty
+              :image="noDataImg"
+              description="没有搜到相关结果"
+              :image-size="98"
+              v-else-if="projects.length === 0 && pageable"
+            />
+            <jm-sorter v-else-if="moveListener" class="list" v-model="projectList" @change="sortList">
               <project-item
                 v-for="(project, index) in projectList"
                 :concurrent="project.concurrent"
@@ -67,11 +65,7 @@
           </div>
           <!-- 显示更多 -->
           <div class="load-more" v-if="pageable" v-scroll="scrollObj">
-            <jm-load-more
-              :state="loadState"
-              :load-more="btnDown"
-              v-if="projects.length !== 0"
-            ></jm-load-more>
+            <jm-load-more :state="loadState" :load-more="btnDown" v-if="projects.length !== 0"></jm-load-more>
           </div>
         </div>
       </template>
@@ -199,16 +193,9 @@ export default defineComponent({
         if (loadingMore.value === true) {
           return;
         }
-        if (
-          !projects.value.find(
-            item => item.status === ProjectStatusEnum.RUNNING,
-          )
-        ) {
+        if (!projects.value.find(item => item.status === ProjectStatusEnum.RUNNING)) {
           // 不存在running场景
-          if (
-            autoRefreshingOfNoRunningCount.value <
-            MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT
-          ) {
+          if (autoRefreshingOfNoRunningCount.value < MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT) {
             autoRefreshingOfNoRunningCount.value++;
             return;
           } else {
@@ -292,10 +279,7 @@ export default defineComponent({
       await loadProject();
     });
     onUpdated(async () => {
-      if (
-        queryForm.value.name === props.name &&
-        queryForm.value.projectGroupId === props.projectGroup?.id
-      ) {
+      if (queryForm.value.name === props.name && queryForm.value.projectGroupId === props.projectGroup?.id) {
         return;
       }
       queryForm.value.name = props.name;
@@ -336,8 +320,7 @@ export default defineComponent({
       return projectList.value.map(({ id }) => {
         return id === currentItem.value ? 'move' : '';
       });
-    },
-    );
+    });
     onBeforeUnmount(() => {
       console.log('终止自动刷新项目列表');
       clearInterval(autoRefreshingInterval);
@@ -405,7 +388,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .project-group {
-  margin-top: 20px;
+  margin-top: 24px;
 
   .prefix-wrapper {
     cursor: not-allowed;
@@ -416,17 +399,17 @@ export default defineComponent({
   .prefix {
     cursor: pointer;
     font-size: 12px;
-    transition: all .1s linear;
-    color: #6B7B8D;
+    transition: all 0.1s linear;
+    color: #6b7b8d;
 
-    &[disabled=true] {
+    &[disabled='true'] {
       pointer-events: none;
-      color: #A7B0BB;
+      color: #a7b0bb;
     }
 
     &.rotate {
       transform: rotate(90deg);
-      transition: all .1s linear;
+      transition: all 0.1s linear;
     }
   }
 
@@ -453,7 +436,7 @@ export default defineComponent({
     .more-container {
       width: 86px;
       height: 24px;
-      background: #EFF7FF;
+      background: #eff7ff;
       border-radius: 15px;
       font-size: 12px;
       font-weight: 400;
@@ -463,7 +446,7 @@ export default defineComponent({
       align-items: center;
 
       a {
-        color: #6B7B8D;
+        color: #6b7b8d;
         line-height: 24px;
       }
 
@@ -480,10 +463,10 @@ export default defineComponent({
       }
 
       &:hover {
-        color: #096DD9;
+        color: #096dd9;
 
         a {
-          color: #096DD9;
+          color: #096dd9;
         }
 
         .more-icon {
@@ -512,7 +495,7 @@ export default defineComponent({
           width: 60%;
           height: 100%;
           box-sizing: border-box;
-          border: 2px solid #096DD9;
+          border: 2px solid #096dd9;
           background: rgba(9, 109, 217, 0.3);
           position: absolute;
           top: 0;
