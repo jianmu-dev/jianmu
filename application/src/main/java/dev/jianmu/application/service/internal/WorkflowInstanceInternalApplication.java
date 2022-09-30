@@ -141,7 +141,7 @@ public class WorkflowInstanceInternalApplication {
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         workflowInstance.end();
-        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getEndTime());
+        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getStartTime(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }
@@ -190,7 +190,7 @@ public class WorkflowInstanceInternalApplication {
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
-        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getEndTime());
+        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getStartTime(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }
@@ -206,7 +206,7 @@ public class WorkflowInstanceInternalApplication {
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
-        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getEndTime());
+        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getStartTime(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }

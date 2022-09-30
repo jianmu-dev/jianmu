@@ -50,10 +50,11 @@ public class ProjectLastExecution {
         this.status = status;
     }
 
-    public void end(String workflowInstanceId, int serialNo, String status, LocalDateTime endTime) {
+    public void end(String workflowInstanceId, int serialNo, String status, LocalDateTime startTime, LocalDateTime endTime) {
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
         this.status = status;
+        this.startTime = startTime;
         this.endTime = endTime;
     }
 
