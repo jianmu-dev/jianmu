@@ -43,11 +43,11 @@
             <jm-timer :abbr="true" :end-time="project.nextTime" class="timer" />
           </div>
           <div class="executed" v-else-if="project.status !== ProjectStatusEnum.INIT">
-            <span class="start-to-current">
+            <span class="start-to-current" v-if="project.startTime">
               <jm-time-viewer :value="project.startTime" />
             </span>
             <span class="duration">
-              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}</span>
+              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}时长</span>
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
@@ -179,11 +179,11 @@
             <jm-timer :abbr="true" :end-time="project.nextTime" class="timer" />
           </div>
           <div class="executed" v-else-if="project.status !== ProjectStatusEnum.INIT">
-            <span class="start-to-current">
+            <span class="start-to-current" v-if="project.startTime">
               <jm-time-viewer :value="startTime" />
             </span>
             <span class="duration">
-              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}</span>
+              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}时长</span>
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
