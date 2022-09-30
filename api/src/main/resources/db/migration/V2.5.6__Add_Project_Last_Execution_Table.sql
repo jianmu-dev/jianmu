@@ -22,31 +22,28 @@ BEGIN
     DECLARE `i` int DEFAULT (0);
     DECLARE `w_count` int DEFAULT (0);
     DECLARE `ref` VARCHAR(45) character SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    DECLARE `version` VARCHAR(45) character SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     DECLARE `instance_id` VARCHAR(45) character SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
     DECLARE `instance_no` int;
     DECLARE `instance_start_time` datetime;
     DECLARE `instance_suspend_time` datetime;
     DECLARE `instance_end_time` datetime;
     DECLARE `instance_status` VARCHAR(45) character SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-    DECLARE `project_cursor` CURSOR FOR SELECT `workflow_ref`, `workflow_version` FROM `jianmu_project`;
+    DECLARE `project_cursor` CURSOR FOR SELECT `workflow_ref` FROM `jianmu_project`;
     DECLARE EXIT HANDLER FOR NOT FOUND SET `i` := 1;
     OPEN `project_cursor`;
     WHILE `i` = 0
         DO
-            FETCH `project_cursor` INTO `ref`, `version`;
+            FETCH `project_cursor` INTO `ref`;
             BEGIN
                 select count(*)
                 into `w_count`
                 FROM `workflow_instance`
-                WHERE `workflow_ref` = `ref`
-                  AND `workflow_version` = `version`;
+                WHERE `workflow_ref` = `ref`;
                 IF `w_count` > 0 THEN
                     SELECT `id`, `serial_no`, `start_time`, `suspended_time`, `end_time`, `status`
                     INTO `instance_id`, `instance_no`, `instance_start_time`, `instance_suspend_time`, `instance_end_time`, `instance_status`
                     FROM `workflow_instance`
                     WHERE `workflow_ref` = `ref`
-                      AND `workflow_version` = `version`
                     ORDER BY serial_no DESC
                     LIMIT 1;
                     INSERT INTO `jm_project_last_execution`(`workflow_ref`, `workflow_instance_id`, `serial_no`,
