@@ -574,6 +574,7 @@ export default defineComponent({
   min-width: 260px;
   background-color: #ffffff;
   min-height: 166px;
+  border-radius: 0px 0px 4px 4px;
 
   &:hover {
     box-shadow: 0px 0px 12px 4px #edf1f8;
@@ -799,7 +800,7 @@ export default defineComponent({
         align-items: center;
 
         button + button {
-          margin-left: 18px;
+          margin-left: 20px;
         }
 
         button {
