@@ -37,6 +37,13 @@ public class ProjectLastExecution {
         this.status = status;
     }
 
+    public void resume(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
+        this.workflowInstanceId = workflowInstanceId;
+        this.serialNo = serialNo;
+        this.startTime = startTime;
+        this.status = status;
+    }
+
     public void end(String workflowInstanceId, int serialNo, String status, LocalDateTime endTime) {
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
