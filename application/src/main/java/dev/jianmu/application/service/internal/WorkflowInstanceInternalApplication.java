@@ -168,7 +168,7 @@ public class WorkflowInstanceInternalApplication {
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByInstanceId(instanceId);
         if (this.workflowInstanceDomainService.canResume(asyncTaskInstances, taskRef)) {
             workflowInstance.resume();
-            projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
+            projectLastExecution.resume(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
             this.workflowInstanceRepository.save(workflowInstance);
             this.projectLastExecutionRepository.update(projectLastExecution);
         }
