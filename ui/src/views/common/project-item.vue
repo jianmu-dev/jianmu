@@ -11,30 +11,125 @@
         <span class="concurrent" v-if="concurrent">可并发</span>
         <router-link
           :to="{
-          name: 'workflow-execution-record-detail',
-          query: { projectId: project.id },
-        }"
+            name: 'workflow-execution-record-detail',
+            query: { projectId: project.id },
+          }"
         >
-          <jm-text-viewer :value="project.name" class="title"/>
+          <jm-text-viewer :value="project.name" :class="{ title: true, disabled: !enabled }" />
         </router-link>
+        <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.CRON" :content="alarmTip" placement="top">
+          <i class="alarm" />
+        </jm-tooltip>
       </div>
-      <div class="time">
-        <div class="running" v-if="project.status === ProjectStatusEnum.RUNNING">
-          <span>执行时长：</span>
-          <jm-timer :start-time="project.startTime"/>
+      <div class="content-center">
+        <div class="status">
+          <div class="left">
+            <div
+              :class="{
+                bar: true,
+                [project.status.toLowerCase()]: true,
+              }"
+            ></div>
+            <div class="desc">
+              {{ statusDesc }}
+            </div>
+            <div class="count" v-if="project.status !== ProjectStatusEnum.INIT">#{{ project.serialNo }}</div>
+          </div>
+          <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
-        <div class="running" v-else-if="project.status === ProjectStatusEnum.SUSPENDED">
-          <span>挂起时长：</span>
-          <jm-timer :start-time="project.suspendedTime"/>
+        <div class="time">
+          <div class="init" v-if="isShowNextTime">
+            <span>距离下次执行还有</span>
+            <jm-timer :abbr="true" :end-time="project.nextTime" class="timer" />
+          </div>
+          <div class="executed" v-else-if="project.status !== ProjectStatusEnum.INIT">
+            <span class="start-to-current">
+              <jm-time-viewer :value="project.startTime" />
+            </span>
+            <span class="duration">
+              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}</span>
+              <jm-timer
+                :abbr="true"
+                :start-time="project.startTime"
+                v-if="project.status === ProjectStatusEnum.RUNNING"
+              />
+              <jm-timer
+                :abbr="true"
+                :start-time="project.suspendedTime"
+                v-else-if="project.status === ProjectStatusEnum.SUSPENDED"
+              />
+              <jm-timer
+                :start-time="project.startTime"
+                :end-time="project.latestTime"
+                v-else-if="project.status === ProjectStatusEnum.FAILED"
+              ></jm-timer>
+              <jm-timer
+                :abbr="true"
+                :start-time="project.startTime"
+                :end-time="project.latestTime"
+                v-else-if="project.status === ProjectStatusEnum.SUCCEEDED"
+              />
+            </span>
+          </div>
+          <div class="empty" v-else></div>
         </div>
-        <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
-      <div class="time">
-        下次执行时间：{{ datetimeFormatter(project.nextTime) }}
-      </div>
-      <div class="operation">
-        <div class="top"></div>
-        <div class="bottom"></div>
+      <div class="content-bottom">
+        <div class="operation">
+          <jm-tooltip :content="`${enabled ? '' : '已禁用，不可'}触发`" placement="bottom">
+            <button
+              :class="{ execute: true, doing: !enabled || executing }"
+              @click="execute(project.id)"
+              @keypress.enter.prevent
+            ></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" content="编辑" placement="bottom">
+            <button class="edit" @click="edit(project.id)"></button>
+          </jm-tooltip>
+          <jm-tooltip v-else content="同步DSL" placement="bottom">
+            <button
+              :class="{ sync: true, doing: synchronizing }"
+              @click="sync(project.id)"
+              @keypress.enter.prevent
+            ></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.source === DslSourceEnum.GIT" content="打开git仓库" placement="bottom">
+            <button class="git-label" @click="openGit(project.gitRepoId)"></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="预览流程" placement="bottom">
+            <button class="workflow-label" @click="dslDialogFlag = true"></button>
+          </jm-tooltip>
+          <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="预览管道" placement="bottom">
+            <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
+            <button class="webhook" @click="webhookDrawerFlag = true"></button>
+          </jm-tooltip>
+        </div>
+        <div class="more">
+          <jm-dropdown trigger="click" placement="bottom-start">
+            <span class="el-dropdown-link">
+              <div class="btn-group"></div>
+            </span>
+            <template #dropdown>
+              <jm-dropdown-menu>
+                <jm-dropdown-item :disabled="abling" @click="able(project.id)">
+                  <a
+                    href="javascript: void(0)"
+                    :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
+                    style="width: 90px; display: inline-block"
+                    >{{ enabled ? '禁用' : '启用' }}</a
+                  >
+                </jm-dropdown-item>
+                <jm-dropdown-item :disabled="deleting" @click="del(project.id)">
+                  <a href="javascript: void(0)" class="jm-icon-button-delete" style="width: 90px; display: inline-block"
+                    >删除</a
+                  >
+                </jm-dropdown-item>
+              </jm-dropdown-menu>
+            </template>
+          </jm-dropdown>
+        </div>
       </div>
     </div>
     <div class="cover"></div>
@@ -51,87 +146,105 @@
         <span class="concurrent" v-if="concurrent">可并发</span>
         <router-link
           :to="{
-          name: 'workflow-execution-record-detail',
-          query: { projectId: project.id },
-        }"
+            name: 'workflow-execution-record-detail',
+            query: { projectId: project.id },
+          }"
         >
-          <jm-text-viewer :value="project.name" :class="{title:true,disabled:!enabled}"/>
+          <jm-text-viewer :value="project.name" :class="{ title: true, disabled: !enabled }" />
         </router-link>
+        <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.CRON" :content="alarmTip" placement="top">
+          <i class="alarm" />
+        </jm-tooltip>
       </div>
-      <div :class="{
-        time: true,
-        disabled: !enabled,
-      }">
-        <div class="running" v-if="project.status === ProjectStatusEnum.RUNNING">
-          <span>执行时长：</span>
-          <jm-timer :start-time="project.startTime"/>
+      <div class="content-center">
+        <div class="status">
+          <div class="left">
+            <div
+              :class="{
+                bar: true,
+                [project.status.toLowerCase()]: true,
+              }"
+            ></div>
+            <div class="desc">
+              {{ statusDesc }}
+            </div>
+            <div class="count" v-if="project.status !== ProjectStatusEnum.INIT">#{{ project.serialNo }}</div>
+          </div>
+          <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
-        <div class="running" v-else-if="project.status === ProjectStatusEnum.SUSPENDED">
-          <span>挂起时长：</span>
-          <jm-timer :start-time="project.suspendedTime"/>
+        <div class="time">
+          <div class="init" v-if="isShowNextTime">
+            <span>距离下次执行还有</span>
+            <jm-timer :abbr="true" :end-time="project.nextTime" class="timer" />
+          </div>
+          <div class="executed" v-else-if="project.status !== ProjectStatusEnum.INIT">
+            <span class="start-to-current">
+              <jm-time-viewer :value="startTime" />
+            </span>
+            <span class="duration">
+              <span>{{ project.status === ProjectStatusEnum.SUSPENDED ? '挂起' : '执行' }}</span>
+              <jm-timer
+                :abbr="true"
+                :start-time="project.startTime"
+                v-if="project.status === ProjectStatusEnum.RUNNING"
+              />
+              <jm-timer
+                :abbr="true"
+                :start-time="project.suspendedTime"
+                v-else-if="project.status === ProjectStatusEnum.SUSPENDED"
+              />
+              <jm-timer
+                :start-time="project.startTime"
+                :end-time="project.latestTime"
+                v-else-if="project.status === ProjectStatusEnum.FAILED"
+              ></jm-timer>
+              <jm-timer
+                :abbr="true"
+                :start-time="project.startTime"
+                :end-time="project.latestTime"
+                v-else-if="project.status === ProjectStatusEnum.SUCCEEDED"
+              />
+            </span>
+          </div>
+          <div class="empty" v-else></div>
         </div>
-        <span v-else>最后完成时间：{{ datetimeFormatter(project.latestTime) }}</span>
       </div>
-      <div :class="{
-        time: true,
-        disabled: !enabled,
-      }">
-        下次执行时间：{{ datetimeFormatter(project.nextTime) }}
-      </div>
-      <div class="operation">
-        <jm-tooltip :content="`${enabled ? '' : '已禁用，不可'}触发`" placement="bottom">
-          <button
-            :class="{ execute: true, doing: !enabled || executing }"
-            @click="execute(project.id)"
-            @keypress.enter.prevent
-          ></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.triggerType === TriggerTypeEnum.WEBHOOK"
-          content="Webhook"
-          placement="bottom"
-        >
-          <button class="webhook" @click="webhookDrawerFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.source === DslSourceEnum.LOCAL"
-          content="编辑"
-          placement="bottom"
-        >
-          <button class="edit" @click="edit(project.id)"></button>
-        </jm-tooltip>
-        <jm-tooltip v-else content="同步DSL" placement="bottom">
-          <button
-            :class="{ sync: true, doing: synchronizing }"
-            @click="sync(project.id)"
-            @keypress.enter.prevent
-          ></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.source === DslSourceEnum.GIT"
-          content="打开git仓库"
-          placement="bottom"
-        >
-          <button class="git-label" @click="openGit(project.gitRepoId)"></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-if="project.dslType === DslTypeEnum.WORKFLOW"
-          content="预览流程"
-          placement="bottom"
-        >
-          <button class="workflow-label" @click="dslDialogFlag = true"></button>
-        </jm-tooltip>
-        <jm-tooltip
-          v-else-if="project.dslType === DslTypeEnum.PIPELINE"
-          content="预览管道"
-          placement="bottom"
-        >
-          <button class="pipeline-label" @click="dslDialogFlag = true"></button>
-        </jm-tooltip>
+      <div class="content-bottom">
+        <div class="operation">
+          <jm-tooltip :content="`${enabled ? '' : '已禁用，不可'}触发`" placement="bottom">
+            <button
+              :class="{ execute: true, doing: !enabled || executing }"
+              @click="execute(project.id)"
+              @keypress.enter.prevent
+            ></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.source === DslSourceEnum.LOCAL" content="编辑" placement="bottom">
+            <button class="edit" @click="edit(project.id)"></button>
+          </jm-tooltip>
+          <jm-tooltip v-else content="同步DSL" placement="bottom">
+            <button
+              :class="{ sync: true, doing: synchronizing }"
+              @click="sync(project.id)"
+              @keypress.enter.prevent
+            ></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.source === DslSourceEnum.GIT" content="打开git仓库" placement="bottom">
+            <button class="git-label" @click="openGit(project.gitRepoId)"></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="预览流程" placement="bottom">
+            <button class="workflow-label" @click="dslDialogFlag = true"></button>
+          </jm-tooltip>
+          <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="预览管道" placement="bottom">
+            <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+          </jm-tooltip>
+          <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
+            <button class="webhook" @click="webhookDrawerFlag = true"></button>
+          </jm-tooltip>
+        </div>
         <div class="more">
           <jm-dropdown trigger="click" placement="bottom-start">
             <span class="el-dropdown-link">
-              <button class="btn-group"></button>
+              <div class="btn-group"></div>
             </span>
             <template #dropdown>
               <jm-dropdown-menu>
@@ -139,15 +252,14 @@
                   <a
                     href="javascript: void(0)"
                     :class="enabled ? 'jm-icon-button-disable' : 'jm-icon-button-off'"
-                    style="width: 90px; display: inline-block;"
-                  >{{ enabled ? '禁用' : '启用' }}</a>
+                    style="width: 90px; display: inline-block"
+                    >{{ enabled ? '禁用' : '启用' }}</a
+                  >
                 </jm-dropdown-item>
                 <jm-dropdown-item :disabled="deleting" @click="del(project.id)">
-                  <a
-                    href="javascript: void(0)"
-                    class="jm-icon-button-delete"
-                    style="width: 90px; display: inline-block;"
-                  >删除</a>
+                  <a href="javascript: void(0)" class="jm-icon-button-delete" style="width: 90px; display: inline-block"
+                    >删除</a
+                  >
                 </jm-dropdown-item>
               </jm-dropdown-menu>
             </template>
@@ -160,11 +272,7 @@
       :current-project-name="project.name"
       v-model:webhookVisible="webhookDrawerFlag"
     ></webhook-drawer>
-    <project-preview-dialog
-      v-if="dslDialogFlag"
-      :project-id="project.id"
-      @close="dslDialogFlag = false"
-    />
+    <project-preview-dialog v-if="dslDialogFlag" :project-id="project.id" @close="dslDialogFlag = false" />
     <div class="cover"></div>
   </div>
 </template>
@@ -178,6 +286,8 @@ import { datetimeFormatter } from '@/utils/formatter';
 import ProjectPreviewDialog from './project-preview-dialog.vue';
 import WebhookDrawer from './webhook-drawer.vue';
 import { useRouter } from 'vue-router';
+import { terminate } from '@/api/workflow-execution-record';
+import dayjs from 'dayjs';
 
 export default defineComponent({
   components: { ProjectPreviewDialog, WebhookDrawer },
@@ -215,7 +325,64 @@ export default defineComponent({
     const enabled = ref<boolean>(props.project.enabled);
     const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
+    // 控制终止按钮显隐
+    const isShowStopBtn = computed<boolean>(
+      () => props.project.status === ProjectStatusEnum.RUNNING || props.project.status === ProjectStatusEnum.SUSPENDED,
+    );
+    // 状态描述
+    const statusDesc = computed<string>(() => {
+      switch (props.project.status) {
+        case ProjectStatusEnum.SUSPENDED:
+          return '挂起';
+        case ProjectStatusEnum.FAILED:
+          return '失败';
+        case ProjectStatusEnum.RUNNING:
+          return '执行中';
+        case ProjectStatusEnum.SUCCEEDED:
+          return '成功';
+        default:
+          return '未启动';
+      }
+    });
+    // alarm 提示
+    const alarmTip = computed<string>(
+      () => `定时项目：下次执行时间 ${dayjs(props.project.nextTime).format('MM-DD hh:mm')}`,
+    );
+    // 控制是否显示下一次执行时间
+    const isShowNextTime = computed<boolean>(() => {
+      const { status, nextTime } = props.project;
+      return (
+        nextTime &&
+        (status === ProjectStatusEnum.FAILED ||
+          status === ProjectStatusEnum.SUCCEEDED ||
+          status === ProjectStatusEnum.INIT)
+      );
+    });
+    const stopProcess = (id: string) => {
+      proxy
+        .$confirm('确定要终止吗?', '终止项目执行', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info',
+        })
+        .then(() => {
+          terminate(id)
+            .then(() => {
+              proxy.$success('终止成功');
+              // 刷新
+              emit('synchronized');
+            })
+            .catch((err: Error) => proxy.$throw(err, proxy));
+        });
+    };
+    const startTime = computed<string>(() => props.project.startTime);
     return {
+      startTime,
+      stopProcess,
+      isShowNextTime,
+      alarmTip,
+      statusDesc,
+      isShowStopBtn,
       isMoveMode,
       isMove,
       DslSourceEnum,
@@ -265,8 +432,6 @@ export default defineComponent({
                 proxy.$throw(err, proxy);
                 executing.value = false;
               });
-          })
-          .catch(() => {
           });
       },
       able: (id: string) => {
@@ -275,12 +440,14 @@ export default defineComponent({
         }
 
         const str = enabled.value ? '禁用' : '启用';
-        const msg = props.project.mutable ? `
+        const msg = props.project.mutable
+          ? `
           <div>
             <span>确定要${str}吗?</span>
             <a href="https://v2.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
           </div>
-        ` : `
+        `
+          : `
           <div>
             <span>${enabled.value ? '已启用' : '已禁用'}，不可修改</span>
             <a href="https://v2.jianmu.dev/guide/global.html" target="_blank" class="jm-icon-button-help"></a>
@@ -288,26 +455,27 @@ export default defineComponent({
           <div style="color: red; margin-top: 5px; font-size: 12px; line-height: normal;">若要修改，请通过DSL更新</div>
         `;
 
-        proxy.$confirm(msg, `${str}项目`, {
-          showConfirmButton: props.project.mutable,
-          confirmButtonText: '确定',
-          cancelButtonText: props.project.mutable ? '取消' : '关闭',
-          type: 'info',
-          dangerouslyUseHTMLString: true,
-        }).then(async () => {
-          abling.value = true;
-          try {
-            await active(id, !enabled.value);
-            enabled.value = !enabled.value;
+        proxy
+          .$confirm(msg, `${str}项目`, {
+            showConfirmButton: props.project.mutable,
+            confirmButtonText: '确定',
+            cancelButtonText: props.project.mutable ? '取消' : '关闭',
+            type: 'info',
+            dangerouslyUseHTMLString: true,
+          })
+          .then(async () => {
+            abling.value = true;
+            try {
+              await active(id, !enabled.value);
+              enabled.value = !enabled.value;
 
-            proxy.$success(enabled.value ? '已启用' : '已禁用');
-          } catch (err) {
-            proxy.$throw(err, proxy);
-          } finally {
-            abling.value = false;
-          }
-        }).catch(() => {
-        });
+              proxy.$success(enabled.value ? '已启用' : '已禁用');
+            } catch (err) {
+              proxy.$throw(err, proxy);
+            } finally {
+              abling.value = false;
+            }
+          });
       },
       edit: (id: string) => {
         router.push({ name: 'update-project', params: { id } });
@@ -337,8 +505,6 @@ export default defineComponent({
                 proxy.$throw(err, proxy);
                 synchronizing.value = false;
               });
-          })
-          .catch(() => {
           });
       },
       del: (id: string) => {
@@ -372,8 +538,6 @@ export default defineComponent({
                 proxy.$throw(err, proxy);
                 deleting.value = false;
               });
-          })
-          .catch(() => {
           });
       },
       openGit: (gitRepoId: string) => {
@@ -404,13 +568,21 @@ export default defineComponent({
 }
 
 .project-item {
-  margin: 0.8%;
-  margin-bottom: 0px;
+  box-sizing: border-box;
+  margin: 0.8% 0.8% 0 0;
   width: 19.2%;
   min-width: 260px;
   background-color: #ffffff;
-  box-shadow: 0px 0px 8px 4px #eff4f9;
   min-height: 166px;
+
+  &:hover {
+    box-shadow: 0px 0px 12px 4px #edf1f8;
+
+    .content {
+      border: 1px solid transparent;
+      border-top: none;
+    }
+  }
 
   &.move {
     position: relative;
@@ -445,12 +617,8 @@ export default defineComponent({
     display: none;
   }
 
-  &:hover {
-    box-shadow: 0px 6px 16px 4px #e6eef6;
-  }
-
   .state-bar {
-    height: 8px;
+    height: 6px;
     overflow: hidden;
 
     &.init {
@@ -458,12 +626,14 @@ export default defineComponent({
     }
 
     &.running {
-      background-image: repeating-linear-gradient(115deg,
-      #10c2c2 0px,
-      #58d4d4 1px,
-      #58d4d4 10px,
-      #10c2c2 11px,
-      #10c2c2 16px);
+      background-image: repeating-linear-gradient(
+        115deg,
+        #10c2c2 0px,
+        #58d4d4 1px,
+        #58d4d4 10px,
+        #10c2c2 11px,
+        #10c2c2 16px
+      );
       background-size: 106px 114px;
       animation: 3s linear 0s infinite normal none running workflow-running;
     }
@@ -484,9 +654,13 @@ export default defineComponent({
   .content {
     min-height: 116px;
     position: relative;
-    padding: 20px 20px 16px 20px;
+    padding: 16px 20px 10px 20px;
+    border: 1px solid #dee4eb;
+    border-top: none;
+    border-radius: 0px 0px 4px 4px;
 
     .content-top {
+      min-height: 24px;
       display: flex;
       align-items: center;
 
@@ -497,127 +671,196 @@ export default defineComponent({
       .concurrent {
         height: 20px;
         line-height: 20px;
-        background: #FFF7E6;
+        background: #fff7e6;
         border-radius: 2px;
         padding: 3px;
         font-size: 12px;
         font-weight: 400;
-        color: #6D4C41;
+        color: #6d4c41;
         margin-right: 5px;
       }
-    }
 
-    .title {
-      margin-right: 20px;
-      font-size: 16px;
-      color: #082340;
-
-      &.disabled {
-        color: #979797;
-      }
-
-      &:hover {
-        color: #096dd9;
+      .alarm {
+        width: 24px;
+        height: 24px;
+        background: url('@/assets/svgs/index/alarm.svg') 100% no-repeat;
       }
     }
 
-    .time {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #6b7b8d;
-      white-space: nowrap;
-
-      .running {
+    .content-center {
+      .status {
+        margin-top: 10px;
         display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #082340;
+        font-weight: 400;
 
-        .jm-timer {
-          flex: 1
-        }
-      }
+        .left {
+          display: flex;
+          align-items: center;
 
-      &.disabled {
-        color: #979797;
-      }
-    }
+          .bar {
+            width: 4px;
+            height: 12px;
+            border-radius: 2px;
 
-    .operation {
-      margin-top: 18px;
-      min-height: 26px;
-      display: flex;
-      align-items: center;
+            &.succeeded {
+              background-color: #3ebb03;
+            }
 
-      button + button {
-        margin-left: 18px;
-      }
+            &.failed {
+              background-color: #cf1524;
+            }
 
-      button {
-        width: 26px;
-        height: 26px;
-        background-color: transparent;
-        border: 0;
-        background-position: center center;
-        background-repeat: no-repeat;
-        cursor: pointer;
-        outline: none;
+            &.suspended {
+              background-color: #7986cb;
+            }
 
-        &:active {
-          background-color: #eff7ff;
-          border-radius: 4px;
-        }
+            &.init {
+              background-color: #979797;
+            }
 
-        &.execute {
-          background-image: url('@/assets/svgs/btn/execute.svg');
-        }
+            &.running {
+              background-color: #10c2c2;
+            }
+          }
 
-        &.edit {
-          background-image: url('@/assets/svgs/btn/edit.svg');
-        }
+          .desc {
+            margin: 0 10px;
+          }
 
-        &.sync {
-          background-image: url('@/assets/svgs/btn/sync.svg');
-
-          &.doing {
-            animation: rotating 2s linear infinite;
+          .count {
           }
         }
 
-        &.webhook {
-          background-image: url('@/assets/svgs/btn/hook.svg');
+        .stop-btn {
+          cursor: pointer;
+
+          &:hover {
+            color: #096dd9;
+          }
+        }
+      }
+
+      .time {
+        margin: 10px 0 15px;
+        color: #6b7b8d;
+        font-size: 14px;
+
+        .init {
+          display: flex;
+
+          .timer {
+            flex: 1;
+            display: inline-block;
+          }
         }
 
-        &.git-label {
-          background-image: url('@/assets/svgs/index/git-label.svg');
+        .executed {
+          display: flex;
+
+          .duration {
+            display: flex;
+            margin-left: 10px;
+            flex: 1;
+
+            span {
+              margin-right: 5px;
+            }
+
+            .jm-timer {
+              flex: 1;
+            }
+          }
+
+          .jm-timer {
+            display: inline-block;
+          }
         }
 
-        &.workflow-label {
-          background-image: url('@/assets/svgs/index/workflow-label.svg');
+        .empty {
+          min-height: 20px;
+        }
+      }
+    }
+
+    .content-bottom {
+      padding: 10px 0 0;
+      border-top: 1px solid #dee4eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .operation {
+        min-height: 26px;
+        display: flex;
+        align-items: center;
+
+        button + button {
+          margin-left: 18px;
         }
 
-        &.pipeline-label {
-          background-image: url('@/assets/svgs/index/pipeline-label.svg');
-        }
-
-        &.btn-group {
-          background-image: url('@/assets/svgs/btn/more2.svg');
-          position: absolute;
-          right: 0px;
-          top: 0px;
-        }
-
-        &.doing {
-          opacity: 0.5;
-          cursor: not-allowed;
+        button {
+          width: 26px;
+          height: 26px;
+          background-color: transparent;
+          border: 0;
+          background-position: center center;
+          background-repeat: no-repeat;
+          cursor: pointer;
+          outline: none;
 
           &:active {
-            background-color: transparent;
+            background-color: #eff7ff;
+            border-radius: 4px;
+          }
+
+          &.execute {
+            background-image: url('@/assets/svgs/btn/execute.svg');
+          }
+
+          &.edit {
+            background-image: url('@/assets/svgs/btn/edit.svg');
+          }
+
+          &.sync {
+            background-image: url('@/assets/svgs/btn/sync.svg');
+
+            &.doing {
+              animation: rotating 2s linear infinite;
+            }
+          }
+
+          &.webhook {
+            background-image: url('@/assets/svgs/btn/hook.svg');
+          }
+
+          &.git-label {
+            background-image: url('@/assets/svgs/index/git-label.svg');
+          }
+
+          &.workflow-label {
+            background-image: url('@/assets/svgs/index/workflow-label.svg');
+          }
+
+          &.pipeline-label {
+            background-image: url('@/assets/svgs/index/pipeline-label.svg');
+          }
+
+          &.doing {
+            opacity: 0.5;
+            cursor: not-allowed;
+
+            &:active {
+              background-color: transparent;
+            }
           }
         }
       }
 
       .more {
-        position: absolute;
-        right: 3px;
-        top: 5px;
         opacity: 0.65;
 
         &:hover {
@@ -625,16 +868,20 @@ export default defineComponent({
         }
 
         .el-dropdown-link {
-          display: inline-block;
-          width: 26px;
-          height: 10px;
+          .btn-group {
+            &:active {
+              background-color: #eff7ff;
+              border-radius: 4px;
+            }
+
+            width: 24px;
+            height: 24px;
+            background-image: url('@/assets/svgs/btn/more2.svg');
+            transform: rotate(90deg);
+          }
         }
       }
     }
   }
-}
-
-.project-item {
-  margin-left: 0px;
 }
 </style>
