@@ -148,7 +148,7 @@ export default defineComponent({
       ViewModeEnum,
       handleChangeRecord(record: IWorkflowExecutionRecordVo) {
         const { name: projectGroupName, triggerId } = record;
-        // entry -> false 建木CI的topbar 更改项目名
+        // entry -> false 建木的topbar 更改项目名
         if (!props.entry) {
           recordDetail.value.project = {
             ...recordDetail.value.project,
