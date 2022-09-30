@@ -69,6 +69,8 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到流程定义"));
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目ID:" + projectId));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         if (!project.isConcurrent()) {
             // 查询待运行的流程数
             int i = this.workflowInstanceRepository
@@ -90,7 +92,10 @@ public class WorkflowInstanceInternalApplication {
         // 创建新的流程实例
         WorkflowInstance workflowInstance = workflowInstanceDomainService.create(cmd.getTriggerId(), cmd.getTriggerType(), serialNo.get(), workflow);
         workflowInstance.init();
+        projectLastExecution.init(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name());
         this.workflowInstanceRepository.add(workflowInstance);
+        this.projectLastExecutionRepository.update(projectLastExecution);
+
     }
 
     // 启动流程
