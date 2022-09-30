@@ -39,7 +39,7 @@ export default defineComponent({
       } else if (second >= 2592000 && second <= 31104000) {
         // 一年之内 (12 * 2592000) 12个2592000秒 = 31104000
         const month = Math.floor(second / 2592000);
-        return month + '月前';
+        return month + '个月前';
       } else {
         // 一年之上
         const year = Math.floor(second / 2592000);
