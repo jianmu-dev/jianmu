@@ -52,6 +52,10 @@ public class ProjectVo {
     private boolean concurrent;
     @Schema(description = "Git库ID")
     private String gitRepoId;
+    @Schema(description = "流程实例ID")
+    private String workflowInstanceId;
+    @Schema(description = "流程实例序号")
+    private int serialNo;
     @Schema(description = "开始执行时间")
     private LocalDateTime startTime;
     @Schema(description = "挂起时间")

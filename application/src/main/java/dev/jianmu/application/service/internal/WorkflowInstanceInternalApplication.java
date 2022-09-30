@@ -201,7 +201,7 @@ public class WorkflowInstanceInternalApplication {
             workflowInstance.terminate();
         }
         // 修改项目最后执行状态
-        projectLastExecution.running(workflowInstance.getStartTime(), workflowInstance.getStatus().name());
+        projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
 
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
@@ -215,7 +215,7 @@ public class WorkflowInstanceInternalApplication {
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         workflowInstance.end();
-        projectLastExecution.end(workflowInstance.getStatus().name(), workflowInstance.getEndTime());
+        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }
@@ -231,7 +231,7 @@ public class WorkflowInstanceInternalApplication {
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.suspend();
-        projectLastExecution.suspend(workflowInstance.getStatus().name(), workflowInstance.getSuspendedTime());
+        projectLastExecution.suspend(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getSuspendedTime());
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }
@@ -260,7 +260,7 @@ public class WorkflowInstanceInternalApplication {
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
-        projectLastExecution.end(workflowInstance.getStatus().name(), workflowInstance.getEndTime());
+        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }
@@ -276,7 +276,7 @@ public class WorkflowInstanceInternalApplication {
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.terminate();
-        projectLastExecution.end(workflowInstance.getStatus().name(), workflowInstance.getEndTime());
+        projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
     }

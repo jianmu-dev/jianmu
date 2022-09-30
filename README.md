@@ -1,8 +1,8 @@
-# 建木CI
+# 建木
 
 #### 介绍
 
-> 建木持续集成平台基于建木自动化平台作为核心实现的持续集成平台，为开发者构建便捷的编译、测试、打包、发布、部署和通知等持续集成生命周期中的相关服务。
+> 建木是一个面向DevOps领域的极易扩展的开源无代码(图形化)/低代码(GitOps)工具。可以帮助用户轻松编排各种DevOps流程并分发到不同平台执行。
 
 ![](https://jianmu-blog.assets.dghub.cn/jianmu-blog/1.29.0/assets/blog-source/%E7%AC%AC%E4%B8%80%E5%B1%8F%E5%9B%BE.png)
 
@@ -64,8 +64,8 @@ openssl rand -hex 16
 
 [官方示例](https://ci.jianmu.dev)
 
-[快速开始](https://docs.jianmu.dev/guide/quick-start.html)
+[建木文档](https://docs.jianmu.dev)
 
-[官网首页](https://jianmu.dev)
+[建木官网](https://jianmu.dev)
 
 ![联系我们](./contact.png)
