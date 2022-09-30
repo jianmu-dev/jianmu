@@ -33,7 +33,7 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
-            <div class="count" v-if="project.status !== ProjectStatusEnum.INIT">#{{ project.serialNo }}</div>
+            <div class="count" v-if="project.serialNo !== 0">#{{ project.serialNo }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
@@ -59,6 +59,7 @@
                 v-else-if="project.status === ProjectStatusEnum.SUSPENDED"
               />
               <jm-timer
+                :abbr="true"
                 :start-time="project.startTime"
                 :end-time="project.latestTime"
                 v-else-if="project.status === ProjectStatusEnum.FAILED"
@@ -168,7 +169,7 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
-            <div class="count" v-if="project.status !== ProjectStatusEnum.INIT">#{{ project.serialNo }}</div>
+            <div class="count" v-if="project.serialNo !== 0">#{{ project.serialNo }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
@@ -194,6 +195,7 @@
                 v-else-if="project.status === ProjectStatusEnum.SUSPENDED"
               />
               <jm-timer
+                :abbr="true"
                 :start-time="project.startTime"
                 :end-time="project.latestTime"
                 v-else-if="project.status === ProjectStatusEnum.FAILED"
@@ -327,7 +329,10 @@ export default defineComponent({
     const webhookDrawerFlag = ref<boolean>(false);
     // 控制终止按钮显隐
     const isShowStopBtn = computed<boolean>(
-      () => props.project.status === ProjectStatusEnum.RUNNING || props.project.status === ProjectStatusEnum.SUSPENDED,
+      () =>
+        props.project.status === ProjectStatusEnum.RUNNING ||
+        props.project.status === ProjectStatusEnum.SUSPENDED ||
+        (props.project.status === ProjectStatusEnum.INIT && props.project.serialNo !== 0),
     );
     // 状态描述
     const statusDesc = computed<string>(() => {
@@ -341,7 +346,7 @@ export default defineComponent({
         case ProjectStatusEnum.SUCCEEDED:
           return '成功';
         default:
-          return '未启动';
+          return props.project.serialNo === 0 ? '未启动' : '待启动';
       }
     });
     // alarm 提示
@@ -863,6 +868,7 @@ export default defineComponent({
 
       .more {
         opacity: 0.65;
+        cursor: pointer;
 
         &:hover {
           opacity: 1;
