@@ -161,12 +161,16 @@ public class WorkflowInstanceInternalApplication {
     public void resume(String instanceId, String taskRef) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         // 恢复流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByInstanceId(instanceId);
         if (this.workflowInstanceDomainService.canResume(asyncTaskInstances, taskRef)) {
             workflowInstance.resume();
+            projectLastExecution.resume(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
             this.workflowInstanceRepository.save(workflowInstance);
+            this.projectLastExecutionRepository.update(projectLastExecution);
         }
     }
 
