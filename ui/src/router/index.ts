@@ -95,9 +95,9 @@ export default async (appContext: AppContext): Promise<Router> => {
     const lastMatched = to.matched[to.matched.length - 1];
 
     if (lastMatched.meta.title) {
-      document.title = `建木CI - ${lastMatched.meta.title}`;
+      document.title = `建木 - ${lastMatched.meta.title}`;
     } else {
-      document.title = '建木CI';
+      document.title = '建木';
     }
 
     const store = _store as any;

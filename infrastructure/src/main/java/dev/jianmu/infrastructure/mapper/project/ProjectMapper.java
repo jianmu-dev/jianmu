@@ -122,7 +122,7 @@ public interface ProjectMapper {
     List<Project> findAll();
 
     @Select("<script>" +
-            "SELECT jp.*, `jpl`.`end_time`, `jpl`.`status`, `jpl`.`start_time`, `jpl`.`suspended_time` " +
+            "SELECT jp.*, jpl`.`workflow_instance_id`, `jpl`.`serial_no`, `jpl`.`end_time`, `jpl`.`status`, `jpl`.`start_time`, `jpl`.`suspended_time` " +
             "FROM `jm_project` `jp` INNER JOIN `jm_project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
             "INNER JOIN `jm_project_last_execution` `jpl` ON (`jp`.`workflow_ref` = `jpl`.`workflow_ref`)" +
             "<where>" +
@@ -177,6 +177,8 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "serial_no", property = "serialNo")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")

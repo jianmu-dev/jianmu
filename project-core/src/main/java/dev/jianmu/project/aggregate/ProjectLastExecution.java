@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
  */
 public class ProjectLastExecution {
     private String workflowRef;
+    // 流程实例ID
+    private String workflowInstanceId;
+    // 流程实例序号
+    private int serialNo;
     // 开始执行时间
     private LocalDateTime startTime;
     // 挂起时间
@@ -26,23 +30,38 @@ public class ProjectLastExecution {
         this.workflowRef = workflowRef;
     }
 
-    public void running(LocalDateTime startTime, String status) {
+    public void running(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
+        this.workflowInstanceId = workflowInstanceId;
+        this.serialNo = serialNo;
         this.startTime = startTime;
         this.status = status;
     }
 
-    public void end(String status, LocalDateTime endTime) {
+    public void end(String workflowInstanceId, int serialNo, String status, LocalDateTime endTime) {
+        this.workflowInstanceId = workflowInstanceId;
+        this.serialNo = serialNo;
         this.status = status;
         this.endTime = endTime;
     }
 
-    public void suspend(String status, LocalDateTime suspendedTime) {
+    public void suspend(String workflowInstanceId, int serialNo, String status, LocalDateTime suspendedTime) {
+        this.workflowInstanceId = workflowInstanceId;
+        this.serialNo = serialNo;
         this.status = status;
         this.suspendedTime = suspendedTime;
     }
 
     public String getWorkflowRef() {
         return workflowRef;
+    }
+
+
+    public String getWorkflowInstanceId() {
+        return workflowInstanceId;
+    }
+
+    public int getSerialNo() {
+        return serialNo;
     }
 
     public LocalDateTime getStartTime() {

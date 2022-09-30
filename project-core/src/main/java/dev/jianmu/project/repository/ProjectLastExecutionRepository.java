@@ -2,7 +2,6 @@ package dev.jianmu.project.repository;
 
 import dev.jianmu.project.aggregate.ProjectLastExecution;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
