@@ -12,6 +12,9 @@
         <span class="project-name">
           <jm-text-viewer :value="project.name" class="title" @click="clickProject(project.id)" />
         </span>
+        <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.CRON" :content="alarmTip" placement="top">
+          <i class="alarm" />
+        </jm-tooltip>
       </div>
       <div class="content-center">
         <div class="status">
@@ -144,6 +147,9 @@
             @click="clickProject(project.id)"
           />
         </span>
+        <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.CRON" :content="alarmTip" placement="top">
+          <i class="alarm" />
+        </jm-tooltip>
       </div>
       <div class="content-center">
         <div class="status">
