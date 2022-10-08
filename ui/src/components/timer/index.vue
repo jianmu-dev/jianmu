@@ -34,6 +34,9 @@ export default defineComponent({
     }, 1000);
     const time = computed<string>(() => {
       let startTimeMillis;
+      if (!props.startTime && !props.endTime) {
+        return '无';
+      }
       if (!props.startTime) {
         startTimeMillis = now.value.getTime();
       } else {
