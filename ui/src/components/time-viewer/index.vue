@@ -17,7 +17,7 @@ export default defineComponent({
     let timer: number;
     const timeText = ref<string>('');
     const timeValue = ref<string>(props.value);
-    const timeToEnd = (endTime: number): string => {
+    const timeToEnd = (endTime: number = new Date().getTime()): string => {
       // 过了多少秒 (当前时间戳 减去 结束时间戳)
       const nowTime = new Date().getTime();
       const second = Math.floor((nowTime - endTime) / 1000);
@@ -39,10 +39,10 @@ export default defineComponent({
       } else if (second >= 2592000 && second <= 31104000) {
         // 一年之内 (12 * 2592000) 12个2592000秒 = 31104000
         const month = Math.floor(second / 2592000);
-        return month + '月前';
+        return month + '个月前';
       } else {
         // 一年之上
-        const year = Math.floor(second / 2592000);
+        const year = Math.floor(second / 31104000);
         return year + '年前';
       }
     };

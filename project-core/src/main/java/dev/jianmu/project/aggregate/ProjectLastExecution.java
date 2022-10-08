@@ -30,6 +30,12 @@ public class ProjectLastExecution {
         this.workflowRef = workflowRef;
     }
 
+    public void init(String workflowInstanceId, int serialNo, String status) {
+        this.workflowInstanceId = workflowInstanceId;
+        this.serialNo = serialNo;
+        this.status = status;
+    }
+
     public void running(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
@@ -37,10 +43,18 @@ public class ProjectLastExecution {
         this.status = status;
     }
 
-    public void end(String workflowInstanceId, int serialNo, String status, LocalDateTime endTime) {
+    public void resume(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
+        this.workflowInstanceId = workflowInstanceId;
+        this.serialNo = serialNo;
+        this.startTime = startTime;
+        this.status = status;
+    }
+
+    public void end(String workflowInstanceId, int serialNo, String status, LocalDateTime startTime, LocalDateTime endTime) {
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
         this.status = status;
+        this.startTime = startTime;
         this.endTime = endTime;
     }
 
