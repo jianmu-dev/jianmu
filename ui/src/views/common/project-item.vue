@@ -33,7 +33,7 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
-            <div class="count" v-if="project.serialNo !== 0">#{{ project.serialNo }}</div>
+            <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
@@ -169,7 +169,7 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
-            <div class="count" v-if="project.serialNo !== 0">#{{ project.serialNo }}</div>
+            <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
@@ -381,7 +381,10 @@ export default defineComponent({
         });
     };
     const startTime = computed<string>(() => props.project.startTime);
+    // 项目执行次数
+    const executeCount = ref<number>(props.project.serialNo);
     return {
+      executeCount,
       startTime,
       stopProcess,
       isShowNextTime,
@@ -428,6 +431,8 @@ export default defineComponent({
 
             executeImmediately(id)
               .then(() => {
+                // 点击执行后，项目执行次数加1
+                executeCount.value += 1;
                 proxy.$success('操作成功');
                 executing.value = false;
 
