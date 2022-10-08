@@ -47,7 +47,8 @@
                 @mouseleave="leave"
                 :move-mode="moveListener"
                 :move="moveClassList[index] === 'move'"
-                @running="handleProjectRunning"
+                @triggered="handleProjectTriggered"
+                @terminated="handleProjectTerminated"
                 @synchronized="handleProjectSynchronized"
                 @deleted="handleProjectDeleted"
               />
@@ -58,9 +59,10 @@
               :concurrent="project.concurrent"
               :key="project.id"
               :project="project"
-              @running="handleProjectRunning"
+              @triggered="handleProjectTriggered"
               @synchronized="handleProjectSynchronized"
               @deleted="handleProjectDeleted"
+              @terminated="handleProjectTerminated"
             />
           </div>
           <!-- 显示更多 -->
@@ -363,14 +365,6 @@ export default defineComponent({
       projectPage,
       projects,
       queryForm,
-      handleProjectRunning: (id: string) => {
-        const index = projects.value.findIndex(item => item.id === id);
-        projects.value[index] = {
-          ...projects.value[index],
-          startTime: new Date().toISOString(),
-          status: ProjectStatusEnum.RUNNING,
-        };
-      },
       handleProjectSynchronized: () => {
         // 刷新项目列表，保留查询状态
         loadProject();
@@ -378,6 +372,21 @@ export default defineComponent({
       handleProjectDeleted: (id: string) => {
         const index = projects.value.findIndex(item => item.id === id);
         projects.value.splice(index, 1);
+      },
+      handleProjectTriggered: async (id: string) => {
+        const index = projects.value.findIndex(item => item.id === id);
+        projects.value[index] = {
+          ...projects.value[index],
+          startTime: undefined,
+          status: ProjectStatusEnum.INIT,
+        };
+        await sleep(800);
+        // 刷新项目列表，保留查询状态
+        await loadProject();
+      },
+      handleProjectTerminated: async (id: string) => {
+        // 刷新项目列表，保留查询状态
+        await loadProject();
       },
       saveFoldStatus,
       projectGroupFoldingMapping,
