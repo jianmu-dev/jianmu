@@ -68,8 +68,9 @@ export default defineComponent({
       } else if (minutes === 60) {
         result += '0m ';
       }
-
-      if (seconds >= 0 && seconds < 60) {
+      if (seconds >= 0 && seconds < 1) {
+        result += '不足1s';
+      } else if (seconds >= 1 && seconds < 60) {
         result += `${seconds}s`;
       } else if (seconds === 60) {
         result += '0s';
