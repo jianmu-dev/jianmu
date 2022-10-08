@@ -90,10 +90,10 @@
             <button class="git-label" @click="openGit(project.gitRepoId)"></button>
           </jm-tooltip>
           <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="预览流程" placement="bottom">
-            <button class="workflow-label" @click="dslDialogFlag = true"></button>
+            <button class="workflow-label" @click="() => $emit('select-project-id')"></button>
           </jm-tooltip>
           <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="预览管道" placement="bottom">
-            <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+            <button class="pipeline-label" @click="() => $emit('select-project-id')"></button>
           </jm-tooltip>
           <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
             <button class="webhook" @click="webhookDrawerFlag = true"></button>
@@ -222,10 +222,10 @@
             <button class="git-label" @click="openGit(project.gitRepoId)"></button>
           </jm-tooltip>
           <jm-tooltip v-if="project.dslType === DslTypeEnum.WORKFLOW" content="预览流程" placement="bottom">
-            <button class="workflow-label" @click="dslDialogFlag = true"></button>
+            <button class="workflow-label" @click="() => $emit('select-project-id')"></button>
           </jm-tooltip>
           <jm-tooltip v-else-if="project.dslType === DslTypeEnum.PIPELINE" content="预览管道" placement="bottom">
-            <button class="pipeline-label" @click="dslDialogFlag = true"></button>
+            <button class="pipeline-label" @click="() => $emit('select-project-id')"></button>
           </jm-tooltip>
           <jm-tooltip v-if="project.triggerType === TriggerTypeEnum.WEBHOOK" content="Webhook" placement="bottom">
             <button class="webhook" @click="webhookDrawerFlag = true"></button>
@@ -324,7 +324,6 @@ export default defineComponent({
     const synchronizing = ref<boolean>(false);
     const deleting = ref<boolean>(false);
     const enabled = ref<boolean>(props.project.enabled);
-    const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
     const clickProject = (projectId: string) => {
       if (window.top !== window) {
@@ -410,7 +409,6 @@ export default defineComponent({
       synchronizing,
       deleting,
       enabled,
-      dslDialogFlag,
       webhookDrawerFlag,
       clickProject,
       execute: (id: string) => {

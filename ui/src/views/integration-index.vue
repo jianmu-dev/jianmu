@@ -3,19 +3,21 @@
     <div class="top">
       <!-- 分类导航 -->
       <div class="classification-tabs">
-        <div :class="['tab-item',currentTab===index?'is-active':'']" v-for="(item,index) in data" :key="index"
-             @click="currentTab=index">{{
-          item.label
-          }}・{{ item.counter }}
+        <div
+          :class="['tab-item', currentTab === index ? 'is-active' : '']"
+          v-for="(item, index) in data"
+          :key="index"
+          @click="currentTab = index"
+        >
+          {{ item.label }}・{{ item.counter }}
         </div>
       </div>
       <div class="selector">
         <div class="all-branch item">
           <jm-select v-model="branch" popper-class="no-arrow">
             <jm-option label="全部分支" value="default">全部分支</jm-option>
-            <jm-option :label="b.branchName" v-for='(b,i) in branches' :key="i" :value="b.branchName">{{
-              b.branchName
-              }}
+            <jm-option :label="b.branchName" v-for="(b, i) in branches" :key="i" :value="b.branchName"
+              >{{ b.branchName }}
             </jm-option>
           </jm-select>
         </div>
@@ -30,23 +32,21 @@
     </div>
     <div class="assembly-line-wrapper">
       <div class="loading" v-loading="loading" v-if="loading"></div>
-      <div class="empty-project" v-else-if="initProjects.length===0">
-        <span class="tip">
-          点击下方模块快速创建
-        </span>
+      <div class="empty-project" v-else-if="initProjects.length === 0">
+        <span class="tip"> 点击下方模块快速创建 </span>
         <div class="create-project">
           <div class="item graph" @click="createGraph">
-            <img src="~@/assets/svgs/index/graph-project-btn-square.svg" alt="">
+            <img src="~@/assets/svgs/index/graph-project-btn-square.svg" alt="" />
             <span>图形流水线</span>
           </div>
           <div class="item code" @click="createCode">
-            <img src="~@/assets/svgs/index/code-project-btn-square.svg" alt="">
+            <img src="~@/assets/svgs/index/code-project-btn-square.svg" alt="" />
             <span>代码流水线</span>
           </div>
         </div>
       </div>
-      <div class="empty-assembly-line" v-else-if="data[currentTab].projects.length===0">
-        <jm-empty description="暂无流水线" :image-size="98" class="empty"/>
+      <div class="empty-assembly-line" v-else-if="data[currentTab].projects.length === 0">
+        <jm-empty description="暂无流水线" :image-size="98" class="empty" />
       </div>
       <project-item
         v-else
@@ -55,7 +55,12 @@
         :key="project.id"
         :project="project"
         :no-disable="true"
-        @select-project-id="()=>{previewId=project.id;dslDialogFlag=true;}"
+        @select-project-id="
+          () => {
+            previewId = project.id;
+            dslDialogFlag = true;
+          }
+        "
         @running="handleProjectRunning"
         @synchronized="handleProjectSynchronized"
         @deleted="handleProjectDeleted"
@@ -63,17 +68,18 @@
     </div>
     <!-- 选择分支的弹框 -->
     <jm-dialog
-      :custom-class="`${entry?'entry':'center'} branch`"
+      :custom-class="`${entry ? 'entry' : 'center'} branch`"
       :model-value="dialogVisible"
       @close="close"
-      width="460px">
+      width="460px"
+    >
       <template #title>
         <div class="editor-title">请选择流水线保存的分支</div>
       </template>
       <jm-form ref="editorFormRef" @submit.prevent>
         <jm-form-item>
           <jm-select v-model="selectBranch" style="width: 100%" popper-class="no-arrow">
-            <jm-option v-for="(b,i) in branches" :key="i" :label="b.branchName" :value="b.branchName">
+            <jm-option v-for="(b, i) in branches" :key="i" :label="b.branchName" :value="b.branchName">
               {{ b.branchName }}
             </jm-option>
           </jm-select>
@@ -83,8 +89,9 @@
         <span class="dialog-footer">
           <jm-button size="small" @click="close">取消</jm-button>
           <!-- 选择了分支后，确认按钮可点 -->
-          <jm-button size="small" type="primary" :loading="loading" @click="submit"
-                     :disabled="!selectBranch">确定</jm-button>
+          <jm-button size="small" type="primary" :loading="loading" @click="submit" :disabled="!selectBranch"
+            >确定</jm-button
+          >
         </span>
       </template>
     </jm-dialog>
@@ -93,7 +100,12 @@
       v-if="dslDialogFlag"
       :project-id="previewId"
       :projects="data[currentTab].projects"
-      @close="()=>{dslDialogFlag=false;previewId=''}"
+      @close="
+        () => {
+          dslDialogFlag = false;
+          previewId = '';
+        }
+      "
     />
   </div>
 </template>
@@ -176,7 +188,7 @@ export default defineComponent({
       }
       return result;
     });
-    const data = computed<Array<{ label: string, projects: IProjectVo[], counter: number }>>(() => [
+    const data = computed<Array<{ label: string; projects: IProjectVo[]; counter: number }>>(() => [
       {
         label: '全部',
         projects: filteredProjects.value,
@@ -212,7 +224,9 @@ export default defineComponent({
     const handleData = async (init?: boolean) => {
       initProjects.value = await getAssemblyLineList({});
       // 保证只有在mounted里面请求分支数据
-      init && (branches.value = await getBranches()) && (selectBranch.value = branches.value.find(item => !!item.isDefault)!.branchName);
+      init &&
+        (branches.value = await getBranches()) &&
+        (selectBranch.value = branches.value.find(item => !!item.isDefault)!.branchName);
     };
     // 请求数据
     const loadData = async (init?: boolean) => {
@@ -230,16 +244,9 @@ export default defineComponent({
     const autoRefreshingOfNoRunningCount = ref<number>(0);
     const refreshHandler = () => {
       autoRefreshingInterval = setInterval(async () => {
-        if (
-          !initProjects.value?.find(
-            item => item.status === ProjectStatusEnum.RUNNING,
-          )
-        ) {
+        if (!initProjects.value?.find(item => item.status === ProjectStatusEnum.RUNNING)) {
           // 不存在running场景
-          if (
-            autoRefreshingOfNoRunningCount.value <
-            MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT
-          ) {
+          if (autoRefreshingOfNoRunningCount.value < MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT) {
             autoRefreshingOfNoRunningCount.value++;
             return;
           } else {
@@ -250,7 +257,10 @@ export default defineComponent({
         }
         autoRefreshingOfNoRunningCount.value = 0;
         // 如果全部是成功或者失败状态不进行后续刷新
-        if (initProjects.value.every(item => (item.status === ProjectStatusEnum.SUCCEEDED)) || initProjects.value.every(item => (item.status === ProjectStatusEnum.FAILED))) {
+        if (
+          initProjects.value.every(item => item.status === ProjectStatusEnum.SUCCEEDED) ||
+          initProjects.value.every(item => item.status === ProjectStatusEnum.FAILED)
+        ) {
           return;
         }
         await handleData();
@@ -338,7 +348,7 @@ export default defineComponent({
 
   .top {
     z-index: 1;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     position: sticky;
     top: 0;
     box-sizing: border-box;
@@ -347,7 +357,8 @@ export default defineComponent({
     justify-content: space-between;
     font-size: 14px;
 
-    .classification-tabs, .dropdown {
+    .classification-tabs,
+    .dropdown {
       font-weight: 400;
       display: flex;
       align-items: center;
@@ -364,10 +375,10 @@ export default defineComponent({
 
         &.is-active {
           font-weight: bold;
-          background-color: #EBF4FF;
+          background-color: #ebf4ff;
           border-radius: 15px;
           //color: #466AFF;
-          color: #096DD9;
+          color: #096dd9;
         }
       }
     }
@@ -400,8 +411,7 @@ export default defineComponent({
         margin: 0 15px 0 5px;
         width: 1px;
         height: 14px;
-        background-color: #E7ECF1;
-
+        background-color: #e7ecf1;
       }
 
       .item {
@@ -411,14 +421,13 @@ export default defineComponent({
 
         .icon {
           display: inline-block;
-          transform: rotate(90deg) scale(.7);
+          transform: rotate(90deg) scale(0.7);
         }
       }
     }
   }
 
   .assembly-line-wrapper {
-
     display: flex;
     flex-wrap: wrap;
 
@@ -432,12 +441,14 @@ export default defineComponent({
     ::v-deep(.project-item) {
       box-sizing: border-box;
       min-width: 277px;
-      box-shadow: none;
-      border: 1px solid #E7ECF1;
-      border-bottom-left-radius: 4px;
-      border-bottom-right-radius: 4px;
       margin: 0.5%;
-      height: 180px;
+      .content {
+        .content-top {
+          .project-name:hover {
+            color: #096dd9;
+          }
+        }
+      }
 
       .webhook-drawer-container {
         .el-overlay {
@@ -446,11 +457,6 @@ export default defineComponent({
             overflow: hidden;
           }
         }
-      }
-
-      &:hover {
-        box-shadow: 0 4px 6px 1px #E1EBF5;
-        border: 1px solid transparent;
       }
     }
 
@@ -486,7 +492,7 @@ export default defineComponent({
 
           &:hover {
             //color: #466AFF;
-            color: #096DD9;
+            color: #096dd9;
           }
         }
       }
@@ -515,25 +521,25 @@ export default defineComponent({
         box-shadow: none;
 
         &.el-button--default {
-          background-color: #F5F5F5;
+          background-color: #f5f5f5;
 
           &:hover {
             //background-color: #EBEFFF;
-            background-color: #EFF7FF;
+            background-color: #eff7ff;
 
             //color: #466AFF;
-            color: #096DD9;
+            color: #096dd9;
           }
         }
 
         &.el-button--primary {
           //background-color: #466AFF;
-          background-color: #096DD9;
+          background-color: #096dd9;
 
           &:hover {
             //background-color: #8199FE;
-            background-color: #3293FD;
-            color: #FFFFFF;
+            background-color: #3293fd;
+            color: #ffffff;
           }
         }
       }
