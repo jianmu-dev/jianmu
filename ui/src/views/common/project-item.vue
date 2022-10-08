@@ -314,7 +314,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['running', 'synchronized', 'deleted'],
+  emits: ['triggered', 'synchronized', 'deleted', 'terminated'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
@@ -374,8 +374,8 @@ export default defineComponent({
           terminate(id)
             .then(() => {
               proxy.$success('终止成功');
-              // 刷新
-              emit('synchronized');
+              // 终止项目
+              emit('terminated', id);
             })
             .catch((err: Error) => proxy.$throw(err, proxy));
         });
@@ -435,8 +435,7 @@ export default defineComponent({
                 executeCount.value += 1;
                 proxy.$success('操作成功');
                 executing.value = false;
-
-                emit('running', id);
+                emit('triggered', id);
               })
               .catch((err: Error) => {
                 proxy.$throw(err, proxy);
