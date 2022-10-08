@@ -3,7 +3,7 @@
   <div class="canvas" ref="container"></div>
   <!-- jm-dsl-editor父容器 -->
   <div v-if="dslMode" class="dsl-editor-container">
-    <jm-dsl-editor :value="visibleDsl" readonly/>
+    <jm-dsl-editor :value="visibleDsl" readonly />
   </div>
 </template>
 <script lang="ts">
@@ -43,8 +43,8 @@ export default defineComponent({
   emits: ['sync-graph-data', 'sync-graph-loading', 'mouseenter-node'],
   setup(props, { emit }) {
     const container = ref<HTMLElement>();
-    let workflowGraph:WorkflowGraph;
-    const visibleDsl = ref<string>();
+    let workflowGraph: WorkflowGraph;
+    const visibleDsl = ref<string>('');
     // record版本号
     const workflowVersion = ref(props.workflowVersion);
     // triggerType
@@ -57,10 +57,16 @@ export default defineComponent({
       emit('sync-graph-loading');
       const { dslText: dsl, nodes } = await fetchWorkflow(props.workflowRef, props.workflowVersion);
       const nodeInfos = nodes.filter(({ metadata }) => metadata).map(({ metadata }) => JSON.parse(metadata as string));
-      workflowGraph = new WorkflowGraph(dsl, nodeInfos, triggerType.value, container.value!, (evt: INodeMouseoverEvent) => {
-        emit('mouseenter-node', evt);
-      });
-      visibleDsl.value = workflowGraph.visibleDsl;
+      workflowGraph = new WorkflowGraph(
+        dsl,
+        nodeInfos,
+        triggerType.value,
+        container.value!,
+        (evt: INodeMouseoverEvent) => {
+          emit('mouseenter-node', evt);
+        },
+      );
+      visibleDsl.value = workflowGraph.visibleDsl || '';
       emit('sync-graph-data', workflowGraph);
     };
     // 执行动画
@@ -76,7 +82,16 @@ export default defineComponent({
     // 切换画布实例
     const recordChangeGraph = async () => {
       // version 和 triggerType 都没变化并且非INIT状态(taskStatus.value.length>0)且上一次字符长度非0 返回
-      if (workflowVersion.value === props.workflowVersion && triggerType.value === props.triggerType && taskStatus.value.length && lastedTaskStatus) {
+      if (
+        workflowVersion.value === props.workflowVersion &&
+        triggerType.value === props.triggerType &&
+        taskStatus.value.length &&
+        lastedTaskStatus
+      ) {
+        return;
+      }
+      // 修复SSE切换viewer 引起的重复loading问题
+      if (props.readonly) {
         return;
       }
       // 记录上一次状态字符长度
@@ -115,7 +130,7 @@ export default defineComponent({
     padding: 5px;
     font-size: 14px;
     font-weight: 400;
-    color: #FFFFFF;
+    color: #ffffff;
     line-height: 22px;
 
     background-color: rgba(51, 51, 51, 0.75);
