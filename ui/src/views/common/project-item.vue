@@ -373,7 +373,7 @@ export default defineComponent({
     });
     const stopProcess = (id: string) => {
       proxy
-        .$confirm('确定要终止吗?', '终止项目执行', {
+        .$confirm('确定要终止吗?', '终止执行', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'info',
