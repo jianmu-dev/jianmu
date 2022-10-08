@@ -15,7 +15,9 @@ import { TaskStatusEnum } from '@/api/dto/enumeration';
 import { SHELL_NODE_TYPE } from '../model/data/common';
 import { NODE } from '@/components/workflow/workflow-editor/shape/gengral-config';
 
-const { icon: { width: iconW, height: iconH } } = NODE;
+const {
+  icon: { width: iconW, height: iconH },
+} = NODE;
 
 export const imgs: {
   [key: string]: any;
@@ -126,7 +128,7 @@ export default function (G6: typeof _G6) {
         labelCfg: {
           position: 'bottom',
           style: {
-            fontSize: 18,
+            fontSize: 14,
             fontWeight: 500,
             fill: '#3F536E',
 
@@ -156,16 +158,12 @@ export default function (G6: typeof _G6) {
           const status = value as string;
           const cfg = item?._cfg as IItemBaseConfig;
           const group = item?._cfg?.group as IGroup;
-          const defaultIcon = group
-            .getChildren()
-            .find(child => child.cfg.name === 'async_task_default_icon');
+          const defaultIcon = group.getChildren().find(child => child.cfg.name === 'async_task_default_icon');
           if (defaultIcon) {
             // 更新默认icon
             defaultIcon.attr('img', imgs[status]);
           }
-          const stateIndicator = group
-            .getChildren()
-            .find(child => child.cfg.name === 'async_task_state_indicator');
+          const stateIndicator = group.getChildren().find(child => child.cfg.name === 'async_task_state_indicator');
           if (stateIndicator) {
             // 更新状态指示灯样式
             stateIndicator.attr(states[status].indicatorStyle);
