@@ -20,6 +20,7 @@
     "codemirror": "^5.61.0",
     "cron-expression-validator": "^1.0.20",
     "dateformat": "^4.5.1",
+    "dayjs": "^1.11.5",
     "element-plus": "^1.0.2-beta.41",
     "good-listener": "^1.2.2",
     "mockjs": "^1.1.0",
