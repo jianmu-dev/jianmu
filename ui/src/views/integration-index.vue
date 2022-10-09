@@ -61,7 +61,8 @@
             dslDialogFlag = true;
           }
         "
-        @running="handleProjectRunning"
+        @triggered="handleProjectTriggered"
+        @terminated="handleProjectTerminated"
         @synchronized="handleProjectSynchronized"
         @deleted="handleProjectDeleted"
       />
@@ -120,6 +121,7 @@ import { useRouter } from 'vue-router';
 import { pushTop } from '@/utils/push-top';
 import ProjectPreviewDialog from '@/views/common/project-preview-dialog.vue';
 import { useStore } from 'vuex';
+import sleep from '@/utils/sleep';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
 export default defineComponent({
@@ -239,6 +241,16 @@ export default defineComponent({
         loading.value = false;
       }
     };
+    /**
+     * 重新刷新数据，不带loading
+     */
+    const reloadData = async () => {
+      try {
+        await handleData(false);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
 
     let autoRefreshingInterval: any;
     const autoRefreshingOfNoRunningCount = ref<number>(0);
@@ -298,17 +310,24 @@ export default defineComponent({
       branches,
       sortType,
       GitRepoEnum,
-      handleProjectRunning: (id: string) => {
+      handleProjectTriggered: async (id: string) => {
         const index = initProjects.value.findIndex(item => item.id === id);
         initProjects.value[index] = {
           ...initProjects.value[index],
-          startTime: new Date().toISOString(),
-          status: ProjectStatusEnum.RUNNING,
+          startTime: undefined,
+          status: ProjectStatusEnum.INIT,
         };
-      },
-      handleProjectSynchronized: () => {
+        await sleep(800);
         // 刷新项目列表，保留查询状态
-        loadData();
+        await reloadData();
+      },
+      handleProjectTerminated: async (id: string) => {
+        // 刷新项目列表，保留查询状态
+        await reloadData();
+      },
+      handleProjectSynchronized: async () => {
+        // 刷新项目列表，保留查询状态
+        await reloadData();
       },
       handleProjectDeleted: (id: string) => {
         const index = initProjects.value.findIndex(item => item.id === id);
@@ -442,6 +461,7 @@ export default defineComponent({
       box-sizing: border-box;
       min-width: 277px;
       margin: 0.5%;
+
       .content {
         .content-top {
           .project-name:hover {
