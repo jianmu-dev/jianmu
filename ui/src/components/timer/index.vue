@@ -1,5 +1,5 @@
 <template>
-  <jm-text-viewer class="jm-timer" :value="time" :tip-append-to-body="tipAppendToBody" />
+  <jm-text-viewer class="jm-timer" :value="time" :tip-append-to-body="tipAppendToBody" :threshold="0" />
 </template>
 
 <script lang="ts">
