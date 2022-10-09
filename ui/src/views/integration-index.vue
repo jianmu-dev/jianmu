@@ -314,7 +314,7 @@ export default defineComponent({
         const index = initProjects.value.findIndex(item => item.id === id);
         initProjects.value[index] = {
           ...initProjects.value[index],
-          startTime: undefined,
+          startTime: new Date().toISOString(),
           status: ProjectStatusEnum.INIT,
         };
         await sleep(800);
