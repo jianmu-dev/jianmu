@@ -31,12 +31,18 @@ public class ProjectLastExecution {
     }
 
     public void init(String workflowInstanceId, int serialNo, String status) {
+        if (this.serialNo > serialNo) {
+            return;
+        }
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
         this.status = status;
     }
 
     public void running(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
+        if (this.serialNo > serialNo) {
+            return;
+        }
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
         this.startTime = startTime;
@@ -44,6 +50,9 @@ public class ProjectLastExecution {
     }
 
     public void resume(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
+        if (this.serialNo > serialNo) {
+            return;
+        }
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
         this.startTime = startTime;
@@ -51,6 +60,9 @@ public class ProjectLastExecution {
     }
 
     public void end(String workflowInstanceId, int serialNo, String status, LocalDateTime startTime, LocalDateTime endTime) {
+        if (this.serialNo > serialNo) {
+            return;
+        }
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
         this.status = status;
@@ -59,6 +71,9 @@ public class ProjectLastExecution {
     }
 
     public void suspend(String workflowInstanceId, int serialNo, String status, LocalDateTime suspendedTime) {
+        if (this.serialNo > serialNo) {
+            return;
+        }
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
         this.status = status;
