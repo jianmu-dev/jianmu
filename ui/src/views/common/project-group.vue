@@ -384,9 +384,9 @@ export default defineComponent({
         // 刷新项目列表，保留查询状态
         await loadProject();
       },
-      handleProjectTerminated: async (id: string) => {
+      handleProjectTerminated: (id: string) => {
         // 刷新项目列表，保留查询状态
-        await loadProject();
+        loadProject();
       },
       saveFoldStatus,
       projectGroupFoldingMapping,
