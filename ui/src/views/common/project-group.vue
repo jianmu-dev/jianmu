@@ -222,6 +222,18 @@ export default defineComponent({
         }
       }, 3000);
     };
+    // 重新加载当前已经加载过的项目
+    const reloadCurrentProjectList = async () => {
+      try {
+        const { pageSize, pageNum } = queryForm.value;
+        // 获得当前已经加载了的总数
+        const currentCount = pageSize * pageNum;
+        projectPage.value = await queryProject({ ...queryForm.value, pageNum: 1, pageSize: currentCount });
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
+
     const loadProject = async () => {
       try {
         // 不分页加载项目列表数据
@@ -365,9 +377,9 @@ export default defineComponent({
       projectPage,
       projects,
       queryForm,
-      handleProjectSynchronized: () => {
+      handleProjectSynchronized: async () => {
         // 刷新项目列表，保留查询状态
-        loadProject();
+        await reloadCurrentProjectList();
       },
       handleProjectDeleted: (id: string) => {
         const index = projects.value.findIndex(item => item.id === id);
@@ -382,11 +394,11 @@ export default defineComponent({
         };
         await sleep(800);
         // 刷新项目列表，保留查询状态
-        await loadProject();
+        await reloadCurrentProjectList();
       },
-      handleProjectTerminated: (id: string) => {
+      handleProjectTerminated: async (id: string) => {
         // 刷新项目列表，保留查询状态
-        loadProject();
+        await reloadCurrentProjectList();
       },
       saveFoldStatus,
       projectGroupFoldingMapping,
