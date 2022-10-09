@@ -33,10 +33,10 @@ export default defineComponent({
       now.value = new Date();
     }, 1000);
     const time = computed<string>(() => {
-      let startTimeMillis;
       if (!props.startTime && !props.endTime) {
         return '无';
       }
+      let startTimeMillis;
       if (!props.startTime) {
         startTimeMillis = now.value.getTime();
       } else {
@@ -49,6 +49,9 @@ export default defineComponent({
         endTimeMillis = Date.parse(props.endTime);
       }
       const millisecond = endTimeMillis - startTimeMillis;
+      if (millisecond < 0) {
+        return '无';
+      }
       const days = Math.floor(millisecond / (1000 * 60 * 60 * 24));
       const hours = Math.floor((millisecond % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((millisecond % (1000 * 60 * 60)) / (1000 * 60));
