@@ -28,7 +28,7 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
-            <div class="count" v-if="project.serialNo !== 0">#{{ project.serialNo }}</div>
+            <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
@@ -163,7 +163,7 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
-            <div class="count" v-if="project.serialNo !== 0">#{{ project.serialNo }}</div>
+            <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
         </div>
@@ -309,9 +309,10 @@ export default defineComponent({
     },
   },
   emits: [
-    'running',
+    'triggered',
     'synchronized',
     'deleted',
+    'terminated',
     'select-project-id',
     'clear-project-id',
     'prev-project',
@@ -388,15 +389,18 @@ export default defineComponent({
           terminate(id)
             .then(() => {
               proxy.$success('终止成功');
-              // 刷新
-              emit('synchronized');
+              // 终止项目
+              emit('terminated', id);
             })
             .catch((err: Error) => proxy.$throw(err, proxy));
         });
     };
     const startTime = computed<string>(() => props.project.startTime);
+    // 项目执行次数
+    const executeCount = ref<number>(props.project.serialNo);
     return {
       entry,
+      executeCount,
       startTime,
       stopProcess,
       isShowNextTime,
@@ -443,10 +447,11 @@ export default defineComponent({
 
             executeImmediately(id)
               .then(() => {
+                // 点击执行后，项目执行次数加1
+                executeCount.value += 1;
                 proxy.$success('操作成功');
                 executing.value = false;
-
-                emit('running', id);
+                emit('triggered', id);
               })
               .catch((err: Error) => {
                 proxy.$throw(err, proxy);

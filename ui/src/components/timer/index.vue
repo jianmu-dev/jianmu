@@ -40,6 +40,9 @@ export default defineComponent({
       now.value = new Date();
     }, 1000);
     const time = computed<string>(() => {
+      if (!props.startTime && !props.endTime) {
+        return '无';
+      }
       let startTimeMillis;
       if (!props.startTime) {
         startTimeMillis = now.value.getTime();
@@ -53,6 +56,9 @@ export default defineComponent({
         endTimeMillis = Date.parse(props.endTime);
       }
       const millisecond = endTimeMillis - startTimeMillis;
+      if (millisecond < 0) {
+        return '无';
+      }
       const days = Math.floor(millisecond / (1000 * 60 * 60 * 24));
       const hours = Math.floor((millisecond % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((millisecond % (1000 * 60 * 60)) / (1000 * 60));
@@ -75,8 +81,10 @@ export default defineComponent({
       } else if (minutes === 60) {
         result += '0m ';
       }
-
-      if (seconds >= 0 && seconds < 60) {
+      // eslint-disable-next-line no-compare-neg-zero
+      if (seconds >= 0 && seconds < 1 && seconds !== -0) {
+        result += '不足1s';
+      } else if (seconds >= 1 && seconds < 60) {
         result += `${seconds}s`;
       } else if (seconds === 60) {
         result += '0s';
