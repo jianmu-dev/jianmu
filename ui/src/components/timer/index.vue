@@ -74,7 +74,8 @@ export default defineComponent({
       } else if (minutes === 60) {
         result += '0m ';
       }
-      if (seconds >= 0 && seconds < 1) {
+      // eslint-disable-next-line no-compare-neg-zero
+      if (seconds >= 0 && seconds < 1 && seconds !== -0) {
         result += '不足1s';
       } else if (seconds >= 1 && seconds < 60) {
         result += `${seconds}s`;
