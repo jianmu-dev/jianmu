@@ -5,23 +5,23 @@
       <div class="project-list">
         <div class="text">项目列表</div>
         <jm-select @change="sortChange" :modelValue="sortType" popper-class="project-list-drop-down">
-          <jm-option v-for="(item,index) in sortTypeList" :key="index" :label="item.label"
-                     :value="item.value"></jm-option>
+          <jm-option
+            v-for="(item, index) in sortTypeList"
+            :key="index"
+            :label="item.label"
+            :value="item.value"
+          ></jm-option>
         </jm-select>
       </div>
       <div class="search">
         <i class="jm-icon-button-search" @click="searchProject"></i>
-        <jm-input
-          placeholder="请输入项目名称"
-          v-model="projectName"
-          @change="searchProject"
-        />
+        <jm-input placeholder="请输入项目名称" v-model="projectName" @change="searchProject" />
       </div>
     </div>
     <div class="divider-line"></div>
     <div class="project">
       <template v-if="initialized && groupListRefresh">
-        <template v-if="projectGroups.length>0">
+        <template v-if="projectGroups.length > 0">
           <project-group
             v-for="projectGroup in projectGroups"
             :key="projectGroup.id"
@@ -31,7 +31,7 @@
           />
         </template>
         <div class="project-empty" v-else>
-          <jm-empty description="暂无项目" :image-size="98"/>
+          <jm-empty description="暂无项目" :image-size="98" />
         </div>
       </template>
     </div>
@@ -66,9 +66,9 @@ export default defineComponent({
     // 改变项目组排序后强制数据及时刷新
     const groupListRefresh = ref<boolean>(true);
     // 项目组排序类型
-    const sortTypeList = ref<Array<{ label: string, value: SortTypeEnum }>>([
+    const sortTypeList = ref<Array<{ label: string; value: SortTypeEnum }>>([
       { label: '默认排序', value: SortTypeEnum.DEFAULT_SORT },
-      { label: '最近执行', value: SortTypeEnum.LAST_EXECUTION_TIME },
+      { label: '最近触发', value: SortTypeEnum.LAST_EXECUTION_TIME },
       { label: '最近修改', value: SortTypeEnum.LAST_MODIFIED_TIME },
     ]);
     // 所有项目组在vuex中保存的排序类型
@@ -121,7 +121,7 @@ export default defineComponent({
       initialized,
       allProjectLoading,
       sortChange,
-      ...mapMutations({ 'changeSortType': 'mutate' }),
+      ...mapMutations({ changeSortType: 'mutate' }),
       sortType,
       sortTypeList,
       groupListRefresh,
@@ -147,7 +147,7 @@ export default defineComponent({
       border-radius: 4px;
 
       .el-input__inner {
-        color: #6B7B8D;
+        color: #6b7b8d;
         height: 36px;
         line-height: 36px;
       }
@@ -159,7 +159,7 @@ export default defineComponent({
 
     .project-list {
       font-size: 20px;
-      color: #6B7B8D;
+      color: #6b7b8d;
       display: flex;
       align-items: center;
 
@@ -205,7 +205,7 @@ export default defineComponent({
     margin: 20px auto 0;
     width: calc(100% - 40px);
     height: 1px;
-    background-color: #E6EBF2;
+    background-color: #e6ebf2;
   }
 
   .project {
