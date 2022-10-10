@@ -122,7 +122,7 @@ public interface ProjectMapper {
     List<Project> findAll();
 
     @Select("<script>" +
-            "SELECT jp.*, jpl`.`workflow_instance_id`, `jpl`.`serial_no`, `jpl`.`end_time`, `jpl`.`status`, `jpl`.`start_time`, `jpl`.`suspended_time` " +
+            "SELECT jp.*, jpl`.`workflow_instance_id`, `jpl`.`serial_no`, `jpl`.`end_time`, `jpl`.`status`, `jpl`.`occurred_time`, `jpl`.`start_time`, `jpl`.`suspended_time` " +
             "FROM `jm_project` `jp` INNER JOIN `jm_project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
             "INNER JOIN `jm_project_last_execution` `jpl` ON (`jp`.`workflow_ref` = `jpl`.`workflow_ref`)" +
             "<where>" +
@@ -133,7 +133,7 @@ public interface ProjectMapper {
             "</where>" +
             "<if test='sortType == \"DEFAULT_SORT\"'> ORDER BY `plp`.`sort` asc</if>" +
             "<if test='sortType == \"LAST_MODIFIED_TIME\"'> ORDER BY `jp`.`last_modified_time` desc</if>" +
-            "<if test='sortType == \"LAST_EXECUTION_TIME\"'> ORDER BY if(`jpl`.`end_time` is null, `jpl`.`start_time`, `jpl`.`end_time`) desc</if>" +
+            "<if test='sortType == \"LAST_EXECUTION_TIME\"'> ORDER BY `jpl`.`occurred_time` desc</if>" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
     @Result(column = "workflow_description", property = "workflowDescription")
@@ -148,6 +148,9 @@ public interface ProjectMapper {
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")
@@ -179,6 +182,7 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")

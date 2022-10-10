@@ -12,9 +12,9 @@ import org.apache.ibatis.annotations.Update;
  * @create 2021-03-21 19:27
  */
 public interface WorkflowInstanceBackupMapper {
-    @Insert("insert into jm_workflow_instance_backup(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
+    @Insert("insert into jm_workflow_instance_backup(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version,occurred_time, start_time, suspended_time, end_time, _version) " +
             "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
-            "#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
+            "#{wk.occurredTime},#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
     @Update("update jm_workflow_instance_backup " +
