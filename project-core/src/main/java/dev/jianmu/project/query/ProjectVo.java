@@ -9,6 +9,8 @@ public class ProjectVo extends Project {
     private String workflowInstanceId;
     // 流程实例序号
     private int serialNo;
+    // 触发时间
+    private LocalDateTime occurredTime;
     // 开始执行时间
     private LocalDateTime startTime;
     // 挂起时间
@@ -24,6 +26,10 @@ public class ProjectVo extends Project {
 
     public int getSerialNo() {
         return serialNo;
+    }
+
+    public LocalDateTime getOccurredTime() {
+        return occurredTime;
     }
 
     public LocalDateTime getStartTime() {

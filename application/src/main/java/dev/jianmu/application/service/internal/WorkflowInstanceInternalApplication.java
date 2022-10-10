@@ -91,8 +91,8 @@ public class WorkflowInstanceInternalApplication {
                 .ifPresent(workflowInstance -> serialNo.set(workflowInstance.getSerialNo() + 1));
         // 创建新的流程实例
         WorkflowInstance workflowInstance = workflowInstanceDomainService.create(cmd.getTriggerId(), cmd.getTriggerType(), serialNo.get(), workflow);
-        workflowInstance.init();
-        projectLastExecution.init(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name());
+        workflowInstance.init(cmd.getOccurredTime());
+        projectLastExecution.init(workflowInstance.getId(), workflowInstance.getSerialNo(), cmd.getOccurredTime(), workflowInstance.getStatus().name());
         this.workflowInstanceRepository.add(workflowInstance);
         this.projectLastExecutionRepository.update(projectLastExecution);
 

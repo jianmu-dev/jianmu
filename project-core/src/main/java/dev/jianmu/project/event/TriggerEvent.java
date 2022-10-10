@@ -1,5 +1,7 @@
 package dev.jianmu.project.event;
 
+import java.time.LocalDateTime;
+
 /**
  * @class TriggerEvent
  * @description TriggerEvent
@@ -12,6 +14,7 @@ public class TriggerEvent {
     private String triggerType;
     private String workflowRef;
     private String workflowVersion;
+    private LocalDateTime occurredTime;
 
     public String getProjectId() {
         return projectId;
@@ -33,12 +36,17 @@ public class TriggerEvent {
         return workflowVersion;
     }
 
+    public LocalDateTime getOccurredTime() {
+        return occurredTime;
+    }
+
     public static final class Builder {
         private String projectId;
         private String triggerId;
         private String triggerType;
         private String workflowRef;
         private String workflowVersion;
+        private LocalDateTime occurredTime;
 
         private Builder() {
         }
@@ -72,6 +80,11 @@ public class TriggerEvent {
             return this;
         }
 
+        public Builder occurredTime(LocalDateTime occurredTime) {
+            this.occurredTime = occurredTime;
+            return this;
+        }
+
         public TriggerEvent build() {
             TriggerEvent triggerEvent = new TriggerEvent();
             triggerEvent.workflowVersion = this.workflowVersion;
@@ -79,6 +92,7 @@ public class TriggerEvent {
             triggerEvent.projectId = this.projectId;
             triggerEvent.triggerId = this.triggerId;
             triggerEvent.triggerType = this.triggerType;
+            triggerEvent.occurredTime = this.occurredTime;
             return triggerEvent;
         }
     }
