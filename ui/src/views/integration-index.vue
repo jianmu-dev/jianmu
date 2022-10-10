@@ -174,8 +174,11 @@ export default defineComponent({
     const filteredProjects = computed<IProjectVo[]>(() => {
       let result = [...initProjects.value].sort((pre, next) => {
         if (sortType.value === GitRepoEnum.LAST_EXECUTION_TIME) {
-          // 根据时间戳降序排列
-          return (next.startTime ? Date.parse(next.startTime) : 0) - (pre.startTime ? Date.parse(pre.startTime) : 0);
+          // 根据触发时间戳降序排列
+          return (
+            (next.occurredTime ? Date.parse(next.occurredTime) : 0) -
+            (pre.occurredTime ? Date.parse(pre.occurredTime) : 0)
+          );
         } else {
           return Date.parse(next.lastModifiedTime as string) - Date.parse(pre.lastModifiedTime as string);
         }
@@ -311,13 +314,7 @@ export default defineComponent({
       sortType,
       GitRepoEnum,
       handleProjectTriggered: async (id: string) => {
-        const index = initProjects.value.findIndex(item => item.id === id);
-        initProjects.value[index] = {
-          ...initProjects.value[index],
-          startTime: new Date().toISOString(),
-          status: ProjectStatusEnum.INIT,
-        };
-        await sleep(800);
+        await sleep(400);
         // 刷新项目列表，保留查询状态
         await reloadData();
       },

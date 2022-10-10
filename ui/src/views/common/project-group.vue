@@ -420,13 +420,7 @@ export default defineComponent({
         projects.value.splice(index, 1);
       },
       handleProjectTriggered: async (id: string) => {
-        const index = projects.value.findIndex(item => item.id === id);
-        projects.value[index] = {
-          ...projects.value[index],
-          startTime: undefined,
-          status: ProjectStatusEnum.INIT,
-        };
-        await sleep(800);
+        await sleep(400);
         // 刷新项目列表，保留查询状态
         await reloadCurrentProjectList();
       },
