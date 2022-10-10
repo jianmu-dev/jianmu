@@ -1,10 +1,14 @@
-ALTER TABLE `workflow_instance`
+ALTER TABLE `jm_workflow_instance`
+    add `occurred_time` datetime DEFAULT NULL COMMENT '触发时间' AFTER `workflow_version`;
+ALTER TABLE `jm_workflow_instance_backup`
     add `occurred_time` datetime DEFAULT NULL COMMENT '触发时间' AFTER `workflow_version`;
 ALTER TABLE `jm_project_last_execution`
     add `occurred_time` datetime DEFAULT NULL COMMENT '触发时间' AFTER `serial_no`;
 
-UPDATE `workflow_instance` `w`
-SET occurred_time = (SELECT occurred_time FROM `jianmu_trigger_event` `o` WHERE `o`.`id` = `w`.`trigger_id`);
+UPDATE `jm_workflow_instance` `w`
+SET occurred_time = (SELECT occurred_time FROM `jm_trigger_event` `o` WHERE `o`.`id` = `w`.`trigger_id`);
+UPDATE `jm_workflow_instance_backup` `w`
+SET occurred_time = (SELECT occurred_time FROM `jm_trigger_event` `o` WHERE `o`.`id` = `w`.`trigger_id`);
 
 DELIMITER //
 CREATE PROCEDURE `update_occurred_time`()
@@ -23,12 +27,12 @@ BEGIN
             BEGIN
                 select count(*)
                 into `w_count`
-                FROM `workflow_instance`
+                FROM `jm_workflow_instance`
                 WHERE `workflow_ref` = `ref`;
                 IF `w_count` > 0 THEN
                     SELECT `workflow_ref`, `occurred_time`
                     INTO `instance_ref`, `instance_occurred_time`
-                    FROM `workflow_instance`
+                    FROM `jm_workflow_instance`
                     WHERE `workflow_ref` = `ref`
                     ORDER BY `serial_no` DESC
                     LIMIT 1;
