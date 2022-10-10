@@ -101,6 +101,7 @@ export interface IProjectVo
       concurrent: boolean;
       workflowInstanceId: string;
       serialNo: number;
+      occurredTime: string;
     }
   > {}
 
