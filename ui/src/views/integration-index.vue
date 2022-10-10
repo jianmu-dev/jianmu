@@ -24,7 +24,7 @@
         <div class="divider"></div>
         <div class="sort item">
           <jm-select v-model="sortType" popper-class="no-arrow">
-            <jm-option label="最近执行" :value="GitRepoEnum.LAST_EXECUTION_TIME">最近执行</jm-option>
+            <jm-option label="最近触发" :value="GitRepoEnum.LAST_EXECUTION_TIME">最近触发</jm-option>
             <jm-option label="最近修改" :value="GitRepoEnum.LAST_MODIFIED_TIME">最近修改</jm-option>
           </jm-select>
         </div>
