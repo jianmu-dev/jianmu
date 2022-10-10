@@ -14,6 +14,8 @@ public class ProjectLastExecution {
     private String workflowInstanceId;
     // 流程实例序号
     private int serialNo;
+    // 触发时间
+    private LocalDateTime occurredTime;
     // 开始执行时间
     private LocalDateTime startTime;
     // 挂起时间
@@ -30,13 +32,17 @@ public class ProjectLastExecution {
         this.workflowRef = workflowRef;
     }
 
-    public void init(String workflowInstanceId, int serialNo, String status) {
+    public void init(String workflowInstanceId, int serialNo, LocalDateTime occurredTime, String status) {
         if (this.serialNo > serialNo) {
             return;
         }
         this.workflowInstanceId = workflowInstanceId;
         this.serialNo = serialNo;
+        this.occurredTime = occurredTime;
         this.status = status;
+        this.startTime = null;
+        this.suspendedTime = null;
+        this.endTime = null;
     }
 
     public void running(String workflowInstanceId, int serialNo, LocalDateTime startTime, String status) {
@@ -91,6 +97,10 @@ public class ProjectLastExecution {
 
     public int getSerialNo() {
         return serialNo;
+    }
+
+    public LocalDateTime getOccurredTime() {
+        return occurredTime;
     }
 
     public LocalDateTime getStartTime() {

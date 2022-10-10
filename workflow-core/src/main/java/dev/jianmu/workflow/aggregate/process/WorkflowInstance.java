@@ -35,6 +35,8 @@ public class WorkflowInstance extends AggregateRoot {
     private String workflowVersion;
     // 创建时间
     private final LocalDateTime createTime = LocalDateTime.now();
+    // 触发时间
+    private LocalDateTime occurredTime;
     // 开始时间
     private LocalDateTime startTime;
     // 挂起时间
@@ -62,11 +64,12 @@ public class WorkflowInstance extends AggregateRoot {
     }
 
     // 初始化流程实例
-    public void init() {
+    public void init(LocalDateTime occurredTime) {
         if (!this.isRunning()) {
             throw new RuntimeException("流程实例已终止或结束，无法初始化");
         }
         this.status = ProcessStatus.INIT;
+        this.occurredTime = occurredTime;
         // 发布流程实例初始化运行事件
         var processStartedEvent = ProcessInitializedEvent.Builder.aProcessInitializedEvent()
                 .triggerId(triggerId)
