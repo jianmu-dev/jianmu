@@ -56,6 +56,8 @@ public class ProjectVo {
     private String workflowInstanceId;
     @Schema(description = "流程实例序号")
     private int serialNo;
+    @Schema(description = "触发时间")
+    private LocalDateTime occurredTime;
     @Schema(description = "开始执行时间")
     private LocalDateTime startTime;
     @Schema(description = "挂起时间")

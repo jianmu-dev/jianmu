@@ -31,6 +31,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -46,6 +47,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -58,6 +60,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -72,14 +75,15 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
     @Result(column = "start_time", property = "startTime")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     @Result(column = "global_parameters", property = "globalParameters", typeHandler = ParameterSetTypeHandler.class)
     Optional<WorkflowInstance> findByTriggerId(String triggerId);
 
-    @Insert("insert into jm_workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version, start_time, suspended_time, end_time, _version) " +
+    @Insert("insert into jm_workflow_instance(id, serial_no, trigger_id, trigger_type, name, description, run_mode, status, workflow_ref, workflow_version,occurred_time, start_time, suspended_time, end_time, _version) " +
             "values(#{wk.id},#{wk.serialNo},#{wk.triggerId},#{wk.triggerType},#{wk.name},#{wk.description},#{wk.runMode},#{wk.status},#{wk.workflowRef},#{wk.workflowVersion}," +
-            "#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
+            "#{wk.occurredTime},#{wk.startTime},#{wk.suspendedTime},#{wk.endTime},#{version})")
     boolean add(@Param("wk") WorkflowInstance workflowInstance, @Param("version") int version);
 
     @Update("update jm_workflow_instance " +
@@ -102,6 +106,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -114,6 +119,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -138,6 +144,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -155,6 +162,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -167,6 +175,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
@@ -179,6 +188,7 @@ public interface WorkflowInstanceMapper {
     @Result(column = "trigger_id", property = "triggerId")
     @Result(column = "trigger_type", property = "triggerType")
     @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")

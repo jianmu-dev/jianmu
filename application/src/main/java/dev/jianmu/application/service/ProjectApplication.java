@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -135,7 +136,7 @@ public class ProjectApplication {
         this.projectRepository.updateByWorkflowRef(project);
     }
 
-    public void trigger(String projectId, String triggerId, String triggerType) {
+    public void trigger(String projectId, String triggerId, String triggerType, LocalDateTime occurredTime) {
         MDC.put("triggerId", triggerId);
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
@@ -145,6 +146,7 @@ public class ProjectApplication {
                 .triggerType(triggerType)
                 .workflowRef(project.getWorkflowRef())
                 .workflowVersion(project.getWorkflowVersion())
+                .occurredTime(occurredTime)
                 .build();
         this.publisher.publishEvent(triggerEvent);
     }
@@ -172,6 +174,7 @@ public class ProjectApplication {
                 .triggerType(Trigger.Type.MANUAL.name())
                 .workflowRef(project.getWorkflowRef())
                 .workflowVersion(project.getWorkflowVersion())
+                .occurredTime(evt.getOccurredTime())
                 .build();
         this.publisher.publishEvent(triggerEvent);
     }
