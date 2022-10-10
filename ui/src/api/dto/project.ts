@@ -104,6 +104,7 @@ export interface IProjectVo
       lastModifiedTime: string;
       workflowInstanceId: string;
       serialNo: number;
+      occurredTime: string;
     }
   > {}
 

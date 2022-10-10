@@ -397,7 +397,7 @@ export default defineComponent({
     };
     const startTime = computed<string>(() => props.project.startTime);
     // 项目执行次数
-    const executeCount = ref<number>(props.project.serialNo);
+    const executeCount = computed<number>(() => props.project.serialNo);
     return {
       entry,
       executeCount,
@@ -447,8 +447,6 @@ export default defineComponent({
 
             executeImmediately(id)
               .then(() => {
-                // 点击执行后，项目执行次数加1
-                executeCount.value += 1;
                 proxy.$success('操作成功');
                 executing.value = false;
                 emit('triggered', id);
