@@ -55,6 +55,7 @@ public class ProjectEventHandler {
                 .triggerType(triggerEvent.getTriggerType())
                 .workflowRef(triggerEvent.getWorkflowRef())
                 .workflowVersion(triggerEvent.getWorkflowVersion())
+                .occurredTime(triggerEvent.getOccurredTime())
                 .build();
         // TODO 集群环境需优化成分布式锁
         PROJECT_LOCK_MAP.putIfAbsent(triggerEvent.getProjectId(), new ReentrantLock());

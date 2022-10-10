@@ -17,7 +17,7 @@ public interface ProjectLastExecutionMapper {
     void add(ProjectLastExecution projectLastExecution);
 
     @Update("UPDATE `jm_project_last_execution` SET `workflow_instance_id` = #{workflowInstanceId}, `serial_no` = #{serialNo}, " +
-            "`start_time` = #{startTime}, `status` = #{status}, `end_time` = #{endTime}, `suspended_time` = #{suspendedTime} " +
+            "`occurred_time` = #{occurredTime},`start_time` = #{startTime}, `status` = #{status}, `end_time` = #{endTime}, `suspended_time` = #{suspendedTime} " +
             "WHERE `workflow_ref` = #{workflowRef}")
     void update(ProjectLastExecution projectLastExecution);
 
@@ -28,6 +28,7 @@ public interface ProjectLastExecutionMapper {
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "occurred_time", property = "occurredTime")
     @Result(column = "start_time", property = "startTime")
     @Result(column = "end_time", property = "endTime")
     @Result(column = "suspended_time", property = "suspendedTime")

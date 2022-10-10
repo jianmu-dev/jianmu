@@ -3,6 +3,8 @@ package dev.jianmu.application.command;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Ethan Liu
  * @class WorkflowCmd
@@ -16,4 +18,5 @@ public class WorkflowStartCmd {
     private String workflowRef;
     private String workflowVersion;
     private String triggerType;
+    private LocalDateTime occurredTime;
 }
