@@ -28,6 +28,8 @@ module.exports = {
         'revert',
         // 打包
         'build',
+        // 升级版本
+        'release',
       ],
     ],
     // subject 大小写不做校验
