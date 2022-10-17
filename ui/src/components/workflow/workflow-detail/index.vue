@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, onUnmounted, PropType, ref } from 'vue';
+import { getCurrentInstance, computed, defineComponent, onMounted, onUnmounted, PropType, ref } from 'vue';
 import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { IWorkflowDetailParam, IRecordDetail, IRecordListParam } from './model/data/common';
 import Topbar from './layout/top/topbar.vue';
@@ -82,6 +82,7 @@ export default defineComponent({
   emits: ['back', 'jump', 'update:model-value', 'logout', 'trigger'],
   setup(props, { emit }) {
     const recordDetail = ref<IRecordDetail>({});
+    const { proxy } = getCurrentInstance() as any;
     // list组件需要的参数
     const param = computed(
       (): IRecordListParam => ({
@@ -173,6 +174,8 @@ export default defineComponent({
             graphPanel.value.refreshGraphPanel();
             // TODO 触发之后第一时间task为0 导致不能进入状态实时更新(延后500毫秒)
           }, 500);
+        } else {
+          proxy.$throw(msg, proxy);
         }
       },
       async terminate() {
