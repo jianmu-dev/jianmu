@@ -3,7 +3,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, ref } from 'vue';
+import { defineComponent, onBeforeUnmount, onUpdated, ref, watch } from 'vue';
+import Timer from '@/components/timer/model';
 
 export default defineComponent({
   name: 'jm-timer',
@@ -28,70 +29,19 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const now = ref<Date>(new Date());
-    const timer = setInterval(() => {
-      now.value = new Date();
-    }, 1000);
-    const time = computed<string>(() => {
-      if (!props.startTime && !props.endTime) {
-        return '无';
-      }
-      let startTimeMillis;
-      if (!props.startTime) {
-        startTimeMillis = now.value.getTime();
-      } else {
-        startTimeMillis = Date.parse(props.startTime);
-      }
-      let endTimeMillis;
-      if (!props.endTime) {
-        endTimeMillis = now.value.getTime();
-      } else {
-        endTimeMillis = Date.parse(props.endTime);
-      }
-      const millisecond = endTimeMillis - startTimeMillis;
-      if (millisecond < 0) {
-        return '无';
-      }
-      const days = Math.floor(millisecond / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((millisecond % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((millisecond % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.round((millisecond % (1000 * 60)) / 1000);
-
-      let result = '';
-
-      if (days > 0) {
-        result += `${days}d `;
-      }
-
-      if (hours > 0 && hours < 24) {
-        result += `${hours}h `;
-      } else if (hours === 24) {
-        result += '0h ';
-      }
-
-      if (minutes > 0 && minutes < 60) {
-        result += `${minutes}m `;
-      } else if (minutes === 60) {
-        result += '0m ';
-      }
-      // eslint-disable-next-line no-compare-neg-zero
-      if (seconds >= 0 && seconds < 1 && seconds !== -0) {
-        result += '不足1s';
-      } else if (seconds >= 1 && seconds < 60) {
-        result += `${seconds}s`;
-      } else if (seconds === 60) {
-        result += '0s';
-      }
-      if (props.abbr) {
-        const arr = result.split(' ');
-        if (arr.length > 2) {
-          return `${arr[0]} ${arr[1]}`;
-        }
-      }
-      return result || '无';
+    const time = ref<string>();
+    const timer = new Timer(props.startTime, props.endTime, props.tipAppendToBody, props.abbr);
+    timer.getTime(t => {
+      time.value = t;
+    });
+    onUpdated(() => {
+      const timer = new Timer(props.startTime, props.endTime, props.tipAppendToBody, props.abbr);
+      timer.getTime(t => {
+        time.value = t;
+      });
     });
     onBeforeUnmount(() => {
-      clearInterval(timer);
+      timer.clearTimer();
     });
     return {
       time,
