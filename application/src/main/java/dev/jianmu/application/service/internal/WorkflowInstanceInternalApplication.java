@@ -188,7 +188,7 @@ public class WorkflowInstanceInternalApplication {
                 .size();
         if (i > 0) {
             MDC.put("triggerId", triggerId);
-            log.warn("当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。");
+            log.warn("当前流水线未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。");
             return;
         }
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
