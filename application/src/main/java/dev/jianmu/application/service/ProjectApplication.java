@@ -483,4 +483,9 @@ public class ProjectApplication {
     public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType) {
         return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType);
     }
+
+    public List<ProjectVo> findByIds(List<String> ids) {
+        return this.projectRepository.findVoByIdIn(ids);
+    }
+
 }

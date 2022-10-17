@@ -55,6 +55,14 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findByWorkflowRef(workflowRef);
     }
 
+    @Override
+    public List<ProjectVo> findVoByIdIn(List<String> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return this.projectMapper.findVoByIdIn(ids);
+    }
+
     public PageInfo<Project> findAllPage(String workflowName, int pageNum, int pageSize) {
         return PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> this.projectMapper.findAllPage(workflowName));

@@ -470,6 +470,34 @@ public class ViewController {
         return pageInfo;
     }
 
+    @GetMapping("/v2/projects/ids")
+    @Operation(summary = "通过id查询项目列表", description = "通过id查询项目列表")
+    public List<ProjectVo> findProjectByIds(@Valid ProjectViewingIdsDto dto) {
+        var projects = this.projectApplication.findByIds(dto.getIds());
+        return projects.stream().map(project -> {
+            var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
+            projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+            if (project.getStatus() == null) {
+                return projectVo;
+            }
+            if (project.getStatus().equals(ProcessStatus.TERMINATED.name())) {
+                projectVo.setStatus("FAILED");
+            }
+            if (project.getStatus().equals(ProcessStatus.FINISHED.name())) {
+                projectVo.setStatus("SUCCEEDED");
+            }
+            if (project.getStatus().equals(ProcessStatus.SUSPENDED.name())) {
+                projectVo.setSuspendedTime(project.getSuspendedTime());
+                projectVo.setStatus("SUSPENDED");
+            }
+            if (project.getStatus().equals(ProcessStatus.RUNNING.name())) {
+                projectVo.setStartTime(project.getStartTime());
+                projectVo.setStatus("RUNNING");
+            }
+            return projectVo;
+        }).collect(Collectors.toList());
+    }
+
     @GetMapping("/projects/groups")
     @Operation(summary = "查询项目组列表", description = "查询项目组列表")
     public List<ProjectGroupVo> findProjectGroupPage() {
