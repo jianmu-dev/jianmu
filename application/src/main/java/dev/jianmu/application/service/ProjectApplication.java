@@ -516,4 +516,9 @@ public class ProjectApplication {
     public Optional<Project> findByName(String associationId, String associationType, String name) {
         return this.projectRepository.findByName(associationId, associationType, name);
     }
+
+    public List<ProjectVo> findByIds(List<String> ids) {
+        return this.projectRepository.findVoByIdIn(ids);
+    }
+
 }
