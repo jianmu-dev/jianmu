@@ -100,7 +100,7 @@ public class WorkflowInstanceInternalApplication {
 
     // 启动流程
     @Transactional
-    public void start(String workflowRef) {
+    public void start(String workflowRef, String triggerId) {
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
@@ -121,6 +121,8 @@ public class WorkflowInstanceInternalApplication {
                 .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
         if (i > 0) {
+            MDC.put("triggerId", triggerId);
+            log.warn("当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。");
             return;
         }
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
