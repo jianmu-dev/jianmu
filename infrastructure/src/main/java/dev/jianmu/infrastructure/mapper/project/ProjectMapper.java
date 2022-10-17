@@ -142,4 +142,31 @@ public interface ProjectMapper {
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "latestTime")
     List<ProjectVo> findAllByGroupId(@Param("projectGroupId") String projectGroupId, @Param("workflowName") String workflowName, @Param("sortType") String sortType);
+
+    @Select("<script>" +
+            "SELECT jp.*, jpl.* FROM `jianmu_project` `jp` JOIN `jm_project_last_execution` `jpl` ON (`jp`.`workflow_ref` = `jpl`.`workflow_ref`)  " +
+            "<where>" +
+            "   `jp`.`id` IN <foreach collection='ids' item='item' open='(' separator=',' close=')'> #{item}" +
+            "   </foreach>" +
+            "</where>" +
+            "</script>")
+    @Result(column = "workflow_name", property = "workflowName")
+    @Result(column = "workflow_description", property = "workflowDescription")
+    @Result(column = "dsl_source", property = "dslSource")
+    @Result(column = "dsl_type", property = "dslType")
+    @Result(column = "event_bridge_id", property = "eventBridgeId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "git_repo_id", property = "gitRepoId")
+    @Result(column = "jp.workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "dsl_text", property = "dslText")
+    @Result(column = "created_time", property = "createdTime")
+    @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_time", property = "lastModifiedTime")
+    @Result(column = "workflow_instance_id", property = "workflowInstanceId")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
+    @Result(column = "end_time", property = "latestTime")
+    List<ProjectVo> findVoByIdIn(@Param("ids") List<String> ids);
 }
