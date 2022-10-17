@@ -96,7 +96,7 @@ public class ProjectController {
         if (concurrent) {
             var project = this.projectApplication.findById(projectId, session.getAssociationId(), type)
                     .orElseThrow(() -> new DataNotFoundException("未找到的项目"));
-            this.workflowInstanceInternalApplication.start(project.getWorkflowRef());
+            this.workflowInstanceInternalApplication.start(project.getWorkflowRef(), null);
         }
     }
 

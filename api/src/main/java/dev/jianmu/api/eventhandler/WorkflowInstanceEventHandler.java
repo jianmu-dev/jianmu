@@ -72,7 +72,7 @@ public class WorkflowInstanceEventHandler {
         log.info("Get ProcessInitializedEvent here -------------------------");
         log.info(event.toString());
         // 执行流程实例
-        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 
@@ -119,7 +119,7 @@ public class WorkflowInstanceEventHandler {
         this.asyncTaskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
         this.taskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
         // 执行流程实例
-        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 
@@ -131,7 +131,7 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
         // 执行流程实例
-        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 
@@ -142,7 +142,7 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
         // 执行流程实例
-        this.workflowInstanceInternalApplication.start(event.getWorkflowRef());
+        this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 }
