@@ -5,7 +5,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>1.0.0-gitlink</version>
+        <version>1.0.1-gitlink</version>
     </parent>
 
     <artifactId>event</artifactId>
