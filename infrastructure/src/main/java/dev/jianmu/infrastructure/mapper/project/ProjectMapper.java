@@ -122,7 +122,7 @@ public interface ProjectMapper {
     List<Project> findAll();
 
     @Select("<script>" +
-            "SELECT jp.*, jpl`.`workflow_instance_id`, `jpl`.`serial_no`, `jpl`.`end_time`, `jpl`.`status`, `jpl`.`occurred_time`, `jpl`.`start_time`, `jpl`.`suspended_time` " +
+            "SELECT jp.*, `jpl`.`workflow_instance_id`, `jpl`.`serial_no`, `jpl`.`end_time`, `jpl`.`status`, `jpl`.`occurred_time`, `jpl`.`start_time`, `jpl`.`suspended_time` " +
             "FROM `jm_project` `jp` INNER JOIN `jm_project_link_group` `plp`  ON `plp`.`project_id` = `jp`.`id` " +
             "INNER JOIN `jm_project_last_execution` `jpl` ON (`jp`.`workflow_ref` = `jpl`.`workflow_ref`)" +
             "<where>" +
