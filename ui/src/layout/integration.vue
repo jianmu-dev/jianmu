@@ -364,7 +364,7 @@ export default defineComponent({
       color: #6b7b8d;
 
       &:hover {
-        color: #466aff;
+        color: #096dd9;
       }
     }
   }
