@@ -357,10 +357,15 @@ export default defineComponent({
     text-align: right;
     font-size: 12px;
     font-weight: 400;
-    color: #666666;
+    color: #6b7b8d;
 
     a {
-      color: #096dd9;
+      font-weight: 600;
+      color: #6b7b8d;
+
+      &:hover {
+        color: #466aff;
+      }
     }
   }
 }
