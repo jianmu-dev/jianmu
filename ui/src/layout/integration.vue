@@ -58,7 +58,7 @@ export default defineComponent({
     provide('reloadMain', reloadMain);
     const observer = new ResizeObserver(
       _throttle(() => {
-        const height: string = (contentRef.value.offsetHeight + 60).toString();
+        const height: string = (contentRef.value.offsetHeight + 80).toString();
         window.parent.postMessage(JSON.stringify({ height }), '*');
       }, 800),
     );
@@ -118,6 +118,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .integration {
   width: 1158px;
+  padding: 20px;
   margin: 0 auto;
   position: relative;
 
