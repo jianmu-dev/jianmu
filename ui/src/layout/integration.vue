@@ -2,9 +2,9 @@
   <div class="integration">
     <div class="top-tabs" v-if="isShowTop">
       <div class="tabs left">
-        <router-link :to="{ name: 'index' }" @click="currentTab = 0" class="tab-item"> 流水线 </router-link>
-        <router-link :to="{ name: 'ext-param' }" @click="currentTab = 1" class="tab-item"> 外部参数 </router-link>
-        <router-link :to="{ name: 'secret-key' }" @click="currentTab = 2" class="tab-item"> 密钥管理 </router-link>
+        <router-link :to="{ name: 'index' }" @click="currentTab = 0" class="tab-item"> 流水线</router-link>
+        <router-link :to="{ name: 'ext-param' }" @click="currentTab = 1" class="tab-item"> 外部参数</router-link>
+        <router-link :to="{ name: 'secret-key' }" @click="currentTab = 2" class="tab-item"> 密钥管理</router-link>
         <div class="divider"></div>
         <a class="using-docs-btn" href="https://forum.gitlink.org.cn/forums/7487/detail" target="_blank">
           <span>使用文档</span>
@@ -58,7 +58,7 @@ export default defineComponent({
     provide('reloadMain', reloadMain);
     const observer = new ResizeObserver(
       _throttle(() => {
-        const height: string = (contentRef.value.offsetHeight + 60 + (route.name === 'index' ? 40 : 0)).toString();
+        const height: string = (contentRef.value.offsetHeight + 60).toString();
         window.parent.postMessage(JSON.stringify({ height }), '*');
       }, 800),
     );
