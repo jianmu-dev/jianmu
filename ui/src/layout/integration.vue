@@ -2,23 +2,24 @@
   <div class="integration">
     <div class="top-tabs" v-if="isShowTop">
       <div class="tabs left">
-        <router-link :to="{name:'index'}" @click="currentTab=0" class="tab-item">
-          流水线
-        </router-link>
-        <router-link :to="{name:'ext-param'}" @click="currentTab=1" class="tab-item">
-          外部参数
-        </router-link>
-        <router-link :to="{name:'secret-key'}" @click="currentTab=2" class="tab-item">
-          密钥管理
-        </router-link>
+        <router-link :to="{ name: 'index' }" @click="currentTab = 0" class="tab-item"> 流水线 </router-link>
+        <router-link :to="{ name: 'ext-param' }" @click="currentTab = 1" class="tab-item"> 外部参数 </router-link>
+        <router-link :to="{ name: 'secret-key' }" @click="currentTab = 2" class="tab-item"> 密钥管理 </router-link>
         <div class="divider"></div>
         <a class="using-docs-btn" href="https://forum.gitlink.org.cn/forums/7487/detail" target="_blank">
           <span>使用文档</span>
           <i class="jump-icon"></i>
         </a>
       </div>
-      <div class="right" v-show="$route.name==='index'">
-        <jm-input placeholder="搜索流水线" class="search-input" size="small" v-model="keyWord" @change="search" clearable>
+      <div class="right" v-show="$route.name === 'index'">
+        <jm-input
+          placeholder="搜索流水线"
+          class="search-input"
+          size="small"
+          v-model="keyWord"
+          @change="search"
+          clearable
+        >
           <template #prefix>
             <i class="jm-icon-button-search"></i>
           </template>
@@ -31,13 +32,14 @@
     </div>
     <div class="content" ref="contentRef">
       <router-view v-slot="{ Component }">
-        <component :is="Component" :keyword="key" v-model="flag" v-model:create-type="creatType"/>
+        <component :is="Component" :keyword="key" v-model="flag" v-model:create-type="creatType" />
+        <div class="link" v-if="isShowTop">引擎功能由<a href="https://jianmu.dev" target="_blank">建木</a>提供</div>
       </router-view>
     </div>
   </div>
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import { computed, defineComponent, getCurrentInstance, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import _throttle from 'lodash/throttle';
@@ -81,7 +83,9 @@ export default defineComponent({
     });
     const currentTab = ref<number>(0);
     // 是否展示顶部导航
-    const isShowTop = computed<boolean>(() => !((route.name === 'create-project') || (route.name === 'update-project') || (route.name === 'manage-secret-key')));
+    const isShowTop = computed<boolean>(
+      () => !(route.name === 'create-project' || route.name === 'update-project' || route.name === 'manage-secret-key'),
+    );
     const keyWord = ref<string>('');
     const key = ref<string>('');
     const tabs = ref<Array<string>>(['流水线', '外部参数', '密钥管理']);
@@ -111,7 +115,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang='less' scoped>
+<style lang="less" scoped>
 .integration {
   width: 1158px;
   margin: 0 auto;
@@ -131,7 +135,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #E9E9E9;
+    border-bottom: 1px solid #e9e9e9;
 
     .tabs {
       display: flex;
@@ -141,7 +145,7 @@ export default defineComponent({
       .divider {
         width: 1px;
         height: 20px;
-        background-color: #D0D0D0;
+        background-color: #d0d0d0;
         margin-right: 30px;
       }
 
@@ -152,10 +156,10 @@ export default defineComponent({
         align-items: center;
 
         &:hover {
-          color: #096DD9;
+          color: #096dd9;
 
           i {
-            background: url("@/assets/svgs/index/jump-active.svg") no-repeat 100%;
+            background: url('@/assets/svgs/index/jump-active.svg') no-repeat 100%;
           }
         }
 
@@ -163,7 +167,7 @@ export default defineComponent({
           margin-left: 5px;
           width: 16px;
           height: 16px;
-          background: url("@/assets/svgs/index/jump.svg") no-repeat 100%;
+          background: url('@/assets/svgs/index/jump.svg') no-repeat 100%;
         }
       }
 
@@ -173,9 +177,10 @@ export default defineComponent({
         font-weight: 500;
         margin-right: 30px;
 
-        &.router-link-exact-active, &:hover {
+        &.router-link-exact-active,
+        &:hover {
           //color: #466AFF;
-          color: #096DD9;
+          color: #096dd9;
         }
       }
     }
@@ -189,7 +194,7 @@ export default defineComponent({
         box-sizing: border-box;
 
         ::v-deep(.el-input__inner) {
-          border-color: #D0D0D0;
+          border-color: #d0d0d0;
           border-radius: 4px;
         }
       }
@@ -211,7 +216,7 @@ export default defineComponent({
           border-radius: 4px;
 
           &:nth-child(1) {
-            border: 1px solid #D0D0D0;
+            border: 1px solid #d0d0d0;
           }
 
           &.jm-icon-button-add::before {
@@ -221,14 +226,14 @@ export default defineComponent({
         }
 
         .code-assembly-line {
-          background-color: #FAFBFC;
+          background-color: #fafbfc;
           margin-right: 10px;
         }
 
         .graph-assembly-line {
-          color: #FFFFFF;
+          color: #ffffff;
           //background-color: #466AFF;
-          background-color: #096DD9;
+          background-color: #096dd9;
         }
       }
     }
@@ -282,7 +287,8 @@ export default defineComponent({
       margin-bottom: 0;
 
       .ext-content {
-        .add-param, .ext-param-card {
+        .add-param,
+        .ext-param-card {
           min-width: 277px;
           margin: 0.8% 0.5% 0 0.5%;
         }
@@ -300,8 +306,8 @@ export default defineComponent({
 
     // 代码项目编辑页
     ::v-deep(.project-editor) {
-
-      .dsl-editor-entry, .dsl-editor {
+      .dsl-editor-entry,
+      .dsl-editor {
         height: 500px;
       }
     }
@@ -338,10 +344,22 @@ export default defineComponent({
         }
 
         .el-dialog__body {
-          border: 1px solid #B9CFE6;
-          box-shadow: 0 0 16px #DDE6EC;
+          border: 1px solid #b9cfe6;
+          box-shadow: 0 0 16px #dde6ec;
         }
       }
+    }
+  }
+
+  .link {
+    margin-top: 35px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 400;
+    color: #666666;
+
+    a {
+      color: #096dd9;
     }
   }
 }
