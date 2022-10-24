@@ -61,7 +61,7 @@
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
-                :end-time="project.latestTime"
+                :end-time="project.startTime ? project.latestTime : project.nextTime"
                 v-else-if="project.status === ProjectStatusEnum.FAILED"
               ></jm-timer>
               <jm-timer
@@ -197,7 +197,7 @@
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
-                :end-time="project.latestTime"
+                :end-time="project.startTime ? project.latestTime : project.nextTime"
                 v-else-if="project.status === ProjectStatusEnum.FAILED"
               ></jm-timer>
               <jm-timer
