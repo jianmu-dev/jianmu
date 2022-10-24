@@ -33,6 +33,17 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
+            <jm-tooltip
+              placement="top"
+              :content="
+                project.status === ProjectStatusEnum.INIT
+                  ? '当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。'
+                  : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
+              "
+              v-if="project.status === ProjectStatusEnum.INIT || project.status === ProjectStatusEnum.SUSPENDED"
+            >
+              <i class="jm-icon-button-help"></i>
+            </jm-tooltip>
             <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
@@ -169,6 +180,17 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
+            <jm-tooltip
+              placement="top"
+              :content="
+                project.status === ProjectStatusEnum.INIT
+                  ? '当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。'
+                  : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
+              "
+              v-if="project.status === ProjectStatusEnum.INIT || project.status === ProjectStatusEnum.SUSPENDED"
+            >
+              <i class="jm-icon-button-help"></i>
+            </jm-tooltip>
             <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
@@ -736,7 +758,16 @@ export default defineComponent({
           }
 
           .desc {
-            margin: 0 10px;
+            margin: 0 6px;
+          }
+
+          .jm-icon-button-help {
+            cursor: pointer;
+
+            &::before {
+              color: #6b7b8d;
+              margin: 0 6px 0 0;
+            }
           }
 
           .count {
