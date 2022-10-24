@@ -1,5 +1,6 @@
 package dev.jianmu.oauth2.api.impl.vo.gitea;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TokenVo {
     @JsonProperty("access_token")
     private String accessToken;

@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BranchesVo implements IBranchesVo {
     private List<Branch> branches;
 
