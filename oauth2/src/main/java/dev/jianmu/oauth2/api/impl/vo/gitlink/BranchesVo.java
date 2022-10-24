@@ -1,5 +1,6 @@
 package dev.jianmu.oauth2.api.impl.vo.gitlink;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.jianmu.oauth2.api.vo.IBranchesVo;
 import lombok.*;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BranchesVo implements IBranchesVo {
     private List<Branch> branches;
     private Integer status;
