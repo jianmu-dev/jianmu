@@ -1,5 +1,6 @@
 package dev.jianmu.oauth2.api.impl.vo.gitlink;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.exception.UnknownException;
@@ -17,6 +18,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TokenVo implements ITokenVo {
     @JsonProperty("access_token")
     private String accessToken;
