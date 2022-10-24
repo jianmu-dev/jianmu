@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount, onUpdated, ref, watch } from 'vue';
+import { defineComponent, onBeforeUnmount, onUpdated, ref } from 'vue';
 import Timer from '@/components/timer/model';
 
 export default defineComponent({
