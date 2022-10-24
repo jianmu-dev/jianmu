@@ -28,6 +28,9 @@ public class CustomWebhookDomainService {
     }
 
     public List<String> getGitEvents(String gitType, List<CustomWebhookInstance.EventInstance> eventInstances) {
+        if (gitType.isBlank()) {
+            return List.of();
+        }
         switch (gitType) {
             case "GITEE":
                 return List.of();

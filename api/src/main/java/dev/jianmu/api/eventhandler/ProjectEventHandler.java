@@ -15,6 +15,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,7 +86,9 @@ public class ProjectEventHandler {
         var session = this.userContextHolder.getSession();
         this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId(), session.getEncryptedToken(), deletedEvent.getAssociationId(), deletedEvent.getAssociationType(), session.getId());
         // 移除gitRepo中flow
-        this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), deletedEvent.getAssociationId());
+        if (!ObjectUtils.isEmpty(deletedEvent.getAssociationType())) {
+            this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), deletedEvent.getAssociationId());
+        }
     }
 
     @TransactionalEventListener
