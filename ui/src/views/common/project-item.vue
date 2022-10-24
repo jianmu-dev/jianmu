@@ -35,6 +35,8 @@
             </div>
             <jm-tooltip
               placement="top"
+              popper-class="tip"
+              :append-to-body="false"
               :content="
                 project.status === ProjectStatusEnum.INIT
                   ? '当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。'
@@ -182,6 +184,8 @@
             </div>
             <jm-tooltip
               placement="top"
+              popper-class="tip"
+              :append-to-body="false"
               :content="
                 project.status === ProjectStatusEnum.INIT
                   ? '当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。'
@@ -758,19 +762,27 @@ export default defineComponent({
           }
 
           .desc {
-            margin: 0 6px;
+            margin: 0 0 0 6px;
+          }
+
+          ::v-deep(.el-popper) {
+            &.tip {
+              width: 250px;
+              line-height: 22px;
+            }
           }
 
           .jm-icon-button-help {
-            cursor: pointer;
+            margin-left: 6px;
 
             &::before {
               color: #6b7b8d;
-              margin: 0 6px 0 0;
+              margin: 0;
             }
           }
 
           .count {
+            margin-left: 6px;
           }
         }
 
