@@ -7,7 +7,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>1.0.2-gitlink</version>
+        <version>1.0.3-gitlink</version>
     </parent>
 
     <artifactId>git-repo-core</artifactId>
