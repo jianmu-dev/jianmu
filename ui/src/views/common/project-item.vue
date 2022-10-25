@@ -34,10 +34,13 @@
               :append-to-body="false"
               :content="
                 project.status === ProjectStatusEnum.INIT
-                  ? '当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。'
-                  : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
+                  ? '前序流水线正在执行或已挂起，待执行完毕或手动终止后，本次流水线将开始执行。 或开启并发执行，开启后，多次可同时执行。'
+                  : '当前流水线中某个节点执行失败，流水线处于暂停状态，需要手动 重试/忽略 挂起节点。'
               "
-              v-if="project.status === ProjectStatusEnum.INIT || project.status === ProjectStatusEnum.SUSPENDED"
+              v-if="
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                project.status === ProjectStatusEnum.SUSPENDED
+              "
             >
               <i class="jm-icon-button-help"></i>
             </jm-tooltip>
@@ -182,10 +185,13 @@
               :append-to-body="false"
               :content="
                 project.status === ProjectStatusEnum.INIT
-                  ? '当前项目未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。'
-                  : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
+                  ? '前序流水线正在执行或已挂起，待执行完毕或手动终止后，本次流水线将开始执行。 或开启并发执行，开启后，多次可同时执行。'
+                  : '当前流水线中某个节点执行失败，流水线处于暂停状态，需要手动 重试/忽略 挂起节点。'
               "
-              v-if="project.status === ProjectStatusEnum.INIT || project.status === ProjectStatusEnum.SUSPENDED"
+              v-if="
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                project.status === ProjectStatusEnum.SUSPENDED
+              "
             >
               <i class="jm-icon-button-help"></i>
             </jm-tooltip>
