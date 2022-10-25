@@ -45,8 +45,7 @@ export default class Timer {
     } else if (minutes === 60) {
       result += '0m ';
     }
-    // eslint-disable-next-line no-compare-neg-zero
-    if (Math.round(seconds) === 0) {
+    if (seconds === 0) {
       result += '0s';
     } else if (seconds > 0 && seconds < 1) {
       result += '不足1s';

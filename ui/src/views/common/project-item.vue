@@ -28,6 +28,22 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
+            <jm-tooltip
+              placement="top"
+              popper-class="tip"
+              :append-to-body="false"
+              :content="
+                project.status === ProjectStatusEnum.INIT
+                  ? '前序流水线正在执行或已挂起，待执行完毕或手动终止后，本次流水线将开始执行。 或开启并发执行，开启后，多次可同时执行。'
+                  : '当前流水线中某个节点执行失败，流水线处于暂停状态，需要手动 重试/忽略 挂起节点。'
+              "
+              v-if="
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                project.status === ProjectStatusEnum.SUSPENDED
+              "
+            >
+              <i class="jm-icon-button-help"></i>
+            </jm-tooltip>
             <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
@@ -56,7 +72,7 @@
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
-                :end-time="project.latestTime"
+                :end-time="project.startTime ? project.latestTime : project.nextTime"
                 v-else-if="project.status === ProjectStatusEnum.FAILED"
               ></jm-timer>
               <jm-timer
@@ -163,6 +179,22 @@
             <div class="desc">
               {{ statusDesc }}
             </div>
+            <jm-tooltip
+              placement="top"
+              popper-class="tip"
+              :append-to-body="false"
+              :content="
+                project.status === ProjectStatusEnum.INIT
+                  ? '前序流水线正在执行或已挂起，待执行完毕或手动终止后，本次流水线将开始执行。 或开启并发执行，开启后，多次可同时执行。'
+                  : '当前流水线中某个节点执行失败，流水线处于暂停状态，需要手动 重试/忽略 挂起节点。'
+              "
+              v-if="
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                project.status === ProjectStatusEnum.SUSPENDED
+              "
+            >
+              <i class="jm-icon-button-help"></i>
+            </jm-tooltip>
             <div class="count" v-if="project.serialNo !== 0">#{{ executeCount }}</div>
           </div>
           <span class="stop-btn" v-show="isShowStopBtn" @click="stopProcess(project.workflowInstanceId)">终止</span>
@@ -191,7 +223,7 @@
               <jm-timer
                 :abbr="true"
                 :start-time="project.startTime"
-                :end-time="project.latestTime"
+                :end-time="project.startTime ? project.latestTime : project.nextTime"
                 v-else-if="project.status === ProjectStatusEnum.FAILED"
               ></jm-timer>
               <jm-timer
@@ -753,10 +785,27 @@ export default defineComponent({
           }
 
           .desc {
-            margin: 0 10px;
+            margin: 0 0 0 6px;
+          }
+
+          ::v-deep(.el-popper) {
+            &.tip {
+              width: 250px;
+              line-height: 22px;
+            }
+          }
+
+          .jm-icon-button-help {
+            margin-left: 6px;
+
+            &::before {
+              color: #6b7b8d;
+              margin: 0;
+            }
           }
 
           .count {
+            margin-left: 6px;
           }
         }
 
