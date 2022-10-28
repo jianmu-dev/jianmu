@@ -43,7 +43,7 @@ public class GitRepoController {
     @PutMapping("/sync")
     @Operation(summary = "同步仓库", description = "同步仓库")
     public void sync(@RequestBody @Valid GitRepoSyncingDto dto) {
-        this.gitRepoApplication.sync(dto.getUserId(), dto.getOwnerRef(), dto.getRef());
+        this.gitRepoApplication.sync(dto.getUserId(), dto.getId(), dto.getOwnerRef(), dto.getRef(), dto.getBranches());
     }
 
     @GetMapping("{id}")

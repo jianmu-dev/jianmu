@@ -129,27 +129,21 @@ public class GitRepoApplication {
     }
 
     @Transactional
-    public void sync(String userId, String ownerRef, String ref) {
+    public void sync(String userId, String id, String owner, String ref, List<Branch> branches) {
         var oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
                 .userId(userId)
                 .build();
         var accessToken = this.accessTokenRepository.get();
-        var repo = oAuth2Api.getRepo(accessToken, ref, ownerRef);
-        var branches = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
-
-        var isCreated = this.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branches);
+        var isCreated = this.syncBranches(id, owner, ref, branches);
         if (isCreated) {
             var webhookUrl = this.oAuth2Properties.getWebhookHost() + "projects/sync";
             var events = this.customWebhookDomainService.getGitEvents(this.oAuth2Properties.getThirdPartyType(), null);
-            oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true, events);
+            oAuth2Api.createWebhook(accessToken, owner, ref, webhookUrl, true, events);
         }
     }
 
-    private Boolean syncBranches(String id, String ref, String owner, String defaultBranch, List<String> branchesString) {
-        var branches = branchesString.stream()
-                .map(name -> new Branch(name, name.equals(defaultBranch)))
-                .collect(Collectors.toList());
+    private Boolean syncBranches(String id, String owner, String ref, List<Branch> branches) {
         var optionalGitRepoById = this.gitRepoRepository.findById(id);
         var optionalGitRepoByRef = this.gitRepoRepository.findByRefAndOwner(ref, owner);
         GitRepo gitRepo;
@@ -280,6 +274,7 @@ public class GitRepoApplication {
 
     /**
      * 获取accessToken
+     *
      * @return
      */
     public String getAccessToken() {
@@ -288,6 +283,7 @@ public class GitRepoApplication {
 
     /**
      * 获取user
+     *
      * @param username
      * @return
      */
