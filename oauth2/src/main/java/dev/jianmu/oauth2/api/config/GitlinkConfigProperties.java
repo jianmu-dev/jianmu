@@ -25,6 +25,7 @@ public class GitlinkConfigProperties {
     private String password;
     private String responseType;
     private SilentLogin silentLogin;
+    private String engineAddress;
 
     @Setter
     @Getter

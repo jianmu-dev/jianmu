@@ -13,6 +13,7 @@ import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
+import dev.jianmu.git.repo.repository.AccessTokenRepository;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.trigger.WebRequestRepositoryImpl;
@@ -22,7 +23,6 @@ import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.UnknownException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
-import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -97,6 +97,7 @@ public class TriggerApplication {
     private final WebRequestRepository webRequestRepository;
     private final WebhookOnlyService webhookOnlyService;
     private final GlobalProperties globalProperties;
+    private final AccessTokenRepository accessTokenRepository;
 
     public TriggerApplication(
             TriggerRepository triggerRepository,
@@ -118,7 +119,8 @@ public class TriggerApplication {
             CustomWebhookDomainService customWebhookDomainService,
             WebRequestRepository webRequestRepository,
             WebhookOnlyService webhookOnlyService,
-            GlobalProperties globalProperties
+            GlobalProperties globalProperties,
+            AccessTokenRepository accessTokenRepository
     ) {
         this.triggerRepository = triggerRepository;
         this.triggerEventRepository = triggerEventRepository;
@@ -140,6 +142,7 @@ public class TriggerApplication {
         this.webRequestRepository = webRequestRepository;
         this.webhookOnlyService = webhookOnlyService;
         this.globalProperties = globalProperties;
+        this.accessTokenRepository = accessTokenRepository;
     }
 
     private static String decode(final String encoded) {
@@ -191,7 +194,7 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void saveOrUpdate(String projectId, Webhook webhook, String encryptedToken, String userId, String webhookType, List<CustomWebhookInstance.EventInstance> eventInstances) {
+    public void saveOrUpdate(String projectId, String userId, Webhook webhook, String webhookType, List<CustomWebhookInstance.EventInstance> eventInstances) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + projectId));
         var webhookInstanceBuilder = CustomWebhookInstanceEvent.Builder.aCustomWebhookInstanceEvent()
@@ -203,12 +206,10 @@ public class TriggerApplication {
         // 修改webhook
         if (optionalTrigger.isPresent()) {
             var trigger = optionalTrigger.get();
-            ref = this.updateGitWebhook(trigger.getRef(), ref, encryptedToken, project.getAssociationId(), project.getAssociationType(), userId, events);
+            ref = this.updateGitWebhook(trigger.getRef(), ref, userId, project.getAssociationId(), project.getAssociationType(), events);
             trigger.setType(Trigger.Type.WEBHOOK);
             trigger.setWebhook(webhook);
-            if (encryptedToken != null) {
-                trigger.setRef(ref);
-            }
+            trigger.setRef(ref);
             this.triggerRepository.updateById(trigger);
             // 修改自定义Webhook实例
             if (webhookType != null) {
@@ -217,7 +218,7 @@ public class TriggerApplication {
             return;
         }
         // 创建webhook
-        ref = this.createGitWebhook(ref, encryptedToken, project.getAssociationId(), project.getAssociationType(), userId, events);
+        ref = this.createGitWebhook(ref, userId, project.getAssociationId(), project.getAssociationType(), events);
         var trigger = Trigger.Builder.aTrigger()
                 .ref(ref)
                 .projectId(projectId)
@@ -232,20 +233,20 @@ public class TriggerApplication {
         }
     }
 
-    private String createGitWebhook(String ref, String encryptedToken, String associationId, String associationType, String userId, List<String> events) {
-        if (encryptedToken == null) {
+    private String createGitWebhook(String ref, String userId, String associationId, String associationType, List<String> events) {
+        if (associationId == null) {
             return ref;
         }
         if (AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             var oAuth2Api = OAuth2ApiProxy.builder()
-                    .userId(userId)
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                    .userId(userId)
                     .build();
             // 创建Git webhook
             var gitRepo = this.gitRepoRepository.findById(associationId)
                     .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
             try {
-                var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+                var accessToken = this.accessTokenRepository.get();
                 ref = oAuth2Api.createWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, false, events).getId();
                 oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref, events);
             } catch (Exception e) {
@@ -255,8 +256,8 @@ public class TriggerApplication {
         return ref;
     }
 
-    private String updateGitWebhook(String ref, String newRef, String encryptedToken, String associationId, String associationType, String userId, List<String> events) {
-        if (encryptedToken == null) {
+    private String updateGitWebhook(String ref, String newRef, String userId, String associationId, String associationType, List<String> events) {
+        if (associationId == null) {
             return newRef;
         }
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
@@ -269,7 +270,7 @@ public class TriggerApplication {
                 .userId(userId)
                 .build();
         try {
-            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            var accessToken = this.accessTokenRepository.get();
             try {
                 oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
                 oAuth2Api.updateWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), this.oAuth2Properties.getWebhookHost() + ref, true, ref, events);
@@ -328,7 +329,7 @@ public class TriggerApplication {
     }
 
     @Transactional
-    public void deleteByProjectId(String projectId, String encryptedToken, String associationId, String associationType, String userId) {
+    public void deleteByProjectId(String projectId, String userId, String associationId, String associationType) {
         // 删除Cron触发器
         this.triggerRepository.findByProjectId(projectId)
                 .ifPresent(trigger -> {
@@ -346,14 +347,14 @@ public class TriggerApplication {
                         }
                     }
                     this.triggerRepository.deleteById(trigger.getId());
-                    this.deleteGitWebhook(associationId, associationType, trigger.getRef(), encryptedToken, userId);
+                    this.deleteGitWebhook(userId, associationId, associationType, trigger.getRef());
                 });
         // 删除WebRequest
         this.webRequestRepository.deleteByProjectId(projectId);
     }
 
     // 删除GitWebhook
-    private void deleteGitWebhook(String associationId, String associationType, String ref, String encryptedToken, String userId) {
+    private void deleteGitWebhook(String userId, String associationId, String associationType, String ref) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return;
         }
@@ -364,7 +365,7 @@ public class TriggerApplication {
         var gitRepo = this.gitRepoRepository.findById(associationId)
                 .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
         try {
-            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            var accessToken = this.accessTokenRepository.get();
             oAuth2Api.getWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
             oAuth2Api.deleteWebhook(accessToken, gitRepo.getOwner(), gitRepo.getRef(), ref);
         } catch (UnknownException e) {

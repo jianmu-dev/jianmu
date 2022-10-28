@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -21,11 +19,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
+ * @author Ethan Liu
  * @class AppConfig
  * @description 自定义Bean配置类
- * @author Ethan Liu
  * @create 2021-03-17 16:49
-*/
+ */
 @Configuration
 public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
@@ -48,13 +46,6 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     @Bean
     public CustomWebhookDomainService createCustomWebhookDomainService() {
         return new CustomWebhookDomainService();
-    }
-
-    @Bean
-    public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-        StrictHttpFirewall firewall = new StrictHttpFirewall();
-        firewall.setAllowUrlEncodedSlash(true);
-        return firewall;
     }
 
     @Bean
@@ -82,13 +73,6 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
         return new SpringAsyncExceptionHandler();
     }
 
-    static class SpringAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
-        @Override
-        public void handleUncaughtException(Throwable throwable, Method method, Object... obj) {
-            logger.error("Async方法执行异常", throwable);
-        }
-    }
-
     @Bean
     public ThreadPoolTaskExecutor mvcTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -100,5 +84,12 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
         configurer.setTaskExecutor(mvcTaskExecutor());
         configurer.setDefaultTimeout(60000L);
+    }
+
+    static class SpringAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
+        @Override
+        public void handleUncaughtException(Throwable throwable, Method method, Object... obj) {
+            logger.error("Async方法执行异常", throwable);
+        }
     }
 }

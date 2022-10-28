@@ -26,12 +26,6 @@ import org.springframework.web.util.UrlPathHelper;
 @MapperScan("dev.jianmu.infrastructure.mapper")
 @EnableRetry
 @EnableAsync(proxyTargetClass = true)
-@SecurityScheme(
-        name = "bearerAuth",
-        type = SecuritySchemeType.HTTP,
-        bearerFormat = "JWT",
-        scheme = "bearer"
-)
 @OpenAPIDefinition(
         info = @Info(
                 title = "建木持续集成平台",

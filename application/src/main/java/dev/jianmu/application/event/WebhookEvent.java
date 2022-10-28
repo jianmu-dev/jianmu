@@ -23,7 +23,6 @@ public class WebhookEvent {
     private String projectId;
     private Webhook webhook;
     private String userId;
-    private String encryptedToken;
     private String webhookType;
     private List<CustomWebhookInstance.EventInstance> eventInstances;
 }

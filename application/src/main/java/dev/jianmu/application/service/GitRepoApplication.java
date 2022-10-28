@@ -7,7 +7,14 @@ import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.git.repo.aggregate.Branch;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.git.repo.aggregate.GitRepo;
+import dev.jianmu.git.repo.aggregate.User;
+import dev.jianmu.git.repo.event.GitRepoDeletedEvent;
+import dev.jianmu.git.repo.repository.AccessTokenRepository;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
+import dev.jianmu.git.repo.repository.UserRepository;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
+import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
+import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
 import dev.jianmu.project.query.ProjectVo;
 import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLastExecutionRepository;
@@ -19,6 +26,7 @@ import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.repository.TriggerRepository;
 import dev.jianmu.trigger.repository.WebRequestRepository;
+import dev.jianmu.trigger.service.CustomWebhookDomainService;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -27,6 +35,7 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +71,11 @@ public class GitRepoApplication {
     private final WebRequestRepository webRequestRepository;
     private final Scheduler quartzScheduler;
     private final ProjectGroupRepository projectGroupRepository;
+    private final ApplicationEventPublisher publisher;
+    private final OAuth2Properties oAuth2Properties;
+    private final AccessTokenRepository accessTokenRepository;
+    private final CustomWebhookDomainService customWebhookDomainService;
+    private final UserRepository userRepository;
 
     public GitRepoApplication(
             GitRepoRepository gitRepoRepository,
@@ -79,7 +93,12 @@ public class GitRepoApplication {
             TriggerEventRepository triggerEventRepository,
             WebRequestRepository webRequestRepository,
             Scheduler quartzScheduler,
-            ProjectGroupRepository projectGroupRepository
+            ProjectGroupRepository projectGroupRepository,
+            ApplicationEventPublisher publisher,
+            OAuth2Properties oAuth2Properties,
+            AccessTokenRepository accessTokenRepository,
+            CustomWebhookDomainService customWebhookDomainService,
+            UserRepository userRepository
     ) {
         this.gitRepoRepository = gitRepoRepository;
         this.projectRepository = projectRepository;
@@ -97,11 +116,68 @@ public class GitRepoApplication {
         this.webRequestRepository = webRequestRepository;
         this.quartzScheduler = quartzScheduler;
         this.projectGroupRepository = projectGroupRepository;
+        this.publisher = publisher;
+        this.oAuth2Properties = oAuth2Properties;
+        this.accessTokenRepository = accessTokenRepository;
+        this.customWebhookDomainService = customWebhookDomainService;
+        this.userRepository = userRepository;
     }
 
     public GitRepo findById(String id) {
         return this.gitRepoRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到git仓库：" + id));
+    }
+
+    @Transactional
+    public void sync(String userId, String ownerRef, String ref) {
+        var oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
+                .userId(userId)
+                .build();
+        var accessToken = this.accessTokenRepository.get();
+        var repo = oAuth2Api.getRepo(accessToken, ref, ownerRef);
+        var branches = oAuth2Api.getBranches(accessToken, repo.getRepo(), repo.getOwner()).getBranchNames();
+
+        var isCreated = this.syncBranches(repo.getId(), repo.getRepo(), repo.getOwner(), repo.getDefaultBranch(), branches);
+        if (isCreated) {
+            var webhookUrl = this.oAuth2Properties.getWebhookHost() + "projects/sync";
+            var events = this.customWebhookDomainService.getGitEvents(this.oAuth2Properties.getThirdPartyType(), null);
+            oAuth2Api.createWebhook(accessToken, repo.getOwner(), repo.getRepo(), webhookUrl, true, events);
+        }
+    }
+
+    private Boolean syncBranches(String id, String ref, String owner, String defaultBranch, List<String> branchesString) {
+        var branches = branchesString.stream()
+                .map(name -> new Branch(name, name.equals(defaultBranch)))
+                .collect(Collectors.toList());
+        var optionalGitRepoById = this.gitRepoRepository.findById(id);
+        var optionalGitRepoByRef = this.gitRepoRepository.findByRefAndOwner(ref, owner);
+        GitRepo gitRepo;
+        if (optionalGitRepoById.isPresent()) {
+            gitRepo = optionalGitRepoById.get();
+        } else if (optionalGitRepoByRef.isPresent()) {
+            this.deleteGitRepo(optionalGitRepoByRef.get());
+            gitRepo = new GitRepo(id);
+        } else {
+            gitRepo = new GitRepo(id);
+        }
+        boolean isCreated = gitRepo.getOwner() == null;
+        // 同步分支
+        gitRepo.syncBranches(ref, owner, branches);
+        this.gitRepoRepository.saveOrUpdate(gitRepo);
+        return isCreated;
+    }
+
+    private void deleteGitRepo(GitRepo gitRepo) {
+        // 删除gitRepo
+        this.gitRepoRepository.deleteById(gitRepo.getId());
+        var event = GitRepoDeletedEvent.Builder.aGetRepoDeletedEvent()
+                .id(gitRepo.getId())
+                .projectIds(gitRepo.getFlows().stream()
+                        .map(Flow::getProjectId)
+                        .collect(Collectors.toList()))
+                .build();
+        this.publisher.publishEvent(event);
     }
 
     @Transactional
@@ -200,5 +276,22 @@ public class GitRepoApplication {
                     });
             this.webRequestRepository.deleteByProjectId(project.getId());
         });
+    }
+
+    /**
+     * 获取accessToken
+     * @return
+     */
+    public String getAccessToken() {
+        return this.accessTokenRepository.get();
+    }
+
+    /**
+     * 获取user
+     * @param username
+     * @return
+     */
+    public User getUserByUserName(String username) {
+        return this.userRepository.getByUsername(username);
     }
 }

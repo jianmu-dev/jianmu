@@ -2,8 +2,8 @@ package dev.jianmu.api.controller;
 
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.*;
-import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.mapper.*;
+import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
@@ -155,9 +155,8 @@ public class ViewController {
     @Operation(summary = "查询命名空间列表", description = "查询命名空间列表")
     public NameSpacesVo findAllNamespace() {
         var type = this.secretApplication.getCredentialManagerType();
-        var repoId = this.getRepoId();
-        var associationType = this.associationUtil.getAssociationType();
-        var list = this.secretApplication.findAll(repoId, associationType);
+        var session = this.userContextHolder.getSession();
+        var list = this.secretApplication.findAll(session.getAssociationId(), session.getAssociationType());
 
         return NameSpacesVo.builder()
                 .credentialManagerType(type)
@@ -165,29 +164,18 @@ public class ViewController {
                 .build();
     }
 
-    // 获取仓库ID
-    private String getRepoId() {
-        try {
-            return this.userContextHolder.getSession().getAssociationId();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     @GetMapping("/namespaces/{name}")
     @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
     public Namespace findByName(@PathVariable String name) {
-        var repoId = this.getRepoId();
-        var associationType = this.associationUtil.getAssociationType();
-        return this.secretApplication.findByName(repoId, associationType, name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
+        var session = this.userContextHolder.getSession();
+        return this.secretApplication.findByName(session.getAssociationId(), session.getAssociationType(), name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
     }
 
     @GetMapping("/namespaces/{name}/keys")
     @Operation(summary = "查询键值对列表", description = "查询键值对列表")
     public List<String> findAll(@PathVariable String name) {
-        var repoId = this.getRepoId();
-        var associationType = this.associationUtil.getAssociationType();
-        var kvs = this.secretApplication.findAllByNamespaceName(repoId, associationType, name);
+        var session = this.userContextHolder.getSession();
+        var kvs = this.secretApplication.findAllByNamespaceName(session.getAssociationId(), session.getAssociationType(), name);
         return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
     }
 
@@ -316,15 +304,14 @@ public class ViewController {
     @GetMapping("/projects/{projectId}")
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
-        var repoId = this.getRepoId();
-        var type = this.associationUtil.getAssociationType();
-        var project = this.projectApplication.findById(projectId, repoId, type).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        var session = this.userContextHolder.getSession();
+        var project = this.projectApplication.findById(projectId, session.getAssociationId(), session.getAssociationType()).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var projectVo = ProjectMapper.INSTANCE.toProjectDetailVo(project);
         var projectLinkGroup = this.projectGroupApplication.findLinkByProjectId(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
         projectVo.setProjectGroupId(projectLinkGroup.getProjectGroupId());
         projectVo.setProjectGroupName(this.projectGroupApplication.findById(projectLinkGroup.getProjectGroupId()).getName());
-        projectVo.setBranch(this.gitRepoApplication.findFlowByProjectId(projectId, repoId).map(Flow::getBranchName).orElse(null));
+        projectVo.setBranch(this.gitRepoApplication.findFlowByProjectId(projectId, session.getAssociationId()).map(Flow::getBranchName).orElse(null));
         return projectVo;
     }
 
@@ -536,9 +523,8 @@ public class ViewController {
     @GetMapping("/v2/projects")
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
-        var repoId = this.getRepoId();
-        var type = this.associationUtil.getAssociationType();
-        var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName(), repoId, type);
+        var session = this.userContextHolder.getSession();
+        var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName(), session.getAssociationId(), session.getAssociationType());
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
             projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
@@ -634,9 +620,8 @@ public class ViewController {
     @GetMapping("/external_parameters/labels")
     @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
     public List<ExternalParameterLabelVo> findAllLabels() {
-        var repoId = this.getRepoId();
-        var type = this.associationUtil.getAssociationType();
-        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(repoId, type);
+        var session = this.userContextHolder.getSession();
+        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(session.getAssociationId(), session.getAssociationType());
         ArrayList<ExternalParameterLabelVo> externalParameterLabelVos = new ArrayList<>();
         externalParameterLabels.forEach(e -> externalParameterLabelVos.add(
                 ExternalParameterLabelVo.builder()
@@ -667,9 +652,8 @@ public class ViewController {
     @GetMapping("/external_parameters")
     @Operation(summary = "获取外部参数列表", description = "获取外部参数列表")
     public List<ExternalParameterVo> findAllExternalParameters() {
-        var repoId = this.getRepoId();
-        var type = this.associationUtil.getAssociationType();
-        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(repoId, type);
+        var session = this.userContextHolder.getSession();
+        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(session.getAssociationId(), session.getAssociationType());
         ArrayList<ExternalParameterVo> externalParameterVos = new ArrayList<>();
         externalParameters.forEach(externalParameter -> externalParameterVos.add(ExternalParameterVo.builder()
                 .id(externalParameter.getId())
