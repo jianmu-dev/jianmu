@@ -23,3 +23,9 @@ credential:
 jianmu:
   worker:
     secret: secret
+  oauth2:
+    gitlink:
+      base-url: xxx
+      client-id: xxx
+      client-secret: xxx
+      engine-address: xxx

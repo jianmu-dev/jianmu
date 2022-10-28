@@ -1,6 +1,5 @@
 package dev.jianmu.api.eventhandler;
 
-import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.application.command.WorkflowStartCmd;
 import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
@@ -36,20 +35,17 @@ public class ProjectEventHandler {
     private final TriggerApplication triggerApplication;
     private final ProjectGroupApplication projectGroupApplication;
     private final GitRepoApplication gitRepoApplication;
-    private final UserContextHolder userContextHolder;
 
     public ProjectEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             TriggerApplication triggerApplication,
             ProjectGroupApplication projectGroupApplication,
-            GitRepoApplication gitRepoApplication,
-            UserContextHolder userContextHolder
+            GitRepoApplication gitRepoApplication
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.triggerApplication = triggerApplication;
         this.projectGroupApplication = projectGroupApplication;
         this.gitRepoApplication = gitRepoApplication;
-        this.userContextHolder = userContextHolder;
     }
 
     @EventListener
@@ -83,8 +79,7 @@ public class ProjectEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleProjectDelete(DeletedEvent deletedEvent) {
         // 项目删除事件, 删除相关的Trigger
-        var session = this.userContextHolder.getSession();
-        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId(), session.getEncryptedToken(), deletedEvent.getAssociationId(), deletedEvent.getAssociationType(), session.getId());
+        this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId(), deletedEvent.getUserId(), deletedEvent.getAssociationId(), deletedEvent.getAssociationType());
         // 移除gitRepo中flow
         if (!ObjectUtils.isEmpty(deletedEvent.getAssociationType())) {
             this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), deletedEvent.getAssociationId());

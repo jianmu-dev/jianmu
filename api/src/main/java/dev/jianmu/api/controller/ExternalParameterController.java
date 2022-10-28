@@ -2,9 +2,9 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.ExternalParameterCreatingDto;
 import dev.jianmu.api.dto.ExternalParameterUpdatingDto;
-import dev.jianmu.api.jwt.UserContextHolder;
-import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.application.service.ExternalParameterApplication;
+import dev.jianmu.application.util.AssociationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
@@ -34,24 +34,21 @@ public class ExternalParameterController {
     @PostMapping
     @Operation(summary = "创建外部参数", description = "创建外部参数")
     public void create(@RequestBody @Valid ExternalParameterCreatingDto dto) {
-        var associationId = this.userContextHolder.getSession().getAssociationId();
-        var associationType = this.associationUtil.getAssociationType();
-        this.externalParameterApplication.create(dto.getName(), dto.getType(), dto.getRef(), dto.getLabel(), dto.getValue(), associationId, associationType);
+        var session = this.userContextHolder.getSession();
+        this.externalParameterApplication.create(dto.getName(), dto.getType(), dto.getRef(), dto.getLabel(), dto.getValue(), session.getAssociationId(), session.getAssociationType());
     }
 
     @DeleteMapping("{id}")
     @Operation(summary = "删除外部参数", description = "删除外部参数")
     public void delete(@PathVariable("id") String id) {
-        var associationId = this.userContextHolder.getSession().getAssociationId();
-        var associationType = this.associationUtil.getAssociationType();
-        this.externalParameterApplication.delete(id, associationId, associationType);
+        var session = this.userContextHolder.getSession();
+        this.externalParameterApplication.delete(id, session.getAssociationId(), session.getAssociationType());
     }
 
     @PutMapping
     @Operation(summary = "修改外部参数", description = "修改外部参数")
     public void update(@RequestBody @Valid ExternalParameterUpdatingDto dto) {
-        var associationId = this.userContextHolder.getSession().getAssociationId();
-        var associationType = this.associationUtil.getAssociationType();
-        this.externalParameterApplication.update(dto.getId(), dto.getValue(), dto.getName(), dto.getLabel(), dto.getType(), associationId, associationType);
+        var session = this.userContextHolder.getSession();
+        this.externalParameterApplication.update(dto.getId(), dto.getValue(), dto.getName(), dto.getLabel(), dto.getType(), session.getAssociationId(), session.getAssociationType());
     }
 }
