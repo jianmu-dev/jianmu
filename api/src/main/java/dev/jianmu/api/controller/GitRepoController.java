@@ -1,8 +1,10 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.api.jwt.UserContextHolder;
+import dev.jianmu.api.dto.GitRepoSyncingDto;
 import dev.jianmu.api.mapper.ProjectVoMapper;
+import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.api.vo.GitRepoBranchVo;
+import dev.jianmu.api.vo.GitRepoVo;
 import dev.jianmu.api.vo.ProjectVo;
 import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.TriggerApplication;
@@ -11,10 +13,9 @@ import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,22 @@ public class GitRepoController {
         this.gitRepoApplication = gitRepoApplication;
         this.triggerApplication = triggerApplication;
         this.userContextHolder = userContextHolder;
+    }
+
+    @PutMapping("/sync")
+    @Operation(summary = "同步仓库", description = "同步仓库")
+    public void sync(@RequestBody @Valid GitRepoSyncingDto dto) {
+        this.gitRepoApplication.sync(dto.getUserId(), dto.getOwnerRef(), dto.getRef());
+    }
+
+    @GetMapping("{id}")
+    @Operation(summary = "查询仓库详情", description = "查询仓库详情")
+    public GitRepoVo findBranches(@PathVariable("id") String id) {
+        var gitRepo = this.gitRepoApplication.findById(id);
+        return GitRepoVo.builder()
+                .ref(gitRepo.getRef())
+                .owner(gitRepo.getOwner())
+                .build();
     }
 
     @GetMapping("/branches")
