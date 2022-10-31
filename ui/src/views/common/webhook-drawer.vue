@@ -18,7 +18,7 @@
               <!-- 左侧图标 -->
               <i class="jm-icon-input-hook"></i>
               <!-- 右侧链接 -->
-              <jm-text-viewer :threshold="0" :value="link" class="webhook-link"/>
+              <jm-text-viewer :threshold="0" :value="link" class="webhook-link" />
             </div>
             <div class="copy-link-address">
               <jm-button type="primary" @click="copy">复制链接</jm-button>
@@ -30,7 +30,7 @@
             <div class="title">请求列表</div>
             <jm-tooltip placement="top">
               <template #content>
-                若无对应的触发记录，可到上游webhook管理中，<br/>
+                若无对应的触发记录，可到上游webhook管理中，<br />
                 查看请求是否发送成功
               </template>
               <i class="jm-icon-button-help"></i>
@@ -38,18 +38,14 @@
           </div>
           <jm-tooltip content="刷新" placement="bottom">
             <jm-button
-              :class="{ 'jm-icon-button-refresh': true, 'doing': refreshFlag}"
+              :class="{ 'jm-icon-button-refresh': true, doing: refreshFlag }"
               :disabled="refreshFlag"
               @click="refresh"
             ></jm-button>
           </jm-tooltip>
         </div>
         <div class="table-container" v-loading="tableLoading">
-          <jm-scrollbar
-            ref="webhookDrawerRef"
-            :height="height"
-            class="webhook-drawer-ref"
-          >
+          <jm-scrollbar ref="webhookDrawerRef" :height="height" class="webhook-drawer-ref">
             <div
               class="table-content"
               ref="scrollRef"
@@ -61,52 +57,35 @@
               }"
             >
               <jm-table :data="webhookRequestList" :row-key="rowkey">
-                <jm-table-column
-                  prop="userAgent"
-                  label="来源"
-                ></jm-table-column>
+                <jm-table-column prop="userAgent" label="来源"></jm-table-column>
                 <jm-table-column prop="timed" label="请求时间" align="center">
                   <template #default="scope">
                     <div>{{ datetimeFormatter(scope.row.requestTime) }}</div>
                   </template>
-                </jm-table-column
-                >
+                </jm-table-column>
                 <jm-table-column prop="statusCode" label="状态" align="center">
                   <template #default="scope">
-                    <div
-                      v-if="scope.row.statusCode === 'OK'"
-                      style="color: #10c2c2"
-                    >
-                      成功
-                    </div>
+                    <div v-if="scope.row.statusCode === 'OK'" style="color: #10c2c2">成功</div>
                     <div v-else style="color: red">失败</div>
                   </template>
                 </jm-table-column>
                 <jm-table-column label="错误信息">
                   <template #default="scope">
-                    <jm-text-viewer :threshold="0" :value="scope.row.errorMsg||''"/>
+                    <jm-text-viewer :threshold="0" :value="scope.row.errorMsg || ''" />
                   </template>
                 </jm-table-column>
                 <jm-table-column label="操作" align="center">
                   <template #default="scope">
                     <div class="table-button">
                       <div class="retry" @click="retry(scope.row.id)">重试</div>
-                      <div
-                        class="see-payload"
-                        @click="seePayload(scope.row.id)"
-                      >
-                        详情
-                      </div>
+                      <div class="see-payload" @click="seePayload(scope.row.id)">详情</div>
                     </div>
                   </template>
                 </jm-table-column>
               </jm-table>
               <!-- 显示更多 -->
               <div class="load-more">
-                <jm-load-more
-                  :state="loadState"
-                  :load-more="btnDown"
-                ></jm-load-more>
+                <jm-load-more :state="loadState" :load-more="btnDown"></jm-load-more>
               </div>
             </div>
           </jm-scrollbar>
@@ -127,29 +106,30 @@
         </div>
         <!-- 查看payload -->
         <div class="payload-content" v-if="!payloadTab" v-loading="payloadLoading">
-          <jm-log-viewer v-if="webhookLog" filename="webhook.txt" :value="webhookLog"/>
+          <jm-log-viewer v-if="webhookLog" filename="webhook.txt" :value="webhookLog" />
         </div>
         <!-- 触发器 -->
         <div v-else class="trigger-content" v-loading="triggerParamsLoading">
           <jm-scrollbar>
-            <custom-webhook-detail v-if="webhookParamsDetail?.webhookEvent"
-                                   :webhook-params-detail="webhookParamsDetail"></custom-webhook-detail>
-            <div style="padding:20px;" v-else>
+            <custom-webhook-detail
+              v-if="webhookParamsDetail?.webhookEvent"
+              :webhook-params-detail="webhookParamsDetail"
+            ></custom-webhook-detail>
+            <div style="padding: 20px" v-else>
               <!-- 参数列表 -->
               <div class="trigger-title">参数列表</div>
               <jm-table class="trigger-table" :data="webhookParamsDetail?.param">
                 <jm-table-column label="参数唯一标识">
                   <template #default="scope">
-                    <jm-text-viewer :threshold="0" :value="scope.row.ref"/>
+                    <jm-text-viewer :threshold="0" :value="scope.row.ref" />
                   </template>
                 </jm-table-column>
                 <jm-table-column label="参数名称">
                   <template #default="scope">
-                    <jm-text-viewer :threshold="0" :value="scope.row.name"/>
+                    <jm-text-viewer :threshold="0" :value="scope.row.name" />
                   </template>
                 </jm-table-column>
-                <jm-table-column label="参数类型" width="200px" prop="type">
-                </jm-table-column>
+                <jm-table-column label="参数类型" width="200px" prop="type"> </jm-table-column>
                 <jm-table-column label="参数值" prop="value">
                   <template #default="scope">
                     <div v-if="scope.row.hidden">
@@ -159,13 +139,20 @@
                       </div>
                       <div class="display-container" v-else>
                         <template v-if="scope.row.value">
-                          <div class="param-value"
-                               :style="{maxWidth:maxWidthRecord[scope.row.value]?`${maxWidthRecord[scope.row.value]}px`: '100%'}">
-                            <jm-text-viewer :threshold="0"
-                                            v-if="!scope.row.hidden"
-                                            :value="scope.row.value"
-                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.value)"
-                                            class="value"
+                          <div
+                            class="param-value"
+                            :style="{
+                              maxWidth: maxWidthRecord[scope.row.value]
+                                ? `${maxWidthRecord[scope.row.value]}px`
+                                : '100%',
+                            }"
+                          >
+                            <jm-text-viewer
+                              :threshold="0"
+                              v-if="!scope.row.hidden"
+                              :value="scope.row.value"
+                              @loaded="({ contentMaxWidth }) => getTotalWidth(contentMaxWidth, scope.row.value)"
+                              class="value"
                             >
                             </jm-text-viewer>
                             <template v-else>
@@ -176,10 +163,7 @@
                       </div>
                     </div>
                     <template v-else>
-                      <param-value
-                        :value="scope.row.value"
-                        :type="scope.row.valueType"
-                      />
+                      <param-value :value="scope.row.value" :type="scope.row.valueType" />
                     </template>
                   </template>
                 </jm-table-column>
@@ -263,10 +247,7 @@ export default defineComponent({
     const scrollableEl = () => {
       return webhookDrawerRef.value?.scrollbar.firstElementChild;
     };
-    const h =
-      (window.innerHeight ||
-        document.documentElement.clientHeight ||
-        document.body.clientHeight) - 335;
+    const h = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 335;
     const scrollHeight = ref<number>(h);
     const height = computed<number>({
       get() {
@@ -281,11 +262,14 @@ export default defineComponent({
     const noMoreFlag = ref<boolean>(false);
     // 表格loading
     const tableLoading = ref<boolean>(false);
-    const link = computed<string | undefined>(
-      () =>
-        webhook.value &&
-        `${window.location.protocol}//${window.location.host}${webhook.value}`,
-    );
+    const link = computed<string | undefined>(() => {
+      if (!webhook.value) {
+        return undefined;
+      }
+      return webhook.value.startsWith('http://') || webhook.value.startsWith('https://')
+        ? webhook.value
+        : `${window.location.protocol}//${window.location.host}${webhook.value}`;
+    });
     // 当前webhook的项目名
     const currentProject = ref<string>(props.currentProjectName as string);
     // 请求参数
@@ -312,9 +296,7 @@ export default defineComponent({
     // webhookUrl
     const getWebhookUrlRequest = async () => {
       try {
-        const { webhook: webhookUrl } = await fetchTriggerWebhook(
-          webhookRequestParams.value.projectId,
-        );
+        const { webhook: webhookUrl } = await fetchTriggerWebhook(webhookRequestParams.value.projectId);
         webhook.value = webhookUrl;
       } catch (err) {
         proxy.$throw(err, proxy);
@@ -326,15 +308,11 @@ export default defineComponent({
       const currentScorllTop = scrollRef.value?.scrollTop || 0;
       try {
         // 请求表格数据
-        webhookRequestData.value = await getWebhookList(
-          webhookRequestParams.value,
-        );
+        webhookRequestData.value = await getWebhookList(webhookRequestParams.value);
         // 数据请求成功取消loading
         tableLoading.value = false;
         // 判断是否有下一页
-        if (
-          webhookRequestData.value.pages > webhookRequestParams.value.pageNum
-        ) {
+        if (webhookRequestData.value.pages > webhookRequestParams.value.pageNum) {
           loadState.value = StateEnum.MORE;
         } else {
           loadState.value = StateEnum.NO_MORE;
@@ -354,12 +332,11 @@ export default defineComponent({
           webhookRequestList.value = webhookRequestData.value.list;
         }
 
-        await nextTick(() => {
-          if (!scrollRef.value) {
-            return;
-          }
-          scrollRef.value.scrollTop = currentScorllTop;
-        });
+        await nextTick();
+        if (!scrollRef.value) {
+          return;
+        }
+        scrollRef.value.scrollTop = currentScorllTop;
       } catch (err) {
         tableLoading.value = false;
         proxy.$throw(err, proxy);
@@ -422,7 +399,7 @@ export default defineComponent({
       }
     };
     // 重试
-    let msg = '<div>确定要重试吗?</div>';
+    const msg = '<div>确定要重试吗?</div>';
     const retry = (id: string) => {
       proxy
         .$confirm(msg, '重试', {
@@ -441,12 +418,12 @@ export default defineComponent({
         // 清空数组
         webhookAuth.value = [];
         // 重新赋值
-        webhookParamsDetail.value.auth
-          ? webhookAuth.value.push(webhookParamsDetail.value.auth)
-          : webhookAuth.value;
+        webhookParamsDetail.value.auth ? webhookAuth.value.push(webhookParamsDetail.value.auth) : webhookAuth.value;
       } catch (err) {
         // 对状态码为400且错误提示为未找到webhook参数的错误单独处理
-        const { data: { statusCode, message } } = err.response;
+        const {
+          data: { statusCode, message },
+        } = err.response;
         if (statusCode === 400) {
           // 将之前缓存的正确数据清空，保证数据渲染正常
           webhookParamsDetail.value = null;
@@ -467,9 +444,7 @@ export default defineComponent({
     // 显示更多
     const btnDown = () => {
       // 如果还有下一页才会触发
-      if (
-        webhookRequestData.value!.pages > webhookRequestParams.value.pageNum
-      ) {
+      if (webhookRequestData.value!.pages > webhookRequestParams.value.pageNum) {
         loadState.value = StateEnum.LOADING;
         webhookRequestParams.value.pageNum++;
         getWebhookRequestList('push');
@@ -688,7 +663,7 @@ export default defineComponent({
         color: #818c9b;
 
         &:active {
-          color: #096DD9;
+          color: #096dd9;
         }
       }
 
@@ -881,7 +856,6 @@ export default defineComponent({
       }
 
       .trigger-table {
-
         td:first-of-type,
         td:last-of-type {
           .cell {
