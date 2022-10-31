@@ -12,13 +12,16 @@ const instance = axios.create({
   // default is `0` (no timeout)
   // timeout: 10 * 1000,
 });
-instance.interceptors.request.use(config => {
-  // 发送请求时记录当前的路由地址
-  config.headers.locationHref = window.location.href;
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
+instance.interceptors.request.use(
+  config => {
+    // 发送请求时记录当前的路由地址
+    config.headers.locationHref = window.location.href;
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  },
+);
 type PayloadType = 'form-data' | 'json' | 'file';
 
 export interface IRequest {
@@ -47,14 +50,16 @@ export default async function rest({
   const m = method.toLocaleLowerCase();
   let contentType: string | undefined;
   let transformRequest: AxiosTransformer | undefined;
-  let params: object | undefined;
-  let data: object | undefined;
+  let params: Record<string, unknown> | undefined;
+  let data: Record<string, unknown> | undefined;
   if (m === 'get' || m === 'delete' || m === 'head') {
+    // eslint-disable-next-line prefer-const
     params = payload;
   } else if (m === 'post' || m === 'put' || m === 'patch') {
     switch (payloadType) {
       case 'form-data':
         contentType = 'application/x-www-form-urlencoded';
+        // eslint-disable-next-line prefer-const
         transformRequest = data => qs.stringify(data, { indices: false });
         break;
       case 'file':
@@ -64,7 +69,7 @@ export default async function rest({
         contentType = 'application/json; charset=utf-8';
         break;
     }
-
+    // eslint-disable-next-line prefer-const
     data = payload;
   } else {
     throw new Error(`Invalid supported method (value: ${method})`);
@@ -79,12 +84,13 @@ export default async function rest({
 
   if (session) {
     // 统一注入Authorization
-    headers['Authorization'] = `${session.type} ${session.token}`;
+    headers['Authorization'] = `${session.sessionId}`;
   }
 
   let res;
 
   try {
+    // eslint-disable-next-line prefer-const
     res = await instance.request({
       url,
       method: m,
@@ -95,7 +101,7 @@ export default async function rest({
       transformRequest,
       onDownloadProgress,
       // 设置20秒超时
-      timeout: onDownloadProgress ? 0 : (timeout || 20 * 1000),
+      timeout: onDownloadProgress ? 0 : timeout || 20 * 1000,
     });
   } catch (err) {
     if (err.response.status === 409) {
@@ -105,13 +111,6 @@ export default async function rest({
       throw new TimeoutError(err.message);
     }
     throw new HttpError(err.response, err.message);
-  }
-
-  const newToken = res.headers['x-authorization-token'];
-
-  if (newToken) {
-    // 更新认证
-    store.commit(`${sessionNs}/mutateToken`, newToken);
   }
 
   if (m === 'head') {

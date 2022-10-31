@@ -92,10 +92,14 @@ module.exports = {
       },
     ],
     // 禁止使用console
-    'no-console': process.env.NODE_ENV === 'production' ? 2 : 0,
+    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     // 禁止使用debugger
-    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
-    // interface为空对象不报错
-    '@typescript-eslint/no-empty-interface': 0,
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    // 解决.vue文件多个单词命名的报错提示
+    'vue/multi-word-component-names': 'off',
+    // 解决定义interface内容为空的报错提示
+    '@typescript-eslint/no-empty-interface': 'off',
+    // 解决ts-ignore报错问题，一般由npm包的typescript类型不存在时导致
+    '@typescript-eslint/ban-ts-comment': 'off',
   },
 };

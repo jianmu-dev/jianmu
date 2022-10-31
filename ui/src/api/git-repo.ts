@@ -1,5 +1,5 @@
 import { restProxy } from '@/api';
-import { IGitRepoBranchVo, IGitRepoFlowViewingDto } from '@/api/dto/git-repo';
+import { IGitRepoBranchVo, IGitRepoFlowViewingDto, IGitRepoVo } from '@/api/dto/git-repo';
 import { IProjectVo } from '@/api/dto/project';
 
 export const baseUrl = '/git_repos';
@@ -23,6 +23,18 @@ export function getAssemblyLineList(dto: IGitRepoFlowViewingDto): Promise<IProje
 export function getBranches(): Promise<IGitRepoBranchVo[]> {
   return restProxy<IGitRepoBranchVo[]>({
     url: `${baseUrl}/branches`,
+    method: 'get',
+    auth: true,
+  });
+}
+
+/**
+ * 获取gitRepo信息
+ */
+
+export function getGitRepo(id: string): Promise<IGitRepoVo> {
+  return restProxy({
+    url: `${baseUrl}/${id}`,
     method: 'get',
     auth: true,
   });

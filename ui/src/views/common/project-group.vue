@@ -65,7 +65,6 @@
                   dslDialogFlag = true;
                 }
               "
-              @running="handleProjectRunning"
               @triggered="handleProjectTriggered"
               @synchronized="handleProjectSynchronized"
               @deleted="handleProjectDeleted"
@@ -306,9 +305,8 @@ export default defineComponent({
     });
     // 初始化项目列表
     onBeforeMount(async () => {
-      await nextTick(() => {
-        queryForm.value.name = props.name;
-      });
+      await nextTick();
+      queryForm.value.name = props.name;
       if (props.pageable) {
         loading.value = true;
       }

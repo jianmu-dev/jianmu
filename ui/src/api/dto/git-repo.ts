@@ -5,19 +5,23 @@ import { GitRepoEnum, ProjectStatusEnum } from '@/api/dto/enumeration';
  */
 export interface IGitRepoFlowViewingDto
   extends Readonly<{
-    name?: string,
-    status?: ProjectStatusEnum,
-    branch?: string,
-    sortType?: GitRepoEnum
-  }> {
-}
+    name?: string;
+    status?: ProjectStatusEnum;
+    branch?: string;
+    sortType?: GitRepoEnum;
+  }> {}
 
 /**
  * 查询分支列表Vo
  */
 export interface IGitRepoBranchVo
   extends Readonly<{
-    branchName: string,
-    isDefault: boolean
-  }> {
-}
+    branchName: string;
+    isDefault: boolean;
+  }> {}
+
+export interface IGitRepoVo
+  extends Readonly<{
+    owner: string;
+    ref: string;
+  }> {}

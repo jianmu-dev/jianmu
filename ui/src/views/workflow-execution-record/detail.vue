@@ -19,10 +19,9 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { IState } from '@/model/modules/session';
-import { ISessionVo } from '@/api/dto/session';
+import { ISession } from '@/model/modules/session';
 import { IWorkflowDetailParam } from '@/components/workflow/workflow-detail/model/data/common';
 import { ViewModeEnum } from '@/api/dto/enumeration';
-// import { LOGIN_INDEX } from '@/router/path-def';
 import { IRootState } from '@/model';
 
 export default defineComponent({
@@ -44,7 +43,7 @@ export default defineComponent({
     const state = store.state[sessionNs] as IState;
     const rootState = store.state as IRootState;
     const entry = rootState.entry || false;
-    const entryUrl = store.state[sessionNs].session.entryUrl;
+
     const loading = ref<boolean>(false);
     // workflow 详情数据是否加载完成
     const loaded = ref<boolean>(false);
@@ -58,7 +57,7 @@ export default defineComponent({
       loading,
       loaded,
       workflowDetail,
-      session: computed<ISessionVo | undefined>(() => state.session),
+      session: computed<ISession | undefined>(() => state.session),
       handleBack() {
         if (!entry) {
           // router.push({ name: 'index' });
@@ -66,7 +65,7 @@ export default defineComponent({
           router.push(fullPath);
           return;
         }
-        window.location.href = entryUrl;
+        window.location.href = store.getters[`${sessionNs}/entryUrl`];
       },
       handleJump(projectGroupId: string) {
         if (!projectGroupId) {
@@ -76,15 +75,7 @@ export default defineComponent({
       },
       handleLogout() {
         console.log('退出登录事件');
-        // try {
-        //   // 清理token
-        //   proxy.deleteSession();
-        //   proxy.$success('退出成功');
-
-        //   router.push(LOGIN_INDEX);
-        // } catch (err) {
-        //   proxy.$throw(err, proxy);
-        // }
+        // TODO login 退出登录
       },
       handleTrigger(err?: Error) {
         if (!err) {
@@ -102,7 +93,7 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         }
       },
-      handleChangeRouterParam(routerParam: { viewMode?: ViewModeEnum, triggerId?: string }) {
+      handleChangeRouterParam(routerParam: { viewMode?: ViewModeEnum; triggerId?: string }) {
         if (!routerParam.triggerId) {
           delete routerParam.triggerId;
         }

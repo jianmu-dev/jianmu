@@ -1,22 +1,25 @@
 <template>
   <div class="ext-param" v-loading="pageLoading">
     <!--  tab  -->
-    <div class="tab-container" v-if="data.length>0">
-      <span :class="['tab-item',currentTab===0?'is-active':'']" @click="currentTab=0">
-       {{ data[0].label }}・{{ data[0].counter }}
+    <div class="tab-container" v-if="data.length > 0">
+      <span :class="['tab-item', currentTab === 0 ? 'is-active' : '']" @click="currentTab = 0">
+        {{ data[0].label }}・{{ data[0].counter }}
       </span>
-      <template v-if="data.length>1">
+      <template v-if="data.length > 1">
         <div class="classification-tabs" ref="scrollBarRef">
-            <span :class="['tab-item',currentTab===index+1?'is-active':'']" v-for="(item,index) in data.slice(1)"
-                  :key="index+1"
-                  @click="currentTab=index+1">{{ item.label }}・{{ item.counter }}
-            </span>
+          <span
+            :class="['tab-item', currentTab === index + 1 ? 'is-active' : '']"
+            v-for="(item, index) in data.slice(1)"
+            :key="index + 1"
+            @click="currentTab = index + 1"
+            >{{ item.label }}・{{ item.counter }}
+          </span>
         </div>
         <div class="btns" v-show="isShowBtn">
-          <div :disabled="disabledClass==='left'" class="left" @click="handleScroll(0)">
+          <div :disabled="disabledClass === 'left'" class="left" @click="handleScroll(0)">
             <div class="triangle"></div>
           </div>
-          <div :disabled="disabledClass==='right'" class="right" @click="handleScroll(1)">
+          <div :disabled="disabledClass === 'right'" class="right" @click="handleScroll(1)">
             <div class="triangle"></div>
           </div>
         </div>
@@ -25,7 +28,7 @@
     <!--  内容  -->
     <div class="ext-content">
       <div class="add-param" @click="add" v-if="!pageLoading">
-        <i class="jm-icon-button-add"/>
+        <i class="jm-icon-button-add" />
         新增参数
       </div>
       <!--  外部参数卡片    -->
@@ -44,17 +47,26 @@
     </div>
 
     <!--  新增/编辑 外部参数  -->
-    <jm-dialog v-model="addExtParamVisible" :title="!editorExtParams.flag?'新增参数':'编辑参数'"
-               :close-on-click-modal="false"
-               destroy-on-close
-               v-if="addExtParamVisible" :custom-class="entry?'entry':'center'">
+    <jm-dialog
+      v-model="addExtParamVisible"
+      :title="!editorExtParams.flag ? '新增参数' : '编辑参数'"
+      :close-on-click-modal="false"
+      destroy-on-close
+      v-if="addExtParamVisible"
+      :custom-class="entry ? 'entry' : 'center'"
+    >
       <jm-form label-position="top" :model="addParam" ref="addParamRef">
         <jm-form-item label="唯一标识" prop="ref" :rules="rules.ref">
-          <jm-input show-word-limit :maxlength="30" v-model="addParam.ref" :disabled="editorExtParams.flag"
-                    placeholder="以英文字母或下划线开头，支持下划线、数字、英文字母"/>
+          <jm-input
+            show-word-limit
+            :maxlength="30"
+            v-model="addParam.ref"
+            :disabled="editorExtParams.flag"
+            placeholder="以英文字母或下划线开头，支持下划线、数字、英文字母"
+          />
         </jm-form-item>
         <jm-form-item label="名称">
-          <jm-input show-word-limit :maxlength="45" v-model="addParam.name" placeholder="请输入参数名称"/>
+          <jm-input show-word-limit :maxlength="45" v-model="addParam.name" placeholder="请输入参数名称" />
         </jm-form-item>
         <jm-form-item label="类型" prop="type" :rules="rules.type">
           <jm-radio-group v-model="addParam.type" @change="changeType">
@@ -64,12 +76,20 @@
           </jm-radio-group>
         </jm-form-item>
         <jm-form-item v-if="valueVisible" label="值" prop="value" :rules="rules.value">
-          <jm-input v-if="addParam.type === ParamTypeEnum.STRING" v-model="addParam.value" type="textarea"
-                    :maxlength="512"
-                    placeholder="请输入参数值"/>
-          <jm-input v-else-if="addParam.type === ParamTypeEnum.NUMBER" v-model="addParam.value" type="number"
-                    placeholder="请输入参数值"
-                    :maxlength="512"/>
+          <jm-input
+            v-if="addParam.type === ParamTypeEnum.STRING"
+            v-model="addParam.value"
+            type="textarea"
+            :maxlength="512"
+            placeholder="请输入参数值"
+          />
+          <jm-input
+            v-else-if="addParam.type === ParamTypeEnum.NUMBER"
+            v-model="addParam.value"
+            type="number"
+            placeholder="请输入参数值"
+            :maxlength="512"
+          />
           <jm-radio-group v-else-if="addParam.type === ParamTypeEnum.BOOL" v-model="addParam.value">
             <jm-radio :label="'true'">true</jm-radio>
             <jm-radio :label="'false'">false</jm-radio>
@@ -86,21 +106,16 @@
             clearable
             placeholder="请选择或创建参数标签"
           >
-            <jm-option
-              v-for="item in labelOption"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <jm-option v-for="item in labelOption" :key="item.value" :label="item.label" :value="item.value" />
           </jm-select>
         </jm-form-item>
       </jm-form>
       <template #footer>
-      <span class="dialog-footer">
-        <jm-button @click="addExtParamVisible = false">取消</jm-button>
-        <jm-button v-if="!editorExtParams.flag" type="primary" @click="sure(addParamRef)">确定</jm-button>
-        <jm-button v-else type="primary" @click="save(addParamRef)">保存</jm-button>
-      </span>
+        <span class="dialog-footer">
+          <jm-button @click="addExtParamVisible = false">取消</jm-button>
+          <jm-button v-if="!editorExtParams.flag" type="primary" @click="sure(addParamRef)">确定</jm-button>
+          <jm-button v-else type="primary" @click="save(addParamRef)">保存</jm-button>
+        </span>
       </template>
     </jm-dialog>
   </div>
@@ -114,7 +129,6 @@ import { IExternalParameterLabelVo, IExternalParameterVo } from '@/api/dto/ext-p
 import listen from 'good-listener';
 import ExtParamCard from './ext-param-card.vue';
 import { ParamTypeEnum } from '@/api/dto/enumeration';
-import { useStore } from 'vuex';
 
 interface addParamType {
   ref: string;
@@ -128,9 +142,7 @@ export default defineComponent({
   components: { ExtParamCard },
   setup() {
     const { proxy } = getCurrentInstance() as any;
-    const store = useStore();
-    const dynamicProjectDesc = store.getters.projectDesc;
-    const entry = store.state.entry;
+    const entry = true;
     const pageLoading = ref<boolean>(false);
     const labelSelectRef = ref<HTMLElement>();
     const extParams = ref<IExternalParameterVo[]>();
@@ -150,12 +162,12 @@ export default defineComponent({
     const currentTab = ref<number>(0);
     const valueVisible = ref<boolean>(true);
     // 存储修改-区分新增/修改，使用同一个弹窗
-    const editorExtParams = ref<{ flag: boolean, id: string }>({
+    const editorExtParams = ref<{ flag: boolean; id: string }>({
       flag: false,
       id: '',
     });
     // label默认值
-    const labelOption = ref<{ label: string, value: string }[]>();
+    const labelOption = ref<{ label: string; value: string }[]>();
     const addParam = ref<addParamType>({ ref: '', name: '', type: ParamTypeEnum.STRING, value: '', label: '' });
 
     const init = async () => {
@@ -164,7 +176,7 @@ export default defineComponent({
         extParams.value = await getExtParamList();
         extLabelList.value = await getExtParamLabelList();
         extLabelList.value?.unshift({ id: '', value: '全部', createdTime: '', lastModifiedTime: '' });
-        const list = [];
+        const list: any[] = [];
         //  判断是否已经有默认
         extLabelList.value?.forEach(item => {
           list.push(item.value);
@@ -175,12 +187,11 @@ export default defineComponent({
       } finally {
         pageLoading.value = false;
       }
-
     };
 
     let listener: any;
     const initScrollHandle = () => {
-      maxScrollX.value = scrollBarRef.value?.scrollWidth - scrollBarRef.value?.offsetWidth;
+      maxScrollX.value = scrollBarRef.value!.scrollWidth - scrollBarRef.value!.offsetWidth;
       maxScrollX.value > 0 && (isShowBtn.value = true);
       listener = listen(scrollBarRef.value, 'scroll', (e: MouseEvent) => {
         scrollX.value = e.target.scrollLeft;
@@ -223,14 +234,13 @@ export default defineComponent({
         labelOption.value?.push({ label: item.value, value: item.value });
       });
     };
-    // 构建tab参数
-    const data = computed<{ label: string, projects: IExternalParameterVo[], counter: number }[]>(() => {
-      let info: any = [];
+    const sortList = () => {
+      const info: any = [];
 
       // label去重
-      let labelList = [];
-      let newArr = [];
-      extLabelList.value?.forEach((ext, index) => {
+      const labelList: any[] = [];
+      const newArr: any[] = [];
+      extLabelList.value?.forEach(ext => {
         if (labelList.includes(ext.value)) {
           return;
         }
@@ -243,21 +253,27 @@ export default defineComponent({
       extLabelList.value?.forEach(labels => {
         info.push({
           label: labels.value,
-          projects: extParams.value?.filter(({ label }) => labels.value === '全部' ? label !== labels.value : label === labels.value),
-          counter: extParams.value?.filter(({ label }) => labels.value === '全部' ? label !== labels.value : label === labels.value).length,
+          projects: extParams.value?.filter(({ label }) =>
+            labels.value === '全部' ? label !== labels.value : label === labels.value,
+          ),
+          counter: extParams.value?.filter(({ label }) =>
+            labels.value === '全部' ? label !== labels.value : label === labels.value,
+          ).length,
         });
       });
 
       // 固定"默认"位置
       for (let i = 0; i < info.length; i++) {
         if (info[i].label === '默认') {
-          let single = info[i];
+          const single = info[i];
           info.splice(i, 1);
           info.splice(1, 0, single);
         }
       }
       return info;
-    });
+    };
+    // 构建tab参数
+    const data = computed<{ label: string; projects: IExternalParameterVo[]; counter: number }[]>(sortList);
     return {
       disabledClass,
       isShowBtn,
@@ -278,15 +294,15 @@ export default defineComponent({
       rules: {
         ref: [
           { required: true, message: '请输入唯一标识', trigger: 'blur' },
-          { pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/, message: '以英文字母或下划线开头，支持下划线、数字、英文字母', trigger: 'blur' },
+          {
+            pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/,
+            message: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+            trigger: 'blur',
+          },
         ],
         type: { required: true, message: '请选择类型', trigger: 'change' },
-        value: [
-          { required: true, message: '请输入参数值', trigger: 'blur' },
-        ],
-        label: [
-          { required: true, message: '请选择或创建参数标签', trigger: 'change' },
-        ],
+        value: [{ required: true, message: '请输入参数值', trigger: 'blur' }],
+        label: [{ required: true, message: '请选择或创建参数标签', trigger: 'change' }],
       },
       handleScroll,
       // 新增-保存
@@ -324,7 +340,10 @@ export default defineComponent({
           list.push(item.label);
         });
         addParam.value = {
-          ref: '', name: '', type: ParamTypeEnum.STRING, value: '',
+          ref: '',
+          name: '',
+          type: ParamTypeEnum.STRING,
+          value: '',
           label: list.length > 0 && currentTab.value !== 0 ? list[currentTab.value] : '',
         };
         editorExtParams.value.flag = false;
@@ -332,7 +351,7 @@ export default defineComponent({
       // 编辑
       editor: (id: string) => {
         getLabelList();
-        const { ref, name, type, value, label } = extParams.value?.find(item => item.id === id);
+        const { ref, name, type, value, label } = extParams.value!.find(item => item.id === id)!;
         addParam.value = { ref, name, type, value, label };
         addExtParamVisible.value = true;
         editorExtParams.value = { id: id, flag: true };
@@ -362,7 +381,7 @@ export default defineComponent({
       del: (id: string, name: string) => {
         let msg = '<div>确定要删除参数吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">名称：${name}</div>`;
-        msg += `<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的${dynamicProjectDesc}将会报错</div>`;
+        msg += '<div style="margin-top: 5px; font-size: 14px; line-height: normal;">删除后已引用该参数的流水线将会报错</div>';
 
         proxy
           .$confirm(msg, '删除参数', {
@@ -447,8 +466,8 @@ export default defineComponent({
 
       &.is-active {
         font-weight: 500;
-        color: #096DD9;
-        background-color: #EBF4FF;
+        color: #096dd9;
+        background-color: #ebf4ff;
         border-radius: 15px;
       }
     }
@@ -471,7 +490,6 @@ export default defineComponent({
       &::-webkit-scrollbar {
         display: none;
       }
-
     }
 
     .btns {
@@ -480,9 +498,10 @@ export default defineComponent({
       border-bottom-right-radius: 15px;
       border-top-right-radius: 15px;
       display: inline-flex;
-      background-color: #FFFFFF;
+      background-color: #ffffff;
 
-      .left, .right {
+      .left,
+      .right {
         cursor: pointer;
 
         &[disabled='true'] {
@@ -501,22 +520,22 @@ export default defineComponent({
         padding: 5px 12px 5px 0;
 
         .triangle {
-          border-right-color: #6B7B8D;
+          border-right-color: #6b7b8d;
         }
 
         &:hover {
-          background-color: #EFF7FF;
+          background-color: #eff7ff;
 
           .triangle {
-            border-right-color: #096DD9;
+            border-right-color: #096dd9;
           }
         }
 
         &[disabled='true'] {
-          background-color: #FFFFFF;
+          background-color: #ffffff;
 
           .triangle {
-            border-right-color: #A7B0BB;
+            border-right-color: #a7b0bb;
           }
         }
       }
@@ -526,22 +545,22 @@ export default defineComponent({
         margin-left: -5px;
 
         .triangle {
-          border-left-color: #6B7B8D;
+          border-left-color: #6b7b8d;
         }
 
         &:hover {
-          background-color: #EFF7FF;
+          background-color: #eff7ff;
 
           .triangle {
-            border-left-color: #096DD9;
+            border-left-color: #096dd9;
           }
         }
 
         &[disabled='true'] {
-          background-color: #FFFFFF;
+          background-color: #ffffff;
 
           .triangle {
-            border-left-color: #A7B0BB;
+            border-left-color: #a7b0bb;
           }
         }
       }
@@ -561,14 +580,14 @@ export default defineComponent({
       flex-direction: column;
       width: 19.2%;
       height: 180px;
-      margin: .8% .385% 0 0.385%;
+      margin: 0.8% 0.385% 0 0.385%;
       border-radius: 4px;
       box-sizing: border-box;
-      border: 1px solid #E7ECF1;
+      border: 1px solid #e7ecf1;
       cursor: pointer;
       font-size: 14px;
       font-weight: 400;
-      color: #096DD9;
+      color: #096dd9;
 
       .jm-icon-button-add {
         font-size: 36px;
@@ -593,28 +612,27 @@ export default defineComponent({
   }
 
   ::v-deep(.el-button--default) {
-    background: #F5F5F5;
+    background: #f5f5f5;
     border-radius: 2px;
 
     &:hover {
-
-      background: #EFF7FF;
+      background: #eff7ff;
       border-radius: 2px;
     }
   }
 
   ::v-deep(.el-button--primary) {
-    background: #096DD9;
+    background: #096dd9;
     border-radius: 2px;
 
     &:hover {
-      background: #3293FD;
+      background: #3293fd;
       border-radius: 2px;
     }
   }
 
   ::v-deep(.save) {
-    background: #096DD9;
+    background: #096dd9;
     box-shadow: none;
     border-radius: 2px;
   }

@@ -1,12 +1,12 @@
 <template>
-  <div :class="{'http-status-error': true, [`_${status}`]: true}">
+  <div :class="{ 'http-status-error': true, [`_${status}`]: true }">
     <div class="desc">{{ message }}</div>
     <div class="back" v-if="!entry || entryUrl">
-      <router-link :to="{name:'index'}">
+      <router-link :to="{ name: 'index' }">
         <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
       </router-link>
     </div>
-    <bottom-nav/>
+    <bottom-nav />
   </div>
   <div class="right-bottom">
     <div class="bg-graph"></div>
@@ -34,8 +34,8 @@ export default defineComponent({
   setup(props) {
     let status = +props.value;
     const store = useStore();
-    const entryUrl = store.state[namespace].session?.entryUrl;
-    const entry = store.state.entry;
+    const entryUrl = store.getters[`${namespace}/entryUrl`];
+    const entry = true;
     const messages: {
       [key: number]: string;
     } = {
@@ -106,7 +106,7 @@ export default defineComponent({
     width: 500px;
     height: 280px;
     position: absolute;
-    background-color: #D9EBFF;
+    background-color: #d9ebff;
     border-top-left-radius: 111px;
     transform: rotate(-67deg);
   }

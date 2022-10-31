@@ -4,47 +4,27 @@
     <div class="loading-over" v-show="loading" v-loading="loading"></div>
     <div class="top">
       <div class="left-top-param">
-        <router-link :to="{name:'index'}">
+        <router-link :to="{ name: 'index' }">
           <i class="jm-icon-button-left back"></i>
         </router-link>
         <div class="project-name">{{ projectName || '未命名项目' }}</div>
         <div class="selector" v-if="!isShowGrouping">
-          <jm-select
-            v-model="editorForm.projectGroupId"
-          >
-            <jm-option
-              v-for="item in projectGroupList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            >
-            </jm-option>
+          <jm-select v-model="editorForm.projectGroupId">
+            <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id"> </jm-option>
           </jm-select>
         </div>
         <div class="branch" v-else>
-          <img src="~@/assets/svgs/index/branch.svg" alt="">
+          <img src="~@/assets/svgs/index/branch.svg" alt="" />
           {{ currentBranch }}
         </div>
       </div>
       <div class="right-top-btn">
-        <jm-button
-          size="small"
-          class="save-return"
-          @click="save(true)"
-          :loading="loading"
-        >保存并返回
-        </jm-button>
-        <jm-button
-          type="primary"
-          size="small"
-          @click="save(false)"
-          :loading="loading"
-        >保存
-        </jm-button>
+        <jm-button size="small" class="save-return" @click="save(true)" :loading="loading">保存并返回 </jm-button>
+        <jm-button type="primary" size="small" @click="save(false)" :loading="loading">保存 </jm-button>
       </div>
     </div>
-    <div :class="[entry?'dsl-editor-entry':'dsl-editor']">
-      <jm-dsl-editor v-model:value="editorForm.dslText"/>
+    <div :class="[entry ? 'dsl-editor-entry' : 'dsl-editor']">
+      <jm-dsl-editor v-model:value="editorForm.dslText" />
     </div>
   </div>
 </template>
@@ -59,14 +39,11 @@ import { IProcessTemplateVo, IProjectIdVo } from '@/api/dto/project';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { useStore } from 'vuex';
 import { IRootState } from '@/model';
-import { namespace as sessionNs, namespace } from '@/store/modules/session';
 import yaml from 'yaml';
-import LoginVerify from '@/views/login/dialog.vue';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
 import { pushTop } from '@/utils/push-top';
 import { DSL_CURRENT_VERSION } from '@/components/workflow/version';
-import _store from '@/store';
 
 export default defineComponent({
   props: {
@@ -74,14 +51,13 @@ export default defineComponent({
     branch: String,
   },
   setup(props: any) {
-    const { proxy, appContext } = getCurrentInstance() as any;
+    const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const store = useStore();
     const currentBranch = ref<string>(props.branch);
-    const entry = store.state.entry;
+    const entry = true;
     // 是否展示分组
-    const isShowGrouping = computed<boolean>(() => store.state.entry);
-    const sessionState = { ...store.state[namespace] };
+    const isShowGrouping = true;
     const reloadMain = inject('reloadMain') as () => void;
     const route = useRoute();
     // 项目分支信息
@@ -117,7 +93,7 @@ export default defineComponent({
     };
     onMounted(async () => {
       // 获取分支信息（如果entry为true时，有必要获取分支信息）
-      if (isShowGrouping.value) {
+      if (isShowGrouping) {
         branches.value = await getBranches();
         const flag = branches.value.some(item => {
           return item.branchName === currentBranch.value;
@@ -135,20 +111,13 @@ export default defineComponent({
       const defaultGroup = projectGroupList.value.find(item => item.isDefaultGroup);
       editorForm.value.projectGroupId = defaultGroup!.id;
     });
-    // 没有登录时做的弹框判断
-    if (!sessionState.session) {
-      _store.dispatch(`${sessionNs}/openAuthDialog`, { appContext, LoginVerify });
-    }
     if (route.query.templateId) {
       getProcessTemplate(route.query.templateId as unknown as number)
         .then((res: IProcessTemplateVo) => {
-          let dsl = res.dsl;
+          const dsl = res.dsl;
           if (route.query.processTemplatesName !== res.name) {
-            let name = `name: ${res.name}`;
-            editorForm.value.dslText = dsl.replace(
-              name,
-              `name: ${route.query.processTemplatesName}`,
-            );
+            const name = `name: ${res.name}`;
+            editorForm.value.dslText = dsl.replace(name, `name: ${route.query.processTemplatesName}`);
           } else {
             editorForm.value.dslText = dsl;
           }
@@ -157,9 +126,7 @@ export default defineComponent({
           console.warn(err.message);
         });
     } else if (route.query.source === 'processTemplates') {
-      editorForm.value.dslText = `name: "${
-        route.query.processTemplatesName || ''
-      }"\n\nworkflow:\n`;
+      editorForm.value.dslText = `name: "${route.query.processTemplatesName || ''}"\n\nworkflow:\n`;
     }
 
     if (editMode.value) {
@@ -169,7 +136,7 @@ export default defineComponent({
           currentBranch.value = branch;
           if (checkDsl(dslText)) {
             if (window.top !== window) {
-              pushTop(`/full/project/pipeline-editor/${props.id}`, appContext);
+              pushTop(`/full/project/pipeline-editor/${props.id}`);
               return;
             }
             const payload = {
@@ -264,8 +231,7 @@ export default defineComponent({
       },
       close,
     };
-  }
-  ,
+  },
 });
 </script>
 
@@ -280,7 +246,7 @@ export default defineComponent({
     top: 0;
     left: 0;
     z-index: 20;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     width: 100vw;
     height: 100vh;
   }
@@ -301,15 +267,16 @@ export default defineComponent({
 
       .back {
         margin-right: 15px;
-        color: #6B7B8D;
+        color: #6b7b8d;
 
         &:hover {
-          background-color: #EFF7FF;
-          color: #096DD9;
+          background-color: #eff7ff;
+          color: #096dd9;
         }
       }
 
-      .selector, .branch {
+      .selector,
+      .branch {
         position: relative;
         display: flex;
         align-items: center;
@@ -320,7 +287,7 @@ export default defineComponent({
           margin: 0 20px;
           width: 2px;
           height: 16px;
-          background-color: #CDD1E3;
+          background-color: #cdd1e3;
         }
 
         ::v-deep(.el-select) {
@@ -366,7 +333,7 @@ export default defineComponent({
 
         &:nth-child(2) {
           &:hover {
-            background-color: #3293FD;
+            background-color: #3293fd;
           }
         }
 
@@ -377,25 +344,26 @@ export default defineComponent({
         }
 
         &.save-return {
-          background: #F5F5F5;
+          background: #f5f5f5;
           border-radius: 2px;
           color: #082340;
           border: none;
           box-shadow: none;
 
           &:hover {
-            background-color: #EFF7FF;
-            color: #096DD9;
+            background-color: #eff7ff;
+            color: #096dd9;
           }
         }
       }
     }
   }
 
-  .dsl-editor, .dsl-editor2 {
+  .dsl-editor,
+  .dsl-editor2 {
     padding: 20px;
     border-radius: 2px;
-    border: 1px solid #EAEEF2;
+    border: 1px solid #eaeef2;
     background-color: #fff;
     box-sizing: border-box;
 

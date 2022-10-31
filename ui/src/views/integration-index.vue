@@ -68,12 +68,7 @@
       />
     </div>
     <!-- 选择分支的弹框 -->
-    <jm-dialog
-      :custom-class="`${entry ? 'entry' : 'center'} branch`"
-      :model-value="dialogVisible"
-      @close="close"
-      width="460px"
-    >
+    <jm-dialog custom-class="entry branch" :model-value="dialogVisible" @close="close" width="460px">
       <template #title>
         <div class="editor-title">请选择流水线保存的分支</div>
       </template>
@@ -148,9 +143,7 @@ export default defineComponent({
     ProjectPreviewDialog,
   },
   setup(props, { emit }) {
-    const { proxy, appContext } = getCurrentInstance() as any;
-    const store = useStore();
-    const entry = store.state.entry;
+    const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const loading = ref<boolean>(false);
     const dialogVisible = computed<boolean>(() => props.modelValue);
@@ -300,7 +293,6 @@ export default defineComponent({
       clearInterval(autoRefreshingInterval);
     });
     return {
-      entry,
       previewId,
       dslDialogFlag,
       initProjects,
@@ -335,7 +327,7 @@ export default defineComponent({
       },
       async submit() {
         if (window.top !== window && createProjectType.value) {
-          pushTop(`/full/project/pipeline-editor?branch=${selectBranch.value}`, appContext);
+          pushTop(`/full/project/pipeline-editor?branch=${selectBranch.value}`);
           return;
         }
         await router.push({

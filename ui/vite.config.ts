@@ -2,14 +2,14 @@ import { ConfigEnv, UserConfigExport } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 import { name, version } from './package.json';
-const target = 'http://localhost:8081';
+const target = 'http://172.20.16.155:8081/';
 const changeOrigin = true;
 // https://vitejs.dev/config/
 export default ({ command, mode }: ConfigEnv): UserConfigExport => {
   let base = '/';
   if (command === 'build') {
     switch (mode) {
-      case 'gitlink':
+      case 'saas':
       case 'cdn':
         base = `https://jianmu-ci.assets.dghub.cn/${name}/v${version}/`;
         break;
@@ -26,7 +26,7 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
         // 解决：
         // Component provided template option but runtime compilation is not supported in this build of Vue
         // Configure your bundler to alias "vue" to "vue/dist/vue.esm-bundler.js".
-        'vue': 'vue/dist/vue.esm-bundler.js',
+        vue: 'vue/dist/vue.esm-bundler.js',
       },
     },
     server: {
