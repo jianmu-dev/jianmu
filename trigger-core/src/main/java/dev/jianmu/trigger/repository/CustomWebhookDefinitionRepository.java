@@ -12,7 +12,7 @@ public interface CustomWebhookDefinitionRepository {
 
     Optional<CustomWebhookDefinition> findById(String id);
 
-    List<CustomWebhookDefinition> findALl();
+    List<CustomWebhookDefinition> findByRef(String ref);
 
     Optional<CustomWebhookDefinition> findByOwnerRefAndRef(String ownerRef, String ref);
 }
