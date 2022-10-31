@@ -1,10 +1,16 @@
-import { INodeDefVersionListVo, IWebhookDefinitionVersionVo, IWebhookDefinitionVo, IWebhookOperatorVo } from './dto/custom-webhook';
+import {
+  INodeDefVersionListVo,
+  IWebhookDefinitionVersionVo,
+  IWebhookDefinitionVo,
+  IWebhookOperatorVo,
+} from './dto/custom-webhook';
 import { restProxy } from '@/api/index';
+import { API_PREFIX } from '@/utils/constants';
 
 const baseUrl = {
-  webhookOperatorUrl: '/view/trigger/webhook/custom/operators',
-  webhookListUrl: '/view/trigger/webhook/custom',
-  webhookVersionList: '/view/trigger/webhook/custom',
+  webhookOperatorUrl: `${API_PREFIX}/view/trigger/webhook/custom/operators`,
+  webhookListUrl: `${API_PREFIX}/view/trigger/webhook/custom`,
+  webhookVersionList: `${API_PREFIX}/view/trigger/webhook/custom`,
 };
 
 /**
@@ -48,7 +54,11 @@ export function getWebhookVersionList(ownerRef: string, ref: string): Promise<IN
  * @param ref
  * @param version
  */
-export function getWebhookVersionParams(ownerRef: string, ref: string, version: string): Promise<IWebhookDefinitionVersionVo> {
+export function getWebhookVersionParams(
+  ownerRef: string,
+  ref: string,
+  version: string,
+): Promise<IWebhookDefinitionVersionVo> {
   return restProxy({
     url: `${baseUrl.webhookVersionList}/${ownerRef}/${ref}/${version}/versions`,
     method: 'get',

@@ -1,8 +1,9 @@
 import { restProxy } from '@/api';
 import { IGitRepoBranchVo, IGitRepoFlowViewingDto, IGitRepoVo } from '@/api/dto/git-repo';
 import { IProjectVo } from '@/api/dto/project';
+import { API_PREFIX } from '@/utils/constants';
 
-export const baseUrl = '/git_repos';
+export const baseUrl = `${API_PREFIX}/git_repos`;
 
 /**
  * 查询流水线列表

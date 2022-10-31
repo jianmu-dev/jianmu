@@ -17,3 +17,8 @@ export const DEFAULT_DATE_FORMAT = 'yyyy-mm-dd';
  * 默认日期时间格式
  */
 export const DEFAULT_DATETIME_FORMAT = 'yyyy-mm-dd HH:MM:ss';
+
+/**
+ * API前缀
+ */
+export const API_PREFIX = '/jianmu_saas';

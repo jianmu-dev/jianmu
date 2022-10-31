@@ -1,7 +1,8 @@
 import { restProxy } from '@/api';
 import { INamespaceSavingDto, ISecretKeyCreatingDto } from '@/api/dto/secret-key';
+import { API_PREFIX } from '@/utils/constants';
 
-export const baseUrl = '/secrets/namespaces';
+export const baseUrl = `${API_PREFIX}/secrets/namespaces`;
 
 /**
  * 保存命名空间
