@@ -56,7 +56,7 @@ import RecordList from './layout/main/record-list.vue';
 import RecordInfo from './layout/main/record-info.vue';
 import LogToolbar from './layout/main/log-toolbar.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
-import { ISessionVo } from '@/api/dto/session';
+import { ISession } from '@/model/modules/session';
 import { ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import { IProjectDetailVo } from '@/api/dto/project';
@@ -73,7 +73,7 @@ export default defineComponent({
       type: Object as PropType<IWorkflowDetailParam>,
       required: true,
     },
-    session: Object as PropType<ISessionVo>,
+    session: Object as PropType<ISession>,
     entry: {
       type: Boolean,
       default: false,

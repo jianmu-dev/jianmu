@@ -25,62 +25,56 @@
         <span class="txt">{{ currentVersion }}</span>
       </div>
     </div>
-    <div class="right">
-      <router-link v-if="!session" :to="{ name: 'login' }">
-        <div class="no-login"></div>
-      </router-link>
-      <jm-dropdown v-else trigger="click">
-        <span class="el-dropdown-link">
-          <jm-tooltip :content="session.username" placement="left" v-if="loginType">
-            <img
-              :src="session.avatarUrl"
-              class="avatar"
-              @error="loadedError"
-              v-if="session.avatarUrl !== 'https://gitee.com/assets/no_portrait.png' && loaded"
-            />
-            <span class="username" v-else>{{ session.username?.charAt(0).toUpperCase() }}</span>
-          </jm-tooltip>
-          <jm-tooltip :content="session.username" placement="left" v-else>
-            <span class="username">{{ session.username?.charAt(0).toUpperCase() }}</span>
-          </jm-tooltip>
-          <i class="el-icon-arrow-down el-icon--right"></i>
-        </span>
-        <template #dropdown>
-          <jm-dropdown-menu>
-            <jm-dropdown-item @click="logout">退出</jm-dropdown-item>
-          </jm-dropdown-menu>
-        </template>
-      </jm-dropdown>
-    </div>
+    <!--    <div class="right">-->
+    <!--      <div class="no-login" v-if="!session"></div>-->
+    <!--      <jm-dropdown v-else trigger="click">-->
+    <!--        <span class="el-dropdown-link">-->
+    <!--          <jm-tooltip :content="session.username" placement="left" v-if="loginType">-->
+    <!--            <img-->
+    <!--              :src="session.avatarUrl"-->
+    <!--              class="avatar"-->
+    <!--              @error="loadedError"-->
+    <!--              v-if="session.avatarUrl !== 'https://gitee.com/assets/no_portrait.png' && loaded"-->
+    <!--            />-->
+    <!--            <span class="username" v-else>{{ session.username?.charAt(0).toUpperCase() }}</span>-->
+    <!--          </jm-tooltip>-->
+    <!--          <jm-tooltip :content="session.username" placement="left" v-else>-->
+    <!--            <span class="username">{{ session.username?.charAt(0).toUpperCase() }}</span>-->
+    <!--          </jm-tooltip>-->
+    <!--          <i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
+    <!--        </span>-->
+    <!--        <template #dropdown>-->
+    <!--          <jm-dropdown-menu>-->
+    <!--            <jm-dropdown-item @click="logout">退出</jm-dropdown-item>-->
+    <!--          </jm-dropdown-menu>-->
+    <!--        </template>-->
+    <!--      </jm-dropdown>-->
+    <!--    </div>-->
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
-import { createNamespacedHelpers, useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { namespace } from '@/store/modules/session';
 import { IState } from '@/model/modules/session';
-import { LOGIN_INDEX } from '@/router/path-def';
-import { ISessionVo } from '@/api/dto/session';
+import { ISession } from '@/model/modules/session';
 import { version as v } from '@/../package.json';
 import { IRootState } from '@/model';
 import { IVersionVo } from '@/api/dto/common';
-
-const { mapMutations } = createNamespacedHelpers(namespace);
+import { toLogin } from '@/utils/login';
 
 export default defineComponent({
   setup() {
     const { proxy } = getCurrentInstance() as any;
-    const router = useRouter();
     const store = useStore();
     const rootState = store.state as IRootState;
     // 头像图片正常显示
     const loaded = ref<boolean>(true);
-    const loginType = computed<string>(() => rootState.thirdPartyType);
-    const defaultSession = ref<ISessionVo>();
-    let state = store.state[namespace] as IState;
-    const session = computed<ISessionVo | undefined>(() => {
+    // const loginType = computed<string>(() => rootState.thirdPartyType);
+    const defaultSession = ref<ISession>();
+    const state = store.state[namespace] as IState;
+    const session = computed<ISession | undefined>(() => {
       return defaultSession.value ? defaultSession.value : state.session;
     });
     const currentVersion = `v${v}`;
@@ -94,13 +88,10 @@ export default defineComponent({
 
     return {
       loaded,
-      loginType,
+      // loginType,
       currentVersion,
       newVersion,
       session,
-      ...mapMutations({
-        deleteSession: 'mutateDeletion',
-      }),
       view: () => {
         if (!newVersion.value) {
           return;
@@ -110,13 +101,9 @@ export default defineComponent({
       },
       logout: () => {
         try {
-          // 清理token
-          proxy.deleteSession();
-          // 退出登录时，将临时登录模式内容清空
-          localStorage.removeItem('temp-login-mode');
           proxy.$success('退出成功');
-
-          router.push(LOGIN_INDEX);
+          // TODO 去登录
+          toLogin();
         } catch (err) {
           proxy.$throw(err, proxy);
         }

@@ -1,52 +1,41 @@
-import { ActionContext, Module } from 'vuex';
-import { ILoginForm, IState } from '@/model/modules/session';
+import { Module } from 'vuex';
+import { IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
-import { authLogin, create, oauthRefreshToken, oauthSilentLogin } from '@/api/session';
-import { IOauth2LoggingDto, IOauth2RefreshingDto, ISessionVo } from '@/api/dto/session';
-import { getStorage, setStorage } from '@/utils/storage';
+import { ISession } from '@/model/modules/session';
+import { getCookie } from '@/utils/cookie';
+import { decode } from 'js-base64';
+import { IGitRepo } from '@/model/modules/git-repo';
 
+export const DEFAULT_SESSION = {
+  clientType: '',
+  expirationTime: 0,
+  sessionId: '',
+  accountId: '',
+  mobileBound: false,
+  createdDate: '',
+  lastModifiedDate: '',
+  version: '',
+} as ISession;
 /**
  * 命名空间
  */
 export const namespace = 'session';
-
-const DEFAULT_STATE_KEY = '_default';
-
-const DEFAULT_STATE: IState = {
-  username: '',
-  remember: false,
-  userSettings: {},
-  session: undefined,
-};
 
 /**
  * 获取状态
  * @param username
  */
 function getState(username?: string): IState {
-  let storage = getStorage<Record<string, IState>>(namespace);
-  if (!storage) {
-    storage = {
-      [DEFAULT_STATE_KEY]: DEFAULT_STATE,
-    };
-  }
-  return storage[username ? `${namespace}_${username}` : DEFAULT_STATE_KEY];
-}
-
-/**
- * 保存状态
- * @param state
- */
-function saveState(state: IState): void {
-  let storage = getStorage<Record<string, IState>>(namespace) as Record<string, IState>;
-  if (!storage) {
-    storage = {};
-  }
-  storage[DEFAULT_STATE_KEY] = state;
-  // 备份，用于下次使用
-  storage[`${namespace}_${state.username}`] = state;
-
-  setStorage(namespace, storage);
+  return {
+    username: '',
+    remember: false,
+    userSettings: {},
+    gitRepo: {
+      owner: '',
+      ref: '',
+    },
+    session: DEFAULT_SESSION,
+  };
 }
 
 export default {
@@ -55,75 +44,35 @@ export default {
     return getState();
   },
   mutations: {
-    mutate(state: IState, { session, loginForm: { username, remember } }: {
-      session: ISessionVo,
-      loginForm: ILoginForm,
-    }) {
-      const previousState: IState = getState(username);
-
-      state.username = username;
-      state.remember = remember;
-      if (previousState && previousState.userSettings) {
-        // 恢复用户设置
-        state.userSettings = previousState.userSettings;
+    mutateSession(state: IState) {
+      let session;
+      if (getCookie('JM-Session')) {
+        session = JSON.parse(decode(getCookie('JM-Session') as string)) as ISession;
       } else {
-        // 数据被认为篡改场景
-        // 默认用户设置
-        state.userSettings = DEFAULT_STATE.userSettings;
+        session = DEFAULT_SESSION;
       }
       state.session = session;
-      saveState(state);
     },
 
-    oauthMutate(state: IState, payload: ISessionVo) {
-      state.session = payload;
-      state.username = payload.username;
-      saveState(state);
-    },
-
-    mutateToken(state: IState, token: string) {
-      (state.session as any).token = token;
-
-      saveState(state);
-    },
-
-    mutateDeletion(state: IState) {
-      // 直接将session重置，避免出现调用方法后session值还在的情况
-      state.session = undefined;
-      saveState(state);
+    mutateGitRepo(state: IState, payload: IGitRepo) {
+      state.gitRepo = payload;
     },
   },
-  actions: {
-    async create({ commit, state }: ActionContext<IState, IRootState>, loginForm: ILoginForm): Promise<void> {
-      const session = await create({
-        username: loginForm.username,
-        password: loginForm.password,
-      });
-
-      commit('mutate', { session, loginForm });
-    },
-    // oauth登录
-    async oauthLogin({
-      commit,
-      rootState,
-    }: ActionContext<IState, IRootState>, payload: IOauth2LoggingDto): Promise<void> {
-      const session = await authLogin(rootState.associationType!, payload);
-      commit('oauthMutate', session);
-    },
-    // oauth token刷新
-    async oauthRefresh({
-      commit,
-      rootState,
-    }: ActionContext<IState, IRootState>, payload: IOauth2RefreshingDto): Promise<void> {
-      const session = await oauthRefreshToken(rootState.associationType!, payload);
-      commit('oauthMutate', session);
-    },
-    // oauth静默登录
-    async oauthSilentLogin({
-      commit,
-    }: ActionContext<IState, IRootState>, payload: string): Promise<void> {
-      const session = await oauthSilentLogin(payload);
-      commit('oauthMutate', session);
+  getters: {
+    entryUrl(state: IState): string {
+      if (!state.session.associationPlatform) {
+        return import.meta.env.VITE_JIANMUHUB_LOGIN_URL as string;
+      }
+      let url = '';
+      switch (state.session.associationPlatform) {
+        case 'GITLINK':
+          url =
+            import.meta.env.MODE === 'saas'
+              ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${state.gitRepo.owner}/${state.gitRepo.ref}/devops`
+              : `/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
+          break;
+      }
+      return url;
     },
   },
 } as Module<IState, IRootState>;

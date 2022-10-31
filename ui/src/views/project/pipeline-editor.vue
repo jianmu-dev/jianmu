@@ -1,7 +1,6 @@
 <template>
   <div class="pipeline" v-loading="loading">
-    <jm-workflow-editor v-model="workflow" @back="close" @save="save"
-                        v-if="loaded"/>
+    <jm-workflow-editor v-model="workflow" @back="close" @save="save" v-if="loaded" />
   </div>
 </template>
 
@@ -12,14 +11,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import yaml from 'yaml';
-import { namespace } from '@/store/modules/session';
-import { createNamespacedHelpers, useStore } from 'vuex';
-import LoginVerify from '@/views/login/dialog.vue';
+import { namespace as sessionNs } from '@/store/modules/session';
+import { useStore } from 'vuex';
 import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
 
-const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 export default defineComponent({
   props: {
     id: {
@@ -30,12 +27,11 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { proxy, appContext } = getCurrentInstance() as any;
+    const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
-    const entry = computed<boolean>(() => store.state.entry);
-    const sessionState = store.state[namespace];
+    const entry = computed<boolean>(() => true);
     const { payload } = route.params;
     const loading = ref<boolean>(false);
     // workflow数据是否加载完成
@@ -45,13 +41,6 @@ export default defineComponent({
     const workflow = ref<IWorkflow>();
     // 项目分支信息
     const branches = ref<IGitRepoBranchVo[]>([]);
-    // 验证用户是否登录
-    const authLogin = () => {
-      if (sessionState.session) {
-        return;
-      }
-      proxy.openAuthDialog({ appContext, LoginVerify });
-    };
     onMounted(async () => {
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
@@ -76,24 +65,23 @@ export default defineComponent({
         return;
       }
       if (editMode) {
-        authLogin();
         try {
           loading.value = true;
           loaded.value = false;
-          const { dslText, projectGroupId, branch } = await fetchProjectDetail(props.id as string);
-          const dsl = yaml.parse(dslText);
-          const rawData = dsl['raw-data'];
-          const { name, global, description } = dsl;
+          const { dslText: t, projectGroupId: id, branch: b } = await fetchProjectDetail(props.id as string);
+          const dslData = yaml.parse(t);
+          const rawDslData = dslData['raw-data'];
+          const { name: n, global: g, description: d } = dslData;
           workflow.value = {
-            name,
-            groupId: projectGroupId,
-            description,
+            name: n,
+            groupId: id,
+            description: d,
             association: {
               entry: entry.value,
-              branch,
+              branch: b,
             },
-            global: new Global(global?.concurrent, global?.param),
-            data: rawData,
+            global: new Global(g?.concurrent, g?.param),
+            data: rawDslData,
           };
         } catch (err) {
           proxy.$throw(err, proxy);
@@ -102,16 +90,15 @@ export default defineComponent({
           loaded.value = true;
         }
       } else {
-        authLogin();
-        let branch = props.branch;
+        let branchData = props.branch;
         // 获取分支信息（如果entry为true时，有必要获取分支信息）
         if (entry.value) {
           branches.value = await getBranches();
           const flag = branches.value.some(item => {
-            return item.branchName === branch;
+            return item.branchName === branchData;
           });
           if (!flag) {
-            branch = branches.value.find(item => item.isDefault)!.branchName;
+            branchData = branches.value.find(item => item.isDefault)!.branchName;
           }
         }
         workflow.value = {
@@ -120,7 +107,7 @@ export default defineComponent({
           description: '',
           association: {
             entry: entry.value,
-            branch,
+            branch: branchData,
           },
           global: new Global(),
           data: '',
@@ -133,8 +120,7 @@ export default defineComponent({
         await router.push({ name: 'index' });
         return;
       }
-      window.location.href = sessionState.session?.entryUrl;
-
+      window.location.href = store.getters[`${sessionNs}/entryUrl`];
     };
     return {
       loaded,
@@ -166,12 +152,6 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         }
       },
-      ...mapMutations({
-        mutateSession: 'oauthMutate',
-      }),
-      ...mapActions({
-        openAuthDialog: 'openAuthDialog',
-      }),
     };
   },
 });

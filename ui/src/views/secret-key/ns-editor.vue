@@ -1,21 +1,18 @@
 <template>
-  <jm-dialog
-    :custom-class="entry?'entry':'center'"
-    v-model="dialogVisible"
-    width="700px">
+  <jm-dialog :custom-class="entry ? 'entry' : 'center'" v-model="dialogVisible" width="700px">
     <template v-slot:title>
       <div class="editor-title">新增密钥命名空间</div>
     </template>
     <jm-form :model="editorForm" :rules="editorRule" ref="editorFormRef" @submit.prevent>
       <jm-form-item label="命名空间" label-position="top" prop="name">
-        <jm-input v-model="editorForm.name" placeholder="支持下划线、数字、英文字母" show-word-limit :maxlength="100"/>
+        <jm-input v-model="editorForm.name" placeholder="支持下划线、数字、英文字母" show-word-limit :maxlength="100" />
       </jm-form-item>
     </jm-form>
     <template #footer>
-        <span class="dialog-footer">
-          <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
-          <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
-        </span>
+      <span class="dialog-footer">
+        <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
+        <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
+      </span>
     </template>
   </jm-dialog>
 </template>
@@ -37,15 +34,14 @@ export default defineComponent({
   emits: ['completed'],
   setup(_, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
-    const store = useStore();
-    const entry = store.state.entry;
+    const entry = true;
     const dialogVisible = ref<boolean>(true);
 
     const editorFormRef = ref<any>(null);
     const editorForm = ref<ISaveNamespaceForm>({
       name: '',
     });
-    const editorRule = ref<object>({
+    const editorRule = ref<Record<string, unknown>>({
       name: [
         { required: true, message: '请输入命名空间', trigger: 'blur' },
         { pattern: /^[a-zA-Z0-9_]([a-zA-Z0-9_]+)?$/, message: '支持下划线、数字、英文字母', trigger: 'blur' },

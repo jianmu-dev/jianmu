@@ -1,16 +1,29 @@
-import { Mutable } from '@/utils/lib';
-import { ISessionCreatingDto, ISessionVo } from '@/api/dto/session';
+import { IGitRepoVo } from '@/api/dto/git-repo';
 
 /**
  * 用户设置
  */
-export interface IUserSettings {
-}
+export interface IUserSettings {}
 
-export interface IAssociationData {
-  ref: string;
-  owner: string;
-}
+/**
+ * 会话值对象
+ */
+export interface ISession
+  extends Readonly<{
+    clientType: string;
+    // 过期时间
+    expirationTime: number;
+    sessionId: string;
+    accountId: string;
+    mobileBound: boolean;
+    createdDate: string;
+    lastModifiedDate: string;
+    version: string;
+    associationPlatform?: string;
+    associationPlatformUserId?: string;
+    associationId?: string;
+    associationType?: string;
+  }> {}
 
 /**
  * vuex状态
@@ -19,19 +32,6 @@ export interface IState {
   username: string;
   remember: boolean;
   userSettings: IUserSettings;
-  session?: ISessionVo;
-}
-
-/**
- * 存储
- */
-export interface IStorage {
-  [key: string]: IState;
-}
-
-/**
- * 登录表单
- */
-export interface ILoginForm extends Mutable<ISessionCreatingDto> {
-  remember: boolean;
+  session: ISession;
+  gitRepo: IGitRepoVo;
 }

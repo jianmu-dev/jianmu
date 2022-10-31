@@ -1,29 +1,21 @@
 <template>
-  <jm-dialog
-    :custom-class="entry?'entry':'center'"
-    v-model="dialogVisible"
-    width="700px">
+  <jm-dialog :custom-class="entry ? 'entry' : 'center'" v-model="dialogVisible" width="700px">
     <template v-slot:title>
       <div class="editor-title">新增密钥</div>
     </template>
     <jm-form :model="editorForm" :rules="editorRule" ref="editorFormRef" @submit.prevent>
       <jm-form-item label="唯一标识" label-position="top" prop="key">
-        <jm-input v-model="editorForm.key" placeholder="支持下划线、数字、英文字母" show-word-limit :maxlength="45"/>
+        <jm-input v-model="editorForm.key" placeholder="支持下划线、数字、英文字母" show-word-limit :maxlength="45" />
       </jm-form-item>
       <jm-form-item label="值" label-position="top" prop="value">
-        <jm-input
-          type="textarea"
-          v-model="editorForm.value"
-          clearable
-          placeholder="请输入值"
-        />
+        <jm-input type="textarea" v-model="editorForm.value" clearable placeholder="请输入值" />
       </jm-form-item>
     </jm-form>
     <template #footer>
-        <span class="dialog-footer">
-          <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
-          <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
-        </span>
+      <span class="dialog-footer">
+        <jm-button size="small" @click="dialogVisible = false">取消</jm-button>
+        <jm-button size="small" type="primary" @click="create" :loading="loading">确定</jm-button>
+      </span>
     </template>
   </jm-dialog>
 </template>
@@ -44,8 +36,7 @@ export default defineComponent({
   emits: ['completed'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
-    const store = useStore();
-    const entry = store.state.entry;
+    const entry = true;
     const dialogVisible = ref<boolean>(true);
 
     const editorFormRef = ref<any>(null);
@@ -54,14 +45,12 @@ export default defineComponent({
       key: '',
       value: '',
     });
-    const editorRule = ref<object>({
+    const editorRule = ref<Record<string, unknown>>({
       key: [
         { required: true, message: '请输入唯一标识', trigger: 'blur' },
         { pattern: /^[a-zA-Z0-9_]([a-zA-Z0-9_]+)?$/, message: '支持下划线、数字、英文字母', trigger: 'blur' },
       ],
-      value: [
-        { required: true, message: '请输入值', trigger: 'blur' },
-      ],
+      value: [{ required: true, message: '请输入值', trigger: 'blur' }],
     });
     const loading = ref<boolean>(false);
 

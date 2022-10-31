@@ -312,7 +312,6 @@ import { active, del, executeImmediately, synchronize } from '@/api/project';
 import { datetimeFormatter } from '@/utils/formatter';
 import WebhookDrawer from './webhook-drawer.vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { pushTop } from '@/utils/push-top';
 import { terminate } from '@/api/workflow-execution-record';
 import dayjs from 'dayjs';
@@ -351,11 +350,9 @@ export default defineComponent({
     'next-project',
   ],
   setup(props: any, { emit }: SetupContext) {
-    const { proxy, appContext } = getCurrentInstance() as any;
+    const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
-    const store = useStore();
-    const dynamicProjectDesc = store.getters.projectDesc;
-    const entry = store.state.entry;
+    const entry = true;
     const isMove = computed<boolean>(() => props.move);
     const isMoveMode = computed<boolean>(() => props.moveMode);
     const executing = ref<boolean>(false);
@@ -366,7 +363,7 @@ export default defineComponent({
     const webhookDrawerFlag = ref<boolean>(false);
     const clickProject = (projectId: string) => {
       if (window.top !== window) {
-        pushTop(`/full/workflow-execution-record/detail?projectId=${projectId}`, appContext);
+        pushTop(`/full/workflow-execution-record/detail?projectId=${projectId}`);
         return;
       }
       router.push({
@@ -569,11 +566,11 @@ export default defineComponent({
 
         const { name } = props.project;
 
-        let msg = `<div>确定要删除${dynamicProjectDesc}吗?</div>`;
+        let msg = '<div>确定要删除流水线吗?</div>';
         msg += `<div style="margin-top: 5px; font-size: 12px; line-height: normal;">名称：${name}</div>`;
 
         proxy
-          .$confirm(msg, `删除${dynamicProjectDesc}`, {
+          .$confirm(msg, '删除流水线', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',

@@ -1,13 +1,13 @@
 <template>
   <div class="project-preview-dialog">
     <jm-dialog
-      :custom-class="entry?'entry':'center'"
+      :custom-class="entry ? 'entry' : 'center'"
       :title="title"
       v-model="dialogVisible"
       :width="dialogWidth"
       @close="close"
     >
-      <div class="content" :class="[isFullscreen? 'isFullscreen':'']">
+      <div class="content" :class="[isFullscreen ? 'isFullscreen' : '']">
         <jm-workflow-viewer
           v-if="!loading && workflowRef && workflowVersion"
           readonly
@@ -15,14 +15,16 @@
           :workflow-ref="workflowRef"
           :workflow-version="workflowVersion"
           :trigger-type="triggerType"
-          @is-fullscreen="isfull=>isFullscreen=isfull"
-          @change-view-mode="mode=>viewMode=mode"
+          @is-fullscreen="isfull => (isFullscreen = isfull)"
+          @change-view-mode="mode => (viewMode = mode)"
         />
-        <div class="overflow-bottom" :class="{'white-bottom': viewMode === ViewModeEnum.YAML}">
-          <div @click="prevProject" class="button-left" :class="{disabled: prevDis}"><i class="jm-icon-button-left"/>上一个
+        <div class="overflow-bottom" :class="{ 'white-bottom': viewMode === ViewModeEnum.YAML }">
+          <div @click="prevProject" class="button-left" :class="{ disabled: prevDis }">
+            <i class="jm-icon-button-left" />上一个
           </div>
-          <div @click="nextProject" class="button-right" :class="{disabled: nextDis}">下一个<i
-            class="jm-icon-button-right"/></div>
+          <div @click="nextProject" class="button-right" :class="{ disabled: nextDis }">
+            下一个<i class="jm-icon-button-right" />
+          </div>
         </div>
       </div>
     </jm-dialog>
@@ -52,9 +54,9 @@ export default defineComponent({
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
     const store = useStore();
-    const entry = store.state.entry;
+    const entry = true;
     const dialogVisible = ref<boolean>(true);
-    const dialogWidth = computed<string>(() => entry ? '1000px' : '1200px');
+    const dialogWidth = computed<string>(() => (entry ? '1000px' : '1200px'));
     const title = ref<string>('');
     const isFullscreen = ref<boolean>(false);
     const loading = ref<boolean>(false);
@@ -65,7 +67,7 @@ export default defineComponent({
     const triggerType = ref<TriggerTypeEnum>();
     const viewMode = ref<string>(ViewModeEnum.GRAPHIC);
     const close = () => emit('close');
-    let previewId = ref(props.projectId);
+    const previewId = ref(props.projectId);
     // 上一个按钮禁止
     const prevDis = computed<boolean>(() => {
       return props.projects.findIndex((e: any) => e.id === previewId.value) === 0;
@@ -84,15 +86,14 @@ export default defineComponent({
 
         const {
           workflowName,
-          workflowRef:ref,
-          workflowVersion:version,
+          workflowRef: ref,
+          workflowVersion: version,
           triggerType: _triggerType,
         } = await fetchProjectDetail(previewId.value);
         title.value = workflowName;
         triggerType.value = _triggerType;
         workflowRef.value = ref;
         workflowVersion.value = version;
-
       } catch (err) {
         close();
 
@@ -199,7 +200,7 @@ export default defineComponent({
         width: 110px;
         font-size: 16px;
         text-align: center;
-        border: 0.5px solid #CAD6EE;
+        border: 0.5px solid #cad6ee;
         border-radius: 2px;
         color: #3f536e;
         font-weight: 400;
@@ -213,8 +214,8 @@ export default defineComponent({
           vertical-align: 1px;
         }
         &:hover {
-          color: #096DD9;
-          background-color: #EFF7FF;
+          color: #096dd9;
+          background-color: #eff7ff;
         }
       }
 
@@ -224,7 +225,7 @@ export default defineComponent({
         width: 110px;
         font-size: 16px;
         text-align: center;
-        border: 0.5px solid #CAD6EE;
+        border: 0.5px solid #cad6ee;
         border-radius: 2px;
         color: #3f536e;
         font-weight: 400;
@@ -239,8 +240,8 @@ export default defineComponent({
         }
 
         &:hover {
-          color: #096DD9;
-          background-color: #EFF7FF;
+          color: #096dd9;
+          background-color: #eff7ff;
         }
       }
 
@@ -256,7 +257,7 @@ export default defineComponent({
     }
 
     .white-bottom {
-      background-color: #FFFFFF;
+      background-color: #ffffff;
     }
   }
   .isFullscreen {
