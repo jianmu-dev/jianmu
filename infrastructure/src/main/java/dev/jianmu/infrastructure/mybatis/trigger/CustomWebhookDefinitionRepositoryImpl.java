@@ -32,8 +32,8 @@ public class CustomWebhookDefinitionRepositoryImpl implements CustomWebhookDefin
     }
 
     @Override
-    public List<CustomWebhookDefinition> findALl() {
-        return this.definitionMapper.findAll();
+    public List<CustomWebhookDefinition> findByRef(String ref) {
+        return this.definitionMapper.findByRef(ref);
     }
 
     @Override

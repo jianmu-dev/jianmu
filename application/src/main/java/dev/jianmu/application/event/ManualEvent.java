@@ -6,9 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
+ * @author Ethan Liu
  * @class ManualEvent
  * @description ManualEvent
- * @author Ethan Liu
  * @create 2021-11-18 15:37
  */
 @Getter
@@ -20,5 +20,4 @@ public class ManualEvent {
     private String associationId;
     private String associationType;
     private String userId;
-    private String encryptedToken;
 }

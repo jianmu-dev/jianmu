@@ -1,6 +1,6 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.api.jwt.UserContextHolder;
+import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.service.ProjectApplication;
@@ -46,9 +46,8 @@ public class WorkflowInstanceController {
     public void terminate(
             @Parameter(description = "流程实例ID") @PathVariable String instanceId
     ) {
-        var repoId = this.userContextHolder.getSession().getAssociationId();
-        var associationType = this.associationUtil.getAssociationType();
-        this.checkProjectPermission(repoId, associationType, instanceId);
+        var session = this.userContextHolder.getSession();
+        this.checkProjectPermission(session.getAssociationId(), session.getAssociationType(), instanceId);
         this.instanceApplication.terminate(instanceId);
     }
 
@@ -69,16 +68,16 @@ public class WorkflowInstanceController {
     @PutMapping("/retry/{instanceId}/{taskRef}")
     @Operation(summary = "流程实例任务重试接口", description = "流程实例任务重试接口")
     public void retry(@PathVariable String instanceId, @PathVariable String taskRef) {
-        var repoId = this.userContextHolder.getSession().getAssociationId();
-        var associationType = this.associationUtil.getAssociationType();
-        this.taskInstanceInternalApplication.retry(instanceId, taskRef, repoId, associationType);
+        var session = this.userContextHolder.getSession();
+
+        this.taskInstanceInternalApplication.retry(instanceId, taskRef, session.getAssociationId(), session.getAssociationType());
     }
 
     @PutMapping("/ignore/{instanceId}/{taskRef}")
     @Operation(summary = "流程实例任务忽略接口", description = "流程实例任务忽略接口")
     public void ignore(@PathVariable String instanceId, @PathVariable String taskRef) {
-        var repoId = this.userContextHolder.getSession().getAssociationId();
-        var associationType = this.associationUtil.getAssociationType();
-        this.taskInstanceInternalApplication.ignore(instanceId, taskRef, repoId, associationType);
+        var session = this.userContextHolder.getSession();
+
+        this.taskInstanceInternalApplication.ignore(instanceId, taskRef, session.getAssociationId(), session.getAssociationType());
     }
 }

@@ -2,11 +2,11 @@ package dev.jianmu.api.controller;
 
 import dev.jianmu.api.dto.KVPairDto;
 import dev.jianmu.api.dto.NamespaceDto;
-import dev.jianmu.api.jwt.UserContextHolder;
 import dev.jianmu.api.mapper.KVPairDtoMapper;
 import dev.jianmu.api.mapper.NamespaceDtoMapper;
-import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.application.service.SecretApplication;
+import dev.jianmu.application.util.AssociationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,34 +39,34 @@ public class SecretController {
     @Operation(summary = "创建命名空间", description = "创建命名空间")
     public void createNamespace(@RequestBody @Valid NamespaceDto namespaceDto) {
         var namespace = NamespaceDtoMapper.INSTANCE.toNamespace(namespaceDto);
-        namespace.setAssociationId(this.userContextHolder.getSession().getAssociationId());
-        namespace.setAssociationType(this.associationUtil.getAssociationType());
+        var session = this.userContextHolder.getSession();
+        namespace.setAssociationId(session.getAssociationId());
+        namespace.setAssociationType(session.getAssociationType());
         this.secretApplication.createNamespace(namespace);
     }
 
     @DeleteMapping("/namespaces/{name}")
     @Operation(summary = "删除命名空间", description = "删除命名空间")
     public void deleteNamespace(@PathVariable String name) {
-        var repoId = this.userContextHolder.getSession().getAssociationId();
-        var type = this.associationUtil.getAssociationType();
-        this.secretApplication.deleteNamespace(repoId, type, name);
+        var session = this.userContextHolder.getSession();
+        this.secretApplication.deleteNamespace(session.getAssociationId(), session.getAssociationType(), name);
     }
 
     @PostMapping("/namespaces/{name}")
     @Operation(summary = "新增键值对", description = "新增键值对")
     public void createKVPair(@PathVariable String name, @RequestBody @Valid KVPairDto kvPairDto) {
+        var session = this.userContextHolder.getSession();
         var kv = KVPairDtoMapper.INSTANCE.toKVPair(kvPairDto);
         kv.setNamespaceName(name);
-        kv.setAssociationId(this.userContextHolder.getSession().getAssociationId());
-        kv.setAssociationType(this.associationUtil.getAssociationType());
+        kv.setAssociationId(session.getAssociationId());
+        kv.setAssociationType(session.getAssociationType());
         this.secretApplication.createKVPair(kv);
     }
 
     @DeleteMapping("/namespaces/{name}/{key}")
     @Operation(summary = "删除键值对", description = "删除键值对")
     public void deleteKVPair(@PathVariable String name, @PathVariable String key) {
-        var repoId = this.userContextHolder.getSession().getAssociationId();
-        var type = this.associationUtil.getAssociationType();
-        this.secretApplication.deleteKVPair(repoId, type, name, key);
+        var session = this.userContextHolder.getSession();
+        this.secretApplication.deleteKVPair(session.getAssociationId(), session.getAssociationType(), name, key);
     }
 }

@@ -9,9 +9,10 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.query.CustomWebhookDefApi;
 import dev.jianmu.application.query.NodeDefApi;
-import dev.jianmu.application.util.DslUtil;
 import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.application.util.DslUtil;
 import dev.jianmu.git.repo.aggregate.Flow;
+import dev.jianmu.git.repo.repository.AccessTokenRepository;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
@@ -19,7 +20,6 @@ import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.UnknownException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
-import dev.jianmu.oauth2.api.util.AESEncryptionUtil;
 import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLastExecution;
@@ -35,7 +35,6 @@ import dev.jianmu.project.repository.ProjectLinkGroupRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.Webhook;
-import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.service.WebhookOnlyService;
@@ -52,12 +51,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PROJECT_GROUP_NAME;
 
@@ -90,6 +87,7 @@ public class ProjectApplication {
     private final OAuth2Properties oAuth2Properties;
     private final CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository;
     private final WebhookOnlyService webhookOnlyService;
+    private final AccessTokenRepository accessTokenRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -108,7 +106,8 @@ public class ProjectApplication {
             GitRepoRepository gitRepoRepository,
             OAuth2Properties oAuth2Properties,
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
-            WebhookOnlyService webhookOnlyService
+            WebhookOnlyService webhookOnlyService,
+            AccessTokenRepository accessTokenRepository
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -127,6 +126,7 @@ public class ProjectApplication {
         this.oAuth2Properties = oAuth2Properties;
         this.webhookDefinitionVersionRepository = webhookDefinitionVersionRepository;
         this.webhookOnlyService = webhookOnlyService;
+        this.accessTokenRepository = accessTokenRepository;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -207,7 +207,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId, String username, String associationId, String associationType, String branch, String encryptedToken, String userId, boolean isSyncProject) {
+    public Project createProject(String dslText, String projectGroupId, String userId, String associationId, String associationType, String branch, boolean isSyncProject) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -222,7 +222,7 @@ public class ProjectApplication {
                 .dslText(dslText)
                 .steps(parser.getSteps())
                 .concurrent(parser.isConcurrent())
-                .lastModifiedBy(username)
+                .lastModifiedBy("")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
                 .triggerType(parser.getTriggerType())
@@ -246,7 +246,7 @@ public class ProjectApplication {
                 .sort(++sort)
                 .build();
 
-        this.pubTriggerEvent(parser, project, userId, encryptedToken);
+        this.pubTriggerEvent(parser, project, userId);
         this.projectRepository.add(project);
         this.projectLastExecutionRepository.add(new ProjectLastExecution(project.getWorkflowRef()));
         this.projectLinkGroupRepository.add(projectLinkGroup);
@@ -254,12 +254,12 @@ public class ProjectApplication {
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId(), branch, associationId));
         if (isSyncProject) {
-            this.createOrUpdateGitFile(branch, encryptedToken, project, project.getWorkflowName(), userId);
+            this.createOrUpdateGitFile(userId, branch, project, project.getWorkflowName());
         }
         return project;
     }
 
-    private void createOrUpdateGitFile(String branch, String encryptedToken, Project project, String oldName, String userId) {
+    private void createOrUpdateGitFile(String userId, String branch, Project project, String oldName) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
             return;
         }
@@ -276,7 +276,7 @@ public class ProjectApplication {
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
                     .userId(userId)
                     .build();
-            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            var accessToken = this.accessTokenRepository.get();
             try {
                 if (!project.getWorkflowName().equals(oldName)) {
                     var oldFilepath = dslLocation + oldName + ".yml";
@@ -294,10 +294,10 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public boolean updateProject(String dslId, String dslText, String projectGroupId, String username, String associationId, String associationType, String encryptedToken, String userId, boolean isSyncProject) {
+    public boolean updateProject(String dslId, String dslText, String projectGroupId, String userId, String associationId, String associationType, boolean isSyncProject) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-        if (username != null) {
+        if (associationId != null) {
             this.checkProjectPermission(associationId, associationType, project);
         }
         var concurrent = project.isConcurrent();
@@ -322,15 +322,13 @@ public class ProjectApplication {
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
-        if (username != null) {
-            project.setLastModifiedBy(username);
-        }
+        project.setLastModifiedBy("");
 
-        this.pubTriggerEvent(parser, project, userId, encryptedToken);
+        this.pubTriggerEvent(parser, project, userId);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         if (isSyncProject) {
-            this.createOrUpdateGitFile(null, encryptedToken, project, oldName, userId);
+            this.createOrUpdateGitFile(userId, null, project, oldName);
         }
         // 返回是否并发执行流程实例
         return !concurrent && project.isConcurrent();
@@ -344,7 +342,7 @@ public class ProjectApplication {
         }
     }
 
-    private void deleteGitFile(String encryptedToken, Project project, String userId) {
+    private void deleteGitFile(Project project, String userId) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
             return;
         }
@@ -359,7 +357,7 @@ public class ProjectApplication {
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
                     .userId(userId)
                     .build();
-            var accessToken = AESEncryptionUtil.decrypt(encryptedToken, this.oAuth2Properties.getClientSecret());
+            var accessToken = this.accessTokenRepository.get();
             try {
                 oAuth2Api.getFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), filepath, branch);
                 oAuth2Api.deleteFile(accessToken, gitRepo.getOwner(), gitRepo.getRef(), "", filepath, null, null, committerEmail, committer, branch, "refactor: delete " + filepath);
@@ -386,7 +384,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void deleteById(String id, String associationId, String associationType, String encryptedToken, String userId) {
+    public void deleteById(String id, String userId, String associationId, String associationType) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         this.checkProjectPermission(associationId, associationType, project);
@@ -400,14 +398,14 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目分组"));
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
-        this.deleteGitFile(encryptedToken, project, userId);
+        this.deleteGitFile(project, userId);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.projectLastExecutionRepository.deleteByRef(project.getWorkflowRef());
         this.workflowRepository.deleteByRef(project.getWorkflowRef());
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.publisher.publishEvent(new DeletedEvent(project.getId(), project.getAssociationId(), project.getAssociationType()));
+        this.publisher.publishEvent(new DeletedEvent(project.getId(), userId, project.getAssociationId(), project.getAssociationType()));
     }
 
     @Transactional
@@ -430,7 +428,7 @@ public class ProjectApplication {
 
     }
 
-    private void pubTriggerEvent(DslParser parser, Project project, String userId, String encryptedToken) {
+    private void pubTriggerEvent(DslParser parser, Project project, String userId) {
         // 创建Cron触发器
         if (project.getTriggerType() == Project.TriggerType.CRON) {
             if (!CronExpression.isValidExpression(parser.getCron())) {
@@ -447,13 +445,12 @@ public class ProjectApplication {
             if (parser.getCustomWebhooks().isEmpty()) {
                 var webhookEvent = WebhookEvent.builder()
                         .projectId(project.getId())
+                        .userId(userId)
                         .webhook(Webhook.Builder.aWebhook()
                                 .only(parser.getWebhook().getOnly())
                                 .auth(parser.getWebhook().getAuth())
                                 .param(parser.getWebhook().getParam())
                                 .build())
-                        .userId(userId)
-                        .encryptedToken(encryptedToken)
                         .build();
                 this.publisher.publishEvent(webhookEvent);
             }
@@ -463,11 +460,10 @@ public class ProjectApplication {
                 var events = this.webhookOnlyService.findEvents(webhookDefinitionVersion.getEvents(), dslWebhook.getEvent());
                 var webhookEvent = WebhookEvent.builder()
                         .projectId(project.getId())
+                        .userId(userId)
                         .webhook(Webhook.Builder.aWebhook()
                                 .events(events)
                                 .build())
-                        .userId(userId)
-                        .encryptedToken(encryptedToken)
                         .webhookType(dslWebhook.getWebhookType())
                         .eventInstances(dslWebhook.getEvent())
                         .build();
@@ -478,10 +474,9 @@ public class ProjectApplication {
         if (project.getTriggerType() == Project.TriggerType.MANUAL) {
             var manualEvent = ManualEvent.builder()
                     .projectId(project.getId())
+                    .userId(userId)
                     .associationId(project.getAssociationId())
                     .associationType(project.getAssociationType())
-                    .userId(userId)
-                    .encryptedToken(encryptedToken)
                     .build();
             this.publisher.publishEvent(manualEvent);
         }

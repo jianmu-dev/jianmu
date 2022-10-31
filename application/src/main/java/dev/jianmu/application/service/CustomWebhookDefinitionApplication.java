@@ -37,8 +37,8 @@ public class CustomWebhookDefinitionApplication {
         return this.definitionRepository.findById(id);
     }
 
-    public List<CustomWebhookDefinition> findAll() {
-        return this.definitionRepository.findALl();
+    public List<CustomWebhookDefinition> findByRef(String ref) {
+        return this.definitionRepository.findByRef(ref);
     }
 
     public List<CustomWebhookDefinitionVersion> findVersionByOwnerRefAndRef(String ownerRef, String ref) {
