@@ -1,12 +1,18 @@
 import { restProxy } from '@/api';
 import { INodeCreatingDto } from '@/api/dto/node-library';
-import { INodeDefinitionVersionExampleVo, INodeDefVersionListVo, INodeDefVersionVo, INodeOutputDefinitionVo } from '@/api/dto/node-definitions';
+import {
+  INodeDefinitionVersionExampleVo,
+  INodeDefVersionListVo,
+  INodeDefVersionVo,
+  INodeOutputDefinitionVo,
+} from '@/api/dto/node-definitions';
+import { API_PREFIX } from '@/utils/constants';
 
-export const baseUrl = '/library';
-const localVersionUrl = '/view/nodes';
-const nodeOutputDefsUrl = '/view/workflow/node_output_defs';
+export const baseUrl = `${API_PREFIX}/library`;
+const localVersionUrl = `${API_PREFIX}/view/nodes`;
+const nodeOutputDefsUrl = `${API_PREFIX}/view/workflow/node_output_defs`;
 
-const hubUrl = import.meta.env.VITE_JIANMU_HUB_API_BASE_URL;
+const hubUrl = import.meta.env.VITE_JIANMUHUB_API_BASE_URL;
 const officialVersionUrl = 'hub/view/node_definitions';
 
 /**
@@ -92,7 +98,11 @@ export function getOfficialVersionList(ref: string, ownerRef: string): Promise<I
  * @param ownerRef
  * @param version
  */
-export function getOfficialNodeParams(ref: string, ownerRef: string, version: string): Promise<INodeDefinitionVersionExampleVo> {
+export function getOfficialNodeParams(
+  ref: string,
+  ownerRef: string,
+  version: string,
+): Promise<INodeDefinitionVersionExampleVo> {
   return restProxy<INodeDefinitionVersionExampleVo>({
     url: `${hubUrl}/${officialVersionUrl}/${ownerRef}/${ref}/versions/${version}`,
     method: 'get',

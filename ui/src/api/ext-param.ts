@@ -1,9 +1,15 @@
-import { IExternalParameterCreatingDto, IExternalParameterLabelVo, IExternalParameterUpdatingDto, IExternalParameterVo } from './dto/ext-param';
+import {
+  IExternalParameterCreatingDto,
+  IExternalParameterLabelVo,
+  IExternalParameterUpdatingDto,
+  IExternalParameterVo,
+} from './dto/ext-param';
 import { restProxy } from '@/api/index';
+import { API_PREFIX } from '@/utils/constants';
 
-const getExtParamUrl = '/view/external_parameters';
-const getExtParamLabelUrl = '/view/external_parameters/labels';
-const extParamUrl = '/external_parameters';
+const getExtParamUrl = `${API_PREFIX}/view/external_parameters`;
+const getExtParamLabelUrl = `${API_PREFIX}/view/external_parameters/labels`;
+const extParamUrl = `${API_PREFIX}/external_parameters`;
 
 /**
  * 获取外部参数列表

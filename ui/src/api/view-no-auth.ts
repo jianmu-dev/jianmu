@@ -1,35 +1,48 @@
 import { restProxy } from '@/api/index';
-import { IAsyncTaskInstanceVo, ITaskExecutionRecordVo, ITaskParamVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
-import { IGlobalParamseterVo, IProcessTemplateVo, IProjectDetailVo, IProjectQueryingDto, IProjectVo, IWorkflowVo } from '@/api/dto/project';
+import {
+  IAsyncTaskInstanceVo,
+  ITaskExecutionRecordVo,
+  ITaskParamVo,
+  IWorkflowExecutionRecordVo,
+} from '@/api/dto/workflow-execution-record';
+import {
+  IGlobalParamseterVo,
+  IProcessTemplateVo,
+  IProjectDetailVo,
+  IProjectQueryingDto,
+  IProjectVo,
+  IWorkflowVo,
+} from '@/api/dto/project';
 import { INamespaceDetailVo, INamespacesVo } from '@/api/dto/secret-key';
 import { IHubNodePageVo, IPageDto, IPageVo, IVersionVo } from '@/api/dto/common';
 import { INodeVo } from '@/api/dto/node-library';
 import { ITriggerEventVo, ITriggerWebhookVo } from '@/api/dto/trigger';
 import { IProjectGroupVo } from '@/api/dto/project-group';
 import { INodeDefinitionSearchingDto, INodeDefinitionVo } from '@/api/dto/node-definitions';
+import { API_PREFIX } from '@/utils/constants';
 
 export const baseUrl = {
-  projectGroup: '/view/projects/groups',
-  project: '/view/projects',
+  projectGroup: `${API_PREFIX}/view/projects/groups`,
+  project: `${API_PREFIX}/view/projects`,
   // TODO 待改善，与/view/projects合并
-  projectV2: '/view/v2/projects',
-  workflow: '/view/workflow_instances',
-  asyncTasks: '/view/async_task_instances',
-  // tasks: '/view/task_instances',
-  workflow_instance: '/view/workflow_instance',
-  tasksV2: '/view/v2/task_instances',
-  task: '/view/task_instance',
-  log: '/view/logs',
-  dsl: '/view/workflow',
-  processLog: '/view/logs/workflow',
-  secretKey: '/view/namespaces',
-  library: '/view/nodes',
-  parameter: '/view/parameters',
-  triggerEvent: '/view/trigger_events',
-  trigger: '/view/trigger',
+  projectV2: `${API_PREFIX}/view/v2/projects`,
+  workflow: `${API_PREFIX}/view/workflow_instances`,
+  asyncTasks: `${API_PREFIX}/view/async_task_instances`,
+  // tasks: `${API_PREFIX}/view/task_instances`,
+  workflow_instance: `${API_PREFIX}/view/workflow_instance`,
+  tasksV2: `${API_PREFIX}/view/v2/task_instances`,
+  task: `${API_PREFIX}/view/task_instance`,
+  log: `${API_PREFIX}/view/logs`,
+  dsl: `${API_PREFIX}/view/workflow`,
+  processLog: `${API_PREFIX}/view/logs/workflow`,
+  secretKey: `${API_PREFIX}/view/namespaces`,
+  library: `${API_PREFIX}/view/nodes`,
+  parameter: `${API_PREFIX}/view/parameters`,
+  triggerEvent: `${API_PREFIX}/view/trigger_events`,
+  trigger: `${API_PREFIX}/view/trigger`,
   version: 'https://jianmu.dev/versions/ci',
 };
-const hubUrl = import.meta.env.VITE_JIANMU_HUB_API_BASE_URL;
+const hubUrl = import.meta.env.VITE_JIANMUHUB_API_BASE_URL;
 const baseHubUrl = {
   processTemplate: '/hub/view/workflow_templates',
   node_definitions: '/hub/view/node_definitions',
@@ -61,9 +74,7 @@ export function queryProjectGroup(): Promise<IProjectGroupVo[]> {
  * 查询项目
  * @param dto
  */
-export function queryProject(
-  dto: IProjectQueryingDto,
-): Promise<IPageVo<IProjectVo>> {
+export function queryProject(dto: IProjectQueryingDto): Promise<IPageVo<IProjectVo>> {
   return restProxy({
     url: baseUrl.projectV2,
     method: 'get',
@@ -86,9 +97,7 @@ export function getProcessTemplate(dto: number): Promise<IProcessTemplateVo> {
  * 获取项目详情
  * @param projectId
  */
-export function fetchProjectDetail(
-  projectId: string,
-): Promise<IProjectDetailVo> {
+export function fetchProjectDetail(projectId: string): Promise<IProjectDetailVo> {
   return restProxy({
     url: `${baseUrl.project}/${projectId}`,
     method: 'get',
@@ -99,9 +108,7 @@ export function fetchProjectDetail(
  * 获取流程执行记录列表
  * @param workflowRef
  */
-export function listWorkflowExecutionRecord(
-  workflowRef: string,
-): Promise<IWorkflowExecutionRecordVo[]> {
+export function listWorkflowExecutionRecord(workflowRef: string): Promise<IWorkflowExecutionRecordVo[]> {
   return restProxy<IWorkflowExecutionRecordVo[]>({
     url: `${baseUrl.workflow}/${workflowRef}`,
     method: 'get',
@@ -123,9 +130,7 @@ export function listAsyncTaskInstance(triggerId: string): Promise<IAsyncTaskInst
  * 获取任务实例列表
  * @param businessId
  */
-export function listTaskInstance(
-  businessId: string,
-): Promise<ITaskExecutionRecordVo[]> {
+export function listTaskInstance(businessId: string): Promise<ITaskExecutionRecordVo[]> {
   return restProxy<ITaskExecutionRecordVo[]>({
     url: `${baseUrl.tasksV2}/${businessId}`,
     method: 'get',
@@ -142,6 +147,7 @@ export function listTaskParam(taskId: string): Promise<ITaskParamVo[]> {
     method: 'get',
   });
 }
+
 /**
  * 获取实例全局参数列表
  * @param triggerId
@@ -158,10 +164,7 @@ export function getGlobalParameters(triggerId: string): Promise<IGlobalParamsete
  * @param workflowRef
  * @param workflowVersion
  */
-export function fetchWorkflow(
-  workflowRef: string,
-  workflowVersion: string,
-): Promise<IWorkflowVo> {
+export function fetchWorkflow(workflowRef: string, workflowVersion: string): Promise<IWorkflowVo> {
   return restProxy<IWorkflowVo>({
     url: `${baseUrl.dsl}/${workflowRef}/${workflowVersion}`,
     method: 'get',
@@ -182,9 +185,7 @@ export function listNamespace(): Promise<INamespacesVo> {
  * 获取命名空间详情
  * @param name
  */
-export function fetchNamespaceDetail(
-  name: string,
-): Promise<INamespaceDetailVo> {
+export function fetchNamespaceDetail(name: string): Promise<INamespaceDetailVo> {
   return restProxy<INamespaceDetailVo>({
     url: `${baseUrl.secretKey}/${name}`,
     method: 'get',
@@ -239,9 +240,7 @@ export function fetchTriggerEvent(triggerId: string): Promise<ITriggerEventVo> {
  * 获取触发器webhook
  * @param projectId
  */
-export function fetchTriggerWebhook(
-  projectId: string,
-): Promise<ITriggerWebhookVo> {
+export function fetchTriggerWebhook(projectId: string): Promise<ITriggerWebhookVo> {
   return restProxy({
     url: `${baseUrl.trigger}/webhook/${projectId}`,
     method: 'get',
@@ -272,9 +271,7 @@ export function listProjectGroup(): Promise<IProjectGroupVo[]> {
 /**
  * 查询项目组详情
  */
-export function getProjectGroupDetail(
-  projectGroupId: string,
-): Promise<IProjectGroupVo> {
+export function getProjectGroupDetail(projectGroupId: string): Promise<IProjectGroupVo> {
   return restProxy({
     url: `${baseUrl.projectGroup}/${projectGroupId}`,
     method: 'get',

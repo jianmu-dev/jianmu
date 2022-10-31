@@ -4,38 +4,38 @@
       <div class="item">
         <div class="param-key">流程名称</div>
         <div class="param-value">
-         <jm-text-viewer :threshold="0" :value="record.name" :tip-append-to-body="false"/>
+          <jm-text-viewer :threshold="0" :value="record.name" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
         <div class="param-key">启动时间</div>
         <div class="param-value">
-         <jm-text-viewer :threshold="0" :value="datetimeFormatter(record.startTime)" :tip-append-to-body="false"/>
+          <jm-text-viewer :threshold="0" :value="datetimeFormatter(record.startTime)" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
         <div class="param-key">最后完成时间</div>
         <div class="param-value">
-         <jm-text-viewer :threshold="0" :value="datetimeFormatter(record.endTime)" :tip-append-to-body="false"/>
+          <jm-text-viewer :threshold="0" :value="datetimeFormatter(record.endTime)" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
-        <div class="param-key ">{{ isSuspended ? '挂起时长' : '执行时长' }}</div>
+        <div class="param-key">{{ isSuspended ? '挂起时长' : '执行时长' }}</div>
         <div class="param-value">
-          <jm-timer v-if="isSuspended" :start-time="record.suspendedTime" :tip-append-to-body="false"/>
-          <jm-timer v-else :start-time="record.startTime" :end-time="record.endTime" :tip-append-to-body="false"/>
+          <jm-timer v-if="isSuspended" :start-time="record.suspendedTime" :tip-append-to-body="false" />
+          <jm-timer v-else :start-time="record.startTime" :end-time="record.endTime" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
         <div class="param-key">流程实例ID</div>
         <div class="param-value">
-         <jm-text-viewer :threshold="0" :value="record.id" :tip-append-to-body="false"/>
+          <jm-text-viewer :threshold="0" :value="record.id" :tip-append-to-body="false" />
         </div>
       </div>
       <div class="item">
         <div class="param-key">流程版本号</div>
         <div class="param-value">
-         <jm-text-viewer :threshold="0" :value="record.workflowVersion" :tip-append-to-body="false"/>
+          <jm-text-viewer :threshold="0" :value="record.workflowVersion" :tip-append-to-body="false" />
         </div>
       </div>
     </div>
@@ -43,13 +43,11 @@
     <div class="process-log">
       <div class="log">
         <div class="loading" v-if="executing">
-          <jm-button type="text" size="small" :loading="executing">
-            加载中...
-          </jm-button>
+          <jm-button type="text" size="small" :loading="executing"> 加载中... </jm-button>
         </div>
         <jm-log-viewer
           :filename="`${record.name}.txt`"
-          :url="`/view/logs/workflow/subscribe/${record.triggerId}?size=`"
+          :url="`${API_PREFIX}/view/logs/workflow/subscribe/${record.triggerId}?size=`"
           :download="download"
           v-model:more="moreLog"
           v-if="record.triggerId"
@@ -65,6 +63,7 @@ import { IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record'
 import { datetimeFormatter } from '@/utils/formatter';
 import { WorkflowExecutionRecordStatusEnum } from '@/api/dto/enumeration';
 import { downloadWorkflowLogs } from '@/api/workflow-execution-record';
+import { API_PREFIX } from '@/utils/constants';
 
 export default defineComponent({
   props: {
@@ -76,8 +75,12 @@ export default defineComponent({
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
     const process = computed<IWorkflowExecutionRecordVo>(() => props.record as IWorkflowExecutionRecordVo);
-    const executing = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.RUNNING === (props.record.status as WorkflowExecutionRecordStatusEnum));
-    const isSuspended = computed<boolean>(() => WorkflowExecutionRecordStatusEnum.SUSPENDED === (props.record.status as WorkflowExecutionRecordStatusEnum));
+    const executing = computed<boolean>(
+      () => WorkflowExecutionRecordStatusEnum.RUNNING === (props.record.status as WorkflowExecutionRecordStatusEnum),
+    );
+    const isSuspended = computed<boolean>(
+      () => WorkflowExecutionRecordStatusEnum.SUSPENDED === (props.record.status as WorkflowExecutionRecordStatusEnum),
+    );
     const processLog = ref<string>('');
     const moreLog = ref<boolean>(false);
 
@@ -91,6 +94,7 @@ export default defineComponent({
     };
 
     return {
+      API_PREFIX,
       process,
       executing,
       isSuspended,
@@ -108,7 +112,7 @@ export default defineComponent({
   font-size: 14px;
   color: #333333;
   margin-bottom: 25px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   height: 100%;
 
   .basic-section {
@@ -116,7 +120,7 @@ export default defineComponent({
     padding: 16px 0 0 20px;
     display: flex;
     justify-content: space-between;
-    box-shadow: 0 0 8px 0 #9EB1C5;
+    box-shadow: 0 0 8px 0 #9eb1c5;
 
     > div {
       margin-bottom: 16px;
@@ -126,7 +130,7 @@ export default defineComponent({
       }
 
       .param-key {
-        color: #6B7B8D;
+        color: #6b7b8d;
         margin-bottom: 8px;
       }
 
@@ -144,7 +148,7 @@ export default defineComponent({
 
   .process-log {
     margin: 0 20px;
-    border: 1px solid #EEF0F7;
+    border: 1px solid #eef0f7;
 
     .log {
       margin: 16px;
@@ -164,6 +168,5 @@ export default defineComponent({
       }
     }
   }
-
 }
 </style>

@@ -1,9 +1,10 @@
 import { restProxy } from '@/api';
 import { IGitCloningDto, IGitVo, IProjectIdVo, IProjectImportingDto, IProjectSavingDto } from '@/api/dto/project';
+import { API_PREFIX } from '@/utils/constants';
 
 export const baseUrl = {
-  project: '/projects',
-  git: '/git',
+  project: `${API_PREFIX}/projects`,
+  git: `${API_PREFIX}/git`,
 };
 
 /**
@@ -21,9 +22,11 @@ export async function save(dto: IProjectSavingDto): Promise<IProjectIdVo> {
     auth: true,
   });
 
-  return dto.id ? {
-    id: dto.id,
-  } : res;
+  return dto.id
+    ? {
+      id: dto.id,
+    }
+    : res;
 }
 
 /**

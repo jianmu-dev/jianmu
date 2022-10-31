@@ -1,10 +1,11 @@
 import { restProxy } from '@/api/index';
+import { API_PREFIX } from '@/utils/constants';
 
 export const baseUrl = {
-  workflow: '/workflow_instances',
+  workflow: `${API_PREFIX}/workflow_instances`,
 };
-const nodeLogUrl = '/view/logs/task/download';
-const workflowLogUrl = '/view/logs/workflow/download';
+const nodeLogUrl = `${API_PREFIX}/view/logs/task/download`;
+const workflowLogUrl = `${API_PREFIX}/view/logs/workflow/download`;
 
 /**
  * 终止流程执行记录
