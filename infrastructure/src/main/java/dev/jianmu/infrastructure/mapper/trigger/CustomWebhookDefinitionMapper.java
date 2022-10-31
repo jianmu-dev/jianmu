@@ -19,13 +19,16 @@ public interface CustomWebhookDefinitionMapper {
     @Result(column = "creator_name", property = "creatorName")
     Optional<CustomWebhookDefinition> findById(String id);
 
-    @Select("select * from jm_custom_webhook_definition")
+    @Select("<script>" +
+            "select * from jm_custom_webhook_definition" +
+            "<if test='ref != null'>WHERE ref = #{ref}</if>" +
+            "</script>")
     @Result(column = "owner_ref", property = "ownerRef")
     @Result(column = "owner_name", property = "ownerName")
     @Result(column = "owner_type", property = "ownerType")
     @Result(column = "creator_ref", property = "creatorRef")
     @Result(column = "creator_name", property = "creatorName")
-    List<CustomWebhookDefinition> findAll();
+    List<CustomWebhookDefinition> findByRef(String ref);
 
     @Select("select * from jm_custom_webhook_definition where owner_ref = #{ownerRef} and ref = #{ref}")
     @Result(column = "owner_ref", property = "ownerRef")
