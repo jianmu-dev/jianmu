@@ -1,24 +1,26 @@
 <template>
   <div class="jm-log-viewer" ref="logViewerRef">
     <div class="operation">
-      <jm-tooltip :content="downloading ? '下载中，请稍后...' : '下载'"
-                  :placement="downloading? 'top-end': 'top'"
-                  :append-to-body="false">
-        <div :class="{download: true, doing: downloading}" @click="downloadLog"></div>
+      <jm-tooltip
+        :content="downloading ? '下载中，请稍后...' : '下载'"
+        :placement="downloading ? 'top-end' : 'top'"
+        :append-to-body="false"
+      >
+        <div :class="{ download: true, doing: downloading }" @click="downloadLog"></div>
       </jm-tooltip>
       <div class="separator"></div>
-      <jm-text-copy :async-value="copy"/>
+      <jm-text-copy :async-value="copy" />
     </div>
-    <div class="auto-scroll" @click="handleAutoScroll(true)"
-         :style="{visibility: `${autoScroll? 'hidden': 'visible'}`}"></div>
-    <div class="no-bg" :style="{width: `${noWidth}px`}"></div>
+    <div
+      class="auto-scroll"
+      @click="handleAutoScroll(true)"
+      :style="{ visibility: `${autoScroll ? 'hidden' : 'visible'}` }"
+    ></div>
+    <div class="no-bg" :style="{ width: `${noWidth}px` }"></div>
     <div class="content">
-      <div v-if="moreLog" class="more-line">
-        日志过大，更多日志请下载查看
-      </div>
-      <div class="line" v-for="(txt, idx) in data" :key="idx"
-           :style="{marginLeft: `${noWidth}px`}">
-        <div class="no" :style="{left: `${-1 * noWidth}px`, width: `${noWidth}px`}">
+      <div v-if="moreLog" class="more-line">日志过大，更多日志请下载查看</div>
+      <div class="line" v-for="(txt, idx) in data" :key="idx" :style="{ marginLeft: `${noWidth}px` }">
+        <div class="no" :style="{ left: `${-1 * noWidth}px`, width: `${noWidth}px` }">
           {{ idx + 1 }}
         </div>
         <pre class="txt">{{ txt }}</pre>
@@ -83,11 +85,18 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download,
-        callback, () => autoScroll.value, handleAutoScroll);
+      logViewer = new LogViewer(
+        logViewerRef.value!,
+        props.filename,
+        props.value,
+        props.url,
+        props.download,
+        callback,
+        () => autoScroll.value,
+        handleAutoScroll,
+      );
       logViewer.listen(data.value);
     });
-
 
     onUpdated(() => {
       if (logViewer.checkValue(props.url, props.value)) {
@@ -95,8 +104,16 @@ export default defineComponent({
       }
       logViewer.destroy();
       initData();
-      logViewer = new LogViewer(logViewerRef.value!, props.filename, props.value, props.url, props.download,
-        callback, () => autoScroll.value, handleAutoScroll);
+      logViewer = new LogViewer(
+        logViewerRef.value!,
+        props.filename,
+        props.value,
+        props.url,
+        props.download,
+        callback,
+        () => autoScroll.value,
+        handleAutoScroll,
+      );
       logViewer.listen(data.value);
     });
 
@@ -138,8 +155,7 @@ export default defineComponent({
 <style scoped lang="less">
 .jm-log-viewer {
   position: relative;
-  background-color: #19253B;
-  padding: 8px 0;
+  background-color: #19253b;
   box-sizing: border-box;
   height: 100%;
 
@@ -149,7 +165,7 @@ export default defineComponent({
     top: 0;
     width: 0;
     height: 100%;
-    background-color: #303D56;
+    background-color: #303d56;
   }
 
   .content {
@@ -160,7 +176,7 @@ export default defineComponent({
 
     .more-line {
       text-align: center;
-      color: #FFFFFF;
+      color: #ffffff;
       padding-bottom: 10px;
     }
 
@@ -180,7 +196,7 @@ export default defineComponent({
         text-align: right;
         padding-right: 10px;
         box-sizing: border-box;
-        color: #8193B2;
+        color: #8193b2;
       }
 
       .txt {
@@ -188,7 +204,7 @@ export default defineComponent({
         word-wrap: break-word;
         white-space: pre-wrap;
         word-break: normal;
-        color: #FFFFFF;
+        color: #ffffff;
       }
     }
   }
@@ -211,7 +227,7 @@ export default defineComponent({
     background-color: #818894;
     box-shadow: 0 0 4px 0 rgba(194, 194, 194, 0.5);
     border-radius: 2px;
-    border: 1px solid #767F91;
+    border: 1px solid #767f91;
     white-space: nowrap;
 
     visibility: hidden;
@@ -236,7 +252,7 @@ export default defineComponent({
       font-size: 20px;
 
       .jm-icon-button-copy {
-        color: #FFFFFF;
+        color: #ffffff;
         opacity: 1;
       }
     }
@@ -245,7 +261,7 @@ export default defineComponent({
       margin: 0 10px;
       width: 1px;
       height: 15px;
-      background-color: #CDD1E3;
+      background-color: #cdd1e3;
       overflow: hidden;
     }
   }
@@ -261,7 +277,7 @@ export default defineComponent({
     width: 24px;
     height: 24px;
     border-radius: 3px;
-    background-color: #19253B;
+    background-color: #19253b;
     background-image: url('./svgs/auto-scroll.svg');
     background-repeat: no-repeat;
     background-size: contain;
