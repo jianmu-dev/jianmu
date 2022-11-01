@@ -12,8 +12,6 @@ import java.util.Optional;
  */
 public class GitRepo {
 
-    // TODO 删除仓库时，同步删除所有流水线对应的项目
-
     /**
      * git仓库id
      */
