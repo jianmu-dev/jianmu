@@ -234,7 +234,7 @@ public class TriggerApplication {
     }
 
     private String createGitWebhook(String ref, String userId, String associationId, String associationType, List<String> events) {
-        if (associationId == null) {
+        if (associationId.isBlank()) {
             return ref;
         }
         ref = URLEncoder.encode(ref, StandardCharsets.UTF_8);
@@ -258,7 +258,7 @@ public class TriggerApplication {
     }
 
     private String updateGitWebhook(String ref, String newRef, String userId, String associationId, String associationType, List<String> events) {
-        if (associationId == null) {
+        if (associationId.isBlank()) {
             return newRef;
         }
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
