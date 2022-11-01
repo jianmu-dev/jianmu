@@ -87,7 +87,7 @@ public class GitlinkController {
             log.warn("DSL文件地址：{}, DSL校验失败：{}", filepath, e.getMessage());
             return;
         }
-        var projectOptional = this.projectApplication.findByName(repoId, this.oAuth2Properties.getType(), filename);
+        var projectOptional = this.projectApplication.findByName(repoId, AssociationUtil.AssociationType.GIT_REPO.name(), filename);
         if (projectOptional.isEmpty()) {
             this.projectApplication.createProject(dslText, null, userId, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), branch, false);
             return;

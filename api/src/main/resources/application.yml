@@ -3,6 +3,7 @@ server:
   servlet:
     encoding:
       force: true
+    context-path: /jianmu_saas
 spring:
   config:
     activate:
