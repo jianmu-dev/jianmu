@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Ethan Liu
@@ -42,6 +44,7 @@ public class WebHookController {
         var bestMatchPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         var apm = new AntPathMatcher();
         var projectName = apm.extractPathWithinPattern(bestMatchPattern, path);
+        projectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8);
         var triggerEvent = this.triggerApplication.receiveHttpEvent(projectName, request, contentType);
         return WebhookResult.builder()
                 .projectId(triggerEvent.getProjectId())
