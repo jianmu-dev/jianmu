@@ -5,7 +5,7 @@
         <div>
           <div class="param-key">流程名称</div>
           <div class="param-value">
-            <jm-text-viewer :threshold="0" :value="record.name" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="record.name" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -17,7 +17,7 @@
         <div>
           <div class="param-key">节点名称</div>
           <div class="param-value">
-            <jm-text-viewer :threshold="0" :value="nodeName" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="nodeName" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -29,7 +29,7 @@
         <div>
           <div class="param-key">节点定义</div>
           <div class="param-value">
-            <jm-text-viewer :threshold="0" :value="nodeDef" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="nodeDef" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -41,7 +41,7 @@
         <div>
           <div class="param-key">启动时间</div>
           <div class="param-value">
-            <jm-text-viewer :threshold="0" :value="datetimeFormatter(task.startTime)" :tip-append-to-body="false"/>
+            <jm-text-viewer :threshold="0" :value="datetimeFormatter(task.startTime)" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -53,7 +53,7 @@
         <div>
           <div class="param-key">执行时长</div>
           <div class="param-value">
-            <jm-timer :start-time="task.startTime" :end-time="task.endTime" :tip-append-to-body="false"/>
+            <jm-timer :start-time="task.startTime" :end-time="task.endTime" :tip-append-to-body="false" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -65,7 +65,7 @@
         <div>
           <div class="param-key">执行状态</div>
           <div>
-            <jm-task-state :value="task.status"/>
+            <jm-task-state :value="task.status" />
           </div>
         </div>
         <div class="param-number" v-if="tasks.length > 1">
@@ -75,18 +75,16 @@
       </div>
     </div>
     <div class="tab-section">
-      <task-list :tasks="tasks" @change="changeTask"/>
+      <task-list :tasks="tasks" @change="changeTask" />
       <jm-tabs v-model="tabActiveName">
         <jm-tab-pane name="log" lazy>
           <template #label>
             <div class="tab">日志</div>
           </template>
           <div class="tab-content">
-            <div :class="[tasks.length>1?'tasks-log':'task-log']" class="log">
+            <div :class="[tasks.length > 1 ? 'tasks-log' : 'task-log']" class="log">
               <div class="loading" v-if="executing">
-                <jm-button type="text" size="small" :loading="executing">
-                  加载中...
-                </jm-button>
+                <jm-button type="text" size="small" :loading="executing"> 加载中... </jm-button>
               </div>
               <jm-log-viewer
                 v-if="currentInstanceId"
@@ -103,7 +101,7 @@
             <div class="tab">业务参数</div>
           </template>
           <div class="tab-content">
-            <div :class="[tasks.length>1?'tasks-params':'task-params']" class="params">
+            <div :class="[tasks.length > 1 ? 'tasks-params' : 'task-params']" class="params">
               <jm-scrollbar>
                 <div class="content">
                   <div class="title">输入参数</div>
@@ -111,31 +109,27 @@
                     :data="taskInputParams"
                     :border="true"
                     :cell-class-name="
-                      ({ row, columnIndex }) =>
-                        row.required && columnIndex === 0 ? 'required-cell' : ''
+                      ({ row, columnIndex }) => (row.required && columnIndex === 0 ? 'required-cell' : '')
                     "
                   >
-                    <jm-table-column
-                      label="参数唯一标识"
-                      header-align="center"
-                      width="200px"
-                      prop="ref"
-                    >
+                    <jm-table-column label="参数唯一标识" header-align="center" width="200px" prop="ref">
                       <template #default="scope">
                         <div
-                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                          :style="{
+                            maxWidth: maxWidthRecord[scope.row.ref] ? `${maxWidthRecord[scope.row.ref]}px` : '100%',
+                          }"
+                        >
                           <div class="text-viewer">
-                            <jm-text-viewer :threshold="0" :value="scope.row.ref" class="value"
-                                            :tip-append-to-body="false"
-                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
+                            <jm-text-viewer
+                              :threshold="0"
+                              :value="scope.row.ref"
+                              class="value"
+                              :tip-append-to-body="false"
+                              @loaded="({ contentMaxWidth }) => getTotalWidth(contentMaxWidth, scope.row.ref)"
+                            />
                           </div>
-                          <jm-tooltip
-                            content="必填项"
-                            placement="top"
-                            :appendToBody="false"
-                            v-if="scope.row.required"
-                          >
-                            <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
+                          <jm-tooltip content="必填项" placement="top" :appendToBody="false" v-if="scope.row.required">
+                            <img src="~@/assets/svgs/task-log/required.svg" alt="" />
                           </jm-tooltip>
                         </div>
                       </template>
@@ -156,52 +150,43 @@
                       prop="required"
                     >
                       <template #default="scope">
-                        <span
-                          :class="[scope.row.required ? 'is-required' : '']"
-                        >
+                        <span :class="[scope.row.required ? 'is-required' : '']">
                           {{ scope.row.required ? '是' : '否' }}
                         </span>
                       </template>
                     </jm-table-column>
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
-                        <param-value
-                          :value="scope.row.value"
-                          :tip-append-to-body="false"
-                          :type="scope.row.valueType"
-                        />
+                        <param-value :value="scope.row.value" :tip-append-to-body="false" :type="scope.row.valueType" />
                       </template>
                     </jm-table-column>
                   </jm-table>
                   <div class="title separator">输出参数</div>
-                  <jm-table :data="taskOutputParams"
-                            :border="true"
-                            :cell-class-name="
-                      ({ row, columnIndex }) =>
-                        row.required && columnIndex === 0 ? 'required-cell' : ''
+                  <jm-table
+                    :data="taskOutputParams"
+                    :border="true"
+                    :cell-class-name="
+                      ({ row, columnIndex }) => (row.required && columnIndex === 0 ? 'required-cell' : '')
                     "
                   >
-                    <jm-table-column
-                      header-align="center"
-                      label="参数唯一标识"
-                      width="200px"
-                      prop="ref"
-                    >
+                    <jm-table-column header-align="center" label="参数唯一标识" width="200px" prop="ref">
                       <template #default="scope">
                         <div
-                          :style="{maxWidth:maxWidthRecord[scope.row.ref]? `${maxWidthRecord[scope.row.ref]}px`: '100%'}">
+                          :style="{
+                            maxWidth: maxWidthRecord[scope.row.ref] ? `${maxWidthRecord[scope.row.ref]}px` : '100%',
+                          }"
+                        >
                           <div class="text-viewer">
-                            <jm-text-viewer :threshold="0" :value="scope.row.ref" class="value"
-                                            :tip-append-to-body="false"
-                                            @loaded="({contentMaxWidth})=>getTotalWidth(contentMaxWidth,scope.row.ref)"/>
+                            <jm-text-viewer
+                              :threshold="0"
+                              :value="scope.row.ref"
+                              class="value"
+                              :tip-append-to-body="false"
+                              @loaded="({ contentMaxWidth }) => getTotalWidth(contentMaxWidth, scope.row.ref)"
+                            />
                           </div>
-                          <jm-tooltip
-                            content="必填项"
-                            placement="top"
-                            :appendToBody="false"
-                            v-if="scope.row.required"
-                          >
-                            <img src="~@/assets/svgs/task-log/required.svg" alt=""/>
+                          <jm-tooltip content="必填项" placement="top" :appendToBody="false" v-if="scope.row.required">
+                            <img src="~@/assets/svgs/task-log/required.svg" alt="" />
                           </jm-tooltip>
                         </div>
                       </template>
@@ -222,20 +207,14 @@
                       prop="required"
                     >
                       <template #default="scope">
-                        <span
-                          :class="[scope.row.required ? 'is-required' : '']"
-                        >
+                        <span :class="[scope.row.required ? 'is-required' : '']">
                           {{ scope.row.required ? '是' : '否' }}
                         </span>
                       </template>
                     </jm-table-column>
                     <jm-table-column label="参数值" header-align="center">
                       <template #default="scope">
-                        <param-value
-                          :value="scope.row.value"
-                          :tip-append-to-body="false"
-                          :type="scope.row.valueType"
-                        />
+                        <param-value :value="scope.row.value" :tip-append-to-body="false" :type="scope.row.valueType" />
                       </template>
                     </jm-table-column>
                   </jm-table>
@@ -296,7 +275,7 @@ export default defineComponent({
     taskRecords: {
       // type: Array as PropType<IWorkflowExecutionRecordVo[]>,
       type: Array,
-      default: ()=>([]),
+      default: () => [],
     },
   },
   setup(props: any) {
@@ -306,11 +285,15 @@ export default defineComponent({
     const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     // 当前实例id
     const currentInstanceId = ref<string>('');
+    // 切换时状态
+    const switchStatus = ref<TaskStatusEnum>();
+    // 初始id
+    const firstId = ref<string>();
     // 异步任务 根据点击的businessId筛选出
     const asyncTask = computed<ITaskExecutionRecordVo>(() => {
       // const latestTaskInstanceId = taskInstances.value.find(e=>e.businessId===props.businessId)?.instanceId || '';
       const latestTaskInstanceId = taskInstances.value[0]?.instanceId || '';
-      const at = props.taskRecords.find((item:any) => item.businessId === props.businessId) || {
+      const at = props.taskRecords.find((item: any) => item.businessId === props.businessId) || {
         instanceId: '',
         businessId: '',
         nodeName: '',
@@ -337,25 +320,31 @@ export default defineComponent({
       }
       return t;
     });
-    const tasks = computed<ITaskExecutionRecordVo[]>(() => {
+    const getTasks = () => {
       if (taskInstances.value.length === 0) {
         return [];
       }
 
       const arr: ITaskExecutionRecordVo[] = [];
-      arr.push({
-        ...asyncTask.value,
-      }, ...taskInstances.value.slice(1));
+      arr.push(
+        {
+          ...asyncTask.value,
+        },
+        ...taskInstances.value.slice(1),
+      );
 
+      firstId.value = arr[0].instanceId;
       return arr;
+    };
+    const tasks = computed<ITaskExecutionRecordVo[]>(getTasks);
+
+    const executing = computed<boolean>(() => {
+      if (switchStatus.value) {
+        return [TaskStatusEnum.INIT, TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(switchStatus.value);
+      } else {
+        return [TaskStatusEnum.INIT, TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(task.value.status);
+      }
     });
-    const executing = computed<boolean>(() =>
-      [
-        TaskStatusEnum.INIT,
-        TaskStatusEnum.WAITING,
-        TaskStatusEnum.RUNNING,
-      ].includes(task.value.status),
-    );
     // 是否为挂起状态
     const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
     const tabActiveName = ref<string>(props.tabType);
@@ -398,7 +387,7 @@ export default defineComponent({
     });
 
     // 递归加载输入输出参数
-    const loadData = async (func: (id: string) => Promise<void>, id: string, retry: number = 0) => {
+    const loadData = async (func: (id: string) => Promise<void>, id: string, retry = 0) => {
       if (!taskInstanceId.value || taskInstanceId.value !== id) {
         console.debug('组件已卸载，终止加载任务');
         return;
@@ -461,14 +450,21 @@ export default defineComponent({
 
     const maxWidthRecord = ref<Record<string, number>>({});
     // 切换任务
-    const changeTask = (instanceId: string) => {
-      if (taskInstanceId.value === instanceId) {
-        currentInstanceId.value = taskInstances.value[0].instanceId;
-        return;
+    const changeTask = async (instanceId: string) => {
+      // 添加判断避免初始化时调用，导致判断task状态失效
+      if (firstId.value !== instanceId) {
+        tasks.value.forEach(item => {
+          if (item.instanceId === instanceId) {
+            switchStatus.value = item.status;
+          }
+        });
+      } else {
+        // 如果是初始化或选择下标0执行task部分逻辑
+        switchStatus.value = undefined;
       }
-      nextTick(() => {
-        currentInstanceId.value = instanceId;
-      });
+      taskParams.value = await listTaskParam(instanceId);
+      await nextTick();
+      currentInstanceId.value = instanceId;
     };
 
     const asyncTaskStartTime = ref<string>('');
@@ -512,7 +508,9 @@ export default defineComponent({
       }),
       download,
       currentInstanceId,
-      nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}@`) ? SHELL_NODE_TYPE : task.value.defKey),
+      nodeDef: computed<string>(() =>
+        task.value.defKey.startsWith(`${SHELL_NODE_TYPE}@`) ? SHELL_NODE_TYPE : task.value.defKey,
+      ),
       // nodeDef: computed<string>(() => task.value.defKey.startsWith(`${SHELL_NODE_TYPE}:`) ? SHELL_NODE_TYPE : task.value.defKey),
       taskInputParams: computed<ITaskParamVo[]>(() =>
         taskParams.value
@@ -521,12 +519,14 @@ export default defineComponent({
       ),
       taskOutputParams: computed<ITaskParamVo[]>(() => {
         const params = taskParams.value
-          .filter(({ ref, type }) => ref && !(ref.startsWith('inner.')) && type === TaskParamTypeEnum.OUTPUT)
+          .filter(({ ref, type }) => ref && !ref.startsWith('inner.') && type === TaskParamTypeEnum.OUTPUT)
           .sort((p1, p2) => p1.ref.localeCompare(p2.ref));
 
-        params.push(...taskParams.value
-          .filter(({ ref, type }) => ref && ref.startsWith('inner.') && type === TaskParamTypeEnum.OUTPUT)
-          .sort((p1, p2) => p1.ref.localeCompare(p2.ref)));
+        params.push(
+          ...taskParams.value
+            .filter(({ ref, type }) => ref && ref.startsWith('inner.') && type === TaskParamTypeEnum.OUTPUT)
+            .sort((p1, p2) => p1.ref.localeCompare(p2.ref)),
+        );
 
         return params;
       }),
@@ -554,7 +554,7 @@ export default defineComponent({
     margin: 20px 24px;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #E6EBF2;
+    border-bottom: 1px solid #e6ebf2;
 
     > div {
       &.item {
@@ -566,7 +566,7 @@ export default defineComponent({
           .title {
             margin-bottom: 12px;
             font-size: 14px;
-            color: #6B7B8D;
+            color: #6b7b8d;
           }
 
           .times {
@@ -574,11 +574,11 @@ export default defineComponent({
           }
 
           .success {
-            color: #3EBB03;
+            color: #3ebb03;
           }
 
           .fail {
-            color: #CF1322;
+            color: #cf1322;
           }
 
           .skip {
@@ -586,11 +586,11 @@ export default defineComponent({
           }
 
           .suspend {
-            color: #7986CB;
+            color: #7986cb;
           }
 
           .ignore {
-            color: #9847FC;
+            color: #9847fc;
           }
         }
       }
@@ -710,7 +710,7 @@ export default defineComponent({
                   position: absolute;
                   left: 100%;
                   margin-left: 5px;
-                  bottom: 0
+                  bottom: 0;
                 }
               }
             }
