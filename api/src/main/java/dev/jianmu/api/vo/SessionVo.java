@@ -17,7 +17,7 @@ import lombok.ToString;
 public class SessionVo {
     private String clientType;
     private Long expirationTime;
-    private String sessionId;
+    private String id;
     private String accountId;
     private Boolean mobileBound;
     private String createdDate;

@@ -684,9 +684,9 @@ public class TriggerApplication {
         var trigger = this.triggerRepository.findByRef(ref)
                 .orElseThrow(() -> {
                     webRequest.setStatusCode(WebRequest.StatusCode.NOT_FOUND);
-                    webRequest.setErrorMsg("未找到触发器");
+                    webRequest.setErrorMsg("未找到触发器：" + ref);
                     this.webRequestRepositoryImpl.add(webRequest);
-                    return new DataNotFoundException("未找到触发器");
+                    return new DataNotFoundException("未找到触发器：" + ref);
                 });
         if (trigger.getType() != Trigger.Type.WEBHOOK) {
             webRequest.setStatusCode(WebRequest.StatusCode.NOT_ACCEPTABLE);
