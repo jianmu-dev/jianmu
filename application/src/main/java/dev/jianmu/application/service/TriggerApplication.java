@@ -201,7 +201,7 @@ public class TriggerApplication {
                 .webhook(webhookType)
                 .eventInstances(eventInstances);
         var events = this.customWebhookDomainService.getGitEvents(this.oAuth2Properties.getThirdPartyType(), eventInstances);
-        String ref = URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8);
+        String ref = project.getWorkflowName();
         var optionalTrigger = this.triggerRepository.findByProjectId(projectId);
         // 修改webhook
         if (optionalTrigger.isPresent()) {
@@ -237,6 +237,7 @@ public class TriggerApplication {
         if (associationId == null) {
             return ref;
         }
+        ref = URLEncoder.encode(ref, StandardCharsets.UTF_8);
         if (AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             var oAuth2Api = OAuth2ApiProxy.builder()
                     .thirdPartyType(ThirdPartyTypeEnum.valueOf(this.oAuth2Properties.getThirdPartyType()))
@@ -263,6 +264,7 @@ public class TriggerApplication {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(associationType)) {
             return newRef;
         }
+        ref = URLEncoder.encode(ref, StandardCharsets.UTF_8);
         var gitRepo = this.gitRepoRepository.findById(associationId)
                 .orElseThrow(() -> new DataNotFoundException("未找到仓库：" + associationId));
         var oAuth2Api = OAuth2ApiProxy.builder()
@@ -294,7 +296,7 @@ public class TriggerApplication {
                         // 更新schedule
                         trigger.setSchedule(schedule);
                         trigger.setType(Trigger.Type.CRON);
-                        trigger.setRef(URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8));
+                        trigger.setRef(project.getWorkflowName());
                         // 停止触发器
                         this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
                         // 卸载任务
@@ -312,7 +314,7 @@ public class TriggerApplication {
                 }, () -> {
                     var trigger = Trigger.Builder.aTrigger()
                             .projectId(projectId)
-                            .ref(URLEncoder.encode(project.getWorkflowName(), StandardCharsets.UTF_8))
+                            .ref(project.getWorkflowName())
                             .type(Trigger.Type.CRON)
                             .schedule(schedule)
                             .build();
