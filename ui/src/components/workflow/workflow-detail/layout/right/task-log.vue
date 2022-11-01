@@ -286,6 +286,10 @@ export default defineComponent({
     const taskInstances = ref<ITaskExecutionRecordVo[]>([]);
     // 当前实例id
     const currentInstanceId = ref<string>('');
+    // 切换时状态
+    const switchStatus = ref<TaskStatusEnum>();
+    // 初始id
+    const firstId = ref<string>();
     // 异步任务 根据点击的businessId筛选出
     const asyncTask = computed<ITaskExecutionRecordVo>(() => {
       // const latestTaskInstanceId = taskInstances.value.find(e=>e.businessId===props.businessId)?.instanceId || '';
@@ -317,7 +321,7 @@ export default defineComponent({
       }
       return t;
     });
-    const tasks = computed<ITaskExecutionRecordVo[]>(() => {
+    const getTasks = () => {
       if (taskInstances.value.length === 0) {
         return [];
       }
@@ -330,11 +334,18 @@ export default defineComponent({
         ...taskInstances.value.slice(1),
       );
 
+      firstId.value = arr[0].instanceId;
       return arr;
+    };
+    const tasks = computed<ITaskExecutionRecordVo[]>(getTasks);
+
+    const executing = computed<boolean>(() => {
+      if (switchStatus.value) {
+        return [TaskStatusEnum.INIT, TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(switchStatus.value);
+      } else {
+        return [TaskStatusEnum.INIT, TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(task.value.status);
+      }
     });
-    const executing = computed<boolean>(() =>
-      [TaskStatusEnum.INIT, TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING].includes(task.value.status),
-    );
     // 是否为挂起状态
     const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
     const tabActiveName = ref<string>(props.tabType);
@@ -440,14 +451,21 @@ export default defineComponent({
 
     const maxWidthRecord = ref<Record<string, number>>({});
     // 切换任务
-    const changeTask = (instanceId: string) => {
-      if (taskInstanceId.value === instanceId) {
-        currentInstanceId.value = taskInstances.value[0].instanceId;
-        return;
+    const changeTask = async (instanceId: string) => {
+      // 添加判断避免初始化时调用，导致判断task状态失效
+      if (firstId.value !== instanceId) {
+        tasks.value.forEach(item => {
+          if (item.instanceId === instanceId) {
+            switchStatus.value = item.status;
+          }
+        });
+      } else {
+        // 如果是初始化或选择下标0执行task部分逻辑
+        switchStatus.value = undefined;
       }
-      nextTick(() => {
-        currentInstanceId.value = instanceId;
-      });
+      taskParams.value = await listTaskParam(instanceId);
+      await nextTick();
+      currentInstanceId.value = instanceId;
     };
 
     const asyncTaskStartTime = ref<string>('');
