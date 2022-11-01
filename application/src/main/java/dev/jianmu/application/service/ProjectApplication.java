@@ -155,9 +155,6 @@ public class ProjectApplication {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         this.checkProjectPermission(associationId, associationType, project);
-        if (!project.isEnabled()) {
-            throw new RuntimeException("当前项目不可触发，请先修改状态");
-        }
 
         var evt = dev.jianmu.trigger.event.TriggerEvent.Builder
                 .aTriggerEvent()
