@@ -30,8 +30,8 @@ public class ExternalParameterApplication {
     }
 
     @Transactional
-    public void create(String name, ExternalParameter.Type type, String ref, String label, String value, String associationId, String associationType) {
-        if (this.externalParameterRepository.findByRef(ref, associationId, associationType).isPresent()) {
+    public void create(String name, ExternalParameter.Type type, String ref, String label, String value, String associationId, String associationType, String associationPlatform) {
+        if (this.externalParameterRepository.findByRef(ref, associationId, associationType, associationPlatform).isPresent()) {
             throw new ExternalParameterRepeatException("外部参数唯一标识重复");
         }
 
@@ -46,30 +46,30 @@ public class ExternalParameterApplication {
                         .associationId(associationId)
                         .associationType(associationType)
                         .build());
-        this.saveLabel(associationId, associationType, label);
+        this.saveLabel(associationId, associationType, associationPlatform, label);
     }
 
     @Transactional
-    public void delete(String id, String associationId, String associationType) {
+    public void delete(String id, String associationId, String associationType, String associationPlatform) {
         ExternalParameter externalParameter = this.externalParameterRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该外部参数"));
 
         if (associationId != null && associationType != null &&
-                (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限" ,externalParameter.getAssociationId(), externalParameter.getAssociationType());
+                (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()) || !associationPlatform.equals(externalParameter.getAssociationPlatform()))) {
+            throw new NoAssociatedPermissionException("无此仓库权限" ,externalParameter.getAssociationId(), externalParameter.getAssociationType(), externalParameter.getAssociationPlatform());
         }
 
         this.externalParameterRepository.deleteById(id);
     }
 
     @Transactional
-    public void update(String id, String value, String name, String label, ExternalParameter.Type type, String associationId, String associationType) {
+    public void update(String id, String value, String name, String label, ExternalParameter.Type type, String associationId, String associationType, String associationPlatform) {
         ExternalParameter externalParameter = this.externalParameterRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到外部参数：" + "\"" + name + "\""));
 
         if (associationId != null && associationType != null &&
-                (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限", associationId, associationType);
+                (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()) || !associationPlatform.equals(externalParameter.getAssociationPlatform()))) {
+            throw new NoAssociatedPermissionException("无此仓库权限", externalParameter.getAssociationId(), externalParameter.getAssociationType(), externalParameter.getAssociationPlatform());
         }
 
         this.checkParameterType(type, value);
@@ -80,7 +80,7 @@ public class ExternalParameterApplication {
         externalParameter.setLastModifiedTime();
 
         this.externalParameterRepository.updateById(externalParameter);
-        this.saveLabel(associationId, associationType, label);
+        this.saveLabel(associationId, associationType, label, associationPlatform);
     }
 
     @Transactional
@@ -90,12 +90,12 @@ public class ExternalParameterApplication {
     }
 
     @Transactional
-    public List<ExternalParameter> findAll(String id, String type) {
-        return this.externalParameterRepository.findAll(id, type);
+    public List<ExternalParameter> findAll(String id, String type, String associationPlatform) {
+        return this.externalParameterRepository.findAll(id, type, associationPlatform);
     }
 
-    private void saveLabel(String associationId, String associationType, String label) {
-        if (this.externalParameterLabelRepository.findByValue(associationId, associationType, label).isPresent()) {
+    private void saveLabel(String associationId, String associationType, String associationPlatform, String label) {
+        if (this.externalParameterLabelRepository.findByValue(associationId, associationType, associationPlatform, label).isPresent()) {
             return;
         }
         this.externalParameterLabelRepository.add(

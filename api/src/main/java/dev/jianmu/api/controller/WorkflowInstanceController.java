@@ -47,12 +47,12 @@ public class WorkflowInstanceController {
             @Parameter(description = "流程实例ID") @PathVariable String instanceId
     ) {
         var session = this.userContextHolder.getSession();
-        this.checkProjectPermission(session.getAssociationId(), session.getAssociationType(), instanceId);
+        this.checkProjectPermission(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), instanceId);
         this.instanceApplication.terminate(instanceId);
     }
 
     // 校验项目增删改查权限
-    private void checkProjectPermission(String associationId, String associationType, String instanceId) {
+    private void checkProjectPermission(String associationId, String associationType, String associationPlatform, String instanceId) {
         if (associationId == null || associationType == null) {
             return;
         }
@@ -60,8 +60,8 @@ public class WorkflowInstanceController {
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         var project = this.projectApplication.findByWorkflowRef(workflowInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowInstance.getWorkflowRef()));
-        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType())) {
-            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType());
+        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()) || !associationPlatform.equals(project.getAssociationPlatform())) {
+            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         }
     }
 
@@ -69,15 +69,13 @@ public class WorkflowInstanceController {
     @Operation(summary = "流程实例任务重试接口", description = "流程实例任务重试接口")
     public void retry(@PathVariable String instanceId, @PathVariable String taskRef) {
         var session = this.userContextHolder.getSession();
-
-        this.taskInstanceInternalApplication.retry(instanceId, taskRef, session.getAssociationId(), session.getAssociationType());
+        this.taskInstanceInternalApplication.retry(instanceId, taskRef, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
 
     @PutMapping("/ignore/{instanceId}/{taskRef}")
     @Operation(summary = "流程实例任务忽略接口", description = "流程实例任务忽略接口")
     public void ignore(@PathVariable String instanceId, @PathVariable String taskRef) {
         var session = this.userContextHolder.getSession();
-
-        this.taskInstanceInternalApplication.ignore(instanceId, taskRef, session.getAssociationId(), session.getAssociationType());
+        this.taskInstanceInternalApplication.ignore(instanceId, taskRef, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
 }

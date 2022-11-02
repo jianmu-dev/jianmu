@@ -151,10 +151,10 @@ public class ProjectApplication {
         this.publisher.publishEvent(triggerEvent);
     }
 
-    public void triggerByManual(String projectId, String associationId, String associationType) {
+    public void triggerByManual(String projectId, String associationId, String associationType, String associationPlatform) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        this.checkProjectPermission(associationId, associationType, project);
+        this.checkProjectPermission(associationId, associationType, associationPlatform, project);
 
         var evt = dev.jianmu.trigger.event.TriggerEvent.Builder
                 .aTriggerEvent()
@@ -204,7 +204,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId, String userId, String associationId, String associationType, String branch, boolean isSyncProject) {
+    public Project createProject(String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, String branch, boolean isSyncProject) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -226,6 +226,7 @@ public class ProjectApplication {
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .associationId(associationId)
                 .associationType(associationType)
+                .associationPlatform(associationPlatform)
                 .build();
         // 添加分组
         if (projectGroupId == null) {
@@ -291,11 +292,11 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public boolean updateProject(String dslId, String dslText, String projectGroupId, String userId, String associationId, String associationType, boolean isSyncProject) {
+    public boolean updateProject(String dslId, String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, boolean isSyncProject) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         if (associationId != null) {
-            this.checkProjectPermission(associationId, associationType, project);
+            this.checkProjectPermission(associationId, associationType, associationPlatform, project);
         }
         var concurrent = project.isConcurrent();
         var oldName = project.getWorkflowName();
@@ -332,10 +333,10 @@ public class ProjectApplication {
     }
 
     // 校验项目增删改查权限
-    private void checkProjectPermission(String associationId, String associationType, Project project) {
+    private void checkProjectPermission(String associationId, String associationType, String associationPlatform, Project project) {
         if (associationId != null && associationType != null &&
-                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType());
+                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()) || !associationPlatform.equals(project.getAssociationPlatform()))) {
+            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         }
     }
 
@@ -381,10 +382,10 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public void deleteById(String id, String userId, String associationId, String associationType) {
+    public void deleteById(String id, String userId, String associationId, String associationType, String associationPlatform) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        this.checkProjectPermission(associationId, associationType, project);
+        this.checkProjectPermission(associationId, associationType, associationPlatform, project);
         var running = this.workflowInstanceRepository
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
@@ -483,12 +484,12 @@ public class ProjectApplication {
         return this.projectRepository.findAll();
     }
 
-    public Optional<Project> findById(String dslId, String associationId, String associationType) {
+    public Optional<Project> findById(String dslId, String associationId, String associationType, String associationPlatform) {
         var projectOptional = this.projectRepository.findById(dslId);
         if (projectOptional.isEmpty()) {
             return projectOptional;
         }
-        this.checkProjectPermission(associationId, associationType, projectOptional.get());
+        this.checkProjectPermission(associationId, associationType, associationPlatform, projectOptional.get());
         return projectOptional;
     }
 
@@ -497,16 +498,16 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
     }
 
-    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType, String associationId, String associationType) {
-        return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType, associationId, associationType);
+    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType, String associationId, String associationType, String associationPlatform) {
+        return this.projectRepository.findPageByGroupId(pageNum, pageSize, projectGroupId, workflowName, sortType, associationId, associationType, associationPlatform);
     }
 
     public Optional<Project> findByWorkflowRef(String workflowRef) {
         return this.projectRepository.findByWorkflowRef(workflowRef);
     }
 
-    public Optional<Project> findByName(String associationId, String associationType, String name) {
-        return this.projectRepository.findByName(associationId, associationType, name);
+    public Optional<Project> findByName(String associationId, String associationType, String associationPlatform, String name) {
+        return this.projectRepository.findByName(associationId, associationType, associationPlatform, name);
     }
 
     public List<ProjectVo> findByIds(List<String> ids) {

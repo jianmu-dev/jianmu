@@ -144,7 +144,7 @@ public class TaskInstanceInternalApplication {
         // 创建表达式上下文
         var context = new ElContext();
         // 外部参数加入上下文
-        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
+        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform())
                 .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
@@ -263,7 +263,7 @@ public class TaskInstanceInternalApplication {
                         .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
                 workflowInstance.terminateInStart();
                 this.workflowInstanceRepository.save(workflowInstance);
-            }else {
+            } else {
                 log.error("清除Volume失败");
                 this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
             }

@@ -156,7 +156,7 @@ public class ViewController {
     public NameSpacesVo findAllNamespace() {
         var type = this.secretApplication.getCredentialManagerType();
         var session = this.userContextHolder.getSession();
-        var list = this.secretApplication.findAll(session.getAssociationId(), session.getAssociationType());
+        var list = this.secretApplication.findAll(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
 
         return NameSpacesVo.builder()
                 .credentialManagerType(type)
@@ -168,14 +168,14 @@ public class ViewController {
     @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
     public Namespace findByName(@PathVariable String name) {
         var session = this.userContextHolder.getSession();
-        return this.secretApplication.findByName(session.getAssociationId(), session.getAssociationType(), name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
+        return this.secretApplication.findByName(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
     }
 
     @GetMapping("/namespaces/{name}/keys")
     @Operation(summary = "查询键值对列表", description = "查询键值对列表")
     public List<String> findAll(@PathVariable String name) {
         var session = this.userContextHolder.getSession();
-        var kvs = this.secretApplication.findAllByNamespaceName(session.getAssociationId(), session.getAssociationType(), name);
+        var kvs = this.secretApplication.findAllByNamespaceName(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), name);
         return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
     }
 
@@ -305,7 +305,8 @@ public class ViewController {
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
         var session = this.userContextHolder.getSession();
-        var project = this.projectApplication.findById(projectId, session.getAssociationId(), session.getAssociationType()).orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+        var project = this.projectApplication.findById(projectId, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform())
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var projectVo = ProjectMapper.INSTANCE.toProjectDetailVo(project);
         var projectLinkGroup = this.projectGroupApplication.findLinkByProjectId(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目关联项目组"));
@@ -524,7 +525,7 @@ public class ViewController {
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
         var session = this.userContextHolder.getSession();
-        var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName(), session.getAssociationId(), session.getAssociationType());
+        var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
             projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
@@ -621,7 +622,7 @@ public class ViewController {
     @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
     public List<ExternalParameterLabelVo> findAllLabels() {
         var session = this.userContextHolder.getSession();
-        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(session.getAssociationId(), session.getAssociationType());
+        List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         ArrayList<ExternalParameterLabelVo> externalParameterLabelVos = new ArrayList<>();
         externalParameterLabels.forEach(e -> externalParameterLabelVos.add(
                 ExternalParameterLabelVo.builder()
@@ -653,7 +654,7 @@ public class ViewController {
     @Operation(summary = "获取外部参数列表", description = "获取外部参数列表")
     public List<ExternalParameterVo> findAllExternalParameters() {
         var session = this.userContextHolder.getSession();
-        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(session.getAssociationId(), session.getAssociationType());
+        List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         ArrayList<ExternalParameterVo> externalParameterVos = new ArrayList<>();
         externalParameters.forEach(externalParameter -> externalParameterVos.add(ExternalParameterVo.builder()
                 .id(externalParameter.getId())

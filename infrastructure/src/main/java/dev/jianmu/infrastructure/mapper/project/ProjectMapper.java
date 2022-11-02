@@ -14,8 +14,8 @@ import java.util.Optional;
  * @create 2021-04-23 11:39
  */
 public interface ProjectMapper {
-    @Insert("insert into jm_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time, concurrent, association_id, association_type) " +
-            "values(#{id}, #{dslSource}, #{dslType}, #{enabled}, #{mutable}, #{triggerType}, #{gitRepoId}, #{workflowName}, #{workflowDescription}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime}, #{concurrent}, #{associationId}, #{associationType})")
+    @Insert("insert into jm_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, created_time, last_modified_by, last_modified_time, concurrent, association_id, association_type, association_platform) " +
+            "values(#{id}, #{dslSource}, #{dslType}, #{enabled}, #{mutable}, #{triggerType}, #{gitRepoId}, #{workflowName}, #{workflowDescription}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime}, #{concurrent}, #{associationId}, #{associationType}, #{associationPlatform})")
     void add(Project project);
 
     @Delete("delete from jm_project where workflow_ref = #{workflowRef}")
@@ -41,6 +41,7 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
+    @Result(column = "association_platform", property = "associationPlatform")
     Optional<Project> findById(String id);
 
     @Select("<script>" +
@@ -48,6 +49,7 @@ public interface ProjectMapper {
             "<where>  `workflow_name` = #{name} " +
             "   <if test='associationId != null'> AND `association_id` = #{associationId} </if>" +
             "   <if test='associationType != null'> AND `association_type` = #{associationType} </if>" +
+            "   <if test='associationPlatform != null'> AND `association_platform` = #{associationPlatform} </if>" +
             "</where>" +
             "</script>")
     @Result(column = "workflow_name", property = "workflowName")
@@ -65,7 +67,11 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
-    Optional<Project> findByName(@Param("associationId") String associationId, @Param("associationType") String associationType, @Param("name") String name);
+    @Result(column = "association_platform", property = "associationPlatform")
+    Optional<Project> findByName(@Param("associationId") String associationId,
+                                 @Param("associationType") String associationType,
+                                 @Param("associationPlatform") String associationPlatform,
+                                 @Param("name") String name);
 
     @Select("select * from jm_project where workflow_ref = #{workflowRef}")
     @Result(column = "workflow_name", property = "workflowName")
@@ -83,6 +89,7 @@ public interface ProjectMapper {
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
+    @Result(column = "association_platform", property = "associationPlatform")
     Optional<Project> findByWorkflowRef(String workflowRef);
 
     @Select("<script>" +
@@ -128,6 +135,7 @@ public interface ProjectMapper {
             "<where>" +
             "   <if test='associationId != null'> AND `jp`.`association_id` = #{associationId} </if>" +
             "   <if test='associationType != null'> AND `jp`.`association_type` = #{associationType} </if>" +
+            "   <if test='associationPlatform != null'> AND `jp`.`association_platform` = #{associationPlatform} </if>" +
             "   <if test='projectGroupId != null'> AND `plp`.`project_group_id` = #{projectGroupId} </if>" +
             "   <if test='workflowName != null'> AND (`jp`.`workflow_name` like concat('%', #{workflowName}, '%') OR `jp`.`workflow_description` like concat('%', #{workflowName}, '%'))</if>" +
             "</where>" +
@@ -158,7 +166,8 @@ public interface ProjectMapper {
                                      @Param("workflowName") String workflowName,
                                      @Param("sortType") String sortType,
                                      @Param("associationId") String associationId,
-                                     @Param("associationType") String associationType);
+                                     @Param("associationType") String associationType,
+                                     @Param("associationPlatform") String associationPlatform);
 
     @Select("<script>" +
             "SELECT jp.*, jpl.* FROM `jm_project` `jp` JOIN `jm_project_last_execution` `jpl` ON (`jp`.`workflow_ref` = `jpl`.`workflow_ref`)  " +

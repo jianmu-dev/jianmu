@@ -457,7 +457,7 @@ public class TriggerApplication {
             return null;
         }
         // 创建表达式上下文
-        var context = this.findTriggerContext(triggerEvent.getPayload(), project.getAssociationId(), project.getAssociationType());
+        var context = this.findTriggerContext(triggerEvent.getPayload(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         var webhookDefinitionVersion = this.webhookDefinitionVersionRepository.findByType(dslWebhook.getWebhook())
                 .orElseThrow(() -> new DataNotFoundException("未找到Webhook定义版本：" + dslWebhook.getWebhook()));
         // 查询触发事件
@@ -487,11 +487,11 @@ public class TriggerApplication {
     }
 
     // 获取trigger的context
-    private ElContext findTriggerContext(String payload, String associationId, String associationTYpe) {
+    private ElContext findTriggerContext(String payload, String associationId, String associationType, String associationPlatform) {
         // 创建表达式上下文
         var context = new ElContext();
         // 外部参数加入上下文
-        this.externalParameterRepository.findAll(associationId, associationTYpe)
+        this.externalParameterRepository.findAll(associationId, associationType, associationPlatform)
                 .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         try {
             var webhookPayload = this.objectMapper.readValue(payload, WebhookPayload.class);
@@ -543,7 +543,7 @@ public class TriggerApplication {
         var webhook = trigger.getWebhook();
         var webhookParams = webhook.getParam();
         // 创建表达式上下文
-        var context = this.findTriggerContext(newWebRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
+        var context = this.findTriggerContext(newWebRequest.getPayload(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         // 查询触发事件
         WebhookEvent webhookEvent = null;
         if (webhook.getEvents() != null) {
@@ -619,7 +619,7 @@ public class TriggerApplication {
         if (webhook.getAuth() != null) {
             var auth = webhook.getAuth();
             var authToken = this.calculateExp(auth.getToken(), ResultType.STRING, context);
-            var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType());
+            var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
             if (authToken.getType() != Parameter.Type.STRING) {
                 log.warn("Auth Token表达式计算错误");
                 newWebRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
@@ -708,7 +708,7 @@ public class TriggerApplication {
         var webhook = trigger.getWebhook();
         var webhookParams = webhook.getParam();
         // 创建表达式上下文
-        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
+        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         // 查询触发事件
         WebhookEvent webhookEvent = null;
         if (webhook.getEvents() != null) {
@@ -784,7 +784,7 @@ public class TriggerApplication {
         if (webhook.getAuth() != null) {
             var auth = webhook.getAuth();
             var authToken = this.calculateExp(auth.getToken(), ResultType.STRING, context);
-            var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType());
+            var authValue = this.findSecret(auth.getValue(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
             if (authToken.getType() != Parameter.Type.STRING) {
                 log.warn("Auth Token表达式计算错误");
                 webRequest.setStatusCode(WebRequest.StatusCode.UNAUTHORIZED);
@@ -824,14 +824,14 @@ public class TriggerApplication {
         }
     }
 
-    private String findSecret(String secretExp, String associationId, String associationType) {
+    private String findSecret(String secretExp, String associationId, String associationType, String associationPlatform) {
         var secret = this.isSecret(secretExp);
         if (secret == null) {
             throw new IllegalArgumentException("密钥参数格式错误：" + secretExp);
         }
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = secret.split("\\.");
-        var kv = this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1], associationId, associationType)
+        var kv = this.credentialManager.findByNamespaceNameAndKey(strings[0], strings[1], associationId, associationType, associationPlatform)
                 .orElseThrow(() -> new DataNotFoundException("未找到密钥"));
         return kv.getValue();
     }
@@ -995,7 +995,7 @@ public class TriggerApplication {
             webRequest.setPayload(this.storageService.readWebhook(webRequest.getId()));
         }
         // 创建表达式上下文
-        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType());
+        var context = this.findTriggerContext(webRequest.getPayload(), project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         WebhookEvent webhookEvent = null;
         dev.jianmu.application.dsl.webhook.Webhook trigger = WebhookDslParser.parse(workflow.getDslText()).getTrigger();
         if (trigger.getWebhook() != null) {

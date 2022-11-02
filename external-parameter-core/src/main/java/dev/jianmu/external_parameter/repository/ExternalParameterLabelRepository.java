@@ -15,9 +15,9 @@ public interface ExternalParameterLabelRepository {
 
     void add(ExternalParameterLabel externalParameterLabel);
 
-    void deleteByAssociationIdAndType(String associationId, String associationType);
+    void deleteByAssociationIdAndType(String associationId, String associationType, String associationPlatform);
 
-    List<ExternalParameterLabel> findAll(String id, String type);
+    List<ExternalParameterLabel> findAll(String id, String type, String associationPlatform);
 
-    Optional<ExternalParameterLabel> findByValue(String id, String type, String value);
+    Optional<ExternalParameterLabel> findByValue(String id, String type, String associationPlatform, String value);
 }

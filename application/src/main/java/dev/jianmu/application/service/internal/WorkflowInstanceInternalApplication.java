@@ -125,7 +125,7 @@ public class WorkflowInstanceInternalApplication {
 
     }
 
-    private Set<GlobalParameter> findGlobalParameters(String triggerId, String workflowRef, String version, String associationId, String associationTYpe) {
+    private Set<GlobalParameter> findGlobalParameters(String triggerId, String workflowRef, String version, String associationId, String associationType, String associationPlatform) {
         var workflow = this.workflowRepository.findByRefAndVersion(workflowRef, version)
                 .orElseThrow(() -> new DataNotFoundException("未找到流程"));
         // 查询参数源
@@ -135,7 +135,7 @@ public class WorkflowInstanceInternalApplication {
         // 创建表达式上下文
         var context = new ElContext();
         // 外部参数加入上下文
-        this.externalParameterRepository.findAll(associationId, associationTYpe)
+        this.externalParameterRepository.findAll(associationId, associationType, associationPlatform)
                 .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
@@ -179,7 +179,7 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         if (project.isConcurrent()) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
-                    .forEach(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType()));
+                    .forEach(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform()));
             return;
         }
         // 检查是否存在运行中的流程
@@ -192,16 +192,16 @@ public class WorkflowInstanceInternalApplication {
             return;
         }
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
-                .ifPresent(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType()));
+                .ifPresent(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform()));
     }
 
     // 流程实例创建Volume
-    private void createVolume(WorkflowInstance workflowInstance, ProjectLastExecution projectLastExecution, String associationId, String associationTYpe) {
+    private void createVolume(WorkflowInstance workflowInstance, ProjectLastExecution projectLastExecution, String associationId, String associationTYpe, String associationPlatform) {
         MDC.put("triggerId", workflowInstance.getTriggerId());
         workflowInstance.createVolume();
         // 添加全局参数
         try {
-            var globalParameters = this.findGlobalParameters(workflowInstance.getTriggerId(), workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion(), associationId, associationTYpe);
+            var globalParameters = this.findGlobalParameters(workflowInstance.getTriggerId(), workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion(), associationId, associationTYpe, associationPlatform);
             workflowInstance.setGlobalParameters(globalParameters);
         } catch (Exception e) {
             log.error("流程实例启动失败：", e);

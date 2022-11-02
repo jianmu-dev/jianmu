@@ -56,6 +56,7 @@ public class ExternalParameterLabel extends BaseAssociation {
         private String value;
         private String associationId;
         private String associationType;
+        private String associationPlatform;
 
         public Builder() {
         }
@@ -69,13 +70,18 @@ public class ExternalParameterLabel extends BaseAssociation {
             return this;
         }
 
-        public ExternalParameterLabel.Builder associationId(String associationId) {
+        public Builder associationId(String associationId) {
             this.associationId = associationId;
             return this;
         }
 
-        public ExternalParameterLabel.Builder associationType(String associationType) {
+        public Builder associationType(String associationType) {
             this.associationType = associationType;
+            return this;
+        }
+
+        public Builder associationPlatform(String associationPlatform) {
+            this.associationPlatform = associationPlatform;
             return this;
         }
 
@@ -84,8 +90,7 @@ public class ExternalParameterLabel extends BaseAssociation {
             parameterLabel.id = UUID.randomUUID().toString().replace("-", "");
             parameterLabel.value = this.value;
             parameterLabel.lastModifiedTime = LocalDateTime.now();
-            parameterLabel.setAssociationId(this.associationId);
-            parameterLabel.setAssociationType(this.associationType);
+            parameterLabel.updateAssociation(this.associationId, this.associationType, this.associationPlatform);
             return parameterLabel;
         }
     }
