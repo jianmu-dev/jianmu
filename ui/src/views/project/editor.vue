@@ -42,7 +42,7 @@ import { IRootState } from '@/model';
 import yaml from 'yaml';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
-import { pushTop } from '@/utils/push-top';
+import { pushTop } from '@/utils/jump-address';
 import { DSL_CURRENT_VERSION } from '@/components/workflow/version';
 
 export default defineComponent({

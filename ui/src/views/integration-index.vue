@@ -113,9 +113,8 @@ import ProjectItem from '@/views/common/project-item.vue';
 import { IProjectVo } from '@/api/dto/project';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { useRouter } from 'vue-router';
-import { pushTop } from '@/utils/push-top';
+import { pushTop } from '@/utils/jump-address';
 import ProjectPreviewDialog from '@/views/common/project-preview-dialog.vue';
-import { useStore } from 'vuex';
 import sleep from '@/utils/sleep';
 
 const MAX_AUTO_REFRESHING_OF_NO_RUNNING_COUNT = 5;
