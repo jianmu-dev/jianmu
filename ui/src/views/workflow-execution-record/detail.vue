@@ -5,7 +5,7 @@
       :session="session"
       :entry="entry"
       @jump="handleJump"
-      @back="handleBack"
+      @back="toEntry"
       @logout="handleLogout"
       @trigger="handleTrigger"
       @update:model-value="handleChangeRouterParam"
@@ -22,6 +22,7 @@ import { IState } from '@/model/modules/session';
 import { ISession } from '@/model/modules/session';
 import { IWorkflowDetailParam } from '@/components/workflow/workflow-detail/model/data/common';
 import { ViewModeEnum } from '@/api/dto/enumeration';
+import { toEntry } from '@/utils/jump-address';
 
 export default defineComponent({
   props: {
@@ -56,9 +57,7 @@ export default defineComponent({
       loaded,
       workflowDetail,
       session: computed<ISession | undefined>(() => state.session),
-      handleBack() {
-        window.location.href = store.getters[`${sessionNs}/entryUrl`];
-      },
+      toEntry,
       handleJump(projectGroupId: string) {
         if (!projectGroupId) {
           return;

@@ -11,11 +11,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import yaml from 'yaml';
-import { namespace as sessionNs } from '@/store/modules/session';
-import { useStore } from 'vuex';
 import { Global } from '@/components/workflow/workflow-editor/model/data/global';
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
+import { toEntry } from '@/utils/jump-address';
 
 export default defineComponent({
   props: {
@@ -30,7 +29,6 @@ export default defineComponent({
     const { proxy } = getCurrentInstance() as any;
     const router = useRouter();
     const route = useRoute();
-    const store = useStore();
     const entry = computed<boolean>(() => true);
     const { payload } = route.params;
     const loading = ref<boolean>(false);
@@ -120,7 +118,7 @@ export default defineComponent({
         await router.push({ name: 'index' });
         return;
       }
-      window.location.href = store.getters[`${sessionNs}/entryUrl`];
+      toEntry();
     };
     return {
       loaded,

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import _store from '@/store';
 import { INDEX } from '@/router/path-def';
-import { namespace as sessionNs } from '@/store/modules/session';
+import { toEntry } from '@/utils/jump-address';
 
 /**
  * 加载业务模块路由
@@ -90,7 +90,7 @@ router.beforeEach((to, from, next) => {
     window.top === window
   ) {
     // 强制跳转到entryUrl
-    window.top.location.href = store.getters[`${sessionNs}/entryUrl`];
+    toEntry();
     return;
   }
   next();

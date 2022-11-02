@@ -312,7 +312,7 @@ import { active, del, executeImmediately, synchronize } from '@/api/project';
 import { datetimeFormatter } from '@/utils/formatter';
 import WebhookDrawer from './webhook-drawer.vue';
 import { useRouter } from 'vue-router';
-import { pushTop } from '@/utils/push-top';
+import { pushTop } from '@/utils/jump-address';
 import { terminate } from '@/api/workflow-execution-record';
 import dayjs from 'dayjs';
 
