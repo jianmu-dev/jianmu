@@ -16,13 +16,13 @@ public interface ExternalParameterRepository {
 
     void deleteById(String id);
 
-    void deleteByAssociationIdAndType(String associationId, String associationType);
+    void deleteByAssociationIdAndType(String associationId, String associationType, String associationPlatform);
 
     void updateById(ExternalParameter externalParameter);
 
     Optional<ExternalParameter> findById(String id);
 
-    List<ExternalParameter> findAll(String id, String type);
+    List<ExternalParameter> findAll(String id, String type, String associationPlatform);
 
-    Optional<ExternalParameter> findByRef(String ref, String associationId, String associationType);
+    Optional<ExternalParameter> findByRef(String ref, String associationId, String associationType, String associationPlatform);
 }

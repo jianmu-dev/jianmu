@@ -25,25 +25,21 @@ public class ExternalParameterLabelRepositoryImpl implements ExternalParameterLa
 
     @Override
     public void add(ExternalParameterLabel externalParameterLabel) {
-        if (externalParameterLabel.getAssociationId() == null || externalParameterLabel.getAssociationType() == null) {
-            externalParameterLabel.setAssociationId("");
-            externalParameterLabel.setAssociationType("");
-        }
         this.externalParameterLabelMapper.add(externalParameterLabel);
     }
 
     @Override
-    public void deleteByAssociationIdAndType(String associationId, String associationType) {
-        this.externalParameterLabelMapper.deleteByAssociationIdAndType(associationId, associationType);
+    public void deleteByAssociationIdAndType(String associationId, String associationType, String associationPlatform) {
+        this.externalParameterLabelMapper.deleteByAssociationIdAndType(associationId, associationType, associationPlatform);
     }
 
     @Override
-    public List<ExternalParameterLabel> findAll(String id, String type) {
-        return this.externalParameterLabelMapper.findAll(id, type);
+    public List<ExternalParameterLabel> findAll(String id, String type, String associationPlatform) {
+        return this.externalParameterLabelMapper.findAll(id, type, associationPlatform);
     }
 
     @Override
-    public Optional<ExternalParameterLabel> findByValue(String id, String type, String value) {
-        return this.externalParameterLabelMapper.findByValue(id, type, value);
+    public Optional<ExternalParameterLabel> findByValue(String id, String type, String associationPlatform, String value) {
+        return this.externalParameterLabelMapper.findByValue(id, type, associationPlatform, value);
     }
 }

@@ -8,10 +8,11 @@ package dev.jianmu.project.aggregate;
  */
 public abstract class BaseAssociation {
 
-
     private String associationId;
 
     private String associationType;
+
+    private String associationPlatform;
 
     public String getAssociationId() {
         return associationId;
@@ -21,11 +22,22 @@ public abstract class BaseAssociation {
         return associationType;
     }
 
-    public void setAssociationId(String associationId) {
-        this.associationId = associationId;
+    public String getAssociationPlatform() {
+        return associationPlatform;
     }
 
-    public void setAssociationType(String associationType) {
+    public void updateAssociation(String associationId, String associationType, String associationPlatform) {
+        this.associationId = associationId;
         this.associationType = associationType;
+        this.associationPlatform = associationPlatform;
+        if (associationId == null) {
+            this.associationId = "";
+        }
+        if (associationType == null) {
+            this.associationType = "";
+        }
+        if (associationPlatform == null) {
+            this.associationPlatform = "";
+        }
     }
 }

@@ -35,20 +35,20 @@ public class ExternalParameterController {
     @Operation(summary = "创建外部参数", description = "创建外部参数")
     public void create(@RequestBody @Valid ExternalParameterCreatingDto dto) {
         var session = this.userContextHolder.getSession();
-        this.externalParameterApplication.create(dto.getName(), dto.getType(), dto.getRef(), dto.getLabel(), dto.getValue(), session.getAssociationId(), session.getAssociationType());
+        this.externalParameterApplication.create(dto.getName(), dto.getType(), dto.getRef(), dto.getLabel(), dto.getValue(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
 
     @DeleteMapping("{id}")
     @Operation(summary = "删除外部参数", description = "删除外部参数")
     public void delete(@PathVariable("id") String id) {
         var session = this.userContextHolder.getSession();
-        this.externalParameterApplication.delete(id, session.getAssociationId(), session.getAssociationType());
+        this.externalParameterApplication.delete(id, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
 
     @PutMapping
     @Operation(summary = "修改外部参数", description = "修改外部参数")
     public void update(@RequestBody @Valid ExternalParameterUpdatingDto dto) {
         var session = this.userContextHolder.getSession();
-        this.externalParameterApplication.update(dto.getId(), dto.getValue(), dto.getName(), dto.getLabel(), dto.getType(), session.getAssociationId(), session.getAssociationType());
+        this.externalParameterApplication.update(dto.getId(), dto.getValue(), dto.getName(), dto.getLabel(), dto.getType(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
 }

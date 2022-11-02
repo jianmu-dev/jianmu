@@ -22,7 +22,7 @@ public interface ProjectRepository {
 
     Optional<Project> findById(String id);
 
-    Optional<Project> findByName(String associationId, String associationType, String name);
+    Optional<Project> findByName(String associationId, String associationType, String associationPlatform, String name);
 
     Optional<Project> findByWorkflowRef(String workflowRef);
 

@@ -27,10 +27,6 @@ public class ProjectRepositoryImpl implements ProjectRepository {
 
     @Override
     public void add(Project project) {
-        if (project.getAssociationId() == null || project.getAssociationType() == null) {
-            project.setAssociationId("");
-            project.setAssociationType("");
-        }
         this.projectMapper.add(project);
     }
 
@@ -50,8 +46,8 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     @Override
-    public Optional<Project> findByName(String associationId, String associationType, String name) {
-        return this.projectMapper.findByName(associationId, associationType, name);
+    public Optional<Project> findByName(String associationId, String associationType, String associationPlatform, String name) {
+        return this.projectMapper.findByName(associationId, associationType, associationPlatform, name);
     }
 
     @Override
@@ -84,8 +80,8 @@ public class ProjectRepositoryImpl implements ProjectRepository {
         return this.projectMapper.findAll();
     }
 
-    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType, String associationId, String associationType) {
+    public PageInfo<ProjectVo> findPageByGroupId(Integer pageNum, Integer pageSize, String projectGroupId, String workflowName, String sortType, String associationId, String associationType, String associationPlatform) {
         return PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> this.projectMapper.findAllByGroupId(projectGroupId, workflowName, sortType, associationId, associationType));
+                .doSelectPageInfo(() -> this.projectMapper.findAllByGroupId(projectGroupId, workflowName, sortType, associationId, associationType, associationPlatform));
     }
 }

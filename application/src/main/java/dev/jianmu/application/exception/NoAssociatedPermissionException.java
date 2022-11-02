@@ -9,11 +9,13 @@ package dev.jianmu.application.exception;
 public class NoAssociatedPermissionException extends RuntimeException {
     private final String associationId;
     private final String associationType;
+    private final String associationPlatform;
 
-    public NoAssociatedPermissionException(String message, String associationId, String associationType) {
+    public NoAssociatedPermissionException(String message, String associationId, String associationType, String associationPlatform) {
         super(message);
         this.associationId = associationId;
         this.associationType = associationType;
+        this.associationPlatform = associationPlatform;
     }
 
     public String getAssociationId() {
@@ -22,5 +24,9 @@ public class NoAssociatedPermissionException extends RuntimeException {
 
     public String getAssociationType() {
         return associationType;
+    }
+
+    public String getAssociationPlatform() {
+        return associationPlatform;
     }
 }

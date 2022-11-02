@@ -25,10 +25,6 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
 
     @Override
     public void add(ExternalParameter externalParameter) {
-        if (externalParameter.getAssociationId() == null || externalParameter.getAssociationType() == null) {
-            externalParameter.setAssociationId("");
-            externalParameter.setAssociationType("");
-        }
         this.externalParameterMapper.add(externalParameter);
     }
 
@@ -38,8 +34,8 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
     }
 
     @Override
-    public void deleteByAssociationIdAndType(String associationId, String associationType) {
-        this.externalParameterMapper.deleteByAssociationIdAndType(associationId, associationType);
+    public void deleteByAssociationIdAndType(String associationId, String associationType, String associationPlatform) {
+        this.externalParameterMapper.deleteByAssociationIdAndType(associationId, associationType,associationPlatform);
     }
 
     @Override
@@ -53,12 +49,12 @@ public class ExternalParameterRepositoryImpl implements ExternalParameterReposit
     }
 
     @Override
-    public List<ExternalParameter> findAll(String id, String type) {
-        return this.externalParameterMapper.findAll(id, type);
+    public List<ExternalParameter> findAll(String id, String type, String associationPlatform) {
+        return this.externalParameterMapper.findAll(id, type, associationPlatform);
     }
 
     @Override
-    public Optional<ExternalParameter> findByRef(String ref, String associationId, String associationType) {
-        return this.externalParameterMapper.findByRef(ref, associationId, associationType);
+    public Optional<ExternalParameter> findByRef(String ref, String associationId, String associationType, String associationPlatform) {
+        return this.externalParameterMapper.findByRef(ref, associationId, associationType, associationPlatform);
     }
 }

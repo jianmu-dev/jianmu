@@ -210,7 +210,7 @@ public class WorkerInternalApplication {
         // 创建表达式上下文
         var context = new ElContext();
         // 外部参数加入上下文
-        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
+        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform())
                 .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         // 全局参数加入上下文
         workflowInstance.getGlobalParameters()
@@ -281,7 +281,7 @@ public class WorkerInternalApplication {
         // 查询项目
         var project = this.projectRepository.findByWorkflowRef(taskInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + taskInstance.getWorkflowRef()));
-        var secretSet = this.getSecretParameterSet(isShellNode, instanceParameters, parameters, project.getAssociationId(), project.getAssociationType());
+        var secretSet = this.getSecretParameterSet(isShellNode, instanceParameters, parameters, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         if (!isShellNode) {
             parameterMap = parameterMap.entrySet().stream()
                     .filter(entry -> entry.getKey() != null)
@@ -379,7 +379,7 @@ public class WorkerInternalApplication {
         return this.parameterDomainService.createNoSecParameterMap(parameterMap, parameters);
     }
 
-    private HashSet<WorkerSecret> getSecretParameterSet(boolean isShellNode, List<InstanceParameter> instanceParameters, List<Parameter> parameters, String associationId, String associationType) {
+    private HashSet<WorkerSecret> getSecretParameterSet(boolean isShellNode, List<InstanceParameter> instanceParameters, List<Parameter> parameters, String associationId, String associationType, String associationPlatform) {
         var secretParameters = parameters.stream()
                 .filter(parameter -> parameter instanceof SecretParameter)
                 // 过滤非正常语法
@@ -390,7 +390,7 @@ public class WorkerInternalApplication {
                 .filter(parameter -> parameter.getId().equals(instanceParameter.getParameterId()))
                 .findFirst()
                 .ifPresent(parameter -> {
-                    var kvPairOptional = this.findSecret(parameter, associationId, associationType);
+                    var kvPairOptional = this.findSecret(parameter, associationId, associationType, associationPlatform);
                     kvPairOptional.ifPresent(kv -> {
                         var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
                         secretSet.add(WorkerSecret.builder()
@@ -403,10 +403,10 @@ public class WorkerInternalApplication {
         return secretSet;
     }
 
-    private Optional<KVPair> findSecret(Parameter<?> parameter, String associationId, String associationType) {
+    private Optional<KVPair> findSecret(Parameter<?> parameter, String associationId, String associationType, String associationPlatform) {
         // 处理密钥类型参数, 获取值后转换为String类型参数
         var strings = parameter.getStringValue().split("\\.");
-        return this.credentialManager.findByNamespaceNameAndKey(associationId, associationType, strings[0], strings[1]);
+        return this.credentialManager.findByNamespaceNameAndKey(associationId, associationType, associationPlatform, strings[0], strings[1]);
     }
 
     /**
@@ -599,13 +599,14 @@ public class WorkerInternalApplication {
             var runnerEnvs = new HashMap<String, String>();
             node.getTaskParameters().forEach(taskParameter -> {
                 if (taskParameter.getType() == Parameter.Type.SECRET) {
-                    this.findUnitSecret(taskParameter, nodeDef, project.getAssociationId(), project.getAssociationType()).ifPresent(workerSecret -> {
-                        unitSecrets.add(workerSecret);
-                        runnerSecrets.add(SecretVar.builder()
-                                .env(workerSecret.getEnv())
-                                .name(workerSecret.getEnv())
-                                .build());
-                    });
+                    this.findUnitSecret(taskParameter, nodeDef, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform())
+                            .ifPresent(workerSecret -> {
+                                unitSecrets.add(workerSecret);
+                                runnerSecrets.add(SecretVar.builder()
+                                        .env(workerSecret.getEnv())
+                                        .name(workerSecret.getEnv())
+                                        .build());
+                            });
                 } else {
                     runnerEnvs.put((isShellNode ? "" : "JIANMU_") + taskParameter.getRef().toUpperCase(), taskParameter.getExpression());
                 }
@@ -660,10 +661,10 @@ public class WorkerInternalApplication {
                 .build();
     }
 
-    private Optional<WorkerSecret> findUnitSecret(TaskParameter taskParameter, NodeDef nodeDef, String associationId, String associationType) {
+    private Optional<WorkerSecret> findUnitSecret(TaskParameter taskParameter, NodeDef nodeDef, String associationId, String associationType, String associationPlatform) {
         var parameter = Parameter.Type.SECRET.newParameter(this.findSecretByExpression(taskParameter.getExpression()));
         if (parameter.getStringValue().split("\\.").length == 2) {
-            var kvPairOptional = this.findSecret(parameter, associationId, associationType);
+            var kvPairOptional = this.findSecret(parameter, associationId, associationType, associationPlatform);
             return kvPairOptional.map(kv -> {
                 var secretParameter = Parameter.Type.STRING.newParameter(kv.getValue());
                 return Optional.of(WorkerSecret.builder()

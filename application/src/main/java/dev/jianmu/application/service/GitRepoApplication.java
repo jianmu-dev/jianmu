@@ -234,10 +234,10 @@ public class GitRepoApplication {
     @Transactional
     public void deleteGitRepoData(String id, List<String> projectIds) {
         // 删除密钥
-        this.credentialManager.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name());
+        this.credentialManager.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name());
         // 删除外部参数
-        this.externalParameterRepository.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name());
-        this.externalParameterLabelRepository.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name());
+        this.externalParameterRepository.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name());
+        this.externalParameterLabelRepository.deleteByAssociationIdAndType(id, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name());
         //删除项目关联表
         this.projectLinkGroupRepository.deleteByProjectIdIn(projectIds);
         this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME)

@@ -48,6 +48,7 @@ public class KVPair extends BaseAssociation {
         private String value;
         private String associationId;
         private String associationType;
+        private String associationPlatform;
 
         private Builder() {
         }
@@ -81,13 +82,17 @@ public class KVPair extends BaseAssociation {
             return this;
         }
 
+        public Builder associationPlatform(String associationPlatform) {
+            this.associationPlatform = associationPlatform;
+            return this;
+        }
+
         public KVPair build() {
             KVPair kVPair = new KVPair();
             kVPair.setNamespaceName(namespaceName);
             kVPair.setKey(key);
             kVPair.setValue(value);
-            kVPair.setAssociationId(associationId);
-            kVPair.setAssociationType(associationType);
+            kVPair.updateAssociation(this.associationId, this.associationType, this.associationPlatform);
             return kVPair;
         }
     }

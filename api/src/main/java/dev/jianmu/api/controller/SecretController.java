@@ -6,7 +6,6 @@ import dev.jianmu.api.mapper.KVPairDtoMapper;
 import dev.jianmu.api.mapper.NamespaceDtoMapper;
 import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.application.service.SecretApplication;
-import dev.jianmu.application.util.AssociationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,12 +26,10 @@ import javax.validation.Valid;
 public class SecretController {
     private final SecretApplication secretApplication;
     private final UserContextHolder userContextHolder;
-    private final AssociationUtil associationUtil;
 
-    public SecretController(SecretApplication secretApplication, UserContextHolder userContextHolder, AssociationUtil associationUtil) {
+    public SecretController(SecretApplication secretApplication, UserContextHolder userContextHolder) {
         this.secretApplication = secretApplication;
         this.userContextHolder = userContextHolder;
-        this.associationUtil = associationUtil;
     }
 
     @PostMapping("/namespaces")
@@ -40,8 +37,7 @@ public class SecretController {
     public void createNamespace(@RequestBody @Valid NamespaceDto namespaceDto) {
         var namespace = NamespaceDtoMapper.INSTANCE.toNamespace(namespaceDto);
         var session = this.userContextHolder.getSession();
-        namespace.setAssociationId(session.getAssociationId());
-        namespace.setAssociationType(session.getAssociationType());
+        namespace.updateAssociation(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         this.secretApplication.createNamespace(namespace);
     }
 
@@ -49,7 +45,7 @@ public class SecretController {
     @Operation(summary = "删除命名空间", description = "删除命名空间")
     public void deleteNamespace(@PathVariable String name) {
         var session = this.userContextHolder.getSession();
-        this.secretApplication.deleteNamespace(session.getAssociationId(), session.getAssociationType(), name);
+        this.secretApplication.deleteNamespace(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), name);
     }
 
     @PostMapping("/namespaces/{name}")
@@ -58,8 +54,7 @@ public class SecretController {
         var session = this.userContextHolder.getSession();
         var kv = KVPairDtoMapper.INSTANCE.toKVPair(kvPairDto);
         kv.setNamespaceName(name);
-        kv.setAssociationId(session.getAssociationId());
-        kv.setAssociationType(session.getAssociationType());
+        kv.updateAssociation(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         this.secretApplication.createKVPair(kv);
     }
 
@@ -67,6 +62,6 @@ public class SecretController {
     @Operation(summary = "删除键值对", description = "删除键值对")
     public void deleteKVPair(@PathVariable String name, @PathVariable String key) {
         var session = this.userContextHolder.getSession();
-        this.secretApplication.deleteKVPair(session.getAssociationId(), session.getAssociationType(), name, key);
+        this.secretApplication.deleteKVPair(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), name, key);
     }
 }

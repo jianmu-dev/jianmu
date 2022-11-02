@@ -13,8 +13,8 @@ import java.util.Optional;
  * @create 2021-04-20 13:31
  */
 public interface KVPairMapper {
-    @Insert("insert into jm_secret_kv_pair(association_id, association_type, namespace_name, kv_key, kv_value, created_time) " +
-            "values(#{associationId}, #{associationType}, #{namespaceName}, #{key}, #{value}, #{createdTime})")
+    @Insert("insert into jm_secret_kv_pair(association_id, association_type, association_platform, namespace_name, kv_key, kv_value, created_time) " +
+            "values(#{associationId}, #{associationType}, #{associationPlatform}, #{namespaceName}, #{key}, #{value}, #{createdTime})")
     void add(KVPair kvPair);
 
     @Delete("<script>" +
@@ -22,10 +22,12 @@ public interface KVPairMapper {
             "<where> namespace_name = #{namespaceName} and kv_key = #{key}" +
             " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
             " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            " <if test='associationPlatform != null'> AND association_platform = #{associationPlatform} </if>" +
             "</where>" +
             "</script>")
     void deleteByNameAndKey(@Param("associationId") String associationId,
                             @Param("associationType") String associationType,
+                            @Param("associationPlatform") String associationPlatform,
                             @Param("namespaceName") String namespaceName,
                             @Param("key") String key);
 
@@ -34,10 +36,12 @@ public interface KVPairMapper {
             "<where> namespace_name = #{namespaceName}" +
             " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
             " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            " <if test='associationPlatform != null'> AND association_platform = #{associationPlatform} </if>" +
             "</where>" +
             "</script>")
     void deleteByName(@Param("associationId") String associationId,
                       @Param("associationType") String associationType,
+                      @Param("associationPlatform") String associationPlatform,
                       @Param("namespaceName") String namespaceName);
 
     @Select("<script>" +
@@ -45,6 +49,7 @@ public interface KVPairMapper {
             "<where> namespace_name = #{namespaceName} and kv_key = #{key}" +
             " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
             " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            " <if test='associationPlatform != null'> AND association_platform = #{associationPlatform} </if>" +
             "</where>" +
             "</script>")
     @Result(column = "namespace_name", property = "namespaceName")
@@ -53,6 +58,7 @@ public interface KVPairMapper {
     @Result(column = "created_time", property = "createdTime")
     Optional<KVPair> findByNamespaceNameAndKey(@Param("associationId") String associationId,
                                                @Param("associationType") String associationType,
+                                               @Param("associationPlatform") String associationPlatform,
                                                @Param("namespaceName") String namespaceName,
                                                @Param("key") String key);
 
@@ -61,6 +67,7 @@ public interface KVPairMapper {
             "<where> namespace_name = #{namespaceName}" +
             " <if test='associationId != null'> AND association_id = #{associationId} </if>" +
             " <if test='associationType != null'> AND association_type = #{associationType} </if>" +
+            " <if test='associationPlatform != null'> AND association_platform = #{associationPlatform} </if>" +
             "</where>" +
             "order by created_time desc" +
             "</script>")
@@ -70,7 +77,11 @@ public interface KVPairMapper {
     @Result(column = "created_time", property = "createdTime")
     List<KVPair> findByNamespaceName(@Param("associationId") String associationId,
                                      @Param("associationType") String associationType,
+                                     @Param("associationPlatform") String associationPlatform,
                                      @Param("namespaceName") String namespaceName);
 
-    @Delete("DELETE FROM `jm_secret_kv_pair` WHERE `association_id` = #{associationId} AND `association_type` = #{associationType}")
-    void deleteByAssociationIdAndType(@Param("associationId") String associationId, @Param("associationType") String associationType);}
+    @Delete("DELETE FROM `jm_secret_kv_pair` WHERE `association_id` = #{associationId} AND `association_type` = #{associationType} AND `association_platform` = #{associationPlatform}")
+    void deleteByAssociationIdAndType(@Param("associationId") String associationId,
+                                      @Param("associationType") String associationType,
+                                      @Param("associationPlatform") String associationPlatform);
+}

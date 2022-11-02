@@ -96,7 +96,7 @@ public class WorkflowInternalApplication {
         // 创建表达式上下文
         var context = new ElContext();
         // 外部参数加入上下文
-        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType())
+        this.externalParameterRepository.findAll(project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform())
                 .forEach(extParam -> context.add("ext", extParam.getRef(), ParameterUtil.toParameter(extParam.getType().name(), extParam.getValue())));
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
