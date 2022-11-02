@@ -22,7 +22,6 @@ import { IState } from '@/model/modules/session';
 import { ISession } from '@/model/modules/session';
 import { IWorkflowDetailParam } from '@/components/workflow/workflow-detail/model/data/common';
 import { ViewModeEnum } from '@/api/dto/enumeration';
-import { IRootState } from '@/model';
 
 export default defineComponent({
   props: {
@@ -41,8 +40,7 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const state = store.state[sessionNs] as IState;
-    const rootState = store.state as IRootState;
-    const entry = rootState.entry || false;
+    const entry = true;
 
     const loading = ref<boolean>(false);
     // workflow 详情数据是否加载完成
@@ -59,12 +57,6 @@ export default defineComponent({
       workflowDetail,
       session: computed<ISession | undefined>(() => state.session),
       handleBack() {
-        if (!entry) {
-          // router.push({ name: 'index' });
-          const { fullPath } = rootState.fromRoute;
-          router.push(fullPath);
-          return;
-        }
         window.location.href = store.getters[`${sessionNs}/entryUrl`];
       },
       handleJump(projectGroupId: string) {

@@ -18,26 +18,6 @@
     <div class="right">
       <!-- <button class="jm-icon-workflow-edit edit-button" @click="jumpToEdit">编辑</button> -->
       <button class="jm-icon-button-on trigger-button" @click="trigger" @keypress.enter.prevent>触发</button>
-      <!--      <div v-show="!entry" class="vertical-divider"></div>-->
-      <!--      <router-link v-if="!session && !entry" :to="{ name: 'login' }">-->
-      <!--        <div class="no-login"></div>-->
-      <!--      </router-link>-->
-      <!--      <div class="no-login" v-if="!session && !entry"></div>-->
-      <!--      <jm-dropdown v-else-if="session && !entry" trigger="click">-->
-      <!--        <span class="el-dropdown-link">-->
-      <!--          <jm-tooltip :content="session.username" placement="left">-->
-      <!--            <span class="username">{{-->
-      <!--                session.username.charAt(0).toUpperCase()-->
-      <!--              }}</span>-->
-      <!--          </jm-tooltip>-->
-      <!--          <i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
-      <!--        </span>-->
-      <!--        <template #dropdown>-->
-      <!--          <jm-dropdown-menu>-->
-      <!--            <jm-dropdown-item @click="$emit('logout')">退出</jm-dropdown-item>-->
-      <!--          </jm-dropdown-menu>-->
-      <!--        </template>-->
-      <!--      </jm-dropdown>-->
     </div>
   </div>
 </template>
@@ -235,48 +215,6 @@ export default defineComponent({
       &:hover {
         background-color: #eff7ff;
         color: @primary-color;
-      }
-    }
-
-    .vertical-divider {
-      width: 1px;
-      height: 20px;
-      margin-left: 20px;
-      margin-right: 10px;
-      background-color: #cdd1e3;
-    }
-
-    .no-login {
-      width: 36px;
-      height: 36px;
-      background-image: url('@/assets/svgs/nav/top/default-avatar.svg');
-      background-position: center center;
-      background-repeat: no-repeat;
-    }
-
-    .el-dropdown-link {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 10px;
-      color: #333333;
-      cursor: pointer;
-
-      .username {
-        display: inline-block;
-        width: 36px;
-        height: 36px;
-        line-height: 36px;
-        text-align: center;
-        overflow: hidden;
-        background-color: #7b8c9c;
-        border-radius: 18px;
-        font-size: 26px;
-        font-weight: bold;
-        color: #ffffff;
-      }
-
-      .el-icon-arrow-down::before {
-        color: #082340;
       }
     }
   }

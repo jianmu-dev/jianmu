@@ -5,7 +5,7 @@ import { IRootState } from '@/model';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IErrorMessageVo } from '@/api/dto/common';
 import { checkLocation } from '@/utils/rest';
-import { toLogin } from '@/utils/login';
+import { toLogin } from '@/utils/jump-address';
 
 /**
  * 全局错误处理
@@ -42,7 +42,6 @@ export async function globalErrorHandler(
         proxy.$error((data as IErrorMessageVo).message);
         break;
       case 401: {
-        // TODO 去登录
         toLogin();
         break;
       }

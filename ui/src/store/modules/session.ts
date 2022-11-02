@@ -5,6 +5,7 @@ import { ISession } from '@/model/modules/session';
 import { getCookie } from '@/utils/cookie';
 import { decode } from 'js-base64';
 import { IGitRepo } from '@/model/modules/git-repo';
+import { toLogin } from '@/utils/jump-address';
 
 export const DEFAULT_SESSION = {
   clientType: '',
@@ -45,13 +46,16 @@ export default {
   },
   mutations: {
     mutateSession(state: IState) {
-      let session;
-      if (getCookie('JM-Session')) {
-        session = JSON.parse(decode(getCookie('JM-Session') as string)) as ISession;
-      } else {
-        session = DEFAULT_SESSION;
+      const cookie = getCookie('JM-Session');
+      if (!cookie) {
+        toLogin();
+        return;
       }
-      state.session = session;
+      try {
+        state.session = JSON.parse(decode(cookie)) as ISession;
+      } catch (err) {
+        toLogin();
+      }
     },
 
     mutateGitRepo(state: IState, payload: IGitRepo) {
@@ -63,15 +67,16 @@ export default {
       if (!state.session.associationPlatform) {
         return import.meta.env.VITE_JIANMUHUB_LOGIN_URL as string;
       }
-      let url = '';
-      switch (state.session.associationPlatform) {
-        case 'GITLINK':
-          url =
-            import.meta.env.MODE === 'saas'
-              ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${state.gitRepo.owner}/${state.gitRepo.ref}/devops`
-              : `/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
-          break;
-      }
+      const url = `/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
+      // TODO 集成到gitlink后放开判断
+      // switch (state.session.associationPlatform) {
+      //   case 'GITLINK':
+      //     url =
+      //       import.meta.env.MODE !== 'development'
+      //         ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${state.gitRepo.owner}/${state.gitRepo.ref}/devops`
+      //         : `/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
+      //     break;
+      // }
       return url;
     },
   },

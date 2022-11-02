@@ -2,7 +2,6 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import _store from '@/store';
 import { INDEX } from '@/router/path-def';
 import { namespace as sessionNs } from '@/store/modules/session';
-import { IState as ISessionState } from '@/model/modules/session';
 
 /**
  * 加载业务模块路由
@@ -44,14 +43,14 @@ const router = createRouter({
     loadModuleRoute(
       INDEX,
       '首页',
-      false,
+      true,
       import('@/layout/integration.vue'),
       import.meta.globEager('./modules/integration.ts'),
       'integration',
     ),
     // loadModuleRoute(INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
     // full模块
-    loadModuleRoute('/full', undefined, false, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
+    loadModuleRoute('/full', undefined, true, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
     // error模块
     loadModuleRoute(
       '/error',
@@ -84,33 +83,16 @@ router.beforeEach((to, from, next) => {
 
   const store = _store as any;
   store.commit('mutateFromRoute', { to, from });
-  const entry = true;
-  const { session } = store.state[sessionNs] as ISessionState;
-  const entryUrl = store.getters[`${sessionNs}/entryUrl`];
   if (
-    entry &&
     // 表示integration布局
     to.matched.find(({ meta: { alias } }) => alias === 'integration') &&
     // 表示非子页面
-    window.top === window &&
-    session
+    window.top === window
   ) {
     // 强制跳转到entryUrl
-    window.top.location.href = entryUrl;
+    window.top.location.href = store.getters[`${sessionNs}/entryUrl`];
     return;
   }
-  if (to.name === 'index' && !session && entry) {
-    next({ name: 'http-status-error', params: { value: 404 } });
-    return;
-  }
-  for (const m of to.matched) {
-    if (m.meta.auth && !session) {
-      // 处理认证
-      next(false);
-      return;
-    }
-  }
-
   next();
 });
 export default router;

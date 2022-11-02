@@ -1,10 +1,8 @@
 <template>
   <div :class="{ 'http-status-error': true, [`_${status}`]: true }">
     <div class="desc">{{ message }}</div>
-    <div class="back" v-if="!entry || entryUrl">
-      <router-link :to="{ name: 'index' }">
-        <jm-button type="primary" class="jm-icon-button-back" size="small">返回首页</jm-button>
-      </router-link>
+    <div class="back">
+      <jm-button type="primary" class="jm-icon-button-back" size="small" @click="toEntry">返回</jm-button>
     </div>
     <bottom-nav />
   </div>
@@ -16,8 +14,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import BottomNav from '@/views/nav/bottom.vue';
-import { useStore } from 'vuex';
-import { namespace } from '@/store/modules/session';
+import { toEntry } from '@/utils/jump-address';
 
 export default defineComponent({
   components: { BottomNav },
@@ -33,9 +30,6 @@ export default defineComponent({
   },
   setup(props) {
     let status = +props.value;
-    const store = useStore();
-    const entryUrl = store.getters[`${namespace}/entryUrl`];
-    const entry = true;
     const messages: {
       [key: number]: string;
     } = {
@@ -48,8 +42,7 @@ export default defineComponent({
       status = 404;
     }
     return {
-      entry,
-      entryUrl,
+      toEntry,
       status,
       message: messages[status],
     };
