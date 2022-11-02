@@ -5,12 +5,10 @@
       <div class="auto-left">
         <div class="first-row">
           <div class="title">{{ project.workflowName }}</div>
-          <div class="vertical-divider"></div>
-          <div v-show="entry" class="jm-icon-workflow-branch branch">{{ project.branch || 'master' }}</div>
-          <div v-show="!entry" class="jm-icon-workflow-group" style="color: #096dd9"></div>
-          <div v-show="!entry" class="project-group-name" @click="$emit('jump', project?.projectGroupId)">
-            {{ project.projectGroupName }}
-          </div>
+          <template v-if="project.branch">
+            <div class="vertical-divider"></div>
+            <div class="jm-icon-workflow-branch branch">{{ project.branch }}</div>
+          </template>
         </div>
         <div class="second-row" v-if="project.workflowDescription">{{ project.workflowDescription }}</div>
       </div>
@@ -34,10 +32,6 @@ export default defineComponent({
     project: {
       type: Object as PropType<IProjectDetailVo>,
       required: true,
-    },
-    entry: {
-      type: Boolean,
-      default: false,
     },
     session: Object as PropType<ISession>,
   },
@@ -138,16 +132,6 @@ export default defineComponent({
           height: 25px;
           background-image: url('@/assets/svgs/index/group-btn.svg');
           background-size: cover;
-        }
-
-        .project-group-name {
-          margin-left: 7px;
-          height: 20px;
-          font-size: 16px;
-          font-weight: 400;
-          color: #096dd9;
-          line-height: 20px;
-          cursor: pointer;
         }
 
         .jm-icon-workflow-branch:before {

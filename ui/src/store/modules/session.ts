@@ -67,14 +67,16 @@ export default {
       if (!state.session.associationPlatform) {
         return import.meta.env.VITE_JIANMUHUB_LOGIN_URL as string;
       }
-      const url = `/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
+      const url = `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${
+        state.gitRepo.ref
+      }&userId=${state.session.associationPlatformUserId}`;
       // TODO 集成到gitlink后放开判断
       // switch (state.session.associationPlatform) {
       //   case 'GITLINK':
       //     url =
       //       import.meta.env.MODE !== 'development'
       //         ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${state.gitRepo.owner}/${state.gitRepo.ref}/devops`
-      //         : `/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
+      //         : `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
       //     break;
       // }
       return url;
