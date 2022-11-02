@@ -4,7 +4,6 @@
       v-if="recordDetail.project"
       :project="recordDetail.project"
       :session="session"
-      :entry="entry"
       @jump="groupId => $emit('jump', groupId)"
       @back="$emit('back')"
       @logout="$emit('logout')"
