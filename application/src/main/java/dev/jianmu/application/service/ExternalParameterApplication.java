@@ -1,11 +1,13 @@
 package dev.jianmu.application.service;
 
-import dev.jianmu.application.exception.*;
+import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.ExternalParameterRepeatException;
+import dev.jianmu.application.exception.IncorrectParameterTypeException;
+import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
-import dev.jianmu.git.repo.aggregate.GitRepo;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,7 @@ public class ExternalParameterApplication {
                         .value(value)
                         .associationId(associationId)
                         .associationType(associationType)
+                        .associationPlatform(associationPlatform)
                         .build());
         this.saveLabel(associationId, associationType, associationPlatform, label);
     }
@@ -56,7 +59,7 @@ public class ExternalParameterApplication {
 
         if (associationId != null && associationType != null &&
                 (!associationId.equals(externalParameter.getAssociationId()) || !associationType.equals(externalParameter.getAssociationType()) || !associationPlatform.equals(externalParameter.getAssociationPlatform()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限" ,externalParameter.getAssociationId(), externalParameter.getAssociationType(), externalParameter.getAssociationPlatform());
+            throw new NoAssociatedPermissionException("无此仓库权限", externalParameter.getAssociationId(), externalParameter.getAssociationType(), externalParameter.getAssociationPlatform());
         }
 
         this.externalParameterRepository.deleteById(id);
@@ -102,6 +105,7 @@ public class ExternalParameterApplication {
                 ExternalParameterLabel.Builder.aReference()
                         .associationId(associationId)
                         .associationType(associationType)
+                        .associationPlatform(associationPlatform)
                         .value(label)
                         .build());
     }
