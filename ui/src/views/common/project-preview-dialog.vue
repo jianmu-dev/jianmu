@@ -36,7 +36,6 @@ import { computed, defineComponent, getCurrentInstance, onBeforeMount, ref, Setu
 import { TriggerTypeEnum, ViewModeEnum } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import { INodeDefVo } from '@/api/dto/project';
-import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
@@ -53,7 +52,6 @@ export default defineComponent({
   emits: ['close', 'prev-project', 'next-project'],
   setup(props: any, { emit }: SetupContext) {
     const { proxy } = getCurrentInstance() as any;
-    const store = useStore();
     const entry = true;
     const dialogVisible = ref<boolean>(true);
     const dialogWidth = computed<string>(() => (entry ? '1000px' : '1200px'));

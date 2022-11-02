@@ -73,12 +73,12 @@ const store = createStore<IRootState>({
         try {
           // 初始化版本
           commit('mutateVersions', await fetchVersion());
-          // 初始化session
-          commit(`${sessionNs}/mutateSession`, undefined, { root: true });
         } catch (err) {
           console.debug('fetch version failed', err.message);
         }
       }
+      // 初始化session
+      commit(`${sessionNs}/mutateSession`, undefined, { root: true });
       const session = (state as any)[`${sessionNs}`].session as ISession;
       if (session.associationType === 'GIT_REPO' && session.associationId) {
         // TODO 调用接口获取gitRepo

@@ -2,6 +2,7 @@ import { ConfigEnv, UserConfigExport } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 import { name, version } from './package.json';
+
 const target = 'http://172.16.101.231';
 const changeOrigin = true;
 // https://vitejs.dev/config/
@@ -31,32 +32,7 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
     server: {
       // 配置服务端代理
       proxy: {
-        // 会话
-        '/auth': { target, changeOrigin },
-        // worker
-        '/workers': { target, changeOrigin },
-        // 密钥管理
-        '/secrets': { target, changeOrigin },
-        // 流程定义
-        '/projects': { target, changeOrigin },
-        '/git': { target, changeOrigin },
-        '/webhook': { target, changeOrigin },
-        // 流程执行中心
-        '/workflow_instances': { target, changeOrigin },
-        '/logs': { target, changeOrigin },
-        // 查询
-        '/view': { target, changeOrigin },
-        // 节点库
-        '/library': { target, changeOrigin },
-        // 触发器
-        '/trigger': { target, changeOrigin },
-        // '/xxx': {
-        //   target: 'http://xxx.xxx.xxx.xxx',
-        //   // 发送请求头中，host会设置成target
-        //   changeOrigin: true,
-        // },
-        // 外部参数
-        '/external_parameters': { target, changeOrigin },
+        '/jianmu_saas': { target, changeOrigin },
       },
     },
   };

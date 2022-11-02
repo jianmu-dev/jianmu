@@ -25,58 +25,20 @@
         <span class="txt">{{ currentVersion }}</span>
       </div>
     </div>
-    <!--    <div class="right">-->
-    <!--      <div class="no-login" v-if="!session"></div>-->
-    <!--      <jm-dropdown v-else trigger="click">-->
-    <!--        <span class="el-dropdown-link">-->
-    <!--          <jm-tooltip :content="session.username" placement="left" v-if="loginType">-->
-    <!--            <img-->
-    <!--              :src="session.avatarUrl"-->
-    <!--              class="avatar"-->
-    <!--              @error="loadedError"-->
-    <!--              v-if="session.avatarUrl !== 'https://gitee.com/assets/no_portrait.png' && loaded"-->
-    <!--            />-->
-    <!--            <span class="username" v-else>{{ session.username?.charAt(0).toUpperCase() }}</span>-->
-    <!--          </jm-tooltip>-->
-    <!--          <jm-tooltip :content="session.username" placement="left" v-else>-->
-    <!--            <span class="username">{{ session.username?.charAt(0).toUpperCase() }}</span>-->
-    <!--          </jm-tooltip>-->
-    <!--          <i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
-    <!--        </span>-->
-    <!--        <template #dropdown>-->
-    <!--          <jm-dropdown-menu>-->
-    <!--            <jm-dropdown-item @click="logout">退出</jm-dropdown-item>-->
-    <!--          </jm-dropdown-menu>-->
-    <!--        </template>-->
-    <!--      </jm-dropdown>-->
-    <!--    </div>-->
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { namespace } from '@/store/modules/session';
-import { IState } from '@/model/modules/session';
-import { ISession } from '@/model/modules/session';
 import { version as v } from '@/../package.json';
 import { IRootState } from '@/model';
 import { IVersionVo } from '@/api/dto/common';
-import { toLogin } from '@/utils/login';
 
 export default defineComponent({
   setup() {
-    const { proxy } = getCurrentInstance() as any;
     const store = useStore();
     const rootState = store.state as IRootState;
-    // 头像图片正常显示
-    const loaded = ref<boolean>(true);
-    // const loginType = computed<string>(() => rootState.thirdPartyType);
-    const defaultSession = ref<ISession>();
-    const state = store.state[namespace] as IState;
-    const session = computed<ISession | undefined>(() => {
-      return defaultSession.value ? defaultSession.value : state.session;
-    });
     const currentVersion = `v${v}`;
     const newVersion = computed<IVersionVo | undefined>(() => {
       if (rootState.versions.length === 0 || rootState.versions[0].versionNo === currentVersion) {
@@ -87,30 +49,14 @@ export default defineComponent({
     });
 
     return {
-      loaded,
-      // loginType,
       currentVersion,
       newVersion,
-      session,
       view: () => {
         if (!newVersion.value) {
           return;
         }
 
         window.open(newVersion.value.releaseUrl, '_blank');
-      },
-      logout: () => {
-        try {
-          proxy.$success('退出成功');
-          // TODO 去登录
-          toLogin();
-        } catch (err) {
-          proxy.$throw(err, proxy);
-        }
-      },
-      // 头像加载失败
-      loadedError() {
-        loaded.value = false;
       },
     };
   },
@@ -170,49 +116,6 @@ export default defineComponent({
 
       .txt {
         font-size: 12px;
-        color: #082340;
-      }
-    }
-  }
-
-  .right {
-    .no-login {
-      width: 36px;
-      height: 36px;
-      background-image: url('@/assets/svgs/nav/top/default-avatar.svg');
-      background-position: center center;
-      background-repeat: no-repeat;
-    }
-
-    .el-dropdown-link {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 10px;
-      color: #333333;
-      cursor: pointer;
-
-      .avatar {
-        width: 36px;
-        height: 36px;
-        overflow: hidden;
-        border-radius: 50%;
-      }
-
-      .username {
-        display: inline-block;
-        width: 36px;
-        height: 36px;
-        line-height: 36px;
-        text-align: center;
-        overflow: hidden;
-        background-color: #7b8c9c;
-        border-radius: 18px;
-        font-size: 26px;
-        font-weight: bold;
-        color: #ffffff;
-      }
-
-      .el-icon-arrow-down::before {
         color: #082340;
       }
     }
