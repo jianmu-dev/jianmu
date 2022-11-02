@@ -218,6 +218,8 @@ public class Project extends BaseAssociation {
         private String associationId;
         // 联合类型
         private String associationType;
+        // 联合平台
+        private String associationPlatform;
 
         private Builder() {
         }
@@ -306,6 +308,11 @@ public class Project extends BaseAssociation {
             return this;
         }
 
+        public Builder associationPlatform(String associationPlatform) {
+            this.associationPlatform = associationPlatform;
+            return this;
+        }
+
         public Project build() {
             Project project = new Project();
             project.id = UUID.randomUUID().toString().replace("-", "");
@@ -322,8 +329,7 @@ public class Project extends BaseAssociation {
             project.dslText = this.dslText;
             project.lastModifiedBy = this.lastModifiedBy;
             project.lastModifiedTime = LocalDateTime.now();
-            project.setAssociationId(this.associationId);
-            project.setAssociationType(this.associationType);
+            project.updateAssociation(this.associationId, this.associationType, this.associationPlatform);
             return project;
         }
     }

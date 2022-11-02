@@ -42,7 +42,7 @@ public class VaultCredentialManager implements CredentialManager {
 
     @Override
     public void createNamespace(Namespace namespace) {
-        var name = this.getNamespace(namespace.getAssociationId(), namespace.getAssociationType(), namespace.getName());
+        var name = this.getNamespace(namespace.getAssociationId(), namespace.getAssociationType(), namespace.getName(), namespace.getAssociationPlatform());
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .get(name);
         if (res != null && res.getData() != null) {
@@ -54,14 +54,14 @@ public class VaultCredentialManager implements CredentialManager {
     }
 
     @Override
-    public void deleteNamespace(String associationId, String associationType, String name) {
+    public void deleteNamespace(String associationId, String associationType, String associationPlatform, String name) {
         this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .delete(this.getNamespace(associationId, associationType, name));
+                .delete(this.getNamespace(associationId, associationType, associationPlatform, name));
     }
 
     @Override
     public void createKVPair(KVPair kvPair) {
-        var namespace = this.getNamespace(kvPair.getAssociationId(), kvPair.getAssociationType(), kvPair.getNamespaceName());
+        var namespace = this.getNamespace(kvPair.getAssociationId(), kvPair.getAssociationType(), kvPair.getAssociationPlatform(), kvPair.getNamespaceName());
         if (kvPair.getKey().equals(EXAMPLE_KEY)) {
             throw new RuntimeException("该密钥名称为内置密钥名称，不可添加");
         }
@@ -79,8 +79,8 @@ public class VaultCredentialManager implements CredentialManager {
     }
 
     @Override
-    public void deleteKVPair(String associationId, String associationType, String namespaceName, String key) {
-        var namespace = this.getNamespace(associationId, associationType, namespaceName);
+    public void deleteKVPair(String associationId, String associationType, String associationPlatform, String namespaceName, String key) {
+        var namespace = this.getNamespace(associationId, associationType, namespaceName, associationPlatform);
         if (key.equals(EXAMPLE_KEY)) {
             throw new RuntimeException("该密钥名称为内置密钥名称，不可删除");
         }
@@ -98,8 +98,8 @@ public class VaultCredentialManager implements CredentialManager {
     }
 
     @Override
-    public Optional<Namespace> findNamespaceByName(String associationId, String associationType, String name) {
-        var namespace = this.getNamespace(associationId, associationType, name);
+    public Optional<Namespace> findNamespaceByName(String associationId, String associationType, String associationPlatform, String name) {
+        var namespace = this.getNamespace(associationId, associationType, associationPlatform, name);
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .get(namespace);
         if (res == null) {
@@ -109,8 +109,8 @@ public class VaultCredentialManager implements CredentialManager {
     }
 
     @Override
-    public List<KVPair> findAllKVByNamespaceName(String associationId, String associationType, String namespaceName) {
-        var namespace = this.getNamespace(associationId, associationType, namespaceName);
+    public List<KVPair> findAllKVByNamespaceName(String associationId, String associationType, String associationPlatform, String namespaceName) {
+        var namespace = this.getNamespace(associationId, associationType, associationPlatform, namespaceName);
         List<KVPair> kvPairs = new ArrayList<>();
         var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
                 .get(namespace);
@@ -124,7 +124,7 @@ public class VaultCredentialManager implements CredentialManager {
     }
 
     @Override
-    public List<Namespace> findAllNamespace(String associationId, String associationType) {
+    public List<Namespace> findAllNamespace(String associationId, String associationType, String associationPlatform) {
         var path = this.credentialProperties.getVault().getVaultEngineName();
         if (associationId != null && associationType != null) {
             path = path + "/" + associationType + "/" + associationId + "/";
@@ -146,8 +146,8 @@ public class VaultCredentialManager implements CredentialManager {
     }
 
     @Override
-    public Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String namespaceName, String key) {
-        var namespace = this.getNamespace(associationId, associationType, namespaceName);
+    public Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String associationPlatform, String namespaceName, String key) {
+        var namespace = this.getNamespace(associationId, associationType, associationPlatform, namespaceName);
         List<KVPair> kvPairs = new ArrayList<>();
         try {
             var res = this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
@@ -164,17 +164,17 @@ public class VaultCredentialManager implements CredentialManager {
         return Optional.empty();
     }
 
-    private String getNamespace(String associationId, String associationType, String namespaceName) {
-        if (associationId != null && associationType != null) {
-            return associationType + "/" + associationId + "/" + namespaceName;
+    private String getNamespace(String associationId, String associationType, String namespaceName, String associationPlatform) {
+        if (associationId != null && associationType != null && associationPlatform != null) {
+            return associationPlatform + "/" + associationType + "/" + associationId + "/" + namespaceName;
         }
         return namespaceName;
     }
 
     @Override
-    public void deleteByAssociationIdAndType(String associationId, String associationType) {
-        this.findAllNamespace(associationId, associationType)
+    public void deleteByAssociationIdAndType(String associationId, String associationType, String associationPlatform) {
+        this.findAllNamespace(associationId, associationType, associationPlatform)
                 .forEach(namespace -> this.vaultOperations.opsForKeyValue(this.credentialProperties.getVault().getVaultEngineName(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)
-                .delete(this.getNamespace(associationId, associationType, namespace.getName())));
+                .delete(this.getNamespace(associationId, associationType, associationPlatform, namespace.getName())));
     }
 }

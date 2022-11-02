@@ -22,7 +22,7 @@ public class ExternalParameterLabelApplication {
     }
 
     @Transactional
-    public List<ExternalParameterLabel> findAll(String id, String type) {
-        return this.externalParameterLabelRepository.findAll(id, type);
+    public List<ExternalParameterLabel> findAll(String id, String type, String platform) {
+        return this.externalParameterLabelRepository.findAll(id, type, platform);
     }
 }

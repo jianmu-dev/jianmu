@@ -99,10 +99,10 @@ public class AsyncTaskInstanceInternalApplication {
 
     // 任务重试
     @Transactional
-    public void retry(String instanceId, String taskRef, String associationId, String associationType) {
+    public void retry(String instanceId, String taskRef, String associationId, String associationType, String associationPlatform) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
-        this.checkProjectPermission(associationId, associationType, workflowInstance.getWorkflowRef());
+        this.checkProjectPermission(associationId, associationType, associationPlatform, workflowInstance.getWorkflowRef());
         MDC.put("triggerId", workflowInstance.getTriggerId());
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
@@ -111,23 +111,23 @@ public class AsyncTaskInstanceInternalApplication {
     }
 
     // 校验项目增删改查权限
-    private void checkProjectPermission(String associationId, String associationType, String workflowRef) {
+    private void checkProjectPermission(String associationId, String associationType, String associationPlatform, String workflowRef) {
         if (associationId == null || associationType == null) {
             return;
         }
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowRef));
-        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType())) {
-            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType());
+        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()) || !associationPlatform.equals(project.getAssociationPlatform())) {
+            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
         }
     }
 
     // 任务忽略
     @Transactional
-    public void ignore(String instanceId, String taskRef, String associationId, String associationType) {
+    public void ignore(String instanceId, String taskRef, String associationId, String associationType, String associationPlatform) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例: " + instanceId));
-        this.checkProjectPermission(associationId, associationType, workflowInstance.getWorkflowRef());
+        this.checkProjectPermission(associationId, associationType, associationPlatform, workflowInstance.getWorkflowRef());
         MDC.put("triggerId", workflowInstance.getTriggerId());
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));

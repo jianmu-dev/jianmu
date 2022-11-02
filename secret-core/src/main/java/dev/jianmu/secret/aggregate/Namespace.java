@@ -48,6 +48,7 @@ public class Namespace extends BaseAssociation {
         private String description;
         private String associationId;
         private String associationType;
+        private String associationPlatform;
 
         private Builder() {
         }
@@ -76,12 +77,16 @@ public class Namespace extends BaseAssociation {
             return this;
         }
 
+        public Builder associationPlatform(String associationPlatform) {
+            this.associationPlatform = associationPlatform;
+            return this;
+        }
+
         public Namespace build() {
             Namespace namespace = new Namespace();
             namespace.setName(name);
             namespace.setDescription(description);
-            namespace.setAssociationId(associationId);
-            namespace.setAssociationType(associationType);
+            namespace.updateAssociation(this.associationId, this.associationType, this.associationPlatform);
             return namespace;
         }
     }

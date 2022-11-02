@@ -15,19 +15,19 @@ public interface CredentialManager {
 
     void createNamespace(Namespace namespace);
 
-    void deleteNamespace(String associationId, String associationType, String name);
+    void deleteNamespace(String associationId, String associationType, String associationPlatform, String name);
 
     void createKVPair(KVPair kvPair);
 
-    void deleteKVPair(String associationId, String associationType, String namespaceName, String key);
+    void deleteKVPair(String associationId, String associationType, String associationPlatform, String namespaceName, String key);
 
-    Optional<Namespace> findNamespaceByName(String associationId, String associationType, String name);
+    Optional<Namespace> findNamespaceByName(String associationId, String associationType, String associationPlatform, String name);
 
-    List<KVPair> findAllKVByNamespaceName(String associationId, String associationType, String namespaceName);
+    List<KVPair> findAllKVByNamespaceName(String associationId, String associationType, String associationPlatform, String namespaceName);
 
-    List<Namespace> findAllNamespace(String associationId, String associationType);
+    List<Namespace> findAllNamespace(String associationId, String associationType, String associationPlatform);
 
-    Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String namespaceName, String key);
+    Optional<KVPair> findByNamespaceNameAndKey(String associationId, String associationType, String associationPlatform, String namespaceName, String key);
 
-    void deleteByAssociationIdAndType(String id, String name);
+    void deleteByAssociationIdAndType(String associationId, String associationType, String associationPlatform);
 }

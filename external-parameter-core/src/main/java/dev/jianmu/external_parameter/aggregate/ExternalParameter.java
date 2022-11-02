@@ -114,6 +114,7 @@ public class ExternalParameter extends BaseAssociation {
         private String label;
         private String associationId;
         private String associationType;
+        private String associationPlatform;
 
         public Builder() {
         }
@@ -157,6 +158,11 @@ public class ExternalParameter extends BaseAssociation {
             return this;
         }
 
+        public Builder associationPlatform(String associationPlatform) {
+            this.associationPlatform = associationPlatform;
+            return this;
+        }
+
         public ExternalParameter build() {
             var parameter = new ExternalParameter();
             parameter.id = UUID.randomUUID().toString().replace("-", "");
@@ -166,8 +172,7 @@ public class ExternalParameter extends BaseAssociation {
             parameter.type = this.type;
             parameter.label = this.label;
             parameter.lastModifiedTime = LocalDateTime.now();
-            parameter.setAssociationId(this.associationId);
-            parameter.setAssociationType(this.associationType);
+            parameter.updateAssociation(this.associationId, this.associationType, this.associationPlatform);
             return parameter;
         }
     }
