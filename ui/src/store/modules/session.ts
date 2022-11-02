@@ -6,6 +6,7 @@ import { getCookie } from '@/utils/cookie';
 import { decode } from 'js-base64';
 import { IGitRepo } from '@/model/modules/git-repo';
 import { toLogin } from '@/utils/jump-address';
+import { JM_ENTRY_URL } from '@/utils/constants';
 
 export const DEFAULT_SESSION = {
   clientType: '',
@@ -65,7 +66,7 @@ export default {
   getters: {
     entryUrl(state: IState): string {
       if (!state.session.associationPlatform) {
-        return import.meta.env.VITE_JIANMUHUB_LOGIN_URL as string;
+        return sessionStorage.getItem(JM_ENTRY_URL) || '/';
       }
       const url = `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${
         state.gitRepo.ref

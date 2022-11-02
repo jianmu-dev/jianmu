@@ -6,6 +6,7 @@ import { RouteLocationNormalized } from 'vue-router';
 import { ISession } from '@/model/modules/session';
 import { namespace as sessionNs } from '@/store/modules/session';
 import { getGitRepo } from '@/api/git-repo';
+import { JM_ENTRY_URL } from '@/utils/constants';
 
 const store = createStore<IRootState>({
   // 开发环境开启严格模式，在严格模式下，无论何时发生了状态变更且不是由 mutation 函数引起的，将会抛出错误
@@ -85,7 +86,10 @@ const store = createStore<IRootState>({
         const gitRepo = await getGitRepo(session.associationId);
         commit(`${sessionNs}/mutateGitRepo`, gitRepo, { root: true });
       }
-
+      // 初始化来源
+      if (!session.associationPlatform && document.referrer) {
+        sessionStorage.setItem(JM_ENTRY_URL, document.referrer);
+      }
       // if (state.workerTypes.length === 0) {
       //   // 初始化worker类型
       //   commit('mutateWorkerTypes', await listWorkerType());
