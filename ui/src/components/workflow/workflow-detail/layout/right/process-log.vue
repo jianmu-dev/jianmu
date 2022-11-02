@@ -14,7 +14,7 @@
         </div>
       </div>
       <div class="item">
-        <div class="param-key">最后完成时间</div>
+        <div class="param-key">完成时间</div>
         <div class="param-value">
           <jm-text-viewer :threshold="0" :value="datetimeFormatter(record.endTime)" :tip-append-to-body="false" />
         </div>
