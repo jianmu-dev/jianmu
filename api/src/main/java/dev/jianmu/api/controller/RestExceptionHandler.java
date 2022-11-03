@@ -1,13 +1,18 @@
 package dev.jianmu.api.controller;
 
+import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.api.vo.ErrorMessage;
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.application.exception.NoAssociatedPermissionException;
+import dev.jianmu.application.service.GitRepoApplication;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.infrastructure.exception.DBException;
+import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import org.apache.catalina.connector.ClientAbortException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -15,6 +20,8 @@ import org.springframework.vault.VaultException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.HandlerMethod;
 
@@ -22,6 +29,7 @@ import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -33,6 +41,23 @@ import java.util.List;
 @RestControllerAdvice
 public class RestExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
+
+    private final RestTemplate restTemplate;
+    private final GitRepoApplication gitRepoApplication;
+    private final UserContextHolder userContextHolder;
+    private final OAuth2Properties oAuth2Properties;
+
+    public RestExceptionHandler(
+            RestTemplate restTemplate,
+            GitRepoApplication gitRepoApplication,
+            UserContextHolder userContextHolder,
+            OAuth2Properties oAuth2Properties
+    ) {
+        this.restTemplate = restTemplate;
+        this.gitRepoApplication = gitRepoApplication;
+        this.userContextHolder = userContextHolder;
+        this.oAuth2Properties = oAuth2Properties;
+    }
 
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -143,5 +168,26 @@ public class RestExceptionHandler {
                 .message(ex.getMessage())
                 .description(request.getDescription(false))
                 .build();
+    }
+
+    @ExceptionHandler(NoAssociatedPermissionException.class)
+    public ResponseEntity<?> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
+        if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(ex.getAssociationType())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        var session = this.userContextHolder.getSession();
+        var gitRepo = this.gitRepoApplication.findById(ex.getAssociationId());
+        try {
+            var url = this.oAuth2Properties.getGitlink().getEngineAddress() + "gitlink_engine/auth/session";
+            var headers = new HttpHeaders();
+            headers.set(HttpHeaders.AUTHORIZATION, session.getId());
+            var param = new HashMap<String, Object>();
+            param.put("ref", gitRepo.getRef());
+            param.put("owner", gitRepo.getOwner());
+            this.restTemplate.exchange(url, HttpMethod.PUT, new HttpEntity<>(param, headers), String.class);
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        }
     }
 }
