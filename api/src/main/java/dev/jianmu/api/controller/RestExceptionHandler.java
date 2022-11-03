@@ -184,7 +184,6 @@ public class RestExceptionHandler {
             var param = new HashMap<String, Object>();
             param.put("ref", gitRepo.getRef());
             param.put("owner", gitRepo.getOwner());
-            param.put("timestamp", System.currentTimeMillis());
             this.restTemplate.exchange(url, HttpMethod.PUT, new HttpEntity<>(param, headers), String.class);
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (HttpClientErrorException e) {
