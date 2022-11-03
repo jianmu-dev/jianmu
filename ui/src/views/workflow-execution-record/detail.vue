@@ -97,7 +97,7 @@ export default defineComponent({
             redirectUrl: props.redirectUrl,
           });
         }
-        router.push({
+        router.replace({
           name: 'workflow-execution-record-detail',
           query,
         });
