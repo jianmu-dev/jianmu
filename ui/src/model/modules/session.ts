@@ -1,11 +1,6 @@
 import { IGitRepoVo } from '@/api/dto/git-repo';
 
 /**
- * 用户设置
- */
-export interface IUserSettings {}
-
-/**
  * 会话值对象
  */
 export interface ISession
@@ -29,9 +24,6 @@ export interface ISession
  * vuex状态
  */
 export interface IState {
-  username: string;
-  remember: boolean;
-  userSettings: IUserSettings;
   session: ISession;
   gitRepo: IGitRepoVo;
 }

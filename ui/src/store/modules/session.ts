@@ -6,7 +6,7 @@ import { getCookie } from '@/utils/cookie';
 import { decode } from 'js-base64';
 import { IGitRepo } from '@/model/modules/git-repo';
 import { toLogin } from '@/utils/jump-address';
-import { JM_ENTRY_URL } from '@/utils/constants';
+import _router from '@/router';
 
 export const DEFAULT_SESSION = {
   clientType: '',
@@ -23,15 +23,8 @@ export const DEFAULT_SESSION = {
  */
 export const namespace = 'session';
 
-/**
- * 获取状态
- * @param username
- */
-function getState(username?: string): IState {
+function getState(): IState {
   return {
-    username: '',
-    remember: false,
-    userSettings: {},
     gitRepo: {
       owner: '',
       ref: '',
@@ -66,7 +59,7 @@ export default {
   getters: {
     entryUrl(state: IState): string {
       if (!state.session.associationPlatform) {
-        return sessionStorage.getItem(JM_ENTRY_URL) || '/';
+        return (_router.currentRoute.value.query.redirectUrl as string) || '/';
       }
       const url = `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${
         state.gitRepo.ref
