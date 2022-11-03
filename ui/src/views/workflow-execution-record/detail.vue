@@ -102,11 +102,11 @@ export default defineComponent({
           proxy.$throw(err, proxy);
         }
       },
-      handleChangeRouterParam(routerParam: { viewMode?: ViewModeEnum, triggerId?: string }) {
+      handleChangeRouterParam(routerParam: { viewMode?: ViewModeEnum; triggerId?: string }) {
         if (!routerParam.triggerId) {
           delete routerParam.triggerId;
         }
-        router.push({
+        router.replace({
           name: 'workflow-execution-record-detail',
           query: {
             ...routerParam,
