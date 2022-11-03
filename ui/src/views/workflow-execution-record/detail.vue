@@ -35,6 +35,7 @@ export default defineComponent({
       default: ViewModeEnum.GRAPHIC,
     },
     triggerId: String,
+    redirectUrl: String,
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
@@ -88,11 +89,17 @@ export default defineComponent({
         if (!routerParam.triggerId) {
           delete routerParam.triggerId;
         }
+        const query = {
+          ...routerParam,
+        };
+        if (props.redirectUrl) {
+          Object.assign(query, {
+            redirectUrl: props.redirectUrl,
+          });
+        }
         router.push({
           name: 'workflow-execution-record-detail',
-          query: {
-            ...routerParam,
-          },
+          query,
         });
       },
     };
