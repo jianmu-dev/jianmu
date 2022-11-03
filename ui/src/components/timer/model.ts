@@ -48,7 +48,7 @@ export default class Timer {
     if (seconds === 0) {
       result += '0s';
     } else if (seconds > 0 && seconds < 1) {
-      result += '不足1s';
+      result += millisecond > 60 * 1000 ? '0s' : '不足1s';
     } else if (seconds >= 1 && seconds < 60) {
       result += `${Math.floor(seconds)}s`;
     } else if (seconds === 60) {
