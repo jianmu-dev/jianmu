@@ -1,5 +1,4 @@
 import { IVersionVo } from '@/api/dto/common';
-import { AssociationTypeEnum } from '@/api/dto/enumeration';
 
 /**
  * 滚动偏移量
