@@ -1,7 +1,6 @@
 <template>
   <div class="pipeline" v-loading="loading">
-    <jm-workflow-editor v-model="workflow" @back="close" @save="save"
-                        v-if="loaded"/>
+    <jm-workflow-editor v-model="workflow" @back="close" @save="save" v-if="loaded" />
   </div>
 </template>
 
@@ -80,20 +79,20 @@ export default defineComponent({
         try {
           loading.value = true;
           loaded.value = false;
-          const { dslText, projectGroupId, branch } = await fetchProjectDetail(props.id as string);
-          const dsl = yaml.parse(dslText);
-          const rawData = dsl['raw-data'];
-          const { name, global, description } = dsl;
+          const { dslText: t, projectGroupId: id, branch: b } = await fetchProjectDetail(props.id as string);
+          const dslData = yaml.parse(t);
+          const rawDslData = dslData['raw-data'];
+          const { name: n, global: g, description: d } = dslData;
           workflow.value = {
-            name,
-            groupId: projectGroupId,
-            description,
+            name: n,
+            groupId: id,
+            description: d,
             association: {
               entry: entry.value,
-              branch,
+              branch: b,
             },
-            global: new Global(global?.concurrent, global?.param),
-            data: rawData,
+            global: new Global(g?.concurrent, g?.param),
+            data: rawDslData,
           };
         } catch (err) {
           proxy.$throw(err, proxy);
@@ -103,15 +102,15 @@ export default defineComponent({
         }
       } else {
         authLogin();
-        let branch = props.branch;
+        let branchData = props.branch;
         // 获取分支信息（如果entry为true时，有必要获取分支信息）
         if (entry.value) {
           branches.value = await getBranches();
           const flag = branches.value.some(item => {
-            return item.branchName === branch;
+            return item.branchName === branchData;
           });
           if (!flag) {
-            branch = branches.value.find(item => item.isDefault)!.branchName;
+            branchData = branches.value.find(item => item.isDefault)!.branchName;
           }
         }
         workflow.value = {
@@ -120,7 +119,7 @@ export default defineComponent({
           description: '',
           association: {
             entry: entry.value,
-            branch,
+            branch: branchData,
           },
           global: new Global(),
           data: '',
@@ -134,7 +133,6 @@ export default defineComponent({
         return;
       }
       window.location.href = sessionState.session?.entryUrl;
-
     };
     return {
       loaded,
