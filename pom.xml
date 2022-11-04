@@ -7,7 +7,7 @@
     <groupId>dev.jianmu</groupId>
     <artifactId>main</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.3-gitlink</version>
+    <version>1.1.0-gitlink</version>
     <modules>
         <module>application</module>
         <module>infrastructure</module>

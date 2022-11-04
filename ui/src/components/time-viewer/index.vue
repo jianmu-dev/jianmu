@@ -20,6 +20,7 @@ export default defineComponent({
     let timeViewer: TimeViewer;
     onUpdated(() => {
       if (props.value !== timeValue.value) {
+        timeViewer.clearTimer();
         timeViewer = new TimeViewer(props.value);
         timeViewer.getTime((t: string) => {
           timeText.value = t;
