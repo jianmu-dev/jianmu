@@ -15,6 +15,7 @@ import { Global } from '@/components/workflow/workflow-editor/model/data/global'
 import { IGitRepoBranchVo } from '@/api/dto/git-repo';
 import { getBranches } from '@/api/git-repo';
 import { toEntry } from '@/utils/jump-address';
+import sleep from '@/utils/sleep';
 
 export default defineComponent({
   props: {
@@ -136,6 +137,7 @@ export default defineComponent({
           entry.value ? Reflect.deleteProperty(payload, 'projectGroupId') : Reflect.deleteProperty(payload, 'branch');
           const { id } = await saveProject(payload);
           proxy.$success(editMode ? '保存成功' : '新增成功');
+          await sleep(500);
           if (!back) {
             // 新增项目，再次点击保存进入项目编辑模式
             if (!editMode) {
