@@ -10,7 +10,7 @@
         <div class="project-name">{{ projectName || '未命名项目' }}</div>
         <div class="selector" v-if="!isShowGrouping">
           <jm-select v-model="editorForm.projectGroupId">
-            <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id"> </jm-option>
+            <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id"></jm-option>
           </jm-select>
         </div>
         <div class="branch" v-else>
@@ -19,8 +19,8 @@
         </div>
       </div>
       <div class="right-top-btn">
-        <jm-button size="small" class="save-return" @click="save(true)" :loading="loading">保存并返回 </jm-button>
-        <jm-button type="primary" size="small" @click="save(false)" :loading="loading">保存 </jm-button>
+        <jm-button size="small" class="save-return" @click="save(true)" :loading="loading">保存并返回</jm-button>
+        <jm-button type="primary" size="small" @click="save(false)" :loading="loading">保存</jm-button>
       </div>
     </div>
     <div :class="[entry ? 'dsl-editor-entry' : 'dsl-editor']">
@@ -204,6 +204,7 @@ export default defineComponent({
         }
         save(payload)
           .then(async ({ id }: IProjectIdVo) => {
+            editorForm.value.id = id;
             // 关闭loading
             loading.value = false;
 
