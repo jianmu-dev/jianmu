@@ -8,7 +8,6 @@ import { IState as ISessionState } from '@/model/modules/session';
 const instance = axios.create({
   // `baseURL` will be prepended to `url` unless `url` is absolute.
   // baseURL: 'http://xxx.xxx.xxx.xxx/',
-  baseURL: import.meta.env.VITE_AXIOS_BASE_URL as string | undefined,
   // default is `0` (no timeout)
   // timeout: 10 * 1000,
 });
