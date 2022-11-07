@@ -84,16 +84,6 @@
                 <configuration>
                     <from>
                         <image>registry://jianmudev/openjdk:11.0.16-jdk-wait-for-it</image>
-                        <platforms>
-                            <platform>
-                                <architecture>amd64</architecture>
-                                <os>linux</os>
-                            </platform>
-                            <platform>
-                                <architecture>arm64</architecture>
-                                <os>linux</os>
-                            </platform>
-                        </platforms>
                     </from>
                     <to>
                         <image>${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
