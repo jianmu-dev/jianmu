@@ -18,6 +18,7 @@ public class SessionVo {
     private String clientType;
     private Long expirationTime;
     private String id;
+    private String sessionId;
     private String accountId;
     private Boolean mobileBound;
     private String createdDate;
