@@ -1,8 +1,8 @@
 package dev.jianmu.api.controller;
 
 import dev.jianmu.api.util.UserContextHolder;
+import dev.jianmu.api.vo.ClientSessionVo;
 import dev.jianmu.api.vo.ErrorMessage;
-import dev.jianmu.api.vo.SessionVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.service.GitRepoApplication;
@@ -185,7 +185,7 @@ public class RestExceptionHandler {
             var param = new HashMap<String, Object>();
             param.put("ref", gitRepo.getRef());
             param.put("owner", gitRepo.getOwner());
-            var sessionVo = this.restTemplate.exchange(url, HttpMethod.PUT, new HttpEntity<>(param, headers), SessionVo.class).getBody();
+            var sessionVo = this.restTemplate.exchange(url, HttpMethod.PUT, new HttpEntity<>(param, headers), ClientSessionVo.class).getBody();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(sessionVo);
         } catch (HttpClientErrorException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
