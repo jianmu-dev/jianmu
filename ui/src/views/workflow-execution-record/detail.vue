@@ -75,10 +75,11 @@ export default defineComponent({
           // 清空当前选中record
           workflowDetail.value.triggerId = '';
           // 地址跳转
-          router.push({
+          router.replace({
             name: 'workflow-execution-record-detail',
             query: {
               projectId: props.projectId,
+              redirectUrl: props.redirectUrl,
             },
           });
         } else {

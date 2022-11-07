@@ -56,7 +56,7 @@ import RecordInfo from './layout/main/record-info.vue';
 import LogToolbar from './layout/main/log-toolbar.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
 import { ISession } from '@/model/modules/session';
-import { ViewModeEnum } from '@/api/dto/enumeration';
+import { ViewModeEnum, WorkflowExecutionRecordStatusEnum as SE } from '@/api/dto/enumeration';
 import { fetchProjectDetail } from '@/api/view-no-auth';
 import { IProjectDetailVo } from '@/api/dto/project';
 import { IEventType } from '@/api/dto/enumeration';
@@ -124,8 +124,16 @@ export default defineComponent({
         },
         () => {
           if (!firstLoad) {
+            const i = recordList.value.allRecords.findIndex((e: any) => {
+              return SE.RUNNING === e.status || SE.SUSPENDED === e.status || false;
+            });
+            // 所有实例中不存在运行和挂起状态数据 直接返回不刷新record
+            if (i === -1) return;
             // SSE重连之前请求最新数据
             recordList.value.refreshRecordList();
+            // 当前停留实例状态非挂起和运行 直接返回不刷新graph
+            const s = recordDetail.value.record?.status || SE.INIT;
+            if (s !== SE.RUNNING && s !== SE.SUSPENDED) return;
             graphPanel.value.refreshGraphPanel();
             return;
           }

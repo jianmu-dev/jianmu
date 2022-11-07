@@ -31,6 +31,8 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
     },
     server: {
       // 配置服务端代理
+      host: 'localhost',
+      port: 3200,
       proxy: {
         '/jianmu_saas': { target, changeOrigin },
       },
