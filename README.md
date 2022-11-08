@@ -1,5 +1,23 @@
 # 建木
 
+<p>
+	<a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://gitee.com/jianmu-dev/jianmu/badge/star.svg?theme=gvp' alt='gitee star'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu/blob/master/LICENSE">
+        <img src='https://img.shields.io/badge/liscense-MulanPSL--2.0-green.svg' alt='license'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/JDK11+-lightgrey.svg' alt='jdk'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/MySQL8+-lightgrey.svg' alt='mysql'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/OS%2FARCH-AMD64%2FARM64-important.svg' alt='os/arch'/>
+    </a>
+</p>
+
 #### 介绍
 
 > 建木是一个面向DevOps领域的极易扩展的开源无代码(图形化)/低代码(GitOps)工具。可以帮助用户轻松编排各种DevOps流程并分发到不同平台执行。
