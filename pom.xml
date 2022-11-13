@@ -7,7 +7,7 @@
     <groupId>dev.jianmu</groupId>
     <artifactId>main</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.2-saas.beta.1</version>
+    <version>0.1.0-saas</version>
     <modules>
         <module>application</module>
         <module>infrastructure</module>
