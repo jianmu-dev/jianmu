@@ -1,0 +1,1 @@
+ALTER TABLE jm_project MODIFY COLUMN workflow_name varchar(255);
