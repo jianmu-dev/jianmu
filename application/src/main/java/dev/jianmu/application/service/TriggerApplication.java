@@ -201,7 +201,7 @@ public class TriggerApplication {
                 .webhook(webhookType)
                 .eventInstances(eventInstances);
         var events = this.customWebhookDomainService.getGitEvents(this.oAuth2Properties.getThirdPartyType(), eventInstances);
-        String ref = project.getWorkflowName();
+        var ref = project.getId();
         var optionalTrigger = this.triggerRepository.findByProjectId(projectId);
         // 修改webhook
         if (optionalTrigger.isPresent()) {
