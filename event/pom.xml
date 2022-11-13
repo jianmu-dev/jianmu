@@ -5,7 +5,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>0.0.2-saas.beta.1</version>
+        <version>0.1.0-saas</version>
     </parent>
 
     <artifactId>event</artifactId>
