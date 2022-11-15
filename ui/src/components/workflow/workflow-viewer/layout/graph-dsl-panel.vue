@@ -104,6 +104,7 @@ export default defineComponent({
       getGraphData();
     };
     onUpdated(() => {
+      console.log('11');
       // 执行动画
       executeAnimation();
       // 切换record 重新生成画布
@@ -111,7 +112,11 @@ export default defineComponent({
     });
     // 保证整个视图都渲染完毕，才能确定图的宽高
     onMounted(() => {
-      getGraphData();
+      console.log('22');
+      // g6刷新详情不会正常渲染画布问题 预览需要执行画布
+      if (props.readonly) {
+        getGraphData();
+      }
     });
     return {
       container,
