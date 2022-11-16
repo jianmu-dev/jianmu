@@ -583,6 +583,7 @@ public class DslParser {
 
     private void checkPipeNode(String nodeName, Map<?, ?> node) {
         // 验证保留关键字
+        // TODO 待删除
         if (nodeName.equals("event")) {
             throw new DslException("节点名称不能使用event");
         }
