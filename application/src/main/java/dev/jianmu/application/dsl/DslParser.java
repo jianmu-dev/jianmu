@@ -589,6 +589,12 @@ public class DslParser {
         if (nodeName.equals("global")) {
             throw new DslException("节点名称不能使用global");
         }
+        if (nodeName.equalsIgnoreCase("start")) {
+            throw new DslException("节点名称不能使用" + nodeName);
+        }
+        if (nodeName.equalsIgnoreCase("end")) {
+            throw new DslException("节点名称不能使用" + nodeName);
+        }
         // 如果为Shell Node，不校验type
         var image = node.get("image");
         if (image != null) {
