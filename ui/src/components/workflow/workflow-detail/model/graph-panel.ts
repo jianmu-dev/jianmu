@@ -2,9 +2,9 @@ import { IGlobalParamseterVo, INodeDefVo } from '@/api/dto/project';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { fetchWorkflow, getGlobalParameters, listAsyncTaskInstance } from '@/api/view-no-auth';
 
-type DslCallbackFnType = (dslSourceCode: string, nodeInfos: INodeDefVo[])=>void;
-type TaskCallbackFnType = (taskRecords: ITaskExecutionRecordVo[])=>void;
-type GlobalParamsCallbackFnType = (globalParams: IGlobalParamseterVo[])=>void;
+type DslCallbackFnType = (dslSourceCode: string, nodeInfos: INodeDefVo[]) => void;
+type TaskCallbackFnType = (taskRecords: ITaskExecutionRecordVo[]) => void;
+type GlobalParamsCallbackFnType = (globalParams: IGlobalParamseterVo[]) => void;
 
 export class GraphPanel {
   private currentRecord: IWorkflowExecutionRecordVo;
@@ -12,7 +12,12 @@ export class GraphPanel {
   private readonly dslCallbackFn: DslCallbackFnType;
   private readonly taskCallbackFn: TaskCallbackFnType;
   private readonly globalParamsCallbackFn: GlobalParamsCallbackFnType;
-  constructor(currentRecord: IWorkflowExecutionRecordVo, dslCallbackFn: DslCallbackFnType, taskCallbackFn: TaskCallbackFnType, globalParamsCallbackFn: GlobalParamsCallbackFnType){
+  constructor(
+    currentRecord: IWorkflowExecutionRecordVo,
+    dslCallbackFn: DslCallbackFnType,
+    taskCallbackFn: TaskCallbackFnType,
+    globalParamsCallbackFn: GlobalParamsCallbackFnType,
+  ) {
     this.currentRecord = currentRecord;
     this.taskRecords = [];
     this.dslCallbackFn = dslCallbackFn;
@@ -24,23 +29,27 @@ export class GraphPanel {
     this.getGlobalParams();
   }
   async getGlobalParams() {
-    if (!this.currentRecord.triggerId || this.currentRecord.status==='INIT') {
+    if (!this.currentRecord.triggerId || this.currentRecord.status === 'INIT') {
       this.globalParamsCallbackFn([]);
       return;
     }
-    const params:IGlobalParamseterVo[] = await getGlobalParameters(this.currentRecord.triggerId);
+    const params: IGlobalParamseterVo[] = await getGlobalParameters(this.currentRecord.triggerId);
     this.globalParamsCallbackFn(params);
   }
   async getDslAndNodeinfos() {
     if (!this.currentRecord.workflowRef) {
       return;
     }
-    const { dslText: dslSourceCode, nodes } = await fetchWorkflow(this.currentRecord.workflowRef, this.currentRecord.workflowVersion);
+    const { dslText: dslSourceCode, nodes } = await fetchWorkflow(
+      this.currentRecord.workflowRef,
+      this.currentRecord.workflowVersion,
+    );
     const nodeInfos = nodes.filter(({ metadata }) => metadata).map(({ metadata }) => JSON.parse(metadata as string));
     this.dslCallbackFn(dslSourceCode, nodeInfos);
   }
   async getTaskRecords() {
     if (!this.currentRecord.triggerId) {
+      this.taskCallbackFn([]);
       return;
     }
     const taskRecords = (await listAsyncTaskInstance(this.currentRecord.triggerId)).map(instance => {
