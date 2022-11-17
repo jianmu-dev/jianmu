@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import _store from '@/store';
-import { INDEX } from '@/router/path-def';
+import { INDEX, INTEGRATION_INDEX } from '@/router/path-def';
 import { toEntry } from '@/utils/jump-address';
 
 /**
@@ -39,15 +39,16 @@ const loadModuleRoute = (
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // platform模块
+    // integration模块
     loadModuleRoute(
-      INDEX,
+      INTEGRATION_INDEX,
       '首页',
       true,
       import('@/layout/integration.vue'),
       import.meta.globEager('./modules/integration.ts'),
       'integration',
     ),
+    // platform模块
     // loadModuleRoute(INDEX, '首页', false, import('@/layout/platform.vue'), import.meta.globEager('./modules/platform.ts')),
     // full模块
     loadModuleRoute('/full', undefined, true, import('@/layout/full.vue'), import.meta.globEager('./modules/full.ts')),
