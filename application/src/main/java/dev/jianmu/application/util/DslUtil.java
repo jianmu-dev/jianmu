@@ -1,8 +1,10 @@
 package dev.jianmu.application.util;
 
+import dev.jianmu.application.exception.DslException;
 import lombok.Getter;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
 import java.util.List;
 import java.util.Map;
@@ -24,14 +26,17 @@ public class DslUtil {
     }
 
     public static Diff diff(String dslText1, String dslText2) {
-        var o1 = yaml.load(dslText1);
-        var o2 = yaml.load(dslText2);
-
-        var diff = new Diff();
-        diff.o1HasRawData = containsRawData(o1);
-        diff.o2HasRawData = containsRawData(o2);
-        diff.diff = compare(o1, o2);
-        return diff;
+        try {
+            var o1 = yaml.load(dslText1);
+            var o2 = yaml.load(dslText2);
+            var diff = new Diff();
+            diff.o1HasRawData = containsRawData(o1);
+            diff.o2HasRawData = containsRawData(o2);
+            diff.diff = compare(o1, o2);
+            return diff;
+        } catch (DuplicateKeyException e) {
+            throw new DslException("DSL解析异常: " + e.getMessage());
+        }
     }
 
     private static boolean containsRawData(Object o) {

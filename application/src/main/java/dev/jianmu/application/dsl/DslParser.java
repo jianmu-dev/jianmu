@@ -799,11 +799,18 @@ public class DslParser {
         }
         var nodeName = (String) ref;
         // 验证保留关键字
+        // TODO 待删除
         if (nodeName.equals("event")) {
             throw new DslException("节点ref不能使用event");
         }
         if (nodeName.equals("global")) {
             throw new DslException("节点ref不能使用global");
+        }
+        if (nodeName.equalsIgnoreCase("start")) {
+            throw new DslException("节点名称不能使用" + nodeName);
+        }
+        if (nodeName.equalsIgnoreCase("end")) {
+            throw new DslException("节点名称不能使用" + nodeName);
         }
         // 如果为Shell Node，不校验type
         var image = node.get("image");
