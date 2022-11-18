@@ -6,6 +6,8 @@ import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.query.NodeDef;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.el.ElContext;
+import dev.jianmu.event.Publisher;
+import dev.jianmu.event.impl.WorkerDeferredResultClearEvent;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.*;
@@ -79,11 +81,10 @@ public class WorkerInternalApplication {
     private final CredentialManager credentialManager;
     private final NodeDefApi nodeDefApi;
     private final WorkerRepository workerRepository;
-    private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final InstanceParameterRepository instanceParameterRepository;
     private final TriggerEventRepository triggerEventRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
-    private final DeferredResultService deferredResultService;
     private final TaskInstanceRepository taskInstanceRepository;
     private final ObjectMapper objectMapper;
     private final MonitoringFileService monitoringFileService;
@@ -91,6 +92,7 @@ public class WorkerInternalApplication {
     private final WorkflowRepository workflowRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final ExpressionLanguage expressionLanguage;
+    private final Publisher publisher;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -98,28 +100,28 @@ public class WorkerInternalApplication {
             CredentialManager credentialManager,
             NodeDefApi nodeDefApi,
             WorkerRepository workerRepository,
-            ApplicationEventPublisher publisher,
+            ApplicationEventPublisher applicationEventPublisher,
             InstanceParameterRepository instanceParameterRepository,
             TriggerEventRepository triggerEventRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
-            DeferredResultService deferredResultService,
             TaskInstanceRepository taskInstanceRepository,
             ObjectMapper objectMapper,
             MonitoringFileService monitoringFileService,
             GlobalProperties globalProperties,
             WorkflowRepository workflowRepository,
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
-            ExpressionLanguage expressionLanguage) {
+            ExpressionLanguage expressionLanguage,
+            Publisher publisher
+    ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
         this.nodeDefApi = nodeDefApi;
         this.workerRepository = workerRepository;
-        this.publisher = publisher;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.instanceParameterRepository = instanceParameterRepository;
         this.triggerEventRepository = triggerEventRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
-        this.deferredResultService = deferredResultService;
         this.taskInstanceRepository = taskInstanceRepository;
         this.objectMapper = objectMapper;
         this.monitoringFileService = monitoringFileService;
@@ -127,6 +129,7 @@ public class WorkerInternalApplication {
         this.workflowRepository = workflowRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.expressionLanguage = expressionLanguage;
+        this.publisher = publisher;
     }
 
     @Transactional
@@ -163,14 +166,14 @@ public class WorkerInternalApplication {
                         // 分发worker
                         List<String> workerTags = this.getWorkerTag(workflowInstance);
                         logger.info("triggerId:{} instanceId:{} tags: {}", workflowInstance.getTriggerId(),
-                                    workflowInstance.getId(), workerTags);
+                                workflowInstance.getId(), workerTags);
                         var workers = workerTags.isEmpty() ?
                                 this.workerRepository.findByTypeInAndCreatedTimeLessThan(
                                         List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
                                         workflowInstance.getStartTime()) :
                                 this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
-                                List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                workerTags, workflowInstance.getStartTime());
+                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                        workerTags, workflowInstance.getStartTime());
                         if (workers.isEmpty()) {
                             throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
                         }
@@ -178,7 +181,9 @@ public class WorkerInternalApplication {
                         taskInstance.setWorkerId(worker.getId());
                         this.taskInstanceRepository.updateWorkerId(taskInstance);
                         // 返回DeferredResult
-                        this.deferredResultService.clearWorker(worker.getId());
+                        this.publisher.publish(WorkerDeferredResultClearEvent.builder()
+                                .workerId(worker.getId())
+                                .build());
                     });
         } catch (RuntimeException e) {
             logger.error("任务分发失败，", e);
@@ -194,8 +199,8 @@ public class WorkerInternalApplication {
 
         // 查询参数源
         var eventParameters = this.triggerEventRepository.findById(workflowInstance.getTriggerId())
-                                                         .map(TriggerEvent::getParameters)
-                                                         .orElseGet(List::of);
+                .map(TriggerEvent::getParameters)
+                .orElseGet(List::of);
         // 创建表达式上下文
         var context = new ElContext();
         // 全局参数加入上下文
@@ -207,8 +212,8 @@ public class WorkerInternalApplication {
                 );
         // 事件参数加入上下文
         var eventParams = eventParameters.stream()
-                                         .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))
-                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .map(eventParameter -> Map.entry(eventParameter.getName(), eventParameter.getParameterId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         var eventParamValues = this.parameterRepository.findByIds(new HashSet<>(eventParams.values()));
         var eventMap = this.parameterDomainService.matchParameters(eventParams, eventParamValues);
         // 事件参数scope为event
@@ -355,8 +360,8 @@ public class WorkerInternalApplication {
     private Map<String, String> getParameterMap(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
         var parameterMap = instanceParameters.stream()
                 .map(instanceParameter -> Map.entry(
-                                instanceParameter.getRef(),
-                                instanceParameter.getParameterId()
+                        instanceParameter.getRef(),
+                        instanceParameter.getParameterId()
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -484,18 +489,18 @@ public class WorkerInternalApplication {
                 .orElseThrow(() -> new RuntimeException("未找到任务实例, businessId：" + businessId));
         switch (status) {
             case "RUNNING":
-                this.publisher.publishEvent(TaskRunningEvent.builder()
+                this.applicationEventPublisher.publishEvent(TaskRunningEvent.builder()
                         .taskId(taskInstance.getId())
                         .build());
                 break;
             case "FAILED":
-                this.publisher.publishEvent(TaskFailedEvent.builder()
+                this.applicationEventPublisher.publishEvent(TaskFailedEvent.builder()
                         .taskId(taskInstance.getId())
                         .errorMsg(errorMsg)
                         .build());
                 break;
             case "SUCCEED":
-                this.publisher.publishEvent(TaskFinishedEvent.builder()
+                this.applicationEventPublisher.publishEvent(TaskFinishedEvent.builder()
                         .taskId(taskInstance.getId())
                         .cmdStatusCode(exitCode)
                         .resultFile(resultFile)

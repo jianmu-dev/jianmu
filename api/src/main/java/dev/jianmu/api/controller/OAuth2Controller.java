@@ -5,7 +5,7 @@ import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.Oauth2LoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
-import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.*;

@@ -24,6 +24,7 @@
         <module>el</module>
         <module>git-repo-core</module>
         <module>oauth2</module>
+        <module>event</module>
     </modules>
 
     <properties>

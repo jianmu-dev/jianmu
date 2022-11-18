@@ -4,7 +4,7 @@ import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.LoginDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
-import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.exception.NotAllowAuthSignInException;
 import dev.jianmu.infrastructure.jwt.JwtProperties;

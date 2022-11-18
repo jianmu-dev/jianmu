@@ -1,8 +1,7 @@
 package dev.jianmu.api.jwt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.jianmu.api.util.JsonUtil;
-import dev.jianmu.user.aggregate.User;
+import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
