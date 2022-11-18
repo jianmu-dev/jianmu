@@ -13,7 +13,7 @@ export const setCookie = (key: string, value: string) => {
     expires: 365 * 100,
   };
   // cookie domain 动态指定
-  const domain = import.meta.env.VITE_COOKIE_DOMAIN;
+  const domain = import.meta.env.VITE_GITLINK_COOKIE_DOMAIN;
   if (domain) {
     Object.assign(cookieAttributes, { domain });
   }
@@ -31,7 +31,7 @@ export const deleteCookie = (key: string) => {
     expires: 365 * 100,
   };
   // cookie domain 动态指定
-  const domain = import.meta.env.VITE_COOKIE_DOMAIN;
+  const domain = import.meta.env.VITE_GITLINK_COOKIE_DOMAIN;
   if (domain) {
     Object.assign(cookieAttributes, { domain });
   }
