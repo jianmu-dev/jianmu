@@ -1,5 +1,51 @@
 # 建木
 
+<div>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://gitee.com/jianmu-dev/jianmu/badge/star.svg?theme=gvp' alt='gitee star'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu/blob/master/LICENSE">
+        <img src='https://img.shields.io/badge/liscense-MulanPSL--2.0-green.svg' alt='license'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/OS%2FARCH-AMD64%2FARM64-important.svg' alt='os/arch'/>
+    </a>
+</div>
+<div>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/-%E6%97%A0%E4%BB%A3%E7%A0%81(%E5%9B%BE%E5%BD%A2%E5%8C%96)-brightgreen.svg' alt='无代码(图形化)'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/-%E4%BD%8E%E4%BB%A3%E7%A0%81(GitOps)-brightgreen.svg' alt='低代码(GitOps)'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/devops-yellow.svg' alt='devops'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/CI%2FCD%2FCO-yellow.svg' alt='ci/cd/co'/>
+    </a>
+</div>
+<div>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/JDK11+-lightgrey.svg' alt='jdk'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/MySQL8+-lightgrey.svg' alt='mysql'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/Vue3-lightgrey.svg' alt='vue'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/Typescript4+-lightgrey.svg' alt='typescript'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/Docker-lightgrey.svg' alt=docker'/>
+    </a>
+    <a target="_blank" href="https://gitee.com/jianmu-dev/jianmu">
+        <img src='https://img.shields.io/badge/Kubernetes-lightgrey.svg' alt=kubernetes'/>
+    </a>
+</div>
+
 #### 介绍
 
 > 建木是一个面向DevOps领域的极易扩展的开源无代码(图形化)/低代码(GitOps)工具。可以帮助用户轻松编排各种DevOps流程并分发到不同平台执行。

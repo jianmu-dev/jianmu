@@ -8,6 +8,8 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
+import dev.jianmu.event.Publisher;
+import dev.jianmu.event.impl.WorkerDeferredResultClearEvent;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.*;
@@ -83,11 +85,10 @@ public class WorkerInternalApplication {
     private final CredentialManager credentialManager;
     private final NodeDefApi nodeDefApi;
     private final WorkerRepository workerRepository;
-    private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final InstanceParameterRepository instanceParameterRepository;
     private final TriggerEventRepository triggerEventRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
-    private final DeferredResultService deferredResultService;
     private final TaskInstanceRepository taskInstanceRepository;
     private final ObjectMapper objectMapper;
     private final MonitoringFileService monitoringFileService;
@@ -97,6 +98,7 @@ public class WorkerInternalApplication {
     private final ProjectRepository projectRepository;
     private final ExpressionLanguage expressionLanguage;
     private final ExternalParameterRepository externalParameterRepository;
+    private final Publisher publisher;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -104,11 +106,10 @@ public class WorkerInternalApplication {
             CredentialManager credentialManager,
             NodeDefApi nodeDefApi,
             WorkerRepository workerRepository,
-            ApplicationEventPublisher publisher,
+            ApplicationEventPublisher applicationEventPublisher,
             InstanceParameterRepository instanceParameterRepository,
             TriggerEventRepository triggerEventRepository,
             WorkflowInstanceRepository workflowInstanceRepository,
-            DeferredResultService deferredResultService,
             TaskInstanceRepository taskInstanceRepository,
             ObjectMapper objectMapper,
             MonitoringFileService monitoringFileService,
@@ -117,18 +118,18 @@ public class WorkerInternalApplication {
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             ProjectRepository projectRepository,
             ExpressionLanguage expressionLanguage,
-            ExternalParameterRepository externalParameterRepository
-    ) {
+            ExternalParameterRepository externalParameterRepository,
+            Publisher publisher
+            ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
         this.credentialManager = credentialManager;
         this.nodeDefApi = nodeDefApi;
         this.workerRepository = workerRepository;
-        this.publisher = publisher;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.instanceParameterRepository = instanceParameterRepository;
         this.triggerEventRepository = triggerEventRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
-        this.deferredResultService = deferredResultService;
         this.taskInstanceRepository = taskInstanceRepository;
         this.objectMapper = objectMapper;
         this.monitoringFileService = monitoringFileService;
@@ -138,6 +139,7 @@ public class WorkerInternalApplication {
         this.projectRepository = projectRepository;
         this.expressionLanguage = expressionLanguage;
         this.externalParameterRepository = externalParameterRepository;
+        this.publisher = publisher;
     }
 
     @Transactional
@@ -189,7 +191,9 @@ public class WorkerInternalApplication {
                         taskInstance.setWorkerId(worker.getId());
                         this.taskInstanceRepository.updateWorkerId(taskInstance);
                         // 返回DeferredResult
-                        this.deferredResultService.clearWorker(worker.getId());
+                        this.publisher.publish(WorkerDeferredResultClearEvent.builder()
+                                .workerId(worker.getId())
+                                .build());
                     });
         } catch (RuntimeException e) {
             logger.error("任务分发失败，", e);
@@ -499,18 +503,18 @@ public class WorkerInternalApplication {
                 .orElseThrow(() -> new RuntimeException("未找到任务实例, businessId：" + businessId));
         switch (status) {
             case "RUNNING":
-                this.publisher.publishEvent(TaskRunningEvent.builder()
+                this.applicationEventPublisher.publishEvent(TaskRunningEvent.builder()
                         .taskId(taskInstance.getId())
                         .build());
                 break;
             case "FAILED":
-                this.publisher.publishEvent(TaskFailedEvent.builder()
+                this.applicationEventPublisher.publishEvent(TaskFailedEvent.builder()
                         .taskId(taskInstance.getId())
                         .errorMsg(errorMsg)
                         .build());
                 break;
             case "SUCCEED":
-                this.publisher.publishEvent(TaskFinishedEvent.builder()
+                this.applicationEventPublisher.publishEvent(TaskFinishedEvent.builder()
                         .taskId(taskInstance.getId())
                         .cmdStatusCode(exitCode)
                         .resultFile(resultFile)

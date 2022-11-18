@@ -8,7 +8,7 @@ import dev.jianmu.api.dto.impl.GitRepoLoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
 import dev.jianmu.api.jwt.UserContextHolder;
-import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.NotAllowRegistrationException;
