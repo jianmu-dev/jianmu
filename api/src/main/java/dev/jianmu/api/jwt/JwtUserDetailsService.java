@@ -1,6 +1,6 @@
 package dev.jianmu.api.jwt;
 
-import dev.jianmu.api.util.JsonUtil;
+import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import org.springframework.security.core.userdetails.UserDetails;
