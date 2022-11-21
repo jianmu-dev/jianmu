@@ -12,7 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +82,7 @@ public class NodeDsl {
             var dslVo = mapper.readValue(dsl, NodeDsl.class);
             dslVo.checkRef();
             dslVo.checkDescription();
+            dslVo.checkResultFile();
             if (dslVo.ref.contains("/")) {
                 var arr = dslVo.ref.split("/");
                 dslVo.ownerRef = arr[0];
@@ -144,5 +146,17 @@ public class NodeDsl {
                 throw new DslException("非必填参数的默认值未定义");
             }
         });
+    }
+
+    /**
+     * 校验返回文件地址
+     */
+    public void checkResultFile() {
+        if (CollectionUtils.isEmpty(this.outputParameters)) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(this.resultFile)) {
+            throw new DslException("未定义resultFile");
+        }
     }
 }

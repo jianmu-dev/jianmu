@@ -2,12 +2,10 @@ package dev.jianmu.event.impl;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 /**
+ * @author Daihw
  * @class AsyncTaskInstanceStatusUpdatedEvent
  * @description 异步任务实例状态更新事件
- * @author Daihw
  * @create 2022/9/15 1:52 下午
  */
 @Getter
@@ -15,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
+public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent {
     private String workflowRef;
     private String workflowVersion;
     private String workflowInstanceId;
@@ -24,7 +22,7 @@ public class AsyncTaskInstanceStatusUpdatedEvent extends BaseEvent{
     private String asyncTaskRef;
     private String asyncTaskType;
     // 开始时间
-    private LocalDateTime startTime;
+    private String startTime;
     // 结束时间
-    private LocalDateTime endTime;
+    private String endTime;
 }
