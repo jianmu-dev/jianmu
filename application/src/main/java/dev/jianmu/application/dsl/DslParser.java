@@ -571,6 +571,7 @@ public class DslParser {
 
     private void pipelineSyntaxCheck() {
         var pipe = this.pipeline;
+        var treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         pipe.forEach((key, val) -> {
             if (val == null) {
                 throw new DslException(key + "节点不能为空");
@@ -578,7 +579,11 @@ public class DslParser {
             if (val instanceof Map) {
                 this.checkPipeNode(key, (Map<?, ?>) val);
             }
+            treeMap.put(key, val);
         });
+        if (this.pipeline.size() != treeMap.size()) {
+            throw new DslException("节点名称不能重复（不区分大小写）");
+        }
     }
 
     private void checkPipeNode(String nodeName, Map<?, ?> node) {
@@ -610,11 +615,16 @@ public class DslParser {
 
     private void workflowSyntaxCheck() {
         var flow = this.workflow;
+        var treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         flow.forEach((key, val) -> {
             if (val instanceof Map) {
                 this.checkNode(key, (Map<?, ?>) val);
             }
+            treeMap.put(key, val);
         });
+        if (this.workflow.size() != treeMap.size()) {
+            throw new DslException("节点名称不能重复（不区分大小写）");
+        }
     }
 
     private void checkNode(String nodeName, Map<?, ?> node) {
