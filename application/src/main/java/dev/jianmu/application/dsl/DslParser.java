@@ -790,8 +790,8 @@ public class DslParser {
             if (node instanceof Map) {
                 this.checkPipeNode((Map<?, ?>) node);
             }
-            var ref = ((Map<?, ?>) node).get("ref");
-            treeMap.put(ref == null ? node.toString() : (String) ref, node);
+            var ref = node instanceof Map ? (String) ((Map<?, ?>) node).get("ref") : node.toString();
+            treeMap.put(ref, node);
         });
         if (this.pipeline.size() != treeMap.size()) {
             throw new DslException("节点ref不能重复（不区分大小写）");
@@ -837,8 +837,8 @@ public class DslParser {
             if (node instanceof Map) {
                 this.checkNode((Map<?, ?>) node);
             }
-            var ref = ((Map<?, ?>) node).get("ref");
-            treeMap.put(ref == null ? node.toString() : (String) ref, node);
+            var ref = node instanceof Map ? (String) ((Map<?, ?>) node).get("ref") : node.toString();
+            treeMap.put(ref, node);
         });
         if (this.workflow.size() != treeMap.size()) {
             throw new DslException("节点ref不能重复（不区分大小写）");
