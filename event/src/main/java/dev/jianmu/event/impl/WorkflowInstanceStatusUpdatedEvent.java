@@ -2,12 +2,10 @@ package dev.jianmu.event.impl;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 /**
+ * @author Daihw
  * @class WorkflowInstanceStatusUpdatedEvent
  * @description 流程实例状态更新事件
- * @author Daihw
  * @create 2022/9/15 1:49 下午
  */
 @Getter
@@ -21,9 +19,9 @@ public class WorkflowInstanceStatusUpdatedEvent extends BaseEvent {
     private String workflowRef;
     private String workflowVersion;
     // 开始时间
-    private LocalDateTime startTime;
+    private String startTime;
     // 挂起时间
-    private LocalDateTime suspendedTime;
+    private String suspendedTime;
     // 结束时间
-    private LocalDateTime endTime;
+    private String endTime;
 }
