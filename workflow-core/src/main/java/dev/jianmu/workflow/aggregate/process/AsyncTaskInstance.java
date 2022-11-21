@@ -267,8 +267,8 @@ public class AsyncTaskInstance extends AggregateRoot {
                 .status(this.status.name())
                 .asyncTaskRef(this.asyncTaskRef)
                 .asyncTaskType(this.asyncTaskType)
-                .startTime(this.startTime)
-                .endTime(this.endTime)
+                .startTime(this.startTime == null ? null : this.startTime.toString())
+                .endTime(this.endTime == null ? null : this.endTime.toString())
                 .build());
     }
 
