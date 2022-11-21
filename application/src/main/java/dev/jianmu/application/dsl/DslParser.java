@@ -782,6 +782,7 @@ public class DslParser {
 
     private void pipelineSyntaxCheck() {
         var pipe = this.pipeline;
+        var treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         pipe.forEach(node -> {
             if (node == null) {
                 throw new DslException("节点不能为空");
@@ -789,7 +790,12 @@ public class DslParser {
             if (node instanceof Map) {
                 this.checkPipeNode((Map<?, ?>) node);
             }
+            var ref = ((Map<?, ?>) node).get("ref");
+            treeMap.put(ref == null ? node.toString() : (String) ref, node);
         });
+        if (this.pipeline.size() != treeMap.size()) {
+            throw new DslException("节点ref不能重复（不区分大小写）");
+        }
     }
 
     private void checkPipeNode(Map<?, ?> node) {
@@ -807,10 +813,10 @@ public class DslParser {
             throw new DslException("节点ref不能使用global");
         }
         if (nodeName.equalsIgnoreCase("start")) {
-            throw new DslException("节点名称不能使用" + nodeName);
+            throw new DslException("节点ref不能使用" + nodeName);
         }
         if (nodeName.equalsIgnoreCase("end")) {
-            throw new DslException("节点名称不能使用" + nodeName);
+            throw new DslException("节点ref不能使用" + nodeName);
         }
         // 如果为Shell Node，不校验type
         var image = node.get("image");
@@ -826,11 +832,17 @@ public class DslParser {
 
     private void workflowSyntaxCheck() {
         var flow = this.workflow;
+        var treeMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         flow.forEach(node -> {
             if (node instanceof Map) {
                 this.checkNode((Map<?, ?>) node);
             }
+            var ref = ((Map<?, ?>) node).get("ref");
+            treeMap.put(ref == null ? node.toString() : (String) ref, node);
         });
+        if (this.workflow.size() != treeMap.size()) {
+            throw new DslException("节点ref不能重复（不区分大小写）");
+        }
     }
 
     private void checkNode(Map<?, ?> node) {
