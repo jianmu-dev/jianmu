@@ -13,6 +13,12 @@ import './utils/baidu-tongji.ts';
 // 打印环境变量，用于调试
 console.debug(import.meta.env);
 const app = createApp(App);
+// 非正式环境使用FunDebug检测代码
+if (import.meta.env.MODE !== 'cdn') {
+  import('@/utils/fundebug').then(({ useFunDebug }) => {
+    useFunDebug(app);
+  });
+}
 // 全局注册公共组件
 app.use(components);
 // 注册路由器
