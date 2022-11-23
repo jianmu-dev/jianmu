@@ -361,6 +361,11 @@
     "@babel/helper-validator-identifier" "^7.18.6"
     to-fast-properties "^2.0.0"
 
+"@bugsnag/safe-json-stringify@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.npmmirror.com/@bugsnag/safe-json-stringify/-/safe-json-stringify-6.0.0.tgz#22abdcd83e008c369902976730c34c150148a758"
+  integrity sha512-htzFO1Zc57S8kgdRK9mLcPVTW1BY2ijfH7Dk2CeZmspTWKdKqSo1iwmqrq2WtRjFlo8aRZYgLX0wFrDXF/9DLA==
+
 "@commitlint/cli@^17.1.2":
   version "17.1.2"
   resolved "https://registry.npmmirror.com/@commitlint/cli/-/cli-17.1.2.tgz#38240f84936df5216f749f06f838dc50cc85a43d"
@@ -2175,6 +2180,23 @@ functional-red-black-tree@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
+
+fundebug-javascript@^2.8.6:
+  version "2.8.6"
+  resolved "https://registry.npmmirror.com/fundebug-javascript/-/fundebug-javascript-2.8.6.tgz#53f1d1e01d05bcd798a5069a72d8a619c19c2e97"
+  integrity sha512-Z5j0qrYytK9OuRkua1JilKYtDoscRiJd8Ay5SGuHDhuCboLMuPzj4Sv1IoCQCIpYWZSZHwtiz345GdYzDQRRbw==
+  dependencies:
+    "@bugsnag/safe-json-stringify" "^6.0.0"
+
+fundebug-revideo@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.npmmirror.com/fundebug-revideo/-/fundebug-revideo-0.8.0.tgz#2fcdf0a1b5cc3c446365737abe8eb04bfc14b081"
+  integrity sha512-Wwo6/tr2YCtQ3WnjLrUht8ncGvQfsqEH1uiKWz6E/qHcP9Bk9xc6NdaXnV/lhdZilhlMo2ZD6ZLrK6+8tCB29Q==
+
+fundebug-vue@^0.3.6:
+  version "0.3.6"
+  resolved "https://registry.npmmirror.com/fundebug-vue/-/fundebug-vue-0.3.6.tgz#c722781fdce41be842b9c62d99871caa927ea855"
+  integrity sha512-fVA2srxZJrtJu80oWbNIAC2EXJn4HG2uG1cbSxX3BTNIDA5KKz/fRU9cHKshMvt6xD9i1RinDsi9pLeuk8uhBA==
 
 generic-names@^2.0.1:
   version "2.0.1"
