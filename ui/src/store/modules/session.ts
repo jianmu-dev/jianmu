@@ -61,18 +61,18 @@ export default {
       if (!state.session.associationPlatform) {
         return (_router.currentRoute.value.query.redirectUrl as string) || '/';
       }
-      const url = `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${
-        state.gitRepo.ref
-      }&userId=${state.session.associationPlatformUserId}`;
-      // TODO 集成到gitlink后放开判断
-      // switch (state.session.associationPlatform) {
-      //   case 'GITLINK':
-      //     url =
-      //       import.meta.env.MODE !== 'development'
-      //         ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${state.gitRepo.owner}/${state.gitRepo.ref}/devops`
-      //         : `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${state.gitRepo.ref}&userId=${state.session.associationPlatformUserId}`;
-      //     break;
-      // }
+
+      let url = '';
+      switch (state.session.associationPlatform) {
+        case 'GITLINK':
+          url =
+            import.meta.env.MODE !== 'development'
+              ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${state.gitRepo.owner}/${state.gitRepo.ref}/devops`
+              : `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${
+                state.gitRepo.ref
+              }&userId=${state.session.associationPlatformUserId}`;
+          break;
+      }
       return url;
     },
   },
