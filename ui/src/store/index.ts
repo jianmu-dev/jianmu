@@ -81,7 +81,7 @@ const store = createStore<IRootState>({
       commit(`${sessionNs}/mutateSession`, undefined, { root: true });
       const session = (state as any)[`${sessionNs}`].session as ISession;
       if (session.associationType === 'GIT_REPO' && session.associationId) {
-        // TODO 调用接口获取gitRepo
+        // 调用接口获取gitRepo
         const gitRepo = await getGitRepo(session.associationId);
         commit(`${sessionNs}/mutateGitRepo`, gitRepo, { root: true });
       }

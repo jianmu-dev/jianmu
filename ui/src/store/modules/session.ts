@@ -1,7 +1,6 @@
 import { Module } from 'vuex';
-import { IState } from '@/model/modules/session';
+import { ISession, IState } from '@/model/modules/session';
 import { IRootState } from '@/model';
-import { ISession } from '@/model/modules/session';
 import { getCookie } from '@/utils/cookie';
 import { decode } from 'js-base64';
 import { IGitRepo } from '@/model/modules/git-repo';
@@ -59,7 +58,11 @@ export default {
   getters: {
     entryUrl(state: IState): string {
       if (!state.session.associationPlatform) {
-        return (_router.currentRoute.value.query.redirectUrl as string) || '/';
+        return (
+          (_router.currentRoute.value.query.redirectUrl as string) ||
+          // TODO 待改成通用SaaS首页
+          '/'
+        );
       }
 
       let url = '';

@@ -1,5 +1,5 @@
 import rest, { IRequest } from '@/utils/rest';
-import { ConflictError } from '@/utils/rest/error';
+import { ConflictError, HttpError } from '@/utils/rest/error';
 import { ISession } from '@/model/modules/session';
 import { namespace } from '@/store/modules/session';
 import _store from '@/store';
@@ -12,6 +12,14 @@ export async function restProxy<T = any>(request: IRequest): Promise<T> {
     if (err instanceof ConflictError) {
       const session = err.response.data as ISession;
       setAuthCookie(session);
+      _store.commit(`${namespace}/mutateSession`);
+      return await rest(request);
+    }
+
+    if (err instanceof HttpError && err.response.status === 401) {
+      console.debug('可能因store中的session过期导致401，尝试同步一次cookie');
+      // 可能因store中的session过期导致401
+      // 尝试同步一次cookie
       _store.commit(`${namespace}/mutateSession`);
       return await rest(request);
     }
