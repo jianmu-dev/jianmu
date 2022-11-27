@@ -17,7 +17,7 @@ export async function restProxy<T = any>(request: IRequest): Promise<T> {
     }
 
     if (err instanceof HttpError && err.response.status === 401) {
-      console.log('尝试同步一次cookie');
+      console.debug('可能因store中的session过期导致401，尝试同步一次cookie');
       // 可能因store中的session过期导致401
       // 尝试同步一次cookie
       _store.commit(`${namespace}/mutateSession`);
