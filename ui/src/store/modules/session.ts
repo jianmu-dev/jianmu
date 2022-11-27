@@ -65,15 +65,20 @@ export default {
         );
       }
 
+      const { owner, ref } = state.gitRepo;
       let url = '';
       switch (state.session.associationPlatform) {
         case 'GITLINK':
-          url =
-            import.meta.env.MODE !== 'development'
-              ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${state.gitRepo.owner}/${state.gitRepo.ref}/devops`
-              : `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${state.gitRepo.owner}&ref=${
-                state.gitRepo.ref
-              }&userId=${state.session.associationPlatformUserId}`;
+          if (import.meta.env.MODE !== 'development') {
+            url =
+              owner && ref
+                ? `${import.meta.env.VITE_GITLINK_BASE_URL}/${owner}/${ref}/devops`
+                : (import.meta.env.VITE_GITLINK_BASE_URL as string);
+          } else {
+            url = `${import.meta.env.VITE_GITLINK_BASE_URL}/demo?owner=${owner}&ref=${ref}&userId=${
+              state.session.associationPlatformUserId
+            }`;
+          }
           break;
       }
       return url;
