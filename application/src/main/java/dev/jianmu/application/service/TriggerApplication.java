@@ -264,6 +264,9 @@ public class TriggerApplication {
             var cronTrigger = this.createCronTrigger(trigger);
             var jobDetail = this.createJobDetail(trigger);
             try {
+                if (this.quartzScheduler.checkExists(jobDetail.getKey())) {
+                    return;
+                }
                 quartzScheduler.scheduleJob(jobDetail, cronTrigger);
             } catch (SchedulerException e) {
                 log.error("触发器加载失败: {}", e.getMessage());
