@@ -1,20 +1,23 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.api.mapper.TaskResultMapper;
-import dev.jianmu.application.service.internal.*;
+import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
+import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
+import dev.jianmu.application.service.internal.WorkerInternalApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
+import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.infrastructure.worker.event.TaskFailedEvent;
 import dev.jianmu.infrastructure.worker.event.TaskFinishedEvent;
 import dev.jianmu.infrastructure.worker.event.TaskRunningEvent;
 import dev.jianmu.task.event.*;
-import dev.jianmu.infrastructure.storage.MonitoringFileService;
-import dev.jianmu.task.event.TaskInstanceCreatedEvent;
-import dev.jianmu.task.event.TaskInstanceFailedEvent;
-import dev.jianmu.task.event.TaskInstanceRunningEvent;
-import dev.jianmu.task.event.TaskInstanceSucceedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -47,6 +50,11 @@ public class TaskInstanceEventHandler {
         this.monitoringFileService = monitoringFileService;
     }
 
+    @Retryable(
+            value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000L, multiplier = 2)
+    )
     @EventListener
     public void handleTaskFinishedEvent(TaskFinishedEvent taskFinishedEvent) {
         // Worker执行状态事件通知任务上下文
