@@ -232,6 +232,11 @@ public class WorkerController {
         }
     }
 
+    @Retryable(
+            value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000L, multiplier = 2)
+    )
     @PatchMapping("{workerId}/tasks/{businessId}")
     @Operation(summary = "更新任务接口", description = "更新任务接口")
     @Parameters({
