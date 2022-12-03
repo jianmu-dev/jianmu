@@ -53,7 +53,8 @@ public class TaskInstanceEventHandler {
     @Retryable(
             value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
             maxAttempts = 5,
-            backoff = @Backoff(delay = 1000L, multiplier = 2)
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
     )
     @EventListener
     public void handleTaskFinishedEvent(TaskFinishedEvent taskFinishedEvent) {
