@@ -193,7 +193,8 @@ public class WorkerController {
     @Retryable(
             value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
             maxAttempts = 5,
-            backoff = @Backoff(delay = 1000L, multiplier = 2)
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
     )
     @PatchMapping("{workerId}/tasks/{businessId}/accept")
     @Operation(summary = "确定任务接口", description = "确定任务接口")
@@ -235,7 +236,8 @@ public class WorkerController {
     @Retryable(
             value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
             maxAttempts = 5,
-            backoff = @Backoff(delay = 1000L, multiplier = 2)
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
     )
     @PatchMapping("{workerId}/tasks/{businessId}")
     @Operation(summary = "更新任务接口", description = "更新任务接口")

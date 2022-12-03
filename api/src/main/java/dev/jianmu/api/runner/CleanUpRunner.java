@@ -28,7 +28,8 @@ public class CleanUpRunner implements ApplicationRunner {
     @Retryable(
             value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
             maxAttempts = 5,
-            backoff = @Backoff(delay = 1000L, multiplier = 2)
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
     )
     @Override
     public void run(ApplicationArguments args) throws Exception {
