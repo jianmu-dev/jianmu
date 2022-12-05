@@ -4,11 +4,16 @@ import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.trigger.service.CustomWebhookDomainService;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import dev.jianmu.workflow.service.WorkflowInstanceDomainService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryListener;
+import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
@@ -24,6 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @description 自定义Bean配置类
  * @create 2021-03-17 16:49
  */
+@Slf4j
 @Configuration
 public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
@@ -91,5 +97,19 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
         public void handleUncaughtException(Throwable throwable, Method method, Object... obj) {
             logger.error("Async方法执行异常", throwable);
         }
+    }
+
+    @Bean
+    public RetryListener retryListener() {
+        return new RetryListenerSupport() {
+            @Override
+            public <T, E extends Throwable> void onError(
+                    RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                String exceptionName = throwable.getClass().getSimpleName();
+                log.warn("[{}] Retry count: {}", exceptionName, context.getRetryCount());
+                log.warn("[{}] Retry method: {}", exceptionName, context.getAttribute("context.name"));
+                log.warn("[{}] Retry exception: {}", exceptionName, throwable.toString());
+            }
+        };
     }
 }

@@ -1,17 +1,17 @@
 #### 安装
 
-``` bash
+```bash
 # 安装依赖
-npm install 或 yarn
+yarn
 
 # 启动，http://localhost:3000/
-npm run serve 或 yarn serve
+yarn serve
 
-# 生产环境构建
-npm run build 或 yarn build
+# 构建
+yarn build
 ```
 
-#### 构建docker镜像
+#### 构建 docker 镜像
 
 ```
 # 创建docker镜像
@@ -22,4 +22,5 @@ docker push jianmudev/jianmu-ci-ui:${version}
 ```
 
 #### 开源协议
-本项目基于MulanPubL-2.0协议。
+
+本项目基于 MulanPubL-2.0 协议。

@@ -17,8 +17,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -186,6 +190,12 @@ public class WorkerController {
         return this.deferredResultService.newWatchDeferredResult(workerId, businessId);
     }
 
+    @Retryable(
+            value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
+    )
     @PatchMapping("{workerId}/tasks/{businessId}/accept")
     @Operation(summary = "确定任务接口", description = "确定任务接口")
     @Parameters({
@@ -223,6 +233,12 @@ public class WorkerController {
         }
     }
 
+    @Retryable(
+            value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
+    )
     @PatchMapping("{workerId}/tasks/{businessId}")
     @Operation(summary = "更新任务接口", description = "更新任务接口")
     @Parameters({

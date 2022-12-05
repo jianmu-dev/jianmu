@@ -4,6 +4,10 @@ import dev.jianmu.application.service.ProjectApplication;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,6 +25,12 @@ public class CleanUpRunner implements ApplicationRunner {
         this.projectApplication = projectApplication;
     }
 
+    @Retryable(
+            value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
+    )
     @Override
     public void run(ApplicationArguments args) throws Exception {
         this.projectApplication.autoClean();
