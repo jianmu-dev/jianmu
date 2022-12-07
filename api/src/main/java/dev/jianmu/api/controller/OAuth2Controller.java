@@ -279,8 +279,11 @@ public class OAuth2Controller {
         if (ObjectUtils.isEmpty(allowLogin.getUser()) && ObjectUtils.isEmpty(allowLogin.getOrganization())) {
             return;
         }
-        if (allowLogin.getUser().contains(username)) {
+        if (!ObjectUtils.isEmpty(allowLogin.getUser()) && allowLogin.getUser().contains(username)) {
             return;
+        }
+        if (ObjectUtils.isEmpty(allowLogin.getOrganization())) {
+            throw new NotAllowLoginException();
         }
         var oAuth2Api = OAuth2ApiProxy.builder()
                 .thirdPartyType(thirdPartyType)
