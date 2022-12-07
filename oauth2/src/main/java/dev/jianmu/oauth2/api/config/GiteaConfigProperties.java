@@ -30,6 +30,9 @@ public class GiteaConfigProperties {
     private AllowLoginVo allowLogin;
 
     public void setAllowLogin(AllowLoginVo allowLogin) {
+        if (allowLogin.getOrganization() == null) {
+            return;
+        }
         var roles = Arrays.stream(GiteaConfigProperties.Role.values()).map(Enum::name)
                 .collect(Collectors.toList());
         var noneMatch = allowLogin.getOrganization().stream()
