@@ -31,6 +31,7 @@ public class GitlinkConfigProperties {
     private AllowLoginVo allowLogin;
 
     public void setAllowLogin(AllowLoginVo allowLogin) {
+        this.allowLogin = allowLogin;
         if (allowLogin.getOrganization() == null) {
             return;
         }
@@ -41,7 +42,6 @@ public class GitlinkConfigProperties {
         if (noneMatch) {
             throw new RoleNotExistedException("oauth2.gitlink.allowLogin.organization.role 配置错误，可选值：" + roles);
         }
-        this.allowLogin = allowLogin;
     }
 
     public enum Role {
