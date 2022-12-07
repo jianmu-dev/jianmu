@@ -30,6 +30,7 @@ public class GitLabConfigProperties {
     private AllowLoginVo allowLogin;
 
     public void setAllowLogin(AllowLoginVo allowLogin) {
+        this.allowLogin = allowLogin;
         if (allowLogin.getOrganization() == null) {
             return;
         }
@@ -40,7 +41,6 @@ public class GitLabConfigProperties {
         if (noneMatch) {
             throw new RoleNotExistedException("oauth2.gitlab.allowLogin.organization.role 配置错误，可选值：" + roles);
         }
-        this.allowLogin = allowLogin;
     }
 
     public Integer findAccessLevel(String org) {
