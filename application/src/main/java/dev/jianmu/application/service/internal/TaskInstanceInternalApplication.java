@@ -22,6 +22,7 @@ import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.el.ExpressionLanguage;
+import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowRepository;
@@ -56,6 +57,7 @@ public class TaskInstanceInternalApplication {
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final MonitoringFileService monitoringFileService;
     private final DeferredResultService deferredResultService;
+    private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
 
     public TaskInstanceInternalApplication(
             TaskInstanceRepository taskInstanceRepository,
@@ -69,7 +71,9 @@ public class TaskInstanceInternalApplication {
             ExpressionLanguage expressionLanguage,
             WorkflowInstanceRepository workflowInstanceRepository,
             MonitoringFileService monitoringFileService,
-            DeferredResultService deferredResultService) {
+            DeferredResultService deferredResultService,
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository
+    ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.workflowRepository = workflowRepository;
         this.instanceDomainService = instanceDomainService;
@@ -82,6 +86,7 @@ public class TaskInstanceInternalApplication {
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.monitoringFileService = monitoringFileService;
         this.deferredResultService = deferredResultService;
+        this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
     }
 
     public List<TaskInstance> findRunningTask() {
@@ -259,6 +264,14 @@ public class TaskInstanceInternalApplication {
                 this.createInnerOutputParameters(taskInstance, workflow.getType().name());
         this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         this.instanceParameterRepository.addAll(outputParameters.keySet());
+        this.taskInstanceRepository.updateStatus(taskInstance);
+    }
+
+    @Transactional
+    public void waiting(String taskInstanceId) {
+        TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        taskInstance.waiting();
         this.taskInstanceRepository.updateStatus(taskInstance);
     }
 
@@ -441,18 +454,24 @@ public class TaskInstanceInternalApplication {
         var taskInstances = this.taskInstanceRepository.findByTriggerId(triggerId);
         if (taskInstances.stream().noneMatch(taskInstance -> taskInstance.isDeletionVolume() || taskInstance.getStatus() == InstanceStatus.RUNNING)) {
             this.workflowInstanceRepository.findByTriggerId(triggerId)
-                    .ifPresent(workflow -> this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
-                            .serialNo(1)
-                            .defKey("end")
-                            .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
-                            .asyncTaskRef("end")
-                            .workflowRef(workflow.getWorkflowRef())
-                            .workflowVersion(workflow.getWorkflowVersion())
-                            .businessId(UUID.randomUUID().toString().replace("-", ""))
-                            .triggerId(triggerId)
-                            .build()));
+                    .ifPresent(workflow -> {
+                        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(triggerId, "End")
+                                .orElseThrow(() -> new RuntimeException("未找到AsyncTaskInstance"));
+                        this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
+                                .serialNo(1)
+                                .defKey("end")
+                                .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
+                                .asyncTaskRef("end")
+                                .workflowRef(workflow.getWorkflowRef())
+                                .workflowVersion(workflow.getWorkflowVersion())
+                                .businessId(asyncTaskInstance.getId())
+                                .triggerId(triggerId)
+                                .build());
+                    });
         }
-        taskInstances.stream().filter(taskInstance -> !taskInstance.isDeletionVolume() && taskInstance.getStatus() == InstanceStatus.WAITING)
+        taskInstances.stream()
+                .filter(taskInstance -> !taskInstance.isDeletionVolume())
+                .filter(taskInstance -> taskInstance.getStatus() == InstanceStatus.INIT || taskInstance.getStatus() == InstanceStatus.WAITING)
                 .forEach(taskInstance -> {
                     taskInstance.executeFailed();
                     this.taskInstanceRepository.terminate(taskInstance);

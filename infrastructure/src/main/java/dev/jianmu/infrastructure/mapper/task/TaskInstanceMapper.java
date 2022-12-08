@@ -22,7 +22,7 @@ public interface TaskInstanceMapper {
     @Update("update task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void updateStatus(TaskInstance taskInstance);
 
-    @Update("update task_instance set worker_id = #{workerId}, end_time = #{endTime} where id = #{id}")
+    @Update("update task_instance set worker_id = #{workerId}, status = #{status}, end_time = #{endTime} where id = #{id}")
     void updateWorkerId(TaskInstance taskInstance);
 
     @Update("update task_instance set end_time = #{endTime}, _version = _version + 1 where id = #{id} and _version = #{version}")

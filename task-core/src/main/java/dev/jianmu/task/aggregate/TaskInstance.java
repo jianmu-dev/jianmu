@@ -33,13 +33,17 @@ public class TaskInstance extends AggregateRoot {
     // 结束时间
     private LocalDateTime endTime;
     // 任务运行状态
-    private InstanceStatus status = InstanceStatus.WAITING;
+    private InstanceStatus status = InstanceStatus.INIT;
     // workerId
     private String workerId;
     // version
     private int version;
 
     private TaskInstance() {
+    }
+
+    public void waiting() {
+        this.status = InstanceStatus.WAITING;
     }
 
     public void running() {
