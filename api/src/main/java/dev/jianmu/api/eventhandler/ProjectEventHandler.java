@@ -5,7 +5,6 @@ import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
-import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
@@ -34,20 +33,17 @@ public class ProjectEventHandler {
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
     private final ProjectGroupApplication projectGroupApplication;
-    private final WorkflowInternalApplication workflowInternalApplication;
 
     public ProjectEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
-            ProjectGroupApplication projectGroupApplication,
-            WorkflowInternalApplication workflowInternalApplication
+            ProjectGroupApplication projectGroupApplication
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.projectGroupApplication = projectGroupApplication;
-        this.workflowInternalApplication = workflowInternalApplication;
     }
 
     @EventListener
@@ -66,7 +62,6 @@ public class ProjectEventHandler {
         lock.lock();
         try {
             this.workflowInstanceInternalApplication.create(cmd, triggerEvent.getProjectId());
-            this.workflowInternalApplication.init(cmd);
         } finally {
             lock.unlock();
         }

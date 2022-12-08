@@ -72,6 +72,13 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessVolumeCreatedEvent here -------------------------");
         log.info(event.toString());
+        // 初始化流程实例
+        var workflowStartCmd = WorkflowStartCmd.builder()
+                .triggerId(event.getTriggerId())
+                .workflowRef(event.getWorkflowRef())
+                .workflowVersion(event.getWorkflowVersion())
+                .build();
+        this.workflowInternalApplication.init(workflowStartCmd);
         // 创建Workspace
         this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "start");
         log.info("-----------------------------------------------------");

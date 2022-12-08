@@ -479,6 +479,10 @@ public class WorkerInternalApplication {
             response.setStatus(HttpStatus.SC_CONFLICT);
             return null;
         }
+        if (taskInstance.getStatus() != InstanceStatus.WAITING) {
+            response.setStatus(HttpStatus.SC_CONFLICT);
+            return null;
+        }
         taskInstance.acceptTask(version);
         if (!this.taskInstanceRepository.acceptTask(taskInstance)) {
             response.setStatus(HttpStatus.SC_CONFLICT);
