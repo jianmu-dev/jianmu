@@ -5,13 +5,13 @@ import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
+import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
 import dev.jianmu.project.event.TriggerEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -34,17 +34,20 @@ public class ProjectEventHandler {
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
     private final ProjectGroupApplication projectGroupApplication;
+    private final WorkflowInternalApplication workflowInternalApplication;
 
     public ProjectEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
-            ProjectGroupApplication projectGroupApplication
+            ProjectGroupApplication projectGroupApplication,
+            WorkflowInternalApplication workflowInternalApplication
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.projectGroupApplication = projectGroupApplication;
+        this.workflowInternalApplication = workflowInternalApplication;
     }
 
     @EventListener
@@ -63,6 +66,7 @@ public class ProjectEventHandler {
         lock.lock();
         try {
             this.workflowInstanceInternalApplication.create(cmd, triggerEvent.getProjectId());
+            this.workflowInternalApplication.init(cmd);
         } finally {
             lock.unlock();
         }

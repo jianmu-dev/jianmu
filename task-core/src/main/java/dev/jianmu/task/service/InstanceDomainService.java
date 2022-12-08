@@ -17,6 +17,7 @@ public class InstanceDomainService {
         if (taskInstances.size() > 0) {
             boolean isRunning = taskInstances.stream()
                     .anyMatch(instance ->
+                            instance.getStatus().equals(InstanceStatus.INIT) ||
                             instance.getStatus().equals(InstanceStatus.WAITING) ||
                                     instance.getStatus().equals(InstanceStatus.RUNNING)
                     );

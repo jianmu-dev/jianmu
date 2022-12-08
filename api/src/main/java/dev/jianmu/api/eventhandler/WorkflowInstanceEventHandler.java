@@ -74,13 +74,6 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         // 创建Workspace
         this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "start");
-        // 初始化流程实例
-        var workflowStartCmd = WorkflowStartCmd.builder()
-                .triggerId(event.getTriggerId())
-                .workflowRef(event.getWorkflowRef())
-                .workflowVersion(event.getWorkflowVersion())
-                .build();
-        this.workflowInternalApplication.init(workflowStartCmd);
         log.info("-----------------------------------------------------");
     }
 

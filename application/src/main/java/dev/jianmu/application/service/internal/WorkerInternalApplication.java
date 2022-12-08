@@ -179,6 +179,7 @@ public class WorkerInternalApplication {
                         }
                         var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers);
                         taskInstance.setWorkerId(worker.getId());
+                        taskInstance.waiting();
                         this.taskInstanceRepository.updateWorkerId(taskInstance);
                         // 返回DeferredResult
                         this.publisher.publish(WorkerDeferredResultClearEvent.builder()
@@ -233,6 +234,8 @@ public class WorkerInternalApplication {
 
     @Transactional
     public void createVolumeTask(String triggerId, String defKey) {
+        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(triggerId, defKey)
+                .orElseThrow(() -> new RuntimeException("未找到AsyncTaskInstance"));
         this.workflowInstanceRepository.findByTriggerId(triggerId)
                 .ifPresent(workflow -> this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
                         .serialNo(1)
@@ -241,7 +244,7 @@ public class WorkerInternalApplication {
                         .asyncTaskRef(defKey)
                         .workflowRef(workflow.getWorkflowRef())
                         .workflowVersion(workflow.getWorkflowVersion())
-                        .businessId(UUID.randomUUID().toString().replace("-", ""))
+                        .businessId(asyncTaskInstance.getId())
                         .triggerId(triggerId)
                         .build()));
     }

@@ -73,6 +73,13 @@ public class AsyncTaskInstanceInternalApplication {
         // 终止同一流程实例中所有运行中的任务
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(triggerId);
         asyncTaskInstances.stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.WAITING)
+                .forEach(asyncTaskInstance -> {
+                    asyncTaskInstance.fail();
+                    log.info("终止待执行任务: " + asyncTaskInstance.getAsyncTaskRef());
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                });
+        asyncTaskInstances.stream()
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.terminate();
@@ -84,6 +91,16 @@ public class AsyncTaskInstanceInternalApplication {
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.fail();
                     log.info("终止挂起任务: " + asyncTaskInstance.getAsyncTaskRef());
+                    this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
+                });
+    }
+
+    // 任务已启动命令
+    @Transactional
+    public void waiting(String asyncTaskInstanceId) {
+        this.asyncTaskInstanceRepository.findById(asyncTaskInstanceId)
+                .ifPresent(asyncTaskInstance -> {
+                    asyncTaskInstance.waiting();
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
     }

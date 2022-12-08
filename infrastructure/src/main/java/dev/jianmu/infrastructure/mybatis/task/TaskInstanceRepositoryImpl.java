@@ -35,9 +35,20 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
 
     private void publishEvent(TaskInstance taskInstance) {
         switch (taskInstance.getStatus()) {
-            case WAITING:
+            case INIT:
                 this.applicationEventPublisher.publishEvent(
                         TaskInstanceCreatedEvent.Builder.aTaskInstanceCreatedEvent()
+                                .defKey(taskInstance.getDefKey())
+                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                                .triggerId(taskInstance.getTriggerId())
+                                .businessId(taskInstance.getBusinessId())
+                                .taskInstanceId(taskInstance.getId())
+                                .build()
+                );
+                break;
+            case WAITING:
+                this.applicationEventPublisher.publishEvent(
+                        TaskInstanceWaitingEvent.Builder.aTaskInstanceRunningEvent()
                                 .defKey(taskInstance.getDefKey())
                                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                                 .triggerId(taskInstance.getTriggerId())
@@ -111,6 +122,7 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void updateWorkerId(TaskInstance taskInstance) {
         this.taskInstanceMapper.updateWorkerId(taskInstance);
+        this.publishEvent(taskInstance);
     }
 
     @Override
