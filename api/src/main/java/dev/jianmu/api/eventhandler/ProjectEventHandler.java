@@ -5,6 +5,7 @@ import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
+import dev.jianmu.infrastructure.lock.DistributedLock;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
@@ -13,11 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ethan Liu
@@ -28,22 +24,24 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 @Slf4j
 public class ProjectEventHandler {
-    private static final Map<String, Lock> PROJECT_LOCK_MAP = new ConcurrentHashMap<>();
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
     private final ProjectGroupApplication projectGroupApplication;
+    private final DistributedLock distributedLock;
 
     public ProjectEventHandler(
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
             ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
-            ProjectGroupApplication projectGroupApplication
+            ProjectGroupApplication projectGroupApplication,
+            DistributedLock distributedLock
     ) {
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
         this.projectGroupApplication = projectGroupApplication;
+        this.distributedLock = distributedLock;
     }
 
     @EventListener
@@ -56,9 +54,7 @@ public class ProjectEventHandler {
                 .workflowVersion(triggerEvent.getWorkflowVersion())
                 .occurredTime(triggerEvent.getOccurredTime())
                 .build();
-        // TODO 集群环境需优化成分布式锁
-        PROJECT_LOCK_MAP.putIfAbsent(triggerEvent.getProjectId(), new ReentrantLock());
-        Lock lock = PROJECT_LOCK_MAP.get(triggerEvent.getProjectId());
+        var lock = this.distributedLock.getLock(triggerEvent.getProjectId());
         lock.lock();
         try {
             this.workflowInstanceInternalApplication.create(cmd, triggerEvent.getProjectId());
