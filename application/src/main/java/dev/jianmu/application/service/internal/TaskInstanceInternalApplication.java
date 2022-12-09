@@ -186,6 +186,45 @@ public class TaskInstanceInternalApplication {
         this.taskInstanceRepository.add(taskInstance);
     }
 
+    @Transactional
+    public void createVolumeTask(String triggerId) {
+        this.workflowInstanceRepository.findByTriggerId(triggerId)
+                .ifPresent(workflow -> {
+                    var startAsyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(triggerId, "start")
+                            .orElseThrow(() -> new RuntimeException("未找到异步开始任务实例 " + triggerId));
+                    this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
+                            .serialNo(1)
+                            .defKey("start")
+                            .nodeInfo(NodeInfo.Builder.aNodeDef().name("start").build())
+                            .asyncTaskRef("start")
+                            .workflowRef(workflow.getWorkflowRef())
+                            .workflowVersion(workflow.getWorkflowVersion())
+                            .businessId(startAsyncTaskInstance.getId())
+                            .triggerId(triggerId)
+                            .build());
+                    var endAsyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(triggerId, "end")
+                            .orElseThrow(() -> new RuntimeException("未找到异步结束任务实例 " + triggerId));
+                    this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
+                            .serialNo(1)
+                            .defKey("end")
+                            .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
+                            .asyncTaskRef("end")
+                            .workflowRef(workflow.getWorkflowRef())
+                            .workflowVersion(workflow.getWorkflowVersion())
+                            .businessId(endAsyncTaskInstance.getId())
+                            .triggerId(triggerId)
+                            .build());
+                });
+    }
+
+    @Transactional
+    public void commitEndEvent(String triggerId) {
+        this.taskInstanceRepository.findByTriggerId(triggerId).stream()
+                .filter(taskInstance -> taskInstance.getDefKey().equals("end") && taskInstance.getStatus() == InstanceStatus.INIT)
+                .findFirst()
+                .ifPresent(this.taskInstanceRepository::commitEvent);
+    }
+
     public void terminate(String asyncTaskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
@@ -264,14 +303,6 @@ public class TaskInstanceInternalApplication {
                 this.createInnerOutputParameters(taskInstance, workflow.getType().name());
         this.parameterRepository.addAll(new ArrayList<>(outputParameters.values()));
         this.instanceParameterRepository.addAll(outputParameters.keySet());
-        this.taskInstanceRepository.updateStatus(taskInstance);
-    }
-
-    @Transactional
-    public void waiting(String taskInstanceId) {
-        TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        taskInstance.waiting();
         this.taskInstanceRepository.updateStatus(taskInstance);
     }
 
@@ -452,22 +483,9 @@ public class TaskInstanceInternalApplication {
     @Transactional
     public void terminateByTriggerId(String triggerId) {
         var taskInstances = this.taskInstanceRepository.findByTriggerId(triggerId);
-        if (taskInstances.stream().noneMatch(taskInstance -> taskInstance.isDeletionVolume() || taskInstance.getStatus() == InstanceStatus.RUNNING)) {
+        if (taskInstances.stream().noneMatch(taskInstance -> taskInstance.getStatus() == InstanceStatus.RUNNING)) {
             this.workflowInstanceRepository.findByTriggerId(triggerId)
-                    .ifPresent(workflow -> {
-                        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(triggerId, "End")
-                                .orElseThrow(() -> new RuntimeException("未找到AsyncTaskInstance"));
-                        this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
-                                .serialNo(1)
-                                .defKey("end")
-                                .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
-                                .asyncTaskRef("end")
-                                .workflowRef(workflow.getWorkflowRef())
-                                .workflowVersion(workflow.getWorkflowVersion())
-                                .businessId(asyncTaskInstance.getId())
-                                .triggerId(triggerId)
-                                .build());
-                    });
+                    .ifPresent(workflow -> this.commitEndEvent(triggerId));
         }
         taskInstances.stream()
                 .filter(taskInstance -> !taskInstance.isDeletionVolume())

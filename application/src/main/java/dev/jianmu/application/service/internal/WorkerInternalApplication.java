@@ -154,6 +154,9 @@ public class WorkerInternalApplication {
     public void dispatchTask(TaskInstanceCreatedEvent event) {
         var taskInstance = this.taskInstanceRepository.findById(event.getTaskInstanceId())
                 .orElseThrow(() -> new RuntimeException("未找到任务实例：" + event.getTaskInstanceId()));
+        if (taskInstance.getStatus() != InstanceStatus.INIT) {
+            return;
+        }
         try {
             if (!taskInstance.isVolume()) {
                 var nodeDef = this.nodeDefApi.findByType(taskInstance.getDefKey());
@@ -230,23 +233,6 @@ public class WorkerInternalApplication {
             }
             return result.getValue().getStringValue();
         }).collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void createVolumeTask(String triggerId, String defKey) {
-        var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(triggerId, defKey)
-                .orElseThrow(() -> new RuntimeException("未找到AsyncTaskInstance"));
-        this.workflowInstanceRepository.findByTriggerId(triggerId)
-                .ifPresent(workflow -> this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
-                        .serialNo(1)
-                        .defKey(defKey)
-                        .nodeInfo(NodeInfo.Builder.aNodeDef().name(defKey).build())
-                        .asyncTaskRef(defKey)
-                        .workflowRef(workflow.getWorkflowRef())
-                        .workflowVersion(workflow.getWorkflowVersion())
-                        .businessId(asyncTaskInstance.getId())
-                        .triggerId(triggerId)
-                        .build()));
     }
 
     public Optional<TaskInstance> pullTasks(String workerId) {

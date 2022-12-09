@@ -110,6 +110,10 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void add(TaskInstance taskInstance) {
         this.taskInstanceMapper.add(taskInstance);
+        // end任务手动commit
+        if (taskInstance.getAsyncTaskRef().equals("end")) {
+            return;
+        }
         this.publishEvent(taskInstance);
     }
 
@@ -121,8 +125,10 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
 
     @Override
     public void updateWorkerId(TaskInstance taskInstance) {
-        this.taskInstanceMapper.updateWorkerId(taskInstance);
-        this.publishEvent(taskInstance);
+        var succeed = this.taskInstanceMapper.updateWorkerId(taskInstance);
+        if (succeed) {
+            this.publishEvent(taskInstance);
+        }
     }
 
     @Override
@@ -138,6 +144,11 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void saveSucceeded(TaskInstance taskInstance) {
         this.taskInstanceMapper.saveSucceeded(taskInstance);
+        this.publishEvent(taskInstance);
+    }
+
+    @Override
+    public void commitEvent(TaskInstance taskInstance) {
         this.publishEvent(taskInstance);
     }
 
