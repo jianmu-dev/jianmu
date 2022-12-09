@@ -82,8 +82,6 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessVolumeCreatedEvent here -------------------------");
         log.info(event.toString());
-        // 创建Workspace
-        this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "start");
         // 初始化流程实例
         var workflowStartCmd = WorkflowStartCmd.builder()
                 .triggerId(event.getTriggerId())
@@ -91,6 +89,8 @@ public class WorkflowInstanceEventHandler {
                 .workflowVersion(event.getWorkflowVersion())
                 .build();
         this.workflowInternalApplication.init(workflowStartCmd);
+        // 创建Workspace
+        this.taskInstanceInternalApplication.createVolumeTask(event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 
@@ -129,7 +129,7 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessEndedEvent here -------------------------");
         log.info(event.toString());
-        this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
+        this.taskInstanceInternalApplication.commitEndEvent(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
@@ -140,7 +140,7 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessNotRunningEvent here -------------------------");
         log.info(event.toString());
-        this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
+        this.taskInstanceInternalApplication.commitEndEvent(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");

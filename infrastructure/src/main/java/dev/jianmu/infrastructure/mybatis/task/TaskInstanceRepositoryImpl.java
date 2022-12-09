@@ -43,9 +43,20 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
 
     private void publishEvent(TaskInstance taskInstance) {
         switch (taskInstance.getStatus()) {
-            case WAITING:
+            case INIT:
                 this.applicationEventPublisher.publishEvent(
                         TaskInstanceCreatedEvent.Builder.aTaskInstanceCreatedEvent()
+                                .defKey(taskInstance.getDefKey())
+                                .asyncTaskRef(taskInstance.getAsyncTaskRef())
+                                .triggerId(taskInstance.getTriggerId())
+                                .businessId(taskInstance.getBusinessId())
+                                .taskInstanceId(taskInstance.getId())
+                                .build()
+                );
+                break;
+            case WAITING:
+                this.applicationEventPublisher.publishEvent(
+                        TaskInstanceWaitingEvent.Builder.aTaskInstanceRunningEvent()
                                 .defKey(taskInstance.getDefKey())
                                 .asyncTaskRef(taskInstance.getAsyncTaskRef())
                                 .triggerId(taskInstance.getTriggerId())
@@ -110,6 +121,10 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
         if (this.backup) {
             this.taskInstanceBackupMapper.add(taskInstance);
         }
+        // end任务手动commit
+        if (taskInstance.getAsyncTaskRef().equals("end")) {
+            return;
+        }
         this.publishEvent(taskInstance);
     }
 
@@ -124,9 +139,12 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
 
     @Override
     public void updateWorkerId(TaskInstance taskInstance) {
-        this.taskInstanceMapper.updateWorkerId(taskInstance);
+        var succeed = this.taskInstanceMapper.updateWorkerId(taskInstance);
         if (this.backup) {
             this.taskInstanceBackupMapper.updateWorkerId(taskInstance);
+        }
+        if (succeed) {
+            this.publishEvent(taskInstance);
         }
     }
 
@@ -152,6 +170,11 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
         if (this.backup) {
             this.taskInstanceBackupMapper.saveSucceeded(taskInstance);
         }
+        this.publishEvent(taskInstance);
+    }
+
+    @Override
+    public void commitEvent(TaskInstance taskInstance) {
         this.publishEvent(taskInstance);
     }
 

@@ -73,6 +73,12 @@ public class AsyncTaskInstance extends AggregateRoot {
     }
 
     // 异步任务开始执行
+    public void waiting() {
+        this.status = TaskStatus.WAITING;
+        this.endTime = null;
+    }
+
+    // 异步任务开始执行
     public void run() {
         var preStatus = this.status;
         this.status = TaskStatus.RUNNING;

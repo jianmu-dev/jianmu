@@ -164,6 +164,9 @@ public class WorkerInternalApplication {
     public void dispatchTask(TaskInstanceCreatedEvent event) {
         var taskInstance = this.taskInstanceRepository.findById(event.getTaskInstanceId())
                 .orElseThrow(() -> new RuntimeException("未找到任务实例：" + event.getTaskInstanceId()));
+        if (taskInstance.getStatus() != InstanceStatus.INIT) {
+            return;
+        }
         try {
             if (!taskInstance.isVolume()) {
                 var nodeDef = this.nodeDefApi.findByType(taskInstance.getDefKey());
@@ -189,6 +192,7 @@ public class WorkerInternalApplication {
                         }
                         var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers);
                         taskInstance.setWorkerId(worker.getId());
+                        taskInstance.waiting();
                         this.taskInstanceRepository.updateWorkerId(taskInstance);
                         // 返回DeferredResult
                         this.publisher.publish(WorkerDeferredResultClearEvent.builder()
@@ -240,21 +244,6 @@ public class WorkerInternalApplication {
             }
             return result.getValue().getStringValue();
         }).collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void createVolumeTask(String triggerId, String defKey) {
-        this.workflowInstanceRepository.findByTriggerId(triggerId)
-                .ifPresent(workflow -> this.taskInstanceRepository.add(TaskInstance.Builder.anInstance()
-                        .serialNo(1)
-                        .defKey(defKey)
-                        .nodeInfo(NodeInfo.Builder.aNodeDef().name(defKey).build())
-                        .asyncTaskRef(defKey)
-                        .workflowRef(workflow.getWorkflowRef())
-                        .workflowVersion(workflow.getWorkflowVersion())
-                        .businessId(UUID.randomUUID().toString().replace("-", ""))
-                        .triggerId(triggerId)
-                        .build()));
     }
 
     public Optional<TaskInstance> pullTasks(String workerId) {
@@ -487,6 +476,10 @@ public class WorkerInternalApplication {
         var taskInstance = this.taskInstanceRepository.findByBusinessIdAndVersion(businessId, version)
                 .orElse(null);
         if (taskInstance == null) {
+            response.setStatus(HttpStatus.SC_CONFLICT);
+            return null;
+        }
+        if (taskInstance.getStatus() != InstanceStatus.WAITING) {
             response.setStatus(HttpStatus.SC_CONFLICT);
             return null;
         }

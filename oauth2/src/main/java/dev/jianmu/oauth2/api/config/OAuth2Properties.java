@@ -3,6 +3,7 @@ package dev.jianmu.oauth2.api.config;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.OAuth2MustHaveOneException;
 import dev.jianmu.oauth2.api.exception.OAuth2OnlyHaveOneException;
+import dev.jianmu.oauth2.api.vo.AllowLoginVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.InitializingBean;
@@ -10,8 +11,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.util.StringUtils;
 
+import javax.validation.Valid;
 import java.util.Objects;
 
 /**
@@ -23,6 +26,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @Component
+@Validated
 @ConfigurationProperties(prefix = "jianmu.oauth2")
 public class OAuth2Properties implements InitializingBean, EnvironmentAware {
     private String type;
@@ -56,6 +60,22 @@ public class OAuth2Properties implements InitializingBean, EnvironmentAware {
         }
         if (this.gitea != null) {
             return this.gitea.getClientSecret();
+        }
+        return null;
+    }
+
+    public AllowLoginVo getAllowLogin() {
+        if (this.gitee != null) {
+            return this.gitee.getAllowLogin();
+        }
+        if (this.gitlink != null) {
+            return this.gitlink.getAllowLogin();
+        }
+        if (this.gitlab != null) {
+            return this.gitlab.getAllowLogin();
+        }
+        if (this.gitea != null) {
+            return this.gitea.getAllowLogin();
         }
         return null;
     }

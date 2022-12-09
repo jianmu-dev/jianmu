@@ -676,4 +676,9 @@ public class GitlinkApi implements OAuth2Api {
         }
         return file;
     }
+
+    @Override
+    public boolean checkOrganizationMember(String accessToken, String org, String userId, String username) {
+        return false;
+    }
 }
