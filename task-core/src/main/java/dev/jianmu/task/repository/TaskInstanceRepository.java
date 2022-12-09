@@ -26,6 +26,8 @@ public interface TaskInstanceRepository {
 
     void saveSucceeded(TaskInstance taskInstance);
 
+    void commitEvent(TaskInstance taskInstance);
+
     Optional<TaskInstance> findById(String instanceId);
 
     Optional<TaskInstance> findByBusinessIdAndMaxSerialNo(String businessId);
