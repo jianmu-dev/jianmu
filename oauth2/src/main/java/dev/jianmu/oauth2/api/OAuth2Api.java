@@ -181,4 +181,6 @@ public interface OAuth2Api {
      * @return
      */
     IFileVo getFile(String accessToken, String owner, String repo, String filepath, String ref);
+
+    boolean checkOrganizationMember(String accessToken, String org, String userId, String username);
 }

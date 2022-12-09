@@ -22,8 +22,8 @@ public interface TaskInstanceMapper {
     @Update("update jm_task_instance set status = #{status}, end_time = #{endTime} where id = #{id}")
     void updateStatus(TaskInstance taskInstance);
 
-    @Update("update jm_task_instance set worker_id = #{workerId}, end_time = #{endTime} where id = #{id}")
-    void updateWorkerId(TaskInstance taskInstance);
+    @Update("update jm_task_instance set worker_id = #{workerId}, status = 'WAITING', end_time = #{endTime} where id = #{id} and status = 'INIT'")
+    boolean updateWorkerId(TaskInstance taskInstance);
 
     @Update("update jm_task_instance set end_time = #{endTime}, _version = _version + 1 where id = #{id} and _version = #{version}")
     boolean acceptTask(TaskInstance taskInstance);

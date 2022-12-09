@@ -131,4 +131,9 @@ public class OAuth2ApiProxy implements OAuth2Api {
     public IFileVo getFile(String accessToken, String owner, String repo, String filepath, String ref) {
         return this.getApi().getFile(accessToken, owner, repo, filepath, ref);
     }
+
+    @Override
+    public boolean checkOrganizationMember(String accessToken, String org, String userId, String username) {
+        return this.getApi().checkOrganizationMember(accessToken, org, userId, username);
+    }
 }

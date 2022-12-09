@@ -97,6 +97,13 @@ public class TaskInstanceEventHandler {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handleTaskInstanceWaitingEvent(TaskInstanceWaitingEvent event) {
+        // 任务上下文抛出事件通知流程上下文
+        logger.info("get TaskInstanceWaitingEvent: {}", event);
+        this.asyncTaskInstanceInternalApplication.waiting(event.getBusinessId());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleTaskInstanceRunningEvent(TaskInstanceRunningEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceRunningEvent: {}", event);

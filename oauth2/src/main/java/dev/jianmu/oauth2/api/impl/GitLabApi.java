@@ -1,15 +1,14 @@
 package dev.jianmu.oauth2.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
-import dev.jianmu.oauth2.api.exception.AccessTokenDoesNotExistException;
-import dev.jianmu.oauth2.api.exception.GetTokenRequestParameterErrorException;
-import dev.jianmu.oauth2.api.exception.HttpServerException;
-import dev.jianmu.oauth2.api.exception.JsonParseException;
+import dev.jianmu.oauth2.api.exception.*;
 import dev.jianmu.oauth2.api.impl.dto.gitlab.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitlab.UserInfoVo;
+import dev.jianmu.oauth2.api.impl.vo.gitlab.OrgMemberVo;
 import dev.jianmu.oauth2.api.impl.vo.gitlab.TokenVo;
 import dev.jianmu.oauth2.api.vo.*;
 import org.springframework.http.*;
@@ -21,6 +20,7 @@ import org.springframework.web.server.ServerErrorException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author huangxi
@@ -30,7 +30,13 @@ import java.util.List;
  */
 @Component
 public class GitLabApi implements OAuth2Api {
-    private final static ObjectMapper MAPPER = new ObjectMapper();
+    private final static ObjectMapper MAPPER;
+
+    static {
+        MAPPER = new ObjectMapper();
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
     private final RestTemplate restTemplate;
     private final OAuth2Properties oAuth2Properties;
 
@@ -175,5 +181,37 @@ public class GitLabApi implements OAuth2Api {
         return null;
     }
 
+    private HttpHeaders createHeader(String token) {
+        var httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        return httpHeaders;
+    }
+
+    @Override
+    public boolean checkOrganizationMember(String accessToken, String org, String userId, String username) {
+        var url = this.oAuth2Properties.getGitlab().getApiUrl() + "groups/{org}/members/{userId}";
+        var pathParam = Map.of("org", org, "userId", userId);
+        var requestEntity = new HttpEntity<>(this.createHeader(accessToken));
+        try {
+            var entity = this.restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class, pathParam);
+            try {
+                var vo = MAPPER.readValue(entity.getBody(), OrgMemberVo.class);
+                return this.oAuth2Properties.getGitlab().findAccessLevel(org) <= vo.getAccessLevel();
+            } catch (JsonProcessingException e) {
+                throw new JsonParseException(e.getMessage());
+            }
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return false;
+            }
+            if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED) ||
+                    e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+                throw new NoPermissionException(e.getMessage());
+            }
+            throw new HttpClientException(e.getMessage());
+        } catch (HttpServerException e) {
+            throw new HttpServerException(e.getMessage());
+        }
+    }
 }
 
