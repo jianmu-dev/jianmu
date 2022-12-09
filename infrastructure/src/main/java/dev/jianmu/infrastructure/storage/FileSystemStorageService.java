@@ -96,10 +96,16 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         boolean isComplete;
         if (isTask) {
             isComplete = this.taskInstanceRepository.findById(logFileName)
-                    .stream().noneMatch(taskInstance -> taskInstance.getStatus() == InstanceStatus.WAITING || taskInstance.getStatus() == InstanceStatus.RUNNING);
+                    .stream()
+                    .noneMatch(taskInstance ->
+                            taskInstance.getStatus() == InstanceStatus.INIT ||
+                                    taskInstance.getStatus() == InstanceStatus.WAITING ||
+                                    taskInstance.getStatus() == InstanceStatus.RUNNING
+                    );
         } else {
             isComplete = this.workflowInstanceRepository.findByTriggerId(logFileName)
-                    .stream().noneMatch(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.RUNNING || workflowInstance.getStatus() == ProcessStatus.SUSPENDED);
+                    .stream()
+                    .noneMatch(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.RUNNING || workflowInstance.getStatus() == ProcessStatus.SUSPENDED);
         }
         var fullName = logFileName + LogfilePostfix;
         String filePath = (isTask ? this.rootLocation : this.workflowLocation) + File.separator + fullName;

@@ -5,17 +5,19 @@ import dev.jianmu.api.dto.JwtResponse;
 import dev.jianmu.api.dto.Oauth2LoggingDto;
 import dev.jianmu.api.jwt.JwtProvider;
 import dev.jianmu.api.jwt.JwtSession;
-import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.api.vo.AuthorizationUrlVo;
 import dev.jianmu.api.vo.ThirdPartyTypeVo;
 import dev.jianmu.application.exception.*;
 import dev.jianmu.infrastructure.GlobalProperties;
+import dev.jianmu.infrastructure.jackson2.JsonUtil;
 import dev.jianmu.infrastructure.jwt.JwtProperties;
 import dev.jianmu.oauth2.api.OAuth2Api;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.NoPermissionException;
+import dev.jianmu.oauth2.api.exception.NotAllowLoginException;
 import dev.jianmu.oauth2.api.impl.OAuth2ApiProxy;
+import dev.jianmu.oauth2.api.vo.AllowLoginVo;
 import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
 import dev.jianmu.oauth2.api.vo.IRepoVo;
 import dev.jianmu.oauth2.api.vo.IUserInfoVo;
@@ -29,6 +31,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -96,6 +99,9 @@ public class OAuth2Controller {
 
         String accessToken = oAuth2Api.getAccessToken(oauth2LoggingDto.getCode(), oauth2LoggingDto.getRedirectUri());
         IUserInfoVo userInfoVo = oAuth2Api.getUserInfo(accessToken);
+
+        // 校验登录权限
+        this.checkLoginPermission(oauth2LoggingDto.thirdPartyType(), accessToken, userInfoVo.getId(), userInfoVo.getUsername());
 
         JwtSession.Role role = null;
         IRepoVo repo = null;
@@ -260,5 +266,33 @@ public class OAuth2Controller {
             }
         }
         throw new OAuth2IsNotAuthorizedException("没有权限操作此仓库");
+    }
+
+    /**
+     * 检查用户有无登录权限
+     */
+    private void checkLoginPermission(ThirdPartyTypeEnum thirdPartyType, String accessToken, String userId, String username) {
+        var allowLogin = this.oAuth2Properties.getAllowLogin();
+        if (allowLogin == null) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(allowLogin.getUser()) && ObjectUtils.isEmpty(allowLogin.getOrganization())) {
+            return;
+        }
+        if (!ObjectUtils.isEmpty(allowLogin.getUser()) && allowLogin.getUser().contains(username)) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(allowLogin.getOrganization())) {
+            throw new NotAllowLoginException();
+        }
+        var oAuth2Api = OAuth2ApiProxy.builder()
+                .thirdPartyType(thirdPartyType)
+                .build();
+        for (AllowLoginVo.Organization organization : allowLogin.getOrganization()) {
+            if (oAuth2Api.checkOrganizationMember(accessToken, organization.getAccount(), userId, username)) {
+                return;
+            }
+        }
+        throw new NotAllowLoginException();
     }
 }

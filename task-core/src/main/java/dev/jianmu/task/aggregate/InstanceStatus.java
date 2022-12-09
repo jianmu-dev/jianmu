@@ -7,6 +7,7 @@ package dev.jianmu.task.aggregate;
  * @create 2021-03-25 16:19
 */
 public enum InstanceStatus {
+    INIT,
     WAITING,
     RUNNING,
     EXECUTION_SUCCEEDED,

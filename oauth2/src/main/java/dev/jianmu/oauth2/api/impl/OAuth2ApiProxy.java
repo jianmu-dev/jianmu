@@ -67,4 +67,9 @@ public class OAuth2ApiProxy implements OAuth2Api {
         return this.getApi().getBranches(accessToken, gitRepo, gitRepoOwner);
     }
 
+    @Override
+    public boolean checkOrganizationMember(String accessToken, String org, String userId, String username) {
+        return this.getApi().checkOrganizationMember(accessToken, org, userId, username);
+    }
+
 }

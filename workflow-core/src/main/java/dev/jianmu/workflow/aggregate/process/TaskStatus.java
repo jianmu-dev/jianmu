@@ -8,6 +8,7 @@ package dev.jianmu.workflow.aggregate.process;
  */
 public enum TaskStatus {
     INIT,
+    WAITING,
     RUNNING,
     SUSPENDED,
     SKIPPED,

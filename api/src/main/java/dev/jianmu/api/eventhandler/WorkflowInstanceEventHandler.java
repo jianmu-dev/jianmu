@@ -25,7 +25,6 @@ public class WorkflowInstanceEventHandler {
     private final WorkflowInternalApplication workflowInternalApplication;
     private final AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication;
     private final ApplicationEventPublisher publisher;
-    private final WorkerInternalApplication workerInternalApplication;
     private final TaskInstanceInternalApplication taskInstanceInternalApplication;
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
 
@@ -33,13 +32,11 @@ public class WorkflowInstanceEventHandler {
             WorkflowInternalApplication workflowInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
             ApplicationEventPublisher publisher,
-            WorkerInternalApplication workerInternalApplication,
             TaskInstanceInternalApplication taskInstanceInternalApplication,
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication) {
         this.workflowInternalApplication = workflowInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
         this.publisher = publisher;
-        this.workerInternalApplication = workerInternalApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
     }
@@ -72,8 +69,6 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessVolumeCreatedEvent here -------------------------");
         log.info(event.toString());
-        // 创建Workspace
-        this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "start");
         // 初始化流程实例
         var workflowStartCmd = WorkflowStartCmd.builder()
                 .triggerId(event.getTriggerId())
@@ -81,6 +76,8 @@ public class WorkflowInstanceEventHandler {
                 .workflowVersion(event.getWorkflowVersion())
                 .build();
         this.workflowInternalApplication.init(workflowStartCmd);
+        // 创建Workspace
+        this.taskInstanceInternalApplication.createVolumeTask(event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 
@@ -119,7 +116,7 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessEndedEvent here -------------------------");
         log.info(event.toString());
-        this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
+        this.taskInstanceInternalApplication.commitEndEvent(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
@@ -130,7 +127,7 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessNotRunningEvent here -------------------------");
         log.info(event.toString());
-        this.workerInternalApplication.createVolumeTask(event.getTriggerId(), "end");
+        this.taskInstanceInternalApplication.commitEndEvent(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");

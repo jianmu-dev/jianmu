@@ -67,4 +67,6 @@ public interface OAuth2Api {
      * @return
      */
     IBranchesVo getBranches(String accessToken, String gitRepo, String gitRepoOwner);
+
+    boolean checkOrganizationMember(String accessToken, String org, String userId, String username);
 }

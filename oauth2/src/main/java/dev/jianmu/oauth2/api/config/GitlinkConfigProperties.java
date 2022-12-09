@@ -1,8 +1,13 @@
 package dev.jianmu.oauth2.api.config;
 
+import dev.jianmu.oauth2.api.exception.RoleNotExistedException;
+import dev.jianmu.oauth2.api.vo.AllowLoginVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * @author huangxi
@@ -23,4 +28,25 @@ public class GitlinkConfigProperties {
     private String username;
     private String password;
     private String responseType;
+    private AllowLoginVo allowLogin;
+
+    public void setAllowLogin(AllowLoginVo allowLogin) {
+        this.allowLogin = allowLogin;
+        if (allowLogin.getOrganization() == null) {
+            return;
+        }
+        var roles = Arrays.stream(GiteeConfigProperties.Role.values()).map(Enum::name)
+                .collect(Collectors.toList());
+        var noneMatch = allowLogin.getOrganization().stream()
+                .noneMatch(t -> roles.contains(t.getRole()));
+        if (noneMatch) {
+            throw new RoleNotExistedException("oauth2.gitlink.allowLogin.organization.role 配置错误，可选值：" + roles);
+        }
+    }
+
+    public enum Role {
+        all,
+        admin,
+        developer
+    }
 }

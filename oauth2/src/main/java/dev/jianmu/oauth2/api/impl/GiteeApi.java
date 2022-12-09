@@ -8,7 +8,10 @@ import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.exception.*;
 import dev.jianmu.oauth2.api.impl.dto.gitee.LoggingDto;
 import dev.jianmu.oauth2.api.impl.vo.gitee.*;
-import dev.jianmu.oauth2.api.vo.*;
+import dev.jianmu.oauth2.api.vo.IBranchesVo;
+import dev.jianmu.oauth2.api.vo.IRepoMemberVo;
+import dev.jianmu.oauth2.api.vo.IRepoVo;
+import dev.jianmu.oauth2.api.vo.IUserInfoVo;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -18,6 +21,7 @@ import org.springframework.web.server.ServerErrorException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author huangxi
@@ -213,5 +217,27 @@ public class GiteeApi implements OAuth2Api {
         return BranchesVo.builder()
                 .branches(branches)
                 .build();
+    }
+
+    @Override
+    public boolean checkOrganizationMember(String accessToken, String org, String userId, String username) {
+        var url = this.oAuth2Properties.getGitee().getApiUrl() + "user/memberships/orgs/{org}" + "?access_token=" + accessToken;
+        var pathParam = Map.of("org", org);
+        try {
+            var entity = this.restTemplate.exchange(url, HttpMethod.GET, null, OrgMemberVo.class, pathParam);
+            assert entity.getBody() != null;
+            return this.oAuth2Properties.getGitee().findRoles(org).contains(entity.getBody().getRole());
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return false;
+            }
+            if (e.getStatusCode().equals(HttpStatus.UNAUTHORIZED) ||
+                    e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+                throw new NoPermissionException(e.getMessage());
+            }
+            throw new HttpClientException(e.getMessage());
+        } catch (HttpServerException e) {
+            throw new HttpServerException(e.getMessage());
+        }
     }
 }
