@@ -64,8 +64,8 @@
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
-            <artifactId>event</artifactId>
-            <version>2.6.0</version>
+            <artifactId>embedded-worker</artifactId>
+            <version>0.3.1-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
