@@ -48,11 +48,26 @@ export class AsyncTask extends BaseNode {
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
 
-  constructor(ownerRef: string, nodeRef: string, ref: string, name: string, icon: string = '', version: string = '',
-    versionDescription: string = '', inputs: IAsyncTaskParam[] = [], outputs: IAsyncTaskParam[] = [],
-    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
-    super(ref, name, NodeTypeEnum.ASYNC_TASK, checkDefaultIcon(icon) ? defaultIcon : icon,
-      `https://jianmuhub.com/${ownerRef}/${nodeRef}/${version}`);
+  constructor(
+    ownerRef: string,
+    nodeRef: string,
+    ref: string,
+    name: string,
+    icon = '',
+    version = '',
+    versionDescription = '',
+    inputs: IAsyncTaskParam[] = [],
+    outputs: IAsyncTaskParam[] = [],
+    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
+    validateParam?: ValidateParamFn,
+  ) {
+    super(
+      ref,
+      name,
+      NodeTypeEnum.ASYNC_TASK,
+      checkDefaultIcon(icon) ? defaultIcon : icon,
+      `https://jianmuhub.com/${ownerRef}/${nodeRef}/${version}`,
+    );
     this.ownerRef = ownerRef;
     this.nodeRef = nodeRef;
     this.version = version;
@@ -63,21 +78,37 @@ export class AsyncTask extends BaseNode {
     this.validateParam = validateParam;
   }
 
-  static build({ ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode }: any,
-    validateParam?: ValidateParamFn): AsyncTask {
-    return new AsyncTask(ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode, validateParam);
+  static build(
+    { ownerRef, nodeRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode }: any,
+    validateParam?: ValidateParamFn,
+  ): AsyncTask {
+    return new AsyncTask(
+      ownerRef,
+      nodeRef,
+      ref,
+      name,
+      icon,
+      version,
+      versionDescription,
+      inputs,
+      outputs,
+      failureMode,
+      validateParam,
+    );
   }
 
   async buildSelectableParam(nodeId: string): Promise<ISelectableParam | undefined> {
     const children: ISelectableParam[] = [];
     if (this.outputs.length > 0) {
-      children.push(...this.outputs.map(({ ref, type, name }) => {
-        return {
-          value: ref,
-          type,
-          label: name || ref,
-        };
-      }));
+      children.push(
+        ...this.outputs.map(({ ref, type, name }) => {
+          return {
+            value: ref,
+            type,
+            label: name || ref,
+          };
+        }),
+      );
     }
 
     children.push(await buildSelectableInnerOutputParam());
@@ -114,7 +145,8 @@ export class AsyncTask extends BaseNode {
               callback();
             },
             trigger: 'blur',
-          }];
+          },
+        ];
       }
       fields[index] = {
         type: 'object',
@@ -138,6 +170,7 @@ export class AsyncTask extends BaseNode {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   toDsl(): object {
     const { ownerRef, nodeRef, ref, name, version, inputs, failureMode } = this;
     const param: {
@@ -184,4 +217,3 @@ export class AsyncTask extends BaseNode {
     };
   }
 }
-
