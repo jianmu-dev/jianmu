@@ -253,7 +253,12 @@ public class ProjectApplication {
         this.projectLinkGroupRepository.add(projectLinkGroup);
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
-        this.publisher.publishEvent(new CreatedEvent(project.getId(), branch, associationId));
+        this.publisher.publishEvent(CreatedEvent.Builder.aCreatedEvent()
+                .projectId(project.getId())
+                .branch(branch)
+                .associationId(associationId)
+                .associationType(associationType)
+                .build());
         if (isSyncProject) {
             this.createOrUpdateGitFile(userId, branch, project, project.getWorkflowName());
         }
@@ -396,7 +401,12 @@ public class ProjectApplication {
         this.workflowInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.asyncTaskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
-        this.publisher.publishEvent(new DeletedEvent(project.getId(), userId, project.getAssociationId(), project.getAssociationType()));
+        this.publisher.publishEvent(DeletedEvent.Builder.aDeletedEvent()
+                .projectId(project.getId())
+                .userId(userId)
+                .associationId(project.getAssociationId())
+                .associationType(project.getAssociationType())
+                .build());
     }
 
     @Transactional
