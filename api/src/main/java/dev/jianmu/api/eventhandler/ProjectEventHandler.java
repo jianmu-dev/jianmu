@@ -5,6 +5,7 @@ import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.service.ProjectGroupApplication;
 import dev.jianmu.application.service.TriggerApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.infrastructure.lock.DistributedLock;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
@@ -15,7 +16,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author Ethan Liu
@@ -69,7 +69,9 @@ public class ProjectEventHandler {
     // 项目创建事件
     public void handleProjectCreate(CreatedEvent createdEvent) {
         // 添加gitRepo中的flow
-        this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), createdEvent.getAssociationId());
+        if (AssociationUtil.AssociationType.GIT_REPO.name().equals(createdEvent.getAssociationType())) {
+            this.gitRepoApplication.addFlow(createdEvent.getProjectId(), createdEvent.getBranch(), createdEvent.getAssociationId());
+        }
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
@@ -77,7 +79,7 @@ public class ProjectEventHandler {
         // 项目删除事件, 删除相关的Trigger
         this.triggerApplication.deleteByProjectId(deletedEvent.getProjectId(), deletedEvent.getUserId(), deletedEvent.getAssociationId(), deletedEvent.getAssociationType());
         // 移除gitRepo中flow
-        if (!ObjectUtils.isEmpty(deletedEvent.getAssociationType())) {
+        if (AssociationUtil.AssociationType.GIT_REPO.name().equals(deletedEvent.getAssociationType())) {
             this.gitRepoApplication.removeFlow(deletedEvent.getProjectId(), deletedEvent.getAssociationId());
         }
     }

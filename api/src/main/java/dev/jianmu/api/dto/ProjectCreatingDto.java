@@ -30,6 +30,4 @@ public class ProjectCreatingDto {
     private String dslText;
     @Schema(description = "项目组ID")
     private String projectGroupId;
-    @Schema(description = "流水线分支")
-    private String branch;
 }

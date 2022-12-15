@@ -80,7 +80,7 @@ public class ProjectController {
         return ProjectIdVo.builder().id(project.getId()).build();
     }
 
-    @PutMapping("inner")
+    @PostMapping("inner")
     @Operation(summary = "内部创建项目", description = "内部创建项目")
     public ProjectIdVo createProject(@Valid @RequestBody ProjectCreatingDto projectCreatingDto) {
         var session = this.userSessionHolder.getSession();
