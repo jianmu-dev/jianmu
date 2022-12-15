@@ -45,7 +45,7 @@ public class AssociationUtil {
 
     // 校验项目操作权限
     public void checkProjectPermission(String associationId, String associationType, String associationPlatform, Project project) {
-        if (project.getAssociationId() == null || project.getAssociationType() == null) {
+        if (project.getAssociationId().isBlank() || project.getAssociationType().isBlank()) {
             return;
         }
         var type = AssociationUtil.AssociationType.valueOf(project.getAssociationType());
