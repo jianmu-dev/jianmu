@@ -9,6 +9,7 @@ import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.external_parameter.repository.ExternalParameterLabelRepository;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
+import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,9 @@ public class ExternalParameterApplication {
     private final ExternalParameterRepository externalParameterRepository;
     private final ExternalParameterLabelRepository externalParameterLabelRepository;
 
-    public ExternalParameterApplication(ExternalParameterRepository externalParameterRepository, ExternalParameterLabelRepository externalParameterLabelRepository, GitRepoRepository gitRepoRepository) {
+    public ExternalParameterApplication(ExternalParameterRepository externalParameterRepository,
+                                        ExternalParameterLabelRepository externalParameterLabelRepository
+    ) {
         this.externalParameterRepository = externalParameterRepository;
         this.externalParameterLabelRepository = externalParameterLabelRepository;
     }

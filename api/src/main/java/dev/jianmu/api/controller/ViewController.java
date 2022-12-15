@@ -3,17 +3,16 @@ package dev.jianmu.api.controller;
 import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.*;
 import dev.jianmu.api.mapper.*;
-import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
-import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.external_parameter.aggregate.ExternalParameter;
 import dev.jianmu.external_parameter.aggregate.ExternalParameterLabel;
 import dev.jianmu.git.repo.aggregate.Flow;
 import dev.jianmu.infrastructure.sse.WorkflowInstanceStatusSubscribeService;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
+import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
@@ -63,12 +62,10 @@ public class ViewController {
     private final StorageService storageService;
     private final ProjectGroupApplication projectGroupApplication;
     private final GitRepoApplication gitRepoApplication;
-    private final UserContextHolder userContextHolder;
+    private final UserSessionHolder userSessionHolder;
     private final ExternalParameterApplication externalParameterApplication;
     private final ExternalParameterLabelApplication externalParameterLabelApplication;
     private final WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService;
-
-    private final AssociationUtil associationUtil;
 
     public ViewController(
             ProjectApplication projectApplication,
@@ -82,11 +79,10 @@ public class ViewController {
             StorageService storageService,
             ProjectGroupApplication projectGroupApplication,
             GitRepoApplication gitRepoApplication,
-            UserContextHolder userContextHolder,
+            UserSessionHolder userSessionHolder,
             ExternalParameterApplication externalParameterApplication,
             ExternalParameterLabelApplication externalParameterLabelApplication,
-            WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService,
-            AssociationUtil associationUtil
+            WorkflowInstanceStatusSubscribeService workflowInstanceStatusSubscribeService
     ) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
@@ -99,11 +95,10 @@ public class ViewController {
         this.storageService = storageService;
         this.projectGroupApplication = projectGroupApplication;
         this.gitRepoApplication = gitRepoApplication;
-        this.userContextHolder = userContextHolder;
+        this.userSessionHolder = userSessionHolder;
         this.externalParameterApplication = externalParameterApplication;
         this.externalParameterLabelApplication = externalParameterLabelApplication;
         this.workflowInstanceStatusSubscribeService = workflowInstanceStatusSubscribeService;
-        this.associationUtil = associationUtil;
     }
 
     @GetMapping("/parameters/types")
@@ -155,7 +150,7 @@ public class ViewController {
     @Operation(summary = "查询命名空间列表", description = "查询命名空间列表")
     public NameSpacesVo findAllNamespace() {
         var type = this.secretApplication.getCredentialManagerType();
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         var list = this.secretApplication.findAll(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
 
         return NameSpacesVo.builder()
@@ -167,14 +162,14 @@ public class ViewController {
     @GetMapping("/namespaces/{name}")
     @Operation(summary = "查询命名空间详情", description = "查询命名空间详情")
     public Namespace findByName(@PathVariable String name) {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         return this.secretApplication.findByName(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), name).orElseThrow(() -> new DataNotFoundException("未找到该命名空间"));
     }
 
     @GetMapping("/namespaces/{name}/keys")
     @Operation(summary = "查询键值对列表", description = "查询键值对列表")
     public List<String> findAll(@PathVariable String name) {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         var kvs = this.secretApplication.findAllByNamespaceName(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), name);
         return kvs.stream().map(KVPair::getKey).collect(Collectors.toList());
     }
@@ -304,7 +299,7 @@ public class ViewController {
     @GetMapping("/projects/{projectId}")
     @Operation(summary = "获取项目详情", description = "获取项目详情")
     public ProjectDetailVo getProject(@PathVariable String projectId) {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         var project = this.projectApplication.findById(projectId, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform())
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         var projectVo = ProjectMapper.INSTANCE.toProjectDetailVo(project);
@@ -524,7 +519,7 @@ public class ViewController {
     @GetMapping("/v2/projects")
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
@@ -621,7 +616,7 @@ public class ViewController {
     @GetMapping("/external_parameters/labels")
     @Operation(summary = "获取外部参数标签列表", description = "获取外部参数标签列表")
     public List<ExternalParameterLabelVo> findAllLabels() {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         List<ExternalParameterLabel> externalParameterLabels = this.externalParameterLabelApplication.findAll(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         ArrayList<ExternalParameterLabelVo> externalParameterLabelVos = new ArrayList<>();
         externalParameterLabels.forEach(e -> externalParameterLabelVos.add(
@@ -653,7 +648,7 @@ public class ViewController {
     @GetMapping("/external_parameters")
     @Operation(summary = "获取外部参数列表", description = "获取外部参数列表")
     public List<ExternalParameterVo> findAllExternalParameters() {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         List<ExternalParameter> externalParameters = this.externalParameterApplication.findAll(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
         ArrayList<ExternalParameterVo> externalParameterVos = new ArrayList<>();
         externalParameters.forEach(externalParameter -> externalParameterVos.add(ExternalParameterVo.builder()

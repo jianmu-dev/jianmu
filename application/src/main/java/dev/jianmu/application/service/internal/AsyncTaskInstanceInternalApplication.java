@@ -2,7 +2,7 @@ package dev.jianmu.application.service.internal;
 
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.exception.NoAssociatedPermissionException;
+import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
@@ -25,13 +25,18 @@ public class AsyncTaskInstanceInternalApplication {
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final ProjectRepository projectRepository;
+    private final AssociationUtil associationUtil;
 
     public AsyncTaskInstanceInternalApplication(
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
-            WorkflowInstanceRepository workflowInstanceRepository, ProjectRepository projectRepository) {
+            WorkflowInstanceRepository workflowInstanceRepository,
+            ProjectRepository projectRepository,
+            AssociationUtil associationUtil
+    ) {
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.projectRepository = projectRepository;
+        this.associationUtil = associationUtil;
     }
 
     @Transactional
@@ -129,14 +134,9 @@ public class AsyncTaskInstanceInternalApplication {
 
     // 校验项目增删改查权限
     private void checkProjectPermission(String associationId, String associationType, String associationPlatform, String workflowRef) {
-        if (associationId == null || associationType == null) {
-            return;
-        }
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowRef));
-        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()) || !associationPlatform.equals(project.getAssociationPlatform())) {
-            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
-        }
+        this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
     }
 
     // 任务忽略

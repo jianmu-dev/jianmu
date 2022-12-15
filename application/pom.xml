@@ -23,6 +23,11 @@
             <artifactId>oauth2</artifactId>
             <version>0.3.1-saas</version>
         </dependency>
+        <dependency>
+            <groupId>dev.jianmu</groupId>
+            <artifactId>jianmu-user-context</artifactId>
+            <version>0.0.5</version>
+        </dependency>
     </dependencies>
 
 

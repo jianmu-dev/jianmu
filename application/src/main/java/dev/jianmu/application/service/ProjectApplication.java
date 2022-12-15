@@ -6,7 +6,6 @@ import dev.jianmu.application.event.CronEvent;
 import dev.jianmu.application.event.ManualEvent;
 import dev.jianmu.application.event.WebhookEvent;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.query.CustomWebhookDefApi;
 import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.util.AssociationUtil;
@@ -88,6 +87,7 @@ public class ProjectApplication {
     private final CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository;
     private final WebhookOnlyService webhookOnlyService;
     private final AccessTokenRepository accessTokenRepository;
+    private final AssociationUtil associationUtil;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -107,7 +107,8 @@ public class ProjectApplication {
             OAuth2Properties oAuth2Properties,
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
             WebhookOnlyService webhookOnlyService,
-            AccessTokenRepository accessTokenRepository
+            AccessTokenRepository accessTokenRepository,
+            AssociationUtil associationUtil
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -127,6 +128,7 @@ public class ProjectApplication {
         this.webhookDefinitionVersionRepository = webhookDefinitionVersionRepository;
         this.webhookOnlyService = webhookOnlyService;
         this.accessTokenRepository = accessTokenRepository;
+        this.associationUtil = associationUtil;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
@@ -154,7 +156,7 @@ public class ProjectApplication {
     public void triggerByManual(String projectId, String associationId, String associationType, String associationPlatform) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        this.checkProjectPermission(associationId, associationType, associationPlatform, project);
+        this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
 
         var evt = dev.jianmu.trigger.event.TriggerEvent.Builder
                 .aTriggerEvent()
@@ -224,6 +226,7 @@ public class ProjectApplication {
                 .dslSource(Project.DslSource.LOCAL)
                 .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
+                .creatorId(userId)
                 .associationId(associationId)
                 .associationType(associationType)
                 .associationPlatform(associationPlatform)
@@ -295,9 +298,7 @@ public class ProjectApplication {
     public boolean updateProject(String dslId, String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, boolean isSyncProject) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-        if (associationId != null) {
-            this.checkProjectPermission(associationId, associationType, associationPlatform, project);
-        }
+        this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
         var concurrent = project.isConcurrent();
         var oldName = project.getWorkflowName();
         // 移动项目到项目组
@@ -330,14 +331,6 @@ public class ProjectApplication {
         }
         // 返回是否并发执行流程实例
         return !concurrent && project.isConcurrent();
-    }
-
-    // 校验项目增删改查权限
-    private void checkProjectPermission(String associationId, String associationType, String associationPlatform, Project project) {
-        if (associationId != null && associationType != null &&
-                (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()) || !associationPlatform.equals(project.getAssociationPlatform()))) {
-            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
-        }
     }
 
     private void deleteGitFile(Project project, String userId) {
@@ -385,7 +378,7 @@ public class ProjectApplication {
     public void deleteById(String id, String userId, String associationId, String associationType, String associationPlatform) {
         Project project = this.projectRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        this.checkProjectPermission(associationId, associationType, associationPlatform, project);
+        this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
         var running = this.workflowInstanceRepository
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
@@ -489,7 +482,7 @@ public class ProjectApplication {
         if (projectOptional.isEmpty()) {
             return projectOptional;
         }
-        this.checkProjectPermission(associationId, associationType, associationPlatform, projectOptional.get());
+        this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, projectOptional.get());
         return projectOptional;
     }
 
