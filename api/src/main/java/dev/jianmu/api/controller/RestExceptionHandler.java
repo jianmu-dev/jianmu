@@ -1,6 +1,5 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.api.vo.ClientSessionVo;
 import dev.jianmu.api.vo.ErrorMessage;
 import dev.jianmu.application.exception.DataNotFoundException;
@@ -8,6 +7,7 @@ import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.service.GitRepoApplication;
 import dev.jianmu.application.util.AssociationUtil;
 import dev.jianmu.infrastructure.exception.DBException;
+import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import org.apache.catalina.connector.ClientAbortException;
 import org.slf4j.Logger;
@@ -45,18 +45,18 @@ public class RestExceptionHandler {
 
     private final RestTemplate restTemplate;
     private final GitRepoApplication gitRepoApplication;
-    private final UserContextHolder userContextHolder;
+    private final UserSessionHolder userSessionHolder;
     private final OAuth2Properties oAuth2Properties;
 
     public RestExceptionHandler(
             RestTemplate restTemplate,
             GitRepoApplication gitRepoApplication,
-            UserContextHolder userContextHolder,
+            UserSessionHolder userSessionHolder,
             OAuth2Properties oAuth2Properties
     ) {
         this.restTemplate = restTemplate;
         this.gitRepoApplication = gitRepoApplication;
-        this.userContextHolder = userContextHolder;
+        this.userSessionHolder = userSessionHolder;
         this.oAuth2Properties = oAuth2Properties;
     }
 
@@ -176,7 +176,7 @@ public class RestExceptionHandler {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(ex.getAssociationType())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         var gitRepo = this.gitRepoApplication.findById(ex.getAssociationId());
         try {
             var url = this.oAuth2Properties.getGitlink().getEngineAddress() + "gitlink_engine/auth/session";

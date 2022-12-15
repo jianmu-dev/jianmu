@@ -1,12 +1,11 @@
 package dev.jianmu.api.controller;
 
-import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.application.exception.DataNotFoundException;
-import dev.jianmu.application.exception.NoAssociatedPermissionException;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.application.util.AssociationUtil;
+import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,14 +28,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkflowInstanceController {
     private final WorkflowInstanceInternalApplication instanceApplication;
     private final AsyncTaskInstanceInternalApplication taskInstanceInternalApplication;
-    private final UserContextHolder userContextHolder;
+    private final UserSessionHolder userSessionHolder;
     private final AssociationUtil associationUtil;
     private final ProjectApplication projectApplication;
 
-    public WorkflowInstanceController(WorkflowInstanceInternalApplication instanceApplication, AsyncTaskInstanceInternalApplication taskInstanceInternalApplication, UserContextHolder userContextHolder, AssociationUtil associationUtil, ProjectApplication projectApplication) {
+    public WorkflowInstanceController(WorkflowInstanceInternalApplication instanceApplication,
+                                      AsyncTaskInstanceInternalApplication taskInstanceInternalApplication,
+                                      UserSessionHolder userSessionHolder,
+                                      AssociationUtil associationUtil,
+                                      ProjectApplication projectApplication
+    ) {
         this.instanceApplication = instanceApplication;
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
-        this.userContextHolder = userContextHolder;
+        this.userSessionHolder = userSessionHolder;
         this.associationUtil = associationUtil;
         this.projectApplication = projectApplication;
     }
@@ -46,36 +50,27 @@ public class WorkflowInstanceController {
     public void terminate(
             @Parameter(description = "流程实例ID") @PathVariable String instanceId
     ) {
-        var session = this.userContextHolder.getSession();
-        this.checkProjectPermission(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), instanceId);
-        this.instanceApplication.terminate(instanceId);
-    }
-
-    // 校验项目增删改查权限
-    private void checkProjectPermission(String associationId, String associationType, String associationPlatform, String instanceId) {
-        if (associationId == null || associationType == null) {
-            return;
-        }
+        var session = this.userSessionHolder.getSession();
         var workflowInstance = this.instanceApplication.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
         var project = this.projectApplication.findByWorkflowRef(workflowInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowInstance.getWorkflowRef()));
-        if (!associationId.equals(project.getAssociationId()) || !associationType.equals(project.getAssociationType()) || !associationPlatform.equals(project.getAssociationPlatform())) {
-            throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
-        }
+        this.associationUtil.checkProjectPermission(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), project);
+
+        this.instanceApplication.terminate(instanceId);
     }
 
     @PutMapping("/retry/{instanceId}/{taskRef}")
     @Operation(summary = "流程实例任务重试接口", description = "流程实例任务重试接口")
     public void retry(@PathVariable String instanceId, @PathVariable String taskRef) {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         this.taskInstanceInternalApplication.retry(instanceId, taskRef, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
 
     @PutMapping("/ignore/{instanceId}/{taskRef}")
     @Operation(summary = "流程实例任务忽略接口", description = "流程实例任务忽略接口")
     public void ignore(@PathVariable String instanceId, @PathVariable String taskRef) {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         this.taskInstanceInternalApplication.ignore(instanceId, taskRef, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
 }

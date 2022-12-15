@@ -1,11 +1,11 @@
 package dev.jianmu.api.controller.view;
 
 import dev.jianmu.api.mapper.CustomWebhookDefinitionMapper;
-import dev.jianmu.api.util.UserContextHolder;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.CustomWebhookDefinitionApplication;
 import dev.jianmu.application.util.CustomWebhookRuleUtil;
+import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookDefinitionVersion;
 import dev.jianmu.trigger.aggregate.custom.webhook.CustomWebhookInstance;
@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 @Tag(name = "查询自定义Webhook API", description = "查询自定义Webhook API")
 public class CustomWebhookController {
     private final CustomWebhookDefinitionApplication definitionApplication;
-    private final UserContextHolder userContextHolder;
+    private final UserSessionHolder userSessionHolder;
 
-    public CustomWebhookController(CustomWebhookDefinitionApplication definitionApplication, UserContextHolder userContextHolder) {
+    public CustomWebhookController(CustomWebhookDefinitionApplication definitionApplication, UserSessionHolder userSessionHolder) {
         this.definitionApplication = definitionApplication;
-        this.userContextHolder = userContextHolder;
+        this.userSessionHolder = userSessionHolder;
     }
 
     @GetMapping("operators")
@@ -61,7 +61,7 @@ public class CustomWebhookController {
     @GetMapping
     @Operation(summary = "查询webhook列表", description = "查询webhook列表")
     public List<WebhookDefinitionVo> findAll() {
-        var session = this.userContextHolder.getSession();
+        var session = this.userSessionHolder.getSession();
         var ref = Arrays.stream(ThirdPartyTypeEnum.values())
                 .filter(t -> t.name().equals(session.getAssociationPlatform()))
                 .findFirst()

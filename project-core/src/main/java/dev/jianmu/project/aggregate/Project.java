@@ -55,6 +55,8 @@ public class Project extends BaseAssociation {
     private boolean concurrent = false;
     // 原始DSL文本
     private String dslText;
+    // 创建者ID
+    private String creatorId;
     // 创建时间
     private final LocalDateTime createdTime = LocalDateTime.now();
     // 最后修改者
@@ -181,6 +183,10 @@ public class Project extends BaseAssociation {
         return lastModifiedTime;
     }
 
+    public String getCreatorId() {
+        return creatorId;
+    }
+
     public LocalDateTime getCreatedTime() {
         return createdTime;
     }
@@ -212,6 +218,8 @@ public class Project extends BaseAssociation {
         private boolean concurrent = false;
         // 原始DSL文本
         private String dslText;
+        // 创建者ID
+        private String creatorId;
         // 最后修改者
         private String lastModifiedBy;
         // 联合ID
@@ -293,6 +301,11 @@ public class Project extends BaseAssociation {
             return this;
         }
 
+        public Builder creatorId(String creatorId) {
+            this.creatorId = creatorId;
+            return this;
+        }
+
         public Builder lastModifiedBy(String lastModifiedBy) {
             this.lastModifiedBy = lastModifiedBy;
             return this;
@@ -327,6 +340,7 @@ public class Project extends BaseAssociation {
             project.concurrent = this.concurrent;
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;
+            project.creatorId = this.creatorId;
             project.lastModifiedBy = this.lastModifiedBy;
             project.lastModifiedTime = LocalDateTime.now();
             project.updateAssociation(this.associationId, this.associationType, this.associationPlatform);
