@@ -1,7 +1,7 @@
 package dev.jianmu.application.util;
 
 import dev.jianmu.application.exception.NoAssociatedPermissionException;
-import dev.jianmu.jianmu_user_context.exception.NotOrganizationOwnerException;
+import dev.jianmu.jianmu_user_context.exception.NotOrganizationMemberException;
 import dev.jianmu.jianmu_user_context.exception.UserIdIllegalException;
 import dev.jianmu.jianmu_user_context.exception.UserRefIllegalException;
 import dev.jianmu.jianmu_user_context.holder.UserPermissionHolder;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
+ * @author Daihw
  * @class AssociationUtil
  * @description AssociationUtil
- * @author Daihw
  * @create 2022/12/15 9:51 上午
  */
 @Slf4j
@@ -22,26 +22,6 @@ import javax.annotation.Resource;
 public class AssociationUtil {
     @Resource
     private UserPermissionHolder userPermissionHolder;
-
-    public enum AssociationType {
-        /**
-         * 用户
-         */
-        PERSONAL,
-        /**
-         * 组织
-         */
-        ORGANIZATION,
-        /**
-         * git仓库
-         */
-        GIT_REPO
-    }
-
-    public enum AssociationPlatform{
-        GITLINK,
-        AUTO_BUILD_IMAGE,
-    }
 
     // 校验项目操作权限
     public void checkProjectPermission(String associationId, String associationType, String associationPlatform, Project project) {
@@ -68,8 +48,8 @@ public class AssociationUtil {
                     permission.checkUserId(project.getCreatorId());
                 } catch (UserIdIllegalException e) {
                     try {
-                        this.userPermissionHolder.getPermission().checkOrganizationOwner(project.getAssociationId());
-                    } catch (NotOrganizationOwnerException exception) {
+                        this.userPermissionHolder.getPermission().checkOrganizationMember(project.getAssociationId(), "ADMIN");
+                    } catch (NotOrganizationMemberException exception) {
                         throw new NoAssociatedPermissionException("无此仓库权限", project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform());
                     }
                 }
@@ -77,5 +57,25 @@ public class AssociationUtil {
             default:
                 log.warn("未知联合类型: {}", type);
         }
+    }
+
+    public enum AssociationType {
+        /**
+         * 用户
+         */
+        PERSONAL,
+        /**
+         * 组织
+         */
+        ORGANIZATION,
+        /**
+         * git仓库
+         */
+        GIT_REPO
+    }
+
+    public enum AssociationPlatform {
+        GITLINK,
+        AUTO_BUILD_IMAGE,
     }
 }
