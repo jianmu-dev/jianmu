@@ -1,7 +1,10 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.application.command.WorkflowStartCmd;
-import dev.jianmu.application.service.internal.*;
+import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
+import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
+import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
+import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.event.process.*;
 import lombok.extern.slf4j.Slf4j;
@@ -65,35 +68,19 @@ public class WorkflowInstanceEventHandler {
 
     @Async
     @EventListener
-    public void handleProcessVolumeCreatedEvent(ProcessVolumeCreatedEvent event) {
-        MDC.put("triggerId", event.getTriggerId());
-        log.info("Get ProcessVolumeCreatedEvent here -------------------------");
-        log.info(event.toString());
-        // 初始化流程实例
-        var workflowStartCmd = WorkflowStartCmd.builder()
-                .triggerId(event.getTriggerId())
-                .workflowRef(event.getWorkflowRef())
-                .workflowVersion(event.getWorkflowVersion())
-                .build();
-        this.workflowInternalApplication.init(workflowStartCmd);
-        // 创建Workspace
-        this.taskInstanceInternalApplication.createVolumeTask(event.getTriggerId());
-        log.info("-----------------------------------------------------");
-    }
-
-    @Async
-    @EventListener
     public void handleProcessStartedEvent(ProcessStartedEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessStartedEvent here -------------------------");
         log.info(event.toString());
-        // 触发流程启动
         var workflowStartCmd = WorkflowStartCmd.builder()
                 .triggerId(event.getTriggerId())
                 .workflowRef(event.getWorkflowRef())
                 .workflowVersion(event.getWorkflowVersion())
                 .build();
-        this.workflowInternalApplication.start(workflowStartCmd);
+        // 初始化流程实例
+        this.workflowInternalApplication.init(workflowStartCmd);
+        // 创建start、end任务
+        this.taskInstanceInternalApplication.createVolumeTask(event.getTriggerId());
         log.info("-----------------------------------------------------");
     }
 

@@ -267,7 +267,7 @@ public class ProjectApplication {
         if (project.isConcurrent()) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
                     .forEach(workflowInstance -> {
-                        workflowInstance.createVolume();
+                        workflowInstance.start();
                         this.workflowInstanceRepository.save(workflowInstance);
                     });
             return;
@@ -281,7 +281,7 @@ public class ProjectApplication {
         }
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
                 .ifPresent(workflowInstance -> {
-                    workflowInstance.createVolume();
+                    workflowInstance.start();
                     this.workflowInstanceRepository.save(workflowInstance);
                 });
     }
