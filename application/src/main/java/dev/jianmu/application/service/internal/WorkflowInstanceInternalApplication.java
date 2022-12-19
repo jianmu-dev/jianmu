@@ -111,7 +111,9 @@ public class WorkflowInstanceInternalApplication {
                         workflowInstance.createVolume();
                         // 修改项目最后执行状态
                         projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
-                        this.workflowInstanceRepository.save(workflowInstance);
+                        if (!this.workflowInstanceRepository.running(workflowInstance)) {
+                            return;
+                        }
                         this.projectLastExecutionRepository.update(projectLastExecution);
                     });
             return;
