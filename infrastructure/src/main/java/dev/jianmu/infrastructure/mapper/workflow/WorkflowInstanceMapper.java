@@ -93,6 +93,12 @@ public interface WorkflowInstanceMapper {
             "where id = #{wk.id}")
     void save(@Param("wk") WorkflowInstance workflowInstance);
 
+    @Update("update jm_workflow_instance " +
+            "set run_mode=#{wk.runMode},status=#{wk.status},start_time=#{wk.startTime}," +
+            "suspended_time=#{wk.suspendedTime},end_time=#{wk.endTime},_version= _version+1 " +
+            "where id = #{wk.id} and `status` != #{wk.status}")
+    boolean running(@Param("wk") WorkflowInstance workflowInstance);
+
     @Delete("delete from jm_workflow_instance where workflow_ref=#{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 

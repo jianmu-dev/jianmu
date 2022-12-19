@@ -8,6 +8,7 @@ import dev.jianmu.infrastructure.mapper.workflow.WorkflowInstanceMapper;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.aggregate.process.WorkflowInstance;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -22,6 +23,7 @@ import java.util.Optional;
  * @description 流程实例仓储实现类
  * @create 2021-03-18 08:38
  */
+@Slf4j
 @Repository
 public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepository {
 
@@ -79,6 +81,18 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
             this.workflowInstanceBackupMapper.save(workflowInstance);
         }
         this.publisher.publishEvent(workflowInstance);
+    }
+
+    @Override
+    public boolean running(WorkflowInstance workflowInstance) {
+        // 基于数据库行级锁，防止任务重复创建
+        // fix: https://gitee.com/jianmu-dev/jianmu/issues/I6691G
+        if (this.workflowInstanceMapper.running(workflowInstance)) {
+            this.publisher.publishEvent(workflowInstance);
+            return true;
+        }
+        log.warn("防止任务重复创建");
+        return false;
     }
 
     @Override

@@ -198,7 +198,7 @@ public class WorkflowInstanceInternalApplication {
     // 流程实例创建Volume
     private void createVolume(WorkflowInstance workflowInstance, ProjectLastExecution projectLastExecution, String associationId, String associationTYpe, String associationPlatform) {
         MDC.put("triggerId", workflowInstance.getTriggerId());
-        workflowInstance.createVolume();
+        workflowInstance.start();
         // 添加全局参数
         try {
             var globalParameters = this.findGlobalParameters(workflowInstance.getTriggerId(), workflowInstance.getWorkflowRef(), workflowInstance.getWorkflowVersion(), associationId, associationTYpe, associationPlatform);
@@ -210,7 +210,9 @@ public class WorkflowInstanceInternalApplication {
         // 修改项目最后执行状态
         projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
 
-        this.workflowInstanceRepository.save(workflowInstance);
+        if (!this.workflowInstanceRepository.running(workflowInstance)) {
+            return;
+        }
         this.projectLastExecutionRepository.update(projectLastExecution);
     }
 
