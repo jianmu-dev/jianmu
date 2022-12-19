@@ -22,6 +22,8 @@ public interface WorkflowInstanceRepository {
 
     void save(WorkflowInstance workflowInstance);
 
+    boolean running(WorkflowInstance workflowInstance);
+
     void commitEvents(WorkflowInstance workflowInstance);
 
     List<WorkflowInstance> findAll(int pageNum, int pageSize);

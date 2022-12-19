@@ -162,6 +162,7 @@ public class WorkflowInternalApplication {
         this.workflowRepository.commitEvents(workflow);
     }
 
+    // TODO 待删除
     @Transactional
     public void start(WorkflowStartCmd cmd) {
         Workflow workflow = this.workflowRepository

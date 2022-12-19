@@ -251,13 +251,6 @@ public class TaskInstanceInternalApplication {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         MDC.put("triggerId", taskInstance.getTriggerId());
-        // start、end任务
-        if (taskInstance.isCreationVolume()) {
-            var workflowInstance = this.workflowInstanceRepository.findByTriggerId(taskInstance.getTriggerId())
-                    .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
-            workflowInstance.start();
-            this.workflowInstanceRepository.commitEvents(workflowInstance);
-        }
         if (taskInstance.isDeletionVolume()) {
             this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
         }
