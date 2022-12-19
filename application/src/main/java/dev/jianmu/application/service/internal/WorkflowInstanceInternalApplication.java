@@ -108,7 +108,7 @@ public class WorkflowInstanceInternalApplication {
         if (project.isConcurrent()) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
                     .forEach(workflowInstance -> {
-                        workflowInstance.createVolume();
+                        workflowInstance.start();
                         // 修改项目最后执行状态
                         projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                         if (!this.workflowInstanceRepository.running(workflowInstance)) {
@@ -129,7 +129,7 @@ public class WorkflowInstanceInternalApplication {
         }
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
                 .ifPresent(workflowInstance -> {
-                    workflowInstance.createVolume();
+                    workflowInstance.start();
                     // 修改项目最后执行状态
                     projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                     this.workflowInstanceRepository.save(workflowInstance);
