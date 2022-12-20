@@ -13,6 +13,10 @@ import javax.validation.constraints.NotBlank;
  */
 @Getter
 public class ProjectCreatingDto {
+    @Schema(description = "创建者ID", required = true)
+    @NotBlank(message = "创建者ID不能为空")
+    private String creatorId;
+
     @Schema(description = "联合ID", required = true)
     @NotBlank(message = "联合ID不能为空")
     private String associationId;
