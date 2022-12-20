@@ -83,8 +83,7 @@ public class ProjectController {
     @PostMapping("inner")
     @Operation(summary = "内部创建项目", description = "内部创建项目")
     public ProjectIdVo createProject(@Valid @RequestBody ProjectCreatingDto projectCreatingDto) {
-        var session = this.userSessionHolder.getSession();
-        var project = this.projectApplication.createProject(projectCreatingDto.getDslText(), projectCreatingDto.getProjectGroupId(), session.getAccountId(), projectCreatingDto.getAssociationId(), projectCreatingDto.getAssociationType(), projectCreatingDto.getAssociationPlatform(), null, false);
+        var project = this.projectApplication.createProject(projectCreatingDto.getDslText(), projectCreatingDto.getProjectGroupId(), projectCreatingDto.getCreatorId(), projectCreatingDto.getAssociationId(), projectCreatingDto.getAssociationType(), projectCreatingDto.getAssociationPlatform(), null, false);
         return ProjectIdVo.builder().id(project.getId()).build();
     }
 
