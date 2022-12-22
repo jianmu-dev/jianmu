@@ -59,6 +59,8 @@ public class Project extends BaseAssociation {
     private String creatorId;
     // 创建时间
     private final LocalDateTime createdTime = LocalDateTime.now();
+    // 最后修改者ID
+    private String lastModifiedById;
     // 最后修改者
     private String lastModifiedBy;
     // 最后修改时间
@@ -109,6 +111,10 @@ public class Project extends BaseAssociation {
 
     public void setTriggerType(TriggerType triggerType) {
         this.triggerType = triggerType;
+    }
+
+    public void setLastModifiedById(String lastModifiedById) {
+        this.lastModifiedById = lastModifiedById;
     }
 
     public void setLastModifiedBy(String lastModifiedBy) {
@@ -175,6 +181,10 @@ public class Project extends BaseAssociation {
         return dslText;
     }
 
+    public String getLastModifiedById() {
+        return lastModifiedById;
+    }
+
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }
@@ -220,6 +230,8 @@ public class Project extends BaseAssociation {
         private String dslText;
         // 创建者ID
         private String creatorId;
+        // 最后修改者ID
+        private String lastModifiedById;
         // 最后修改者
         private String lastModifiedBy;
         // 联合ID
@@ -306,6 +318,11 @@ public class Project extends BaseAssociation {
             return this;
         }
 
+        public Builder lastModifiedById(String lastModifiedById) {
+            this.lastModifiedById = lastModifiedById;
+            return this;
+        }
+
         public Builder lastModifiedBy(String lastModifiedBy) {
             this.lastModifiedBy = lastModifiedBy;
             return this;
@@ -341,6 +358,7 @@ public class Project extends BaseAssociation {
             project.workflowRef = this.workflowRef;
             project.dslText = this.dslText;
             project.creatorId = this.creatorId;
+            project.lastModifiedById = this.lastModifiedById;
             project.lastModifiedBy = this.lastModifiedBy;
             project.lastModifiedTime = LocalDateTime.now();
             project.updateAssociation(this.associationId, this.associationType, this.associationPlatform);
