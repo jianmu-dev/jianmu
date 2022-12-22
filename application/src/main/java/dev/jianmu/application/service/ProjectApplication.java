@@ -15,6 +15,7 @@ import dev.jianmu.git.repo.repository.AccessTokenRepository;
 import dev.jianmu.git.repo.repository.GitRepoRepository;
 import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.mybatis.project.ProjectRepositoryImpl;
+import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
 import dev.jianmu.oauth2.api.config.OAuth2Properties;
 import dev.jianmu.oauth2.api.enumeration.ThirdPartyTypeEnum;
 import dev.jianmu.oauth2.api.exception.UnknownException;
@@ -88,6 +89,7 @@ public class ProjectApplication {
     private final WebhookOnlyService webhookOnlyService;
     private final AccessTokenRepository accessTokenRepository;
     private final AssociationUtil associationUtil;
+    private final UserSessionHolder userSessionHolder;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -108,7 +110,8 @@ public class ProjectApplication {
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
             WebhookOnlyService webhookOnlyService,
             AccessTokenRepository accessTokenRepository,
-            AssociationUtil associationUtil
+            AssociationUtil associationUtil,
+            UserSessionHolder userSessionHolder
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -129,12 +132,14 @@ public class ProjectApplication {
         this.webhookOnlyService = webhookOnlyService;
         this.accessTokenRepository = accessTokenRepository;
         this.associationUtil = associationUtil;
+        this.userSessionHolder = userSessionHolder;
     }
 
     public void switchEnabled(String projectId, boolean enabled) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         project.switchEnabled(enabled);
+        project.setLastModifiedById(this.userSessionHolder.getAccountId());
         this.projectRepository.updateByWorkflowRef(project);
     }
 
@@ -227,6 +232,7 @@ public class ProjectApplication {
                 .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .creatorId(userId)
+                .lastModifiedById(userId)
                 .associationId(associationId)
                 .associationType(associationType)
                 .associationPlatform(associationPlatform)
@@ -326,6 +332,7 @@ public class ProjectApplication {
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
+        project.setLastModifiedById(this.userSessionHolder.getAccountId());
         project.setLastModifiedBy("");
 
         this.pubTriggerEvent(parser, project, userId);
