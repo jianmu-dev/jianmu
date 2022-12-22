@@ -499,7 +499,7 @@ public class ProjectApplication {
         if (projectOptional.isEmpty()) {
             return projectOptional;
         }
-        this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, projectOptional.get());
+        this.associationUtil.checkProjectViewPermission(associationId, associationType, associationPlatform, projectOptional.get());
         return projectOptional;
     }
 
