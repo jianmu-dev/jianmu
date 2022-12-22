@@ -48,11 +48,11 @@ public class AccessTokenRepositoryImpl implements AccessTokenRepository {
 
     @Override
     public String get() {
-        if (token != null && token.exist()) {
+        if (token.exist()) {
             return token.getAccessToken();
         }
         synchronized (AccessTokenRepositoryImpl.class) {
-            if (token != null && token.exist()) {
+            if (token.exist()) {
                 return token.getAccessToken();
             }
             var param = new HashMap<String, String>();
