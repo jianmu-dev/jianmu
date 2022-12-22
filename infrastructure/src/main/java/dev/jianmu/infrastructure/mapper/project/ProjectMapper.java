@@ -14,8 +14,8 @@ import java.util.Optional;
  * @create 2021-04-23 11:39
  */
 public interface ProjectMapper {
-    @Insert("insert into jm_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, creator_id, created_time, last_modified_by, last_modified_time, concurrent, association_id, association_type, association_platform) " +
-            "values(#{id}, #{dslSource}, #{dslType}, #{enabled}, #{mutable}, #{triggerType}, #{gitRepoId}, #{workflowName}, #{workflowDescription}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{creatorId}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedTime}, #{concurrent}, #{associationId}, #{associationType}, #{associationPlatform})")
+    @Insert("insert into jm_project(id, dsl_source, dsl_type, enabled, mutable, trigger_type, git_repo_id, workflow_name, workflow_description, workflow_ref, workflow_version, steps, dsl_text, creator_id, created_time, last_modified_by, last_modified_by_id, last_modified_time, concurrent, association_id, association_type, association_platform) " +
+            "values(#{id}, #{dslSource}, #{dslType}, #{enabled}, #{mutable}, #{triggerType}, #{gitRepoId}, #{workflowName}, #{workflowDescription}, #{workflowRef}, #{workflowVersion}, #{steps}, #{dslText}, #{creatorId}, #{createdTime}, #{lastModifiedBy}, #{lastModifiedById}, #{lastModifiedTime}, #{concurrent}, #{associationId}, #{associationType}, #{associationPlatform})")
     void add(Project project);
 
     @Delete("delete from jm_project where workflow_ref = #{workflowRef}")
