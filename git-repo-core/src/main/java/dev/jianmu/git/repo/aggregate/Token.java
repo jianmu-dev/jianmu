@@ -37,8 +37,8 @@ public class Token {
      * @return
      */
     public boolean exist() {
-        if (this.accessToken != null && this.accessToken.length() != 0) {
-            return true;
+        if (this.accessToken == null || this.accessToken.length() == 0) {
+            return false;
         }
 
         return new Date().getTime() < (this.createdAt + this.expiresIn) * 1000L;
