@@ -174,7 +174,14 @@ public class RestExceptionHandler {
     @ExceptionHandler(NoAssociatedPermissionException.class)
     public ResponseEntity<?> validationNoAssociatedPermissionException(NoAssociatedPermissionException ex, WebRequest request) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(ex.getAssociationType())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorMessage.builder()
+                            .statusCode(HttpStatus.BAD_REQUEST.value())
+                            .timestamp(LocalDateTime.now())
+                            .message("无权限")
+                            .description(request.getDescription(false))
+                            .build());
         }
         var session = this.userSessionHolder.getSession();
         var gitRepo = this.gitRepoApplication.findById(ex.getAssociationId());
