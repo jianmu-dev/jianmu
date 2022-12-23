@@ -5,13 +5,13 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>0.4.2-saas</version>
+        <version>0.4.3-saas</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>api</artifactId>
     <packaging>jar</packaging>
-    <version>0.4.2-saas</version>
+    <version>0.4.3-saas</version>
 
     <properties>
         <grpc.version>1.36.0</grpc.version>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>application</artifactId>
-            <version>0.4.2-saas</version>
+            <version>0.4.3-saas</version>
         </dependency>
 
         <dependency>
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>oauth2</artifactId>
-            <version>0.4.2-saas</version>
+            <version>0.4.3-saas</version>
         </dependency>
     </dependencies>
 
