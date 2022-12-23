@@ -21,7 +21,7 @@ public interface ProjectMapper {
     @Delete("delete from jm_project where workflow_ref = #{workflowRef}")
     void deleteByWorkflowRef(String workflowRef);
 
-    @Update("update jm_project set dsl_type = #{dslType}, enabled = #{enabled}, mutable = #{mutable}, concurrent = #{concurrent}, trigger_type = #{triggerType}, workflow_name = #{workflowName}, workflow_description = #{workflowDescription}, workflow_version = #{workflowVersion}, steps = #{steps}, dsl_text = #{dslText} , last_modified_by = #{lastModifiedBy}, last_modified_time = #{lastModifiedTime} " +
+    @Update("update jm_project set dsl_type = #{dslType}, enabled = #{enabled}, mutable = #{mutable}, concurrent = #{concurrent}, trigger_type = #{triggerType}, workflow_name = #{workflowName}, workflow_description = #{workflowDescription}, workflow_version = #{workflowVersion}, steps = #{steps}, dsl_text = #{dslText} , last_modified_by = #{lastModifiedBy}, last_modified_by_id=#{lastModifiedById}, last_modified_time = #{lastModifiedTime} " +
             "where workflow_ref = #{workflowRef}")
     void updateByWorkflowRef(Project project);
 
