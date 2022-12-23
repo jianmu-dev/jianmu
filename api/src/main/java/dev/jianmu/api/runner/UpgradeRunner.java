@@ -44,7 +44,7 @@ public class UpgradeRunner implements ApplicationRunner {
                     .orElseThrow(() -> new DataNotFoundException("未找到归属的项目组"));
             var text = project.getDslText() + "\n";
             try {
-                this.projectApplication.updateProject(project.getId(), text, group.getProjectGroupId(), null, null, null, null,false);
+                this.projectApplication.updateProject(project.getLastModifiedById(), project.getId(), text, group.getProjectGroupId(), null, null, null, null,false);
             } catch (Exception e) {
                 log.warn("项目- {}升级失败：", project.getWorkflowName(), e);
             }

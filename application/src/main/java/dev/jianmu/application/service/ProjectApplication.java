@@ -89,7 +89,6 @@ public class ProjectApplication {
     private final WebhookOnlyService webhookOnlyService;
     private final AccessTokenRepository accessTokenRepository;
     private final AssociationUtil associationUtil;
-    private final UserSessionHolder userSessionHolder;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -110,8 +109,7 @@ public class ProjectApplication {
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
             WebhookOnlyService webhookOnlyService,
             AccessTokenRepository accessTokenRepository,
-            AssociationUtil associationUtil,
-            UserSessionHolder userSessionHolder
+            AssociationUtil associationUtil
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -132,14 +130,13 @@ public class ProjectApplication {
         this.webhookOnlyService = webhookOnlyService;
         this.accessTokenRepository = accessTokenRepository;
         this.associationUtil = associationUtil;
-        this.userSessionHolder = userSessionHolder;
     }
 
-    public void switchEnabled(String projectId, boolean enabled) {
+    public void switchEnabled(String accountId, String projectId, boolean enabled) {
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
         project.switchEnabled(enabled);
-        project.setLastModifiedById(this.userSessionHolder.getAccountId());
+        project.setLastModifiedById(accountId);
         this.projectRepository.updateByWorkflowRef(project);
     }
 
@@ -211,7 +208,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public Project createProject(String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, String branch, boolean isSyncProject) {
+    public Project createProject(String creatorId, String modifiedId, String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, String branch, boolean isSyncProject) {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         // 生成流程Ref
@@ -231,8 +228,8 @@ public class ProjectApplication {
                 .dslSource(Project.DslSource.LOCAL)
                 .triggerType(parser.getTriggerType())
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
-                .creatorId(userId)
-                .lastModifiedById(userId)
+                .creatorId(creatorId)
+                .lastModifiedById(modifiedId)
                 .associationId(associationId)
                 .associationType(associationType)
                 .associationPlatform(associationPlatform)
@@ -306,7 +303,7 @@ public class ProjectApplication {
     }
 
     @Transactional
-    public boolean updateProject(String dslId, String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, boolean isSyncProject) {
+    public boolean updateProject(String accountId, String dslId, String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, boolean isSyncProject) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
@@ -332,7 +329,7 @@ public class ProjectApplication {
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
         project.setWorkflowVersion(workflow.getVersion());
-        project.setLastModifiedById(this.userSessionHolder.getAccountId());
+        project.setLastModifiedById(accountId);
         project.setLastModifiedBy("");
 
         this.pubTriggerEvent(parser, project, userId);
