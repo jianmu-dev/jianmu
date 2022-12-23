@@ -47,13 +47,13 @@ public class ProjectController {
     @PutMapping("/enable/{projectId}")
     @Operation(summary = "激活项目", description = "激活项目")
     public void enable(@PathVariable String projectId) {
-        this.projectApplication.switchEnabled(projectId, true);
+        this.projectApplication.switchEnabled(this.userSessionHolder.getAccountId(), projectId, true);
     }
 
     @PutMapping("/disable/{projectId}")
     @Operation(summary = "禁用项目", description = "禁用项目")
     public void disable(@PathVariable String projectId) {
-        this.projectApplication.switchEnabled(projectId, false);
+        this.projectApplication.switchEnabled(this.userSessionHolder.getAccountId(), projectId, false);
     }
 
     @PostMapping("/trigger/{projectId}")
@@ -76,14 +76,15 @@ public class ProjectController {
                 throw new RuntimeException("请选择正确的分支");
             }
         }
-        var project = this.projectApplication.createProject(dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getAssociationPlatformUserId(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), dslTextDto.getBranch(), true);
+        var project = this.projectApplication.createProject(session.getAccountId(), session.getAccountId(), dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getAssociationPlatformUserId(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), dslTextDto.getBranch(), true);
         return ProjectIdVo.builder().id(project.getId()).build();
     }
 
     @PostMapping("inner")
     @Operation(summary = "内部创建项目", description = "内部创建项目")
     public ProjectIdVo createProject(@Valid @RequestBody ProjectCreatingDto projectCreatingDto) {
-        var project = this.projectApplication.createProject(projectCreatingDto.getDslText(), projectCreatingDto.getProjectGroupId(), projectCreatingDto.getCreatorId(), projectCreatingDto.getAssociationId(), projectCreatingDto.getAssociationType(), projectCreatingDto.getAssociationPlatform(), null, false);
+        var accountId = this.userSessionHolder.getAccountId();
+        var project = this.projectApplication.createProject(projectCreatingDto.getCreatorId(), accountId, projectCreatingDto.getDslText(), projectCreatingDto.getProjectGroupId(), "", projectCreatingDto.getAssociationId(), projectCreatingDto.getAssociationType(), projectCreatingDto.getAssociationPlatform(), null, false);
         return ProjectIdVo.builder().id(project.getId()).build();
     }
 
@@ -91,7 +92,7 @@ public class ProjectController {
     @Operation(summary = "更新项目", description = "根据ID更新项目DSL定义")
     public void updateProject(@PathVariable String projectId, @RequestBody @Valid DslTextDto dslTextDto) {
         var session = this.userSessionHolder.getSession();
-        var concurrent = this.projectApplication.updateProject(projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getAssociationPlatformUserId(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), true);
+        var concurrent = this.projectApplication.updateProject(session.getAccountId(), projectId, dslTextDto.getDslText(), dslTextDto.getProjectGroupId(), session.getAssociationPlatformUserId(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), true);
         // 并发执行正在排队的流程实例
         if (concurrent) {
             var project = this.projectApplication.findById(projectId, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform())

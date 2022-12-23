@@ -89,14 +89,14 @@ public class GitlinkController {
         }
         var projectOptional = this.projectApplication.findByName(repoId, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name(), filename);
         if (projectOptional.isEmpty()) {
-            this.projectApplication.createProject(dslText, null, userId, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name(), branch, false);
+            this.projectApplication.createProject("", "", dslText, null, userId, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name(), branch, false);
             return;
         }
         var project = projectOptional.get();
         this.gitRepoApplication.findById(repoId)
                 .findFlowByProjectId(project.getId())
                 .filter(flow -> flow.getBranchName().equals(branch))
-                .ifPresent(flow -> this.projectApplication.updateProject(project.getId(), dslText, null, userId, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name(), false));
+                .ifPresent(flow -> this.projectApplication.updateProject("", project.getId(), dslText, null, userId, repoId, AssociationUtil.AssociationType.GIT_REPO.name(), ThirdPartyTypeEnum.GITLINK.name(), false));
     }
 
     private String findDslByFilepath(String accessToken, String userId, String owner, String repo, String filepath, String branch) {
