@@ -101,6 +101,7 @@ public class AsyncTaskInstance extends AggregateRoot {
         if (this.status != TaskStatus.SUSPENDED) {
             throw new RuntimeException("非挂起状态的任务不能重试");
         }
+        this.version++;
         this.activatingTime = LocalDateTime.now();
         var taskRetryEvent = TaskRetryEvent.Builder.aTaskRetryEvent()
                 .nodeRef(this.asyncTaskRef)
