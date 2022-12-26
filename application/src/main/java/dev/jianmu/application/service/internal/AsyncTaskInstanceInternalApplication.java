@@ -123,8 +123,9 @@ public class AsyncTaskInstanceInternalApplication {
         MDC.put("triggerId", workflowInstance.getTriggerId());
         var asyncTaskInstance = this.asyncTaskInstanceRepository.findByTriggerIdAndTaskRef(workflowInstance.getTriggerId(), taskRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到该节点实例: " + taskRef));
+        var version = asyncTaskInstance.getVersion();
         asyncTaskInstance.retry();
-        this.asyncTaskInstanceRepository.retryById(asyncTaskInstance);
+        this.asyncTaskInstanceRepository.retryById(asyncTaskInstance, version);
     }
 
     // 任务忽略

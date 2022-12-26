@@ -78,8 +78,7 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     }
 
     @Override
-    public void retryById(AsyncTaskInstance asyncTaskInstance) {
-        int version = this.asyncTaskInstanceMapper.getVersion(asyncTaskInstance.getId());
+    public void retryById(AsyncTaskInstance asyncTaskInstance, int version) {
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
         if (!succeed) {
             throw new DBException.OptimisticLocking("未找到对应的乐观锁版本数据，无法完成数据更新");
