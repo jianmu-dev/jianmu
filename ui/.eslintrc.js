@@ -97,5 +97,7 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     // interface为空对象不报错
     '@typescript-eslint/no-empty-interface': 0,
+    // 解决.vue文件多个单词命名的报错提示
+    'vue/multi-word-component-names': 'off',
   },
 };

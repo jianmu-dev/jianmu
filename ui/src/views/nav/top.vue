@@ -25,7 +25,7 @@
         <span class="txt">{{ currentVersion }}</span>
       </div>
     </div>
-    <div class="right">
+    <div class="right" v-if="authMode !== 'false'">
       <router-link v-if="!session" :to="{ name: 'login' }">
         <div class="no-login"></div>
       </router-link>
@@ -75,11 +75,12 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const rootState = store.state as IRootState;
+    const authMode = computed<string>(() => rootState.authMode);
     // 头像图片正常显示
     const loaded = ref<boolean>(true);
     const loginType = computed<string>(() => rootState.thirdPartyType);
     const defaultSession = ref<ISessionVo>();
-    let state = store.state[namespace] as IState;
+    const state = store.state[namespace] as IState;
     const session = computed<ISessionVo | undefined>(() => {
       return defaultSession.value ? defaultSession.value : state.session;
     });
@@ -93,6 +94,7 @@ export default defineComponent({
     });
 
     return {
+      authMode,
       loaded,
       loginType,
       currentVersion,

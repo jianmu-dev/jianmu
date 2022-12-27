@@ -56,10 +56,16 @@ export default {
     return getState();
   },
   mutations: {
-    mutate(state: IState, { session, loginForm: { username, remember } }: {
-      session: ISessionVo,
-      loginForm: ILoginForm,
-    }) {
+    mutate(
+      state: IState,
+      {
+        session,
+        loginForm: { username, remember },
+      }: {
+        session: ISessionVo;
+        loginForm: ILoginForm;
+      },
+    ) {
       const previousState: IState = getState(username);
 
       state.username = username;
@@ -105,24 +111,23 @@ export default {
       commit('mutate', { session, loginForm });
     },
     async oauthLogin({ commit }: ActionContext<IState, IRootState>, payload: IOauth2LoggingDto): Promise<void> {
-      const session = (payload.gitRepo && payload.gitRepoOwner) ? await authLogin({
-        code: payload.code,
-        thirdPartyType: payload.thirdPartyType,
-        redirectUri: payload.redirectUri,
-        gitRepo: payload.gitRepo,
-        gitRepoOwner: payload.gitRepoOwner,
-      }) : await authLogin({
-        code: payload.code,
-        thirdPartyType: payload.thirdPartyType,
-        redirectUri: payload.redirectUri,
-      });
+      const session =
+        payload.gitRepo && payload.gitRepoOwner
+          ? await authLogin({
+            code: payload.code,
+            thirdPartyType: payload.thirdPartyType,
+            redirectUri: payload.redirectUri,
+            gitRepo: payload.gitRepo,
+            gitRepoOwner: payload.gitRepoOwner,
+          })
+          : await authLogin({
+            code: payload.code,
+            thirdPartyType: payload.thirdPartyType,
+            redirectUri: payload.redirectUri,
+          });
       commit('oauthMutate', session);
     },
     async openAuthDialog({ rootState }: ActionContext<IState, IRootState>, { appContext, LoginVerify }) {
-      const authMode = rootState.authMode;
-      if (!authMode) {
-        return;
-      }
       dynamicRender(LoginVerify, appContext);
     },
   },

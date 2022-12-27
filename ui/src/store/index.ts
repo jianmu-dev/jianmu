@@ -13,7 +13,7 @@ const store = createStore<IRootState>({
   state: {
     versions: [],
     thirdPartyType: '',
-    authMode: true,
+    authMode: 'readonly',
     workerTypes: [],
     parameterTypes: [],
     fromRoute: {
@@ -39,10 +39,16 @@ const store = createStore<IRootState>({
       state.parameterTypes = payload;
     },
 
-    mutateFromRoute(state: IRootState, { to, from }: {
-      to: RouteLocationNormalized;
-      from: RouteLocationNormalized;
-    }): void {
+    mutateFromRoute(
+      state: IRootState,
+      {
+        to,
+        from,
+      }: {
+        to: RouteLocationNormalized;
+        from: RouteLocationNormalized;
+      },
+    ): void {
       if (to.path === from.path) {
         // 忽略重复
         return;
@@ -57,9 +63,16 @@ const store = createStore<IRootState>({
       const { path, fullPath } = from;
       state.fromRoute = { path, fullPath };
     },
-    mutateScrollbarOffset(state: IRootState, { fullPath, left, top }: {
-      fullPath: string;
-    } & IScrollOffset) {
+    mutateScrollbarOffset(
+      state: IRootState,
+      {
+        fullPath,
+        left,
+        top,
+      }: {
+        fullPath: string;
+      } & IScrollOffset,
+    ) {
       const { scrollbarOffset } = state;
       scrollbarOffset[fullPath] = { left, top };
     },
@@ -98,6 +111,7 @@ const store = createStore<IRootState>({
 
 // 动态加载模块
 Object.values(import.meta.globEager('./modules/*.ts')).forEach(({ default: module, namespace }) =>
-  store.registerModule(namespace, module));
+  store.registerModule(namespace, module),
+);
 
 export default store;
