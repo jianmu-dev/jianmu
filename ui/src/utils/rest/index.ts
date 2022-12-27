@@ -12,13 +12,16 @@ const instance = axios.create({
   // default is `0` (no timeout)
   // timeout: 10 * 1000,
 });
-instance.interceptors.request.use(config => {
-  // 发送请求时记录当前的路由地址
-  config.headers.locationHref = window.location.href;
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
+instance.interceptors.request.use(
+  config => {
+    // 发送请求时记录当前的路由地址
+    config.headers.locationHref = window.location.href;
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  },
+);
 type PayloadType = 'form-data' | 'json' | 'file';
 
 export interface IRequest {
@@ -50,11 +53,13 @@ export default async function rest({
   let params: object | undefined;
   let data: object | undefined;
   if (m === 'get' || m === 'delete' || m === 'head') {
+    // eslint-disable-next-line prefer-const
     params = payload;
   } else if (m === 'post' || m === 'put' || m === 'patch') {
     switch (payloadType) {
       case 'form-data':
         contentType = 'application/x-www-form-urlencoded';
+        // eslint-disable-next-line prefer-const
         transformRequest = data => qs.stringify(data, { indices: false });
         break;
       case 'file':
@@ -65,6 +70,7 @@ export default async function rest({
         break;
     }
 
+    // eslint-disable-next-line prefer-const
     data = payload;
   } else {
     throw new Error(`Invalid supported method (value: ${method})`);
@@ -77,7 +83,7 @@ export default async function rest({
   const store = _store as any;
   const { session } = store.state[sessionNs] as ISessionState;
 
-  if (auth && session) {
+  if (session) {
     // 统一注入Authorization
     headers['Authorization'] = `${session.type} ${session.token}`;
   }
@@ -85,6 +91,7 @@ export default async function rest({
   let res;
 
   try {
+    // eslint-disable-next-line prefer-const
     res = await instance.request({
       url,
       method: m,
@@ -95,7 +102,7 @@ export default async function rest({
       transformRequest,
       onDownloadProgress,
       // 设置20秒超时
-      timeout: onDownloadProgress ? 0 : (timeout || 20 * 1000),
+      timeout: onDownloadProgress ? 0 : timeout || 20 * 1000,
     });
   } catch (err) {
     if (err.message.startsWith('timeout of')) {
