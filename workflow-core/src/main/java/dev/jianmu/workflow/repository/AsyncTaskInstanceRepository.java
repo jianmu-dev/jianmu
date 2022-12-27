@@ -28,7 +28,7 @@ public interface AsyncTaskInstanceRepository {
 
     void activateById(AsyncTaskInstance asyncTaskInstance, int version);
 
-    void retryById(AsyncTaskInstance asyncTaskInstance);
+    void retryById(AsyncTaskInstance asyncTaskInstance, int version);
 
     void ignoreById(AsyncTaskInstance asyncTaskInstance);
 
