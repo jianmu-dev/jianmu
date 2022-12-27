@@ -68,6 +68,7 @@ export default async function rest({
         contentType = 'application/json; charset=utf-8';
         break;
     }
+
     // eslint-disable-next-line prefer-const
     data = payload;
   } else {
