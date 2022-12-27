@@ -100,8 +100,7 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     }
 
     @Override
-    public void retryById(AsyncTaskInstance asyncTaskInstance) {
-        int version = this.asyncTaskInstanceMapper.getVersion(asyncTaskInstance.getId());
+    public void retryById(AsyncTaskInstance asyncTaskInstance, int version) {
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
         if (this.backup) {
             this.asyncTaskInstanceBackupMapper.activateById(asyncTaskInstance, version);
