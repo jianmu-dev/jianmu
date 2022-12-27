@@ -23,8 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@ConditionalOnProperty(prefix = "jianmu", name = "auth-mode", havingValue = "true")
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@ConditionalOnProperty(prefix = "jianmu", name = "auth-mode", havingValue = "readonly", matchIfMissing = true)
+public class ReadonlySecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtUserDetailsService jwtUserDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
     private final JwtAuthTokenFilter jwtAuthTokenFilter;
@@ -36,13 +36,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/swagger-resources/**",
             "/v2/api-docs",
             "/v3/api-docs/**",
-//            "/view/**",
+            "/view/**",
             "/webhook/**",
             "/webjars/**",
             "/workers/**"
     };
 
-    public WebSecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint, JwtAuthTokenFilter jwtAuthTokenFilter) {
+    public ReadonlySecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint, JwtAuthTokenFilter jwtAuthTokenFilter) {
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
         this.jwtAuthTokenFilter = jwtAuthTokenFilter;

@@ -31,5 +31,5 @@ public class ThirdPartyTypeVo {
      * authMode
      */
     @Schema(required = true)
-    private boolean authMode;
+    private String authMode;
 }
