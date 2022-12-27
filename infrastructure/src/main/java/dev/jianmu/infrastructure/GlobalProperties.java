@@ -1,6 +1,8 @@
 package dev.jianmu.infrastructure;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -22,7 +24,7 @@ import javax.validation.constraints.NotNull;
 public class GlobalProperties {
     @NotNull
     private Global global = new Global();
-    private Boolean authMode = true;
+    private String authMode = "readonly";
     private Worker worker = new Worker();
     private TriggerQueue triggerQueue = new TriggerQueue();
 
