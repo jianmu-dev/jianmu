@@ -30,6 +30,14 @@ public class WorkflowInstanceController {
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
     }
 
+    @PutMapping("/{workflowRef}/stop")
+    @Operation(summary = "全部流程终止接口", description = "全部流程终止接口")
+    public void terminateAll(
+            @Parameter(description = "流程ref") @PathVariable String workflowRef
+    ) {
+        this.instanceApplication.terminateByRef(workflowRef);
+    }
+
     @PutMapping("/stop/{instanceId}")
     @Operation(summary = "流程终止接口", description = "流程终止接口")
     public void terminate(
