@@ -38,7 +38,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/v3/api-docs/**",
             "/webhook/**",
             "/webjars/**",
-            "/workers/**"
+            "/workers/**",
+            "/view/logs/task/subscribe/**",
+            "/view/logs/workflow/subscribe/**"
     };
 
     public WebSecurityConfig(JwtUserDetailsService jwtUserDetailsService, JwtAuthEntryPoint jwtAuthEntryPoint, JwtAuthTokenFilter jwtAuthTokenFilter) {
