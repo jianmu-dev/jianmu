@@ -183,6 +183,22 @@ public class WorkflowInstanceInternalApplication {
         }
     }
 
+    // 终止全部流程
+    @Async
+    @Transactional
+    public void terminateByRef(String workflowRef) {
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
+        this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
+                .forEach(workflowInstance -> {
+                    MDC.put("triggerId", workflowInstance.getTriggerId());
+                    workflowInstance.terminate();
+                    projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getStartTime(), workflowInstance.getEndTime());
+                    this.workflowInstanceRepository.save(workflowInstance);
+                });
+        this.projectLastExecutionRepository.update(projectLastExecution);
+    }
+
     // 终止流程
     @Async
     @Transactional
