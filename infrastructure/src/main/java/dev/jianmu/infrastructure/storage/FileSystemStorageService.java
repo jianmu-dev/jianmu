@@ -136,8 +136,9 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
         try (var linesCount = Files.lines(path);
              var lines = Files.lines(path)) {
             var countLine = linesCount.count();
-            counter.set(countLine - size);
-            lines.skip(countLine > size ? countLine - size : 0)
+            var startLine = countLine > size ? countLine - size : 0;
+            counter.set(startLine);
+            lines.skip(startLine)
                     .forEach(line -> this.template.sendMessage(SseEmitter.event()
                             .id(String.valueOf(counter.incrementAndGet()))
                             .data(line), sseEmitter)
