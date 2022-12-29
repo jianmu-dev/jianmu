@@ -449,6 +449,7 @@ export default defineComponent({
         right: -32px;
         height: 16px;
         border: 1px solid #cdd1e3;
+        pointer-events: none;
       }
     }
     .clicked {
