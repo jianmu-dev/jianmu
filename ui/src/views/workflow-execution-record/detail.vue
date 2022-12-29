@@ -1,16 +1,17 @@
 <template>
   <div class="workflow-execution-record-detail" v-loading="loading">
     <div class="basic-section">
-      <jm-tooltip content="全部终止" placement="left">
-        <button
-          v-if="showStopAll"
-          @click="terminateAllRecord"
-          class="all-stop jm-icon-button-stop"
-          @keypress.enter.prevent
-        >
-          全部终止
-        </button>
-      </jm-tooltip>
+      <button
+        v-if="showStopAll"
+        @click="terminateAllRecord"
+        class="all-stop jm-icon-button-stop"
+        :class="[clicked ? 'clicked' : '']"
+        @keypress.enter.prevent
+      >
+        终止全部
+      </button>
+      <!-- <jm-tooltip :content="clicked ? '暂无法点击' : '终止全部'" placement="left">
+      </jm-tooltip> -->
       <jm-tooltip content="触发" placement="left">
         <button class="trigger-btn jm-icon-button-on" @click="execute" @keypress.enter.prevent></button>
       </jm-tooltip>
@@ -276,11 +277,13 @@ export default defineComponent({
             e.status === WorkflowExecutionRecordStatusEnum.SUSPENDED,
         ).length >= 2,
     );
+    const clicked = ref<boolean>(false);
     return {
       navScrollBar,
       WorkflowExecutionRecordStatusEnum,
       data,
       showStopAll,
+      clicked,
       loading,
       ...mapMutations({
         mutateRecordDetail: 'mutateRecordDetail',
@@ -357,7 +360,11 @@ export default defineComponent({
             cancelButtonText: '取消',
             type: 'info',
           })
-          .then(() => {
+          .then((type: any) => {
+            if (clicked.value) return;
+            if (type === 'confirm') {
+              clicked.value = true;
+            }
             if (!data.value.record) {
               return;
             }
@@ -367,7 +374,12 @@ export default defineComponent({
                 // 刷新详情
                 reloadMain();
               })
-              .catch((err: Error) => proxy.$throw(err, proxy));
+              .catch((err: Error) => proxy.$throw(err, proxy))
+              .finally(() => {
+                setTimeout(() => {
+                  clicked.value = false;
+                }, 6000);
+              });
           });
       },
       terminate: () => {
@@ -438,6 +450,9 @@ export default defineComponent({
         height: 16px;
         border: 1px solid #cdd1e3;
       }
+    }
+    .clicked {
+      cursor: no-drop;
     }
     .trigger-btn {
       position: absolute;
