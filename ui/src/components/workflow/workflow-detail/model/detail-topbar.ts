@@ -1,7 +1,7 @@
 import { executeImmediately } from '@/api/project';
 import { terminateAll } from '@/api/workflow-execution-record';
 
-type TriggerCallbackFnType = (error?: Error) => void;
+type TriggerCallbackFnType = (msg: string, error?: Error) => void;
 
 export class DeatilTopbar {
   private readonly projectId: string;
@@ -18,13 +18,13 @@ export class DeatilTopbar {
   async terminateAllRecord(): Promise<void> {
     try {
       await terminateAll(this.workflowRef);
-      this.triggerCallbackFn();
+      this.triggerCallbackFn('操作成功，正在终止，请稍后');
     } catch (error: any) {
       if (error.response.status === 400) {
         console.log('触发新流程 error', error.response.data.message);
-        this.triggerCallbackFn(error);
+        this.triggerCallbackFn('', error);
       } else {
-        this.triggerCallbackFn(error);
+        this.triggerCallbackFn('', error);
       }
     }
   }
@@ -34,13 +34,13 @@ export class DeatilTopbar {
   async trigger(): Promise<void> {
     try {
       await executeImmediately(this.projectId);
-      this.triggerCallbackFn();
+      this.triggerCallbackFn('操作成功');
     } catch (error: any) {
       if (error.response.status === 400) {
         console.log('触发新流程 error', error.response.data.message);
-        this.triggerCallbackFn(error);
+        this.triggerCallbackFn('', error);
       } else {
-        this.triggerCallbackFn(error);
+        this.triggerCallbackFn('', error);
       }
     }
   }
