@@ -18,8 +18,9 @@ export function terminate(id: string): Promise<void> {
     auth: true,
   });
 }
+
 /**
- * 终止全部流程执行
+ * 终止所有流程执行
  * @param workflowRef
  */
 export function terminateAll(workflowRef: string): Promise<void> {
