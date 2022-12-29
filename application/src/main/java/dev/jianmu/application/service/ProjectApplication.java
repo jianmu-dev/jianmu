@@ -268,7 +268,7 @@ public class ProjectApplication {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
                     .forEach(workflowInstance -> {
                         workflowInstance.start();
-                        this.workflowInstanceRepository.save(workflowInstance);
+                        this.workflowInstanceRepository.running(workflowInstance);
                     });
             return;
         }
@@ -282,7 +282,7 @@ public class ProjectApplication {
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
                 .ifPresent(workflowInstance -> {
                     workflowInstance.start();
-                    this.workflowInstanceRepository.save(workflowInstance);
+                    this.workflowInstanceRepository.running(workflowInstance);
                 });
     }
 
