@@ -50,6 +50,10 @@ public class WorkflowInstanceController {
     public void terminateAll(
             @Parameter(description = "流程ref") @PathVariable String workflowRef
     ) {
+        var session = this.userSessionHolder.getSession();
+        var project = this.projectApplication.findByWorkflowRef(workflowRef)
+                .orElseThrow(() -> new DataNotFoundException("未找到项目：" + workflowRef));
+        this.associationUtil.checkProjectPermission(session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform(), project);
         this.instanceApplication.terminateByRef(workflowRef);
     }
 
