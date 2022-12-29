@@ -18,17 +18,6 @@ export function terminate(id: string): Promise<void> {
     auth: true,
   });
 }
-/**
- * 终止全部流程执行
- * @param workflowRef
- */
-export function terminateAll(workflowRef: string): Promise<void> {
-  return restProxy({
-    url: `${baseUrl.workflow}/${workflowRef}/stop`,
-    method: 'put',
-    auth: true,
-  });
-}
 
 /**
  * 终止所有流程执行
