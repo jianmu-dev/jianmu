@@ -1,6 +1,17 @@
 <template>
   <div class="workflow-execution-record-detail" v-loading="loading">
     <div class="basic-section">
+      <button
+        v-if="showStopAll"
+        @click="terminateAllRecord"
+        class="all-stop jm-icon-button-stop"
+        :class="[clicked ? 'clicked' : '']"
+        @keypress.enter.prevent
+      >
+        终止全部
+      </button>
+      <!-- <jm-tooltip :content="clicked ? '暂无法点击' : '终止全部'" placement="left">
+      </jm-tooltip> -->
       <jm-tooltip content="触发" placement="left">
         <button class="trigger-btn jm-icon-button-on" @click="execute" @keypress.enter.prevent></button>
       </jm-tooltip>
@@ -13,27 +24,21 @@
               path: `/project-group/detail/${data.project?.projectGroupId}`,
             }"
           >
-            <span class="project-group-name">{{
-                data.project?.projectGroupName
-              }}</span>
+            <span class="project-group-name">{{ data.project?.projectGroupName }}</span>
           </router-link>
         </div>
-        <div
-          class="desc"
-          v-html="data.record?.description?.replace(/\n/g, '<br/>')"
-        ></div>
+        <div class="desc" v-html="data.record?.description?.replace(/\n/g, '<br/>')"></div>
       </div>
       <div v-if="!data.record?.status" class="instance-tabs">
         <div class="tab init selected">
-          <!--          <div class="left-horn"/>-->
-          <div class="right-horn"/>
+          <div class="right-horn" />
           <div class="label">-</div>
         </div>
       </div>
       <jm-scrollbar v-else ref="navScrollBar">
         <div class="instance-tabs">
           <div
-            v-for="(record) of data.allRecords"
+            v-for="record of data.allRecords"
             :key="record.id"
             :class="{
               tab: true,
@@ -42,8 +47,8 @@
             }"
             @click="changeRecord(record)"
           >
-            <div v-if="record.id === data.record.id" class="left-horn"/>
-            <div v-if="record.id === data.record.id" class="right-horn"/>
+            <div v-if="record.id === data.record.id" class="left-horn" />
+            <div v-if="record.id === data.record.id" class="right-horn" />
             <div class="label">{{ record.serialNo }}</div>
           </div>
         </div>
@@ -51,9 +56,7 @@
       <div
         :class="{
           'instance-tab-content': true,
-          [!data.record?.status
-            ? 'init'
-            : data.record.status.toLowerCase()]: true,
+          [!data.record?.status ? 'init' : data.record.status.toLowerCase()]: true,
         }"
       >
         <div class="item">
@@ -67,27 +70,23 @@
           <div>完成时间</div>
         </div>
         <div class="item" v-if="data.record?.status === WorkflowExecutionRecordStatusEnum.SUSPENDED">
-          <jm-timer class="value" :start-time="data.record?.suspendedTime"/>
+          <jm-timer class="value" :start-time="data.record?.suspendedTime" />
           <div>挂起时长</div>
         </div>
         <div class="item" v-else>
-          <jm-timer class="value" :start-time="data.record?.startTime" :end-time="data.record?.endTime"/>
+          <jm-timer class="value" :start-time="data.record?.startTime" :end-time="data.record?.endTime" />
           <div>执行时长</div>
         </div>
         <div class="item">
           <div v-if="!data.record?.id" class="value">无</div>
-          <jm-text-viewer v-else :value="data.record?.id" class="value"/>
+          <jm-text-viewer v-else :value="data.record?.id" class="value" />
           <div>流程实例ID</div>
         </div>
         <div class="item">
-          <jm-text-viewer :value="data.record?.workflowVersion || '无'" class="value"/>
+          <jm-text-viewer :value="data.record?.workflowVersion || '无'" class="value" />
           <div>流程版本号</div>
         </div>
-        <jm-tooltip
-          v-if="checkWorkflowRunning(data.record?.status)"
-          content="终止"
-          placement="left"
-        >
+        <jm-tooltip v-if="checkWorkflowRunning(data.record?.status)" content="终止" placement="left">
           <button
             :class="{
               'terminate-btn': true,
@@ -102,7 +101,7 @@
     </div>
 
     <div class="workflow-section">
-      <workflow/>
+      <workflow />
     </div>
   </div>
 </template>
@@ -119,7 +118,7 @@ import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/wo
 import { executeImmediately } from '@/api/project';
 import sleep from '@/utils/sleep';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
-import { terminate } from '@/api/workflow-execution-record';
+import { terminate, terminateAll } from '@/api/workflow-execution-record';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
 import { IProjectDetailVo } from '@/api/dto/project';
 import { IRootState } from '@/model';
@@ -145,6 +144,7 @@ export default defineComponent({
     const reloadMain = inject('reloadMain') as () => void;
     const navScrollBar = ref();
     let terminateLoad = false;
+
     const loadData = async (refreshing?: boolean) => {
       try {
         await proxy.fetchDetail({
@@ -174,17 +174,15 @@ export default defineComponent({
     provide('loadData', loadData);
 
     const checkWorkflowRunning = (status: WorkflowExecutionRecordStatusEnum): boolean => {
-      return [WorkflowExecutionRecordStatusEnum.INIT,
+      return [
+        WorkflowExecutionRecordStatusEnum.INIT,
         WorkflowExecutionRecordStatusEnum.RUNNING,
         WorkflowExecutionRecordStatusEnum.SUSPENDED,
       ].includes(status);
     };
 
     const checkTaskRunning = (status: TaskStatusEnum): boolean => {
-      return [TaskStatusEnum.WAITING,
-        TaskStatusEnum.RUNNING,
-        TaskStatusEnum.SUSPENDED,
-      ].includes(status);
+      return [TaskStatusEnum.WAITING, TaskStatusEnum.RUNNING, TaskStatusEnum.SUSPENDED].includes(status);
     };
 
     const loadDetail = async (refreshing?: boolean) => {
@@ -203,11 +201,12 @@ export default defineComponent({
           loading.value = !loading.value;
         }
 
-        const { status } = state.recordDetail
-          .record as IWorkflowExecutionRecordVo;
+        const { status } = state.recordDetail.record as IWorkflowExecutionRecordVo;
 
-        if (checkWorkflowRunning(status) ||
-          state.recordDetail.taskRecords.find(item => checkTaskRunning(item.status))) {
+        if (
+          checkWorkflowRunning(status) ||
+          state.recordDetail.taskRecords.find(item => checkTaskRunning(item.status))
+        ) {
           console.debug('3秒后刷新');
           await sleep(3000);
           await loadDetail(true);
@@ -235,18 +234,17 @@ export default defineComponent({
       await loadDetail();
 
       // 初始化滚动偏移量
-      if (
-        state.recordDetail.project?.id === props.projectId &&
-        props.workflowExecutionRecordId && navScrollBar.value
-      ) {
+      if (state.recordDetail.project?.id === props.projectId && props.workflowExecutionRecordId && navScrollBar.value) {
         if (state.recordDetail.navScrollLeft === 0) {
           const index = state.recordDetail.allRecords.findIndex(({ id }) => id === props.workflowExecutionRecordId);
           const contentWidth = navScrollBar.value.scrollbar.firstElementChild.clientWidth;
-          const navScrollLeft = navScrollBar.value.scrollbar
-            .firstElementChild.firstElementChild.firstElementChild.children
-            .item(index).offsetLeft;
+          const navScrollLeft =
+            navScrollBar.value.scrollbar.firstElementChild.firstElementChild.firstElementChild.children.item(
+              index,
+            ).offsetLeft;
           if (navScrollLeft > contentWidth) {
-            const maxNavScrollBarLeft = navScrollBar.value.scrollbar.firstElementChild.scrollWidth -
+            const maxNavScrollBarLeft =
+              navScrollBar.value.scrollbar.firstElementChild.scrollWidth -
               navScrollBar.value.scrollbar.firstElementChild.clientWidth;
             proxy.mutateNavScrollLeft(navScrollLeft > maxNavScrollBarLeft ? maxNavScrollBarLeft : navScrollLeft);
           }
@@ -271,10 +269,21 @@ export default defineComponent({
       taskRecords: ITaskExecutionRecordVo[];
     }>(() => state.recordDetail);
 
+    const showStopAll = computed<boolean>(
+      () =>
+        data.value.allRecords.filter(
+          e =>
+            e.status === WorkflowExecutionRecordStatusEnum.RUNNING ||
+            e.status === WorkflowExecutionRecordStatusEnum.SUSPENDED,
+        ).length >= 2,
+    );
+    const clicked = ref<boolean>(false);
     return {
       navScrollBar,
       WorkflowExecutionRecordStatusEnum,
       data,
+      showStopAll,
+      clicked,
       loading,
       ...mapMutations({
         mutateRecordDetail: 'mutateRecordDetail',
@@ -307,9 +316,9 @@ export default defineComponent({
       },
       datetimeFormatter,
       checkWorkflowRunning,
+
       execute: () => {
-        const isWarning =
-          data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
+        const isWarning = data.value.project?.triggerType === TriggerTypeEnum.WEBHOOK;
         let msg = '<div>确定要触发吗?</div>';
         if (isWarning) {
           msg +=
@@ -342,8 +351,35 @@ export default defineComponent({
                 reloadMain();
               })
               .catch((err: Error) => proxy.$throw(err, proxy));
+          });
+      },
+      terminateAllRecord: () => {
+        proxy
+          .$confirm('确定要终止执行中/挂起的全部实例吗？', '终止全部', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'info',
           })
-          .catch(() => {
+          .then((type: any) => {
+            if (clicked.value) return;
+            if (type === 'confirm') {
+              clicked.value = true;
+            }
+            if (!data.value.record) {
+              return;
+            }
+            terminateAll(data.value.record.workflowRef)
+              .then(() => {
+                proxy.$success('操作成功，正在终止，请稍后');
+                // 刷新详情
+                reloadMain();
+              })
+              .catch((err: Error) => proxy.$throw(err, proxy))
+              .finally(() => {
+                setTimeout(() => {
+                  clicked.value = false;
+                }, 6000);
+              });
           });
       },
       terminate: () => {
@@ -366,8 +402,6 @@ export default defineComponent({
                 reloadMain();
               })
               .catch((err: Error) => proxy.$throw(err, proxy));
-          })
-          .catch(() => {
           });
       },
       goBack() {
@@ -394,6 +428,32 @@ export default defineComponent({
     padding-top: 16px;
     background: #ffffff;
 
+    .all-stop {
+      position: absolute;
+      right: 97px;
+      top: 20px;
+      width: 98px;
+      height: 36px;
+      border: 1px solid #cad6ee;
+      border-radius: 2px;
+      color: #042749;
+      background-color: #ffffff;
+      cursor: pointer;
+      &::before {
+        font-size: 16px;
+        margin-right: 6px;
+      }
+      &::after {
+        position: relative;
+        content: '';
+        right: -32px;
+        height: 16px;
+        border: 1px solid #cdd1e3;
+      }
+    }
+    .clicked {
+      cursor: no-drop;
+    }
     .trigger-btn {
       position: absolute;
       right: 12px;
@@ -430,7 +490,7 @@ export default defineComponent({
           width: 20px;
           height: 20px;
           line-height: 20px;
-          color: #6B7B8D;
+          color: #6b7b8d;
           margin-right: 20px;
 
           &::before {
