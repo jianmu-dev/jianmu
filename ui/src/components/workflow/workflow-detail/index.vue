@@ -183,17 +183,17 @@ export default defineComponent({
         // graph-panel 同步modelValue数据/地址栏
         emit('update:model-value', { ...props.modelValue, viewMode });
       },
-      trigger(msg: any) {
+      trigger(msg: string, err?: Error) {
         // undefined 触发成功之后刷新record列表 msg -> undefined为成功
-        if (!msg) {
+        if (!err) {
           recordList.value.refreshRecordList();
-          emit('trigger', msg);
+          emit('trigger', msg, err);
           setTimeout(() => {
             graphPanel.value.refreshGraphPanel();
             // TODO 触发之后第一时间task为0 导致不能进入状态实时更新(延后500毫秒)
           }, 500);
         } else {
-          proxy.$throw(msg, proxy);
+          proxy.$throw(err, proxy);
         }
       },
       async terminate() {

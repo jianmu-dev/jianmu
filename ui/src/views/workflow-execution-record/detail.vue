@@ -69,9 +69,9 @@ export default defineComponent({
         console.log('退出登录事件');
         // TODO login 退出登录
       },
-      handleTrigger(err?: Error) {
+      handleTrigger(msg: string, err?: Error) {
         if (!err) {
-          proxy.$success('操作成功');
+          proxy.$success(msg);
           // 清空当前选中record
           workflowDetail.value.triggerId = '';
           // 地址跳转

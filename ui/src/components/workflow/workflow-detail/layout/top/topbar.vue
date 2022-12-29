@@ -50,9 +50,13 @@ export default defineComponent({
   emits: ['back', 'trigger', 'logout', 'jump', 'jump-to-edit'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
-    const detailTopbar = new DeatilTopbar(props.project.id, props.project.workflowRef, (error?: Error): void => {
-      emit('trigger', error ? error : undefined);
-    });
+    const detailTopbar = new DeatilTopbar(
+      props.project.id,
+      props.project.workflowRef,
+      (msg: string, error?: Error): void => {
+        emit('trigger', msg, error ? error : undefined);
+      },
+    );
 
     const clicked = ref<boolean>(false);
     return {
@@ -215,14 +219,23 @@ export default defineComponent({
     .stop-button {
       width: 98px;
       height: 36px;
-      border: 1px solid #cad6ee;
-      border-radius: 2px;
-      line-height: 36px;
-      font-size: 14px;
-      color: #042749;
+      background: @default-background-color;
       margin-right: 24px;
+      border-radius: 2px;
+      border: 0.5px solid #cad6ee;
+      font-size: 14px;
+      color: #116ed2;
+      cursor: pointer;
+      outline: none;
+
       &::before {
         font-size: 16px;
+        margin-right: 4px;
+      }
+
+      &:hover {
+        background-color: #eff7ff;
+        color: @primary-color;
       }
     }
     .clicked {
