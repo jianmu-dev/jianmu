@@ -4,6 +4,7 @@
       v-if="recordDetail.project"
       :project="recordDetail.project"
       :session="session"
+      :showStopAll="showStopAll"
       @jump="groupId => $emit('jump', groupId)"
       @back="$emit('back')"
       @logout="$emit('logout')"
@@ -145,9 +146,19 @@ export default defineComponent({
     onUnmounted(() => {
       detailSse.destroy();
     });
+
+    // 运行中加挂起数量 大于等于2 显示终止全部按钮
+    const showStopAll = computed<boolean>(() =>
+      recordList.value
+        ? recordList.value.allRecords.filter(
+          (e: IWorkflowExecutionRecordVo) => e.status === SE.RUNNING || e.status === SE.SUSPENDED,
+        ).length >= 2
+        : false,
+    );
     return {
       recordDetail,
       recordList,
+      showStopAll,
       listEvent,
       graphPanel,
       taskEvent,

@@ -15,13 +15,21 @@
     </div>
     <div class="right">
       <!-- <button class="jm-icon-workflow-edit edit-button" @click="jumpToEdit">编辑</button> -->
+      <button
+        v-show="showStopAll"
+        :class="[clicked ? 'clicked' : '']"
+        class="jm-icon-button-stop stop-button"
+        @click="terminateAll"
+      >
+        终止全部
+      </button>
       <button class="jm-icon-button-on trigger-button" @click="trigger" @keypress.enter.prevent>触发</button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, PropType } from 'vue';
+import { defineComponent, getCurrentInstance, PropType, ref } from 'vue';
 import { IProjectDetailVo } from '@/api/dto/project';
 import { ISession } from '@/model/modules/session';
 import { DeatilTopbar } from '../../model/detail-topbar';
@@ -34,15 +42,39 @@ export default defineComponent({
       required: true,
     },
     session: Object as PropType<ISession>,
+    showStopAll: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['back', 'trigger', 'logout', 'jump', 'jump-to-edit'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
-    const detailTopbar = new DeatilTopbar(props.project.id, (error?: Error): void => {
+    const detailTopbar = new DeatilTopbar(props.project.id, props.project.workflowRef, (error?: Error): void => {
       emit('trigger', error ? error : undefined);
     });
 
+    const clicked = ref<boolean>(false);
     return {
+      clicked,
+      terminateAll() {
+        const isWarning = props.project?.triggerType === TriggerTypeEnum.WEBHOOK;
+        const msg = '<div>确定要终止执行中/挂起的全部实例吗？</div>';
+        proxy
+          .$confirm(msg, '终止全部', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: isWarning ? 'warning' : 'info',
+            dangerouslyUseHTMLString: true,
+          })
+          .then((type: string) => {
+            if (clicked.value) return;
+            if (type === 'confirm') {
+              clicked.value = true;
+            }
+            detailTopbar.terminateAllRecord();
+          });
+      },
       trigger() {
         const isWarning = props.project?.triggerType === TriggerTypeEnum.WEBHOOK;
         let msg = '<div>确定要触发吗?</div>';
@@ -179,6 +211,22 @@ export default defineComponent({
         color: #0e70d9;
         background-color: #ffffff;
       }
+    }
+    .stop-button {
+      width: 98px;
+      height: 36px;
+      border: 1px solid #cad6ee;
+      border-radius: 2px;
+      line-height: 36px;
+      font-size: 14px;
+      color: #042749;
+      margin-right: 24px;
+      &::before {
+        font-size: 16px;
+      }
+    }
+    .clicked {
+      cursor: no-drop;
     }
 
     .trigger-button {
