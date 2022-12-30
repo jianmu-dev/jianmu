@@ -231,7 +231,6 @@ export default defineComponent({
 
       &::before {
         font-size: 16px;
-        // margin-right: 4px;
       }
 
       &:hover {
