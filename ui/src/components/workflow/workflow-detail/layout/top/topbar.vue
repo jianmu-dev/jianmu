@@ -222,6 +222,7 @@ export default defineComponent({
       background: @default-background-color;
       margin-right: 24px;
       border-radius: 2px;
+      text-indent: -2px;
       border: 0.5px solid #cad6ee;
       font-size: 14px;
       color: #116ed2;
@@ -230,7 +231,7 @@ export default defineComponent({
 
       &::before {
         font-size: 16px;
-        margin-right: 4px;
+        // margin-right: 4px;
       }
 
       &:hover {
