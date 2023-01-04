@@ -264,11 +264,18 @@ public class ProjectApplication {
     private void concurrentWorkflowInstance(String workflowRef) {
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
+        var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         if (project.isConcurrent()) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
                     .forEach(workflowInstance -> {
                         workflowInstance.start();
-                        this.workflowInstanceRepository.running(workflowInstance);
+                        if (!this.workflowInstanceRepository.running(workflowInstance)) {
+                            return;
+                        }
+                        // 修改项目最后执行状态
+                        projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
+                        this.projectLastExecutionRepository.update(projectLastExecution);
                     });
             return;
         }
@@ -282,7 +289,12 @@ public class ProjectApplication {
         this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
                 .ifPresent(workflowInstance -> {
                     workflowInstance.start();
-                    this.workflowInstanceRepository.running(workflowInstance);
+                    if (!this.workflowInstanceRepository.running(workflowInstance)) {
+                        return;
+                    }
+                    // 修改项目最后执行状态
+                    projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
+                    this.projectLastExecutionRepository.update(projectLastExecution);
                 });
     }
 

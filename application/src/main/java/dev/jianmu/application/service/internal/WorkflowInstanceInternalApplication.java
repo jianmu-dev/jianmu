@@ -109,11 +109,11 @@ public class WorkflowInstanceInternalApplication {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
                     .forEach(workflowInstance -> {
                         workflowInstance.start();
-                        // 修改项目最后执行状态
-                        projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                         if (!this.workflowInstanceRepository.running(workflowInstance)) {
                             return;
                         }
+                        // 修改项目最后执行状态
+                        projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                         this.projectLastExecutionRepository.update(projectLastExecution);
                     });
             return;
