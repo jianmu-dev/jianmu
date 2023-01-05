@@ -52,7 +52,7 @@ public class Project {
     // 状态是否可变
     private boolean mutable = false;
     // 可否并发执行
-    private boolean concurrent = false;
+    private int concurrent;
     // 原始DSL文本
     private String dslText;
     // 创建时间
@@ -77,7 +77,7 @@ public class Project {
         this.mutable = mutable;
     }
 
-    public void setConcurrent(boolean concurrent) {
+    public void setConcurrent(int concurrent) {
         this.concurrent = concurrent;
     }
 
@@ -165,7 +165,7 @@ public class Project {
         return mutable;
     }
 
-    public boolean isConcurrent() {
+    public int getConcurrent() {
         return concurrent;
     }
 
@@ -209,7 +209,7 @@ public class Project {
         // 状态是否可变
         private boolean mutable;
         // 可否并发执行
-        private boolean concurrent = false;
+        private int concurrent;
         // 原始DSL文本
         private String dslText;
         // 最后修改者
@@ -277,7 +277,7 @@ public class Project {
             return this;
         }
 
-        public Builder concurrent(boolean concurrent) {
+        public Builder concurrent(int concurrent) {
             this.concurrent = concurrent;
             return this;
         }

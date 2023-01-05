@@ -191,7 +191,7 @@ public class ProjectApplication {
                 .steps(parser.getSteps())
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
-                .concurrent(parser.isConcurrent())
+                .concurrent(parser.getConcurrent())
                 .gitRepoId(gitRepo.getId())
                 .dslSource(Project.DslSource.GIT)
                 .triggerType(parser.getTriggerType())
@@ -230,7 +230,7 @@ public class ProjectApplication {
         logger.info("开始同步Git仓库中的DSL");
         var project = this.projectRepository.findById(projectId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
-        var concurrent = project.isConcurrent();
+        var concurrent = project.getConcurrent();
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
                 .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
@@ -244,7 +244,7 @@ public class ProjectApplication {
         project.setSteps(parser.getSteps());
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
-        project.setConcurrent(parser.isConcurrent());
+        project.setConcurrent(parser.getConcurrent());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -255,7 +255,7 @@ public class ProjectApplication {
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         this.jgitService.cleanUp(gitRepo.getId());
-        if (!concurrent && project.isConcurrent()) {
+        if (project.getConcurrent() > concurrent) {
             this.concurrentWorkflowInstance(workflow.getRef());
         }
     }
@@ -266,8 +266,12 @@ public class ProjectApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
-        if (project.isConcurrent()) {
+        int i = this.workflowInstanceRepository
+                .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
+                .size();
+        if (project.getConcurrent() > i) {
             this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
+                    .stream().limit(project.getConcurrent() - i)
                     .forEach(workflowInstance -> {
                         workflowInstance.start();
                         if (!this.workflowInstanceRepository.running(workflowInstance)) {
@@ -277,25 +281,7 @@ public class ProjectApplication {
                         projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
                         this.projectLastExecutionRepository.update(projectLastExecution);
                     });
-            return;
         }
-        // 检查是否存在运行中的流程
-        int i = this.workflowInstanceRepository
-                .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
-                .size();
-        if (i > 0) {
-            return;
-        }
-        this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
-                .ifPresent(workflowInstance -> {
-                    workflowInstance.start();
-                    if (!this.workflowInstanceRepository.running(workflowInstance)) {
-                        return;
-                    }
-                    // 修改项目最后执行状态
-                    projectLastExecution.running(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStartTime(), workflowInstance.getStatus().name());
-                    this.projectLastExecutionRepository.update(projectLastExecution);
-                });
     }
 
     @Transactional
@@ -315,7 +301,7 @@ public class ProjectApplication {
                 .steps(parser.getSteps())
                 .enabled(parser.isEnabled())
                 .mutable(parser.isMutable())
-                .concurrent(parser.isConcurrent())
+                .concurrent(parser.getConcurrent())
                 .lastModifiedBy("admin")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
@@ -347,7 +333,7 @@ public class ProjectApplication {
     public void updateProject(String dslId, String dslText, String projectGroupId) {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
-        var concurrent = project.isConcurrent();
+        var concurrent = project.getConcurrent();
         if (project.getDslSource() == Project.DslSource.GIT) {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
         }
@@ -369,7 +355,7 @@ public class ProjectApplication {
         project.setSteps(parser.getSteps());
         project.setEnabled(parser.isEnabled());
         project.setMutable(parser.isMutable());
-        project.setConcurrent(parser.isConcurrent());
+        project.setConcurrent(parser.getConcurrent());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -378,7 +364,7 @@ public class ProjectApplication {
         this.pubTriggerEvent(parser, project);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
-        if (!concurrent && project.isConcurrent()) {
+        if (project.getConcurrent() > concurrent) {
             this.concurrentWorkflowInstance(workflow.getRef());
         }
     }
