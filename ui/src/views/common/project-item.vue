@@ -8,7 +8,7 @@
     ></div>
     <div class="content">
       <div class="content-top">
-        <span class="concurrent" v-if="concurrent">可并发</span>
+        <span class="concurrent" v-if="concurrentVal">可并发</span>
         <router-link
           :to="{
             name: 'workflow-execution-record-detail',
@@ -43,7 +43,7 @@
                   : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
               "
               v-if="
-                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrentVal) ||
                 project.status === ProjectStatusEnum.SUSPENDED
               "
             >
@@ -160,7 +160,7 @@
     ></div>
     <div class="content">
       <div class="content-top">
-        <span class="concurrent" v-if="concurrent">可并发</span>
+        <span class="concurrent" v-if="concurrentVal">可并发</span>
         <router-link
           :to="{
             name: 'workflow-execution-record-detail',
@@ -195,7 +195,7 @@
                   : '当前流程中某个节点执行失败，流程处于暂停状态，需要手动 重试/忽略 挂起节点。'
               "
               v-if="
-                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrentVal) ||
                 project.status === ProjectStatusEnum.SUSPENDED
               "
             >
@@ -342,7 +342,7 @@ export default defineComponent({
     },
     // 控制项目是否展示可并发
     concurrent: {
-      type: Boolean,
+      type: [Boolean, Number],
       default: false,
     },
   },
@@ -359,6 +359,13 @@ export default defineComponent({
     const enabled = ref<boolean>(props.project.enabled);
     const dslDialogFlag = ref<boolean>(false);
     const webhookDrawerFlag = ref<boolean>(false);
+    const concurrentVal = computed(() => {
+      if (typeof props.concurrent === 'number') {
+        return props.concurrent !== 1;
+      } else {
+        return props.concurrent;
+      }
+    });
     // 控制终止按钮显隐
     const isShowStopBtn = computed<boolean>(
       () =>
@@ -437,6 +444,7 @@ export default defineComponent({
       enabled,
       dslDialogFlag,
       webhookDrawerFlag,
+      concurrentVal,
       execute: (id: string) => {
         if (!enabled.value || executing.value) {
           return;

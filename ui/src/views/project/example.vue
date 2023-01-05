@@ -22,7 +22,7 @@ export default defineComponent({
       name: '未命名项目',
       groupId: '1',
       global: {
-        concurrent: false,
+        concurrent: 1,
       },
       data: '',
     });
@@ -36,7 +36,7 @@ export default defineComponent({
         name,
         groupId: '1',
         global: {
-          concurrent: global ? global.concurrent : false,
+          concurrent: global ? global.concurrent : 1,
         },
         data: rawData,
       };
