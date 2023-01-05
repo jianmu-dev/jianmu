@@ -10,38 +10,20 @@
         class="jm-icon-button-previous"
         size="small"
         @click="previousStep"
-      >上一步
+        >上一步
       </jm-button>
-      <jm-button
-        class="jm-icon-button-preserve"
-        size="small"
-        @click="save(true)"
-        :loading="loading"
-      >保存并返回
+      <jm-button class="jm-icon-button-preserve" size="small" @click="save(true)" :loading="loading"
+        >保存并返回
       </jm-button>
-      <jm-button
-        type="primary"
-        class="jm-icon-button-preserve"
-        size="small"
-        @click="save(false)"
-        :loading="loading"
-      >保存
+      <jm-button type="primary" class="jm-icon-button-preserve" size="small" @click="save(false)" :loading="loading"
+        >保存
       </jm-button>
     </div>
     <div class="form">
       <jm-form :model="editorForm" :rules="rules" ref="form">
         <jm-form-item label="选择项目组" prop="projectGroupId">
-          <jm-select
-            v-model="editorForm.projectGroupId"
-            placeholder="请选择项目组"
-          >
-            <jm-option
-              v-for="item in projectGroupList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            >
-            </jm-option>
+          <jm-select v-model="editorForm.projectGroupId" placeholder="请选择项目组">
+            <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id"> </jm-option>
           </jm-select>
         </jm-form-item>
       </jm-form>
@@ -50,7 +32,7 @@
       <jm-tab-pane name="dsl" lazy>
         <template #label><i class="jm-icon-tab-dsl"></i> DSL模式</template>
         <div class="dsl-editor">
-          <jm-dsl-editor v-model:value="editorForm.dslText"/>
+          <jm-dsl-editor v-model:value="editorForm.dslText" />
         </div>
       </jm-tab-pane>
     </jm-tabs>
@@ -106,9 +88,7 @@ export default defineComponent({
     });
 
     const rules = {
-      projectGroupId: [
-        { required: true, message: '请选择项目组', trigger: 'change' },
-      ],
+      projectGroupId: [{ required: true, message: '请选择项目组', trigger: 'change' }],
     };
     // 没有登录时做的弹框判断
     if (!sessionState.session) {
@@ -120,10 +100,7 @@ export default defineComponent({
           let dsl = res.dsl;
           if (route.query.processTemplatesName !== res.name) {
             let name = `name: ${res.name}`;
-            editorForm.value.dslText = dsl.replace(
-              name,
-              `name: ${route.query.processTemplatesName}`,
-            );
+            editorForm.value.dslText = dsl.replace(name, `name: ${route.query.processTemplatesName}`);
           } else {
             editorForm.value.dslText = dsl;
           }
@@ -132,9 +109,7 @@ export default defineComponent({
           console.warn(err.message);
         });
     } else if (route.query.source === 'processTemplates') {
-      editorForm.value.dslText = `name: "${
-        route.query.processTemplatesName || ''
-      }"\n\nworkflow:\n`;
+      editorForm.value.dslText = `name: "${route.query.processTemplatesName || ''}"\n\nworkflow:\n`;
     }
 
     if (editMode) {
@@ -149,7 +124,7 @@ export default defineComponent({
               groupId: projectGroupId,
               description,
               global: {
-                concurrent: global ? global.concurrent : false,
+                concurrent: global ? global.concurrent : 1,
               },
               data: rawData,
             };
@@ -253,7 +228,7 @@ export default defineComponent({
     top: 0;
     left: 0;
     z-index: 20;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     width: 100vw;
     height: 100vh;
   }

@@ -19,9 +19,22 @@
         </jm-tooltip>
       </div>
       <div class="configs">
-        <div>并发执行</div>
-        <div>
-          <jm-switch v-model="workflowForm.global.concurrent"></jm-switch>
+        最大并发数
+        <i class="jm-icon-button-help" @mouseover="tooltipVisible = true" @mouseout="tooltipVisible = false"></i>
+        <jm-select
+          ref="concurrentRef"
+          v-model="concurrentVal"
+          filterable
+          allow-create
+          default-first-option
+          @keyup.enter="changeConcurrent"
+          @change="changeConcurrent"
+        >
+          <jm-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+        </jm-select>
+        <div class="tooltip-popper" v-show="tooltipVisible">
+          <span class="popper-description">单个流程中可同时执行/挂起的实例数</span>
+          <img src="../../svgs/concurrent-example.svg" class="concurrent-example" />
         </div>
       </div>
       <div class="operations">
@@ -29,16 +42,12 @@
         <jm-button type="primary" @click="save(false)" @keypress.enter.prevent>保存</jm-button>
       </div>
     </div>
-    <project-panel
-      v-if="projectPanelVisible"
-      v-model="projectPanelVisible"
-      :workflow-data="workflowData"
-    />
+    <project-panel v-if="projectPanelVisible" v-model="projectPanelVisible" :workflow-data="workflowData" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, inject, PropType, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, inject, onMounted, PropType, ref } from 'vue';
 import { Graph } from '@antv/x6';
 import { ZoomTypeEnum } from '../../model/data/enumeration';
 import { WorkflowTool } from '../../model/workflow-tool';
@@ -67,6 +76,45 @@ export default defineComponent({
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     const workflowValidator = getWorkflowValidator();
     const zoomVal = ref<number>(graph.zoom());
+    const options = [
+      {
+        value: '1',
+        label: '1',
+      },
+      {
+        value: '10',
+        label: '10',
+      },
+      {
+        value: '30',
+        label: '30',
+      },
+      {
+        value: '50',
+        label: '50',
+      },
+      {
+        value: '70',
+        label: '70',
+      },
+      {
+        value: '100',
+        label: '100',
+      },
+    ];
+    const tooltipVisible = ref<boolean>(false);
+    const concurrentVal = ref<string>();
+    const concurrentRef = ref();
+    onMounted(() => {
+      if (workflowForm.value.global.concurrent === true) {
+        concurrentVal.value = '9';
+        return;
+      } else if (workflowForm.value.global.concurrent === false) {
+        concurrentVal.value = '1';
+        return;
+      }
+      concurrentVal.value = workflowForm.value.global.concurrent.toString();
+    });
 
     const workflowTool = new WorkflowTool(graph);
 
@@ -83,31 +131,35 @@ export default defineComponent({
         }
         workflowTool.slimGraphData(originData);
         workflowTool.slimGraphData(targetData);
-        if (workflowBackUp.name !== workflowForm.value.name ||
+        if (
+          workflowBackUp.name !== workflowForm.value.name ||
           workflowBackUp.description !== workflowForm.value.description ||
           workflowBackUp.groupId !== workflowForm.value.groupId ||
           !compare(originData, targetData) ||
           !compare(JSON.stringify(workflowBackUp.global), JSON.stringify(workflowForm.value.global))
         ) {
-          proxy.$confirm(' ', '保存此次修改', {
-            confirmButtonText: '保存',
-            cancelButtonText: '不保存',
-            distinguishCancelAndClose: true,
-            type: 'info',
-          }).then(async () => {
-            try {
-              await workflowValidator.checkNodes();
-            } catch ({ message }) {
-              proxy.$error(message);
-              return;
-            }
-            workflowForm.value.data = JSON.stringify(targetData);
-            emit('save', true, workflowTool.toDsl(workflowForm.value));
-          }).catch((action: string) => {
-            if (action === 'cancel') {
-              emit('back');
-            }
-          });
+          proxy
+            .$confirm(' ', '保存此次修改', {
+              confirmButtonText: '保存',
+              cancelButtonText: '不保存',
+              distinguishCancelAndClose: true,
+              type: 'info',
+            })
+            .then(async () => {
+              try {
+                await workflowValidator.checkNodes();
+              } catch ({ message }) {
+                proxy.$error(message);
+                return;
+              }
+              workflowForm.value.data = JSON.stringify(targetData);
+              emit('save', true, workflowTool.toDsl(workflowForm.value));
+            })
+            .catch((action: string) => {
+              if (action === 'cancel') {
+                emit('back');
+              }
+            });
         } else {
           emit('back');
         }
@@ -132,6 +184,19 @@ export default defineComponent({
           proxy.$error(message);
         }
       },
+      tooltipVisible,
+      options,
+      concurrentVal,
+      concurrentRef,
+      changeConcurrent: () => {
+        const reg = /^[1-9][0-9]{0,3}$/;
+        if (Number(concurrentVal.value) > 9999 || !reg.test(concurrentVal.value as string)) {
+          concurrentVal.value = workflowForm.value.global.concurrent.toString();
+        } else {
+          workflowForm.value.global.concurrent = Number(concurrentVal.value);
+        }
+        concurrentRef.value.blur();
+      },
     };
   },
 });
@@ -142,7 +207,7 @@ export default defineComponent({
 
 .jm-workflow-editor-toolbar {
   height: @tool-bar-height;
-  background: #FFFFFF;
+  background: #ffffff;
   z-index: 3;
   font-size: 14px;
   color: #042749;
@@ -152,11 +217,11 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
 
-  button[class^="jm-icon-"] {
+  button[class^='jm-icon-'] {
     border-radius: 2px;
     border-width: 0;
     background-color: transparent;
-    color: #6B7B8D;
+    color: #6b7b8d;
     cursor: pointer;
     text-align: center;
     width: 24px;
@@ -168,7 +233,7 @@ export default defineComponent({
     }
 
     &:hover {
-      background-color: #EFF7FF;
+      background-color: #eff7ff;
       color: @primary-color;
     }
   }
@@ -180,6 +245,10 @@ export default defineComponent({
     .title {
       margin-left: 20px;
       margin-right: 10px;
+      max-width: 253px;
+      text-overflow: ellipsis;
+      overflow-x: hidden;
+      white-space: nowrap;
     }
   }
 
@@ -205,7 +274,58 @@ export default defineComponent({
     .configs {
       display: flex;
       align-items: center;
-      margin: 0 50px;
+      margin: 0 60px 0 44px;
+      position: relative;
+
+      ::v-deep(.el-select) {
+        width: 88px;
+        height: 36px;
+
+        .el-input__icon {
+          display: none;
+        }
+
+        .el-input {
+          .el-input__inner {
+            border-color: #dde3ee;
+          }
+        }
+      }
+
+      .jm-icon-button-help {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        color: #6b7b8d;
+        text-align: center;
+        line-height: 24px;
+        font-size: 14px;
+      }
+
+      .tooltip-popper {
+        width: 436px;
+        height: 295px;
+        padding: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        box-sizing: border-box;
+
+        position: absolute;
+        top: 51px;
+        right: 100px;
+
+        .popper-description {
+          font-weight: 500;
+          font-size: 18px;
+          color: #042749;
+        }
+
+        .concurrent-example {
+          border: 10px solid #f0f2f5;
+          margin-top: 8px;
+        }
+      }
 
       > div + div {
         margin-left: 10px;
@@ -214,14 +334,14 @@ export default defineComponent({
 
     .operations {
       .save-return {
-        background: #F5F5F5;
+        background: #f5f5f5;
         border-radius: 2px;
         color: #082340;
         border: none;
         box-shadow: none;
 
         &:hover {
-          background: #D9D9D9;
+          background: #d9d9d9;
         }
       }
     }

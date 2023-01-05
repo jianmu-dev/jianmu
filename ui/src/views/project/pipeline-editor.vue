@@ -1,7 +1,6 @@
 <template>
   <div class="pipeline" v-loading="loading">
-    <jm-workflow-editor v-model="workflow" @back="close" @save="save"
-                        v-if="!loaded"/>
+    <jm-workflow-editor v-model="workflow" @back="close" @save="save" v-if="!loaded" />
   </div>
 </template>
 
@@ -41,7 +40,7 @@ export default defineComponent({
       groupId: '1',
       description: '',
       global: {
-        concurrent: false,
+        concurrent: 1,
       },
       data: '',
     });
@@ -84,7 +83,7 @@ export default defineComponent({
             groupId: projectGroupId,
             description,
             global: {
-              concurrent: global ? global.concurrent : false,
+              concurrent: global ? global.concurrent : 1,
             },
             data: rawData,
           };

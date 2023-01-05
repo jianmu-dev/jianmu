@@ -98,7 +98,7 @@ export interface IProjectVo
       enabled: boolean;
       mutable: boolean;
       description?: string;
-      concurrent: boolean;
+      concurrent: boolean | number;
       workflowInstanceId: string;
       serialNo: number;
       occurredTime: string;
