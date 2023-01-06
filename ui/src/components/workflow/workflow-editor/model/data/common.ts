@@ -34,11 +34,12 @@ export interface IWorkflowNode {
    */
   validate(): Promise<void>;
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   toDsl(): object;
 }
 
 export interface IGlobal {
-  concurrent: boolean;
+  concurrent: number | boolean;
 }
 
 /**
