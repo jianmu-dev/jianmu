@@ -18,10 +18,10 @@ interface IGlobalParam {
 }
 
 export class Global {
-  concurrent: boolean;
+  concurrent: boolean | number;
   readonly params: IGlobalParam[];
 
-  constructor(concurrent: boolean = false, params: IGlobalParam[] = []) {
+  constructor(concurrent: boolean | number = 1, params: IGlobalParam[] = []) {
     this.concurrent = concurrent;
     this.params = params.map(param => {
       if (param.hidden === undefined) {
@@ -43,7 +43,11 @@ export class Global {
         fields: {
           ref: [
             { required: true, message: '请输入唯一标识', trigger: 'blur' },
-            { pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/, message: '以英文字母或下划线开头，支持下划线、数字、英文字母', trigger: 'blur' },
+            {
+              pattern: /^[a-zA-Z_]([a-zA-Z0-9_]+)?$/,
+              message: '以英文字母或下划线开头，支持下划线、数字、英文字母',
+              trigger: 'blur',
+            },
             {
               validator: (rule: any, value: any, callback: any) => {
                 if (!value) {
@@ -51,7 +55,10 @@ export class Global {
                   return;
                 }
                 try {
-                  checkDuplicate(this.params.map(({ ref }) => ref), RefTypeEnum.GLOBAL_PARAM);
+                  checkDuplicate(
+                    this.params.map(({ ref }) => ref),
+                    RefTypeEnum.GLOBAL_PARAM,
+                  );
                 } catch ({ message, ref }) {
                   if (ref === value) {
                     callback(message);
@@ -107,10 +114,13 @@ export class Global {
     const { concurrent, params } = this;
     return {
       concurrent,
-      param: params.length === 0 ? undefined : params.map(param => ({
-        ...param,
-        hidden: param.hidden || undefined,
-      })),
+      param:
+        params.length === 0
+          ? undefined
+          : params.map(param => ({
+            ...param,
+            hidden: param.hidden || undefined,
+          })),
     };
   }
 }

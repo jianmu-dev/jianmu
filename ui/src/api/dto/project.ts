@@ -99,7 +99,7 @@ export interface IProjectVo
       enabled: boolean;
       mutable: boolean;
       description?: string;
-      concurrent: boolean;
+      concurrent: boolean | number;
       branch: string;
       lastModifiedTime: string;
       workflowInstanceId: string;
@@ -115,7 +115,7 @@ export interface IProjectDetailVo
   extends Readonly<
     BaseVo & {
       id: string;
-      concurrent: boolean;
+      concurrent: boolean | number;
       dslSource: DslSourceEnum;
       dslType: DslTypeEnum;
       gitRepoId?: string;

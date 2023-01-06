@@ -49,7 +49,7 @@ public class ProjectVo {
     @Schema(description = "状态是否可变")
     private boolean mutable;
     @Schema(description = "可否并发执行")
-    private boolean concurrent;
+    private int concurrent;
     @Schema(description = "Git库ID")
     private String gitRepoId;
     @Schema(description = "流程实例ID")
