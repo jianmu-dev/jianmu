@@ -54,7 +54,7 @@ public class GlobalProperties {
         private String secret;
         private Registry registry = new Registry();
         private K8s k8s = new K8s();
-        private Container container;
+        private Container container = new Container();
 
         @Data
         @Component
