@@ -296,6 +296,7 @@ public class WorkerInternalApplication {
                                             .build()
                             )
                     )
+                    .extra_hosts(this.globalProperties.getWorker().getContainer().getExtraHosts())
                     .build();
         } else {
             dev.jianmu.embedded.worker.aggregate.spec.ContainerSpec spec;
@@ -322,6 +323,7 @@ public class WorkerInternalApplication {
                                             .build()
                             )
                     )
+                    .extra_hosts(this.globalProperties.getWorker().getContainer().getExtraHosts())
                     .build();
         }
         // 添加RegistryAddress
