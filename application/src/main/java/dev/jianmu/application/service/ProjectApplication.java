@@ -222,7 +222,7 @@ public class ProjectApplication {
                 .workflowVersion(workflow.getVersion())
                 .dslText(dslText)
                 .steps(parser.getSteps())
-                .concurrent(parser.isConcurrent())
+                .concurrent(parser.getConcurrent())
                 .lastModifiedBy("")
                 .gitRepoId("")
                 .dslSource(Project.DslSource.LOCAL)
@@ -307,7 +307,7 @@ public class ProjectApplication {
         Project project = this.projectRepository.findById(dslId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
         this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
-        var concurrent = project.isConcurrent();
+        var concurrent = project.getConcurrent();
         var oldName = project.getWorkflowName();
         // 移动项目到项目组
         this.publisher.publishEvent(new MovedEvent(project.getId(), projectGroupId));
@@ -324,7 +324,7 @@ public class ProjectApplication {
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
         project.setTriggerType(parser.getTriggerType());
         project.setSteps(parser.getSteps());
-        project.setConcurrent(parser.isConcurrent());
+        project.setConcurrent(parser.getConcurrent());
         project.setWorkflowName(parser.getName());
         project.setWorkflowDescription(parser.getDescription());
         project.setLastModifiedTime();
@@ -339,7 +339,7 @@ public class ProjectApplication {
             this.createOrUpdateGitFile(userId, null, project, oldName);
         }
         // 返回是否并发执行流程实例
-        return !concurrent && project.isConcurrent();
+        return project.getConcurrent() > concurrent;
     }
 
     private void deleteGitFile(Project project, String userId) {

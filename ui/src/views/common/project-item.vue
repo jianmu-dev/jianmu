@@ -8,7 +8,7 @@
     ></div>
     <div class="content">
       <div class="content-top">
-        <span class="concurrent" v-if="concurrent">可并发</span>
+        <span class="concurrent" v-if="concurrentVal">可并发</span>
         <span class="project-name">
           <jm-text-viewer :value="project.name" class="title" @click="clickProject(project.id)" />
         </span>
@@ -38,7 +38,7 @@
                   : '当前流水线中某个节点执行失败，流水线处于暂停状态，需要手动 重试/忽略 挂起节点。'
               "
               v-if="
-                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrentVal) ||
                 project.status === ProjectStatusEnum.SUSPENDED
               "
             >
@@ -155,7 +155,7 @@
     ></div>
     <div class="content">
       <div class="content-top">
-        <span class="concurrent" v-if="concurrent">可并发</span>
+        <span class="concurrent" v-if="concurrentVal">可并发</span>
         <span class="project-name">
           <jm-text-viewer
             :value="project.name"
@@ -189,7 +189,7 @@
                   : '当前流水线中某个节点执行失败，流水线处于暂停状态，需要手动 重试/忽略 挂起节点。'
               "
               v-if="
-                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrent) ||
+                (project.status === ProjectStatusEnum.INIT && project.serialNo !== 0 && !concurrentVal) ||
                 project.status === ProjectStatusEnum.SUSPENDED
               "
             >
@@ -335,7 +335,7 @@ export default defineComponent({
     },
     // 控制项目是否展示可并发
     concurrent: {
-      type: Boolean,
+      type: [Boolean, Number],
       default: false,
     },
   },
@@ -361,6 +361,13 @@ export default defineComponent({
     const deleting = ref<boolean>(false);
     const enabled = ref<boolean>(props.project.enabled);
     const webhookDrawerFlag = ref<boolean>(false);
+    const concurrentVal = computed(() => {
+      if (typeof props.concurrent === 'number') {
+        return props.concurrent !== 1;
+      } else {
+        return props.concurrent;
+      }
+    });
     const clickProject = (projectId: string) => {
       if (window.top !== window) {
         pushTop(`/full/workflow-execution-record/detail?projectId=${projectId}`);
@@ -449,6 +456,7 @@ export default defineComponent({
       deleting,
       enabled,
       webhookDrawerFlag,
+      concurrentVal,
       clickProject,
       execute: (id: string) => {
         if (!enabled.value || executing.value) {
