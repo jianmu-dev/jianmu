@@ -175,11 +175,6 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
-        if (project.isConcurrent()) {
-            this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
-                    .forEach(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform()));
-            return;
-        }
         // 检查是否存在运行中的流程
         int i = this.workflowInstanceRepository
                 .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
