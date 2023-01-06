@@ -134,7 +134,7 @@ public class ProjectApplication {
 
     public void switchEnabled(String accountId, String projectId, boolean enabled) {
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         project.switchEnabled(enabled);
         project.setLastModifiedById(accountId);
         this.projectRepository.updateByWorkflowRef(project);
@@ -143,7 +143,7 @@ public class ProjectApplication {
     public void trigger(String projectId, String triggerId, String triggerType, LocalDateTime occurredTime) {
         MDC.put("triggerId", triggerId);
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(project.getId())
                 .triggerId(triggerId)
@@ -157,7 +157,7 @@ public class ProjectApplication {
 
     public void triggerByManual(String projectId, String associationId, String associationType, String associationPlatform) {
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
 
         var evt = dev.jianmu.trigger.event.TriggerEvent.Builder
@@ -305,7 +305,7 @@ public class ProjectApplication {
     @Transactional
     public boolean updateProject(String accountId, String dslId, String dslText, String projectGroupId, String userId, String associationId, String associationType, String associationPlatform, boolean isSyncProject) {
         Project project = this.projectRepository.findById(dslId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + dslId));
         this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
         var concurrent = project.getConcurrent();
         var oldName = project.getWorkflowName();
@@ -386,16 +386,16 @@ public class ProjectApplication {
     @Transactional
     public void deleteById(String id, String userId, String associationId, String associationType, String associationPlatform) {
         Project project = this.projectRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目, 项目id: " + id));
         this.associationUtil.checkProjectPermission(associationId, associationType, associationPlatform, project);
         var running = this.workflowInstanceRepository
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
         if (running > 0) {
-            throw new RuntimeException("仍有流程执行中，不能删除");
+            throw new RuntimeException("仍有流程执行中，不能删除。项目id: " + id);
         }
         var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目分组"));
+                .orElseThrow(() -> new DataNotFoundException("未找到项目分组， 项目id: " + id));
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.deleteGitFile(project, userId);
