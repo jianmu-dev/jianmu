@@ -50,7 +50,7 @@ public class DslParser {
     private final Map<String, Object> global = new HashMap<>();
     private List<Object> workflow;
     private List<Object> pipeline;
-    private boolean concurrent = false;
+    private int concurrent = 1;
     private String tag = "";
     private String name;
     private String description;
@@ -380,7 +380,10 @@ public class DslParser {
         this.createGlobalParameters(globalParam);
         var concurrent = this.global.get("concurrent");
         if (concurrent instanceof Boolean) {
-            this.concurrent = (Boolean) concurrent;
+            this.concurrent = (Boolean) concurrent ? 9 : 1;
+        }
+        if (concurrent instanceof Number) {
+            this.concurrent = (int) concurrent;
         }
         var tag = this.global.get("tag");
         if (tag instanceof String) {
@@ -778,6 +781,18 @@ public class DslParser {
                         }
                     }
                 });
+        var concurrent = this.global.get("concurrent");
+                if (concurrent != null && !(concurrent instanceof Boolean) && !(concurrent instanceof Number)) {
+                    throw new DslException("concurrent必须为大于0、小于10000的正整数");
+                }
+                if (concurrent instanceof Number) {
+                    if (!(concurrent instanceof Integer)) {
+                        throw new DslException("concurrent必须为大于0、小于10000的正整数");
+                    }
+                    if ((int) concurrent < 1 || (int) concurrent > 9999){
+                        throw new DslException("concurrent必须为大于0、小于10000的正整数");
+                    }
+                }
     }
 
     private void pipelineSyntaxCheck() {
@@ -1020,7 +1035,7 @@ public class DslParser {
         return pipeline;
     }
 
-    public boolean isConcurrent() {
+    public int getConcurrent() {
         return concurrent;
     }
 

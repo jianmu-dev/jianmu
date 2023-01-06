@@ -52,7 +52,7 @@ public class Project extends BaseAssociation {
     // 状态是否可变
     private boolean mutable = true;
     // 可否并发执行
-    private boolean concurrent = false;
+    private int concurrent;
     // 原始DSL文本
     private String dslText;
     // 创建者ID
@@ -81,7 +81,7 @@ public class Project extends BaseAssociation {
         this.mutable = mutable;
     }
 
-    public void setConcurrent(boolean concurrent) {
+    public void setConcurrent(int concurrent) {
         this.concurrent = concurrent;
     }
 
@@ -173,7 +173,7 @@ public class Project extends BaseAssociation {
         return mutable;
     }
 
-    public boolean isConcurrent() {
+    public int getConcurrent() {
         return concurrent;
     }
 
@@ -225,7 +225,7 @@ public class Project extends BaseAssociation {
         // 状态是否可变
         private boolean mutable;
         // 可否并发执行
-        private boolean concurrent = false;
+        private int concurrent;
         // 原始DSL文本
         private String dslText;
         // 创建者ID
@@ -303,7 +303,7 @@ public class Project extends BaseAssociation {
             return this;
         }
 
-        public Builder concurrent(boolean concurrent) {
+        public Builder concurrent(int concurrent) {
             this.concurrent = concurrent;
             return this;
         }

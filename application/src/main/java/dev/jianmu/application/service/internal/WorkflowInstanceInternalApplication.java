@@ -98,19 +98,17 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目ID:" + projectId));
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
-        if (!project.isConcurrent()) {
-            // 查询待运行的流程数
-            int i = this.workflowInstanceRepository
-                    .findByRefAndStatuses(workflow.getRef(), List.of(ProcessStatus.INIT))
-                    .size();
-            if (i >= this.globalProperties.getTriggerQueue().getMax()) {
-                var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()
-                        .triggerId(cmd.getTriggerId())
-                        .triggerType(cmd.getTriggerType())
-                        .build();
-                this.publisher.publishEvent(triggerFailedEvent);
-                throw new RuntimeException("待执行流程数已超过最大值：" + this.globalProperties.getTriggerQueue().getMax());
-            }
+        // 查询待运行的流程数
+        int i = this.workflowInstanceRepository
+                .findByRefAndStatuses(workflow.getRef(), List.of(ProcessStatus.INIT))
+                .size();
+        if (i >= this.globalProperties.getTriggerQueue().getMax()) {
+            var triggerFailedEvent = TriggerFailedEvent.Builder.aTriggerFailedEvent()
+                    .triggerId(cmd.getTriggerId())
+                    .triggerType(cmd.getTriggerType())
+                    .build();
+            this.publisher.publishEvent(triggerFailedEvent);
+            throw new RuntimeException("待执行流程数已超过最大值：" + this.globalProperties.getTriggerQueue().getMax());
         }
         // 查询serialNo
         AtomicInteger serialNo = new AtomicInteger(1);
@@ -186,13 +184,14 @@ public class WorkflowInstanceInternalApplication {
         int i = this.workflowInstanceRepository
                 .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
-        if (i > 0) {
+        if (project.getConcurrent() < i) {
             MDC.put("triggerId", triggerId);
             log.warn("当前流水线未开启并发执行。前序流程正在执行或已挂起，待执行完毕或手动终止后，当前流程将开始执行。");
             return;
         }
-        this.workflowInstanceRepository.findByRefAndStatusAndSerialNoMin(workflowRef, ProcessStatus.INIT)
-                .ifPresent(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform()));
+        this.workflowInstanceRepository.findByRefAndStatuses(workflowRef, List.of(ProcessStatus.INIT))
+                        .stream().limit(project.getConcurrent() - i)
+                        .forEach(workflowInstance -> this.createVolume(workflowInstance, projectLastExecution, project.getAssociationId(), project.getAssociationType(), project.getAssociationPlatform()));
     }
 
     // 流程实例创建Volume
