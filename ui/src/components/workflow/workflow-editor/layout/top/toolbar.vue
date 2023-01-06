@@ -23,12 +23,12 @@
         <i class="jm-icon-button-help" @mouseover="tooltipVisible = true" @mouseout="tooltipVisible = false"></i>
         <jm-select
           ref="concurrentRef"
-          v-model="concurrentVal"
+          :model-value="concurrentVal"
           filterable
           allow-create
-          default-first-option
-          @keyup.enter="changeConcurrent"
+          @keyup.enter="enterConcurrent"
           @change="changeConcurrent"
+          @blur="blurConcurrent"
         >
           <jm-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
         </jm-select>
@@ -76,7 +76,7 @@ export default defineComponent({
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     const workflowValidator = getWorkflowValidator();
     const zoomVal = ref<number>(graph.zoom());
-    const options = [
+    const options = ref([
       {
         value: '1',
         label: '1',
@@ -101,7 +101,7 @@ export default defineComponent({
         value: '100',
         label: '100',
       },
-    ];
+    ]);
     const tooltipVisible = ref<boolean>(false);
     const concurrentVal = ref<string>();
     const concurrentRef = ref();
@@ -117,6 +117,16 @@ export default defineComponent({
     });
 
     const workflowTool = new WorkflowTool(graph);
+
+    const changeConcurrent = (val: string) => {
+      const reg = /^[1-9][0-9]{0,3}$/;
+      if (Number(val) > 9999 || !reg.test(val)) {
+        concurrentVal.value = workflowForm.value.global.concurrent.toString();
+      } else {
+        concurrentVal.value = val;
+        workflowForm.value.global.concurrent = Number(concurrentVal.value);
+      }
+    };
 
     return {
       ZoomTypeEnum,
@@ -188,14 +198,13 @@ export default defineComponent({
       options,
       concurrentVal,
       concurrentRef,
-      changeConcurrent: () => {
-        const reg = /^[1-9][0-9]{0,3}$/;
-        if (Number(concurrentVal.value) > 9999 || !reg.test(concurrentVal.value as string)) {
-          concurrentVal.value = workflowForm.value.global.concurrent.toString();
-        } else {
-          workflowForm.value.global.concurrent = Number(concurrentVal.value);
-        }
+      changeConcurrent,
+      enterConcurrent: (e: any) => {
+        changeConcurrent(e.target.value);
         concurrentRef.value.blur();
+      },
+      blurConcurrent: (e: any) => {
+        changeConcurrent(e.target.value);
       },
     };
   },
