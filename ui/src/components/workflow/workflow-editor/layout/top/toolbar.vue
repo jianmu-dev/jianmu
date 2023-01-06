@@ -295,6 +295,11 @@ export default defineComponent({
         }
 
         .el-input {
+          &.is-focus {
+            .el-input__inner {
+              border-color: #096dd9;
+            }
+          }
           .el-input__inner {
             border-color: #dde3ee;
           }
