@@ -54,6 +54,7 @@ public class GlobalProperties {
         private String secret;
         private Registry registry = new Registry();
         private K8s k8s = new K8s();
+        private Container container;
 
         @Data
         @Component
@@ -73,6 +74,13 @@ public class GlobalProperties {
             private String keepalive = "alpine:3.13.6";
             // IfNotPresent, Always and Never
             private String imagePullPolicy = "IfNotPresent";
+        }
+
+        @Data
+        @Component
+        @Validated
+        public static class Container {
+            private String[] extraHosts;
         }
     }
 
