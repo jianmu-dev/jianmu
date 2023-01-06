@@ -104,7 +104,7 @@ public class ProjectApplication {
 
     public void switchEnabled(String projectId, boolean enabled) {
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         project.switchEnabled(enabled);
         this.projectRepository.updateByWorkflowRef(project);
     }
@@ -112,7 +112,7 @@ public class ProjectApplication {
     public void trigger(String projectId, String triggerId, String triggerType, LocalDateTime occurredTime) {
         MDC.put("triggerId", triggerId);
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         var triggerEvent = TriggerEvent.Builder.aTriggerEvent()
                 .projectId(project.getId())
                 .triggerId(triggerId)
@@ -126,7 +126,7 @@ public class ProjectApplication {
 
     public void triggerByManual(String projectId) {
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         if (!project.isEnabled()) {
             throw new RuntimeException("当前项目不可触发，请先修改状态");
         }
@@ -201,7 +201,7 @@ public class ProjectApplication {
         // 添加到默认分组
         String groupId;
         if (projectGroupId != null) {
-            this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
+            this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组，项目组id: " + projectGroupId));
             groupId = projectGroupId;
         } else {
             groupId = this.projectGroupRepository.findByName(DEFAULT_PROJECT_GROUP_NAME).map(ProjectGroup::getId)
@@ -229,10 +229,10 @@ public class ProjectApplication {
     public void syncProject(String projectId) {
         logger.info("开始同步Git仓库中的DSL");
         var project = this.projectRepository.findById(projectId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
         var concurrent = project.getConcurrent();
         var gitRepo = this.gitRepoRepository.findById(project.getGitRepoId())
-                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库配置"));
+                .orElseThrow(() -> new DataNotFoundException("未找到Git仓库，git仓库id: " + project.getGitRepoId()));
         var dslText = this.jgitService.readDsl(gitRepo.getId(), gitRepo.getDslPath());
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
@@ -263,9 +263,9 @@ public class ProjectApplication {
     // 并发流程实例
     private void concurrentWorkflowInstance(String workflowRef) {
         var project = this.projectRepository.findByWorkflowRef(workflowRef)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目, ref::" + workflowRef));
+                .orElseThrow(() -> new DataNotFoundException("未找到项目, ref: " + workflowRef));
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(project.getWorkflowRef())
-                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
+                .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录, ref: " + workflowRef));
         int i = this.workflowInstanceRepository
                 .findByRefAndStatuses(workflowRef, List.of(ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
@@ -309,7 +309,7 @@ public class ProjectApplication {
                 .dslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE)
                 .build();
         // 添加分组
-        this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组"));
+        this.projectGroupRepository.findById(projectGroupId).orElseThrow(() -> new DataNotFoundException("未找到该项目组，项目组id: " + projectGroupId));
         var sort = this.projectLinkGroupRepository.findByProjectGroupIdAndSortMax(projectGroupId)
                 .map(ProjectLinkGroup::getSort)
                 .orElse(-1);
@@ -332,7 +332,7 @@ public class ProjectApplication {
     @Transactional
     public void updateProject(String dslId, String dslText, String projectGroupId) {
         Project project = this.projectRepository.findById(dslId)
-                .orElseThrow(() -> new DataNotFoundException("未找到该DSL"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + dslId));
         var concurrent = project.getConcurrent();
         if (project.getDslSource() == Project.DslSource.GIT) {
             throw new IllegalArgumentException("不能修改通过Git导入的项目");
@@ -386,15 +386,15 @@ public class ProjectApplication {
     @Transactional
     public void deleteById(String id) {
         Project project = this.projectRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到该项目"));
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目, 项目id: " + id));
         var running = this.workflowInstanceRepository
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
         if (running > 0) {
-            throw new RuntimeException("仍有流程执行中，不能删除");
+            throw new RuntimeException("仍有流程执行中，不能删除。项目id: " + id);
         }
         var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到项目分组"));
+                .orElseThrow(() -> new DataNotFoundException("未找到项目分组， 项目id: " + id));
         this.projectLinkGroupRepository.deleteById(projectLinkGroup.getId());
         this.projectGroupRepository.subProjectCountById(projectLinkGroup.getProjectGroupId(), 1);
         this.projectRepository.deleteByWorkflowRef(project.getWorkflowRef());
