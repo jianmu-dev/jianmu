@@ -52,6 +52,16 @@ public class DeferredResultService {
     }
 
     /**
+     * 是否存在监视任务
+     */
+    public boolean existWatchDeferredResult(String workerId, String businessId) {
+        if (!this.watchDeferredResults.containsKey(workerId)) {
+            return false;
+        }
+        return this.watchDeferredResults.get(workerId).containsKey(businessId);
+    }
+
+    /**
      * 创建获取终止任务的DeferredResult
      *
      * @param workerId

@@ -3,9 +3,6 @@ package dev.jianmu.application.service.internal;
 import dev.jianmu.application.command.AsyncTaskActivatingCmd;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.infrastructure.exception.DBException;
-import dev.jianmu.task.aggregate.NodeInfo;
-import dev.jianmu.task.aggregate.TaskInstance;
-import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.WorkflowInstanceRepository;
@@ -13,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 /**
  * @author Ethan Liu
@@ -75,7 +70,7 @@ public class AsyncTaskInstanceInternalApplication {
         asyncTaskInstances.stream()
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.WAITING)
                 .forEach(asyncTaskInstance -> {
-                    asyncTaskInstance.fail();
+                    asyncTaskInstance.terminate();
                     log.info("终止待执行任务: " + asyncTaskInstance.getAsyncTaskRef());
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });

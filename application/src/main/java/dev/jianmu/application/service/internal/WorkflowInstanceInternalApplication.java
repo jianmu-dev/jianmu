@@ -197,6 +197,10 @@ public class WorkflowInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         // 终止流程
         MDC.put("triggerId", workflowInstance.getTriggerId());
+        if (workflowInstance.getStatus() == ProcessStatus.TERMINATED) {
+            log.warn("流程实例已终止，无需终止");
+            return;
+        }
         workflowInstance.terminate();
         projectLastExecution.end(workflowInstance.getId(), workflowInstance.getSerialNo(), workflowInstance.getStatus().name(), workflowInstance.getStartTime(), workflowInstance.getEndTime());
         this.workflowInstanceRepository.save(workflowInstance);
