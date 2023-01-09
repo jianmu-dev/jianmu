@@ -10,8 +10,9 @@ import dev.jianmu.application.query.NodeDefApi;
 import dev.jianmu.application.util.ParameterUtil;
 import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
+import dev.jianmu.event.Publisher;
+import dev.jianmu.event.impl.WatchDeferredResultTerminateEvent;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
-import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.project.repository.ProjectRepository;
 import dev.jianmu.task.aggregate.InstanceParameter;
@@ -60,10 +61,10 @@ public class TaskInstanceInternalApplication {
     private final ExpressionLanguage expressionLanguage;
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final MonitoringFileService monitoringFileService;
-    private final DeferredResultService deferredResultService;
     private final ExternalParameterRepository externalParameterRepository;
     private final ProjectRepository projectRepository;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
+    private final Publisher publisher;
 
     public TaskInstanceInternalApplication(
             TaskInstanceRepository taskInstanceRepository,
@@ -77,10 +78,10 @@ public class TaskInstanceInternalApplication {
             ExpressionLanguage expressionLanguage,
             WorkflowInstanceRepository workflowInstanceRepository,
             MonitoringFileService monitoringFileService,
-            DeferredResultService deferredResultService,
             ExternalParameterRepository externalParameterRepository,
             ProjectRepository projectRepository,
-            AsyncTaskInstanceRepository asyncTaskInstanceRepository
+            AsyncTaskInstanceRepository asyncTaskInstanceRepository,
+            Publisher publisher
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
         this.workflowRepository = workflowRepository;
@@ -93,10 +94,10 @@ public class TaskInstanceInternalApplication {
         this.expressionLanguage = expressionLanguage;
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.monitoringFileService = monitoringFileService;
-        this.deferredResultService = deferredResultService;
         this.externalParameterRepository = externalParameterRepository;
         this.projectRepository = projectRepository;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
+        this.publisher = publisher;
     }
 
     public List<TaskInstance> findRunningTask() {
@@ -243,7 +244,10 @@ public class TaskInstanceInternalApplication {
     public void terminate(String asyncTaskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
-        this.deferredResultService.terminateDeferredResult(taskInstance.getWorkerId(), taskInstance.getBusinessId());
+        this.publisher.publish(WatchDeferredResultTerminateEvent.builder()
+                .workerId(taskInstance.getWorkerId())
+                .businessId(taskInstance.getBusinessId())
+                .build());
     }
 
     @Transactional

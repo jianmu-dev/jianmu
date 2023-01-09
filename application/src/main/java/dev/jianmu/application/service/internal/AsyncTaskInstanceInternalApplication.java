@@ -79,7 +79,7 @@ public class AsyncTaskInstanceInternalApplication {
         asyncTaskInstances.stream()
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.WAITING)
                 .forEach(asyncTaskInstance -> {
-                    asyncTaskInstance.fail();
+                    asyncTaskInstance.terminate();
                     log.info("终止待执行任务: " + asyncTaskInstance.getAsyncTaskRef());
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });

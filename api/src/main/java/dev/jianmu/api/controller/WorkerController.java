@@ -11,6 +11,7 @@ import dev.jianmu.infrastructure.GlobalProperties;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.worker.DeferredResultService;
 import dev.jianmu.infrastructure.worker.unit.Unit;
+import dev.jianmu.task.aggregate.InstanceStatus;
 import dev.jianmu.worker.aggregate.Worker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -187,7 +188,16 @@ public class WorkerController {
             @Parameter(name = "X-Jianmu-Token", in = ParameterIn.HEADER, description = "认证token")
     })
     public DeferredResult<ResponseEntity<?>> watchTasks(@PathVariable String workerId, @PathVariable("businessId") String businessId) {
-        return this.deferredResultService.newWatchDeferredResult(workerId, businessId);
+        var exist = this.deferredResultService.existWatchDeferredResult(workerId, businessId);
+        var deferredResult = this.deferredResultService.newWatchDeferredResult(workerId, businessId);
+        if (!exist) {
+            var taskInstance = this.taskInstanceApplication.findByBusinessIdAndMaxSerialNo(businessId)
+                    .orElseThrow(() -> new RuntimeException("未找到任务实例，businessId: " + businessId));
+            if (taskInstance.getStatus() == InstanceStatus.EXECUTION_FAILED) {
+                deferredResult.setResult(ResponseEntity.status(HttpStatus.OK).body(businessId));
+            }
+        }
+        return deferredResult;
     }
 
     @Retryable(
