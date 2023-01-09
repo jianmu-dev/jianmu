@@ -301,7 +301,7 @@ export default defineComponent({
       align-items: center;
 
       .branch-name-container {
-        width: 280px;
+        width: 168px;
       }
 
       &:before {
