@@ -302,6 +302,11 @@ export default defineComponent({
 
       .branch-name-container {
         width: 168px;
+        ::v-deep(.jm-text-viewer) {
+          .el-popper {
+            width: 300px;
+          }
+        }
       }
 
       &:before {
