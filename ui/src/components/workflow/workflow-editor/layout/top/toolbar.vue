@@ -8,7 +8,9 @@
       </div>
       <div class="branch" v-if="workflowData.association.entry">
         <img src="~@/assets/svgs/index/branch.svg" alt="" />
-        {{ workflowData.association.branch }}
+        <div class="branch-name-container">
+          <jm-text-viewer :threshold="0" :value="workflowData.association.branch" :tip-append-to-body="false" />
+        </div>
       </div>
     </div>
     <div class="right">
@@ -297,6 +299,10 @@ export default defineComponent({
 
       display: flex;
       align-items: center;
+
+      .branch-name-container {
+        width: 280px;
+      }
 
       &:before {
         content: '';
