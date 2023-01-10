@@ -4,13 +4,16 @@
       <button class="jm-icon-button-left" @click="$emit('back')"></button>
       <div class="auto-left">
         <div class="first-row">
-          <div class="title">{{ project.workflowName }}</div>
-          <template v-if="project.branch">
-            <div class="vertical-divider"></div>
-            <div class="jm-icon-workflow-branch branch">{{ project.branch }}</div>
-          </template>
+          <div class="title">
+            <jm-text-viewer :value="project.workflowName"></jm-text-viewer>
+          </div>
+          <div class="jm-icon-workflow-branch branch" v-if="project.branch">
+            <div class="branch-box"><jm-text-viewer :value="project.branch"></jm-text-viewer></div>
+          </div>
         </div>
-        <div class="second-row" v-if="project.workflowDescription">{{ project.workflowDescription }}</div>
+        <div class="second-row" v-if="project.workflowDescription">
+          <jm-text-viewer :value="project.workflowDescription"></jm-text-viewer>
+        </div>
       </div>
     </div>
     <div class="right">
@@ -150,10 +153,13 @@ export default defineComponent({
     .auto-left {
       .first-row {
         display: flex;
+        align-items: center;
 
         .title {
           margin-left: 20px;
-          font-size: 16px;
+          font-size: 18px;
+          width: 234px;
+          color: #042749;
         }
 
         .vertical-divider {
@@ -171,13 +177,28 @@ export default defineComponent({
         }
 
         .jm-icon-workflow-branch:before {
-          vertical-align: middle;
+          margin-right: 10px;
+          color: #6e7a88;
         }
 
         .branch {
+          display: flex;
+          position: relative;
+          align-items: center;
           font-size: 16px;
-          line-height: 20px;
-          margin-left: -5px;
+          margin-left: 30px;
+          color: #042749;
+          &::after {
+            position: absolute;
+            left: -15px;
+            content: '';
+            width: 1px;
+            height: 16px;
+            background-color: #cdd1e3;
+          }
+          .branch-box {
+            width: 200px;
+          }
         }
       }
 
@@ -185,6 +206,7 @@ export default defineComponent({
         margin-left: 20px;
         font-size: 14px;
         color: #6b7b8d;
+        width: 478px;
       }
     }
   }

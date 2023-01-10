@@ -332,10 +332,11 @@ export default defineComponent({
           align-items: center;
           border-bottom: none;
           height: 60px;
+          justify-content: center;
 
           .el-dialog__title {
             color: #082340;
-            flex: 1;
+            width: 568px;
             text-align: center;
           }
 
