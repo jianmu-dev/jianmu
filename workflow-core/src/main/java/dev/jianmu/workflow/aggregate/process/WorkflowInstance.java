@@ -113,6 +113,8 @@ public class WorkflowInstance extends AggregateRoot {
                 .workflowInstanceId(this.id)
                 .build();
         this.raiseEvent(processStartedEvent);
+        // 发布流程实例状态变更事件
+        this.publishStatusUpdatedEvent();
     }
 
     // 挂起流程实例
