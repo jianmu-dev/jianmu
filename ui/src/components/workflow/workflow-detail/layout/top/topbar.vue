@@ -4,8 +4,11 @@
       <button class="jm-icon-button-left" @click="$emit('back')"></button>
       <div class="auto-left">
         <div class="first-row">
-          <div class="title">
-            <jm-text-viewer :value="project.workflowName"></jm-text-viewer>
+          <div class="title" :style="{ width: width + 'px' }">
+            <jm-text-viewer
+              @loaded="({ contentMaxWidth }) => (width = contentMaxWidth)"
+              :value="project.workflowName"
+            ></jm-text-viewer>
           </div>
           <div class="jm-icon-workflow-branch branch" v-if="project.branch">
             <div class="branch-box"><jm-text-viewer :value="project.branch"></jm-text-viewer></div>
@@ -62,8 +65,10 @@ export default defineComponent({
     );
 
     const clicked = ref<boolean>(false);
+    const width = ref<number>(234);
     return {
       clicked,
+      width,
       terminateAll() {
         const isWarning = props.project?.triggerType === TriggerTypeEnum.WEBHOOK;
         const msg = '<div>确定要终止执行中/挂起的全部实例吗？</div>';
@@ -157,8 +162,9 @@ export default defineComponent({
 
         .title {
           margin-left: 20px;
-          font-size: 18px;
-          width: 234px;
+          font-size: 16px;
+          line-height: 25px;
+          max-width: 234px;
           color: #042749;
         }
 
