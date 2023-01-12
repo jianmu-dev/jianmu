@@ -57,3 +57,5 @@ registry:
   url: https://jianmuhub.com
 credential:
   type: local
+storage:
+  filepath: data

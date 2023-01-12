@@ -68,7 +68,7 @@
     </dependencies>
 
     <build>
-        <finalName>jianmu-ci-server-${project.version}</finalName>
+        <finalName>jianmu-server</finalName>
         <extensions>
             <extension>
                 <groupId>kr.motd.maven</groupId>
@@ -77,56 +77,6 @@
             </extension>
         </extensions>
         <plugins>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>3.1.4</version>
-                <configuration>
-                    <from>
-                        <image>registry://jianmudev/openjdk:11.0.16-jdk-wait-for-it</image>
-                        <platforms>
-                            <platform>
-                                <architecture>amd64</architecture>
-                                <os>linux</os>
-                            </platform>
-                            <platform>
-                                <architecture>arm64</architecture>
-                                <os>linux</os>
-                            </platform>
-                        </platforms>
-                    </from>
-                    <to>
-                        <image>${env.JIANMU_IMAGE_NAME}:${env.JIANMU_IMAGE_TAG}</image>
-                        <auth>
-                            <username>${env.JIANMU_DOCKER_USERNAME}</username>
-                            <password>${env.JIANMU_DOCKER_PASSWORD}</password>
-                        </auth>
-                    </to>
-                    <allowInsecureRegistries>true</allowInsecureRegistries>
-                    <container>
-                        <!--解决中文乱码-->
-                        <environment>
-                            <LANG>C.UTF-8</LANG>
-                            <LANGUAGE>C.UTF-8</LANGUAGE>
-                            <LC_ALL>C.UTF-8</LC_ALL>
-                        </environment>
-                        <!-- 指定镜像时区，保证log输出时间为GMT+8 -->
-                        <jvmFlags>
-                            <jvmFlag>-Duser.timezone=Asia/Shanghai</jvmFlag>
-                        </jvmFlags>
-                        <!-- 指定镜像生成时间 -->
-                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                    </container>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
