@@ -86,11 +86,11 @@ export default defineComponent({
     const defaultImages = ref<Array<{ id: number; imageName: string }>>([
       {
         id: 0,
-        imageName: 'ubuntu:22.10',
+        imageName: 'docker.jianmuhub.com/library/alpine:3.17.0',
       },
       {
         id: 1,
-        imageName: 'docker.jianmuhub.com/library/alpine:3.17.0',
+        imageName: 'ubuntu:22.10',
       },
       {
         id: 2,
