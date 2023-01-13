@@ -3,6 +3,7 @@
     <!-- use Spring default values -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <springProperty scope="context" name="dataDir" source="storage.filepath"/>
 
     <appender name="Sifting" class="ch.qos.logback.classic.sift.SiftingAppender">
         <!--discriminator鉴别器，设置运行时动态属性,siftingAppender根据这个属性来输出日志到不同文件 -->
@@ -18,7 +19,7 @@
                 <encoder charset="UTF-8">
                     <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] %-5level [%thread] %file:%line - %msg%n</pattern>
                 </encoder>
-                <file>./ci/workflow_log/${triggerId}.log</file>
+                <file>${dataDir}/workflow_log/${triggerId}.log</file>
             </appender>
         </sift>
     </appender>
