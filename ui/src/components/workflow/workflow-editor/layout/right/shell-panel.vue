@@ -1,13 +1,8 @@
 <template>
   <div class="jm-workflow-editor-shell-panel">
-    <jm-form
-      :model="form"
-      ref="formRef"
-      label-position="top"
-      @submit.prevent
-    >
+    <jm-form :model="form" ref="formRef" label-position="top" @submit.prevent>
       <jm-form-item label="节点名称" prop="name" :rules="nodeData.getFormRules().name" class="node-name">
-        <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
+        <jm-input v-model="form.name" show-word-limit :maxlength="36" />
       </jm-form-item>
       <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">
         <jm-select
@@ -19,12 +14,7 @@
           clearable
           placeholder="请选择或输入镜像"
         >
-          <jm-option
-            v-for="item in defaultImages"
-            :key="item.id"
-            :label="item.imageName"
-            :value="item.imageName"
-          />
+          <jm-option v-for="item in defaultImages" :key="item.id" :label="item.imageName" :value="item.imageName" />
         </jm-select>
       </jm-form-item>
       <jm-form-item class="shell-env node-item">
@@ -35,9 +25,12 @@
               <div>可以使用表达式，引用全局参数、事件参</div>
               <div>
                 <span>数或上游节点的输出参数，详见</span>
-                <a href="https://v2.jianmu.dev/guide/expression.html"
-                   target="_blank"
-                   style="color:#fff;text-decoration: underline;">参数章节</a>
+                <a
+                  href="https://v2.jianmu.dev/guide/expression.html"
+                  target="_blank"
+                  style="color: #fff; text-decoration: underline"
+                  >参数章节</a
+                >
               </div>
             </template>
             <i class="jm-icon-button-help"></i>
@@ -45,7 +38,7 @@
         </template>
         <div class="shell-env-content">
           <shell-env
-            v-for="(shell,index) in form.envs"
+            v-for="(shell, index) in form.envs"
             :key="shell.key"
             v-model:name="shell.name"
             v-model:value="shell.value"
@@ -55,16 +48,21 @@
             @delete="deleteShellEnv"
           />
           <div class="add-shell-env" @click="addShellEnv">
-            <i class="jm-icon-button-add"/>
+            <i class="jm-icon-button-add" />
             添加环境变量
           </div>
         </div>
       </jm-form-item>
       <jm-form-item label="脚本" class="script-container">
-        <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script"/>
+        <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script" />
       </jm-form-item>
-      <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failureMode"
-                    v-if="failureVisible">
+      <jm-form-item
+        label="执行失败时"
+        class="node-item"
+        prop="failureMode"
+        :rules="nodeData.getFormRules().failureMode"
+        v-if="failureVisible"
+      >
         <jm-radio-group v-model="form.failureMode">
           <jm-radio :label="'suspend'">挂起</jm-radio>
           <jm-radio :label="'ignore'">忽略</jm-radio>
@@ -96,14 +94,14 @@ export default defineComponent({
     const form = ref<Shell>(props.nodeData);
     const failureVisible = ref<boolean>(true);
     // 默认镜像
-    const defaultImages = ref<Array<{ id: number, imageName: string }>>([
+    const defaultImages = ref<Array<{ id: number; imageName: string }>>([
       {
         id: 0,
         imageName: 'ubuntu:22.10',
       },
       {
         id: 1,
-        imageName: 'alpine:3.16.0',
+        imageName: 'docker.jianmuhub.com/library/alpine:3.17.0',
       },
       {
         id: 2,
@@ -170,7 +168,7 @@ export default defineComponent({
     }
 
     .shell-env-content {
-      border: 1px solid #E6EBF2;
+      border: 1px solid #e6ebf2;
 
       .add-shell-env {
         padding: 14px 20px;
