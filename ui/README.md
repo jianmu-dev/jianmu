@@ -11,16 +11,6 @@ yarn serve
 yarn build
 ```
 
-#### 构建 docker 镜像
-
-```
-# 创建docker镜像
-docker build -t jianmudev/jianmu-ci-ui:${version} .
-
-# 上传docker镜像
-docker push jianmudev/jianmu-ci-ui:${version}
-```
-
 #### 开源协议
 
 本项目基于 MulanPubL-2.0 协议。
