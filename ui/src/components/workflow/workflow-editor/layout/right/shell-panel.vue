@@ -1,16 +1,11 @@
 <template>
   <div class="jm-workflow-editor-shell-panel">
-    <jm-form
-      :model="form"
-      ref="formRef"
-      label-position="top"
-      @submit.prevent
-    >
+    <jm-form :model="form" ref="formRef" label-position="top" @submit.prevent>
       <jm-form-item label="节点唯一标识" prop="ref" class="node-name" :rules="nodeData.getFormRules().ref">
-        <jm-input v-model="form.ref" show-word-limit :maxlength="30"/>
+        <jm-input v-model="form.ref" show-word-limit :maxlength="30" />
       </jm-form-item>
       <jm-form-item label="节点名称" prop="name" class="node-item">
-        <jm-input v-model="form.name" show-word-limit :maxlength="36"/>
+        <jm-input v-model="form.name" show-word-limit :maxlength="36" />
       </jm-form-item>
       <jm-form-item label="docker镜像" prop="image" :rules="nodeData.getFormRules().image" class="node-item">
         <jm-select
@@ -22,21 +17,14 @@
           clearable
           placeholder="请选择或输入镜像"
         >
-          <jm-option
-            v-for="item in defaultImages"
-            :key="item.id"
-            :label="item.imageName"
-            :value="item.imageName"
-          />
+          <jm-option v-for="item in defaultImages" :key="item.id" :label="item.imageName" :value="item.imageName" />
         </jm-select>
       </jm-form-item>
       <jm-form-item class="shell-env node-item">
-        <template #label>
-          环境变量
-        </template>
+        <template #label> 环境变量 </template>
         <div class="shell-env-content">
           <shell-env
-            v-for="(shell,index) in form.envs"
+            v-for="(shell, index) in form.envs"
             :key="shell.key"
             v-model:name="shell.name"
             v-model:value="shell.value"
@@ -45,19 +33,24 @@
             :index="index"
             :rules="nodeData.getFormRules().envs.fields[index].fields"
             @delete="deleteShellEnv"
-            @change-name="(newVal,oldVal)=>changeName(index,oldVal,'envs')"
+            @change-name="(newVal, oldVal) => changeName(index, oldVal, 'envs')"
           />
           <div class="add-shell-env" @click="addShellEnv">
-            <i class="jm-icon-button-add"/>
+            <i class="jm-icon-button-add" />
             添加环境变量
           </div>
         </div>
       </jm-form-item>
       <jm-form-item label="脚本" class="script-container">
-        <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script"/>
+        <jm-input type="textarea" placeholder="请输入shell脚本" v-model="form.script" />
       </jm-form-item>
-      <jm-form-item label="执行失败时" class="node-item" prop="failureMode" :rules="nodeData.getFormRules().failureMode"
-                    v-if="failureVisible">
+      <jm-form-item
+        label="执行失败时"
+        class="node-item"
+        prop="failureMode"
+        :rules="nodeData.getFormRules().failureMode"
+        v-if="failureVisible"
+      >
         <jm-radio-group v-model="form.failureMode">
           <jm-radio :label="'suspend'">挂起</jm-radio>
           <jm-radio :label="'ignore'">忽略</jm-radio>
@@ -90,14 +83,14 @@ export default defineComponent({
     const form = ref<Shell>(props.nodeData);
     const failureVisible = ref<boolean>(true);
     // 默认镜像
-    const defaultImages = ref<Array<{ id: number, imageName: string }>>([
+    const defaultImages = ref<Array<{ id: number; imageName: string }>>([
       {
         id: 0,
         imageName: 'ubuntu:22.10',
       },
       {
         id: 1,
-        imageName: 'alpine:3.16.0',
+        imageName: 'docker.jianmuhub.com/library/alpine:3.17.0',
       },
       {
         id: 2,
@@ -133,9 +126,9 @@ export default defineComponent({
       deleteShellEnv: (index: number) => {
         form.value.envs.splice(index, 1);
       },
-      changeName:(index:number, oldVal:string, formModelName:string)=>{
-        form.value.envs.forEach(({ name }, idx)=>{
-          if(index === idx || oldVal !== name){
+      changeName: (index: number, oldVal: string, formModelName: string) => {
+        form.value.envs.forEach(({ name }, idx) => {
+          if (index === idx || oldVal !== name) {
             return;
           }
           formRef.value.validateField(`${formModelName}.${idx}.name`);
@@ -168,7 +161,7 @@ export default defineComponent({
 
   .shell-env {
     .shell-env-content {
-      border: 1px solid #E6EBF2;
+      border: 1px solid #e6ebf2;
 
       .add-shell-env {
         padding: 14px 20px;
