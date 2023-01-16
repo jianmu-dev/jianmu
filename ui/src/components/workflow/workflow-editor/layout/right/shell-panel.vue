@@ -101,19 +101,15 @@ export default defineComponent({
       },
       {
         id: 1,
-        imageName: 'ubuntu:22.10',
+        imageName: 'docker.jianmuhub.com/library/debian:buster-slim',
       },
       {
         id: 2,
-        imageName: 'node:18.3.0-alpine3.16',
+        imageName: 'docker.jianmuhub.com/library/ubuntu:22.04',
       },
       {
         id: 3,
-        imageName: 'maven:3-jdk-11',
-      },
-      {
-        id: 4,
-        imageName: 'golang:1.18.1-buster',
+        imageName: 'docker.jianmuhub.com/library/centos:8.1.1911',
       },
     ]);
     // 用户按下enter键选中镜像
