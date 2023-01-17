@@ -96,6 +96,10 @@ export default defineComponent({
         id: 2,
         imageName: 'docker.jianmuhub.com/library/ubuntu:22.04',
       },
+      {
+        id: 3,
+        imageName: 'docker.jianmuhub.com/library/anolisos:8.6',
+      },
     ]);
     // 用户按下enter键选中镜像
     const enterSelect = (e: any) => {
