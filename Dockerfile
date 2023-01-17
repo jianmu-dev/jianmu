@@ -1,4 +1,4 @@
-FROM openjdk:11.0.16-jdk
+FROM docker.jianmuhub.com/library/corretto:11.0.17
 WORKDIR /home/jianmu/
 ENV PATH="/home/jianmu:${PATH}"
 COPY wait-for-it.sh .
