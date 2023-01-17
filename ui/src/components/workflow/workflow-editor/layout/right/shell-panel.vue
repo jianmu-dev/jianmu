@@ -98,7 +98,7 @@ export default defineComponent({
       },
       {
         id: 3,
-        imageName: 'docker.jianmuhub.com/library/centos:8.1.1911',
+        imageName: 'docker.jianmuhub.com/library/anolisos:8.6',
       },
     ]);
     // 用户按下enter键选中镜像
