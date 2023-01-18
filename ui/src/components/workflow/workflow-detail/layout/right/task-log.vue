@@ -486,7 +486,7 @@ export default defineComponent({
     // 下载日志
     const download = async () => {
       try {
-        return await downloadNodeLogs(task.value.instanceId);
+        return await downloadNodeLogs(currentInstanceId.value);
       } catch (err) {
         proxy.$throw(err, proxy);
       }
