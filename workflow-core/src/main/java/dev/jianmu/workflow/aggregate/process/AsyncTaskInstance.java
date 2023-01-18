@@ -95,7 +95,6 @@ public class AsyncTaskInstance extends AggregateRoot {
                         .workflowRef(this.workflowRef)
                         .workflowVersion(this.workflowVersion)
                         .nodeType(this.asyncTaskType)
-                        .preStatus(preStatus)
                         .build()
         );
         // 发布状态变更事件

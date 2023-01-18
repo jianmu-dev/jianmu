@@ -1,7 +1,5 @@
 package dev.jianmu.workflow.event.process;
 
-import dev.jianmu.workflow.aggregate.process.TaskStatus;
-
 /**
  * @author Ethan Liu
  * @program: workflow
@@ -10,13 +8,7 @@ import dev.jianmu.workflow.aggregate.process.TaskStatus;
  */
 public class TaskRunningEvent extends AsyncTaskInstanceEvent {
 
-    private TaskStatus preStatus;
-
     private TaskRunningEvent() {
-    }
-
-    public TaskStatus getPreStatus() {
-        return preStatus;
     }
 
     public static final class Builder {
@@ -34,8 +26,6 @@ public class TaskRunningEvent extends AsyncTaskInstanceEvent {
         protected String nodeRef;
         // 节点类型
         protected String nodeType;
-        // 之前的任务状态
-        private TaskStatus preStatus;
 
         private Builder() {
         }
@@ -79,11 +69,6 @@ public class TaskRunningEvent extends AsyncTaskInstanceEvent {
             return this;
         }
 
-        public Builder preStatus(TaskStatus preStatus) {
-            this.preStatus = preStatus;
-            return this;
-        }
-
         public TaskRunningEvent build() {
             TaskRunningEvent taskRunningEvent = new TaskRunningEvent();
             taskRunningEvent.workflowInstanceId = this.workflowInstanceId;
@@ -93,7 +78,6 @@ public class TaskRunningEvent extends AsyncTaskInstanceEvent {
             taskRunningEvent.workflowVersion = this.workflowVersion;
             taskRunningEvent.nodeRef = this.nodeRef;
             taskRunningEvent.nodeType = this.nodeType;
-            taskRunningEvent.preStatus = this.preStatus;
             return taskRunningEvent;
         }
     }
