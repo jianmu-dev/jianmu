@@ -111,15 +111,13 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
-    @Async
     @EventListener
     public void handleTaskRunningEvent(TaskRunningEvent event) {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get TaskRunningEvent here -------------------------");
         log.info(event.toString());
-        if (event.getPreStatus() == TaskStatus.SUSPENDED) {
-            this.workflowInstanceInternalApplication.resume(event.getWorkflowInstanceId(), event.getNodeRef());
-        }        log.info("-----------------------------------------------------");
+        this.workflowInstanceInternalApplication.resume(event.getWorkflowInstanceId(), event.getNodeRef());
+        log.info("-----------------------------------------------------");
     }
 
     @Async
