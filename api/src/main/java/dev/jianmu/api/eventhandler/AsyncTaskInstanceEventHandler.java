@@ -111,6 +111,7 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Async
     @EventListener
     public void handleTaskRunningEvent(TaskRunningEvent event) {
         MDC.put("triggerId", event.getTriggerId());
