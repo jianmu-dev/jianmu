@@ -119,6 +119,9 @@ export default defineComponent({
     const workflowTool = new WorkflowTool(graph);
 
     const changeConcurrent = (val: string) => {
+      if (!val) {
+        return;
+      }
       const reg = /^[1-9][0-9]{0,3}$/;
       if (Number(val) > 9999 || !reg.test(val)) {
         concurrentVal.value = workflowForm.value.global.concurrent.toString();
