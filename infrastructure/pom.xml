@@ -5,7 +5,7 @@
     <parent>
         <artifactId>main</artifactId>
         <groupId>dev.jianmu</groupId>
-        <version>0.4.9-saas</version>
+        <version>0.4.10-saas</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,67 +15,67 @@
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>project-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>node-definition</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>workflow-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>el</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>task-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>secret-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>user-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>trigger-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>worker-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>external-parameter-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>embedded-worker</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>git-repo-core</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
         <dependency>
             <groupId>dev.jianmu</groupId>
             <artifactId>event</artifactId>
-            <version>0.4.9-saas</version>
+            <version>0.4.10-saas</version>
         </dependency>
 
         <!--For yaml file-->
