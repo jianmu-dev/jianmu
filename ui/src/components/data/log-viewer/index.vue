@@ -173,6 +173,11 @@ export default defineComponent({
     height: 100%;
     overflow: auto;
     line-height: 22px;
+    // 日志内容可选
+    user-select: text;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
 
     .more-line {
       text-align: center;
