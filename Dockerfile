@@ -7,3 +7,4 @@ COPY version .
 # 兼容旧版本
 RUN ["ln", "-s", "/home/jianmu/data", "/ci"]
 RUN ["chmod", "+x", "wait-for-it.sh"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Shanghai",  "-jar", "jianmu-server.jar"]
