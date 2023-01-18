@@ -77,8 +77,8 @@ import java.util.stream.Collectors;
 public class WorkerInternalApplication {
     private static final Logger logger = LoggerFactory.getLogger(WorkerInternalApplication.class);
     private final String optionScript = "set -e";
-    private final String traceScript = "\necho + %s\n%s";
-    private final String noTraceScript = "\n%s";
+    private final String traceScript = "\nset -x";
+    private final String script = "\n%s";
 
     private final ParameterRepository parameterRepository;
     private final ParameterDomainService parameterDomainService;
@@ -348,16 +348,11 @@ public class WorkerInternalApplication {
     private String createScript(List<String> commands) {
         var sb = new StringBuilder();
         sb.append(optionScript);
+        if (this.globalProperties.getTrace()) {
+            sb.append(traceScript);
+        }
         try (var formatter = new Formatter(sb, Locale.ROOT)) {
-            commands.forEach(cmd -> {
-                var escaped = String.format("%s", cmd);
-                escaped = escaped.replace("$", "\\$");
-                if (globalProperties.getTrace()) {
-                    formatter.format(traceScript, escaped, cmd);
-                } else {
-                    formatter.format(noTraceScript, cmd);
-                }
-            });
+            commands.forEach(cmd -> formatter.format(script, cmd));
         }
         return sb.toString();
     }
