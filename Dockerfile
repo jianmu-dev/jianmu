@@ -1,4 +1,4 @@
-FROM docker.jianmuhub.com/library/amazoncorretto:11.0.17
+FROM docker.jianmuhub.com/library/amazoncorretto:11.0.18
 WORKDIR /home/jianmu/
 ENV PATH="/home/jianmu:${PATH}"
 COPY wait-for-it.sh .
