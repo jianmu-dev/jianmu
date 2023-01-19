@@ -158,6 +158,9 @@ public class WorkflowInstanceInternalApplication {
     public void resume(String instanceId, String taskRef) {
         var workflowInstance = this.workflowInstanceRepository.findById(instanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该流程实例"));
+        if (workflowInstance.getStatus() != ProcessStatus.SUSPENDED) {
+            return;
+        }
         var projectLastExecution = this.projectLastExecutionRepository.findByRef(workflowInstance.getWorkflowRef())
                 .orElseThrow(() -> new DataNotFoundException("未找到项目最后执行记录"));
         // 恢复流程
