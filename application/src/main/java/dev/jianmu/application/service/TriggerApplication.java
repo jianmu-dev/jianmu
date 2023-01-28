@@ -296,7 +296,6 @@ public class TriggerApplication {
                         // 更新schedule
                         trigger.setSchedule(schedule);
                         trigger.setType(Trigger.Type.CRON);
-                        trigger.setRef(project.getWorkflowName());
                         // 停止触发器
                         this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
                         // 卸载任务
@@ -314,7 +313,6 @@ public class TriggerApplication {
                 }, () -> {
                     var trigger = Trigger.Builder.aTrigger()
                             .projectId(projectId)
-                            .ref(project.getWorkflowName())
                             .type(Trigger.Type.CRON)
                             .schedule(schedule)
                             .build();
