@@ -210,6 +210,7 @@ public class TriggerApplication {
             trigger.setType(Trigger.Type.WEBHOOK);
             trigger.setWebhook(webhook);
             trigger.setRef(ref);
+            trigger.setSchedule(null);
             this.triggerRepository.updateById(trigger);
             // 修改自定义Webhook实例
             if (webhookType != null) {
@@ -296,6 +297,7 @@ public class TriggerApplication {
                         // 更新schedule
                         trigger.setSchedule(schedule);
                         trigger.setType(Trigger.Type.CRON);
+                        trigger.setWebhook(null);
                         // 停止触发器
                         this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
                         // 卸载任务
