@@ -162,6 +162,7 @@ public class TriggerApplication {
                 .ifPresentOrElse(trigger -> {
                     trigger.setType(Trigger.Type.WEBHOOK);
                     trigger.setWebhook(webhook);
+                    trigger.setSchedule(null);
                     this.triggerRepository.updateById(trigger);
                 }, () -> {
                     var trigger = Trigger.Builder.aTrigger()
@@ -181,6 +182,7 @@ public class TriggerApplication {
                         // 更新schedule
                         trigger.setSchedule(schedule);
                         trigger.setType(Trigger.Type.CRON);
+                        trigger.setWebhook(null);
                         // 停止触发器
                         this.quartzScheduler.pauseTrigger(TriggerKey.triggerKey(trigger.getId()));
                         // 卸载任务
