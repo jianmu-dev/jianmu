@@ -106,9 +106,9 @@ public class AppConfig implements AsyncConfigurer, WebMvcConfigurer {
             public <T, E extends Throwable> void onError(
                     RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
                 String exceptionName = throwable.getClass().getSimpleName();
-                log.warn("[{}] Retry count: {}", exceptionName, context.getRetryCount());
-                log.warn("[{}] Retry method: {}", exceptionName, context.getAttribute("context.name"));
-                log.warn("[{}] Retry exception: {}", exceptionName, throwable.toString());
+                log.warn("[{}] Try count: {}", exceptionName, context.getRetryCount());
+                log.warn("[{}] Try method: {}", exceptionName, context.getAttribute("context.name"));
+                log.warn("[{}] Try exception: {}", exceptionName, throwable.toString());
             }
         };
     }
