@@ -390,7 +390,7 @@ export default defineComponent({
     });
     // alarm 提示
     const alarmTip = computed<string>(
-      () => `定时项目：下次执行时间 ${dayjs(props.project.nextTime).format('MM-DD hh:mm')}`,
+      () => `定时项目：下次执行时间 ${dayjs(props.project.nextTime).format('MM-DD HH:mm')}`,
     );
     // 控制是否显示下一次执行时间
     const isShowNextTime = computed<boolean>(() => {
