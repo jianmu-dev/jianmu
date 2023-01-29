@@ -1,26 +1,16 @@
 <template>
-  <jm-dialog
-    width="667px"
-    destroy-on-close
-    @close="cancel"
-  >
+  <jm-dialog width="667px" destroy-on-close @close="cancel">
     <template #title>
-      <div class="title-container">
-        <i class="jm-icon-workflow-edit"></i>编辑信息
-      </div>
+      <div class="title-container"><i class="jm-icon-workflow-edit"></i>编辑信息</div>
     </template>
     <div class="jm-workflow-editor-project-panel">
       <jm-form ref="editProjectInfoRef" :model="projectInfoForm" :rules="rules">
         <jm-form-item label="名称" prop="name" class="name-item">
-          <jm-input v-model="projectInfoForm.name" :maxlength="45" placeholder="请输入名称" :show-word-limit="true"/>
+          <jm-input v-model="projectInfoForm.name" :maxlength="45" placeholder="请输入名称" :show-word-limit="true" />
         </jm-form-item>
         <jm-form-item label="分组" class="group-item" prop="groupId" v-if="!workflowData.association.entry">
           <jm-select v-model="projectInfoForm.groupId" placeholder="请选择分组" v-loading="loading">
-            <jm-option
-              v-for="item in projectGroupList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"/>
+            <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id" />
           </jm-select>
         </jm-form-item>
         <jm-form-item label="描述" class="description-item">
@@ -29,7 +19,8 @@
             v-model="projectInfoForm.description"
             :maxlength="255"
             placeholder="请输入描述"
-            :show-word-limit="true"/>
+            :show-word-limit="true"
+          />
         </jm-form-item>
         <div class="btn-container">
           <jm-button @click="cancel" class="cancel">取消</jm-button>
@@ -84,7 +75,7 @@ export default defineComponent({
       projectInfoForm,
       loading,
       save: () => {
-        editProjectInfoRef.value.validate((valid: boolean) => {
+        editProjectInfoRef.value?.validate((valid: boolean) => {
           if (!valid) {
             return false;
           }
@@ -132,13 +123,13 @@ export default defineComponent({
 
       .cancel {
         color: #082340;
-        background: #F5F5F5;
+        background: #f5f5f5;
         border-radius: 2px;
         border: none;
         box-shadow: none;
 
         &:hover {
-          background: #D9D9D9;
+          background: #d9d9d9;
         }
       }
     }
