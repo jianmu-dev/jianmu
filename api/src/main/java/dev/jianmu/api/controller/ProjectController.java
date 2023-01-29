@@ -5,6 +5,7 @@ import dev.jianmu.api.dto.DslTextDto;
 import dev.jianmu.api.dto.GitRepoDto;
 import dev.jianmu.api.mapper.GitRepoMapper;
 import dev.jianmu.api.vo.ProjectIdVo;
+import dev.jianmu.api.vo.TriggerProjectVo;
 import dev.jianmu.application.service.GitApplication;
 import dev.jianmu.application.service.ProjectApplication;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,8 +50,11 @@ public class ProjectController {
 
     @PostMapping("/trigger/{projectId}")
     @Operation(summary = "触发项目", description = "触发项目启动")
-    public void trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {
-        this.projectApplication.triggerByManual(projectId);
+    public TriggerProjectVo trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {
+        var triggerEvent = this.projectApplication.triggerByManual(projectId);
+        return TriggerProjectVo.builder()
+                .triggerId(triggerEvent.getTriggerId())
+                .build();
     }
 
     @PostMapping
