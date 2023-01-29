@@ -90,13 +90,20 @@ export class TextViewer {
     this.transitCalculator = document.getElementById(`${this.id}`)!;
     this.callback = callback;
     this.resizeObserver = new ResizeObserver(
-      _throttle(async () => {
+      _throttle(async (entries: ResizeObserverEntry[]) => {
+        const { width, height } = entries[0].contentRect;
+        // 元素被隐藏宽高会变成0，如果宽高都为0本身也没必要进行监听
+        if (!width && !height) {
+          return;
+        }
+        // 如果宽度没发生变化，不需要重新计算
+        if (width === this.wrapperSize.width) {
+          return;
+        }
         await this.reload();
       }, this.threshold),
     );
-    this.resizeObserver.observe(
-      this.wrapperElement!.parentElement as Element,
-    );
+    this.resizeObserver.observe(this.wrapperElement!.parentElement as Element);
   }
 
   destroy(): void {
@@ -110,17 +117,10 @@ export class TextViewer {
    * @param w
    * @return 最大宽度
    */
-  private async calculateMaxCharWidth(
-    value: string,
-    i: number = 0,
-    w: number = 0,
-  ): Promise<number> {
+  private async calculateMaxCharWidth(value: string, i = 0, w = 0): Promise<number> {
     this.temporaryContent.value = value[i];
     await nextTick();
-    const maxWidth = Math.max(
-      w,
-      this.transitCalculator.getBoundingClientRect().width,
-    );
+    const maxWidth = Math.max(w, this.transitCalculator.getBoundingClientRect().width);
     // 比较到字符内容的最后一位的字符得到最大的宽度值，结束递归。
     if (i === value.length - 1) {
       this.temporaryContent.value = '';
@@ -149,8 +149,7 @@ export class TextViewer {
   private async calculateEllipsisWidth(): Promise<number> {
     this.temporaryContent.value = '...';
     await nextTick();
-    const ellipsisWidth =
-      this.transitCalculator.getBoundingClientRect().width;
+    const ellipsisWidth = this.transitCalculator.getBoundingClientRect().width;
     this.temporaryContent.value = '';
     return ellipsisWidth;
   }
@@ -193,30 +192,21 @@ export class TextViewer {
     wrapperSize: Readonly<ISize>,
     value: string,
     rows: number,
-    i: number = 0,
+    i = 0,
     contentArr: string[] = [],
   ): Promise<string[]> {
     this.temporaryContent.value += value[i];
     await nextTick();
     // 获取到此时用于计算的元素中的文字在页面中占据的实际宽度
-    let contentWidth =
-      this.transitCalculator.getBoundingClientRect().width;
+    let contentWidth = this.transitCalculator.getBoundingClientRect().width;
     // 提前先判断最后剩余的文本内容占据的宽度是否会大于外层容器的宽度，若大于外层容器的宽度，控制只让最后一行文本是带着...去计算生成截取的文本
-    if (
-      rows === contentArr.length + 1 &&
-      (await this.calculateLastLineMaxWidth(contentArr)) > wrapperSize.width
-    ) {
+    if (rows === contentArr.length + 1 && (await this.calculateLastLineMaxWidth(contentArr)) > wrapperSize.width) {
       contentWidth += this.ellipsisWidth;
     }
     // 截取到字符串的offsetWidth大于外层元素设置的宽度
     if (contentWidth > wrapperSize.width) {
       // 用于计算的元素中的文本的内容的倒数第二位的文本内容加入数组中，因为此时文本内容已经超过外层盒子的宽度，所以应当减一位。
-      contentArr.push(
-        this.temporaryContent.value.substring(
-          0,
-          this.temporaryContent.value.length - 1,
-        ),
-      );
+      contentArr.push(this.temporaryContent.value.substring(0, this.temporaryContent.value.length - 1));
       // 文本内容截取后将响应式占位宽度的span内容清空
       this.temporaryContent.value = '';
       // 如果生成的文本内容数组长度和指定的行数相等递归结束。
@@ -224,13 +214,7 @@ export class TextViewer {
         return contentArr;
       }
       // 当生成的文本内容数组小于指定的行数时，继续重复步骤生成文本字段。
-      return await this.generateVNodesInnerText(
-        wrapperSize,
-        value,
-        rows,
-        i,
-        contentArr,
-      );
+      return await this.generateVNodesInnerText(wrapperSize, value, rows, i, contentArr);
     }
     // 截取到字符串最后一位递归结束（当rows计算出得特别大也会在追加到最后一个字符后终止递归）
     if (i === value.length - 1) {
@@ -240,13 +224,7 @@ export class TextViewer {
       return contentArr;
     }
     // 当行追加内容
-    return await this.generateVNodesInnerText(
-      wrapperSize,
-      value,
-      rows,
-      i + 1,
-      contentArr,
-    );
+    return await this.generateVNodesInnerText(wrapperSize, value, rows, i + 1, contentArr);
   }
 
   /**
@@ -276,11 +254,7 @@ export class TextViewer {
    * @param lineHeight 行高
    * @return vNode
    */
-  private async generateVNode(
-    contentArr: string[],
-    rows: number,
-    lineHeight: number,
-  ): Promise<VNode> {
+  private async generateVNode(contentArr: string[], rows: number, lineHeight: number): Promise<VNode> {
     // 如果数组中没有内容证明没有达到指定宽度，不做操作
     if (contentArr.length === 0) {
       return createVNode('div', { class: 'content' });
@@ -356,30 +330,21 @@ export class TextViewer {
     return createVNode('div', { class: 'content' }, vNodes);
   }
 
-  private async init(value: string = ''): Promise<void> {
+  private async init(value = ''): Promise<void> {
     if (value.length === 0) {
       // 如果传入的内容为空字符串，生成一个类名为content的空div 作为VNode
-      const wrapperNode = await this.generateVNode(
-        [],
-        0,
-        this.lineHeight,
-      );
-      render(
-        wrapperNode,
-        this.wrapperElement,
-      );
+      const wrapperNode = await this.generateVNode([], 0, this.lineHeight);
+      render(wrapperNode, this.wrapperElement);
       return;
     }
     // 防止在组件外部使用flex布局，造成宽度为0
     if (!this.wrapperSize.width) {
       return;
     }
-    let isOverFlow: boolean = false;
+    let isOverFlow = false;
     this.temporaryContent.value = this.plainText;
     await nextTick();
-    isOverFlow =
-      this.transitCalculator.getBoundingClientRect().width >
-      this.wrapperSize.width;
+    isOverFlow = this.transitCalculator.getBoundingClientRect().width > this.wrapperSize.width;
     this.temporaryContent.value = '';
     // 获取传入文本中最大的字符占据的宽度。（注意：获取传入文本最大字符占据的宽度，应当是在value值存在的情况下）
     const maxCharWidth = await this.calculateMaxCharWidth(value);
@@ -402,35 +367,17 @@ export class TextViewer {
       // 获取...占据的宽度
       this.ellipsisWidth = await this.calculateEllipsisWidth();
 
-      const contentArr = await this.generateVNodesInnerText(
-        this.wrapperSize,
-        value,
-        rows,
-      );
-      const wrapperNode = await this.generateVNode(
-        contentArr,
-        rows,
-        this.lineHeight,
-      );
+      const contentArr = await this.generateVNodesInnerText(this.wrapperSize, value, rows);
+      const wrapperNode = await this.generateVNode(contentArr, rows, this.lineHeight);
       this.temporaryContent.value = '';
       element.parentElement!.style.removeProperty('overflow');
       this.wrapperElement.firstElementChild!.nextElementSibling!.removeChild(element);
       // 将VNode渲染到页面
-      render(
-        wrapperNode,
-        this.wrapperElement,
-      );
+      render(wrapperNode, this.wrapperElement);
     } else {
       // 传入字符占据的宽度小于外层盒子的宽度，直接渲染
-      const wrapperNode = await this.generateVNode(
-        [this.plainText],
-        1,
-        this.lineHeight,
-      );
-      render(
-        wrapperNode,
-        this.wrapperElement,
-      );
+      const wrapperNode = await this.generateVNode([this.plainText], 1, this.lineHeight);
+      render(wrapperNode, this.wrapperElement);
     }
   }
 
