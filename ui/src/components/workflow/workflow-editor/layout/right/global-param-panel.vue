@@ -1,21 +1,14 @@
 <template>
-  <jm-drawer
-    title="全局参数"
-    :size="410"
-    direction="rtl"
-    destroy-on-close
-    v-model="visible"
-    @closed="close"
-  >
+  <jm-drawer title="全局参数" :size="410" direction="rtl" destroy-on-close v-model="visible" @closed="close">
     <template #title>
       <div>全局参数</div>
     </template>
     <div class="drawer-content">
       <jm-scrollbar class="global-scroll">
         <div class="param-container">
-          <jm-form label-position="top" :model="workflowForm.global.params" ref="globalFormRef">
+          <jm-form label-position="top" :model="workflowForm.global.params" ref="globalFormRef" @submit.prevent>
             <global-param
-              v-for="(param,index) in workflowForm.global.params"
+              v-for="(param, index) in workflowForm.global.params"
               :key="paramKeys[index]"
               v-model:reference="param.ref"
               v-model:name="param.name"
@@ -25,12 +18,12 @@
               v-model:hidden="param.hidden"
               :index="index"
               :rules="workflowForm.global.getFormRules().params.fields[index].fields"
-              @change-reference="(newVal,oldVal)=>changeReference(index,oldVal)"
+              @change-reference="(newVal, oldVal) => changeReference(index, oldVal)"
               @delete="deleteParam"
             />
           </jm-form>
           <div class="add-param" @click="addParam">
-            <i class="jm-icon-button-add"/>
+            <i class="jm-icon-button-add" />
             全局参数
           </div>
         </div>
@@ -76,8 +69,8 @@ export default defineComponent({
       // 抽屉打开并且params有值的时候触发表单校验
       if (visible.value && workflowForm.value.global.params.length > 0) {
         await nextTick();
-        globalFormRef.value!.validate().catch(() => {
-        });
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        globalFormRef.value!.validate().catch(() => {});
       }
     });
     return {
@@ -115,7 +108,7 @@ export default defineComponent({
           if (index === idx || oldVal !== ref) {
             return;
           }
-          globalFormRef.value.validateField(`${idx}.ref`);
+          globalFormRef.value?.validateField(`${idx}.ref`);
         });
       },
     };
@@ -130,9 +123,8 @@ export default defineComponent({
       height: calc(100vh - 140px);
 
       .param-container {
-
         .add-param {
-          border-bottom: 1px solid #E6EBF2;
+          border-bottom: 1px solid #e6ebf2;
           padding: 10px 20px;
           color: #306bd2;
           font-size: 14px;
