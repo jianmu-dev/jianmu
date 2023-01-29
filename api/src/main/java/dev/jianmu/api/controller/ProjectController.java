@@ -5,6 +5,7 @@ import dev.jianmu.api.dto.ProjectCreatingDto;
 import dev.jianmu.api.vo.ProjectIdVo;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.GitRepoApplication;
+import dev.jianmu.api.vo.TriggerProjectVo;
 import dev.jianmu.application.service.ProjectApplication;
 import dev.jianmu.application.service.internal.WorkflowInstanceInternalApplication;
 import dev.jianmu.jianmu_user_context.holder.UserSessionHolder;
@@ -58,9 +59,12 @@ public class ProjectController {
 
     @PostMapping("/trigger/{projectId}")
     @Operation(summary = "触发项目", description = "触发项目启动")
-    public void trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {
+    public TriggerProjectVo trigger(@Parameter(description = "触发器ID") @PathVariable String projectId) {
         var session = this.userSessionHolder.getSession();
-        this.projectApplication.triggerByManual(projectId, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
+        var triggerEvent = this.projectApplication.triggerByManual(projectId, session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
+        return TriggerProjectVo.builder()
+                .triggerId(triggerEvent.getTriggerId())
+                .build();
     }
 
     @PostMapping
