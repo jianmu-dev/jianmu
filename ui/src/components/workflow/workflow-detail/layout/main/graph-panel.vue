@@ -10,8 +10,8 @@
       :viewMode="viewMode"
       @click-task-node="openTaskLog"
       @click-webhook-node="openWebhookLog"
-      @async-dsl="dslText=>dslSourceCode=dslText"
-      @change-view-mode="viewMode=>$emit('change-view-mode', viewMode)"
+      @async-dsl="dslText => (dslSourceCode = dslText)"
+      @change-view-mode="viewMode => $emit('change-view-mode', viewMode)"
     />
     <!-- :readonly="true" 不能加true 组件内部逻辑需要处理 -->
     <!-- 查看任务执行日志 -->
@@ -22,17 +22,17 @@
       direction="rtl"
       destroy-on-close
     >
-      <task-log :dsl="dslSourceCode" :business-id="taskLogForm.id" :tab-type="taskLogForm.tabType" :record="record" :taskRecords="taskRecords"/>
+      <task-log
+        :dsl="dslSourceCode"
+        :business-id="taskLogForm.id"
+        :tab-type="taskLogForm.tabType"
+        :record="record"
+        :taskRecords="taskRecords"
+      />
     </jm-drawer>
     <!-- 查看流程日志 -->
-    <jm-drawer
-      title="查看流程日志"
-      :size="850"
-      v-model="processLogDrawer"
-      direction="rtl"
-      destroy-on-close
-    >
-      <process-log :record="record"/>
+    <jm-drawer title="查看流程日志" :size="850" v-model="processLogDrawer" direction="rtl" destroy-on-close>
+      <process-log :record="record" />
     </jm-drawer>
     <!-- 查看Webhook日志 -->
     <jm-drawer
@@ -51,13 +51,7 @@
       />
     </jm-drawer>
     <!-- 查看全局参数 -->
-    <jm-drawer
-      title="查看全局参数"
-      :size="810"
-      v-model="paramLogDrawer"
-      direction="rtl"
-      destroy-on-close
-    >
+    <jm-drawer title="查看全局参数" :size="810" v-model="paramLogDrawer" direction="rtl" destroy-on-close>
       <param-log :globalParams="globalParams"></param-log>
     </jm-drawer>
   </div>
@@ -68,7 +62,7 @@ import { IGlobalParamseterVo, INodeDefVo } from '@/api/dto/project';
 import { ITaskExecutionRecordVo, IWorkflowExecutionRecordVo } from '@/api/dto/workflow-execution-record';
 import { NodeToolbarTabTypeEnum } from '@/components/workflow/workflow-viewer/model/data/enumeration';
 import { IOpenTaskLogForm, IOpenWebhookLogForm } from '@/model/modules/workflow-execution-record';
-import { computed, defineComponent, onBeforeUnmount, onMounted, onUpdated, PropType, ref } from 'vue';
+import { computed, defineComponent, onMounted, onUpdated, PropType, ref } from 'vue';
 import { GraphPanel } from '../../model/graph-panel';
 import ProcessLog from '../right/process-log.vue';
 import TaskLog from '../right/task-log.vue';
@@ -108,15 +102,15 @@ export default defineComponent({
     const nodeInfos = ref<INodeDefVo[]>();
     const taskRecords = ref<ITaskExecutionRecordVo[]>([]);
     const globalParams = ref<IGlobalParamseterVo[]>([]);
-    const gparam = computed<IWorkflowExecutionRecordVo>(()=>({
+    const gparam = computed<IWorkflowExecutionRecordVo>(() => ({
       ...props.record,
     }));
     const triggerId = ref(props.record.triggerId);
     const recordStatus = ref(props.record.status);
-    let graphPanel:GraphPanel;
+    let graphPanel: GraphPanel;
     const timestamp = ref<number>(props.event?.timestamp || 0);
     // 节流
-    let shortTimeGetOne:boolean = true;
+    let shortTimeGetOne = true;
     // record 页面变化引起数据变化 函数执行
     onUpdated(async () => {
       // 非手动更改当前实例状态
@@ -129,12 +123,12 @@ export default defineComponent({
         // 记录当前触发事件时间戳(时间戳没改变即不会改变任务状态)
         timestamp.value = props.event.timestamp;
         // 修改任务数据和状态
-        const i = taskRecords.value.findIndex(e => e.businessId===props.event!.id);
+        const i = taskRecords.value.findIndex(e => e.businessId === props.event!.id);
         // 找不到更新的那条任务就查询数据并返回
         if (i === -1 && shortTimeGetOne) {
           shortTimeGetOne = false;
           graphPanel.getTaskRecords();
-          setTimeout(()=> {
+          setTimeout(() => {
             shortTimeGetOne = true;
           }, 60000);
           return;
@@ -143,6 +137,10 @@ export default defineComponent({
         if (i === -1) return;
         taskRecords.value.splice(i, 1, {
           ...taskRecords.value[i],
+          // 下面三行添加开始结束时间字段 解决左侧弹窗拿不到数据问题
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          startTime: props.event.startTime!,
+          endTime: props.event.endTime,
           status: props.event.status,
         });
         // 引起子组件 onUpdated 更新状态灯
@@ -156,7 +154,7 @@ export default defineComponent({
       await graphPanel.getTaskRecords();
       graphPanel.getGlobalParams();
     });
-    onMounted(async ()=>{
+    onMounted(async () => {
       // 赋值 dslSourceCode nodeInfos
       const dslCallbackFn = (dsl: string, nodes: INodeDefVo[]) => {
         dslSourceCode.value = dsl;
@@ -197,8 +195,11 @@ export default defineComponent({
       webhookLogForm,
       openTaskLog: async (nodeId: string, tabType: NodeToolbarTabTypeEnum) => {
         if ([NodeToolbarTabTypeEnum.RETRY, NodeToolbarTabTypeEnum.IGNORE].includes(tabType)) {
-          const nodeData = taskRecords.value&&taskRecords.value.find(({ businessId }) => businessId === nodeId)!;
-          await (tabType === NodeToolbarTabTypeEnum.RETRY ? retryTask : ignoreTask)(props.record!.id, nodeData? nodeData.nodeName: 'null');
+          const nodeData = taskRecords.value && taskRecords.value.find(({ businessId }) => businessId === nodeId)!;
+          await (tabType === NodeToolbarTabTypeEnum.RETRY ? retryTask : ignoreTask)(
+            props.record!.id,
+            nodeData ? nodeData.nodeName : 'null',
+          );
           return;
         }
         taskLogForm.value.drawerVisible = true;
