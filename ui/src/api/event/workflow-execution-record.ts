@@ -57,4 +57,6 @@ export interface IAsyncTaskInstanceStatusUpdatedEvent extends IEvent {
    * 状态
    */
   status: TaskStatusEnum;
+  startTime?: string;
+  endTime?: string;
 }
