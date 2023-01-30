@@ -392,7 +392,7 @@ public class ProjectApplication {
                 .findByRefAndStatuses(project.getWorkflowRef(), List.of(ProcessStatus.INIT, ProcessStatus.RUNNING, ProcessStatus.SUSPENDED))
                 .size();
         if (running > 0) {
-            throw new RuntimeException("仍有流程执行中，不能删除。项目id: " + id);
+            throw new RuntimeException("仍有流程执行中，不能删除");
         }
         var projectLinkGroup = this.projectLinkGroupRepository.findByProjectId(id)
                 .orElseThrow(() -> new DataNotFoundException("未找到项目分组， 项目id: " + id));
