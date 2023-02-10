@@ -343,6 +343,32 @@ public class ProjectApplication {
         return project.getConcurrent() > concurrent;
     }
 
+    @Transactional
+    public void innerUpdateProject(String projectId, String dslText) {
+        Project project = this.projectRepository.findById(projectId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该项目，项目id: " + projectId));
+        // diff DSL
+        if (project.getDslText().equals(dslText)) {
+            return;
+        }
+        // 解析DSL,语法检查
+        var parser = DslParser.parse(dslText);
+        var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
+
+        project.setDslText(dslText);
+        project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
+        project.setTriggerType(parser.getTriggerType());
+        project.setSteps(parser.getSteps());
+        project.setConcurrent(parser.getConcurrent());
+        project.setWorkflowName(parser.getName());
+        project.setWorkflowDescription(parser.getDescription());
+        project.setLastModifiedTime();
+        project.setWorkflowVersion(workflow.getVersion());
+
+        this.projectRepository.updateByWorkflowRef(project);
+        this.workflowRepository.add(workflow);
+    }
+
     private void deleteGitFile(Project project, String userId) {
         if (!AssociationUtil.AssociationType.GIT_REPO.name().equals(project.getAssociationType())) {
             return;
@@ -521,5 +547,4 @@ public class ProjectApplication {
     public List<ProjectVo> findByIds(List<String> ids) {
         return this.projectRepository.findVoByIdIn(ids);
     }
-
 }
