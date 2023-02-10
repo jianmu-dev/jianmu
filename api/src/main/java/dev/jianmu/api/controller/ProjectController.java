@@ -105,6 +105,12 @@ public class ProjectController {
         }
     }
 
+    @PutMapping("/{projectId}/inner")
+    @Operation(summary = "内部更新项目", description = "内部更新项目")
+    public void innerUpdateProject(@PathVariable String projectId, @RequestBody @Valid DslTextDto dslTextDto) {
+        this.projectApplication.innerUpdateProject(projectId, dslTextDto.getDslText());
+    }
+
     @DeleteMapping("/{projectId}")
     @Operation(summary = "删除项目", description = "删除项目")
     public void deleteById(@PathVariable String projectId) {
