@@ -39,6 +39,7 @@ public interface ProjectMapper {
     @Result(column = "creator_id", property = "creatorId")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
@@ -66,6 +67,7 @@ public interface ProjectMapper {
     @Result(column = "creator_id", property = "creatorId")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
@@ -89,6 +91,7 @@ public interface ProjectMapper {
     @Result(column = "creator_id", property = "creatorId")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "association_id", property = "associationId")
     @Result(column = "association_type", property = "associationType")
@@ -112,6 +115,7 @@ public interface ProjectMapper {
     @Result(column = "dsl_text", property = "dslText")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Project> findAllPage(String workflowName);
 
@@ -128,6 +132,7 @@ public interface ProjectMapper {
     @Result(column = "dsl_text", property = "dslText")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Project> findAll();
 
@@ -158,6 +163,7 @@ public interface ProjectMapper {
     @Result(column = "dsl_text", property = "dslText")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "serial_no", property = "serialNo")
@@ -191,6 +197,7 @@ public interface ProjectMapper {
     @Result(column = "dsl_text", property = "dslText")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     @Result(column = "workflow_instance_id", property = "workflowInstanceId")
     @Result(column = "serial_no", property = "serialNo")
@@ -217,6 +224,7 @@ public interface ProjectMapper {
     @Result(column = "dsl_text", property = "dslText")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "last_modified_by", property = "lastModifiedBy")
+    @Result(column = "last_modified_by_id", property = "lastModifiedById")
     @Result(column = "last_modified_time", property = "lastModifiedTime")
     List<Project> findByIdIn(@Param("ids") List<String> ids);
 }
