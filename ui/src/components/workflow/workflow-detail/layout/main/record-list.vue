@@ -142,7 +142,10 @@ export default defineComponent({
               } as IWorkflowExecutionRecordVo,
           ];
         if (props.param.triggerId && allRecords.value.length) {
-          handleChange(allRecords.value.find(e => e.triggerId === props.param.triggerId) as IWorkflowExecutionRecordVo);
+          handleChange(
+            (allRecords.value.find(e => e.triggerId === props.param.triggerId) as IWorkflowExecutionRecordVo) ||
+              allRecords.value[allRecords.value.length - 1],
+          );
         } else if (allRecords.value.length) {
           handleChange(allRecords.value[0]);
         }
