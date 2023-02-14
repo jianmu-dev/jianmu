@@ -50,11 +50,10 @@ public interface InstanceParameterMapper {
             "(" +
             "SELECT max(serial_no) as max_no, async_task_ref, ref FROM jm_task_instance_parameter " +
             "    WHERE trigger_id=#{triggerId} " +
-            "    AND type='OUTPUT'" +
             "    GROUP BY  async_task_ref, ref" +
             ") as B " +
             "WHERE trigger_id=#{triggerId} " +
-            "AND T.async_task_ref=B.async_task_ref AND T.ref=B.ref AND T.serial_no=B.max_no")
+            "AND T.async_task_ref=B.async_task_ref AND T.ref=B.ref AND T.serial_no=B.max_no AND T.type='OUTPUT'")
     @Result(column = "instance_id", property = "instanceId")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "def_key", property = "defKey")
