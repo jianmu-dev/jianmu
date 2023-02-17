@@ -101,7 +101,7 @@ public class RestExceptionHandler {
         return ErrorMessage.builder()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
-                .message(ex.getCause().getMessage().contains("workflow_name_UNIQUE") ? "项目名称不能重复" : "主键重复")
+                .message(ex.getCause().getMessage().contains("jm_project.association_id_type_platform_workflow_name") ? "项目名称不能重复" : "主键重复")
                 .description(request.getDescription(false))
                 .build();
     }
