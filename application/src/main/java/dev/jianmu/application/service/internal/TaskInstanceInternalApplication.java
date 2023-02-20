@@ -12,12 +12,10 @@ import dev.jianmu.event.Publisher;
 import dev.jianmu.event.impl.WatchDeferredResultTerminateEvent;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
-import dev.jianmu.task.aggregate.InstanceParameter;
-import dev.jianmu.task.aggregate.InstanceStatus;
-import dev.jianmu.task.aggregate.NodeInfo;
-import dev.jianmu.task.aggregate.TaskInstance;
+import dev.jianmu.task.aggregate.*;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.task.repository.VolumeRepository;
 import dev.jianmu.task.service.InstanceDomainService;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
@@ -58,6 +56,7 @@ public class TaskInstanceInternalApplication {
     private final WorkflowInstanceRepository workflowInstanceRepository;
     private final MonitoringFileService monitoringFileService;
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
+    private final VolumeRepository volumeRepository;
     private final Publisher publisher;
 
     public TaskInstanceInternalApplication(
@@ -73,6 +72,7 @@ public class TaskInstanceInternalApplication {
             WorkflowInstanceRepository workflowInstanceRepository,
             MonitoringFileService monitoringFileService,
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
+            VolumeRepository volumeRepository,
             Publisher publisher
     ) {
         this.taskInstanceRepository = taskInstanceRepository;
@@ -87,6 +87,7 @@ public class TaskInstanceInternalApplication {
         this.workflowInstanceRepository = workflowInstanceRepository;
         this.monitoringFileService = monitoringFileService;
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
+        this.volumeRepository = volumeRepository;
         this.publisher = publisher;
     }
 
@@ -215,6 +216,10 @@ public class TaskInstanceInternalApplication {
                             .businessId(endAsyncTaskInstance.getId())
                             .triggerId(triggerId)
                             .build());
+                    // 创建Volume记录
+                    var volume = Volume.Builder.aVolume().name(triggerId).scope(Volume.Scope.WORKFLOW).build();
+                    this.volumeRepository.create(volume);
+                    log.info("创建Volume: {}", volume.getName());
                 });
     }
 
@@ -241,11 +246,21 @@ public class TaskInstanceInternalApplication {
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         MDC.put("triggerId", taskInstance.getTriggerId());
         if (taskInstance.isDeletionVolume()) {
+            // 成功删除Volume
+            this.volumeRepository.deleteByName(taskInstance.getTriggerId());
+            log.info("删除Volume: {}", taskInstance.getTriggerId());
             this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
         }
         if (taskInstance.isVolume()) {
             taskInstance.executeSucceeded();
             this.taskInstanceRepository.saveSucceeded(taskInstance);
+            // 查找Volume并激活
+            // TODO 为兼容老数据有可能存在未存储的Volume记录
+            this.volumeRepository.findByName(taskInstance.getTriggerId())
+                    .ifPresent(volume -> {
+                        volume.activate(taskInstance.getWorkerId());
+                        this.volumeRepository.activate(volume);
+                    });
             return;
         }
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
@@ -288,8 +303,17 @@ public class TaskInstanceInternalApplication {
                         .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
                 workflowInstance.terminateInStart();
                 this.workflowInstanceRepository.save(workflowInstance);
+                // 创建Volume失败，删除Volume记录
+                this.volumeRepository.deleteByName(taskInstance.getTriggerId());
+                log.info("删除Volume: {}", taskInstance.getTriggerId());
             } else {
                 log.error("清除Volume失败");
+                // 清除Volume失败，标记Volume记录
+                this.volumeRepository.findByName(taskInstance.getTriggerId())
+                        .ifPresent(volume -> {
+                            volume.taint();
+                            this.volumeRepository.taint(volume);
+                        });
                 this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
             }
             this.taskInstanceRepository.updateStatus(taskInstance);
