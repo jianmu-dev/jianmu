@@ -17,4 +17,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TaskRunningEvent {
     private String taskId;
+    private String workerId;
 }

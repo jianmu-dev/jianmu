@@ -22,7 +22,6 @@ import dev.jianmu.secret.aggregate.CredentialManager;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.InstanceStatus;
-import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
@@ -495,16 +494,19 @@ public class WorkerInternalApplication {
             case "RUNNING":
                 this.applicationEventPublisher.publishEvent(TaskRunningEvent.builder()
                         .taskId(taskInstance.getId())
+                        .workerId(workerId)
                         .build());
                 break;
             case "FAILED":
                 this.applicationEventPublisher.publishEvent(TaskFailedEvent.builder()
+                        .workerId(workerId)
                         .taskId(taskInstance.getId())
                         .errorMsg(errorMsg)
                         .build());
                 break;
             case "SUCCEED":
                 this.applicationEventPublisher.publishEvent(TaskFinishedEvent.builder()
+                        .workerId(workerId)
                         .taskId(taskInstance.getId())
                         .cmdStatusCode(exitCode)
                         .resultFile(resultFile)
