@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TaskFailedEvent {
+    private String workerId;
     private String triggerId;
     private String taskId;
     private String errorMsg;
