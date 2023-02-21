@@ -38,10 +38,7 @@
           </jm-checkbox>
         </div>
         <div class="btn">
-          <jm-button type="primary" @click="login" :loading="loading"
-          >登录
-          </jm-button
-          >
+          <jm-button type="primary" @click="login" :loading="loading">登录 </jm-button>
         </div>
       </jm-form>
     </div>
@@ -52,17 +49,15 @@
       <div class="tip">登录遇到问题，请尝试重新登录</div>
       <div class="operations">
         <jm-button class="btn cancel" @click="$emit('cancel')">取消</jm-button>
-        <jm-button type='primary' class="btn" @click="fetchThirdAuthUrl">重新登录</jm-button>
+        <jm-button type="primary" class="btn" @click="fetchThirdAuthUrl">重新登录</jm-button>
       </div>
     </div>
-    <div :class="[`${loginType.toLowerCase()}-login`,loading?'loading':'']" @click="fetchThirdAuthUrl" v-else>
+    <div :class="[`${loginType.toLowerCase()}-login`, loading ? 'loading' : '']" @click="fetchThirdAuthUrl" v-else>
       <div class="logo">
         <div class="img" v-if="!loading"></div>
         <div class="loading" v-else></div>
       </div>
-      <span class="tip">{{
-          loading ? `${Type} 账号登录中…` : `使用 ${Type} 账号登录`
-        }}</span>
+      <span class="tip">{{ loading ? `${Type} 账号登录中…` : `使用 ${Type} 账号登录` }}</span>
     </div>
   </div>
 </template>
@@ -139,20 +134,28 @@ export default defineComponent({
         proxy.$throw(err, proxy);
       }
     };
-    const refreshState = (e: any) => {
+    const refreshState = async (e: any) => {
       if (e.key === 'session') {
-        proxy.$success('登录成功');
         const newSession = JSON.parse(e.newValue)['_default'].session;
-        proxy.mutateSession(newSession);
+        // 如果session的token不为空,证明是刷新token导致的storage变化，不用提示登录成功[https://gitee.com/jianmu-dev/jianmu/issues/I6FI2D]
+        if (store.state[namespace].session?.token) {
+          loading.value = false;
+          authError.value = false;
+          setTimeout(() => {
+            emit('logined');
+          }, 500);
+          return;
+        }
         // 登录成功
         loading.value = false;
         authError.value = false;
+        proxy.$success('登录成功');
         setTimeout(() => {
           emit('logined');
         }, 500);
+        proxy.mutateSession(newSession);
       }
       if (e.key === 'temp-login-error-message') {
-        console.log(localStorage.getItem('temp-login-mode') !== 'index');
         // 只有是弹窗登录授权失败才展示重新登录
         localStorage.getItem('temp-login-mode') !== 'index' && (authError.value = true);
         // 登录失败
@@ -160,16 +163,17 @@ export default defineComponent({
       }
     };
     onMounted(async () => {
-      window.onstorage = refreshState;
+      window.addEventListener('storage', refreshState);
       // 判断是否为弹窗方式登录
       const dialogLogin = localStorage.getItem('temp-login-mode') !== 'index';
       if (props.error_description) {
         proxy.$error(props.error_description);
         // dialogLogin ? proxy.$error(props.error_description + '，页面即将关闭') : proxy.$error(props.error_description);
         localStorage.setItem('temp-login-error-message', props.error_description);
-        dialogLogin && setTimeout(() => {
-          window.close();
-        }, 2000);
+        dialogLogin &&
+          setTimeout(() => {
+            window.close();
+          }, 2000);
         return;
       }
       // 三方登录 有code码证明进行了授权验证，避免登录接口重复调用
@@ -187,9 +191,10 @@ export default defineComponent({
         } catch (err) {
           proxy.$throw(err, proxy);
           localStorage.setItem('temp-login-error-message', err.message);
-          dialogLogin && setTimeout(() => {
-            window.close();
-          }, 2000);
+          dialogLogin &&
+            setTimeout(() => {
+              window.close();
+            }, 2000);
         } finally {
           loading.value = false;
           emit('logined');
@@ -212,13 +217,9 @@ export default defineComponent({
       loading,
       loginFormRef,
       loginForm,
-      loginRule: ref<object>({
-        username: [
-          { required: true, message: '用户名不能为空', trigger: 'blur' },
-        ],
-        password: [
-          { required: true, message: '密码不能为空', trigger: 'blur' },
-        ],
+      loginRule: ref<Record<string, any>>({
+        username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
+        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
       }),
       login: () => {
         // 开启loading
@@ -303,7 +304,11 @@ export default defineComponent({
     }
   }
 
-  .gitee-login, .gitlink-login, .gitlab-login, .gitea-login, .error-login {
+  .gitee-login,
+  .gitlink-login,
+  .gitlab-login,
+  .gitea-login,
+  .error-login {
     cursor: pointer;
     position: absolute;
     top: 50%;
@@ -319,7 +324,7 @@ export default defineComponent({
 
     &:hover {
       .tip {
-        color: #096DD9;
+        color: #096dd9;
       }
     }
 
@@ -327,13 +332,13 @@ export default defineComponent({
       .img {
         width: 56px;
         height: 56px;
-        background: url("@/assets/svgs/logo/gitee.svg") no-repeat 100%;
+        background: url('@/assets/svgs/logo/gitee.svg') no-repeat 100%;
       }
 
       .loading {
         width: 30px;
         height: 30px;
-        background: url("@/assets/svgs/logo/loading.svg") no-repeat;
+        background: url('@/assets/svgs/logo/loading.svg') no-repeat;
         animation: rotating 2s linear infinite;
       }
     }
@@ -341,7 +346,7 @@ export default defineComponent({
     .tip {
       font-size: 14px;
       font-weight: 400;
-      color: #012C53;
+      color: #012c53;
       margin-top: 20px;
     }
   }
@@ -351,7 +356,7 @@ export default defineComponent({
       .img {
         width: 56px;
         height: 35px;
-        background-image: url("@/assets/svgs/logo/gitlink.svg");
+        background-image: url('@/assets/svgs/logo/gitlink.svg');
         background-size: cover;
         background-repeat: no-repeat;
       }
@@ -363,7 +368,7 @@ export default defineComponent({
       .img {
         width: 56px;
         height: 56px;
-        background-image: url("@/assets/svgs/logo/gitlab.svg");
+        background-image: url('@/assets/svgs/logo/gitlab.svg');
         background-size: cover;
         background-repeat: no-repeat;
       }
@@ -375,7 +380,7 @@ export default defineComponent({
       .img {
         width: 56px;
         height: 56px;
-        background-image: url("@/assets/svgs/logo/gitea.svg");
+        background-image: url('@/assets/svgs/logo/gitea.svg');
         background-size: cover;
         background-repeat: no-repeat;
       }
@@ -392,7 +397,7 @@ export default defineComponent({
 
     &:hover {
       .tip {
-        color: #012C53;
+        color: #012c53;
       }
     }
 
@@ -416,7 +421,7 @@ export default defineComponent({
           }
 
           color: #082340;
-          background-color: #F5F5F5;
+          background-color: #f5f5f5;
           margin-right: 40px;
         }
       }
@@ -426,7 +431,7 @@ export default defineComponent({
       .img {
         width: 56px;
         height: 56px;
-        background-image: url("@/assets/svgs/logo/error.svg");
+        background-image: url('@/assets/svgs/logo/error.svg');
         background-size: cover;
         background-repeat: no-repeat;
       }
