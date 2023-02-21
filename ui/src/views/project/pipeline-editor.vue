@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { defineComponent, getCurrentInstance, inject, nextTick, onMounted, ref } from 'vue';
 import { IWorkflow } from '@/components/workflow/workflow-editor/model/data/common';
 import { useRoute, useRouter } from 'vue-router';
 import { save as saveProject } from '@/api/project';
@@ -14,7 +14,6 @@ import yaml from 'yaml';
 import { namespace } from '@/store/modules/session';
 import { createNamespacedHelpers, useStore } from 'vuex';
 import LoginVerify from '@/views/login/dialog.vue';
-import { ISessionVo } from '@/api/dto/session';
 
 const { mapMutations, mapActions } = createNamespacedHelpers(namespace);
 export default defineComponent({
@@ -44,15 +43,6 @@ export default defineComponent({
       },
       data: '',
     });
-    const defaultSession = ref<ISessionVo>();
-    const refreshState = (e: any) => {
-      if (e.key !== 'session') {
-        return;
-      }
-      defaultSession.value = JSON.parse(e.newValue)['_default'].session;
-      // 将新tab中的session值，保存在vuex中
-      proxy.mutateSession(defaultSession.value);
-    };
     // 验证用户是否登录
     const authLogin = () => {
       if (sessionState.session) {
@@ -61,7 +51,6 @@ export default defineComponent({
       proxy.openAuthDialog({ appContext, LoginVerify });
     };
     onMounted(async () => {
-      window.addEventListener('storage', refreshState);
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
         workflow.value = JSON.parse(payload as string);
@@ -96,9 +85,6 @@ export default defineComponent({
       } else {
         authLogin();
       }
-    });
-    onBeforeUnmount(() => {
-      window.removeEventListener('storage', refreshState);
     });
     const close = async () => {
       await router.push({ name: 'index' });
