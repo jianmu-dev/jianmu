@@ -12,6 +12,7 @@ import dev.jianmu.el.ElContext;
 import dev.jianmu.external_parameter.repository.ExternalParameterRepository;
 import dev.jianmu.event.Publisher;
 import dev.jianmu.event.impl.WatchDeferredResultTerminateEvent;
+import dev.jianmu.infrastructure.exception.DBException;
 import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.node.definition.aggregate.NodeParameter;
 import dev.jianmu.project.repository.ProjectRepository;
@@ -24,6 +25,8 @@ import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.workflow.aggregate.parameter.NodeOutputDefinitionEnum;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
+import dev.jianmu.workflow.aggregate.process.ProcessStatus;
+import dev.jianmu.workflow.aggregate.process.TaskStatus;
 import dev.jianmu.workflow.el.ExpressionLanguage;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
 import dev.jianmu.workflow.repository.ParameterRepository;
@@ -32,6 +35,8 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -238,14 +243,46 @@ public class TaskInstanceInternalApplication {
                 });
     }
 
+    // 激活end任务
+    @Retryable(
+            value = {DBException.OptimisticLocking.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
+    )
     @Transactional
-    public void commitEndEvent(String triggerId) {
+    public void activeEndTask(String triggerId) {
+        var workflowInstance = this.workflowInstanceRepository.findByTriggerId(triggerId)
+                .orElseThrow(() -> new DataNotFoundException("未找到流程实例"));
+        if (workflowInstance.getStatus() == ProcessStatus.FINISHED) {
+            this.commitEndEvent(triggerId);
+            return;
+        }
+        // 终止状态的流程实例
+        var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(triggerId);
+        var finished = asyncTaskInstances.stream()
+                .filter(asyncTaskInstance -> !asyncTaskInstance.getAsyncTaskType().equalsIgnoreCase("end"))
+                .noneMatch(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING);
+        var endAsyncTask = asyncTaskInstances.stream()
+                .filter(asyncTaskInstance -> asyncTaskInstance.getAsyncTaskType().equalsIgnoreCase("end"))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("未找到结束任务"));
+        if (!finished || endAsyncTask.getStatus() != TaskStatus.INIT) {
+            return;
+        }
+        endAsyncTask.waiting();
+        this.asyncTaskInstanceRepository.activateById(endAsyncTask, endAsyncTask.getVersion());
+        this.commitEndEvent(triggerId);
+    }
+
+    private void commitEndEvent(String triggerId) {
         this.taskInstanceRepository.findByTriggerId(triggerId).stream()
                 .filter(taskInstance -> taskInstance.getDefKey().equals("end") && taskInstance.getStatus() == InstanceStatus.INIT)
                 .findFirst()
                 .ifPresent(this.taskInstanceRepository::commitEvent);
     }
 
+    @Transactional
     public void terminate(String asyncTaskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
@@ -253,6 +290,10 @@ public class TaskInstanceInternalApplication {
                 .workerId(taskInstance.getWorkerId())
                 .businessId(taskInstance.getBusinessId())
                 .build());
+        if (taskInstance.getStatus() == InstanceStatus.WAITING) {
+            taskInstance.executeFailed();
+            this.taskInstanceRepository.updateStatus(taskInstance);
+        }
     }
 
     @Transactional
@@ -513,22 +554,5 @@ public class TaskInstanceInternalApplication {
             log.warn("e: ", e);
         }
         return Map.of();
-    }
-
-    // 终止全部任务
-    @Transactional
-    public void terminateByTriggerId(String triggerId) {
-        var taskInstances = this.taskInstanceRepository.findByTriggerId(triggerId);
-        if (taskInstances.stream().noneMatch(taskInstance -> taskInstance.getStatus() == InstanceStatus.RUNNING)) {
-            this.workflowInstanceRepository.findByTriggerId(triggerId)
-                    .ifPresent(workflow -> this.commitEndEvent(triggerId));
-        }
-        taskInstances.stream()
-                .filter(taskInstance -> !taskInstance.isDeletionVolume())
-                .filter(taskInstance -> taskInstance.getStatus() == InstanceStatus.INIT || taskInstance.getStatus() == InstanceStatus.WAITING)
-                .forEach(taskInstance -> {
-                    taskInstance.executeFailed();
-                    this.taskInstanceRepository.terminate(taskInstance);
-                });
     }
 }
