@@ -31,8 +31,6 @@ import dev.jianmu.workflow.repository.WorkflowRepository;
 import dev.jianmu.workflow.service.ParameterDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -258,12 +256,8 @@ public class TaskInstanceInternalApplication {
             return;
         }
         endAsyncTask.waiting();
-        try {
-            this.asyncTaskInstanceRepository.activateById(endAsyncTask, endAsyncTask.getVersion());
-            this.commitEndEvent(triggerId);
-        } catch (DBException.OptimisticLocking e) {
-            log.warn("激活end任务乐观锁异常，忽略");
-        }
+        this.asyncTaskInstanceRepository.activateById(endAsyncTask, endAsyncTask.getVersion());
+        this.commitEndEvent(triggerId);
     }
 
     private void commitEndEvent(String triggerId) {
