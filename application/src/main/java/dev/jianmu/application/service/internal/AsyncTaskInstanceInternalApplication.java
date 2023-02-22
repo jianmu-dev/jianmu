@@ -68,6 +68,7 @@ public class AsyncTaskInstanceInternalApplication {
         // 终止同一流程实例中所有运行中的任务
         var asyncTaskInstances = this.asyncTaskInstanceRepository.findByTriggerId(triggerId);
         asyncTaskInstances.stream()
+                .filter(asyncTaskInstance -> !asyncTaskInstance.getAsyncTaskType().equalsIgnoreCase("end"))
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.WAITING)
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.terminate();
@@ -75,6 +76,7 @@ public class AsyncTaskInstanceInternalApplication {
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });
         asyncTaskInstances.stream()
+                .filter(asyncTaskInstance -> !asyncTaskInstance.getAsyncTaskType().equalsIgnoreCase("end"))
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.RUNNING)
                 .forEach(asyncTaskInstance -> {
                     asyncTaskInstance.terminate();
