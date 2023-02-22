@@ -71,7 +71,7 @@ public class AsyncTaskInstanceInternalApplication {
                 .filter(asyncTaskInstance -> !asyncTaskInstance.getAsyncTaskType().equalsIgnoreCase("end"))
                 .filter(asyncTaskInstance -> asyncTaskInstance.getStatus() == TaskStatus.WAITING)
                 .forEach(asyncTaskInstance -> {
-                    asyncTaskInstance.terminateAndFailed();
+                    asyncTaskInstance.terminate();
                     log.info("终止待执行任务: " + asyncTaskInstance.getAsyncTaskRef());
                     this.asyncTaskInstanceRepository.updateById(asyncTaskInstance);
                 });

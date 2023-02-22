@@ -273,6 +273,7 @@ public class TaskInstanceInternalApplication {
                 .ifPresent(this.taskInstanceRepository::commitEvent);
     }
 
+    @Transactional
     public void terminate(String asyncTaskInstanceId) {
         var taskInstance = this.taskInstanceRepository.findByBusinessIdAndMaxSerialNo(asyncTaskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
@@ -280,6 +281,10 @@ public class TaskInstanceInternalApplication {
                 .workerId(taskInstance.getWorkerId())
                 .businessId(taskInstance.getBusinessId())
                 .build());
+        if (taskInstance.getStatus() == InstanceStatus.WAITING) {
+            taskInstance.executeFailed();
+            this.taskInstanceRepository.updateStatus(taskInstance);
+        }
     }
 
     @Transactional
@@ -540,17 +545,5 @@ public class TaskInstanceInternalApplication {
             log.warn("e: ", e);
         }
         return Map.of();
-    }
-
-    // 终止全部任务
-    @Transactional
-    public void terminateByTriggerId(String triggerId) {
-        this.taskInstanceRepository.findByTriggerId(triggerId).stream()
-                .filter(taskInstance -> !taskInstance.isDeletionVolume())
-                .filter(taskInstance -> taskInstance.getStatus() == InstanceStatus.INIT || taskInstance.getStatus() == InstanceStatus.WAITING)
-                .forEach(taskInstance -> {
-                    taskInstance.executeFailed();
-                    this.taskInstanceRepository.terminate(taskInstance);
-                });
     }
 }

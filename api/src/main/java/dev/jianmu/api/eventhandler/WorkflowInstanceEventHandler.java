@@ -92,7 +92,6 @@ public class WorkflowInstanceEventHandler {
         log.info(event.toString());
         this.asyncTaskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
         this.taskInstanceInternalApplication.activeEndTask(event.getTriggerId());
-        this.taskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");

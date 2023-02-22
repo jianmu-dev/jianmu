@@ -248,12 +248,6 @@ public class AsyncTaskInstance extends AggregateRoot {
         this.raiseEvent(terminatingEvent);
     }
 
-    public void terminateAndFailed() {
-        this.status = TaskStatus.FAILED;
-        this.endTime = LocalDateTime.now();
-        this.terminate();
-    }
-
     public String getId() {
         return id;
     }
