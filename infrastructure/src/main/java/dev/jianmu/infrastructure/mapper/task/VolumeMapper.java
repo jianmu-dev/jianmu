@@ -27,7 +27,7 @@ public interface VolumeMapper {
     @Result(column = "available_time", property = "availableTime")
     Optional<Volume> findByName(String name);
 
-    @Update("update jm_volume set available = #{available} where name = #{name}")
+    @Update("update jm_volume set available = #{available}, worker_id = #{workerId}, available_time = #{availableTime} where name = #{name}")
     void activate(Volume volume);
 
     @Update("update jm_volume set taint = #{taint} where name = #{name}")

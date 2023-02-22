@@ -101,7 +101,7 @@ public class WorkflowInstanceEventHandler {
         log.info("Get ProcessTerminatedEvent here -------------------------");
         log.info(event.toString());
         this.asyncTaskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
-        this.taskInstanceInternalApplication.terminateByTriggerId(event.getTriggerId());
+        this.taskInstanceInternalApplication.activeEndTask(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
@@ -113,7 +113,7 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessEndedEvent here -------------------------");
         log.info(event.toString());
-        this.taskInstanceInternalApplication.commitEndEvent(event.getTriggerId());
+        this.taskInstanceInternalApplication.activeEndTask(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
@@ -124,7 +124,7 @@ public class WorkflowInstanceEventHandler {
         MDC.put("triggerId", event.getTriggerId());
         log.info("Get ProcessNotRunningEvent here -------------------------");
         log.info(event.toString());
-        this.taskInstanceInternalApplication.commitEndEvent(event.getTriggerId());
+        this.taskInstanceInternalApplication.activeEndTask(event.getTriggerId());
         // 执行流程实例
         this.workflowInstanceInternalApplication.start(event.getWorkflowRef(), event.getTriggerId());
         log.info("-----------------------------------------------------");
