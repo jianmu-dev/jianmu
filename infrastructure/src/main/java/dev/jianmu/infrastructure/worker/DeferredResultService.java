@@ -71,7 +71,7 @@ public class DeferredResultService {
     public DeferredResult<ResponseEntity<?>> newWatchDeferredResult(String workerId, String businessId) {
         var deferredResult = new DeferredResult<ResponseEntity<?>>(watchTimeout, null);
         this.watchDeferredResults.putIfAbsent(workerId, new ConcurrentHashMap<>());
-        this.watchDeferredResults.get(workerId).putIfAbsent(businessId, deferredResult);
+        this.watchDeferredResults.get(workerId).put(businessId, deferredResult);
 
         deferredResult.onError(Throwable -> deferredResult.setResult(ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("error")));
         deferredResult.onTimeout(() -> deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body("timeout")));
