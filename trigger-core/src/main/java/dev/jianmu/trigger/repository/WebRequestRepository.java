@@ -16,4 +16,6 @@ public interface WebRequestRepository {
     Optional<WebRequest> findById(String id);
 
     void update(WebRequest webRequest);
+
+    Optional<WebRequest> findByTriggerId(String triggerId);
 }

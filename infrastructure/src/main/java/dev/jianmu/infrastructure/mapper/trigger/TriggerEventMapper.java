@@ -1,6 +1,7 @@
 package dev.jianmu.infrastructure.mapper.trigger;
 
 import dev.jianmu.trigger.event.TriggerEvent;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Select;
@@ -25,4 +26,9 @@ public interface TriggerEventMapper {
     @Insert("insert into jianmu_trigger_event(id, project_id, trigger_id, web_request_id, trigger_type, occurred_time) " +
             "values(#{id}, #{projectId}, #{triggerId}, #{webRequestId}, #{triggerType}, #{occurredTime})")
     void save(TriggerEvent triggerEvent);
+
+    @Delete("delete t1, t2 from jianmu_trigger_event t1 " +
+            "left join jianmu_web_request t2 on t1.web_request_id = (t2.id collate utf8mb4_0900_ai_ci) " +
+            "where t1.id = #{triggerId}")
+    void deleteByTriggerId(String triggerId);
 }

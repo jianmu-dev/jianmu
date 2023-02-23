@@ -43,4 +43,14 @@ public class TriggerEventRepositoryImpl implements TriggerEventRepository {
             this.triggerEventParameterMapper.save(triggerEvent.getId(), parameter);
         });
     }
+
+    @Override
+    public void deleteByTriggerId(String triggerId) {
+        this.triggerEventMapper.deleteByTriggerId(triggerId);
+    }
+
+    @Override
+    public void deleteParameterByTriggerId(String triggerId) {
+        this.triggerEventParameterMapper.deleteByTriggerId(triggerId);
+    }
 }
