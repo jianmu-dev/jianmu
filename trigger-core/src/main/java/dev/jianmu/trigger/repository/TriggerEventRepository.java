@@ -14,4 +14,8 @@ public interface TriggerEventRepository {
     Optional<TriggerEvent> findById(String id);
 
     void save(TriggerEvent triggerEvent);
+
+    void deleteByTriggerId(String triggerId);
+
+    void deleteParameterByTriggerId(String triggerId);
 }

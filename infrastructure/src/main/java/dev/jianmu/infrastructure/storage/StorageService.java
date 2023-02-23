@@ -29,4 +29,10 @@ public interface StorageService {
     BufferedWriter writeWebhook(String webhookFileName);
 
     String readWebhook(String webhookFileName);
+
+    void deleteWorkflowLog(String triggerId);
+
+    void deleteTaskLog(String taskId);
+
+    void deleteWebhook(String webhookRequestId);
 }

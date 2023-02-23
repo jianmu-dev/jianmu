@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure.mapper.task;
 
 import dev.jianmu.task.aggregate.InstanceParameter;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Set;
@@ -23,6 +20,11 @@ public interface InstanceParameterMapper {
             "</foreach>" +
             " </script>")
     void addAll(@Param("instanceParameters") Set<InstanceParameter> instanceParameters);
+
+    @Delete("delete t1, t2 from task_instance_parameter t1 " +
+            "left join parameter t2 on t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) " +
+            "where t1.trigger_id = #{triggerId}")
+    void deleteByTriggerId(String triggerId);
 
     @Select("select * from task_instance_parameter where instance_id = #{instanceId}")
     @Result(column = "instance_id", property = "instanceId")
