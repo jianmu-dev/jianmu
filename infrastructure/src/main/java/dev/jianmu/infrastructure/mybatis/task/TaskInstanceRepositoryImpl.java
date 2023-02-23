@@ -140,7 +140,7 @@ public class TaskInstanceRepositoryImpl implements TaskInstanceRepository {
     @Override
     public void updateWorkerId(TaskInstance taskInstance) {
         var succeed = this.taskInstanceMapper.updateWorkerId(taskInstance);
-        if (this.backup) {
+        if (this.backup && succeed) {
             this.taskInstanceBackupMapper.updateWorkerId(taskInstance);
         }
         if (succeed) {

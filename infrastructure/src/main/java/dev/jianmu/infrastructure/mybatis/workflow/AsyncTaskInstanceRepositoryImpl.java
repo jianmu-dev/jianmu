@@ -78,7 +78,7 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     @Override
     public void succeedById(AsyncTaskInstance asyncTaskInstance, int version) {
         var succeed = this.asyncTaskInstanceMapper.succeedById(asyncTaskInstance, version);
-        if (this.backup) {
+        if (this.backup && succeed) {
             this.asyncTaskInstanceBackupMapper.succeedById(asyncTaskInstance, version);
         }
         if (!succeed) {
@@ -90,7 +90,7 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     @Override
     public void activateById(AsyncTaskInstance asyncTaskInstance, int version) {
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
-        if (this.backup) {
+        if (this.backup && succeed) {
             this.asyncTaskInstanceBackupMapper.activateById(asyncTaskInstance, version);
         }
         if (!succeed) {
@@ -102,7 +102,7 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     @Override
     public void retryById(AsyncTaskInstance asyncTaskInstance, int version) {
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
-        if (this.backup) {
+        if (this.backup && succeed) {
             this.asyncTaskInstanceBackupMapper.activateById(asyncTaskInstance, version);
         }
         if (!succeed) {
@@ -115,7 +115,7 @@ public class AsyncTaskInstanceRepositoryImpl implements AsyncTaskInstanceReposit
     public void ignoreById(AsyncTaskInstance asyncTaskInstance) {
         int version = this.asyncTaskInstanceMapper.getVersion(asyncTaskInstance.getId());
         var succeed = this.asyncTaskInstanceMapper.activateById(asyncTaskInstance, version);
-        if (this.backup) {
+        if (this.backup && succeed) {
             this.asyncTaskInstanceBackupMapper.activateById(asyncTaskInstance, version);
         }
         if (!succeed) {
