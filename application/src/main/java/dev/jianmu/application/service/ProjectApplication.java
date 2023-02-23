@@ -471,7 +471,7 @@ public class ProjectApplication {
                         this.webRequestRepository.findByTriggerId(workflowInstance.getTriggerId()).ifPresent(webRequest -> {
                             this.storageService.deleteWebhook(webRequest.getId());
                         });
-                        this.triggerEventRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+                        this.triggerEventRepository.deleteEventAdnWebRequestByTriggerId(workflowInstance.getTriggerId());
                         this.triggerEventRepository.deleteParameterByTriggerId(workflowInstance.getTriggerId());
                         // 删除任务实例
                         this.taskInstanceRepository.findByTriggerId(workflowInstance.getTriggerId()).stream()

@@ -17,5 +17,7 @@ public interface TriggerEventRepository {
 
     void deleteByTriggerId(String triggerId);
 
+    void deleteEventAdnWebRequestByTriggerId(String triggerId);
+
     void deleteParameterByTriggerId(String triggerId);
 }
