@@ -29,4 +29,9 @@ public interface TriggerEventMapper {
 
     @Delete("DELETE FROM jm_trigger_event where trigger_id = #{triggerId}")
     void deleteByTriggerId(String triggerId);
+
+    @Delete("delete t1, t2 from jm_trigger_event t1 " +
+            "left join jm_web_request t2 on t1.web_request_id = (t2.id collate utf8mb4_0900_ai_ci) " +
+            "where t1.id = #{triggerId}")
+    void deleteEventAdnWebRequestByTriggerId(String triggerId);
 }

@@ -18,4 +18,6 @@ public interface WebRequestRepository {
     void update(WebRequest webRequest);
 
     void deleteByProjectId(String projectId);
+
+    Optional<WebRequest> findByTriggerId(String triggerId);
 }

@@ -17,6 +17,9 @@ public interface WebRequestMapper {
             "values(#{id}, #{projectId}, #{workflowRef}, #{workflowVersion}, #{triggerId}, #{userAgent}, #{statusCode}, #{errorMsg}, #{requestTime})")
     void add(WebRequest webRequest);
 
+    @Update("UPDATE jm_web_request set status_code = #{statusCode}, error_msg = #{errorMsg} where id = #{id}")
+    void update(WebRequest webRequest);
+
     @Select("SELECT * FROM jm_web_request where project_id = #{projectId} order by request_time desc")
     @Result(column = "project_id", property = "projectId")
     @Result(column = "workflow_ref", property = "workflowRef")
@@ -39,9 +42,11 @@ public interface WebRequestMapper {
     @Result(column = "request_time", property = "requestTime")
     Optional<WebRequest> findById(String id);
 
-    @Update("UPDATE jm_web_request set status_code = #{statusCode}, error_msg = #{errorMsg} where id = #{id}")
-    void update(WebRequest webRequest);
-
     @Delete("DELETE FROM jm_web_request where project_id = #{projectId}")
     void deleteByProjectId(String projectId);
+
+    @Select("select t2.* from jm_trigger_event t1 " +
+            "join jm_web_request t2 on t1.web_request_id = (t2.id collate utf8mb4_0900_ai_ci) " +
+            "where t1.id = #{triggerId}")
+    Optional<WebRequest> findByTriggerId(String triggerId);
 }
