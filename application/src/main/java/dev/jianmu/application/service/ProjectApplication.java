@@ -24,6 +24,7 @@ import dev.jianmu.project.aggregate.Project;
 import dev.jianmu.project.aggregate.ProjectGroup;
 import dev.jianmu.project.aggregate.ProjectLastExecution;
 import dev.jianmu.project.aggregate.ProjectLinkGroup;
+import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.project.event.CreatedEvent;
 import dev.jianmu.project.event.DeletedEvent;
 import dev.jianmu.project.event.MovedEvent;
@@ -32,12 +33,14 @@ import dev.jianmu.project.query.ProjectVo;
 import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
+import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
 import dev.jianmu.trigger.aggregate.Webhook;
 import dev.jianmu.trigger.repository.CustomWebhookDefinitionVersionRepository;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.trigger.service.WebhookOnlyService;
+import dev.jianmu.trigger.repository.WebRequestRepository;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import dev.jianmu.workflow.repository.AsyncTaskInstanceRepository;
@@ -89,6 +92,9 @@ public class ProjectApplication {
     private final WebhookOnlyService webhookOnlyService;
     private final AccessTokenRepository accessTokenRepository;
     private final AssociationUtil associationUtil;
+    private final InstanceParameterRepository instanceParameterRepository;
+    private final StorageService storageService;
+    private final WebRequestRepository webRequestRepository;
 
     public ProjectApplication(
             ProjectRepositoryImpl projectRepository,
@@ -109,7 +115,10 @@ public class ProjectApplication {
             CustomWebhookDefinitionVersionRepository webhookDefinitionVersionRepository,
             WebhookOnlyService webhookOnlyService,
             AccessTokenRepository accessTokenRepository,
-            AssociationUtil associationUtil
+            AssociationUtil associationUtil,
+            InstanceParameterRepository instanceParameterRepository,
+            StorageService storageService,
+            WebRequestRepository webRequestRepository
     ) {
         this.projectRepository = projectRepository;
         this.workflowRepository = workflowRepository;
@@ -130,6 +139,9 @@ public class ProjectApplication {
         this.webhookOnlyService = webhookOnlyService;
         this.accessTokenRepository = accessTokenRepository;
         this.associationUtil = associationUtil;
+        this.instanceParameterRepository = instanceParameterRepository;
+        this.storageService = storageService;
+        this.webRequestRepository = webRequestRepository;
     }
 
     public void switchEnabled(String accountId, String projectId, boolean enabled) {
@@ -452,9 +464,23 @@ public class ProjectApplication {
                     .stream()
                     .filter(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.FINISHED || workflowInstance.getStatus() == ProcessStatus.TERMINATED)
                     .forEach(workflowInstance -> {
+                        // 删除流程实例
                         this.workflowInstanceRepository.deleteById(workflowInstance.getId());
+                        this.storageService.deleteWorkflowLog(workflowInstance.getTriggerId());
+                        // 删除触发器事件和web请求
+                        this.webRequestRepository.findByTriggerId(workflowInstance.getTriggerId()).ifPresent(webRequest -> {
+                            this.storageService.deleteWebhook(webRequest.getId());
+                        });
+                        this.triggerEventRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+                        this.triggerEventRepository.deleteParameterByTriggerId(workflowInstance.getTriggerId());
+                        // 删除任务实例
+                        this.taskInstanceRepository.findByTriggerId(workflowInstance.getTriggerId()).stream()
+                                .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("start"))
+                                .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("end"))
+                                .forEach(taskInstance -> this.storageService.deleteTaskLog(taskInstance.getId()));
                         this.asyncTaskInstanceRepository.deleteByWorkflowInstanceId(workflowInstance.getId());
                         this.taskInstanceRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+                        this.instanceParameterRepository.deleteByTriggerId(workflowInstance.getTriggerId());
                     });
         });
 

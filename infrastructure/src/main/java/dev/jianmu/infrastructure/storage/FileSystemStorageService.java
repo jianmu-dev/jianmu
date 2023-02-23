@@ -204,4 +204,28 @@ public class FileSystemStorageService implements StorageService, ApplicationRunn
             throw new RuntimeException("webhook文件不存在");
         }
     }
+
+    @Override
+    public void deleteWorkflowLog(String triggerId) {
+        var file = new File(this.workflowLocation + File.separator + triggerId + LogfilePostfix);
+        if (!file.delete()) {
+            logger.warn("流程日志删除失败，triggerId：{}", triggerId);
+        }
+    }
+
+    @Override
+    public void deleteTaskLog(String taskId) {
+        var file = new File(this.rootLocation + File.separator + taskId + LogfilePostfix);
+        if (!file.delete()) {
+            logger.warn("任务日志删除失败，taskInstanceId：{}", taskId);
+        }
+    }
+
+    @Override
+    public void deleteWebhook(String webhookRequestId) {
+        var file = new File(this.webhookRootLocation + File.separator + webhookRequestId + webhookFilePostfix);
+        if (!file.delete()) {
+            logger.warn("webhook删除失败，webhookRequestId：{}", webhookRequestId);
+        }
+    }
 }

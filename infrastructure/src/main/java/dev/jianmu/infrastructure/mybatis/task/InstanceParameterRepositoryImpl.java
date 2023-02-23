@@ -43,4 +43,9 @@ public class InstanceParameterRepositoryImpl implements InstanceParameterReposit
     public List<InstanceParameter> findLastOutputParamByTriggerId(String triggerId) {
         return this.instanceParameterMapper.findLastOutputParamByTriggerId(triggerId);
     }
+
+    @Override
+    public void deleteByTriggerId(String triggerId) {
+        this.instanceParameterMapper.deleteByTriggerId(triggerId);
+    }
 }
