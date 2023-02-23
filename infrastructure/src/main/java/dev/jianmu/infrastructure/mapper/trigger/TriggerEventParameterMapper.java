@@ -20,8 +20,8 @@ public interface TriggerEventParameterMapper {
             "values(#{triggerEventId}, #{ep.ref}, #{ep.name}, #{ep.type}, #{ep.value}, #{ep.required}, #{ep.parameterId}, #{ep.hidden})")
     void save(@Param("triggerEventId") String triggerEventId, @Param("ep") TriggerEventParameter triggerEventParameter);
 
-    @Delete("delete t1, t2 from jianmu_trigger_event_parameter t1 " +
-            "left join parameter t2 on t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) " +
+    @Delete("delete t1, t2 from jm_trigger_event_parameter t1 " +
+            "left join jm_parameter t2 on t1.parameter_id = (t2.id collate utf8mb4_0900_ai_ci) " +
             "where t1.trigger_event_id = #{triggerId}")
     void deleteByTriggerId(String triggerId);
 }
