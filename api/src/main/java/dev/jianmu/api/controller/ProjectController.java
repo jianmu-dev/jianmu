@@ -117,4 +117,10 @@ public class ProjectController {
         var session = this.userSessionHolder.getSession();
         this.projectApplication.deleteById(projectId, session.getAssociationPlatformUserId(), session.getAssociationId(), session.getAssociationType(), session.getAssociationPlatform());
     }
+
+    @DeleteMapping("clean")
+    @Operation(summary = "清除执行记录旧数据")
+    public void cleanOldData() {
+        this.projectApplication.cleanOldData();
+    }
 }

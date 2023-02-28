@@ -35,4 +35,6 @@ public interface WorkflowInstanceRepository {
     void deleteByWorkflowRef(String workflowRef);
 
     void deleteById(String id);
+
+    List<WorkflowInstance> findOldDataByRefOffset(String workflowRef, Long offset);
 }
