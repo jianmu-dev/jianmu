@@ -163,6 +163,24 @@ public class WorkerInternalApplication {
                     throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
                 }
             }
+            if (taskInstance.isVolume()) {
+                var workers = this.workerRepository.findByTypeInAndCreatedTimeLessThan(
+                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                        LocalDateTime.now()
+                );
+                if (workers.isEmpty()) {
+                    throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
+                }
+                var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers);
+                taskInstance.setWorkerId(worker.getId());
+                taskInstance.waiting();
+                this.taskInstanceRepository.updateWorkerId(taskInstance);
+                // 返回DeferredResult
+                this.publisher.publish(WorkerDeferredResultClearEvent.builder()
+                        .workerId(worker.getId())
+                        .build());
+                return;
+            }
             this.workflowInstanceRepository.findByTriggerId(event.getTriggerId())
                     .ifPresent(workflowInstance -> {
                         // 分发worker
@@ -345,8 +363,8 @@ public class WorkerInternalApplication {
     private Map<String, String> getParameterMap(List<InstanceParameter> instanceParameters, List<Parameter> parameters) {
         var parameterMap = instanceParameters.stream()
                 .map(instanceParameter -> Map.entry(
-                        instanceParameter.getRef(),
-                        instanceParameter.getParameterId()
+                                instanceParameter.getRef(),
+                                instanceParameter.getParameterId()
                         )
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

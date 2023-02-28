@@ -22,6 +22,8 @@ public class Volume {
     private String name;
     // 作用域
     private Scope scope;
+    // 关联项目ID
+    private String projectId;
     // workerId
     private String workerId;
     // 是否可用
@@ -43,6 +45,13 @@ public class Volume {
         this.taint = true;
     }
 
+    public String getMountName() {
+        if (this.projectId == null) {
+            return this.name;
+        }
+        return this.projectId +"_"+ this.name;
+    }
+
     public String getId() {
         return id;
     }
@@ -53,6 +62,10 @@ public class Volume {
 
     public Scope getScope() {
         return scope;
+    }
+
+    public String getProjectId() {
+        return projectId;
     }
 
     public String getWorkerId() {
@@ -80,6 +93,7 @@ public class Volume {
         private String id = UUID.randomUUID().toString().replace("-", "");
         private String name;
         private Scope scope;
+        private String projectId;
 
         private Builder() {
         }
@@ -98,11 +112,17 @@ public class Volume {
             return this;
         }
 
+        public Builder projectId(String projectId) {
+            this.projectId = projectId;
+            return this;
+        }
+
         public Volume build() {
             Volume volume = new Volume();
             volume.name = this.name;
             volume.id = this.id;
             volume.scope = this.scope;
+            volume.projectId = this.projectId;
             return volume;
         }
     }
