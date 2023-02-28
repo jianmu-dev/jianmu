@@ -121,6 +121,11 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
+    public List<WorkflowInstance> findOldDataByRefOffset(String workflowRef, Long offset) {
+        return this.workflowInstanceBackupMapper.findByRefOffset(workflowRef, offset);
+    }
+
+    @Override
     public List<WorkflowInstance> findByRefOffset(String workflowRef, long offset) {
         return this.workflowInstanceMapper.findByRefOffset(workflowRef, offset);
     }

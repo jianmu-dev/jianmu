@@ -486,6 +486,33 @@ public class ProjectApplication {
 
     }
 
+    // 清除流程实例旧数据
+    @Transactional
+    public void cleanOldData() {
+        logger.info("开始清除执行记录旧数据");
+        this.projectRepository.findAll().forEach(project -> {
+            this.workflowInstanceRepository.findOldDataByRefOffset(project.getWorkflowRef(), this.globalProperties.getGlobal().getRecord().getMax())
+                    .stream()
+                    .filter(workflowInstance -> workflowInstance.getStatus() == ProcessStatus.FINISHED || workflowInstance.getStatus() == ProcessStatus.TERMINATED)
+                    .forEach(workflowInstance -> {
+                        this.storageService.deleteWorkflowLog(workflowInstance.getTriggerId());
+                        // 删除触发器事件和web请求
+                        this.webRequestRepository.findByTriggerId(workflowInstance.getTriggerId()).ifPresent(webRequest -> {
+                            this.storageService.deleteWebhook(webRequest.getId());
+                        });
+                        this.triggerEventRepository.deleteEventAdnWebRequestByTriggerId(workflowInstance.getTriggerId());
+                        this.triggerEventRepository.deleteParameterByTriggerId(workflowInstance.getTriggerId());
+                        // 删除任务实例
+                        this.taskInstanceRepository.findByTriggerId(workflowInstance.getTriggerId()).stream()
+                                .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("start"))
+                                .filter(taskInstance -> !taskInstance.getAsyncTaskRef().equalsIgnoreCase("end"))
+                                .forEach(taskInstance -> this.storageService.deleteTaskLog(taskInstance.getId()));
+                        this.instanceParameterRepository.deleteByTriggerId(workflowInstance.getTriggerId());
+                    });
+        });
+        logger.info("结束清除执行记录旧数据");
+    }
+
     private void pubTriggerEvent(DslParser parser, Project project, String userId) {
         // 创建Cron触发器
         if (project.getTriggerType() == Project.TriggerType.CRON) {
