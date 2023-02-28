@@ -1,12 +1,14 @@
 package dev.jianmu.application.service;
 
 import dev.jianmu.application.exception.DataNotFoundException;
+import dev.jianmu.infrastructure.storage.MonitoringFileService;
 import dev.jianmu.task.aggregate.NodeInfo;
 import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.task.repository.VolumeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class CacheApplication {
     private final VolumeRepository volumeRepository;
     private final TaskInstanceRepository taskInstanceRepository;
+    private final MonitoringFileService monitoringFileService;
 
-    public CacheApplication(VolumeRepository volumeRepository, TaskInstanceRepository taskInstanceRepository) {
+    public CacheApplication(
+            VolumeRepository volumeRepository,
+            TaskInstanceRepository taskInstanceRepository,
+            MonitoringFileService monitoringFileService
+    ) {
         this.volumeRepository = volumeRepository;
         this.taskInstanceRepository = taskInstanceRepository;
+        this.monitoringFileService = monitoringFileService;
     }
 
     @Transactional
@@ -73,5 +81,45 @@ public class CacheApplication {
                 .triggerId(volume.getMountName())
                 .build();
         this.taskInstanceRepository.add(task);
+    }
+
+    public void executeSucceeded(String taskInstanceId) {
+        TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        MDC.put("triggerId", taskInstance.getTriggerId());
+        if (taskInstance.isDeletionVolume()) {
+            // 成功删除Volume
+            this.volumeRepository.deleteByName(taskInstance.getTriggerId());
+            log.info("删除Volume: {}", taskInstance.getTriggerId());
+            this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
+        }
+        // 查找Volume并激活
+        // TODO 为兼容老数据有可能存在未存储的Volume记录
+        this.volumeRepository.findByName(taskInstance.getTriggerId())
+                .ifPresent(volume -> {
+                    volume.activate(taskInstance.getWorkerId());
+                    this.volumeRepository.activate(volume);
+                });
+    }
+
+    public void executeFailed(String taskInstanceId) {
+        TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
+                .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
+        MDC.put("triggerId", taskInstance.getTriggerId());
+        if (taskInstance.isCreationVolume()) {
+            log.error("创建Volume失败");
+            // 创建Volume失败，删除Volume记录
+            this.volumeRepository.deleteByName(taskInstance.getTriggerId());
+            log.info("删除Volume: {}", taskInstance.getTriggerId());
+        } else {
+            log.error("清除Volume失败");
+            // 清除Volume失败，标记Volume记录
+            this.volumeRepository.findByName(taskInstance.getTriggerId())
+                    .ifPresent(volume -> {
+                        volume.taint();
+                        this.volumeRepository.taint(volume);
+                    });
+            this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
+        }
     }
 }
