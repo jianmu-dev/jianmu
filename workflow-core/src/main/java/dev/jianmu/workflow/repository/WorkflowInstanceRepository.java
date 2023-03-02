@@ -37,4 +37,6 @@ public interface WorkflowInstanceRepository {
     void deleteById(String id);
 
     List<WorkflowInstance> findOldDataByRefOffset(String workflowRef, Long offset);
+
+    List<WorkflowInstance> findByWorkflowAndRunningStatusLimit(String workflowRef, Long limit);
 }

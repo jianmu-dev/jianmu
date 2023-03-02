@@ -105,7 +105,7 @@ public interface WorkflowInstanceMapper {
     @Delete("delete from jm_workflow_instance where id=#{id}")
     void deleteById(String id);
 
-    @Select("SELECT * FROM jm_workflow_instance where workflow_ref=#{workflowRef} and serial_no < ((select max(serial_no) from jm_workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
+    @Select("SELECT * FROM jm_workflow_instance where workflow_ref=#{workflowRef} and serial_no <= ((select max(serial_no) from jm_workflow_instance where workflow_ref=#{workflowRef}) - #{offset})")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -199,4 +199,17 @@ public interface WorkflowInstanceMapper {
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findPageByWorkflowRef(String workflowRef);
+
+    @Select("select * from jm_workflow_instance where workflow_ref = #{workflowRef} and status in ('RUNNING', 'SUSPENDED') order by serial_no desc limit #{limit}")
+    @Result(column = "serial_no", property = "serialNo")
+    @Result(column = "workflow_ref", property = "workflowRef")
+    @Result(column = "workflow_version", property = "workflowVersion")
+    @Result(column = "trigger_id", property = "triggerId")
+    @Result(column = "trigger_type", property = "triggerType")
+    @Result(column = "run_mode", property = "runMode")
+    @Result(column = "occurred_time", property = "occurredTime")
+    @Result(column = "start_time", property = "startTime")
+    @Result(column = "suspended_time", property = "suspendedTime")
+    @Result(column = "end_time", property = "endTime")
+    List<WorkflowInstance> findByWorkflowAndRunningStatusLimit(@Param("workflowRef") String workflowRef, @Param("limit") Long limit);
 }
