@@ -169,7 +169,7 @@ export default defineComponent({
 
 <style lang="less">
 .jm-workflow-detail-record-list {
-  display: flex;
+  display: inline-flex;
   padding: 18px 30px 0;
   background-color: #ffffff;
   .tab {
