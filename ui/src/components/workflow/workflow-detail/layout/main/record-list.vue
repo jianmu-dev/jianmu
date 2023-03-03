@@ -270,7 +270,7 @@ export default defineComponent({
     &.selected {
       cursor: default;
       height: 52px;
-      // min-width: auto;
+
       .label {
         padding-left: 4px;
         line-height: 52px;
