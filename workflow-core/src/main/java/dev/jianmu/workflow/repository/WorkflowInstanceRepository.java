@@ -38,5 +38,5 @@ public interface WorkflowInstanceRepository {
 
     List<WorkflowInstance> findOldDataByRefOffset(String workflowRef, Long offset);
 
-    List<WorkflowInstance> findByWorkflowAndRunningStatusLimit(String workflowRef, Long limit);
+    List<WorkflowInstance> findByWorkflowAndRunningStatusOffset(String workflowRef, Long offset);
 }
