@@ -103,6 +103,11 @@ public class WorkflowInstanceRepositoryImpl implements WorkflowInstanceRepositor
     }
 
     @Override
+    public List<WorkflowInstance> findByWorkflowAndRunningStatusOffset(String workflowRef, Long offset) {
+        return this.workflowInstanceMapper.findByWorkflowAndRunningStatusOffset(workflowRef, offset);
+    }
+
+    @Override
     public List<WorkflowInstance> findByRefOffset(String workflowRef, long offset) {
         return this.workflowInstanceMapper.findByRefOffset(workflowRef, offset);
     }

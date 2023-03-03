@@ -33,7 +33,10 @@ public class WorkflowInstanceApplication {
     }
 
     public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
-        return this.workflowInstanceRepository.findByWorkflowRefLimit(workflowRef, globalProperties.getGlobal().getRecord().getMax());
+        var list = this.workflowInstanceRepository.findByWorkflowRefLimit(workflowRef, globalProperties.getGlobal().getRecord().getMax());
+        var runnings = this.workflowInstanceRepository.findByWorkflowAndRunningStatusOffset(workflowRef, this.globalProperties.getGlobal().getRecord().getMax());
+        list.addAll(runnings);
+        return list;
     }
 
     public PageInfo<WorkflowInstance> findPageByWorkflowRef(Integer pageNum, Integer pageSize, String workflowRef) {
