@@ -33,8 +33,8 @@ public class WorkflowInstanceApplication {
     }
 
     public List<WorkflowInstance> findByWorkflowRef(String workflowRef) {
+        var list = this.workflowInstanceRepository.findByWorkflowRefLimit(workflowRef, globalProperties.getGlobal().getRecord().getMax());
         var runnings = this.workflowInstanceRepository.findByWorkflowAndRunningStatusOffset(workflowRef, this.globalProperties.getGlobal().getRecord().getMax());
-        var runnings = this.workflowInstanceRepository.findByWorkflowAndRunningStatusLimit(workflowRef, this.globalProperties.getGlobal().getRecord().getMax());
         list.addAll(runnings);
         return list;
     }
