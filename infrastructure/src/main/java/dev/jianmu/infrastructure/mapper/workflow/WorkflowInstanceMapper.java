@@ -200,7 +200,8 @@ public interface WorkflowInstanceMapper {
     @Result(column = "end_time", property = "endTime")
     List<WorkflowInstance> findPageByWorkflowRef(String workflowRef);
 
-    @Select("select * from jm_workflow_instance where workflow_ref = #{workflowRef} and status in ('RUNNING', 'SUSPENDED') order by serial_no desc limit #{limit}")
+    @Select("select * from jm_workflow_instance where workflow_ref = #{workflowRef} and status in ('RUNNING', 'SUSPENDED') " +
+            "and serial_no <= ((select max(serial_no) from jm_workflow_instance where workflow_ref=#{workflowRef}) - #{offset}) order by serial_no desc")
     @Result(column = "serial_no", property = "serialNo")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "workflow_version", property = "workflowVersion")
@@ -211,5 +212,5 @@ public interface WorkflowInstanceMapper {
     @Result(column = "start_time", property = "startTime")
     @Result(column = "suspended_time", property = "suspendedTime")
     @Result(column = "end_time", property = "endTime")
-    List<WorkflowInstance> findByWorkflowAndRunningStatusLimit(@Param("workflowRef") String workflowRef, @Param("limit") Long limit);
+    List<WorkflowInstance> findByWorkflowAndRunningStatusOffset(@Param("workflowRef") String workflowRef, @Param("offset") Long offset);
 }
