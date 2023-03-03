@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg">
-<metadata>Copyright (C) 2022 by original authors @ fontello.com</metadata>
+<metadata>Copyright (C) 2023 by original authors @ fontello.com</metadata>
 <defs>
 <font id="jm-icon-button" horiz-adv-x="1000" >
 <font-face font-family="jm-icon-button" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
@@ -53,6 +53,12 @@
 <glyph glyph-name="disable" unicode="&#xe816;" d="M94 350c5 220 186 394 406 390 220 4 401-170 406-390-5-220-186-394-406-390-220-4-401 170-406 390z m62 0c4-186 158-333 344-330 61 0 121 16 174 45-175 228-310 404-406 528-71-61-111-150-112-243z m569-249c75 61 118 153 119 249-4 186-158 334-344 330-64 0-127-17-181-50l406-529z" horiz-adv-x="1000" />
 
 <glyph glyph-name="copy" unicode="&#xe817;" d="M145-48l644 0 0-59-644 0 0 59z m-65 658l65 0 0-717-65 0 0 717z m645 120l-451 0c-65 0-65-61-65-61l0-597c0-60 65-60 65-60l580 0c64 0 64 60 64 60l0 479-193 179 0 0z m-387-419l451 0 0-59-451 0 0 59 0 0z m0 120l451 0 0-60-451 0 0 60z m0-239l451 0 0-60-451 0 0 60z m387 359l0 119 129-119-129 0 0 0 0 0z" horiz-adv-x="960" />
+
+<glyph glyph-name="clear" unicode="&#xe818;" d="M225 325v-312h550v312h75v-350c0-21-17-38-37-38h-625c-21 0-38 17-38 38v350h75z m113 400c0 21 16 38 37 38h250c21 0 38-17 38-38v-87h212c21 0 38-17 38-38v-250c0-21-17-37-38-37h-750c-21 0-37 16-37 37v250c0 21 16 38 37 38h213v87z m75-37v-88c0-21-17-37-38-37h-212v-175h675v175h-213c-21 0-37 16-37 37v88h-175z m-80-467c21 0 38-17 38-38v-208c0-21-17-38-38-38-20 0-37 17-37 38v208c0 21 17 38 37 38z" horiz-adv-x="1000" />
+
+<glyph glyph-name="collapse" unicode="&#xe819;" d="M224 377c14 14 38 14 53 0l223-224 224 224c14 14 38 14 53 0 14-15 14-39 0-53l-250-250c-15-15-39-15-53 0l-250 250c-15 14-15 38 0 53z m0 250c14 14 38 14 53 0l223-224 224 224c14 14 38 14 53 0 14-15 14-39 0-53l-250-250c-15-15-39-15-53 0l-250 250c-15 14-15 38 0 53z" horiz-adv-x="1000" />
+
+<glyph glyph-name="warning" unicode="&#xe81a;" d="M554 652c-24 42-84 42-108 0l-350-604c-24-42 6-94 54-94h700c48 0 78 52 54 94l-350 604z m-54-489c23 0 42-19 42-42v-21c0-23-19-42-42-42-23 0-42 19-42 42v21c0 23 19 42 42 42z m0 333c23 0 42-19 42-42l0-208c0-23-19-42-42-42-23 0-41 19-41 42l-1 208c0 23 19 42 42 42z" horiz-adv-x="1000" />
 </font>
 </defs>
 </svg>
