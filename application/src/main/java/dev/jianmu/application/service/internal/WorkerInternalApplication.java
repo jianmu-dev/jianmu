@@ -293,7 +293,8 @@ public class WorkerInternalApplication {
         // 查询node
         var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
                 .orElseThrow(() -> new DataNotFoundException("未找到流程"));
-        var volumeMounts = workflow.findNode(taskInstance.getAsyncTaskRef()).getTaskCaches().stream()
+        var node = workflow.findNode(taskInstance.getAsyncTaskRef());
+        var volumeMounts = node.getTaskCaches() == null ? new ArrayList<VolumeMount>() : node.getTaskCaches().stream()
                 .map(taskCache -> VolumeMount.builder()
                         .source(taskCache.getSource())
                         .target(taskCache.getTarget())
