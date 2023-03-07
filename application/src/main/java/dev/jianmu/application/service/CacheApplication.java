@@ -12,6 +12,8 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @author <a href="https://gitee.com/ethan-liu">Ethan Liu</a>
  * @date 2023-02-24 08:08
@@ -34,19 +36,20 @@ public class CacheApplication {
     }
 
     @Transactional
-    public void create(String projectId, String name) {
+    public void create(String workflowRef, String name) {
         var volume = Volume.Builder.aVolume()
-                .name(name)
+                .name(String.join("_", workflowRef, name))
                 .scope(Volume.Scope.PROJECT)
-                .projectId(projectId)
+                .workflowRef(workflowRef)
                 .build();
+        var taskInstances = this.taskInstanceRepository.findByBusinessId(volume.getId());
         var task = TaskInstance.Builder.anInstance()
-                .serialNo(1)
+                .serialNo(taskInstances.size() + 1)
                 .defKey("start")
                 .nodeInfo(NodeInfo.Builder.aNodeDef().name("start").build())
                 .asyncTaskRef("cache")
                 .businessId(volume.getId())
-                .triggerId(volume.getMountName())
+                .triggerId(volume.getName())
                 .build();
         this.volumeRepository.create(volume);
         this.taskInstanceRepository.add(task);
@@ -69,39 +72,115 @@ public class CacheApplication {
     }
 
     @Transactional
-    public void deleteById(String id) {
+    public void clean(String id) {
         var volume = this.volumeRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("未找到要删除的Cache"));
+                .orElseThrow(() -> new DataNotFoundException("未找到要清理的Cache"));
+        if (volume.isCleaning()) {
+            throw new RuntimeException("缓存正在清理……");
+        }
+        var taskInstances = this.taskInstanceRepository.findByBusinessId(volume.getId());
+        volume.clean();
         var task = TaskInstance.Builder.anInstance()
-                .serialNo(1)
+                .serialNo(taskInstances.size() + 1)
                 .defKey("end")
                 .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
                 .asyncTaskRef("cache")
                 .businessId(volume.getId())
-                .triggerId(volume.getMountName())
+                .triggerId(volume.getName())
+                .build();
+        this.volumeRepository.clean(volume);
+        this.taskInstanceRepository.add(task);
+    }
+
+    @Transactional
+    public void deleteById(String id) {
+        var volume = this.volumeRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("未找到要删除的Cache"));
+        var taskInstances = this.taskInstanceRepository.findByBusinessId(volume.getId());
+        var task = TaskInstance.Builder.anInstance()
+                .serialNo(taskInstances.size() + 1)
+                .defKey("end")
+                .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
+                .asyncTaskRef("cache")
+                .businessId(volume.getId())
+                .triggerId(volume.getName())
                 .build();
         this.taskInstanceRepository.add(task);
     }
 
+    @Transactional
+    public void deleteByNameAndWorkflowRef(String name, String workflowRef) {
+        var volume = this.volumeRepository.findByName(String.join("_", workflowRef, name))
+                .orElseThrow(() -> new DataNotFoundException("未找到要删除的Cache"));
+        var taskInstances = this.taskInstanceRepository.findByBusinessId(volume.getId());
+        var task = TaskInstance.Builder.anInstance()
+                .serialNo(taskInstances.size() + 1)
+                .defKey("end")
+                .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
+                .asyncTaskRef("cache")
+                .businessId(volume.getId())
+                .triggerId(volume.getName())
+                .build();
+        this.taskInstanceRepository.add(task);
+    }
+
+    @Transactional
+    public void deleteByWorkflowRef(String workflowRef) {
+        this.volumeRepository.findByWorkflowRef(workflowRef).forEach(volume -> {
+            var taskInstances = this.taskInstanceRepository.findByBusinessId(volume.getId());
+            var task = TaskInstance.Builder.anInstance()
+                    .serialNo(taskInstances.size() + 1)
+                    .defKey("end")
+                    .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
+                    .asyncTaskRef("cache")
+                    .businessId(volume.getId())
+                    .triggerId(volume.getName())
+                    .build();
+            this.taskInstanceRepository.add(task);
+        });
+    }
+
+    @Transactional
     public void executeSucceeded(String taskInstanceId) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         MDC.put("triggerId", taskInstance.getTriggerId());
-        if (taskInstance.isDeletionVolume()) {
-            // 成功删除Volume
-            this.volumeRepository.deleteByName(taskInstance.getTriggerId());
-            log.info("删除Volume: {}", taskInstance.getTriggerId());
-            this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
+        var volume = this.volumeRepository.findByName(taskInstance.getTriggerId())
+                .orElseThrow(() -> new DataNotFoundException("未找到volume，name: " + taskInstance.getTriggerId()));
+        if (taskInstance.isCreationVolume()) {
+            // 查找Volume并激活
+            // TODO 为兼容老数据有可能存在未存储的Volume记录
+            volume.activate(taskInstance.getWorkerId());
+            this.volumeRepository.activate(volume);
+            return;
         }
-        // 查找Volume并激活
-        // TODO 为兼容老数据有可能存在未存储的Volume记录
-        this.volumeRepository.findByName(taskInstance.getTriggerId())
-                .ifPresent(volume -> {
-                    volume.activate(taskInstance.getWorkerId());
-                    this.volumeRepository.activate(volume);
-                });
+
+        // 重建Volume
+        if (volume.isCleaning()) {
+            this.reBuild(volume);
+            return;
+        }
+        // 成功删除Volume
+        this.volumeRepository.deleteByName(taskInstance.getTriggerId());
+        log.info("删除Volume: {}", taskInstance.getTriggerId());
+        this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
+
     }
 
+    private void reBuild(Volume volume) {
+        var taskInstances = this.taskInstanceRepository.findByBusinessId(volume.getId());
+        var task = TaskInstance.Builder.anInstance()
+                .serialNo(taskInstances.size() + 1)
+                .defKey("start")
+                .nodeInfo(NodeInfo.Builder.aNodeDef().name("start").build())
+                .asyncTaskRef("cache")
+                .businessId(volume.getId())
+                .triggerId(volume.getName())
+                .build();
+        this.taskInstanceRepository.add(task);
+    }
+
+    @Transactional
     public void executeFailed(String taskInstanceId) {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
@@ -121,5 +200,9 @@ public class CacheApplication {
                     });
             this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
         }
+    }
+
+    public List<Volume> findByWorkflowRefAndScope(String workflowRef, Volume.Scope scope) {
+        return this.volumeRepository.findByWorkflowRefAndScope(workflowRef, scope);
     }
 }

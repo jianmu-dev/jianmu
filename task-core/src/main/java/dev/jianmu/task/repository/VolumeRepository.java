@@ -2,6 +2,7 @@ package dev.jianmu.task.repository;
 
 import dev.jianmu.task.aggregate.Volume;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,11 +19,21 @@ public interface VolumeRepository {
     // 根据Name查找
     Optional<Volume> findByName(String name);
 
+    // 根据WorkflowRef查找
+    List<Volume> findByWorkflowRef(String workflowRef);
+
+    // 根据WorkflowRef、scope查找
+    List<Volume> findByWorkflowRefAndScope(String workflowRef, Volume.Scope scope);
+
     // 激活Volume
     void activate(Volume volume);
 
     // 标记Volume
     void taint(Volume volume);
+
+    // 清理Volume
+    void clean(Volume volume);
+
 
     // 根据ID删除Volume
     void deleteById(String id);

@@ -53,6 +53,18 @@ public class AsyncTask extends BaseNode {
         return Parameter.Type.STRING;
     }
 
+    public static Set<TaskCache> createCaches(Map<String, String> cache) {
+        if (cache == null) {
+            return Set.of();
+        }
+        return cache.entrySet().stream().map(entry ->
+                TaskCache.Builder.aTaskCache()
+                        .source(entry.getKey())
+                        .target(entry.getValue())
+                        .build()
+        ).collect(Collectors.toSet());
+    }
+
     public static final class Builder {
         // 显示名称
         protected String name;
@@ -65,6 +77,7 @@ public class AsyncTask extends BaseNode {
         // 节点元数据快照
         protected String metadata;
         private Set<TaskParameter> taskParameters;
+        private Set<TaskCache> taskCaches;
 
         private Builder() {
         }
@@ -103,6 +116,11 @@ public class AsyncTask extends BaseNode {
             return this;
         }
 
+        public Builder taskCaches(Set<TaskCache> taskCaches) {
+            this.taskCaches = taskCaches;
+            return this;
+        }
+
         public AsyncTask build() {
             AsyncTask asyncTask = new AsyncTask();
             asyncTask.name = this.name;
@@ -111,6 +129,7 @@ public class AsyncTask extends BaseNode {
             asyncTask.taskParameters = this.taskParameters;
             asyncTask.type = this.type;
             asyncTask.metadata = this.metadata;
+            asyncTask.taskCaches = this.taskCaches;
             return asyncTask;
         }
     }

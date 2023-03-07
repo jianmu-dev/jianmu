@@ -57,6 +57,7 @@ public class DslParser {
     private final List<DslNode> dslNodes = new ArrayList<>();
     private final List<ShellNode> shellNodes = new ArrayList<>();
     private Set<GlobalParameter> globalParameters = new HashSet<>();
+    private final List<String> caches = new ArrayList<>();
 
     private Map<String, Node> symbolTable = new HashMap<>();
 
@@ -76,7 +77,6 @@ public class DslParser {
             String yamlJson = parser.mapper.writeValueAsString(yamlMap);
             parser = parser.mapper.readValue(yamlJson, DslParser.class);
             parser.syntaxCheck();
-            parser.createGlobal();
         } catch (IOException | DuplicateKeyException e) {
             throw new DslException("DSL解析异常: " + e.getMessage());
         }
@@ -297,6 +297,14 @@ public class DslParser {
             List<Object> tags = (List<Object>) tag;
             this.tag = tags.stream().map(Object::toString).collect(Collectors.joining(","));
         }
+
+        var cache = this.global.get("cache");
+        if (cache instanceof String) {
+            this.caches.add((String) cache);
+        }
+        if (cache instanceof List) {
+            this.caches.addAll(((List<?>) cache).stream().map(t -> (String) t).collect(Collectors.toList()));
+        }
     }
 
     private Set<Node> calculatePipelineNodes(List<NodeDef> nodeDefs) {
@@ -355,6 +363,7 @@ public class DslParser {
         if (dslNode.getEnvironment() != null) {
             taskParameters = AsyncTask.createTaskParameters(dslNode.getEnvironment());
         }
+        var taskCaches = AsyncTask.createCaches(dslNode.getCache());
         var asyncTask = AsyncTask.Builder.anAsyncTask()
                 .name("Shell Node")
                 .ref(dslNode.getName())
@@ -362,6 +371,7 @@ public class DslParser {
                 .taskParameters(taskParameters)
                 .description("Shell Node")
                 .metadata("{}")
+                .taskCaches(taskCaches)
                 .build();
         if (dslNode.getOnFailure() != null) {
             if (dslNode.getOnFailure().equals("suspend")) {
@@ -383,6 +393,7 @@ public class DslParser {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             taskParameters = AsyncTask.createTaskParameters(dslNode.getParam(), inputParameters);
         }
+        var taskCaches = AsyncTask.createCaches(dslNode.getCache());
         var asyncTask = AsyncTask.Builder.anAsyncTask()
                 .name(nodeDef.getName())
                 .ref(dslNode.getName())
@@ -390,6 +401,7 @@ public class DslParser {
                 .taskParameters(taskParameters)
                 .description(nodeDef.getDescription())
                 .metadata(nodeDef.toJsonString())
+                .taskCaches(taskCaches)
                 .build();
         if (dslNode.getOnFailure() != null) {
             if (dslNode.getOnFailure().equals("suspend")) {
@@ -431,6 +443,7 @@ public class DslParser {
         }
         this.triggerSyntaxCheck();
         this.globalParamSyntaxCheck();
+        this.createGlobal();
         if (null != this.workflow) {
             this.workflowSyntaxCheck();
             this.type = Workflow.Type.WORKFLOW;
@@ -582,6 +595,15 @@ public class DslParser {
                 throw new DslException("concurrent必须为大于0、小于10000的正整数");
             }
         }
+
+        var cache = this.global.get("cache");
+        if (cache instanceof List) {
+            ((List<?>) cache).forEach(v -> {
+                if (!(v instanceof String)) {
+                    throw new DslException("cache配置错误");
+                }
+            });
+        }
     }
 
     private void pipelineSyntaxCheck() {
@@ -616,6 +638,16 @@ public class DslParser {
         if (nodeName.equalsIgnoreCase("end")) {
             throw new DslException("节点名称不能使用" + nodeName);
         }
+        // 校验节点cache
+        var cache = node.get("cache");
+        if (cache instanceof Map) {
+            ((Map<?, ?>) cache).forEach((k, v) -> {
+                if (!this.caches.contains((String) k)) {
+                    throw new DslException("global段未声明缓存：" + k);
+                }
+            });
+        }
+
         // 如果为Shell Node，不校验type
         var image = node.get("image");
         if (image != null) {
@@ -831,5 +863,9 @@ public class DslParser {
 
     public String getTag() {
         return tag;
+    }
+
+    public List<String> getCaches() {
+        return caches;
     }
 }

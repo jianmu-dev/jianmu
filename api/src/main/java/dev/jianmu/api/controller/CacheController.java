@@ -4,7 +4,10 @@ import dev.jianmu.application.service.CacheApplication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author <a href="https://gitee.com/ethan-liu">Ethan Liu</a>
@@ -21,15 +24,9 @@ public class CacheController {
         this.cacheApplication = cacheApplication;
     }
 
-    @PostMapping("/{projectId}/{cacheName}")
-    @Operation(summary = "创建缓存", description = "创建缓存")
-    public void create(@PathVariable String projectId, @PathVariable String cacheName) {
-        this.cacheApplication.create(projectId, cacheName);
-    }
-
-    @DeleteMapping("/{cacheId}")
-    @Operation(summary = "删除缓存", description = "删除缓存")
-    public void delete(@PathVariable String cacheId) {
-        this.cacheApplication.deleteById(cacheId);
+    @PutMapping("/{cacheId}")
+    @Operation(summary = "清理缓存", description = "清理缓存")
+    public void clean(@PathVariable String cacheId) {
+        this.cacheApplication.clean(cacheId);
     }
 }

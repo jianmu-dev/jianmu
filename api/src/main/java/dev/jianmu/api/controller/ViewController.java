@@ -6,13 +6,17 @@ import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
+import dev.jianmu.application.service.internal.WorkflowInternalApplication;
 import dev.jianmu.infrastructure.storage.StorageService;
 import dev.jianmu.infrastructure.storage.vo.LogVo;
 import dev.jianmu.node.definition.aggregate.NodeDefinitionVersion;
 import dev.jianmu.secret.aggregate.KVPair;
 import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
+import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.trigger.event.TriggerEvent;
+import dev.jianmu.workflow.aggregate.definition.TaskCache;
+import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,7 +49,6 @@ import static dev.jianmu.application.service.ProjectGroupApplication.DEFAULT_PRO
 public class ViewController {
     private final ProjectApplication projectApplication;
     private final TriggerApplication triggerApplication;
-    private final WorkflowInstanceApplication workflowInstanceApplication;
     private final AsyncTaskInstanceApplication asyncTaskInstanceApplication;
     private final HubApplication hubApplication;
     private final SecretApplication secretApplication;
@@ -54,11 +57,12 @@ public class ViewController {
     private final ParameterApplication parameterApplication;
     private final StorageService storageService;
     private final ProjectGroupApplication projectGroupApplication;
+    private final CacheApplication cacheApplication;
+    private final WorkflowInternalApplication workflowInternalApplication;
 
     public ViewController(
             ProjectApplication projectApplication,
             TriggerApplication triggerApplication,
-            WorkflowInstanceApplication workflowInstanceApplication,
             AsyncTaskInstanceApplication asyncTaskInstanceApplication,
             HubApplication hubApplication,
             SecretApplication secretApplication,
@@ -66,10 +70,12 @@ public class ViewController {
             TaskInstanceApplication taskInstanceApplication,
             ParameterApplication parameterApplication,
             StorageService storageService,
-            ProjectGroupApplication projectGroupApplication) {
+            ProjectGroupApplication projectGroupApplication,
+            CacheApplication cacheApplication,
+            WorkflowInternalApplication workflowInternalApplication
+    ) {
         this.projectApplication = projectApplication;
         this.triggerApplication = triggerApplication;
-        this.workflowInstanceApplication = workflowInstanceApplication;
         this.asyncTaskInstanceApplication = asyncTaskInstanceApplication;
         this.hubApplication = hubApplication;
         this.secretApplication = secretApplication;
@@ -78,6 +84,8 @@ public class ViewController {
         this.parameterApplication = parameterApplication;
         this.storageService = storageService;
         this.projectGroupApplication = projectGroupApplication;
+        this.cacheApplication = cacheApplication;
+        this.workflowInternalApplication = workflowInternalApplication;
     }
 
     @GetMapping("/parameters/types")
@@ -443,9 +451,19 @@ public class ViewController {
     @Operation(summary = "查询项目列表", description = "查询项目列表")
     public PageInfo<ProjectVo> findProjectPage(@Valid ProjectViewingDto dto) {
         var projects = this.projectApplication.findPageByGroupId(dto.getPageNum(), dto.getPageSize(), dto.getProjectGroupId(), dto.getName(), dto.getSortTypeName());
+        var refVersions = projects.getList().stream()
+                .map(t -> t.getWorkflowRef() + t.getWorkflowVersion())
+                .collect(Collectors.toList());
+        var workflows = this.workflowInternalApplication.findByRefVersions(refVersions);
         var projectVos = projects.getList().stream().map(project -> {
             var projectVo = ProjectVoMapper.INSTANCE.toProjectVo(project);
             projectVo.setNextTime(this.triggerApplication.getNextFireTime(project.getId()));
+            projectVo.setCaches(workflows.stream()
+                    .filter(workflow -> workflow.getRef().equals(projectVo.getWorkflowRef()))
+                    .findFirst()
+                    .map(Workflow::getCaches)
+                    .orElse(null)
+            );
             if (project.getStatus() == null) {
                 return projectVo;
             }
@@ -468,6 +486,40 @@ public class ViewController {
         PageInfo<ProjectVo> pageInfo = PageUtils.pageInfo2PageInfoVo(projects);
         pageInfo.setList(projectVos);
         return pageInfo;
+    }
+
+    @PostMapping("/caches/{workflowRef}")
+    @Operation(summary = "获取项目缓存", description = "获取项目缓存")
+    public List<ProjectCacheVo> getProjectCache(@PathVariable String workflowRef) {
+        var volumes = this.cacheApplication.findByWorkflowRefAndScope(workflowRef, Volume.Scope.PROJECT);
+        var workflow = this.projectApplication.findLastWorkflowByRef(workflowRef);
+        return volumes.stream()
+                .map(volume -> {
+                    var name = volume.getName().split("_")[1];
+                    return ProjectCacheVo.builder()
+                            .id(volume.getId())
+                            .name(name)
+                            .available(volume.isAvailable())
+                            .workerId(volume.getWorkerId())
+                            .nodeCaches(workflow.getNodes().stream()
+                                    .filter(node -> node.getTaskCaches() != null && node.getTaskCaches().stream()
+                                            .anyMatch(taskCache -> taskCache.getSource().equals(name))
+                                    )
+                                    .map(node -> ProjectCacheVo.ProjectNodeCacheVo.builder()
+                                            .name(node.getName())
+                                            .metadata(node.getMetadata())
+                                            .path(node.getTaskCaches().stream()
+                                                    .filter(taskCache -> taskCache.getSource().equals(name))
+                                                    .findFirst()
+                                                    .map(TaskCache::getTarget)
+                                                    .orElseThrow()
+                                            )
+                                            .build()
+                                    ).collect(Collectors.toList())
+                            )
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/v2/projects/ids")
