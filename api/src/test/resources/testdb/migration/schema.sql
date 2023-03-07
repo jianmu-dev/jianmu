@@ -264,3 +264,6 @@ CREATE TABLE `shell_node_def`
     `shell_node` text         NOT NULL COMMENT '序列化对象',
     PRIMARY KEY (`id`)
 );
+
+ALTER TABLE `workflow`
+    ADD COLUMN `caches` blob COMMENT '缓存' AFTER `tag`;

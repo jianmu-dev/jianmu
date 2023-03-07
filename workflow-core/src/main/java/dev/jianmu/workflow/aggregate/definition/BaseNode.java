@@ -2,10 +2,7 @@ package dev.jianmu.workflow.aggregate.definition;
 
 import dev.jianmu.workflow.aggregate.process.FailureMode;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ethan Liu
@@ -34,6 +31,8 @@ public abstract class BaseNode implements Node {
     protected String metadata;
     // 参数列表
     protected Set<TaskParameter> taskParameters;
+    // 缓存
+    protected Set<TaskCache> taskCaches;
 
     protected BaseNode() {
     }
@@ -138,5 +137,15 @@ public abstract class BaseNode implements Node {
     @Override
     public void setTaskParameters(Set<TaskParameter> taskParameters) {
         this.taskParameters = taskParameters;
+    }
+
+    @Override
+    public Set<TaskCache> getTaskCaches() {
+        return this.taskCaches;
+    }
+
+    @Override
+    public void setTaskCaches(Set<TaskCache> taskCaches) {
+        this.taskCaches = taskCaches;
     }
 }

@@ -27,6 +27,7 @@ public class DslNode {
     private String image;
     private Map<String, String> environment;
     private List<String> script;
+    private Map<String, String> cache;
 
     public void setType(String type) {
         this.type = type;
@@ -56,6 +57,14 @@ public class DslNode {
             node.script = List.of((String) script);
         } else {
             node.script = List.of();
+        }
+
+        var cache = nodeMap.get("cache");
+        if (cache instanceof Map) {
+            node.cache = ((Map<?, ?>) cache).entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .map(entry -> Map.entry((String) entry.getKey(), (String) entry.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
         return node;
     }
@@ -103,6 +112,14 @@ public class DslNode {
             dslNode.expression = (String) e;
         } else {
             dslNode.expression = "";
+        }
+
+        var cache = node.get("cache");
+        if (cache instanceof Map) {
+            dslNode.cache = ((Map<?, ?>) cache).entrySet().stream()
+                    .filter(entry -> entry.getValue() != null)
+                    .map(entry -> Map.entry((String) entry.getKey(), (String) entry.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
         return dslNode;
     }

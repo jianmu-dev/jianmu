@@ -51,7 +51,13 @@ public class DispatchWorker {
         return crc & slot_size;
     }
 
-    public static Worker getWorker(String triggerId, List<Worker> workers) {
+    public static Worker getWorker(String triggerId, List<Worker> workers, String workerId) {
+        if (workerId != null) {
+            return workers.stream()
+                    .filter(worker -> worker.getId().equals(workerId))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("未找到Worker: " + workerId));
+        }
         var num = crc16(triggerId);
         var size = slot_size / workers.size();
         var i = num % size == 0 ? num / size - 1 : num / size;

@@ -256,4 +256,8 @@ public class WorkflowInternalApplication {
                     .forEach(t -> this.doActivate(workflow, cmd.getNodeRef(), cmd.getTriggerId(), t.getVersion()));
         }
     }
+
+    public List<Workflow> findByRefVersions(List<String> refVersions) {
+        return this.workflowRepository.findByRefVersions(refVersions);
+    }
 }
