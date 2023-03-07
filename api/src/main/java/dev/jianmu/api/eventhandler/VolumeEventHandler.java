@@ -30,9 +30,15 @@ public class VolumeEventHandler {
     @EventListener
     public void handlerVolumeDeletedEvent(VolumeDeletedEvent event) {
         switch (event.deletedType) {
-            case ID -> this.cacheApplication.deleteById(event.getId());
-            case NAME -> this.cacheApplication.deleteByNameAndWorkflowRef(event.getName(), event.getWorkflowRef());
-            case REF -> this.cacheApplication.deleteByWorkflowRef(event.getWorkflowRef());
+            case ID:
+                this.cacheApplication.deleteById(event.getId());
+                break;
+            case NAME:
+                this.cacheApplication.deleteByNameAndWorkflowRef(event.getName(), event.getWorkflowRef());
+                break;
+            case REF:
+                this.cacheApplication.deleteByWorkflowRef(event.getWorkflowRef());
+                break;
         }
     }
 }
