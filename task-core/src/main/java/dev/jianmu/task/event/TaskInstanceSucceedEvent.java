@@ -7,6 +7,10 @@ package dev.jianmu.task.event;
  * @create 2021-04-06 16:09
  */
 public class TaskInstanceSucceedEvent extends BaseEvent {
+    public boolean isCache() {
+        return this.asyncTaskRef.equals("cache");
+    }
+
     private TaskInstanceSucceedEvent() {
     }
 
