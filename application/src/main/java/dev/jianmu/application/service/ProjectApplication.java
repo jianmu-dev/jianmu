@@ -398,16 +398,18 @@ public class ProjectApplication {
         var lastWorkflow = this.workflowRepository.findByRefAndVersion(workflow.getRef(), lastWorkflowVersion)
                 .orElseThrow(() -> new DataNotFoundException(String.format("未找到workflow：%s-%s", workflow.getRef(), lastWorkflowVersion)));
         // 删除cache
-        lastWorkflow.getCaches().stream()
-                .filter(cache -> !workflow.getCaches().contains(cache))
-                .forEach(cache -> {
-                    this.publisher.publishEvent(VolumeDeletedEvent.aVolumeDeletedEvent()
-                            .name(cache)
-                            .workflowRef(workflow.getRef())
-                            .deletedType(VolumeDeletedEvent.VolumeDeletedType.NAME)
-                            .build()
-                    );
-                });
+        if (lastWorkflow.getCaches() != null) {
+            lastWorkflow.getCaches().stream()
+                    .filter(cache -> !workflow.getCaches().contains(cache))
+                    .forEach(cache -> {
+                        this.publisher.publishEvent(VolumeDeletedEvent.aVolumeDeletedEvent()
+                                .name(cache)
+                                .workflowRef(workflow.getRef())
+                                .deletedType(VolumeDeletedEvent.VolumeDeletedType.NAME)
+                                .build()
+                        );
+                    });
+        }
         // 创建cache
         workflow.getCaches().stream()
                 .filter(cache -> !lastWorkflow.getCaches().contains(cache))
