@@ -191,7 +191,7 @@ public class WorkerInternalApplication {
             if (workers.isEmpty()) {
                 throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
             }
-            var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers, volumeWorkerId);
+            var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers, volumeWorkerId, taskInstance.getAsyncTaskRef());
             taskInstance.setWorkerId(worker.getId());
             taskInstance.waiting();
             this.taskInstanceRepository.updateWorkerId(taskInstance);

@@ -51,12 +51,16 @@ public class DispatchWorker {
         return crc & slot_size;
     }
 
-    public static Worker getWorker(String triggerId, List<Worker> workers, String workerId) {
+    public static Worker getWorker(String triggerId, List<Worker> workers, String workerId, String asyncTaskRef) {
         if (workerId != null) {
             return workers.stream()
                     .filter(worker -> worker.getId().equals(workerId))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("未找到Worker: " + workerId));
+        }
+        // 获取cacheId
+        if (asyncTaskRef.equals("cache")) {
+            triggerId = triggerId.split("_")[0];
         }
         var num = crc16(triggerId);
         var size = slot_size / workers.size();
