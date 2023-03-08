@@ -495,7 +495,7 @@ public class ViewController {
         var workflow = this.projectApplication.findLastWorkflowByRef(workflowRef);
         return volumes.stream()
                 .map(volume -> {
-                    var name = volume.getName().split("_")[1];
+                    var name = volume.getSimpleName();
                     return ProjectCacheVo.builder()
                             .id(volume.getId())
                             .name(name)
@@ -519,6 +519,29 @@ public class ViewController {
                             )
                             .build();
                 })
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/caches/{workflowRef}/{workflowVersion}/{asyncTaskRef}")
+    @Operation(summary = "获取节点缓存", description = "获取节点缓存")
+    public List<NodeCacheVo> getProjectCache(@PathVariable String workflowRef, @PathVariable String workflowVersion, @PathVariable String asyncTaskRef) {
+        var workflow = this.workflowInternalApplication.findByRefAndVersion(workflowRef, workflowVersion)
+                .orElseThrow(() -> new DataNotFoundException("未找到workflow: " + workflowRef + workflowVersion));
+        var node = workflow.findNode(asyncTaskRef);
+        if (node.getTaskCaches() == null) {
+            return List.of();
+        }
+        var volumes = this.cacheApplication.findByWorkflowRefAndScope(workflowRef, Volume.Scope.PROJECT);
+        return node.getTaskCaches().stream()
+                .map(cache -> NodeCacheVo.builder()
+                        .name(cache.getSource())
+                        .path(cache.getTarget())
+                        .available(volumes.stream()
+                                .filter(volume -> cache.getSource().equals(volume.getSimpleName()))
+                                .findFirst()
+                                .map(Volume::isAvailable)
+                                .orElse(false))
+                        .build())
                 .collect(Collectors.toList());
     }
 
