@@ -522,16 +522,18 @@ public class ViewController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping("/caches/{workflowRef}/{workflowVersion}/{asyncTaskRef}")
-    @Operation(summary = "获取节点缓存", description = "获取节点缓存")
-    public List<NodeCacheVo> getProjectCache(@PathVariable String workflowRef, @PathVariable String workflowVersion, @PathVariable String asyncTaskRef) {
-        var workflow = this.workflowInternalApplication.findByRefAndVersion(workflowRef, workflowVersion)
-                .orElseThrow(() -> new DataNotFoundException("未找到workflow: " + workflowRef + workflowVersion));
-        var node = workflow.findNode(asyncTaskRef);
+    @PostMapping("/caches/async_task_instances/{asyncTaskId}")
+    @Operation(summary = "获取任务缓存", description = "获取任务缓存")
+    public List<NodeCacheVo> getAsyncTaskCache(@PathVariable String asyncTaskId) {
+        var asyncTaskInstance = this.asyncTaskInstanceApplication.findById(asyncTaskId)
+                .orElseThrow(() -> new DataNotFoundException("未找到异步任务实例：" + asyncTaskId));
+        var workflow = this.workflowInternalApplication.findByRefAndVersion(asyncTaskInstance.getWorkflowRef(), asyncTaskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到workflow: " + asyncTaskInstance.getWorkflowRef() + asyncTaskInstance.getWorkflowVersion()));
+        var node = workflow.findNode(asyncTaskInstance.getAsyncTaskRef());
         if (node.getTaskCaches() == null) {
             return List.of();
         }
-        var volumes = this.cacheApplication.findByWorkflowRefAndScope(workflowRef, Volume.Scope.PROJECT);
+        var volumes = this.cacheApplication.findByWorkflowRefAndScope(asyncTaskInstance.getWorkflowRef(), Volume.Scope.PROJECT);
         return node.getTaskCaches().stream()
                 .map(cache -> NodeCacheVo.builder()
                         .name(cache.getSource())

@@ -109,8 +109,10 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceSucceedEvent(TaskInstanceSucceedEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceSucceedEvent: {}", event);
-        if (event.isCache()) {
+        if (event.isVolume()) {
             this.cacheApplication.executeSucceeded(event.getTaskInstanceId());
+        }
+        if (event.isCache()) {
             return;
         }
         this.asyncTaskInstanceInternalApplication.succeed(event.getBusinessId());
@@ -120,8 +122,10 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceFailedEvent: {}", event);
-        if (event.isCache()) {
+        if (event.isVolume()) {
             this.cacheApplication.executeFailed(event.getTaskInstanceId());
+        }
+        if (event.isCache()) {
             return;
         }
         this.asyncTaskInstanceInternalApplication.stop(event.getTriggerId(), event.getBusinessId());
