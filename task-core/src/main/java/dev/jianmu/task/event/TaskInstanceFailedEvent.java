@@ -11,6 +11,10 @@ public class TaskInstanceFailedEvent extends BaseEvent {
         return this.asyncTaskRef.equals("cache");
     }
 
+    public boolean isVolume() {
+        return this.defKey.equals("start") || this.defKey.equals("end");
+    }
+
     private TaskInstanceFailedEvent() {
     }
 
