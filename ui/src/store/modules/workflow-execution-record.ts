@@ -32,21 +32,24 @@ export default {
     };
   },
   mutations: {
-    mutateRecordDetail(state: IState, {
-      project,
-      allRecords = [],
-      record,
-      recordDsl,
-      taskRecords = [],
-      nodeInfos = [],
-    }: Partial<{
-      project: IProjectDetailVo;
-      allRecords: IWorkflowExecutionRecordVo[];
-      record: IWorkflowExecutionRecordVo;
-      recordDsl: string;
-      taskRecords: ITaskExecutionRecordVo[];
-      nodeInfos: INodeDefVo[];
-    }>) {
+    mutateRecordDetail(
+      state: IState,
+      {
+        project,
+        allRecords = [],
+        record,
+        recordDsl,
+        taskRecords = [],
+        nodeInfos = [],
+      }: Partial<{
+        project: IProjectDetailVo;
+        allRecords: IWorkflowExecutionRecordVo[];
+        record: IWorkflowExecutionRecordVo;
+        recordDsl: string;
+        taskRecords: ITaskExecutionRecordVo[];
+        nodeInfos: INodeDefVo[];
+      }>,
+    ) {
       const { recordDetail } = state;
       recordDetail.project = project;
       recordDetail.allRecords = allRecords;
@@ -61,20 +64,30 @@ export default {
     },
   },
   actions: {
-    async fetchDetail({ commit }: ActionContext<IState, IRootState>, { projectId, workflowExecutionRecordId }: {
-      projectId: string;
-      workflowExecutionRecordId?: string;
-    }): Promise<void> {
+    async fetchDetail(
+      { commit }: ActionContext<IState, IRootState>,
+      {
+        projectId,
+        workflowExecutionRecordId,
+      }: {
+        projectId: string;
+        workflowExecutionRecordId?: string;
+      },
+    ): Promise<void> {
       const project = await fetchProjectDetail(projectId);
       const allRecords = await listWorkflowExecutionRecord(project.workflowRef);
-      let record = allRecords.length === 0 ? undefined : (workflowExecutionRecordId ? allRecords.find(item => item.id === workflowExecutionRecordId) : allRecords[0]);
+      let record =
+        allRecords.length === 0
+          ? undefined
+          : workflowExecutionRecordId
+            ? allRecords.find(item => item.id === workflowExecutionRecordId)
+            : allRecords[0];
       const { dslText, nodes } = await fetchWorkflow(
         record ? record.workflowRef : project.workflowRef,
-        record ? record.workflowVersion : project.workflowVersion);
+        record ? record.workflowVersion : project.workflowVersion,
+      );
       const recordDsl = dslText;
-      const nodeInfos = nodes
-        .filter(({ metadata }) => metadata)
-        .map(({ metadata }) => JSON.parse(metadata as string));
+      const nodeInfos = nodes.filter(({ metadata }) => metadata).map(({ metadata }) => JSON.parse(metadata as string));
       if (!record) {
         const dsl = yaml.parse(recordDsl);
         const description = dsl.workflow?.description || dsl.pipeline?.description;
@@ -92,17 +105,20 @@ export default {
           triggerType: project.triggerType,
         };
       }
-      const taskRecords = !record.triggerId ? [] : (await listAsyncTaskInstance(record.triggerId)).map(instance => {
-        return {
-          instanceId: '',
-          businessId: instance.id,
-          nodeName: instance.asyncTaskRef,
-          defKey: instance.asyncTaskType,
-          startTime: instance.startTime,
-          endTime: instance.endTime,
-          status: instance.status,
-        };
-      });
+      const taskRecords = !record.triggerId
+        ? []
+        : (await listAsyncTaskInstance(record.triggerId)).map(instance => {
+          return {
+            instanceId: '',
+            businessId: instance.id,
+            nodeName: instance.asyncTaskRef,
+            defKey: instance.asyncTaskType,
+            startTime: instance.startTime,
+            endTime: instance.endTime,
+            status: instance.status,
+            taskCache: instance.taskCache,
+          };
+        });
       commit('mutateRecordDetail', { project, allRecords, record, recordDsl, taskRecords, nodeInfos });
     },
   },
