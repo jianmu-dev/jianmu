@@ -57,7 +57,7 @@ public class DslParser {
     private final List<DslNode> dslNodes = new ArrayList<>();
     private final List<ShellNode> shellNodes = new ArrayList<>();
     private Set<GlobalParameter> globalParameters = new HashSet<>();
-    private final List<String> caches = new ArrayList<>();
+    private List<String> caches;
 
     private Map<String, Node> symbolTable = new HashMap<>();
 
@@ -300,10 +300,10 @@ public class DslParser {
 
         var cache = this.global.get("cache");
         if (cache instanceof String) {
-            this.caches.add((String) cache);
+            this.caches = List.of((String) cache);
         }
         if (cache instanceof List) {
-            this.caches.addAll(((List<?>) cache).stream().map(t -> (String) t).collect(Collectors.toList()));
+            this.caches = ((List<?>) cache).stream().map(t -> (String) t).collect(Collectors.toList());
         }
     }
 
