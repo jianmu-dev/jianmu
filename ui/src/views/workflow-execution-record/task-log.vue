@@ -84,7 +84,7 @@
           <div class="tab-content">
             <div :class="[tasks.length > 1 ? 'tasks-log' : 'task-log']" class="log">
               <div class="loading" v-if="executing">
-                <jm-button type="text" size="small" :loading="executing"> 加载中... </jm-button>
+                <jm-button type="text" size="small" :loading="executing"> 加载中...</jm-button>
               </div>
               <jm-log-viewer
                 v-if="currentInstanceId"
@@ -221,6 +221,51 @@
             </div>
           </div>
         </jm-tab-pane>
+        <jm-tab-pane name="cache" lazy>
+          <template #label>
+            <div class="tab">缓存</div>
+          </template>
+          <div class="tab-content">
+            <div class="params">
+              <jm-scrollbar>
+                <div class="content">
+                  <div class="cache-table">
+                    <jm-table :data="nodeCaches" :border="true">
+                      <jm-table-column header-align="center" label="缓存" prop="name">
+                        <template #default="scope">
+                          <jm-text-viewer :value="scope.row.name" />
+                        </template>
+                      </jm-table-column>
+                      <jm-table-column label="挂载目录" header-align="center" prop="path">
+                        <template #default="scope">
+                          <jm-text-viewer :value="scope.row.path" />
+                        </template>
+                      </jm-table-column>
+                      <jm-table-column header-align="center" class-name="status" prop="available">
+                        <template #header>
+                          <div class="wrapper">
+                            <span>状态</span>
+                            <jm-tooltip>
+                              <template #content>
+                                <p>对于不可用的缓存，可到项目卡片-</p>
+                                <p>更多-缓存中清理或项目编辑页删除</p>
+                              </template>
+                              <i class="icon jm-icon-button-help"></i>
+                            </jm-tooltip>
+                          </div>
+                        </template>
+                        <template #default="scope">
+                          <div class="enable" v-if="scope.row.available">可用</div>
+                          <div class="disabled" v-else>不可用<i class="jm-icon-button-warning icon"></i></div>
+                        </template>
+                      </jm-table-column>
+                    </jm-table>
+                  </div>
+                </div>
+              </jm-scrollbar>
+            </div>
+          </div>
+        </jm-tab-pane>
       </jm-tabs>
     </div>
   </div>
@@ -244,7 +289,7 @@ import { IState } from '@/model/modules/workflow-execution-record';
 import { ITaskExecutionRecordVo, ITaskParamVo } from '@/api/dto/workflow-execution-record';
 import TaskList from '@/views/workflow-execution-record/task-list.vue';
 import { datetimeFormatter } from '@/utils/formatter';
-import { listTaskInstance, listTaskParam } from '@/api/view-no-auth';
+import { fetchNodeCache, listTaskInstance, listTaskParam } from '@/api/view-no-auth';
 import sleep from '@/utils/sleep';
 import { ParamTypeEnum, TaskParamTypeEnum, TaskStatusEnum } from '@/api/dto/enumeration';
 import { HttpError, TimeoutError } from '@/utils/rest/error';
@@ -252,6 +297,7 @@ import { SHELL_NODE_TYPE } from '@/components/workflow/workflow-viewer/model/dat
 import { sortTasks } from '@/components/workflow/workflow-viewer/model/util';
 import { downloadNodeLogs } from '@/api/workflow-execution-record';
 import ParamValue from '@/views/common/param-value.vue';
+import { INodeCacheVo } from '@/api/dto/cache';
 
 export default defineComponent({
   components: { TaskList, ParamValue },
@@ -335,6 +381,8 @@ export default defineComponent({
     const isSuspended = computed<boolean>(() => task.value.status === TaskStatusEnum.SUSPENDED);
     const tabActiveName = ref<string>(props.tabType);
     const taskParams = ref<ITaskParamVo[]>([]);
+    // 节点缓存
+    const nodeCaches = ref<INodeCacheVo[]>([]);
     const moreLog = ref<boolean>(false);
     // 运行状态次数
     const statusParams = computed<{
@@ -419,6 +467,14 @@ export default defineComponent({
       }, id);
     };
 
+    const loadNodeCaches = async () => {
+      try {
+        nodeCaches.value = await fetchNodeCache(props.businessId);
+      } catch (err) {
+        proxy.$throw(err, proxy);
+      }
+    };
+
     const destroy = () => {
       taskInstanceId.value = '';
     };
@@ -426,6 +482,7 @@ export default defineComponent({
     // 初始化任务
     onBeforeMount(async () => {
       taskInstances.value = sortTasks(await listTaskInstance(props.businessId), true);
+      await loadNodeCaches();
       if (taskInstances.value.length > 0) {
         initialize(taskInstances.value[0].instanceId);
         currentInstanceId.value = taskInstances.value[0].instanceId;
@@ -476,6 +533,7 @@ export default defineComponent({
       }
     };
     return {
+      nodeCaches,
       ParamTypeEnum,
       maxWidthRecord,
       workflowName: state.recordDetail.record?.name,
@@ -656,6 +714,33 @@ export default defineComponent({
       ::v-deep(.el-table) {
         overflow: visible;
 
+        .icon {
+          width: 16px;
+          height: 16px;
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+
+          &:before {
+            margin: 0;
+          }
+        }
+
+        .el-table__header-wrapper {
+          thead tr th .cell .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .icon {
+              color: #6b7b8d;
+              margin-left: 4px;
+            }
+          }
+        }
+
         .el-table__body-wrapper {
           overflow: visible;
 
@@ -703,6 +788,29 @@ export default defineComponent({
                 padding: 0px 10px;
               }
             }
+
+            &.status {
+              .cell {
+                // 不可用演示
+                .disabled {
+                  padding: 2px 6px 2px 8px;
+                  width: 74px;
+                  height: 24px;
+                  display: flex;
+                  align-items: center;
+                  background: rgba(236, 77, 77, 0.1);
+                  border-radius: 12px;
+                  font-weight: 400;
+                  font-size: 14px;
+                  line-height: 20px;
+                  color: #ec4d4d;
+
+                  .icon {
+                    margin-left: 2px;
+                  }
+                }
+              }
+            }
           }
 
           .cell {
@@ -721,6 +829,10 @@ export default defineComponent({
 
       .tasks-log {
         height: calc(100vh - 330px);
+      }
+
+      .cache-table {
+        padding: 20px 0 0;
       }
 
       .log {
