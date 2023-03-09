@@ -221,7 +221,7 @@
             </div>
           </div>
         </jm-tab-pane>
-        <jm-tab-pane name="cache" lazy>
+        <jm-tab-pane name="cache" v-if="showCache" lazy>
           <template #label>
             <div class="tab">缓存</div>
           </template>
@@ -354,6 +354,8 @@ export default defineComponent({
       }
       return t;
     });
+    // 控制缓存tab显隐
+    const showCache = computed<boolean>(() => !!task.value.taskCaches);
     const getTasks = () => {
       if (taskInstances.value.length === 0) {
         return [];
@@ -533,6 +535,7 @@ export default defineComponent({
       }
     };
     return {
+      showCache,
       nodeCaches,
       ParamTypeEnum,
       maxWidthRecord,

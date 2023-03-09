@@ -29,3 +29,12 @@ export interface INodeCacheVo
     available: boolean;
     path: string;
   }> {}
+
+/**
+ * task Cache Vo
+ */
+export interface ITaskCacheVo
+  extends Readonly<{
+    source: string;
+    target: string;
+  }> {}

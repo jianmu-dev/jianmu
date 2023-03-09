@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance, ref } from 'vue';
+import { computed, defineComponent, getCurrentInstance, PropType, ref } from 'vue';
 import { IProjectCacheVo } from '@/api/dto/cache';
 import yaml from 'yaml';
 import { clearCache } from '@/api/cache';
@@ -64,7 +64,7 @@ export default defineComponent({
   props: {
     cacheData: {
       required: true,
-      type: Object,
+      type: Object as PropType<IProjectCacheVo>,
     },
   },
   setup(props) {
@@ -72,7 +72,7 @@ export default defineComponent({
     const toggle = ref<boolean>(true);
     const dialogVisible = ref<boolean>(false);
     const loading = ref<boolean>(false);
-    const originData = computed<IProjectCacheVo>(() => props.cacheData as IProjectCacheVo);
+    const originData = computed<IProjectCacheVo>(() => props.cacheData);
     const nodeICons = ref<string[]>(originData.value.nodeCaches.map(item => yaml.parse(item.metadata).icon));
     const toClear = () => {
       dialogVisible.value = true;
