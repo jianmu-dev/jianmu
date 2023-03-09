@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Getter
 public class DslNode {
     private String name;
+    private String alias;
     private String type;
     private String onFailure;
     private List<String> sources;
@@ -36,6 +37,8 @@ public class DslNode {
     private static DslNode shellNode(String nodeName, Map<?, ?> nodeMap) {
         var node = new DslNode();
         node.name = nodeName;
+        var alias = (String) nodeMap.get("alias");
+        node.alias = alias == null ? nodeName : alias;
         setRelation(nodeMap, node);
         node.image = (String) nodeMap.get("image");
         node.onFailure = (String) nodeMap.get("on-failure");
@@ -72,6 +75,8 @@ public class DslNode {
     private static DslNode normalNode(String nodeName, Map<?, ?> node) {
         var dslNode = new DslNode();
         dslNode.name = nodeName;
+        var alias = (String) node.get("alias");
+        dslNode.alias = alias == null ? nodeName : alias;
         dslNode.type = (String) node.get("type");
         dslNode.onFailure = (String) node.get("on-failure");
         setRelation(node, dslNode);
