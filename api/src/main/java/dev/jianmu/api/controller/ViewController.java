@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import dev.jianmu.api.dto.*;
 import dev.jianmu.api.mapper.*;
 import dev.jianmu.api.vo.*;
+import dev.jianmu.application.dsl.DslParser;
 import dev.jianmu.application.exception.DataNotFoundException;
 import dev.jianmu.application.service.*;
 import dev.jianmu.application.service.internal.WorkflowInternalApplication;
@@ -15,7 +16,6 @@ import dev.jianmu.secret.aggregate.Namespace;
 import dev.jianmu.task.aggregate.InstanceParameter;
 import dev.jianmu.task.aggregate.Volume;
 import dev.jianmu.trigger.event.TriggerEvent;
-import dev.jianmu.workflow.aggregate.definition.TaskCache;
 import dev.jianmu.workflow.aggregate.definition.Workflow;
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 import dev.jianmu.workflow.aggregate.process.ProcessStatus;
@@ -309,16 +309,38 @@ public class ViewController {
     @GetMapping("/async_task_instances/{triggerId}")
     @Operation(summary = "异步任务实例列表接口", description = "异步任务实例列表接口")
     public List<AsyncTaskInstanceVo> findAsyncTasksByTriggerId(@PathVariable String triggerId) {
-        return this.asyncTaskInstanceApplication.findByTriggerId(triggerId).stream()
-                .map(AsyncTaskInstanceMapper.INSTANCE::toAsyncTaskInstanceVo)
+        var asyncTaskInstances = this.asyncTaskInstanceApplication.findByTriggerId(triggerId);
+        if (asyncTaskInstances.isEmpty()) {
+            return List.of();
+        }
+        var asyncTaskInstance = asyncTaskInstances.get(0);
+        var workflow = this.workflowInternalApplication.findByRefAndVersion(asyncTaskInstance.getWorkflowRef(), asyncTaskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程：" + asyncTaskInstance.getWorkflowRef() + asyncTaskInstance.getWorkflowVersion()));
+        return asyncTaskInstances.stream()
+                .map(instance -> {
+                    var instanceVo = AsyncTaskInstanceMapper.INSTANCE.toAsyncTaskInstanceVo(instance);
+                    instanceVo.setTaskCaches(workflow.findNode(instance.getAsyncTaskRef()).getTaskCaches());
+                    return instanceVo;
+                })
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/v2/task_instances/{businessId}")
     @Operation(summary = "任务实例列表接口", description = "根据异步任务实例ID查询")
     public List<TaskInstanceVo> findByBusinessId(@PathVariable String businessId) {
-        return this.taskInstanceApplication.findByBusinessId(businessId).stream()
-                .map(TaskInstanceMapper.INSTANCE::toTaskInstanceVo)
+        var taskInstances = this.taskInstanceApplication.findByBusinessId(businessId);
+        if (taskInstances.isEmpty()) {
+            return List.of();
+        }
+        var taskInstance = taskInstances.get(0);
+        var workflow = this.workflowInternalApplication.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程：" + taskInstance.getWorkflowRef() + taskInstance.getWorkflowVersion()));
+        return taskInstances.stream()
+                .map(instance -> {
+                    var taskInstanceVo = TaskInstanceMapper.INSTANCE.toTaskInstanceVo(instance);
+                    taskInstanceVo.setTaskCaches(workflow.findNode(instance.getAsyncTaskRef()).getTaskCaches());
+                    return taskInstanceVo;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -493,6 +515,7 @@ public class ViewController {
     public List<ProjectCacheVo> getProjectCache(@PathVariable String workflowRef) {
         var volumes = this.cacheApplication.findByWorkflowRefAndScope(workflowRef, Volume.Scope.PROJECT);
         var workflow = this.projectApplication.findLastWorkflowByRef(workflowRef);
+        var parse = DslParser.parse(workflow.getDslText());
         return volumes.stream()
                 .map(volume -> {
                     var name = volume.getSimpleName();
@@ -501,19 +524,12 @@ public class ViewController {
                             .name(name)
                             .available(volume.isAvailable())
                             .workerId(volume.getWorkerId())
-                            .nodeCaches(workflow.getNodes().stream()
-                                    .filter(node -> node.getTaskCaches() != null && node.getTaskCaches().stream()
-                                            .anyMatch(taskCache -> taskCache.getSource().equals(name))
-                                    )
+                            .nodeCaches(parse.getDslNodes().stream()
+                                    .filter(node -> node.getCache() != null && node.getCache().containsKey(name))
                                     .map(node -> ProjectCacheVo.ProjectNodeCacheVo.builder()
-                                            .name(node.getName())
-                                            .metadata(node.getMetadata())
-                                            .path(node.getTaskCaches().stream()
-                                                    .filter(taskCache -> taskCache.getSource().equals(name))
-                                                    .findFirst()
-                                                    .map(TaskCache::getTarget)
-                                                    .orElseThrow()
-                                            )
+                                            .name(node.getAlias())
+                                            .metadata(workflow.findNode(node.getName()).getMetadata())
+                                            .path(node.getCache().get(name))
                                             .build()
                                     ).collect(Collectors.toList())
                             )
