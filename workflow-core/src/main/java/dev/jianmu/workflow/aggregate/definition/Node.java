@@ -67,8 +67,8 @@ public interface Node {
     void setTaskParameters(Set<TaskParameter> taskParameters);
 
     // 获取缓存
-    Set<TaskCache> getTaskCaches();
+    List<TaskCache> getTaskCaches();
 
     // 设置缓存
-    void setTaskCaches(Set<TaskCache> taskCaches);
+    void setTaskCaches(List<TaskCache> taskCaches);
 }
