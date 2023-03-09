@@ -22,12 +22,16 @@ public class Volume {
     private String name;
     // 作用域
     private Scope scope;
+    // 关联项目ref
+    private String workflowRef;
     // workerId
     private String workerId;
     // 是否可用
     private boolean available = false;
     // 是否删除失败
     private boolean taint = false;
+    // 是否正在清理
+    private boolean cleaning = false;
     // 创建时间
     private final LocalDateTime createdTime = LocalDateTime.now();
     // 可用时间
@@ -36,11 +40,22 @@ public class Volume {
     public void activate(String workerId) {
         this.workerId = workerId;
         this.available = true;
+        this.cleaning = false;
         this.availableTime = LocalDateTime.now();
     }
 
     public void taint() {
         this.taint = true;
+    }
+
+    public void clean() {
+        this.cleaning = true;
+        this.available = false;
+    }
+
+    public String getSimpleName() {
+        var arr = this.name.split("_");
+        return arr.length > 1 ? arr[1] : arr[0];
     }
 
     public String getId() {
@@ -55,6 +70,10 @@ public class Volume {
         return scope;
     }
 
+    public String getWorkflowRef() {
+        return workflowRef;
+    }
+
     public String getWorkerId() {
         return workerId;
     }
@@ -65,6 +84,10 @@ public class Volume {
 
     public boolean isTainted() {
         return taint;
+    }
+
+    public boolean isCleaning() {
+        return cleaning;
     }
 
     public LocalDateTime getCreatedTime() {
@@ -80,6 +103,7 @@ public class Volume {
         private String id = UUID.randomUUID().toString().replace("-", "");
         private String name;
         private Scope scope;
+        private String workflowRef;
 
         private Builder() {
         }
@@ -98,11 +122,17 @@ public class Volume {
             return this;
         }
 
+        public Builder workflowRef(String workflowRef) {
+            this.workflowRef = workflowRef;
+            return this;
+        }
+
         public Volume build() {
             Volume volume = new Volume();
             volume.name = this.name;
             volume.id = this.id;
             volume.scope = this.scope;
+            volume.workflowRef = this.workflowRef;
             return volume;
         }
     }

@@ -22,6 +22,9 @@ import dev.jianmu.project.repository.GitRepoRepository;
 import dev.jianmu.project.repository.ProjectGroupRepository;
 import dev.jianmu.project.repository.ProjectLastExecutionRepository;
 import dev.jianmu.project.repository.ProjectLinkGroupRepository;
+import dev.jianmu.task.aggregate.Volume;
+import dev.jianmu.task.event.VolumeCreatedEvent;
+import dev.jianmu.task.event.VolumeDeletedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
 import dev.jianmu.trigger.aggregate.Trigger;
@@ -179,6 +182,7 @@ public class ProjectApplication {
                 .ref(ref)
                 .type(parser.getType())
                 .tag(parser.getTag())
+                .caches(parser.getCaches())
                 .name(parser.getName())
                 .description(parser.getDescription())
                 .nodes(nodes)
@@ -339,6 +343,12 @@ public class ProjectApplication {
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
+        parser.getCaches().forEach(cache -> this.publisher.publishEvent(VolumeCreatedEvent.aVolumeCreatedEvent()
+                .name(cache)
+                .scope(Volume.Scope.PROJECT)
+                .workflowRef(workflow.getRef())
+                .build()
+        ));
         return project;
     }
 
@@ -360,6 +370,7 @@ public class ProjectApplication {
         // 解析DSL,语法检查
         var parser = DslParser.parse(dslText);
         var workflow = this.createWorkflow(parser, dslText, project.getWorkflowRef());
+        var lastWorkflowVersion = project.getWorkflowVersion();
 
         project.setDslText(dslText);
         project.setDslType(parser.getType().equals(Workflow.Type.WORKFLOW) ? Project.DslType.WORKFLOW : Project.DslType.PIPELINE);
@@ -375,11 +386,41 @@ public class ProjectApplication {
         project.setWorkflowVersion(workflow.getVersion());
 
         this.pubTriggerEvent(parser, project);
+        this.publishCacheEvent(workflow, lastWorkflowVersion);
         this.projectRepository.updateByWorkflowRef(project);
         this.workflowRepository.add(workflow);
         if (project.getConcurrent() > concurrent) {
             this.concurrentWorkflowInstance(workflow.getRef());
         }
+    }
+
+    private void publishCacheEvent(Workflow workflow, String lastWorkflowVersion) {
+        var lastWorkflow = this.workflowRepository.findByRefAndVersion(workflow.getRef(), lastWorkflowVersion)
+                .orElseThrow(() -> new DataNotFoundException(String.format("未找到workflow：%s-%s", workflow.getRef(), lastWorkflowVersion)));
+        // 删除cache
+        if (lastWorkflow.getCaches() != null) {
+            lastWorkflow.getCaches().stream()
+                    .filter(cache -> !workflow.getCaches().contains(cache))
+                    .forEach(cache -> {
+                        this.publisher.publishEvent(VolumeDeletedEvent.aVolumeDeletedEvent()
+                                .name(cache)
+                                .workflowRef(workflow.getRef())
+                                .deletedType(VolumeDeletedEvent.VolumeDeletedType.NAME)
+                                .build()
+                        );
+                    });
+        }
+        // 创建cache
+        workflow.getCaches().stream()
+                .filter(cache -> !lastWorkflow.getCaches().contains(cache))
+                .forEach(cache -> {
+                    this.publisher.publishEvent(VolumeCreatedEvent.aVolumeCreatedEvent()
+                            .name(cache)
+                            .scope(Volume.Scope.PROJECT)
+                            .workflowRef(workflow.getRef())
+                            .build()
+                    );
+                });
     }
 
     // diff DSL
@@ -418,6 +459,10 @@ public class ProjectApplication {
         this.taskInstanceRepository.deleteByWorkflowRef(project.getWorkflowRef());
         this.gitRepoRepository.deleteById(project.getGitRepoId());
         this.publisher.publishEvent(new DeletedEvent(project.getId()));
+        this.publisher.publishEvent(VolumeDeletedEvent.aVolumeDeletedEvent()
+                .workflowRef(project.getWorkflowRef())
+                .deletedType(VolumeDeletedEvent.VolumeDeletedType.REF)
+                .build());
     }
 
     @Transactional
@@ -513,4 +558,10 @@ public class ProjectApplication {
         return this.projectRepository.findVoByIdIn(ids);
     }
 
+    public Workflow findLastWorkflowByRef(String ref) {
+        var project = this.projectRepository.findByWorkflowRef(ref)
+                .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
+        return this.workflowRepository.findByRefAndVersion(ref, project.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到该Workflow"));
+    }
 }

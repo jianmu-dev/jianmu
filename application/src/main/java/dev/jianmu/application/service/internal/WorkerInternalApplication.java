@@ -23,6 +23,7 @@ import dev.jianmu.task.aggregate.TaskInstance;
 import dev.jianmu.task.event.TaskInstanceCreatedEvent;
 import dev.jianmu.task.repository.InstanceParameterRepository;
 import dev.jianmu.task.repository.TaskInstanceRepository;
+import dev.jianmu.task.repository.VolumeRepository;
 import dev.jianmu.trigger.event.TriggerEvent;
 import dev.jianmu.trigger.repository.TriggerEventRepository;
 import dev.jianmu.worker.aggregate.Worker;
@@ -92,6 +93,7 @@ public class WorkerInternalApplication {
     private final AsyncTaskInstanceRepository asyncTaskInstanceRepository;
     private final ExpressionLanguage expressionLanguage;
     private final Publisher publisher;
+    private final VolumeRepository volumeRepository;
 
     public WorkerInternalApplication(
             ParameterRepository parameterRepository,
@@ -110,7 +112,8 @@ public class WorkerInternalApplication {
             WorkflowRepository workflowRepository,
             AsyncTaskInstanceRepository asyncTaskInstanceRepository,
             ExpressionLanguage expressionLanguage,
-            Publisher publisher
+            Publisher publisher,
+            VolumeRepository volumeRepository
     ) {
         this.parameterRepository = parameterRepository;
         this.parameterDomainService = parameterDomainService;
@@ -129,6 +132,7 @@ public class WorkerInternalApplication {
         this.asyncTaskInstanceRepository = asyncTaskInstanceRepository;
         this.expressionLanguage = expressionLanguage;
         this.publisher = publisher;
+        this.volumeRepository = volumeRepository;
     }
 
     @Transactional
@@ -163,36 +167,50 @@ public class WorkerInternalApplication {
                     throw new RuntimeException("无法执行此类节点任务: " + nodeDef.getType());
                 }
             }
-            this.workflowInstanceRepository.findByTriggerId(event.getTriggerId())
-                    .ifPresent(workflowInstance -> {
-                        // 分发worker
-                        List<String> workerTags = this.getWorkerTag(workflowInstance);
-                        logger.info("triggerId:{} instanceId:{} tags: {}", workflowInstance.getTriggerId(),
-                                workflowInstance.getId(), workerTags);
-                        var workers = workerTags.isEmpty() ?
-                                this.workerRepository.findByTypeInAndCreatedTimeLessThan(
-                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                        workflowInstance.getStartTime()) :
-                                this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
-                                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
-                                        workerTags, workflowInstance.getStartTime());
-                        if (workers.isEmpty()) {
-                            throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
-                        }
-                        var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers);
-                        taskInstance.setWorkerId(worker.getId());
-                        taskInstance.waiting();
-                        this.taskInstanceRepository.updateWorkerId(taskInstance);
-                        // 返回DeferredResult
-                        this.publisher.publish(WorkerDeferredResultClearEvent.builder()
-                                .workerId(worker.getId())
-                                .build());
-                    });
+            List<Worker> workers;
+            if (taskInstance.isVolume()) {
+                workers = this.workerRepository.findByTypeInAndCreatedTimeLessThan(
+                        List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                        LocalDateTime.now()
+                );
+            } else {
+                var workflowInstance = this.workflowInstanceRepository.findByTriggerId(event.getTriggerId())
+                        .orElseThrow(() -> new DataNotFoundException("未找到流程实例，triggerId：" + event.getTriggerId()));
+                List<String> workerTags = this.getWorkerTag(workflowInstance);
+                logger.info("triggerId:{} instanceId:{} tags: {}", workflowInstance.getTriggerId(), workflowInstance.getId(), workerTags);
+                workers = workerTags.isEmpty() ?
+                        this.workerRepository.findByTypeInAndCreatedTimeLessThan(
+                                List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                workflowInstance.getStartTime()) :
+                        this.workerRepository.findByTypeInAndTagAndCreatedTimeLessThan(
+                                List.of(Worker.Type.DOCKER, Worker.Type.KUBERNETES),
+                                workerTags, workflowInstance.getStartTime());
+            }
+            String volumeWorkerId = this.findCacheWorkerId(taskInstance);
+            // 分发worker
+            if (workers.isEmpty()) {
+                throw new RuntimeException("worker数量为0，节点任务类型：" + Worker.Type.DOCKER);
+            }
+            var worker = DispatchWorker.getWorker(taskInstance.getTriggerId(), workers, volumeWorkerId, taskInstance.getAsyncTaskRef());
+            taskInstance.setWorkerId(worker.getId());
+            taskInstance.waiting();
+            this.taskInstanceRepository.updateWorkerId(taskInstance);
+            // 返回DeferredResult
+            this.publisher.publish(WorkerDeferredResultClearEvent.builder()
+                    .workerId(worker.getId())
+                    .build());
         } catch (RuntimeException e) {
             logger.error("任务分发失败，", e);
             taskInstance.dispatchFailed();
             this.taskInstanceRepository.updateStatus(taskInstance);
         }
+    }
+
+    private String findCacheWorkerId(TaskInstance taskInstance) {
+        var volumes = this.volumeRepository.findByWorkflowRef(taskInstance.getWorkflowRef()).stream()
+                .filter(dev.jianmu.task.aggregate.Volume::isAvailable)
+                .collect(Collectors.toList());
+        return volumes.isEmpty() ? null : volumes.get(0).getWorkerId();
     }
 
     private List<String> getWorkerTag(WorkflowInstance workflowInstance) {
@@ -272,6 +290,21 @@ public class WorkerInternalApplication {
                 .filter(entry -> entry.getKey() != null)
                 .map(entry -> Map.entry(entry.getKey().toUpperCase(), entry.getValue() == null ? "" : entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // 查询node
+        var workflow = this.workflowRepository.findByRefAndVersion(taskInstance.getWorkflowRef(), taskInstance.getWorkflowVersion())
+                .orElseThrow(() -> new DataNotFoundException("未找到流程"));
+        var node = workflow.findNode(taskInstance.getAsyncTaskRef());
+        var volumeMounts = node.getTaskCaches() == null ? new ArrayList<VolumeMount>() : node.getTaskCaches().stream()
+                .map(taskCache -> VolumeMount.builder()
+                        .source(taskCache.getSource())
+                        .target(taskCache.getTarget())
+                        .build()
+                )
+                .collect(Collectors.toList());
+        volumeMounts.add(VolumeMount.builder()
+                .source(taskInstance.getTriggerId())
+                .target("/" + taskInstance.getTriggerId())
+                .build());
 
         // 创建ContainerSpec
         ContainerSpec newSpec;
@@ -287,14 +320,7 @@ public class WorkerInternalApplication {
                     .secrets(secretSet)
                     .entrypoint(entrypoint)
                     .args(args)
-                    .volume_mounts(
-                            List.of(
-                                    VolumeMount.builder()
-                                            .source(taskInstance.getTriggerId())
-                                            .target("/" + taskInstance.getTriggerId())
-                                            .build()
-                            )
-                    )
+                    .volume_mounts(volumeMounts)
                     .extra_hosts(this.globalProperties.getWorker().getContainer().getExtraHosts())
                     .build();
         } else {
@@ -314,14 +340,7 @@ public class WorkerInternalApplication {
                     .secrets(secretSet)
                     .entrypoint(spec.getEntrypoint())
                     .args(spec.getCmd())
-                    .volume_mounts(
-                            List.of(
-                                    VolumeMount.builder()
-                                            .source(taskInstance.getTriggerId())
-                                            .target("/" + taskInstance.getTriggerId())
-                                            .build()
-                            )
-                    )
+                    .volume_mounts(volumeMounts)
                     .extra_hosts(this.globalProperties.getWorker().getContainer().getExtraHosts())
                     .build();
         }

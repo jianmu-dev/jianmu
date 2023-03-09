@@ -35,6 +35,7 @@ public class Workflow extends AggregateRoot {
     private Type type;
     // 对应执行器标签
     private String tag;
+    private List<String> caches;
     // 描述
     private String description;
     // 版本
@@ -382,6 +383,10 @@ public class Workflow extends AggregateRoot {
         return Arrays.asList(this.tag.split(","));
     }
 
+    public List<String> getCaches() {
+        return caches;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -415,6 +420,8 @@ public class Workflow extends AggregateRoot {
         private Type type;
         // 标签
         private String tag;
+        // 缓存
+        private List<String> caches;
         // 描述
         private String description;
         // Node列表
@@ -448,6 +455,11 @@ public class Workflow extends AggregateRoot {
 
         public Builder tag(String tag) {
             this.tag = tag;
+            return this;
+        }
+
+        public Builder caches(List<String> caches) {
+            this.caches = caches;
             return this;
         }
 
@@ -500,6 +512,7 @@ public class Workflow extends AggregateRoot {
             workflow.globalParameters = Set.copyOf(this.globalParameters);
             workflow.ref = this.ref;
             workflow.tag = this.tag;
+            workflow.caches = this.caches;
             workflow.dslText = this.dslText;
             workflow.type = this.type;
             workflow.name = this.name;

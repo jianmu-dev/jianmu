@@ -1,6 +1,7 @@
 package dev.jianmu.api.eventhandler;
 
 import dev.jianmu.api.mapper.TaskResultMapper;
+import dev.jianmu.application.service.CacheApplication;
 import dev.jianmu.application.service.internal.AsyncTaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.TaskInstanceInternalApplication;
 import dev.jianmu.application.service.internal.WorkerInternalApplication;
@@ -32,18 +33,22 @@ public class TaskInstanceEventHandler {
     private final WorkerInternalApplication workerInternalApplication;
     private final WorkflowInstanceInternalApplication workflowInstanceInternalApplication;
     private final MonitoringFileService monitoringFileService;
+    private final CacheApplication cacheApplication;
 
     public TaskInstanceEventHandler(
             TaskInstanceInternalApplication taskInstanceInternalApplication,
             AsyncTaskInstanceInternalApplication asyncTaskInstanceInternalApplication,
             WorkerInternalApplication workerInternalApplication,
             WorkflowInstanceInternalApplication workflowInstanceInternalApplication,
-            MonitoringFileService monitoringFileService) {
+            MonitoringFileService monitoringFileService,
+            CacheApplication cacheApplication
+    ) {
         this.taskInstanceInternalApplication = taskInstanceInternalApplication;
         this.asyncTaskInstanceInternalApplication = asyncTaskInstanceInternalApplication;
         this.workerInternalApplication = workerInternalApplication;
         this.workflowInstanceInternalApplication = workflowInstanceInternalApplication;
         this.monitoringFileService = monitoringFileService;
+        this.cacheApplication = cacheApplication;
     }
 
     @EventListener
@@ -104,6 +109,12 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceSucceedEvent(TaskInstanceSucceedEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceSucceedEvent: {}", event);
+        if (event.isVolume()) {
+            this.cacheApplication.executeSucceeded(event.getTaskInstanceId());
+        }
+        if (event.isCache()) {
+            return;
+        }
         this.asyncTaskInstanceInternalApplication.succeed(event.getBusinessId());
     }
 
@@ -111,6 +122,12 @@ public class TaskInstanceEventHandler {
     public void handleTaskInstanceFailedEvent(TaskInstanceFailedEvent event) {
         // 任务上下文抛出事件通知流程上下文
         logger.info("get TaskInstanceFailedEvent: {}", event);
+        if (event.isVolume()) {
+            this.cacheApplication.executeFailed(event.getTaskInstanceId());
+        }
+        if (event.isCache()) {
+            return;
+        }
         this.asyncTaskInstanceInternalApplication.stop(event.getTriggerId(), event.getBusinessId());
     }
 
