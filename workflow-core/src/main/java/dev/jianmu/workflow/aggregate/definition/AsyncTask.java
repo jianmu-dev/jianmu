@@ -2,6 +2,7 @@ package dev.jianmu.workflow.aggregate.definition;
 
 import dev.jianmu.workflow.aggregate.parameter.Parameter;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -53,16 +54,16 @@ public class AsyncTask extends BaseNode {
         return Parameter.Type.STRING;
     }
 
-    public static Set<TaskCache> createCaches(Map<String, String> cache) {
+    public static List<TaskCache> createCaches(Map<String, String> cache) {
         if (cache == null) {
-            return Set.of();
+            return null;
         }
         return cache.entrySet().stream().map(entry ->
                 TaskCache.Builder.aTaskCache()
                         .source(entry.getKey())
                         .target(entry.getValue())
                         .build()
-        ).collect(Collectors.toSet());
+        ).collect(Collectors.toList());
     }
 
     public static final class Builder {
@@ -77,7 +78,7 @@ public class AsyncTask extends BaseNode {
         // 节点元数据快照
         protected String metadata;
         private Set<TaskParameter> taskParameters;
-        private Set<TaskCache> taskCaches;
+        private List<TaskCache> taskCaches;
 
         private Builder() {
         }
@@ -116,7 +117,7 @@ public class AsyncTask extends BaseNode {
             return this;
         }
 
-        public Builder taskCaches(Set<TaskCache> taskCaches) {
+        public Builder taskCaches(List<TaskCache> taskCaches) {
             this.taskCaches = taskCaches;
             return this;
         }

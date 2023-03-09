@@ -3,6 +3,7 @@ package dev.jianmu.application.dsl;
 import dev.jianmu.workflow.aggregate.definition.Branch;
 import lombok.Getter;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,7 +68,7 @@ public class DslNode {
             node.cache = ((Map<?, ?>) cache).entrySet().stream()
                     .filter(entry -> entry.getValue() != null)
                     .map(entry -> Map.entry((String) entry.getKey(), (String) entry.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,(k1, k2) -> k2, LinkedHashMap::new));
         }
         return node;
     }

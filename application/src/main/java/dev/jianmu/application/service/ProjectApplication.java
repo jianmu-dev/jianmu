@@ -343,13 +343,20 @@ public class ProjectApplication {
         this.projectGroupRepository.addProjectCountById(projectGroupId, 1);
         this.workflowRepository.add(workflow);
         this.publisher.publishEvent(new CreatedEvent(project.getId()));
-        parser.getCaches().forEach(cache -> this.publisher.publishEvent(VolumeCreatedEvent.aVolumeCreatedEvent()
+        this.publishCacheCreatedEvent(parser.getCaches(), workflow.getRef());
+        return project;
+    }
+
+    private void publishCacheCreatedEvent(List<String> caches, String workflowRef) {
+        if (caches == null) {
+            return;
+        }
+        caches.forEach(cache -> this.publisher.publishEvent(VolumeCreatedEvent.aVolumeCreatedEvent()
                 .name(cache)
                 .scope(Volume.Scope.PROJECT)
-                .workflowRef(workflow.getRef())
+                .workflowRef(workflowRef)
                 .build()
         ));
-        return project;
     }
 
     @Transactional

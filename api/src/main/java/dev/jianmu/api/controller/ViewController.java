@@ -516,8 +516,12 @@ public class ViewController {
         var volumes = this.cacheApplication.findByWorkflowRefAndScope(workflowRef, Volume.Scope.PROJECT);
         var workflow = this.projectApplication.findLastWorkflowByRef(workflowRef);
         var parse = DslParser.parse(workflow.getDslText());
-        return volumes.stream()
-                .map(volume -> {
+        return workflow.getCaches().stream()
+                .map(cache -> {
+                    var volume = volumes.stream()
+                            .filter(t -> t.getSimpleName().equals(cache))
+                            .findFirst()
+                            .orElse(Volume.Builder.aVolume().build());
                     var name = volume.getSimpleName();
                     return ProjectCacheVo.builder()
                             .id(volume.getId())
@@ -534,8 +538,7 @@ public class ViewController {
                                     ).collect(Collectors.toList())
                             )
                             .build();
-                })
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
     }
 
     @PostMapping("/caches/async_task_instances/{asyncTaskId}")

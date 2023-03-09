@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Ethan Liu
@@ -39,5 +39,5 @@ public class TaskInstanceVo {
     private LocalDateTime endTime;
     private Status status;
     // 任务缓存
-    private Set<TaskCache> taskCaches;
+    private List<TaskCache> taskCaches;
 }

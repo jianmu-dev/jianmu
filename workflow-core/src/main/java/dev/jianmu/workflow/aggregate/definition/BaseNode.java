@@ -32,7 +32,7 @@ public abstract class BaseNode implements Node {
     // 参数列表
     protected Set<TaskParameter> taskParameters;
     // 缓存
-    protected Set<TaskCache> taskCaches;
+    protected List<TaskCache> taskCaches;
 
     protected BaseNode() {
     }
@@ -140,12 +140,12 @@ public abstract class BaseNode implements Node {
     }
 
     @Override
-    public Set<TaskCache> getTaskCaches() {
+    public List<TaskCache> getTaskCaches() {
         return this.taskCaches;
     }
 
     @Override
-    public void setTaskCaches(Set<TaskCache> taskCaches) {
+    public void setTaskCaches(List<TaskCache> taskCaches) {
         this.taskCaches = taskCaches;
     }
 }
