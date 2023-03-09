@@ -296,7 +296,7 @@ public class WorkerInternalApplication {
         var node = workflow.findNode(taskInstance.getAsyncTaskRef());
         var volumeMounts = node.getTaskCaches() == null ? new ArrayList<VolumeMount>() : node.getTaskCaches().stream()
                 .map(taskCache -> VolumeMount.builder()
-                        .source(taskCache.getSource())
+                        .source(workflow.getRef() + "_" + taskCache.getSource())
                         .target(taskCache.getTarget())
                         .build()
                 )
