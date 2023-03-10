@@ -11,6 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -53,6 +57,12 @@ public class AsyncTaskInstanceEventHandler {
         log.info("-----------------------------------------------------");
     }
 
+    @Retryable(
+            value = {DeadlockLoserDataAccessException.class, CannotAcquireLockException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000L, multiplier = 2),
+            listeners = "retryListener"
+    )
     @Async
     @EventListener
     public void handleTaskActivatingEvent(TaskActivatingEvent event) {
