@@ -23,7 +23,7 @@
       <jm-form :model="editorForm" :rules="rules" ref="form">
         <jm-form-item label="选择项目组" prop="projectGroupId">
           <jm-select v-model="editorForm.projectGroupId" placeholder="请选择项目组">
-            <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id"> </jm-option>
+            <jm-option v-for="item in projectGroupList" :key="item.id" :label="item.name" :value="item.id"></jm-option>
           </jm-select>
         </jm-form-item>
       </jm-form>
@@ -97,9 +97,9 @@ export default defineComponent({
     if (route.query.templateId) {
       getProcessTemplate(route.query.templateId as unknown as number)
         .then((res: IProcessTemplateVo) => {
-          let dsl = res.dsl;
+          const dsl = res.dsl;
           if (route.query.processTemplatesName !== res.name) {
-            let name = `name: ${res.name}`;
+            const name = `name: ${res.name}`;
             editorForm.value.dslText = dsl.replace(name, `name: ${route.query.processTemplatesName}`);
           } else {
             editorForm.value.dslText = dsl;
@@ -125,6 +125,7 @@ export default defineComponent({
               description,
               global: {
                 concurrent: global ? global.concurrent : 1,
+                caches: global.cache ? global.cache : undefined,
               },
               data: rawData,
             };

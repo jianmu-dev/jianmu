@@ -53,6 +53,7 @@ export default defineComponent({
     onMounted(async () => {
       // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
+        // 初始化走这里获取到的cache为空
         workflow.value = JSON.parse(payload as string);
         loaded.value = true;
         await nextTick();
@@ -60,6 +61,7 @@ export default defineComponent({
         return;
       }
       if (editMode) {
+        // 刷新后走这个分支cache有数据
         authLogin();
         try {
           loading.value = true;
@@ -73,6 +75,7 @@ export default defineComponent({
             description,
             global: {
               concurrent: global ? global.concurrent : 1,
+              caches: global.cache ? global.cache : undefined,
             },
             data: rawData,
           };

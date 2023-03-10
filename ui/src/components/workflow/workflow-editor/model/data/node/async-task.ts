@@ -36,12 +36,22 @@ export function checkDefaultIcon(icon: string) {
   return false;
 }
 
+/**
+ * 模拟缓存定义
+ */
+export interface ICache {
+  key: string;
+  name: string;
+  value: string;
+}
+
 export class AsyncTask extends BaseNode {
   readonly ownerRef: string;
   version: string;
   versionDescription: string;
   readonly inputs: IAsyncTaskParam[];
   readonly outputs: IAsyncTaskParam[];
+  caches: ICache[];
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
 
@@ -54,6 +64,7 @@ export class AsyncTask extends BaseNode {
     versionDescription = '',
     inputs: IAsyncTaskParam[] = [],
     outputs: IAsyncTaskParam[] = [],
+    caches: ICache[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
     validateParam?: ValidateParamFn,
   ) {
@@ -69,12 +80,13 @@ export class AsyncTask extends BaseNode {
     this.versionDescription = versionDescription;
     this.inputs = inputs;
     this.outputs = outputs;
+    this.caches = caches;
     this.failureMode = failureMode;
     this.validateParam = validateParam;
   }
 
   static build(
-    { ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, failureMode }: any,
+    { ownerRef, ref, name, icon, version, versionDescription, inputs, outputs, caches, failureMode }: any,
     validateParam?: ValidateParamFn,
   ): AsyncTask {
     return new AsyncTask(
@@ -86,6 +98,7 @@ export class AsyncTask extends BaseNode {
       versionDescription,
       inputs,
       outputs,
+      caches,
       failureMode,
       validateParam,
     );
@@ -165,6 +178,17 @@ export class AsyncTask extends BaseNode {
       };
     });
 
+    const shellCacheFields: Record<string, CustomRule> = {};
+    this.caches.forEach((_, index) => {
+      shellCacheFields[index] = {
+        type: 'object',
+        required: true,
+        fields: {
+          name: [{ required: true, message: '请选择缓存', trigger: 'change' }],
+          value: [{ required: true, message: '请输入目录', trigger: 'blur' }],
+        } as Record<string, CustomRule>,
+      };
+    });
     return {
       ...rules,
       version: [{ required: true, message: '请选择节点版本', trigger: 'change' }],
@@ -174,13 +198,19 @@ export class AsyncTask extends BaseNode {
         len: this.inputs.length,
         fields,
       },
+      caches: {
+        type: 'array',
+        required: false,
+        len: this.caches.length,
+        fields: shellCacheFields,
+      },
       failureMode: [{ required: true }],
     };
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   toDsl(): object {
-    const { name, version, inputs, failureMode } = this;
+    const { name, version, inputs, caches, failureMode } = this;
     const param: {
       [key: string]: string | number | boolean;
     } = {};
@@ -216,10 +246,16 @@ export class AsyncTask extends BaseNode {
       }
     });
 
+    const _cache: {
+      [key: string]: string;
+    } = {};
+    caches.forEach(({ name, value }) => (_cache[name] = value));
+
     return {
       alias: name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
       type: `${this.ownerRef}/${super.getRef()}:${version}`,
+      cache: caches.length === 0 ? undefined : _cache,
       param: inputs.length === 0 ? undefined : param,
     };
   }
