@@ -127,6 +127,7 @@ export default defineComponent({
           font-size: 14px;
           font-weight: 400;
           margin-top: 4px;
+          max-width: 530px;
         }
       }
     }
@@ -139,6 +140,7 @@ export default defineComponent({
   }
 
   .cache-drawer {
+    background-color: #eff4f9;
     height: 100%;
     box-sizing: border-box;
     padding: 20px 24px 20px 24px;
