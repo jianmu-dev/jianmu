@@ -133,14 +133,15 @@ export default defineComponent({
     }
 
     .el-drawer__body {
-      //.el-scrollbar .el-scrollbar__wrap .el-scrollbar__view {
-      //  height: 100%;
-      //}
+      .content-wrapper {
+        .el-scrollbar {
+          background-color: #eff4f9;
+        }
+      }
     }
   }
 
   .cache-drawer {
-    background-color: #eff4f9;
     height: 100%;
     box-sizing: border-box;
     padding: 20px 24px 20px 24px;
