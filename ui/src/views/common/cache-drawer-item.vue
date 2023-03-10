@@ -114,57 +114,6 @@ export default defineComponent({
   color: #3f536e;
   margin-bottom: 20px;
 
-  ::v-deep(.el-dialog) {
-    .el-dialog__header {
-      padding: 16px;
-      line-height: 24px;
-      height: 56px;
-      border-bottom: 1px transparent solid;
-      box-shadow: 0px 1px 0px #f2f4f8;
-      box-sizing: border-box;
-      color: #242e42;
-      font-weight: 500;
-    }
-
-    .el-dialog__body {
-      font-weight: 400;
-      font-size: 14px;
-      line-height: 22px;
-      color: #242e42;
-      min-height: 82px;
-      padding: 10px 16px;
-    }
-
-    .el-dialog__footer {
-      background-color: #fff;
-      box-shadow: 0px -1px 0px #f2f4f8;
-      height: 56px;
-      padding: 10px 16px;
-
-      .el-button {
-        box-shadow: none;
-      }
-
-      .el-button--default {
-        color: #36435c;
-        border-color: #b4bfcc;
-
-        &:hover {
-          border-color: #79879c;
-          color: #36435c;
-        }
-      }
-
-      .el-button--primary {
-        background: #096dd9;
-
-        &:hover {
-          background: #2e8de6;
-        }
-      }
-    }
-  }
-
   .top {
     display: flex;
     align-items: center;
@@ -332,6 +281,7 @@ export default defineComponent({
           &.dir {
             flex: 1;
             padding-right: 16px;
+            padding-left: 0;
 
             .jm-text-viewer {
               width: 100%;

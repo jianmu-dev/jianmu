@@ -255,7 +255,9 @@
                           </div>
                         </template>
                         <template #default="scope">
-                          <div class="enable" v-if="scope.row.available">可用</div>
+                          <div class="enable" v-if="scope.row.available">
+                            可用<i class="jm-icon-button-success icon"></i>
+                          </div>
                           <div class="disabled" v-else>不可用<i class="jm-icon-button-warning icon"></i></div>
                         </template>
                       </jm-table-column>
@@ -794,23 +796,39 @@ export default defineComponent({
 
             &.status {
               .cell {
+                font-weight: 400;
+                font-size: 14px;
+                line-height: 20px;
+                display: flex;
+                justify-content: center;
+
+                .enable,
+                .disabled {
+                  display: flex;
+                  align-items: center;
+
+                  .icon {
+                    margin-left: 2px;
+                  }
+                }
+
+                .enable {
+                  padding: 2px 4px 2px 8px;
+                  width: 58px;
+                  height: 24px;
+                  background: rgba(62, 187, 3, 0.15);
+                  border-radius: 12px;
+                  color: #3ebb03;
+                }
+
                 // 不可用演示
                 .disabled {
                   padding: 2px 6px 2px 8px;
                   width: 74px;
                   height: 24px;
-                  display: flex;
-                  align-items: center;
                   background: rgba(236, 77, 77, 0.1);
                   border-radius: 12px;
-                  font-weight: 400;
-                  font-size: 14px;
-                  line-height: 20px;
                   color: #ec4d4d;
-
-                  .icon {
-                    margin-left: 2px;
-                  }
                 }
               }
             }
