@@ -598,13 +598,13 @@ public class DslParser {
 
         var cache = this.global.get("cache");
         if (cache != null) {
-            if (cache instanceof Map) {
+            if (!(cache instanceof String) && !(cache instanceof List)) {
                 throw new DslException("global段cache格式配置错误");
             }
             if (cache instanceof List) {
                 ((List<?>) cache).forEach(v -> {
                     if (!(v instanceof String)) {
-                        throw new DslException("global段cache配置错误");
+                        throw new DslException("global段cache仅支持字符串类型");
                     }
                 });
             }
