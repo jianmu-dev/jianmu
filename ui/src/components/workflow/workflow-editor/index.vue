@@ -1,20 +1,35 @@
 <template>
   <div class="jm-workflow-editor">
     <template v-if="graph">
-      <toolbar :workflow-data="workflowData" @back="handleBack" @save="handleSave"/>
+      <toolbar
+        :workflow-data="workflowData"
+        @back="handleBack"
+        @save="handleSave"
+        @open-cache-panel="handleCachePanel"
+      />
       <node-config-panel
         v-if="selectedNodeId"
         v-model="nodeConfigPanelVisible"
         :node-id="selectedNodeId"
         :node-waring-clicked="nodeWaringClicked"
+        :workflow-data="workflowData"
         modal-class="node-config-panel-overlay"
-        @closed="handleNodeConfigPanelClosed"/>
+        @closed="handleNodeConfigPanelClosed"
+      />
+      <cache-panel
+        modal-class="node-config-panel-overlay"
+        v-model="cachePanelVisible"
+        :workflow-data="workflowData"
+        @closed="handleCachePanel"
+      />
     </template>
     <div class="main">
-      <node-panel v-if="graph" @node-selected="nodeId => handleNodeSelected(nodeId, true)"/>
-      <graph-panel :workflow-data="workflowData"
-                   @graph-created="handleGraphCreated"
-                   @node-selected="nodeId => handleNodeSelected(nodeId, false)"/>
+      <node-panel v-if="graph" @node-selected="nodeId => handleNodeSelected(nodeId, true)" />
+      <graph-panel
+        :workflow-data="workflowData"
+        @graph-created="handleGraphCreated"
+        @node-selected="nodeId => handleNodeSelected(nodeId, false)"
+      />
     </div>
   </div>
 </template>
@@ -25,8 +40,10 @@ import { cloneDeep } from 'lodash';
 import Toolbar from './layout/top/toolbar.vue';
 import NodePanel from './layout/left/node-panel.vue';
 import NodeConfigPanel from './layout/right/node-config-panel.vue';
+import CachePanel from './layout/right/cache-panel.vue';
 import GraphPanel from './layout/main/graph-panel.vue';
 import { IWorkflow } from './model/data/common';
+// eslint-disable-next-line no-redeclare
 import { Graph, Node } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
@@ -36,7 +53,7 @@ registerCustomVueShape();
 
 export default defineComponent({
   name: 'jm-workflow-editor',
-  components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel },
+  components: { Toolbar, NodePanel, NodeConfigPanel, GraphPanel, CachePanel },
   props: {
     modelValue: {
       type: Object as PropType<IWorkflow>,
@@ -51,6 +68,8 @@ export default defineComponent({
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeId = ref<string>('');
     const nodeWaringClicked = ref<boolean>(false);
+    const cachePanelVisible = ref<boolean>(false);
+    let checkCache: () => Promise<void>;
     let workflowValidator: WorkflowValidator;
 
     provide('getGraph', (): Graph => graph.value!);
@@ -93,6 +112,16 @@ export default defineComponent({
         graph.value!.unselect(selectedNodeId.value);
         selectedNodeId.value = '';
       },
+      cachePanelVisible,
+      handleCachePanel: async (visible: boolean, _checkGlobalParams: () => Promise<void>) => {
+        cachePanelVisible.value = visible;
+        // 是否是关闭
+        if (!visible) {
+          await checkCache();
+          return;
+        }
+        checkCache = _checkGlobalParams;
+      },
     };
   },
 });
@@ -109,7 +138,7 @@ export default defineComponent({
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #F0F2F5;
+  background-color: #f0f2f5;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;

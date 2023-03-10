@@ -1,6 +1,7 @@
 import { RuleItem } from 'async-validator';
 import { NodeTypeEnum } from './enumeration';
 import { ISelectableParam } from '../../../workflow-expression-editor/model/data';
+import { CacheTypeEnum } from '../../layout/right/cache-panel.vue';
 
 type TriggerValue = 'blur' | 'change';
 
@@ -38,8 +39,15 @@ export interface IWorkflowNode {
   toDsl(): object;
 }
 
+export interface ICache {
+  ref: string;
+  key: string;
+  type?: CacheTypeEnum;
+}
+
 export interface IGlobal {
   concurrent: number | boolean;
+  caches?: ICache[];
 }
 
 /**

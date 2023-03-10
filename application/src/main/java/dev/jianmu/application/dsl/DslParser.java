@@ -591,18 +591,23 @@ public class DslParser {
             if (!(concurrent instanceof Integer)) {
                 throw new DslException("concurrent必须为大于0、小于10000的正整数");
             }
-            if ((int) concurrent < 1 || (int) concurrent > 9999){
+            if ((int) concurrent < 1 || (int) concurrent > 9999) {
                 throw new DslException("concurrent必须为大于0、小于10000的正整数");
             }
         }
 
         var cache = this.global.get("cache");
-        if (cache instanceof List) {
-            ((List<?>) cache).forEach(v -> {
-                if (!(v instanceof String)) {
-                    throw new DslException("cache配置错误");
-                }
-            });
+        if (cache != null) {
+            if (!(cache instanceof String) && !(cache instanceof List)) {
+                throw new DslException("global段cache格式配置错误");
+            }
+            if (cache instanceof List) {
+                ((List<?>) cache).forEach(v -> {
+                    if (!(v instanceof String)) {
+                        throw new DslException("global段cache仅支持字符串类型");
+                    }
+                });
+            }
         }
     }
 
@@ -638,15 +643,7 @@ public class DslParser {
         if (nodeName.equalsIgnoreCase("end")) {
             throw new DslException("节点名称不能使用" + nodeName);
         }
-        // 校验节点cache
-        var cache = node.get("cache");
-        if (cache instanceof Map) {
-            ((Map<?, ?>) cache).forEach((k, v) -> {
-                if (!this.caches.contains((String) k)) {
-                    throw new DslException("global段未声明缓存：" + k);
-                }
-            });
-        }
+       this.checkNodeCache(nodeName, node);
 
         // 如果为Shell Node，不校验type
         var image = node.get("image");
@@ -658,6 +655,22 @@ public class DslParser {
         if (null == type) {
             throw new DslException("Node type未设置");
         }
+    }
+
+    // 校验节点cache
+    private void checkNodeCache(String nodeName, Map<?, ?> node) {
+        var cache = node.get("cache");
+        if (cache == null) {
+            return;
+        }
+        if (!(cache instanceof Map)) {
+            throw new DslException("节点\"" + nodeName + "\"缓存格式配置错误");
+        }
+        ((Map<?, ?>) cache).forEach((k, v) -> {
+            if (!this.caches.contains((String) k)) {
+                throw new DslException("global段未声明缓存：" + k);
+            }
+        });
     }
 
     private void workflowSyntaxCheck() {
@@ -675,6 +688,7 @@ public class DslParser {
     }
 
     private void checkNode(String nodeName, Map<?, ?> node) {
+        this.checkNodeCache(nodeName, node);
         // 如果为Shell Node，不校验type
         var image = node.get("image");
         if (image != null) {

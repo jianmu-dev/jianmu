@@ -96,16 +96,15 @@ export class WorkflowTool {
   optimizeSelectionBoxStyle(): void {
     const factor = this.graph.zoom();
 
-    Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-widget-transform'))
-      .forEach(el => {
-        const t = selectedBorderWidth * factor;
-        el.style.borderWidth = `${t}px`;
-        el.style.marginLeft = `-${t}px`;
-        el.style.marginTop = `-${t}px`;
-      });
+    Array.from(this.graph.container.querySelectorAll<SVGElement>('.x6-widget-transform')).forEach(el => {
+      const t = selectedBorderWidth * factor;
+      el.style.borderWidth = `${t}px`;
+      el.style.marginLeft = `-${t}px`;
+      el.style.marginTop = `-${t}px`;
+    });
   }
 
-  slimGraphData({ cells }: { cells?: Cell.Properties[]; }): void {
+  slimGraphData({ cells }: { cells?: Cell.Properties[] }): void {
     if (!cells) {
       return;
     }
@@ -145,9 +144,11 @@ export class WorkflowTool {
     if (nodeProxyArr[0].isTrigger()) {
       idArr.splice(0, 1);
       const nodeProxy = nodeProxyArr.splice(0, 1)[0];
+      // eslint-disable-next-line prefer-const
       trigger = nodeProxy.getData().toDsl();
     }
     const pipeline: {
+      // eslint-disable-next-line @typescript-eslint/ban-types
       [key: string]: object;
     } = {};
 
@@ -156,8 +157,7 @@ export class WorkflowTool {
       const ref = `node_${index}`;
       const nodeData = nodeProxy.getData();
 
-      if (nodeData instanceof AsyncTask &&
-        (nodeData as AsyncTask).outputs.length > 0) {
+      if (nodeData instanceof AsyncTask && (nodeData as AsyncTask).outputs.length > 0) {
         // 只有在异步任务节点有输出参数时，才有可能被下游节点引用
         idMap.set(idArr[index], ref);
       }
@@ -165,17 +165,50 @@ export class WorkflowTool {
       pipeline[ref] = nodeData.toDsl();
     });
 
+    // 构造global
+    const global: {
+      concurrent: boolean | number;
+      cache: string[] | string;
+    } = { concurrent: false, cache: [] };
+
+    global.concurrent = workflowData.global.concurrent;
+
+    const getGlobal = () => {
+      if (workflowData.global.caches?.length === 0) {
+        return {
+          concurrent: workflowData.global.concurrent,
+          cache: undefined,
+        };
+      } else if (workflowData.global.caches?.length === 1) {
+        return {
+          concurrent: global.concurrent,
+          cache: workflowData.global.caches[0].ref,
+        };
+      } else {
+        workflowData.global.caches?.forEach(item => {
+          // cache多个时为数组，typeof cache === 'object' 避免报错
+          if (typeof global.cache !== 'object') {
+            return;
+          }
+          global.cache.push(item.ref);
+        });
+        return global;
+      }
+    };
+
     let dsl = yaml.stringify({
       name: workflowData.name,
       description: workflowData.description,
-      global: workflowData.global,
+      global: getGlobal(),
       trigger,
       pipeline,
     });
 
-    idMap.forEach((value, key) =>
-      // TODO 待完善，优化成正则表达式提取方式
-      (dsl = dsl.replaceAll('${' + key + '.', '${' + value + '.')));
+    idMap.forEach(
+      (value, key) =>
+        // TODO 待完善，优化成正则表达式提取方式
+        (dsl = dsl.replaceAll('${' + key + '.', '${' + value + '.')),
+    );
 
     dsl += '\n\n' + `raw-data: ${JSON.stringify(workflowData.data)}`;
 
