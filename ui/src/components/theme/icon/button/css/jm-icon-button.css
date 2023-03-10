@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'jm-icon-button';
-  src: url('../font/jm-icon-button.eot?96424042');
-  src: url('../font/jm-icon-button.eot?96424042#iefix') format('embedded-opentype'),
-    url('../font/jm-icon-button.woff2?96424042') format('woff2'),
-    url('../font/jm-icon-button.woff?96424042') format('woff'),
-    url('../font/jm-icon-button.ttf?96424042') format('truetype'),
-    url('../font/jm-icon-button.svg?96424042#jm-icon-button') format('svg');
+  src: url('../font/jm-icon-button.eot?56855584');
+  src: url('../font/jm-icon-button.eot?56855584#iefix') format('embedded-opentype'),
+    url('../font/jm-icon-button.woff2?56855584') format('woff2'),
+    url('../font/jm-icon-button.woff?56855584') format('woff'),
+    url('../font/jm-icon-button.ttf?56855584') format('truetype'),
+    url('../font/jm-icon-button.svg?56855584#jm-icon-button') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -15,7 +15,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'jm-icon-button';
-    src: url('../font/jm-icon-button.svg?96424042#jm-icon-button') format('svg');
+    src: url('../font/jm-icon-button.svg?56855584#jm-icon-button') format('svg');
   }
 }
 */
@@ -136,3 +136,6 @@
 .jm-icon-button-warning:before {
   content: '\e81a';
 } /* '' */
+.jm-icon-button-success:before {
+  content: '\e836';
+} /* '' */
