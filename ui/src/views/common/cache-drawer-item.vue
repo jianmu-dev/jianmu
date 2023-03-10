@@ -59,6 +59,8 @@ import { computed, defineComponent, getCurrentInstance, PropType, ref } from 'vu
 import { IProjectCacheVo } from '@/api/dto/cache';
 import yaml from 'yaml';
 import { clearCache } from '@/api/cache';
+import defaultIcon from '@/components/workflow/workflow-editor/svgs/shape/async-task.svg';
+import shellIcon from '@/components/workflow/workflow-editor/svgs/shape/shell.svg';
 
 export default defineComponent({
   props: {
@@ -69,11 +71,22 @@ export default defineComponent({
   },
   setup(props) {
     const { proxy } = getCurrentInstance() as any;
-    const toggle = ref<boolean>(true);
+    const toggle = ref<boolean>(false);
     const dialogVisible = ref<boolean>(false);
     const loading = ref<boolean>(false);
     const originData = computed<IProjectCacheVo>(() => props.cacheData);
-    const nodeICons = ref<string[]>(originData.value.nodeCaches.map(item => yaml.parse(item.metadata).icon));
+    const nodeICons = ref<string[]>(
+      originData.value.nodeCaches.map(item => {
+        const data = yaml.parse(item.metadata);
+        if (data.icon === undefined) {
+          return shellIcon;
+        }
+        if (data.icon === null) {
+          return defaultIcon;
+        }
+        return data.icon;
+      }),
+    );
     const toClear = () => {
       dialogVisible.value = true;
     };

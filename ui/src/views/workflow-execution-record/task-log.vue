@@ -248,7 +248,7 @@
                             <jm-tooltip>
                               <template #content>
                                 <p>对于不可用的缓存，可到项目卡片-</p>
-                                <p>更多-缓存中清理或项目编辑页删除</p>
+                                <p style="margin-top: 5px">更多-缓存中清理或项目编辑页删除</p>
                               </template>
                               <i class="icon jm-icon-button-help"></i>
                             </jm-tooltip>
