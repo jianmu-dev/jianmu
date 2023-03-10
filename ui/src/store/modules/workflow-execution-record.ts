@@ -116,7 +116,7 @@ export default {
             startTime: instance.startTime,
             endTime: instance.endTime,
             status: instance.status,
-            taskCache: instance.taskCache,
+            taskCaches: instance.taskCaches,
           };
         });
       commit('mutateRecordDetail', { project, allRecords, record, recordDsl, taskRecords, nodeInfos });
