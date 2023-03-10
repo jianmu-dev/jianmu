@@ -4,23 +4,25 @@
       <div class="mask">
         <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
           <template #content>
-            <div style="white-space: nowrap" v-html="tips"/>
+            <div style="white-space: nowrap" v-html="tips" />
           </template>
           <div class="tooltip-section"></div>
         </jm-tooltip>
       </div>
     </template>
-    <jm-popover v-else-if="popoverVisible"
-                :append-to-body="false"
-                :offset="0"
-                trigger="hover"
-                width="auto"
-                placement="top">
+    <jm-popover
+      v-else-if="popoverVisible"
+      :append-to-body="false"
+      :offset="0"
+      trigger="hover"
+      width="auto"
+      placement="top"
+    >
       <template #reference>
         <div class="mask">
           <jm-tooltip v-if="tips" placement="bottom" :appendToBody="false">
             <template #content>
-              <div style="white-space: nowrap" v-html="tips"/>
+              <div style="white-space: nowrap" v-html="tips" />
             </template>
             <div class="tooltip-section"></div>
           </jm-tooltip>
@@ -68,13 +70,18 @@
           <div class="separator"></div>
         </template>
         <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.LOG)">
-          <div class="icon view-log"/>
+          <div class="icon view-log" />
           <div class="txt">日志</div>
         </div>
         <div class="separator"></div>
         <div class="item" @click="handleClick(NodeToolbarTabTypeEnum.PARAMS)">
-          <div class="icon view-params"/>
+          <div class="icon view-params" />
           <div class="txt">参数</div>
+        </div>
+        <div class="separator" v-if="taskCaches"></div>
+        <div class="item" v-if="taskCaches" @click="handleClick(NodeToolbarTabTypeEnum.CACHE)">
+          <div class="icon view-cache" />
+          <div class="txt">缓存</div>
         </div>
       </div>
     </jm-popover>
@@ -97,6 +104,10 @@ export default defineComponent({
     readonly: {
       type: Boolean,
       required: true,
+    },
+    taskCaches: {
+      type: Boolean,
+      default: false,
     },
     taskBusinessId: String,
     taskStatus: String as PropType<TaskStatusEnum>,
@@ -222,7 +233,7 @@ export default defineComponent({
 
       &:active {
         .icon {
-          background-color: #EFF7FF;
+          background-color: #eff7ff;
           border-radius: 2px;
         }
       }
@@ -250,6 +261,9 @@ export default defineComponent({
         &.view-params {
           background-image: url('./svgs/task-tool/view-params.svg');
         }
+        &.view-cache {
+          background-image: url('./svgs/task-tool/view-cache.svg');
+        }
       }
 
       .txt {
@@ -264,7 +278,7 @@ export default defineComponent({
       margin: 0 10px 20px 10px;
       width: 1px;
       height: 15px;
-      background-color: #D9DEE7;
+      background-color: #d9dee7;
       overflow: hidden;
     }
   }

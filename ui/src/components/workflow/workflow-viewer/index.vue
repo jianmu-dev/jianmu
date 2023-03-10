@@ -1,28 +1,41 @@
 <template>
   <div class="jm-workflow-viewer">
     <div v-if="!readonly && !dslMode && graph && tasks.length > 0" class="task-states">
-      <task-state v-for="{status, count} in taskStates"
-                  :key="status" :status="status" :count="count"
-                  @mouseenter="graph?.highlightNodeState(status, true)"
-                  @mouseleave="graph?.highlightNodeState(status, false)"/>
+      <task-state
+        v-for="{ status, count } in taskStates"
+        :key="status"
+        :status="status"
+        :count="count"
+        @mouseenter="graph?.highlightNodeState(status, true)"
+        @mouseleave="graph?.highlightNodeState(status, false)"
+      />
     </div>
-    <toolbar v-if="graph" :readonly="readonly" :dsl-type="graph?.dslType" v-model:dsl-mode="dslMode" :zoom-value="zoom"
-             :fullscreen-el="fullscreenEl"
-             @click-process-log="clickProcessLog"
-             @on-zoom="handleZoom"
-             @on-fullscreen="handleFullscreen"
-             @rotate="handleRotation"/>
-    <node-toolbar v-if="!dslMode && nodeEvent"
-                  :graph-type="graphType"
-                  :readonly="readonly"
-                  :task-business-id="selectedTask?.businessId"
-                  :task-status="selectedTask?.status"
-                  :node-event="nodeEvent"
-                  :zoom="zoom"
-                  @node-click="clickNode"
-                  @mouseleave="destroyNodeToolbar"/>
-    <div v-show="!dslMode" class="canvas" ref="container"/>
-    <jm-dsl-editor v-if="dslMode" :value="workflowGraph?.visibleDsl" readonly/>
+    <toolbar
+      v-if="graph"
+      :readonly="readonly"
+      :dsl-type="graph?.dslType"
+      v-model:dsl-mode="dslMode"
+      :zoom-value="zoom"
+      :fullscreen-el="fullscreenEl"
+      @click-process-log="clickProcessLog"
+      @on-zoom="handleZoom"
+      @on-fullscreen="handleFullscreen"
+      @rotate="handleRotation"
+    />
+    <node-toolbar
+      v-if="!dslMode && nodeEvent"
+      :graph-type="graphType"
+      :readonly="readonly"
+      :task-business-id="selectedTask?.businessId"
+      :task-status="selectedTask?.status"
+      :task-caches="selectedTask?.taskCaches"
+      :node-event="nodeEvent"
+      :zoom="zoom"
+      @node-click="clickNode"
+      @mouseleave="destroyNodeToolbar"
+    />
+    <div v-show="!dslMode" class="canvas" ref="container" />
+    <jm-dsl-editor v-if="dslMode" :value="workflowGraph?.visibleDsl" readonly />
   </div>
 </template>
 
@@ -115,7 +128,13 @@ export default defineComponent({
           return;
         }
 
-        workflowGraph.value = new WorkflowGraph(props.dsl, props.triggerType, props.nodeInfos, container.value as HTMLElement, direction);
+        workflowGraph.value = new WorkflowGraph(
+          props.dsl,
+          props.triggerType,
+          props.nodeInfos,
+          container.value as HTMLElement,
+          direction,
+        );
         graph.value = workflowGraph.value!.graph;
 
         updateZoom();
@@ -156,23 +175,31 @@ export default defineComponent({
         }
         return graph.value!.getGraphType();
       }),
-      selectedTask: computed<{
-        businessId: string;
-        status: TaskStatusEnum;
-      } | undefined>(() => {
+      selectedTask: computed<
+        | {
+            businessId: string;
+            status: TaskStatusEnum;
+            taskCaches: boolean;
+          }
+        | undefined
+      >(() => {
         if (!nodeEvent.value || nodeEvent.value.type !== NodeTypeEnum.ASYNC_TASK) {
           return;
         }
 
         // 按开始时间降序排序，保证第一个是最新的
         const tasks = sortTasks(props.tasks, true, nodeEvent.value.id);
-        return tasks.length === 0 ? {
-          businessId: '',
-          status: TaskStatusEnum.INIT,
-        } : {
-          businessId: tasks[0].businessId,
-          status: tasks[0].status,
-        };
+        return tasks.length === 0
+          ? {
+            businessId: '',
+            status: TaskStatusEnum.INIT,
+            taskCaches: false,
+          }
+          : {
+            businessId: tasks[0].businessId,
+            status: tasks[0].status,
+            taskCaches: !!tasks[0].taskCaches,
+          };
       }),
       dslMode,
       nodeEvent,
@@ -228,8 +255,10 @@ export default defineComponent({
           return;
         }
 
-        const direction = graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL ?
-          GraphDirectionEnum.VERTICAL : GraphDirectionEnum.HORIZONTAL;
+        const direction =
+          graph.value!.getDirection() === GraphDirectionEnum.HORIZONTAL
+            ? GraphDirectionEnum.VERTICAL
+            : GraphDirectionEnum.HORIZONTAL;
 
         // fix: #I5EH4G
         workflowGraph.value!.destroy();
@@ -246,17 +275,19 @@ export default defineComponent({
           count: number;
         }[] = [];
 
-        const tasks = props.tasks.filter(({ defKey }) =>
-          defKey !== 'Start' && defKey !== 'End' && defKey !== 'Condition' && defKey !== 'Switch');
+        const tasks = props.tasks.filter(
+          ({ defKey }) => defKey !== 'Start' && defKey !== 'End' && defKey !== 'Condition' && defKey !== 'Switch',
+        );
         const taskMap = new Map();
         // 按开始时间生序排序，保证最后一个是最新的
-        sortTasks(tasks, false)
-          .forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
+        sortTasks(tasks, false).forEach((task: ITaskExecutionRecordVo) => taskMap.set(task.nodeName, task));
 
-        Object.keys(TaskStatusEnum).forEach(status => sArr.push({
-          status,
-          count: status === TaskStatusEnum.INIT ? (graph.value?.getAsyncTaskNodeCount() - taskMap.size) : 0,
-        }));
+        Object.keys(TaskStatusEnum).forEach(status =>
+          sArr.push({
+            status,
+            count: status === TaskStatusEnum.INIT ? graph.value?.getAsyncTaskNodeCount() - taskMap.size : 0,
+          }),
+        );
 
         taskMap.forEach(({ status }: ITaskExecutionRecordVo) => {
           const s = sArr.find(item => item.status === status);
@@ -278,11 +309,11 @@ export default defineComponent({
 
   @keyframes x6-edge-running {
     to {
-      stroke-dashoffset: -1000
+      stroke-dashoffset: -1000;
     }
   }
 
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   position: relative;
   height: 100%;
 
@@ -306,7 +337,7 @@ export default defineComponent({
       padding: 5px;
       font-size: 14px;
       font-weight: 400;
-      color: #FFFFFF;
+      color: #ffffff;
       line-height: 22px;
 
       background-color: rgba(51, 51, 51, 0.75);
