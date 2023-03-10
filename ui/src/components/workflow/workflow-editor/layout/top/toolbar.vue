@@ -18,6 +18,11 @@
           <button class="jm-icon-workflow-zoom-center" @click="zoom(ZoomTypeEnum.CENTER)"></button>
         </jm-tooltip>
       </div>
+      <div class="cache" @click="openCachePanel">
+        <i class="jm-icon-workflow-cache" />
+        <span>缓存</span>
+        <i class="cache-icon" v-if="cacheIconVisible" />
+      </div>
       <div class="configs">
         最大并发数
         <i class="jm-icon-button-help" @mouseover="tooltipVisible = true" @mouseout="tooltipVisible = false"></i>
@@ -56,6 +61,7 @@ import { IWorkflow } from '../../model/data/common';
 import { WorkflowValidator } from '../../model/workflow-validator';
 import { cloneDeep } from 'lodash';
 import { compare } from '../../model/util/object';
+import { Global } from '../../model/data/global';
 
 export default defineComponent({
   components: { ProjectPanel },
@@ -65,7 +71,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['back', 'save'],
+  emits: ['back', 'save', 'open-cache-panel'],
   setup(props, { emit }) {
     const { proxy } = getCurrentInstance() as any;
     let workflowBackUp = cloneDeep(props.workflowData);
@@ -76,6 +82,7 @@ export default defineComponent({
     const getWorkflowValidator = inject('getWorkflowValidator') as () => WorkflowValidator;
     const workflowValidator = getWorkflowValidator();
     const zoomVal = ref<number>(graph.zoom());
+    const cacheIconVisible = ref<boolean>(false);
     const options = ref([
       {
         value: '1',
@@ -131,6 +138,16 @@ export default defineComponent({
       }
     };
 
+    // 缓存校验图标
+    const checkCache = async (): Promise<void> => {
+      try {
+        await new Global(workflowForm.value.global).validateCache();
+        cacheIconVisible.value = false;
+      } catch (err) {
+        cacheIconVisible.value = true;
+      }
+    };
+
     return {
       ZoomTypeEnum,
       workflowForm,
@@ -138,7 +155,7 @@ export default defineComponent({
       zoomPercentage: computed<string>(() => `${Math.round(zoomVal.value * 100)}%`),
       goBack: async () => {
         const originData = workflowBackUp.data ? JSON.parse(workflowBackUp.data) : {};
-        let targetData: any = graph.toJSON();
+        const targetData: any = graph.toJSON();
         if (targetData.cells.length === 0) {
           delete targetData.cells;
         }
@@ -197,6 +214,10 @@ export default defineComponent({
           proxy.$error(message);
         }
       },
+      openCachePanel: () => {
+        emit('open-cache-panel', true, checkCache);
+      },
+      cacheIconVisible,
       tooltipVisible,
       options,
       concurrentVal,
@@ -267,6 +288,7 @@ export default defineComponent({
   .right {
     display: flex;
     justify-content: right;
+    align-items: center;
 
     .tools {
       display: flex;
@@ -280,6 +302,37 @@ export default defineComponent({
 
       .jm-icon-workflow-zoom-in {
         margin-right: 10px;
+      }
+    }
+
+    .cache {
+      height: 20px;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+      color: #042749;
+      display: flex;
+      align-items: center;
+      margin: 0 0 0 50px;
+      cursor: pointer;
+      position: relative;
+
+      .jm-icon-workflow-cache {
+        margin-right: 6px;
+
+        &::before {
+          color: #6b7b8d;
+        }
+      }
+
+      .cache-icon {
+        display: flex;
+        width: 12px;
+        height: 12px;
+        background: url('../../svgs/cache-waring.svg');
+        position: absolute;
+        right: -8px;
+        top: -4px;
       }
     }
 
@@ -303,6 +356,7 @@ export default defineComponent({
               border-color: #096dd9;
             }
           }
+
           .el-input__inner {
             border-color: #dde3ee;
           }

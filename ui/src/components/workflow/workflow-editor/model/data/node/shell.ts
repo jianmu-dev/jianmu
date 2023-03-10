@@ -9,27 +9,43 @@ export interface IShellEnv {
   value: string;
 }
 
+/**
+ * 模拟缓存定义
+ */
+export interface ICache {
+  key: string;
+  name: string;
+  value: string;
+}
+
 export class Shell extends BaseNode {
   image: string;
   readonly envs: IShellEnv[];
   script: string;
+  caches: ICache[];
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
 
-  constructor(name: string = 'shell', image: string = '',
-    envs: IShellEnv[] = [], script: string = '',
-    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND, validateParam?: ValidateParamFn) {
+  constructor(
+    name = 'shell',
+    image = '',
+    envs: IShellEnv[] = [],
+    script = '',
+    caches: ICache[] = [],
+    failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
+    validateParam?: ValidateParamFn,
+  ) {
     super(NodeRefEnum.SHELL, name, NodeTypeEnum.SHELL, icon, 'https://v2.jianmu.dev/guide/shell-node.html');
     this.image = image;
     this.envs = envs;
     this.script = script;
+    this.caches = caches;
     this.failureMode = failureMode;
     this.validateParam = validateParam;
   }
 
-  static build({ name, image, envs, script, failureMode }: any,
-    validateParam?: ValidateParamFn): Shell {
-    return new Shell(name, image, envs, script, failureMode, validateParam);
+  static build({ name, image, envs, script, caches, failureMode }: any, validateParam?: ValidateParamFn): Shell {
+    return new Shell(name, image, envs, script, caches, failureMode, validateParam);
   }
 
   getFormRules(): Record<string, CustomRule> {
@@ -63,6 +79,18 @@ export class Shell extends BaseNode {
       };
     });
 
+    const shellCacheFields: Record<string, CustomRule> = {};
+    this.caches.forEach((_, index) => {
+      shellCacheFields[index] = {
+        type: 'object',
+        required: true,
+        fields: {
+          name: [{ required: true, message: '请选择缓存', trigger: 'change' }],
+          value: [{ required: true, message: '请输入目录', trigger: 'blur' }],
+        } as Record<string, CustomRule>,
+      };
+    });
+
     return {
       ...rules,
       image: [{ required: true, message: '请选择或输入镜像', trigger: 'change' }],
@@ -72,24 +100,36 @@ export class Shell extends BaseNode {
         len: this.envs.length,
         fields: shellEnvFields,
       },
+      caches: {
+        type: 'array',
+        required: false,
+        len: this.caches.length,
+        fields: shellCacheFields,
+      },
       failureMode: [{ required: true }],
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   toDsl(): object {
-    const { name, image, envs, script, failureMode } = this;
+    const { name, image, envs, script, caches, failureMode } = this;
     const environment: {
       [key: string]: string;
     } = {};
     envs.forEach(({ name, value }) => (environment[name] = value));
 
+    const _cache: {
+      [key: string]: string;
+    } = {};
+    caches.forEach(({ name, value }) => (_cache[name] = value));
+
     return {
       alias: name,
       'on-failure': failureMode === FailureModeEnum.SUSPEND ? undefined : failureMode,
       image,
+      cache: caches.length === 0 ? undefined : _cache,
       environment: envs.length === 0 ? undefined : environment,
       script: script ? script.split('\n') : undefined,
     };
   }
 }
-
