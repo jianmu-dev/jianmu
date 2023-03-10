@@ -51,7 +51,6 @@ export default defineComponent({
       proxy.openAuthDialog({ appContext, LoginVerify });
     };
     onMounted(async () => {
-      // 如果路由中带有workflow的回显数据不在发送请求
       if (payload && editMode) {
         // 初始化走这里获取到的cache为空
         workflow.value = JSON.parse(payload as string);
@@ -61,7 +60,6 @@ export default defineComponent({
         return;
       }
       if (editMode) {
-        // 刷新后走这个分支cache有数据
         authLogin();
         try {
           loading.value = true;
