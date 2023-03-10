@@ -407,7 +407,7 @@ public class ProjectApplication {
         // 删除cache
         if (lastWorkflow.getCaches() != null) {
             lastWorkflow.getCaches().stream()
-                    .filter(cache -> !workflow.getCaches().contains(cache))
+                    .filter(cache -> workflow.getCaches() == null || !workflow.getCaches().contains(cache))
                     .forEach(cache -> {
                         this.publisher.publishEvent(VolumeDeletedEvent.aVolumeDeletedEvent()
                                 .name(cache)
@@ -420,7 +420,7 @@ public class ProjectApplication {
         // 创建cache
         if (workflow.getCaches() != null) {
             workflow.getCaches().stream()
-                    .filter(cache -> !lastWorkflow.getCaches().contains(cache))
+                    .filter(cache -> lastWorkflow.getCaches() == null || !lastWorkflow.getCaches().contains(cache))
                     .forEach(cache -> {
                         this.publisher.publishEvent(VolumeCreatedEvent.aVolumeCreatedEvent()
                                 .name(cache)
