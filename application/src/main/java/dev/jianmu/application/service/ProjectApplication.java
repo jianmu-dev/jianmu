@@ -418,16 +418,18 @@ public class ProjectApplication {
                     });
         }
         // 创建cache
-        workflow.getCaches().stream()
-                .filter(cache -> !lastWorkflow.getCaches().contains(cache))
-                .forEach(cache -> {
-                    this.publisher.publishEvent(VolumeCreatedEvent.aVolumeCreatedEvent()
-                            .name(cache)
-                            .scope(Volume.Scope.PROJECT)
-                            .workflowRef(workflow.getRef())
-                            .build()
-                    );
-                });
+        if (workflow.getCaches() != null) {
+            workflow.getCaches().stream()
+                    .filter(cache -> !lastWorkflow.getCaches().contains(cache))
+                    .forEach(cache -> {
+                        this.publisher.publishEvent(VolumeCreatedEvent.aVolumeCreatedEvent()
+                                .name(cache)
+                                .scope(Volume.Scope.PROJECT)
+                                .workflowRef(workflow.getRef())
+                                .build()
+                        );
+                    });
+        }
     }
 
     // diff DSL

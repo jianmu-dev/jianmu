@@ -515,6 +515,9 @@ public class ViewController {
     public List<ProjectCacheVo> getProjectCache(@PathVariable String workflowRef) {
         var volumes = this.cacheApplication.findByWorkflowRefAndScope(workflowRef, Volume.Scope.PROJECT);
         var workflow = this.projectApplication.findLastWorkflowByRef(workflowRef);
+        if (workflow.getCaches() == null) {
+            return List.of();
+        }
         var parse = DslParser.parse(workflow.getDslText());
         return workflow.getCaches().stream()
                 .map(cache -> {
