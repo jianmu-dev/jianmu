@@ -140,8 +140,13 @@ export default defineComponent({
 
     // 缓存校验图标
     const checkCache = async (): Promise<void> => {
+      const { global } = workflowForm.value;
+      // 如果没有值直接忽略
+      if (global && (global.caches?.length === 0 || !global.caches)) {
+        return;
+      }
       try {
-        await new Global(workflowForm.value.global).validateCache();
+        await new Global(global).validateCache();
         cacheIconVisible.value = false;
       } catch (err) {
         cacheIconVisible.value = true;
