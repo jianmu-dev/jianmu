@@ -79,12 +79,20 @@ export default defineComponent({
 
     // 初始化构造遍历数据
     const cacheList: any = [];
-    workflowForm.value.global.caches?.forEach(item => {
-      const cache = { ref: item, key: uuidv4() };
-      cacheList.push(cache);
-      cacheTypes[cache.key] = CacheTypeEnum.EDIT;
-    });
-    globalForm.value.caches = cacheList;
+    if (workflowForm.value.global.caches && workflowForm.value.global.caches?.length > 0) {
+      if (typeof workflowForm.value.global.caches !== 'object') {
+        const cache = { ref: workflowForm.value.global.caches, key: uuidv4() };
+        cacheList.push(cache);
+        cacheTypes[cache.key] = CacheTypeEnum.EDIT;
+      } else {
+        workflowForm.value.global.caches?.forEach(item => {
+          const cache = { ref: item, key: uuidv4() };
+          cacheList.push(cache);
+          cacheTypes[cache.key] = CacheTypeEnum.EDIT;
+        });
+      }
+      globalForm.value.caches = cacheList;
+    }
 
     return {
       globalForm,
