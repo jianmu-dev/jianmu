@@ -1,10 +1,7 @@
 package dev.jianmu.infrastructure;
 
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -55,6 +52,8 @@ public class GlobalProperties {
         private Registry registry = new Registry();
         private K8s k8s = new K8s();
         private Container container = new Container();
+        // IfNotPresent, Always and Never
+        private String imagePullPolicy = "IfNotPresent";
 
         @Data
         @Component
@@ -72,8 +71,6 @@ public class GlobalProperties {
             private String namespace = "jianmu";
             private String placeholder = "jianmudev/placeholder:0.3";
             private String keepalive = "alpine:3.13.6";
-            // IfNotPresent, Always and Never
-            private String imagePullPolicy = "IfNotPresent";
         }
 
         @Data
