@@ -222,7 +222,10 @@ public class TaskInstanceInternalApplication {
                             .triggerId(triggerId)
                             .build());
                     // 创建Volume记录
-                    var volume = Volume.Builder.aVolume().name(triggerId).scope(Volume.Scope.WORKFLOW).build();
+                    var volume = Volume.Builder.aVolume().name(triggerId)
+                            .scope(Volume.Scope.WORKFLOW)
+                            .workflowRef(startAsyncTaskInstance.getWorkflowRef())
+                            .build();
                     this.volumeRepository.create(volume);
                     log.info("创建Volume: {}", volume.getName());
                 });

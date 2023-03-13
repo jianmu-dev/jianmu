@@ -38,7 +38,7 @@ public class CacheApplication {
     @Transactional
     public void create(String workflowRef, String name) {
         var volume = Volume.Builder.aVolume()
-                .name(String.join("_", workflowRef, name))
+                .name(name)
                 .scope(Volume.Scope.PROJECT)
                 .workflowRef(workflowRef)
                 .build();
@@ -49,7 +49,8 @@ public class CacheApplication {
                 .nodeInfo(NodeInfo.Builder.aNodeDef().name("start").build())
                 .asyncTaskRef("cache")
                 .businessId(volume.getId())
-                .triggerId(volume.getName())
+                .triggerId(volume.getMountName())
+                .workflowRef(workflowRef)
                 .build();
         this.volumeRepository.create(volume);
         this.taskInstanceRepository.add(task);
@@ -86,7 +87,8 @@ public class CacheApplication {
                 .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
                 .asyncTaskRef("cache")
                 .businessId(volume.getId())
-                .triggerId(volume.getName())
+                .triggerId(volume.getMountName())
+                .workflowRef(volume.getWorkflowRef())
                 .build();
         this.volumeRepository.clean(volume);
         this.taskInstanceRepository.add(task);
@@ -103,14 +105,15 @@ public class CacheApplication {
                 .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
                 .asyncTaskRef("cache")
                 .businessId(volume.getId())
-                .triggerId(volume.getName())
+                .triggerId(volume.getMountName())
+                .workflowRef(volume.getWorkflowRef())
                 .build();
         this.taskInstanceRepository.add(task);
     }
 
     @Transactional
     public void deleteByNameAndWorkflowRef(String name, String workflowRef) {
-        var volume = this.volumeRepository.findByName(String.join("_", workflowRef, name))
+        var volume = this.volumeRepository.findByNameAndWorkflowRef(name, workflowRef)
                 .orElseThrow(() -> new DataNotFoundException("未找到要删除的Cache"));
         var taskInstances = this.taskInstanceRepository.findByBusinessId(volume.getId());
         var task = TaskInstance.Builder.anInstance()
@@ -119,7 +122,8 @@ public class CacheApplication {
                 .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
                 .asyncTaskRef("cache")
                 .businessId(volume.getId())
-                .triggerId(volume.getName())
+                .triggerId(volume.getMountName())
+                .workflowRef(workflowRef)
                 .build();
         this.taskInstanceRepository.add(task);
     }
@@ -134,7 +138,8 @@ public class CacheApplication {
                     .nodeInfo(NodeInfo.Builder.aNodeDef().name("end").build())
                     .asyncTaskRef("cache")
                     .businessId(volume.getId())
-                    .triggerId(volume.getName())
+                    .triggerId(volume.getMountName())
+                    .workflowRef(workflowRef)
                     .build();
             this.taskInstanceRepository.add(task);
         });
@@ -145,8 +150,8 @@ public class CacheApplication {
         TaskInstance taskInstance = this.taskInstanceRepository.findById(taskInstanceId)
                 .orElseThrow(() -> new DataNotFoundException("未找到该任务实例"));
         MDC.put("triggerId", taskInstance.getTriggerId());
-        var volume = this.volumeRepository.findByName(taskInstance.getTriggerId())
-                .orElseThrow(() -> new DataNotFoundException("未找到volume，name: " + taskInstance.getTriggerId()));
+        var volume = this.volumeRepository.findByNameAndWorkflowRef(this.findVolumeName(taskInstance.getTriggerId()), taskInstance.getWorkflowRef())
+                .orElseThrow(() -> new DataNotFoundException("未找到volume：" + taskInstance.getTriggerId()));
         if (taskInstance.isCreationVolume()) {
             // 查找Volume并激活
             // TODO 为兼容老数据有可能存在未存储的Volume记录
@@ -161,10 +166,15 @@ public class CacheApplication {
             return;
         }
         // 成功删除Volume
-        this.volumeRepository.deleteByName(taskInstance.getTriggerId());
+        this.volumeRepository.deleteByNameAndWorkflowRef(this.findVolumeName(taskInstance.getTriggerId()), taskInstance.getWorkflowRef());
         log.info("删除Volume: {}", taskInstance.getTriggerId());
         this.monitoringFileService.clearCallbackByLogId(taskInstance.getTriggerId());
 
+    }
+
+    private String findVolumeName(String triggerId) {
+        var arr = triggerId.split("_");
+        return arr.length == 1 ? arr[0] : arr[1];
     }
 
     private void reBuild(Volume volume) {
@@ -175,7 +185,8 @@ public class CacheApplication {
                 .nodeInfo(NodeInfo.Builder.aNodeDef().name("start").build())
                 .asyncTaskRef("cache")
                 .businessId(volume.getId())
-                .triggerId(volume.getName())
+                .triggerId(volume.getMountName())
+                .workflowRef(volume.getWorkflowRef())
                 .build();
         this.taskInstanceRepository.add(task);
     }
@@ -188,12 +199,12 @@ public class CacheApplication {
         if (taskInstance.isCreationVolume()) {
             log.error("创建Volume失败");
             // 创建Volume失败，删除Volume记录
-            this.volumeRepository.deleteByName(taskInstance.getTriggerId());
+            this.volumeRepository.deleteByNameAndWorkflowRef(this.findVolumeName(taskInstance.getTriggerId()), taskInstance.getWorkflowRef());
             log.info("删除Volume: {}", taskInstance.getTriggerId());
         } else {
             log.error("清除Volume失败");
             // 清除Volume失败，标记Volume记录
-            this.volumeRepository.findByName(taskInstance.getTriggerId())
+            this.volumeRepository.findByNameAndWorkflowRef(this.findVolumeName(taskInstance.getTriggerId()), taskInstance.getWorkflowRef())
                     .ifPresent(volume -> {
                         volume.taint();
                         this.volumeRepository.taint(volume);

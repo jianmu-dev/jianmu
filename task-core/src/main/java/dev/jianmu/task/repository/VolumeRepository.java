@@ -17,7 +17,7 @@ public interface VolumeRepository {
     Optional<Volume> findById(String id);
 
     // 根据Name查找
-    Optional<Volume> findByName(String name);
+    Optional<Volume> findByNameAndWorkflowRef(String name, String workflowRef);
 
     // 根据WorkflowRef查找
     List<Volume> findByWorkflowRef(String workflowRef);
@@ -39,5 +39,5 @@ public interface VolumeRepository {
     void deleteById(String id);
 
     // 根据name删除Volume
-    void deleteByName(String name);
+    void deleteByNameAndWorkflowRef(String name, String workflowRef);
 }
