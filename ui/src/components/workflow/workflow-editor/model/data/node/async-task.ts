@@ -1,10 +1,11 @@
 import { BaseNode } from './base-node';
-import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum } from '../enumeration';
+import { FailureModeEnum, NodeTypeEnum, ParamTypeEnum, RefTypeEnum } from '../enumeration';
 import defaultIcon from '../../../svgs/shape/async-task.svg';
 import { CustomRule, ValidateParamFn } from '../common';
 import { ISelectableParam } from '../../../../workflow-expression-editor/model/data';
 import { INNER_PARAM_LABEL, INNER_PARAM_TAG } from '../../../../workflow-expression-editor/model/const';
 import { TaskStatusEnum } from '@/api/dto/enumeration';
+import { checkDuplicate } from '../../util/reference';
 
 export interface IAsyncTaskParam {
   readonly ref: string;
@@ -185,7 +186,35 @@ export class AsyncTask extends BaseNode {
         required: true,
         fields: {
           name: [{ required: true, message: '请选择缓存', trigger: 'change' }],
-          value: [{ required: true, message: '请输入目录', trigger: 'blur' }],
+          value: [
+            { required: true, message: '请输入目录', trigger: 'blur' },
+            {
+              pattern: /^\//,
+              message: '请输入以/开头的目录',
+              trigger: 'blur',
+            },
+            {
+              validator: (rule: any, value: any, callback: any) => {
+                if (!value) {
+                  callback();
+                  return;
+                }
+                try {
+                  checkDuplicate(
+                    this.caches.map(({ value }) => value),
+                    RefTypeEnum.DIR,
+                  );
+                } catch ({ message, value }) {
+                  if (value === value) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'blur',
+            },
+          ],
         } as Record<string, CustomRule>,
       };
     });

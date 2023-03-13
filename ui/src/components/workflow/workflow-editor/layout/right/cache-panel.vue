@@ -32,7 +32,10 @@
         </div>
       </div>
     </jm-scrollbar>
-    <jm-dialog v-model="delDialogVisible" width="428px" title="确定删除当前缓存？">
+    <jm-dialog v-model="delDialogVisible" width="428px">
+      <template #title>
+        <span class="dialog-title">确定删除当前缓存？</span>
+      </template>
       删除后节点中的缓存挂载会被一并删除
       <template #footer>
         <jm-button @click="delDialogVisible = false">取消</jm-button>
@@ -202,6 +205,14 @@ export default defineComponent({
           width: 24px;
           height: 24px;
         }
+      }
+    }
+  }
+
+  ::v-deep(.el-dialog) {
+    .el-dialog__header {
+      .dialog-title {
+        font-size: 16px;
       }
     }
   }

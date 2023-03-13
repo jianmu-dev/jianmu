@@ -31,7 +31,13 @@
         </jm-select>
       </jm-form-item>
       <jm-form-item :prop="`${formModelName}.${index}.value`" :rules="rules.value">
-        <jm-input v-model="dirVal" @input="updateCache" class="dir-val" placeholder="请输入缓存要挂载的目录" />
+        <jm-input
+          v-model="dirVal"
+          @input="updateCache"
+          @change="changeDir"
+          class="dir-val"
+          placeholder="请输入缓存要挂载的目录"
+        />
       </jm-form-item>
     </div>
     <i class="jm-icon-button-delete" @click="deleteSelected" />
@@ -66,7 +72,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update-disable', 'update-cache', 'delete-selected'],
+  emits: ['update-disable', 'update-cache', 'delete-selected', 'change-dir'],
   setup(props, { emit }) {
     const cacheList = ref<{ name: string; disable: boolean }[]>(props.cacheInfo || []);
     const cacheVal = ref<string>(props.name || '');
@@ -100,6 +106,7 @@ export default defineComponent({
         // 更新列表显隐
         emit('update-disable', cacheVal.value, props.index);
       },
+      changeDir: () => emit('change-dir'),
       updateCache: () => emit('update-cache', props.index, cacheVal.value, dirVal.value),
       deleteSelected: () => emit('delete-selected', cacheVal.value, props.index),
       cacheVal,
@@ -152,6 +159,7 @@ export default defineComponent({
         line-height: 24px;
         color: #526579;
         margin-left: 12px;
+        text-align: center;
 
         &:hover {
           cursor: pointer;
@@ -170,6 +178,7 @@ export default defineComponent({
     line-height: 24px;
     color: #526579;
     margin-left: 12px;
+    text-align: center;
 
     position: absolute;
     right: 0;

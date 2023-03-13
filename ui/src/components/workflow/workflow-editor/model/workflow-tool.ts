@@ -190,7 +190,7 @@ export class WorkflowTool {
           if (typeof global.cache !== 'object') {
             return;
           }
-          global.cache.push(item.ref);
+          global.cache.push(item.ref ? item.ref : <any>item);
         });
         return global;
       }
