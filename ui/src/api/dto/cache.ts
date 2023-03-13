@@ -16,7 +16,7 @@ export interface IProjectCacheVo
     id: string;
     name: string;
     available: boolean;
-    workerId: string;
+    workerId?: string;
     nodeCaches: IProjectNodeCacheVo[];
   }> {}
 
