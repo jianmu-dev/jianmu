@@ -317,6 +317,10 @@ export default defineComponent({
             item.disable = false;
           }
         });
+        // 删除后校验
+        form.value.caches.forEach((item, idx) => {
+          formRef.value?.validateField(`caches.${idx}.value`);
+        });
       },
     };
   },

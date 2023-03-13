@@ -118,8 +118,8 @@ export class Shell extends BaseNode {
               trigger: 'blur',
             },
             {
-              validator: (rule: any, value: any, callback: any) => {
-                if (!value) {
+              validator: (rule: any, _value: any, callback: any) => {
+                if (!_value) {
                   callback();
                   return;
                 }
@@ -128,8 +128,8 @@ export class Shell extends BaseNode {
                     this.caches.map(({ value }) => value),
                     RefTypeEnum.DIR,
                   );
-                } catch ({ message, value }) {
-                  if (value === value) {
+                } catch ({ message, ref }) {
+                  if (ref === _value) {
                     callback(message);
                     return;
                   }
