@@ -74,6 +74,7 @@
           :rules="form.getFormRules().caches.fields[index].fields"
           @update-disable="updateDisable"
           @update-cache="updateCache"
+          @change-dir="changeDir"
           @delete-selected="deleteCacheSelector"
         />
         <div class="add-select-cache-btn">
@@ -226,6 +227,11 @@ export default defineComponent({
             item.name = cacheVal;
             item.value = dirVal;
           }
+        });
+      },
+      changeDir: () => {
+        form.value.caches.forEach((item, idx) => {
+          formRef.value?.validateField(`caches.${idx}.value`);
         });
       },
       deleteCacheSelector: (_name: string, index: number) => {

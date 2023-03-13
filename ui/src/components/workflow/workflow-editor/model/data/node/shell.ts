@@ -1,7 +1,8 @@
 import { BaseNode } from './base-node';
-import { FailureModeEnum, NodeRefEnum, NodeTypeEnum } from '../enumeration';
+import { FailureModeEnum, NodeRefEnum, NodeTypeEnum, RefTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/shell.svg';
 import { CustomRule, ValidateParamFn } from '../common';
+import { checkDuplicate } from '../../util/reference';
 
 export interface IShellEnv {
   key: string;
@@ -86,7 +87,35 @@ export class Shell extends BaseNode {
         required: true,
         fields: {
           name: [{ required: true, message: '请选择缓存', trigger: 'change' }],
-          value: [{ required: true, message: '请输入目录', trigger: 'blur' }],
+          value: [
+            { required: true, message: '请输入目录', trigger: 'blur' },
+            {
+              pattern: /^\//,
+              message: '请输入以/开头的目录',
+              trigger: 'blur',
+            },
+            {
+              validator: (rule: any, value: any, callback: any) => {
+                if (!value) {
+                  callback();
+                  return;
+                }
+                try {
+                  checkDuplicate(
+                    this.caches.map(({ value }) => value),
+                    RefTypeEnum.DIR,
+                  );
+                } catch ({ message, value }) {
+                  if (value === value) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'blur',
+            },
+          ],
         } as Record<string, CustomRule>,
       };
     });

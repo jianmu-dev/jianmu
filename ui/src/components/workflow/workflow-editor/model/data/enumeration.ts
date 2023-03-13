@@ -70,4 +70,5 @@ export enum RefTypeEnum {
   SHELL_ENV = 'Shell节点环境变量',
   SHELL_OUTPUT = 'Shell节点输出参数',
   CACHE = '缓存',
+  DIR = '目录',
 }
