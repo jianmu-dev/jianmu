@@ -36,7 +36,7 @@
           @input="updateCache"
           @change="changeDir"
           class="dir-val"
-          placeholder="请输入缓存要挂载的目录"
+          placeholder="请输入缓存要挂载的目录,以/开头"
         />
       </jm-form-item>
     </div>

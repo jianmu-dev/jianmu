@@ -1,5 +1,5 @@
 <template>
-  <jm-drawer title="缓存" :size="410" direction="rtl" destroy-on-close v-model="visible" @close="closeDrawer">
+  <jm-drawer title="缓存" :size="410" direction="rtl" destroy-on-close @close="closeDrawer" @opened="dialogOpended">
     <template #title>
       <div class="title-content">
         <div class="title">缓存</div>
@@ -15,9 +15,9 @@
         <jm-form @submit.prevent ref="cacheFormRef" :model="globalForm.caches" label-position="top">
           <cache-editor
             v-for="(item, index) in globalForm.caches"
-            :key="item[index]"
+            :key="item.key"
             v-model:reference="item.ref"
-            :type="item.type"
+            :type="cacheTypes[item.key]"
             :index="index"
             :rules="globalForm.getCacheFormRules().caches.fields[index].fields"
             @change-cache="changeCache"
@@ -36,7 +36,7 @@
       <template #title>
         <span class="dialog-title">确定删除当前缓存？</span>
       </template>
-      删除后节点中的缓存挂载会被一并删除
+      删除后已引用该缓存的节点将会报错
       <template #footer>
         <jm-button @click="delDialogVisible = false">取消</jm-button>
         <jm-button type="primary" @click="delCache">确定</jm-button>
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, onUpdated, getCurrentInstance, nextTick, PropType, inject } from 'vue';
+import { ref, defineComponent, onUpdated, getCurrentInstance, nextTick, PropType, inject, onMounted } from 'vue';
 import CacheEditor from './form/cache-editor.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { IWorkflow } from '../../model/data/common';
@@ -63,10 +63,6 @@ export enum CacheTypeEnum {
 export default defineComponent({
   components: { CacheEditor },
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     workflowData: {
       type: Object as PropType<IWorkflow>,
       required: true,
@@ -74,45 +70,37 @@ export default defineComponent({
   },
   emits: ['closed'],
   setup(props, { emit }) {
-    const visible = ref<boolean>(props.modelValue);
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const globalForm = ref<Global>(new Global(props.workflowData.global));
     const cacheFormRef = ref<HTMLFormElement>();
     const delDialogVisible = ref<boolean>(false);
     const currentIndex = ref<number>();
+    const cacheTypes: Record<string, CacheTypeEnum> = {};
 
     // 初始化构造遍历数据
     const cacheList: any = [];
     workflowForm.value.global.caches?.forEach(item => {
-      cacheList.push({ ref: item, key: uuidv4(), type: CacheTypeEnum.EDIT });
+      const cache = { ref: item, key: uuidv4() };
+      cacheList.push(cache);
+      cacheTypes[cache.key] = CacheTypeEnum.EDIT;
     });
     globalForm.value.caches = cacheList;
 
-    onUpdated(async () => {
-      if (visible.value === props.modelValue) {
-        return;
-      }
-      visible.value = props.modelValue;
-      // 打开抽屉并且caches有值进行校验
-      if (visible.value && globalForm.value.caches.length > 0) {
-        await nextTick();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        cacheFormRef.value!.validate().catch(() => {});
-      }
-    });
-
     return {
-      visible,
       globalForm,
       cacheFormRef,
       delDialogVisible,
-      closeDrawer: () => {
-        visible.value = false;
+      cacheTypes,
+      closeDrawer: async () => {
         workflowForm.value.global.caches = globalForm.value.caches;
-        emit('closed', visible.value);
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        cacheFormRef.value!.validate().catch(() => {});
+        emit('closed');
       },
       addCache: () => {
-        globalForm.value.caches.push({ ref: '', key: uuidv4(), type: CacheTypeEnum.ADD });
+        const cache = { ref: '', key: uuidv4() };
+        globalForm.value.caches.push(cache);
+        cacheTypes[cache.key] = CacheTypeEnum.ADD;
       },
       changeCache: (val: string, oldVal: string, _index: number) => {
         globalForm.value.caches.find((item, index) => index === _index)!.ref = val;
@@ -131,8 +119,17 @@ export default defineComponent({
       },
       // dialog
       delCache: () => {
-        globalForm.value.caches.splice(currentIndex.value!, 1);
+        const cache = globalForm.value.caches.splice(currentIndex.value!, 1)[0];
+        delete cacheTypes[cache.key];
         delDialogVisible.value = false;
+      },
+      dialogOpended: async () => {
+        // 打开抽屉并且caches有值进行校验
+        if (globalForm.value.caches.length === 0) {
+          return;
+        }
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        cacheFormRef.value!.validate().catch(() => {});
       },
     };
   },

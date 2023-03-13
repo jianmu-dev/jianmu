@@ -71,6 +71,14 @@ export class Global {
   async validateCache(): Promise<void> {
     const { caches } = this.getCacheFormRules();
     const validator = new Schema({ caches });
+    // 区分数据结构构建数据，避免状态错误
+    if (!this.caches[0].ref) {
+      const arr: any = [];
+      this.caches.forEach(item => {
+        arr.push({ ref: item });
+      });
+      this.caches = arr;
+    }
     const source: Record<string, Value> = {
       caches: this.caches,
     };

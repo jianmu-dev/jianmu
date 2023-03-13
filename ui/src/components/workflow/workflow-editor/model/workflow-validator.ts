@@ -2,6 +2,7 @@ import { Cell, CellView, Graph, JQuery, Node, Point } from '@antv/x6';
 import { NodeTypeEnum } from './data/enumeration';
 import { CustomX6NodeProxy } from './data/custom-x6-node-proxy';
 import nodeWarningIcon from '../svgs/node-warning.svg';
+import { IWorkflow } from './data/common';
 
 export type ClickNodeWarningCallbackFnType = (nodeId: string) => void;
 
@@ -12,10 +13,12 @@ function isWarning(node: Node): boolean {
 export class WorkflowValidator {
   private readonly graph: Graph;
   private readonly proxy: any;
+  private readonly workflowData: IWorkflow;
 
-  constructor(graph: Graph, proxy: any) {
+  constructor(graph: Graph, proxy: any, workflowData: IWorkflow) {
     this.graph = graph;
     this.proxy = proxy;
+    this.workflowData = workflowData;
   }
 
   addWarning(node: Node, clickNodeWarningCallback: ClickNodeWarningCallbackFnType): void {
@@ -40,7 +43,7 @@ export class WorkflowValidator {
         x: '100%',
         y: 0,
         offset: { x: -13, y: -11 },
-        onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent, cell: Cell, view: CellView }) =>
+        onClick: ({ cell: { id } }: { e: JQuery.MouseDownEvent; cell: Cell; view: CellView }) =>
           clickNodeWarningCallback(id),
       },
     });
@@ -65,8 +68,11 @@ export class WorkflowValidator {
       throw new Error('未存在任何节点');
     }
 
-    if (!nodes.find(node => [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK]
-      .includes(new CustomX6NodeProxy(node).getData().getType()))) {
+    if (
+      !nodes.find(node =>
+        [NodeTypeEnum.SHELL, NodeTypeEnum.ASYNC_TASK].includes(new CustomX6NodeProxy(node).getData().getType()),
+      )
+    ) {
       throw new Error('至少有一个shell或任务节点');
     }
 
@@ -85,7 +91,7 @@ export class WorkflowValidator {
       }
     }
 
-    const workflowNodes = nodes.map(node => new CustomX6NodeProxy(node).getData(this.graph));
+    const workflowNodes = nodes.map(node => new CustomX6NodeProxy(node).getData(this.graph, this.workflowData));
     for (const workflowNode of workflowNodes) {
       try {
         await workflowNode.validate();
@@ -113,8 +119,7 @@ export class WorkflowValidator {
     const maxX = x + width;
     const maxY = y + height;
 
-    if (mousePosX >= x && mousePosX <= maxX &&
-      mousePosY >= y && mousePosY <= maxY) {
+    if (mousePosX >= x && mousePosX <= maxX && mousePosY >= y && mousePosY <= maxY) {
       // 在节点面板中拖放时，失败
       return false;
     }
@@ -129,8 +134,7 @@ export class WorkflowValidator {
     }
 
     // 表示当前拖放的节点为trigger
-    const currentTrigger = this.graph.getNodes()
-      .find(node => new CustomX6NodeProxy(node).isTrigger());
+    const currentTrigger = this.graph.getNodes().find(node => new CustomX6NodeProxy(node).isTrigger());
 
     if (currentTrigger) {
       this.proxy.$warning('只能有一个触发器');

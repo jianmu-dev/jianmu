@@ -1,7 +1,7 @@
 import { BaseNode } from './base-node';
 import { FailureModeEnum, NodeRefEnum, NodeTypeEnum, RefTypeEnum } from '../enumeration';
 import icon from '../../../svgs/shape/shell.svg';
-import { CustomRule, ValidateParamFn } from '../common';
+import { CustomRule, ValidateCacheFn, ValidateParamFn } from '../common';
 import { checkDuplicate } from '../../util/reference';
 
 export interface IShellEnv {
@@ -26,6 +26,7 @@ export class Shell extends BaseNode {
   caches: ICache[];
   failureMode: FailureModeEnum;
   private readonly validateParam?: ValidateParamFn;
+  private readonly validateCache?: ValidateCacheFn;
 
   constructor(
     name = 'shell',
@@ -35,6 +36,7 @@ export class Shell extends BaseNode {
     caches: ICache[] = [],
     failureMode: FailureModeEnum = FailureModeEnum.SUSPEND,
     validateParam?: ValidateParamFn,
+    validateCache?: ValidateCacheFn,
   ) {
     super(NodeRefEnum.SHELL, name, NodeTypeEnum.SHELL, icon, 'https://v2.jianmu.dev/guide/shell-node.html');
     this.image = image;
@@ -43,10 +45,15 @@ export class Shell extends BaseNode {
     this.caches = caches;
     this.failureMode = failureMode;
     this.validateParam = validateParam;
+    this.validateCache = validateCache;
   }
 
-  static build({ name, image, envs, script, caches, failureMode }: any, validateParam?: ValidateParamFn): Shell {
-    return new Shell(name, image, envs, script, caches, failureMode, validateParam);
+  static build(
+    { name, image, envs, script, caches, failureMode }: any,
+    validateParam: ValidateParamFn | undefined,
+    validateCache: ValidateCacheFn | undefined,
+  ): Shell {
+    return new Shell(name, image, envs, script, caches, failureMode, validateParam, validateCache);
   }
 
   getFormRules(): Record<string, CustomRule> {
@@ -86,7 +93,23 @@ export class Shell extends BaseNode {
         type: 'object',
         required: true,
         fields: {
-          name: [{ required: true, message: '请选择缓存', trigger: 'change' }],
+          name: [
+            { required: true, message: '请选择缓存', trigger: 'change' },
+            {
+              validator: (rule: any, name: any, callback: any) => {
+                if (name && this.validateCache) {
+                  try {
+                    this.validateCache(name);
+                  } catch ({ message }) {
+                    callback(message);
+                    return;
+                  }
+                }
+                callback();
+              },
+              trigger: 'change',
+            },
+          ],
           value: [
             { required: true, message: '请输入目录', trigger: 'blur' },
             {
@@ -95,8 +118,8 @@ export class Shell extends BaseNode {
               trigger: 'blur',
             },
             {
-              validator: (rule: any, value: any, callback: any) => {
-                if (!value) {
+              validator: (rule: any, _value: any, callback: any) => {
+                if (!_value) {
                   callback();
                   return;
                 }
@@ -105,8 +128,8 @@ export class Shell extends BaseNode {
                     this.caches.map(({ value }) => value),
                     RefTypeEnum.DIR,
                   );
-                } catch ({ message, value }) {
-                  if (value === value) {
+                } catch ({ message, ref }) {
+                  if (ref === _value) {
                     callback(message);
                     return;
                   }
