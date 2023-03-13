@@ -15,7 +15,7 @@
         <jm-form @submit.prevent ref="cacheFormRef" :model="globalForm.caches" label-position="top">
           <cache-editor
             v-for="(item, index) in globalForm.caches"
-            :key="item[index]"
+            :key="item.key"
             v-model:reference="item.ref"
             :type="cacheTypes[item.key]"
             :index="index"
