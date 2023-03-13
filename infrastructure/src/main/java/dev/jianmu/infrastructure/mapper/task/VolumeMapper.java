@@ -23,12 +23,12 @@ public interface VolumeMapper {
     @Result(column = "available_time", property = "availableTime")
     Optional<Volume> findById(String id);
 
-    @Select("select * from volume where name = #{name}")
+    @Select("select * from volume where name = #{name} and workflow_ref = #{workflowRef}")
     @Result(column = "workflow_ref", property = "workflowRef")
     @Result(column = "worker_id", property = "workerId")
     @Result(column = "created_time", property = "createdTime")
     @Result(column = "available_time", property = "availableTime")
-    Optional<Volume> findByName(String name);
+    Optional<Volume> findByNameAndWorkflowRef(@Param("name") String name, @Param("workflowRef") String workflowRef);
 
     @Select("select * from volume where workflow_ref = #{workflowRef}")
     @Result(column = "workflow_ref", property = "workflowRef")
@@ -56,6 +56,6 @@ public interface VolumeMapper {
     @Delete("delete from volume where id = #{id}")
     void deleteById(String id);
 
-    @Delete("delete from volume where name = #{name}")
-    void deleteByName(String name);
+    @Delete("delete from volume where name = #{name} and workflow_ref = #{workflowRef}")
+    void deleteByNameAndWorkflowRef(@Param("name") String name, @Param("workflowRef") String workflowRef);
 }

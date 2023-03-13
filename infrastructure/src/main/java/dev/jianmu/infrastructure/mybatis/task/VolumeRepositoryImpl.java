@@ -31,8 +31,8 @@ public class VolumeRepositoryImpl implements VolumeRepository {
     }
 
     @Override
-    public Optional<Volume> findByName(String name) {
-        return this.volumeMapper.findByName(name);
+    public Optional<Volume> findByNameAndWorkflowRef(String name, String workflowRef) {
+        return this.volumeMapper.findByNameAndWorkflowRef(name, workflowRef);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class VolumeRepositoryImpl implements VolumeRepository {
     }
 
     @Override
-    public void deleteByName(String name) {
-        this.volumeMapper.deleteByName(name);
+    public void deleteByNameAndWorkflowRef(String name, String workflowRef) {
+        this.volumeMapper.deleteByNameAndWorkflowRef(name, workflowRef);
     }
 }

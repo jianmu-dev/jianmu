@@ -522,10 +522,10 @@ public class ViewController {
         return workflow.getCaches().stream()
                 .map(cache -> {
                     var volume = volumes.stream()
-                            .filter(t -> t.getSimpleName().equals(cache))
+                            .filter(t -> t.getName().equals(cache))
                             .findFirst()
                             .orElse(Volume.Builder.aVolume().build());
-                    var name = volume.getSimpleName();
+                    var name = volume.getName();
                     return ProjectCacheVo.builder()
                             .id(volume.getId())
                             .name(name)
@@ -561,7 +561,7 @@ public class ViewController {
                         .name(cache.getSource())
                         .path(cache.getTarget())
                         .available(volumes.stream()
-                                .filter(volume -> cache.getSource().equals(volume.getSimpleName()))
+                                .filter(volume -> cache.getSource().equals(volume.getName()))
                                 .findFirst()
                                 .map(Volume::isAvailable)
                                 .orElse(false))
