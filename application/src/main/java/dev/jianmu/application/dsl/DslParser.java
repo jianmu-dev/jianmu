@@ -606,8 +606,8 @@ public class DslParser {
                     if (!(v instanceof String)) {
                         throw new DslException("global段cache名称仅支持字符串类型");
                     }
-                    if (((String) v).length() > 45) {
-                        throw new DslException("global段cache名称长度不能超过45个字符");
+                    if (((String) v).length() > 30) {
+                        throw new DslException("global段cache名称长度不能超过30个字符");
                     }
                 });
             }
