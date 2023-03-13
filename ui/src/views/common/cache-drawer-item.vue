@@ -10,7 +10,7 @@
       </div>
       <div class="clear-btn" @click="toClear"><i class="jm-icon-button-clear icon"></i>清理</div>
     </div>
-    <div class="worker">
+    <div class="worker" v-if="originData.workerId">
       {{ originData.workerId }}
     </div>
     <div class="divider"></div>
