@@ -47,6 +47,7 @@ import { IWorkflow } from './model/data/common';
 import { Graph, Node } from '@antv/x6';
 import registerCustomVueShape from './shape/custom-vue-shape';
 import { WorkflowValidator } from './model/workflow-validator';
+import { CustomX6NodeProxy } from '@/components/workflow/workflow-editor/model/data/custom-x6-node-proxy';
 
 // 注册自定义x6元素
 registerCustomVueShape();
@@ -67,9 +68,9 @@ export default defineComponent({
     const graph = ref<Graph>();
     const nodeConfigPanelVisible = ref<boolean>(false);
     const selectedNodeId = ref<string>('');
+    let checkCache: () => Promise<void>;
     const nodeWaringClicked = ref<boolean>(false);
     const cachePanelVisible = ref<boolean>(false);
-    let checkCache: () => Promise<void>;
     let workflowValidator: WorkflowValidator;
 
     provide('getGraph', (): Graph => graph.value!);
@@ -113,14 +114,24 @@ export default defineComponent({
         selectedNodeId.value = '';
       },
       cachePanelVisible,
-      handleCachePanel: async (visible: boolean, _checkGlobalParams: () => Promise<void>) => {
-        cachePanelVisible.value = visible;
-        // 是否是关闭
-        if (!visible) {
-          await checkCache();
-          return;
+      handleCachePanel: async () => {
+        await checkCache();
+        const nodes = graph.value!.getNodes();
+        for (const node of nodes) {
+          const workflowNode = new CustomX6NodeProxy(node).getData(graph.value, workflowData.value);
+          try {
+            await workflowNode.validate();
+            workflowValidator.removeWarning(node);
+          } catch ({ errors }) {
+            workflowValidator.addWarning(node, nodeId => {
+              handleNodeSelected(nodeId, true);
+            });
+          }
         }
-        checkCache = _checkGlobalParams;
+      },
+      openCachePanel: (_checkCache: () => Promise<void>) => {
+        checkCache = _checkCache;
+        cachePanelVisible.value = true;
       },
     };
   },

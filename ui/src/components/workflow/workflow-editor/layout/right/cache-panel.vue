@@ -1,5 +1,5 @@
 <template>
-  <jm-drawer title="缓存" :size="410" direction="rtl" destroy-on-close v-model="visible" @close="closeDrawer">
+  <jm-drawer title="缓存" :size="410" direction="rtl" destroy-on-close @close="closeDrawer" @opened="dialogOpended">
     <template #title>
       <div class="title-content">
         <div class="title">缓存</div>
@@ -63,10 +63,6 @@ export enum CacheTypeEnum {
 export default defineComponent({
   components: { CacheEditor },
   props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
     workflowData: {
       type: Object as PropType<IWorkflow>,
       required: true,
@@ -74,12 +70,12 @@ export default defineComponent({
   },
   emits: ['closed'],
   setup(props, { emit }) {
-    const visible = ref<boolean>(props.modelValue);
     const workflowForm = ref<IWorkflow>(props.workflowData);
     const globalForm = ref<Global>(new Global(props.workflowData.global));
     const cacheFormRef = ref<HTMLFormElement>();
     const delDialogVisible = ref<boolean>(false);
     const currentIndex = ref<number>();
+    const cacheTypes: Record<string, CacheTypeEnum> = {};
 
     // 初始化构造遍历数据
     const cacheList: any = [];
@@ -88,28 +84,16 @@ export default defineComponent({
     });
     globalForm.value.caches = cacheList;
 
-    onUpdated(async () => {
-      if (visible.value === props.modelValue) {
-        return;
-      }
-      visible.value = props.modelValue;
-      // 打开抽屉并且caches有值进行校验
-      if (visible.value && globalForm.value.caches.length > 0) {
-        await nextTick();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        cacheFormRef.value!.validate().catch(() => {});
-      }
-    });
-
     return {
-      visible,
       globalForm,
       cacheFormRef,
       delDialogVisible,
-      closeDrawer: () => {
-        visible.value = false;
+      cacheTypes,
+      closeDrawer: async () => {
         workflowForm.value.global.caches = globalForm.value.caches;
-        emit('closed', visible.value);
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        cacheFormRef.value!.validate().catch(() => {});
+        emit('closed');
       },
       addCache: () => {
         globalForm.value.caches.push({ ref: '', key: uuidv4(), type: CacheTypeEnum.ADD });

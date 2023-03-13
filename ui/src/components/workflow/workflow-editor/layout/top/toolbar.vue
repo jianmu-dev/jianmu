@@ -215,7 +215,8 @@ export default defineComponent({
         }
       },
       openCachePanel: () => {
-        emit('open-cache-panel', true, checkCache);
+        checkCache();
+        emit('open-cache-panel', checkCache);
       },
       cacheIconVisible,
       tooltipVisible,
